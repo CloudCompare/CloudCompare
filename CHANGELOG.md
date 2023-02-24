@@ -73,6 +73,7 @@ v2.13.alpha (???) - (??/??/????)
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
 	- Rasterize:
+		- new option to interpolate the grid with Kriging
 		- various improvements and glitch fixes
 		- if a scalar field projection option is chosen, all SF and colors will be projected at once so that all layers are valid right away
 			(no need to 'update' the grid several times)

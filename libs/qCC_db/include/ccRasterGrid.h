@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,12 +17,12 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_RASTER_GRID_HEADER
-#define CC_RASTER_GRID_HEADER
-
 //local
 #include "qCC_db.h"
 #include "ccBBox.h"
+
+//CCCoreLib
+#include <Kriging.h>
 
 //system
 #include <limits>
@@ -151,6 +153,26 @@ struct QCC_DB_LIB_API ccRasterGrid
 							INVALID_PROJECTION_TYPE		= 255,
 	};
 
+	//! Types of interpolation
+	enum class InterpolationType {	NONE = 0,
+									DELAUNAY = 1,
+									KRIGING = 2
+	};
+
+	//! Delaunay interpolation parameter(s)
+	struct QCC_DB_LIB_API DelaunayInterpolationParams
+	{
+		double maxEdgeLength = 1.0;
+	};
+
+	//! Kriging parameters
+	struct QCC_DB_LIB_API KrigingParams
+	{
+		Kriging::KrigeParams params;
+		bool autoGuess = true;
+		int kNN = 8;
+	};
+
 	//! Fills the grid with a point cloud
 	/** Since version 2.8, we are using the "PixelIsPoint" convention
 		(contrarily to what was written in the code comments so far!).
@@ -159,8 +181,8 @@ struct QCC_DB_LIB_API ccRasterGrid
 	bool fillWith(	ccGenericPointCloud* cloud,
 					unsigned char projectionDimension,
 					ProjectionType projectionType,
-					bool doInterpolateEmptyCells,
-					double maxEdgeLength,
+					InterpolationType emptyCellsInterpolation = InterpolationType::NONE,
+					void* interpolationParams = nullptr, // either nullptr, DelaunayInterpolationParams* or KrigingParams*
 					ProjectionType sfProjectionType = INVALID_PROJECTION_TYPE,
 					ccProgressDialog* progressDialog = nullptr,
 					int zStdDevSfIndex = -1);
@@ -171,8 +193,12 @@ struct QCC_DB_LIB_API ccRasterGrid
 								FILL_MAXIMUM_HEIGHT		= 2,
 								FILL_CUSTOM_HEIGHT		= 3,
 								FILL_AVERAGE_HEIGHT		= 4,
-								INTERPOLATE				= 5,
+								INTERPOLATE_DELAUNAY	= 5,
+								KRIGING					= 6,
 	};
+
+	//! Converts the empty cells fill option to the corresponding interpolation type
+	static InterpolationType InterpolationTypeFromEmptyCellFillOption(EmptyCellFillOption option);
 
 	//! Fills the empty cells
 	void fillEmptyCells(EmptyCellFillOption fillEmptyCellsStrategy,
@@ -189,6 +215,13 @@ struct QCC_DB_LIB_API ccRasterGrid
 		\param maxSquareEdgeLength Max (square) edge length to filter large triangles during the interpolation process
 	**/
 	bool interpolateEmptyCells(double maxSquareEdgeLength);
+
+	//! Interpolates the empty cells with the Kriging algorithm
+	bool fillGridCellsWithKriging(	unsigned char Z,
+									int knn,
+									Kriging::KrigeParams& krigeParams,
+									bool useInputParams,
+									ccProgressDialog* progressDialog = nullptr);
 
 	//! Sets valid
 	inline void setValid(bool state) { valid = state; }
@@ -254,5 +287,3 @@ struct QCC_DB_LIB_API ccRasterGrid
 	//! Whether the grid is valid/up-to-date
 	bool valid;
 };
-
-#endif //CC_RASTER_GRID_HEADER

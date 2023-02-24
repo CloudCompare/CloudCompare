@@ -110,7 +110,7 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 	}
 	else if (option == COMMAND_RASTER_FILL_INTERPOLATE)
 	{
-		return ccRasterGrid::INTERPOLATE;
+		return ccRasterGrid::INTERPOLATE_DELAUNAY;
 	}
 	else
 	{
@@ -141,7 +141,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 	ccRasterGrid::ProjectionType projectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::ProjectionType sfProjectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
-	double maxEdgeLength = 0.0;
+	ccRasterGrid::DelaunayInterpolationParams dInterpParams;
 	QString projStdDevSFDesc, sfProjStdDevSFDesc;
 
 	while (!cmd.arguments().empty())
@@ -267,8 +267,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			cmd.arguments().pop_front();
 
 			bool ok = false;
-			maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
-			if (!ok || maxEdgeLength < 0.0)
+			dInterpParams.maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok || dInterpParams.maxEdgeLength < 0.0)
 			{
 				return cmd.error(QString("Invalid max edge length value! (after %1)").arg(COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH));
 			}
@@ -399,11 +399,27 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
 			}
 
+			ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);
+			void* interpolationParams = nullptr;
+			switch (interpolationType)
+			{
+			case ccRasterGrid::InterpolationType::DELAUNAY:
+				interpolationParams = (void*)&dInterpParams;
+				break;
+			case ccRasterGrid::InterpolationType::KRIGING:
+				//interpolationParams = (void*)&dInterpParams;
+				//TODO
+				break;
+			default:
+				// do nothing
+				break;
+			}
+
 			if (grid.fillWith(	cloudDesc.pc,
 								vertDir,
 								projectionType,
-								emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-								maxEdgeLength,
+								interpolationType,
+								interpolationParams,
 								sfProjectionType,
 								pDlg.data(),
 								invVarProjSFIndex )

@@ -351,15 +351,17 @@ replaced by the cell's average height!</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QComboBox" name="fillEmptyCellsComboBox">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="toolTip">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Strategy to fill empty cells:
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QComboBox" name="fillEmptyCellsComboBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;Strategy to fill empty cells:
 &lt;ul&gt;
 &lt;li&gt;minimum height&lt;/li&gt;
 &lt;li&gt;average height&lt;/li&gt;
@@ -368,38 +370,53 @@ replaced by the cell's average height!</string>
 &lt;li&gt;interpolation&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/body&gt;&lt;/html&gt;</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>leave empty</string>
-              </property>
+               </property>
+               <item>
+                <property name="text">
+                 <string>leave empty</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>minimum height</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>average height</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>maximum height</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>user specified value</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>interpolate</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>kriging</string>
+                </property>
+               </item>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>minimum height</string>
-              </property>
+              <widget class="QToolButton" name="interpParamsToolButton">
+               <property name="icon">
+                <iconset resource="../icons.qrc">
+                 <normaloff>:/CC/images/gearIcon.png</normaloff>:/CC/images/gearIcon.png</iconset>
+               </property>
+              </widget>
              </item>
-             <item>
-              <property name="text">
-               <string>average height</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>maximum height</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>user specified value</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>interpolate</string>
-              </property>
-             </item>
-            </widget>
+            </layout>
            </item>
            <item row="1" column="0">
             <widget class="QLabel" name="label">
@@ -421,33 +438,6 @@ replaced by the cell's average height!</string>
              </property>
              <property name="toolTip">
               <string>Custom value for empty cells</string>
-             </property>
-             <property name="decimals">
-              <number>6</number>
-             </property>
-             <property name="minimum">
-              <double>-999999999.000000000000000</double>
-             </property>
-             <property name="maximum">
-              <double>999999999.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Max edge length</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="toolTip">
-              <string>Max edge length for interpolation/triangulation
-(ignored if zero)</string>
              </property>
              <property name="decimals">
               <number>6</number>
@@ -1183,7 +1173,9 @@ applied to all existing scalar fields</string>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>projectSFCheckBox</sender>

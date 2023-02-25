@@ -39,7 +39,7 @@ public:
 	~ccUnrollDlg() override;
 	
 	ccPointCloud::UnrollMode getType() const;
-	int getAxisDimension() const;
+	CCVector3d getAxis() const;
 	bool isAxisPositionAuto() const;
 	CCVector3 getAxisPosition() const;
 	void getAngleRange(double& start_deg, double& stop_deg) const;

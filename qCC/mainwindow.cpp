@@ -5783,7 +5783,7 @@ void MainWindow::doActionUnroll()
 
 	ccPointCloud::UnrollMode mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
+	CCVector3d axisDir = unrollDlg.getAxis();
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
 	CCVector3 center = unrollDlg.getAxisPosition();
 
@@ -5806,7 +5806,7 @@ void MainWindow::doActionUnroll()
 	{
 		ccPointCloud::UnrollCylinderParams params;
 		params.radius = radius;
-		params.axisDim = dim;
+		params.axisDir = CCVector3::fromArray(axisDir.u);
 		if (unrollDlg.isAxisPositionAuto())
 		{
 			center = pc->getOwnBB().getCenter();
@@ -5824,7 +5824,7 @@ void MainWindow::doActionUnroll()
 		params.radius = (mode == ccPointCloud::CONE ? 0 : radius);
 		params.apex = center;
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
-		params.axisDim = dim;
+		params.axisDir = CCVector3::fromArray(axisDir.u);
 		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
 	}
 	break;

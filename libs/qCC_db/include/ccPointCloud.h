@@ -652,7 +652,7 @@ public: //other methods
 	struct UnrollBaseParams
 	{
 		PointCoordinateType radius;	//!< Unrolling cylinder radius (or cone base radius)
-		unsigned char axisDim;		//!< Unrolling cylinder/cone axis (X=0, Y=1 or Z=2)
+		CCVector3 axisDir;			//!< Unrolling cylinder/cone axis direction
 	};
 
 	//! Cylinder unrolling parameters

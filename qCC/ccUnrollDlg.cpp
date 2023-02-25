@@ -47,9 +47,26 @@ ccPointCloud::UnrollMode ccUnrollDlg::getType() const
 	return static_cast<ccPointCloud::UnrollMode>(m_ui->comboBoxUnrollShapeType->currentIndex());
 }
 
-int ccUnrollDlg::getAxisDimension() const
+CCVector3d ccUnrollDlg::getAxis() const
 {
-	return m_ui->comboBoxAxisDimension->currentIndex();
+	int axisDim = m_ui->comboBoxAxisDimension->currentIndex();
+	switch (axisDim)
+	{
+	case 0:
+		return CCVector3d(1.0, 0.0, 0.0);
+		break;
+	case 1:
+		return CCVector3d(0.0, 1.0, 0.0);
+		break;
+	case 2:
+		return CCVector3d(0.0, 0.0, 1.0);
+		break;
+	case 3:
+	default:
+		return CCVector3d(m_ui->axisXDoubleSpinBox->value(), m_ui->axisYDoubleSpinBox->value(), m_ui->axisZDoubleSpinBox->value());
+	}
+
+	return {};
 }
  
 bool ccUnrollDlg::isAxisPositionAuto() const
@@ -65,9 +82,9 @@ void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
 
 CCVector3 ccUnrollDlg::getAxisPosition() const
 {
-	return CCVector3(	static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisX->value()),
-						static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisY->value()),
-						static_cast<PointCoordinateType>(m_ui->doubleSpinBoxAxisZ->value()));
+	return CCVector3(	static_cast<PointCoordinateType>(m_ui->axisCenterXDoubleSpinBox->value()),
+						static_cast<PointCoordinateType>(m_ui->axisCenterYDoubleSpinBox->value()),
+						static_cast<PointCoordinateType>(m_ui->axisCenterZDoubleSpinBox->value()));
 }
 
 double ccUnrollDlg::getRadius() const
@@ -94,7 +111,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->angleFrame->setVisible(false);
 		m_ui->autoCenterFrame->setVisible(true);
 		m_ui->radiusFrame->setVisible(true);
-		m_ui->groupBoxAxisPosition->setTitle("Axis position");
+		m_ui->axisPositionGroupBox->setTitle("Axis position");
 		m_ui->radiusLabel->setText("Radius");
 		axisAutoStateChanged(m_ui->checkBoxAuto->checkState());
 	}
@@ -105,12 +122,12 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->autoCenterFrame->setVisible(false);
 		m_ui->radiusFrame->setVisible(false);
 		m_ui->radiusLabel->setText("Base radius");
-		m_ui->groupBoxAxisPosition->setTitle("Cone apex");
+		m_ui->axisPositionGroupBox->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
 		//may be disabled if we were in cylinder mode previously
-		m_ui->doubleSpinBoxAxisX->setDisabled(false);
-		m_ui->doubleSpinBoxAxisY->setDisabled(false);
-		m_ui->doubleSpinBoxAxisZ->setDisabled(false);
+		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
 	}
 	break;
 	case ccPointCloud::STRAIGHTENED_CONE: //straightened cone (fixed radius)
@@ -119,12 +136,12 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->angleFrame->setVisible(true);
 		m_ui->radiusFrame->setVisible(true);
 		m_ui->autoCenterFrame->setVisible(false);
-		m_ui->groupBoxAxisPosition->setTitle("Cone apex");
+		m_ui->axisPositionGroupBox->setTitle("Cone apex");
 		axisAutoStateChanged(Qt::Unchecked);
 		//may be disabled if we were in cylinder mode previously
-		m_ui->doubleSpinBoxAxisX->setDisabled(false);
-		m_ui->doubleSpinBoxAxisY->setDisabled(false);
-		m_ui->doubleSpinBoxAxisZ->setDisabled(false);
+		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
 	}
 	break;
 	};
@@ -134,32 +151,31 @@ void ccUnrollDlg::axisAutoStateChanged(int checkState)
 {
 	if (checkState == Qt::Unchecked)
 	{
-		m_ui->axisFrame->setEnabled(true);
+		m_ui->axisCenterFrame->setEnabled(true);
 		axisDimensionChanged(m_ui->comboBoxAxisDimension->currentIndex());
 	}
 	else
 	{
-		m_ui->axisFrame->setEnabled(false);
+		m_ui->axisCenterFrame->setEnabled(false);
 	}
 }
 
 void ccUnrollDlg::axisDimensionChanged(int index)
 {
-	//if axis is in auto mode, no need to change anything
-	if ( (m_ui->comboBoxUnrollShapeType->currentIndex() != 0)
-		 || (m_ui->checkBoxAuto->checkState() == Qt::Checked) )
-	{
-		return;
-	}
+	m_ui->axisFrame->setEnabled(index == 3);
 
-	//in 'cylinder' mode, we hide the axis coordinate that is not needed
-	m_ui->doubleSpinBoxAxisX->setDisabled(index == 0);
-	m_ui->doubleSpinBoxAxisY->setDisabled(index == 1);
-	m_ui->doubleSpinBoxAxisZ->setDisabled(index == 2);
+	if (	(m_ui->comboBoxUnrollShapeType->currentIndex() == 0)
+		&&	(m_ui->checkBoxAuto->checkState() != Qt::Checked) )
+	{
+		//in 'cylinder' mode, we hide the axis coordinate that is not needed
+		m_ui->axisCenterXDoubleSpinBox->setDisabled(index == 0);
+		m_ui->axisCenterYDoubleSpinBox->setDisabled(index == 1);
+		m_ui->axisCenterZDoubleSpinBox->setDisabled(index == 2);
+	}
 }
 
 //semi-persistent settings
-static CCVector3d s_axisCenter(0, 0, 0);
+static CCVector3d s_axisCenter(0.0, 0.0, 0.0);
 static double s_startAngle_deg = 0.0;
 static double s_stopAngle_deg = 360.0;
 
@@ -174,11 +190,14 @@ void ccUnrollDlg::toPersistentSettings() const
 		settings.setValue("radius",				m_ui->radiusDoubleSpinBox->value());
 		settings.setValue("autoCenter",			m_ui->checkBoxAuto->isChecked());
 		settings.setValue("exportDeviationSF",	m_ui->exportDeviationSFCheckBox->isChecked());
+		settings.setValue("axis.x",				m_ui->axisXDoubleSpinBox->value());
+		settings.setValue("axis.y",				m_ui->axisYDoubleSpinBox->value());
+		settings.setValue("axis.z",				m_ui->axisZDoubleSpinBox->value());
 
 		//save the axis center as semi-persistent only
-		s_axisCenter.x = m_ui->doubleSpinBoxAxisX->value();
-		s_axisCenter.y = m_ui->doubleSpinBoxAxisY->value();
-		s_axisCenter.z = m_ui->doubleSpinBoxAxisZ->value();
+		s_axisCenter.x = m_ui->axisCenterXDoubleSpinBox->value();
+		s_axisCenter.y = m_ui->axisCenterYDoubleSpinBox->value();
+		s_axisCenter.z = m_ui->axisCenterZDoubleSpinBox->value();
 
 		getAngleRange(s_startAngle_deg, s_stopAngle_deg);
 	}
@@ -190,12 +209,17 @@ void ccUnrollDlg::fromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("Unroll");
 	{
-		int shapeType   = settings.value("shapeType",     m_ui->comboBoxUnrollShapeType->currentIndex()).toInt();
-		int axisDim     = settings.value("axisDimension", m_ui->comboBoxAxisDimension->currentIndex()).toInt();
-		double angle    = settings.value("angle",         m_ui->halfAngleDoubleSpinBox->value()).toDouble();
-		double radius   = settings.value("radius",        m_ui->radiusDoubleSpinBox->value()).toDouble();
-		bool autoCenter = settings.value("autoCenter",    m_ui->checkBoxAuto->isChecked()).toBool();
+		int shapeType          = settings.value("shapeType",         m_ui->comboBoxUnrollShapeType->currentIndex()).toInt();
+		int axisDim            = settings.value("axisDimension",     m_ui->comboBoxAxisDimension->currentIndex()).toInt();
+		double angle           = settings.value("angle",             m_ui->halfAngleDoubleSpinBox->value()).toDouble();
+		double radius          = settings.value("radius",            m_ui->radiusDoubleSpinBox->value()).toDouble();
+		bool autoCenter        = settings.value("autoCenter",        m_ui->checkBoxAuto->isChecked()).toBool();
 		bool exportDeviationSF = settings.value("exportDeviationSF", m_ui->exportDeviationSFCheckBox->isChecked()).toBool();
+
+		CCVector3d axis;
+		axis.x = settings.value("axis.x", m_ui->axisXDoubleSpinBox->value()).toDouble();
+		axis.y = settings.value("axis.y", m_ui->axisYDoubleSpinBox->value()).toDouble();
+		axis.z = settings.value("axis.z", m_ui->axisZDoubleSpinBox->value()).toDouble();
 
 		m_ui->comboBoxUnrollShapeType->setCurrentIndex(shapeType);
 		m_ui->comboBoxAxisDimension->setCurrentIndex(axisDim);
@@ -204,9 +228,12 @@ void ccUnrollDlg::fromPersistentSettings()
 		m_ui->checkBoxAuto->setChecked(autoCenter);
 		m_ui->exportDeviationSFCheckBox->setChecked(exportDeviationSF);
 
-		m_ui->doubleSpinBoxAxisX->setValue(s_axisCenter.x);
-		m_ui->doubleSpinBoxAxisY->setValue(s_axisCenter.y);
-		m_ui->doubleSpinBoxAxisZ->setValue(s_axisCenter.z);
+		m_ui->axisXDoubleSpinBox->setValue(axis.x);
+		m_ui->axisYDoubleSpinBox->setValue(axis.y);
+		m_ui->axisZDoubleSpinBox->setValue(axis.z);
+		m_ui->axisCenterXDoubleSpinBox->setValue(s_axisCenter.x);
+		m_ui->axisCenterYDoubleSpinBox->setValue(s_axisCenter.y);
+		m_ui->axisCenterZDoubleSpinBox->setValue(s_axisCenter.z);
 
 		m_ui->startAngleDoubleSpinBox->setValue(s_startAngle_deg);
 		m_ui->stopAngleDoubleSpinBox ->setValue(s_stopAngle_deg);

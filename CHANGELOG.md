@@ -64,6 +64,9 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- Tools > Projection > Unroll
+		- it is now possible to set any 3D axis for the cylinder or the cone
+
 	- Edit > Apply Tranformation
 		- new shortcut buttons to set the rotation axis to I(1,0,0), J(0,1,0) or K(0,0,1)
 		- new option (checkbox): 'Apply to global coordinates'

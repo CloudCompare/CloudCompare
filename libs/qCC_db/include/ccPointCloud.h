@@ -676,6 +676,7 @@ public: //other methods
 		\param exportDeviationSF to export the deviations from the ideal shape as a scalar field
 		\param startAngle_deg start angle (in degrees) - 0 corresponds to +X (east)
 		\param stopAngle_deg stop angle (in degrees)
+		\param arbitraryOutputCS whether the output cloud should be exported in an arbitrary coordinate system or not
 		\param progressCb for progress notification
 		\return the unrolled point cloud
 	**/
@@ -684,6 +685,7 @@ public: //other methods
 							bool exportDeviationSF = false,
 							double startAngle_deg = 0.0,
 							double stopAngle_deg = 360.0,
+							bool arbitraryOutputCS = false,
 							CCCoreLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Adds associated SF color ramp info to current GL context

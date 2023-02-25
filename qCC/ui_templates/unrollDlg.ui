@@ -70,6 +70,17 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCheckBox" name="arbitraryCSCheckBox">
+       <property name="toolTip">
+        <string>Output cloud will use an arbitrary coordinate system
+(instead of being related to the original cloud coordinate system)</string>
+       </property>
+       <property name="text">
+        <string>output to arbitrary CS</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

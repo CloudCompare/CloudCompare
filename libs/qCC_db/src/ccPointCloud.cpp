@@ -3709,6 +3709,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 									bool exportDeviationSF/*=false*/,
 									double startAngle_deg/*=0.0*/,
 									double stopAngle_deg/*=360.0*/,
+									bool arbitraryOutputCS/*=false*/,
 									CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/) const
 {
 	if (	!params
@@ -3845,6 +3846,8 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
 	}
 
+	CCVector3 xDir2 = arbitraryOutputCS ? CCVector3(1, 0, 0) : xDir;
+
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		const CCVector3* Pin = getPoint(i);
@@ -3911,8 +3914,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			assert(false);
 		}
 
-		// convert Pout to 3D
-		Pout = (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
+		if (!arbitraryOutputCS)
+		{
+			// projects the output point to a coordinate system linked to the input cylinder/cone CS
+			Pout = (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
+		}
 		
 		// first unroll its normal if necessary
 		if (withNormals)
@@ -3984,7 +3990,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				break;
 			}
 
-			N2 = (N2.x * xDir) + (N2.y * yDir) + (N2.z * axisDir);
+			if (!arbitraryOutputCS)
+			{
+				// projects the output point to a coordinate system linked to the input cylinder/cone CS
+				N2 = (N2.x * xDir) + (N2.y * yDir) + (N2.z * axisDir);
+			}
 			N2.normalize();
 			unrolledNormals[i] = N2;
 		}
@@ -4033,15 +4043,15 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			{
 			case CYLINDER:
 			case STRAIGHTENED_CONE:
-				Pout += static_cast<PointCoordinateType>(dLongitude_rad * params->radius) * xDir;
+				Pout += static_cast<PointCoordinateType>(dLongitude_rad * params->radius) * xDir2;
 				break;
 			case STRAIGHTENED_CONE2:
-				Pout += static_cast<PointCoordinateType>(dLongitude_rad * coneAbscissa * sin_alpha) * xDir;
+				Pout += static_cast<PointCoordinateType>(dLongitude_rad * coneAbscissa * sin_alpha) * xDir2;
 				break;
 
 			case CONE:
-				Pout += static_cast<PointCoordinateType>(coneAbscissa * sin(dLongitude_rad)) * xDir;
-				Pout += static_cast<PointCoordinateType>(-coneAbscissa * cos(dLongitude_rad)) * yDir;
+				Pout += static_cast<PointCoordinateType>(coneAbscissa * sin(dLongitude_rad)) * xDir2;
+				Pout += static_cast<PointCoordinateType>(-coneAbscissa * cos(dLongitude_rad)) * xDir2;
 				//Pout = coneParams->apex + Pout; //nope, this projection is arbitrary and should be centered on (0, 0, 0)
 				break;
 

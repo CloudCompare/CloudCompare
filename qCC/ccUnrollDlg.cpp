@@ -21,6 +21,11 @@
 //Qt
 #include <QSettings>
 
+//semi-persistent settings
+static double s_startAngle_deg = 0.0;
+static double s_stopAngle_deg = 360.0;
+static bool s_arbitraryOutputCS = false;
+
 ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, m_ui( new Ui::UnrollDialog )
@@ -71,7 +76,12 @@ CCVector3d ccUnrollDlg::getAxis() const
  
 bool ccUnrollDlg::isAxisPositionAuto() const
 {
-	return (m_ui->checkBoxAuto->checkState() == Qt::Checked);
+	return m_ui->checkBoxAuto->isChecked();
+}
+
+bool ccUnrollDlg::useArbitraryOutputCS() const
+{
+	return m_ui->arbitraryCSCheckBox->isChecked();
 }
 
 void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
@@ -174,11 +184,6 @@ void ccUnrollDlg::axisDimensionChanged(int index)
 	}
 }
 
-//semi-persistent settings
-static CCVector3d s_axisCenter(0.0, 0.0, 0.0);
-static double s_startAngle_deg = 0.0;
-static double s_stopAngle_deg = 360.0;
-
 void ccUnrollDlg::toPersistentSettings() const
 {
 	QSettings settings;
@@ -193,13 +198,13 @@ void ccUnrollDlg::toPersistentSettings() const
 		settings.setValue("axis.x",				m_ui->axisXDoubleSpinBox->value());
 		settings.setValue("axis.y",				m_ui->axisYDoubleSpinBox->value());
 		settings.setValue("axis.z",				m_ui->axisZDoubleSpinBox->value());
-
-		//save the axis center as semi-persistent only
-		s_axisCenter.x = m_ui->axisCenterXDoubleSpinBox->value();
-		s_axisCenter.y = m_ui->axisCenterYDoubleSpinBox->value();
-		s_axisCenter.z = m_ui->axisCenterZDoubleSpinBox->value();
+		settings.setValue("axisCenter.x",		m_ui->axisCenterXDoubleSpinBox->value());
+		settings.setValue("axisCenter.y",		m_ui->axisCenterYDoubleSpinBox->value());
+		settings.setValue("axisCenter.z",		m_ui->axisCenterZDoubleSpinBox->value());
 
 		getAngleRange(s_startAngle_deg, s_stopAngle_deg);
+
+		s_arbitraryOutputCS = useArbitraryOutputCS();
 	}
 	settings.endGroup();
 }
@@ -221,6 +226,11 @@ void ccUnrollDlg::fromPersistentSettings()
 		axis.y = settings.value("axis.y", m_ui->axisYDoubleSpinBox->value()).toDouble();
 		axis.z = settings.value("axis.z", m_ui->axisZDoubleSpinBox->value()).toDouble();
 
+		CCVector3d axisCenter;
+		axisCenter.x = settings.value("axisCenter.x", m_ui->axisCenterXDoubleSpinBox->value()).toDouble();
+		axisCenter.y = settings.value("axisCenter.y", m_ui->axisCenterYDoubleSpinBox->value()).toDouble();
+		axisCenter.z = settings.value("axisCenter.z", m_ui->axisCenterZDoubleSpinBox->value()).toDouble();
+
 		m_ui->comboBoxUnrollShapeType->setCurrentIndex(shapeType);
 		m_ui->comboBoxAxisDimension->setCurrentIndex(axisDim);
 		m_ui->halfAngleDoubleSpinBox->setValue(angle);
@@ -231,12 +241,14 @@ void ccUnrollDlg::fromPersistentSettings()
 		m_ui->axisXDoubleSpinBox->setValue(axis.x);
 		m_ui->axisYDoubleSpinBox->setValue(axis.y);
 		m_ui->axisZDoubleSpinBox->setValue(axis.z);
-		m_ui->axisCenterXDoubleSpinBox->setValue(s_axisCenter.x);
-		m_ui->axisCenterYDoubleSpinBox->setValue(s_axisCenter.y);
-		m_ui->axisCenterZDoubleSpinBox->setValue(s_axisCenter.z);
+		m_ui->axisCenterXDoubleSpinBox->setValue(axisCenter.x);
+		m_ui->axisCenterYDoubleSpinBox->setValue(axisCenter.y);
+		m_ui->axisCenterZDoubleSpinBox->setValue(axisCenter.z);
 
 		m_ui->startAngleDoubleSpinBox->setValue(s_startAngle_deg);
 		m_ui->stopAngleDoubleSpinBox ->setValue(s_stopAngle_deg);
+
+		m_ui->arbitraryCSCheckBox->setChecked(s_arbitraryOutputCS);
 	}
 	settings.endGroup();
 }

@@ -5785,6 +5785,7 @@ void MainWindow::doActionUnroll()
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
 	CCVector3d axisDir = unrollDlg.getAxis();
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
+	bool arbitraryOutputCS = unrollDlg.useArbitraryOutputCS();
 	CCVector3 center = unrollDlg.getAxisPosition();
 
 	//let's rock unroll ;)
@@ -5812,7 +5813,7 @@ void MainWindow::doActionUnroll()
 			center = pc->getOwnBB().getCenter();
 		}
 		params.center = center;
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;
 
@@ -5825,7 +5826,7 @@ void MainWindow::doActionUnroll()
 		params.apex = center;
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
 		params.axisDir = CCVector3::fromArray(axisDir.u);
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;
 	

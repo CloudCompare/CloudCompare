@@ -66,7 +66,8 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
-
+		- option to output the unrolled cloud in an arbitrary coordinate system (X: unroll angle / Y = distance to primitive / Z = longitude)
+		
 	- Edit > Apply Tranformation
 		- new shortcut buttons to set the rotation axis to I(1,0,0), J(0,1,0) or K(0,0,1)
 		- new option (checkbox): 'Apply to global coordinates'

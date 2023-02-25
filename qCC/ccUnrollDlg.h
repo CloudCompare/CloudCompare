@@ -41,6 +41,7 @@ public:
 	ccPointCloud::UnrollMode getType() const;
 	CCVector3d getAxis() const;
 	bool isAxisPositionAuto() const;
+	bool useArbitraryOutputCS() const;
 	CCVector3 getAxisPosition() const;
 	void getAngleRange(double& start_deg, double& stop_deg) const;
 	double getRadius() const;

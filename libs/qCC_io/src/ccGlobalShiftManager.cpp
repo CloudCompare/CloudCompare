@@ -36,7 +36,7 @@ double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
 // default name for the Global Shift 'bookmarks' file
 static QString s_defaultGlobalShiftListFilename("global_shift_list.txt");
 
-// default and last input shift/scale entires (don't use it directly, use GetLast() instead)
+// default and last input shift/scale entries (don't use it directly, use GetLast() instead)
 static std::vector<ccGlobalShiftManager::ShiftInfo> s_lastInfoBuffer;
 const std::vector<ccGlobalShiftManager::ShiftInfo>& ccGlobalShiftManager::GetLast()
 {

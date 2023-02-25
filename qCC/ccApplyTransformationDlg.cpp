@@ -38,6 +38,7 @@
 
 static QString s_lastMatrix("1.00000000 0.00000000 0.00000000 0.00000000\n0.00000000 1.00000000 0.00000000 0.00000000\n0.00000000 0.00000000 1.00000000 0.00000000\n0.00000000 0.00000000 0.00000000 1.00000000");
 static bool s_inverseMatrix = false;
+static bool s_applyToGlobal = false;
 static int s_currentFormIndex = 0;
 
 //! Dialog to define a dip / dip dir. transformation
@@ -61,6 +62,7 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	//restore last state
 	matrixTextEdit->setPlainText(s_lastMatrix);
 	inverseCheckBox->setChecked(s_inverseMatrix);
+	applyToGlobalCheckBox->setChecked(s_applyToGlobal);
 	onMatrixTextChange(); //provoke the update of the other forms
 	tabWidget->setCurrentIndex(s_currentFormIndex);
 
@@ -71,6 +73,10 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	connect(fromFileToolButton,		 &QToolButton::clicked,			this, &ccApplyTransformationDlg::loadFromASCIIFile);
 	connect(fromClipboardToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::loadFromClipboard);
 	connect(fromDipDipDirToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::initFromDipAndDipDir);
+
+	connect(setIAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(1.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(0.0); });
+	connect(setJAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(1.0); rzAxisDoubleSpinBox->setValue(0.0); });
+	connect(setKAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(1.0); });
 
 	connect(rxAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
 	connect(ryAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
@@ -220,7 +226,7 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 	}
 }
 
-ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
+ccGLMatrixd ccApplyTransformationDlg::getTransformation(bool& applyToGlobal) const
 {
 	//get current input matrix text
 	QString matText = matrixTextEdit->toPlainText();
@@ -233,6 +239,8 @@ ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
 	{
 		mat.invert();
 	}
+
+	applyToGlobal = applyToGlobalCheckBox->isChecked();
 
 	return mat;
 }
@@ -255,6 +263,7 @@ void ccApplyTransformationDlg::checkMatrixValidityAndAccept()
 
 	s_lastMatrix = matrixTextEdit->toPlainText();
 	s_inverseMatrix = inverseCheckBox->isChecked();
+	s_applyToGlobal = applyToGlobalCheckBox->isChecked();
 	s_currentFormIndex = tabWidget->currentIndex();
 }
 

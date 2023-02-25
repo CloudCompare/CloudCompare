@@ -64,6 +64,12 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- Edit > Apply Tranformation
+		- new shortcut buttons to set the rotation axis to I(1,0,0), J(0,1,0) or K(0,0,1)
+		- new option (checkbox): 'Apply to global coordinates'
+			- this allows to apply the transformation matrix to the original Global coordinates instead of the local ones.
+			  (useful to georeference a cloud with a known transformation)
+
 	- multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath
 		  (warning: some dialogs may keep the previous value as it's stored in the system registry)

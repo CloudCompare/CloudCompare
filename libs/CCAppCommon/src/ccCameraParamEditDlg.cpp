@@ -63,11 +63,13 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(m_ui->eyDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 	connect(m_ui->ezDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
 
-	connect(m_ui->fovDoubleSpinBox,					qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::fovChanged);
-	connect(m_ui->nearClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,					[&] { nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value()); });
-	connect(m_ui->farClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,					[&] { farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value()); });
-	connect(m_ui->nearClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::nearClippingCheckBoxToggled);
-	connect(m_ui->farClippingCheckBox,				&QCheckBox::toggled,								this,	&ccCameraParamEditDlg::farClippingCheckBoxToggled);
+	connect(m_ui->fovDoubleSpinBox,					qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccCameraParamEditDlg::fovChanged);
+	connect(m_ui->nearClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,						[&] { nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value()); });
+	connect(m_ui->farClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,						[&] { farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value()); });
+	connect(m_ui->nearClippingDepthDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	[&] (double d) { if (d != 0) nearClippingDepthChanged(d); });
+	connect(m_ui->farClippingDepthDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	[&] (double d) { if (d != 0) farClippingDepthChanged(d); });
+	connect(m_ui->nearClippingCheckBox,				&QCheckBox::toggled,									this,	&ccCameraParamEditDlg::nearClippingCheckBoxToggled);
+	connect(m_ui->farClippingCheckBox,				&QCheckBox::toggled,									this,	&ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
 	connect(m_ui->viewUpToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setTopView);
 	connect(m_ui->viewDownToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setBottomView);

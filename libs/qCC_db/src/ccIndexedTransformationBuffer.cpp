@@ -151,8 +151,8 @@ ccBBox ccIndexedTransformationBuffer::getOwnBB(bool withGLFeatures/*=false*/)
 	}
 
 	ccBBox box = m_bBox;
-	box.minCorner() -= CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
-	box.maxCorner() += CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
+	box.minCorner() -= CCVector3(m_trihedronsScale, m_trihedronsScale, m_trihedronsScale);
+	box.maxCorner() += CCVector3(m_trihedronsScale, m_trihedronsScale, m_trihedronsScale);
 
 	return box;
 }

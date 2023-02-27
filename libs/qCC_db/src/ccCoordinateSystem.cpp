@@ -23,7 +23,7 @@
 
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
 									   PointCoordinateType axisWidth, 
-									   const ccGLMatrix* transMat/*=nullptr*/,
+									   const ccGLMatrixd* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
 	: ccGenericPrimitive(name, transMat), 
 	  m_DisplayScale(displayScale), 
@@ -35,7 +35,7 @@ ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
 	showColors(true);
 }
 
-ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
+ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrixd* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
 	: ccGenericPrimitive(name, transMat), 
 	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
@@ -80,26 +80,26 @@ void ccCoordinateSystem::setDisplayScale(PointCoordinateType size)
 	}
 }
 
-CCVector3 ccCoordinateSystem::getXYPlaneNormal() const
+CCVector3d ccCoordinateSystem::getXYPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(2);
 }
 
-CCVector3 ccCoordinateSystem::getYZPlaneNormal() const
+CCVector3d ccCoordinateSystem::getYZPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(0);
 }
 
-CCVector3 ccCoordinateSystem::getZXPlaneNormal() const
+CCVector3d ccCoordinateSystem::getZXPlaneNormal() const
 {
 	return m_transformation.getColumnAsVec3D(1);
 }
 
-ccPlane* ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createXYplane(const ccGLMatrixd* transMat) const
 {
-	ccGLMatrix xyPlaneMat;
+	ccGLMatrixd xyPlaneMat;
 	xyPlaneMat.toIdentity();
-	xyPlaneMat.setTranslation(CCVector3(m_DisplayScale / 2, m_DisplayScale / 2, 0.0));
+	xyPlaneMat.setTranslation(CCVector3d(m_DisplayScale / 2, m_DisplayScale / 2, 0.0));
 	if (transMat)
 	{
 		xyPlaneMat = *transMat * xyPlaneMat;
@@ -109,13 +109,13 @@ ccPlane* ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
 	return xyPlane;
 }
 
-ccPlane* ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createYZplane(const ccGLMatrixd* transMat) const
 {
-	ccGLMatrix yzPlaneMat;
-	yzPlaneMat.initFromParameters(	static_cast<PointCoordinateType>(M_PI_2),
-										static_cast<PointCoordinateType>(0),
-										static_cast<PointCoordinateType>(M_PI_2),
-										CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
+	ccGLMatrixd yzPlaneMat;
+	yzPlaneMat.initFromParameters(	M_PI_2,
+									0,
+									M_PI_2,
+									CCVector3d(0.0, m_DisplayScale / 2, m_DisplayScale / 2) );
 	if (transMat)
 	{
 		yzPlaneMat = *transMat * yzPlaneMat;
@@ -125,13 +125,13 @@ ccPlane* ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
 	return yzPlane;
 }
 
-ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
+ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrixd* transMat) const
 {
-	ccGLMatrix zxPlaneMat;
-	zxPlaneMat.initFromParameters(static_cast<PointCoordinateType>(0),
-									static_cast<PointCoordinateType>(-M_PI_2),
-									static_cast<PointCoordinateType>(-M_PI_2),
-		CCVector3(m_DisplayScale / 2, 0, m_DisplayScale / 2));
+	ccGLMatrixd zxPlaneMat;
+	zxPlaneMat.initFromParameters(	0,
+									-M_PI_2,
+									-M_PI_2,
+									CCVector3d(m_DisplayScale / 2, 0, m_DisplayScale / 2) );
 	if (transMat)
 	{
 		zxPlaneMat = *transMat * zxPlaneMat;
@@ -244,7 +244,7 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glPushMatrix();
 		glFunc->glMatrixMode(GL_MODELVIEW);
-		glFunc->glMultMatrixf(m_transformation.data());
+		glFunc->glMultMatrixd(m_transformation.data());
 
 		if (m_width != 0)
 		{

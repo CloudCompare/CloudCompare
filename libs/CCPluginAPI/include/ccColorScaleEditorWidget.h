@@ -195,8 +195,8 @@ public:
 
 	//! Adds a new slider widget
 	/** \param relativePos slider position (relatively to scale boundaries [0.0,1.0])
-	\param color slider color
-	\return created slider (pointer on)
+		\param color slider color
+		\return created slider (pointer to)
 	**/
 	ColorScaleElementSlider* addNewSlider(double relativePos, QColor color);
 
@@ -269,7 +269,7 @@ public:
 	//! Returns the current number of color scale steps
 	inline int getStepCount() const { return (m_sliders ? m_sliders->size() : 0); }
 
-	//! Returns a given slider (pointer on)
+	//! Returns a given slider (pointer to)
 	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->elements().at(index) : nullptr; }
 
 	//! Sets a given slider color

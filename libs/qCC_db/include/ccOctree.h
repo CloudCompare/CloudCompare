@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_OCTREE_HEADER
-#define CC_OCTREE_HEADER
 
 //Local
 #include "ccGenericGLDisplay.h"
@@ -69,9 +68,9 @@ public: //GENERAL METHODS
 	void translateBoundingBox(const CCVector3& T);
 
 	//! Returns the octree (square) bounding-box
-	ccBBox getSquareBB() const;
+	CCCoreLib::BoundingBox getSquareBB() const;
 	//! Returns the points bounding-box
-	ccBBox getPointsBB() const;
+	CCCoreLib::BoundingBox getPointsBB() const;
 
 	//inherited from DgmOctree
 	virtual void clear() override;
@@ -197,5 +196,3 @@ protected: //MEMBERS
 	ccOctreeFrustumIntersector* m_frustumIntersector;
 
 };
-
-#endif //CC_OCTREE_HEADER

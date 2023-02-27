@@ -67,7 +67,7 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	return true;
 }
 
-void ccSensor::applyGLTransformation(const ccGLMatrix& trans)
+void ccSensor::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	//transparent call
 	ccHObject::applyGLTransformation(trans);
@@ -89,19 +89,23 @@ void ccSensor::getIndexBounds(double& minIndex, double& maxIndex) const
 	}
 }
 
-bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double index) const
+bool ccSensor::getAbsoluteTransformation(ccGLMatrixd& trans, double index) const
 {
 	trans.toIdentity();
 	if (m_posBuffer)
-		if (!m_posBuffer->getInterpolatedTransformation(index,trans))
+	{
+		ccIndexedTransformation indexTrans;
+		if (!m_posBuffer->getInterpolatedTransformation(index, indexTrans))
 			return false;
+		trans = ccGLMatrixd(indexTrans.data());
+	}
 
 	trans *= m_rigidTransformation;
 
 	return true;
 }
 
-bool ccSensor::getActiveAbsoluteTransformation(ccIndexedTransformation& trans) const
+bool ccSensor::getActiveAbsoluteTransformation(ccGLMatrixd& trans) const
 {
 	if (!getAbsoluteTransformation(trans, m_activeIndex))
 	{
@@ -112,10 +116,9 @@ bool ccSensor::getActiveAbsoluteTransformation(ccIndexedTransformation& trans) c
 	return true;
 }
 
-bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec) const
+bool ccSensor::getActiveAbsoluteCenter(CCVector3d& vec) const
 {
-	ccIndexedTransformation trans;
-	
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
@@ -123,16 +126,14 @@ bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec) const
 	return true;
 }
 
-bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation) const
+bool ccSensor::getActiveAbsoluteRotation(ccGLMatrixd& rotation) const
 {
-	ccIndexedTransformation trans;
-	
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
-	ccGLMatrix mat = trans;
-	mat.setTranslation(CCVector3(0.0,0.0,0.0));
-	rotation = mat;
+	rotation = trans;
+	rotation.clearTranslation();
 
 	return true;
 }
@@ -186,8 +187,19 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 		return false;
 
 	//rigid transformation (dataVersion>=34)
-	if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (dataVersion < 55)
+	{
+		ccGLMatrix oldTrans;
+		if (!oldTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		{
+			return ReadError();
+		}
+		m_rigidTransformation = ccGLMatrixd(oldTrans.data());
+	}
+	else if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return ReadError();
+	}
 
 	//various parameters (dataVersion>=35)
 	QDataStream inStream(&in);

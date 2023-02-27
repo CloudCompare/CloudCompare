@@ -22,7 +22,7 @@
 #include "ccPointCloud.h"
 
 ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
-										const ccGLMatrix* transMat/*=nullptr*/,
+										const ccGLMatrixd* transMat/*=nullptr*/,
 										unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: ccMesh(new ccPointCloud("vertices"), uniqueID)
 	, m_drawPrecision(0)
@@ -96,7 +96,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 		ccGenericPointCloud* cloud = prim.getAssociatedCloud();
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
-			verts->addPoint(*cloud->getPoint(i));
+			verts->addLocalPoint(*cloud->getLocalPoint(i));
 			if (primHasVertNorms)
 			{
 				verts->addNormIndex(cloud->getPointNormalIndex(i));
@@ -232,7 +232,7 @@ bool ccGenericPrimitive::updateRepresentation()
 	return success;
 }
 
-void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
+void ccGenericPrimitive::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	//transparent call
 	ccMesh::applyGLTransformation(trans);
@@ -241,7 +241,7 @@ void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
 	m_transformation = trans * m_transformation;
 }
 
-const ccGLMatrix& ccGenericPrimitive::getGLTransformationHistory() const
+const ccGLMatrixd& ccGenericPrimitive::getGLTransformationHistory() const
 {
 	return m_transformation;
 }
@@ -252,7 +252,7 @@ void ccGenericPrimitive::applyTransformationToVertices()
 	//to 'applyGLTransformation_recursive' will multiply
 	//this matrix by the new one, we must set the
 	//m_transformation matrix to identity first! (tricky, isn't it?)
-	ccGLMatrix oldTrans = m_transformation;
+	ccGLMatrixd oldTrans = m_transformation;
 	m_transformation.toIdentity();
 	setGLTransformation(oldTrans);
 	applyGLTransformation_recursive();

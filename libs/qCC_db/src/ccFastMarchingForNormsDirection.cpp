@@ -106,7 +106,7 @@ int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
 			//aCell->signConfidence = 1;
 			aCell->cellCode = cellCodes.back();
 			aCell->N = ComputeRobustAverageNorm(&Yk,cloud);
-			aCell->C = *CCCoreLib::Neighbourhood(&Yk).getGravityCenter();
+			aCell->C = *CCCoreLib::Neighbourhood(&Yk).getLocalGravityCenter();
 		}
 
 		m_theGrid[gridPos] = aCell;
@@ -483,9 +483,9 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 
 		//we start the propagation from this point
 		//its corresponding cell in fact ;)
-		const CCVector3 *thePoint = cloud->getPoint(lastProcessedPoint);
+		const CCVector3* P = cloud->getLocalPoint(lastProcessedPoint);
 		Tuple3i cellPos;
-		octree->getTheCellPosWhichIncludesThePoint(thePoint, cellPos, octreeLevel);
+		octree->getTheCellPosWhichIncludesThePoint(*P, cellPos, octreeLevel);
 
 		//clipping (in case the octree is not 'complete')
 		cellPos.x = std::min(octreeWidth, cellPos.x);

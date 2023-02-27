@@ -135,7 +135,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 
 	//preferred orientation
 	CCVector3 prefOrientation(0, 0, 0);
-	CCVector3 originPoint(0, 0, 0);
+	CCVector3d originPoint(0, 0, 0);
 	bool useOriginPoint = false;
 	bool fromOriginPoint = true;
 
@@ -158,7 +158,8 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	case PLUS_BARYCENTER:
 	case MINUS_BARYCENTER:
 		{
-			originPoint = CCCoreLib::GeometricalAnalysisTools::ComputeGravityCenter(theCloud);
+			CCVector3 localOriginPoint = CCCoreLib::GeometricalAnalysisTools::ComputeLocalGravityCenter(theCloud);
+			originPoint = theCloud->toGlobal(localOriginPoint);
 			ccLog::Print(QString("[UpdateNormalOrientations] Barycenter: (%1;%2;%3)").arg(originPoint.x).arg(originPoint.y).arg(originPoint.z));
 			useOriginPoint = true;
 			fromOriginPoint = (preferredOrientation == PLUS_BARYCENTER);
@@ -168,7 +169,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 	case PLUS_ORIGIN:
 	case MINUS_ORIGIN:
 		{
-			originPoint = CCVector3(0, 0, 0);
+			//originPoint = CCVector3d(0, 0, 0);
 			useOriginPoint = true;
 			fromOriginPoint = (preferredOrientation == PLUS_ORIGIN);
 		}
@@ -229,13 +230,16 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 		}
 		else if (useOriginPoint)
 		{
+			CCVector3d P;
+			theCloud->getGlobalPoint(i, P);
+
 			if (fromOriginPoint)
 			{
-				prefOrientation = *(theCloud->getPoint(i)) - originPoint;
+				prefOrientation = CCVector3::fromArray((P - originPoint).u);
 			}
 			else
 			{
-				prefOrientation = originPoint - *(theCloud->getPoint(i));
+				prefOrientation = CCVector3::fromArray((originPoint - P).u);
 			}
 		}
 
@@ -385,10 +389,10 @@ bool ccNormalVectors::ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPer
 	CCCoreLib::Neighbourhood Z(points);
 
 	Tuple3ub dims;
-	const PointCoordinateType* h = Z.getQuadric(&dims);
+	const PointCoordinateType* h = Z.getLocalQuadric(&dims);
 	if (h)
 	{
-		const CCVector3* gv = Z.getGravityCenter();
+		const CCVector3* gv = Z.getLocalGravityCenter();
 		assert(gv);
 
 		const unsigned char& iX = dims.x;
@@ -482,9 +486,9 @@ bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist
 		//we look if the central point is one of the triangle's vertices
 		if (tsi->i1 == 0 || tsi->i2 == 0 || tsi->i3 == 0)
 		{
-			const CCVector3 *A = pointAndNeighbors->getPoint(tsi->i1);
-			const CCVector3 *B = pointAndNeighbors->getPoint(tsi->i2);
-			const CCVector3 *C = pointAndNeighbors->getPoint(tsi->i3);
+			const CCVector3* A = pointAndNeighbors->getLocalPoint(tsi->i1);
+			const CCVector3* B = pointAndNeighbors->getLocalPoint(tsi->i2);
+			const CCVector3* C = pointAndNeighbors->getLocalPoint(tsi->i3);
 
 			CCVector3 no = (*B - *A).cross(*C - *A);
 			//no.normalize();
@@ -512,7 +516,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+	cell.parentOctree->computeLocalCellCenter(nNSS.cellPos, cell.level, nNSS.localCellCenter);
 
 	//we already know which points are lying in the current cell
 	unsigned pointCount = cell.points->size();
@@ -520,14 +524,14 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 	CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	for (unsigned j = 0; j < pointCount; ++j, ++it)
 	{
-		it->point = cell.points->getPointPersistentPtr(j);
+		it->localPoint = cell.points->getLocalPointPersistentPtr(j);
 		it->pointIndex = cell.points->getPointGlobalIndex(j);
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
-		cell.points->getPoint(i, nNSS.queryPoint);
+		cell.points->getLocalPoint(i, nNSS.localQueryPoint);
 
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
@@ -539,10 +543,10 @@ bool ccNormalVectors::ComputeNormsAtLevelWithQuadric(	const CCCoreLib::DgmOctree
 		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC)
 		{
-			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
-			if (ComputeNormalWithQuadric(&neighbours, nNSS.queryPoint, N))
+			if (ComputeNormalWithQuadric(&neighbours, nNSS.localQueryPoint, N))
 			{
 				theNorms->setValue(cell.points->getPointGlobalIndex(i), N);
 			}
@@ -566,7 +570,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+	cell.parentOctree->computeLocalCellCenter(nNSS.cellPos, cell.level, nNSS.localCellCenter);
 
 	//we already know which points are lying in the current cell
 	unsigned pointCount = cell.points->size();
@@ -575,7 +579,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 		CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 		for (unsigned j = 0; j < pointCount; ++j, ++it)
 		{
-			it->point = cell.points->getPointPersistentPtr(j);
+			it->localPoint = cell.points->getLocalPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
 		}
 	}
@@ -583,7 +587,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
-		cell.points->getPoint(i, nNSS.queryPoint);
+		cell.points->getLocalPoint(i, nNSS.localQueryPoint);
 
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
@@ -595,7 +599,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCCoreLib::DgmOctree::octr
 		}
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
-			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
 			if (ComputeNormalWithLS(&neighbours, N))
@@ -624,7 +628,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::oc
 	nNSS.level = cell.level;
 	nNSS.minNumberOfNeighbors = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+	cell.parentOctree->computeLocalCellCenter(nNSS.cellPos, cell.level, nNSS.localCellCenter);
 
 	//we already know which points are lying in the current cell
 	unsigned pointCount = cell.points->size();
@@ -633,7 +637,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::oc
 	{
 		for (unsigned j = 0; j < pointCount; ++j, ++it)
 		{
-			it->point = cell.points->getPointPersistentPtr(j);
+			it->localPoint = cell.points->getLocalPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
 		}
 	}
@@ -641,14 +645,14 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCCoreLib::DgmOctree::oc
 
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
-		cell.points->getPoint(i, nNSS.queryPoint);
+		cell.points->getLocalPoint(i, nNSS.localQueryPoint);
 
 		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
 		{
 			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3)
 				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3;
-			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
+			CCCoreLib::DgmOctreeReferenceCloud neighbours(nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;
 			if (ComputeNormalWithTri(&neighbours, N))
@@ -688,8 +692,8 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoord
 	// uses a right hand rule for the dip of the plane
 	if (N.norm2() > std::numeric_limits<PointCoordinateType>::epsilon())
 	{
-		strike_deg = 180.0 - CCCoreLib::RadiansToDegrees( atan2(N.y, N.x) );		//atan2 output is between -180 and 180! So strike is always positive here
-		PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);		//x is the horizontal magnitude
+		strike_deg = 180.0 - CCCoreLib::RadiansToDegrees( atan2(N.y, N.x) );	//atan2 output is between -180 and 180! So strike is always positive here
+		PointCoordinateType x = sqrt(N.x*N.x + N.y*N.y);						//x is the horizontal magnitude
 		dip_deg = CCCoreLib::RadiansToDegrees( atan2(x, N.z) );
 	}
 	else

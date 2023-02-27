@@ -63,12 +63,12 @@ protected:
 #ifdef COMPUTE_REAL_RADIUS
 			CCVector3d sumP(0, 0, 0);
 #else //otherwise we use the bounding box
-			ccBBox bbox;
+			CCCoreLib::BoundingBox bbox;
 #endif
 			for (uint32_t codeIndex = node.firstCodeIndex; codeIndex < cellCodes.size() && (cellCodes[codeIndex].theCode >> bitDec) == currentTruncatedCellCode; ++codeIndex)
 			{
 				++node.pointCount;
-				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
+				const CCVector3* P = m_cloud.getLocalPoint(cellCodes[codeIndex].theIndex);
 #ifdef COMPUTE_REAL_RADIUS
 				sumP += *P;
 #else
@@ -138,7 +138,7 @@ protected:
 			for (uint32_t codeIndex = node.firstCodeIndex; codeIndex < cellCodes.size() && (cellCodes[codeIndex].theCode >> bitDec) == currentTruncatedCellCode; ++codeIndex)
 			{
 				++node.pointCount;
-				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
+				const CCVector3* P = m_cloud.getLocalPoint(cellCodes[codeIndex].theIndex);
 				sumP += *P;
 			}
 
@@ -149,7 +149,7 @@ protected:
 				double maxSquareRadius = 0;
 				for (uint32_t i = 0; i < node.pointCount; ++i)
 				{
-					const CCVector3* P = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
+					const CCVector3* P = m_cloud.getLocalPoint(cellCodes[node.firstCodeIndex + i].theIndex);
 					double squareRadius = (P->toDouble() - sumP).norm2();
 					if (squareRadius > maxSquareRadius)
 					{

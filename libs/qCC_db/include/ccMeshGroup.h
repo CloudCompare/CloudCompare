@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_MESH_GROUP_HEADER
-#define CC_MESH_GROUP_HEADER
 
 //Local
 #include "ccGenericMesh.h"
@@ -38,13 +37,12 @@ public:
 	//inherited methods (ccGenericMesh)
 	ccGenericPointCloud* getAssociatedCloud() const override { return 0; }
 	void refreshBB() override {}
-	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override { return false; }
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override { return false; }
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override { return false; }
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgb& color) override { return false; }
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override { return false; }
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override { return false; }
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color) override { return false; }
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override { return false; }
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override { return false; }
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override { return false; }
 	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override { return false; }
 	bool hasMaterials() const override { return false; }
 	const ccMaterialSet* getMaterialSet() const override { return 0; }
@@ -76,19 +74,20 @@ public:
 
 	//inherited methods (GenericIndexedMesh)
 	unsigned size() const override { return 0; }
-	void forEach(genericTriangleAction action) override {}
 	void placeIteratorAtBeginning() override {}
-	CCCoreLib::GenericTriangle* _getNextTriangle() override { return 0; }
-	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override { return 0; }
+	CCCoreLib::GenericLocalTriangle* _getNextLocalTriangle() override { return nullptr; }
+	CCCoreLib::GenericGlobalTriangle* _getNextGlobalTriangle() override { return nullptr; }
+	CCCoreLib::GenericLocalTriangle* _getLocalTriangle(unsigned triangleIndex) override { return nullptr; }
+	CCCoreLib::GenericGlobalTriangle* _getGlobalTriangle(unsigned triangleIndex) override { return nullptr; }
 	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override { return 0; }
 	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override { return 0; }
-	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override {}
-	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override {}
+	void getLocalTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override {};
+	void getGlobalTriangleVertices(unsigned triangleIndex, CCVector3d& A, CCVector3d& B, CCVector3d& C) const override {};
+	void getLocalBoundingBox(CCVector3& localBBMin, CCVector3& localBBMax) override {};
+	CCVector3d getLocalToGlobalTranslation() const override { return { 0.0, 0.0, 0.0 }; }
 
 protected:
 
 	//inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 };
-
-#endif //CC_MESH_GROUP_HEADER

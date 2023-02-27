@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_QUADRIC_PRIMITIVE_HEADER
-#define CC_QUADRIC_PRIMITIVE_HEADER
 
 //Local
 #include "ccGenericPrimitive.h"
@@ -43,11 +42,11 @@ public:
 		\param name name
 		\param precision drawing precision
 	**/
-	ccQuadric(	CCVector2 minCorner,
-				CCVector2 maxCorner,
-				const PointCoordinateType eq[6],
+	ccQuadric(	const CCVector2d& minCorner,
+				const CCVector2d& maxCorner,
+				const double eq[6],
 				const Tuple3ub* dims = nullptr,
-				const ccGLMatrix* transMat = nullptr,
+				const ccGLMatrixd* transMat = nullptr,
 				QString name = QString("Quadric"),
 				unsigned precision = DEFAULT_DRAWING_PRECISION);
 
@@ -65,15 +64,15 @@ public:
 	virtual ccGenericPrimitive* clone() const override;
 
 	//inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	virtual ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	//! Returns min corner
-	const CCVector2& getMinCorner() const { return m_minCorner; }
+	const CCVector2d& getMinCorner() const { return m_minCorner; }
 	//! Returns max corner
-	const CCVector2& getMaxCorner() const { return m_maxCorner; }
+	const CCVector2d& getMaxCorner() const { return m_maxCorner; }
 
 	//! Returns the equation coefficients
-	inline const PointCoordinateType* getEquationCoefs() const { return m_eq; }
+	inline const double* getEquationCoefs() const { return m_eq; }
 
 	//! Returns the equation 'coordinate system' (X,Y,Z dimensions indexes)
 	inline const Tuple3ub& getEquationDims() const { return m_dims; }
@@ -83,7 +82,7 @@ public:
 		\param[out] Q position of the input point in the quadric coordinate system
 		\return elevation of the input point (in the coordinate system quadric)
 	**/
-	PointCoordinateType projectOnQuadric(const CCVector3& P, CCVector3& Q) const;
+	double projectOnQuadric(const CCVector3d& P, CCVector3d& Q) const;
 
 	//! Returns the equation coefficients as a string
 	QString getEquationString() const;
@@ -105,20 +104,18 @@ protected:
 	bool buildUp() override;
 
 	//! Min corner
-	CCVector2 m_minCorner;
+	CCVector2d m_minCorner;
 	//! Max corner
-	CCVector2 m_maxCorner;
+	CCVector2d m_maxCorner;
 
 	//! Equation coefficients
-	PointCoordinateType m_eq[6];
+	double m_eq[6];
 
 	//! Dimension indexes
 	Tuple3ub m_dims;
 
 	//! Min height
-	PointCoordinateType m_minZ;
+	double m_minZ;
 	//! Max height
-	PointCoordinateType m_maxZ;
+	double m_maxZ;
 };
-
-#endif //CC_QUADRIC_PRIMITIVE_HEADER

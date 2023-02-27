@@ -24,7 +24,7 @@
 ccDish::ccDish(	PointCoordinateType radius,
 				PointCoordinateType height,
 				PointCoordinateType radius2/*=0*/,
-				const ccGLMatrix* transMat/*=nullptr*/,
+				const ccGLMatrixd* transMat/*=nullptr*/,
 				QString name/*="Dish"*/,
 				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
 	: ccGenericPrimitive(name,transMat)
@@ -60,27 +60,27 @@ bool ccDish::buildUp()
 
 	//section angular span
 	double startAngle_rad = 0.0;
-	const double endAngle_rad = M_PI/2.0;
+	const double endAngle_rad = M_PI / 2.0;
 
 	PointCoordinateType realRadius = m_baseRadius;
-	if (m_secondRadius == 0 && m_height<m_baseRadius) //partial spherical mode
+	if (m_secondRadius == 0 && m_height < m_baseRadius) //partial spherical mode
 	{
-		realRadius = (m_height*m_height+m_baseRadius*m_baseRadius)/(2*m_height);
-		startAngle_rad = acos(m_baseRadius/realRadius);
-		assert(startAngle_rad<endAngle_rad);
+		realRadius = (m_height*m_height + m_baseRadius * m_baseRadius) / (2 * m_height);
+		startAngle_rad = acos(m_baseRadius / realRadius);
+		assert(startAngle_rad < endAngle_rad);
 	}
 
 	const unsigned steps = m_drawPrecision;
-	double angleStep_rad = 2.0*M_PI/steps;
-	unsigned sectionSteps = static_cast<unsigned>(ceil((endAngle_rad-startAngle_rad)*m_drawPrecision/(2.0*M_PI)));
-	double sectionAngleStep_rad = (endAngle_rad-startAngle_rad)/sectionSteps;
+	double angleStep_rad = 2.0*M_PI / steps;
+	unsigned sectionSteps = static_cast<unsigned>(ceil((endAngle_rad - startAngle_rad)*m_drawPrecision / (2.0*M_PI)));
+	double sectionAngleStep_rad = (endAngle_rad - startAngle_rad) / sectionSteps;
 
 	//vertices
-	unsigned vertCount = steps*sectionSteps+1; //+1 for north pole
+	unsigned vertCount = steps * sectionSteps + 1; //+1 for north pole
 	//faces
-	unsigned faceCount = steps*((sectionSteps-1)*2+1);
+	unsigned faceCount = steps * ((sectionSteps - 1) * 2 + 1);
 
-	if (!init(vertCount,true,faceCount,0))
+	if (!init(vertCount, true, faceCount, 0))
 	{
 		ccLog::Error("[ccDish::buildUp] Not enough memory");
 		return false;
@@ -91,20 +91,20 @@ bool ccDish::buildUp()
 	assert(verts);
 
 	//first point: north pole
-	verts->addPoint(CCVector3(0,0,m_height));
-	verts->addNorm(CCVector3(0,0,1));
+	verts->addLocalPoint(CCVector3(0, 0, m_height));
+	verts->addNorm(CCVector3(0, 0, 1));
 
 	//then, angular sweep
 	{
-		for (unsigned j=1; j<=sectionSteps; ++j)
+		for (unsigned j = 1; j <= sectionSteps; ++j)
 		{
 			PointCoordinateType theta = static_cast<PointCoordinateType>(endAngle_rad - j * sectionAngleStep_rad); //we start from north pole!
 			PointCoordinateType cos_theta = cos(theta);
 			PointCoordinateType sin_theta = sin(theta);
 
 			CCVector3 N0(cos_theta, 0, sin_theta);
-		
-			for (unsigned i=0; i<steps; ++i) //then we make a full revolution
+
+			for (unsigned i = 0; i < steps; ++i) //then we make a full revolution
 			{
 				PointCoordinateType phi = static_cast<PointCoordinateType>(i * angleStep_rad);
 				PointCoordinateType cos_phi = cos(phi);
@@ -122,10 +122,10 @@ bool ccDish::buildUp()
 				}
 				else //spherical section mode
 				{
-					P.z += m_height-realRadius;
+					P.z += m_height - realRadius;
 				}
 
-				verts->addPoint(P);
+				verts->addLocalPoint(P);
 				verts->addNorm(N);
 			}
 		}
@@ -135,25 +135,25 @@ bool ccDish::buildUp()
 	{
 		//north pole
 		{
-			for (unsigned i=0; i<steps; ++i)
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				unsigned A = 1+i;
-				unsigned B = (i+1<steps ? A+1 : 1);
-				addTriangle(A,B,0);
+				unsigned A = 1 + i;
+				unsigned B = (i + 1 < steps ? A + 1 : 1);
+				addTriangle(A, B, 0);
 			}
 		}
 
 		//slices
-		for (unsigned j=1; j<sectionSteps; ++j)
+		for (unsigned j = 1; j < sectionSteps; ++j)
 		{
-			unsigned shift = 1+(j-1)*steps;		
-			for (unsigned i=0; i<steps; ++i)
+			unsigned shift = 1 + (j - 1)*steps;
+			for (unsigned i = 0; i < steps; ++i)
 			{
-				unsigned A = shift+i;
-				unsigned B = (i+1<steps ? A+1 : shift);
+				unsigned A = shift + i;
+				unsigned B = (i + 1 < steps ? A + 1 : shift);
 				assert(B < vertCount);
-				addTriangle(A,A+steps,B);
-				addTriangle(B+steps,B,A+steps);
+				addTriangle(A, A + steps, B);
+				addTriangle(B + steps, B, A + steps);
 			}
 		}
 	}

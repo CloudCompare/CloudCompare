@@ -89,7 +89,7 @@ public:
 	const ccCameraSensor* getAssociatedSensor() const { return m_associatedSensor; }
 
 	//inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	virtual ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	//! Compute the displayed image size
 	QSizeF computeDisplayedSize(int glWidth, int glHeight) const;

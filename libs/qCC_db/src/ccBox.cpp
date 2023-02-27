@@ -22,7 +22,7 @@
 #include "ccPointCloud.h"
 
 ccBox::ccBox(	const CCVector3& dims,
-				const ccGLMatrix* transMat/*=nullptr*/,
+				const ccGLMatrixd* transMat/*=nullptr*/,
 				QString name/*=QString("Box")*/)
 	: ccGenericPrimitive(name, transMat)
 	, m_dims(dims)
@@ -57,28 +57,28 @@ bool ccBox::buildUp()
 	}
 
 	//upper plane
-	ccGLMatrix upperMat;
+	ccGLMatrixd upperMat;
 	upperMat.getTranslation()[2] = m_dims.z / 2;
 	*this += ccPlane(m_dims.x, m_dims.y, &upperMat);
 	//lower plane
-	ccGLMatrix lowerMat;
-	lowerMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI), CCVector3(1, 0, 0), CCVector3(0, 0, -m_dims.z / 2));
+	ccGLMatrixd lowerMat;
+	lowerMat.initFromParameters(-M_PI, CCVector3d(1, 0, 0), CCVector3d(0, 0, -m_dims.z / 2));
 	*this += ccPlane(m_dims.x, m_dims.y, &lowerMat);
 	//left plane
-	ccGLMatrix leftMat;
-	leftMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI / 2), CCVector3(0, 1, 0), CCVector3(-m_dims.x / 2, 0, 0));
+	ccGLMatrixd leftMat;
+	leftMat.initFromParameters(-M_PI / 2, CCVector3d(0, 1, 0), CCVector3d(-m_dims.x / 2, 0, 0));
 	*this += ccPlane(m_dims.z, m_dims.y, &leftMat);
 	//right plane
-	ccGLMatrix rightMat;
-	rightMat.initFromParameters(static_cast<PointCoordinateType>(M_PI / 2), CCVector3(0, 1, 0), CCVector3(m_dims.x / 2, 0, 0));
+	ccGLMatrixd rightMat;
+	rightMat.initFromParameters(M_PI / 2, CCVector3d(0, 1, 0), CCVector3d(m_dims.x / 2, 0, 0));
 	*this += ccPlane(m_dims.z, m_dims.y, &rightMat);
 	//front plane
-	ccGLMatrix frontMat;
-	frontMat.initFromParameters(static_cast<PointCoordinateType>(M_PI / 2), CCVector3(1, 0, 0), CCVector3(0, -m_dims.y / 2, 0));
+	ccGLMatrixd frontMat;
+	frontMat.initFromParameters(M_PI / 2, CCVector3d(1, 0, 0), CCVector3d(0, -m_dims.y / 2, 0));
 	*this += ccPlane(m_dims.x, m_dims.z, &frontMat);
 	//back plane
-	ccGLMatrix backMat;
-	backMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI / 2), CCVector3(1, 0, 0), CCVector3(0, m_dims.y / 2, 0));
+	ccGLMatrixd backMat;
+	backMat.initFromParameters(-M_PI / 2, CCVector3d(1, 0, 0), CCVector3d(0, m_dims.y / 2, 0));
 	*this += ccPlane(m_dims.x, m_dims.z, &backMat);
 
 	return (vertices() && vertices()->size() == 24 && this->size() == 12);

@@ -115,10 +115,10 @@ public:
 	void reset();
 
 	//! Manually sets the box parameters
-	void set(const ccBBox& extents, const ccGLMatrix& transformation);
+	void set(const ccBBox& extents, const ccGLMatrixd& transformation);
 
 	//! Returns the box parameters
-	void get(ccBBox& extents, ccGLMatrix& transformation);
+	void get(ccBBox& extents, ccGLMatrixd& transformation);
 
 	//! Associated entity container
 	inline const ccHObject& getContainer() const { return m_entityContainer; }
@@ -137,7 +137,7 @@ protected: //methods
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Computes arrows display scale
-	PointCoordinateType computeArrowsScale() const;
+	double computeArrowsScale() const;
 
 protected: //members
 	

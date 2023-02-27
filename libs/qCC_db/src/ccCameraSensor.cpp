@@ -264,7 +264,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 	}
 
 	//get current sensor position
-	ccIndexedTransformation sensorPos;
+	ccGLMatrixd sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		return ccBBox();
@@ -279,11 +279,11 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		return ccBBox();
 	}
 
-	cloud.addPoint(CCVector3(0, 0, 0));
-	cloud.addPoint(CCVector3( upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
-	cloud.addPoint(CCVector3(-upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
-	cloud.addPoint(CCVector3(-upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
-	cloud.addPoint(CCVector3( upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addLocalPoint(CCVector3(0, 0, 0));
+	cloud.addLocalPoint(CCVector3( upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addLocalPoint(CCVector3(-upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addLocalPoint(CCVector3(-upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addLocalPoint(CCVector3( upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
 
 	//add frustum corners if necessary
 	if (m_frustumInfos.isComputed
@@ -294,27 +294,24 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		if (cloud.reserve(cloud.size() + cornerCount))
 		{
 			for (unsigned i = 0; i < cornerCount; ++i)
-				cloud.addPoint(*m_frustumInfos.frustumCorners->getPoint(i));
+				cloud.addLocalPoint(*m_frustumInfos.frustumCorners->getLocalPoint(i));
 		}
 	}
 
-	cloud.applyRigidTransformation(sensorPos);
+	cloud.applyGlobalRigidTransformation(sensorPos);
 	return cloud.getOwnBB(false);
 }
 
-ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
+ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrixd& trans)
 {
 	//get current sensor position
-	ccIndexedTransformation sensorPos;
-	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	if (!getAbsoluteTransformation(trans, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
-	trans = sensorPos;
-
-	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true);
+	CCVector3d upperLeftPoint = computeUpperLeftPoint();
+	return ccBBox(-upperLeftPoint, CCVector3d(upperLeftPoint.x, upperLeftPoint.y, 0), true);
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
@@ -361,7 +358,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 		}
 	}
 
-	ccIndexedTransformation trans;
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 	{
 		return false;
@@ -372,8 +369,7 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 	//fov
 	float fov_deg = CCCoreLib::RadiansToDegrees( m_intrinsicParams.vFOV_rad );
 	//camera position/orientation
-	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd, fov_deg, ar);
+	win->setupProjectiveViewport(trans, fov_deg, ar);
 
 	return true;
 }
@@ -417,7 +413,7 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win/
 	float fov_deg = CCCoreLib::RadiansToDegrees(fOV_rad);
 
 	//camera position/orientation
-	ccIndexedTransformation trans;
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 	{
 		return false;
@@ -425,8 +421,7 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win/
 
 	//image aspect ratio
 	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
-	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd, fov_deg, ar);
+	win->setupProjectiveViewport(trans, fov_deg, ar);
 
 	return true;
 }
@@ -686,10 +681,9 @@ short ccCameraSensor::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(43), ccSensor::minimumFileVersion_MeOnly());
 }
 
-bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const
+bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3d& localCoord, CCVector3d& globalCoord) const
 {
-	ccIndexedTransformation trans;
-
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
@@ -699,10 +693,9 @@ bool ccCameraSensor::fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CC
 	return true;
 }
 
-bool ccCameraSensor::fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord) const
+bool ccCameraSensor::fromGlobalCoordToLocalCoord(const CCVector3d& globalCoord, CCVector3d& localCoord) const
 {
-	ccIndexedTransformation trans;
-
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
@@ -712,12 +705,12 @@ bool ccCameraSensor::fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, C
 	return true;
 }
 
-bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
+bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3d& localCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
 {
 #ifdef CHECK_THIS_AFTERWARDS
 
 	// Change in 3D image coordinates system for good projection
-	CCVector3 imageCoordSystem(localCoord.x, localCoord.y, -localCoord.z);
+	CCVector3d imageCoordSystem(localCoord.x, localCoord.y, -localCoord.z);
 
 	// We test if the point is in front or behind the sensor ? If it is behind (or in the center of the sensor i.e. z=0.0), we can't project!
 	if (imageCoordSystem.z < FLT_EPSILON)
@@ -727,10 +720,10 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	ccGLMatrix mat;
 	if (!getProjectionMatrix(mat))
 		return false;
-	CCVector3 projCoord = mat * imageCoordSystem; // at this stage, coordinates are homogeneous
+	CCVector3d projCoord = mat * imageCoordSystem; // at this stage, coordinates are homogeneous
 	projCoord = projCoord/projCoord.z; // coordinates are now in pixels
-	CCVector2 initial(projCoord.x, projCoord.y);
-	CCVector2 coord = initial;
+	CCVector2d initial(projCoord.x, projCoord.y);
+	CCVector2d coord = initial;
 
 	//apply lens correction if necessary
 	//if (withLensError)
@@ -749,7 +742,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 #else
 
 	// We test if the point is in front or behind the sensor ? If it is behind (or in the center of the sensor i.e. depth = 0), we can't project!
-	double depth = -static_cast<double>(localCoord.z); //warning: the camera looks backward!
+	double depth = -localCoord.z; //warning: the camera looks backward!
 #define BACK_POINTS_CULLING
 #ifdef BACK_POINTS_CULLING
 	if (depth < FLT_EPSILON)
@@ -795,7 +788,7 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	return true;
 }
 
-bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3& localCoord, PointCoordinateType depth, bool withLensCorrection/*=true*/) const
+bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3d& localCoord, PointCoordinateType depth, bool withLensCorrection/*=true*/) const
 {
 	CCVector3d p2(imageCoord.x, imageCoord.y, 0.0);
 
@@ -805,39 +798,38 @@ bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCV
 	//apply inverse radial distortion (if any)
 	//TODO
 
-	double factor = static_cast<double>(m_intrinsicParams.vertFocal_pix);
+	double factor = m_intrinsicParams.vertFocal_pix;
 	CCVector3d p = p2 / factor;
 
 	//perspective
-	localCoord = CCVector3(	static_cast<PointCoordinateType>(p.x * depth),
-							static_cast<PointCoordinateType>(p.y * depth),
-							-depth);
+	localCoord = CCVector3d(	p.x * depth,
+								p.y * depth,
+								-depth );
 
 	return true;
 }
 
-bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
+bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3d& globalCoord, CCVector2& imageCoord, bool withLensError/*=true*/) const
 {
-	CCVector3 localCoord;
-	if (!fromGlobalCoordToLocalCoord(globalCoord,localCoord))
+	CCVector3d localCoord;
+	if (!fromGlobalCoordToLocalCoord(globalCoord, localCoord))
 		return false;
 
 	return fromLocalCoordToImageCoord(localCoord, imageCoord, withLensError);
 }
 
-bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3& globalCoord, PointCoordinateType z0, bool withLensCorrection/*=true*/) const
+bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3d& globalCoord, double z0, bool withLensCorrection/*=true*/) const
 {
-	ccIndexedTransformation trans;
-
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
-	CCVector3 localCoord;
+	CCVector3d localCoord;
 	if (!fromImageCoordToLocalCoord(imageCoord, localCoord, CCCoreLib::PC_ONE, withLensCorrection))
 		return false;
 
 	//update altitude: we must compute the intersection between the plane Z = Z0 (world) and the camera (input pixel) viewing direction
-	CCVector3 viewDir = localCoord;
+	CCVector3d viewDir = localCoord;
 	trans.applyRotation(viewDir);
 	viewDir.normalize();
 
@@ -847,10 +839,10 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CC
 		return false;
 	}
 
-	CCVector3 camC = trans.getTranslationAsVec3D();
-	PointCoordinateType dZ = z0 - camC.z;
+	CCVector3d camC = trans.getTranslationAsVec3D();
+	double dZ = z0 - camC.z;
 
-	PointCoordinateType u = dZ / viewDir.z;
+	double u = dZ / viewDir.z;
 #ifdef BACK_POINTS_CULLING
 	if (u < 0)
 		return false; //wrong direction!
@@ -1021,11 +1013,12 @@ bool ccCameraSensor::computeUncertainty(CCCoreLib::ReferenceCloud* points, std::
 
 	for (unsigned i = 0; i < count; i++)
 	{
-		const CCVector3* coordGlobal = points->getPoint(i);
-		CCVector3 coordLocal;
+		CCVector3d coordGlobal;
+		points->getGlobalPoint(i, coordGlobal);
+		CCVector3d coordLocal;
 		CCVector2 coordImage;
 
-		if (	fromGlobalCoordToLocalCoord(*coordGlobal,coordLocal)
+		if (	fromGlobalCoordToLocalCoord(coordGlobal, coordLocal)
 			&&	fromLocalCoordToImageCoord(coordLocal, coordImage) )
 		{
 			computeUncertainty(coordImage, std::abs(coordLocal.z), accuracy[i]);
@@ -1182,26 +1175,27 @@ ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
 	return new ccImage(newImage, image->getName() + QString(".undistort"));
 }
 
-bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord/*, bool withLensCorrection*/) const
+bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3d& globalCoord/*, bool withLensCorrection*/) const
 {
-	CCVector3 localCoord;
+	CCVector3d localCoord;
 
 	// Tests if the projection is in the field of view
 	if (!fromGlobalCoordToLocalCoord(globalCoord, localCoord/*, withLensCorrection*/))
 		return false;
 
 	// Tests if the projected point is between zNear and zFar
-	const float& z = localCoord.z;
-	const float& n = m_intrinsicParams.zNear_mm;
-	const float& f = m_intrinsicParams.zFar_mm;
+	double n = m_intrinsicParams.zNear_mm;
+	double f = m_intrinsicParams.zFar_mm;
 
-	return (-z <= f && -z > n && std::abs(f+z) >= FLT_EPSILON && std::abs(n+z) >= FLT_EPSILON);
+	return (-localCoord.z <= f && -localCoord.z > n && std::abs(f + localCoord.z) >= FLT_EPSILON && std::abs(n + localCoord.z) >= FLT_EPSILON);
 }
 
 CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 {
 	if (m_intrinsicParams.arrayHeight == 0)
-		return CCVector3(0,0,0);
+	{
+		return CCVector3(0, 0, 0);
+	}
 
 	float ar = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight : 1.0f;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
@@ -1238,18 +1232,18 @@ bool ccCameraSensor::computeFrustumCorners()
 	}
 
 	// DO NOT MODIFY THE ORDER OF THE CORNERS!! A LOT OF CODE DEPENDS OF THIS ORDER!!
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
-	m_frustumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3( xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3( xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3(-xIn,-yIn, -CCCoreLib::PC_ONE) * zFar);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zNear);
+	m_frustumInfos.frustumCorners->addLocalPoint(CCVector3(-xIn, yIn, -CCCoreLib::PC_ONE) * zFar);
 
 	// compute center of the circumscribed sphere
-	const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
-	const CCVector3* P5 = m_frustumInfos.frustumCorners->getPoint(5);
+	const CCVector3* P0 = m_frustumInfos.frustumCorners->getLocalPoint(0);
+	const CCVector3* P5 = m_frustumInfos.frustumCorners->getLocalPoint(5);
 
 	float dz = P0->z-P5->z;
 	float z = (std::abs(dz) < FLT_EPSILON ? P0->z : (P0->norm2() - P5->norm2()) / (2*dz));
@@ -1262,7 +1256,7 @@ bool ccCameraSensor::computeFrustumCorners()
 	return true;
 }
 
-bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustumCorners[8], CCVector3 edges[6], CCVector3& center)
+bool ccCameraSensor::computeGlobalPlaneCoefficients(double planeCoefficients[6][4], CCVector3d frustumCorners[8], CCVector3d edges[6], CCVector3d& center)
 {
 	if (!m_frustumInfos.isComputed)
 	{
@@ -1274,15 +1268,28 @@ bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 
 	assert(m_frustumInfos.frustumCorners && m_frustumInfos.frustumCorners->size() == 8);
 
+	m_frustumInfos.frustumCorners->getGlobalPoint(0, frustumCorners[0]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(1, frustumCorners[1]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(2, frustumCorners[2]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(3, frustumCorners[3]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(4, frustumCorners[4]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(5, frustumCorners[5]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(6, frustumCorners[6]);
+	m_frustumInfos.frustumCorners->getGlobalPoint(7, frustumCorners[7]);
+
+	ccGLMatrixd trans;
+	if (!getActiveAbsoluteTransformation(trans))
+		return false;
+
 	// compute frustum corners in the global coordinates system
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(0), frustumCorners[0]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(1), frustumCorners[1]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(2), frustumCorners[2]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(3), frustumCorners[3]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(4), frustumCorners[4]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(5), frustumCorners[5]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(6), frustumCorners[6]);
-	fromLocalCoordToGlobalCoord(*m_frustumInfos.frustumCorners->getPoint(7), frustumCorners[7]);
+	trans.apply(frustumCorners[0]);
+	trans.apply(frustumCorners[1]);
+	trans.apply(frustumCorners[2]);
+	trans.apply(frustumCorners[3]);
+	trans.apply(frustumCorners[4]);
+	trans.apply(frustumCorners[5]);
+	trans.apply(frustumCorners[6]);
+	trans.apply(frustumCorners[7]);
 
 	/*
 	//-- METHOD 1 --//
@@ -1346,9 +1353,9 @@ bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 	// compute equations for side planes
 	for (int i = 0; i < 4; i++)
 	{
-		CCVector3 v1 = frustumCorners[i * 2 + 1] - frustumCorners[i * 2];
-		CCVector3 v2 = frustumCorners[((i + 1) * 2) % 8] - frustumCorners[i * 2];
-		CCVector3 n = v1.cross(v2); n.normalize();
+		CCVector3d v1 = frustumCorners[i * 2 + 1] - frustumCorners[i * 2];
+		CCVector3d v2 = frustumCorners[((i + 1) * 2) % 8] - frustumCorners[i * 2];
+		CCVector3d n = v1.cross(v2); n.normalize();
 		planeCoefficients[i][0] = n.x;
 		planeCoefficients[i][1] = n.y;
 		planeCoefficients[i][2] = n.z;
@@ -1356,9 +1363,9 @@ bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 	}
 	// compute equations for near and far planes
 	{
-		CCVector3 v1 = frustumCorners[0] - frustumCorners[6];
-		CCVector3 v2 = frustumCorners[4] - frustumCorners[6];
-		CCVector3 n = v1.cross(v2); n.normalize();
+		CCVector3d v1 = frustumCorners[0] - frustumCorners[6];
+		CCVector3d v2 = frustumCorners[4] - frustumCorners[6];
+		CCVector3d n = v1.cross(v2); n.normalize();
 		planeCoefficients[4][0] = n.x;
 		planeCoefficients[4][1] = n.y;
 		planeCoefficients[4][2] = n.z;
@@ -1394,7 +1401,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!MACRO_Draw3D(context))
 		return;
 
-	ccIndexedTransformation sensorPos;
+	ccGLMatrixd sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		//no visible position for this index!
@@ -1421,7 +1428,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	glFunc->glMultMatrixf(sensorPos.data());
+	glFunc->glMultMatrixd(sensorPos.data());
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
 
@@ -1486,14 +1493,14 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//frustum area (lines)
 			if (m_frustumInfos.drawFrustum)
 			{
-				const CCVector3* P0 = m_frustumInfos.frustumCorners->getPoint(0);
-				const CCVector3* P1 = m_frustumInfos.frustumCorners->getPoint(1);
-				const CCVector3* P2 = m_frustumInfos.frustumCorners->getPoint(2);
-				const CCVector3* P3 = m_frustumInfos.frustumCorners->getPoint(3);
-				const CCVector3* P4 = m_frustumInfos.frustumCorners->getPoint(4);
-				const CCVector3* P5 = m_frustumInfos.frustumCorners->getPoint(5);
-				const CCVector3* P6 = m_frustumInfos.frustumCorners->getPoint(6);
-				const CCVector3* P7 = m_frustumInfos.frustumCorners->getPoint(7);
+				const CCVector3* P0 = m_frustumInfos.frustumCorners->getLocalPoint(0);
+				const CCVector3* P1 = m_frustumInfos.frustumCorners->getLocalPoint(1);
+				const CCVector3* P2 = m_frustumInfos.frustumCorners->getLocalPoint(2);
+				const CCVector3* P3 = m_frustumInfos.frustumCorners->getLocalPoint(3);
+				const CCVector3* P4 = m_frustumInfos.frustumCorners->getLocalPoint(4);
+				const CCVector3* P5 = m_frustumInfos.frustumCorners->getLocalPoint(5);
+				const CCVector3* P6 = m_frustumInfos.frustumCorners->getLocalPoint(6);
+				const CCVector3* P7 = m_frustumInfos.frustumCorners->getLocalPoint(7);
 
 				glFunc->glPushAttrib(GL_LINE_BIT);
 				glFunc->glLineWidth(2.0);
@@ -1683,7 +1690,7 @@ bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
 			const KeyPoint& kp = keypointsImage[i];
 			double kpx = static_cast<double>(kp.x);
 			double kpy = static_cast<double>(kp.y);
-			const CCVector3* P = keypoints3D->getPoint(kp.index);
+			const CCVector3* P = keypoints3D->getLocalPoint(kp.index);
 
 			*_A++ = 1.0;
 			*_A++ = kpx;
@@ -1785,7 +1792,7 @@ bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
 }
 
 ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
-													PointCoordinateType Z0,
+													double Z0,
 													double& pixelSize,
 													bool undistortImages/*=true*/,
 													double* minCorner/*=nullptr*/,
@@ -1801,7 +1808,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	//top-left
 	{
 		CCVector2 xTopLeft(0, 0);
-		CCVector3 P3D;
+		CCVector3d P3D;
 		if (!fromImageCoordToGlobalCoord(xTopLeft, P3D, Z0))
 			return nullptr;
 #ifdef QT_DEBUG
@@ -1817,7 +1824,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	//top-right
 	{
 		CCVector2 xTopRight(static_cast<PointCoordinateType>(width), 0);
-		CCVector3 P3D;
+		CCVector3d P3D;
 		if (!fromImageCoordToGlobalCoord(xTopRight, P3D, Z0))
 			return nullptr;
 #ifdef QT_DEBUG
@@ -1833,7 +1840,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	//bottom-right
 	{
 		CCVector2 xBottomRight(static_cast<PointCoordinateType>(width), static_cast<PointCoordinateType>(height));
-		CCVector3 P3D;
+		CCVector3d P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomRight, P3D, Z0))
 			return nullptr;
 #ifdef QT_DEBUG
@@ -1849,7 +1856,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	//bottom-left
 	{
 		CCVector2 xBottomLeft(0, static_cast<PointCoordinateType>(height));
-		CCVector3 P3D;
+		CCVector3d P3D;
 		if (!fromImageCoordToGlobalCoord(xBottomLeft, P3D, Z0))
 			return nullptr;
 #ifdef QT_DEBUG
@@ -1866,8 +1873,8 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 		memcpy(realCorners, corners, 8 * sizeof(double));
 
 	//we look for min and max bounding box
-	double minC[2] = {corners[0],corners[1]};
-	double maxC[2] = {corners[0],corners[1]};
+	double minC[2]{ corners[0], corners[1] };
+	double maxC[2]{ corners[0], corners[1] };
 
 	for (unsigned k = 1; k < 4; ++k)
 	{
@@ -1901,11 +1908,11 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 	double _pixelSize = pixelSize;
 	if (_pixelSize <= 0)
 	{
-		int maxSize = std::max(width,height);
-		_pixelSize = std::max(dx,dy)/maxSize;
+		int maxSize = std::max(width, height);
+		_pixelSize = std::max(dx, dy) / maxSize;
 	}
-	unsigned w = static_cast<unsigned>(dx/_pixelSize);
-	unsigned h = static_cast<unsigned>(dy/_pixelSize);
+	unsigned w = static_cast<unsigned>(dx / _pixelSize);
+	unsigned h = static_cast<unsigned>(dy / _pixelSize);
 
 	QImage orthoImage(w,h,QImage::Format_ARGB32);
 	if (orthoImage.isNull()) //not enough memory!
@@ -1916,22 +1923,22 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(	const ccImage* image,
 
 	for (unsigned i = 0; i < w; ++i)
 	{
-		PointCoordinateType xip = static_cast<PointCoordinateType>(minC[0] + i*_pixelSize);
+		double xip = minC[0] + i * _pixelSize;
 		for (unsigned j = 0; j < h; ++j)
 		{
-			PointCoordinateType yip = static_cast<PointCoordinateType>(minC[1] + j*_pixelSize);
+			double yip = minC[1] + j * _pixelSize;
 
 			QRgb rgb = blackValue; //output pixel is (transparent) black by default
 
-			CCVector3 P3D(xip,yip,Z0);
+			CCVector3d P3D(xip, yip, Z0);
 			CCVector2 imageCoord;
-			if (fromGlobalCoordToImageCoord(P3D,imageCoord,undistortImages))
+			if (fromGlobalCoordToImageCoord(P3D, imageCoord, undistortImages))
 			{
 				int x = static_cast<int>(imageCoord.x);
 				int y = static_cast<int>(imageCoord.y);
 				if (x >= 0 && x < width && y >= 0 && y < height)
 				{
-					rgb = image->data().pixel(x,y);
+					rgb = image->data().pixel(x, y);
 				}
 			}
 
@@ -2018,8 +2025,8 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
 	}
 
 	//we look for min and max bounding box
-	double minC[2] = { corners[0], corners[1] };
-	double maxC[2] = { corners[0], corners[1] };
+	double minC[2]{ corners[0], corners[1] };
+	double maxC[2]{ corners[0], corners[1] };
 
 	for (unsigned k = 1; k < 4; ++k)
 	{
@@ -2136,7 +2143,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 	//max dimension of all (ortho-rectified) images, horizontally or vertically
 	double maxDimAllImages = 0;
 	//corners for the global set
-	double globalCorners[4] = { 0, 0, 0, 0 };
+	double globalCorners[4]{ 0, 0, 0, 0 };
 
 	//compute output corners and max dimension for all images
 	for (size_t k = 0; k < count; ++k)
@@ -2415,7 +2422,7 @@ ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
 				if (r + g + b > 0)
 				{
 					//add point
-					proj->addPoint(P);
+					proj->addLocalPoint(P);
 					//and color
 					int a = qAlpha(rgb);
 					ccColor::Rgba color(static_cast<ColorCompType>(r),
@@ -2489,63 +2496,19 @@ bool ccOctreeFrustumIntersector::build(CCCoreLib::DgmOctree* octree)
 	return true;
 }
 
-//// an other method to compute frustum cell intersection (not used)
-//
-//unsigned char boxIntersectPlane(const CCVector3& minCorner, const CCVector3& maxCorner, const float planeCoefficient[4])
-//{
-//	CCVector3 n(planeCoefficient[0], planeCoefficient[1], planeCoefficient[2]);
-//	float d = planeCoefficient[3];
-//
-//	CCVector3 c = (maxCorner + minCorner) / 2.0;
-//	CCVector3 h = (maxCorner - minCorner) / 2.0;
-//
-//	float e = h[0]*abs(n[0]) + h[1]*abs(n[1]) + h[2]*abs(n[2]);
-//	float s = c.dot(n) + d;
-//
-//	if ((s-e) > 0.0)
-//		return CELL_OUTSIDE_FRUSTUM;
-//	if ((s+e) < 0.0)
-//		return CELL_INSIDE_FRUSTUM;
-//	return CELL_INTERSECT_FRUSTUM;
-//}
-//
-//unsigned char boxIntersectFrustum(const CCVector3& minCorner, const CCVector3& maxCorner, const float planesCoefficients[6][4])
-//{
-//	bool intersecting = false;
-//
-//	for (int i=0 ; i<6 ; i++)
-//	{
-//		float onePlaneCoefficients[4];
-//		for (int j=0 ; j<4 ; j++)
-//			onePlaneCoefficients[j] = planesCoefficients[i][j];
-//
-//		int result = boxIntersectPlane(minCorner, maxCorner, onePlaneCoefficients);
-//
-//		//pay attention to the signification of OUTSIDE and INSIDE there : INSIDE means that the box is in the positive half space delimited by the plane, OUTSIDE means that the box is in the negative half space !!
-//		if (result == CELL_OUTSIDE_FRUSTUM)
-//			return CELL_OUTSIDE_FRUSTUM;
-//		if (result == CELL_INTERSECT_FRUSTUM)
-//			intersecting = true;
-//	}
-//
-//	if (intersecting == true)
-//		return CELL_INTERSECT_FRUSTUM;
-//	return CELL_INSIDE_FRUSTUM;
-//}
-
 ccOctreeFrustumIntersector::OctreeCellVisibility
-ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
-														const CCVector3& bbMax,
-														const float planesCoefficients[6][4],
-														const CCVector3 frustumCorners[8],
-														const CCVector3 frustumEdges[6],
-														const CCVector3& frustumCenter)
+ccOctreeFrustumIntersector::separatingAxisTest(	const CCVector3d& bbMin,
+												const CCVector3d& bbMax,
+												const double planesCoefficients[6][4],
+												const CCVector3d frustumCorners[8],
+												const CCVector3d frustumEdges[6],
+												const CCVector3d& frustumCenter)
 {
 	// first test : if the box is too far from the frustum, there is no intersection
-	CCVector3 boxCenter = (bbMax + bbMin) / 2;
-	PointCoordinateType dCenter = (boxCenter - frustumCenter).norm();
-	PointCoordinateType boxRadius = (bbMax - bbMin).norm();
-	PointCoordinateType frustumRadius = (frustumCorners[0] - frustumCenter).norm();
+	CCVector3d boxCenter = (bbMax + bbMin) / 2;
+	double dCenter = (boxCenter - frustumCenter).norm();
+	double boxRadius = (bbMax - bbMin).norm();
+	double frustumRadius = (frustumCorners[0] - frustumCenter).norm();
 	if (dCenter > boxRadius + frustumRadius)
 		return CELL_OUTSIDE_FRUSTUM;
 
@@ -2553,10 +2516,10 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 	// --> if we are lucky, it could save a lot of time !...
 
 	//box corners
-	CCVector3 boxCorners[8];
+	CCVector3d boxCorners[8];
 	{
 		for (unsigned i = 0; i < 8; i++)
-			boxCorners[i] = CCVector3(	(i & 4) ? bbMin.x : bbMax.x,
+			boxCorners[i] = CCVector3d(	(i & 4) ? bbMin.x : bbMax.x,
 										(i & 2) ? bbMin.y : bbMax.y,
 										(i & 1) ? bbMin.z : bbMax.z);
 	}
@@ -2568,18 +2531,18 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 	//	nbEdgesFrustum = n4 = 6;
 	//	nbOtherFrustumCombinations = n5 = 2
 	//	nbVecToTest = n1 + n2 + n3*n4 = 3 + 5 + 3*6 + n5 = 28;
-	static const unsigned nbVecToTest = 28;
-	CCVector3 VecToTest[nbVecToTest];
+	static const unsigned NbVecToTest = 28;
+	CCVector3d VecToTest[NbVecToTest];
 	// vectors orthogonals to box planes
-	VecToTest[0]  = CCVector3(1, 0, 0);
-	VecToTest[1]  = CCVector3(0, 1, 0);
-	VecToTest[2]  = CCVector3(0, 0, 1);
-	// vectors orthogonals to frustum planes
-	VecToTest[3]  = CCVector3(planesCoefficients[0][0], planesCoefficients[0][1], planesCoefficients[0][2]);
-	VecToTest[4]  = CCVector3(planesCoefficients[1][0], planesCoefficients[1][1], planesCoefficients[1][2]);
-	VecToTest[5]  = CCVector3(planesCoefficients[2][0], planesCoefficients[2][1], planesCoefficients[2][2]);
-	VecToTest[6]  = CCVector3(planesCoefficients[3][0], planesCoefficients[3][1], planesCoefficients[3][2]);
-	VecToTest[7]  = CCVector3(planesCoefficients[4][0], planesCoefficients[4][1], planesCoefficients[4][2]);
+	VecToTest[0]  = CCVector3d(1, 0, 0);
+	VecToTest[1]  = CCVector3d(0, 1, 0);
+	VecToTest[2]  = CCVector3d(0, 0, 1);
+	// vectors orthogonals tod frustum planes
+	VecToTest[3]  = CCVector3d(planesCoefficients[0][0], planesCoefficients[0][1], planesCoefficients[0][2]);
+	VecToTest[4]  = CCVector3d(planesCoefficients[1][0], planesCoefficients[1][1], planesCoefficients[1][2]);
+	VecToTest[5]  = CCVector3d(planesCoefficients[2][0], planesCoefficients[2][1], planesCoefficients[2][2]);
+	VecToTest[6]  = CCVector3d(planesCoefficients[3][0], planesCoefficients[3][1], planesCoefficients[3][2]);
+	VecToTest[7]  = CCVector3d(planesCoefficients[4][0], planesCoefficients[4][1], planesCoefficients[4][2]);
 	// combinations box and frustum
 	VecToTest[8]  = VecToTest[0].cross(frustumEdges[0]);
 	VecToTest[9]  = VecToTest[0].cross(frustumEdges[1]);
@@ -2605,7 +2568,7 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 
 	// normalization
 	{
-		for (auto &testVec : VecToTest)
+		for (auto& testVec : VecToTest)
 		{
 			testVec.normalize();
 		}
@@ -2615,15 +2578,15 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 
 	// project volume corners
 	{
-		for (const auto &testVec : VecToTest)
+		for (const auto& testVec : VecToTest)
 		{
 			//box points
-			float dMinBox = testVec.dot(boxCorners[0]);
-			float dMaxBox = dMinBox;
+			double dMinBox = testVec.dot(boxCorners[0]);
+			double dMaxBox = dMinBox;
 			{
 				for (unsigned j = 1; j < 8; j++)
 				{
-					float d = testVec.dot(boxCorners[j]);
+					double d = testVec.dot(boxCorners[j]);
 					if (d > dMaxBox)
 						dMaxBox = d;
 					if (d < dMinBox)
@@ -2632,12 +2595,12 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 			}
 
 			//frustum points
-			float dMinFru = testVec.dot(frustumCorners[0]);
-			float dMaxFru = dMinFru;
+			double dMinFru = testVec.dot(frustumCorners[0]);
+			double dMaxFru = dMinFru;
 			{
 				for (unsigned j = 1; j < 8; j++)
 				{
-					float d = testVec.dot(frustumCorners[j]);
+					double d = testVec.dot(frustumCorners[j]);
 					if (d > dMaxFru)
 						dMaxFru = d;
 					if (d < dMinFru)
@@ -2647,14 +2610,16 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 
 			//if this plane is a separating plane, the cell is outside the frustum
 			if (dMaxBox < dMinFru || dMaxFru < dMinBox)
+			{
 				return CELL_OUTSIDE_FRUSTUM;
-
-			// if this plane is NOT a separating plane, the cell is at least intersecting the frustum
-			else
+			}
+			else // if this plane is NOT a separating plane, the cell is at least intersecting the frustum
 			{
 				// moreover, the cell can be completely inside the frustum...
-				if (dMaxBox>dMaxFru || dMinBox<dMinFru)
+				if (dMaxBox > dMaxFru || dMinBox < dMinFru)
+				{
 					boxInside = false;
+				}
 			}
 		}
 	}
@@ -2665,10 +2630,10 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char level,
 																	CCCoreLib::DgmOctree::CellCode parentTruncatedCode,
 																	OctreeCellVisibility parentResult,
-																	const float planesCoefficients[6][4],
-																	const CCVector3 ptsFrustum[8],
-																	const CCVector3 edges[6],
-																	const CCVector3& center)
+																	const double planesCoefficients[6][4],
+																	const CCVector3d ptsFrustum[8],
+																	const CCVector3d edges[6],
+																	const CCVector3d& center)
 {
 	if (parentResult == CELL_OUTSIDE_FRUSTUM)
 		return;
@@ -2691,8 +2656,11 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 			CCVector3 bbMax;
 			m_associatedOctree->computeCellLimits(truncatedCode, level, bbMin, bbMax, true);
 
+			CCVector3d bbMinGlobal = m_associatedOctree->associatedCloud()->toGlobal(bbMin);
+			CCVector3d bbMaxGlobal = m_associatedOctree->associatedCloud()->toGlobal(bbMax);
+			
 			// look if there is a separating plane
-			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTUM ? CELL_INSIDE_FRUSTUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustum, edges, center));
+			OctreeCellVisibility result = (parentResult == CELL_INSIDE_FRUSTUM ? CELL_INSIDE_FRUSTUM : separatingAxisTest(bbMinGlobal, bbMaxGlobal, planesCoefficients, ptsFrustum, edges, center));
 
 			// if the cell is not outside the frustum, there is a kind of intersection (inside or intersecting)
 			if (result != CELL_OUTSIDE_FRUSTUM)
@@ -2710,12 +2678,12 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 	}
 }
 
-void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3> >& pointsToTest,
+void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vector< std::pair<unsigned, CCVector3d> >& pointsToTest,
 																		std::vector<unsigned>& inCameraFrustum,
-																		const float planesCoefficients[6][4],
-																		const CCVector3 ptsFrustum[8],
-																		const CCVector3 edges[6],
-																		const CCVector3& center)
+																		const double planesCoefficients[6][4],
+																		const CCVector3d ptsFrustum[8],
+																		const CCVector3d edges[6],
+																		const CCVector3d& center)
 {
 	// clear old result
 	{
@@ -2759,8 +2727,9 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionWithOctree(	std::vect
 			for (size_t i = 0; i < pointCount; i++)
 			{
 				unsigned currentIndice = pointsInCell.getPointGlobalIndex(static_cast<unsigned>(i));
-				const CCVector3* vec = pointsInCell.getPoint(static_cast<unsigned>(i));
-				pointsToTest[sizeBefore + i] = std::pair<unsigned, CCVector3>(currentIndice, *vec);
+				CCVector3d P;
+				pointsInCell.getGlobalPoint(static_cast<unsigned>(i), P);
+				pointsToTest[sizeBefore + i] = std::pair<unsigned, CCVector3d>(currentIndice, P);
 			}
 		}
 	}

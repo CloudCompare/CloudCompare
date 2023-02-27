@@ -259,10 +259,10 @@ CCVector3 ccWaveform::getSamplePos(float index, const CCVector3& P0, const Wavef
 	return P0 + m_beamDir.toPC() * static_cast<PointCoordinateType>(delta_ps);
 }
 
-void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)
+void ccWaveform::applyRigidTransformation(const ccGLMatrixd& trans)
 {
 	//we apply only the rotation
-	CCVector3 u = m_beamDir.toPC();
+	CCVector3d u = m_beamDir.toDouble();
 	trans.applyRotation(u);
 	m_beamDir = u.toFloat();
 }

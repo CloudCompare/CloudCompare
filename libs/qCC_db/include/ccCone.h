@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,16 +17,10 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_CONE_PRIMITIVE_HEADER
-#define CC_CONE_PRIMITIVE_HEADER
-
 //Local
 #include "ccGenericPrimitive.h"
 
-
-//! Cone (primitive)
-/** 3D cone primitive
-**/
+//! 3D cone (primitive)
 class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 {
 public:
@@ -51,7 +47,7 @@ public:
 			PointCoordinateType height,
 			PointCoordinateType xOff = 0,
 			PointCoordinateType yOff = 0,
-			const ccGLMatrix* transMat = nullptr,
+			const ccGLMatrixd* transMat = nullptr,
 			QString name = QString("Cone"),
 			unsigned precision = DEFAULT_DRAWING_PRECISION,
 			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
@@ -86,14 +82,14 @@ public:
 	virtual void setTopRadius(PointCoordinateType radius);
 
 	//! Returns cone axis bottom end point after applying transformation
-	virtual CCVector3 getBottomCenter() const;
+	virtual CCVector3d getBottomCenter() const;
 	//! Returns cone axis top end point after applying transformation
-	virtual CCVector3 getTopCenter() const;
+	virtual CCVector3d getTopCenter() const;
 
 	//! Returns cone axis end point associated with whichever radii is smaller
-	virtual CCVector3 getSmallCenter() const;
+	virtual CCVector3d getSmallCenter() const;
 	//! Returns cone axis end point associated with whichever radii is larger
-	virtual CCVector3 getLargeCenter() const;
+	virtual CCVector3d getLargeCenter() const;
 
 	//! Returns whichever cone radii is smaller
 	virtual PointCoordinateType getSmallRadius() const;
@@ -131,5 +127,3 @@ protected:
 	//! Height
 	PointCoordinateType m_height;
 };
-
-#endif //CC_CONE_PRIMITIVE_HEADER

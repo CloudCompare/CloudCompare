@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,12 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_TORUS_PRIMITIVE_HEADER
-#define CC_TORUS_PRIMITIVE_HEADER
-
 //Local
 #include "ccGenericPrimitive.h"
-
 
 //! Torus (primitive)
 /** 3D torus primitive (with circular or rectangular section)
@@ -51,7 +49,7 @@ public:
 			double angle_rad = 2.0*M_PI,
 			bool rectangularSection = false,
 			PointCoordinateType rectSectionHeight = 0,
-			const ccGLMatrix* transMat = nullptr,
+			const ccGLMatrixd* transMat = nullptr,
 			QString name = QString("Torus"),
 			unsigned precision = DEFAULT_DRAWING_PRECISION,
 			unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
@@ -92,5 +90,3 @@ protected:
 	//! Subtended angle (in radians)
 	double m_angle_rad;
 };
-
-#endif //CC_TORUS_PRIMITIVE_HEADER

@@ -47,7 +47,7 @@ public:
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
 	**/
-	virtual inline void setGlobalShift(double x, double y, double z) { return setGlobalShift(CCVector3d(x, y, z)); }
+	virtual inline void setGlobalShift(double x, double y, double z) { return setGlobalShift({ x, y, z }); }
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
@@ -96,9 +96,6 @@ public:
 		return Plocal.toPC();
 	}
 
-	//inherited from ccHObject
-	bool getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
-	GlobalBoundingBox getOwnGlobalBB(bool withGLFeatures = false) override;
 protected:
 
 	//! Serialization helper (output)

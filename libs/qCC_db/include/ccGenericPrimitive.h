@@ -36,7 +36,7 @@ public:
 		\param uniqueID unique ID (handle with care)
 	**/
 	ccGenericPrimitive(	QString name = QString(),
-						const ccGLMatrix* transMat = nullptr,
+						const ccGLMatrixd* transMat = nullptr,
 						unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Returns type name (sphere, cylinder, etc.)
@@ -80,18 +80,18 @@ public:
 	virtual inline unsigned getDrawingPrecision() const { return m_drawPrecision; }
 
 	//! Returns the transformation that is currently applied to the vertices
-	virtual inline ccGLMatrix& getTransformation() { return m_transformation; }
+	virtual inline ccGLMatrixd& getTransformation() { return m_transformation; }
 
 	//! Returns the transformation that is currently applied to the vertices (const version)
-	virtual inline const ccGLMatrix& getTransformation() const { return m_transformation; }
+	virtual inline const ccGLMatrixd& getTransformation() const { return m_transformation; }
 
 	//inherited methods (ccHObject)
-	const ccGLMatrix& getGLTransformationHistory() const override;
+	const ccGLMatrixd& getGLTransformationHistory() const override;
 
 protected:
 
 	//! Inherited from ccGenericMesh
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 
 	//inherited from ccMesh
 	bool toFile_MeOnly(QFile& out, short dataVersion) const override;
@@ -132,7 +132,7 @@ protected:
 	//! Associated transformation (applied to vertices)
 	/** Different from ccDrawableObject::m_glTrans!
 	**/
-	ccGLMatrix m_transformation;
+	ccGLMatrixd m_transformation;
 
 	//! Drawing precision (for primitives that support this feature)
 	unsigned m_drawPrecision;

@@ -33,15 +33,16 @@ struct SFPair
 	CCCoreLib::ScalarField* out;
 };
 
-bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
-						void** additionalParameters,
-						CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
+static bool CellSFInterpolator(	const CCCoreLib::DgmOctree::octreeCell& cell,
+								void** additionalParameters,
+								CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	//additional parameters
 //	const ccPointCloud* srcCloud = reinterpret_cast<ccPointCloud*>(additionalParameters[0]);
 	const CCCoreLib::DgmOctree* srcOctree = reinterpret_cast<CCCoreLib::DgmOctree*>(additionalParameters[1]);
 	std::vector<SFPair>* scalarFields = reinterpret_cast<std::vector< SFPair >*>(additionalParameters[2]);
 	const ccPointCloudInterpolator::Parameters* params = reinterpret_cast<const ccPointCloudInterpolator::Parameters*>(additionalParameters[3]);
+	const CCVector3& destLocalToSrcLocal = *reinterpret_cast<CCVector3*>(additionalParameters[4]);
 	
 	bool normalDistWeighting = false;
 	double interpSigma2x2 = 0;
@@ -61,7 +62,7 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 			nNSS.minNumberOfNeighbors = params->knn;
 		}
 		cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-		cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+		cell.parentOctree->computeLocalCellCenter(nNSS.cellPos, cell.level, nNSS.localCellCenter);
 	}
 
 	std::vector<double> sumValues;
@@ -74,7 +75,8 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 	for (unsigned i = 0; i < pointCount; i++)
 	{
 		unsigned outPointIndex = cell.points->getPointGlobalIndex(i);
-		cell.points->getPoint(i, nNSS.queryPoint);
+		cell.points->getLocalPoint(i, nNSS.localQueryPoint);
+		nNSS.localQueryPoint += destLocalToSrcLocal; // the query point is in the 'destination' CS and needs to go the 'source' CS
 
 		//look for neighbors (either inside a sphere or the k nearest ones)
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
@@ -177,8 +179,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 	ccBBox box = destCloud->getOwnBB();
 	ccBBox otherBox = srcCloud->getOwnBB();
 
-	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
-	CCVector3 dist = box.getCenter() - otherBox.getCenter();
+	CCVector3d dimSum = box.getDiagVec() + otherBox.getDiagVec();
+	CCVector3d dist = box.getCenter() - otherBox.getCenter();
 	if (	std::abs(dist.x) > dimSum.x / 2
 		||	std::abs(dist.y) > dimSum.y / 2
 		||	std::abs(dist.z) > dimSum.z / 2)
@@ -270,8 +272,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 		assert(srcCloud && destCloud);
 
 		//we spatially 'synchronize' the octrees
-		CCCoreLib::DgmOctree *_srcOctree = nullptr;
-		CCCoreLib::DgmOctree *_destOctree = nullptr;
+		CCCoreLib::DgmOctree* _srcOctree = nullptr;
+		CCCoreLib::DgmOctree* _destOctree = nullptr;
 		CCCoreLib::DistanceComputationTools::SOReturnCode soCode = CCCoreLib::DistanceComputationTools::synchronizeOctrees(
 			srcCloud,
 			destCloud,
@@ -304,15 +306,19 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 
 		try
 		{
+			CCVector3d srcLocalToGlobal = srcCloud->getLocalToGlobalTranslation();
+			CCVector3d destLocalToGlobal = destCloud->getLocalToGlobalTranslation();
+			CCVector3 destLocalToSrcLocal = CCVector3::fromArray((destLocalToGlobal - srcLocalToGlobal).u);
+
 			//additional parameters
-			void* additionalParameters[] = {	reinterpret_cast<void*>(srcCloud),
-												reinterpret_cast<void*>(srcOctree.data()),
-												reinterpret_cast<void*>(&scalarFields),
-												(void*)(&params)
-			};
+			void* additionalParameters[] {	reinterpret_cast<void*>(srcCloud),
+											reinterpret_cast<void*>(srcOctree.data()),
+											reinterpret_cast<void*>(&scalarFields),
+											(void*)(&params),
+											reinterpret_cast<void*>(&destLocalToSrcLocal) };
 
 			if (destOctree->executeFunctionForAllCellsAtLevel(	octreeLevel,
-																cellSFInterpolator,
+																CellSFInterpolator,
 																additionalParameters,
 																true,
 																progressCb,

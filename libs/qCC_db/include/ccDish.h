@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_DISH_PRIMITIVE_HEADER
-#define CC_DISH_PRIMITIVE_HEADER
 
 //Local
 #include "ccGenericPrimitive.h"
@@ -46,7 +45,7 @@ public:
 	ccDish(PointCoordinateType radius,
 		PointCoordinateType height,
 		PointCoordinateType radius2 = 0,
-		const ccGLMatrix* transMat = nullptr,
+		const ccGLMatrixd* transMat = nullptr,
 		QString name = QString("Dish"),
 		unsigned precision = DEFAULT_DRAWING_PRECISION);
 
@@ -78,5 +77,3 @@ protected:
 	//! Height
 	PointCoordinateType m_height;
 };
-
-#endif //CC_DISH_PRIMITIVE_HEADER

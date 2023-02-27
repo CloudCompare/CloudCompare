@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_BOX_PRIMITIVE_HEADER
-#define CC_BOX_PRIMITIVE_HEADER
 
 //Local
 #include "ccGenericPrimitive.h"
@@ -36,7 +35,7 @@ public:
 		\param name name
 	**/
 	ccBox(	const CCVector3& dims,
-			const ccGLMatrix* transMat = nullptr,
+			const ccGLMatrixd* transMat = nullptr,
 			QString name = QString("Box"));
 
 	//! Simplified constructor
@@ -69,5 +68,3 @@ protected:
 	CCVector3 m_dims;
 
 };
-
-#endif //CC_BOX_PRIMITIVE_HEADER

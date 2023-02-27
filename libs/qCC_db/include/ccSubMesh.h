@@ -47,11 +47,11 @@ public:
 	ccGenericPointCloud* getAssociatedCloud() const override;
 	void refreshBB() override;
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgb& color) override;
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color) override;
 	bool interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
 	bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
 	bool hasMaterials() const override;
 	const ccMaterialSet* getMaterialSet() const override;
@@ -78,15 +78,19 @@ public:
 
 	//inherited methods (GenericIndexedMesh)
 	inline unsigned size() const override { return static_cast<unsigned>(m_triIndexes.size()); }
-	void forEach(genericTriangleAction action) override;
 	inline void placeIteratorAtBeginning() override { m_globalIterator = 0; }
-	CCCoreLib::GenericTriangle* _getNextTriangle() override; //temporary object
-	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override; //temporary object
+	CCCoreLib::GenericLocalTriangle* _getNextLocalTriangle() override; //temporary
+	CCCoreLib::GenericGlobalTriangle* _getNextGlobalTriangle() override; //temporary
+	CCCoreLib::GenericLocalTriangle* _getLocalTriangle(unsigned triangleIndex) override; //temporary
+	CCCoreLib::GenericGlobalTriangle* _getGlobalTriangle(unsigned triangleIndex) override; //temporary
 	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override;
 	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override;
-	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
-	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override;
-	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
+	void getLocalTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override;
+	void getGlobalTriangleVertices(unsigned triangleIndex, CCVector3d& A, CCVector3d& B, CCVector3d& C) const override;
+	void getLocalBoundingBox(CCVector3& localBBMin, CCVector3& localBBMax) override;
+	bool interpolateNormalsLocal(unsigned triIndex, const CCVector3& P, CCVector3& N) override;
+	bool interpolateNormalsGlobal(unsigned triIndex, const CCVector3d& P, CCVector3& N) override;
+	CCVector3d getLocalToGlobalTranslation() const override;
 
 	//! Returns global index (i.e. relative to the associated mesh) of a given element
 	/** \param localIndex local index (i.e. relative to the internal index container)
@@ -185,8 +189,8 @@ protected:
 	//! Iterator on the triangles references container
 	unsigned m_globalIterator;
 
-	//! Bounding-box
-	ccBBox m_bBox;
+	//! Bounding-box (local coordinate system)
+	CCCoreLib::BoundingBox m_localBBox;
 };
 
 #endif //CC_SUB_MESH_HEADER

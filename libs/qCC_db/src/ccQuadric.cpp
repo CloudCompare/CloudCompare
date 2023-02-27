@@ -32,35 +32,34 @@
 //system
 #include <string.h>
 
-ccQuadric::ccQuadric(	CCVector2 minCorner,
-						CCVector2 maxCorner,
-						const PointCoordinateType eq[6],
+ccQuadric::ccQuadric(	const CCVector2d& minCorner,
+						const CCVector2d& maxCorner,
+						const double eq[6],
 						const Tuple3ub* dims/*=nullptr*/,
-						const ccGLMatrix* transMat/*=nullptr*/,
+						const ccGLMatrixd* transMat/*=nullptr*/,
 						QString name/*=QString("Quadric")*/,
 						unsigned precision/*=DEFAULT_DRAWING_PRECISION*/)
-	: ccGenericPrimitive(name,transMat)
+	: ccGenericPrimitive(name, transMat)
 	, m_minCorner(minCorner)
 	, m_maxCorner(maxCorner)
-	, m_dims(0,1,2)
+	, m_eq{0, 0, 0, 0, 0, 0}
+	, m_dims(0, 1, 2)
 	, m_minZ(0)
 	, m_maxZ(0)
 {
-	memcpy(m_eq,eq,sizeof(PointCoordinateType)*6);
-
 	if (dims)
 	{
 		m_dims = *dims;
 	}
-	
-	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
+
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
 }
 
 ccQuadric::ccQuadric(QString name /*=QString("Plane")*/)
 	: ccGenericPrimitive(name)
-	, m_minCorner(0,0)
-	, m_maxCorner(0,0)
-	, m_dims(0,1,2)
+	, m_minCorner(0, 0)
+	, m_maxCorner(0, 0)
+	, m_dims(0, 1, 2)
 	, m_minZ(0)
 	, m_maxZ(0)
 {}
@@ -70,9 +69,9 @@ bool ccQuadric::buildUp()
 	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
-	unsigned vertCount = m_drawPrecision*m_drawPrecision;
-	unsigned triCount = (m_drawPrecision-1)*(m_drawPrecision-1)*2;
-	if (!init(vertCount,true,triCount,0))
+	unsigned vertCount = m_drawPrecision * m_drawPrecision;
+	unsigned triCount = (m_drawPrecision - 1)*(m_drawPrecision - 1) * 2;
+	if (!init(vertCount, true, triCount, 0))
 	{
 		ccLog::Error("[ccQuadric::buildUp] Not enough memory");
 		return false;
@@ -82,18 +81,18 @@ bool ccQuadric::buildUp()
 	assert(verts);
 	assert(verts->hasNormals());
 
-	CCVector2 areaSize = m_maxCorner - m_minCorner;
-	PointCoordinateType stepX = areaSize.x/static_cast<PointCoordinateType>(m_drawPrecision-1);
-	PointCoordinateType stepY = areaSize.y/static_cast<PointCoordinateType>(m_drawPrecision-1);
+	CCVector2d areaSize = m_maxCorner - m_minCorner;
+	double stepX = areaSize.x / static_cast<PointCoordinateType>(m_drawPrecision - 1);
+	double stepY = areaSize.y / static_cast<PointCoordinateType>(m_drawPrecision - 1);
 
-	for (unsigned x=0; x<m_drawPrecision; ++x)
+	for (unsigned x = 0; x < m_drawPrecision; ++x)
 	{
-		CCVector3 P(m_minCorner.x + stepX * x, 0, 0);
-		for (unsigned y=0; y<m_drawPrecision; ++y)
+		CCVector3d P(m_minCorner.x + stepX * x, 0, 0);
+		for (unsigned y = 0; y < m_drawPrecision; ++y)
 		{
 			P.y = m_minCorner.y + stepY * y;
-			
-			P.z = m_eq[0] + m_eq[1]*P.x + m_eq[2]*P.y + m_eq[3]*P.x*P.x + m_eq[4]*P.x*P.y + m_eq[5]*P.y*P.y;
+
+			P.z = m_eq[0] + m_eq[1] * P.x + m_eq[2] * P.y + m_eq[3] * P.x*P.x + m_eq[4] * P.x*P.y + m_eq[5] * P.y*P.y;
 
 			//compute the min and max heights of the quadric!
 			if (x != 0 || y != 0)
@@ -108,7 +107,15 @@ bool ccQuadric::buildUp()
 				m_minZ = m_maxZ = P.z;
 			}
 
-			verts->addPoint(P);
+			if (verts->size() == 0)
+			{
+				verts->setLocalToGlobalTranslation(P);
+				verts->addLocalPoint({ 0, 0, 0 });
+			}
+			else
+			{
+				verts->addLocalPoint(verts->toLocal(P));
+			}
 
 			//normal --> TODO: is there a simple way to deduce it from the equation?
 			//CCVector3 N;
@@ -120,13 +127,13 @@ bool ccQuadric::buildUp()
 
 			if (x != 0 && y != 0)
 			{
-				unsigned iA = (x-1) * m_drawPrecision + y-1;
+				unsigned iA = (x - 1) * m_drawPrecision + y - 1;
 				unsigned iB = iA + 1;
 				unsigned iC = iA + m_drawPrecision;
 				unsigned iD = iB + m_drawPrecision;
 
-				addTriangle(iA,iC,iB);
-				addTriangle(iB,iC,iD);
+				addTriangle(iA, iC, iB);
+				addTriangle(iB, iC, iD);
 			}
 		}
 	}
@@ -138,10 +145,10 @@ bool ccQuadric::buildUp()
 
 ccGenericPrimitive* ccQuadric::clone() const
 {
-	return finishCloneJob(new ccQuadric(m_minCorner,m_maxCorner,m_eq,&m_dims,&m_transformation,getName(),m_drawPrecision));
+	return finishCloneJob(new ccQuadric(m_minCorner, m_maxCorner, m_eq, &m_dims, &m_transformation, getName(), m_drawPrecision));
 }
 
-ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/*=nullptr*/)
+ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms/*=nullptr*/)
 {
 	//number of points
 	unsigned count = cloud->size();
@@ -168,7 +175,7 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 		}
 
 		assert(Yk.getGravityCenter());
-		G = *Yk.getGravityCenter();
+		G = *Yk.getLocalGravityCenter();
 
 		//local base
 		N = CCVector3(theLSPlane);
@@ -184,30 +191,31 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 		ccLog::Warning("[ccQuadric::Fit] Not enough memory!");
 		return nullptr;
 	}
+	tempCloud.setLocalToGlobalTranslation(cloud->getLocalToGlobalTranslation());
 
 	cloud->placeIteratorAtBeginning();
-	for (unsigned k=0; k<count; ++k)
+	for (unsigned k = 0; k < count; ++k)
 	{
 		//projection into local 2D plane ref.
-		CCVector3 P = *(cloud->getNextPoint()) - G;
+		CCVector3 P = *(cloud->getNextLocalPoint()) - G;
 
-		tempCloud.addPoint(CCVector3(P.dot(X),P.dot(Y),P.dot(N)));
+		tempCloud.addLocalPoint(CCVector3(P.dot(X), P.dot(Y), P.dot(N)));
 	}
 
 	CCCoreLib::Neighbourhood Zk(&tempCloud);
 	{
 		//set exact values for gravity center and plane equation
 		//(just to be sure and to avoid re-computing them)
-		Zk.setGravityCenter(CCVector3(0,0,0));
+		Zk.setLocalGravityCenter(CCVector3(0, 0, 0));
 		PointCoordinateType perfectEq[4] = { 0, 0, 1, 0 };
 		Zk.setLSPlane(	perfectEq,
-						CCVector3(1,0,0),
-						CCVector3(0,1,0),
-						CCVector3(0,0,1));
+						CCVector3(1, 0, 0),
+						CCVector3(0, 1, 0),
+						CCVector3(0, 0, 1));
 	}
 
 	Tuple3ub dims;
-	const PointCoordinateType* eq = Zk.getQuadric(&dims);
+	const double* eq = Zk.getGlobalQuadric(&dims);
 	if (!eq)
 	{
 		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
@@ -215,15 +223,15 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 	}
 
 	//we recenter the quadric object
-	ccGLMatrix glMat(X,Y,N,G);
+	ccGLMatrixd glMat(X, Y, N, cloud->toGlobal(G));
 
 	ccBBox bb = tempCloud.getOwnBB();
-	CCVector2 minXY(bb.minCorner().x,bb.minCorner().y);
-	CCVector2 maxXY(bb.maxCorner().x,bb.maxCorner().y);
+	CCVector2d minXY(bb.minCorner().x, bb.minCorner().y);
+	CCVector2d maxXY(bb.maxCorner().x, bb.maxCorner().y);
 
 	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, &dims, &glMat);
 
-	quadric->setMetaData(QString("Equation"),QVariant(quadric->getEquationString()));
+	quadric->setMetaData(QString("Equation"), QVariant(quadric->getEquationString()));
 
 	//compute rms if necessary
 	if (rms)
@@ -234,10 +242,10 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 
 		*rms = 0;
 
-		for (unsigned k=0; k<count; ++k)
+		for (unsigned k = 0; k < count; ++k)
 		{
 			//projection into local 2D plane ref.
-			const CCVector3* P = tempCloud.getPoint(k);
+			const CCVector3* P = tempCloud.getLocalPoint(k);
 
 			PointCoordinateType z = eq[0] + eq[1]*P->u[dX] + eq[2]*P->u[dY] + eq[3]*P->u[dX]*P->u[dX] + eq[4]*P->u[dX]*P->u[dY] + eq[5]*P->u[dY]*P->u[dY];
 			*rms += (z-P->z)*(z-P->z);
@@ -253,7 +261,7 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 	return quadric;
 }
 
-PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q) const
+double ccQuadric::projectOnQuadric(const CCVector3d& P, CCVector3d& Q) const
 {
 	//back project into quadric coordinate system
 	Q = P;
@@ -263,8 +271,8 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 	const unsigned char dY = m_dims.y;
 	const unsigned char dZ = m_dims.z;
 
-	PointCoordinateType originalZ = Q.u[dZ];
-	Q.u[dZ] = m_eq[0] + m_eq[1]*Q.u[dX] + m_eq[2]*Q.u[dY] + m_eq[3]*Q.u[dX]*Q.u[dX] + m_eq[4]*Q.u[dX]*Q.u[dY] + m_eq[5]*Q.u[dY]*Q.u[dY];
+	double originalZ = Q.u[dZ];
+	Q.u[dZ] = m_eq[0] + m_eq[1] * Q.u[dX] + m_eq[2] * Q.u[dY] + m_eq[3] * Q.u[dX] * Q.u[dX] + m_eq[4] * Q.u[dX] * Q.u[dY] + m_eq[5] * Q.u[dY] * Q.u[dY];
 
 	m_transformation.apply(Q);
 
@@ -276,7 +284,7 @@ QString ccQuadric::getEquationString() const
 	const unsigned char dX = m_dims.x;
 	const unsigned char dY = m_dims.y;
 	const unsigned char dZ = m_dims.z;
-	static const char dimChars[3] = {'x','y','z'};
+	static const char dimChars[3] = { 'x','y','z' };
 
 	QString equationStr = QString("%1 = %2 + %3 * %4").arg(dimChars[dZ]).arg(m_eq[0]).arg(m_eq[1]).arg(dimChars[dX]);
 	equationStr += QString(" + %1 * %2 + %3 * %4^2").arg(m_eq[2]).arg(dimChars[dY]).arg(m_eq[3]).arg(dimChars[dX]);
@@ -307,7 +315,9 @@ bool ccQuadric::toFile_MeOnly(QFile& out, short dataVersion) const
 	outStream << m_maxCorner.y;
 
 	for (unsigned i = 0; i < 6; ++i)
+	{
 		outStream << m_eq[i];
+	}
 
 	return true;
 }
@@ -317,15 +327,40 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion>=35)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.x, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.y, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.x, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.y, 1);
 
-	for (unsigned i = 0; i < 6; ++i)
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_eq + i, 1);
+	if (dataVersion < 55)
+	{
+		//parameters (dataVersion>=35 && dataVersion < 55)
+		CCVector2 minCorner, maxCorner;
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &minCorner.x, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &minCorner.y, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &maxCorner.x, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &maxCorner.y, 1);
+
+		m_minCorner = CCVector2d(minCorner.x, minCorner.y);
+		m_maxCorner = CCVector2d(maxCorner.x, maxCorner.y);
+
+		for (unsigned i = 0; i < 6; ++i)
+		{
+			PointCoordinateType coef = 0;
+			ccSerializationHelper::CoordsFromDataStream(inStream, flags, &coef, 1);
+			m_eq[i] = coef;
+		}
+	}
+	else
+	{
+		inStream >> m_minCorner.x;
+		inStream >> m_minCorner.y;
+		inStream >> m_maxCorner.x;
+		inStream >> m_maxCorner.y;
+
+		for (unsigned i = 0; i < 6; ++i)
+		{
+			inStream >> m_eq[i];
+		}
+
+	}
 
 	return true;
 }
@@ -335,8 +370,8 @@ short ccQuadric::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(35), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
-ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
+ccBBox ccQuadric::getOwnFitBB(ccGLMatrixd& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
+	return ccBBox(CCVector3d(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
 }

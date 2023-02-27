@@ -62,7 +62,7 @@ public:
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::GBL_SENSOR; }
 	bool isSerializable() const override { return true; }
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
-	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	//inherited from ccSensor
 	bool applyViewport(ccGenericGLDisplay* win = nullptr) const override;
@@ -74,10 +74,10 @@ public:
 		that shouldn't be compared while computing the distances between two point
 		clouds for instance (for more information on this	particular topic, refer to
 		Daniel Girardeau-Montaut's PhD manuscript - Chapter 2, section 2.3.3).
-		\param P the point to test
+		\param globalP the point to test (in the sensor global coordinate system)
 		\return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	unsigned char checkVisibility(const CCVector3& P) const override;
+	uint8_t checkVisibility(const CCVector3d& globalP) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** \warning this method uses the cloud global iterator.
@@ -165,14 +165,14 @@ public: //setters and getters
 public: //projection tools
 
 	//! Projects a point in the sensor world
-	/** \param[in] sourcePoint 3D point to project
+	/** \param[in] sourcePoint 3D point to project (in the global coordinate system)
 		\param[out] destPoint projected point in polar coordinates: (theta,phi) = (yaw,pitch) (angles between [-pi,+pi] or [0 ; 2pi] if the corresponding angle is 'shifted')
 		\param[out] depth distance between the sensor optical center and the 3D point
 		\param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
-	void projectPoint(	const CCVector3& sourcePoint,
-						CCVector2& destPoint,
-						PointCoordinateType &depth,
+	void projectPoint(	const CCVector3d& sourcePoint,
+						CCVector2d& destPoint,
+						double& depth,
 						double posIndex = 0 ) const;
 
 	//! 2D grid of normals
@@ -229,7 +229,7 @@ protected:
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Converts 2D angular coordinates (yaw,pitch) in integer depth buffer coordinates
-	bool convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const;
+	bool convertToDepthMapCoords(double yaw, double pitch, unsigned& i, unsigned& j) const;
 
 	//! Minimal pitch limit (in radians)
 	/** Phi = 0 corresponds to the scanner vertical direction (upward) **/

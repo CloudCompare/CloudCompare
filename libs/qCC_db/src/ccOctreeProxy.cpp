@@ -28,13 +28,17 @@ ccOctreeProxy::ccOctreeProxy(	ccOctree::Shared octree/*=ccOctree::Shared(nullptr
 
 ccBBox ccOctreeProxy::getOwnBB(bool withGLFeatures/*=false*/)
 {
-	if (!m_octree)
+	if (!m_octree || !m_octree->associatedCloud())
 	{
 		assert(false);
-		return ccBBox();
+		return {};
 	}
-	
-	return withGLFeatures ? m_octree->getSquareBB() : m_octree->getPointsBB();
+
+	CCCoreLib::BoundingBox localBBox = withGLFeatures ? m_octree->getSquareBB() : m_octree->getPointsBB();
+
+	return ccBBox(	m_octree->associatedCloud()->toGlobal(localBBox.minCorner()),
+					m_octree->associatedCloud()->toGlobal(localBBox.maxCorner()),
+					localBBox.isValid() );
 }
 
 void ccOctreeProxy::drawMeOnly(CC_DRAW_CONTEXT& context)

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GENERIC_POINT_CLOUD_HEADER
-#define CC_GENERIC_POINT_CLOUD_HEADER
 
 //Local
 #include "ccAdvancedTypes.h"
@@ -67,7 +66,7 @@ public:
 	//! Copy constructor
 	ccGenericPointCloud(const ccGenericPointCloud& cloud);
 
-	//! Default destructor
+	//! Destructor
 	~ccGenericPointCloud() override;
 	
 	
@@ -231,8 +230,11 @@ public:
 	**/
 	virtual bool removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) = 0;
 
-	//! Applies a rigid transformation (rotation + translation)
-	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
+	//! Applies a rigid transformation to the local coordinates (rotation + translation)
+	virtual void applyLocalRigidTransformation(const ccGLMatrix& localTrans) = 0;
+
+	//! Applies a rigid transformation to the global coordinates (rotation + translation)
+	virtual void applyGlobalRigidTransformation(const ccGLMatrixd& globalTrans) = 0;
 
 	//! Crops the cloud inside (or outside) a bounding box
 	/** \warning Always returns a selection (potentially empty) if successful.
@@ -249,7 +251,7 @@ public:
 		\param fz multiplication factor along the Z dimension
 		\param center scaling center (0,0,0) by default
 	**/
-	virtual void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0, 0, 0)) = 0;
+	virtual void scale(double fx, double fy, double fz, const CCVector3d& center = CCVector3d(0, 0, 0)) = 0;
 
 	//inherited from ccSerializableObject
 	bool isSerializable() const override { return true; }
@@ -269,7 +271,7 @@ public:
 	//! Imports the parameters from another cloud
 	/** Only the specific parameters are imported.
 	**/
-	void importParametersFrom(const ccGenericPointCloud* cloud);
+	virtual void importParametersFrom(const ccGenericPointCloud* cloud);
 
 	//! Point picking (brute force or octree-driven)
 	/** \warning the octree-driven method only works if pickWidth == pickHeight
@@ -298,5 +300,3 @@ protected:
 	unsigned char m_pointSize;
 
 };
-
-#endif //CC_GENERIC_POINT_CLOUD_HEADER

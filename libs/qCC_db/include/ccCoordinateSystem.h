@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,8 +16,6 @@
 //#          COPYRIGHT: Chris Brown                                        #
 //#                                                                        #
 //##########################################################################
-
-#pragma once
 
 //Local
 #include "ccGenericPrimitive.h"
@@ -38,7 +38,7 @@ public:
 	**/
 	ccCoordinateSystem(	PointCoordinateType displayScale,
 						PointCoordinateType axisWidth,
-						const ccGLMatrix* transMat = nullptr,
+						const ccGLMatrixd* transMat = nullptr,
 						QString name = QString("CoordinateSystem"));
 
 	//! Default constructor
@@ -46,7 +46,7 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	ccCoordinateSystem(	const ccGLMatrix* transMat,
+	ccCoordinateSystem(	const ccGLMatrixd* transMat,
 						QString name = QString("CoordinateSystem"));
 
 	//! Simplified constructor
@@ -68,16 +68,16 @@ public:
 	void showAxisLines(bool show) { m_showAxisLines = show; }
 	
 	//ccPlane get2AxisPlane(int axisNum);
-	inline CCVector3 getOrigin() const { return m_transformation.getTranslationAsVec3D(); };
+	inline CCVector3d getOrigin() const { return m_transformation.getTranslationAsVec3D(); };
 	inline PointCoordinateType getAxisWidth() const { return m_width; };
 	void setAxisWidth(PointCoordinateType size);
 
 	inline PointCoordinateType getDisplayScale() const { return m_DisplayScale; };
 	void setDisplayScale(PointCoordinateType size);
 
-	CCVector3 getXYPlaneNormal() const;
-	CCVector3 getYZPlaneNormal() const;
-	CCVector3 getZXPlaneNormal() const;
+	CCVector3d getXYPlaneNormal() const;
+	CCVector3d getYZPlaneNormal() const;
+	CCVector3d getZXPlaneNormal() const;
 
 	//! Default Display scale
 	static constexpr PointCoordinateType DEFAULT_DISPLAY_SCALE = 1.0;
@@ -101,17 +101,13 @@ protected:
 	short minimumFileVersion_MeOnly() const override;
 	bool buildUp() override;
 
-	ccPlane* createXYplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane* createYZplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane* createZXplane(const ccGLMatrix* transMat = nullptr) const;
+	ccPlane* createXYplane(const ccGLMatrixd* transMat = nullptr) const;
+	ccPlane* createYZplane(const ccGLMatrixd* transMat = nullptr) const;
+	ccPlane* createZXplane(const ccGLMatrixd* transMat = nullptr) const;
 
 	//! CoordinateSystem options
 	PointCoordinateType m_DisplayScale;
 	PointCoordinateType m_width;
 	bool m_showAxisPlanes;
 	bool m_showAxisLines;
-	
-
 };
-
-

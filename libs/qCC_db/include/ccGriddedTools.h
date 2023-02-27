@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,15 +17,11 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GRIDDED_CLOUD_TOOLS_HEADER
-#define CC_GRIDDED_CLOUD_TOOLS_HEADER
-
 //Local
 #include "ccPointCloud.h"
 
-
 class ccGBLSensor;
-class ccGLMatrix;
+class ccGLMatrixd;
 
 //! Tools dedicated to gridded clouds
 class QCC_DB_LIB_API ccGriddedTools
@@ -43,10 +41,10 @@ public:
 			, maxRange(0)
 		{}
 
-		PointCoordinateType minPhi, maxPhi;
-		PointCoordinateType minTheta, maxTheta;
-		PointCoordinateType deltaPhiRad, deltaThetaRad;
-		PointCoordinateType maxRange;
+		double minPhi, maxPhi;
+		double minTheta, maxTheta;
+		double deltaPhiRad, deltaThetaRad;
+		double maxRange;
 	};
 
 	//! Detects the given grid parameters (angular span, etc.)
@@ -61,7 +59,7 @@ public:
 									const ccPointCloud::Grid::Shared grid,
 									GridParameters& parameters,
 									bool verbose = false,
-									ccGLMatrix* cloudToSensorTrans = nullptr);
+									ccGLMatrixd* cloudToSensorTrans = nullptr);
 
 	//! Determines the (TLS) sensor parameters from the relative position of gridded points
 	/** \param cloud cloud on which to compute the sensor parameters (should be a single grid)
@@ -71,7 +69,5 @@ public:
 	**/
 	static ccGBLSensor* ComputeBestSensor(	ccPointCloud* cloud,
 											ccPointCloud::Grid::Shared grid,
-											ccGLMatrix* cloudToSensorTrans = nullptr);
+											ccGLMatrixd* cloudToSensorTrans = nullptr);
 };
-
-#endif

@@ -141,18 +141,22 @@ void ccGBLSensor::setYawStep(PointCoordinateType dTheta)
 	}
 }
 
-void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
-								CCVector2& destPoint,
-								PointCoordinateType &depth,
+void ccGBLSensor::projectPoint(	const CCVector3d& sourcePoint,
+								CCVector2d& destPoint,
+								double& depth,
 								double posIndex/*=0*/) const
 {
 	//project point in sensor world
-	CCVector3 P = sourcePoint;
+	CCVector3d P = sourcePoint;
 
 	//sensor to world global transformation = sensor position * rigid transformation
-	ccIndexedTransformation sensorPos; //identity by default
+	ccGLMatrixd sensorPos; //identity by default
 	if (m_posBuffer)
-		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
+	{
+		ccIndexedTransformation indexedSensorPos;
+		m_posBuffer->getInterpolatedTransformation(posIndex, indexedSensorPos);
+		sensorPos = ccGLMatrixd(indexedSensorPos.data());
+	}
 	sensorPos *= m_rigidTransformation;
 
 	//apply (inverse) global transformation (i.e world to sensor)
@@ -192,7 +196,7 @@ void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
 	depth = P.norm();
 }
 
-bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const
+bool ccGBLSensor::convertToDepthMapCoords(double yaw, double pitch, unsigned& i, unsigned& j) const
 {
 	if (m_depthBuffer.zBuff.empty())
 	{
@@ -237,8 +241,8 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 	NormalGrid* normalGrid = new NormalGrid;
 	try
 	{
-		static const CCVector3 zeroNormal(0, 0, 0);
-		normalGrid->resize(size, zeroNormal);
+		static const CCVector3 ZeroNormal(0, 0, 0);
+		normalGrid->resize(size, ZeroNormal);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -248,50 +252,54 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 	}
 
 	//sensor to world global transformation = sensor position * rigid transformation
-	ccIndexedTransformation sensorPos; //identity by default
+	ccGLMatrixd sensorPos; //identity by default
 	if (m_posBuffer)
-		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
+	{
+		ccIndexedTransformation indexedSensorPos;
+		m_posBuffer->getInterpolatedTransformation(posIndex, indexedSensorPos);
+		sensorPos = ccGLMatrixd(indexedSensorPos.data());
+	}
 	sensorPos *= m_rigidTransformation;
 
 	//project each point + normal
 	{
-		CCVector3 sensorOrigin = sensorPos.getTranslationAsVec3D();
+		CCVector3d sensorOrigin = sensorPos.getTranslationAsVec3D();
 
 		cloud->placeIteratorAtBeginning();
 		unsigned pointCount = cloud->size();
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const CCVector3* P = cloud->getNextPoint();
+			const CCVector3d P = cloud->getNextGlobalPoint();
 			const CCVector3& N = theNorms[i];
 
 			//project point
-			CCVector2 Q;
-			PointCoordinateType depth1;
-			projectPoint(*P, Q, depth1, m_activeIndex);
+			CCVector2d Q;
+			double depth1;
+			projectPoint(P, Q, depth1, m_activeIndex);
 
-			CCVector3 U = *P - sensorOrigin;
-			PointCoordinateType distToSensor = U.norm();
+			CCVector3d U = P - sensorOrigin;
+			double distToSensor = U.norm();
 
-			CCVector3 S;
+			CCVector3d S;
 			if (CCCoreLib::GreaterThanEpsilon(distToSensor))
 			{
 				//project point + normal
-				CCVector3 P2 = *P + N;
-				CCVector2 Q2;
-				PointCoordinateType depth2;
+				CCVector3d P2 = P + N;
+				CCVector2d Q2;
+				double depth2;
 				projectPoint(P2, Q2, depth2, m_activeIndex);
 
 				S.x = (Q2.x - Q.x);
 				S.y = (Q2.y - Q.y);
-				PointCoordinateType squareS2D = (S.x*S.x + S.y*S.y);
+				double squareS2D = (S.x*S.x + S.y*S.y);
 
 				if (CCCoreLib::GreaterThanSquareEpsilon(squareS2D))
 				{
 					//normal component along sensor viewing dir.
-					S.z = -N.dot(U) / distToSensor;
+					S.z = -CCVector3d::fromArray(N.u).dot(U) / distToSensor;
 
 					//deduce other normals components
-					PointCoordinateType coef = sqrt((CCCoreLib::PC_ONE - S.z*S.z) / squareS2D);
+					double  coef = sqrt((1.0 - S.z*S.z) / squareS2D);
 					S.x *= coef;
 					S.y *= coef;
 				}
@@ -314,7 +322,7 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(	CCCoreLib::GenericCloud* c
 			{
 				//add the transformed normal
 				CCVector3& newN = normalGrid->at(y*m_depthBuffer.width + x);
-				newN += S;
+				newN += CCVector3::fromArray(S.u);
 			}
 			else
 			{
@@ -391,10 +399,10 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(	CCCoreLib::GenericCloud* clo
 		{
 			for (unsigned i = 0; i < pointCount; ++i)
 			{
-				const CCVector3 *P = cloud->getNextPoint();
-				CCVector2 Q;
-				PointCoordinateType depth;
-				projectPoint(*P, Q, depth, m_activeIndex);
+				const CCVector3d P = cloud->getNextGlobalPoint();
+				CCVector2d Q;
+				double depth;
+				projectPoint(P, Q, depth, m_activeIndex);
 
 				unsigned x = 0;
 				unsigned y = 0;
@@ -540,11 +548,11 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 		theCloud->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const CCVector3* P = theCloud->getNextPoint();
-			CCVector2 Q;
-			PointCoordinateType depth;
+			const CCVector3d P = theCloud->getNextGlobalPoint();
+			CCVector2d Q;
+			double depth;
 			//Q.x and Q.y are inside [-pi;pi] by default (result of atan2)
-			projectPoint(*P, Q, depth, m_activeIndex);
+			projectPoint(P, Q, depth, m_activeIndex);
 
 			//yaw
 			int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.x));
@@ -599,10 +607,10 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 		theCloud->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const CCVector3 *P = theCloud->getNextPoint();
-			CCVector2 Q;
-			PointCoordinateType depth;
-			projectPoint(*P, Q, depth, m_activeIndex);
+			const CCVector3d P = theCloud->getNextGlobalPoint();
+			CCVector2d Q;
+			double depth;
+			projectPoint(P, Q, depth, m_activeIndex);
 
 			if (i != 0)
 			{
@@ -718,24 +726,24 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 
 			for (unsigned i = 0; i < pointCount; ++i)
 			{
-				const CCVector3* P = theCloud->getNextPoint();
-				CCVector2 Q;
-				PointCoordinateType depth;
-				projectPoint(*P, Q, depth, m_activeIndex);
+				const CCVector3d P = theCloud->getNextGlobalPoint();
+				CCVector2d Q;
+				double depth;
+				projectPoint(P, Q, depth, m_activeIndex);
 
 				unsigned x = 0;
 				unsigned y = 0;
 				if (convertToDepthMapCoords(Q.x, Q.y, x, y))
 				{
 					PointCoordinateType& zBuf = m_depthBuffer.zBuff[y*m_depthBuffer.width + x];
-					zBuf = std::max(zBuf, depth);
-					m_sensorRange = std::max(m_sensorRange, depth);
+					zBuf = std::max(zBuf, static_cast<PointCoordinateType>(depth));
+					m_sensorRange = std::max(m_sensorRange, static_cast<PointCoordinateType>(depth));
 				}
 
 				if (projectedCloud)
 				{
-					projectedCloud->addPoint(CCVector3(Q.x, Q.y, 0));
-					projectedCloud->setPointScalarValue(i, depth);
+					projectedCloud->addLocalPoint(CCVector3(Q.x, Q.y, 0));
+					projectedCloud->setPointScalarValue(i, static_cast<PointCoordinateType>(depth));
 				}
 
 				if (!nprogress.oneStep())
@@ -755,7 +763,7 @@ bool ccGBLSensor::computeDepthBuffer(CCCoreLib::GenericCloud* theCloud, int& err
 	return true;
 }
 
-unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
+uint8_t ccGBLSensor::checkVisibility(const CCVector3d& globalP) const
 {
 	if (m_depthBuffer.zBuff.empty()) //no z-buffer?
 	{
@@ -763,9 +771,9 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 	}
 
 	//project point
-	CCVector2 Q;
-	PointCoordinateType depth;
-	projectPoint(P, Q, depth, m_activeIndex);
+	CCVector2d Q;
+	double depth;
+	projectPoint(globalP, Q, depth, m_activeIndex);
 
 	//out of sight
 	if (depth > m_sensorRange)
@@ -782,7 +790,7 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 	}
 
 	//hidden?
-	if (depth > m_depthBuffer.zBuff[y*m_depthBuffer.width + x] * (1.0f + m_uncertainty))
+	if (depth > m_depthBuffer.zBuff[y*m_depthBuffer.width + x] * (1.0 + m_uncertainty))
 	{
 		return CCCoreLib::POINT_HIDDEN;
 	}
@@ -795,7 +803,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!MACRO_Draw3D(context))
 		return;
 
-	ccIndexedTransformation sensorPos;
+	ccGLMatrixd sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		//no visible position for this index!
@@ -825,7 +833,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//apply rigid transformation
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
-	glFunc->glMultMatrixf(sensorPos.data());
+	glFunc->glMultMatrixd(sensorPos.data());
 
 	//test: center as sphere
 	//{
@@ -910,7 +918,7 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)
 	}
 
 	//get sensor position
-	ccIndexedTransformation sensorPos;
+	ccGLMatrixd sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
 		return ccBBox();
@@ -923,30 +931,29 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures/*=false*/)
 		return ccBBox();
 	}
 
-	cloud.addPoint(CCVector3(-m_scale, -m_scale, -m_scale));
-	cloud.addPoint(CCVector3(-m_scale, -m_scale,  m_scale));
-	cloud.addPoint(CCVector3(-m_scale,  m_scale, -m_scale));
-	cloud.addPoint(CCVector3(-m_scale,  m_scale,  m_scale));
-	cloud.addPoint(CCVector3( m_scale, -m_scale, -m_scale));
-	cloud.addPoint(CCVector3( m_scale, -m_scale,  m_scale));
-	cloud.addPoint(CCVector3( m_scale,  m_scale, -m_scale));
-	cloud.addPoint(CCVector3( m_scale,  m_scale,  m_scale));
+	cloud.addLocalPoint(CCVector3(-m_scale, -m_scale, -m_scale));
+	cloud.addLocalPoint(CCVector3(-m_scale, -m_scale,  m_scale));
+	cloud.addLocalPoint(CCVector3(-m_scale,  m_scale, -m_scale));
+	cloud.addLocalPoint(CCVector3(-m_scale,  m_scale,  m_scale));
+	cloud.addLocalPoint(CCVector3( m_scale, -m_scale, -m_scale));
+	cloud.addLocalPoint(CCVector3( m_scale, -m_scale,  m_scale));
+	cloud.addLocalPoint(CCVector3( m_scale,  m_scale, -m_scale));
+	cloud.addLocalPoint(CCVector3( m_scale,  m_scale,  m_scale));
 
-	cloud.applyRigidTransformation(sensorPos);
+	cloud.applyGlobalRigidTransformation(sensorPos);
 	return cloud.getOwnBB(false);
 }
 
-ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
+ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrixd& trans)
 {
 	//get sensor position
-	ccIndexedTransformation sensorPos;
-	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
-		return ccBBox();
+	if (!getAbsoluteTransformation(trans, m_activeIndex))
+	{
+		return {};
+	}
 
-	trans = sensorPos;
-
-	return ccBBox(	CCVector3(-m_scale,-m_scale,-m_scale),
-					CCVector3( m_scale, m_scale, m_scale),
+	return ccBBox(	CCVector3d(-m_scale,-m_scale,-m_scale),
+					CCVector3d( m_scale, m_scale, m_scale),
 					true );
 }
 
@@ -962,15 +969,15 @@ bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 		}
 	}
 
-	ccIndexedTransformation trans;
+	ccGLMatrixd trans;
 	if (!getActiveAbsoluteTransformation(trans))
 	{
 		return false;
 	}
 	//scanner main directions
-	CCVector3d sensorX(trans.data()[0], trans.data()[1], trans.data()[2]);
-	CCVector3d sensorY(trans.data()[4], trans.data()[5], trans.data()[6]);
-	CCVector3d sensorZ(trans.data()[8], trans.data()[9], trans.data()[10]);
+	CCVector3d sensorX = trans.getColumnAsVec3D(0);
+	CCVector3d sensorY = trans.getColumnAsVec3D(1);
+	CCVector3d sensorZ = trans.getColumnAsVec3D(2);
 
 	switch (getRotationOrder())
 	{

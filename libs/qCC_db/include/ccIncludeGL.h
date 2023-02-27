@@ -38,6 +38,8 @@ public:
 	//type-less glVertex3Xv call (X=f,d)
 	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glVertex3fv(v); }
 	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glVertex3dv(v); }
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<float>& P) { glFunc->glVertex3fv(P.u); }
+	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<double>& P) { glFunc->glVertex3dv(P.u); }
 
 	//type-less glVertex3X call (X=f,d)
 	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
@@ -50,6 +52,8 @@ public:
 	//type-less glNormal3Xv call (X=f,d)
 	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glNormal3fv(v); }
 	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glNormal3dv(v); }
+	static inline void Normal3(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<float>& P) { glFunc->glNormal3fv(P.u); }
+	static inline void Normal3(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<double>& P) { glFunc->glNormal3dv(P.u); }
 
 	//type-less glRotateX call (X=f,d)
 	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
@@ -58,6 +62,8 @@ public:
 	//type-less glTranslateX call (X=f,d)
 	static inline void Translate(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
 	static inline void Translate(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<float>& P) { glFunc->glTranslatef(P.x, P.y, P.z); }
+	static inline void Translate(QOpenGLFunctions_2_1* glFunc, const Vector3Tpl<double>& P) { glFunc->glTranslated(P.x, P.y, P.z); }
 
 	//type-less glColor3Xv call (X=f,ub)
 	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }

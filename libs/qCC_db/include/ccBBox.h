@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_BBOX_HEADER
-#define CC_BBOX_HEADER
-
 //Local
 #include "ccDrawableObject.h"
 
@@ -28,21 +27,21 @@
 /** Supports several operators such as addition (to a matrix or a vector) and
 	multiplication (by a matrix or a scalar).
 **/
-class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
+class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBoxD
 {
 public:
 
 	//! Default constructor
-	ccBBox() : CCCoreLib::BoundingBox() {}
+	ccBBox() : CCCoreLib::BoundingBoxD() {}
 	//! Constructor from two vectors (lower min. and upper max. corners)
-	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner, bool valid) : CCCoreLib::BoundingBox(bbMinCorner, bbMaxCorner, valid) {}
-	//! Constructor from two vectors (lower min. and upper max. corners)
-	ccBBox(const CCCoreLib::BoundingBox& bbox) : CCCoreLib::BoundingBox(bbox) {}
+	ccBBox(const CCVector3d& bbMinCorner, const CCVector3d& bbMaxCorner, bool valid) : CCCoreLib::BoundingBoxD(bbMinCorner, bbMaxCorner, valid) {}
+	//! Constructor from another bounding box)
+	ccBBox(const CCCoreLib::BoundingBoxD& bbox) : CCCoreLib::BoundingBoxD(bbox) {}
 
 	//! Applies transformation to the bounding box
-	const ccBBox operator * (const ccGLMatrix& mat);
+	ccBBox operator * (const ccGLMatrix& mat) const;
 	//! Applies transformation to the bounding box
-	const ccBBox operator * (const ccGLMatrixd& mat);
+	ccBBox operator * (const ccGLMatrixd& mat) const;
 
 	//! Draws bounding box (OpenGL)
 	/** \param context OpenGL context
@@ -50,5 +49,3 @@ public:
 	**/
 	void draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const;
 };
-
-#endif //CC_BBOX_HEADER

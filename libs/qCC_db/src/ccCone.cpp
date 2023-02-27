@@ -26,7 +26,7 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				PointCoordinateType height,
 				PointCoordinateType xOff/*=0*/,
 				PointCoordinateType yOff/*=0*/,
-				const ccGLMatrix* transMat/*=nullptr*/,
+				const ccGLMatrixd* transMat/*=nullptr*/,
 				QString name/*="Cylinder"*/,
 				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
 				unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -107,18 +107,18 @@ bool ccCone::buildUp()
 	CCVector3 topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
 	{
 		//bottom center
-		verts->addPoint(bottomCenter);
+		verts->addLocalPoint(bottomCenter);
 		CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, -1).u);
 		m_triNormals->addElement(nIndex);
 		//top center
-		verts->addPoint(topCenter);
+		verts->addLocalPoint(topCenter);
 		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1).u);
 		m_triNormals->addElement(nIndex);
 	}
 
 	//then, angular sweep for top and/or bottom surfaces
 	{
-		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI) / static_cast<PointCoordinateType>(steps);
+		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI) / steps;
 		//bottom surface
 		if (!singlePointBottom)
 		{
@@ -127,7 +127,7 @@ bool ccCone::buildUp()
 				CCVector3 P(bottomCenter.x + cos(angle_rad_step*i)*m_bottomRadius,
 							bottomCenter.y + sin(angle_rad_step*i)*m_bottomRadius,
 							bottomCenter.z);
-				verts->addPoint(P);
+				verts->addLocalPoint(P);
 			}
 		}
 		//top surface
@@ -138,7 +138,7 @@ bool ccCone::buildUp()
 				CCVector3 P(topCenter.x + cos(angle_rad_step*i)*m_topRadius,
 							topCenter.y + sin(angle_rad_step*i)*m_topRadius,
 							topCenter.z);
-				verts->addPoint(P);
+				verts->addLocalPoint(P);
 			}
 		}
 		//side normals
@@ -258,22 +258,22 @@ void ccCone::setTopRadius(PointCoordinateType radius)
 	applyTransformationToVertices();
 }
 
-CCVector3 ccCone::getBottomCenter() const
+CCVector3d ccCone::getBottomCenter() const
 {
-	CCVector3 bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
-	ccGLMatrix trans = getGLTransformationHistory();
+	CCVector3d bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
+	ccGLMatrixd trans = getGLTransformationHistory();
 	trans.apply(bottomCenter);
 	return bottomCenter;
 }
-CCVector3 ccCone::getTopCenter() const
+CCVector3d ccCone::getTopCenter() const
 {
 	CCVector3 topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
-	ccGLMatrix trans = getGLTransformationHistory();
+	ccGLMatrixd trans = getGLTransformationHistory();
 	trans.apply(topCenter);
 	return topCenter;
 }
 
-CCVector3 ccCone::getSmallCenter() const
+CCVector3d ccCone::getSmallCenter() const
 {
 	if (m_topRadius <= m_bottomRadius)
 	{
@@ -282,7 +282,7 @@ CCVector3 ccCone::getSmallCenter() const
 	return getBottomCenter();
 }
 
-CCVector3 ccCone::getLargeCenter() const
+CCVector3d ccCone::getLargeCenter() const
 {
 	if (m_topRadius >= m_bottomRadius)
 	{

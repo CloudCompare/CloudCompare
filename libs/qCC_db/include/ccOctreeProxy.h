@@ -25,7 +25,7 @@
 #include <ccOctree.h>
 
 //! Octree structure proxy
-/** Implements ccHObject while holding a (shared) pointer on the octree instance (--> safer)
+/** Implements ccHObject while holding a (shared) pointer to the octree instance (--> safer)
 **/
 class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 {

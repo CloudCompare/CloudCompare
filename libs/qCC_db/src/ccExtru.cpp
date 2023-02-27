@@ -29,7 +29,7 @@
 
 ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 				 PointCoordinateType height,
-				 const ccGLMatrix* transMat /*= 0*/,
+				 const ccGLMatrixd* transMat /*= 0*/,
 				 QString name/*="Extrusion"*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_height(height)
@@ -48,7 +48,7 @@ ccExtru::ccExtru(QString name/*="Plane"*/)
 
 ccGenericPrimitive* ccExtru::clone() const
 {
-	return finishCloneJob(new ccExtru(m_profile,m_height,&m_transformation,getName()));
+	return finishCloneJob(new ccExtru(m_profile, m_height, &m_transformation, getName()));
 }
 
 bool ccExtru::buildUp()
@@ -67,8 +67,8 @@ bool ccExtru::buildUp()
 	std::string errorStr;
 	if (!mesh.buildMesh(m_profile, count, errorStr))
 	{
-		ccLog::Warning( QStringLiteral("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'")
-					    .arg( QString::fromStdString( errorStr) ) );
+		ccLog::Warning(QStringLiteral("[ccPlane::buildUp] Profile triangulation failed (CClib said: '%1'")
+			.arg(QString::fromStdString(errorStr)));
 		return false;
 	}
 
@@ -97,14 +97,14 @@ bool ccExtru::buildUp()
 
 	//bottom & top faces normals
 	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
-	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0,  1.0).u));
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, 1.0).u));
 
 	//add profile vertices & normals
 	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector2& P = m_profile[i];
-		verts->addPoint(CCVector3(P.x, P.y, 0));
-		verts->addPoint(CCVector3(P.x, P.y, m_height));
+		verts->addLocalPoint(CCVector3(P.x, P.y, 0));
+		verts->addLocalPoint(CCVector3(P.x, P.y, m_height));
 
 		const CCVector2& PNext = m_profile[(i + 1) % count];
 		CCVector2 N(-(PNext.y - P.y), PNext.x - P.x);

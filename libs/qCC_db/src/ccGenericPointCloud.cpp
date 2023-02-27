@@ -186,7 +186,7 @@ ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 
 	if (size())
 	{
-		getBoundingBox(box.minCorner(), box.maxCorner());
+		getGlobalBoundingBox(box.minCorner(), box.maxCorner());
 		box.setValidity(true);
 	}
 	
@@ -361,7 +361,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 						getDisplay()->redraw();
 				}
 #endif
-				if (point.point)
+				if (point.localPoint)
 				{
 					nearestPointIndex = point.pointIndex;
 					nearestSquareDist = point.squareDistd;
@@ -393,7 +393,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		}
 
 		//warning: we have to handle the relative GL transformation!
-		ccGLMatrix trans;
+		ccGLMatrixd trans;
 		bool noGLTrans = !getAbsoluteGLTransformation(trans);
 
 		//visibility table (if any)
@@ -431,17 +431,18 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
 				)
 			{
-				const CCVector3* P = getPoint(i);
+				CCVector3d P;
+				getGlobalPoint(i, P);
 
 				CCVector3d Q2D;
 				bool insideFrustum = false;
 				if (noGLTrans)
 				{
-					camera.project(*P, Q2D, &insideFrustum);
+					camera.project(P, Q2D, &insideFrustum);
 				}
 				else
 				{
-					CCVector3 P3D = *P;
+					CCVector3d P3D = P;
 					trans.apply(P3D);
 					camera.project(P3D, Q2D, &insideFrustum);
 				}
@@ -459,7 +460,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				if (	std::abs(Q2D.x - clickPos.x) <= pickWidth
 					&&	std::abs(Q2D.y - clickPos.y) <= pickHeight)
 				{
-					const double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
+					const double squareDist = (X - P).norm2d();
 					if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
 					{
 						nearestSquareDist = squareDist;

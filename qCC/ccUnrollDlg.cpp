@@ -18,6 +18,11 @@
 #include "ccUnrollDlg.h"
 #include "ui_unrollDlg.h"
 
+#include "ccEntitySelectionDlg.h"
+
+//qCC_db
+#include <ccCylinder.h>
+
 //Qt
 #include <QSettings>
 
@@ -26,20 +31,33 @@ static double s_startAngle_deg = 0.0;
 static double s_stopAngle_deg = 360.0;
 static bool s_arbitraryOutputCS = false;
 
-ccUnrollDlg::ccUnrollDlg(QWidget* parent/*=nullptr*/)
+ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent/*=nullptr*/)
 	: QDialog(parent)
 	, m_ui( new Ui::UnrollDialog )
+	, m_dbRootEntity(dbRootEntity)
 {
 	m_ui->setupUi(this);
 
 	connect(m_ui->checkBoxAuto, &QCheckBox::stateChanged, this, &ccUnrollDlg::axisAutoStateChanged);
 	connect(m_ui->comboBoxUnrollShapeType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
 	connect(m_ui->comboBoxAxisDimension, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
+	connect(m_ui->flipxAxisToolButton, &QToolButton::clicked, [this] {	m_ui->axisXDoubleSpinBox->setValue(-m_ui->axisXDoubleSpinBox->value());
+																		m_ui->axisYDoubleSpinBox->setValue(-m_ui->axisYDoubleSpinBox->value());
+																		m_ui->axisZDoubleSpinBox->setValue(-m_ui->axisZDoubleSpinBox->value());
+		});
+
+	connect(m_ui->fromEntityToolButton, &QToolButton::clicked, this, &ccUnrollDlg::loadParametersFromEntity);
 
 	m_ui->checkBoxAuto->setChecked(true);
 
 	shapeTypeChanged(m_ui->comboBoxUnrollShapeType->currentIndex());
 	axisDimensionChanged(m_ui->comboBoxAxisDimension->currentIndex());
+
+	if (!m_dbRootEntity)
+	{
+		assert(false);
+		m_ui->fromEntityToolButton->setVisible(false);
+	}
 }
 
 ccUnrollDlg::~ccUnrollDlg()
@@ -124,6 +142,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->axisPositionGroupBox->setTitle("Axis position");
 		m_ui->radiusLabel->setText("Radius");
 		axisAutoStateChanged(m_ui->checkBoxAuto->checkState());
+		m_ui->fromEntityToolButton->setEnabled(true);
 	}
 	break;
 	case ccPointCloud::CONE: //cone
@@ -138,6 +157,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
 		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
 		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
+		m_ui->fromEntityToolButton->setEnabled(false); // not supported for now
 	}
 	break;
 	case ccPointCloud::STRAIGHTENED_CONE: //straightened cone (fixed radius)
@@ -152,6 +172,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
 		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
 		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
+		m_ui->fromEntityToolButton->setEnabled(false); // not supported for now
 	}
 	break;
 	};
@@ -251,4 +272,42 @@ void ccUnrollDlg::fromPersistentSettings()
 		m_ui->arbitraryCSCheckBox->setChecked(s_arbitraryOutputCS);
 	}
 	settings.endGroup();
+}
+
+void ccUnrollDlg::loadParametersFromEntity()
+{
+	if (!m_dbRootEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccHObject::Container cylinders;
+	m_dbRootEntity->filterChildren(cylinders, true, CC_TYPES::CYLINDER, false);
+
+	if (cylinders.empty())
+	{
+		ccLog::Error("No cylinder in DB");
+		return;
+	}
+	int selectedIndex = ccEntitySelectionDialog::SelectEntity(cylinders, -1, this, tr("Select a cylinder entity"));
+	if (selectedIndex < 0)
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	const ccCylinder* cylinder = static_cast<const ccCylinder*>(cylinders[selectedIndex]);
+	CCVector3 axis = cylinder->getTransformation().getColumnAsVec3D(2); // Z axis is the cylinder axis
+	CCVector3 origin = cylinder->getTransformation().getTranslationAsVec3D();
+	PointCoordinateType radius = cylinder->getBottomRadius();
+
+	m_ui->comboBoxAxisDimension->setCurrentIndex(3); // custom
+	m_ui->axisXDoubleSpinBox->setValue(axis.x);
+	m_ui->axisYDoubleSpinBox->setValue(axis.y);
+	m_ui->axisZDoubleSpinBox->setValue(axis.z);
+	m_ui->axisCenterXDoubleSpinBox->setValue(origin.x);
+	m_ui->axisCenterYDoubleSpinBox->setValue(origin.y);
+	m_ui->axisCenterZDoubleSpinBox->setValue(origin.z);
+	m_ui->checkBoxAuto->setChecked(false);
 }

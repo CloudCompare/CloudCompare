@@ -3665,8 +3665,7 @@ static void ProjectOnCylinder(	const CCVector3& AP,
 	PointCoordinateType y = AP.dot(yDir);
 	phi_rad = atan2(y, x);
 	//deviation = 2D distance to the center (XY plane)
-	CCVector3 AP2D = x * xDir + y * yDir;
-	delta = AP2D.norm() - radius;
+	delta = sqrt(x*x + y*y) - radius;
 }
 
 static void ProjectOnCone(	const CCVector3& AP,
@@ -3685,8 +3684,7 @@ static void ProjectOnCone(	const CCVector3& AP,
 	//3D distance to the apex
 	PointCoordinateType normAP = AP.norm();
 	//2D distance to the apex (XY plane)
-	CCVector3 AP2D = x * xDir + y * yDir;
-	PointCoordinateType AP2Dnorm = AP2D.norm();
+	PointCoordinateType AP2Dnorm = sqrt(x*x + y * y);
 
 	//angle between +Z and AP
 	PointCoordinateType beta_rad = atan2(AP2Dnorm, -z);
@@ -3869,7 +3867,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			//we project the point
 			//Pout.x = longitude_rad * radius;
 			Pout.y = -delta;
-			Pout.z = Pin->dot(axisDir);
+			Pout.z = AP.dot(axisDir);
 		}
 		break;
 
@@ -3917,7 +3915,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		if (!arbitraryOutputCS)
 		{
 			// projects the output point to a coordinate system linked to the input cylinder/cone CS
-			Pout = (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
+			Pout = cylParams->center + (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
 		}
 		
 		// first unroll its normal if necessary
@@ -3980,7 +3978,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				P2out.x =  coneAbscissa2 * sin(theta2_rad);
 				P2out.y = -coneAbscissa2 * cos(theta2_rad);
 				P2out.z = delta2;
-				P2out = (P2out.x * xDir) + (P2out.y * yDir) + (P2out.z * axisDir);
+				P2out = cylParams->center + (P2out.x * xDir) + (P2out.y * yDir) + (P2out.z * axisDir);
 				N2 = P2out - Pout;
 			}
 			break;

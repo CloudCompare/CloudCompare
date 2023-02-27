@@ -5775,7 +5775,7 @@ void MainWindow::doActionUnroll()
 	}
 	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-	ccUnrollDlg unrollDlg(this);
+	ccUnrollDlg unrollDlg(m_ccRoot ? m_ccRoot->getRootEntity() : nullptr, this);
 	unrollDlg.fromPersistentSettings();
 	if (!unrollDlg.exec())
 		return;

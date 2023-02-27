@@ -35,7 +35,7 @@ class ccUnrollDlg : public QDialog
 public:
 
 	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = nullptr);
+	explicit ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent = nullptr);
 	~ccUnrollDlg() override;
 	
 	ccPointCloud::UnrollMode getType() const;
@@ -47,6 +47,7 @@ public:
 	double getRadius() const;
 	double getConeHalfAngle() const;
 	bool exportDeviationSF() const;
+	void loadParametersFromEntity();
 
 	void toPersistentSettings() const;
 	void fromPersistentSettings();
@@ -58,4 +59,5 @@ protected:
 
 protected:
 	Ui::UnrollDialog* m_ui;
+	ccHObject* m_dbRootEntity;
 };

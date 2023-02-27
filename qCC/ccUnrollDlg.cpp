@@ -19,6 +19,7 @@
 #include "ui_unrollDlg.h"
 
 #include "ccEntitySelectionDlg.h"
+#include "ccUtils.h"
 
 //qCC_db
 #include <ccCylinder.h>
@@ -47,6 +48,8 @@ ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent/*=nullptr*/)
 		});
 
 	connect(m_ui->fromEntityToolButton, &QToolButton::clicked, this, &ccUnrollDlg::loadParametersFromEntity);
+	connect(m_ui->pasteAxisToolButton, &QToolButton::clicked, this, &ccUnrollDlg::axisFromClipboard);
+	connect(m_ui->pasteCenterToolButton, &QToolButton::clicked, this, &ccUnrollDlg::centerFromClipboard);
 
 	m_ui->checkBoxAuto->setChecked(true);
 
@@ -310,4 +313,26 @@ void ccUnrollDlg::loadParametersFromEntity()
 	m_ui->axisCenterYDoubleSpinBox->setValue(origin.y);
 	m_ui->axisCenterZDoubleSpinBox->setValue(origin.z);
 	m_ui->checkBoxAuto->setChecked(false);
+}
+
+void ccUnrollDlg::axisFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		m_ui->axisXDoubleSpinBox->setValue(vector.x);
+		m_ui->axisYDoubleSpinBox->setValue(vector.y);
+		m_ui->axisZDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccUnrollDlg::centerFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		m_ui->axisCenterXDoubleSpinBox->setValue(vector.x);
+		m_ui->axisCenterYDoubleSpinBox->setValue(vector.y);
+		m_ui->axisCenterZDoubleSpinBox->setValue(vector.z);
+	}
 }

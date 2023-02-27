@@ -61,6 +61,14 @@ protected:
 	//! Signal called when a button is clicked
 	void buttonClicked(QAbstractButton*);
 
+	void axisFromClipboard();
+	void transFromClipboard();
+	void eulerAnglesFromClipboard();
+	void eulerTransFromClipboard();
+	void fromAxisFromClipboard();
+	void toAxisFromClipboard();
+	void fromToTransFromClipboard();
+
 protected:
 
 	//! Updates all forms with a given matrix

@@ -67,6 +67,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- button to flip the 3D axis
+		- ability to paste the axis and the axis point from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- option to choose an existing cylinder entity in the DB tree, and use it to set the unrolling cylinder parameters
 		- option to output the unrolled cloud in an arbitrary coordinate system (X: unroll angle / Y = distance to primitive / Z = longitude)
 		
@@ -76,6 +77,7 @@ v2.13.alpha (???) - (??/??/????)
 			- this allows to apply the transformation matrix to the original Global coordinates instead of the local ones.
 			  (useful to georeference a cloud with a known transformation)
 		- new tab to define the transformation as a rotation from a vector to another one (+ a translation)
+		- ability to paste the axes, triplet of angles and translation vectors from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 
 	- Multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath

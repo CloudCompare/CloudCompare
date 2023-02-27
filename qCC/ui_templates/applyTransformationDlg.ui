@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -272,6 +272,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -385,6 +396,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -471,6 +493,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteEulerAnglesToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -534,6 +567,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
             <property name="maximum">
              <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteEulerTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
             </property>
            </widget>
           </item>
@@ -653,6 +697,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteFromAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -749,6 +804,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteToAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -812,6 +878,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
             <property name="maximum">
              <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteFromToTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
             </property>
            </widget>
           </item>
@@ -886,7 +963,9 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

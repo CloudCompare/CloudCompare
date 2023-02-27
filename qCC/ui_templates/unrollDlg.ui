@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>603</width>
     <height>320</height>
    </rect>
   </property>
@@ -224,6 +224,17 @@
             <widget class="QToolButton" name="flipxAxisToolButton">
              <property name="text">
               <string>flip</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pasteAxisToolButton">
+             <property name="toolTip">
+              <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../icons.qrc">
+               <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
              </property>
             </widget>
            </item>
@@ -464,6 +475,17 @@
            </property>
            <property name="maximum">
             <double>1000000000.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="pasteCenterToolButton">
+           <property name="toolTip">
+            <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../icons.qrc">
+             <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
            </property>
           </widget>
          </item>

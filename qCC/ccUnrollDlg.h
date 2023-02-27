@@ -47,7 +47,6 @@ public:
 	double getRadius() const;
 	double getConeHalfAngle() const;
 	bool exportDeviationSF() const;
-	void loadParametersFromEntity();
 
 	void toPersistentSettings() const;
 	void fromPersistentSettings();
@@ -56,6 +55,9 @@ protected:
 	void shapeTypeChanged(int index);
 	void axisDimensionChanged(int index);
 	void axisAutoStateChanged(int checkState);
+	void loadParametersFromEntity();
+	void axisFromClipboard();
+	void centerFromClipboard();
 
 protected:
 	Ui::UnrollDialog* m_ui;

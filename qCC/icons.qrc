@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/clipboard.png</file>
     <file>images/gearIcon.png</file>
     <file>images/hashtag.png</file>
     <file>images/raster_grid.jpg</file>

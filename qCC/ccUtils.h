@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,15 +17,18 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCUTILS_H
-#define CCUTILS_H
-
 class QString;
+
+//CCCoreLib
+#include <CCGeom.h>
 
 namespace ccUtils
 {
 	//! Display a warning or error for locked verts
-	void    DisplayLockedVerticesWarning(const QString &meshName, bool displayAsError);
-}
+	void DisplayLockedVerticesWarning(const QString &meshName, bool displayAsError);
 
-#endif //CCUTILS_H
+	//! Tries to convert the current contents of the clipboard into a vector (3 values)
+	/** Supported separators: white spaces, comma or semicolon
+	**/
+	bool GetVectorFromClipboard(CCVector3d& vector, bool sendErrors = true);
+}

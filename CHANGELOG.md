@@ -73,6 +73,7 @@ v2.13.alpha (???) - (??/??/????)
 		- new option (checkbox): 'Apply to global coordinates'
 			- this allows to apply the transformation matrix to the original Global coordinates instead of the local ones.
 			  (useful to georeference a cloud with a known transformation)
+		- new tab to define the transformation as a rotation from a vector to another one (+ a translation)
 
 	- multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath

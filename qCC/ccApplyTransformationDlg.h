@@ -44,10 +44,12 @@ protected:
 	//! Automatically removes anything between square brackets, and update the other forms
 	void onMatrixTextChange();
 
-	//! Updates dialog when a component of the rotation axis/angle form changes
+	//! Updates dialog when a component of the Rotation axis/angle form changes
 	void onRotAngleValueChanged(double);
-	//! Updates dialog when a component of the euleur form changes
+	//! Updates dialog when a component of the Euler form changes
 	void onEulerValueChanged(double);
+	//! Updates dialog when a component of the From/to axes form changes
+	void onFromToValueChanged(double);
 
 	//! Loads matrix from ASCII file
 	void loadFromASCIIFile();
@@ -62,7 +64,7 @@ protected:
 protected:
 
 	//! Updates all forms with a given matrix
-	void updateAll(const ccGLMatrix& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true);
+	void updateAll(const ccGLMatrix& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true, bool fromToForm = true);
 };
 
 #endif //CC_APPLY_TRANSFORMATION_DLG_HEADER

@@ -286,7 +286,7 @@ class ccPointCloudLOD
 	//! Index map
 	LODIndexSet m_indexMap;
 
-	//! Last index map (pointer on)
+	//! Last index map (pointer to)
 	LODIndexSet m_lastIndexMap;
 
 	//! Associated octree

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_BOX_PRIMITIVE_HEADER
-#define CC_BOX_PRIMITIVE_HEADER
-
 // Local
 #include "ccGenericPrimitive.h"
 
@@ -34,9 +33,9 @@ class QCC_DB_LIB_API ccBox : public ccGenericPrimitive
 	    \param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 	    \param name name
 	**/
-	ccBox(const CCVector3&  dims,
-	      const ccGLMatrix* transMat = nullptr,
-	      QString           name     = QString("Box"));
+	ccBox(const CCVector3&   dims,
+	      const ccGLMatrixd* transMat = nullptr,
+	      QString            name     = QString("Box"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -79,5 +78,3 @@ class QCC_DB_LIB_API ccBox : public ccGenericPrimitive
 	//! Box dimensions
 	CCVector3 m_dims;
 };
-
-#endif // CC_BOX_PRIMITIVE_HEADER

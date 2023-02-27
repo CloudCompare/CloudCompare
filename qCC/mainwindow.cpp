@@ -5461,7 +5461,7 @@ void MainWindow::doActionComputeCPS()
 		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
-	// cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistances
+	// cmpPC->forEachScalarValue(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistances
 
 	CCCoreLib::ReferenceCloud                                                  CPSet(srcCloud);
 	ccProgressDialog                                                           pDlg(true, this);
@@ -9745,7 +9745,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 			if (s_flipNormals)
 			{
-				compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueInverted);
+				compEnt->forEachScalarValue(CCCoreLib::ScalarFieldTools::InvertScalarValue);
 				sfName += "[-]";
 			}
 		}

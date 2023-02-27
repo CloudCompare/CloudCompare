@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_PLANE_PRIMITIVE_HEADER
-#define CC_PLANE_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -38,7 +37,7 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	**/
 	ccPlane(PointCoordinateType xWidth,
 	        PointCoordinateType yWidth,
-	        const ccGLMatrix*   transMat = nullptr,
+	        const ccGLMatrixd*  transMat = nullptr,
 	        QString             name     = QString("Plane"));
 
 	//! Simplified constructor
@@ -60,7 +59,7 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	virtual ccGenericPrimitive* clone() const override;
 
 	// inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	virtual ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	//! Returns 'X' width
 	PointCoordinateType getXWidth() const
@@ -75,7 +74,7 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	}
 
 	//! Returns the center
-	CCVector3 getCenter() const
+	CCVector3d getCenter() const
 	{
 		return m_transformation.getTranslationAsVec3D();
 	}
@@ -97,7 +96,7 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	}
 
 	// inherited from ccPlanarEntityInterface
-	CCVector3 getNormal() const override
+	CCVector3d getNormal() const override
 	{
 		return m_transformation.getColumnAsVec3D(2);
 	}
@@ -155,7 +154,5 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	PointCoordinateType m_yWidth;
 
 	// Array [a,b,c,d] such that ax+by+cz = d
-	PointCoordinateType m_PlaneEquation[4];
+	PointCoordinateType m_planeEquation[4];
 };
-
-#endif // CC_PLANE_PRIMITIVE_HEADER

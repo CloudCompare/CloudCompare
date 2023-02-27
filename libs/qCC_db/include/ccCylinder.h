@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CYLINDER_PRIMITIVE_HEADER
-#define CC_CYLINDER_PRIMITIVE_HEADER
 
 // Local
 #include "ccCone.h"
@@ -44,7 +43,7 @@ class QCC_DB_LIB_API ccCylinder : public ccCone
 	**/
 	ccCylinder(PointCoordinateType radius,
 	           PointCoordinateType height,
-	           const ccGLMatrix*   transMat  = nullptr,
+	           const ccGLMatrixd*  transMat  = nullptr,
 	           QString             name      = QString("Cylinder"),
 	           unsigned            precision = DEFAULT_DRAWING_PRECISION,
 	           unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
@@ -74,5 +73,3 @@ class QCC_DB_LIB_API ccCylinder : public ccCone
 		return setBottomRadius(radius);
 	}
 };
-
-#endif // CC_CYLINDER_PRIMITIVE_HEADER

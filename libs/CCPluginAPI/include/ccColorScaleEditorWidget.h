@@ -222,8 +222,8 @@ class CCPLUGIN_LIB_API SlidersWidget : public ColorScaleEditorBaseWidget
 
 	//! Adds a new slider widget
 	/** \param relativePos slider position (relatively to scale boundaries [0.0,1.0])
-	\param color slider color
-	\return created slider (pointer on)
+	    \param color slider color
+	    \return created slider (pointer to)
 	**/
 	ColorScaleElementSlider* addNewSlider(double relativePos, QColor color);
 

@@ -246,10 +246,10 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 					priorityQueue.push(Edge(firstUnvisitedIndex, *it, graph.weight(firstUnvisitedIndex, *it)));
 				}
 #else
-				const CCVector3* P = cloud->getPoint(firstUnvisitedIndex);
-				nNSS.queryPoint    = *P;
-				octree->getTheCellPosWhichIncludesThePoint(P, nNSS.cellPos, level);
-				octree->computeCellCenter(nNSS.cellPos, level, nNSS.cellCenter);
+				const CCVector3* P   = cloud->getLocalPoint(firstUnvisitedIndex);
+				nNSS.localQueryPoint = *P;
+				octree->getTheCellPosWhichIncludesThePoint(*P, nNSS.cellPos, level);
+				octree->computeLocalCellCenter(nNSS.cellPos, level, nNSS.localCellCenter);
 				nNSS.pointsInNeighbourhood.clear();
 				nNSS.alreadyVisitedNeighbourhoodSize = 0;
 
@@ -341,10 +341,10 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud,
 					for (Graph::IndexSet::const_iterator it = neighbors.begin(); it != neighbors.end(); ++it)
 						priorityQueue.push(Edge(v, *it, graph.weight(v, *it)));
 #else
-					const CCVector3* P = cloud->getPoint(v);
-					nNSS.queryPoint    = *P;
-					octree->getTheCellPosWhichIncludesThePoint(P, nNSS.cellPos, level);
-					octree->computeCellCenter(nNSS.cellPos, level, nNSS.cellCenter);
+					const CCVector3* P   = cloud->getLocalPoint(v);
+					nNSS.localQueryPoint = *P;
+					octree->getTheCellPosWhichIncludesThePoint(*P, nNSS.cellPos, level);
+					octree->computeLocalCellCenter(nNSS.cellPos, level, nNSS.localCellCenter);
 					nNSS.pointsInNeighbourhood.clear();
 					nNSS.alreadyVisitedNeighbourhoodSize = 0;
 

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_MESH_GROUP_HEADER
-#define CC_MESH_GROUP_HEADER
 
 // Local
 #include "ccGenericMesh.h"
@@ -48,15 +47,11 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	void refreshBB() override
 	{
 	}
-	bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N) override
-	{
-		return false;
-	}
 	bool interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override
 	{
 		return false;
 	}
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgb& color) override
 	{
 		return false;
 	}
@@ -64,7 +59,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override
+	bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color) override
 	{
 		return false;
 	}
@@ -72,7 +67,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override
+	bool getColorFromMaterial(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override
 	{
 		return false;
 	}
@@ -141,20 +136,8 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	void setGlobalShift(const CCVector3d& shift) override
-	{ /* this method shouldn't be called on ccMeshGroup instances */
-		assert(false);
-	}
-	void setGlobalScale(double scale) override
-	{ /* this method shouldn't be called on ccMeshGroup instances */
-		assert(false);
-	}
 
 	// inherited methods (ccHObject)
-	bool isSerializable() const override
-	{
-		return true;
-	}
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
 	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion_MeOnly() const override;
@@ -164,19 +147,24 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return 0;
 	}
-	void forEach(genericTriangleAction action) override
-	{
-	}
 	void placeIteratorAtBeginning() override
 	{
 	}
-	CCCoreLib::GenericTriangle* _getNextTriangle() override
+	CCCoreLib::GenericLocalTriangle* _getNextLocalTriangle() override
 	{
-		return 0;
+		return nullptr;
 	}
-	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override
+	CCCoreLib::GenericGlobalTriangle* _getNextGlobalTriangle() override
 	{
-		return 0;
+		return nullptr;
+	}
+	CCCoreLib::GenericLocalTriangle* _getLocalTriangle(unsigned triangleIndex) override
+	{
+		return nullptr;
+	}
+	CCCoreLib::GenericGlobalTriangle* _getGlobalTriangle(unsigned triangleIndex) override
+	{
+		return nullptr;
 	}
 	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override
 	{
@@ -186,16 +174,15 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return 0;
 	}
-	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override
+	void       getLocalTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override {};
+	void       getGlobalTriangleVertices(unsigned triangleIndex, CCVector3d& A, CCVector3d& B, CCVector3d& C) const override {};
+	void       getLocalBoundingBox(CCVector3& localBBMin, CCVector3& localBBMax) override {};
+	CCVector3d getLocalToGlobalTranslation() const override
 	{
-	}
-	void getBoundingBox(CCVector3& bbMin, CCVector3& bbMax) override
-	{
+		return {0.0, 0.0, 0.0};
 	}
 
   protected:
 	// inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 };
-
-#endif // CC_MESH_GROUP_HEADER

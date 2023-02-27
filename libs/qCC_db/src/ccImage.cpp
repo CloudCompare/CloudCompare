@@ -266,7 +266,7 @@ short ccImage::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(38), ccHObject::minimumFileVersion_MeOnly());
 }
 
-ccBBox ccImage::getOwnFitBB(ccGLMatrix& trans)
+ccBBox ccImage::getOwnFitBB(ccGLMatrixd& trans)
 {
 	ccHObject::Container sensors;
 	filterChildren(sensors, false, CC_TYPES::SENSOR, false, m_currentDisplay);

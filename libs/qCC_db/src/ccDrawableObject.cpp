@@ -108,19 +108,19 @@ void ccDrawableObject::enableGLTransformation(bool state)
 	}
 }
 
-void ccDrawableObject::setGLTransformation(const ccGLMatrix& trans)
+void ccDrawableObject::setGLTransformation(const ccGLMatrixd& trans)
 {
 	m_glTrans = trans;
 	enableGLTransformation(true);
 }
 
-void ccDrawableObject::rotateGL(const ccGLMatrix& rotMat)
+void ccDrawableObject::rotateGL(const ccGLMatrixd& rotMat)
 {
 	m_glTrans = rotMat * m_glTrans;
 	enableGLTransformation(true);
 }
 
-void ccDrawableObject::translateGL(const CCVector3& trans)
+void ccDrawableObject::translateGL(const CCVector3d& trans)
 {
 	m_glTrans += trans;
 	enableGLTransformation(true);

@@ -24,7 +24,7 @@
 ccDish::ccDish(PointCoordinateType radius,
                PointCoordinateType height,
                PointCoordinateType radius2 /*=0*/,
-               const ccGLMatrix*   transMat /*=nullptr*/,
+               const ccGLMatrixd*  transMat /*=nullptr*/,
                QString             name /*="Dish"*/,
                unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/)
     : ccGenericPrimitive(name, transMat)
@@ -91,7 +91,7 @@ bool ccDish::buildUp()
 	assert(verts);
 
 	// first point: north pole
-	verts->addPoint(CCVector3(0, 0, m_height));
+	verts->addLocalPoint(CCVector3(0, 0, m_height));
 	verts->addNorm(CCVector3(0, 0, 1));
 
 	// then, angular sweep
@@ -125,7 +125,7 @@ bool ccDish::buildUp()
 					P.z += m_height - realRadius;
 				}
 
-				verts->addPoint(P);
+				verts->addLocalPoint(P);
 				verts->addNorm(N);
 			}
 		}

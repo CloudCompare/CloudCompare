@@ -60,7 +60,7 @@ class QCC_DB_LIB_API ccPolyline : public CCCoreLib::Polyline
 		return true;
 	}
 	bool hasColors() const override;
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 
 	// inherited methods (ccShiftedObject)
 	void              setGlobalShift(const CCVector3d& shift) override;
@@ -252,6 +252,9 @@ class QCC_DB_LIB_API ccPolyline : public CCCoreLib::Polyline
 
 	// inherited methods (ccHObject)
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+
+	// transfer the parameters of this polyline vertices to another cloud
+	void transferVerticesParametersTo(ccPointCloud* cloud) const;
 
 	//! Unique RGB color
 	ccColor::Rgb m_rgbColor;

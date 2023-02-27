@@ -37,7 +37,7 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	**/
 	ccCoordinateSystem(PointCoordinateType displayScale,
 	                   PointCoordinateType axisWidth,
-	                   const ccGLMatrix*   transMat = nullptr,
+	                   const ccGLMatrixd*  transMat = nullptr,
 	                   QString             name     = QString("CoordinateSystem"));
 
 	//! Default constructor
@@ -45,8 +45,8 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	    \param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 	    \param name name
 	**/
-	ccCoordinateSystem(const ccGLMatrix* transMat,
-	                   QString           name = QString("CoordinateSystem"));
+	ccCoordinateSystem(const ccGLMatrixd* transMat,
+	                   QString            name = QString("CoordinateSystem"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -85,7 +85,7 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	}
 
 	// ccPlane get2AxisPlane(int axisNum);
-	inline CCVector3 getOrigin() const
+	inline CCVector3d getOrigin() const
 	{
 		return m_transformation.getTranslationAsVec3D();
 	};
@@ -101,9 +101,9 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	};
 	void setDisplayScale(PointCoordinateType size);
 
-	CCVector3 getXYPlaneNormal() const;
-	CCVector3 getYZPlaneNormal() const;
-	CCVector3 getZXPlaneNormal() const;
+	CCVector3d getXYPlaneNormal() const;
+	CCVector3d getYZPlaneNormal() const;
+	CCVector3d getZXPlaneNormal() const;
 
 	//! Default Display scale
 	static constexpr PointCoordinateType DEFAULT_DISPLAY_SCALE = 1.0;
@@ -126,9 +126,9 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	short minimumFileVersion_MeOnly() const override;
 	bool  buildUp() override;
 
-	ccPlane* createXYplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane* createYZplane(const ccGLMatrix* transMat = nullptr) const;
-	ccPlane* createZXplane(const ccGLMatrix* transMat = nullptr) const;
+	ccPlane* createXYplane(const ccGLMatrixd* transMat = nullptr) const;
+	ccPlane* createYZplane(const ccGLMatrixd* transMat = nullptr) const;
+	ccPlane* createZXplane(const ccGLMatrixd* transMat = nullptr) const;
 
 	//! CoordinateSystem options
 	PointCoordinateType m_DisplayScale;

@@ -212,7 +212,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 		return true;
 	}
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
-	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	// inherited from ccSensor
 	bool applyViewport(ccGenericGLDisplay* win = nullptr) const override;
@@ -299,13 +299,13 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	/** \param localCoord local coordinates of the 3D point (input)
 	    \param globalCoord corresponding global coordinates of the 3D point (output)
 	**/
-	bool fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const;
+	bool fromLocalCoordToGlobalCoord(const CCVector3d& localCoord, CCVector3d& globalCoord) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/** \param globalCoord global coordinates of the 3D point (input)
 	    \param localCoord corresponding local coordinates of the 3D point (output)
 	**/
-	bool fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord) const;
+	bool fromGlobalCoordToLocalCoord(const CCVector3d& globalCoord, CCVector3d& localCoord) const;
 
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
@@ -313,7 +313,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param withLensError to take lens distortion into account
 	    \return if operation has succeeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
-	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2& imageCoord, bool withLensError = true) const;
+	bool fromLocalCoordToImageCoord(const CCVector3d& localCoord, CCVector2& imageCoord, bool withLensError = true) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
@@ -322,7 +322,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
 	    \return if operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3& localCoord, PointCoordinateType depth, bool withLensCorrection = true) const;
+	bool fromImageCoordToLocalCoord(const CCVector2& imageCoord, CCVector3d& localCoord, double depth, bool withLensCorrection = true) const;
 
 	//! Computes the coordinates of a 3D point in the image knowing its coordinates in the global coordinate system.
 	/** \param globalCoord global coordinates of the 3D point
@@ -330,7 +330,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param withLensError to take lens distortion into account
 	    \return if operation has succeeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
-	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector2& imageCoord, bool withLensError = true) const;
+	bool fromGlobalCoordToImageCoord(const CCVector3d& globalCoord, CCVector2& imageCoord, bool withLensError = true) const;
 
 	//! Computes the global coordinates of a 3D points from its 3D coordinates (pixel position in the image)
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
@@ -339,7 +339,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param withLensCorrection if we want to correct the initial pixel coordinates with the lens correction formula
 	    \return if operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3& globalCoord, PointCoordinateType z0, bool withLensCorrection = true) const;
+	bool fromImageCoordToGlobalCoord(const CCVector2& imageCoord, CCVector3d& globalCoord, double z0, bool withLensCorrection = true) const;
 
 	//! Apply the Brown's lens correction to the real projection (through a lens) of a 3D point in the image
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
@@ -426,13 +426,13 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param realCorners (optional) image real 3D corners (4*2 values)
 	    \return ortho-rectified image
 	**/
-	ccImage* orthoRectifyAsImageDirect(const ccImage*      image,
-	                                   PointCoordinateType altitude,
-	                                   double&             pixelSize,
-	                                   bool                undistortImages = true,
-	                                   double*             minCorner       = nullptr,
-	                                   double*             maxCorner       = nullptr,
-	                                   double*             realCorners     = nullptr) const;
+	ccImage* orthoRectifyAsImageDirect(const ccImage* image,
+	                                   double         altitude,
+	                                   double&        pixelSize,
+	                                   bool           undistortImages = true,
+	                                   double*        minCorner       = nullptr,
+	                                   double*        maxCorner       = nullptr,
+	                                   double*        realCorners     = nullptr) const;
 
 	//! Projective ortho-rectification of multiple images (as image files)
 	/** \param images set of N calibrated images (i.e. images with their associated sensor)
@@ -513,7 +513,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    //TODO withLensCorrection if we want to take the lens distortion into consideration
 	    \return if operation has succeeded
 	**/
-	bool isGlobalCoordInFrustum(const CCVector3& globalCoord /*, bool withLensCorrection*/) const;
+	bool isGlobalCoordInFrustum(const CCVector3d& globalCoord /*, bool withLensCorrection*/) const;
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes
@@ -522,7 +522,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param center center of the the frustum circumscribed sphere
 	    \return success
 	**/
-	bool computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 ptsFrustum[8], CCVector3 edges[6], CCVector3& center);
+	bool computeGlobalPlaneCoefficients(double planeCoefficients[6][4], CCVector3d ptsFrustum[8], CCVector3d edges[6], CCVector3d& center);
 
   public: // helpers
 	//! Helper: converts camera focal from pixels to mm
@@ -621,12 +621,12 @@ class ccOctreeFrustumIntersector
 	    \param edges 3D coordinates (global coordinates system) of the six director vector of the frustum edges
 	    \param center 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
-	void computeFrustumIntersectionWithOctree(std::vector<std::pair<unsigned, CCVector3>>& pointsToTest,
-	                                          std::vector<unsigned>&                       inCameraFrustum,
-	                                          const float                                  planesCoefficients[6][4],
-	                                          const CCVector3                              ptsFrustum[8],
-	                                          const CCVector3                              edges[6],
-	                                          const CCVector3&                             center);
+	void computeFrustumIntersectionWithOctree(std::vector<std::pair<unsigned, CCVector3d>>& pointsToTest,
+	                                          std::vector<unsigned>&                        inCameraFrustum,
+	                                          const double                                  planesCoefficients[6][4],
+	                                          const CCVector3d                              ptsFrustum[8],
+	                                          const CCVector3d                              edges[6],
+	                                          const CCVector3d&                             center);
 
 	//! Compute intersection between the octree and the height children cells of a parent cell.
 	/** \param level current level
@@ -640,10 +640,10 @@ class ccOctreeFrustumIntersector
 	void computeFrustumIntersectionByLevel(unsigned char                  level,
 	                                       CCCoreLib::DgmOctree::CellCode parentTruncatedCode,
 	                                       OctreeCellVisibility           parentResult,
-	                                       const float                    planesCoefficients[6][4],
-	                                       const CCVector3                ptsFrustum[8],
-	                                       const CCVector3                edges[6],
-	                                       const CCVector3&               center);
+	                                       const double                   planesCoefficients[6][4],
+	                                       const CCVector3d               ptsFrustum[8],
+	                                       const CCVector3d               edges[6],
+	                                       const CCVector3d&              center);
 
 	//! Separating Axis Test
 	/** See "Detecting intersection of a rectangular solid and a convex polyhedron" of Ned Greene
@@ -655,12 +655,12 @@ class ccOctreeFrustumIntersector
 	    \param frustumEdges 3D coordinates (global coordinates system) of the six director vector of the frustum edges
 	    \param frustumCenter 3D coordinates of the frustum center (global coordinates system) ; this is the center of the circumscribed sphere
 	**/
-	OctreeCellVisibility separatingAxisTest(const CCVector3& bbMin,
-	                                        const CCVector3& bbMax,
-	                                        const float      planesCoefficients[6][4],
-	                                        const CCVector3  frustumCorners[8],
-	                                        const CCVector3  frustumEdges[6],
-	                                        const CCVector3& frustumCenter);
+	OctreeCellVisibility separatingAxisTest(const CCVector3d& bbMin,
+	                                        const CCVector3d& bbMax,
+	                                        const double      planesCoefficients[6][4],
+	                                        const CCVector3d  frustumCorners[8],
+	                                        const CCVector3d  frustumEdges[6],
+	                                        const CCVector3d& frustumCenter);
 
   protected:
 	CCCoreLib::DgmOctree* m_associatedOctree;

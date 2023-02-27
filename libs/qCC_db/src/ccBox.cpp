@@ -21,9 +21,9 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-ccBox::ccBox(const CCVector3&  dims,
-             const ccGLMatrix* transMat /*=nullptr*/,
-             QString           name /*=QString("Box")*/)
+ccBox::ccBox(const CCVector3&   dims,
+             const ccGLMatrixd* transMat /*=nullptr*/,
+             QString            name /*=QString("Box")*/)
     : ccGenericPrimitive(name, transMat)
     , m_dims(dims)
 {
@@ -51,14 +51,14 @@ bool ccBox::buildUp()
 	// 1/-- 2/|
 	// | 4 -|-7
 	// 0/-- 3/
-	verts->addPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2, m_dims.z / 2));
-	verts->addPoint(CCVector3(-m_dims.x / 2, m_dims.y / 2, m_dims.z / 2));
-	verts->addPoint(CCVector3(m_dims.x / 2, m_dims.y / 2, m_dims.z / 2));
-	verts->addPoint(CCVector3(m_dims.x / 2, -m_dims.y / 2, m_dims.z / 2));
-	verts->addPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
-	verts->addPoint(CCVector3(-m_dims.x / 2, m_dims.y / 2, -m_dims.z / 2));
-	verts->addPoint(CCVector3(m_dims.x / 2, m_dims.y / 2, -m_dims.z / 2));
-	verts->addPoint(CCVector3(m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2, m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(-m_dims.x / 2, m_dims.y / 2, m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(m_dims.x / 2, m_dims.y / 2, m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(m_dims.x / 2, -m_dims.y / 2, m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(-m_dims.x / 2, m_dims.y / 2, -m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(m_dims.x / 2, m_dims.y / 2, -m_dims.z / 2));
+	verts->addLocalPoint(CCVector3(m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
 
 	// front plane
 	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1)));

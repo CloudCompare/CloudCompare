@@ -28,7 +28,10 @@
 #include "DistanceComputationTools.h"
 #include "Neighbourhood.h"
 
-ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*=nullptr*/, QString name /*=QString("Plane")*/)
+ccPlane::ccPlane(PointCoordinateType xWidth,
+                 PointCoordinateType yWidth,
+                 const ccGLMatrixd*  transMat /*=nullptr*/,
+                 QString             name /*=QString("Plane")*/)
     : ccGenericPrimitive(name, transMat)
     , m_xWidth(xWidth)
     , m_yWidth(yWidth)
@@ -58,10 +61,10 @@ bool ccPlane::buildUp()
 	// B ------ C
 	// |        |
 	// A ------ D
-	verts->addPoint(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0));
-	verts->addPoint(CCVector3(-m_xWidth / 2, m_yWidth / 2, 0));
-	verts->addPoint(CCVector3(m_xWidth / 2, m_yWidth / 2, 0));
-	verts->addPoint(CCVector3(m_xWidth / 2, -m_yWidth / 2, 0));
+	verts->addLocalPoint(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0));
+	verts->addLocalPoint(CCVector3(-m_xWidth / 2, m_yWidth / 2, 0));
+	verts->addLocalPoint(CCVector3(m_xWidth / 2, m_yWidth / 2, 0));
+	verts->addLocalPoint(CCVector3(m_xWidth / 2, -m_yWidth / 2, 0));
 
 	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1)));
 
@@ -101,12 +104,12 @@ void ccPlane::getEquation(CCVector3& N, PointCoordinateType& constVal) const
 
 const PointCoordinateType* ccPlane::getEquation()
 {
-	CCVector3 N        = getNormal();
-	m_PlaneEquation[0] = N.x;
-	m_PlaneEquation[1] = N.y;
-	m_PlaneEquation[2] = N.z;
-	m_PlaneEquation[3] = getCenter().dot(N); // a point on the plane dot the plane normal
-	return m_PlaneEquation;
+	CCVector3d N       = getNormal();
+	m_planeEquation[0] = static_cast<PointCoordinateType>(N.x);
+	m_planeEquation[1] = static_cast<PointCoordinateType>(N.y);
+	m_planeEquation[2] = static_cast<PointCoordinateType>(N.z);
+	m_planeEquation[3] = static_cast<PointCoordinateType>(getCenter().dot(N)); // a point on the plane dot the plane normal
+	return m_planeEquation;
 }
 
 ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms /*=nullptr*/)
@@ -130,7 +133,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms 
 	}
 
 	// get the centroid
-	const CCVector3* G = Yk.getGravityCenter();
+	const CCVector3* G = Yk.getLocalGravityCenter();
 	assert(G);
 
 	// and a local base
@@ -146,7 +149,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms 
 	for (unsigned k = 0; k < count; ++k)
 	{
 		// projection into local 2D plane ref.
-		CCVector3 P = *(cloud->getNextPoint()) - *G;
+		CCVector3 P = *(cloud->getNextLocalPoint()) - *G;
 
 		CCVector2 P2D(P.dot(*X), P.dot(Y));
 
@@ -171,7 +174,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms 
 	PointCoordinateType dX = maxXY.x - minXY.x;
 	PointCoordinateType dY = maxXY.y - minXY.y;
 	CCVector3           Gt = *G + *X * (minXY.x + dX / 2) + Y * (minXY.y + dY / 2);
-	ccGLMatrix          glMat(*X, Y, N, Gt);
+	ccGLMatrixd         glMat(*X, Y, N, Gt);
 
 	ccPlane* plane = new ccPlane(dX, dY, &glMat);
 
@@ -225,10 +228,10 @@ short ccPlane::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
-ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
+ccBBox ccPlane::getOwnFitBB(ccGLMatrixd& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true);
+	return ccBBox(CCVector3d(-m_xWidth / 2.0, -m_yWidth / 2.0, 0.0), CCVector3d(m_xWidth / 2.0, m_yWidth / 2.0, 0.0), true);
 }
 
 ccMaterial::Shared ccPlane::setAsTexture(QImage image, QString imageFilename /*=QString()*/)
@@ -332,8 +335,8 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 
 void ccPlane::flip()
 {
-	ccGLMatrix reverseMat;
-	reverseMat.initFromParameters(static_cast<PointCoordinateType>(M_PI), CCVector3(1, 0, 0), CCVector3(0, 0, 0));
+	ccGLMatrixd reverseMat;
+	reverseMat.initFromParameters(M_PI, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
 
 	m_transformation = m_transformation * reverseMat;
 	updateRepresentation();

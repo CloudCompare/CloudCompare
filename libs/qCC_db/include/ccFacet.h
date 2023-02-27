@@ -78,9 +78,9 @@ class QCC_DB_LIB_API ccFacet : public ccHObject
 	void setColor(const ccColor::Rgb& rgb);
 
 	// inherited from ccPlanarEntityInterface
-	inline CCVector3 getNormal() const override
+	inline CCVector3d getNormal() const override
 	{
-		return CCVector3(m_planeEquation);
+		return CCVector3d::fromArray(m_planeEquation);
 	}
 
 	//! Returns associated RMS
@@ -212,7 +212,7 @@ class QCC_DB_LIB_API ccFacet : public ccHObject
 	short minimumFileVersion_MeOnly() const override;
 
 	// ccHObject interface
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 };
 
 #endif // CC_FACET_PRIMITIVE_HEADER

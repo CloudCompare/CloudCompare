@@ -102,14 +102,14 @@ void ccOctree::clear()
 	DgmOctree::clear();
 }
 
-ccBBox ccOctree::getSquareBB() const
+CCCoreLib::BoundingBox ccOctree::getSquareBB() const
 {
-	return ccBBox(m_dimMin, m_dimMax, true);
+	return CCCoreLib::BoundingBox(m_dimMin, m_dimMax, true);
 }
 
-ccBBox ccOctree::getPointsBB() const
+CCCoreLib::BoundingBox ccOctree::getPointsBB() const
 {
-	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
+	return CCCoreLib::BoundingBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
 }
 
 void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
@@ -384,7 +384,7 @@ bool ccOctree::DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 		ccGL::Normal3v(glFunc, N.u);
 	}
 
-	const CCVector3* gravityCenter = CCCoreLib::Neighbourhood(cell.points).getGravityCenter();
+	const CCVector3* gravityCenter = CCCoreLib::Neighbourhood(cell.points).getLocalGravityCenter();
 	ccGL::Vertex3v(glFunc, gravityCenter->u);
 
 	return true;
@@ -407,8 +407,8 @@ bool ccOctree::DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell
 	if (glFunc == nullptr)
 		return false;
 
-	CCVector3 cellCenter;
-	cell.parentOctree->computeCellCenter(cell.truncatedCode, cell.level, cellCenter, true);
+	CCVector3 localCellCenter;
+	cell.parentOctree->computeLocalCellCenter(cell.truncatedCode, cell.level, localCellCenter, true);
 
 	if (glParams->showSF)
 	{
@@ -434,7 +434,7 @@ bool ccOctree::DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell
 	}
 
 	glFunc->glPushMatrix();
-	ccGL::Translate(glFunc, cellCenter.x, cellCenter.y, cellCenter.z);
+	ccGL::Translate(glFunc, localCellCenter);
 	primitive->draw(*context);
 	glFunc->glPopMatrix();
 
@@ -492,10 +492,10 @@ bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned
 		return false;
 
 	// initialization
-	float     globalPlaneCoefficients[6][4];
-	CCVector3 globalCorners[8];
-	CCVector3 globalEdges[6];
-	CCVector3 globalCenter;
+	double     globalPlaneCoefficients[6][4];
+	CCVector3d globalCorners[8];
+	CCVector3d globalEdges[6];
+	CCVector3d globalCenter;
 	sensor->computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
 	if (!m_frustumIntersector)
@@ -509,14 +509,14 @@ bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned
 	}
 
 	// get points of cells in frustum
-	std::vector<std::pair<unsigned, CCVector3>> pointsToTest;
+	std::vector<std::pair<unsigned, CCVector3d>> pointsToTest;
 	m_frustumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
 	// project points
-	for (size_t i = 0; i < pointsToTest.size(); i++)
+	for (const auto& pointsToTest : pointsToTest)
 	{
-		if (sensor->isGlobalCoordInFrustum(pointsToTest[i].second /*, false*/))
-			inCameraFrustum.push_back(pointsToTest[i].first);
+		if (sensor->isGlobalCoordInFrustum(pointsToTest.second /*, false*/))
+			inCameraFrustum.push_back(pointsToTest.first);
 	}
 
 	return true;
@@ -527,7 +527,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
                             PointDescriptor&            output,
                             double                      pickWidth_pix /*=3.0*/) const
 {
-	output.point       = nullptr;
+	output.localPoint  = nullptr;
 	output.squareDistd = -1.0;
 
 	if (!m_theAssociatedCloudAsGPC)
@@ -549,8 +549,8 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 		return false;
 	}
 
-	ccGLMatrix trans;
-	bool       hasGLTrans = m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans);
+	ccGLMatrixd trans;
+	bool        hasGLTrans = m_theAssociatedCloudAsGPC->getAbsoluteGLTransformation(trans);
 
 	// compute 3D picking 'ray'
 	CCVector3 rayAxis;
@@ -568,7 +568,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 
 		if (hasGLTrans)
 		{
-			ccGLMatrix iTrans = trans.inverse();
+			ccGLMatrixd iTrans = trans.inverse();
 			iTrans.applyRotation(rayAxis);
 			iTrans.apply(rayOrigin);
 		}
@@ -711,7 +711,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 			    && (!activeSF || activeSF->getColor(activeSF->getValue(it->theIndex))))
 			{
 				// test the point
-				const CCVector3* P = m_theAssociatedCloud->getPoint(it->theIndex);
+				const CCVector3* P = m_theAssociatedCloud->getLocalPoint(it->theIndex);
 				CCVector3        Q = *P;
 				if (hasGLTrans)
 				{
@@ -727,9 +727,9 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 					    && std::abs(Q2D.y - clickPos.y) <= pickWidth_pix)
 					{
 						double squareDist = CCVector3d(X.x - Q.x, X.y - Q.y, X.z - Q.z).norm2d();
-						if (!output.point || squareDist < output.squareDistd)
+						if (!output.localPoint || squareDist < output.squareDistd)
 						{
-							output.point       = P;
+							output.localPoint  = P;
 							output.pointIndex  = it->theIndex;
 							output.squareDistd = squareDist;
 						}
@@ -843,7 +843,7 @@ PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*              
 				unsigned randomIndex = dist(gen);
 				assert(randomIndex < cloud->size());
 
-				const CCVector3*                    P = cloud->getPoint(randomIndex);
+				const CCVector3*                    P = cloud->getLocalPoint(randomIndex);
 				CCCoreLib::DgmOctree::NeighboursSet Yk;
 				int                                 n = octree->getPointsInSphericalNeighbourhood(*P, radius, Yk, octreeLevel);
 				assert(n >= 1);

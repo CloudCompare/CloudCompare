@@ -60,7 +60,7 @@ ccCircle* ccCircle::clone() const
 	return clonedCircle;
 }
 
-void ccCircle::applyGLTransformation(const ccGLMatrix& trans)
+void ccCircle::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	// we call the ccHObject method instead of the ccPolyline one,
 	// to only update the transformation history matrix, and not
@@ -172,7 +172,7 @@ void ccCircle::updateInternalRepresentation()
 	resize(0); // should never fail
 
 	// reset the vertices transformation history
-	ccGLMatrix Id;
+	ccGLMatrixd Id;
 	Id.toIdentity();
 	vertices->setGLTransformationHistory(Id);
 
@@ -186,7 +186,7 @@ void ccCircle::updateInternalRepresentation()
 	for (unsigned i = 0; i < m_resolution; ++i)
 	{
 		CCVector3 P = CCVector3::fromArray(CCVector3d(cos(i * angleStep_rad) * m_radius, sin(i * angleStep_rad) * m_radius, 0).u);
-		vertices->addPoint(P);
+		vertices->addLocalPoint(P);
 	}
 
 	addPointIndex(0, m_resolution);

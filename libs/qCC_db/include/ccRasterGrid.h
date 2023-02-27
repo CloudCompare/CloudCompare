@@ -243,7 +243,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 	}
 
 	//! Computes the position of the cell that includes a given point
-	inline CCVector2i computeCellPos(const CCVector3& P, unsigned char dimX, unsigned char dimY) const
+	inline CCVector2i computeCellPos(const CCVector3d& P, unsigned char dimX, unsigned char dimY) const
 	{
 		// minCorner corresponds to the lower left cell CENTER
 		return CCVector2i(static_cast<int>((P.u[dimX] - minCorner.u[dimX]) / gridStep + 0.5),

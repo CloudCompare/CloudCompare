@@ -326,6 +326,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			EnableGLStippleMask(context.qGLContext, true);
 		}
 
+		ccGL::Translate(glFunc, getLocalToGlobalTranslation());
+
 		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
 		{
 			assert(!entityPickingMode || !glParams.showSF);
@@ -365,9 +367,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
 					const CCCoreLib::VerticesIndexes* ti = getTriangleVertIndexes(static_cast<unsigned>(chunkStart + n));
-					*_vertices++                         = *vertices->getPoint(ti->i1);
-					*_vertices++                         = *vertices->getPoint(ti->i2);
-					*_vertices++                         = *vertices->getPoint(ti->i3);
+					*_vertices++                         = *vertices->getLocalPoint(ti->i1);
+					*_vertices++                         = *vertices->getLocalPoint(ti->i2);
+					*_vertices++                         = *vertices->getLocalPoint(ti->i3);
 				}
 
 				// scalar field
@@ -454,9 +456,9 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			const ccColor::Rgba* rgba2 = nullptr;
 			const ccColor::Rgba* rgba3 = nullptr;
 			// current vertex normal
-			const PointCoordinateType* N1 = nullptr;
-			const PointCoordinateType* N2 = nullptr;
-			const PointCoordinateType* N3 = nullptr;
+			const CCVector3* N1 = nullptr;
+			const CCVector3* N2 = nullptr;
+			const CCVector3* N3 = nullptr;
 			// current vertex texture coordinates
 			TexCoords2D* Tx1 = nullptr;
 			TexCoords2D* Tx2 = nullptr;
@@ -535,17 +537,17 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						int n2 = 0;
 						int n3 = 0;
 						getTriangleNormalIndexes(n, n1, n2, n3);
-						N1 = (n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n1)).u : nullptr);
-						N2 = (n1 == n2 ? N1 : n1 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n2)).u
+						N1 = (n1 >= 0 ? &ccNormalVectors::GetNormal(triNormals->at(n1)) : nullptr);
+						N2 = (n1 == n2 ? N1 : n1 >= 0 ? &ccNormalVectors::GetNormal(triNormals->at(n2))
 						                              : nullptr);
-						N3 = (n1 == n3 ? N1 : n3 >= 0 ? ccNormalVectors::GetNormal(triNormals->at(n3)).u
+						N3 = (n1 == n3 ? N1 : n3 >= 0 ? &ccNormalVectors::GetNormal(triNormals->at(n3))
 						                              : nullptr);
 					}
 					else
 					{
-						N1 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i1)).u;
-						N2 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i2)).u;
-						N3 = compressedNormals->getNormal(normalsIndexesTable->at(tsi->i3)).u;
+						N1 = &compressedNormals->getNormal(normalsIndexesTable->at(tsi->i1));
+						N2 = &compressedNormals->getNormal(normalsIndexesTable->at(tsi->i2));
+						N3 = &compressedNormals->getNormal(normalsIndexesTable->at(tsi->i3));
 					}
 				}
 
@@ -600,36 +602,36 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				// vertex 1
 				if (N1)
-					ccGL::Normal3v(glFunc, N1);
+					ccGL::Normal3(glFunc, *N1);
 				if (rgb1)
 					ccGL::Color(glFunc, *rgb1);
 				else if (rgba1)
 					ccGL::Color(glFunc, *rgba1);
 				if (Tx1)
 					glFunc->glTexCoord2fv(Tx1->t);
-				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i1)->u);
+				ccGL::Vertex3(glFunc, *vertices->getLocalPoint(tsi->i1));
 
 				// vertex 2
 				if (N2)
-					ccGL::Normal3v(glFunc, N2);
+					ccGL::Normal3(glFunc, *N2);
 				if (rgb2)
 					ccGL::Color(glFunc, *rgb2);
 				else if (rgba2)
 					ccGL::Color(glFunc, *rgba2);
 				if (Tx2)
 					glFunc->glTexCoord2fv(Tx2->t);
-				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i2)->u);
+				ccGL::Vertex3(glFunc, *vertices->getLocalPoint(tsi->i2));
 
 				// vertex 3
 				if (N3)
-					ccGL::Normal3v(glFunc, N3);
+					ccGL::Normal3(glFunc, *N3);
 				if (rgb3)
 					ccGL::Color(glFunc, *rgb3);
 				else if (rgba3)
 					ccGL::Color(glFunc, *rgba3);
 				if (Tx3)
 					glFunc->glTexCoord2fv(Tx3->t);
-				ccGL::Vertex3v(glFunc, vertices->getPoint(tsi->i3)->u);
+				ccGL::Vertex3(glFunc, *vertices->getLocalPoint(tsi->i3));
 			}
 
 			glFunc->glEnd();
@@ -810,10 +812,10 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned         triIndex = triIndices->at(i);
-					const CCVector3* P        = cloud->getPoint(i);
+					const CCVector3* P        = cloud->getLocalPoint(i);
 
 					CCVector3 N(0, 0, 1);
-					interpolateNormals(triIndex, *P, N);
+					interpolateNormalsLocal(triIndex, *P, N);
 					cloud->addNorm(N);
 				}
 
@@ -833,10 +835,10 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned         triIndex = triIndices->at(i);
-					const CCVector3* P        = cloud->getPoint(i);
+					const CCVector3* localP   = cloud->getLocalPoint(i);
 
 					ccColor::Rgba color;
-					getColorFromMaterial(triIndex, *P, color, withRGB);
+					getColorFromMaterial(triIndex, *localP, color, withRGB);
 					cloud->addColor(color);
 				}
 
@@ -854,10 +856,10 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 				for (unsigned i = 0; i < cloud->size(); ++i)
 				{
 					unsigned         triIndex = triIndices->at(i);
-					const CCVector3* P        = cloud->getPoint(i);
+					const CCVector3* localP   = cloud->getLocalPoint(i);
 
 					ccColor::Rgb C;
-					interpolateColors(triIndex, *P, C);
+					interpolateColors(triIndex, *localP, C);
 					cloud->addColor(C);
 				}
 
@@ -904,17 +906,17 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 	setMetaData(mesh->metaData());
 }
 
-void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const
+void ccGenericMesh::computeInterpolationWeightsLocal(unsigned triIndex, const CCVector3& localP, CCVector3d& weights) const
 {
-	CCCoreLib::GenericTriangle* tri = const_cast<ccGenericMesh*>(this)->_getTriangle(triIndex);
-	const CCVector3*            A   = tri->_getA();
-	const CCVector3*            B   = tri->_getB();
-	const CCVector3*            C   = tri->_getC();
+	CCCoreLib::GenericLocalTriangle* tri = const_cast<ccGenericMesh*>(this)->_getLocalTriangle(triIndex);
+	const CCVector3*                 A   = tri->_getA();
+	const CCVector3*                 B   = tri->_getB();
+	const CCVector3*                 C   = tri->_getC();
 
 	// barycentric interpolation weights
-	weights.x = ((P - *B).cross(*C - *B)).normd() /*/2*/;
-	weights.y = ((P - *C).cross(*A - *C)).normd() /*/2*/;
-	weights.z = ((P - *A).cross(*B - *A)).normd() /*/2*/;
+	weights.x = ((localP - *B).cross(*C - *B)).normd() /*/2*/;
+	weights.y = ((localP - *C).cross(*A - *C)).normd() /*/2*/;
+	weights.z = ((localP - *A).cross(*B - *A)).normd() /*/2*/;
 
 	// normalize weights
 	double sum = weights.x + weights.y + weights.z;
@@ -923,7 +925,7 @@ void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVecto
 
 bool ccGenericMesh::trianglePicking(unsigned                    triIndex,
                                     const CCVector2d&           clickPos,
-                                    const ccGLMatrix&           trans,
+                                    const ccGLMatrixd&          trans,
                                     bool                        noGLTrans,
                                     const ccGenericPointCloud&  vertices,
                                     const ccGLCameraParameters& camera,
@@ -933,10 +935,10 @@ bool ccGenericMesh::trianglePicking(unsigned                    triIndex,
 {
 	assert(triIndex < size());
 
-	CCVector3 A3D;
-	CCVector3 B3D;
-	CCVector3 C3D;
-	getTriangleVertices(triIndex, A3D, B3D, C3D);
+	CCVector3d A3D;
+	CCVector3d B3D;
+	CCVector3d C3D;
+	getGlobalTriangleVertices(triIndex, A3D, B3D, C3D);
 
 	CCVector3d A2D;
 	CCVector3d B2D;
@@ -953,9 +955,9 @@ bool ccGenericMesh::trianglePicking(unsigned                    triIndex,
 	}
 	else
 	{
-		CCVector3 A3Dp = trans * A3D;
-		CCVector3 B3Dp = trans * B3D;
-		CCVector3 C3Dp = trans * C3D;
+		CCVector3d A3Dp = trans * A3D;
+		CCVector3d B3Dp = trans * B3D;
+		CCVector3d C3Dp = trans * C3D;
 		camera.project(A3Dp, A2D, &insideA);
 		camera.project(B3Dp, B2D, &insideB);
 		camera.project(C3Dp, C2D, &insideC);
@@ -1024,8 +1026,8 @@ bool ccGenericMesh::trianglePicking(const CCVector2d&           clickPos,
                                     CCVector3d&                 nearestPoint,
                                     CCVector3d*                 barycentricCoords /*=nullptr*/) const
 {
-	ccGLMatrix trans;
-	bool       noGLTrans = !getAbsoluteGLTransformation(trans);
+	ccGLMatrixd trans;
+	bool        noGLTrans = !getAbsoluteGLTransformation(trans);
 
 	// back project the clicked point in 3D
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
@@ -1115,8 +1117,8 @@ bool ccGenericMesh::trianglePicking(unsigned                    triIndex,
 		return false;
 	}
 
-	ccGLMatrix trans;
-	bool       noGLTrans = !getAbsoluteGLTransformation(trans);
+	ccGLMatrixd trans;
+	bool        noGLTrans = !getAbsoluteGLTransformation(trans);
 
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	if (!vertices)
@@ -1128,7 +1130,7 @@ bool ccGenericMesh::trianglePicking(unsigned                    triIndex,
 	return trianglePicking(triIndex, clickPos, trans, noGLTrans, *vertices, camera, point, barycentricCoords);
 }
 
-bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside /*=true*/) const
+bool ccGenericMesh::computeLocalPointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& localP, bool warningIfOutside /*=true*/) const
 {
 	if (triIndex >= size())
 	{
@@ -1140,7 +1142,7 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 	CCVector3 A;
 	CCVector3 B;
 	CCVector3 C;
-	getTriangleVertices(triIndex, A, B, C);
+	getLocalTriangleVertices(triIndex, A, B, C);
 
 	double z = 1.0 - uv.x - uv.y;
 	if (warningIfOutside && ((z < -1.0e-6) || (z > 1.0 + 1.0e-6)))
@@ -1148,9 +1150,9 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 		ccLog::Warning("Point falls outside of the triangle");
 	}
 
-	P = CCVector3(static_cast<PointCoordinateType>(uv.x * A.x + uv.y * B.x + z * C.x),
-	              static_cast<PointCoordinateType>(uv.x * A.y + uv.y * B.y + z * C.y),
-	              static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
+	localP = CCVector3(static_cast<PointCoordinateType>(uv.x * A.x + uv.y * B.x + z * C.x),
+	                   static_cast<PointCoordinateType>(uv.x * A.y + uv.y * B.y + z * C.y),
+	                   static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
 
 	return true;
 }

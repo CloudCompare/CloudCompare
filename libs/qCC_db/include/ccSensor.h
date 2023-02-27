@@ -72,10 +72,10 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 	    a point that is not POINT_VISIBLE won't be compared during a point-to-cloud distance
 	    computation process.
 	    \deprecated This method is deprecated and should be ignored.
-	    \param P a 3D point
+	    \param globalP a 3D point (in the sensor global coordinate system)
 	    \return the visibility of the point
 	**/
-	virtual inline unsigned char checkVisibility(const CCVector3& P) const
+	virtual inline uint8_t checkVisibility(const CCVector3d& globalP) const
 	{
 		return CCCoreLib::POINT_VISIBLE;
 	}
@@ -107,33 +107,33 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 	/** Absolute transformation corresponds to the rigid transformation
 	    multiplied by the associated transformation interpolated at the given index.
 	**/
-	bool getAbsoluteTransformation(ccIndexedTransformation& trans, double index) const;
+	bool getAbsoluteTransformation(ccGLMatrixd& trans, double index) const;
 
 	//! Gets currently active absolute transformation
-	bool getActiveAbsoluteTransformation(ccIndexedTransformation& trans) const;
+	bool getActiveAbsoluteTransformation(ccGLMatrixd& trans) const;
 
 	//! Gets currently active absolute position
-	bool getActiveAbsoluteCenter(CCVector3& vec) const;
+	bool getActiveAbsoluteCenter(CCVector3d& vec) const;
 
 	//! Gets currently active rotation matrix (without translation)
-	bool getActiveAbsoluteRotation(ccGLMatrix& rotation) const;
+	bool getActiveAbsoluteRotation(ccGLMatrixd& rotation) const;
 
 	//! Sets the rigid transformation between this sensor and its associated positions
 	/** Rigid transformation goes from the sensor position(s) to the sensor "optical" center.
 	 **/
-	virtual void setRigidTransformation(const ccGLMatrix& mat)
+	virtual void setRigidTransformation(const ccGLMatrixd& mat)
 	{
 		m_rigidTransformation = mat;
 	}
 
 	//! Returns the rigid transformation between this sensor and its associated positions
-	virtual ccGLMatrix& getRigidTransformation()
+	virtual ccGLMatrixd& getRigidTransformation()
 	{
 		return m_rigidTransformation;
 	}
 
 	//! Returns the rigid transformation between this sensor and its associated positions (const version)
-	virtual const ccGLMatrix& getRigidTransformation() const
+	virtual const ccGLMatrixd& getRigidTransformation() const
 	{
 		return m_rigidTransformation;
 	}
@@ -172,7 +172,7 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 	virtual bool applyViewport(ccGenericGLDisplay* win = nullptr) const;
 
 	// inherited from ccHObject
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 
   protected:
 	// inherited from ccHObject
@@ -186,7 +186,7 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 	//! Rigid transformation between this sensor and its associated positions
 	/** The transformation goes from the sensor position(s) to the sensor "optical" center.
 	 **/
-	ccGLMatrix m_rigidTransformation;
+	ccGLMatrixd m_rigidTransformation;
 
 	//! Active index (for displayed position, etc.)
 	double m_activeIndex;

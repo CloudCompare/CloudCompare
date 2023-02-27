@@ -50,7 +50,7 @@ class QCC_DB_LIB_API ccCircle : public ccPolyline
 	}
 
 	// inherited methods (ccHObject)
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 
 	//! Clones this circle
 	ccCircle* clone() const;

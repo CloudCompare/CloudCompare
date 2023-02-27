@@ -271,7 +271,7 @@ class QCC_DB_LIB_API ccDrawableObject
 	    (distance computation, etc.) for instance.
 	    Note: GL transformation is automatically enabled.
 	**/
-	virtual void setGLTransformation(const ccGLMatrix& trans);
+	virtual void setGLTransformation(const ccGLMatrixd& trans);
 
 	//! Enables/disables associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
@@ -287,7 +287,7 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! Returns associated GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	 **/
-	inline virtual const ccGLMatrix& getGLTransformation() const
+	inline virtual const ccGLMatrixd& getGLTransformation() const
 	{
 		return m_glTrans;
 	}
@@ -304,14 +304,14 @@ class QCC_DB_LIB_API ccDrawableObject
 	    Note: GL transformation is automatically enabled.
 	    See ccDrawableObject::setGLTransformation.
 	**/
-	virtual void rotateGL(const ccGLMatrix& rotMat);
+	virtual void rotateGL(const ccGLMatrixd& rotMat);
 
 	//! Translates current GL transformation by a rotation matrix
 	/** 'GLtrans = GLtrans + T'
 	    Note: GL transformation is automatically enabled.
 	    See ccDrawableObject::setGLTransformation.
 	**/
-	virtual void translateGL(const CCVector3& trans);
+	virtual void translateGL(const CCVector3d& trans);
 
   public: // clipping planes
 	//! Removes all clipping planes (if any)
@@ -386,7 +386,7 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! Current GL transformation
 	/** See ccDrawableObject::setGLTransformation.
 	 **/
-	ccGLMatrix m_glTrans;
+	ccGLMatrixd m_glTrans;
 	//! Current GL transformation activation state
 	/** See ccDrawableObject::setGLTransformation.
 	 **/

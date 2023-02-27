@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_HIERARCHY_OBJECT_HEADER
-#define CC_HIERARCHY_OBJECT_HEADER
 
 // Local
 #include "ccBBox.h"
@@ -241,52 +240,24 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	bool isAncestorOf(const ccHObject* anObject) const;
 
   public: // bounding-box
-	//! Returns the entity's own bounding-box (with local/shifted coordinates)
+	//! Returns the entity's own bounding-box (with global/non-shifted coordinates - if relevant)
 	/** Children bounding-boxes are ignored.
 	    \param withGLFeatures whether to take into account display-only elements (if any)
 	    \return bounding-box
 	**/
 	virtual ccBBox getOwnBB(bool withGLFeatures = false);
 
-	//! Returns the local bounding-box of this entity and it's children
-	/** \param withGLFeatures whether to take into account display-only elements (if any)
-	    \param onlyEnabledChildren only consider the 'enabled' children
+	//! Returns the bounding-box of this entity and its children
+	/** \param withGLFeatures		whether to take into account display-only elements (if any)
+	    \param onlyEnabledChildren	only consider the 'enabled' children
 	    \return bounding-box
 	**/
 	virtual ccBBox getBB_recursive(bool withGLFeatures = false, bool onlyEnabledChildren = true);
 
-	//! Global (non-shifted) bounding-box
-	using GlobalBoundingBox = CCCoreLib::BoundingBoxTpl<double>;
-
-	//! Returns the entity's own global bounding-box (with global/non-shifted coordinates - if relevant)
-	/** Children bounding-boxes are ignored.
-	    May differ from the (local) bounding-box if the entity is shifted
-	    \param withGLFeatures whether to take into account display-only elements (if any)
-	    \return global bounding-box
-	**/
-	virtual GlobalBoundingBox getOwnGlobalBB(bool withGLFeatures = false);
-
-	//! Returns the entity's own global bounding-box (with global/non-shifted coordinates - if relevant)
-	/** Children bounding-boxes are ignored.
-	    By default this method returns the local bounding-box!
-	    But it may differ from the (local) bounding-box if the entity is shifted.
-	    \param[out] minCorner min global bounding-box corner
-	    \param[out] maxCorner max global bounding-box corner
-	    \return whether the bounding box is valid or not
-	**/
-	virtual bool getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner);
-
-	//! Returns the global bounding-box of this entity and it's children
-	/** \param withGLFeatures whether to take into account display-only elements (if any)
-	    \param onlyEnabledChildren only consider the 'enabled' children
-	    \return bounding-box
-	**/
-	virtual GlobalBoundingBox getGlobalBB_recursive(bool withGLFeatures = false, bool onlyEnabledChildren = true);
-
-	//! Returns the bounding-box of this entity and it's children WHEN DISPLAYED
-	/** Children's GL transformation is taken into account (if enabled).
-	    \param relative whether the bounding-box is relative (i.e. in the entity's local coordinate system) or absolute (in which case the parent's GL transformation will be taken into account)
-	    \param display if not null, this method will return the bounding-box of this entity (and its children) in the specified 3D view (i.e. potentially not visible)
+	//! Returns the bounding-box of this entity and its children WHEN DISPLAYED
+	/** If enabled, the children's GL transformation will be taken into account.
+	    \param relative		whether the bounding-box is relative (i.e. in the entity's local coordinate system) or absolute (in which case the parent's GL transformation will be taken into account)
+	    \param display		if not null, this method will return the bounding-box of this entity (and its children) visible in the specified 3D view
 	    \return bounding-box
 	**/
 	virtual ccBBox getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display = nullptr);
@@ -294,12 +265,11 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	//! Returns best-fit bounding-box (if available)
 	/** \warning Only suitable for leaf objects (i.e. without children)
 	    Therefore children bboxes are always ignored.
-	    \warning This method is not supported by all entities!
-	    (returns the axis-aligned bounding-box by default).
-	    \param[out] trans associated transformation (so that the bounding-box can be displayed in the right position!)
+	    \warning This method is not supported by all entities! (returns the axis-aligned bounding-box by default).
+	    \param[out] trans associated GL transformation (if any)
 	    \return fit bounding-box
 	**/
-	inline virtual ccBBox getOwnFitBB(ccGLMatrix& trans)
+	inline virtual ccBBox getOwnFitBB(ccGLMatrixd& trans)
 	{
 		trans.toIdentity();
 		return getOwnBB();
@@ -316,7 +286,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	/** \param[out] trans absolute transformation
 	    \return whether a GL transformation is actually enabled or not
 	**/
-	bool getAbsoluteGLTransformation(ccGLMatrix& trans) const;
+	bool getAbsoluteGLTransformation(ccGLMatrixd& trans) const;
 
 	//! Returns whether the object is actually displayed (visible) or not
 	virtual bool isDisplayed() const;
@@ -384,7 +354,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	    a pre-transformation.
 	    \param trans a ccGLMatrix structure (reference to)
 	**/
-	void applyGLTransformation_recursive(const ccGLMatrix* trans = nullptr);
+	void applyGLTransformation_recursive(const ccGLMatrixd* trans = nullptr);
 
 	//! Notifies all dependent entities that the geometry of this entity has changed
 	virtual void notifyGeometryUpdate();
@@ -439,12 +409,12 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	}
 
 	//! Returns the transformation 'history' matrix
-	virtual inline const ccGLMatrix& getGLTransformationHistory() const
+	virtual inline const ccGLMatrixd& getGLTransformationHistory() const
 	{
 		return m_glTransHistory;
 	}
 	//! Sets the transformation 'history' matrix (handle with care!)
-	virtual inline void setGLTransformationHistory(const ccGLMatrix& mat)
+	virtual inline void setGLTransformationHistory(const ccGLMatrixd& mat)
 	{
 		m_glTransHistory = mat;
 	}
@@ -477,7 +447,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	/** this = rotMat*(this-rotCenter)+(rotCenter+trans)
 	    \param trans a ccGLMatrix structure
 	**/
-	virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrixd& trans);
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)
@@ -538,7 +508,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	/** History of all the applied transformations since the creation of the object
 	    as a single transformation.
 	**/
-	ccGLMatrix m_glTransHistory;
+	ccGLMatrixd m_glTransHistory;
 
 	//! Flag to safely handle dependencies when the object is being deleted
 	bool m_isDeleting;
@@ -574,5 +544,3 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 		}
 	}
 }
-
-#endif // CC_HIERARCHY_OBJECT_HEADER

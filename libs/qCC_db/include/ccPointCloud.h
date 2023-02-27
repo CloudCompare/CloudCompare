@@ -27,6 +27,7 @@
 
 // Local
 #include "ccColorScale.h"
+#include "ccGenericPointCloud.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
 
@@ -75,7 +76,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	**/
 	ccPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID) throw();
 
-	//! Default destructor
+	//! Destructor
 	~ccPointCloud() override;
 
 	//! Returns class ID
@@ -138,6 +139,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 
 	// inherited from ccGenericPointCloud
 	ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = nullptr, bool ignoreChildren = false) override;
+	void                 importParametersFrom(const ccGenericPointCloud* cloud) override;
 
 	//! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
@@ -252,7 +254,9 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	inline void shrinkToFit()
 	{
 		if (size() < capacity())
+		{
 			resize(size());
+		}
 	}
 
   public: // scalar-fields management
@@ -315,16 +319,16 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 		short minimumFileVersion() const override;
 
 		//! Grid width
-		unsigned w;
+		unsigned w = 0;
 		//! Grid height
-		unsigned h;
+		unsigned h = 0;
 
 		//! Number of valid indexes
-		unsigned validCount;
+		unsigned validCount = 0;
 		//! Minimum valid index
-		unsigned minValidIndex;
+		unsigned minValidIndex = 0;
 		//! Maximum valid index
-		unsigned maxValidIndex;
+		unsigned maxValidIndex = 0;
 
 		//! Grid indexes (size: w x h)
 		std::vector<int> indexes;
@@ -386,7 +390,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	bool orientNormalsWithGrids(ccProgressDialog* pDlg = nullptr);
 
 	//! Normals are forced to point to O
-	bool orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog* pDlg = nullptr);
+	bool orientNormalsTowardViewPoint(const CCVector3d& VP, ccProgressDialog* pDlg = nullptr);
 
 	//! Compute the normals by approximating the local surface around each point
 	bool computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
@@ -507,10 +511,15 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	void clearFWFData();
 
   public: // other methods
-	//! Returns the cloud gravity center
+	//! Returns the cloud gravity center (local coordinate system)
 	/** \return gravity center
 	 **/
-	CCVector3 computeGravityCenter();
+	CCVector3 computeLocalGravityCenter();
+
+	//! Returns the cloud gravity center (global coordinate system)
+	/** \return gravity center
+	 **/
+	CCVector3d computeGlobalGravityCenter();
 
 	// inherited from base class
 	void invalidateBoundingBox() override;
@@ -527,7 +536,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	void setDisplay(ccGenericGLDisplay* win) override;
 
 	// inherited from CCCoreLib::GenericCloud
-	unsigned char testVisibility(const CCVector3& P) const override;
+	uint8_t testVisibility(const CCVector3& localP) const override;
 
 	// inherited from CCCoreLib::GenericIndexedCloud
 	bool normalsAvailable() const override
@@ -544,7 +553,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	const CompressedNormType&  getPointNormalIndex(unsigned pointIndex) const override;
 	const CCVector3&           getPointNormal(unsigned pointIndex) const override;
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
-	void                       scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0, 0, 0)) override;
+	void                       scale(double fx, double fy, double fz, const CCVector3d& center = CCVector3d(0, 0, 0)) override;
 	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table.
 	    \warning If the visibility table selects all points from this point cloud, the return value will be the original point cloud
 	             rather than a new one.
@@ -555,7 +564,8 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	                                                           bool                       silent                      = false,
 	                                                           CCCoreLib::ReferenceCloud* selection                   = nullptr) override;
 	bool                 removeVisiblePoints(VisibilityTableType* visTable = nullptr, std::vector<int>* newIndexes = nullptr) override;
-	void                 applyRigidTransformation(const ccGLMatrix& trans) override;
+	void                 applyLocalRigidTransformation(const ccGLMatrix& localTrans) override;
+	void                 applyGlobalRigidTransformation(const ccGLMatrixd& globalTrans) override;
 	inline void          refreshBB() override
 	{
 		invalidateBoundingBox();
@@ -793,7 +803,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Translates cloud
 	/** \param T translation vector
 	 **/
-	void translate(const CCVector3& T);
+	void translate(const CCVector3d& T);
 
 	//! Filters out points whose scalar values falls into an interval
 	/** Threshold values should be expressed relatively to the current displayed scalar field.
@@ -823,22 +833,22 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Base unrolling parameters
 	struct UnrollBaseParams
 	{
-		PointCoordinateType radius = 0; //!< Unrolling cylinder radius (or cone base radius)
-		CCVector3           axisDir;    //!< Unrolling cylinder/cone axis direction
+		double     radius;  //!< Unrolling cylinder radius (or cone base radius)
+		CCVector3d axisDir; //!< Unrolling cylinder/cone axis direction
 	};
 
 	//! Cylinder unrolling parameters
 	struct UnrollCylinderParams : public UnrollBaseParams
 	{
-		CCVector3 center; //!< A point belonging to the cylinder axis
+		CCVector3d center; //!< A point belonging to the cylinder axis
 	};
 
 	//! Cone unrolling parameters
 	struct UnrollConeParams : public UnrollBaseParams
 	{
-		CCVector3 apex;                //!< Cone apex
-		double    coneAngle_deg = 0.0; //!< Cone aperture angle (in degrees)
-		double    spanRatio     = 0.5; //!< Conical projection span ratio
+		CCVector3d apex;                //!< Cone apex
+		double     coneAngle_deg = 0.0; //!< Cone aperture angle (in degrees)
+		double     spanRatio     = 0.5; //!< Conical projection span ratio
 	};
 
 	//! Unrolls the cloud and its normals on a cylinder or a cone
@@ -871,13 +881,13 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	**/
 	int addScalarField(ccScalarField* sf);
 
-	//! Returns pointer on RGBA colors table
+	//! Returns pointer to the RGBA color table
 	RGBAColorsTableType* rgbaColors() const
 	{
 		return m_rgbaColors;
 	}
 
-	//! Returns pointer on compressed normals indexes table
+	//! Returns pointer to the compressed normals index table
 	NormsIndexesTableType* normals() const
 	{
 		return m_normals;
@@ -937,7 +947,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
   protected:
 	// inherited from ccHObject
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
-	void  applyGLTransformation(const ccGLMatrix& trans) override;
+	void  applyGLTransformation(const ccGLMatrixd& trans) override;
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
 	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion_MeOnly() const override;

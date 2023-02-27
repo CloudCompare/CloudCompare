@@ -79,9 +79,9 @@ QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
 	return QString();
 }
 
-CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
+CCVector3d cc2DLabel::PickedPoint::getPointGlobalPosition() const
 {
-	CCVector3 P;
+	CCVector3d P;
 
 	if (_cloud)
 	{
@@ -91,7 +91,7 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		}
 		else
 		{
-			P = *_cloud->getPointPersistentPtr(index);
+			_cloud->getGlobalPoint(index, P);
 		}
 	}
 	else if (_mesh)
@@ -102,7 +102,43 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		}
 		else
 		{
-			_mesh->computePointPosition(index, uv, P);
+			CCVector3 localP;
+			_mesh->computeLocalPointPosition(index, uv, localP);
+			P = _mesh->toGlobal(localP);
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+
+	return P;
+}
+
+CCVector3 cc2DLabel::PickedPoint::getPointLocalPosition() const
+{
+	CCVector3 P;
+
+	if (_cloud)
+	{
+		if (entityCenterPoint)
+		{
+			return _cloud->toLocal(_cloud->getOwnBB().getCenter());
+		}
+		else
+		{
+			_cloud->getLocalPoint(index, P);
+		}
+	}
+	else if (_mesh)
+	{
+		if (entityCenterPoint)
+		{
+			return _mesh->toLocal(_mesh->getOwnBB().getCenter());
+		}
+		else
+		{
+			_mesh->computeLocalPointPosition(index, uv, P);
 		}
 	}
 	else
@@ -621,26 +657,10 @@ short cc2DLabel::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(50), ccHObject::minimumFileVersion_MeOnly());
 }
 
-void AddPointCoordinates(QStringList& body, QString pointShortName, const CCVector3& P, const ccShiftedObject& shiftedObject, int precision)
+void AddPointCoordinates(QStringList& body, QString pointShortName, const CCVector3d& P, int precision)
 {
-	bool isShifted = shiftedObject.isShifted();
-
-	QString coordStr = pointShortName;
-	if (isShifted)
-	{
-		body << coordStr;
-		coordStr = QString("  [shifted]");
-	}
-
-	coordStr += QString(" (%1;%2;%3)").arg(P.x, 0, 'f', precision).arg(P.y, 0, 'f', precision).arg(P.z, 0, 'f', precision);
+	QString coordStr = pointShortName + QString(" (%1;%2;%3)").arg(P.x, 0, 'f', precision).arg(P.y, 0, 'f', precision).arg(P.z, 0, 'f', precision);
 	body << coordStr;
-
-	if (isShifted)
-	{
-		CCVector3d Pg           = shiftedObject.toGlobal3d(P);
-		QString    globCoordStr = QString("  [original] (%1;%2;%3)").arg(Pg.x, 0, 'f', precision).arg(Pg.y, 0, 'f', precision).arg(Pg.z, 0, 'f', precision);
-		body << globCoordStr;
-	}
 }
 
 void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, int precision, QString pointName = QString())
@@ -650,7 +670,6 @@ void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, in
 
 	if (pp._cloud)
 	{
-		shiftedObject = pp._cloud;
 		if (pp.entityCenterPoint)
 			pointShortName = CENTER_STRING + QString("@%1").arg(pp._cloud->getUniqueID());
 		else
@@ -664,7 +683,6 @@ void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, in
 			assert(false);
 			return;
 		}
-		shiftedObject = vertices;
 		if (pp.entityCenterPoint)
 			pointShortName = CENTER_STRING + QString("@%1").arg(pp._mesh->getUniqueID());
 		else
@@ -672,10 +690,11 @@ void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, in
 	}
 
 	if (!pointName.isEmpty())
+	{
 		pointShortName = QString("%1 (%2)").arg(pointName, pointShortName);
+	}
 
-	assert(shiftedObject);
-	AddPointCoordinates(body, pointShortName, pp.getPointPosition(), *shiftedObject, precision);
+	AddPointCoordinates(body, pointShortName, pp.getPointGlobalPosition(), precision);
 }
 
 void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
@@ -806,9 +825,9 @@ void cc2DLabel::getLabelInfo2(LabelInfo2& info) const
 		return;
 
 	// 1st point
-	CCVector3 P1 = m_pickedPoints[0].getPointPosition();
+	CCVector3d P1 = m_pickedPoints[0].getPointGlobalPosition();
 	// 2nd point
-	CCVector3 P2 = m_pickedPoints[1].getPointPosition();
+	CCVector3d P2 = m_pickedPoints[1].getPointGlobalPosition();
 
 	info.diff = P2 - P1;
 }
@@ -821,18 +840,18 @@ void cc2DLabel::getLabelInfo3(LabelInfo3& info) const
 		return;
 
 	// 1st point
-	CCVector3 P1 = m_pickedPoints[0].getPointPosition();
+	CCVector3d P1 = m_pickedPoints[0].getPointGlobalPosition();
 	// 2nd point
-	CCVector3 P2 = m_pickedPoints[1].getPointPosition();
+	CCVector3d P2 = m_pickedPoints[1].getPointGlobalPosition();
 	// 3rd point
-	CCVector3 P3 = m_pickedPoints[2].getPointPosition();
+	CCVector3d P3 = m_pickedPoints[2].getPointGlobalPosition();
 
 	// area
-	CCVector3 P1P2 = P2 - P1;
-	CCVector3 P1P3 = P3 - P1;
-	CCVector3 P2P3 = P3 - P2;
-	CCVector3 N    = P1P2.cross(P1P3); // N = ABxAC
-	info.area      = N.norm() / 2;
+	CCVector3d P1P2 = P2 - P1;
+	CCVector3d P1P3 = P3 - P1;
+	CCVector3d P2P3 = P3 - P2;
+	CCVector3d N    = P1P2.cross(P1P3); // N = ABxAC
+	info.area       = N.norm() / 2;
 
 	// normal
 	N.normalize();
@@ -1041,7 +1060,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		for (size_t i = 0; i < count; i++)
 		{
 			// project the point in 2D
-			CCVector3 P3D = m_pickedPoints[i].getPointPosition();
+			CCVector3d P3D = m_pickedPoints[i].getPointGlobalPosition();
 			camera.project(P3D, m_pickedPoints[i].pos2D);
 		}
 	}
@@ -1065,12 +1084,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			ccGL::Color(glFunc, DefaultTriangleColor);
 		}
 		glFunc->glBegin(GL_TRIANGLES);
-		CCVector3 P3D = m_pickedPoints[0].getPointPosition();
-		ccGL::Vertex3v(glFunc, P3D.u);
-		P3D = m_pickedPoints[1].getPointPosition();
-		ccGL::Vertex3v(glFunc, P3D.u);
-		P3D = m_pickedPoints[2].getPointPosition();
-		ccGL::Vertex3v(glFunc, P3D.u);
+		CCVector3d P3D = m_pickedPoints[0].getPointGlobalPosition();
+		ccGL::Vertex3(glFunc, P3D);
+		P3D = m_pickedPoints[1].getPointGlobalPosition();
+		ccGL::Vertex3(glFunc, P3D);
+		P3D = m_pickedPoints[2].getPointGlobalPosition();
+		ccGL::Vertex3(glFunc, P3D);
 		glFunc->glEnd();
 
 		if (!entityPickingMode)
@@ -1137,18 +1156,17 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			{
 				glFunc->glMatrixMode(GL_MODELVIEW);
 				glFunc->glPushMatrix();
-				CCVector3 P = m_pickedPoints[i].getPointPosition();
-				ccGL::Translate(glFunc, P.x, P.y, P.z);
-				float scale = context.labelMarkerSize * m_relMarkerScale;
+				CCVector3d P = m_pickedPoints[i].getPointGlobalPosition();
+				ccGL::Translate(glFunc, P);
+				double scale = context.labelMarkerSize * m_relMarkerScale;
 				if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 				{
 					// in perspective view, the actual scale depends on the distance to the camera!
 					double d     = (camera.modelViewMat * P).norm();
-					double unitD = viewportParams.zFar / 2;                     // we consider that the 'standard' scale is at half the depth
-					scale        = static_cast<float>(scale * sqrt(d / unitD)); // sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
+					double unitD = viewportParams.zFar / 2; // we consider that the 'standard' scale is at half the depth
+					scale *= sqrt(d / unitD);               // sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 				}
-				scale = static_cast<float>(scale * context.devicePixelRatio);
-				glFunc->glScalef(scale, scale, scale);
+				glFunc->glScaled(scale, scale, scale);
 				m_pickedPoints[i].markerScale = scale;
 				c_unitPointMarker->draw(markerContext);
 				glFunc->glPopMatrix();
@@ -1411,8 +1429,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 						ccGenericPointCloud* cloud = m_pickedPoints[0].cloudOrVertices();
 						assert(cloud);
-						bool      isShifted = cloud->isShifted();
-						CCVector3 P         = m_pickedPoints[0].getPointPosition();
+						bool       isShifted = cloud->isShifted();
+						CCVector3d P         = m_pickedPoints[0].getPointGlobalPosition();
 						// 1st block: X, Y, Z (local)
 						{
 							int   c = tab.add2x3Block();
@@ -1431,14 +1449,13 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 						// next block:  X, Y, Z (global)
 						if (isShifted)
 						{
-							int        c  = tab.add2x3Block();
-							CCVector3d Pd = cloud->toGlobal3d(P);
+							int c = tab.add2x3Block();
 							tab.colContent[c] << "Xg";
-							tab.colContent[c + 1] << QString::number(Pd.x, 'f', precision);
+							tab.colContent[c + 1] << QString::number(P.x, 'f', precision);
 							tab.colContent[c] << "Yg";
-							tab.colContent[c + 1] << QString::number(Pd.y, 'f', precision);
+							tab.colContent[c + 1] << QString::number(P.y, 'f', precision);
 							tab.colContent[c] << "Zg";
-							tab.colContent[c + 1] << QString::number(Pd.z, 'f', precision);
+							tab.colContent[c + 1] << QString::number(P.z, 'f', precision);
 						}
 						// next block: normal
 						if (info.hasNormal)
@@ -1877,11 +1894,11 @@ bool cc2DLabel::pointPicking(const CCVector2d&           clickPos,
 				continue;
 			}
 
-			const CCVector3 P = pp.getPointPosition();
+			const CCVector3d P = pp.getPointGlobalPosition();
 
 			// warning: we have to handle the relative GL transformation!
-			ccGLMatrix trans;
-			bool       noGLTrans = pp.entity() ? !pp.entity()->getAbsoluteGLTransformation(trans) : true;
+			ccGLMatrixd trans;
+			bool        noGLTrans = pp.entity() ? !pp.entity()->getAbsoluteGLTransformation(trans) : true;
 
 			CCVector3d Q2D;
 			bool       insideFrustum = false;
@@ -1891,7 +1908,7 @@ bool cc2DLabel::pointPicking(const CCVector2d&           clickPos,
 			}
 			else
 			{
-				CCVector3 P3D = P;
+				CCVector3d P3D = P;
 				trans.apply(P3D);
 				camera.project(P3D, Q2D, &insideFrustum);
 			}

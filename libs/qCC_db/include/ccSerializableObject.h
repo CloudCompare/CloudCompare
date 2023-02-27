@@ -132,8 +132,8 @@ class ccSerializableObject
 class ccSerializationHelper
 {
   public:
-	//! Reads one or several 'PointCoordinateType' values from a QDataStream either in float or double format depending on the 'flag' value
-	static void CoordsFromDataStream(QDataStream& stream, int flags, PointCoordinateType* out, unsigned count = 1)
+	//! Reads one or several 'float' values from a QDataStream either in float or double format depending on the 'flag' value
+	static void CoordsFromDataStream(QDataStream& stream, int flags, float* out, unsigned count = 1)
 	{
 		if (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS)
 		{
@@ -141,7 +141,26 @@ class ccSerializationHelper
 			{
 				double val;
 				stream >> val;
-				*out = static_cast<PointCoordinateType>(val);
+				*out = static_cast<float>(val);
+			}
+		}
+		else
+		{
+			for (unsigned i = 0; i < count; ++i, ++out)
+			{
+				stream >> *out;
+			}
+		}
+	}
+
+	//! Reads one or several 'double' values from a QDataStream either in float or double format depending on the 'flag' value
+	static void CoordsFromDataStream(QDataStream& stream, int flags, double* out, unsigned count = 1)
+	{
+		if (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS)
+		{
+			for (unsigned i = 0; i < count; ++i, ++out)
+			{
+				stream >> *out;
 			}
 		}
 		else
@@ -150,7 +169,7 @@ class ccSerializationHelper
 			{
 				float val;
 				stream >> val;
-				*out = static_cast<PointCoordinateType>(val);
+				*out = val;
 			}
 		}
 	}

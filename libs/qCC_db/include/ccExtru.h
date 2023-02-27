@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_EXTRU_PRIMITIVE_HEADER
-#define CC_EXTRU_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -38,7 +37,7 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	**/
 	ccExtru(const std::vector<CCVector2>& profile,
 	        PointCoordinateType           height,
-	        const ccGLMatrix*             transMat = nullptr,
+	        const ccGLMatrixd*            transMat = nullptr,
 	        QString                       name     = QString("Extrusion"));
 
 	//! Simplified constructor
@@ -84,5 +83,3 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	//! Profile
 	std::vector<CCVector2> m_profile;
 };
-
-#endif // CC_EXTRU_PRIMITIVE_HEADER

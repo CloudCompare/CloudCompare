@@ -26,7 +26,7 @@
 
 ccExtru::ccExtru(const std::vector<CCVector2>& profile,
                  PointCoordinateType           height,
-                 const ccGLMatrix*             transMat /*= 0*/,
+                 const ccGLMatrixd*            transMat /*= 0*/,
                  QString                       name /*="Extrusion"*/)
     : ccGenericPrimitive(name, transMat)
     , m_height(height)
@@ -100,8 +100,8 @@ bool ccExtru::buildUp()
 	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector2& P = m_profile[i];
-		verts->addPoint(CCVector3(P.x, P.y, 0));
-		verts->addPoint(CCVector3(P.x, P.y, m_height));
+		verts->addLocalPoint(CCVector3(P.x, P.y, 0));
+		verts->addLocalPoint(CCVector3(P.x, P.y, m_height));
 
 		const CCVector2& PNext = m_profile[(i + 1) % count];
 		CCVector2        N(-(PNext.y - P.y), PNext.x - P.x);

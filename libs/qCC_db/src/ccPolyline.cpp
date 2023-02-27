@@ -146,7 +146,7 @@ void ccPolyline::showArrow(bool state, unsigned vertIndex, PointCoordinateType l
 ccBBox ccPolyline::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	ccBBox emptyBox;
-	getBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
+	getGlobalBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
 	emptyBox.setValidity((!is2DMode() || !withGLFeatures) && size() != 0); // a 2D polyline is considered as a purely 'GL' fature
 	return emptyBox;
 }
@@ -156,7 +156,7 @@ bool ccPolyline::hasColors() const
 	return true;
 }
 
-void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
+void ccPolyline::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	// transparent call
 	ccHObject::applyGLTransformation(trans);
@@ -193,14 +193,18 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	if (!draw)
+	{
 		return;
+	}
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	// color-based entity picking
 	bool         entityPickingMode = MACRO_EntityPicking(context);
@@ -230,6 +234,8 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 	}
 
+	ccGL::Translate(glFunc, getAssociatedCloud()->getLocalToGlobalTranslation());
+
 	// vertices visibility
 	const ccGenericPointCloud::VisibilityTableType* _verticesVisibility = nullptr;
 	{
@@ -256,8 +262,8 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (_verticesVisibility->at(nextPointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
 
-			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(pointIndex)->u);
-			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(nextPointIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getLocalPoint(pointIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getLocalPoint(nextPointIndex)->u);
 		}
 		glFunc->glEnd();
 	}
@@ -269,11 +275,11 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glBegin(GL_LINE_STRIP);
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
-			ccGL::Vertex3v(glFunc, getPoint(i)->u);
+			ccGL::Vertex3(glFunc, *getLocalPoint(i));
 		}
 		if (m_isClosed)
 		{
-			ccGL::Vertex3v(glFunc, getPoint(0)->u);
+			ccGL::Vertex3(glFunc, *getLocalPoint(0));
 		}
 		glFunc->glEnd();
 	}
@@ -286,8 +292,8 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!visFiltering || (_verticesVisibility->at(i0) == CCCoreLib::POINT_VISIBLE && _verticesVisibility->at(i1) == CCCoreLib::POINT_VISIBLE))
 		{
-			const CCVector3* P0 = getPoint(i0);
-			const CCVector3* P1 = getPoint(i1);
+			const CCVector3* P0 = getLocalPoint(i0);
+			const CCVector3* P1 = getLocalPoint(i1);
 			// direction of the last polyline chunk
 			CCVector3 u = *P1 - *P0;
 			u.normalize();
@@ -356,7 +362,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (!visFiltering || _verticesVisibility->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
-				ccGL::Vertex3v(glFunc, getPoint(i)->u);
+				ccGL::Vertex3(glFunc, *getLocalPoint(i));
 			}
 		}
 		glFunc->glEnd();
@@ -556,7 +562,7 @@ bool ccPolyline::split(PointCoordinateType       maxEdgeLength,
 	while (startIndex <= lastIndex)
 	{
 		unsigned stopIndex = startIndex;
-		while (stopIndex < lastIndex && (*getPoint(stopIndex + 1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
+		while (stopIndex < lastIndex && (*getLocalPoint(stopIndex + 1) - *getLocalPoint(stopIndex)).norm() <= maxEdgeLength)
 		{
 			++stopIndex;
 		}
@@ -570,7 +576,7 @@ bool ccPolyline::split(PointCoordinateType       maxEdgeLength,
 			if (isClosed())
 			{
 				unsigned realStartIndex = vertCount;
-				while (realStartIndex > stopIndex && (*getPoint(realStartIndex - 1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
+				while (realStartIndex > stopIndex && (*getLocalPoint(realStartIndex - 1) - *getLocalPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
 				{
 					--realStartIndex;
 				}
@@ -639,12 +645,10 @@ PointCoordinateType ccPolyline::computeLength() const
 		unsigned lastVert = isClosed() ? vertCount : vertCount - 1;
 		for (unsigned i = 0; i < lastVert; ++i)
 		{
-			CCVector3 A;
-			getPoint(i, A);
-			CCVector3 B;
-			getPoint((i + 1) % vertCount, B);
+			const CCVector3* A = getLocalPoint(i);
+			const CCVector3* B = getLocalPoint((i + 1) % vertCount);
 
-			length += (B - A).norm();
+			length += (*B - *A).norm();
 		}
 	}
 
@@ -759,8 +763,8 @@ ccPointCloud* ccPolyline::samplePoints(bool   densityBased,
 	for (unsigned i = 0; i < pointCount;)
 	{
 		unsigned         indexB = ((indexA + 1) % size());
-		const CCVector3& A      = *getPoint(indexA);
-		const CCVector3& B      = *getPoint(indexB);
+		const CCVector3& A      = *getLocalPoint(indexA);
+		const CCVector3& B      = *getLocalPoint(indexB);
 		CCVector3        AB     = B - A;
 		double           lAB    = AB.normd();
 
@@ -787,7 +791,7 @@ ccPointCloud* ccPolyline::samplePoints(bool   densityBased,
 		alpha        = std::min(alpha, 1.0);
 
 		CCVector3 P = A + static_cast<PointCoordinateType>(alpha) * AB;
-		cloud->addPoint(P);
+		cloud->addLocalPoint(P);
 
 		// proceed to the next point
 		++i;
@@ -809,10 +813,30 @@ ccPointCloud* ccPolyline::samplePoints(bool   densityBased,
 	}
 
 	// import parameters from the source
-	cloud->copyGlobalShiftAndScale(*this);
-	cloud->setGLTransformationHistory(getGLTransformationHistory());
+	transferVerticesParametersTo(cloud);
 
 	return cloud;
+}
+
+void ccPolyline::transferVerticesParametersTo(ccPointCloud* cloud) const
+{
+	if (!cloud)
+	{
+		assert(false);
+		return;
+	}
+
+	ccGenericPointCloud* genericCloud = dynamic_cast<ccGenericPointCloud*>(m_theAssociatedCloud);
+	if (genericCloud)
+	{
+		cloud->importParametersFrom(genericCloud);
+	}
+	else
+	{
+		cloud->setLocalToGlobalTranslation(m_theAssociatedCloud->getLocalToGlobalTranslation());
+		cloud->copyGlobalShiftAndScale(*this);
+		cloud->setGLTransformationHistory(getGLTransformationHistory());
+	}
 }
 
 ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterationCount) const
@@ -862,7 +886,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		if (openPoly)
 		{
 			// we always keep the first vertex
-			newStateVertices->addPoint(*currentIterationVertices->getPoint(0));
+			newStateVertices->addLocalPoint(*currentIterationVertices->getLocalPoint(0));
 		}
 
 		for (unsigned i = 0; i < segmentCount; ++i)
@@ -870,26 +894,26 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 			unsigned iP = i;
 			unsigned iQ = ((iP + 1) % vertCount);
 
-			const CCVector3& P = *currentIterationVertices->getPoint(iP);
-			const CCVector3& Q = *currentIterationVertices->getPoint(iQ);
+			const CCVector3& P = *currentIterationVertices->getLocalPoint(iP);
+			const CCVector3& Q = *currentIterationVertices->getLocalPoint(iQ);
 
 			if (!openPoly || i != 0)
 			{
 				CCVector3 P0 = (CCCoreLib::PC_ONE - ratio) * P + ratio * Q;
-				newStateVertices->addPoint(P0);
+				newStateVertices->addLocalPoint(P0);
 			}
 
 			if (!openPoly || i + 1 != segmentCount)
 			{
 				CCVector3 P1 = ratio * P + (CCCoreLib::PC_ONE - ratio) * Q;
-				newStateVertices->addPoint(P1);
+				newStateVertices->addLocalPoint(P1);
 			}
 		}
 
 		if (openPoly)
 		{
 			// we always keep the last vertex
-			newStateVertices->addPoint(*currentIterationVertices->getPoint(currentIterationVertices->size() - 1));
+			newStateVertices->addLocalPoint(*currentIterationVertices->getLocalPoint(currentIterationVertices->size() - 1));
 		}
 
 		if (currentIterationVertices != this)
@@ -904,7 +928,6 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		{
 			smoothPoly = new ccPolyline(newStateVertices);
 			smoothPoly->addChild(newStateVertices);
-			newStateVertices->setEnabled(false);
 			if (!smoothPoly->reserve(newStateVertices->size()))
 			{
 				ccLog::Warning("[ccPolyline::smoothChaikin] not enough memory");
@@ -916,6 +939,8 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 			// copy state
 			smoothPoly->importParametersFrom(*this);
 			smoothPoly->setName(getName() + QString(".smoothed (ratio=%1)").arg(ratio));
+			newStateVertices->setEnabled(false);
+			transferVerticesParametersTo(newStateVertices);
 		}
 	}
 
@@ -1004,8 +1029,8 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 			{
 				kept = true;
 
-				const CCVector3* P0 = verticesCloud->getPoint(pointIndex);
-				const CCVector3* P1 = verticesCloud->getPoint(nextPointIndex);
+				const CCVector3* P0 = getLocalPoint(i);
+				const CCVector3* P1 = getLocalPoint(nextIndex);
 
 				// recreate a chunk if none is ready yet
 				static const unsigned DefaultPolySizeIncrement = 64;
@@ -1022,7 +1047,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 						break;
 					}
 					chunkPoly->addPointIndex(0);
-					chunkCloud->addPoint(*P0);
+					chunkCloud->addLocalPoint(*P0);
 				}
 				else if (chunkPoly->size() == chunkPoly->capacity())
 				{
@@ -1035,7 +1060,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 
 				// add the next vertex
 				chunkPoly->addPointIndex(chunkCloud->size());
-				chunkCloud->addPoint(*P1);
+				chunkCloud->addLocalPoint(*P1);
 			}
 
 			if (!kept || i + 1 == maxIndex)
@@ -1047,6 +1072,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 					chunkPoly->setName(getName() + QString(".segmented (part %1)").arg(output.size() + 1));
 					chunkCloud->shrinkToFit();
 					chunkPoly->resize(chunkPoly->size());
+					transferVerticesParametersTo(chunkCloud);
 					try
 					{
 						output.push_back(chunkPoly);

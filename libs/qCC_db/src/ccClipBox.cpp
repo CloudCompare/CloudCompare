@@ -41,7 +41,7 @@ static QSharedPointer<ccCone>     c_arrowHead(nullptr);
 static QSharedPointer<ccSphere>   c_centralSphere(nullptr);
 static QSharedPointer<ccTorus>    c_torus(nullptr);
 
-void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+void DrawUnitArrow(bool entityPickingMode, const CCVector3d& start, const CCVector3d& direction, double scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -53,17 +53,17 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 
-	ccGL::Translate(glFunc, start.x, start.y, start.z);
+	ccGL::Translate(glFunc, start);
 	ccGL::Scale(glFunc, scale, scale, scale);
 
 	// we compute scalar prod between the two vectors
-	CCVector3           Z(0.0, 0.0, 1.0);
-	PointCoordinateType ps = Z.dot(direction);
+	CCVector3d Z(0.0, 0.0, 1.0);
+	double     ps = Z.dot(direction);
 
 	if (ps < 1)
 	{
-		CCVector3           axis(1, 0, 0);
-		PointCoordinateType angle_deg = static_cast<PointCoordinateType>(180.0);
+		CCVector3d axis(1, 0, 0);
+		double     angle_deg = 180.0;
 
 		if (ps > -1)
 		{
@@ -82,11 +82,11 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 	if (!c_arrowHead)
 		c_arrowHead.reset(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
 
-	glFunc->glTranslatef(0, 0, 0.3f);
+	ccGL::Translate(glFunc, 0, 0, 0.3);
 	c_arrowShaft->setTempColor(col);
 	c_arrowShaft->showNormals(!entityPickingMode);
 	c_arrowShaft->draw(context);
-	glFunc->glTranslatef(0, 0, 0.3f + 0.2f);
+	ccGL::Translate(glFunc, 0, 0, 0.3 + 0.2);
 	c_arrowHead->setTempColor(col);
 	c_arrowHead->showNormals(!entityPickingMode);
 	c_arrowHead->draw(context);
@@ -94,7 +94,7 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 	glFunc->glPopMatrix();
 }
 
-static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+static void DrawUnitTorus(bool entityPickingMode, const CCVector3d& center, const CCVector3d& direction, double scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -106,17 +106,17 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
 
-	ccGL::Translate(glFunc, center.x, center.y, center.z);
+	ccGL::Translate(glFunc, center);
 	ccGL::Scale(glFunc, scale, scale, scale);
 
 	// we compute scalar prod between the two vectors
-	CCVector3           Z(0, 0, 1);
-	PointCoordinateType ps = Z.dot(direction);
+	CCVector3d Z(0, 0, 1);
+	double     ps = Z.dot(direction);
 
 	if (ps < 1)
 	{
-		CCVector3           axis(1, 0, 0);
-		PointCoordinateType angle_deg = 180;
+		CCVector3d axis(1, 0, 0);
+		double     angle_deg = 180;
 
 		if (ps > -1)
 		{
@@ -133,7 +133,7 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 	if (!c_torus)
 		c_torus.reset(new ccTorus(0.2f, 0.4f, 2.0 * M_PI, false, 0, nullptr, "Torus", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
 
-	glFunc->glTranslatef(0, 0, 0.3f);
+	ccGL::Translate(glFunc, 0, 0, 0.3);
 	c_torus->setTempColor(col);
 	c_torus->showNormals(!entityPickingMode);
 	c_torus->draw(context);
@@ -141,7 +141,7 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 	glFunc->glPopMatrix();
 }
 
-static void DrawUnitCross(bool entityPickingMode, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
+static void DrawUnitCross(bool entityPickingMode, const CCVector3d& center, double scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -151,12 +151,12 @@ static void DrawUnitCross(bool entityPickingMode, const CCVector3& center, Point
 		return;
 
 	scale /= 2;
-	DrawUnitArrow(entityPickingMode, center, CCVector3(-1, 0, 0), scale, col, context);
-	DrawUnitArrow(entityPickingMode, center, CCVector3(1, 0, 0), scale, col, context);
-	DrawUnitArrow(entityPickingMode, center, CCVector3(0, -1, 0), scale, col, context);
-	DrawUnitArrow(entityPickingMode, center, CCVector3(0, 1, 0), scale, col, context);
-	DrawUnitArrow(entityPickingMode, center, CCVector3(0, 0, -1), scale, col, context);
-	DrawUnitArrow(entityPickingMode, center, CCVector3(0, 0, 1), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(-1, 0, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(1, 0, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(0, -1, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(0, 1, 0), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(0, 0, -1), scale, col, context);
+	DrawUnitArrow(entityPickingMode, center, CCVector3d(0, 0, 1), scale, col, context);
 }
 
 ccClipBox::ccClipBox(QString name /*= QString("clipping box")*/, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -211,17 +211,17 @@ void ccClipBox::update()
 	}
 
 	// now add the 6 box clipping planes
-	ccBBox     extents;
-	ccGLMatrix transformation;
+	ccBBox      extents;
+	ccGLMatrixd transformation;
 	get(extents, transformation);
 
-	CCVector3 C       = transformation * extents.getCenter();
-	CCVector3 halfDim = extents.getDiagVec() / 2;
+	CCVector3d C       = transformation * extents.getCenter();
+	CCVector3d halfDim = extents.getDiagVec() / 2;
 
 	// for each dimension
 	for (unsigned d = 0; d < 3; ++d)
 	{
-		CCVector3 N = transformation.getColumnAsVec3D(d);
+		CCVector3d N = transformation.getColumnAsVec3D(d);
 		// positive side
 		{
 			ccClipPlane posPlane;
@@ -230,7 +230,7 @@ void ccClipBox::update()
 			posPlane.equation.z = N.z;
 
 			// compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C - half_dim * N)).N = 0
-			posPlane.equation.w = -static_cast<double>(C.dot(N)) + halfDim.u[d];
+			posPlane.equation.w = -C.dot(N) + halfDim.u[d];
 			for (unsigned ci = 0; ci < m_entityContainer.getChildrenNumber(); ++ci)
 			{
 				m_entityContainer.getChild(ci)->addClipPlanes(posPlane);
@@ -246,7 +246,7 @@ void ccClipBox::update()
 
 			// compute the 'constant' coefficient knowing that P belongs to the plane if (P - (C + half_dim * N)).N = 0
 			// negPlane.equation.w = -(static_cast<double>(C.dot(N)) + halfDim.u[d]);
-			negPlane.equation.w = static_cast<double>(C.dot(N)) + halfDim.u[d];
+			negPlane.equation.w = C.dot(N) + halfDim.u[d];
 			for (unsigned ci = 0; ci < m_entityContainer.getChildrenNumber(); ++ci)
 			{
 				m_entityContainer.getChild(ci)->addClipPlanes(negPlane);
@@ -271,7 +271,7 @@ void ccClipBox::reset()
 	Q_EMIT boxModified(&m_box);
 }
 
-void ccClipBox::set(const ccBBox& extents, const ccGLMatrix& transformation)
+void ccClipBox::set(const ccBBox& extents, const ccGLMatrixd& transformation)
 {
 	m_box = extents;
 	setGLTransformation(transformation);
@@ -282,7 +282,7 @@ void ccClipBox::set(const ccBBox& extents, const ccGLMatrix& transformation)
 	Q_EMIT boxModified(&m_box);
 }
 
-void ccClipBox::get(ccBBox& extents, ccGLMatrix& transformation)
+void ccClipBox::get(ccBBox& extents, ccGLMatrixd& transformation)
 {
 	extents = m_box;
 
@@ -503,13 +503,13 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		ccGLMatrixd rotMat;
 		rotMat.initFromParameters(angle_rad, Rb, CCVector3d(0, 0, 0));
 
-		CCVector3   C = m_box.getCenter();
+		CCVector3d  C = m_box.getCenter();
 		ccGLMatrixd transMat;
 		transMat.setTranslation(-C);
 		transMat = rotMat * transMat;
 		transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
 
-		m_glTrans = m_glTrans * ccGLMatrix(transMat.inverse().data());
+		m_glTrans = m_glTrans * transMat.inverse();
 		enableGLTransformation(true);
 	}
 	else
@@ -565,7 +565,7 @@ void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud
 
 	if (m_glTransEnabled)
 	{
-		ccGLMatrix transMat = m_glTrans.inverse();
+		ccGLMatrixd transMat = m_glTrans.inverse();
 
 #if defined(_OPENMP)
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -574,7 +574,7 @@ void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud
 		{
 			if (!shrink || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
-				CCVector3 P = *cloud->getPoint(static_cast<unsigned>(i));
+				CCVector3 P = *cloud->getLocalPoint(static_cast<unsigned>(i));
 				transMat.apply(P);
 				visTable->at(i) = (m_box.contains(P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
@@ -589,7 +589,7 @@ void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud
 		{
 			if (!shrink || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
-				const CCVector3* P = cloud->getPoint(static_cast<unsigned>(i));
+				const CCVector3* P = cloud->getLocalPoint(static_cast<unsigned>(i));
 				visTable->at(i)    = (m_box.contains(*P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
@@ -602,21 +602,21 @@ ccBBox ccClipBox::getOwnBB(bool withGLFeatures /*=false*/)
 
 	if (withGLFeatures)
 	{
-		PointCoordinateType scale = computeArrowsScale();
-		bbox.minCorner() -= CCVector3(scale, scale, scale);
-		bbox.maxCorner() += CCVector3(scale, scale, scale);
+		double scale = computeArrowsScale();
+		bbox.minCorner() -= CCVector3d(scale, scale, scale);
+		bbox.maxCorner() += CCVector3d(scale, scale, scale);
 	}
 
 	return bbox;
 }
 
-PointCoordinateType ccClipBox::computeArrowsScale() const
+double ccClipBox::computeArrowsScale() const
 {
-	PointCoordinateType scale = m_box.getDiagNorm() / 10;
+	double scale = m_box.getDiagNorm() / 10;
 
 	if (m_entityContainer.getChildrenNumber() != 0)
 	{
-		scale = std::max<PointCoordinateType>(scale, getBox().getDiagNorm() / 25);
+		scale = std::max(scale, getBox().getDiagNorm() / 25);
 	}
 
 	return scale;
@@ -659,11 +659,11 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	// draw the interactors
 	{
-		const CCVector3& minC   = m_box.minCorner();
-		const CCVector3& maxC   = m_box.maxCorner();
-		const CCVector3  center = m_box.getCenter();
+		const CCVector3d& minC   = m_box.minCorner();
+		const CCVector3d& maxC   = m_box.maxCorner();
+		const CCVector3d  center = m_box.getCenter();
 
-		PointCoordinateType scale = computeArrowsScale();
+		double scale = computeArrowsScale();
 
 		// custom arrow 'context'
 		CC_DRAW_CONTEXT componentContext = context;
@@ -677,19 +677,19 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glEnable(GL_LIGHT0);
 		}
 
-		DrawUnitArrow(entityPickingMode, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_ARROW]) : ccColor::red), componentContext);
-		DrawUnitArrow(entityPickingMode, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_ARROW]) : ccColor::red), componentContext);
-		DrawUnitArrow(entityPickingMode, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_ARROW]) : ccColor::green), componentContext);
-		DrawUnitArrow(entityPickingMode, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_ARROW]) : ccColor::green), componentContext);
-		DrawUnitArrow(entityPickingMode, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_ARROW]) : ccColor::blue), componentContext);
-		DrawUnitArrow(entityPickingMode, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_ARROW]) : ccColor::blue), componentContext);
-		DrawUnitCross(entityPickingMode, minC - CCVector3(scale, scale, scale) / 2.0, scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[CROSS]) : ccColor::yellow), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(minC.x, center.y, center.z), CCVector3(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_TORUS]) : c_lightRed), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(center.x, minC.y, center.z), CCVector3(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_TORUS]) : c_lightGreen), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(center.x, center.y, minC.z), CCVector3(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_TORUS]) : c_lightBlue), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(maxC.x, center.y, center.z), CCVector3(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_TORUS]) : c_lightRed), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(center.x, maxC.y, center.z), CCVector3(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_TORUS]) : c_lightGreen), componentContext);
-		DrawUnitTorus(entityPickingMode, CCVector3(center.x, center.y, maxC.z), CCVector3(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_TORUS]) : c_lightBlue), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(minC.x, center.y, center.z), CCVector3d(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_ARROW]) : ccColor::red), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(maxC.x, center.y, center.z), CCVector3d(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_ARROW]) : ccColor::red), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(center.x, minC.y, center.z), CCVector3d(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_ARROW]) : ccColor::green), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(center.x, maxC.y, center.z), CCVector3d(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_ARROW]) : ccColor::green), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(center.x, center.y, minC.z), CCVector3d(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_ARROW]) : ccColor::blue), componentContext);
+		DrawUnitArrow(entityPickingMode, CCVector3d(center.x, center.y, maxC.z), CCVector3d(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_ARROW]) : ccColor::blue), componentContext);
+		DrawUnitCross(entityPickingMode, minC - CCVector3d(scale, scale, scale) / 2.0, scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[CROSS]) : ccColor::yellow), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(minC.x, center.y, center.z), CCVector3d(-1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_MINUS_TORUS]) : c_lightRed), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(center.x, minC.y, center.z), CCVector3d(0.0, -1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_MINUS_TORUS]) : c_lightGreen), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(center.x, center.y, minC.z), CCVector3d(0.0, 0.0, -1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_MINUS_TORUS]) : c_lightBlue), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(maxC.x, center.y, center.z), CCVector3d(1.0, 0.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[X_PLUS_TORUS]) : c_lightRed), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(center.x, maxC.y, center.z), CCVector3d(0.0, 1.0, 0.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Y_PLUS_TORUS]) : c_lightGreen), componentContext);
+		DrawUnitTorus(entityPickingMode, CCVector3d(center.x, center.y, maxC.z), CCVector3d(0.0, 0.0, 1.0), scale, (entityPickingMode ? context.entityPicking.registerEntity(m_parts[Z_PLUS_TORUS]) : c_lightBlue), componentContext);
 
 		if (!entityPickingMode)
 		{

@@ -539,7 +539,7 @@ bool ccHObject::isAncestorOf(const ccHObject* anObject) const
 	return isAncestorOf(parent);
 }
 
-bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
+bool ccHObject::getAbsoluteGLTransformation(ccGLMatrixd& trans) const
 {
 	trans.toIdentity();
 	bool hasGLTrans = false;
@@ -561,23 +561,7 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 
 ccBBox ccHObject::getOwnBB(bool withGLFeatures /*=false*/)
 {
-	return ccBBox();
-}
-
-ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
-{
-	// by default this method returns the local bounding-box!
-	ccBBox box = getOwnBB(false);
-	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
-}
-
-bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
-{
-	// by default this method returns the local bounding-box!
-	ccBBox box = getOwnBB(false);
-	minCorner  = box.minCorner();
-	maxCorner  = box.maxCorner();
-	return box.isValid();
+	return {};
 }
 
 ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabledChildren /*=true*/)
@@ -595,45 +579,32 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabl
 	return box;
 }
 
-ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabledChildren /*=true*/)
-{
-	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
-
-	for (auto child : m_children)
-	{
-		if (!onlyEnabledChildren || child->isEnabled())
-		{
-			box += child->getGlobalBB_recursive(withGLFeatures, onlyEnabledChildren);
-		}
-	}
-
-	return box;
-}
-
 ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display /*=nullptr*/)
 {
 	ccBBox box;
 
 	if (!display || display == m_currentDisplay)
-		box = getOwnBB(true);
-
-	for (auto child : m_children)
 	{
-		if (child->isEnabled())
+		box = getOwnBB(true);
+	}
+
+	for (const auto& child : m_children)
+	{
+		if (child && child->isEnabled())
 		{
-			ccBBox childBox = child->getDisplayBB_recursive(true, display);
+			ccBBox childBBox = child->getDisplayBB_recursive(true, display);
 			if (child->isGLTransEnabled())
 			{
-				childBox = childBox * child->getGLTransformation();
+				childBBox = childBBox * child->getGLTransformation();
 			}
-			box += childBox;
+			box += childBBox;
 		}
 	}
 
 	if (!relative && box.isValid())
 	{
 		// get absolute bounding-box?
-		ccGLMatrix trans;
+		ccGLMatrixd trans;
 		getAbsoluteGLTransformation(trans);
 		box = box * trans;
 	}
@@ -682,13 +653,13 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	case SELECTION_FIT_BBOX:
 	{
 		// get the set of OpenGL functions (version 2.1)
-		ccGLMatrix trans;
-		ccBBox     box = getOwnFitBB(trans);
+		ccGLMatrixd trans;
+		ccBBox      box = getOwnFitBB(trans);
 		if (box.isValid())
 		{
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
-			glFunc->glMultMatrixf(trans.data());
+			glFunc->glMultMatrixd(trans.data());
 			box.draw(context, col);
 			glFunc->glPopMatrix();
 		}
@@ -745,7 +716,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
-			glFunc->glMultMatrixf(m_glTrans.data());
+			glFunc->glMultMatrixd(m_glTrans.data());
 		}
 
 		// LOD for clouds is enabled?
@@ -796,7 +767,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 				glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
-				CCVector3 C          = bBox.getCenter();
+				CCVector3d C         = bBox.getCenter();
 				m_nameIn3DPosIsValid = camera.project(C, m_nameIn3DPos);
 			}
 			else
@@ -827,15 +798,15 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		glFunc->glPopMatrix();
 }
 
-void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
+void ccHObject::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	m_glTransHistory = trans * m_glTransHistory;
 }
 
-void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput /*=nullptr*/)
+void ccHObject::applyGLTransformation_recursive(const ccGLMatrixd* transInput /*=nullptr*/)
 {
-	ccGLMatrix        transTemp;
-	const ccGLMatrix* transToApply = transInput;
+	ccGLMatrixd        transTemp;
+	const ccGLMatrixd* transToApply = transInput;
 
 	if (m_glTransEnabled)
 	{
@@ -1166,7 +1137,17 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	// read transformation history (dataVersion >= 45)
 	if (dataVersion >= 45)
 	{
-		if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (dataVersion < 57)
+		{
+			// the former GL transformation history matrix was using floats by default
+			ccGLMatrix oldGLTransHistory;
+			if (!oldGLTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
+			{
+				return false;
+			}
+			m_glTransHistory = ccGLMatrixd(oldGLTransHistory.data());
+		}
+		else if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		{
 			return false;
 		}
@@ -1336,7 +1317,17 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	if (m_glTransEnabled)
 	{
-		if (!m_glTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (dataVersion < 57)
+		{
+			// the former GL transformation was using floats by default
+			ccGLMatrix oldGLTrans;
+			if (!oldGLTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
+			{
+				return false;
+			}
+			m_glTrans = ccGLMatrixd(oldGLTrans.data());
+		}
+		else if (!m_glTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		{
 			m_glTransEnabled = false;
 			return false;

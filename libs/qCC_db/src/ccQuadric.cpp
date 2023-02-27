@@ -32,21 +32,20 @@
 // system
 #include <string.h>
 
-ccQuadric::ccQuadric(CCVector2                      minCorner,
-                     CCVector2                      maxCorner,
-                     const PointCoordinateType      eq[6],
+ccQuadric::ccQuadric(const CCVector2d&              minCorner,
+                     const CCVector2d&              maxCorner,
+                     const double                   eq[6],
                      const CCCoreLib::SquareMatrix* toLocalOrientation /*=nullptr*/,
-                     const ccGLMatrix*              transMat /*=nullptr*/,
+                     const ccGLMatrixd*             transMat /*=nullptr*/,
                      QString                        name /*=QString("Quadric")*/,
                      unsigned                       precision /*=DEFAULT_DRAWING_PRECISION*/)
     : ccGenericPrimitive(name, transMat)
     , m_minCorner(minCorner)
     , m_maxCorner(maxCorner)
+    , m_eq{eq[0], eq[1], eq[2], eq[3], eq[4], eq[5]}
     , m_minZ(0)
     , m_maxZ(0)
 {
-	memcpy(m_eq, eq, sizeof(PointCoordinateType) * 6);
-
 	if (toLocalOrientation)
 	{
 		m_toLocalOrientation = *toLocalOrientation;
@@ -81,9 +80,9 @@ bool ccQuadric::buildUp()
 	assert(verts);
 	assert(verts->hasNormals());
 
-	CCVector2           areaSize = m_maxCorner - m_minCorner;
-	PointCoordinateType stepX    = areaSize.x / static_cast<PointCoordinateType>(m_drawPrecision - 1);
-	PointCoordinateType stepY    = areaSize.y / static_cast<PointCoordinateType>(m_drawPrecision - 1);
+	CCVector2d areaSize = m_maxCorner - m_minCorner;
+	double     stepX    = areaSize.x / static_cast<PointCoordinateType>(m_drawPrecision - 1);
+	double     stepY    = areaSize.y / static_cast<PointCoordinateType>(m_drawPrecision - 1);
 
 	for (unsigned x = 0; x < m_drawPrecision; ++x)
 	{
@@ -112,7 +111,15 @@ bool ccQuadric::buildUp()
 				m_minZ = m_maxZ = P.z;
 			}
 
-			verts->addPoint(P);
+			if (verts->size() == 0)
+			{
+				verts->setLocalToGlobalTranslation(P);
+				verts->addLocalPoint({0, 0, 0});
+			}
+			else
+			{
+				verts->addLocalPoint(verts->toLocal(P));
+			}
 
 			// normal --> TODO: is there a simple way to deduce it from the equation?
 			// CCVector3 N;
@@ -164,7 +171,7 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* 
 	CCCoreLib::Neighbourhood Zk(cloud);
 
 	CCCoreLib::SquareMatrix    toLocalOrientation;
-	const PointCoordinateType* eq = Zk.getQuadric(&toLocalOrientation);
+	const PointCoordinateType* eq = Zk.getLocalQuadric(&toLocalOrientation);
 	if (!eq)
 	{
 		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
@@ -173,17 +180,17 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* 
 
 	// we recenter the quadric object
 	CCCoreLib::SquareMatrix globalOrientation = toLocalOrientation.transposed(); // transposed is equivalent to inverse for a 3x3 rotation matrix
-	CCVector3               X(globalOrientation.getValue(0, 0),
-                globalOrientation.getValue(1, 0),
-                globalOrientation.getValue(2, 0));
-	CCVector3               Y(globalOrientation.getValue(0, 1),
-                globalOrientation.getValue(1, 1),
-                globalOrientation.getValue(2, 1));
-	CCVector3               N(globalOrientation.getValue(0, 2),
-                globalOrientation.getValue(1, 2),
-                globalOrientation.getValue(2, 2));
-	const CCVector3*        G = Zk.getGravityCenter();
-	ccGLMatrix              glMat(X, Y, N, *G);
+	CCVector3d              X(globalOrientation.getValue(0, 0),
+                 globalOrientation.getValue(1, 0),
+                 globalOrientation.getValue(2, 0));
+	CCVector3d              Y(globalOrientation.getValue(0, 1),
+                 globalOrientation.getValue(1, 1),
+                 globalOrientation.getValue(2, 1));
+	CCVector3d              N(globalOrientation.getValue(0, 2),
+                 globalOrientation.getValue(1, 2),
+                 globalOrientation.getValue(2, 2));
+	const CCVector3*        G = Zk.getLocalGravityCenter();
+	ccGLMatrixd             glMat(X, Y, N, *G);
 
 	if (rms)
 	{
@@ -193,7 +200,7 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* 
 	ccBBox localBB;
 	for (unsigned i = 0; i < cloud->size(); ++i)
 	{
-		CCVector3 Plocal = toLocalOrientation * (*cloud->getPoint(i) - *G);
+		CCVector3 Plocal = toLocalOrientation * (*cloud->getLocalPoint(i) - *G);
 		localBB.add(Plocal);
 
 		if (rms)
@@ -222,10 +229,11 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* 
 		}
 	}
 
-	CCVector2 minXY(localBB.minCorner().x, localBB.minCorner().y);
-	CCVector2 maxXY(localBB.maxCorner().x, localBB.maxCorner().y);
+	CCVector2d minXY(localBB.minCorner().x, localBB.minCorner().y);
+	CCVector2d maxXY(localBB.maxCorner().x, localBB.maxCorner().y);
 
-	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, &toLocalOrientation, &glMat);
+	double     eqD[6]{eq[0], eq[1], eq[2], eq[3], eq[4], eq[5]};
+	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eqD, &toLocalOrientation, &glMat);
 
 	quadric->setMetaData(QString("Equation"), QVariant(quadric->getEquationString()));
 	if (rms)
@@ -236,13 +244,13 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* 
 	return quadric;
 }
 
-PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q) const
+double ccQuadric::projectOnQuadric(const CCVector3d& P, CCVector3d& Q) const
 {
 	// back project into quadric coordinate system
 	Q = P;
 	m_transformation.inverse().apply(Q);
 
-	CCVector3 QLocal = m_toLocalOrientation * Q;
+	CCVector3 QLocal = m_toLocalOrientation * CCVector3::fromArray(Q.u);
 
 	PointCoordinateType originalZ = QLocal.z;
 	QLocal.z                      = m_eq[0]
@@ -304,6 +312,7 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	// parameters (dataVersion>=35)
 	QDataStream inStream(&in);
+
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.x, 1);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.y, 1);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.x, 1);
@@ -320,10 +329,4 @@ bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 short ccQuadric::minimumFileVersion_MeOnly() const
 {
 	return std::max(static_cast<short>(35), ccGenericPrimitive::minimumFileVersion_MeOnly());
-}
-
-ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
-{
-	trans = m_transformation;
-	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
 }

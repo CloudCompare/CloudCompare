@@ -209,7 +209,7 @@ bool ccFacet::createInternalRepresentation(CCCoreLib::GenericIndexedCloudPersist
 	CCVector3 X;
 	CCVector3 Y;
 
-	if (!Yk.projectPointsOn2DPlane<CCCoreLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
+	if (!Yk.projectLocalPointsOn2DPlane<CCCoreLib::PointProjectionTools::IndexedCCVector2>(points2D, nullptr, &m_center, &X, &Y))
 	{
 		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 		return false;
@@ -248,11 +248,12 @@ bool ccFacet::createInternalRepresentation(CCCoreLib::GenericIndexedCloudPersist
 				ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 				return false;
 			}
+			m_contourVertices->setLocalToGlobalTranslation(points->getLocalToGlobalTranslation());
 
 			// projection on the LS plane (in 3D)
 			for (std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 			{
-				m_contourVertices->addPoint(m_center + X * (*it)->x + Y * (*it)->y);
+				m_contourVertices->addLocalPoint(m_center + X * (*it)->x + Y * (*it)->y);
 			}
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
@@ -269,6 +270,7 @@ bool ccFacet::createInternalRepresentation(CCCoreLib::GenericIndexedCloudPersist
 			m_contourPolyline = new ccPolyline(m_contourVertices);
 			if (m_contourPolyline->reserve(hullPtsCount))
 			{
+				// m_contourPolyline->setLocalToGlobalTranslation(points->getLocalToGlobalTranslation()); //FIXME
 				m_contourPolyline->addPointIndex(0, hullPtsCount);
 				m_contourPolyline->setClosed(true);
 				m_contourPolyline->setVisible(true);
@@ -570,7 +572,7 @@ short ccFacet::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(32), ccHObject::minimumFileVersion_MeOnly());
 }
 
-void ccFacet::applyGLTransformation(const ccGLMatrix& trans)
+void ccFacet::applyGLTransformation(const ccGLMatrixd& trans)
 {
 	ccHObject::applyGLTransformation(trans);
 

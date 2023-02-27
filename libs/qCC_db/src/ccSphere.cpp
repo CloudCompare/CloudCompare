@@ -20,11 +20,11 @@
 // Local
 #include "ccPointCloud.h"
 
-// QT
+// Qt
 #include <QFontMetrics>
 
 ccSphere::ccSphere(PointCoordinateType radius,
-                   const ccGLMatrix*   transMat /*=nullptr*/,
+                   const ccGLMatrixd*  transMat /*=nullptr*/,
                    QString             name /*=QString("Sphere")*/,
                    unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/,
                    unsigned            uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -68,10 +68,10 @@ bool ccSphere::buildUp()
 	}
 
 	// 2 first points: poles
-	verts->addPoint(CCVector3(0, 0, m_radius));
+	verts->addLocalPoint(CCVector3(0, 0, m_radius));
 	verts->addNorm(CCVector3(0, 0, 1));
 
-	verts->addPoint(CCVector3(0, 0, -m_radius));
+	verts->addLocalPoint(CCVector3(0, 0, -m_radius));
 	verts->addNorm(CCVector3(0, 0, -1));
 
 	// then, angular sweep
@@ -103,7 +103,7 @@ bool ccSphere::buildUp()
 
 				P = N * m_radius;
 
-				verts->addPoint(P);
+				verts->addLocalPoint(P);
 				verts->addNorm(N);
 			}
 		}
@@ -216,13 +216,13 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	if (!bBox.isValid())
 		return;
 
-	ccGLMatrix trans;
+	ccGLMatrixd trans;
 	getAbsoluteGLTransformation(trans);
 
 	ccGLCameraParameters camera;
 	context.display->getGLCameraParameters(camera);
 
-	CCVector3  C = bBox.getCenter();
+	CCVector3d C = bBox.getCenter();
 	CCVector3d Q2D;
 	trans.apply(C);
 	camera.project(C, Q2D);

@@ -48,7 +48,7 @@ class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 	 **/
 	virtual inline void setGlobalShift(double x, double y, double z)
 	{
-		return setGlobalShift(CCVector3d(x, y, z));
+		return setGlobalShift({x, y, z});
 	}
 
 	//! Sets shift applied to original coordinates (information storage only)
@@ -106,10 +106,6 @@ class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 		CCVector3d Plocal = Pglobal.toDouble() * getGlobalScale() + getGlobalShift();
 		return Plocal.toPC();
 	}
-
-	// inherited from ccHObject
-	bool              getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner) override;
-	GlobalBoundingBox getOwnGlobalBB(bool withGLFeatures = false) override;
 
   protected:
 	//! Serialization helper (output)

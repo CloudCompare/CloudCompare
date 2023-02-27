@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,15 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SPHERE_PRIMITIVE_HEADER
-#define CC_SPHERE_PRIMITIVE_HEADER
-
 // Local
 #include "ccGenericPrimitive.h"
 
-//! Sphere (primitive)
-/** 3D sphere primitive
- **/
+//! 3D sphere (primitive)
 class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 {
   public:
@@ -35,7 +32,7 @@ class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 	    \param uniqueID unique ID (handle with care)
 	**/
 	ccSphere(PointCoordinateType radius,
-	         const ccGLMatrix*   transMat  = nullptr,
+	         const ccGLMatrixd*  transMat  = nullptr,
 	         QString             name      = QString("Sphere"),
 	         unsigned            precision = 24,
 	         unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
@@ -85,5 +82,3 @@ class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 	//! Radius
 	PointCoordinateType m_radius;
 };
-
-#endif // CC_SPHERE_PRIMITIVE_HEADER

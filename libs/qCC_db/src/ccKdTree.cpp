@@ -248,13 +248,13 @@ bool ccKdTree::convertCellIndexToRandomColor()
 class GetCellBBoxVisitor
 {
   public:
-	ccBBox m_UpdatedBox;
+	CCCoreLib::BoundingBox m_updatedBox;
 
 	GetCellBBoxVisitor()
 	{
 		// invalidate the initial bounding box
-		m_UpdatedBox.maxCorner() = CCVector3(CCCoreLib::PC_NAN, CCCoreLib::PC_NAN, CCCoreLib::PC_NAN);
-		m_UpdatedBox.minCorner() = CCVector3(CCCoreLib::PC_NAN, CCCoreLib::PC_NAN, CCCoreLib::PC_NAN);
+		m_updatedBox.maxCorner() = CCVector3(CCCoreLib::PC_NAN, CCCoreLib::PC_NAN, CCCoreLib::PC_NAN);
+		m_updatedBox.minCorner() = CCVector3(CCCoreLib::PC_NAN, CCCoreLib::PC_NAN, CCCoreLib::PC_NAN);
 	}
 
 	void visit(ccKdTree::BaseNode* node)
@@ -266,7 +266,7 @@ class GetCellBBoxVisitor
 			ccKdTree::Node* parent = static_cast<ccKdTree::Node*>(node->parent);
 
 			// we choose the right 'side' of the box that corresponds to the parent's split plane
-			CCVector3& boxCorner = (parent->leftChild == node ? m_UpdatedBox.maxCorner() : m_UpdatedBox.minCorner());
+			CCVector3& boxCorner = (parent->leftChild == node ? m_updatedBox.maxCorner() : m_updatedBox.minCorner());
 
 			// if this side has not been setup yet...
 			if (boxCorner.u[parent->splitDim] != boxCorner.u[parent->splitDim]) // NaN
@@ -277,20 +277,20 @@ class GetCellBBoxVisitor
 	}
 };
 
-ccBBox ccKdTree::getCellBBox(BaseNode* node) const
+CCCoreLib::BoundingBox ccKdTree::getCellBBox(BaseNode* node) const
 {
 	if (!node || !m_associatedCloud)
-		return ccBBox();
+		return {};
 
 	GetCellBBoxVisitor helper;
 	helper.visit(node);
 
 	// finish the job
-	ccBBox& box = helper.m_UpdatedBox;
+	CCCoreLib::BoundingBox& box = helper.m_updatedBox;
 	{
 		CCVector3 bbMin;
 		CCVector3 bbMax;
-		m_associatedCloud->getBoundingBox(bbMin, bbMax);
+		m_associatedCloud->getLocalBoundingBox(bbMin, bbMax);
 		for (int i = 0; i < 3; ++i)
 		{
 			if (box.minCorner().u[i] != box.minCorner().u[i]) // still NaN value?
@@ -308,10 +308,10 @@ ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 class GetNeighborLeavesVisitor
 {
   public:
-	GetNeighborLeavesVisitor(ccKdTree::BaseNode* cell,
-	                         ccKdTree::LeafSet&  neighbors,
-	                         const ccBBox&       cellBox,
-	                         const ccBBox&       treeBox)
+	GetNeighborLeavesVisitor(ccKdTree::BaseNode*           cell,
+	                         ccKdTree::LeafSet&            neighbors,
+	                         const CCCoreLib::BoundingBox& cellBox,
+	                         const CCCoreLib::BoundingBox& treeBox)
 	    : m_targetCell(cell)
 	    , m_targetCellBox(cellBox)
 	    , m_currentCellBox(treeBox)
@@ -368,12 +368,12 @@ class GetNeighborLeavesVisitor
 	}
 
   protected:
-	ccKdTree::BaseNode* m_targetCell;
-	ccBBox              m_targetCellBox;
-	ccBBox              m_currentCellBox;
-	ccKdTree::LeafSet*  m_neighbors;
-	bool                m_userDataFilterEnabled;
-	int                 m_userDataFilterValue;
+	ccKdTree::BaseNode*    m_targetCell;
+	CCCoreLib::BoundingBox m_targetCellBox;
+	CCCoreLib::BoundingBox m_currentCellBox;
+	ccKdTree::LeafSet*     m_neighbors;
+	bool                   m_userDataFilterEnabled;
+	int                    m_userDataFilterValue;
 };
 
 bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter /*=nullptr*/)
@@ -382,13 +382,17 @@ bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& ne
 		return false;
 
 	// determine the cell bounding box
-	ccBBox cellBox = getCellBBox(cell);
+	CCCoreLib::BoundingBox cellBox = getCellBBox(cell);
 	if (!cellBox.isValid())
 		return false;
 
 	try
 	{
-		GetNeighborLeavesVisitor visitor(cell, neighbors, cellBox, getOwnBB(false));
+		CCCoreLib::BoundingBox localBBox;
+		m_associatedGenericCloud->getLocalBoundingBox(localBBox.minCorner(), localBBox.maxCorner());
+		localBBox.setValidity(true);
+
+		GetNeighborLeavesVisitor visitor(cell, neighbors, cellBox, localBBox);
 		if (userDataFilter)
 			visitor.setUserDataFilter(*userDataFilter);
 		visitor.visit(m_root);

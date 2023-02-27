@@ -61,18 +61,8 @@ void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne /*=true*/
 void ccSubMesh::onUpdateOf(ccHObject* obj)
 {
 	if (obj == m_associatedMesh)
-		m_bBox.setValidity(false);
-}
-
-void ccSubMesh::forEach(genericTriangleAction action)
-{
-	if (!m_associatedMesh)
-		return;
-
-	for (unsigned int index : m_triIndexes)
 	{
-		CCCoreLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(index);
-		action(*tri);
+		m_localBBox.setValidity(false);
 	}
 }
 
@@ -81,9 +71,14 @@ ccGenericPointCloud* ccSubMesh::getAssociatedCloud() const
 	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : nullptr;
 }
 
-CCCoreLib::GenericTriangle* ccSubMesh::_getNextTriangle() // temporary object
+CCCoreLib::GenericLocalTriangle* ccSubMesh::_getNextLocalTriangle() // temporary object
 {
-	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
+	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getLocalTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
+}
+
+CCCoreLib::GenericGlobalTriangle* ccSubMesh::_getNextGlobalTriangle() // temporary object
+{
+	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getGlobalTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
 }
 
 CCCoreLib::VerticesIndexes* ccSubMesh::getNextTriangleVertIndexes()
@@ -91,10 +86,20 @@ CCCoreLib::VerticesIndexes* ccSubMesh::getNextTriangleVertIndexes()
 	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->getTriangleVertIndexes(m_triIndexes[m_globalIterator++]) : nullptr;
 }
 
-bool ccSubMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
+bool ccSubMesh::interpolateNormalsLocal(unsigned triIndex, const CCVector3& P, CCVector3& N)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->interpolateNormals(getTriGlobalIndex(triIndex), P, N);
+		return m_associatedMesh->interpolateNormalsLocal(getTriGlobalIndex(triIndex), P, N);
+
+	// shouldn't happen
+	assert(false);
+	return false;
+}
+
+bool ccSubMesh::interpolateNormalsGlobal(unsigned triIndex, const CCVector3d& P, CCVector3& N)
+{
+	if (m_associatedMesh && triIndex < size())
+		return m_associatedMesh->interpolateNormalsGlobal(getTriGlobalIndex(triIndex), P, N);
 
 	// shouldn't happen
 	assert(false);
@@ -111,10 +116,10 @@ bool ccSubMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCV
 	return false;
 }
 
-bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color)
+bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgb& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
+		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), localP, color);
 
 	// shouldn't happen
 	assert(false);
@@ -131,10 +136,10 @@ bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccCo
 	return false;
 }
 
-bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color)
+bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
+		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), localP, color);
 
 	// shouldn't happen
 	assert(false);
@@ -151,10 +156,10 @@ bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccCo
 	return false;
 }
 
-bool ccSubMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture)
+bool ccSubMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color, bool interpolateColorIfNoTexture)
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->getColorFromMaterial(getTriGlobalIndex(triIndex), P, color, interpolateColorIfNoTexture);
+		return m_associatedMesh->getColorFromMaterial(getTriGlobalIndex(triIndex), localP, color, interpolateColorIfNoTexture);
 
 	// shouldn't happen
 	assert(false);
@@ -171,26 +176,66 @@ bool ccSubMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vert
 	return false;
 }
 
-CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) // temporary object
+CCCoreLib::GenericLocalTriangle* ccSubMesh::_getLocalTriangle(unsigned triIndex) // temporary object
 {
 	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->_getTriangle(getTriGlobalIndex(triIndex));
+	{
+		return m_associatedMesh->_getLocalTriangle(getTriGlobalIndex(triIndex));
+	}
 
 	// shouldn't happen
 	assert(false);
 	return nullptr;
 }
 
-void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
+CCCoreLib::GenericGlobalTriangle* ccSubMesh::_getGlobalTriangle(unsigned triIndex) // temporary object
 {
 	if (m_associatedMesh && triIndex < size())
 	{
-		m_associatedMesh->getTriangleVertices(getTriGlobalIndex(triIndex), A, B, C);
+		return m_associatedMesh->_getGlobalTriangle(getTriGlobalIndex(triIndex));
+	}
+
+	// shouldn't happen
+	assert(false);
+	return nullptr;
+}
+
+void ccSubMesh::getLocalTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
+{
+	if (m_associatedMesh && triIndex < size())
+	{
+		m_associatedMesh->getLocalTriangleVertices(getTriGlobalIndex(triIndex), A, B, C);
 	}
 	else
 	{
 		// shouldn't happen
 		assert(false);
+	}
+}
+
+void ccSubMesh::getGlobalTriangleVertices(unsigned triIndex, CCVector3d& A, CCVector3d& B, CCVector3d& C) const
+{
+	if (m_associatedMesh && triIndex < size())
+	{
+		m_associatedMesh->getGlobalTriangleVertices(getTriGlobalIndex(triIndex), A, B, C);
+	}
+	else
+	{
+		// shouldn't happen
+		assert(false);
+	}
+}
+
+CCVector3d ccSubMesh::getLocalToGlobalTranslation() const
+{
+	if (m_associatedMesh)
+	{
+		return m_associatedMesh->getLocalToGlobalTranslation();
+	}
+	else
+	{
+		assert(false);
+		return CCVector3d(0, 0, 0);
 	}
 }
 
@@ -328,7 +373,7 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool                    remo
 		if (removeSelectedTriangles && lastTriIndex < triCount)
 		{
 			resize(lastTriIndex); // can't fail, always smaller
-			m_bBox.setValidity(false);
+			m_localBBox.setValidity(false);
 			notifyGeometryUpdate();
 		}
 	}
@@ -448,7 +493,8 @@ void ccSubMesh::clear(bool releaseMemory)
 		m_triIndexes.resize(0);
 	else
 		m_triIndexes.clear();
-	m_bBox.setValidity(false);
+
+	m_localBBox.setValidity(false);
 }
 
 bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
@@ -463,7 +509,7 @@ bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
 		return false;
 	}
 
-	m_bBox.setValidity(false);
+	m_localBBox.setValidity(false);
 
 	return true;
 }
@@ -493,7 +539,7 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 		m_triIndexes.emplace_back(i);
 	}
 
-	m_bBox.setValidity(false);
+	m_localBBox.setValidity(false);
 
 	return true;
 }
@@ -502,7 +548,7 @@ void ccSubMesh::setTriangleIndex(unsigned localIndex, unsigned globalIndex)
 {
 	assert(localIndex < size());
 	m_triIndexes[localIndex] = globalIndex;
-	m_bBox.setValidity(false);
+	m_localBBox.setValidity(false);
 }
 
 bool ccSubMesh::reserve(size_t n)
@@ -540,16 +586,16 @@ unsigned ccSubMesh::capacity() const
 
 void ccSubMesh::refreshBB()
 {
-	m_bBox.clear();
+	m_localBBox.clear();
 
 	if (m_associatedMesh)
 	{
 		for (unsigned globalIndex : m_triIndexes)
 		{
-			CCCoreLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(globalIndex);
-			m_bBox.add(*tri->_getA());
-			m_bBox.add(*tri->_getB());
-			m_bBox.add(*tri->_getC());
+			CCCoreLib::GenericLocalTriangle* tri = m_associatedMesh->_getLocalTriangle(globalIndex);
+			m_localBBox.add(*tri->_getA());
+			m_localBBox.add(*tri->_getB());
+			m_localBBox.add(*tri->_getC());
 		}
 	}
 
@@ -559,24 +605,24 @@ void ccSubMesh::refreshBB()
 ccBBox ccSubMesh::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	// force BB refresh if necessary
-	if (!m_bBox.isValid() && size() != 0)
+	if (!m_localBBox.isValid() && size() != 0)
 	{
 		refreshBB();
 	}
 
-	return m_bBox;
+	return ccBBox(toGlobal(m_localBBox.minCorner()), toGlobal(m_localBBox.maxCorner()), m_localBBox.isValid());
 }
 
-void ccSubMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
+void ccSubMesh::getLocalBoundingBox(CCVector3& localBBMin, CCVector3& localBBMax)
 {
 	// force BB refresh if necessary
-	if (!m_bBox.isValid() && size() != 0)
+	if (!m_localBBox.isValid() && size() != 0)
 	{
 		refreshBB();
 	}
 
-	bbMin = m_bBox.minCorner();
-	bbMax = m_bBox.maxCorner();
+	localBBMin = m_localBBox.minCorner();
+	localBBMax = m_localBBox.maxCorner();
 }
 
 bool ccSubMesh::toFile_MeOnly(QFile& out, short dataVersion) const

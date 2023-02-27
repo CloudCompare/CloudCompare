@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_TORUS_PRIMITIVE_HEADER
-#define CC_TORUS_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -49,7 +48,7 @@ class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
 	        double              angle_rad          = 2.0 * M_PI,
 	        bool                rectangularSection = false,
 	        PointCoordinateType rectSectionHeight  = 0,
-	        const ccGLMatrix*   transMat           = nullptr,
+	        const ccGLMatrixd*  transMat           = nullptr,
 	        QString             name               = QString("Torus"),
 	        unsigned            precision          = DEFAULT_DRAWING_PRECISION,
 	        unsigned            uniqueID           = ccUniqueIDGenerator::InvalidUniqueID);
@@ -98,5 +97,3 @@ class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
 	//! Subtended angle (in radians)
 	double m_angle_rad;
 };
-
-#endif // CC_TORUS_PRIMITIVE_HEADER

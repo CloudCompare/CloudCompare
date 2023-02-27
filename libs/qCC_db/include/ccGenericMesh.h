@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_MESH_HEADER
-#define CC_GENERIC_MESH_HEADER
 
 // CCCoreLib
 #include <GenericIndexedMesh.h>
@@ -117,8 +116,8 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Returns per-triangle normals shared array
 	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
 
-	//! Returns the (barycentric) interpolation weights for a given triangle
-	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
+	//! Returns the (barycentric) interpolation weights for a given triangle (local coordinates)
+	virtual void computeInterpolationWeightsLocal(unsigned triIndex, const CCVector3& localP, CCVector3d& weights) const;
 
 	//! Interpolates normal(s) inside a given triangle
 	/** \param triIndex triangle index
@@ -130,11 +129,11 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Interpolates RGB colors inside a given triangle
 	/** \param triIndex triangle index
-	    \param P point where to interpolate (should be inside the triangle!)
+	    \param localP point where to interpolate (should be inside the triangle!)
 	    \param[out] color interpolated color
 	    \return success
 	**/
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) = 0;
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgb& color) = 0;
 
 	//! Interpolates RGB colors inside a given triangle
 	/** \param triIndex triangle index
@@ -146,11 +145,11 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Interpolates RGBA colors inside a given triangle
 	/** \param triIndex triangle index
-	    \param P point where to interpolate (should be inside the triangle!)
+	    \param localP point where to interpolate (should be inside the triangle!)
 	    \param[out] color interpolated color
 	    \return success
 	**/
-	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) = 0;
+	virtual bool interpolateColors(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color) = 0;
 
 	//! Interpolates RGBA colors inside a given triangle
 	/** \param triIndex triangle index
@@ -162,12 +161,12 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Returns RGB color fom a given triangle material/texture
 	/** \param triIndex triangle index
-	    \param P point where to grab color (should be inside the triangle!)
+	    \param localP point where to grab color (should be inside the triangle!)
 	    \param[out] color texel color
 	    \param interpolateColorIfNoTexture whether to return the color interpolated from the RGB field if no texture/material is associated to the given triangles
 	    \return success
 	**/
-	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) = 0;
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& localP, ccColor::Rgba& color, bool interpolateColorIfNoTexture) = 0;
 
 	//! Returns RGB color of a vertex fom a given triangle material/texture
 	/** \param triIndex triangle index
@@ -254,8 +253,8 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	                             CCVector3d&                 point,
 	                             CCVector3d*                 barycentricCoords = nullptr) const;
 
-	//! Computes the point that corresponds to the given uv (barycentric) coordinates
-	bool computePointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& P, bool warningIfOutside = true) const;
+	//! Computes the local point that corresponds to the given uv (barycentric) coordinates
+	bool computeLocalPointPosition(unsigned triIndex, const CCVector2d& uv, CCVector3& localP, bool warningIfOutside = true) const;
 
 	//! Helper to determine if the input cloud acts as vertices of a mesh
 	static bool IsCloudVerticesOfMesh(ccGenericPointCloud* cloud, ccGenericMesh** mesh = nullptr);
@@ -286,7 +285,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,
 	                             const CCVector2d&           clickPos,
-	                             const ccGLMatrix&           trans,
+	                             const ccGLMatrixd&          trans,
 	                             bool                        noGLTrans,
 	                             const ccGenericPointCloud&  vertices,
 	                             const ccGLCameraParameters& camera,
@@ -320,5 +319,3 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Polygon stippling state
 	bool m_stippling;
 };
-
-#endif // CC_GENERIC_MESH_HEADER

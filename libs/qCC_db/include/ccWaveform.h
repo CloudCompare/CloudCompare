@@ -143,8 +143,8 @@ class QCC_DB_LIB_API ccWaveform : public ccSerializableObject
 		return m_echoTime_ps;
 	}
 
-	//! Applies a rigid transformation (on the beam direction)
-	void applyRigidTransformation(const ccGLMatrix& trans);
+	//! Applies a rigid transformation (to the beam direction)
+	void applyRigidTransformation(const ccGLMatrixd& trans);
 
 	//! Returns the return index
 	uint8_t returnIndex() const

@@ -172,8 +172,10 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 		//! Entity center mode (index will be invalid)
 		bool entityCenterPoint;
 
-		//! Returns the point position (3D)
-		CCVector3 getPointPosition() const;
+		//! Returns the point global position (3D)
+		CCVector3d getPointGlobalPosition() const;
+		//! Returns the point local position (3D)
+		CCVector3 getPointLocalPosition() const;
 		//! Returns the cloud or the mesh vertices
 		ccGenericPointCloud* cloudOrVertices() const;
 		//! Returns the cloud or the mesh unique ID
@@ -287,7 +289,7 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	//! Two-points label info
 	struct LabelInfo2
 	{
-		CCVector3 diff;
+		CCVector3d diff;
 		//! Default constructor
 		LabelInfo2()
 		    : diff(0, 0, 0)
@@ -300,10 +302,10 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	//! Three-points label info
 	struct LabelInfo3
 	{
-		CCVector3           normal;
-		PointCoordinateType area;
-		CCVector3d          angles;
-		CCVector3d          edges;
+		CCVector3d normal;
+		double     area;
+		CCVector3d angles;
+		CCVector3d edges;
 		//! Default constructor
 		LabelInfo3()
 		    : normal(0, 0, 0)

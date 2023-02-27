@@ -34,9 +34,9 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	    \param transMat optional 3D transformation applied to the primitive vertices (can be set afterwards with ccDrawableObject::setGLTransformation + ccDrawableObject::applyGLTransformation_recursive)
 	    \param uniqueID unique ID (handle with care)
 	**/
-	ccGenericPrimitive(QString           name     = QString(),
-	                   const ccGLMatrix* transMat = nullptr,
-	                   unsigned          uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
+	ccGenericPrimitive(QString            name     = QString(),
+	                   const ccGLMatrixd* transMat = nullptr,
+	                   unsigned           uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Returns type name (sphere, cylinder, etc.)
 	virtual QString getTypeName() const = 0;
@@ -88,23 +88,23 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	}
 
 	//! Returns the transformation that is currently applied to the vertices
-	virtual inline ccGLMatrix& getTransformation()
+	virtual inline ccGLMatrixd& getTransformation()
 	{
 		return m_transformation;
 	}
 
 	//! Returns the transformation that is currently applied to the vertices (const version)
-	virtual inline const ccGLMatrix& getTransformation() const
+	virtual inline const ccGLMatrixd& getTransformation() const
 	{
 		return m_transformation;
 	}
 
 	// inherited methods (ccHObject)
-	const ccGLMatrix& getGLTransformationHistory() const override;
+	const ccGLMatrixd& getGLTransformationHistory() const override;
 
   protected:
 	//! Inherited from ccGenericMesh
-	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void applyGLTransformation(const ccGLMatrixd& trans) override;
 
 	// inherited from ccMesh
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
@@ -145,7 +145,7 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	//! Associated transformation (applied to vertices)
 	/** Different from ccDrawableObject::m_glTrans!
 	 **/
-	ccGLMatrix m_transformation;
+	ccGLMatrixd m_transformation;
 
 	//! Drawing precision (for primitives that support this feature)
 	unsigned m_drawPrecision;

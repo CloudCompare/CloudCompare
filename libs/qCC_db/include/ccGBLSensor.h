@@ -70,7 +70,7 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 		return true;
 	}
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
-	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrixd& trans) override;
 
 	// inherited from ccSensor
 	bool applyViewport(ccGenericGLDisplay* win = nullptr) const override;
@@ -85,7 +85,7 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	    \param P the point to test
 	    \return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	unsigned char checkVisibility(const CCVector3& P) const override;
+	uint8_t checkVisibility(const CCVector3d& globalP) const override;
 
 	//! Computes angular parameters automatically (all but the angular steps!)
 	/** \warning this method uses the cloud global iterator.
@@ -218,10 +218,10 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	    \param[out] depth distance between the sensor optical center and the 3D point
 	    \param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
-	void projectPoint(const CCVector3&     sourcePoint,
-	                  CCVector2&           destPoint,
-	                  PointCoordinateType& depth,
-	                  double               posIndex = 0) const;
+	void projectPoint(const CCVector3d& sourcePoint,
+	                  CCVector2d&       destPoint,
+	                  double&           depth,
+	                  double            posIndex = 0) const;
 
 	//! 2D grid of normals
 	using NormalGrid = std::vector<CCVector3>;
@@ -278,7 +278,7 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Converts 2D angular coordinates (yaw,pitch) in integer depth buffer coordinates
-	bool convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const;
+	bool convertToDepthMapCoords(double yaw, double pitch, unsigned& i, unsigned& j) const;
 
 	//! Minimal pitch limit (in radians)
 	/** Phi = 0 corresponds to the scanner vertical direction (upward) **/

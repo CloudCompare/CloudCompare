@@ -299,10 +299,11 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	for (unsigned n = 0; n < pointCount; ++n)
 	{
 		// for each point
-		const CCVector3* P = cloud->getPoint(n);
+		CCVector3d P;
+		cloud->getGlobalPoint(n, P);
 
 		// project it inside the grid
-		CCVector2i cellPos = computeCellPos(*P, X, Y);
+		CCVector2i cellPos = computeCellPos(P, X, Y);
 
 		// we skip points that fall outside of the grid!
 		if (cellPos.x < 0 || cellPos.x >= static_cast<int>(width)
@@ -409,10 +410,11 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 				void** pRef = aCell.pointRefHead;
 				for (unsigned n = 0; n < aCell.nbPoints; ++n)
 				{
-					unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
-					const CCVector3* P              = cloud->getPoint(pointIndex);
+					unsigned   pointIndex = static_cast<unsigned>(pRef - pointRefList.data());
+					CCVector3d P;
+					cloud->getGlobalPoint(pointIndex, P);
 					cellPointIndexedHeight[n].index = pointIndex;
-					cellPointIndexedHeight[n].val   = P->u[Z];
+					cellPointIndexedHeight[n].val   = P.u[Z];
 					pRef                            = reinterpret_cast<void**>(*pRef);
 				}
 
@@ -497,10 +499,11 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						double     minimumSquareDistToP = 0.0;
 						for (unsigned n = 0; n < aCell.nbPoints; n++)
 						{
-							unsigned         pointIndex = cellPointIndexedHeight[n].index;
-							const CCVector3* P          = cloud->getPoint(pointIndex);
-							CCVector2d       P2D(P->u[X], P->u[Y]);
-							double           squareDistToP = (C - P2D).norm2();
+							unsigned   pointIndex = cellPointIndexedHeight[n].index;
+							CCVector3d P;
+							cloud->getGlobalPoint(pointIndex, P);
+							CCVector2d P2D(P.u[X], P.u[Y]);
+							double     squareDistToP = (C - P2D).norm2();
 							if ((squareDistToP < minimumSquareDistToP) || (n == 0))
 							{
 								minimumSquareDistToP    = squareDistToP;
@@ -1416,6 +1419,14 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		return nullptr;
 	}
 
+	// horizontal dimensions
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
+
+	const unsigned char outX = (exportToOriginalCS ? X : 0);
+	const unsigned char outY = (exportToOriginalCS ? Y : 1);
+	const unsigned char outZ = (exportToOriginalCS ? Z : 2);
+
 	ccPointCloud* cloudGrid = nullptr;
 
 	ccPointCloud* inputCloudAsPC = (inputCloud && inputCloud->isA(CC_TYPES::POINT_CLOUD)) ? static_cast<ccPointCloud*>(inputCloud) : nullptr;
@@ -1469,7 +1480,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 					const ccRasterCell& cell = rows[j][i];
 					if (cell.nbPoints) // non empty cell
 					{
-						const_cast<CCVector3*>(cloudGrid->getPoint(pointIndex))->u[Z] = static_cast<PointCoordinateType>(cell.h);
+						const_cast<CCVector3*>(cloudGrid->getLocalPoint(pointIndex))->u[Z] = static_cast<PointCoordinateType>(cell.h - cloudGrid->getLocalToGlobalTranslation().u[Z]);
 						++pointIndex;
 					}
 				}
@@ -1486,6 +1497,13 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 	else
 	{
 		cloudGrid = new ccPointCloud("grid");
+
+		CCVector3d Pg;
+		Pg.u[outX] = box.minCorner().u[X];
+		Pg.u[outY] = box.minCorner().u[Y];
+		Pg.u[outZ] = 0.0;
+
+		cloudGrid->setLocalToGlobalTranslation(Pg);
 	}
 	assert(cloudGrid);
 
@@ -1615,14 +1633,6 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		}
 	}
 
-	// horizontal dimensions
-	const unsigned char X = (Z == 2 ? 0 : Z + 1);
-	const unsigned char Y = (X == 2 ? 0 : X + 1);
-
-	const unsigned char outX = (exportToOriginalCS ? X : 0);
-	const unsigned char outY = (exportToOriginalCS ? Y : 1);
-	const unsigned char outZ = (exportToOriginalCS ? Z : 2);
-
 	// as the 'non empty cells points' are already in the cloud
 	// we must take care of where we put the scalar fields values!
 	unsigned nonEmptyCellIndex = 0;
@@ -1684,13 +1694,13 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 					// corresponding to this non-empty cell
 					if (!resampleInputCloudXY || aCell->nbPoints == 0)
 					{
-						CCVector3 Pf;
-						Pf.u[outX] = static_cast<PointCoordinateType>(Px);
-						Pf.u[outY] = static_cast<PointCoordinateType>(Py);
-						Pf.u[outZ] = static_cast<PointCoordinateType>(aCell->h);
+						CCVector3d Pf;
+						Pf.u[outX] = Px;
+						Pf.u[outY] = Py;
+						Pf.u[outZ] = aCell->h;
 
 						assert(cloudGrid->size() < cloudGrid->capacity());
-						cloudGrid->addPoint(Pf);
+						cloudGrid->addGlobalPoint(Pf);
 
 						if (projectColors)
 						{
@@ -1737,8 +1747,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 								// Set up vector of height values for current cell
 								for (unsigned n = 0; n < aCell->nbPoints; ++n)
 								{
-									const CCVector3* P = inputCloud->getPoint(cellPointIndexes[n]);
-									cellPointVal.push_back(P->u[Z]);
+									CCVector3d P;
+									inputCloud->getGlobalPoint(cellPointIndexes[n], P);
+									cellPointVal.push_back(P.u[Z]);
 								}
 							}
 							else // SF statistics

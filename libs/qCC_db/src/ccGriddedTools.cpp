@@ -28,7 +28,7 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
                                       const ccPointCloud::Grid::Shared grid,
                                       GridParameters&                  parameters,
                                       bool                             verbose /*=false*/,
-                                      ccGLMatrix*                      cloudToSensorTrans /*=nullptr*/)
+                                      ccGLMatrixd*                     cloudToSensorTrans /*=nullptr*/)
 {
 	if (!cloud || !grid)
 	{
@@ -36,20 +36,21 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 		return false;
 	}
 
-	parameters.minPhi        = static_cast<PointCoordinateType>(M_PI);
+	parameters.minPhi        = M_PI;
 	parameters.maxPhi        = -parameters.minPhi;
-	parameters.minTheta      = static_cast<PointCoordinateType>(M_PI);
+	parameters.minTheta      = M_PI;
 	parameters.maxTheta      = -parameters.minTheta;
 	parameters.deltaPhiRad   = 0;
 	parameters.deltaThetaRad = 0;
 	parameters.maxRange      = 0;
+	parameters.maxRange      = 0;
 
 	// we must test if the angles are shifted (i.e the scan spans above theta = pi)
 	// we'll compute all parameters for both cases, and choose the best one at the end!
-	PointCoordinateType minPhiShifted   = parameters.minPhi;
-	PointCoordinateType maxPhiShifted   = parameters.maxPhi;
-	PointCoordinateType minThetaShifted = parameters.minTheta;
-	PointCoordinateType maxThetaShifted = parameters.maxTheta;
+	double minPhiShifted   = parameters.minPhi;
+	double maxPhiShifted   = parameters.maxPhi;
+	double minThetaShifted = parameters.minTheta;
+	double maxThetaShifted = parameters.maxTheta;
 
 	try
 	{
@@ -77,20 +78,21 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 
 				if (maxIndex > minIndex)
 				{
-					PointCoordinateType minPhiCurrentLine        = 0;
-					PointCoordinateType maxPhiCurrentLine        = 0;
-					PointCoordinateType minPhiCurrentLineShifted = 0;
-					PointCoordinateType maxPhiCurrentLineShifted = 0;
+					double minPhiCurrentLine        = 0;
+					double maxPhiCurrentLine        = 0;
+					double minPhiCurrentLineShifted = 0;
+					double maxPhiCurrentLineShifted = 0;
 					for (unsigned k = minIndex; k <= maxIndex; ++k)
 					{
 						int index = _indexGrid[k];
 						if (index >= 0)
 						{
-							CCVector3 P = *(cloud->getPoint(static_cast<unsigned>(index)));
+							CCVector3d P;
+							cloud->getGlobalPoint(static_cast<unsigned>(index), P);
 							if (cloudToSensorTrans)
 								cloudToSensorTrans->apply(P);
-							PointCoordinateType p        = atan2(P.z, sqrt(P.x * P.x + P.y * P.y)); // see ccGBLSensor::projectPoint
-							PointCoordinateType pShifted = (p < 0 ? p + static_cast<PointCoordinateType>(2.0 * M_PI) : p);
+							double p        = atan2(P.z, sqrt(P.x * P.x + P.y * P.y)); // see ccGBLSensor::projectPoint
+							double pShifted = (p < 0 ? p + 2.0 * M_PI : p);
 							if (k != minIndex)
 							{
 								if (minPhiCurrentLine > p)
@@ -110,7 +112,7 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 							}
 
 							// find max range
-							PointCoordinateType range = P.norm();
+							double range = P.norm();
 							if (range > parameters.maxRange)
 								parameters.maxRange = range;
 						}
@@ -140,8 +142,8 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 			if (!angles.empty())
 			{
 				// check the 'shifted' hypothesis
-				PointCoordinateType spanShifted = maxPhiShifted - minPhiShifted;
-				PointCoordinateType span        = parameters.maxPhi - parameters.minPhi;
+				double spanShifted = maxPhiShifted - minPhiShifted;
+				double span        = parameters.maxPhi - parameters.minPhi;
 				if (spanShifted < 0.99 * span)
 				{
 					// we prefer the shifted version!
@@ -161,7 +163,7 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 					}
 				}
 
-				parameters.deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+				parameters.deltaPhiRad = angles[maxSpanIndex].first;
 				if (verbose)
 				{
 					ccLog::Print(QStringLiteral("[Scan grid] Detected pitch step: %1 degrees (span [%2 - %3])")
@@ -202,21 +204,22 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 
 				if (maxIndex > minIndex)
 				{
-					PointCoordinateType minThetaCurrentCol        = 0;
-					PointCoordinateType maxThetaCurrentCol        = 0;
-					PointCoordinateType minThetaCurrentColShifted = 0;
-					PointCoordinateType maxThetaCurrentColShifted = 0;
+					double minThetaCurrentCol        = 0;
+					double maxThetaCurrentCol        = 0;
+					double minThetaCurrentColShifted = 0;
+					double maxThetaCurrentColShifted = 0;
 					for (unsigned k = minIndex; k <= maxIndex; ++k)
 					{
 						int index = _indexGrid[k * grid->w];
 						if (index >= 0)
 						{
 							// warning: indexes are shifted (0 = no point)
-							CCVector3 P = *(cloud->getPoint(static_cast<unsigned>(index)));
+							CCVector3d P;
+							cloud->getGlobalPoint(static_cast<unsigned>(index), P);
 							if (cloudToSensorTrans)
 								cloudToSensorTrans->apply(P);
-							PointCoordinateType t        = atan2(P.y, P.x); // see ccGBLSensor::projectPoint
-							PointCoordinateType tShifted = (t < 0 ? t + static_cast<PointCoordinateType>(2.0 * M_PI) : t);
+							double t        = atan2(P.y, P.x); // see ccGBLSensor::projectPoint
+							double tShifted = (t < 0 ? t + 2.0 * M_PI : t);
 							if (k != minIndex)
 							{
 								if (minThetaCurrentColShifted > tShifted)
@@ -259,8 +262,8 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 			if (!angles.empty())
 			{
 				// check the 'shifted' hypothesis
-				PointCoordinateType spanShifted = maxThetaShifted - minThetaShifted;
-				PointCoordinateType span        = parameters.maxTheta - parameters.minTheta;
+				double spanShifted = maxThetaShifted - minThetaShifted;
+				double span        = parameters.maxTheta - parameters.minTheta;
 				if (spanShifted < 0.99 * span)
 				{
 					// we prefer the shifted version!
@@ -280,7 +283,7 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 					}
 				}
 
-				parameters.deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+				parameters.deltaThetaRad = angles[maxSpanIndex].first;
 				if (verbose)
 				{
 					ccLog::Print(QStringLiteral("[Scan grid] Detected yaw step: %1 degrees (span [%2 - %3])")
@@ -305,7 +308,9 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 	return true;
 }
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans /*=nullptr*/)
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud*              cloud,
+                                               ccPointCloud::Grid::Shared grid,
+                                               ccGLMatrixd*               cloudToSensorTrans /*=nullptr*/)
 {
 	GridParameters parameters;
 	if (!DetectParameters(cloud, grid, parameters, true, cloudToSensorTrans))

@@ -71,7 +71,7 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 	bool convertCellIndexToRandomColor();
 
 	//! Returns the bounding-box of a given cell
-	ccBBox getCellBBox(BaseNode* node) const;
+	CCCoreLib::BoundingBox getCellBBox(BaseNode* node) const;
 
 	//! A set of leaves
 	typedef std::unordered_set<Leaf*> LeafSet;

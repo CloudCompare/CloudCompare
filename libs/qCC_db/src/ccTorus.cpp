@@ -26,7 +26,7 @@ ccTorus::ccTorus(PointCoordinateType insideRadius,
                  double              angle_rad /*=2.0*M_PI*/,
                  bool                rectangularSection /*=false*/,
                  PointCoordinateType rectSectionHeight /*=0*/,
-                 const ccGLMatrix*   transMat /*=nullptr*/,
+                 const ccGLMatrixd*  transMat /*=nullptr*/,
                  QString             name /*=QString("Torus")*/,
                  unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/,
                  unsigned            uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -150,7 +150,7 @@ bool ccTorus::buildUp()
 			CCVector3 P(sweepU.x * (sweepRadius + sectPoints[i].x),
 			            sweepU.y * (sweepRadius + sectPoints[i].x),
 			            sectPoints[i].z);
-			verts->addPoint(P);
+			verts->addLocalPoint(P);
 		}
 
 		// normals
@@ -178,11 +178,11 @@ bool ccTorus::buildUp()
 	if (!closed && !m_rectSection)
 	{
 		CCVector3 P(sweepRadius, 0, 0);
-		verts->addPoint(P);
+		verts->addLocalPoint(P);
 		CCVector3 P2(static_cast<PointCoordinateType>(cos(m_angle_rad)) * sweepRadius,
 		             static_cast<PointCoordinateType>(sin(m_angle_rad)) * sweepRadius,
 		             0);
-		verts->addPoint(P2);
+		verts->addLocalPoint(P2);
 	}
 
 	if (!closed)

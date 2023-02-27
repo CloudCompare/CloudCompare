@@ -178,12 +178,12 @@ ccPointCloud* ccPointCloud::From(CCCoreLib::GenericCloud* cloud, const ccGeneric
 			cloud->placeIteratorAtBeginning();
 			for (unsigned i = 0; i < n; i++)
 			{
-				pc->addPoint(*cloud->getNextPoint());
+				pc->addLocalPoint(*cloud->getNextLocalPoint());
 			}
 		}
 	}
 
-	if (pc && sourceCloud)
+	if (sourceCloud)
 	{
 		pc->importParametersFrom(sourceCloud);
 	}
@@ -214,13 +214,13 @@ ccPointCloud* ccPointCloud::From(const CCCoreLib::GenericIndexedCloud* cloud, co
 			for (unsigned i = 0; i < n; i++)
 			{
 				CCVector3 P;
-				cloud->getPoint(i, P);
-				pc->addPoint(P);
+				cloud->getLocalPoint(i, P);
+				pc->addLocalPoint(P);
 			}
 		}
 	}
 
-	if (pc && sourceCloud)
+	if (sourceCloud)
 	{
 		pc->importParametersFrom(sourceCloud);
 	}
@@ -306,7 +306,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 		{
 			for (unsigned i = 0; i < selectionSize; i++)
 			{
-				result->addPoint(*getPointPersistentPtr(selection->getPointGlobalIndex(i)));
+				result->addLocalPoint(*getLocalPointPersistentPtr(selection->getPointGlobalIndex(i)));
 			}
 		}
 
@@ -558,6 +558,13 @@ void ccPointCloud::setDisplay(ccGenericGLDisplay* win)
 	BaseClass::setDisplay(win);
 }
 
+void ccPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
+{
+	ccGenericPointCloud::importParametersFrom(cloud);
+
+	setLocalToGlobalTranslation(cloud->getLocalToGlobalTranslation());
+}
+
 ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud /*=nullptr*/, bool ignoreChildren /*=false*/)
 {
 	if (destCloud && !destCloud->isA(CC_TYPES::POINT_CLOUD))
@@ -622,17 +629,26 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	// merge display parameters
 	setVisible(isVisible() || addedCloud->isVisible());
 
-	// 3D points (already reserved)
-	if (size() == pointCountBefore) // in some cases points have already been copied! (ok it's tricky)
+	// 3D points
+	if (size() == pointCountBefore)
 	{
 		// we remove structures that are not compatible with fusion process
 		deleteOctree();
 		unallocateVisibilityArray();
 
+		if (pointCountBefore == 0)
+		{
+			importParametersFrom(addedCloud);
+		}
+
 		for (unsigned i = 0; i < addedPoints; i++)
 		{
-			addPoint(*addedCloud->getPoint(i));
+			addLocalPoint(*addedCloud->getLocalPoint(i));
 		}
+	}
+	else
+	{
+		// in some cases points have already been copied! (ok it's tricky)
 	}
 
 	// deprecate internal structures
@@ -1849,7 +1865,7 @@ static bool ComputeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& ce
 	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
-	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+	cell.parentOctree->computeLocalCellCenter(nNSS.cellPos, cell.level, nNSS.localCellCenter);
 
 	// we already know the points lying in the first cell (this is the one we are treating :)
 	try
@@ -1865,7 +1881,7 @@ static bool ComputeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& ce
 	{
 		for (unsigned i = 0; i < n; ++i, ++it)
 		{
-			it->point      = cell.points->getPointPersistentPtr(i);
+			it->localPoint = cell.points->getLocalPointPersistentPtr(i);
 			it->pointIndex = cell.points->getPointGlobalIndex(i);
 		}
 	}
@@ -1900,7 +1916,7 @@ static bool ComputeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& ce
 		}
 
 		// we retrieve the points inside a spherical neighbourhood (radius: '3*sigma')
-		cell.points->getPoint(i, nNSS.queryPoint);
+		cell.points->getLocalPoint(i, nNSS.localQueryPoint);
 		// warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
 
@@ -2164,17 +2180,18 @@ bool ccPointCloud::setRGBColorByBanding(unsigned char dim, double freq)
 	enableTempColor(false);
 	assert(m_rgbaColors);
 
-	float bands = (2.0 * M_PI) / freq;
+	double bands = (2.0 * M_PI) / freq;
 
 	unsigned count = size();
 	for (unsigned i = 0; i < count; i++)
 	{
-		const CCVector3* P = getPoint(i);
+		CCVector3d P;
+		getGlobalPoint(i, P);
 
-		float         z = bands * P->u[dim];
-		ccColor::Rgba C(static_cast<ColorCompType>(((sin(z + 0.0f) + 1.0f) / 2.0f) * ccColor::MAX),
-		                static_cast<ColorCompType>(((sin(z + 2.0944f) + 1.0f) / 2.0f) * ccColor::MAX),
-		                static_cast<ColorCompType>(((sin(z + 4.1888f) + 1.0f) / 2.0f) * ccColor::MAX),
+		double        z = bands * P.u[dim];
+		ccColor::Rgba C(static_cast<ColorCompType>(((sin(z + 0.0) + 1.0) / 2.0) * ccColor::MAX),
+		                static_cast<ColorCompType>(((sin(z + 2.0944) + 1.0) / 2.0) * ccColor::MAX),
+		                static_cast<ColorCompType>(((sin(z + 4.1888) + 1.0) / 2.0) * ccColor::MAX),
 		                ccColor::MAX);
 
 		m_rgbaColors->setValue(i, C);
@@ -2213,8 +2230,9 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	unsigned count = size();
 	for (unsigned i = 0; i < count; i++)
 	{
-		const CCVector3*    Q           = getPoint(i);
-		double              relativePos = (Q->u[heightDim] - minHeight) / height;
+		CCVector3d Q;
+		getGlobalPoint(i, Q);
+		double              relativePos = (Q.u[heightDim] - minHeight) / height;
 		const ccColor::Rgb* col         = colorScale->getColorByRelativePos(relativePos);
 		if (!col) // DGM: yes it happens if we encounter a point with NaN coordinates!!!
 		{
@@ -2257,28 +2275,42 @@ bool ccPointCloud::setColor(const ccColor::Rgba& col)
 	return true;
 }
 
-CCVector3 ccPointCloud::computeGravityCenter()
+CCVector3 ccPointCloud::computeLocalGravityCenter()
 {
-	return CCCoreLib::GeometricalAnalysisTools::ComputeGravityCenter(this);
+	return CCCoreLib::GeometricalAnalysisTools::ComputeLocalGravityCenter(this);
 }
 
-void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
+CCVector3d ccPointCloud::computeGlobalGravityCenter()
 {
-	return applyRigidTransformation(trans);
+	return toGlobal(CCCoreLib::GeometricalAnalysisTools::ComputeLocalGravityCenter(this));
 }
 
-void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
+void ccPointCloud::applyGLTransformation(const ccGLMatrixd& trans)
+{
+	return applyGlobalRigidTransformation(trans);
+}
+
+void ccPointCloud::applyGlobalRigidTransformation(const ccGLMatrixd& globalTrans)
 {
 	// Clears the LOD structure (and potentially stop its construction)
 	clearLOD();
 
 	// transparent call
-	ccGenericPointCloud::applyGLTransformation(trans);
+	ccGenericPointCloud::applyGLTransformation(globalTrans);
 
+	// update the local to global translation
+	m_fromLocalToGlobal = globalTrans * m_fromLocalToGlobal;
+
+	// update the local points
 	unsigned count = size();
-	for (unsigned i = 0; i < count; i++)
 	{
-		trans.apply(*point(i));
+		ccGLMatrix localTrans(globalTrans.data());
+		localTrans.clearTranslation();
+
+		for (unsigned i = 0; i < count; i++)
+		{
+			localTrans.apply(*localPoint(i));
+		}
 	}
 
 	// we must also take care of the normals!
@@ -2295,9 +2327,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 			{
 				for (unsigned i = 0; i < ccNormalVectors::GetNumberOfVectors(); i++)
 				{
-					CCVector3 new_n(ccNormalVectors::GetNormal(i));
-					trans.applyRotation(new_n);
-					CompressedNormType newNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
+					CCVector3 newNormal(ccNormalVectors::GetNormal(i));
+					globalTrans.applyRotation(newNormal);
+					CompressedNormType newNormIndex = ccNormalVectors::GetNormIndex(newNormal.u);
 					newNorms.emplace_back(newNormIndex);
 				}
 
@@ -2311,15 +2343,14 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 
 		// if there is less points than the compressed normals array size
 		//(or if there is not enough memory to instantiate the temporary
-		// array), we recompress each normal ...
+		// array), we recompress each normal one by one...
 		if (!recoded)
 		{
-			// on recode direct chaque normale
 			for (CompressedNormType& _theNormIndex : *m_normals)
 			{
-				CCVector3 new_n(ccNormalVectors::GetNormal(_theNormIndex));
-				trans.applyRotation(new_n);
-				_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
+				CCVector3 newNormal(ccNormalVectors::GetNormal(_theNormIndex));
+				globalTrans.applyRotation(newNormal);
+				_theNormIndex = ccNormalVectors::GetNormIndex(newNormal.u);
 			}
 		}
 
@@ -2330,15 +2361,13 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	// and the scan grids!
 	if (!m_grids.empty())
 	{
-		ccGLMatrixd transd(trans.data());
-
 		for (Grid::Shared& grid : m_grids)
 		{
 			if (!grid)
 			{
 				continue;
 			}
-			grid->sensorPosition = transd * grid->sensorPosition;
+			grid->sensorPosition = globalTrans * grid->sensorPosition;
 		}
 	}
 
@@ -2347,7 +2376,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	{
 		if (w.descriptorID() != 0)
 		{
-			w.applyRigidTransformation(trans);
+			w.applyRigidTransformation(globalTrans);
 		}
 	}
 
@@ -2358,56 +2387,62 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 	refreshBB(); // calls notifyGeometryUpdate + releaseVBOs
 }
 
-void ccPointCloud::translate(const CCVector3& T)
+void ccPointCloud::applyLocalRigidTransformation(const ccGLMatrix& localTrans)
+{
+	ccGLMatrixd globalTrans(localTrans.data());
+	globalTrans.clearTranslation();
+
+	CCVector3d globalT = m_fromLocalToGlobal - globalTrans * m_fromLocalToGlobal + localTrans.getTranslationAsVec3D();
+	globalTrans.setTranslation(globalT);
+
+	applyGlobalRigidTransformation(globalTrans);
+}
+
+void ccPointCloud::translate(const CCVector3d& T)
 {
 	if (CCCoreLib::LessThanEpsilon(std::abs(T.x) + std::abs(T.y) + std::abs(T.z)))
 		return;
 
-	unsigned count = size();
-	{
-		for (unsigned i = 0; i < count; i++)
-			*point(i) += T;
-	}
+	m_fromLocalToGlobal += T;
 
 	notifyGeometryUpdate(); // calls releaseVBOs()
-	invalidateBoundingBox();
-
-	// same thing for the octree
-	ccOctree::Shared octree = getOctree();
-	if (octree)
-	{
-		octree->translateBoundingBox(T);
-	}
-
-	// and same thing for the Kd-tree(s)!
-	ccHObject::Container kdtrees;
-	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
-	{
-		for (size_t i = 0; i < kdtrees.size(); ++i)
-		{
-			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
-		}
-	}
 
 	// update the transformation history
 	{
-		ccGLMatrix trans;
+		ccGLMatrixd trans;
 		trans.setTranslation(T);
 		m_glTransHistory = trans * m_glTransHistory;
 	}
 }
 
-void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center)
+void ccPointCloud::scale(double fx, double fy, double fz, const CCVector3d& center /*=CCVector3d(0, 0, 0)*/)
 {
+	unsigned count = size();
+	if (count == 0)
+	{
+		return;
+	}
+
+	// set the first local point to (0, 0, 0)
+	CCVector3  Pl0 = *getLocalPoint(0);
+	CCVector3d Pg0;
+	getGlobalPoint(0, Pg0);
+	{
+		Pg0.x = (Pg0.x - center.x) * fx + center.x;
+		Pg0.y = (Pg0.y - center.y) * fy + center.y;
+		Pg0.z = (Pg0.z - center.z) * fz + center.z;
+	}
+	setLocalToGlobalTranslation(Pg0);
+	*localPoint(0) = {0, 0, 0};
+
 	// transform the points
 	{
-		unsigned count = size();
-		for (unsigned i = 0; i < count; i++)
+		for (unsigned i = 1; i < count; i++)
 		{
-			CCVector3* P = point(i);
-			P->x         = (P->x - center.x) * fx + center.x;
-			P->y         = (P->y - center.y) * fy + center.y;
-			P->z         = (P->z - center.z) * fz + center.z;
+			CCVector3* P = localPoint(i);
+			P->x         = static_cast<PointCoordinateType>((P->x - Pl0.x) * fx);
+			P->y         = static_cast<PointCoordinateType>((P->y - Pl0.y) * fy);
+			P->z         = static_cast<PointCoordinateType>((P->z - Pl0.z) * fz);
 		}
 	}
 
@@ -2444,10 +2479,9 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 	{
 		if (fx == fy && fx == fz && fx > 0)
 		{
-			CCVector3 centerInv = -center;
+			CCVector3 centerInv = -Pl0;
 			octree->translateBoundingBox(centerInv);
 			octree->multiplyBoundingBox(fx);
-			octree->translateBoundingBox(center);
 		}
 		else
 		{
@@ -2465,10 +2499,9 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 			for (size_t i = 0; i < kdtrees.size(); ++i)
 			{
 				ccKdTree* kdTree    = static_cast<ccKdTree*>(kdtrees[i]);
-				CCVector3 centerInv = -center;
+				CCVector3 centerInv = -Pl0;
 				kdTree->translateBoundingBox(centerInv);
 				kdTree->multiplyBoundingBox(fx);
-				kdTree->translateBoundingBox(center);
 			}
 		}
 		else
@@ -2483,12 +2516,12 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 	}
 
 	// new we have to compute a proper transformation matrix
-	ccGLMatrix scaleTrans;
+	ccGLMatrixd scaleTrans;
 	{
-		ccGLMatrix transToCenter;
+		ccGLMatrixd transToCenter;
 		transToCenter.setTranslation(-center);
 
-		ccGLMatrix scaleAndReposition;
+		ccGLMatrixd scaleAndReposition;
 		scaleAndReposition.data()[0]  = fx;
 		scaleAndReposition.data()[5]  = fy;
 		scaleAndReposition.data()[10] = fz;
@@ -2505,7 +2538,7 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 			if (grid)
 			{
 				// update the scan position
-				grid->sensorPosition = ccGLMatrixd(scaleTrans.data()) * grid->sensorPosition;
+				grid->sensorPosition = scaleTrans * grid->sensorPosition;
 			}
 		}
 	}
@@ -2521,12 +2554,12 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 				sensor->applyGLTransformation(scaleTrans);
 
 				// update the graphic scale, etc.
-				PointCoordinateType meanScale = (fx + fy + fz) / 3;
+				double meanScale = (fx + fy + fz) / 3;
 				// sensor->setGraphicScale(sensor->getGraphicScale() * meanScale);
 				if (sensor->isA(CC_TYPES::GBL_SENSOR))
 				{
 					ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
-					gblSensor->setSensorRange(gblSensor->getSensorRange() * meanScale);
+					gblSensor->setSensorRange(gblSensor->getSensorRange() * static_cast<PointCoordinateType>(meanScale));
 				}
 			}
 		}
@@ -2838,7 +2871,7 @@ void glLODChunkVertexPointer(ccPointCloud*      cloud,
 	for (unsigned j = startIndex; j < stopIndex; j++)
 	{
 		unsigned         pointIndex = indexMap[j];
-		const CCVector3* P          = cloud->getPoint(pointIndex);
+		const CCVector3* P          = cloud->getLocalPoint(pointIndex);
 		*(_points)++                = P->x;
 		*(_points)++                = P->y;
 		*(_points)++                = P->z;
@@ -4090,8 +4123,8 @@ bool ccPointCloud::interpolateColorsFrom(ccGenericPointCloud*                oth
 	ccBBox box      = getOwnBB();
 	ccBBox otherBox = otherCloud->getOwnBB();
 
-	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
-	CCVector3 dist   = box.getCenter() - otherBox.getCenter();
+	CCVector3d dimSum = box.getDiagVec() + otherBox.getDiagVec();
+	CCVector3d dist   = box.getCenter() - otherBox.getCenter();
 	if (std::abs(dist.x) > dimSum.x / 2
 	    || std::abs(dist.y) > dimSum.y / 2
 	    || std::abs(dist.z) > dimSum.z / 2)
@@ -4129,43 +4162,43 @@ bool ccPointCloud::interpolateColorsFrom(ccGenericPointCloud*                oth
 	return true;
 }
 
-static void ProjectOnCylinder(const CCVector3&     AP,
-                              const CCVector3&     xDir,
-                              const CCVector3&     yDir,
-                              PointCoordinateType  radius,
-                              PointCoordinateType& delta,
-                              PointCoordinateType& phi_rad)
+static void ProjectOnCylinder(const CCVector3d& AP,
+                              const CCVector3d& xDir,
+                              const CCVector3d& yDir,
+                              double            radius,
+                              double&           delta,
+                              double&           phi_rad)
 {
 	// longitude (0 = +X = east)
-	PointCoordinateType x = AP.dot(xDir);
-	PointCoordinateType y = AP.dot(yDir);
-	phi_rad               = atan2(y, x);
+	double x = AP.dot(xDir);
+	double y = AP.dot(yDir);
+	phi_rad  = atan2(y, x);
 	// deviation = 2D distance to the center (XY plane)
 	delta = sqrt(x * x + y * y) - radius;
 }
 
-static void ProjectOnCone(const CCVector3&     AP,
-                          PointCoordinateType  alpha_rad,
-                          const CCVector3&     axisDir,
-                          const CCVector3&     xDir,
-                          const CCVector3&     yDir,
-                          PointCoordinateType& s,
-                          PointCoordinateType& delta,
-                          PointCoordinateType& phi_rad)
+static void ProjectOnCone(const CCVector3d& AP,
+                          double            alpha_rad,
+                          const CCVector3d& axisDir,
+                          const CCVector3d& xDir,
+                          const CCVector3d& yDir,
+                          double&           s,
+                          double&           delta,
+                          double&           phi_rad)
 {
-	PointCoordinateType x = AP.dot(xDir);
-	PointCoordinateType y = AP.dot(yDir);
-	PointCoordinateType z = AP.dot(axisDir);
+	double x = AP.dot(xDir);
+	double y = AP.dot(yDir);
+	double z = AP.dot(axisDir);
 
 	// 3D distance to the apex
-	PointCoordinateType normAP = AP.norm();
+	double normAP = AP.norm();
 	// 2D distance to the apex (XY plane)
-	PointCoordinateType AP2Dnorm = sqrt(x * x + y * y);
+	double AP2Dnorm = sqrt(x * x + y * y);
 
 	// angle between +Z and AP
-	PointCoordinateType beta_rad = atan2(AP2Dnorm, -z);
+	double beta_rad = atan2(AP2Dnorm, -z);
 	// angular deviation
-	PointCoordinateType gamma_rad = beta_rad - alpha_rad; // if gamma_rad > 0, the point is outside the cone
+	double gamma_rad = beta_rad - alpha_rad; // if gamma_rad > 0, the point is outside the cone
 
 	// projection on the cone
 	{
@@ -4221,7 +4254,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		return nullptr;
 	}
 
-	CCVector3 axisDir = params->axisDir;
+	CCVector3d axisDir = params->axisDir;
 	axisDir.normalize(); // just in case
 	if (axisDir.norm() < 1.0e-6)
 	{
@@ -4229,7 +4262,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		return nullptr;
 	}
 
-	CCVector3 xDir, yDir;
+	CCVector3d xDir, yDir;
 	{
 		int mainDim = 0;
 		if (std::abs(axisDir.x) >= std::abs(axisDir.y))
@@ -4244,13 +4277,13 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		switch (mainDim)
 		{
 		case 0:
-			xDir = CCVector3(0, CCCoreLib::PC_ONE, 0); // Y
+			xDir = CCVector3(0.0, 1.0, 0.0); // Y
 			break;
 		case 1:
-			xDir = CCVector3(0, 0, CCCoreLib::PC_ONE); // Z
+			xDir = CCVector3(0.0, 0.0, 1.0); // Z
 			break;
 		case 2:
-			xDir = CCVector3(CCCoreLib::PC_ONE, 0, 0); // X
+			xDir = CCVector3(1.0, 0.0, 0.0); // X
 			break;
 		}
 
@@ -4279,7 +4312,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 	}
 
 	CCCoreLib::ReferenceCloud duplicatedPoints(const_cast<ccPointCloud*>(this));
-	std::vector<CCVector3>    unrolledPoints;
+	std::vector<CCVector3d>   unrolledPoints;
 	std::vector<ScalarType>   deviationValues;
 	std::vector<CCVector3>    unrolledNormals;
 	bool                      withNormals = hasNormals();
@@ -4323,24 +4356,25 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
 	}
 
-	CCVector3 xDir2 = arbitraryOutputCS ? CCVector3(1, 0, 0) : xDir;
+	CCVector3d xDir2 = arbitraryOutputCS ? CCVector3d(1.0, 0.0, 0.0) : xDir;
 
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
-		const CCVector3* Pin = getPoint(i);
+		CCVector3d Pin;
+		getGlobalPoint(i, Pin);
 
 		// we project the point
-		CCVector3           AP;
-		CCVector3           Pout(0, 0, 0);
-		PointCoordinateType longitude_rad = 0; // longitude (rad)
-		PointCoordinateType delta         = 0; // distance to the cone/cylinder surface
-		PointCoordinateType posAlongAxis  = 0;
+		CCVector3d AP;
+		CCVector3d Pout(0, 0, 0);
+		double     longitude_rad = 0; // longitude (rad)
+		double     delta         = 0; // distance to the cone/cylinder surface
+		double     posAlongAxis  = 0;
 
 		switch (mode)
 		{
 		case CYLINDER:
 		{
-			AP = *Pin - cylParams->center;
+			AP = Pin - cylParams->center;
 			ProjectOnCylinder(AP, xDir, yDir, params->radius, delta, longitude_rad);
 
 			// we project the point
@@ -4352,10 +4386,10 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 
 		case CONE_CONICAL:
 		{
-			AP = *Pin - coneParams->apex;
+			AP = Pin - coneParams->apex;
 			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, posAlongAxis, delta, longitude_rad);
 			// unrolling
-			// PointCoordinateType theta_rad = longitude_rad * coneParams->spanRatio;
+			// double theta_rad = longitude_rad * coneParams->spanRatio;
 			// Pout.x = posAlongAxis * sin(theta_rad); // will be set later
 			// Pout.y = -posAlongAxis * cos(theta_rad); // will be set later
 			Pout.z = delta;
@@ -4365,7 +4399,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		case CONE_CYLINDRICAL_FIXED_RADIUS:
 		case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
 		{
-			AP = *Pin - coneParams->apex;
+			AP = Pin - coneParams->apex;
 			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, posAlongAxis, delta, longitude_rad);
 			// we simply develop the cone as a cylinder
 			// Pout.x = phi_rad * params->radius; // will be set later
@@ -4383,43 +4417,43 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		if (withNormals)
 		{
 			const CCVector3& N   = getPointNormal(i);
-			CCVector3        AP2 = AP + N;
-			CCVector3        N2(0, 0, 0);
+			CCVector3d       AP2 = AP + N;
+			CCVector3d       N2(0, 0, 0);
 
 			switch (mode)
 			{
 			case CYLINDER:
 			{
-				PointCoordinateType delta2         = 0;
-				PointCoordinateType longitude2_rad = 0;
+				double delta2         = 0;
+				double longitude2_rad = 0;
 				ProjectOnCylinder(AP2, xDir, yDir, params->radius, delta2, longitude2_rad);
 
 				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
 				N2.y = -(delta2 - delta);
-				N2.z = N.dot(axisDir);
+				N2.z = CCVector3d::fromArray(N.u).dot(axisDir);
 			}
 			break;
 
 			case CONE_CONICAL:
 			{
-				PointCoordinateType posAlongAxis2  = 0;
-				PointCoordinateType delta2         = 0;
-				PointCoordinateType longitude2_rad = 0;
+				double posAlongAxis2  = 0;
+				double delta2         = 0;
+				double longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
 				// unrolling
-				PointCoordinateType theta_rad  = longitude_rad * coneParams->spanRatio;
-				PointCoordinateType theta2_rad = longitude2_rad * coneParams->spanRatio;
-				N2.x                           = posAlongAxis2 * sin(theta2_rad) - posAlongAxis * sin(theta_rad);
-				N2.y                           = -(posAlongAxis2 * cos(theta2_rad) - posAlongAxis * cos(theta_rad));
-				N2.z                           = delta2 - delta;
+				double theta_rad  = longitude_rad * coneParams->spanRatio;
+				double theta2_rad = longitude2_rad * coneParams->spanRatio;
+				N2.x              = posAlongAxis2 * sin(theta2_rad) - posAlongAxis * sin(theta_rad);
+				N2.y              = -(posAlongAxis2 * cos(theta2_rad) - posAlongAxis * cos(theta_rad));
+				N2.z              = delta2 - delta;
 			}
 			break;
 
 			case CONE_CYLINDRICAL_FIXED_RADIUS:
 			{
-				PointCoordinateType posAlongAxis2  = 0;
-				PointCoordinateType delta2         = 0;
-				PointCoordinateType longitude2_rad = 0;
+				double posAlongAxis2  = 0;
+				double delta2         = 0;
+				double longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
 				// we simply develop the cone as a cylinder
 				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
@@ -4430,9 +4464,9 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 
 			case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
 			{
-				PointCoordinateType posAlongAxis2  = 0;
-				PointCoordinateType delta2         = 0;
-				PointCoordinateType longitude2_rad = 0;
+				double posAlongAxis2  = 0;
+				double delta2         = 0;
+				double longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
 				N2.x = static_cast<PointCoordinateType>((longitude2_rad * posAlongAxis2 - longitude_rad * posAlongAxis) * sin_alpha);
 				N2.y = -(delta2 - delta);
@@ -4451,7 +4485,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 				N2 = (N2.x * xDir) + (N2.y * yDir) + (N2.z * axisDir);
 			}
 			N2.normalize();
-			unrolledNormals[i] = N2;
+			unrolledNormals[i] = CCVector3::fromArray(N2.u);
 		}
 
 		if (!arbitraryOutputCS)
@@ -4492,7 +4526,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		dLongitude_rad += 2 * M_PI;
 
 		// 2) repeat the unrolling process
-		CCVector3 Pout2 = Pout;
+		CCVector3d Pout2 = Pout;
 		for (; dLongitude_rad < stopAngle_rad; dLongitude_rad += 2 * M_PI)
 		{
 			// do we need to reserve more memory?
@@ -4538,11 +4572,11 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 
 			case CYLINDER:
 			case CONE_CYLINDRICAL_FIXED_RADIUS:
-				Pout += static_cast<PointCoordinateType>(dLongitude_rad * params->radius) * xDir2;
+				Pout += (dLongitude_rad * params->radius) * xDir2;
 				Pout2 = Pout;
 				break;
 			case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
-				Pout += static_cast<PointCoordinateType>(dLongitude_rad * posAlongAxis * sin_alpha) * xDir2;
+				Pout += (dLongitude_rad * posAlongAxis * sin_alpha) * xDir2;
 				Pout2 = Pout;
 				break;
 			default:
@@ -4593,8 +4627,8 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 		// update the coordinates, the normals and the deviation SF
 		for (unsigned i = 0; i < duplicatedPoints.size(); ++i)
 		{
-			CCVector3* P = clone->point(i);
-			*P           = unrolledPoints[i];
+			CCVector3* P = clone->localPoint(i);
+			*P           = clone->toLocal(unrolledPoints[i]);
 
 			unsigned globalIndex = duplicatedPoints.getPointGlobalIndex(i);
 			if (withNormals)
@@ -5350,8 +5384,9 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside /*=
 
 	for (unsigned i = 0; i < count; ++i)
 	{
-		const CCVector3* P             = point(i);
-		bool             pointIsInside = box.contains(*P);
+		CCVector3d P;
+		getGlobalPoint(i, P);
+		bool pointIsInside = box.contains(P);
 		if (inside == pointIsInside)
 		{
 			ref->addPointIndex(i);
@@ -5404,10 +5439,11 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 
 	for (unsigned i = 0; i < count; ++i)
 	{
-		const CCVector3* P = point(i);
+		CCVector3d P;
+		getGlobalPoint(i, P);
 
-		CCVector2 P2D(P->u[X], P->u[Y]);
-		bool      pointIsInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, poly);
+		CCVector2d P2D(P.u[X], P.u[Y]);
+		bool       pointIsInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, poly);
 		if (inside == pointIsInside)
 		{
 			ref->addPointIndex(i);
@@ -5919,7 +5955,7 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 		}
 
 		// the code below has been kindly provided by Romain Janvier
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		CCVector3 localSensorOrigin = toLocal(scanGrid->sensorPosition.getTranslationAsVec3D());
 
 		for (int j = 0; j < static_cast<int>(scanGrid->h) - 1; ++j)
 		{
@@ -5976,10 +6012,10 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 				case 15:
 				{
 					/* Choose the triangulation with smaller diagonal. */
-					double d0     = (*getPoint(v0) - sensorOrigin).normd();
-					double d1     = (*getPoint(v1) - sensorOrigin).normd();
-					double d2     = (*getPoint(v2) - sensorOrigin).normd();
-					double d3     = (*getPoint(v3) - sensorOrigin).normd();
+					double d0     = (*getLocalPoint(v0) - localSensorOrigin).normd();
+					double d1     = (*getLocalPoint(v1) - localSensorOrigin).normd();
+					double d2     = (*getLocalPoint(v2) - localSensorOrigin).normd();
+					double d3     = (*getLocalPoint(v3) - localSensorOrigin).normd();
 					float  ddiff1 = std::abs(d0 - d3);
 					float  ddiff2 = std::abs(d1 - d2);
 					if (ddiff1 < ddiff2)
@@ -6008,9 +6044,9 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 					}
 					const Tuple3i& t = tris[idx];
 
-					const CCVector3* A = getPoint(t.u[0]);
-					const CCVector3* B = getPoint(t.u[1]);
-					const CCVector3* C = getPoint(t.u[2]);
+					const CCVector3* A = getLocalPoint(t.u[0]);
+					const CCVector3* B = getLocalPoint(t.u[1]);
+					const CCVector3* C = getLocalPoint(t.u[2]);
 
 					// now check the triangle angles
 					if (minTriangleAngle_deg > 0)
@@ -6151,7 +6187,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 		}
 
 		// ccGLMatrixd toSensorCS = scanGrid->sensorPosition.inverse();
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		CCVector3 localSensorOrigin = toLocal(scanGrid->sensorPosition.getTranslationAsVec3D());
 
 		const int* _indexGrid = scanGrid->indexes.data();
 		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
@@ -6162,7 +6198,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 				{
 					unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
 					assert(pointIndex <= pointCount);
-					const CCVector3* P = getPoint(pointIndex);
+					const CCVector3* P = getLocalPoint(pointIndex);
 					// CCVector3 PinSensorCS = toSensorCS * (*P);
 
 					CCVector3 N = getPointNormal(pointIndex);
@@ -6170,7 +6206,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 					// check normal vector sign
 					// CCVector3 NinSensorCS(N);
 					// toSensorCS.applyRotation(NinSensorCS);
-					CCVector3 OP = *P - sensorOrigin;
+					CCVector3 OP = *P - localSensorOrigin;
 					OP.normalize();
 					PointCoordinateType dotProd = OP.dot(N);
 					if (dotProd > 0)
@@ -6201,16 +6237,17 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 	return true;
 }
 
-bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog* pDlg)
+bool ccPointCloud::orientNormalsTowardViewPoint(const CCVector3d& VP, ccProgressDialog* pDlg)
 {
 	int progressIndex = 0;
 	for (unsigned pointIndex = 0; pointIndex < m_points.size(); ++pointIndex)
 	{
-		const CCVector3* P  = getPoint(pointIndex);
-		CCVector3        N  = getPointNormal(pointIndex);
-		CCVector3        OP = *P - VP;
+		CCVector3d P;
+		getGlobalPoint(pointIndex, P);
+		CCVector3  N  = getPointNormal(pointIndex);
+		CCVector3d OP = P - VP;
 		OP.normalize();
-		PointCoordinateType dotProd = OP.dot(N);
+		double dotProd = OP.dot(N);
 		if (dotProd > 0)
 		{
 			N = -N;
@@ -6446,19 +6483,19 @@ bool ccPointCloud::hasSensor() const
 	return false;
 }
 
-unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
+uint8_t ccPointCloud::testVisibility(const CCVector3& localP) const
 {
 	if (m_visibilityCheckEnabled)
 	{
 		// if we have associated sensors, we can use them to check the visibility of other points
-		unsigned char bestVisibility = 255;
+		uint8_t bestVisibility = 255;
 		for (size_t i = 0; i < m_children.size(); ++i)
 		{
 			ccHObject* child = m_children[i];
 			if (child && child->isA(CC_TYPES::GBL_SENSOR))
 			{
-				ccGBLSensor*  sensor     = static_cast<ccGBLSensor*>(child);
-				unsigned char visibility = sensor->checkVisibility(P);
+				ccGBLSensor* sensor     = static_cast<ccGBLSensor*>(child);
+				uint8_t      visibility = sensor->checkVisibility(localP);
 
 				if (visibility == CCCoreLib::POINT_VISIBLE)
 					return CCCoreLib::POINT_VISIBLE;
@@ -6624,7 +6661,7 @@ bool ccPointCloud::enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityR
 ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_deg /*=0.0*/) const
 {
 	// the code below has been kindly provided by Romain Janvier
-	CCVector3 sensorOrigin = (grid.sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+	CCVector3 localSensorOrigin = toLocal(grid.sensorPosition.getTranslationAsVec3D());
 
 	ccMesh* mesh = new ccMesh(const_cast<ccPointCloud*>(this));
 	mesh->setName("Grid mesh");
@@ -6690,10 +6727,10 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 			case 15:
 			{
 				/* Choose the triangulation with smaller diagonal. */
-				double d0     = (*getPoint(v0) - sensorOrigin).normd();
-				double d1     = (*getPoint(v1) - sensorOrigin).normd();
-				double d2     = (*getPoint(v2) - sensorOrigin).normd();
-				double d3     = (*getPoint(v3) - sensorOrigin).normd();
+				double d0     = (*getLocalPoint(v0) - localSensorOrigin).normd();
+				double d1     = (*getLocalPoint(v1) - localSensorOrigin).normd();
+				double d2     = (*getLocalPoint(v2) - localSensorOrigin).normd();
+				double d3     = (*getLocalPoint(v3) - localSensorOrigin).normd();
 				float  ddiff1 = std::abs(d0 - d3);
 				float  ddiff2 = std::abs(d1 - d2);
 				if (ddiff1 < ddiff2)
@@ -6725,9 +6762,9 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				// now check the triangle angles
 				if (minTriangleAngle_deg > 0)
 				{
-					const CCVector3* A = getPoint(t.u[0]);
-					const CCVector3* B = getPoint(t.u[1]);
-					const CCVector3* C = getPoint(t.u[2]);
+					const CCVector3* A = getLocalPoint(t.u[0]);
+					const CCVector3* B = getLocalPoint(t.u[1]);
+					const CCVector3* C = getLocalPoint(t.u[2]);
 
 					CCVector3 uAB = (*B - *A);
 					uAB.normalize();
@@ -6848,9 +6885,11 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 			return false;
 		}
 
+		CCVector3d shift = getLocalToGlobalTranslation();
+
 		for (unsigned k = 0; k < ptsCount; ++k)
 		{
-			ScalarType s = static_cast<ScalarType>(getPoint(k)->u[d]);
+			ScalarType s = static_cast<ScalarType>(shift.u[d] + getLocalPoint(k)->u[d]);
 			sf->setValue(k, s);
 		}
 		sf->computeMinAndMax();
@@ -7021,9 +7060,9 @@ bool ccPointCloud::shiftPointsAlongNormals(PointCoordinateType shift)
 	for (unsigned i = 0; i < size(); ++i)
 	{
 		const CCVector3& N = getPointNormal(i);
-		const CCVector3* P = getPoint(i);
+		CCVector3*       P = localPoint(i);
 
-		const_cast<CCVector3&>(*P) = *P + (shift * N);
+		*P += (shift * N);
 	}
 
 	invalidateBoundingBox();

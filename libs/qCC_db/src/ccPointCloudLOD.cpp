@@ -89,7 +89,7 @@ class ccPointCloudLODThread : public QThread
 			for (uint32_t codeIndex = node.firstCodeIndex; codeIndex < cellCodes.size() && (cellCodes[codeIndex].theCode >> bitDec) == currentTruncatedCellCode; ++codeIndex)
 			{
 				++node.pointCount;
-				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
+				const CCVector3* P = m_cloud.getLocalPoint(cellCodes[codeIndex].theIndex);
 				sumP += *P;
 
 				if (m_earlyStop)
@@ -105,7 +105,7 @@ class ccPointCloudLODThread : public QThread
 				double maxSquareRadius = 0;
 				for (uint32_t i = 0; i < node.pointCount; ++i)
 				{
-					const CCVector3* P            = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
+					const CCVector3* P            = m_cloud.getLocalPoint(cellCodes[node.firstCodeIndex + i].theIndex);
 					double           squareRadius = (P->toDouble() - sumP).norm2();
 					if (squareRadius > maxSquareRadius)
 					{

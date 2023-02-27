@@ -10303,7 +10303,7 @@ void MainWindow::doActionSaveFile()
 	//default filter
 	QString selectedFilter = fileFilters.first();
 	if (hasCloud)
-		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(),selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(), selectedFilter).toString();
 	else if (hasMesh)
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterMesh(), selectedFilter).toString();
 	else if (hasImages)

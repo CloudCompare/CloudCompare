@@ -3684,7 +3684,7 @@ static void ProjectOnCone(	const CCVector3& AP,
 	//3D distance to the apex
 	PointCoordinateType normAP = AP.norm();
 	//2D distance to the apex (XY plane)
-	PointCoordinateType AP2Dnorm = sqrt(x*x + y * y);
+	PointCoordinateType AP2Dnorm = sqrt(x*x + y*y);
 
 	//angle between +Z and AP
 	PointCoordinateType beta_rad = atan2(AP2Dnorm, -z);

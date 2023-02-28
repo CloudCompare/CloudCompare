@@ -91,7 +91,7 @@ QString ccApplication::GetMinCCVersionForFileVersion(short fileVersion)
 }
 
 ccApplication::ccApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QString( "2.13.alpha (%1)" ).arg(QDate::currentDate().toString("MM-dd-yyyy")) )
+	: ccApplicationBase( argc, argv, isCommandLine, QString( "2.13.alpha (%1)" ).arg(QDate::currentDate().toString("MM-dd-yyyy")))
 {
 	setApplicationName( "CloudCompare" );
 	

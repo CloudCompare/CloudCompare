@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>520</width>
+    <width>603</width>
     <height>320</height>
    </rect>
   </property>
@@ -45,6 +45,17 @@
          <string>Straightened cone</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="fromEntityToolButton">
+       <property name="toolTip">
+        <string>Load parameters from a cylinder in the DB tree</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/dbContainerSymbol.png</normaloff>:/CC/images/dbContainerSymbol.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
@@ -206,6 +217,24 @@
              </property>
              <property name="value">
               <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="flipxAxisToolButton">
+             <property name="text">
+              <string>flip</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pasteAxisToolButton">
+             <property name="toolTip">
+              <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../icons.qrc">
+               <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
              </property>
             </widget>
            </item>
@@ -450,6 +479,17 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="pasteCenterToolButton">
+           <property name="toolTip">
+            <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../icons.qrc">
+             <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -633,7 +673,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

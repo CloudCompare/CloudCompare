@@ -20,6 +20,7 @@
 //Local
 #include "ccPersistentSettings.h"
 #include "mainwindow.h"
+#include "ccUtils.h"
 #include "ui_dipDirTransformationDlg.h"
 
 //qCC_db
@@ -74,24 +75,52 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	connect(fromClipboardToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::loadFromClipboard);
 	connect(fromDipDipDirToolButton, &QToolButton::clicked,			this, &ccApplyTransformationDlg::initFromDipAndDipDir);
 
-	connect(setIAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(1.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(0.0); });
-	connect(setJAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(1.0); rzAxisDoubleSpinBox->setValue(0.0); });
-	connect(setKAxisToolButton, &QToolButton::clicked, [this] {rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(1.0); });
+	// Axis and angle
+	connect(rxAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(ryAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(rzAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(rAngleDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(txAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(tyAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(tzAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(setIAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(1.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(0.0); });
+	connect(setJAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(1.0); rzAxisDoubleSpinBox->setValue(0.0); });
+	connect(setKAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(1.0); });
+	connect(pasteAxisToolButton,		&QToolButton::clicked,								this,	&ccApplyTransformationDlg::axisFromClipboard);
+	connect(pasteTransToolButton,		&QToolButton::clicked,								this,	&ccApplyTransformationDlg::transFromClipboard);
 
-	connect(rxAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(ryAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(rzAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(rAngleDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(txAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(tyAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
-	connect(tzAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	// Euler angles
+	connect(ePhiDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(eThetaDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(ePsiDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etxAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etyAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(etzAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(pasteEulerAnglesToolButton,	&QToolButton::clicked,								this,	&ccApplyTransformationDlg::eulerAnglesFromClipboard);
+	connect(pasteEulerTransToolButton,	&QToolButton::clicked,								this,	&ccApplyTransformationDlg::eulerTransFromClipboard);
 
-	connect(ePhiDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
-	connect(eThetaDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
-	connect(ePsiDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
-	connect(etxAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
-	connect(etyAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
-	connect(etzAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	// From-->to axes
+	connect(fromXAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromYAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromZAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(toXAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(toYAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(toZAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromToTxAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromToTyAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromToTzAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(pasteFromAxisToolButton,	&QToolButton::clicked,								this, &ccApplyTransformationDlg::fromAxisFromClipboard);
+	connect(pasteToAxisToolButton,		&QToolButton::clicked,								this, &ccApplyTransformationDlg::toAxisFromClipboard);
+	connect(pasteFromToTransToolButton,	&QToolButton::clicked,								this, &ccApplyTransformationDlg::fromToTransFromClipboard);
+
+	connect(setFromAxisIToolButton, &QToolButton::clicked, [this] {fromXAxisDoubleSpinBox->setValue(1.0); fromYAxisDoubleSpinBox->setValue(0.0); fromZAxisDoubleSpinBox->setValue(0.0); });
+	connect(setFromAxisJToolButton, &QToolButton::clicked, [this] {fromXAxisDoubleSpinBox->setValue(0.0); fromYAxisDoubleSpinBox->setValue(1.0); fromZAxisDoubleSpinBox->setValue(0.0); });
+	connect(setFromAxisKToolButton, &QToolButton::clicked, [this] {fromXAxisDoubleSpinBox->setValue(0.0); fromYAxisDoubleSpinBox->setValue(0.0); fromZAxisDoubleSpinBox->setValue(1.0); });
+
+	connect(setToAxisIToolButton, &QToolButton::clicked, [this] {toXAxisDoubleSpinBox->setValue(1.0); toYAxisDoubleSpinBox->setValue(0.0); toZAxisDoubleSpinBox->setValue(0.0); });
+	connect(setToAxisJToolButton, &QToolButton::clicked, [this] {toXAxisDoubleSpinBox->setValue(0.0); toYAxisDoubleSpinBox->setValue(1.0); toZAxisDoubleSpinBox->setValue(0.0); });
+	connect(setToAxisKToolButton, &QToolButton::clicked, [this] {toXAxisDoubleSpinBox->setValue(0.0); toYAxisDoubleSpinBox->setValue(0.0); toZAxisDoubleSpinBox->setValue(1.0); });
+
 }
 
 void ccApplyTransformationDlg::onMatrixTextChange()
@@ -101,7 +130,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	{
 		//automatically remove anything between square brackets
 		static const QRegExp squareBracketsFilter("\\[([^]]+)\\]");
-		text.replace(squareBracketsFilter,"");
+		text.replace(squareBracketsFilter, "");
 		matrixTextEdit->blockSignals(true);
 		matrixTextEdit->setPlainText(text);
 		matrixTextEdit->blockSignals(false);
@@ -110,7 +139,9 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	bool valid = false;
 	ccGLMatrix mat = ccGLMatrix::FromString(text, valid);
 	if (valid)
-		updateAll(mat, false, true, true); //no need to update the current form
+	{
+		updateAll(mat, false, true, true, true); //no need to update the current form
+	}
 }
 
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
@@ -130,7 +161,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(alpha, axis, t);
 
-	updateAll(mat, true, false, true); //no need to update the current form
+	updateAll(mat, true, false, true, true); //no need to update the current form
 }
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
@@ -150,10 +181,38 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	ccGLMatrix mat;
 	mat.initFromParameters(phi, theta, psi, t);
 
-	updateAll(mat, true, true, false); //no need to update the current form
+	updateAll(mat, true, true, false, true); //no need to update the current form
 }
 
-void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=true*/, bool axisAngleForm/*=true*/, bool eulerForm/*=true*/)
+void ccApplyTransformationDlg::onFromToValueChanged(double)
+{
+	CCVector3 fromAxis, toAxis;
+	CCVector3 t;
+
+	fromAxis.x = static_cast<PointCoordinateType>(fromXAxisDoubleSpinBox->value());
+	fromAxis.y = static_cast<PointCoordinateType>(fromYAxisDoubleSpinBox->value());
+	fromAxis.z = static_cast<PointCoordinateType>(fromZAxisDoubleSpinBox->value());
+	toAxis.x = static_cast<PointCoordinateType>(toXAxisDoubleSpinBox->value());
+	toAxis.y = static_cast<PointCoordinateType>(toYAxisDoubleSpinBox->value());
+	toAxis.z = static_cast<PointCoordinateType>(toZAxisDoubleSpinBox->value());
+	t.x = static_cast<PointCoordinateType>(fromToTxAxisDoubleSpinBox->value());
+	t.y = static_cast<PointCoordinateType>(fromToTyAxisDoubleSpinBox->value());
+	t.z = static_cast<PointCoordinateType>(fromToTzAxisDoubleSpinBox->value());
+
+	fromAxis.normalize();
+	toAxis.normalize();
+	ccGLMatrix mat = ccGLMatrix::FromToRotation(fromAxis, toAxis);
+	mat.setTranslation(t);
+
+	updateAll(mat, true, true, true, false); //no need to update the current form
+
+}
+
+void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
+											bool textForm/*=true*/,
+											bool axisAngleForm/*=true*/,
+											bool eulerForm/*=true*/,
+											bool fromToForm/*=true*/ )
 {
 	if (textForm)
 	{
@@ -176,12 +235,12 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		PointCoordinateType alpha = 0;
 		CCVector3 axis;
 		CCVector3 t;
-		mat.getParameters(alpha,axis,t);
+		mat.getParameters(alpha, axis, t);
 
 		rxAxisDoubleSpinBox->setValue(axis.x);
 		ryAxisDoubleSpinBox->setValue(axis.y);
 		rzAxisDoubleSpinBox->setValue(axis.z);
-		rAngleDoubleSpinBox->setValue( CCCoreLib::RadiansToDegrees( alpha ) );
+		rAngleDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(alpha));
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
@@ -208,11 +267,11 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		PointCoordinateType theta = 0;
 		PointCoordinateType psi = 0;
 		CCVector3 t;
-		mat.getParameters(phi,theta,psi,t);
+		mat.getParameters(phi, theta, psi, t);
 
-		ePhiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( phi ) );
-		eThetaDoubleSpinBox ->setValue( CCCoreLib::RadiansToDegrees( theta ) );
-		ePsiDoubleSpinBox   ->setValue( CCCoreLib::RadiansToDegrees( psi ) );
+		ePhiDoubleSpinBox   ->setValue(CCCoreLib::RadiansToDegrees(phi));
+		eThetaDoubleSpinBox ->setValue(CCCoreLib::RadiansToDegrees(theta));
+		ePsiDoubleSpinBox   ->setValue(CCCoreLib::RadiansToDegrees(psi));
 		etxAxisDoubleSpinBox->setValue(t.x);
 		etyAxisDoubleSpinBox->setValue(t.y);
 		etzAxisDoubleSpinBox->setValue(t.z);
@@ -223,6 +282,44 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 		etxAxisDoubleSpinBox->blockSignals(false);
 		etyAxisDoubleSpinBox->blockSignals(false);
 		etzAxisDoubleSpinBox->blockSignals(false);
+	}
+
+	if (fromToForm)
+	{
+		fromXAxisDoubleSpinBox   ->blockSignals(true);
+		fromYAxisDoubleSpinBox   ->blockSignals(true);
+		fromZAxisDoubleSpinBox   ->blockSignals(true);
+		toXAxisDoubleSpinBox     ->blockSignals(true);
+		toYAxisDoubleSpinBox     ->blockSignals(true);
+		toZAxisDoubleSpinBox     ->blockSignals(true);
+		fromToTxAxisDoubleSpinBox->blockSignals(true);
+		fromToTyAxisDoubleSpinBox->blockSignals(true);
+		fromToTzAxisDoubleSpinBox->blockSignals(true);
+
+		CCVector3 from(0, 0, 1);
+		CCVector3 to = from;
+		mat.applyRotation(to);
+		CCVector3 t = mat.getTranslationAsVec3D();
+
+		fromXAxisDoubleSpinBox   ->setValue(from.x);
+		fromYAxisDoubleSpinBox   ->setValue(from.y);
+		fromZAxisDoubleSpinBox   ->setValue(from.z);
+		toXAxisDoubleSpinBox     ->setValue(to.x);
+		toYAxisDoubleSpinBox     ->setValue(to.y);
+		toZAxisDoubleSpinBox     ->setValue(to.z);
+		fromToTxAxisDoubleSpinBox->setValue(t.x);
+		fromToTyAxisDoubleSpinBox->setValue(t.y);
+		fromToTzAxisDoubleSpinBox->setValue(t.z);
+
+		fromXAxisDoubleSpinBox   ->blockSignals(false);
+		fromYAxisDoubleSpinBox   ->blockSignals(false);
+		fromZAxisDoubleSpinBox   ->blockSignals(false);
+		toXAxisDoubleSpinBox     ->blockSignals(false);
+		toYAxisDoubleSpinBox     ->blockSignals(false);
+		toZAxisDoubleSpinBox     ->blockSignals(false);
+		fromToTxAxisDoubleSpinBox->blockSignals(false);
+		fromToTyAxisDoubleSpinBox->blockSignals(false);
+		fromToTzAxisDoubleSpinBox->blockSignals(false);
 	}
 }
 
@@ -351,15 +448,92 @@ void ccApplyTransformationDlg::initFromDipAndDipDir()
 		}
 	}
 
-	updateAll(trans, true, true, true);
+	updateAll(trans, true, true, true, true);
 }
 
 void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
 {
 	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
 	{
-		updateAll(ccGLMatrix(), true, true, true);
+		updateAll(ccGLMatrix(), true, true, true, true);
 		inverseCheckBox->setChecked(false);
+	}
+}
+
+void ccApplyTransformationDlg::axisFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		rxAxisDoubleSpinBox->setValue(vector.x);
+		ryAxisDoubleSpinBox->setValue(vector.y);
+		rzAxisDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::transFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		txAxisDoubleSpinBox->setValue(vector.x);
+		tyAxisDoubleSpinBox->setValue(vector.y);
+		tzAxisDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::eulerAnglesFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		ePhiDoubleSpinBox->setValue(vector.x);
+		eThetaDoubleSpinBox->setValue(vector.y);
+		ePsiDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::eulerTransFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		etxAxisDoubleSpinBox->setValue(vector.x);
+		etyAxisDoubleSpinBox->setValue(vector.y);
+		etzAxisDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::fromAxisFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		fromXAxisDoubleSpinBox->setValue(vector.x);
+		fromYAxisDoubleSpinBox->setValue(vector.y);
+		fromZAxisDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::toAxisFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		toXAxisDoubleSpinBox->setValue(vector.x);
+		toYAxisDoubleSpinBox->setValue(vector.y);
+		toZAxisDoubleSpinBox->setValue(vector.z);
+	}
+}
+
+void ccApplyTransformationDlg::fromToTransFromClipboard()
+{
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
+	{
+		fromToTxAxisDoubleSpinBox->setValue(vector.x);
+		fromToTyAxisDoubleSpinBox->setValue(vector.y);
+		fromToTzAxisDoubleSpinBox->setValue(vector.z);
 	}
 }
 

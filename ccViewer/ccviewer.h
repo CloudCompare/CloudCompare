@@ -42,7 +42,7 @@ class ccViewer : public QMainWindow
 
 public:
 	//! Default constructor
-	ccViewer(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	ccViewer(QWidget *parent = 0, Qt::WindowFlags flags = QFlags<Qt::WindowType>());
 
 	//! Default destructor
 	~ccViewer();

@@ -57,7 +57,7 @@ ccEntitySelectionDialog::ccEntitySelectionDialog(	const ccHObject::Container& en
 	//default selection
 	if (defaultSelectedIndex >= 0 && static_cast<size_t>(defaultSelectedIndex) < entities.size())
 	{
-		m_ui->listWidget->setItemSelected(m_ui->listWidget->item(defaultSelectedIndex), true);
+		m_ui->listWidget->item(defaultSelectedIndex)->setSelected(true);
 	}
 
 	//custom lalel

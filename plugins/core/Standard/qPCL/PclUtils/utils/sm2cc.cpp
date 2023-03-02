@@ -255,6 +255,32 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 	}
 	break;
 
+	case PCLScalarField::INT8:
+	{
+		pcl::PointCloud<Int8Scalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
+
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
+		}
+	}
+	break;
+
+	case PCLScalarField::UINT8:
+	{
+		pcl::PointCloud<UInt8Scalar> pclScalar;
+		FROM_PCL_CLOUD(pclCloud, pclScalar);
+
+		for (unsigned i = 0; i < pointCount; ++i)
+		{
+			ScalarType scalar = static_cast<ScalarType>(pclScalar.points[i].S5c4laR);
+			newSF->addElement(scalar);
+		}
+	}
+	break;
+
 	case PCLScalarField::INT16:
 	{
 		pcl::PointCloud<ShortScalar> pclScalar;

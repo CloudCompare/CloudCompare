@@ -1243,9 +1243,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			comboBox->addItem(glWindow->windowTitle());
 		}
 
-		connect(comboBox, qOverload<const QString&>(&QComboBox::currentIndexChanged),
-				this, &ccPropertiesTreeDelegate::objectDisplayChanged);
-
+		connect(comboBox, &QComboBox::currentTextChanged, this, &ccPropertiesTreeDelegate::objectDisplayChanged);
 		outputWidget = comboBox;
 	}
 	break;
@@ -1576,8 +1574,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 				comboBox->addItem( tr( s_sfColor ) );
 				comboBox->setItemIcon(comboBox->count() - 1, QIcon(QString::fromUtf8(":/CC/images/typeSF.png")));
 			}
-			connect(comboBox, qOverload<const QString&>(&QComboBox::currentIndexChanged),
-					this, &ccPropertiesTreeDelegate::colorSourceChanged);
+			connect(comboBox, &QComboBox::currentTextChanged, this, &ccPropertiesTreeDelegate::colorSourceChanged);
 		}
 
 		outputWidget = comboBox;

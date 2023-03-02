@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_RASTERIZE_TOOL_HEADER
-#define CC_RASTERIZE_TOOL_HEADER
 
 //Local
 #include "cc2.5DimEditor.h"
@@ -145,6 +144,9 @@ private:
 	//! Called when a statistics export target changes
 	void onStatExportTargetChanged(bool);
 
+	//! Show the interpolation parametrers dialog (depending on the current interpolation mode)
+	void showInterpolationParamsDialog();
+
 private: //standard methods
 
 	//Inherited from cc2Point5DimEditor
@@ -226,6 +228,10 @@ private: //members
 
 	//! Contour lines
 	std::vector<ccPolyline*> m_contourLines;
-};
 
-#endif //CC_RASTERIZE_TOOL_HEADER
+	//! Delunay interpolation parameters
+	ccRasterGrid::DelaunayInterpolationParams m_delaunayInterpParams;
+
+	//! Kriging parameters
+	ccRasterGrid::KrigingParams m_krigingParams;
+};

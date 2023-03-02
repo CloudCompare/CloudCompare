@@ -139,7 +139,7 @@ public:
 	ccHObject* dbRootObject() override;
 	inline  QMainWindow* getMainWindow() override { return this; }
 	ccHObject* loadFile(QString filename, bool silent) override;
-	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
+	inline const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
 	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
 	void destroyGLWindow(ccGLWindow*) const override;
 	ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
@@ -153,7 +153,10 @@ public:
 	
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
-	
+
+	//! Similar to getSelectedEntities, but makes sure no children of another selected entity is in the output selection
+	ccHObject::Container getTopLevelSelectedEntities() const;
+
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
@@ -479,7 +482,7 @@ private:
 	void setView( CC_VIEW_ORIENTATION view ) override;
 	
 	//! Apply transformation to the selected entities
-	void applyTransformation(const ccGLMatrixd& transMat);
+	void applyTransformation(const ccGLMatrixd& transMat, bool applyToGlobal);
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,

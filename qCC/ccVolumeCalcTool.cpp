@@ -47,25 +47,25 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 {
 	m_ui->setupUi(this);
 
-	connect(m_ui->buttonBox,						&QDialogButtonBox::accepted,													this,	&ccVolumeCalcTool::saveSettingsAndAccept);
-	connect(m_ui->buttonBox,						&QDialogButtonBox::rejected,													this,	&ccVolumeCalcTool::reject);
+	connect(m_ui->buttonBox,						&QDialogButtonBox::accepted,						this,	&ccVolumeCalcTool::saveSettingsAndAccept);
+	connect(m_ui->buttonBox,						&QDialogButtonBox::rejected,						this,	&ccVolumeCalcTool::reject);
 	connect(m_ui->gridStepDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::updateGridInfo);
 	connect(m_ui->gridStepDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
 	connect(m_ui->groundMaxEdgeLengthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(m_ui->ceilMaxEdgeLengthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->ceilMaxEdgeLengthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
 	connect(m_ui->groundEmptyValueDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
 	connect(m_ui->ceilEmptyValueDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(m_ui->projDimComboBox,					qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::projectionDirChanged);
-	connect(m_ui->updatePushButton,					&QPushButton::clicked,															this,	&ccVolumeCalcTool::updateGridAndDisplay);
-	connect(m_ui->heightProjectionComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::gridOptionChanged);
-	connect(m_ui->fillGroundEmptyCellsComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::groundFillEmptyCellStrategyChanged);
-	connect(m_ui->fillCeilEmptyCellsComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged);
-	connect(m_ui->swapToolButton,					&QToolButton::clicked,															this,	&ccVolumeCalcTool::swapRoles);
-	connect(m_ui->groundComboBox,					qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::groundSourceChanged);
-	connect(m_ui->ceilComboBox,						qOverload<int>(&QComboBox::currentIndexChanged),			this,	&ccVolumeCalcTool::ceilSourceChanged);
-	connect(m_ui->clipboardPushButton,				&QPushButton::clicked,															this,	&ccVolumeCalcTool::exportToClipboard);
-	connect(m_ui->exportGridPushButton,				&QPushButton::clicked,															this,	&ccVolumeCalcTool::exportGridAsCloud);
-	connect(m_ui->precisionSpinBox,					qOverload<int>(&QSpinBox::valueChanged),					this,	&ccVolumeCalcTool::setDisplayedNumberPrecision);
+	connect(m_ui->projDimComboBox,					qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::projectionDirChanged);
+	connect(m_ui->updatePushButton,					&QPushButton::clicked,								this,	&ccVolumeCalcTool::updateGridAndDisplay);
+	connect(m_ui->heightProjectionComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::gridOptionChanged);
+	connect(m_ui->fillGroundEmptyCellsComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::groundFillEmptyCellStrategyChanged);
+	connect(m_ui->fillCeilEmptyCellsComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged);
+	connect(m_ui->swapToolButton,					&QToolButton::clicked,								this,	&ccVolumeCalcTool::swapRoles);
+	connect(m_ui->groundComboBox,					qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::groundSourceChanged);
+	connect(m_ui->ceilComboBox,						qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccVolumeCalcTool::ceilSourceChanged);
+	connect(m_ui->clipboardPushButton,				&QPushButton::clicked,								this,	&ccVolumeCalcTool::exportToClipboard);
+	connect(m_ui->exportGridPushButton,				&QPushButton::clicked,								this,	&ccVolumeCalcTool::exportGridAsCloud);
+	connect(m_ui->precisionSpinBox,					qOverload<int>(&QSpinBox::valueChanged),			this,	&ccVolumeCalcTool::setDisplayedNumberPrecision);
 
 	if (m_cloud1 && !m_cloud2)
 	{
@@ -226,10 +226,10 @@ void ccVolumeCalcTool::groundFillEmptyCellStrategyChanged(int)
 {
 	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_ui->fillGroundEmptyCellsComboBox);
 
-	m_ui->groundEmptyValueDoubleSpinBox->setEnabled( (m_ui->groundComboBox->currentIndex() == 0)
-													 || (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
+	m_ui->groundEmptyValueDoubleSpinBox->setEnabled(	(m_ui->groundComboBox->currentIndex() == 0)
+													||	(fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 
-	m_ui->groundMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+	m_ui->groundMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 
 	gridIsUpToDate(false);
 }
@@ -238,10 +238,10 @@ void ccVolumeCalcTool::ceilFillEmptyCellStrategyChanged(int)
 {
 	ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy = getFillEmptyCellsStrategy(m_ui->fillCeilEmptyCellsComboBox);
 
-	m_ui->ceilEmptyValueDoubleSpinBox->setEnabled( (m_ui->ceilComboBox->currentIndex() == 0)
-												   ||	(fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
+	m_ui->ceilEmptyValueDoubleSpinBox->setEnabled(	(m_ui->ceilComboBox->currentIndex() == 0)
+												||	(fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) );
 
-	m_ui->ceilMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+	m_ui->ceilMaxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 
 	gridIsUpToDate(false);
 }
@@ -608,11 +608,29 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			return SendError("Not enough memory", parentWidget);
 		}
 
+		ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(groundEmptyCellFillStrategy);
+		ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+		void* interpolationParams = nullptr;
+		switch (interpolationType)
+		{
+		case ccRasterGrid::InterpolationType::DELAUNAY:
+			dInterpParams.maxEdgeLength = groundMaxEdgeLength;
+			interpolationParams = (void*)&dInterpParams;
+			break;
+		case ccRasterGrid::InterpolationType::KRIGING:
+			// not supported yet
+			assert(false);
+			break;
+		default:
+			// do nothing
+			break;
+		}
+
 		if (groundRaster.fillWith(	ground,
 									vertDim,
 									projectionType,
-									groundEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-									groundMaxEdgeLength,
+									interpolationType,
+									interpolationParams,
 									ccRasterGrid::INVALID_PROJECTION_TYPE,
 									pDlg.data()))
 		{
@@ -635,11 +653,29 @@ bool ccVolumeCalcTool::ComputeVolume(	ccRasterGrid& grid,
 			return SendError("Not enough memory", parentWidget);
 		}
 
+		ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(ceilEmptyCellFillStrategy);
+		ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+		void* interpolationParams = nullptr;
+		switch (interpolationType)
+		{
+		case ccRasterGrid::InterpolationType::DELAUNAY:
+			dInterpParams.maxEdgeLength = ceilMaxEdgeLength;
+			interpolationParams = (void*)&dInterpParams;
+			break;
+		case ccRasterGrid::InterpolationType::KRIGING:
+			// not supported yet
+			assert(false);
+			break;
+		default:
+			// do nothing
+			break;
+		}
+
 		if (ceilRaster.fillWith(ceil,
 								vertDim,
 								projectionType,
-								ceilEmptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-								ceilMaxEdgeLength,
+								interpolationType,
+								interpolationParams,
 								ccRasterGrid::INVALID_PROJECTION_TYPE,
 								pDlg.data()))
 		{

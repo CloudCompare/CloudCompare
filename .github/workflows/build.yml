@@ -36,7 +36,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Setup (Windows)
         if: matrix.config.os == 'windows-latest'
@@ -111,7 +111,6 @@ jobs:
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
             -DPLUGIN_IO_QLAS=ON \
-            -DPLUGIN_IO_QPDAL=ON \
             -DPLUGIN_IO_QRDB=ON \
             -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
             -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
@@ -157,9 +156,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Install Dependencies
         run: >
@@ -172,7 +171,7 @@ jobs:
           libboost-program-options-dev libboost-thread-dev
           libeigen3-dev
           libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-          libdlib-dev libproj-dev libxerces-c-dev xvfb libpdal-dev libjsoncpp-dev liblaszip-dev
+          libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -209,7 +208,6 @@ jobs:
           -DPLUGIN_IO_QE57=ON
           -DPLUGIN_IO_QPHOTOSCAN=ON
           -DPLUGIN_IO_QLAS=ON
-          -DPLUGIN_IO_QPDAL=ON
           -DPLUGIN_IO_QRDB=ON
           -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON
           -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON

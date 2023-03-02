@@ -31,6 +31,9 @@
            <property name="text">
             <string>Enter 4x4 matrix values:</string>
            </property>
+           <property name="buddy">
+            <cstring>fromGroupBox</cstring>
+           </property>
           </widget>
          </item>
          <item>
@@ -239,6 +242,47 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="setIAxisToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (1, 0, 0)</string>
+            </property>
+            <property name="text">
+             <string>I</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setJAxisToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 1, 0)</string>
+            </property>
+            <property name="text">
+             <string>J</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setKAxisToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 0, 1)</string>
+            </property>
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -352,6 +396,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -438,6 +493,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteEulerAnglesToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -504,6 +570,17 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QToolButton" name="pasteEulerTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -522,13 +599,359 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>From &gt; To axes</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QGroupBox" name="fromGroupBox">
+         <property name="title">
+          <string>From axis</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromXAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">X: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromYAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Y: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromZAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Z: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setFromAxisIToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (1, 0, 0)</string>
+            </property>
+            <property name="text">
+             <string>I</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setFromAxisJToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 1, 0)</string>
+            </property>
+            <property name="text">
+             <string>J</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setFromAxisKToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 0, 1)</string>
+            </property>
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteFromAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="toGroupBox">
+         <property name="title">
+          <string>To axis</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QDoubleSpinBox" name="toXAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">X: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="toYAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Y: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="toZAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Z: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setToAxisIToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (1, 0, 0)</string>
+            </property>
+            <property name="text">
+             <string>I</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setToAxisJToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 1, 0)</string>
+            </property>
+            <property name="text">
+             <string>J</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="setToAxisKToolButton">
+            <property name="toolTip">
+             <string>Shortcut to set the rotation axis to (0, 0, 1)</string>
+            </property>
+            <property name="text">
+             <string>K</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteToAxisToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="fromToTransGroupBox">
+         <property name="title">
+          <string>Translation</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromToTxAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">X: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromToTyAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Y: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="fromToTzAxisDoubleSpinBox">
+            <property name="prefix">
+             <string notr="true">Z: </string>
+            </property>
+            <property name="decimals">
+             <number>8</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="pasteFromToTransToolButton">
+            <property name="toolTip">
+             <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../icons.qrc">
+              <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>119</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="inverseCheckBox">
-     <property name="text">
-      <string>Apply inverse transformation</string>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="inverseCheckBox">
+        <property name="text">
+         <string>Apply inverse transformation</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="applyToGlobalCheckBox">
+        <property name="toolTip">
+         <string>Applies the transformation to global coordinates
+(may trigger an update of the Global Shift)</string>
+        </property>
+        <property name="text">
+         <string>Apply to global coordinates</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -540,7 +963,9 @@ Let P be a 3D point, the transformed point P' will be such that: P' = R.P + T.</
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

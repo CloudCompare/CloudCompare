@@ -35,12 +35,13 @@ class ccUnrollDlg : public QDialog
 public:
 
 	//! Default constructor
-	explicit ccUnrollDlg(QWidget* parent = nullptr);
+	explicit ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent = nullptr);
 	~ccUnrollDlg() override;
 	
 	ccPointCloud::UnrollMode getType() const;
-	int getAxisDimension() const;
+	CCVector3d getAxis() const;
 	bool isAxisPositionAuto() const;
+	bool useArbitraryOutputCS() const;
 	CCVector3 getAxisPosition() const;
 	void getAngleRange(double& start_deg, double& stop_deg) const;
 	double getRadius() const;
@@ -54,7 +55,11 @@ protected:
 	void shapeTypeChanged(int index);
 	void axisDimensionChanged(int index);
 	void axisAutoStateChanged(int checkState);
+	void loadParametersFromEntity();
+	void axisFromClipboard();
+	void centerFromClipboard();
 
 protected:
 	Ui::UnrollDialog* m_ui;
+	ccHObject* m_dbRootEntity;
 };

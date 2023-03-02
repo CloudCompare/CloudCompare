@@ -365,10 +365,14 @@
             <item>
              <widget class="QPushButton" name="spherePosFromClipboardButton">
               <property name="toolTip">
-               <string>Try to interpret clipboard contents as position (&quot;x y z&quot;)</string>
+               <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
               </property>
               <property name="text">
                <string>clipboard</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../icons.qrc">
+                <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
               </property>
              </widget>
             </item>

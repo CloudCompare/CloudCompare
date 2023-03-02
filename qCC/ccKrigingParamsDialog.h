@@ -17,18 +17,36 @@
 //#                                                                        #
 //##########################################################################
 
-class QString;
+//Qt
+#include <QDialog>
 
-//CCCoreLib
-#include <CCGeom.h>
+//qCC_db
+#include <ccRasterGrid.h>
 
-namespace ccUtils
+class Ui_KrigingParamsDialog;
+
+//! Dialog to set the Kriging parameters
+class ccKrigingParamsDialog : public QDialog
 {
-	//! Display a warning or error for locked verts
-	void DisplayLockedVerticesWarning(const QString &meshName, bool displayAsError);
+	Q_OBJECT
 
-	//! Tries to convert the current contents of the clipboard into a vector (3 values)
-	/** Supported separators: white spaces, comma or semicolon
-	**/
-	bool GetVectorFromClipboard(CCVector3d& vector, bool sendErrors = true);
-}
+public:
+
+	//! Default constructor
+	ccKrigingParamsDialog(QWidget* parent = nullptr);
+
+	//! Destructor
+	virtual ~ccKrigingParamsDialog();
+
+	//! Sets the parameters
+	void setParameters(const ccRasterGrid::KrigingParams& krigingParams);
+
+	//! Gets the parameters
+	void getParameters(ccRasterGrid::KrigingParams& krigingParams);
+
+protected:
+
+	//! Associated ui
+	Ui_KrigingParamsDialog* m_ui;
+
+};

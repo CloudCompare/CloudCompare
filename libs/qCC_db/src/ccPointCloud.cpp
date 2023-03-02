@@ -557,6 +557,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		//merge display parameters
 		showColors(colorsShown() || addedCloud->colorsShown());
 
+		if (hasColors())
+		{
+			m_rgbaColors->resize(pointCountBefore); // just in case
+		}
+
 		//if the added cloud has no color
 		if (!addedCloud->hasColors())
 		{
@@ -1805,6 +1810,7 @@ bool ccPointCloud::setColor(const ccColor::Rgba& col)
 			return false;
 
 	assert(m_rgbaColors);
+	m_rgbaColors->resize(size()); // reserve might have set a capacity larger than the cloud size!
 	m_rgbaColors->fill(col);
 
 	//update the grid colors as well!
@@ -3648,40 +3654,47 @@ bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* otherCloud,
 }
 
 static void ProjectOnCylinder(	const CCVector3& AP,
-								const Tuple3ub& dim,
+								const CCVector3& xDir,
+								const CCVector3& yDir,
 								PointCoordinateType radius,
 								PointCoordinateType& delta,
 								PointCoordinateType& phi_rad)
 {
-	//2D distance to the center (XY plane)
-	PointCoordinateType APnorm_XY = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
 	//longitude (0 = +X = east)
-	phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
-	//deviation
-	delta = APnorm_XY - radius;
+	PointCoordinateType x = AP.dot(xDir);
+	PointCoordinateType y = AP.dot(yDir);
+	phi_rad = atan2(y, x);
+	//deviation = 2D distance to the center (XY plane)
+	delta = sqrt(x*x + y*y) - radius;
 }
 
 static void ProjectOnCone(	const CCVector3& AP,
 							PointCoordinateType alpha_rad,
-							const Tuple3ub& dim,
+							const CCVector3& axisDir,
+							const CCVector3& xDir,
+							const CCVector3& yDir,
 							PointCoordinateType& s,
 							PointCoordinateType& delta,
 							PointCoordinateType& phi_rad)
 {
+	PointCoordinateType x = AP.dot(xDir);
+	PointCoordinateType y = AP.dot(yDir);
+	PointCoordinateType z = AP.dot(axisDir);
+
 	//3D distance to the apex
 	PointCoordinateType normAP = AP.norm();
 	//2D distance to the apex (XY plane)
-	PointCoordinateType normAP_XY = sqrt(AP.u[dim.x] * AP.u[dim.x] + AP.u[dim.y] * AP.u[dim.y]);
+	PointCoordinateType AP2Dnorm = sqrt(x*x + y * y);
 
 	//angle between +Z and AP
-	PointCoordinateType beta_rad = atan2(normAP_XY, -AP.u[dim.z]);
+	PointCoordinateType beta_rad = atan2(AP2Dnorm, -z);
 	//angular deviation
 	PointCoordinateType gamma_rad = beta_rad - alpha_rad; //if gamma_rad > 0, the point is outside the cone
 
 	//projection on the cone
 	{
 		//longitude (0 = +X = east)
-		phi_rad = atan2(AP.u[dim.y], AP.u[dim.x]);
+		phi_rad = atan2(y, x);
 		//curvilinear distance from the Apex
 		s = normAP * cos(gamma_rad);
 		//(normal) deviation
@@ -3694,10 +3707,10 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 									bool exportDeviationSF/*=false*/,
 									double startAngle_deg/*=0.0*/,
 									double stopAngle_deg/*=360.0*/,
+									bool arbitraryOutputCS/*=false*/,
 									CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/) const
 {
 	if (	!params
-		||	params->axisDim > 2
 		||	startAngle_deg >= stopAngle_deg)
 	{
 		//invalid input parameters
@@ -3729,10 +3742,49 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		return nullptr;
 	}
 
-	Tuple3ub dim;
-	dim.z = params->axisDim;
-	dim.x = (dim.z < 2 ? dim.z + 1 : 0);
-	dim.y = (dim.x < 2 ? dim.x + 1 : 0);
+	CCVector3 axisDir = params->axisDir;
+	axisDir.normalize(); // just in case
+	if (axisDir.norm() < 1.0e-6)
+	{
+		ccLog::Error("Invalid input axis direction (too short)");
+		return nullptr;
+	}
+
+	CCVector3 xDir, yDir;
+	{
+		int mainDim = 0;
+		if (std::abs(axisDir.x) >= std::abs(axisDir.y))
+		{
+			mainDim = (std::abs(axisDir.x) >= std::abs(axisDir.z) ? 0 : 2);
+		}
+		else
+		{
+			mainDim = (std::abs(axisDir.y) >= std::abs(axisDir.z) ? 1 : 2);
+		}
+
+		switch (mainDim)
+		{
+		case 0:
+			xDir = CCVector3(0, CCCoreLib::PC_ONE, 0); // Y
+			break;
+		case 1:
+			xDir = CCVector3(0, 0, CCCoreLib::PC_ONE); // Z
+			break;
+		case 2:
+			xDir = CCVector3(CCCoreLib::PC_ONE, 0, 0); // X
+			break;
+		}
+
+		// now project the X and Y main directions on the plane perpendicular to axisDir
+		yDir = axisDir.cross(xDir);
+		yDir.normalize();
+		xDir = yDir.cross(axisDir);
+		xDir.normalize();
+	}
+
+	ccLog::Print(QString("[Unroll] Axis direction: (%1;%2;%3)").arg(axisDir.x).arg(axisDir.y).arg(axisDir.z));
+	ccLog::Print(QString("[Unroll] 1st orthogonal direction: (%1;%2;%3)").arg(xDir.x).arg(xDir.y).arg(xDir.z));
+	ccLog::Print(QString("[Unroll] 2nd orthogonal direction: (%1;%2;%3)").arg(yDir.x).arg(yDir.y).arg(yDir.z));
 
 	unsigned numberOfPoints = size();
 	CCCoreLib::NormalizedProgress nprogress(progressCb, numberOfPoints);
@@ -3792,13 +3844,15 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
 	}
 
+	CCVector3 xDir2 = arbitraryOutputCS ? CCVector3(1, 0, 0) : xDir;
+
 	for (unsigned i = 0; i < numberOfPoints; i++)
 	{
 		const CCVector3* Pin = getPoint(i);
 
 		//we project the point
 		CCVector3 AP;
-		CCVector3 Pout;
+		CCVector3 Pout(0, 0, 0);
 		PointCoordinateType longitude_rad = 0; //longitude (rad)
 		PointCoordinateType delta = 0; //distance to the cone/cylinder surface
 		PointCoordinateType coneAbscissa = 0;
@@ -3808,54 +3862,60 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		case CYLINDER:
 		{
 			AP = *Pin - cylParams->center;
-			ProjectOnCylinder(AP, dim, params->radius, delta, longitude_rad);
+			ProjectOnCylinder(AP, xDir, yDir, params->radius, delta, longitude_rad);
 
 			//we project the point
-			//Pout.u[dim.x] = longitude_rad * radius;
-			Pout.u[dim.y] = -delta;
-			Pout.u[dim.z] = Pin->u[dim.z];
+			//Pout.x = longitude_rad * radius;
+			Pout.y = -delta;
+			Pout.z = AP.dot(axisDir);
 		}
 		break;
 
 		case STRAIGHTENED_CONE:
 		{
 			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
 			//we simply develop the cone as a cylinder
-			//Pout.u[dim.x] = phi_rad * params->radius;
-			Pout.u[dim.y] = -delta;
-			//Pout.u[dim.z] = Pin->u[dim.z];
-			Pout.u[dim.z] = coneParams->apex.u[dim.z] - coneAbscissa;
+			//Pout.x = phi_rad * params->radius;
+			Pout.y = -delta;
+			//Pout.z = Pin->dot(axisDir);
+			Pout.z = coneParams->apex.dot(axisDir) - coneAbscissa;
 		}
 		break;
 
 		case STRAIGHTENED_CONE2:
 		{
 			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
 			//we simply develop the cone as a cylinder
-			//Pout.u[dim.x] = phi_rad * coneAbscissa * sin_alpha;
-			Pout.u[dim.y] = -delta;
-			//Pout.u[dim.z] = Pin->u[dim.z];
-			Pout.u[dim.z] = coneParams->apex.u[dim.z] - coneAbscissa;
+			//Pout.x = phi_rad * coneAbscissa * sin_alpha;
+			Pout.y = -delta;
+			//Pout.z = Pin->dot(axisDir);
+			Pout.z = coneParams->apex.dot(axisDir) - coneAbscissa;
 		}
 		break;
 
 		case CONE:
 		{
 			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, dim, coneAbscissa, delta, longitude_rad);
+			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
 			//unrolling
 			PointCoordinateType theta_rad = longitude_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
 			//project the point
-			Pout.u[dim.y] = -coneAbscissa * cos(theta_rad);
-			Pout.u[dim.x] =  coneAbscissa * sin(theta_rad);
-			Pout.u[dim.z] = delta;
+			Pout.x =  coneAbscissa * sin(theta_rad);
+			Pout.y = -coneAbscissa * cos(theta_rad);
+			Pout.z = delta;
 		}
 		break;
 
 		default:
 			assert(false);
+		}
+
+		if (!arbitraryOutputCS)
+		{
+			// projects the output point to a coordinate system linked to the input cylinder/cone CS
+			Pout = cylParams->center + (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
 		}
 		
 		// first unroll its normal if necessary
@@ -3863,7 +3923,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		{
 			const CCVector3& N = getPointNormal(i);
 			CCVector3 AP2 = AP + N;
-			CCVector3 N2;
+			CCVector3 N2(0, 0, 0);
 
 			switch (mode)
 			{
@@ -3871,11 +3931,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			{
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCylinder(AP2, dim, params->radius, delta2, longitude2_rad);
+				ProjectOnCylinder(AP2, xDir, yDir, params->radius, delta2, longitude2_rad);
 
-				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
-				N2.u[dim.y] = -(delta2 - delta);
-				N2.u[dim.z] = N.u[dim.z];
+				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.y = -(delta2 - delta);
+				N2.z = N.dot(axisDir);
 			}
 			break;
 
@@ -3884,11 +3944,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				PointCoordinateType coneAbscissa2 = 0;
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
-				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
-				N2.u[dim.y] = -(delta2 - delta);
-				N2.u[dim.z] = coneAbscissa - coneAbscissa2;
+				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.y = -(delta2 - delta);
+				N2.z = coneAbscissa - coneAbscissa2;
 			}
 			break;
 
@@ -3897,11 +3957,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				PointCoordinateType coneAbscissa2 = 0;
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
-				N2.u[dim.x] = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
-				N2.u[dim.y] = -(delta2 - delta);
-				N2.u[dim.z] = coneAbscissa - coneAbscissa2;
+				N2.x = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
+				N2.y = -(delta2 - delta);
+				N2.z = coneAbscissa - coneAbscissa2;
 			}
 			break;
 
@@ -3910,14 +3970,15 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				PointCoordinateType coneAbscissa2 = 0;
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, dim, coneAbscissa2, delta2, longitude2_rad);
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
 				//unrolling
 				PointCoordinateType theta2_rad = longitude2_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
 				//project the point
 				CCVector3 P2out;
-				P2out.u[dim.x] =  coneAbscissa2 * sin(theta2_rad);
-				P2out.u[dim.y] = -coneAbscissa2 * cos(theta2_rad);
-				P2out.u[dim.z] = delta2;
+				P2out.x =  coneAbscissa2 * sin(theta2_rad);
+				P2out.y = -coneAbscissa2 * cos(theta2_rad);
+				P2out.z = delta2;
+				P2out = cylParams->center + (P2out.x * xDir) + (P2out.y * yDir) + (P2out.z * axisDir);
 				N2 = P2out - Pout;
 			}
 			break;
@@ -3927,6 +3988,11 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 				break;
 			}
 
+			if (!arbitraryOutputCS)
+			{
+				// projects the output point to a coordinate system linked to the input cylinder/cone CS
+				N2 = (N2.x * xDir) + (N2.y * yDir) + (N2.z * axisDir);
+			}
 			N2.normalize();
 			unrolledNormals[i] = N2;
 		}
@@ -3975,15 +4041,15 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			{
 			case CYLINDER:
 			case STRAIGHTENED_CONE:
-				Pout.u[dim.x] = dLongitude_rad * params->radius;
+				Pout += static_cast<PointCoordinateType>(dLongitude_rad * params->radius) * xDir2;
 				break;
 			case STRAIGHTENED_CONE2:
-				Pout.u[dim.x] = dLongitude_rad * coneAbscissa * sin_alpha;
+				Pout += static_cast<PointCoordinateType>(dLongitude_rad * coneAbscissa * sin_alpha) * xDir2;
 				break;
 
 			case CONE:
-				Pout.u[dim.x] =  coneAbscissa * sin(dLongitude_rad);
-				Pout.u[dim.y] = -coneAbscissa * cos(dLongitude_rad);
+				Pout += static_cast<PointCoordinateType>(coneAbscissa * sin(dLongitude_rad)) * xDir2;
+				Pout += static_cast<PointCoordinateType>(-coneAbscissa * cos(dLongitude_rad)) * xDir2;
 				//Pout = coneParams->apex + Pout; //nope, this projection is arbitrary and should be centered on (0, 0, 0)
 				break;
 

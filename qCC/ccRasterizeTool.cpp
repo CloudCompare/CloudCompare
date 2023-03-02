@@ -23,6 +23,7 @@
 #include "ccPersistentSettings.h"
 #include "ccContourLinesGenerator.h"
 #include "mainwindow.h"
+#include "ccKrigingParamsDialog.h"
 
 //qCC_db
 #include <ccColorScalesManager.h>
@@ -47,6 +48,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QStandardItemModel>
+#include <QInputDialog>
 
 #ifdef CC_GDAL_SUPPORT
 //GDAL
@@ -119,7 +121,6 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->gridStepDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::updateGridInfo);
 	connect(m_UI->gridStepDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
 	connect(m_UI->emptyValueDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
-	connect(m_UI->maxEdgeLengthDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccRasterizeTool::gridOptionChanged);
 
 	connect(m_UI->dimensionComboBox,			qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::projectionDirChanged);
 	connect(m_UI->heightProjectionComboBox,		qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccRasterizeTool::projectionTypeChanged);
@@ -139,6 +140,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->exportContoursPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::exportContourLines);
 	connect(m_UI->clearContoursPushButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::removeContourLines);
 	connect(m_UI->generateHillshadePushButton,	&QAbstractButton::clicked,							this,	&ccRasterizeTool::generateHillshade);
+	connect(m_UI->interpParamsToolButton,		&QAbstractButton::clicked,							this,	&ccRasterizeTool::showInterpolationParamsDialog);
 
 	connect(m_UI->exportHeightStatsCheckBox,	&QCheckBox::toggled,								this,	&ccRasterizeTool::onStatExportTargetChanged);
 	connect(m_UI->exportSFStatsCheckBox,		&QCheckBox::toggled,								this,	&ccRasterizeTool::onStatExportTargetChanged);
@@ -434,14 +436,14 @@ void ccRasterizeTool::fillEmptyCellStrategyChanged(int)
 
 	// empty cell value
 	{
-		bool active = (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) || (fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+		bool active = (fillEmptyCellsStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT) || (fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY);
 		m_UI->emptyValueDoubleSpinBox->setEnabled(active);
 		m_UI->emptyValueDoubleSpinBox->setVisible(active);
 	}
 
-	// max edge length
+	// interpolation parameters button
 	{
-		m_UI->maxEdgeLengthDoubleSpinBox->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE);
+		m_UI->interpParamsToolButton->setEnabled(fillEmptyCellsStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY || fillEmptyCellsStrategy == ccRasterGrid::KRIGING);
 	}
 
 	gridIsUpToDate(false);
@@ -515,18 +517,19 @@ void ccRasterizeTool::loadSettings()
 {
 	QSettings settings;
 	settings.beginGroup(ccPS::HeightGridGeneration());
-	int projType				= settings.value("ProjectionType",        m_UI->heightProjectionComboBox->currentIndex()).toInt();
-	int projDim					= settings.value("ProjectionDim",         m_UI->dimensionComboBox->currentIndex()).toInt();
-	bool sfProj					= settings.value("SfProjEnabled",         m_UI->projectSFCheckBox->isChecked()).toBool();
-	int sfProjStrategy			= settings.value("SfProjStrategy",        m_UI->scalarFieldProjection->currentIndex()).toInt();
-	int fillStrategy			= settings.value("FillStrategy",          m_UI->fillEmptyCellsComboBox->currentIndex()).toInt();
-	double maxEdgeLength		= settings.value("MaxEdgeLength",         m_UI->maxEdgeLengthDoubleSpinBox->value()).toDouble();
-	double step					= settings.value("GridStep",              m_UI->gridStepDoubleSpinBox->value()).toDouble();
-	double emptyHeight			= settings.value("EmptyCellsHeight",      m_UI->emptyValueDoubleSpinBox->value()).toDouble();
-	bool resampleCloud			= settings.value("ResampleOrigCloud",     m_UI->resampleCloudCheckBox->isChecked()).toBool();
-	int minVertexCount			= settings.value("MinVertexCount",        m_UI->minVertexCountSpinBox->value()).toInt();
-	bool ignoreBorders			= settings.value("IgnoreBorders",         m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
-	bool projectContoursOnAlt	= settings.value("projectContoursOnAlt",  m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
+	int projType							= settings.value("ProjectionType",        m_UI->heightProjectionComboBox->currentIndex()).toInt();
+	int projDim								= settings.value("ProjectionDim",         m_UI->dimensionComboBox->currentIndex()).toInt();
+	bool sfProj								= settings.value("SfProjEnabled",         m_UI->projectSFCheckBox->isChecked()).toBool();
+	int sfProjStrategy						= settings.value("SfProjStrategy",        m_UI->scalarFieldProjection->currentIndex()).toInt();
+	int fillStrategy						= settings.value("FillStrategy",          m_UI->fillEmptyCellsComboBox->currentIndex()).toInt();
+	m_delaunayInterpParams.maxEdgeLength	= settings.value("MaxEdgeLength",         m_delaunayInterpParams.maxEdgeLength).toDouble();
+	m_krigingParams.kNN						= settings.value("KrigingKNN",            m_krigingParams.kNN).toDouble();
+	double step								= settings.value("GridStep",              m_UI->gridStepDoubleSpinBox->value()).toDouble();
+	double emptyHeight						= settings.value("EmptyCellsHeight",      m_UI->emptyValueDoubleSpinBox->value()).toDouble();
+	bool resampleCloud						= settings.value("ResampleOrigCloud",     m_UI->resampleCloudCheckBox->isChecked()).toBool();
+	int minVertexCount						= settings.value("MinVertexCount",        m_UI->minVertexCountSpinBox->value()).toInt();
+	bool ignoreBorders						= settings.value("IgnoreBorders",         m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
+	bool projectContoursOnAlt				= settings.value("projectContoursOnAlt",  m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
 	
 	//Statistics checkboxes
 	bool generateHeightStatistics				= settings.value("GenerateHeightStatistics",			m_UI->exportHeightStatsCheckBox->isChecked()).toBool();
@@ -547,7 +550,6 @@ void ccRasterizeTool::loadSettings()
 	m_UI->gridStepDoubleSpinBox->setValue(step);
 	m_UI->heightProjectionComboBox->setCurrentIndex(m_cloudHasScalarFields || projType != ccRasterGrid::PROJ_INVERSE_VAR_VALUE ? projType : 0);
 	m_UI->fillEmptyCellsComboBox->setCurrentIndex(fillStrategy);
-	m_UI->maxEdgeLengthDoubleSpinBox->setValue(maxEdgeLength);
 	m_UI->emptyValueDoubleSpinBox->setValue(emptyHeight);
 	m_UI->dimensionComboBox->setCurrentIndex(projDim);
 	m_UI->projectSFCheckBox->setChecked(m_cloudHasScalarFields && sfProj);
@@ -614,7 +616,8 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("SfProjEnabled", m_UI->projectSFCheckBox->isChecked());
 	settings.setValue("SfProjStrategy", m_UI->scalarFieldProjection->currentIndex());
 	settings.setValue("FillStrategy", m_UI->fillEmptyCellsComboBox->currentIndex());
-	settings.setValue("MaxEdgeLength", m_UI->maxEdgeLengthDoubleSpinBox->value());
+	settings.setValue("MaxEdgeLength", m_delaunayInterpParams.maxEdgeLength);
+	settings.setValue("KrigingKNN", m_krigingParams.kNN);
 	settings.setValue("GridStep", m_UI->gridStepDoubleSpinBox->value());
 	settings.setValue("EmptyCellsHeight", m_UI->emptyValueDoubleSpinBox->value());
 	settings.setValue("ResampleOrigCloud", m_UI->resampleCloudCheckBox->isChecked());
@@ -819,8 +822,21 @@ bool ccRasterizeTool::updateGrid(bool projectSFs/*=false*/)
 	//main parameters
 	ccRasterGrid::ProjectionType projectionType = getTypeOfProjection();
 	ccRasterGrid::ProjectionType sfProjectionType = projectSFs ? getTypeOfSFProjection() : ccRasterGrid::INVALID_PROJECTION_TYPE;
-	bool interpolateEmptyCells = (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox) == ccRasterGrid::INTERPOLATE);
-	double maxEdgeLength = m_UI->maxEdgeLengthDoubleSpinBox->value();
+
+	ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox));
+	void* interpolationParams = nullptr;
+	switch (interpolationType)
+	{
+	case ccRasterGrid::InterpolationType::DELAUNAY:
+		interpolationParams = (void*)&m_delaunayInterpParams;
+		break;
+	case ccRasterGrid::InterpolationType::KRIGING:
+		interpolationParams = (void*)&m_krigingParams;
+		break;
+	default:
+		// do nothing
+		break;
+	}
 
 	//cloud bounding-box --> grid size
 	ccBBox box = getCustomBBox();
@@ -888,8 +904,8 @@ bool ccRasterizeTool::updateGrid(bool projectSFs/*=false*/)
 	if (!m_grid.fillWith(	m_cloud,
 							Z,
 							projectionType,
-							interpolateEmptyCells,
-							maxEdgeLength,
+							interpolationType,
+							interpolationParams,
 							sfProjectionType,
 							&pDlg,
                             zStdDevSfIndex))
@@ -1441,7 +1457,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 			emptyCellHeight = grid.maxHeight;
 			break;
 		case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-		case ccRasterGrid::INTERPOLATE:
+		case ccRasterGrid::INTERPOLATE_DELAUNAY:
 			emptyCellHeight = customHeightForEmptyCells;
 			break;
 		case ccRasterGrid::FILL_AVERAGE_HEIGHT:
@@ -1947,7 +1963,7 @@ ccRasterGrid::EmptyCellFillOption ccRasterizeTool::getFillEmptyCellsStrategyExt(
 		emptyCellsHeight = m_grid.maxHeight;
 		break;
 	case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-	case ccRasterGrid::INTERPOLATE:
+	case ccRasterGrid::INTERPOLATE_DELAUNAY:
 		{
 			double customEmptyCellsHeight = getCustomHeightForEmptyCells();
 			//update min and max height by the way (only if there are invalid cells ;)
@@ -2216,4 +2232,42 @@ void ccRasterizeTool::onStatExportTargetChanged(bool)
 {
 	m_UI->exportStatisticsFrame->setEnabled(	m_UI->exportHeightStatsCheckBox->isChecked()
 											||	(m_UI->exportSFStatsCheckBox->isEnabled() && m_UI->exportSFStatsCheckBox->isChecked()));
+}
+
+void ccRasterizeTool::showInterpolationParamsDialog()
+{
+	switch (getFillEmptyCellsStrategy(m_UI->fillEmptyCellsComboBox))
+	{
+	case ccRasterGrid::EmptyCellFillOption::INTERPOLATE_DELAUNAY:
+	{
+		bool ok = false;
+		double value = QInputDialog::getDouble(this, tr("Delaunay triangulation"), tr("Triangles max edge length"), m_delaunayInterpParams.maxEdgeLength , 1.0e-6, 1.0e6, 6, &ok);
+		if (ok)
+		{
+			m_delaunayInterpParams.maxEdgeLength = value;
+			gridIsUpToDate(false);
+		}
+	}
+	break;
+
+	case ccRasterGrid::EmptyCellFillOption::KRIGING:
+	{
+		ccKrigingParamsDialog dlg(this);
+
+		dlg.setParameters(m_krigingParams);
+
+		if (dlg.exec())
+		{
+			dlg.getParameters(m_krigingParams);
+
+			gridIsUpToDate(false);
+		}
+	}
+	break;
+
+	default:
+		assert(false);
+		break;
+	}
+
 }

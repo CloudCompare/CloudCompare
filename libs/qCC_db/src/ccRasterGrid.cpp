@@ -184,6 +184,21 @@ bool ccRasterGrid::init(unsigned w,
 	return true;
 }
 
+ccRasterGrid::InterpolationType ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(EmptyCellFillOption option)
+{
+	switch (option)
+	{
+	case INTERPOLATE_DELAUNAY:
+		return InterpolationType::DELAUNAY;
+	case KRIGING:
+		return InterpolationType::KRIGING;
+	default:
+		break;
+	}
+
+	return InterpolationType::NONE;
+}
+
 //! Index and value
 struct IndexAndValue
 {
@@ -194,8 +209,8 @@ struct IndexAndValue
 bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 								unsigned char Z,
 								ProjectionType projectionType,
-								bool doInterpolateEmptyCells,
-								double maxEdgeLength,
+								InterpolationType emptyCellsInterpolation/*=InterpolationType::NONE*/,
+								void* interpolationParams/*=nullptr*/,
 								ProjectionType sfProjectionType/*=INVALID_PROJECTION_TYPE*/,
 								ccProgressDialog* progressDialog/*=nullptr*/,
 								int zStdDevSfIndex/*=-1*/)
@@ -624,9 +639,40 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	updateNonEmptyCellCount();
 
 	//specific case: interpolate the empty cells
-	if (doInterpolateEmptyCells)
+	switch (emptyCellsInterpolation)
 	{
-		interpolateEmptyCells(maxEdgeLength * maxEdgeLength);
+	case InterpolationType::NONE:
+		// do nothing
+		break;
+
+	case InterpolationType::DELAUNAY:
+	{
+		DelaunayInterpolationParams* const params = reinterpret_cast<DelaunayInterpolationParams* const>(interpolationParams);
+		if (params)
+		{
+			interpolateEmptyCells(params->maxEdgeLength * params->maxEdgeLength);
+		}
+		else
+		{
+			ccLog::Error("[Rasterize] Internal error: Delauny interpolation parameters are not set");
+		}
+	}
+	break;
+
+	case InterpolationType::KRIGING:
+	{
+		KrigingParams* krigingParams = reinterpret_cast<KrigingParams*>(interpolationParams);
+		if (krigingParams)
+		{
+			fillGridCellsWithKriging(Z, krigingParams->kNN, krigingParams->params, !krigingParams->autoGuess, progressDialog);
+		}
+		else
+		{
+			ccLog::Error("[Rasterize] Internal error: Krigin interpolation parameters are not set");
+		}
+	}
+	break;
+
 	}
 
 	//computation of the average and extreme height values in the grid
@@ -929,6 +975,221 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 	return true;
 }
 
+bool ccRasterGrid::fillGridCellsWithKriging(unsigned char Z,
+											int knn,
+											Kriging::KrigeParams& krigeParams,
+											bool useInputParams,
+											ccProgressDialog* progressDialog/*=nullptr*/)
+{
+	if (Z > 2)
+	{
+		ccLog::Error("Internal error: invalid Z dimension");
+		return false;
+	}
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
+
+	if (nonEmptyCellCount == 0)
+	{
+		ccLog::Warning("Not enough non-empty cells to perform Kriging");
+		return false;
+	}
+
+	// Kriging structure
+	std::vector<DataPoint> dataPoints;
+	try
+	{
+		dataPoints.reserve(nonEmptyCellCount);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error(QObject::tr("Kriging: not enough memory"));
+		return false;
+	}
+
+	if (progressDialog)
+	{
+		progressDialog->setMethodTitle(QObject::tr("Kriging").toStdString().c_str());
+		progressDialog->setInfo(QObject::tr("Non-empty cells: %1\nGrid: %2 x %3").arg(nonEmptyCellCount).arg(width).arg(height));
+		progressDialog->start();
+		progressDialog->show();
+		QCoreApplication::processEvents();
+	}
+
+	// use non-empty cells
+	{
+		for (unsigned j = 0; j < height; ++j)
+		{
+			const Row& row = rows[j];
+			CCVector2d point(0.0, (j + 0.5) * gridStep);
+
+			for (unsigned i = 0; i < width; ++i)
+			{
+				point.x = (i + 0.5) * gridStep;
+
+				const ccRasterCell& cell = row[i];
+				if (cell.nbPoints)
+				{
+					dataPoints.push_back(DataPoint(point.x, point.y, cell.h));
+				}
+			}
+		}
+	}
+
+	RasterParameters rasterParams(CCVector2d(0, 0), gridStep, width, height);
+
+	unsigned stepCount = 1;
+	stepCount += static_cast<unsigned>(scalarFields.size());
+	if (hasColors)
+		stepCount += 3;
+
+	CCCoreLib::NormalizedProgress nProgress(progressDialog, static_cast<unsigned>(nonEmptyCellCount * stepCount));
+
+	Kriging kriging(dataPoints, rasterParams);
+	knn = std::min(knn, static_cast<int>(nonEmptyCellCount - 1));
+
+	auto* context = kriging.createOrdinaryKrigeContext(knn);
+	if (!context)
+	{
+		ccLog::Error(QObject::tr("Failed to initialize the Kriging algorithm"));
+		return false;
+	}
+
+	// process the altitudes first
+	{
+		if (!useInputParams)
+		{
+			// compute default parameters
+			Kriging::Model model = krigeParams.model;
+			krigeParams = kriging.computeDefaultParameters();
+			if (model != Kriging::Invalid)
+			{
+				// restore the input model
+				krigeParams.model = model;
+			}
+		}
+
+		for (unsigned j = 0; j < height; ++j)
+		{
+			Row& row = rows[j];
+
+			for (unsigned i = 0; i < width; ++i)
+			{
+				ccRasterCell& cell = row[i];
+				cell.h = kriging.ordinaryKrigeSingleCell(krigeParams, i, j, context);
+
+				if (!nProgress.oneStep())
+				{
+					//process cancelled by user
+					return false;
+				}
+			}
+		}
+	}
+
+	// then process the scalar values (if any)
+	for (size_t sfIndex = 0; sfIndex < scalarFields.size(); ++sfIndex)
+	{
+		SF& sf = scalarFields[sfIndex];
+
+		// update the kriging value
+		{
+			size_t index = 0;
+			for (unsigned j = 0; j < height; ++j)
+			{
+				const Row& row = rows[j];
+				for (unsigned i = 0; i < width; ++i)
+				{
+					const ccRasterCell& cell = row[i];
+					if (cell.nbPoints)
+					{
+						dataPoints[index++].value = sf[i + j * width];
+					}
+				}
+			}
+			assert(index == nonEmptyCellCount);
+		}
+
+		// compute default parameters
+		Kriging::KrigeParams sfKrigeParams = kriging.computeDefaultParameters();
+		// use the same model as for the altitudes
+		if (krigeParams.model != Kriging::Invalid)
+		{
+			sfKrigeParams.model = krigeParams.model;
+		}
+
+		for (unsigned j = 0; j < height; ++j)
+		{
+			Row& row = rows[j];
+
+			for (unsigned i = 0; i < width; ++i)
+			{
+				sf[i + j * width] = kriging.ordinaryKrigeSingleCell(sfKrigeParams, i, j, context);
+
+				if (!nProgress.oneStep())
+				{
+					//process cancelled by user
+					return false;
+				}
+			}
+		}
+	}
+
+	if (hasColors)
+	{
+		for (unsigned char c = 0; c < 3; ++c)
+		{
+			// update the kriging value
+			{
+				size_t index = 0;
+				for (unsigned j = 0; j < height; ++j)
+				{
+					const Row& row = rows[j];
+					for (unsigned i = 0; i < width; ++i)
+					{
+						const ccRasterCell& cell = row[i];
+						if (cell.nbPoints)
+						{
+							dataPoints[index++].value = cell.color.u[c];
+						}
+					}
+				}
+				assert(index == nonEmptyCellCount);
+			}
+
+			// compute default parameters
+			Kriging::KrigeParams colorKrigeParams = kriging.computeDefaultParameters();
+			// use the same model as for the altitudes
+			if (krigeParams.model != Kriging::Invalid)
+			{
+				colorKrigeParams.model = krigeParams.model;
+			}
+
+			for (unsigned j = 0; j < height; ++j)
+			{
+				Row& row = rows[j];
+
+				for (unsigned i = 0; i < width; ++i)
+				{
+					double col = kriging.ordinaryKrigeSingleCell(colorKrigeParams, i, j, context);
+					ccRasterCell& cell = row[i];
+					cell.color.u[c] = std::max(0.0, std::min(255.0, col));
+
+					if (!nProgress.oneStep())
+					{
+						//process cancelled by user
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	kriging.releaseOrdinaryKrigeContext(context);
+
+	return true;
+}
+
 unsigned ccRasterGrid::updateNonEmptyCellCount()
 {
 	nonEmptyCellCount = 0;
@@ -1001,17 +1262,19 @@ void ccRasterGrid::fillEmptyCells(	EmptyCellFillOption fillEmptyCellsStrategy,
 		defaultHeight = maxHeight;
 		break;
 	case FILL_CUSTOM_HEIGHT:
-	case INTERPOLATE: // we still fill the empty cells, as some cells may not be interpolated in the end!
+	case INTERPOLATE_DELAUNAY: // we still fill the empty cells, as some cells may not be interpolated in the end!
 		defaultHeight = customCellHeight;
 		break;
 	case FILL_AVERAGE_HEIGHT:
 		defaultHeight = meanHeight;
 		break;
+	case KRIGING:
+		// nothing to do
+		return;
 	default:
 		assert(false);
 		return;
 	}
-	assert(std::isfinite(defaultHeight));
 
 	for (unsigned i = 0; i < height; ++i)
 	{

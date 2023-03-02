@@ -32,6 +32,8 @@ constexpr char COMMAND_RASTER_FILL_MIN_HEIGHT[]			= "MIN_H";
 constexpr char COMMAND_RASTER_FILL_MAX_HEIGHT[]			= "MAX_H";
 constexpr char COMMAND_RASTER_FILL_CUSTOM_HEIGHT[]		= "CUSTOM_H";
 constexpr char COMMAND_RASTER_FILL_INTERPOLATE[]		= "INTERP";
+constexpr char COMMAND_RASTER_FILL_KRIGING[]			= "KRIGING";
+constexpr char COMMAND_RASTER_FILL_KRIGING_KNN[]		= "KRIGING_KNN";
 constexpr char COMMAND_RASTER_PROJ_TYPE[]				= "PROJ";
 constexpr char COMMAND_RASTER_SF_PROJ_TYPE[]			= "SF_PROJ";
 constexpr char COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH[]	= "MAX_EDGE_LENGTH";
@@ -94,7 +96,7 @@ static bool ReadProjectionType(ccCommandLineInterface& cmd, ccRasterGrid::Projec
 	return true;
 }
 
-static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString option, ccCommandLineInterface &cmd)
+static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString option, ccCommandLineInterface& cmd)
 {
 	if (option == COMMAND_RASTER_FILL_MIN_HEIGHT)
 	{
@@ -110,7 +112,11 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 	}
 	else if (option == COMMAND_RASTER_FILL_INTERPOLATE)
 	{
-		return ccRasterGrid::INTERPOLATE;
+		return ccRasterGrid::INTERPOLATE_DELAUNAY;
+	}
+	else if (option == COMMAND_RASTER_FILL_KRIGING)
+	{
+		return ccRasterGrid::KRIGING;
 	}
 	else
 	{
@@ -141,7 +147,12 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 	ccRasterGrid::ProjectionType projectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::ProjectionType sfProjectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
 	ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
-	double maxEdgeLength = 0.0;
+	ccRasterGrid::DelaunayInterpolationParams dInterpParams;
+	ccRasterGrid::KrigingParams krigingParams;
+	{
+		// force auto-guess
+		krigingParams.autoGuess = true;
+	}
 	QString projStdDevSFDesc, sfProjStdDevSFDesc;
 
 	while (!cmd.arguments().empty())
@@ -267,10 +278,22 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			cmd.arguments().pop_front();
 
 			bool ok = false;
-			maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
-			if (!ok || maxEdgeLength < 0.0)
+			dInterpParams.maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok || dInterpParams.maxEdgeLength < 0.0)
 			{
 				return cmd.error(QString("Invalid max edge length value! (after %1)").arg(COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_FILL_KRIGING_KNN))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			bool ok = false;
+			krigingParams.kNN = cmd.arguments().takeFirst().toInt(&ok);
+			if (!ok || krigingParams.kNN <= 0)
+			{
+				return cmd.error(QString("Invalid Kriging knn value! (after %1)").arg(COMMAND_RASTER_FILL_KRIGING_KNN));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_RESAMPLE))
@@ -399,11 +422,26 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
 			}
 
+			ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);
+			void* interpolationParams = nullptr;
+			switch (interpolationType)
+			{
+			case ccRasterGrid::InterpolationType::DELAUNAY:
+				interpolationParams = (void*)&dInterpParams;
+				break;
+			case ccRasterGrid::InterpolationType::KRIGING:
+				interpolationParams = (void*)&krigingParams;
+				break;
+			default:
+				// do nothing
+				break;
+			}
+
 			if (grid.fillWith(	cloudDesc.pc,
 								vertDir,
 								projectionType,
-								emptyCellFillStrategy == ccRasterGrid::INTERPOLATE,
-								maxEdgeLength,
+								interpolationType,
+								interpolationParams,
 								sfProjectionType,
 								pDlg.data(),
 								invVarProjSFIndex )

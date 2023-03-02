@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>654</width>
-    <height>371</height>
+    <width>603</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,6 +48,17 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="fromEntityToolButton">
+       <property name="toolTip">
+        <string>Load parameters from a cylinder in the DB tree</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/dbContainerSymbol.png</normaloff>:/CC/images/dbContainerSymbol.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -70,16 +81,33 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCheckBox" name="arbitraryCSCheckBox">
+       <property name="toolTip">
+        <string>Output cloud will use an arbitrary coordinate system
+(instead of being related to the original cloud coordinate system)</string>
+       </property>
+       <property name="text">
+        <string>output to arbitrary CS</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="shapeGroupBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="title">
       <string>Shape</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <layout class="QHBoxLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
@@ -96,7 +124,7 @@
         <item>
          <widget class="QComboBox" name="comboBoxAxisDimension">
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <item>
            <property name="text">
@@ -113,8 +141,123 @@
             <string notr="true">Z</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
          </widget>
         </item>
+        <item>
+         <widget class="QFrame" name="axisFrame">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QDoubleSpinBox" name="axisXDoubleSpinBox">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-1000000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="axisYDoubleSpinBox">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-1000000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000000.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="axisZDoubleSpinBox">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-1000000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>1000000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="flipxAxisToolButton">
+             <property name="text">
+              <string>flip</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pasteAxisToolButton">
+             <property name="toolTip">
+              <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../icons.qrc">
+               <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QFrame" name="angleFrame">
           <property name="frameShape">
@@ -136,19 +279,6 @@
            <property name="bottomMargin">
             <number>0</number>
            </property>
-           <item>
-            <spacer name="horizontalSpacer">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
            <item>
             <widget class="QLabel" name="labelAngle">
              <property name="toolTip">
@@ -200,19 +330,6 @@
             <number>0</number>
            </property>
            <item>
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
             <widget class="QLabel" name="radiusLabel">
              <property name="toolTip">
               <string>Cylinder (or cone base) radius</string>
@@ -241,6 +358,19 @@
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
         </item>
@@ -250,13 +380,13 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBoxAxisPosition">
+    <widget class="QGroupBox" name="axisPositionGroupBox">
      <property name="title">
       <string>Axis position</string>
      </property>
      <layout class="QVBoxLayout">
       <item>
-       <widget class="QFrame" name="axisFrame">
+       <widget class="QFrame" name="axisCenterFrame">
         <layout class="QHBoxLayout">
          <property name="leftMargin">
           <number>0</number>
@@ -281,7 +411,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxAxisX">
+          <widget class="QDoubleSpinBox" name="axisCenterXDoubleSpinBox">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -295,22 +425,6 @@
             <double>1000000000.000000000000000</double>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <widget class="QLabel" name="label2">
@@ -323,7 +437,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxAxisY">
+          <widget class="QDoubleSpinBox" name="axisCenterYDoubleSpinBox">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -337,22 +451,6 @@
             <double>1000000000.000000000000000</double>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>10</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
          <item>
           <widget class="QLabel" name="label3">
@@ -365,7 +463,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="doubleSpinBoxAxisZ">
+          <widget class="QDoubleSpinBox" name="axisCenterZDoubleSpinBox">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -379,6 +477,30 @@
             <double>1000000000.000000000000000</double>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="pasteCenterToolButton">
+           <property name="toolTip">
+            <string>Paste from clipboard (3 values expected, separated by a comma, a semicolon or whitespaces)</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../icons.qrc">
+             <normaloff>:/CC/images/clipboard.png</normaloff>:/CC/images/clipboard.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -551,7 +673,9 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

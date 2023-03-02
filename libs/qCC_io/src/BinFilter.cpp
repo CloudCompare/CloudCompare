@@ -797,10 +797,24 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
-			ccHObject* cloud = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-			if (cloud)
+			ccHObject* cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+			if (cloudEntity)
 			{
-				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
+				poly->setAssociatedCloud(cloud);
+
+				// now check the indexes
+				unsigned pointCount = cloud->size();
+				for (unsigned i = 0; i < poly->size(); ++i)
+				{
+					if (poly->getPointGlobalIndex(i) >= pointCount)
+					{
+						ccLog::Warning(QString("[BIN] Polyline '%1' (ID=%2) seems corrupted!").arg(poly->getName()).arg(poly->getUniqueID()));
+						delete poly;
+						currentObject = nullptr;
+						break;
+					}
+				}
 			}
 			else
 			{

@@ -1063,36 +1063,69 @@ void MainWindow::doActionApplyTransformation()
 	if (!dlg.exec())
 		return;
 
-	ccGLMatrixd transMat = dlg.getTransformation();
-	applyTransformation(transMat);
+	bool applyToGlobal = false;
+	ccGLMatrixd transMat = dlg.getTransformation(applyToGlobal);
+	applyTransformation(transMat, applyToGlobal);
 }
 
-void MainWindow::applyTransformation(const ccGLMatrixd& mat)
+ccHObject::Container MainWindow::getTopLevelSelectedEntities() const
+{
+	ccHObject::Container topLevelSelectedEntities;
+	for (size_t i = 0; i < m_selectedEntities.size(); ++i)
+	{
+		ccHObject* entity = m_selectedEntities[i];
+		bool hasParentsInselection = false;
+		for (size_t j = 0; j < m_selectedEntities.size(); ++j)
+		{
+			if (i == j)
+				continue;
+
+			ccHObject* otherEntity = m_selectedEntities[j];
+			if (otherEntity->isAncestorOf(entity))
+			{
+				hasParentsInselection = true;
+				break;
+			}
+		}
+
+		if (!hasParentsInselection)
+		{
+			topLevelSelectedEntities.push_back(entity);
+		}
+	}
+
+	return topLevelSelectedEntities;
+}
+
+void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 {
 	//if the transformation is partly converted to global shift/scale
-	bool updateGlobalShiftAndScale = false;
-	double scaleChange = 1.0;
-	CCVector3d shiftChange(0, 0, 0);
-	ccGLMatrixd transMat = mat;
+	bool autoApplyPreviousGlobalShiftAndScale = false;
+	double previousScale = 1.0;
+	CCVector3d previousShift(0, 0, 0);
 
-	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
-	ccHObject::Container selectedEntities = getSelectedEntities();
+	//we don't want any entity that would be the children of other selected entitiesmust backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
+	ccHObject::Container selectedEntities = getTopLevelSelectedEntities();
 
-	//special case: the selected entity is a group
-	//if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
-	//{
-	//	ccHObject* ent = selectedEntities.front();
-	//	m_selectedEntities.clear();
-	//	for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
-	//	{
-	//		selectedEntities.push_back(ent->getChild(i));
-	//	}
-	//}
-
-	bool firstCloud = true;
-
-	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
+	for (ccHObject* entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
+		ccGLMatrixd transMat = mat;
+
+		if (applyToGlobal && nullptr != dynamic_cast<ccShiftedObject*>(entity))
+		{
+			// the user wants to apply the transformation to the global coordinates
+			ccShiftedObject* shiftedEntity = static_cast<ccShiftedObject*>(entity);
+			CCVector3d globalShift = shiftedEntity->getGlobalShift();
+			double globalScale = shiftedEntity->getGlobalScale();
+
+			// we compute the impact to the local coordinate system without changing the
+			// actual Global Shift & Scale parameters (for now)
+			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
+
+			// we switch to a local transformation matrix
+			transMat.setTranslation(localTranslation);
+		}
+
 		//we don't test primitives (it's always ok while the 'vertices lock' test would fail)
 		if (!entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
@@ -1107,45 +1140,54 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 					continue;
 				}
 
-				if (firstCloud)
+				//test if the translated cloud coordinates were already "too large"
+				//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
+				ccBBox localBBox = entity->getOwnBB();
+				CCVector3d Pl = localBBox.minCorner();
+				double Dl = localBBox.getDiagNormd();
+
+				//if the cloud is alright
+				if (	!ccGlobalShiftManager::NeedShift(Pl)
+					&&	!ccGlobalShiftManager::NeedRescale(Dl) )
 				{
-					//test if the translated cloud was already "too big"
-					//(in which case we won't bother the user about the fact
-					//that the transformed cloud will be too big...)
-					ccBBox localBBox = entity->getOwnBB();
-					CCVector3d Pl = localBBox.minCorner();
-					double Dl = localBBox.getDiagNormd();
+					//test if the translated cloud coordinates are too large (in local coordinate space)
+					ccBBox transformedBox = entity->getOwnBB() * transMat;
+					CCVector3d transformedPl = transformedBox.minCorner();
+					double transformedDl = transformedBox.getDiagNormd();
 
-					//the cloud was alright
-					if (	!ccGlobalShiftManager::NeedShift(Pl)
-						&&	!ccGlobalShiftManager::NeedRescale(Dl))
+					bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+					if (needShift)
 					{
-						//test if the translated cloud is not "too big" (in local coordinate space)
-						ccBBox rotatedBox = entity->getOwnBB() * transMat;
-						double Dl2 = rotatedBox.getDiagNorm();
-						CCVector3d Pl2 = rotatedBox.getCenter();
+						//existing shift information
+						CCVector3d globalShift = cloud->getGlobalShift();
+						double globalScale = cloud->getGlobalScale();
 
-						bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
-						bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
+						//we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
+						CCVector3d Pg = cloud->toGlobal3d(transformedPl);
+						double Dg = transformedDl / globalScale;
 
-						if (needShift || needRescale)
+						//let's try to find better Global Shift and Scale values
+						CCVector3d newShift(0.0, 0.0, 0.0);
+						double newScale = 1.0;
+
+						//should we try to use the previous Global Shift and Scale values?
+						if (autoApplyPreviousGlobalShiftAndScale)
 						{
-							//existing shift information
-							CCVector3d globalShift = cloud->getGlobalShift();
-							double globalScale = cloud->getGlobalScale();
+							if (	!ccGlobalShiftManager::NeedShift(Pg + previousShift)
+								&&	!ccGlobalShiftManager::NeedRescale(Dg * previousScale))
+							{
+								newScale = previousScale;
+								newShift = previousShift;
+								needShift = false;
+							}
+						}
 
-							//we compute the transformation matrix in the global coordinate space
-							ccGLMatrixd globalTransMat = transMat;
-							globalTransMat.scaleRotation(1.0 / globalScale);
-							globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
-							//and we apply it to the cloud bounding-box
-							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
-							double Dg = rotatedBox.getDiagNorm();
-							CCVector3d Pg = rotatedBox.getCenter();
-
+						//if we still need to define new Global Shift and Scale
+						if (needShift)
+						{
 							//ask the user the right values!
-							ccShiftAndScaleCloudDlg sasDlg(Pl2, Dl2, Pg, Dg, this);
-							sasDlg.showApplyAllButton(false);
+							ccShiftAndScaleCloudDlg sasDlg(transformedPl, transformedDl, Pg, Dg, this);
+							sasDlg.showApplyAllButton(selectedEntities.size() > 1);
 							sasDlg.showTitle(true);
 							sasDlg.setKeepGlobalPos(true);
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
@@ -1153,34 +1195,52 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 
 							//add "original" entry
 							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
-							//sasDlg.setCurrentProfile(index);
-							//add "suggested" entry
-							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
-							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
-							sasDlg.setCurrentProfile(index);
+							//add "previous" entry (if any)
+							if (autoApplyPreviousGlobalShiftAndScale)
+							{
+								index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Previous"), previousShift, previousScale));
+							}
 							//add "last" entries (if any)
-							sasDlg.addShiftInfo(ccGlobalShiftManager::GetLast());
+							int matchingIndex = -1;
+							const auto& previousEntries = ccGlobalShiftManager::GetLast();
+							for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : previousEntries)
+							{
+								index = sasDlg.addShiftInfo(shiftInfo);
 
+								if (matchingIndex < 0)
+								{
+									if (	!ccGlobalShiftManager::NeedShift(Pg + shiftInfo.shift)
+										&&	!ccGlobalShiftManager::NeedRescale(Dg * shiftInfo.scale) )
+									{
+										matchingIndex = index;
+									}
+								}
+							}
+
+							//if not good solution found...
+							if (matchingIndex < 0)
+							{
+								//add "suggested" entry
+								CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+								double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
+								matchingIndex = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
+							}
+
+							sasDlg.setCurrentProfile(matchingIndex);
 							if (sasDlg.exec())
 							{
+								newScale = sasDlg.getScale();
+								newShift = sasDlg.getShift();
+								needShift = false;
+
 								//store the shift for next time!
-								double newScale = sasDlg.getScale();
-								CCVector3d newShift = sasDlg.getShift();
 								ccGlobalShiftManager::StoreShift(newShift, newScale);
 
-								//get the relative modification to existing global shift/scale info
-								assert(cloud->getGlobalScale() != 0);
-								scaleChange = newScale / cloud->getGlobalScale();
-								shiftChange = newShift - cloud->getGlobalShift();
-
-								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
-
-								//update transformation matrix accordingly
-								if (updateGlobalShiftAndScale)
+								if (sasDlg.applyAll())
 								{
-									transMat.scaleRotation(scaleChange);
-									transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+									autoApplyPreviousGlobalShiftAndScale = true;
+									previousScale = newScale;
+									previousShift = newShift;
 								}
 							}
 							else if (sasDlg.cancelled())
@@ -1189,44 +1249,49 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 								return;
 							}
 						}
+
+						assert(!needShift);
+
+						//get the relative modification to existing global shift/scale info
+						assert(globalScale != 0);
+						double scaleChange = newScale / globalScale;
+						CCVector3d shiftChange = newShift - globalShift;
+
+						if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+						{
+							//apply translation as global shift
+							cloud->setGlobalShift(newShift);
+							cloud->setGlobalScale(newScale);
+							ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+
+							transMat.scaleRotation(scaleChange);
+							transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+						}
 					}
-
-					firstCloud = false;
-				}
-
-				if (updateGlobalShiftAndScale)
-				{
-					//apply translation as global shift
-					cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
-					cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
-					const CCVector3d& T = cloud->getGlobalShift();
-					double scale = cloud->getGlobalScale();
-					ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
 				}
 			}
 		}
 
-		//we temporarily detach entity, as it may undergo
+		//we temporarily detach the entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->setGLTransformation(ccGLMatrix(transMat.data()));
+
 		//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
 		entity->applyGLTransformation_recursive();
 		entity->prepareDisplayForRefresh_recursive();
-		putObjectBackIntoDBTree(entity,objContext);
+		putObjectBackIntoDBTree(entity, objContext);
 	}
 
-	//reselect previously selected entities!
-	if (m_ccRoot)
-		m_ccRoot->selectEntities(selectedEntities);
-
 	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
-	ccLog::Print(transMat.toString(12,' ')); //full precision
+	ccLog::Print(mat.toString(12, ' ')); //full precision
 	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 	//reselect previously selected entities!
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
+
+	zoomOnSelectedEntities();
 
 	refreshAll();
 }
@@ -1352,7 +1417,7 @@ void MainWindow::doActionApplyScale()
 				C = cloud->getOwnBB().getCenter();
 			}
 
-			//we temporarily detach entity, as it may undergo
+			//we temporarily detach the entity, as it may undergo
 			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::scale
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 
@@ -1372,6 +1437,16 @@ void MainWindow::doActionApplyScale()
 				cloud->setGlobalShift( CCVector3d(	shift.x*scales.x,
 													shift.y*scales.y,
 													shift.z*scales.z) );
+			}
+
+			//specific case for polyline vertices
+			if (cloud->getParent() && cloud->getParent()->isA(CC_TYPES::POLY_LINE))
+			{
+				ccPolyline* poly = static_cast<ccPolyline*>(cloud->getParent());
+				if (poly->getAssociatedCloud() == cloud)
+				{
+					poly->invalidateBoundingBox();
+				}
 			}
 
 			ent->prepareDisplayForRefresh_recursive();
@@ -1606,7 +1681,7 @@ void MainWindow::doComputeBestFitBB()
 					cloud->setGLTransformation(trans);
 					trans.invert();
 
-					//we temporarily detach entity, as it may undergo
+					//we temporarily detach the entity, as it may undergo
 					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 					ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 					static_cast<ccPointCloud*>(cloud)->applyRigidTransformation(trans);
@@ -4626,7 +4701,7 @@ void MainWindow::doActionRasterize()
 	}
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-	ccRasterizeTool rasterizeTool(cloud,this);
+	ccRasterizeTool rasterizeTool(cloud, this);
 	rasterizeTool.exec();
 }
 
@@ -5334,7 +5409,7 @@ void MainWindow::doActionFastRegistration(FastRegistrationMode mode)
 		ccConsole::Print(glTrans.toString(12, ' ')); //full precision
 		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
-		//we temporarily detach entity, as it may undergo
+		//we temporarily detach the entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
@@ -5381,7 +5456,7 @@ void MainWindow::doActionMatchBBCenters()
 		ccConsole::Print(glTrans.toString(12,' ')); //full precision
 		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
-		//we temporarily detach entity, as it may undergo
+		//we temporarily detach the entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
@@ -5700,7 +5775,7 @@ void MainWindow::doActionUnroll()
 	}
 	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-	ccUnrollDlg unrollDlg(this);
+	ccUnrollDlg unrollDlg(m_ccRoot ? m_ccRoot->getRootEntity() : nullptr, this);
 	unrollDlg.fromPersistentSettings();
 	if (!unrollDlg.exec())
 		return;
@@ -5708,8 +5783,9 @@ void MainWindow::doActionUnroll()
 
 	ccPointCloud::UnrollMode mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
+	CCVector3d axisDir = unrollDlg.getAxis();
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
+	bool arbitraryOutputCS = unrollDlg.useArbitraryOutputCS();
 	CCVector3 center = unrollDlg.getAxisPosition();
 
 	//let's rock unroll ;)
@@ -5731,13 +5807,13 @@ void MainWindow::doActionUnroll()
 	{
 		ccPointCloud::UnrollCylinderParams params;
 		params.radius = radius;
-		params.axisDim = dim;
+		params.axisDir = CCVector3::fromArray(axisDir.u);
 		if (unrollDlg.isAxisPositionAuto())
 		{
 			center = pc->getOwnBB().getCenter();
 		}
 		params.center = center;
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;
 
@@ -5749,8 +5825,8 @@ void MainWindow::doActionUnroll()
 		params.radius = (mode == ccPointCloud::CONE ? 0 : radius);
 		params.apex = center;
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
-		params.axisDim = dim;
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
+		params.axisDir = CCVector3::fromArray(axisDir.u);
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;
 	
@@ -7290,11 +7366,13 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				Z.normalize();
 
 				ccGLMatrixd trans;
-				double* mat = trans.data();
-				mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0;
-				mat[1] = Y.x; mat[5] = Y.y; mat[9]  = Y.z; mat[13] = 0;
-				mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0;
-				mat[3] = 0  ; mat[7] = 0  ; mat[11] = 0  ; mat[15] = 1;
+				{
+					double* mat = trans.data();
+					mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0.0;
+					mat[1] = Y.x; mat[5] = Y.y; mat[9]  = Y.z; mat[13] = 0.0;
+					mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0.0;
+					mat[3] = 0.0; mat[7] = 0.0; mat[11] = 0.0; mat[15] = 1.0;
+				}
 
 				CCVector3d T = -A->toDouble();
 				trans.apply(T);
@@ -7302,7 +7380,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				trans.setTranslation(T);
 
 				assert(haveOneSelection() && m_selectedEntities.front() == s_levelEntity);
-				applyTransformation(trans);
+				applyTransformation(trans, false);
 
 				//clear message
 				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
@@ -10225,7 +10303,7 @@ void MainWindow::doActionSaveFile()
 	//default filter
 	QString selectedFilter = fileFilters.first();
 	if (hasCloud)
-		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(),selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(), selectedFilter).toString();
 	else if (hasMesh)
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterMesh(), selectedFilter).toString();
 	else if (hasImages)

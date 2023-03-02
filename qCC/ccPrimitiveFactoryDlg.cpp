@@ -17,11 +17,9 @@
 
 #include "ccPrimitiveFactoryDlg.h"
 
-//Qt
-#include <QClipboard>
-
-//qCC
-#include <mainwindow.h>
+//local
+#include "mainwindow.h"
+#include "ccUtils.h"
 
 //qCC_db
 #include <ccGenericPrimitive.h>
@@ -145,27 +143,12 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 
 void ccPrimitiveFactoryDlg::setSpherePositionFromClipboard()
 {
-	QClipboard *clipboard = QApplication::clipboard();
-	if (clipboard != nullptr)
+	CCVector3d vector;
+	if (ccUtils::GetVectorFromClipboard(vector))
 	{
-		QStringList valuesStr = clipboard->text().simplified().split(QChar(' '), Qt::SkipEmptyParts);
-		if (valuesStr.size() == 3)
-		{
-			CCVector3d vec;
-			bool success;
-			for (unsigned i = 0; i < 3; ++i)
-			{
-				vec[i] = valuesStr[i].toDouble(&success);
-				if (!success)
-					break;
-			}
-			if (success)
-			{
-				spherePosXDoubleSpinBox->setValue(vec.x);
-				spherePosYDoubleSpinBox->setValue(vec.y);
-				spherePosZDoubleSpinBox->setValue(vec.z);
-			}
-		}
+		spherePosXDoubleSpinBox->setValue(vector.x);
+		spherePosYDoubleSpinBox->setValue(vector.y);
+		spherePosZDoubleSpinBox->setValue(vector.z);
 	}
 }
 

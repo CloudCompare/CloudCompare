@@ -7194,7 +7194,7 @@ void ccGLWindow::renderText(int x, int y, const QString & str, uint16_t uniqueID
 				texture->setMipLevels(0);
 				texture->allocateStorage();
 			}
-			texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev, textImage.bits());
+			texture->setData(QOpenGLTexture::RGBA, QOpenGLTexture::UInt32_RGBA8_Rev, static_cast<void const *>(textImage.bits()));
 			texture->bind();
 
 			ccGL::Color(glFunc, ccColor::bright); //DGM: warning must be float colors to work properly?!

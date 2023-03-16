@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include <QtGlobal>
-#include <QDate>
 
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
@@ -27,7 +26,7 @@
 
 
 ccViewerApplication::ccViewerApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QString( "1.41.alpha (%1)" ).arg(QDate::currentDate().toString("MM-dd-yyyy")))
+	: ccApplicationBase( argc, argv, isCommandLine, QString( "1.41.alpha (%1)" ).arg(__DATE__))
 {
 	setApplicationName( "CloudCompareViewer" );
 }

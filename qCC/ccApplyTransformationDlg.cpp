@@ -83,6 +83,7 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	connect(txAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
 	connect(tyAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
 	connect(tzAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
+	connect(scaleDoubleSpinBox,			qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onRotAngleValueChanged);
 	connect(setIAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(1.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(0.0); });
 	connect(setJAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(1.0); rzAxisDoubleSpinBox->setValue(0.0); });
 	connect(setKAxisToolButton,			&QToolButton::clicked,								[this]	{rxAxisDoubleSpinBox->setValue(0.0); ryAxisDoubleSpinBox->setValue(0.0); rzAxisDoubleSpinBox->setValue(1.0); });
@@ -96,6 +97,7 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	connect(etxAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
 	connect(etyAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
 	connect(etzAxisDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
+	connect(eScaleDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccApplyTransformationDlg::onEulerValueChanged);
 	connect(pasteEulerAnglesToolButton,	&QToolButton::clicked,								this,	&ccApplyTransformationDlg::eulerAnglesFromClipboard);
 	connect(pasteEulerTransToolButton,	&QToolButton::clicked,								this,	&ccApplyTransformationDlg::eulerTransFromClipboard);
 
@@ -109,6 +111,7 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=nullptr*/)
 	connect(fromToTxAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
 	connect(fromToTyAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
 	connect(fromToTzAxisDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
+	connect(fromToScaleDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccApplyTransformationDlg::onFromToValueChanged);
 	connect(pasteFromAxisToolButton,	&QToolButton::clicked,								this, &ccApplyTransformationDlg::fromAxisFromClipboard);
 	connect(pasteToAxisToolButton,		&QToolButton::clicked,								this, &ccApplyTransformationDlg::toAxisFromClipboard);
 	connect(pasteFromToTransToolButton,	&QToolButton::clicked,								this, &ccApplyTransformationDlg::fromToTransFromClipboard);
@@ -149,6 +152,7 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	PointCoordinateType alpha = 0;
 	CCVector3 axis;
 	CCVector3 t;
+	PointCoordinateType scale = 1.0;
 
 	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
 	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
@@ -157,9 +161,14 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 	t.x		= static_cast<PointCoordinateType>(txAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(tyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
+	scale	= static_cast<PointCoordinateType>(scaleDoubleSpinBox->value());
 
 	ccGLMatrix mat;
 	mat.initFromParameters(alpha, axis, t);
+	if (scale != 1)
+	{
+		mat.scaleRotation(scale);
+	}
 
 	updateAll(mat, true, false, true, true); //no need to update the current form
 }
@@ -170,6 +179,7 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	PointCoordinateType theta = 0;
 	PointCoordinateType psi = 0;
 	CCVector3 t;
+	PointCoordinateType scale = 1.0;
 
 	phi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePhiDoubleSpinBox->value() ) );
 	theta	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( eThetaDoubleSpinBox->value() ) );
@@ -177,9 +187,14 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 	t.x		= static_cast<PointCoordinateType>(etxAxisDoubleSpinBox->value());
 	t.y		= static_cast<PointCoordinateType>(etyAxisDoubleSpinBox->value());
 	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());
+	scale	= static_cast<PointCoordinateType>(eScaleDoubleSpinBox->value());
 
 	ccGLMatrix mat;
 	mat.initFromParameters(phi, theta, psi, t);
+	if (scale != 1)
+	{
+		mat.scaleRotation(scale);
+	}
 
 	updateAll(mat, true, true, false, true); //no need to update the current form
 }
@@ -188,21 +203,27 @@ void ccApplyTransformationDlg::onFromToValueChanged(double)
 {
 	CCVector3 fromAxis, toAxis;
 	CCVector3 t;
+	PointCoordinateType scale = 1.0;
 
-	fromAxis.x = static_cast<PointCoordinateType>(fromXAxisDoubleSpinBox->value());
-	fromAxis.y = static_cast<PointCoordinateType>(fromYAxisDoubleSpinBox->value());
-	fromAxis.z = static_cast<PointCoordinateType>(fromZAxisDoubleSpinBox->value());
-	toAxis.x = static_cast<PointCoordinateType>(toXAxisDoubleSpinBox->value());
-	toAxis.y = static_cast<PointCoordinateType>(toYAxisDoubleSpinBox->value());
-	toAxis.z = static_cast<PointCoordinateType>(toZAxisDoubleSpinBox->value());
-	t.x = static_cast<PointCoordinateType>(fromToTxAxisDoubleSpinBox->value());
-	t.y = static_cast<PointCoordinateType>(fromToTyAxisDoubleSpinBox->value());
-	t.z = static_cast<PointCoordinateType>(fromToTzAxisDoubleSpinBox->value());
+	fromAxis.x	= static_cast<PointCoordinateType>(fromXAxisDoubleSpinBox->value());
+	fromAxis.y	= static_cast<PointCoordinateType>(fromYAxisDoubleSpinBox->value());
+	fromAxis.z	= static_cast<PointCoordinateType>(fromZAxisDoubleSpinBox->value());
+	toAxis.x	= static_cast<PointCoordinateType>(toXAxisDoubleSpinBox->value());
+	toAxis.y	= static_cast<PointCoordinateType>(toYAxisDoubleSpinBox->value());
+	toAxis.z	= static_cast<PointCoordinateType>(toZAxisDoubleSpinBox->value());
+	t.x			= static_cast<PointCoordinateType>(fromToTxAxisDoubleSpinBox->value());
+	t.y			= static_cast<PointCoordinateType>(fromToTyAxisDoubleSpinBox->value());
+	t.z			= static_cast<PointCoordinateType>(fromToTzAxisDoubleSpinBox->value());
+	scale		= static_cast<PointCoordinateType>(fromToScaleDoubleSpinBox->value());
 
 	fromAxis.normalize();
 	toAxis.normalize();
 	ccGLMatrix mat = ccGLMatrix::FromToRotation(fromAxis, toAxis);
 	mat.setTranslation(t);
+	if (scale != 1)
+	{
+		mat.scaleRotation(scale);
+	}
 
 	updateAll(mat, true, true, true, false); //no need to update the current form
 
@@ -235,7 +256,8 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		PointCoordinateType alpha = 0;
 		CCVector3 axis;
 		CCVector3 t;
-		mat.getParameters(alpha, axis, t);
+		PointCoordinateType scale = 1;
+		mat.getParameters(alpha, axis, t, &scale);
 
 		rxAxisDoubleSpinBox->setValue(axis.x);
 		ryAxisDoubleSpinBox->setValue(axis.y);
@@ -244,6 +266,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
+		scaleDoubleSpinBox->setValue(scale);
 
 		rxAxisDoubleSpinBox->blockSignals(false);
 		ryAxisDoubleSpinBox->blockSignals(false);
@@ -267,7 +290,8 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		PointCoordinateType theta = 0;
 		PointCoordinateType psi = 0;
 		CCVector3 t;
-		mat.getParameters(phi, theta, psi, t);
+		PointCoordinateType scale = 1;
+		mat.getParameters(phi, theta, psi, t, &scale);
 
 		ePhiDoubleSpinBox   ->setValue(CCCoreLib::RadiansToDegrees(phi));
 		eThetaDoubleSpinBox ->setValue(CCCoreLib::RadiansToDegrees(theta));
@@ -275,6 +299,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		etxAxisDoubleSpinBox->setValue(t.x);
 		etyAxisDoubleSpinBox->setValue(t.y);
 		etzAxisDoubleSpinBox->setValue(t.z);
+		eScaleDoubleSpinBox ->setValue(scale);
 
 		ePhiDoubleSpinBox   ->blockSignals(false);
 		eThetaDoubleSpinBox ->blockSignals(false);
@@ -299,6 +324,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		CCVector3 from(0, 0, 1);
 		CCVector3 to = from;
 		mat.applyRotation(to);
+		PointCoordinateType scale = mat.getColumnAsVec3D(0).norm();
 		CCVector3 t = mat.getTranslationAsVec3D();
 
 		fromXAxisDoubleSpinBox   ->setValue(from.x);
@@ -310,6 +336,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		fromToTxAxisDoubleSpinBox->setValue(t.x);
 		fromToTyAxisDoubleSpinBox->setValue(t.y);
 		fromToTzAxisDoubleSpinBox->setValue(t.z);
+		fromToScaleDoubleSpinBox ->setValue(scale);
 
 		fromXAxisDoubleSpinBox   ->blockSignals(false);
 		fromYAxisDoubleSpinBox   ->blockSignals(false);

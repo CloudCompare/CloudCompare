@@ -78,6 +78,7 @@ v2.13.alpha (???) - (??/??/????)
 			  (useful to georeference a cloud with a known transformation)
 		- new tab to define the transformation as a rotation from a vector to another one (+ a translation)
 		- ability to paste the axes, triplet of angles and translation vectors from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
+		- the tool now tries to handle rotation scaling separately (with a dedicated field, assuming it's the same scaling for all dimensions)
 
 	- Multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath

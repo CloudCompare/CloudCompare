@@ -672,7 +672,7 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 	QString cameraRepresentationStr("visualReferenceRepresentation");
 
 	e57::BlobNode blob(imf, imageSize);
-	cameraRepresentation.set("pngImage", blob);
+	cameraRepresentation.set("jpegImage", blob);
 	cameraRepresentation.set("imageHeight", e57::IntegerNode(imf, image->getH()));
 	cameraRepresentation.set("imageWidth", e57::IntegerNode(imf, image->getW()));
 
@@ -2314,6 +2314,14 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	QImage qImage;
 	assert(imageBits);
 	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(visualRefRepresentation->imageSize), imageFormat);
+
+	// a bug in some 2.13.alpha versions was causing CC to save JPEG images declared as PNG images :(
+	if (!loadResult && visualRefRepresentation->imageType == E57_PNG_IMAGE)
+	{
+		loadResult = qImage.loadFromData(imageBits, static_cast<int>(visualRefRepresentation->imageSize), "jpegImage");
+		ccLog::Warning("[E57] JPG image was wrongly tagged as PNG. You should save this E57 again to fix this...");
+	}
+
 	delete[] imageBits;
 	imageBits = nullptr;
 

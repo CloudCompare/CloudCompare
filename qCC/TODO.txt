@@ -136,6 +136,11 @@ Various:
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
 [*] Overlay grid (for 3D views - http://www.cloudcompare.org/forum/viewtopic.php?t=926) 
 
+From Florian W.
+[*] Adding an option in front of RANSAC to specify the angular position in space to a reference point would also be very useful. This could perhaps be set so that the program only finds shapes that lie vertically or horizontally in space. Sometimes it happens that cylinders are found which are arranged obliquely and do not exist at all. This is probably due to the density of the point cloud (in my case it has to be thinned out because it is too computationally intensive).
+[*] Adding the length setting for the cylinders before RANSAC could also reduce the frequency of errors. 
+[*] When sorting incorrectly recognized shapes according to RANSAC, there is unfortunately no "Back function / Back button". An accidental deletion of an actual shape would then no longer be tragic.
+
 From Pablo V.
 [*] Improve the raster interpolation algorithm of the Rasterize tool (https://www.cloudcompare.org/forum/viewtopic.php?p=25155#p25155)
 

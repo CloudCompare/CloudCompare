@@ -62,6 +62,11 @@ v2.13.alpha (???) - (??/??/????)
 	- Edit > Translate/Rotate: 
 		- In advanced section, added an option to rotate / translate entities of a small increment, with button or using left/right arrows (Thanks to [Lighpoint Scientific](https://lightpointdata.com)!)
 
+	- New default color ramp:
+		- Cividis ("to flatten the perceptual delta perceived by people with color vision deficiency,
+			and it prevents loss of information when printing in black and white")
+			See https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf (and thanks to Louis Gagnon)
+
 - Improvements:
 
 	- Tools > Projection > Unroll

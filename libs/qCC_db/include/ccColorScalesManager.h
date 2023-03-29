@@ -53,7 +53,9 @@ public:
 							BROWN_YELLOW	=	11,		/**< Brown-Yellow */
 							YELLOW_BROWN	=	12,		/**< Yellow-Brown */
 							TOPO_LANDSERF	=	13,		/**< Topo Landserf (quartile) */
-							HIGH_CONTRAST	=	14		/**< High contrast */
+							HIGH_CONTRAST	=	14,		/**< High contrast */
+							CIVIDIS			=	15,		/**< matplotlib library colorscale - see https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf */
+
 	};
 
 	//! Returns a pre-defined color scale UUID

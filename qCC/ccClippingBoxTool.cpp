@@ -1239,17 +1239,14 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 		} //extract envelope polylines
 
 		//release memory
-		if (error || singleSliceMode)
+		if (error)
 		{
 			for (ccHObject* slice : outputSlices)
 			{
 				delete slice;
 			}
 			outputSlices.resize(0);
-		}
 
-		if (error)
-		{
 			for (ccPolyline* poly : outputEnvelopes)
 			{
 				delete poly;
@@ -1451,7 +1448,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	QElapsedTimer eTimer;
 	eTimer.start();
 
-	if (!ExtractSlicesAndContours(clouds,
+	if (!ExtractSlicesAndContours(	clouds,
 									meshes,
 									*m_clipBox,
 									singleSliceMode,

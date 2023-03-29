@@ -232,6 +232,7 @@ v2.13.alpha (???) - (??/??/????)
 	- M3C2 plugin:
 		- the display was not always updated when M3C2 computation was done
 		- some parameters were not properly restored when re-opening the plugin dialog (e.g. the 'normal source')
+	- Glitch fix: extracting a single slice via the Contour extraction option of the 'Cross Section' tool would not work
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

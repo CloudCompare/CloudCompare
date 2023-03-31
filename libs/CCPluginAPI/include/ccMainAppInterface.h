@@ -29,7 +29,7 @@
 
 class QMainWindow;
 class QWidget;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccColorScalesManager;
 class ccOverlayDialog;
 class ccPickingHub;
@@ -44,16 +44,16 @@ public:
 	virtual QMainWindow* getMainWindow() = 0;
 
 	//! Returns active GL sub-window (if any)
-	virtual ccGLWindow* getActiveGLWindow() = 0;
+	virtual ccGLWindowInterface* getActiveGLWindow() = 0;
 
 	//! Creates a new instance of GL window (with its encapsulating widget)
 	/** \warning This instance must be destroyed by the application as well (see destroyGLWindow)
 		Note that the encapsulating widget is the window instance itself if 'stereo' mode is disabled
 	**/
-	virtual void createGLWindow(ccGLWindow*& window, QWidget*& widget) const = 0;
+	virtual void createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const = 0;
 
 	//! Destroys an instance of GL window created by createGLWindow
-	virtual void destroyGLWindow(ccGLWindow*) const = 0;
+	virtual void destroyGLWindow(ccGLWindowInterface*) const = 0;
 
 	//! Registers a MDI area 'overlay' dialog
 	/** Overlay dialogs are displayed in the central MDI area, above the 3D views.
@@ -165,7 +165,7 @@ public:
 	virtual void redrawAll(bool only2D = false) = 0;
 
 	//! Redraws all GL windows that have the 'refresh' flag on
-	/** See ccGLWindow::toBeRefreshed and ccDrawableObject::prepareDisplayForRefresh.
+	/** See ccGLWindowInterface::toBeRefreshed and ccDrawableObject::prepareDisplayForRefresh.
 		\param only2D whether to redraw everything (false) or only the 2D layer (true)
 	**/
 	virtual void refreshAll(bool only2D = false) = 0;
@@ -177,7 +177,7 @@ public:
 	virtual void disableAll() = 0;
 
 	//! Disables all GL windows but the specified one
-	virtual void disableAllBut(ccGLWindow* win) = 0;
+	virtual void disableAllBut(ccGLWindowInterface* win) = 0;
 
 	//! Updates UI (menu and properties browser) to reflect current selection state
 	/** This method should be called whenever a change is made to any selected entity

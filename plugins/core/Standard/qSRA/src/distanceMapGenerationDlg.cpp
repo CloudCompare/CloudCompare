@@ -224,7 +224,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		params.colorScaleUseShader = false;
 		m_window->setDisplayParameters(params,true);
 		m_window->setPerspectiveState(false,true);
-		m_window->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_CLICKABLE_ITEMS | ccGLWindow::INTERACT_ZOOM_CAMERA);
+		m_window->setInteractionMode(ccGLWindowInterface::INTERACT_PAN | ccGLWindowInterface::INTERACT_CLICKABLE_ITEMS | ccGLWindowInterface::INTERACT_ZOOM_CAMERA);
 		m_window->displayOverlayEntities(false, false);
 		m_window->showSF(displayColorScaleCheckBox->isChecked());
 		m_window->setSunLight(true);
@@ -531,7 +531,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 	if (!m_window || !box.isValid())
 		return;
 
-	//equivalent to 'ccGLWindow::updateConstellationCenterAndZoom' but we take aspect ratio into account
+	//equivalent to 'ccGLWindowInterface::updateConstellationCenterAndZoom' but we take aspect ratio into account
 
 	//we get the bounding-box diagonal length
 	PointCoordinateType bbDiag = box.getDiagNorm();

@@ -27,7 +27,7 @@
 #include <CCGeom.h>
 
 class ccMainAppInterface;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 class ccPointCloud;
 class ccPolyline;
@@ -110,7 +110,7 @@ protected:
 	ccMainAppInterface* m_app;
 
 	//! Associated GL window
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 
 	//! Associated classifier
 	Classifier m_classifier;

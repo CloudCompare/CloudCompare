@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
@@ -15,13 +17,9 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MEASUREMENT_HEADER
-#define CC_MEASUREMENT_HEADER
-
 #include <ccHObject.h>
 #include <ccPointCloud.h>
 #include <ccMainAppInterface.h>
-#include <ccGLWindow.h>
 
 /*
 A template class for all "measurements" made with ccCompass. Contains basic stuff like highligts, draw colours etc.
@@ -74,5 +72,3 @@ protected:
 	ccColor::Rgb m_alternate_colour = ccColor::cyan;
 	ccColor::Rgb m_normal_colour = ccColor::blue;
 };
-
-#endif

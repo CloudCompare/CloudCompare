@@ -28,7 +28,7 @@
 #include <QGamepad>
 #include <QTimer>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! Gaempad handler
 class CCAPPCOMMON_LIB_API GamepadInput : public QGamepad
@@ -46,7 +46,7 @@ public:
 	void stop();
 
 	//! Updates a window with the current gamepad state
-	void update(ccGLWindow* win);
+	void update(ccGLWindowInterface* win);
 
 Q_SIGNALS:
 

@@ -24,7 +24,7 @@
 #include <QMessageBox>
 
 //qCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //common dialogs
 #include <ccCameraParamEditDlg.h>
@@ -75,7 +75,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
 		QWidget* glWidget = nullptr;
-		CreateGLWindow(m_glWindow, glWidget, stereoMode);
+		ccGLWindowInterface::Create(m_glWindow, glWidget, stereoMode);
 		assert(m_glWindow && glWidget);
 
 		verticalLayout->addWidget(glWidget);
@@ -99,9 +99,9 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #endif
 
 	//Signals & slots connection
-	connect(m_glWindow,								&ccGLWindow::filesDropped,				this,	qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
-	connect(m_glWindow,								&ccGLWindow::entitySelectionChanged,	this,	&ccViewer::selectEntity);
-	connect(m_glWindow,								&ccGLWindow::exclusiveFullScreenToggled,this,	&ccViewer::onExclusiveFullScreenToggled);
+	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::filesDropped,				this,	qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
+	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::entitySelectionChanged,	this,	&ccViewer::selectEntity);
+	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::exclusiveFullScreenToggled,this,	&ccViewer::onExclusiveFullScreenToggled);
 	
 	//"Options" menu
 	connect(ui.actionDisplayParameters,				&QAction::triggered,					this,	&ccViewer::showDisplayParameters);
@@ -172,9 +172,11 @@ ccViewer::~ccViewer()
 		//m_glWindow->redraw();
 		delete currentRoot;
 	}
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	m_glWindow->setParent(0);
-#endif
+
+	if (ccGLWindowInterface::SupportStereo())
+	{
+		m_glWindow->asQObject()->setParent(nullptr);
+	}
 }
 
 void ccViewer::loadPlugins()
@@ -396,11 +398,11 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 bool ccViewer::checkForLoadedEntities()
 {
 	bool loadedEntities = true;
-	m_glWindow->displayNewMessage(QString(),ccGLWindow::SCREEN_CENTER_MESSAGE); //clear (any) message in the middle area
+	m_glWindow->displayNewMessage(QString(), ccGLWindowInterface::SCREEN_CENTER_MESSAGE); //clear (any) message in the middle area
 
 	if (!m_glWindow->getSceneDB())
 	{
-		m_glWindow->displayNewMessage("Drag & drop files on the 3D window to load them!",ccGLWindow::SCREEN_CENTER_MESSAGE,true,3600);
+		m_glWindow->displayNewMessage("Drag & drop files on the 3D window to load them!", ccGLWindowInterface::SCREEN_CENTER_MESSAGE, true, 3600);
 		loadedEntities = false;
 	}
 
@@ -646,18 +648,18 @@ void ccViewer::reflectPivotVisibilityState()
 	if ( m_glWindow == nullptr )
 		return;
 	
-	ccGLWindow::PivotVisibility vis = m_glWindow->getPivotVisibility();
+	ccGLWindowInterface::PivotVisibility vis = m_glWindow->getPivotVisibility();
 
-	ui.actionSetPivotAlwaysOn->setChecked(vis == ccGLWindow::PIVOT_ALWAYS_SHOW);
-	ui.actionSetPivotRotationOnly->setChecked(vis == ccGLWindow::PIVOT_SHOW_ON_MOVE);
-	ui.actionSetPivotOff->setChecked(vis == ccGLWindow::PIVOT_HIDE);
+	ui.actionSetPivotAlwaysOn->setChecked(vis == ccGLWindowInterface::PIVOT_ALWAYS_SHOW);
+	ui.actionSetPivotRotationOnly->setChecked(vis == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE);
+	ui.actionSetPivotOff->setChecked(vis == ccGLWindowInterface::PIVOT_HIDE);
 }
 
 void ccViewer::setPivotAlwaysOn()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_ALWAYS_SHOW);
+		m_glWindow->setPivotVisibility(ccGLWindowInterface::PIVOT_ALWAYS_SHOW);
 		m_glWindow->redraw();
 	}
 	reflectPivotVisibilityState();
@@ -667,7 +669,7 @@ void ccViewer::setPivotRotationOnly()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_SHOW_ON_MOVE);
+		m_glWindow->setPivotVisibility(ccGLWindowInterface::PIVOT_SHOW_ON_MOVE);
 		m_glWindow->redraw();
 	}
 	reflectPivotVisibilityState();
@@ -677,7 +679,7 @@ void ccViewer::setPivotOff()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setPivotVisibility(ccGLWindow::PIVOT_HIDE);
+		m_glWindow->setPivotVisibility(ccGLWindowInterface::PIVOT_HIDE);
 		m_glWindow->redraw();
 	}
 	reflectPivotVisibilityState();
@@ -727,8 +729,8 @@ void ccViewer::toggleStereoMode(bool state)
 	if (isActive)
 	{
 		m_glWindow->disableStereoMode();
-		if (	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-			||	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+		if (	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+			||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 		{
 			//disable full screen
 			ui.actionFullScreen->setChecked(false);
@@ -748,9 +750,8 @@ void ccViewer::toggleStereoMode(bool state)
 			return;
 		}
 
-		ccGLWindow::StereoParams params = smDlg.getParameters();
-#ifndef CC_GL_WINDOW_USE_QWINDOW
-		if (!params.isAnaglyph())
+		ccGLWindowInterface::StereoParams params = smDlg.getParameters();
+		if (!ccGLWindowInterface::SupportStereo() && !params.isAnaglyph())
 		{
 			ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
 			//activation of the stereo mode failed: cancel selection
@@ -759,7 +760,6 @@ void ccViewer::toggleStereoMode(bool state)
 			ui.actionEnableStereo->blockSignals(false);
 			return;
 		}
-#endif
 
 		//force perspective state!
 		if (!m_glWindow->getViewportParameters().perspectiveView)
@@ -768,8 +768,8 @@ void ccViewer::toggleStereoMode(bool state)
 			reflectPerspectiveState();
 		}
 
-		if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-			||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+		if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+			||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 		{
 			//force full screen
 			ui.actionFullScreen->setChecked(true);
@@ -792,8 +792,8 @@ void ccViewer::toggleFullScreen(bool state)
 	if (m_glWindow)
 	{
 		if (	m_glWindow->stereoModeIsEnabled()
-			&&	(	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-				||	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+			&&	(	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+				||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 			)
 		{
 			//auto disable stereo mode as NVidia Vision only works in full screen mode!
@@ -813,8 +813,8 @@ void ccViewer::onExclusiveFullScreenToggled(bool state)
 	if (	!state
 		&&	m_glWindow
 		&&	m_glWindow->stereoModeIsEnabled()
-		&&	(	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-			||	m_glWindow->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+		&&	(	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+			||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 		)
 	{
 		//auto disable stereo mode as NVidia Vision only works in full screen mode!
@@ -838,11 +838,11 @@ void ccViewer::toggleRotationAboutVertAxis()
 
 	if (isLocked)
 	{
-		m_glWindow->displayNewMessage(QString("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
+		m_glWindow->displayNewMessage(QString("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 	}
 	else
 	{
-		m_glWindow->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::ROTAION_LOCK_MESSAGE);
+		m_glWindow->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 	}
 	m_glWindow->redraw();
 }
@@ -1287,14 +1287,14 @@ void ccViewer::on3DMouseMove(std::vector<float>& vec)
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_glWindow)
-		Mouse3DInput::Apply(vec,m_glWindow);
+		Mouse3DInput::Apply(vec, m_glWindow);
 #endif
 }
 
 void ccViewer::on3DMouseReleased()
 {
 	//active window?
-	if (m_glWindow && m_glWindow->getPivotVisibility() == ccGLWindow::PIVOT_SHOW_ON_MOVE)
+	if (m_glWindow && m_glWindow->getPivotVisibility() == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE)
 	{
 		//we have to hide the pivot symbol!
 		m_glWindow->showPivotSymbol(false);

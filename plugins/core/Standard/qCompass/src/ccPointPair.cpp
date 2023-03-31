@@ -156,7 +156,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const double* M = camera.modelViewMat.data();
 				double d = (camera.modelViewMat * (*P)).norm();
 				double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
+				scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 			}
 			glFunc->glScalef(scale, scale, scale);
 			c_unitPointMarker->showNormals(!entityPickingMode);

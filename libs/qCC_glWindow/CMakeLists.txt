@@ -7,6 +7,10 @@ add_subdirectory( src )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCGLWINDOW_LIB_BUILD )
 
+if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
+	target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
+endif()
+
 target_link_libraries( ${PROJECT_NAME}
 	QCC_DB_LIB
 )

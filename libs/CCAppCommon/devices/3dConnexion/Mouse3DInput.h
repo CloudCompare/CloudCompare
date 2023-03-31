@@ -32,7 +32,7 @@
 //system
 #include <vector>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! 3DxWare driver wrapper for 3D mouse handling
 class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
@@ -241,7 +241,7 @@ public:
 	static void GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& mat);
 
 	//! Applies motion data to a given 3D window
-	static void Apply(const std::vector<float>& motionData, ccGLWindow* win);
+	static void Apply(const std::vector<float>& motionData, ccGLWindowInterface* win);
 
 	//! Called when a new system message is available
 	/** For 'internal' use only

@@ -4,7 +4,7 @@
 #include <QGamepadManager>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //system
 #include <assert.h>
@@ -32,7 +32,7 @@ void GamepadInput::stop()
 	m_timer.stop();
 }
 
-void GamepadInput::update(ccGLWindow* win)
+void GamepadInput::update(ccGLWindowInterface* win)
 {
 	if (!win)
 	{

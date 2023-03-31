@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
@@ -15,13 +17,10 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_TOOL_HEADER
-#define CC_TOOL_HEADER
-
 #include <ccHObject.h>
 #include <ccPointCloud.h>
 #include <ccMainAppInterface.h>
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 /*
 Template class that defining the basic functionality of qCompass "tools". 
@@ -79,7 +78,5 @@ protected:
 	ccMainAppInterface* m_app;
 
 	//link to the active openGLWindow
-	ccGLWindow*  m_window;
+	ccGLWindowInterface* m_window;
 };
-
-#endif

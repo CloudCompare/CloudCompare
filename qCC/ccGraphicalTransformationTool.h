@@ -26,7 +26,7 @@
 //qCC_db
 #include <ccHObject.h>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! Dialog + mechanism for graphical transformation of entities
 /** Mouse driven rotation and translation of selected entities at screen.
@@ -43,7 +43,7 @@ public:
 	virtual ~ccGraphicalTransformationTool();
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool linkWith(ccGLWindowInterface* win) override;
 	virtual bool start() override;
 	virtual void stop(bool state) override;
 

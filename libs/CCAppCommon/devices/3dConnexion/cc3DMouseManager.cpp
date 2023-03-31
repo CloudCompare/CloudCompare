@@ -20,7 +20,7 @@
 #include <QMenu>
 
 #include "cc3DMouseManager.h"
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 #include "ccMainAppInterface.h"
 
@@ -172,7 +172,7 @@ void cc3DMouseManager::on3DMouseKeyDown(int key)
 	case Mouse3DInput::V3DK_CW:
 	case Mouse3DInput::V3DK_CCW:
 	{
-		ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+		ccGLWindowInterface* activeWin = m_appInterface->getActiveGLWindow();
 		if (activeWin != nullptr)
 		{
 			CCVector3d axis(0,0,-1);
@@ -245,18 +245,18 @@ void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 		case Mouse3DInput::V3DCMD_VIEW_ROLLCW:
 		case Mouse3DInput::V3DCMD_VIEW_ROLLCCW:
 		{
-			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+			ccGLWindowInterface* activeWin = m_appInterface->getActiveGLWindow();
 			if (activeWin != nullptr)
 			{
-				CCVector3d axis(0,0,-1);
-				CCVector3d trans(0,0,0);
+				CCVector3d axis(0, 0, -1);
+				CCVector3d trans(0, 0, 0);
 				ccGLMatrixd mat;
 				double angle = M_PI/2;
 				if (cmd == Mouse3DInput::V3DCMD_VIEW_ROLLCCW)
 				{
 					angle = -angle;
 				}
-				mat.initFromParameters(angle,axis,trans);
+				mat.initFromParameters(angle, axis, trans);
 				activeWin->rotateBaseViewMat(mat);
 				activeWin->redraw();
 			}
@@ -265,7 +265,7 @@ void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 		case Mouse3DInput::V3DCMD_VIEW_SPINCW:
 		case Mouse3DInput::V3DCMD_VIEW_SPINCCW:
 		{
-			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+			ccGLWindowInterface* activeWin = m_appInterface->getActiveGLWindow();
 			if (activeWin != nullptr)
 			{
 				CCVector3d axis(0, 1, 0);
@@ -284,7 +284,7 @@ void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 		case Mouse3DInput::V3DCMD_VIEW_TILTCW:
 		case Mouse3DInput::V3DCMD_VIEW_TILTCCW:
 		{
-			ccGLWindow* activeWin = m_appInterface->getActiveGLWindow();
+			ccGLWindowInterface* activeWin = m_appInterface->getActiveGLWindow();
 			if (activeWin != nullptr)
 			{
 				CCVector3d axis(1, 0, 0);
@@ -310,7 +310,7 @@ void cc3DMouseManager::on3DMouseCMDKeyDown(int cmd)
 
 void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 {
-	ccGLWindow* win = m_appInterface->getActiveGLWindow();
+	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
 
@@ -319,11 +319,11 @@ void cc3DMouseManager::on3DMouseMove(std::vector<float>& vec)
 
 void cc3DMouseManager::on3DMouseReleased()
 {
-	ccGLWindow* win = m_appInterface->getActiveGLWindow();
+	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
 
-	if (win->getPivotVisibility() == ccGLWindow::PIVOT_SHOW_ON_MOVE)
+	if (win->getPivotVisibility() == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE)
 	{
 		//we have to hide the pivot symbol!
 		win->showPivotSymbol(false);

@@ -38,7 +38,6 @@ class ccMainAppInterface;
 class ccPointCloud;
 class ccPolyline;
 class ccScalarField;
-class ccGLWindow;
 class ccColorScaleSelector;
 class ccSymbolCloud;
 class ccMapWindow;

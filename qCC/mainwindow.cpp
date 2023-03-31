@@ -58,7 +58,7 @@
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 #include <ccRenderingTools.h>
 
 //local includes
@@ -164,7 +164,7 @@ enum PickingOperation {	NO_PICKING_OPERATION,
 						PICKING_ROTATION_CENTER,
 						PICKING_LEVEL_POINTS,
 					  };
-static ccGLWindow* s_pickingWindow = nullptr;
+static ccGLWindowInterface* s_pickingWindow = nullptr;
 static PickingOperation s_currentPickingOperation = NO_PICKING_OPERATION;
 static std::vector<cc2DLabel*> s_levelLabels;
 static ccPointCloud* s_levelMarkersCloud = nullptr;
@@ -402,7 +402,7 @@ void MainWindow::doEnableQtWarnings(bool state)
 void MainWindow::increasePointSize()
 {
 	//active window?
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setPointSize(win->getViewportParameters().defaultPointSize + 1);
@@ -413,7 +413,7 @@ void MainWindow::increasePointSize()
 void MainWindow::decreasePointSize()
 {
 	//active window?
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setPointSize(win->getViewportParameters().defaultPointSize - 1);
@@ -2088,7 +2088,7 @@ void MainWindow::doActionCreateGBLSensor()
 				//ccIndexedTransformation trans;
 				//sensor->addPosition(trans,0);
 
-				ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
+				ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(cloud->getDisplay());
 				if (win)
 				{
 					sensor->setDisplay_recursive(win);
@@ -2148,11 +2148,11 @@ void MainWindow::doActionCreateCameraSensor()
 	}
 	spDlg.updateCamSensor(sensor);
 
-	ccGLWindow* win = nullptr;
+	ccGLWindowInterface* win = nullptr;
 	if (ent)
 	{
 		ent->addChild(sensor);
-		win = static_cast<ccGLWindow*>(ent->getDisplay());
+		win = static_cast<ccGLWindowInterface*>(ent->getDisplay());
 	}
 	else
 	{
@@ -3619,7 +3619,7 @@ void MainWindow::doActionMerge()
 
 void MainWindow::zoomOn(ccHObject* object)
 {
-	ccGLWindow* win = static_cast<ccGLWindow*>(object->getDisplay());
+	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(object->getDisplay());
 	if (win)
 	{
 		ccBBox box = object->getDisplayBB_recursive(false,win);
@@ -5862,7 +5862,7 @@ void MainWindow::doActionUnroll()
 	}
 }
 
-ccGLWindow* MainWindow::getActiveGLWindow()
+ccGLWindowInterface* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
 	{
@@ -5872,26 +5872,26 @@ ccGLWindow* MainWindow::getActiveGLWindow()
 	QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
 	if (activeSubWindow)
 	{
-		return GLWindowFromWidget(activeSubWindow->widget());
+		return ccGLWindowInterface::FromWidget(activeSubWindow->widget());
 	}
 	else
 	{
 		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 		if (!subWindowList.isEmpty())
 		{
-			return GLWindowFromWidget(subWindowList[0]->widget());
+			return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
 		}
 	}
 
 	return nullptr;
 }
 
-QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
+QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 	for (int i = 0; i < subWindowList.size(); ++i)
 	{
-		if (GLWindowFromWidget(subWindowList[i]->widget()) == win)
+		if (ccGLWindowInterface::FromWidget(subWindowList[i]->widget()) == win)
 			return subWindowList[i];
 	}
 
@@ -5899,12 +5899,12 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 	return nullptr;
 }
 
-ccGLWindow* MainWindow::getGLWindow(int index) const
+ccGLWindowInterface* MainWindow::getGLWindow(int index) const
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();	
 	if (index >= 0 && index < subWindowList.size())
 	{
-		ccGLWindow* win = GLWindowFromWidget(subWindowList[index]->widget());
+		ccGLWindowInterface* win = ccGLWindowInterface::FromWidget(subWindowList[index]->widget());
 		assert(win);
 		return win;
 	}
@@ -5922,7 +5922,7 @@ int MainWindow::getGLWindowCount() const
 
 void MainWindow::zoomIn()
 {
-	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::getActiveGLWindow();
 	if (win)
 	{
 		//we simulate a real wheel event
@@ -5932,7 +5932,7 @@ void MainWindow::zoomIn()
 
 void MainWindow::zoomOut()
 {
-	ccGLWindow* win = MainWindow::getActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::getActiveGLWindow();
 	if (win)
 	{
 		//we simulate a real wheel event
@@ -5940,12 +5940,12 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindow* MainWindow::new3DViewInternal( bool allowEntitySelection )
+ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 {
 	assert(m_ccRoot && m_mdiArea);
 
 	QWidget* viewWidget = nullptr;
-	ccGLWindow* view3D = nullptr;
+	ccGLWindowInterface* view3D = nullptr;
 	
 	createGLWindow(view3D, viewWidget);
 	if (!viewWidget || !view3D)
@@ -5968,30 +5968,30 @@ ccGLWindow* MainWindow::new3DViewInternal( bool allowEntitySelection )
 
 	if ( allowEntitySelection )
 	{
-		connect(view3D, &ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
+		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitySelectionChanged, this, [=] (ccHObject *entity) {
 			m_ccRoot->selectEntity( entity );
 		});
 		
-		connect(view3D, &ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
+		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
 			m_ccRoot->selectEntities( entities );
 		});
 	}
 
 	//'echo' mode
-	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
-	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
-	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
 
-	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
-	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
-	connect(view3D,	&ccGLWindow::newLabel, this, &MainWindow::handleNewLabel);
-	connect(view3D,	&ccGLWindow::exclusiveFullScreenToggled, this, &MainWindow::onExclusiveFullScreenToggled);
+	connect(view3D->signalEmitter(),	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::newLabel, this, &MainWindow::handleNewLabel);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::exclusiveFullScreenToggled, this, &MainWindow::onExclusiveFullScreenToggled);
 
 	if (m_pickingHub)
 	{
 		//we must notify the picking hub as well if the window is destroyed
-		connect(view3D, &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
+		connect(view3D->signalEmitter(), &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
@@ -6012,11 +6012,17 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 		return;
 
 	//we assume only ccGLWindow can be connected to this slot!
-	ccGLWindow* win = qobject_cast<ccGLWindow*>(glWindow);
-
-	m_ccRoot->hidePropertiesView();
-	m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
-	m_ccRoot->updatePropertiesView();
+	ccGLWindowInterface* win = dynamic_cast<ccGLWindowInterface*>(glWindow);
+	if (win)
+	{
+		m_ccRoot->hidePropertiesView();
+		m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
+		m_ccRoot->updatePropertiesView();
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 static bool s_autoSaveGuiElementPos = true;
@@ -6295,7 +6301,7 @@ void MainWindow::repositionOverlayDialog(ccMDIDialogs& mdiDlg)
 
 void MainWindow::toggleVisualDebugTraces()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleDebugTrace();
@@ -6324,7 +6330,7 @@ void MainWindow::toggleFullScreen(bool state)
 
 void MainWindow::toggleExclusiveFullScreen(bool state)
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleExclusiveFullScreen(state);
@@ -6450,7 +6456,7 @@ void MainWindow::activateRegisterPointPairTool()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindow* win = new3DView();
+	ccGLWindowInterface* win = new3DView();
 	if (!win)
 	{
 		ccLog::Error(tr("[PointPairRegistration] Failed to create dedicated 3D view!"));
@@ -6513,7 +6519,7 @@ void MainWindow::activateSectionExtractionMode()
 	}
 
 	//add clouds
-	ccGLWindow* firstDisplay = nullptr;
+	ccGLWindowInterface* firstDisplay = nullptr;
 	{
 		unsigned validCount = 0;
 		for (ccHObject *entity : getSelectedEntities())
@@ -6524,7 +6530,7 @@ void MainWindow::activateSectionExtractionMode()
 				{
 					if (!firstDisplay && entity->getDisplay())
 					{
-						firstDisplay = static_cast<ccGLWindow*>(entity->getDisplay());
+						firstDisplay = static_cast<ccGLWindowInterface*>(entity->getDisplay());
 					}
 					
 					++validCount;
@@ -6545,7 +6551,7 @@ void MainWindow::activateSectionExtractionMode()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindow* win = new3DViewInternal(false);
+	ccGLWindowInterface* win = new3DViewInternal(false);
 	if (!win)
 	{
 		ccLog::Error(tr("[SectionExtraction] Failed to create dedicated 3D view!"));
@@ -6587,14 +6593,14 @@ void MainWindow::deactivateSectionExtractionMode(bool state)
 
 	updateUI();
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 		win->redraw();
 }
 
 void MainWindow::activateSegmentationMode()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6668,7 +6674,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 	updateUI();
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->redraw();
@@ -6677,7 +6683,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 void MainWindow::activateTracePolylineMode()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6713,7 +6719,7 @@ void MainWindow::deactivateTracePolylineMode(bool)
 
 	updateUI();
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->redraw();
@@ -6722,7 +6728,7 @@ void MainWindow::deactivateTracePolylineMode(bool)
 
 void MainWindow::activatePointListPickingMode()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6788,7 +6794,7 @@ void MainWindow::deactivatePointListPickingMode(bool state)
 
 void MainWindow::activatePointPickingMode()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6842,7 +6848,7 @@ void MainWindow::activateClippingBoxMode()
 		return;
 	}
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6900,7 +6906,7 @@ void MainWindow::activateTranslateRotateMode()
 	if (!haveSelection())
 		return;
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6978,7 +6984,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 
 void MainWindow::testFrameRate()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 		win->startFrameRateTest();
 }
@@ -6995,7 +7001,7 @@ void MainWindow::showDisplayOptions()
 
 void MainWindow::doActionRenderToFile()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7035,7 +7041,7 @@ void MainWindow::doActionEditCamera()
 void MainWindow::doActionAdjustZoom()
 {
 	//current active MDI area
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7060,7 +7066,7 @@ void MainWindow::doActionAdjustZoom()
 static unsigned s_viewportIndex = 0;
 void MainWindow::doActionSaveViewportAsCamera()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7073,7 +7079,7 @@ void MainWindow::doActionSaveViewportAsCamera()
 
 void MainWindow::zoomOnSelectedEntities()
 {
-	ccGLWindow* win = nullptr;
+	ccGLWindowInterface* win = nullptr;
 
 	ccHObject tempGroup("TempGroup");
 	size_t selNum = m_selectedEntities.size();
@@ -7084,7 +7090,7 @@ void MainWindow::zoomOnSelectedEntities()
 		if (i == 0 || !win)
 		{
 			//take the first valid window as reference
-			win = static_cast<ccGLWindow*>(entity->getDisplay());
+			win = static_cast<ccGLWindowInterface*>(entity->getDisplay());
 		}
 
 		if (win)
@@ -7122,17 +7128,17 @@ void MainWindow::zoomOnSelectedEntities()
 
 void MainWindow::setGlobalZoom()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 		win->zoomGlobal();
 }
 
 void MainWindow::setPivotAlwaysOn()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindow::PIVOT_ALWAYS_SHOW);
+		win->setPivotVisibility(ccGLWindowInterface::PIVOT_ALWAYS_SHOW);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7143,10 +7149,10 @@ void MainWindow::setPivotAlwaysOn()
 
 void MainWindow::setPivotRotationOnly()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindow::PIVOT_SHOW_ON_MOVE);
+		win->setPivotVisibility(ccGLWindowInterface::PIVOT_SHOW_ON_MOVE);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7157,10 +7163,10 @@ void MainWindow::setPivotRotationOnly()
 
 void MainWindow::setPivotOff()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindow::PIVOT_HIDE);
+		win->setPivotVisibility(ccGLWindowInterface::PIVOT_HIDE);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7169,7 +7175,7 @@ void MainWindow::setPivotOff()
 	}
 }
 
-void MainWindow::setOrthoView(ccGLWindow* win)
+void MainWindow::setOrthoView(ccGLWindowInterface* win)
 {
 	if (win)
 	{
@@ -7188,7 +7194,7 @@ void MainWindow::setOrthoView(ccGLWindow* win)
 	}
 }
 
-void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=true*/)
+void MainWindow::setCenteredPerspectiveView(ccGLWindowInterface* win, bool autoRedraw/*=true*/)
 {
 	if (win)
 	{
@@ -7204,7 +7210,7 @@ void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=t
 	}
 }
 
-void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
+void MainWindow::setViewerPerspectiveView(ccGLWindowInterface* win)
 {
 	if (win)
 	{
@@ -7219,7 +7225,7 @@ void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 	}
 }
 
-void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
+void MainWindow::enablePickingOperation(ccGLWindowInterface* win, QString message)
 {
 	if (!win)
 	{
@@ -7239,7 +7245,7 @@ void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 	//	m_pprDlg->pause(true);
 
 	s_pickingWindow = win;
-	win->displayNewMessage(message, ccGLWindow::LOWER_LEFT_MESSAGE, true, 24 * 3600);
+	win->displayNewMessage(message, ccGLWindowInterface::LOWER_LEFT_MESSAGE, true, 24 * 3600);
 	win->redraw(true, false);
 
 	freezeUI(true);
@@ -7270,8 +7276,8 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	if (aborted)
 	{
-		s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
-		s_pickingWindow->displayNewMessage(tr("Picking operation aborted"), ccGLWindow::LOWER_LEFT_MESSAGE);
+		s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE); //clear previous messages
+		s_pickingWindow->displayNewMessage(tr("Picking operation aborted"), ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 	}
 	s_pickingWindow->redraw(false);
 
@@ -7383,7 +7389,7 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				applyTransformation(trans, false);
 
 				//clear message
-				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false); //clear previous message
 				s_pickingWindow->setView(CC_TOP_VIEW);
 			}
 			else
@@ -7405,12 +7411,12 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 			{
 				m_transTool->setRotationCenter(newPivot);
 				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false); //clear previous message
 				s_pickingWindow->displayNewMessage(QString("Point (%1 ; %2 ; %3) set as rotation center for interactive transformation")
 					.arg(pickedPoint.x, 0, 'f', precision)
 					.arg(pickedPoint.y, 0, 'f', precision)
 					.arg(pickedPoint.z, 0, 'f', precision),
-					ccGLWindow::LOWER_LEFT_MESSAGE, true);
+					ccGLWindowInterface::LOWER_LEFT_MESSAGE, true);
 			}
 			else
 			{
@@ -7450,7 +7456,7 @@ void MainWindow::doLevel()
 		return;
 	}
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 	{
 		ccConsole::Error(tr("No active 3D view!"));
@@ -7498,7 +7504,7 @@ void MainWindow::doPickRotationCenter()
 		return;
 	}
 
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (!win)
 	{
 		ccConsole::Error(tr("No active 3D view!"));
@@ -7574,7 +7580,7 @@ void MainWindow::clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY p
 
 void MainWindow::setView( CC_VIEW_ORIENTATION view )
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setView(view);
@@ -9349,7 +9355,7 @@ void MainWindow::deactivateComparisonMode(int result)
 
 void MainWindow::toggleActiveWindowSunLight()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleSunLight();
@@ -9359,7 +9365,7 @@ void MainWindow::toggleActiveWindowSunLight()
 
 void MainWindow::toggleActiveWindowCustomLight()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleCustomLight();
@@ -9369,7 +9375,7 @@ void MainWindow::toggleActiveWindowCustomLight()
 
 void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setAutoPickPivotAtCenter(state);
@@ -9384,7 +9390,7 @@ void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 
 void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->showCursorCoordinates(state);
@@ -9393,7 +9399,7 @@ void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
 
 void MainWindow::toggleActiveWindowStereoVision(bool state)
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		bool isActive = win->stereoModeIsEnabled();
@@ -9407,8 +9413,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 		{
 			win->disableStereoMode();
 
-			if (	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-				||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+			if (	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+				||	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//disable (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -9428,10 +9434,10 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				return;
 			}
 
-			ccGLWindow::StereoParams params = smDlg.getParameters();
+			ccGLWindowInterface::StereoParams params = smDlg.getParameters();
 			ccLog::Warning(QString::number(params.stereoStrength));
-#ifndef CC_GL_WINDOW_USE_QWINDOW
-			if (!params.isAnaglyph())
+
+			if (!ccGLWindowInterface::SupportStereo() && !params.isAnaglyph())
 			{
 				ccLog::Error(tr("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead."));
 				//activation of the stereo mode failed: cancel selection
@@ -9440,7 +9446,6 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				m_UI->actionEnableStereo->blockSignals(false);
 				return;
 			}
-#endif
 
 			//force perspective state!
 			if (!win->getViewportParameters().perspectiveView)
@@ -9448,8 +9453,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				setCenteredPerspectiveView(win, false);
 			}
 
-			if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-				||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+			if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+				||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//force (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(true);
@@ -9465,8 +9470,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 
 			if (!win->enableStereoMode(params))
 			{
-				if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-					||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
+				if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+					||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 				{
 					//disable (exclusive) full screen
 					m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -9482,13 +9487,13 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 	}
 }
 
-bool MainWindow::checkStereoMode(ccGLWindow* win)
+bool MainWindow::checkStereoMode(ccGLWindowInterface* win)
 {
 	assert(win);
 
 	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
-		ccGLWindow::StereoParams params = win->getStereoParams();
+		ccGLWindowInterface::StereoParams params = win->getStereoParams();
 		bool wasExclusiveFullScreen = win->exclusiveFullScreen();
 		if (wasExclusiveFullScreen)
 		{
@@ -9530,7 +9535,7 @@ bool MainWindow::checkStereoMode(ccGLWindow* win)
 
 void MainWindow::toggleActiveWindowCenteredPerspective()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		const ccViewportParameters& params = win->getViewportParameters();
@@ -9547,7 +9552,7 @@ void MainWindow::toggleActiveWindowCenteredPerspective()
 
 void MainWindow::toggleActiveWindowViewerBasedPerspective()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		const ccViewportParameters& params = win->getViewportParameters();
@@ -9705,7 +9710,7 @@ void MainWindow::createPointCloudFromClipboard()
 
 void MainWindow::toggleLockRotationAxis()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		bool wasLocked = win->isRotationAxisLocked();
@@ -9731,11 +9736,11 @@ void MainWindow::toggleLockRotationAxis()
 
 		if (isLocked)
 		{
-			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
-			win->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
 		win->redraw(true, false);
 	}
@@ -9776,7 +9781,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 	}
 
 	//otherwise we simply enable the bubble view mode in the active 3D view
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setBubbleViewMode(true);
@@ -9786,7 +9791,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 
 void MainWindow::doActionDeleteShader()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setShader(nullptr);
@@ -9899,7 +9904,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	//we can now set destination display (if none already)
 	if (!obj->getDisplay())
 	{
-		ccGLWindow* activeWin = getActiveGLWindow();
+		ccGLWindowInterface* activeWin = getActiveGLWindow();
 		if (!activeWin)
 		{
 			//no active GL window?!
@@ -9912,7 +9917,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	assert(obj->getDisplay());
 	if (updateZoom)
 	{
-		static_cast<ccGLWindow*>(obj->getDisplay())->zoomGlobal(); //automatically calls ccGLWindow::redraw
+		static_cast<ccGLWindowInterface*>(obj->getDisplay())->zoomGlobal(); //automatically calls ccGLWindowInterface::redraw
 	}
 	else if (autoRedraw)
 	{
@@ -9923,7 +9928,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 void MainWindow::onExclusiveFullScreenToggled(bool state)
 {
 	//we simply update the fullscreen action method icon (whatever the window)
-	ccGLWindow* win = getActiveGLWindow();
+	ccGLWindowInterface* win = getActiveGLWindow();
 	
 	if ( win == nullptr )
 		return;
@@ -9934,8 +9939,8 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 
 	if (	!state
 		&&	win->stereoModeIsEnabled()
-		&&	(	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
-			||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY ))
+		&&	(	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+			||	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY ))
 	{
 		//auto disable stereo mode as NVidia Vision only works in full screen mode!
 		m_UI->actionEnableStereo->setChecked(false);
@@ -9960,14 +9965,21 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
-	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
+	ccGLWindowInterface* win = dynamic_cast<ccGLWindowInterface*>(QObject::sender());
 
-	addToDB(filenames, QString(), win);
+	if (win)
+	{
+		addToDB(filenames, QString(), win);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
-							ccGLWindow* destWin/*=nullptr*/)
+							ccGLWindowInterface* destWin/*=nullptr*/)
 {
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0, 0, 0);
@@ -10447,7 +10459,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : nullptr;
+	ccGLWindowInterface* win = mdiWin ? ccGLWindowInterface::FromWidget(mdiWin->widget()) : nullptr;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -10479,7 +10491,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }
 
-void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
+void MainWindow::updateViewModePopUpMenu(ccGLWindowInterface* win)
 {
 	if (!m_viewModePopupButton)
 		return;
@@ -10515,7 +10527,7 @@ void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
 	}
 }
 
-void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
+void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindowInterface* win)
 {
 	if (!m_pivotVisibilityPopupButton)
 		return;
@@ -10526,13 +10538,13 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 		QAction* visibilityAction = nullptr;
 		switch(win->getPivotVisibility())
 		{
-		case ccGLWindow::PIVOT_HIDE:
+		case ccGLWindowInterface::PIVOT_HIDE:
 			visibilityAction = m_UI->actionSetPivotOff;
 			break;
-		case ccGLWindow::PIVOT_SHOW_ON_MOVE:
+		case ccGLWindowInterface::PIVOT_SHOW_ON_MOVE:
 			visibilityAction = m_UI->actionSetPivotRotationOnly;
 			break;
-		case ccGLWindow::PIVOT_ALWAYS_SHOW:
+		case ccGLWindowInterface::PIVOT_ALWAYS_SHOW:
 			visibilityAction = m_UI->actionSetPivotAlwaysOn;
 			break;
 		default:
@@ -10556,7 +10568,7 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 
 void MainWindow::updateMenus()
 {
-	ccGLWindow* active3DView = getActiveGLWindow();
+	ccGLWindowInterface* active3DView = getActiveGLWindow();
 	bool hasMdiChild = (active3DView != nullptr);
 	int mdiChildCount = getGLWindowCount();
 	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0);
@@ -10624,11 +10636,11 @@ void MainWindow::update3DViewsMenu()
 
 		int i = 0;
 		
-		for ( QMdiSubWindow *window : windows )
+		for ( QMdiSubWindow* window : windows )
 		{
-			ccGLWindow *child = GLWindowFromWidget(window->widget());
+			ccGLWindowInterface *child = ccGLWindowInterface::FromWidget(window->widget());
 
-			QString text = QString("&%1 %2").arg(++i).arg(child->windowTitle());
+			QString text = QString("&%1 %2").arg(++i).arg(child->getWindowTitle());
 			QAction *action = m_UI->menu3DViews->addAction(text);
 			
 			action->setCheckable(true);
@@ -10645,22 +10657,22 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window || !m_mdiArea)
 		return;
-	m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
+	m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow*>(window));
 }
 
 void MainWindow::redrawAll(bool only2D/*=false*/)
 {
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for (QMdiSubWindow* window : m_mdiArea->subWindowList())
 	{
-		GLWindowFromWidget(window->widget())->redraw(only2D);
+		ccGLWindowInterface::FromWidget(window->widget())->redraw(only2D);
 	}
 }
 
 void MainWindow::refreshAll(bool only2D/*=false*/)
 {
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for (QMdiSubWindow* window : m_mdiArea->subWindowList())
 	{
-		GLWindowFromWidget(window->widget())->refresh(only2D);
+		ccGLWindowInterface::FromWidget(window->widget())->refresh(only2D);
 	}
 }
 
@@ -10695,7 +10707,7 @@ void MainWindow::updateUIWithSelection()
 
 void MainWindow::enableAll()
 {
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	{
 		window->setEnabled( true );
 	}
@@ -10703,18 +10715,18 @@ void MainWindow::enableAll()
 
 void MainWindow::disableAll()
 {
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	{
 		window->setEnabled( false );
 	}
 }
 
-void MainWindow::disableAllBut(ccGLWindow* win)
+void MainWindow::disableAllBut(ccGLWindowInterface* win)
 {
 	//we disable all other windows
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	{
-		if (GLWindowFromWidget(window->widget()) != win)
+		if (ccGLWindowInterface::FromWidget(window->widget()) != win)
 		{
 			window->setEnabled(false);
 		}
@@ -10919,18 +10931,18 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
 	if (!sendingWindow)
 		return;
 
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindow *child = GLWindowFromWidget(window->widget());
+		ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
 		if (child != sendingWindow)
 		{
-			child->blockSignals(true);
+			child->signalEmitter()->blockSignals(true);
 			child->onWheelEvent(wheelDelta_deg);
-			child->blockSignals(false);
+			child->signalEmitter()->blockSignals(false);
 			child->redraw();
 		}
 	}
@@ -10941,18 +10953,18 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
 	if (!sendingWindow)
 		return;
 
-	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindow *child = GLWindowFromWidget(window->widget());
+		ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
 		if (child != sendingWindow)
 		{
-			child->blockSignals(true);
+			child->signalEmitter()->blockSignals(true);
 			child->rotateBaseViewMat(rotMat);
-			child->blockSignals(false);
+			child->signalEmitter()->blockSignals(false);
 			child->redraw();
 		}
 	}
@@ -10963,19 +10975,19 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	 ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
 	 if (!sendingWindow)
 		 return;
 
 
-	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	 for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindow *child = GLWindowFromWidget(window->widget());
+		 ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
-			 child->blockSignals(true);
+			 child->signalEmitter()->blockSignals(true);
 			 child->setCameraPos(P);
-			 child->blockSignals(false);
+			 child->signalEmitter()->blockSignals(false);
 			 child->redraw();
 		 }
 	 }
@@ -10986,18 +10998,18 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	 ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
 	 if (!sendingWindow)
 		 return;
 
-	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
+	 for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindow *child = GLWindowFromWidget(window->widget());
+		 ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
-			 child->blockSignals(true);
+			 child->signalEmitter()->blockSignals(true);
 			 child->setPivotPoint(P);
-			 child->blockSignals(false);
+			 child->signalEmitter()->blockSignals(false);
 			 child->redraw();
 		 }
 	 }
@@ -11049,7 +11061,7 @@ void MainWindow::DestroyInstance()
 	s_instance=nullptr;
 }
 
-void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
+void MainWindow::GetGLWindows(std::vector<ccGLWindowInterface*>& glWindows)
 {
 	const QList<QMdiSubWindow*> windows = TheInstance()->m_mdiArea->subWindowList();
 
@@ -11059,28 +11071,28 @@ void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 	glWindows.clear();
 	glWindows.reserve( windows.size() );
 
-	for ( QMdiSubWindow *window : windows )
+	for ( QMdiSubWindow* window : windows )
 	{
-		glWindows.push_back(GLWindowFromWidget(window->widget()));
+		glWindows.push_back(ccGLWindowInterface::FromWidget(window->widget()));
 	}
 }
 
-ccGLWindow* MainWindow::GetActiveGLWindow()
+ccGLWindowInterface* MainWindow::GetActiveGLWindow()
 {
 	return TheInstance()->getActiveGLWindow();
 }
 
-ccGLWindow* MainWindow::GetGLWindow(const QString& title)
+ccGLWindowInterface* MainWindow::GetGLWindow(const QString& title)
 {
 	const QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
 
 	if ( windows.empty() )
 		return nullptr;
 
-	for ( QMdiSubWindow *window : windows )
+	for ( QMdiSubWindow* window : windows )
 	{
-		ccGLWindow* win = GLWindowFromWidget(window->widget());
-		if (win->windowTitle() == title)
+		ccGLWindowInterface* win = ccGLWindowInterface::FromWidget(window->widget());
+		if (win->getWindowTitle() == title)
 			return win;
 	}
 
@@ -11117,19 +11129,19 @@ ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()
 	return ccObject::GetUniqueIDGenerator();
 }
 
-void MainWindow::createGLWindow(ccGLWindow*& window, QWidget*& widget) const
+void MainWindow::createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const
 {
 	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
-	CreateGLWindow(window, widget, stereoMode);
+	ccGLWindowInterface::Create(window, widget, stereoMode);
 	assert(window && widget);
 }
 
-void MainWindow::destroyGLWindow(ccGLWindow* view3D) const
+void MainWindow::destroyGLWindow(ccGLWindowInterface* view3D) const
 {
 	if (view3D)
 	{
-		view3D->setParent(nullptr);
+		view3D->asQObject()->setParent(nullptr);
 		delete view3D;
 	}
 }

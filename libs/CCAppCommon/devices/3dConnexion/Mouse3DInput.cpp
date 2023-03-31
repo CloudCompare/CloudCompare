@@ -24,12 +24,13 @@
 //qCC_db
 #include <ccLog.h>
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 //CCCoreLib
 #include <CCPlatform.h>
 
 //Qt
 #include <QApplication>
+#include <QWidget>
 
 //system
 #include <assert.h>
@@ -311,7 +312,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 	}
 }
 
-void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
+void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterface* win)
 {
 	assert(motionData.size() >= 6);
 

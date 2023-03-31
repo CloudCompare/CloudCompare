@@ -36,7 +36,7 @@
 #include "ccMaterial.h"
 
 // qCC_glWindow
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 // Common
 #include "ccApplicationBase.h"
@@ -64,12 +64,13 @@ void ccApplicationBase::InitOpenGL()
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStencilBufferSize(0);
 
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-		format.setStereo(true);
-#endif
+		if (ccGLWindowInterface::SupportStereo())
+		{
+			format.setStereo(true);
+		}
 
 #ifdef Q_OS_MAC
-		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindow::functions()
+		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindowInterface::functions()
 		format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
 
@@ -134,7 +135,7 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	}
 	settings.endGroup();
 
-	ccGLWindow::setShaderPath(m_shaderPath);
+	ccGLWindowInterface::SetShaderPath(m_shaderPath);
 	ccPluginManager::Get().setPaths(m_pluginPaths);
 
 	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("qt"), m_translationPath);
@@ -148,9 +149,10 @@ QString ccApplicationBase::versionLongStr(bool includeOS) const
 {
 	QString verStr = m_versionStr;
 
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	verStr += QStringLiteral(" Stereo");
-#endif
+	if (ccGLWindowInterface::SupportStereo())
+	{
+		verStr += QStringLiteral(" Stereo");
+	}
 
 #if defined(CC_ENV_64)
 	const QString arch("64-bit");

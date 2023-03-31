@@ -498,7 +498,7 @@ bool ccCompass::startMeasuring()
 	}
 
 	//setup listener for mouse events
-	m_app->getActiveGLWindow()->installEventFilter(this);
+	m_app->getActiveGLWindow()->asQObject()->installEventFilter(this);
 
 	//refresh window
 	m_app->getActiveGLWindow()->redraw(true, false);
@@ -529,7 +529,7 @@ bool ccCompass::stopMeasuring(bool finalStop/*=false*/)
 	//remove click listener
 	if (m_app->getActiveGLWindow())
 	{
-		m_app->getActiveGLWindow()->removeEventFilter(this);
+		m_app->getActiveGLWindow()->asQObject()->removeEventFilter(this);
 	}
 
 	//reset gui

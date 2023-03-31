@@ -62,7 +62,7 @@ void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntitie
 			m_referencePlane->setVisible(true);
 
 			//display instructions
-			m_app->getActiveGLWindow()->displayNewMessage("Select measurement point.", ccGLWindow::LOWER_LEFT_MESSAGE);
+			m_app->getActiveGLWindow()->displayNewMessage("Select measurement point.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 
 			//redraw
 			m_app->getActiveGLWindow()->refresh();
@@ -126,7 +126,7 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 			m_app->addToDB(temp, false, false, false, true);
 
 			//display instructions
-			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point.", ccGLWindow::LOWER_LEFT_MESSAGE);
+			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 
 		}
 		else
@@ -209,7 +209,7 @@ void ccThicknessTool::toolActivated()
 	recurseChildren(m_app->dbRootObject(), true, false);
 
 	//display instructions
-	m_app->getActiveGLWindow()->displayNewMessage("Select reference plane for thickness measurement.", ccGLWindow::LOWER_LEFT_MESSAGE);
+	m_app->getActiveGLWindow()->displayNewMessage("Select reference plane for thickness measurement.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 
 	//redraw
 	m_app->getActiveGLWindow()->redraw(false, false);

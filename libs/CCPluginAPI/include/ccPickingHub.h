@@ -22,7 +22,7 @@
 #include "ccPickingListener.h"
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QObject>
@@ -58,7 +58,7 @@ public:
 	bool addListener(	ccPickingListener* listener,
 						bool exclusive = false,
 						bool autoStartPicking = true,
-						ccGLWindow::PICKING_MODE mode = ccGLWindow::POINT_OR_TRIANGLE_PICKING);
+						ccGLWindowInterface::PICKING_MODE mode = ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING);
 
 	//! Removes a listener
 	/** \param listener listener to be removed
@@ -71,13 +71,13 @@ public:
 	//		\param autoEnableOnActivatedWindow whether picking mode should be enabled automatically on newly activated windows (if listeners are present only)
 	//	**/
 	//DGM: too dangerous, we can't change this behavior on the fly
-	//void setPickingMode(ccGLWindow::PICKING_MODE mode, bool autoEnableOnActivatedWindow = true);
+	//void setPickingMode(ccGLWindowInterface::PICKING_MODE mode, bool autoEnableOnActivatedWindow = true);
 	
 	//! Manual start / stop of the picking mode on the active window
 	void togglePickingMode(bool state);
 
 	//! Returns the currently active window
-	ccGLWindow* activeWindow() const { return m_activeGLWindow; }
+	ccGLWindowInterface* activeWindow() const { return m_activeGLWindow; }
 
 	//! Returns whether the picking mechanism is currently locked (i.e. an exclusive listener is registered)
 	bool isLocked() const { return m_exclusive && !m_listeners.empty(); }
@@ -97,10 +97,10 @@ protected:
 	ccMainAppInterface* m_app;
 
 	//! Active GL window
-	ccGLWindow* m_activeGLWindow;
+	ccGLWindowInterface* m_activeGLWindow;
 
 	//! Default picking mode
-	ccGLWindow::PICKING_MODE m_pickingMode;
+	ccGLWindowInterface::PICKING_MODE m_pickingMode;
 
 	//! Automatically enables the picking mechanism on activated GL windows
 	bool m_autoEnableOnActivatedWindow;

@@ -18,7 +18,7 @@
 #include "ccOverlayDialog.h"
 
 //qCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -43,7 +43,7 @@ ccOverlayDialog::~ccOverlayDialog()
 	onLinkedWindowDeletion();
 }
 
-bool ccOverlayDialog::linkWith(ccGLWindow* win)
+bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 {
 	if (m_processing)
 	{
@@ -67,7 +67,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 				widget->removeEventFilter(this);
 			}
 		}
-		m_associatedWin->disconnect(this);
+		m_associatedWin->asQObject()->disconnect(this);
 		m_associatedWin = nullptr;
 	}
 
@@ -79,7 +79,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 		{
 			widget->installEventFilter(this);
 		}
-		connect(m_associatedWin, &QObject::destroyed, this, &ccOverlayDialog::onLinkedWindowDeletion);
+		connect(m_associatedWin->asQObject(), &QObject::destroyed, this, &ccOverlayDialog::onLinkedWindowDeletion);
 	}
 
 	return true;

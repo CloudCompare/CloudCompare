@@ -99,7 +99,7 @@ void qAnimation::doAction()
 		return;
 
 	//get active GL window
-	ccGLWindow* glWindow = m_app->getActiveGLWindow();
+	ccGLWindowInterface* glWindow = m_app->getActiveGLWindow();
 	if (!glWindow)
 	{
 		m_app->dispToConsole("No active 3D view!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

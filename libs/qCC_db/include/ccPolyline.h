@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GL_POLYLINE_HEADER
-#define CC_GL_POLYLINE_HEADER
 
 //CCCoreLib
 #include <Polyline.h>
@@ -229,5 +228,3 @@ protected:
 	//! Arrow index
 	unsigned m_arrowIndex;
 };
-
-#endif //CC_GL_POLYLINE_HEADER

@@ -11,6 +11,10 @@ if( PLUGIN_STANDARD_QSRA )
 
     AddPlugin( NAME ${PROJECT_NAME} )
 
+	if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
+		target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_GL_WINDOW_USE_QWINDOW )
+	endif()
+
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )

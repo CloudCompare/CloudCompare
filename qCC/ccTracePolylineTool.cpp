@@ -282,12 +282,12 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	return newPoly;
 }
 
-bool ccTracePolylineTool::linkWith(ccGLWindow* win)
+bool ccTracePolylineTool::linkWith(ccGLWindowInterface* win)
 {
 	assert(m_polyTip);
 	assert(!m_poly3D || !win);
 
-	ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
 	{
@@ -297,7 +297,7 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 	if (oldWin)
 	{
 		oldWin->removeFromOwnDB(m_polyTip);
-		oldWin->disconnect(this);
+		oldWin->signalEmitter()->disconnect(this);
 
 		if (m_polyTip)
 			m_polyTip->setDisplay(nullptr);
@@ -305,8 +305,8 @@ bool ccTracePolylineTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &ccTracePolylineTool::closePolyLine);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved,		  this, &ccTracePolylineTool::updatePolyLineTip);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked, this, &ccTracePolylineTool::closePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,		  this, &ccTracePolylineTool::updatePolyLineTip);
 	}
 
 	return true;
@@ -331,12 +331,12 @@ bool ccTracePolylineTool::start()
 	{
 		m_pickingHub->removeListener(this);
 	}
-	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
-	m_associatedWin->setInteractionMode(	ccGLWindow::MODE_TRANSFORM_CAMERA
-										|	ccGLWindow::INTERACT_SIG_RB_CLICKED
-										|	ccGLWindow::INTERACT_CTRL_PAN
-										|	ccGLWindow::INTERACT_SIG_MOUSE_MOVED);
-	m_associatedWin->setCursor(Qt::CrossCursor);
+	m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING);
+	m_associatedWin->setInteractionMode(	ccGLWindowInterface::MODE_TRANSFORM_CAMERA
+										|	ccGLWindowInterface::INTERACT_SIG_RB_CLICKED
+										|	ccGLWindowInterface::INTERACT_CTRL_PAN
+										|	ccGLWindowInterface::INTERACT_SIG_MOUSE_MOVED);
+	m_associatedWin->setWindowCursor(Qt::CrossCursor);
 
 	m_ui->snapSizeSpinBox->blockSignals(true);
 	m_ui->snapSizeSpinBox->setValue(s_defaultPickingRadius);
@@ -362,16 +362,16 @@ void ccTracePolylineTool::stop(bool accepted)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->displayNewMessage("Polyline tracing [OFF]",
-			ccGLWindow::UPPER_CENTER_MESSAGE,
-			false,
-			2,
-			ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage(	"Polyline tracing [OFF]",
+											ccGLWindowInterface::UPPER_CENTER_MESSAGE,
+											false,
+											2,
+											ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_polyTip);
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->setCursor(Qt::ArrowCursor);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setWindowCursor(Qt::ArrowCursor);
 	}
 
 	s_defaultPickingRadius = m_ui->snapSizeSpinBox->value();
@@ -553,7 +553,7 @@ void ccTracePolylineTool::closePolyLine(int, int)
 		{
 			m_pickingHub->removeListener(this);
 		}
-		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING); //no more picking
+		m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING); //no more picking
 		m_done = true;
 
 		if (m_associatedWin)
@@ -597,7 +597,7 @@ void ccTracePolylineTool::restart(bool reset)
 	}
 
 	//enable picking
-	if (m_pickingHub && !m_pickingHub->addListener(this, true/*, true, ccGLWindow::POINT_PICKING*/))
+	if (m_pickingHub && !m_pickingHub->addListener(this, true/*, true, ccGLWindowInterface::POINT_PICKING*/))
 	{
 		ccLog::Error("The picking mechanism is already in use. Close the tool using it first.");
 	}

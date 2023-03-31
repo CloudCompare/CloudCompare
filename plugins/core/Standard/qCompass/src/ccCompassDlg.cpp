@@ -17,9 +17,6 @@
 
 #include "ccCompassDlg.h"
 
-//Local
-#include "ccGLWindow.h"
-
 //qCC_db
 #include <ccLog.h>
 

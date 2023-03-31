@@ -22,7 +22,7 @@
 
 #include <ui_adjustZoomDlg.h>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! Dialog to set the current focal of a 3D view (or equivalently the pixel size)
 /** Orthographic mode only.
@@ -33,7 +33,7 @@ class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
 
 public:
 
-	ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent = nullptr);
+	ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent = nullptr);
 	virtual ~ccAdjustZoomDlg() = default;
 
 	//! Returns requested focal distance

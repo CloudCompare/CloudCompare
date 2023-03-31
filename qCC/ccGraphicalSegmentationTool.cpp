@@ -43,7 +43,7 @@
 #include <ccSubMesh.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QMenu>
@@ -199,11 +199,11 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 	}
 }
 
-bool ccGraphicalSegmentationTool::linkWith(ccGLWindow *win)
+bool ccGraphicalSegmentationTool::linkWith(ccGLWindowInterface *win)
 {
 	assert(m_segmentationPoly);
 
-	ccGLWindow *oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
 	{
@@ -212,7 +212,7 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow *win)
 
 	if (oldWin)
 	{
-		oldWin->disconnect(this);
+		oldWin->signalEmitter()->disconnect(this);
 		if (m_segmentationPoly)
 		{
 			m_segmentationPoly->setDisplay(nullptr);
@@ -221,10 +221,10 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindow *win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked,	this, &ccGraphicalSegmentationTool::addPointToPolyline);
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked,	this, &ccGraphicalSegmentationTool::closePolyLine);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved,			this, &ccGraphicalSegmentationTool::updatePolyLine);
-		connect(m_associatedWin, &ccGLWindow::buttonReleased,		this, &ccGraphicalSegmentationTool::closeRectangle);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,	this, &ccGraphicalSegmentationTool::addPointToPolyline);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked,	this, &ccGraphicalSegmentationTool::closePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &ccGraphicalSegmentationTool::updatePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased,		this, &ccGraphicalSegmentationTool::closeRectangle);
 
 		if (m_segmentationPoly)
 		{
@@ -252,7 +252,7 @@ bool ccGraphicalSegmentationTool::start()
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->addToOwnDB(m_segmentationPoly);
-	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
+	m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING);
 	pauseSegmentationMode(false);
 
 	m_somethingHasChanged = false;
@@ -322,13 +322,13 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	if (m_associatedWin)
 	{
 		m_associatedWin->displayNewMessage("Segmentation [OFF]",
-											ccGLWindow::UPPER_CENTER_MESSAGE,
+											ccGLWindowInterface::UPPER_CENTER_MESSAGE,
 											false,
 											2,
-											ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+											ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setPickingMode(ccGLWindowInterface::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 		m_associatedWin->removeFromOwnDB(m_segmentationPoly);
 	}
@@ -354,7 +354,7 @@ void ccGraphicalSegmentationTool::reset()
 	if (m_associatedWin)
 	{
 		m_associatedWin->redraw(false);
-		m_associatedWin->releaseMouse();
+		m_associatedWin->doReleaseMouse();
 	}
 	razButton->setEnabled(false);
 	validButton->setEnabled(false);
@@ -716,7 +716,7 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 	//DGM: to increase the poll rate of the mouse movements in ccGLWindow::mouseMoveEvent
 	//we have to completely grab the mouse focus!
 	//(the only way to take back the control is to right-click now...)
-	m_associatedWin->grabMouse();
+	m_associatedWin->doGrabMouse();
 	m_associatedWin->redraw(true, false);
 }
 
@@ -747,7 +747,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->releaseMouse();
+		m_associatedWin->doReleaseMouse();
 		m_associatedWin->redraw(true, false);
 	}
 }
@@ -760,7 +760,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->releaseMouse();
+		m_associatedWin->doReleaseMouse();
 	}
 
 	assert(m_segmentationPoly);
@@ -773,7 +773,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	else
 	{
 		//remove last point!
-		m_segmentationPoly->resize(vertCount-1); //can't fail --> smaller
+		m_segmentationPoly->resize(vertCount - 1); //can't fail --> smaller
 		m_segmentationPoly->setClosed(true);
 	}
 
@@ -823,7 +823,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	// we must close the polyline if we are in RUNNING mode
 	if ((m_state & POLYLINE) != 0 && (m_state & RUNNING) != 0)
 	{
-		QPoint mousePos = m_associatedWin->mapFromGlobal(QCursor::pos());
+		QPoint mousePos = m_associatedWin->doMapFromGlobal(QCursor::pos());
 		ccLog::Warning(QString("Polyline was not closed - we'll close it with the current mouse cursor position: (%1 ; %2)").arg(mousePos.x()).arg(mousePos.y()));
 		addPointToPolylineExt(mousePos.x(), mousePos.y(), true);
 		closePolyLine(0, 0);
@@ -1005,26 +1005,26 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 
 		if (m_associatedWin)
 		{
-			m_associatedWin->releaseMouse();
+			m_associatedWin->doReleaseMouse();
 		}
 
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->displayNewMessage("Segmentation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->displayNewMessage("Segmentation [PAUSED]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Unpause to segment again", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 	}
 	else
 	{
 		m_state = STARTED;
-		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
 		if (m_rectangularSelection)
 		{
-			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-			m_associatedWin->displayNewMessage("Left click: set opposite corners", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Left click: set opposite corners", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 		}
 		else
 		{
-			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-			m_associatedWin->displayNewMessage("Left click: add contour points / Right click: close", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Left click: add contour points / Right click: close", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 		}
 	}
 
@@ -1064,9 +1064,9 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalSegmentationTool::doSetRectangularSelection()
@@ -1083,9 +1083,9 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalSegmentationTool::doActionUseExistingPolyline()

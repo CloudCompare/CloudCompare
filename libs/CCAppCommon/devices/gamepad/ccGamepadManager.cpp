@@ -11,13 +11,13 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                   COPYRIGHT: CloudCompare project                      #
 //#                                                                        #
 //##########################################################################
 
 //Local
 #include "ccGamepadManager.h"
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 #include "ccMainAppInterface.h"
 #include "GamepadInput.h"
 #include "ccPickOneElementDlg.h"
@@ -268,7 +268,7 @@ void ccGamepadManager::onGamepadInput()
 {
 	assert(m_gamepadInput);
 
-	ccGLWindow* win = m_appInterface->getActiveGLWindow();
+	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
 	if (win)
 	{
 		m_gamepadInput->update(win);

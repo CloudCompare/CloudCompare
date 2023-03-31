@@ -22,7 +22,7 @@
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccContourLinesGenerator.h"
 #include "ccCropTool.h"
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 #include "ccReservedIDs.h"
 #include "mainwindow.h"
 
@@ -288,7 +288,7 @@ unsigned ccClippingBoxTool::getNumberOfAssociatedEntity() const
 	return m_clipBox ? m_clipBox->getContainer().getChildrenNumber() : 0;
 }
 
-bool ccClippingBoxTool::linkWith(ccGLWindow* win)
+bool ccClippingBoxTool::linkWith(ccGLWindowInterface* win)
 {
 	if (m_associatedWin && m_clipBox)
 	{
@@ -340,8 +340,8 @@ bool ccClippingBoxTool::start()
 
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
-	//m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
-	//m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+	//m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
+	//m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 	m_associatedWin->redraw();
 
 	return ccOverlayDialog::start();
@@ -368,7 +368,7 @@ void ccClippingBoxTool::stop(bool state)
 	if (m_associatedWin)
 	{
 		m_associatedWin->setUnclosable(false);
-		//m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		//m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 2, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->redraw();
 	}
 
@@ -390,7 +390,7 @@ void ccClippingBoxTool::removeLastContour()
 			{
 				//obj->prepareDisplayForRefresh();
 				mainWindow->removeFromDB(obj);
-				ccGLWindow* win = mainWindow->getActiveGLWindow();
+				ccGLWindowInterface* win = mainWindow->getActiveGLWindow();
 				if (win)
 					win->redraw();
 			}

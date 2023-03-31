@@ -27,7 +27,7 @@
 //GUI
 #include <ui_envelopeExtractorDlg.h>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 
 //! Dialog for debugging envelope extraction
@@ -50,7 +50,7 @@ public:
 	void waitForUser(unsigned defaultDelay_ms = 100);
 
 	//! Returns associated GL window
-	inline ccGLWindow* win() { return m_glWindow; }
+	inline ccGLWindowInterface* win() { return m_glWindow; }
 
 	//! Zooms on a given 2D region (3D bouding-box considered in 2D only)
 	void zoomOn(const ccBBox& bbox);
@@ -79,5 +79,5 @@ protected:
 	QEventLoop m_loop;
 
 	//! Associated 3D window
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 };

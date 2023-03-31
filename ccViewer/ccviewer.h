@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE LIGHT VIEWER                            #
@@ -17,21 +19,17 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCVIEWER_H
-#define CCVIEWER_H
-
 //Qt
 #include <QMainWindow>
 #include <QStringList>
 
 //GUIs
 #include <ui_ccviewer.h>
-//#include <ui_ccviewerAbout.h>
 
 //System
 #include <set>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 class Mouse3DInput;
 
@@ -154,7 +152,7 @@ protected: //members
 	void release3DMouse();
 
 	//! Associated GL context
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 
 	//! Currently selected object
 	ccHObject* m_selectedObject;
@@ -166,5 +164,3 @@ private:
 	//! Associated GUI
 	Ui::ccViewerClass ui;
 };
-
-#endif // CCVIEWER_H

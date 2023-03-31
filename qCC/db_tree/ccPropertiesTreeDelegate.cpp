@@ -25,7 +25,7 @@
 #include "sfEditDlg.h"
 
 //qCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 #include <ccGuiParameters.h>
 
 //qCC_db
@@ -1233,14 +1233,14 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		QComboBox *comboBox = new QComboBox(parent);
 
-		std::vector<ccGLWindow*> glWindows;
+		std::vector<ccGLWindowInterface*> glWindows;
 		MainWindow::GetGLWindows(glWindows);
 
 		comboBox->addItem( tr( s_noneString ) );
 
 		for (auto &glWindow : glWindows)
 		{
-			comboBox->addItem(glWindow->windowTitle());
+			comboBox->addItem(glWindow->getWindowTitle());
 		}
 
 		connect(comboBox, qOverload<const QString&>(&QComboBox::currentIndexChanged),
@@ -1530,7 +1530,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		comboBox->addItem( tr( s_defaultPointSizeString ) ); //size = 0
 		
-		for (int i = static_cast<int>(ccGLWindow::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindow::MAX_POINT_SIZE_F); ++i)
+		for (int i = static_cast<int>(ccGLWindowInterface::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindowInterface::MAX_POINT_SIZE_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
 		}
@@ -1547,7 +1547,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		comboBox->addItem( tr( s_defaultPolyWidthSizeString ) ); //size = 0
 				
-		for (int i = static_cast<int>(ccGLWindow::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindow::MAX_LINE_WIDTH_F); ++i)
+		for (int i = static_cast<int>(ccGLWindowInterface::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindowInterface::MAX_LINE_WIDTH_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
 		}
@@ -1728,8 +1728,8 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			return;
 		}
 
-		ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-		int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
+		ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(m_currentObject->getDisplay());
+		int pos = (win ? comboBox->findText(win->getWindowTitle()) : 0);
 
 		comboBox->setCurrentIndex(std::max(pos, 0)); //0 = "NONE"
 		break;
@@ -2256,11 +2256,11 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr);
 	if (sf)
 	{
-		ccGLWindow* glWindow = static_cast<ccGLWindow*>(cloud->getDisplay());
-		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(ccColorScalesManager::GetUniqueInstance(),
-			MainWindow::TheInstance(),
-			sf->getColorScale(),
-			glWindow ? glWindow->asWidget() : nullptr);
+		ccGLWindowInterface* glWindow = static_cast<ccGLWindowInterface*>(cloud->getDisplay());
+		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(	ccColorScalesManager::GetUniqueInstance(),
+																				MainWindow::TheInstance(),
+																				sf->getColorScale(),
+																				glWindow ? glWindow->asWidget() : nullptr);
 		editorDialog->setAssociatedScalarField(sf);
 		if (editorDialog->exec())
 		{
@@ -2576,7 +2576,7 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 		return;
 	}
 
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::GetActiveGLWindow();
 	if (!win)
 		return;
 
@@ -2598,7 +2598,7 @@ void ccPropertiesTreeDelegate::updateLabelViewport()
 		return;
 	}
 
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::GetActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -2764,10 +2764,10 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 
 	QString actualDisplayTitle;
 
-	ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
+	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(m_currentObject->getDisplay());
 	if (win)
 	{
-		actualDisplayTitle = win->windowTitle();
+		actualDisplayTitle = win->getWindowTitle();
 	}
 	else
 	{
@@ -2780,7 +2780,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 		//to be sure that they will also be redrawn!
 		m_currentObject->prepareDisplayForRefresh_recursive();
 
-		ccGLWindow* win = MainWindow::GetGLWindow(newDisplayTitle);
+		ccGLWindowInterface* win = MainWindow::GetGLWindow(newDisplayTitle);
 		m_currentObject->setDisplay_recursive(win);
 		if (win)
 		{

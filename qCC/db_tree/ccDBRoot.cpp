@@ -18,7 +18,7 @@
 #include "ccDBRoot.h"
 
 //Local
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 //Qt
 #include <QApplication>
@@ -1553,8 +1553,8 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccLog::Warning("[alignCameraWithEntity] Selected entity has no associated display");
 		return;
 	}
-	assert(display);
-	ccGLWindow* win = static_cast<ccGLWindow*>(display);
+	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(display);
+	assert(win);
 
 	//plane normal
 	CCVector3d planeNormal;

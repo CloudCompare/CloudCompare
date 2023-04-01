@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                            CLOUDCOMPARE                                #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_MAIN_APP_INTERFACE_HEADER
-#define CC_MAIN_APP_INTERFACE_HEADER
 
 //Qt
 #include <QString>
@@ -50,10 +49,10 @@ public:
 	/** \warning This instance must be destroyed by the application as well (see destroyGLWindow)
 		Note that the encapsulating widget is the window instance itself if 'stereo' mode is disabled
 	**/
-	virtual void createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const = 0;
+	virtual void createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const { window = nullptr; widget = nullptr; }
 
 	//! Destroys an instance of GL window created by createGLWindow
-	virtual void destroyGLWindow(ccGLWindowInterface*) const = 0;
+	virtual void destroyGLWindow(ccGLWindowInterface*) const {}
 
 	//! Registers a MDI area 'overlay' dialog
 	/** Overlay dialogs are displayed in the central MDI area, above the 3D views.
@@ -66,15 +65,15 @@ public:
 	- it's a good idea to freeez the UI when the tool starts to avoid other overlay dialogs
 	to appear (don't forget to unfreeze the UI afterwards)
 	**/
-	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) = 0;
+	virtual void registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos) {}
 
 	//! Unregisters a MDI area 'overlay' dialog
 	/** \warning Original overlay dialog object will be deleted (see QObject::deleteLater)
 	**/
-	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) = 0;
+	virtual void unregisterOverlayDialog(ccOverlayDialog* dlg) {}
 
 	//! Forces the update of all registered MDI 'overlay' dialogs
-	virtual void updateOverlayDialogsPlacement() = 0;
+	virtual void updateOverlayDialogsPlacement() {}
 
 	//! Returns the unique ID generator
 	virtual ccUniqueIDGenerator::Shared getUniqueIDGenerator() = 0;
@@ -116,13 +115,13 @@ public:
 	/** This method must be called before any modification to the db tree
 		\warning May change the set of currently selected entities
 	**/
-	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) = 0;
+	virtual ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj) { return {}; }
 
 	//! Adds back object to DB tree
 	/** This method should be called once modifications to the db tree are finished
 		(see removeObjectTemporarilyFromDBTree).
 	**/
-	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) = 0;
+	virtual void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context) {}
 
 	//! Selects or unselects an entity (in db tree)
 	/** \param obj entity
@@ -154,7 +153,7 @@ public:
 	virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) = 0;
 
 	//! Forces display of console widget
-	virtual void forceConsoleDisplay() = 0;
+	virtual void forceConsoleDisplay() {}
 
 	//! Returns DB root (as a ccHObject)
 	virtual ccHObject* dbRootObject() = 0;
@@ -190,14 +189,14 @@ public:
 	virtual void freezeUI(bool state) = 0;
 
 	//! Returns color scale manager (unique instance)
-	virtual ccColorScalesManager* getColorScalesManager() = 0;
+	virtual ccColorScalesManager* getColorScalesManager() { return nullptr; }
 
 	//! Spawns an histogram dialog
 	virtual void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
 										double minVal,
 										double maxVal,
 										QString title,
-										QString xAxisLabel) = 0;
+										QString xAxisLabel ) {}
 
 	//! Returns the picking hub (if any)
 	virtual ccPickingHub* pickingHub() { return nullptr; }
@@ -215,5 +214,3 @@ public:
 	virtual void increasePointSize() = 0;
 	virtual void decreasePointSize() = 0;
 };
-
-#endif //CC_MAIN_APP_INTERFACE_HEADER

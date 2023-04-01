@@ -46,6 +46,11 @@
 #include "Mouse3DInput.h"
 #endif
 
+//Gamepads
+#ifdef CC_GAMEPAD_SUPPORT
+#include "ccGamepadManager.h"
+#endif
+
 //Camera parameters dialog
 static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
@@ -54,6 +59,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	, m_glWindow(nullptr)
 	, m_selectedObject(nullptr)
 	, m_3dMouseInput(nullptr)
+	, m_gamepadManager(nullptr)
 {
 	ui.setupUi(this);
 
@@ -63,7 +69,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
 	
-	setWindowTitle(QString("ccViewer v%1").arg(ccApp->versionLongStr( false )));
+	setWindowTitle(QString("ccViewer v%1").arg(ccApp->versionLongStr(false)));
 
 	//insert GL window in a vertical layout
 	{
@@ -97,6 +103,12 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 #else
 	ui.actionEnable3DMouse->setEnabled(false);
 #endif
+
+#ifdef CC_GAMEPAD_SUPPORT
+	m_gamepadManager = new ccGamepadManager(this, this);
+	ui.menuOptions->insertMenu(ui.menu3DMouse->menuAction(), m_gamepadManager->menu());
+#endif
+
 
 	//Signals & slots connection
 	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::filesDropped,				this,	qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
@@ -144,7 +156,6 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	connect(ui.actionZoomOnSelectedEntity,			&QAction::triggered,					this,	&ccViewer::zoomOnSelectedEntity);
 	connect(ui.actionDelete,						&QAction::triggered,					this,	&ccViewer::doActionDeleteSelectedEntity);
 
-
 	//"Shaders" menu
 	connect(ui.actionNoFilter,						&QAction::triggered,					this,	&ccViewer::doDisableGLFilter);
 
@@ -158,6 +169,11 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 ccViewer::~ccViewer()
 {
 	release3DMouse();
+
+#ifdef CC_GAMEPAD_SUPPORT
+	delete m_gamepadManager;
+	m_gamepadManager = nullptr;
+#endif
 
 	if (s_cpeDlg)
 	{
@@ -443,7 +459,7 @@ void ccViewer::updateGLFrameGradient()
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
-void ccViewer::addToDB(QStringList filenames)
+ccHObject* ccViewer::addToDB(QStringList filenames)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
@@ -464,6 +480,8 @@ void ccViewer::addToDB(QStringList filenames)
 
 	const ccOptions& options = ccOptions::Instance();
 	FileIOFilter::ResetSesionCounter();
+
+	ccHObject* firstLoadedEntity = nullptr;
 
 	for (int i = 0; i < filenames.size(); ++i)
 	{
@@ -500,7 +518,7 @@ void ccViewer::addToDB(QStringList filenames)
 						{
 							pc->setCurrentDisplayedScalarField(0);
 							pc->showSFColorsScale(true);
-							scaleAlreadyDisplayed=true;
+							scaleAlreadyDisplayed = true;
 						}
 					}
 					else if (ent->isKindOf(CC_TYPES::MESH))
@@ -509,15 +527,20 @@ void ccViewer::addToDB(QStringList filenames)
 						if (mesh->hasScalarFields())
 						{
 							mesh->showSF(true);
-							scaleAlreadyDisplayed=true;
+							scaleAlreadyDisplayed = true;
 							ccPointCloud* pc = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
 							pc->showSFColorsScale(true);
 						}
 					}
 				}
 			}
+
+			if (!firstLoadedEntity)
+			{
+				firstLoadedEntity = newGroup;
+			}
 		}
-		
+
 		if (result == CC_FERR_CANCELED_BY_USER)
 		{
 			//stop importing the file if the user has cancelled the current process!
@@ -526,9 +549,15 @@ void ccViewer::addToDB(QStringList filenames)
 	}
 
 	checkForLoadedEntities();
+
+	return firstLoadedEntity;
 }
 
-void ccViewer::addToDB(ccHObject* entity)
+void ccViewer::addToDB(	ccHObject* entity,
+						bool updateZoom/*=false*/,
+						bool autoExpandDBTree/*=true*/,
+						bool checkDimensions/*=false*/,
+						bool autoRedraw/*=true*/)
 {
 	assert(entity && m_glWindow);
 
@@ -556,6 +585,28 @@ void ccViewer::addToDB(ccHObject* entity)
 	}
 
 	checkForLoadedEntities();
+}
+
+void ccViewer::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
+{
+	ccHObject* currentRoot = m_glWindow->getSceneDB();
+	if (currentRoot)
+	{
+		if (currentRoot == obj)
+		{
+			m_glWindow->setSceneDB(nullptr);
+			if (autoDelete)
+			{
+				delete currentRoot;
+			}
+		}
+		else
+		{
+			currentRoot->removeChild(obj);
+		}
+	}
+
+	m_glWindow->redraw();
 }
 
 void ccViewer::showDisplayParameters()
@@ -627,7 +678,7 @@ void ccViewer::setCenteredPerspectiveView()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setPerspectiveState(true,true);
+		m_glWindow->setPerspectiveState(true, true);
 		m_glWindow->redraw();
 	}
 	reflectPerspectiveState();
@@ -1300,4 +1351,104 @@ void ccViewer::on3DMouseReleased()
 		m_glWindow->showPivotSymbol(false);
 		m_glWindow->redraw();
 	}
+}
+
+const ccHObject::Container& ccViewer::getSelectedEntities() const
+{
+	static ccHObject::Container Empty;
+	return Empty;
+}
+
+void ccViewer::dispToConsole(QString message, ConsoleMessageLevel level)
+{
+	printf("%s\n", qPrintable(message));
+}
+
+ccHObject* ccViewer::dbRootObject()
+{
+	return m_glWindow->getSceneDB();
+}
+
+void ccViewer::redrawAll(bool only2D/*=false*/)
+{
+	m_glWindow->redraw(only2D);
+}
+
+void ccViewer::refreshAll(bool only2D/*=false*/)
+{
+	m_glWindow->refresh(only2D);
+}
+
+void ccViewer::enableAll()
+{
+	m_glWindow->asWidget()->setEnabled(true);
+}
+
+void ccViewer::disableAll()
+{
+	m_glWindow->asWidget()->setEnabled(false);
+}
+
+void ccViewer::disableAllBut(ccGLWindowInterface* win)
+{
+	if (win != m_glWindow)
+	{
+		m_glWindow->asWidget()->setEnabled(false);
+	}
+}
+
+void ccViewer::setView(CC_VIEW_ORIENTATION view)
+{
+	m_glWindow->setView(view, true);
+}
+
+void ccViewer::toggleActiveWindowCustomLight()
+{
+	ui.actionToggleCustomLight->setChecked(!ui.actionToggleCustomLight->isChecked());
+}
+
+void ccViewer::toggleActiveWindowSunLight()
+{
+	ui.actionToggleSunLight->setChecked(!ui.actionToggleSunLight->isChecked());
+}
+
+void ccViewer::toggleActiveWindowCenteredPerspective()
+{
+	if (ui.actionSetCenteredPerspectiveView->isChecked())
+	{
+		ui.actionSetOrthoView->trigger();
+	}
+	else
+	{
+		ui.actionSetCenteredPerspectiveView->trigger();
+	}
+}
+
+void ccViewer::toggleActiveWindowViewerBasedPerspective()
+{
+	if (ui.actionSetViewerPerspectiveView->isChecked())
+	{
+		ui.actionSetOrthoView->trigger();
+	}
+	else
+	{
+		ui.actionSetViewerPerspectiveView->trigger();
+	}
+}
+
+void ccViewer::increasePointSize()
+{
+	m_glWindow->setPointSize(m_glWindow->getViewportParameters().defaultPointSize + 1);
+	m_glWindow->redraw();
+}
+
+void ccViewer::decreasePointSize()
+{
+	m_glWindow->setPointSize(m_glWindow->getViewportParameters().defaultPointSize - 1);
+	m_glWindow->redraw();
+}
+
+ccUniqueIDGenerator::Shared ccViewer::getUniqueIDGenerator()
+{
+	return ccObject::GetUniqueIDGenerator();
 }

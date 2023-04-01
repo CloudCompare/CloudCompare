@@ -97,8 +97,9 @@ function( DeployQt )
 				--no-opengl-sw
 				--no-quick-import
 				--no-system-d3d-compiler
-				--concurrent				
+				--concurrent
 				--verbose=1
+				--gamepad
 			VERBATIM
 		)
 	

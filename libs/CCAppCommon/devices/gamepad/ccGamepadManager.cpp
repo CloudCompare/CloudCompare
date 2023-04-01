@@ -185,33 +185,41 @@ void ccGamepadManager::setupGamepadInput()
 
 	connect(m_gamepadInput, &GamepadInput::updated, this, &ccGamepadManager::onGamepadInput, Qt::DirectConnection);
 
-	connect(m_gamepadInput, &GamepadInput::buttonL1Changed, this, [=]() {
-		m_appInterface->decreasePointSize();
-	});
-	connect(m_gamepadInput, &GamepadInput::buttonR1Changed, this, [=]() {
-		m_appInterface->increasePointSize();
-	});
+	if (m_appInterface)
+	{
 
-	connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {
-		if (state)
-		{
-			m_appInterface->setGlobalZoom();
-		}
-	});
-	connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state)
-	{
-		if (state)
-		{
-			m_appInterface->toggleActiveWindowViewerBasedPerspective();
-		}
-	});
-	connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state)
-	{
-		if (state)
-		{
-			m_appInterface->toggleActiveWindowCenteredPerspective();
-		}
-	});
+		connect(m_gamepadInput, &GamepadInput::buttonL1Changed, this, [=](bool state) {
+			if (state)
+			{
+				m_appInterface->decreasePointSize();
+			}
+			});
+		connect(m_gamepadInput, &GamepadInput::buttonR1Changed, this, [=](bool state) {
+			if (state)
+			{
+				m_appInterface->increasePointSize();
+			}
+			});
+
+		connect(m_gamepadInput, &GamepadInput::buttonStartChanged, this, [=](bool state) {
+			if (state)
+			{
+				m_appInterface->setGlobalZoom();
+			}
+			});
+		connect(m_gamepadInput, &GamepadInput::buttonAChanged, this, [=](bool state) {
+			if (state)
+			{
+				m_appInterface->toggleActiveWindowViewerBasedPerspective();
+			}
+			});
+		connect(m_gamepadInput, &GamepadInput::buttonBChanged, this, [=](bool state) {
+			if (state)
+			{
+				m_appInterface->toggleActiveWindowCenteredPerspective();
+			}
+			});
+	}
 
 	QGamepadManager* manager = QGamepadManager::instance();
 	if (manager)
@@ -268,9 +276,12 @@ void ccGamepadManager::onGamepadInput()
 {
 	assert(m_gamepadInput);
 
-	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
-	if (win)
+	if (m_appInterface)
 	{
-		m_gamepadInput->update(win);
+		ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
+		if (win)
+		{
+			m_gamepadInput->update(win);
+		}
 	}
 }

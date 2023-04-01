@@ -69,6 +69,8 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- ccViewer now supports gamepads
+
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- button to flip the 3D axis

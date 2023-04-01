@@ -29,6 +29,14 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
 endif()
 
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
+
 if( WIN32 )
 	DeployQt(
 		TARGET
@@ -48,14 +56,6 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
 )
-
-if( CCCORELIB_USE_QT_CONCURRENT )
-	# We want *deployqt to handle this dependency, so instead of just copying the file
-	# link to the target.
-	target_link_libraries( ${PROJECT_NAME}
-		Qt5::Concurrent
-	)
-endif()
 
 # contrib. libraries support
 if ( APPLE )

@@ -188,11 +188,6 @@ ccViewer::~ccViewer()
 		//m_glWindow->redraw();
 		delete currentRoot;
 	}
-
-	if (ccGLWindowInterface::SupportStereo())
-	{
-		m_glWindow->asQObject()->setParent(nullptr);
-	}
 }
 
 void ccViewer::loadPlugins()

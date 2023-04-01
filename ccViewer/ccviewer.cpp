@@ -78,7 +78,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 		const int margin = 10;
 		verticalLayout->setContentsMargins(margin, margin, margin, margin);
 
-		bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
+		bool stereoMode = ccGLWindowInterface::TestStereoSupport();
 
 		QWidget* glWidget = nullptr;
 		ccGLWindowInterface::Create(m_glWindow, glWidget, stereoMode);
@@ -797,9 +797,9 @@ void ccViewer::toggleStereoMode(bool state)
 		}
 
 		ccGLWindowInterface::StereoParams params = smDlg.getParameters();
-		if (!ccGLWindowInterface::SupportStereo() && !params.isAnaglyph())
+		if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
 		{
-			ccLog::Error("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead.");
+			ccLog::Error(tr("It seems your graphic card doesn't support Quad Buffered Stereo rendering"));
 			//activation of the stereo mode failed: cancel selection
 			ui.actionEnableStereo->blockSignals(true);
 			ui.actionEnableStereo->setChecked(false);

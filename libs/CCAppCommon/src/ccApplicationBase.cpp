@@ -46,6 +46,9 @@
 // ccPluginAPI
 #include <ccPersistentSettings.h>
 
+// Qt
+#include <QOpenGLWidget>
+
 #if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
 #error CloudCompare does not support versions of Qt prior to 5.5
 #endif
@@ -60,14 +63,9 @@ void ccApplicationBase::InitOpenGL()
 	**/
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-
-		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStencilBufferSize(0);
-
-		if (ccGLWindowInterface::SupportStereo())
-		{
-			format.setStereo(true);
-		}
+		format.setStereo(true); //we request stereo support by default, but this may not be supported!
+		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
 #ifdef Q_OS_MAC
 		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindowInterface::functions()
@@ -148,11 +146,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 QString ccApplicationBase::versionLongStr(bool includeOS) const
 {
 	QString verStr = m_versionStr;
-
-	if (ccGLWindowInterface::SupportStereo())
-	{
-		verStr += QStringLiteral(" Stereo");
-	}
 
 #if defined(CC_ENV_64)
 	const QString arch("64-bit");
@@ -300,4 +293,3 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 
 	return true;
 }
-

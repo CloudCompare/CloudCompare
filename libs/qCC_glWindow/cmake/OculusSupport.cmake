@@ -9,10 +9,6 @@ if(OPTION_USE_OCULUS_SDK)
 	set( OCULUS_SDK_INCLUDE_DIR "" CACHE PATH "Oculus SDK (LibOVR) include directory" )
 	set( OCULUS_SDK_LIBRARY_FILE "" CACHE FILEPATH "Oculus SDK (LibOVR) static library file" )
 	
-	if ( NOT OPTION_GL_QUAD_BUFFER_SUPPORT )
-		message( SEND_ERROR "OPTION_GL_QUAD_BUFFER_SUPPORT must be enabled to support Oculus" )
-	endif()	
-
 	if ( NOT OCULUS_SDK_INCLUDE_DIR )
 		message( SEND_ERROR "No Oculus SDK include dir specified (OCULUS_SDK_INCLUDE_DIR)" )
 	else()

@@ -9437,9 +9437,9 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			ccGLWindowInterface::StereoParams params = smDlg.getParameters();
 			ccLog::Warning(QString::number(params.stereoStrength));
 
-			if (!ccGLWindowInterface::SupportStereo() && !params.isAnaglyph())
+			if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
 			{
-				ccLog::Error(tr("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead."));
+				ccLog::Error(tr("It seems your graphic card doesn't support Quad Buffered Stereo rendering"));
 				//activation of the stereo mode failed: cancel selection
 				m_UI->actionEnableStereo->blockSignals(true);
 				m_UI->actionEnableStereo->setChecked(false);
@@ -11131,7 +11131,7 @@ ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()
 
 void MainWindow::createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const
 {
-	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
+	bool stereoMode = ccGLWindowInterface::TestStereoSupport();
 
 	ccGLWindowInterface::Create(window, widget, stereoMode);
 	assert(window && widget);

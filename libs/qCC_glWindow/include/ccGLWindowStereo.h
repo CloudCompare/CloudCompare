@@ -1,4 +1,5 @@
 #pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -21,21 +22,24 @@
 //local
 #include "ccGLWindowInterface.h"
 
-// Qt
-#include <QOpenGLWidget>
+#include <QHBoxLayout>
+#include <QWidget>
+#include <QWindow>
+
+class QOpenGLPaintDevice;
 
 //! OpenGL 3D view
-class CCGLWINDOW_LIB_API ccGLWindow : public QOpenGLWidget, public ccGLWindowInterface
+class CCGLWINDOW_LIB_API ccGLWindowStereo : public QWindow, public ccGLWindowInterface
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	ccGLWindow(QSurfaceFormat* format = nullptr, QOpenGLWidget* parent = nullptr, bool silentInitialization = false);
+	ccGLWindowStereo(QSurfaceFormat* format = nullptr, QWindow* parent = nullptr, bool silentInitialization = false);
 
 	//! Destructor
-	~ccGLWindow() override;
+	~ccGLWindowStereo() override;
 
 	//inherited from ccGLWindowInterface
 	inline qreal getDevicePixelRatio() const override { return devicePixelRatio(); }
@@ -52,36 +56,63 @@ public:
 	inline void doShowMaximized() override { showMaximized(); }
 	inline void doResize(int w, int h) override { resize(w, h); }
 	inline void doResize(const QSize& size) override { resize(size); }
-	inline QImage doGrabFramebuffer() override { return grabFramebuffer(); }
-	inline bool isStereo() const override { return false; }
+	inline QImage doGrabFramebuffer() override { return {}; }
+	inline bool isStereo() const override { return true; }
 
-	inline QWidget* asWidget() override { return this; }
+	//! Returns the parent widget
+	QWidget* parentWidget() const { return m_parentWidget; }
+
+	//! Sets 'parent' widget
+	void setParentWidget(QWidget* widget);
+
+	//! Returns the font
+	inline const QFont& font() const { return m_font; }
+
+	//shortcuts
+	void setWindowTitle(QString title) { setTitle(title); }
+	QString windowTitle() const { return title(); }
+	inline QWidget* asWidget() override { return m_parentWidget; }
 	inline QSize getScreenSize() const override { return size(); }
 
 	//inherited from ccGLWindowInterface
-	inline int qtWidth() const override { return QOpenGLWidget::width(); }
-	inline int qtHeight() const override { return QOpenGLWidget::height(); }
-	inline QSize qtSize() const override { return QOpenGLWidget::size(); }
+	inline int qtWidth() const override { return QWindow::width(); }
+	inline int qtHeight() const override { return QWindow::height(); }
+	inline QSize qtSize() const override { return QWindow::size(); }
 	bool enableStereoMode(const StereoParams& params) override;
+	void disableStereoMode() override;
 
 public:
 
 	//inherited from ccGenericGLDisplay
 	void requestUpdate() override;
 	
-	static void Create(ccGLWindow*& window, QWidget*& widget, bool silentInitialization = false);
+	//! For compatibility with the QOpenGLWidget version
+	inline void update() { doPaintGL(); }
 
-	static ccGLWindow* FromWidget(QWidget* widget);
+	void grabMouse();
+	void releaseMouse();
+
+	static void Create(ccGLWindowStereo*& window, QWidget*& widget, bool silentInitialization = false);
+
+	static ccGLWindowStereo* FromWidget(QWidget* widget);
 
 protected: //rendering
 
 	//inherited from ccGLWindowInterface
 	inline ccQOpenGLFunctions* functions() const override { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : nullptr; }
 	inline QSurfaceFormat getSurfaceFormat() const override { return format(); }
-	inline void doSetMouseTracking(bool enable) override { setMouseTracking(true); }
-	inline void doShowFullScreen() override { showFullScreen(); }
-	inline void doShowNormal() override { showNormal(); }
-	
+	void doSetMouseTracking(bool enable) override;
+	void doShowFullScreen() override { showFullScreen(); }
+	void doShowNormal() override { showNormal(); }
+	bool prepareOtherStereoGlassType(CC_DRAW_CONTEXT& context, RenderingParams& params, ccFrameBufferObject*& currentFBO) override;
+	void processOtherStereoGlassType(RenderingParams& renderingParams) override;
+	bool setCustomCameraProjection(RenderingParams& params, ccGLMatrixd& modelViewMat, ccGLMatrixd& projectionMat) override;
+	bool initPaintGL() override;
+	void swapGLBuffers() override;
+
+	//! Returns the context (if any)
+	inline QOpenGLContext* context() const { return m_context; }
+
 	//reimplemented from QOpenGLWidget
 	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
 	//we need to automatically bind our own afterwards!
@@ -94,9 +125,9 @@ protected: //other methods
 	Q_SLOT void onItemPickedFastSlot(ccHObject* pickedEntity, int pickedItemIndex, int x, int y) { onItemPickedFast(pickedEntity, pickedItemIndex, x, y); }
 
 	//inherited from ccGLWindowInterface
-	int width() const override { return QOpenGLWidget::width(); }
-	int height() const override { return QOpenGLWidget::height(); }
-	QSize size() const override { return QOpenGLWidget::size(); }
+	int width() const override { return QWindow::width(); }
+	int height() const override { return QWindow::height(); }
+	QSize size() const override { return QWindow::size(); }
 	GLuint defaultQtFBO() const override;
 
 	//events handling
@@ -107,11 +138,12 @@ protected: //other methods
 	void wheelEvent(QWheelEvent* event) override { processWheelEvent(event); }
 	bool event(QEvent* evt) override;
 
-	void initializeGL() override { initialize(); }
-	void resizeGL(int w, int h) override { onResizeGL(w, h); }
-	void paintGL() override { doPaintGL(); }
-	void dragEnterEvent(QDragEnterEvent* event) override { doDragEnterEvent(event); }
-	void dropEvent(QDropEvent* event) override { doDropEvent(event); }
+	bool preInitialize(bool &firstTime) override;
+	bool postInitialize(bool firstTime) override;
+
+	void resizeGL(int w, int h);
+	virtual void dragEnterEvent(QDragEnterEvent* event) { doDragEnterEvent(event); }
+	virtual void dropEvent(QDropEvent* event) { doDropEvent(event); }
 
 protected: //members
 
@@ -126,4 +158,56 @@ protected: //members
 
 	//! Associated widget (we use the WidgetContainer mechanism)
 	QWidget* m_parentWidget;
+};
+
+//! Container widget for ccGLWindow
+class CCGLWINDOW_LIB_API ccGLStereoWidget : public QWidget
+{
+	Q_OBJECT
+
+public:
+
+	ccGLStereoWidget(ccGLWindowStereo* window, QWidget* parent = nullptr)
+		: QWidget(parent)
+	{
+		setLayout(new QHBoxLayout);
+		layout()->setContentsMargins(0, 0, 0, 0);
+
+		if (window)
+		{
+			setAssociatedWindow(window);
+		}
+	}
+
+	virtual ~ccGLStereoWidget()
+	{
+		if (m_associatedWindow)
+		{
+			m_associatedWindow->setParent(nullptr);
+			m_associatedWindow->close();
+		}
+	}
+
+	inline ccGLWindowStereo* associatedWindow() const { return m_associatedWindow; }
+
+	void setAssociatedWindow(ccGLWindowStereo* window)
+	{
+		if (window)
+		{
+			assert(layout() && layout()->count() == 0);
+			QWidget* container = QWidget::createWindowContainer(window, this);
+			layout()->addWidget(container);
+
+			m_associatedWindow = window;
+			m_associatedWindow->setParentWidget(container);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+protected:
+
+	ccGLWindowStereo* m_associatedWindow;
 };

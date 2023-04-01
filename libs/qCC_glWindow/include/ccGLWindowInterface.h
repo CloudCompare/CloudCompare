@@ -35,10 +35,15 @@
 #include <list>
 #include <unordered_set>
 
+class QDragEnterEvent;
+class QDropEvent;
+class QEvent;
+class QLayout;
+class QMouseEvent;
 class QOpenGLDebugMessage;
 class QOpenGLBuffer;
 class QOpenGLContext;
-class QLayout;
+class QWheelEvent;
 
 class ccColorRampShader;
 class ccFrameBufferObject;
@@ -253,6 +258,9 @@ public:
 	//! Destructor
 	virtual ~ccGLWindowInterface();
 
+	//! Returns whether this window is a stereo display or not
+	virtual bool isStereo() const = 0;
+
 	// Qt-equivalent shortcuts
 	virtual qreal getDevicePixelRatio() const = 0;
 	virtual QFont getFont() const = 0;
@@ -268,6 +276,11 @@ public:
 	virtual void doShowMaximized() = 0;
 	virtual void doResize(int w, int h) = 0;
 	virtual void doResize(const QSize &) = 0;
+	virtual QImage doGrabFramebuffer() = 0;
+
+	//inherited from ccGenericGLDisplay
+	void refresh(bool only2D = false) override;
+	void redraw(bool only2D = false, bool resetLOD = true) override;
 
 	//! Sets 'scene graph' root
 	void setSceneDB(ccHObject* root);
@@ -446,7 +459,8 @@ public:
 	void setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw = true);
 
 	//! Sets current interaction flags
-	virtual void setInteractionMode(INTERACTION_FLAGS flags) = 0;
+	void setInteractionMode(INTERACTION_FLAGS flags);
+
 	//! Returns the current interaction flags
 	inline virtual INTERACTION_FLAGS getInteractionMode() const { return m_interactionFlags; }
 
@@ -545,16 +559,16 @@ public:
 	inline void invalidateVisualization() { m_validModelviewMatrix = false; }
 
 	//! Renders screen to an image
-	virtual QImage renderToImage(	float zoomFactor = 1.0f,
-									bool dontScaleFeatures = false,
-									bool renderOverlayItems = false,
-									bool silent = false) = 0;
+	QImage renderToImage(	float zoomFactor = 1.0f,
+							bool dontScaleFeatures = false,
+							bool renderOverlayItems = false,
+							bool silent = false );
 
 	//! Renders screen to a file
 	bool renderToFile(	QString filename,
 						float zoomFactor = 1.0f,
 						bool dontScaleFeatures = false,
-						bool renderOverlayItems = false);
+						bool renderOverlayItems = false );
 
 	static void SetShaderPath(const QString &path);
 	static QString GetShaderPath();
@@ -664,7 +678,7 @@ public: //LOD
 public: //fullscreen
 
 	//! Toggles (exclusive) full-screen mode
-	virtual void toggleExclusiveFullScreen(bool state) = 0;
+	void toggleExclusiveFullScreen(bool state);
 
 	//! Returns whether the window is in exclusive full screen mode or not
 	inline bool exclusiveFullScreen() const { return m_exclusiveFullscreen; }
@@ -705,10 +719,10 @@ public: //stereo mode
 	};
 
 	//! Enables stereo display mode
-	virtual bool enableStereoMode(const StereoParams& params) = 0;
+	virtual bool enableStereoMode(const StereoParams& params);
 
 	//! Disables stereo display mode
-	virtual void disableStereoMode() = 0;
+	virtual void disableStereoMode();
 
 	//! Returns whether the stereo display mode is enabled or not
 	inline bool stereoModeIsEnabled() const { return m_stereoModeEnabled; }
@@ -732,7 +746,7 @@ public: //stereo mode
 	//! Returns whether the rotation axis is locaked or not
 	inline bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
-public:
+public: // other methods
 
 	//! Applies a 1:1 global zoom
 	void zoomGlobal();
@@ -741,7 +755,7 @@ public:
 	void onWheelEvent(float wheelDelta_deg);
 
 	//! Tests frame rate
-	virtual void startFrameRateTest() = 0;
+	void startFrameRateTest();
 
 	//! Request an update of the display
 	/** The request will be executed if not in auto refresh mode already
@@ -760,7 +774,11 @@ public:
 
 	static ccGLWindowInterface* FromWidget(QWidget* widget);
 
-	static bool SupportStereo();
+	static bool StereoSupported();
+	static void SetStereoSupported(bool state);
+	static bool TestStereoSupport(bool forceRetest = false);
+
+	bool isQuadBufferSupported() const;
 
 protected: //rendering
 
@@ -769,6 +787,33 @@ protected: //rendering
 
 	//! Returns the set of OpenGL functions
 	virtual ccQOpenGLFunctions* functions() const = 0;
+
+	//! Called when the screen is resized
+	void onResizeGL(int w, int h);
+
+	//! Sets the OpenGL viewport
+	void setGLViewport(const QRect& rect);
+	//! Sets the OpenGL viewport (shortut)
+	inline void setGLViewport(int x, int y, int w, int h) { setGLViewport(QRect(x, y, w, h)); }
+
+	//! Initialize the OpenGL context
+	bool initialize();
+
+	//! Releases all textures, GL lists, etc.
+	void uninitializeGL();
+
+	//! Rendering method
+	void doPaintGL();
+
+	//! Rendering method custom initialzation step (to be overridden)
+	virtual bool initPaintGL() { return true; }
+	//! Swap the OpenGL buffers if necessary (to be overridden)
+	virtual void swapGLBuffers() { }
+
+	//! Called at the very beginning of the initialization process (see initialize)
+	virtual bool preInitialize(bool& firstTime) { Q_UNUSED(firstTime); return true; }
+	//! Called at the very end of the initialization process (see initialize)
+	virtual bool postInitialize(bool firstTime) { Q_UNUSED(firstTime); return true; }
 
 	//On some versions of Qt, QGLWidget::renderText seems to need glColorf instead of glColorub!
 	// See https://bugreports.qt-project.org/browse/QTBUG-6217
@@ -788,12 +833,6 @@ protected: //rendering
 							color.b / 255.0f,
 							color.a / 255.0f);
 	}
-
-	//! Binds an FBO or releases the current one (if input is nullptr)
-	/** This method must be called instead of the FBO's own 'start' and 'stop' methods
-		so as to properly handle the interactions with QOpenGLWidget's own FBO.
-	**/
-	bool bindFBO(ccFrameBufferObject* fbo);
 
 	//! LOD state
 	struct CCGLWINDOW_LIB_API LODState
@@ -815,7 +854,111 @@ protected: //rendering
 		unsigned progressIndicator;
 	};
 
+	//! Stereo rendering pass
+	enum StereoRenderingPass
+	{
+		MONO_OR_LEFT_RENDERING_PASS = 0,
+		RIGHT_RENDERING_PASS = 1
+	};
+
+	//! Rendering params
+	struct RenderingParams
+	{
+		// Next LOD state
+		LODState nextLODState;
+
+		// Current pass
+		StereoRenderingPass pass = MONO_OR_LEFT_RENDERING_PASS;
+
+		// 2D background
+		bool drawBackground = true;
+		bool clearDepthLayer = true;
+		bool clearColorLayer = true;
+
+		// 3D central layer
+		bool draw3DPass = true;
+		bool useFBO = false;
+		bool draw3DCross = false;
+
+		// 2D foreground
+		bool drawForeground = true;
+
+		//! Candidate pivot point(s) (will be used when the mouse is released)
+		/** Up to 2 candidates, if stereo mode is enabled **/
+		CCVector3d autoPivotCandidates[2];
+		bool hasAutoPivotCandidates[2] = { false, false };
+	};
+
+	//! Draws the background layer
+	/** Background + 2D background objects
+	**/
+	void drawBackground(CC_DRAW_CONTEXT& context, RenderingParams& params);
+
+	//! Draws the main 3D layer
+	void draw3D(CC_DRAW_CONTEXT& context, RenderingParams& params);
+
+	//! Draws the foreground layer
+	/** 2D foreground objects / text
+	**/
+	void drawForeground(CC_DRAW_CONTEXT& context, RenderingParams& params);
+
+	//! Renders the next L.O.D. level
+	void renderNextLODLevel();
+
+	//! Full rendering pass (drawBackground + draw3D + drawForeground)
+	void fullRenderingPass(CC_DRAW_CONTEXT& context, RenderingParams& params);
+
+	//! Draws pivot point symbol in 3D
+	void drawPivot();
+
+	//! To be overriden
+	/** \return whether the viewport is modified **/
+	virtual bool prepareOtherStereoGlassType(CC_DRAW_CONTEXT& context, RenderingParams& params, ccFrameBufferObject*& currentFBO) { return false; }
+
+	//! To be overriden
+	virtual void processOtherStereoGlassType(RenderingParams& params) {}
+
+	//! To be overriden
+	/** \return whether a custom camera projection was set **/
+	virtual bool setCustomCameraProjection(RenderingParams& params, ccGLMatrixd& modelViewMat, ccGLMatrixd& projectionMat) { return false; }
+
 protected: //other methods
+
+	// Qt-equivalent shortcuts
+	virtual QSurfaceFormat getSurfaceFormat() const = 0;
+	virtual void doSetMouseTracking(bool enable) = 0;
+	virtual void doShowFullScreen() = 0;
+	virtual void doShowNormal() = 0;
+
+	void processMousePressEvent(QMouseEvent *event);
+	void processMouseDoubleClickEvent(QMouseEvent *event);
+	void processMouseMoveEvent(QMouseEvent *event);
+	void processMouseReleaseEvent(QMouseEvent *event);
+	void processWheelEvent(QWheelEvent* event);
+
+	//! Enables stereo display mode (advanced mode)
+	bool enableStereoMode(const StereoParams& params, bool needSecondFBO, bool needAutoRefresh);
+
+	//! Action when a 'drag' event is received
+	void doDragEnterEvent(QDragEnterEvent* event);
+
+	//! Action when a 'drop' event is received
+	void doDropEvent(QDropEvent* event);
+
+	//! Reacts to the itemPickedFast signal
+	void onItemPickedFast(ccHObject* pickedEntity, int pickedItemIndex, int x, int y);
+
+	//! Checks for scheduled redraw
+	void checkScheduledRedraw();
+
+	//! Performs standard picking at the last clicked mouse position (see m_lastMousePos)
+	void doPicking();
+
+	//! Binds an FBO or releases the current one (if input is nullptr)
+	/** This method must be called instead of the FBO's own 'start' and 'stop' methods
+		so as to properly handle the interactions with QOpenGLWidget's own FBO.
+	**/
+	bool bindFBO(ccFrameBufferObject* fbo);
 
 	//these methods are now protected to prevent issues with Retina or other high DPI displays
 	//(see glWidth(), glHeight(), qtWidth(), qtHeight(), qtSize(), glSize()
@@ -932,7 +1075,7 @@ protected: //other methods
 	std::unordered_set<ccInteractor*> m_activeItems;
 
 	//! Inits FBO (frame buffer object)
-	virtual bool initFBO(int w, int h) = 0;
+	bool initFBO(int w, int h);
 	//! Inits FBO (safe)
 	bool initFBOSafe(ccFrameBufferObject* &fbo, int w, int h);
 	//! Releases any active FBO
@@ -998,6 +1141,19 @@ protected: //other methods
 
 	//! Computes the default increment (for moving the perspective camera, the cutting planes, etc.)
 	double computeDefaultIncrement() const;
+
+	bool processEvents(QEvent* evt);
+
+	//! Stops frame rate test
+	void stopFrameRateTest();
+
+	//! Returns whether the frame rate test is in progress or not
+	bool isFrameRateTestInProgress();
+
+	//! Updates the frame rate test
+	/** \return whether the frame rate test is in progress or not
+	**/
+	void updateFrameRateTest();
 
 protected: //definitions
 

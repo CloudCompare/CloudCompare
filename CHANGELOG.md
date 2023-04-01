@@ -69,6 +69,10 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- The stereo and the non-stereo version of CloudCompare and ccViewer are now unified
+		- no need to manage 2 different versions
+		- CC and ccViewer will automatically detect if Quad Buffer Stereo is supported, and use it when needed
+
 	- ccViewer now supports gamepads
 
 	- Tools > Projection > Unroll

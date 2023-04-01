@@ -173,7 +173,7 @@ font: italic;</string>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="customScaleDoubleSpinBox">
+             <widget class="QDoubleSpinBox" name="customScaleXDoubleSpinBox">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -193,6 +193,16 @@ font: italic;</string>
                <double>0.001000000000000</double>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="customScaleYDoubleSpinBox">
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="customScaleZDoubleSpinBox"/>
             </item>
             <item>
              <spacer name="horizontalSpacer_9">
@@ -322,8 +332,8 @@ font: italic;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>618</width>
-            <height>292</height>
+            <width>784</width>
+            <height>288</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">

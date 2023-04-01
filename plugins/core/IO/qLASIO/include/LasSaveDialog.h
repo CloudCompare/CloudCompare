@@ -75,6 +75,7 @@ class LasSaveDialog : public QDialog
 	void handleSelectedVersionChange(const QString&);
 	void handleSelectedPointFormatChange(int index);
 	void handleComboBoxChange(int index);
+	void handleCustomScaleButtontoggled(bool checked);
 	void addExtraScalarFieldCard();
 
   private:

@@ -51,15 +51,6 @@ if( CCCORELIB_USE_QT_CONCURRENT )
 	)
 endif()
 
-# contrib. libraries support
-if( APPLE )
-	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
-elseif( UNIX )
-	target_link_contrib( ${PROJECT_NAME} lib/cloudcompare )
-else()
-	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
-endif()
-
 # Add custom preprocessor definitions
 if( WIN32 )
 	if (MSVC)

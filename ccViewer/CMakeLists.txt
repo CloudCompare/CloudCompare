@@ -57,15 +57,6 @@ target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
 )
 
-# contrib. libraries support
-if ( APPLE )
-	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
-elseif( UNIX )
-	target_link_contrib( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
-else()
-	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-endif()
-
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_VIEWER )
 

@@ -69,9 +69,6 @@ include( Install )
 # Add external libraries
 include( CMakeExternalLibs )
 
-# Contrib. libraries (mainly for I/O)
-include( AllSupport )
-
 # Internal libs used by both CloudCompare & ccViewer
 add_subdirectory( libs )
 

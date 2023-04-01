@@ -29,7 +29,7 @@ function( target_link_OCULUS_SDK ) # 1 argument: ARGV0 = project name
 			target_compile_definitions( ${ARGV0} PRIVATE CC_OCULUS_SUPPORT )
 			target_link_libraries( ${ARGV0} ${OCULUS_SDK_LIBRARY_FILE} )
 		else()
-			message( SEND_ERROR "FBX SDK library not found: can't link" )
+			message( SEND_ERROR "Oculus SDK library not found: can't link" )
 		endif()
 	endif()
 endfunction()

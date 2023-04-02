@@ -25,10 +25,10 @@
 //Qt
 #include <QAction>
 #include <QMainWindow>
-#include <QGuiApplication>
+#include <QCoreApplication>
 #include <QMenu>
 
-ccGamepadManager::ccGamepadManager( ccMainAppInterface *appInterface, QObject *parent )
+ccGamepadManager::ccGamepadManager(ccMainAppInterface* appInterface, QObject* parent)
 	: QObject(parent)
 	, m_appInterface(appInterface)
 	, m_gamepadInput(nullptr)
@@ -37,7 +37,13 @@ ccGamepadManager::ccGamepadManager( ccMainAppInterface *appInterface, QObject *p
 {
 	setupMenu();
 	setupGamepadInput(); //DGM:at this point we can only init the gamepadInput structure (Qt will send a signal when the gamepad is connected - at least from its point of view)
-	enableDevice(true, true); //DGM: but if it's already connected, we'll have to 'enable' it ourselves
+#ifdef CC_GAMEPAD_SUPPORT
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	enableDevice(true, true); //DGM: due to the workaround (in main.cpp) if it's already connected, we'll have to 'enable' it ourselves
+#endif
+#endif
+#endif
 }
 
 ccGamepadManager::~ccGamepadManager()
@@ -88,7 +94,7 @@ void ccGamepadManager::enableDevice(bool state, bool silent, int deviceID/*=-1*/
 				QList<int> gamepads;
 				for (int i = 0; i < 3; ++i)
 				{
-					QGuiApplication::processEvents();
+					QCoreApplication::processEvents();
 					gamepads = manager->connectedGamepads();
 					if (!gamepads.empty())
 					{
@@ -226,7 +232,7 @@ void ccGamepadManager::setupGamepadInput()
 	{
 		connect(manager, &QGamepadManager::gamepadConnected, this, [&](int deviceId)
 		{
-			ccLog::Print(QString("gamepad device %1 has been connected").arg(deviceId));
+			ccLog::Print(QString("gamepad device %1 has been detected").arg(deviceId));
 			//auto-enable the device (if none is enabled yet)
 			if (m_actionEnable && !m_actionEnable->isChecked())
 			{

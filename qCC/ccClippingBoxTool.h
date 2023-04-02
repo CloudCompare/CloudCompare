@@ -35,7 +35,7 @@
 class ccGenericPointCloud;
 class ccGenericMesh;
 class ccProgressDialog;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 class ccClipBox;
 class ccPolyline;
@@ -54,7 +54,7 @@ public:
 	virtual ~ccClippingBoxTool();
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool linkWith(ccGLWindowInterface* win) override;
 	virtual bool start() override;
 	virtual void stop(bool state) override;
 

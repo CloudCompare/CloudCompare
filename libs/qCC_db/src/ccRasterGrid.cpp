@@ -19,6 +19,7 @@
 
 //CCCoreLib
 #include <Delaunay2dMesh.h>
+#include <ParallelSort.h>
 
 //qCC_db
 #include "ccGenericPointCloud.h"
@@ -386,6 +387,8 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 		}
 	}
 
+	std::vector<ScalarType> sfValues; // common vector used to sort SF values in each cell
+
 	//now we can browse through all points belonging to each cell 
 	for (unsigned j = 0; j < height; ++j)
 	{
@@ -413,7 +416,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 				auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
 				//sorting indexed points in cell based on height in ascending order
-				std::sort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](const IndexAndValue& a, const IndexAndValue& b) { return a.val < b.val; });
+				ParallelSort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](const IndexAndValue& a, const IndexAndValue& b) { return a.val < b.val; });
 
 				//compute standard statistics on height values
 
@@ -569,14 +572,83 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 						switch (sfProjectionType)
 						{
 						case PROJ_MINIMUM_VALUE:
-						case PROJ_MEDIAN_VALUE:
-						case PROJ_MAXIMUM_VALUE:
-							//for Min, Max and Median projection, we pick the SF value corresponding to the "selected" height point
-							scalarFields[k][pos] = sf->getValue(aCell.nearestPointIndex);
-							break;
-						case PROJ_AVERAGE_VALUE:
-							//for average, we do a simple average of unsorted SF-values in cell
 						{
+							ScalarType minValue = CCCoreLib::NAN_VALUE;
+							for (unsigned n = 0; n < aCell.nbPoints; n++)
+							{
+								unsigned pointIndex = cellPointIndexedHeight[n].index;
+								ScalarType value = sf->getValue(pointIndex);
+								if (CCCoreLib::ScalarField::ValidValue(value))
+								{
+									if (std::isnan(minValue) || minValue > value)
+									{
+										minValue = value;
+									}
+								}
+							}
+							scalarFields[k][pos] = minValue;
+						}
+						break;
+
+						case PROJ_MEDIAN_VALUE:
+						{
+							sfValues.clear();
+							sfValues.reserve(aCell.nbPoints);
+							for (unsigned n = 0; n < aCell.nbPoints; n++)
+							{
+								unsigned pointIndex = cellPointIndexedHeight[n].index;
+								ScalarType value = sf->getValue(pointIndex);
+								if (CCCoreLib::ScalarField::ValidValue(value))
+								{
+									sfValues.push_back(value);
+								}
+							}
+							if (sfValues.size() > 1)
+							{
+								ParallelSort(sfValues.begin(), sfValues.end());
+								size_t midIndex = sfValues.size() / 2;
+								if (sfValues.size() % 2) // odd number
+								{
+									scalarFields[k][pos] = sfValues[midIndex];
+								}
+								else
+								{
+									scalarFields[k][pos] = static_cast<ScalarType>((static_cast<double>(sfValues[midIndex - 1]) + sfValues[midIndex]) / 2);
+								}
+							}
+							else if (sfValues.size() == 1)
+							{
+								scalarFields[k][pos] = sfValues[0];
+							}
+							else
+							{
+								scalarFields[k][pos] = CCCoreLib::NAN_VALUE;
+							}
+						}
+						break;
+
+						case PROJ_MAXIMUM_VALUE:
+						{
+							ScalarType maxValue = CCCoreLib::NAN_VALUE;
+							for (unsigned n = 0; n < aCell.nbPoints; n++)
+							{
+								unsigned pointIndex = cellPointIndexedHeight[n].index;
+								ScalarType value = sf->getValue(pointIndex);
+								if (CCCoreLib::ScalarField::ValidValue(value))
+								{
+									if (std::isnan(maxValue) || maxValue < value)
+									{
+										maxValue = value;
+									}
+								}
+							}
+							scalarFields[k][pos] = maxValue;
+						}
+						break;
+
+						case PROJ_AVERAGE_VALUE:
+						{
+							//for average, we do a simple average of unsorted SF-values in cell
 							double scalarFieldWeightedSum = 0.0;
 							unsigned validPointCount = 0;
 							for (unsigned n = 0; n < aCell.nbPoints; n++)
@@ -592,6 +664,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 							scalarFields[k][pos] = validPointCount != 0 ? scalarFieldWeightedSum / validPointCount : std::numeric_limits<double>::quiet_NaN();
 						}
 						break;
+
 						case PROJ_INVERSE_VAR_VALUE:
 							//inverse variance projection mode: weighted average with weights of 1/var
 							if (projectionType == PROJ_INVERSE_VAR_VALUE && k == zStdDevSfIndex)
@@ -625,6 +698,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 
 							}
 							break;
+
 						default:
 							assert(false);
 							break;
@@ -1648,7 +1722,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 							if (exportedStatisticsNeedSorting)
 							{
 								//Sorting data in cell in ascending order
-								std::sort(cellPointVal.begin(), cellPointVal.end(), [](ScalarType a, ScalarType b) { return a < b; });
+								ParallelSort(cellPointVal.begin(), cellPointVal.end(), [](ScalarType a, ScalarType b) { return a < b; });
 							}
 
 							if (cellPointVal.size())

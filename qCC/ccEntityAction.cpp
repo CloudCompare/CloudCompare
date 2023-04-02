@@ -2777,17 +2777,24 @@ namespace ccEntityAction
 				{
 					unsigned n = pc->size();
 					double squareSum = 0;
+					double sum = 0;
 					for (unsigned i = 0; i < n; ++i)
 					{
 						ScalarType v = pc->getPointScalarValue(i);
 						if (CCCoreLib::ScalarField::ValidValue(v))
 						{
+							sum += static_cast<double>(v);
 							squareSum += static_cast<double>(v) * v;
 						}
 					}
 
 					double rms = sqrt(squareSum / sfValidCount);
-					ccConsole::Print(QObject::tr("Scalar field RMS = %1").arg(rms));
+					ccConsole::Print(QObject::tr("Scalar field statistics:"));
+					ccConsole::Print(QObject::tr("Number of valid values = %1 / %2 (%3%)").arg(sfValidCount).arg(pc->size()).arg((100.0 * sfValidCount) / pc->size(), 0, 'f', 2));
+					ccConsole::Print(QObject::tr("Sum of all valid values = %1").arg(QString::number(sum, 'f', 6)));
+					ccConsole::Print(QObject::tr("Sum of all valid squared values = %1").arg(QString::number(squareSum, 'f', 6)));
+					ccConsole::Print(QObject::tr("Average value = %1").arg(sum / sfValidCount));
+					ccConsole::Print(QObject::tr("RMS (Root Mean Square) = %1").arg(rms));
 				}
 
 				//show histogram

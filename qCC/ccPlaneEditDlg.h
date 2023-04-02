@@ -28,7 +28,7 @@
 //Qt
 #include <QDialog>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccPlane;
 class ccHObject;
 class ccPickingHub;
@@ -69,7 +69,7 @@ protected:
 protected: //members
 
 	//! Picking window (if any)
-	ccGLWindow* m_pickingWin;
+	ccGLWindowInterface* m_pickingWin;
 
 	//! Associated plane (if any)
 	ccPlane* m_associatedPlane;

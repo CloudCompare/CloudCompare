@@ -29,7 +29,7 @@
 #include <ccSphere.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QSettings>
@@ -94,8 +94,8 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 		params.displayCross = false;
 		m_glWindow->setDisplayParameters(params, true);
 		m_glWindow->setPerspectiveState(false, true);
-		m_glWindow->setInteractionMode(ccGLWindow::MODE_PAN_ONLY | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
-		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+		m_glWindow->setInteractionMode(ccGLWindowInterface::MODE_PAN_ONLY | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+		m_glWindow->setPickingMode(ccGLWindowInterface::NO_PICKING);
 		m_glWindow->displayOverlayEntities(false, false);
 		m_glWindow->setSunLight(true);
 		m_glWindow->setCustomLight(false);
@@ -103,10 +103,10 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 		viewFrame->setLayout(new QHBoxLayout());
 		viewFrame->layout()->addWidget(glWidget);
 
-		connect(m_glWindow, &ccGLWindow::leftButtonClicked,		this, &qCanupo2DViewDialog::addOrSelectPoint);
-		connect(m_glWindow, &ccGLWindow::rightButtonClicked,	this, &qCanupo2DViewDialog::removePoint);
-		connect(m_glWindow, &ccGLWindow::mouseMoved,			this, &qCanupo2DViewDialog::moveSelectedPoint);
-		connect(m_glWindow, &ccGLWindow::buttonReleased,		this, &qCanupo2DViewDialog::deselectPoint);
+		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,		this, &qCanupo2DViewDialog::addOrSelectPoint);
+		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked,	this, &qCanupo2DViewDialog::removePoint);
+		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &qCanupo2DViewDialog::moveSelectedPoint);
+		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased,		this, &qCanupo2DViewDialog::deselectPoint);
 	}
 
 	updateScalesList(true);
@@ -519,7 +519,7 @@ void qCanupo2DViewDialog::addOrSelectPoint(int x, int y)
 	double maxPickingDist = static_cast<double>(m_pickingRadius) * m_glWindow->computeActualPixelSize();
 
 	//to allow 'mouse move" tracking event
-	m_glWindow->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+	m_glWindow->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
 
 	//is the closest point close enough?
 	if (closeIndex >= 0)
@@ -676,7 +676,7 @@ void qCanupo2DViewDialog::moveSelectedPoint(int x, int y, Qt::MouseButtons butto
 void qCanupo2DViewDialog::deselectPoint()
 {
 	//to disable 'mouse move' event tracking
-    m_glWindow->setInteractionMode(ccGLWindow::MODE_PAN_ONLY | ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+    m_glWindow->setInteractionMode(ccGLWindowInterface::MODE_PAN_ONLY | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
 
 	m_selectedPointIndex = -1;
 }

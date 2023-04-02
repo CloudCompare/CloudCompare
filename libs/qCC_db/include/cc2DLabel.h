@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_2D_LABEL_HEADER
-#define CC_2D_LABEL_HEADER
 
 //Local
 #include "ccHObject.h"
@@ -324,5 +323,3 @@ protected:
 	//! Relative marker scale
 	float m_relMarkerScale;
 };
-
-#endif //CC_2D_LABEL_HEADER

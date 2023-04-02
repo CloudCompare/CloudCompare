@@ -18,7 +18,7 @@
 #include "ccOverlayDialog.h"
 
 //qCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -43,7 +43,7 @@ ccOverlayDialog::~ccOverlayDialog()
 	onLinkedWindowDeletion();
 }
 
-bool ccOverlayDialog::linkWith(ccGLWindow* win)
+bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 {
 	if (m_processing)
 	{
@@ -67,7 +67,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 				widget->removeEventFilter(this);
 			}
 		}
-		m_associatedWin->disconnect(this);
+		m_associatedWin->signalEmitter()->disconnect(this);
 		m_associatedWin = nullptr;
 	}
 
@@ -79,18 +79,27 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 		{
 			widget->installEventFilter(this);
 		}
-		connect(m_associatedWin, &QObject::destroyed, this, &ccOverlayDialog::onLinkedWindowDeletion);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, this, &ccOverlayDialog::onLinkedWindowDeletion);
 	}
 
 	return true;
 }
 
-void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=nullptr*/)
+void ccOverlayDialog::onLinkedWindowDeletion(ccGLWindowInterface* object/*=nullptr*/)
 {
-	if (m_processing)
-		stop(false);
+	if (m_associatedWin == object)
+	{
+		if (m_processing)
+		{
+			stop(false);
+		}
 
-	linkWith(nullptr);
+		linkWith(nullptr);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 bool ccOverlayDialog::start()

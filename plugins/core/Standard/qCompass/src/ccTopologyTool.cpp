@@ -42,7 +42,7 @@ void ccTopologyTool::onNewSelection(const ccHObject::Container& selectedEntities
 			m_firstPick = o->getUniqueID();
 
 			//write instructions to screen
-			m_app->getActiveGLWindow()->displayNewMessage("Select second (younger) GeoObject.", ccGLWindow::LOWER_LEFT_MESSAGE);
+			m_app->getActiveGLWindow()->displayNewMessage("Select second (younger) GeoObject.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 		}
 		else //yes.. this is the second pick
 		{
@@ -67,7 +67,7 @@ void ccTopologyTool::onNewSelection(const ccHObject::Container& selectedEntities
 void ccTopologyTool::toolActivated()
 { 
 	//display instructions
-	m_app->getActiveGLWindow()->displayNewMessage("Select first (older) GeoObject.", ccGLWindow::LOWER_LEFT_MESSAGE);
+	m_app->getActiveGLWindow()->displayNewMessage("Select first (older) GeoObject.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 }
 
 //called when the tool is set to disactive (for cleanup)

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                      CLOUDCOMPARE PLUGIN: qSRA                         #
@@ -14,9 +16,6 @@
 //#                           COPYRIGHT: EDF                               #
 //#                                                                        #
 //##########################################################################
-
-#ifndef Q_SRA_PLUGIN_HEADER
-#define Q_SRA_PLUGIN_HEADER
 
 #include "ccStdPluginInterface.h"
 
@@ -68,5 +67,3 @@ protected:
 	//! Associated action
 	QAction* m_doProjectCloudDists;
 };
-
-#endif //Q_SRA_PLUGIN_HEADER

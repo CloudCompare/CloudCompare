@@ -28,7 +28,7 @@
 
 #include "ui_animationDlg.h"
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccPolyline;
 class cc2DViewportObject;
 class QListWidgetItem;
@@ -41,7 +41,7 @@ class qAnimationDlg : public QDialog, public Ui::AnimationDialog
 public:
 
 	//! Default constructor
-	qAnimationDlg(ccGLWindow* view3d,  QWidget* parent = nullptr);
+	qAnimationDlg(ccGLWindowInterface* view3d,  QWidget* parent = nullptr);
 
 	//! Destrcuctor
 	virtual ~qAnimationDlg();
@@ -123,5 +123,5 @@ protected: //members
 	Trajectory m_smoothVideoSteps;
 
 	//! Associated 3D view
-	ccGLWindow* m_view3d;
+	ccGLWindowInterface* m_view3d;
 };

@@ -69,6 +69,18 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
+	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified
+		- no need to manage/compile 2 different versions anymore
+		- CC and ccViewer will automatically detect if Quad Buffer Stereo is supported, and use it when needed
+
+	- Gamepad support
+		- ccViewer now supports gamepads
+		- CloudCompare should now properly detect gamepads on Windows
+
+	- The display can now be rendered to a file even with 'Anaglyph' (Red/Blue) stereo mode enabled
+		- 'Display > Render to file'
+		- 'Animation' plugin
+
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- button to flip the 3D axis
@@ -210,6 +222,9 @@ v2.13.alpha (???) - (??/??/????)
 
 	- CSF plugin
 		- the CSF filter can now be applied on multiple clouds at once (both in the GUI and the command line version)
+
+	- Some more basic statistics are displayed in the Console when using the 'Edit > SF > Compute stat. params' tool
+		- number of valid values, sum of all valid values and squared values, average, RMS
 
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting

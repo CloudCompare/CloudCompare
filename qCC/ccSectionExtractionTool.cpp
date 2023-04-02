@@ -33,7 +33,7 @@
 #include <ccProgressDialog.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //CCCoreLib
 #include <ReferenceCloud.h>
@@ -155,9 +155,9 @@ void ccSectionExtractionTool::onShortcutTriggered(int key)
 	}
 }
 
-bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
+bool ccSectionExtractionTool::linkWith(ccGLWindowInterface* win)
 {
-	ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 
 	if (!ccOverlayDialog::linkWith(win))
 	{
@@ -208,10 +208,10 @@ bool ccSectionExtractionTool::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &ccSectionExtractionTool::addPointToPolyline);
-		connect(m_associatedWin, &ccGLWindow::rightButtonClicked, this, &ccSectionExtractionTool::closePolyLine);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &ccSectionExtractionTool::updatePolyLine);
-		connect(m_associatedWin, &ccGLWindow::entitySelectionChanged, this, &ccSectionExtractionTool::entitySelected);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked, this, &ccSectionExtractionTool::addPointToPolyline);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked, this, &ccSectionExtractionTool::closePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved, this, &ccSectionExtractionTool::updatePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::entitySelectionChanged, this, &ccSectionExtractionTool::entitySelected);
 
 		//import sections in current display
 		for (auto & section : m_sections)
@@ -511,8 +511,8 @@ void ccSectionExtractionTool::stop(bool accepted)
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setPickingMode(ccGLWindowInterface::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
 	}
 
@@ -879,9 +879,9 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 			m_editedPoly->clear();
 			m_editedPolyVertices->clear();
 		}
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_PAN_ONLY);
-		m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		m_associatedWin->setPickingMode(ccGLWindow::ENTITY_PICKING); //to be able to select polylines!
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_PAN_ONLY);
+		m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->setPickingMode(ccGLWindowInterface::ENTITY_PICKING); //to be able to select polylines!
 	}
 	else
 	{
@@ -893,10 +893,10 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 
 		m_state = STARTED;
 
-		m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
-		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
-		m_associatedWin->displayNewMessage("Section edition mode", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-		m_associatedWin->displayNewMessage("Left click: add section points / Right click: stop", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+		m_associatedWin->displayNewMessage("Section edition mode", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Left click: add section points / Right click: stop", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 	}
 
 	//update mini-GUI

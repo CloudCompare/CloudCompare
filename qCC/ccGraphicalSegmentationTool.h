@@ -32,7 +32,7 @@
 
 class ccPolyline;
 class ccPointCloud;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccMainAppInterface;
 
 //! Graphical segmentation mechanism (with polyline)
@@ -66,7 +66,7 @@ public:
 	const QSet<ccHObject*>& entities() const { return m_toSegment; }
 
 	//inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool linkWith(ccGLWindowInterface* win) override;
 	virtual bool start() override;
 	virtual void stop(bool accepted) override;
 

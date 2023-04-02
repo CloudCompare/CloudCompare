@@ -24,7 +24,6 @@
 #include <QAction>
 
 //CC
-#include <ccGLWindow.h>
 #include <ccOverlayDialog.h>
 
 //Local

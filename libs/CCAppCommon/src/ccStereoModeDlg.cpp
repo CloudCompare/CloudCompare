@@ -101,34 +101,34 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 	}
 }
 
-ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
+ccGLWindowInterface::StereoParams ccStereoModeDlg::getParameters() const
 {
-	ccGLWindow::StereoParams params;
+	ccGLWindowInterface::StereoParams params;
 
 	//glass type
 	switch (m_ui->glassTypeComboBox->currentIndex())
 	{
 	case COMBO_INDEX_RED_BLUE:
-		params.glassType = ccGLWindow::StereoParams::RED_BLUE;
+		params.glassType = ccGLWindowInterface::StereoParams::RED_BLUE;
 		break;
 	case COMBO_INDEX_BLUE_RED:
-		params.glassType = ccGLWindow::StereoParams::BLUE_RED;
+		params.glassType = ccGLWindowInterface::StereoParams::BLUE_RED;
 		break;
 	case COMBO_INDEX_RED_CYAN:
 	default:
-		params.glassType = ccGLWindow::StereoParams::RED_CYAN;
+		params.glassType = ccGLWindowInterface::StereoParams::RED_CYAN;
 		break;
 	case COMBO_INDEX_CYAN_RED:
-		params.glassType = ccGLWindow::StereoParams::CYAN_RED;
+		params.glassType = ccGLWindowInterface::StereoParams::CYAN_RED;
 		break;
 	case COMBO_INDEX_NV_VISION:
-		params.glassType = ccGLWindow::StereoParams::NVIDIA_VISION;
+		params.glassType = ccGLWindowInterface::StereoParams::NVIDIA_VISION;
 		break;
 	case COMBO_INDEX_OCULUS:
-		params.glassType = ccGLWindow::StereoParams::OCULUS;
+		params.glassType = ccGLWindowInterface::StereoParams::OCULUS;
 		break;
 	case COMBO_INDEX_GENERIC:
-		params.glassType = ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY;
+		params.glassType = ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY;
 		break;
 	}
 
@@ -141,30 +141,30 @@ ccGLWindow::StereoParams ccStereoModeDlg::getParameters() const
 	return params;
 }
 
-void ccStereoModeDlg::setParameters(const ccGLWindow::StereoParams& params)
+void ccStereoModeDlg::setParameters(const ccGLWindowInterface::StereoParams& params)
 {
 	//glass type
 	switch (params.glassType)
 	{
-	case ccGLWindow::StereoParams::RED_BLUE:
+	case ccGLWindowInterface::StereoParams::RED_BLUE:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_BLUE);
 		break;
-	case ccGLWindow::StereoParams::BLUE_RED:
+	case ccGLWindowInterface::StereoParams::BLUE_RED:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_BLUE_RED);
 		break;
-	case ccGLWindow::StereoParams::RED_CYAN:
+	case ccGLWindowInterface::StereoParams::RED_CYAN:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_RED_CYAN);
 		break;
-	case ccGLWindow::StereoParams::CYAN_RED:
+	case ccGLWindowInterface::StereoParams::CYAN_RED:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_CYAN_RED);
 		break;
-	case ccGLWindow::StereoParams::NVIDIA_VISION:
+	case ccGLWindowInterface::StereoParams::NVIDIA_VISION:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_NV_VISION);
 		break;
-	case ccGLWindow::StereoParams::OCULUS:
+	case ccGLWindowInterface::StereoParams::OCULUS:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_OCULUS);
 		break;
-	case ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY:
+	case ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_GENERIC);
 		break;
 	default:

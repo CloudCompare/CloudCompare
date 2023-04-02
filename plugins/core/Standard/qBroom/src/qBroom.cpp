@@ -26,7 +26,7 @@
 #include <ccPointCloud.h>
 
 //qCC
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //system
 #include <assert.h>

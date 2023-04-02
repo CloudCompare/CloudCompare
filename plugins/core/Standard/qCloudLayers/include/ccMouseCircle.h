@@ -23,7 +23,7 @@ except for a circle with radius r around the mouse.
 */
 
 #include <ccStdPluginInterface.h>
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 #include <cc2DViewportObject.h>
 
 //Qt
@@ -35,7 +35,7 @@ class ccMouseCircle : public cc2DViewportObject, public QObject
 {
 public:
 	//constructor
-	explicit ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindow* owner, QString name = QString("MouseCircle"));
+	explicit ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindowInterface* owner, QString name = QString("MouseCircle"));
 
 	//deconstructor
 	~ccMouseCircle();
@@ -59,8 +59,8 @@ protected:
 private:
 	ccMainAppInterface* m_app;
 
-	//ccGLWindow this overlay is attached to -> used to get mouse position & events
-	ccGLWindow* m_owner;
+	//ccGLWindowInterface this overlay is attached to -> used to get mouse position & events
+	ccGLWindowInterface* m_owner;
 	float m_pixelSize;
 
 	//event to get mouse-move updates & trigger repaint

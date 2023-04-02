@@ -42,7 +42,7 @@ public:
 	//inherited from ccPointPickingGenericInterface
 	virtual bool start() override;
 	virtual void stop(bool state) override;
-	virtual bool linkWith(ccGLWindow* win) override;
+	virtual bool linkWith(ccGLWindowInterface* win) override;
 
 protected:
 

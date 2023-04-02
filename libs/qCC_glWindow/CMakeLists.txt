@@ -11,7 +11,10 @@ target_link_libraries( ${PROJECT_NAME}
 	QCC_DB_LIB
 )
 
-if ( OPTION_USE_OCULUS_SDK )
+# Oculus support
+include( cmake/OculusSupport.cmake )
+
+if ( OPTION_USE_OCULUS_SDK )	
     target_link_OCULUS_SDK( ${PROJECT_NAME} )
 endif()
 

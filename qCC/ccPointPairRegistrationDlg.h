@@ -35,7 +35,7 @@
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;
-class ccGLWindow;
+class ccGLWindowInterface;
 class cc2DLabel;
 class ccPickingHub;
 
@@ -50,12 +50,12 @@ public:
 	explicit ccPointPairRegistrationDlg(ccPickingHub* pickingHub, ccMainAppInterface* app, QWidget* parent = nullptr);
 
 	//inherited from ccOverlayDialog
-	bool linkWith(ccGLWindow* win) override;
+	bool linkWith(ccGLWindowInterface* win) override;
 	bool start() override;
 	void stop(bool state) override;
 
 	//! Inits dialog
-	bool init(	ccGLWindow* win,
+	bool init(	ccGLWindowInterface* win,
 				const ccHObject::Container& alignedEntities,
 				const ccHObject::Container* referenceEntities = nullptr);
 
@@ -186,7 +186,7 @@ protected: //members
 	ccPointCloud m_refPoints;
 
 	//! Dedicated window
-	ccGLWindow* m_win;
+	ccGLWindowInterface* m_win;
 
 	//! Whether the dialog is paused or not
 	bool m_paused;

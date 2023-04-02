@@ -368,12 +368,17 @@ bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
 	}
 
 	//aspect ratio
-	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
-	//fov
-	float fov_deg = CCCoreLib::RadiansToDegrees( m_intrinsicParams.vFOV_rad );
+	double sensorAR = static_cast<double>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
+	//the sensor width (fully) fits the 3D view width
+	QSize screenSize = win->getScreenSize();
+	double screenAR = static_cast<double>(screenSize.width()) / screenSize.height();
+	double fOV_rad = 2 * atan(tan(m_intrinsicParams.vFOV_rad / 2) * screenAR * (screenAR >= sensorAR ? 1.0 : sensorAR));
+	double fov_deg = CCCoreLib::RadiansToDegrees(fOV_rad);
+	ccLog::Print(QString("[ccCameraSensor::applyViewport] Horizontal FOV = %1 deg").arg(fov_deg));
+
 	//camera position/orientation
 	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd, fov_deg, ar);
+	win->setupProjectiveViewport(transd, static_cast<float>(fov_deg));
 
 	return true;
 }
@@ -408,13 +413,15 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win/
 		return applyViewport(win);
 	}
 
-	QSize screenSize = win->getScreenSize();
-	QSizeF displayedSize = image->computeDisplayedSize(screenSize.width(), screenSize.height());
+	//image aspect ratio
+	double imageAR = static_cast<double>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 
-	//the image height (fully) fits the 3D view height
+	//the image width (fully) fits the 3D view width
+	QSize screenSize = win->getScreenSize();
 	double screenAR = static_cast<double>(screenSize.width()) / screenSize.height();
-	double fOV_rad = 2 * atan((m_intrinsicParams.arrayHeight / (2 * m_intrinsicParams.vertFocal_pix)) * screenAR);
-	float fov_deg = CCCoreLib::RadiansToDegrees(fOV_rad);
+	double fOV_rad = 2 * atan((m_intrinsicParams.arrayHeight / (2 * m_intrinsicParams.vertFocal_pix)) * screenAR * (screenAR >= imageAR ? 1.0 : imageAR));
+	double fov_deg = CCCoreLib::RadiansToDegrees(fOV_rad);
+	ccLog::Print(QString("[ccCameraSensor::applyImageViewport] Horizontal FOV = %1 deg").arg(fov_deg));
 
 	//camera position/orientation
 	ccIndexedTransformation trans;
@@ -423,10 +430,8 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win/
 		return false;
 	}
 
-	//image aspect ratio
-	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd, fov_deg, ar);
+	win->setupProjectiveViewport(transd, static_cast<float>(fov_deg));
 
 	return true;
 }

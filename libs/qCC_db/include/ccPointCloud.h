@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_POINT_CLOUD_HEADER
-#define CC_POINT_CLOUD_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the warnings about dominant inheritance
@@ -875,5 +874,3 @@ protected: //waveform (e.g. from airborne scanners)
 	SharedFWFDataContainer m_fwfData;
 
 };
-
-#endif //CC_POINT_CLOUD_HEADER

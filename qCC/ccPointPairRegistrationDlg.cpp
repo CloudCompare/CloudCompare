@@ -25,7 +25,7 @@
 #include <ccPickingHub.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_db
 #include <ccGenericPointCloud.h>
@@ -188,14 +188,15 @@ void ccPointPairRegistrationDlg::clear()
 	m_referenceEntities.clear();
 }
 
-bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
+bool ccPointPairRegistrationDlg::linkWith(ccGLWindowInterface* win)
 {
-	ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 	if (oldWin)
 	{
 		if (oldWin != win)
 		{
-			oldWin->disconnect(this);
+			//TODO FIXME: is it still necessary?
+			oldWin->signalEmitter()->disconnect(this);
 		}
 
 		oldWin->removeFromOwnDB(&m_alignedPoints);
@@ -223,7 +224,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 	if (m_associatedWin)
 	{
-		if (!m_pickingHub->addListener(this, true, true, ccGLWindow::POINT_OR_TRIANGLE_OR_LABEL_PICKING))
+		if (!m_pickingHub->addListener(this, true, true, ccGLWindowInterface::POINT_OR_TRIANGLE_OR_LABEL_PICKING))
 		{
 			ccLog::Error("Picking mechanism is already in use! Close the other tool first, and then restart this one.");
 			return false;
@@ -232,9 +233,9 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		m_associatedWin->addToOwnDB(&m_alignedPoints);
 		m_associatedWin->addToOwnDB(&m_refPoints);
 
-		m_associatedWin->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE);
-		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)", ccGLWindow::LOWER_LEFT_MESSAGE, true, 3600);
-		m_associatedWin->displayNewMessage(QString("Pick equivalent points on both clouds (at least %1 pairs - mind the order)").arg(MIN_PAIRS_COUNT), ccGLWindow::LOWER_LEFT_MESSAGE, true, 3600);
+		m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE);
+		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)", ccGLWindowInterface::LOWER_LEFT_MESSAGE, true, 3600);
+		m_associatedWin->displayNewMessage(QString("Pick equivalent points on both clouds (at least %1 pairs - mind the order)").arg(MIN_PAIRS_COUNT), ccGLWindowInterface::LOWER_LEFT_MESSAGE, true, 3600);
 	}
 
 	return true;
@@ -260,7 +261,7 @@ static void SetEnabled_recursive(ccHObject* ent)
 		SetEnabled_recursive(ent->getParent());
 }
 
-bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
+bool ccPointPairRegistrationDlg::init(	ccGLWindowInterface* win,
 										const ccHObject::Container& alignedEntities,
 										const ccHObject::Container* referenceEntities/*=nullptr*/)
 {
@@ -310,7 +311,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 			}
 			if (sourceDisplay)
 			{
-				ccGlFilter* filter = static_cast<ccGLWindow*>(sourceDisplay)->getGlFilter();
+				ccGlFilter* filter = static_cast<ccGLWindowInterface*>(sourceDisplay)->getGlFilter();
 				if (filter)
 					// transfer the GL filter to the dedicated tool window
 					win->setGlFilter(filter->clone());
@@ -386,7 +387,7 @@ bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
 	showReferenceCheckBox->setEnabled(!m_referenceEntities.empty());
 	showAlignedCheckBox->setChecked(true);
 
-	m_associatedWin->showMaximized();
+	m_associatedWin->doShowMaximized();
 	resetTitle();
 
 	if (hasOriginViewportParams)
@@ -1300,8 +1301,8 @@ void ccPointPairRegistrationDlg::resetTitle()
 {
 	if ( m_associatedWin != nullptr )
 	{
-		m_associatedWin->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false);
-		m_associatedWin->displayNewMessage("[Point-pair registration]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600);
+		m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false);
+		m_associatedWin->displayNewMessage("[Point-pair registration]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600);
 	}
 }
 
@@ -1318,7 +1319,7 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 		&&	callHornRegistration(trans, rms, true))
 	{
 		QString rmsString = QString("Achievable RMS: %1").arg(rms);
-		m_associatedWin->displayNewMessage(rmsString, ccGLWindow::UPPER_CENTER_MESSAGE, true, 60 * 60);
+		m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		resetToolButton->setEnabled(true);
 		validToolButton->setEnabled(true);
 	}
@@ -1346,7 +1347,7 @@ void ccPointPairRegistrationDlg::align()
 		{
 			QString rmsString = QString("Current RMS: %1").arg(rms);
 			ccLog::Print(QString("[PointPairRegistration] ") + rmsString);
-			m_associatedWin->displayNewMessage(rmsString, ccGLWindow::UPPER_CENTER_MESSAGE, true, 60 * 60);
+			m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		}
 		else
 		{
@@ -1387,14 +1388,14 @@ void ccPointPairRegistrationDlg::align()
 		//force clouds visibility
 		{
 			//we don't want the window zoom to change or the window to be be redrawn
-			ccGLWindow* associatedWin = nullptr;
-			std::swap(m_associatedWin,associatedWin);
+			ccGLWindowInterface* associatedWin = nullptr;
+			std::swap(m_associatedWin, associatedWin);
 			if (!showAlignedCheckBox->isChecked())
 				showAlignedCheckBox->setChecked(true);
 			if (!showReferenceCheckBox->isChecked())
 				showReferenceCheckBox->setChecked(true);
 			//restore window ref
-			std::swap(m_associatedWin,associatedWin);
+			std::swap(m_associatedWin, associatedWin);
 		}
 
 		if (m_associatedWin)

@@ -24,7 +24,7 @@
 class QWidget;
 class ccGBLSensor;
 class ccScalarField;
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! Misc. tools for rendering of advanced structures
 class CCGLWINDOW_LIB_API ccRenderingTools
@@ -43,5 +43,5 @@ public:
 	static void DrawColorRamp(const CC_DRAW_CONTEXT& context);
 
 	//! See other version of DrawColorRamp
-	static void DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom = 1.0f);
+	static void DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindowInterface* win, int glW, int glH, float renderZoom = 1.0f);
 };

@@ -12,7 +12,7 @@
 #include <QWidget>
 
 //CC
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 #include <ccPointCloud.h>
 
 ccCloudLayersDlg::ccCloudLayersDlg(ccMainAppInterface* app, QWidget* parent)
@@ -97,7 +97,7 @@ bool ccCloudLayersDlg::start()
 	resetUI();
 	m_app->freezeUI(true);
 
-	connect(m_associatedWin, &ccGLWindow::mouseMoved, this, &ccCloudLayersDlg::mouseMoved);
+	connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved, this, &ccCloudLayersDlg::mouseMoved);
 
 	return ccOverlayDialog::start();
 }
@@ -294,11 +294,11 @@ void ccCloudLayersDlg::startClicked()
 		return;
 	}
 
-	m_app->getActiveGLWindow()->setPickingMode(ccGLWindow::PICKING_MODE::NO_PICKING);
+	m_app->getActiveGLWindow()->setPickingMode(ccGLWindowInterface::PICKING_MODE::NO_PICKING);
 
 	//set orthographic view (as this tool doesn't work in perspective mode)
 	m_app->getActiveGLWindow()->setPerspectiveState(false, true);
-	m_app->getActiveGLWindow()->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+	m_app->getActiveGLWindow()->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
 	m_mouseCircle->setVisible(true);
 
 	pbStart->setEnabled(false);
@@ -313,8 +313,8 @@ void ccCloudLayersDlg::pauseClicked()
 	}
 
 	m_mouseCircle->setVisible(false);
-	m_app->getActiveGLWindow()->setPickingMode(ccGLWindow::PICKING_MODE::DEFAULT_PICKING);
-	m_app->getActiveGLWindow()->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+	m_app->getActiveGLWindow()->setPickingMode(ccGLWindowInterface::PICKING_MODE::DEFAULT_PICKING);
+	m_app->getActiveGLWindow()->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 	m_app->getActiveGLWindow()->redraw(true, false);
 
 	pbStart->setEnabled(true);

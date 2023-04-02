@@ -119,12 +119,15 @@ int main(int argc, char **argv)
 
     ccApplication::InitOpenGL();
 
-#ifdef CC_GAMEPAD_SUPPORT
-	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
-#endif
-
 	ccApplication app(argc, argv, commandLine);
 
+#ifdef CC_GAMEPAD_SUPPORT
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
+#endif
+#endif
+#endif
 	//store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);
 
@@ -188,7 +191,7 @@ int main(int argc, char **argv)
 		}
 		mainWindow->initPlugins();
 		mainWindow->show();
-		QApplication::processEvents();
+		QCoreApplication::processEvents();
 
 		//show current Global Shift parameters in Console
 		{

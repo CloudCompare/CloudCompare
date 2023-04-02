@@ -21,7 +21,7 @@
 #include <CCPlatform.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QCoreApplication>
@@ -60,7 +60,7 @@ void ccEnvelopeExtractorDlg::init()
 	//create 3D window
 	{
 		QWidget* glWidget = nullptr;
-		CreateGLWindow(m_glWindow, glWidget, false, true);
+		ccGLWindowInterface::Create(m_glWindow, glWidget, false, true);
 		assert(m_glWindow && glWidget);
 
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
@@ -74,8 +74,8 @@ void ccEnvelopeExtractorDlg::init()
 		params.colorScaleUseShader = false;
 		m_glWindow->setDisplayParameters(params, true);
 		m_glWindow->setPerspectiveState(false, true);
-		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
-		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+		m_glWindow->setInteractionMode(ccGLWindowInterface::INTERACT_PAN | ccGLWindowInterface::INTERACT_ZOOM_CAMERA | ccGLWindowInterface::INTERACT_CLICKABLE_ITEMS);
+		m_glWindow->setPickingMode(ccGLWindowInterface::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true, false);
 		m_glWindow->setSunLight(true);
 		m_glWindow->setCustomLight(false);

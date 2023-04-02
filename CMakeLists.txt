@@ -20,14 +20,6 @@ include( DeployQt )
 # CCViewer
 option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
 
-# Quad buffer stereo support
-option( OPTION_GL_QUAD_BUFFER_SUPPORT "Check to compile CloudCompare and ccViewer with Quad Buffer support" OFF )
-
-if ( OPTION_GL_QUAD_BUFFER_SUPPORT )
-    # Add the define for all libs and applications
-	add_definitions( -DCC_GL_WINDOW_USE_QWINDOW )
-endif()
-
 # Testing
 option( BUILD_TESTING "Build tests for CC" OFF )
 if ( BUILD_TESTING )
@@ -43,10 +35,6 @@ set( CMAKE_DEBUG_POSTFIX "d" )
 if(WIN32 OR APPLE) 
 	set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
 	set( CCVIEWER_DEST_FOLDER ccViewer )
-	if (OPTION_GL_QUAD_BUFFER_SUPPORT)
-		set ( CLOUDCOMPARE_DEST_FOLDER ${CLOUDCOMPARE_DEST_FOLDER}Stereo )
-		set ( CCVIEWER_DEST_FOLDER ${CCVIEWER_DEST_FOLDER}Stereo )
-	endif()
 else()
 	set( CLOUDCOMPARE_DEST_FOLDER bin )
 	set( CCVIEWER_DEST_FOLDER bin )
@@ -73,9 +61,6 @@ include( Install )
 
 # Add external libraries
 include( CMakeExternalLibs )
-
-# Contrib. libraries (mainly for I/O)
-include( AllSupport )
 
 # Internal libs used by both CloudCompare & ccViewer
 add_subdirectory( libs )

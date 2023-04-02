@@ -35,7 +35,7 @@ const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
 
 IcmFilter::IcmFilter()
-	: FileIOFilter( {
+	: FileIOFilter({
 					"_ICM Filter",
 					DEFAULT_PRIORITY,	// priority
 					QStringList{ "icm" },
@@ -43,7 +43,7 @@ IcmFilter::IcmFilter()
 					QStringList{ "Clouds + calibrated images [meta][ascii] (*.icm)" },
 					QStringList(),
 					Import
-					} )
+		})
 {
 }
 
@@ -69,13 +69,13 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
 
 	//lecture du header
-	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		fclose(fp);
 		return CC_FERR_READING;
 	}
 
-	if (strncmp(line,"#CC_ICM_FILE",12)!=0)
+	if (strncmp(line, "#CC_ICM_FILE", 12) != 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRONG_FILE_TYPE;
@@ -85,42 +85,42 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 	QString path = QFileInfo(filename).absolutePath();
 
 	char cloudFileName[MAX_ASCII_FILE_LINE_LENGTH];
-	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		fclose(fp);
 		return CC_FERR_READING;
 	}
-	if (strncmp(line,"FILE_NAME=",10)!=0)
+	if (strncmp(line, "FILE_NAME=", 10) != 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
-	sscanf(line,"FILE_NAME=%s",cloudFileName);
+	sscanf(line, "FILE_NAME=%s", cloudFileName);
 
 	char subFileType[12];
-	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		fclose(fp);
 		return CC_FERR_READING;
 	}
-	if (strncmp(line,"FILE_TYPE=",10)!=0)
+	if (strncmp(line, "FILE_TYPE=", 10) != 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
-	sscanf(line,"FILE_TYPE=%s",subFileType);
+	sscanf(line, "FILE_TYPE=%s", subFileType);
 
 	FileIOFilter::Shared filter = FileIOFilter::FindBestFilterForExtension(subFileType);
 	if (!filter)
 	{
-		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName,subFileType));
+		ccLog::Warning(QString("[ICM] No I/O filter found for loading file '%1' (type = '%2')").arg(cloudFileName, subFileType));
 		fclose(fp);
 		return CC_FERR_UNKNOWN_FILE;
 	}
 
 	//load the corresponding file (potentially containing several clouds)
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path,cloudFileName), parameters, filter, result);
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path, cloudFileName), parameters, filter, result);
 	if (!entities)
 	{
 		fclose(fp);
@@ -130,7 +130,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 	container.addChild(entities);
 
 	//chargement des images
-	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		ccLog::Error("[ICM] Read error (IMAGES_DESCRIPTOR)! No image loaded");
 		fclose(fp);
@@ -138,16 +138,16 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 	else
 	{
-		if (strncmp(line,"IMAGES_DESCRIPTOR=",18)!=0)
+		if (strncmp(line, "IMAGES_DESCRIPTOR=", 18) != 0)
 		{
 			fclose(fp);
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 		char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
-		sscanf(line,"IMAGES_DESCRIPTOR=%s",imagesDescriptorFileName);
-		
-		int n = LoadCalibratedImages(entities,path,imagesDescriptorFileName,entities->getBB_recursive());
-		ccLog::Print("[ICM] %i image(s) loaded ...",n);
+		sscanf(line, "IMAGES_DESCRIPTOR=%s", imagesDescriptorFileName);
+
+		int n = LoadCalibratedImages(entities, path, imagesDescriptorFileName, entities->getBB_recursive());
+		ccLog::Print("[ICM] %i image(s) loaded ...", n);
 	}
 
 	fclose(fp);
@@ -159,7 +159,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	assert(entities);
 
 	//ouverture du fichier
-	QString completeImageDescFilename = QString("%1/%2").arg(path,imageDescFilename);
+	QString completeImageDescFilename = QString("%1/%2").arg(path, imageDescFilename);
 
 	if (CheckForSpecialChars(completeImageDescFilename))
 	{
@@ -185,25 +185,25 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 	int loadedImages = 0;
 
 	//IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
-	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp) != nullptr)
+	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp) != nullptr)
 	{
 		if (line[0] == 'D' && line[1] == 'E' && line[2] == 'F')
 		{
 			char imageFileName[256];
-			sscanf(line,"DEF %s Viewpoint {",imageFileName);
+			sscanf(line, "DEF %s Viewpoint {", imageFileName);
 
 			//add absolute path
 			ccImage* CI = new ccImage();
 			QString errorStr;
-			if (!CI->load(QString("%1/%2").arg(path,imageFileName),errorStr))
+			if (!CI->load(QString("%1/%2").arg(path, imageFileName), errorStr))
 			{
-				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName,errorStr));
+				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName, errorStr));
 				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
 
-			ccLog::Print("[IcmFilter] Image '%s' loaded",imageFileName);
+			ccLog::Print("[IcmFilter] Image '%s' loaded", imageFileName);
 			CI->setEnabled(false);
 			CI->setName(imageFileName);
 #ifdef INCLUDE_PHOTOS
@@ -211,67 +211,67 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 #endif
 
 			//FOV
-			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
 				ccLog::Print("[IcmFilter] Read error (fieldOfView)!");
 				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
-			
-			float fov_rad = 0;
-			sscanf(line,"\t fieldOfView %f\n",&fov_rad);
 
-			float fov_deg = CCCoreLib::RadiansToDegrees( fov_rad );
-			ccLog::Print("\t FOV=%f (degrees)",fov_deg);
+			float fov_rad = 0;
+			sscanf(line, "\t fieldOfView %f\n", &fov_rad);
+
+			float fov_deg = CCCoreLib::RadiansToDegrees(fov_rad);
+			ccLog::Print("\t FOV=%f (degrees)", fov_deg);
 
 			//Position
 			float t[3];
-			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (position)!");
 				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
-			sscanf(line,"\t position %f %f %f\n",t,t+1,t+2);
+			sscanf(line, "\t position %f %f %f\n", t, t + 1, t + 2);
 
-			ccLog::Print("\t Camera pos=(%f,%f,%f)",t[0],t[1],t[2]);
+			ccLog::Print("\t Camera pos=(%f,%f,%f)", t[0], t[1], t[2]);
 
 			//Description
 			char desc[MAX_ASCII_FILE_LINE_LENGTH];
-			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (description)!");
 				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
-			sscanf(line,"\t description \"%s\"\n",desc);
+			sscanf(line, "\t description \"%s\"\n", desc);
 
 			//CI->setDescription(desc);
-			ccLog::Print("\t Description: '%s'",desc);
+			ccLog::Print("\t Description: '%s'", desc);
 
 			//Orientation
 			float axis[3]{ 0.0f, 0.0f, 0.0f };
 			float angle_rad = 0.0f;
-			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
+			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (orientation)!");
 				fclose(fp);
 				return loadedImages;
 			}
-			sscanf(line,"\t orientation %f %f %f %f\n",axis,axis+1,axis+2,&angle_rad);
+			sscanf(line, "\t orientation %f %f %f %f\n", axis, axis + 1, axis + 2, &angle_rad);
 
-			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
-			
+			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]", axis[0], axis[1], axis[2], angle_rad);
+
 			ccCameraSensor::IntrinsicParameters params;
 			params.vFOV_rad = fov_rad;
 			params.arrayWidth = CI->getW();
 			params.arrayHeight = CI->getH();
 			params.principal_point[0] = params.arrayWidth / 2.0f;
 			params.principal_point[1] = params.arrayHeight / 2.0f;
-			params.vertFocal_pix = 1.0f; //default focal (for the 3D symbol)
+			params.vertFocal_pix = params.arrayHeight / (2 * tan(params.vFOV_rad / 2));
 			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f;
 			ccCameraSensor* sensor = new ccCameraSensor(params);
 

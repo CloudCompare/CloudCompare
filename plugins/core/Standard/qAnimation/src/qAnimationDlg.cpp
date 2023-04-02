@@ -25,7 +25,7 @@
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QtGui>
@@ -57,7 +57,7 @@
 static const QString s_stepDurationKey("StepDurationSec");
 static const QString s_stepEnabledKey("StepEnabled");
 
-qAnimationDlg::qAnimationDlg(ccGLWindow* view3d, QWidget* parent)
+qAnimationDlg::qAnimationDlg(ccGLWindowInterface* view3d, QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AnimationDialog()
 	, m_view3d(view3d)
@@ -1218,7 +1218,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 					customSize.setWidth((originalViewSize.width() / 8 + 1) * 8);
 				if (originalViewSize.height() % 8)
 					customSize.setHeight((originalViewSize.height() / 8 + 1) * 8);
-				m_view3d->resize(customSize);
+				m_view3d->doResize(customSize);
 				QApplication::processEvents();
 			}
 		}
@@ -1359,7 +1359,7 @@ void qAnimationDlg::render(bool asSeparateFrames)
 		encoder->close();
 
 		//hack: restore original size
-		m_view3d->resize(originalViewSize);
+		m_view3d->doResize(originalViewSize);
 		QApplication::processEvents();
 	}
 #endif

@@ -36,7 +36,7 @@
 #include <ccScalarField.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_io
 #include <ImageFileFilter.h>

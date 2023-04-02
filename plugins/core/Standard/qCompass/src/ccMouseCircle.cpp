@@ -42,7 +42,7 @@ struct Circle
 };
 static Circle s_unitCircle;
 
-ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name) 
+ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name) 
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
 	, m_radius(50)
 	, m_radiusStep(4)
@@ -53,7 +53,7 @@ ccMouseCircle::ccMouseCircle(ccGLWindow* owner, QString name)
 	//attach to owner
 	assert(owner); //check valid pointer
 	ccMouseCircle::m_owner = owner;
-	m_owner->installEventFilter(this);
+	m_owner->asQObject()->installEventFilter(this);
 	m_owner->addToOwnDB(this, true);
 }
 
@@ -62,7 +62,7 @@ ccMouseCircle::~ccMouseCircle()
 	//cleanup event listner
 	if (m_owner)
 	{
-		m_owner->removeEventFilter(this);
+		m_owner->asQObject()->removeEventFilter(this);
 		m_owner->removeFromOwnDB(this);
 	}
 }

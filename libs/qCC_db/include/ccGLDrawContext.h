@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GL_DRAW_CONTEXT_HEADER
-#define CC_GL_DRAW_CONTEXT_HEADER
 
 #include "ccIncludeGL.h"
 #include "ccColorBasedEntityPicking.h"
@@ -206,5 +205,3 @@ struct ccGLDrawContext
 };
 
 using CC_DRAW_CONTEXT = ccGLDrawContext;
-
-#endif //CC_GL_DRAW_CONTEXT_HEADER

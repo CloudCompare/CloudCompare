@@ -223,6 +223,9 @@ v2.13.alpha (???) - (??/??/????)
 	- CSF plugin
 		- the CSF filter can now be applied on multiple clouds at once (both in the GUI and the command line version)
 
+	- Some more basic statistics are displayed in the Console when using the 'Edit > SF > Compute stat. params' tool
+		- number of valid values, sum of all valid values and squared values, average, RMS
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

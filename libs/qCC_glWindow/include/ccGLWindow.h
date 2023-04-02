@@ -112,18 +112,4 @@ protected: //other methods
 	void paintGL() override { doPaintGL(); }
 	void dragEnterEvent(QDragEnterEvent* event) override { doDragEnterEvent(event); }
 	void dropEvent(QDropEvent* event) override { doDropEvent(event); }
-
-protected: //members
-
-	//! Associated OpenGL context
-	QOpenGLContext* m_context;
-
-	//! OpenGL device
-	QOpenGLPaintDevice* m_device;
-
-	//! Format
-	QSurfaceFormat m_format;
-
-	//! Associated widget (we use the WidgetContainer mechanism)
-	QWidget* m_parentWidget;
 };

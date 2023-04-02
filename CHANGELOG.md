@@ -69,8 +69,8 @@ v2.13.alpha (???) - (??/??/????)
 
 - Improvements:
 
-	- The stereo and the non-stereo version of CloudCompare and ccViewer are now unified
-		- no need to manage 2 different versions
+	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified
+		- no need to manage/compile 2 different versions anymore
 		- CC and ccViewer will automatically detect if Quad Buffer Stereo is supported, and use it when needed
 
 	- Gamepad support
@@ -78,6 +78,8 @@ v2.13.alpha (???) - (??/??/????)
 		- CloudCompare should now properly detect gamepads on Windows
 
 	- The display can now be rendered to a file even with 'Anaglyph' (Red/Blue) stereo mode enabled
+		- 'Display > Render to file'
+		- 'Animation' plugin
 
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone

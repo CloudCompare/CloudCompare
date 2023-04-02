@@ -9433,7 +9433,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			}
 
 			ccGLWindowInterface::StereoParams params = smDlg.getParameters();
-			ccLog::Warning(QString::number(params.stereoStrength));
+			ccLog::WarningDebug("Stereo strength: " + QString::number(params.stereoStrength));
 
 			if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
 			{

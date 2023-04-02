@@ -85,7 +85,7 @@ public:
 public:
 
 	void onActiveWindowChanged(QMdiSubWindow*);
-	void onActiveWindowDeleted(QObject*);
+	void onActiveWindowDeleted(ccGLWindowInterface*);
 	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
 protected:

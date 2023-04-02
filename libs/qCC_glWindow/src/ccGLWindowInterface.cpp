@@ -64,13 +64,20 @@ constexpr float ccGLWindowInterface::MIN_POINT_SIZE_F;
 constexpr float ccGLWindowInterface::MAX_POINT_SIZE_F;
 constexpr float ccGLWindowInterface::MIN_LINE_WIDTH_F;
 constexpr float ccGLWindowInterface::MAX_LINE_WIDTH_F;
-constexpr int ccGLWindowInterface::CC_GL_FILTER_BANNER_MARGIN;
-constexpr double ccGLWindowInterface::CC_DISPLAYED_PIVOT_RADIUS_PERCENT;
 
 //Max click duration for enabling picking mode (in ms)
 constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
-//Vaious overlay elements dimensions
+//GL filter banner margin (height = 2*margin + current font height)
+static constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
+
+//Percentage of the smallest screen dimension
+static constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8;
+
+//Default picking radius value
+static const int DefaultPickRadius = 5;
+
+//Various overlay elements dimensions
 constexpr double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH   = 10.0;
 constexpr float  CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
 constexpr float  CC_DISPLAYED_CENTER_CROSS_LENGTH   = 10.0f;
@@ -98,6 +105,22 @@ static QString s_shaderPath;
 // Whether stereo (quad buffer) rendering is supported
 static bool s_stereoSupported = false;
 static bool s_stereoChecked = false;
+
+// Reserved texture indexes
+enum class RenderTextReservedIDs
+{
+	NotReserved = 0,
+	FullScreenLabel,
+	BubbleViewLabel,
+	PointSizeLabel,
+	LineSizeLabel,
+	GLFilterLabel,
+	ScaleLabel,
+	trihedronX,
+	trihedronY,
+	trihedronZ,
+	StandardMessagePrefix = 1024
+};
 
 void ccGLWindowInterface::SetStereoSupported(bool state)
 {
@@ -247,12 +270,11 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent/*=nullptr*/, bool silen
 	, m_texturePoolLastIndex(0)
 	, m_clippingPlanesEnabled(true)
 	, m_defaultCursorShape(Qt::ArrowCursor)
-	, m_signalEmitter(new ccGLWindowSignalEmitter(parent))
+	, m_signalEmitter(new ccGLWindowSignalEmitter(this, parent))
+	, m_displayScale(1.0, 1.0)
 {
 	//start internal timer
 	m_timer.start();
-
-	QString windowTitle = QString("3D View %1").arg(m_uniqueID);
 
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
@@ -1622,6 +1644,9 @@ ccGLMatrixd ccGLWindowInterface::computeModelViewMatrix() const
 
 	ccGLMatrixd scaleMatd = m_viewportParams.computeScaleMatrix(m_glViewport);
 
+	scaleMatd.data()[0] *= m_displayScale.x;
+	scaleMatd.data()[5] *= m_displayScale.y;
+
 	return scaleMatd * viewMatd;
 }
 
@@ -2918,7 +2943,7 @@ void ccGLWindowInterface::togglePerspective(bool objectCentered)
 
 double ccGLWindowInterface::computeActualPixelSize() const
 {
-	return m_viewportParams.computePixelSize(glHeight() <= glWidth() ? glWidth() : (glWidth() * glWidth()) / glHeight());
+	return m_viewportParams.computePixelSize(glWidth()); // we now use the width as the driving dimension for scaling
 }
 
 void ccGLWindowInterface::setBubbleViewMode(bool state)
@@ -3015,26 +3040,6 @@ void ccGLWindowInterface::setPerspectiveState(bool state, bool objectCenteredVie
 	invalidateViewport();
 	invalidateVisualization();
 	deprecate3DLayer();
-}
-
-void ccGLWindowInterface::setGLCameraAspectRatio(float ar)
-{
-	if (ar < 0.0f)
-	{
-		ccLog::Warning("[ccGLWindowInterface::setGLCameraAspectRatio] Invalid AR value!");
-		return;
-	}
-
-	if (m_viewportParams.cameraAspectRatio != ar)
-	{
-		//update parameter
-		m_viewportParams.cameraAspectRatio = ar;
-
-		//and camera state
-		invalidateViewport();
-		invalidateVisualization();
-		deprecate3DLayer();
-	}
 }
 
 void ccGLWindowInterface::setFov(float fov_deg)
@@ -3249,7 +3254,6 @@ void ccGLWindowInterface::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 
 void ccGLWindowInterface::setupProjectiveViewport(	const ccGLMatrixd& cameraMatrix,
 													float fov_deg/*=0.0f*/,
-													float ar/*=1.0f*/,
 													bool viewerBasedPerspective/*=true*/,
 													bool bubbleViewMode/*=false*/)
 {
@@ -3264,9 +3268,6 @@ void ccGLWindowInterface::setupProjectiveViewport(	const ccGLMatrixd& cameraMatr
 	{
 		setFov(fov_deg);
 	}
-
-	//aspect ratio
-	setGLCameraAspectRatio(ar);
 
 	//set the camera matrix 'translation' as OpenGL camera center
 	CCVector3d T = cameraMatrix.getTranslationAsVec3D();
@@ -4380,6 +4381,7 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 		}
 		else
 		{
+			Q_EMIT m_signalEmitter->aboutToClose(this);
 			evt->accept();
 		}
 	}
@@ -6242,7 +6244,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 		{
 			//displacement vector (in "3D")
 			double pixSize = computeActualPixelSize();
-			CCVector3d u(dx * pixSize, -dy * pixSize, 0.0);
+			CCVector3d u(dx * pixSize / m_displayScale.x, -dy * pixSize / m_displayScale.y, 0.0);
 
 			const int retinaScale = getDevicePixelRatio();
 			u *= retinaScale;
@@ -7019,6 +7021,37 @@ ccGLWindowInterface* ccGLWindowInterface::FromWidget(QWidget* widget)
 	assert(false);
 	return nullptr;
 }
+
+ccGLWindowInterface* ccGLWindowInterface::FromEmitter(QObject* object)
+{
+	ccGLWindowSignalEmitter* emitter = qobject_cast<ccGLWindowSignalEmitter*>(object);
+	if (!emitter)
+	{
+		ccLog::Warning(QString("[ccGLWindowInterface::FromEmitter] Object %1 is not a window signal emitter").arg(object->objectName()));
+		assert(false);
+		return nullptr;
+	}
+
+	return emitter->getAssociatedWindow();
+}
+
+ccGLWindowInterface* ccGLWindowInterface::FromQObject(QObject* object)
+{
+	ccGLWindow* glWindow = qobject_cast<ccGLWindow*>(object);
+	if (glWindow)
+	{
+		return glWindow;
+	}
+	ccGLWindowStereo* glStereoWindow = qobject_cast<ccGLWindowStereo*>(object);
+	if (glStereoWindow)
+	{
+		return glStereoWindow;
+	}
+
+	ccLog::Warning(QString("[ccGLWindowInterface::FromQObject] Object %1 is not a valid GL window").arg(object->objectName()));
+	return nullptr;
+}
+
 
 bool ccGLWindowInterface::TestStereoSupport(bool forceRetest/*=false*/)
 {

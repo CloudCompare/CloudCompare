@@ -469,9 +469,9 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 		initWith(m_associatedWin);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::baseViewMatChanged,		this,	&ccCameraParamEditDlg::initWithMatrix);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged,			this,	&ccCameraParamEditDlg::updateCameraCenter);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged,			this,	&ccCameraParamEditDlg::updatePivotPoint);
+		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged,		this,	&ccCameraParamEditDlg::updatePivotPoint);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::perspectiveStateChanged,	this,	&ccCameraParamEditDlg::updateViewMode);
-		connect(m_associatedWin->signalEmitter(),	&QObject::destroyed,											this,	&QWidget::hide);
+		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::aboutToClose,				this,	&QWidget::hide);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::fovChanged,				this,	&ccCameraParamEditDlg::updateWinFov);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::nearClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateNearClippingDepth);
 		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::farClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateFarClippingDepth);

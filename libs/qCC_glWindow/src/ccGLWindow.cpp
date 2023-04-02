@@ -31,7 +31,8 @@
 ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 						QOpenGLWidget* parent/*=nullptr*/,
 						bool silentInitialization/*=false*/)
-	: ccGLWindowInterface(parent, silentInitialization)
+	: QOpenGLWidget(parent)
+	, ccGLWindowInterface(this, silentInitialization)
 {
 	m_font = font();
 
@@ -57,6 +58,10 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 
 	setAttribute(Qt::WA_AcceptTouchEvents, true);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
+
+	QString windowTitle = QString("3D View %1").arg(m_uniqueID);
+	setWindowTitle(windowTitle);
+	setObjectName(windowTitle);
 }
 
 ccGLWindow::~ccGLWindow()

@@ -80,8 +80,8 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	if (glWindow)
 	{
 		//link this new window
-		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::itemPicked, this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
-		connect(glWindow->signalEmitter(), &QObject::destroyed, this, &ccPickingHub::onActiveWindowDeleted);
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::itemPicked,	this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose,	this, &ccPickingHub::onActiveWindowDeleted);
 		m_activeGLWindow = glWindow;
 
 		if (m_autoEnableOnActivatedWindow && !m_listeners.empty())
@@ -91,9 +91,9 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	}
 }
 
-void ccPickingHub::onActiveWindowDeleted(QObject* obj)
+void ccPickingHub::onActiveWindowDeleted(ccGLWindowInterface* glWindow)
 {
-	if (obj == m_activeGLWindow->asQObject())
+	if (m_activeGLWindow && glWindow == m_activeGLWindow)
 	{
 		m_activeGLWindow = nullptr;
 	}

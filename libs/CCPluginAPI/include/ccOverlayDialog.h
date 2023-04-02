@@ -83,7 +83,7 @@ Q_SIGNALS:
 protected:
 
 	//! Slot called when the linked window is deleted (calls 'onClose')
-	virtual void onLinkedWindowDeletion(QObject* object = nullptr);
+	virtual void onLinkedWindowDeletion(ccGLWindowInterface* object = nullptr);
 
 protected:
 

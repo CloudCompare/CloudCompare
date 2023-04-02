@@ -5978,20 +5978,20 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 	}
 
 	//'echo' mode
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::mouseWheelRotated,			this, &MainWindow::echoMouseWheelRotate);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::viewMatRotated,				this, &MainWindow::echoBaseViewMatRotation);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged,				this, &MainWindow::echoCameraPosChanged);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged,			this, &MainWindow::echoPivotPointChanged);
 
-	connect(view3D->signalEmitter(),	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::newLabel, this, &MainWindow::handleNewLabel);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::exclusiveFullScreenToggled, this, &MainWindow::onExclusiveFullScreenToggled);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::aboutToClose,					this, &MainWindow::prepareWindowDeletion);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::filesDropped,					this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::newLabel,						this, &MainWindow::handleNewLabel);
+	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::exclusiveFullScreenToggled,	this, &MainWindow::onExclusiveFullScreenToggled);
 
 	if (m_pickingHub)
 	{
 		//we must notify the picking hub as well if the window is destroyed
-		connect(view3D->signalEmitter(), &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
+		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
@@ -6006,17 +6006,15 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 	return view3D;
 }
 
-void MainWindow::prepareWindowDeletion(QObject* glWindow)
+void MainWindow::prepareWindowDeletion(ccGLWindowInterface* glWindow)
 {
 	if (!m_ccRoot)
 		return;
 
-	//we assume only ccGLWindow can be connected to this slot!
-	ccGLWindowInterface* win = dynamic_cast<ccGLWindowInterface*>(glWindow);
-	if (win)
+	if (glWindow)
 	{
 		m_ccRoot->hidePropertiesView();
-		m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
+		m_ccRoot->getRootEntity()->removeFromDisplay_recursive(glWindow);
 		m_ccRoot->updatePropertiesView();
 	}
 	else
@@ -9965,8 +9963,7 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
-	ccGLWindowInterface* win = dynamic_cast<ccGLWindowInterface*>(QObject::sender());
-
+	ccGLWindowInterface* win = ccGLWindowInterface::FromEmitter(sender());
 	if (win)
 	{
 		addToDB(filenames, QString(), win);
@@ -10931,7 +10928,7 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
+	ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
 	if (!sendingWindow)
 		return;
 
@@ -10953,7 +10950,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
+	ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
 	if (!sendingWindow)
 		return;
 
@@ -10975,7 +10972,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
+	 ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
 	 if (!sendingWindow)
 		 return;
 
@@ -10998,7 +10995,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindowInterface* sendingWindow = dynamic_cast<ccGLWindowInterface*>(sender());
+	 ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
 	 if (!sendingWindow)
 		 return;
 

@@ -200,7 +200,7 @@ private:
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
 	**/
-	void prepareWindowDeletion(QObject* glWindow);
+	void prepareWindowDeletion(ccGLWindowInterface* glWindow);
 
 	//! Slot called when the exclusive fullscreen mode is toggled on a window
 	void onExclusiveFullScreenToggled(bool);

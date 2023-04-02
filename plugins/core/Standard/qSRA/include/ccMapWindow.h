@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                      CLOUDCOMPARE PLUGIN: qSRA                         #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef QSRA_MAP_GL_WINDOW_HEADER
-#define QSRA_MAP_GL_WINDOW_HEADER
-
 //qCC
 #include <ccGLWindow.h>
 
@@ -30,7 +29,7 @@ class ccMapWindow : public ccGLWindow
 public:
 
 	//! Default constructor
-	explicit ccMapWindow(ccGLWindowParent* parent = nullptr)
+	explicit ccMapWindow(QOpenGLWidget* parent = nullptr)
 		: ccGLWindow(nullptr, parent, true)
 		, m_sfForRampDisplay(nullptr)
 		, m_showSF(true)
@@ -68,8 +67,8 @@ public:
 	//! Returns associated scalar field
 	ccScalarField* getAssociatedScalarField() const { return m_sfForRampDisplay; }
 
-	//inherited fro ccGLWindow
-	virtual void getContext(CC_DRAW_CONTEXT& context)
+	//inherited from ccGLWindow
+	void getContext(CC_DRAW_CONTEXT& context) override
 	{
 		ccGLWindow::getContext(context);
 
@@ -87,7 +86,4 @@ protected:
 
 	//! Whether to show or not the associated SF
 	bool m_showSF;
-
 };
-
-#endif

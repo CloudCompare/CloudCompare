@@ -67,7 +67,7 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 				widget->removeEventFilter(this);
 			}
 		}
-		m_associatedWin->asQObject()->disconnect(this);
+		m_associatedWin->signalEmitter()->disconnect(this);
 		m_associatedWin = nullptr;
 	}
 
@@ -79,18 +79,27 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 		{
 			widget->installEventFilter(this);
 		}
-		connect(m_associatedWin->asQObject(), &QObject::destroyed, this, &ccOverlayDialog::onLinkedWindowDeletion);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, this, &ccOverlayDialog::onLinkedWindowDeletion);
 	}
 
 	return true;
 }
 
-void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=nullptr*/)
+void ccOverlayDialog::onLinkedWindowDeletion(ccGLWindowInterface* object/*=nullptr*/)
 {
-	if (m_processing)
-		stop(false);
+	if (m_associatedWin == object)
+	{
+		if (m_processing)
+		{
+			stop(false);
+		}
 
-	linkWith(nullptr);
+		linkWith(nullptr);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 bool ccOverlayDialog::start()

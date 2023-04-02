@@ -37,7 +37,8 @@ static OculusHMD s_oculus;
 ccGLWindowStereo::ccGLWindowStereo(	QSurfaceFormat* format/*=nullptr*/,
 									QWindow* parent/*=nullptr*/,
 									bool silentInitialization/*=false*/)
-	: ccGLWindowInterface(parent, silentInitialization)
+	: QWindow(parent)
+	, ccGLWindowInterface(this, silentInitialization)
 	, m_context(nullptr)
 	, m_device(new QOpenGLPaintDevice)
 	, m_parentWidget(nullptr)
@@ -57,6 +58,10 @@ ccGLWindowStereo::ccGLWindowStereo(	QSurfaceFormat* format/*=nullptr*/,
 	connect(&m_scheduleTimer, &QTimer::timeout, [&]() { checkScheduledRedraw(); });
 	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [&]() { update(); });
 	connect(&m_deferredPickingTimer, &QTimer::timeout, this, [&]() { doPicking(); });
+
+	QString windowTitle = QString("3D View Stereo %1").arg(m_uniqueID);
+	setWindowTitle(windowTitle);
+	setObjectName(windowTitle);
 }
 
 ccGLWindowStereo::~ccGLWindowStereo()

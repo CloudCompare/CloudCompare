@@ -17,6 +17,9 @@
 //#                                                                        #
 //##########################################################################
 
+//Local
+#include "ccGLWindowSignalEmitter.h"
+
 //qCC_db
 #include <ccGenericGLDisplay.h>
 #include <ccGLUtils.h>
@@ -33,7 +36,6 @@
 
 //system
 #include <list>
-#include <unordered_set>
 
 class QDragEnterEvent;
 class QDropEvent;
@@ -48,134 +50,11 @@ class QWheelEvent;
 class ccColorRampShader;
 class ccFrameBufferObject;
 class ccGlFilter;
-class ccHObject;
 class ccInteractor;
 class ccPolyline;
 class ccShader;
 
 struct HotZone;
-
-//! ccGLWindow Signal emitter
-class CCGLWINDOW_LIB_API ccGLWindowSignalEmitter : public QObject
-{
-	Q_OBJECT
-
-public:
-	//! Default constructor
-	ccGLWindowSignalEmitter(QObject* parent) : QObject(parent) {}
-
-Q_SIGNALS:
-
-	//! Signal emitted when an entity is selected in the 3D view
-	void entitySelectionChanged(ccHObject* entity);
-	//! Signal emitted when multiple entities are selected in the 3D view
-	void entitiesSelectionChanged(std::unordered_set<int> entIDs);
-
-	//! Signal emitted when a point (or a triangle) is picked
-	/** \param entity 'picked' entity
-		\param subEntityID point or triangle index in entity
-		\param x mouse cursor x position
-		\param y mouse cursor y position
-		\param P the picked point
-		\param uvw barycentric coordinates of the point (if picked on a mesh)
-	**/
-	void itemPicked(ccHObject* entity, unsigned subEntityID, int x, int y, const CCVector3& P, const CCVector3d& uvw);
-
-	//! Signal emitted when an item is picked (FAST_PICKING mode only)
-	/** \param entity entity
-		\param subEntityID point or triangle index in entity
-		\param x mouse cursor x position
-		\param y mouse cursor y position
-	**/
-	void itemPickedFast(ccHObject* entity, int subEntityID, int x, int y);
-
-	//! Signal emitted when fast picking is finished (FAST_PICKING mode only)
-	void fastPickingFinished();
-
-	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
-
-	//! Signal emitted when the window 'model view' matrix is interactively changed
-	void viewMatRotated(const ccGLMatrixd& rotMat);
-	//! Signal emitted when the mouse wheel is rotated
-	void mouseWheelRotated(float wheelDelta_deg);
-
-	//! Signal emitted when the perspective state changes (see setPerspectiveState)
-	void perspectiveStateChanged();
-
-	//! Signal emitted when the window 'base view' matrix is changed
-	void baseViewMatChanged(const ccGLMatrixd& newViewMat);
-
-	//! Signal emitted when the f.o.v. changes
-	void fovChanged(float fov);
-
-	//! Signal emitted when the near clipping depth has been changed
-	void nearClippingDepthChanged(double depth);
-
-	//! Signal emitted when the far clipping depth has been changed
-	void farClippingDepthChanged(double depth);
-
-	//! Signal emitted when the pivot point is changed
-	void pivotPointChanged(const CCVector3d&);
-
-	//! Signal emitted when the camera position is changed
-	void cameraPosChanged(const CCVector3d&);
-
-	//! Signal emitted when the selected object is translated by the user
-	void translation(const CCVector3d& t);
-
-	//! Signal emitted when the selected object is rotated by the user
-	/** \param rotMat rotation applied to current viewport (4x4 OpenGL matrix)
-	**/
-	void rotation(const ccGLMatrixd& rotMat);
-
-	//! Signal emitted when the left mouse button is clicked on the window
-	/** See INTERACT_SIG_LB_CLICKED.
-		Arguments correspond to the clicked point coordinates (x,y) in
-		pixels relative to the window corner!
-	**/
-	void leftButtonClicked(int x, int y);
-
-	//! Signal emitted when the right mouse button is clicked on the window
-	/** See INTERACT_SIG_RB_CLICKED.
-		Arguments correspond to the clicked point coordinates (x,y) in
-		pixels relative to the window corner!
-	**/
-	void rightButtonClicked(int x, int y);
-
-	//! Signal emitted when the mouse is moved
-	/** See INTERACT_SIG_MOUSE_MOVED.
-		The two first arguments correspond to the current cursor coordinates (x,y)
-		relative to the window corner!
-	**/
-	void mouseMoved(int x, int y, Qt::MouseButtons buttons);
-
-	//! Signal emitted when a mouse button is released (cursor on the window)
-	/** See INTERACT_SIG_BUTTON_RELEASED.
-	**/
-	void buttonReleased();
-
-	//! Signal emitted during 3D pass of OpenGL display process
-	/** Any object connected to this slot can draw additional stuff in 3D.
-		Depth buffering, lights and shaders are enabled by default.
-	**/
-	void drawing3D();
-
-	//! Signal emitted when files are dropped on the window
-	void filesDropped(const QStringList& filenames);
-
-	//! Signal emitted when a new label is created
-	void newLabel(ccHObject* obj);
-
-	//! Signal emitted when the exclusive fullscreen is toggled
-	void exclusiveFullScreenToggled(bool exclusive);
-
-	//! Signal emitted when the middle mouse button is clicked on the window
-	/** See INTERACT_SIG_MB_CLICKED.
-		Arguments correspond to the clicked point coordinates (x,y) in
-		pixels relative to the window corner!
-	**/
-	void middleButtonClicked(int x, int y);
-};
 
 //! OpenGL 3D view interface
 class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
@@ -303,7 +182,7 @@ public:
 	const ccViewportParameters& getViewportParameters() const override { return m_viewportParams; }
 	QPointF toCenteredGLCoordinates(int x, int y) const override;
 	QPointF toCornerGLCoordinates(int x, int y) const override;
-	void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
 	void aboutToBeRemoved(ccDrawableObject* entity) override;
 	void getGLCameraParameters(ccGLCameraParameters& params) override;
 
@@ -486,7 +365,7 @@ public:
 	inline void setUnclosable(bool state) { m_unclosable = state; }
 
 	//! Returns context information
-	void getContext(CC_DRAW_CONTEXT& context);
+	virtual void getContext(CC_DRAW_CONTEXT& context);
 
 	//! Minimum point size
 	static constexpr float MIN_POINT_SIZE_F = 1.0f;
@@ -533,9 +412,6 @@ public:
 	void setFov(float fov);
 	//! Returns the current f.o.v. (field of view) in degrees
 	float getFov() const;
-
-	//! Sets current OpenGL camera aspect ratio (width/height)
-	void setGLCameraAspectRatio(float ar);
 
 	//! Whether to allow near and far clipping planes or not
 	inline void setClippingPlanesEnabled(bool enabled) { m_clippingPlanesEnabled = enabled; }
@@ -606,9 +482,6 @@ public:
 	//! Whether display parameters are overidden for this window
 	inline bool hasOverriddenDisplayParameters() const { return m_overriddenDisplayParametersEnabled; }
 
-	//! Default picking radius value
-	static const int DefaultPickRadius = 5;
-
 	//! Sets picking radius
 	inline void setPickingRadius(int radius) { m_pickRadius = radius; }
 	//! Returns the current picking radius
@@ -625,9 +498,6 @@ public:
 
 	//! Computes the trihedron size (in pixels)
 	float computeTrihedronLength() const;
-
-	//! GL filter banner margin (height = 2*margin + current font height)
-	static constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
@@ -773,12 +643,19 @@ public: // other methods
 						bool silentInitialization = false);
 
 	static ccGLWindowInterface* FromWidget(QWidget* widget);
+	static ccGLWindowInterface* FromEmitter(QObject* object);
+	static ccGLWindowInterface* FromQObject(QObject* object);
 
 	static bool StereoSupported();
 	static void SetStereoSupported(bool state);
 	static bool TestStereoSupport(bool forceRetest = false);
 
 	bool isQuadBufferSupported() const;
+
+	//! Sets the display scale (multiplier)
+	void setDisplayScale(const CCVector2d& scale) { m_displayScale = scale; }
+	//! Returns the display scale (multiplier)
+	const CCVector2d& getDisplayScale() const { return m_displayScale; }
 
 protected: //rendering
 
@@ -1155,27 +1032,6 @@ protected: //other methods
 	**/
 	void updateFrameRateTest();
 
-protected: //definitions
-
-	// Reserved texture indexes
-	enum class RenderTextReservedIDs
-	{
-		NotReserved = 0,
-		FullScreenLabel,
-		BubbleViewLabel,
-		PointSizeLabel,
-		LineSizeLabel,
-		GLFilterLabel,
-		ScaleLabel,
-		trihedronX,
-		trihedronY,
-		trihedronZ,
-		StandardMessagePrefix = 1024
-	};
-
-	//! Percentage of the smallest screen dimension
-	static constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8;
-
 protected: //members
 
 	//! Unique ID
@@ -1546,6 +1402,9 @@ protected: //members
 
 	//! Signal emitter
 	ccGLWindowSignalEmitter* m_signalEmitter;
+
+	//! Display scale
+	CCVector2d m_displayScale;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ccGLWindowInterface::INTERACTION_FLAGS);

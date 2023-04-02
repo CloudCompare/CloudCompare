@@ -4996,8 +4996,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	}
 
 	//if a FBO is activated
-	if (currentFBO
-		&&	renderingParams.useFBO)
+	if (currentFBO && renderingParams.useFBO)
 	{
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
@@ -5082,35 +5081,36 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		if (m_stereoModeEnabled && m_stereoParams.isAnaglyph())
 		{
 			//change color filter
-			static GLboolean RED[3] = { GL_TRUE, GL_FALSE, GL_FALSE };
-			static GLboolean BLUE[3] = { GL_FALSE, GL_FALSE, GL_TRUE };
-			static GLboolean CYAN[3] = { GL_FALSE, GL_TRUE, GL_TRUE };
-			const GLboolean* RGB = nullptr;
+			static GLboolean RED[3] { GL_TRUE, GL_FALSE, GL_FALSE };
+			static GLboolean BLUE[3] { GL_FALSE, GL_FALSE, GL_TRUE };
+			static GLboolean CYAN[3] { GL_FALSE, GL_TRUE, GL_TRUE };
+
+			GLboolean* rgbFilter = nullptr;
 			switch (m_stereoParams.glassType)
 			{
 			case StereoParams::RED_BLUE:
-				RGB = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? RED : BLUE);
+				rgbFilter = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? RED : BLUE);
 				break;
 
 			case StereoParams::BLUE_RED:
-				RGB = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? BLUE : RED);
+				rgbFilter = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? BLUE : RED);
 				break;
 
 			case StereoParams::RED_CYAN:
-				RGB = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? RED : CYAN);
+				rgbFilter = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? RED : CYAN);
 				break;
 
 			case StereoParams::CYAN_RED:
-				RGB = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? CYAN : RED);
+				rgbFilter = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? CYAN : RED);
 				break;
 
 			default:
 				assert(false);
 			}
 
-			if (RGB)
+			if (rgbFilter)
 			{
-				glFunc->glColorMask(RGB[0], RGB[1], RGB[2], GL_TRUE);
+				glFunc->glColorMask(rgbFilter[0], rgbFilter[1], rgbFilter[2], GL_TRUE);
 			}
 		}
 
@@ -5170,10 +5170,10 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		modifiedViewport = false;
 	}
 
-	bool oculusMode = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS);
 	glFunc->glFlush();
 
 	//process and/or display the FBO (if any)
+	bool oculusMode = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS);
 	if (currentFBO && renderingParams.useFBO)
 	{
 		//we disable fbo (if any)
@@ -5736,7 +5736,11 @@ QImage ccGLWindowInterface::renderToImage(	float zoomFactor/*=1.0f*/,
 	renderingParams.drawForeground = false;
 	renderingParams.useFBO = false; //DGM: make sure that no FBO is used internally!
 	bool stereoModeWasEnabled = m_stereoModeEnabled;
-	m_stereoModeEnabled = false;
+	if (m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
+	{
+		// Screen capture doesn't work with real stereo rendering
+		m_stereoModeEnabled = false;
+	}
 
 	//disable LOD!
 	bool wasLODEnabled = isLODEnabled();
@@ -5747,6 +5751,12 @@ QImage ccGLWindowInterface::renderToImage(	float zoomFactor/*=1.0f*/,
 	logGLError("ccGLWindow::renderToFile/FBO start");
 
 	fullRenderingPass(CONTEXT, renderingParams);
+
+	if (m_stereoModeEnabled) //2 nd pass for single display 'stereo' rendering (= anaglyphs)
+	{
+		renderingParams.pass = RIGHT_RENDERING_PASS;
+		fullRenderingPass(CONTEXT, renderingParams);
+	}
 
 	//disable the FBO
 	logGLError("ccGLWindow::renderToFile/FBO stop");

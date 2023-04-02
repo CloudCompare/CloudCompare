@@ -75,6 +75,8 @@ v2.13.alpha (???) - (??/??/????)
 
 	- ccViewer now supports gamepads
 
+	- The display can now be rendered to a file even with 'Anaglyph' (Red/Blue) stereo mode enabled
+
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- button to flip the 3D axis

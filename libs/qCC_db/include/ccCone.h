@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_CONE_PRIMITIVE_HEADER
-#define CC_CONE_PRIMITIVE_HEADER
 
 //Local
 #include "ccGenericPrimitive.h"
@@ -108,6 +107,12 @@ public:
 	virtual bool hasDrawingPrecision() const override { return true; }
 	virtual ccGenericPrimitive* clone() const override;
 
+	//! Computes the cone apex position
+	CCVector3 computeApex() const;
+
+	//! Computes the cone half angle (in degrees)
+	double computeHalfAngle_deg() const;
+
 protected:
 
 	//inherited from ccGenericPrimitive
@@ -131,5 +136,3 @@ protected:
 	//! Height
 	PointCoordinateType m_height;
 };
-
-#endif //CC_CONE_PRIMITIVE_HEADER

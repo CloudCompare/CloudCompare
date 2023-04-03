@@ -355,3 +355,32 @@ short ccCone::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
 
+CCVector3 ccCone::computeApex() const
+{
+	PointCoordinateType smallRadius = getSmallRadius();
+	if (CCCoreLib::LessThanEpsilon(smallRadius))
+	{
+		// cone is 'pointy'
+		return getTopCenter();
+	}
+
+	CCVector3 smallCenter = getTopCenter();
+	CCVector3 largeCenter = getBottomCenter();
+	if (smallRadius == m_bottomRadius)
+	{
+		std::swap(smallCenter, largeCenter);
+	}
+
+	PointCoordinateType deltaRadius = getLargeRadius() - smallRadius;
+	CCVector3 slope = (smallCenter - largeCenter) / std::max(deltaRadius, std::numeric_limits<PointCoordinateType>::quiet_NaN());
+
+	return smallCenter + smallRadius * slope;
+}
+
+double ccCone::computeHalfAngle_deg() const
+{
+	double height = (getTopCenter() - getBottomCenter()).normd();
+	double deltaRadius = getLargeRadius() - getSmallRadius();
+
+	return CCCoreLib::RadiansToDegrees(atan2(deltaRadius, height));
+}

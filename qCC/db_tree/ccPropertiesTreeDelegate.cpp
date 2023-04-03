@@ -711,6 +711,13 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 			appendRow(ITEM( tr( "Bottom radius" ) ), PERSISTENT_EDITOR(OBJECT_CONE_BOTTOM_RADIUS), true);
 			appendRow(ITEM( tr( "Top radius" ) ), PERSISTENT_EDITOR(OBJECT_CONE_TOP_RADIUS), true);
 		}
+
+		const ccCone* cone = static_cast<const ccCone*>(_obj);
+		CCVector3 apex = cone->computeApex();
+		appendRow(ITEM(tr("Apex")), ITEM(QStringLiteral("X: %0\nY: %1\nZ: %2").arg(apex.x).arg(apex.y).arg(apex.z)));
+
+		double angle_deg = cone->computeHalfAngle_deg();
+		appendRow(ITEM(tr("Half angle")), ITEM(QStringLiteral("%1 deg.").arg(angle_deg)));
 	}
 	else if (_obj->isKindOf(CC_TYPES::PLANE))
 	{

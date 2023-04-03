@@ -645,13 +645,13 @@ public: //other methods
 	void hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
 	//! Unrolling mode (see ccPointCloud::unroll)
-	enum UnrollMode { CYLINDER = 0, CONE = 1, STRAIGHTENED_CONE = 2, STRAIGHTENED_CONE2 = 3 };
+	enum UnrollMode { CYLINDER = 0, CONE_CONICAL = 1, CONE_CYLINDRICAL_FIXED_RADIUS = 2, CONE_CYLINDRICAL_ADAPTIVE_RADIUS = 3 };
 
 	//! Base unrolling parameters
 	struct UnrollBaseParams
 	{
-		PointCoordinateType radius;	//!< Unrolling cylinder radius (or cone base radius)
-		CCVector3 axisDir;			//!< Unrolling cylinder/cone axis direction
+		PointCoordinateType radius = 0;	//!< Unrolling cylinder radius (or cone base radius)
+		CCVector3 axisDir;				//!< Unrolling cylinder/cone axis direction
 	};
 
 	//! Cylinder unrolling parameters
@@ -664,7 +664,8 @@ public: //other methods
 	struct UnrollConeParams : public UnrollBaseParams
 	{
 		CCVector3 apex;				//!< Cone apex
-		double coneAngle_deg;		//!< Cone aperture angle (in degrees)
+		double coneAngle_deg = 0.0;	//!< Cone aperture angle (in degrees)
+		double spanRatio = 0.5;		//!< Conical projection span ratio
 	};
 
 	//! Unrolls the cloud and its normals on a cylinder or a cone

@@ -83,9 +83,12 @@ v2.13.alpha (???) - (??/??/????)
 
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
+		- the cone projection type is now set in a separate combo-box to make things clearer
+		- Cone projection methods are 'Conical', 'Cylidrical (fixed radius)' and 'Cylidrical (adaptive radius)'
+		- The conical projection method now takes a an additional 'span ratio' parameter as input (to reduce or increase the conical projection angular span)
 		- button to flip the 3D axis
 		- ability to paste the axis and the axis point from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
-		- option to choose an existing cylinder entity in the DB tree, and use it to set the unrolling cylinder parameters
+		- option to choose an existing cylinder or cone entity in the DB tree, and use it to set the unrolling parameters
 		- option to output the unrolled cloud in an arbitrary coordinate system (X: unroll angle / Y = distance to primitive / Z = longitude)
 		
 	- Edit > Apply Tranformation

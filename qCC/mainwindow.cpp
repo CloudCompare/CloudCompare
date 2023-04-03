@@ -5817,15 +5817,16 @@ void MainWindow::doActionUnroll()
 	}
 	break;
 
-	case ccPointCloud::CONE:
-	case ccPointCloud::STRAIGHTENED_CONE:
-	case ccPointCloud::STRAIGHTENED_CONE2:
+	case ccPointCloud::CONE_CONICAL:
+	case ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS:
+	case ccPointCloud::CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
 	{
 		ccPointCloud::UnrollConeParams params;
-		params.radius = (mode == ccPointCloud::CONE ? 0 : radius);
+		params.radius = (mode == ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS ? radius : 0);
 		params.apex = center;
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
 		params.axisDir = CCVector3::fromArray(axisDir.u);
+		params.spanRatio = unrollDlg.getConicalProjSpanRatio();
 		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;

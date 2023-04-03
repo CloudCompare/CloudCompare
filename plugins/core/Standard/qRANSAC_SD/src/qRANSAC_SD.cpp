@@ -777,7 +777,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				const ConePrimitiveShape* cone = static_cast<const ConePrimitiveShape*>(shape);
 				Vec3f CC = cone->Internal().Center();
 				Vec3f CA = cone->Internal().AxisDirection();
-				float alpha = cone->Internal().Angle();
+				float alpha_rad = cone->Internal().Angle();
 
 				//compute max height
 				Vec3f minP, maxP;
@@ -801,8 +801,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				}
 
 
-				float minRadius = tan(alpha) * minHeight;
-				float maxRadius = tan(alpha) * maxHeight;
+				float minRadius = tan(alpha_rad) * minHeight;
+				float maxRadius = tan(alpha_rad) * maxHeight;
 
 				//let's build the cone primitive
 				{
@@ -827,7 +827,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					//eventually create the cone primitive
 					prim = new ccCone(maxRadius, minRadius, maxHeight - minHeight, 0, 0, &glMat);
 					prim->setEnabled(false);
-					prim->setName(QString("Cone (alpha=%1/h=%2)").arg(alpha, 0, 'f').arg(static_cast<double>(maxHeight) - minHeight, 0, 'f'));
+					prim->setName(QString("Cone (alpha=%1 deg / h=%2)").arg(CCCoreLib::RadiansToDegrees(alpha_rad), 0, 'f').arg(static_cast<double>(maxHeight) - minHeight, 0, 'f'));
 					pcShape->setName(QString("Cone_%1").arg(coneCount, 4, 10, QChar('0')));
 					coneCount++;
 				}

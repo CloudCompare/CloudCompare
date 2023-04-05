@@ -43,6 +43,12 @@
 
 int main(int argc, char *argv[])
 {
+
+#ifdef Q_OS_WIN
+	//enables automatic scaling based on the monitor's pixel density
+	ccViewerApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
 	ccViewerApplication::InitOpenGL();
 	
 	// Convert the input arguments to QString before the application is initialized

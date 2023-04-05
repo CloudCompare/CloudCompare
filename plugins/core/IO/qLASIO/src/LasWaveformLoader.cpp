@@ -193,7 +193,13 @@ void LasWaveformLoader::loadWaveform(ccPointCloud& pointCloud, const laszip_poin
 	uint32_t byteCount           = 0;
 	float    returnPointLocation = 0;
 	float    x_t = 0, y_t = 0, z_t = 0;
-	stream >> descriptorIndex >> byteOffset >> byteCount >> returnPointLocation >> x_t >> y_t >> z_t;
+
+	returnPointLocation = ((float *) &currentPoint.wave_packet[13])[0];
+	x_t = ((float *) &currentPoint.wave_packet[17])[0];
+	y_t = ((float *) &currentPoint.wave_packet[21])[0];
+	z_t = ((float *) &currentPoint.wave_packet[25])[0];
+
+	stream >> descriptorIndex >> byteOffset >> byteCount;
 
 	ccPointCloud::FWFDescriptorSet& cloudDescriptors = pointCloud.fwfDescriptors();
 	if (descriptors.contains(descriptorIndex) && !cloudDescriptors.contains(descriptorIndex))

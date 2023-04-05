@@ -93,11 +93,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 
 	setupPaths();
 
-#ifdef Q_OS_WIN
-	//enables automatic scaling based on the monitor's pixel density
-	setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-
 #ifdef Q_OS_MAC
 	// Mac OS X apps don't show icons in menus
 	setAttribute(Qt::AA_DontShowIconsInMenus);

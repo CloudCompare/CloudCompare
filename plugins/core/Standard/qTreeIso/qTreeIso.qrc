@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/CC/plugin/qTreeIso">
+        <file>info.json</file>
+        <file>images/JP1_final_seg.png</file>
+        <file>images/JP1_init_seg.png</file>
+        <file>images/JP1_interim_seg.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,29 @@
+{
+	"type" : "Standard",
+	"core" : true,
+	"name" : "TreeIso",
+	"description": "A 3D graph-based individual-tree isolator (treeiso) from Terrestrial Laser Scanning point clouds",
+	"authors" : [
+		{
+			"name" : "Zhouxin Xi"
+		},
+		{
+			"name" : "Chris Hopkinson"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Zhouxin Xi"
+		}
+	],
+  "references": [
+    {
+      "text": "3D Graph-Based Individual-Tree Isolation (Treeiso) from Terrestrial Laser Scanning Point Clouds.",
+      "url": "https://www.mdpi.com/2072-4292/14/23/6116"
+    },
+    {
+      "text": "Artemis Lab, Department of Geography & Environment, University of Lethbridge",
+      "url": "https://github.com/truebelief/artemis_treeiso"
+    }
+  ]
+}

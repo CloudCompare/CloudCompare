@@ -1134,7 +1134,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						mtlFilename = mtlFilename.left(mtlFilename.size() - 1);
 					}
 					ccLog::Print(QString("[OBJ] Material file: ") + mtlFilename);
-					QString mtlPath = QFileInfo(filename).canonicalPath();
+					QString mtlPath = QFileInfo(filename).path();
 					//we try to load it
 					if (!materials)
 					{

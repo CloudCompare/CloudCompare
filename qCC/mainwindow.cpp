@@ -174,6 +174,7 @@ static QFileDialog::Options CCFileDialogOptions()
 {
 	//dialog options
 	QFileDialog::Options dialogOptions = QFileDialog::Options();
+	dialogOptions |= QFileDialog::DontResolveSymlinks;
 	if (!ccOptions::Instance().useNativeDialogs)
 	{
 		dialogOptions |= QFileDialog::DontUseNativeDialog;

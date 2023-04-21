@@ -125,3 +125,7 @@ else()
 		SHADER_DEST_FOLDER "shaders"
 )
 endif()
+
+# Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to
+# always get an up-to-date version number (based on the current date)
+add_custom_target(CC_VIEWER_UPDATE_VERSION ALL COMMAND ${CMAKE_COMMAND} -E touch_nocreate ${CMAKE_CURRENT_SOURCE_DIR}/ccViewerApplication.cpp)

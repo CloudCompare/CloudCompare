@@ -15,6 +15,7 @@ add_subdirectory( qPoissonRecon )
 add_subdirectory( qRANSAC_SD )
 add_subdirectory( qSRA )
 add_subdirectory( qMeshBoolean )
+add_subdirectory( qTreeIso)
 
 #plugins integrated as submodules
 set( submod_plugins

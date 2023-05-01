@@ -16,6 +16,8 @@ This tool relies on the cut-pursuit algorithm, please also consider citing:
 Landrieu, L.; Obozinski, G. Cut Pursuit: Fast Algorithms to Learn Piecewise Constant Functions on General Weighted Graphs. SIAM J. Imaging Sci. 2017, 10, 1724–1766. hal link
 Raguet, H.; Landrieu, L. Cut-pursuit algorithm for regularizing nonsmooth functionals with graph total variation. In Proceedings of the International Conference on Machine Learning, Stockholm, Sweden, 10–15 July 2018; Volume 80, pp. 4247–4256.
 
+The cut-pursuit files are licensed under the **MIT** license - see the [LICENSE-MIT](LICENSE-MIT.txt) file for details.
+
 A Matlab version shared via:
 https://github.com/truebelief/artemis_treeiso
 

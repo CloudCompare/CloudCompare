@@ -215,7 +215,7 @@ bool TreeIso::intermediate_seg_pcd(ccPointCloud* pc, const unsigned PR_MIN_NN2, 
 	for (unsigned i = 0; i < n_centroids; ++i)
 	{
 		knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree(currentClusterDecMats[minIdxsC[i][0]]);
-		knn_cpp_build(knn_kdtree, 8);
+		knn_cpp_build(knn_kdtree);
 		for (unsigned j = 1; j < n_K; ++j)
 		{
 			if (minIdxsD[i][j] > 0)
@@ -500,6 +500,10 @@ bool TreeIso::final_seg_pcd(ccPointCloud* pc, const unsigned PR_MIN_NN3, const f
 
 				}
 			}
+			if ((iter == 1) & (toMergeCandidateMetrics.size() == 0))
+			{
+				break;
+			}
 			if ((iter == 1) & (toMergeIds.size() == 0)) {
 				int cand_ind = arg_max_col(toMergeCandidateMetrics);
 				toMergeIds.push_back(toMergeCandidateIds[cand_ind]);
@@ -518,7 +522,7 @@ bool TreeIso::final_seg_pcd(ccPointCloud* pc, const unsigned PR_MIN_NN3, const f
 
 
 			knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree(groupCentroidsRemain);
-			knn_cpp_build(knn_kdtree, 8);
+			knn_cpp_build(knn_kdtree);
 			std::vector <std::vector<size_t>>groupNNIdx;
 			std::vector <std::vector<float>>groupNNIdxDists;
 
@@ -565,7 +569,7 @@ bool TreeIso::final_seg_pcd(ccPointCloud* pc, const unsigned PR_MIN_NN3, const f
 
 
 					knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree2(nnClusterCentroids);
-					knn_cpp_build(knn_kdtree2, 8);
+					knn_cpp_build(knn_kdtree2);
 					std::vector <std::vector<size_t>>min3D_idx;
 					std::vector <std::vector<float>>min3D_dists;
 
@@ -681,8 +685,10 @@ bool TreeIso::final_seg_pcd(ccPointCloud* pc, const unsigned PR_MIN_NN3, const f
 		outSF->computeMinAndMax();
 		m_pointCloud->colorsHaveChanged();
 		m_pointCloud->setCurrentDisplayedScalarField(outSFIndex);
-
 	}
+
+
+
 }
 
 //1. initial 3D segmentation
@@ -775,6 +781,8 @@ bool TreeIso::init_seg(const unsigned min_nn1, const float regStrength1, const f
 
 	auto elapsed = since(start).count() / 1000;
 	app->dispToConsole(QString("[TreeIso] Init segs took: %1 seconds !!!").arg(elapsed));
+
+	ent->redrawDisplay();
 
 	return true;
 }
@@ -893,7 +901,7 @@ bool TreeIso::intermediate_seg(const unsigned PR_MIN_NN2, const float PR_REG_STR
 	for (unsigned i = 0; i < n_centroids; ++i)
 	{
 		knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree(currentClusterDecMats[minIdxsC[i][0]]);
-		knn_cpp_build(knn_kdtree, 8);
+		knn_cpp_build(knn_kdtree);
 		for (unsigned j = 1; j < n_K; ++j)
 		{
 			if (minIdxsD[i][j] > 0)
@@ -1027,7 +1035,7 @@ bool TreeIso::intermediate_seg(const unsigned PR_MIN_NN2, const float PR_REG_STR
 	auto elapsed = since(start).count() / 1000;
 	app->dispToConsole(QString("[TreeIso] Intermediate segs took: %1 seconds !!!").arg(elapsed));
 
-
+	ent->redrawDisplay();
 return true;
 }
 //bool TreeIso::LoadPcd(ccMainAppInterface* app/*=nullptr*/)
@@ -1229,6 +1237,10 @@ bool TreeIso::final_seg(const unsigned PR_MIN_NN3, const float PR_REL_HEIGHT_LEN
 
 				}
 			}
+			if ((iter == 1) & (toMergeCandidateMetrics.size() == 0))
+			{
+				break;
+			}
 			if ((iter == 1) & (toMergeIds.size() == 0)) {
 				int cand_ind= arg_max_col(toMergeCandidateMetrics);
 				toMergeIds.push_back(toMergeCandidateIds[cand_ind]);
@@ -1246,7 +1258,7 @@ bool TreeIso::final_seg(const unsigned PR_MIN_NN3, const float PR_REL_HEIGHT_LEN
 
 
 			knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree(groupCentroidsRemain);
-			knn_cpp_build(knn_kdtree, 8);
+			knn_cpp_build(knn_kdtree);
 			std::vector <std::vector<size_t>>groupNNIdx;
 			std::vector <std::vector<float>>groupNNIdxDists;
 
@@ -1293,7 +1305,7 @@ bool TreeIso::final_seg(const unsigned PR_MIN_NN3, const float PR_REL_HEIGHT_LEN
 
 
 					knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>> knn_kdtree2(nnClusterCentroids);
-					knn_cpp_build(knn_kdtree2, 8);
+					knn_cpp_build(knn_kdtree2);
 					std::vector <std::vector<size_t>>min3D_idx;
 					std::vector <std::vector<float>>min3D_dists;
 
@@ -1417,6 +1429,11 @@ bool TreeIso::final_seg(const unsigned PR_MIN_NN3, const float PR_REL_HEIGHT_LEN
 		app->dispToConsole(QString("[TreeIso] Final segs took: %1 seconds !!!").arg(elapsed));
 	}
 
+	ent->redrawDisplay();
+
+	//app->updateUI();
+	//app->refreshAll();
+
 }
 
 
@@ -1439,6 +1456,14 @@ void testWriteLog(std::vector<T>arr, std::string fname) {
 		outfile << std::endl;
 	}
 	outfile.close();
+}
+
+void knn_cpp_build(knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>>& kdtree) {
+	kdtree.setBucketSize(16);
+	kdtree.setSorted(true);
+	kdtree.setThreads(0);
+	kdtree.build();
+	return;
 }
 
 void knn_cpp_build(knncpp::KDTreeMinkowskiX<float, knncpp::EuclideanDistance<float>>& kdtree, int n_thread) {

@@ -56,7 +56,7 @@ public:
 	//! MTL (material) file parser
 	/** Inspired from KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
 	**/
-	static bool ParseMTL(QString path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
+	static bool ParseMTL(const QString& path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
 
 	//! Saves to an MTL file (+ associated texture images)
 	bool saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const;

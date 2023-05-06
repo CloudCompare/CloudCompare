@@ -291,7 +291,7 @@ static CCVector2d MinMaxOfEnabledScalarField(const CCCoreLib::GenericIndexedClou
 static ccHObject::GlobalBoundingBox BBoxOfHObjectContainer(const ccHObject::Container& objects)
 {
 	ccHObject::GlobalBoundingBox globalBB;
-	for (ccHObject *obj : objects)
+	for (ccHObject* obj : objects)
 	{
 		ccHObject::GlobalBoundingBox box = obj->getGlobalBB_recursive();
 		globalBB += box;
@@ -309,7 +309,7 @@ static CCVector2d MRangeOfContainer(ccHObject::Container &objects)
 {
 	CCVector2d range(std::numeric_limits<double>::max(), std::numeric_limits<double>::min());
 
-	auto updateRange = [&range](const CCCoreLib::GenericIndexedCloudPersist *cloud)
+	auto updateRange = [&range](const CCCoreLib::GenericIndexedCloudPersist* cloud)
 	{
 		if (!cloud || !cloud->isScalarFieldEnabled())
 			return;
@@ -326,20 +326,20 @@ static CCVector2d MRangeOfContainer(ccHObject::Container &objects)
 	};
 
 	//call the same method on the first child so as to get its type
-	for (ccHObject *obj : objects)
+	for (ccHObject* obj : objects)
 	{
 		switch (obj->getClassID())
 		{
 			case CC_TYPES::POINT_CLOUD:
 			{
-				const ccGenericPointCloud *cloud = ccHObjectCaster::ToGenericPointCloud(obj);
+				const ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				updateRange(cloud);
 				break;
 			}
 			case CC_TYPES::POLY_LINE:
 			{
-				const ccPolyline *poly = ccHObjectCaster::ToPolyline(obj);
-				const CCCoreLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
+				const ccPolyline* poly = ccHObjectCaster::ToPolyline(obj);
+				const CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
 				updateRange(vertices);
 				break;
 			}
@@ -355,7 +355,6 @@ static CCVector2d MRangeOfContainer(ccHObject::Container &objects)
 	}
 	return range;
 }
-
 
 static void UpdateFileLength(QDataStream& out, int32_t newFileLentgh)
 {
@@ -450,7 +449,6 @@ CC_FILE_ERROR ShapeFileHeader::writeTo(QDataStream& out)
 	assert(out.device()->pos() == ESRI_HEADER_SIZE);
 	return CC_FERR_NO_ERROR;
 }
-
 
 //! Shape File Save dialog
 class SaveSHPFileDialog : public QDialog, public Ui::SaveSHPFileDlg
@@ -575,79 +573,75 @@ static void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shap
 		return;
 	}
 
-	switch (baseEntity->getClassID())
+	if (baseEntity->isKindOf(CC_TYPES::POLY_LINE))
 	{
-		case CC_TYPES::POINT_CLOUD:
+		shapeType = ESRI_SHAPE_TYPE::POLYLINE_Z;
+		shapes.push_back(baseEntity);
+	}
+	else if (baseEntity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		unsigned count = ccHObjectCaster::ToGenericPointCloud(baseEntity)->size();
+		if (count != 0)
 		{
-			unsigned count = ccHObjectCaster::ToGenericPointCloud(baseEntity)->size();
-			if (count != 0)
-			{
-				shapeType = ESRI_SHAPE_TYPE::MULTI_POINT_Z;
-				shapes.push_back(baseEntity);
-			}
-			break;
-		}
-		case CC_TYPES::POLY_LINE:
-		{
-			shapeType = ESRI_SHAPE_TYPE::POLYLINE_Z;
+			shapeType = ESRI_SHAPE_TYPE::MULTI_POINT_Z;
 			shapes.push_back(baseEntity);
-			break;
 		}
-		case CC_TYPES::MESH:
+	}
+	else if (baseEntity->isKindOf(CC_TYPES::MESH))
+	{
+		shapeType = ESRI_SHAPE_TYPE::MULTI_PATCH;
+		shapes.push_back(baseEntity);
+	}
+	else if (baseEntity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		//we only allow groups with children of the same type!
+		if (baseEntity->getChildrenNumber())
 		{
-			shapeType = ESRI_SHAPE_TYPE::MULTI_PATCH;
-			shapes.push_back(baseEntity);
-			break;
-		}
-		case CC_TYPES::HIERARCHY_OBJECT:
-			//we only allow groups with children of the same type!
-			if (baseEntity->getChildrenNumber())
-			{
-				ccHObject* child = baseEntity->getChild(0);
-				assert(child);
-				if (!child)
-					return;
+			ccHObject* child = baseEntity->getChild(0);
+			assert(child);
+			if (!child)
+				return;
 
-				//first we check that all entities have the same type
-				for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
+			//first we check that all entities have the same type
+			for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
+			{
+				if (baseEntity->getChild(i) && baseEntity->getChild(i)->getClassID() != child->getClassID())
 				{
-					if (baseEntity->getChild(i) && baseEntity->getChild(i)->getClassID() != child->getClassID())
-					{
-						//mixed shapes are not allowed in shape files
-						return;
-					}
+					//mixed shapes are not allowed in shape files
+					return;
 				}
+			}
 
-				//call the same method on the first child so as to get its type
-				GetSupportedShapes(child, shapes, shapeType);
-				if (shapeType == ESRI_SHAPE_TYPE::NULL_SHAPE)
-					return;
+			//call the same method on the first child so as to get its type
+			GetSupportedShapes(child, shapes, shapeType);
+			if (shapeType == ESRI_SHAPE_TYPE::NULL_SHAPE)
+				return;
 
-				//then add the remaining children
-				for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
+			//then add the remaining children
+			for (unsigned i = 1; i < baseEntity->getChildrenNumber(); ++i)
+			{
+				ESRI_SHAPE_TYPE otherShapeType = ESRI_SHAPE_TYPE::NULL_SHAPE;
+				ccHObject* child = baseEntity->getChild(i);
+				if (child)
+					GetSupportedShapes(child, shapes, otherShapeType);
+
+				if (otherShapeType != shapeType)
 				{
-					ESRI_SHAPE_TYPE otherShapeType = ESRI_SHAPE_TYPE::NULL_SHAPE;
-					ccHObject* child = baseEntity->getChild(i);
 					if (child)
-						GetSupportedShapes(child, shapes, otherShapeType);
-
-					if (otherShapeType != shapeType)
-					{
-						if (child)
-							ccLog::Warning(QString("[SHP] Entity %1 has not the same type (%2) as the others in the selection (%3)! Can't mix types...")
+						ccLog::Warning(QString("[SHP] Entity %1 has not the same type (%2) as the others in the selection (%3)! Can't mix types...")
 							.arg(child->getName())
 							.arg(ToString(otherShapeType))
 							.arg(ToString(shapeType)));
-						//mixed shapes are not allowed in shape files
-						shapes.clear();
-						return;
-					}
+					//mixed shapes are not allowed in shape files
+					shapes.clear();
+					return;
 				}
 			}
-			break;
-		default:
-			//nothing to do
-			break;
+		}
+	}
+	else
+	{
+		//unhandled entity
 	}
 }
 
@@ -796,7 +790,7 @@ static ccMesh* CreateMesh(
 		return nullptr;
 	}
 
-	ccPointCloud *vertices = BuildVertices(points, firstIndex, lastIndex);
+	ccPointCloud* vertices = BuildVertices(points, firstIndex, lastIndex);
 	if (!vertices)
 	{
 		return nullptr;
@@ -868,22 +862,28 @@ static CC_FILE_ERROR BuildPatches(
 		{
 			case ESRI_PART_TYPE::TRIANGLE_STRIP:
 			{
-				ccMesh *mesh = CreateMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j = 2; j < vertCount; ++j)
+				ccMesh* mesh = CreateMesh(points, scalarValues, firstIndex, lastIndex);
+				if (mesh)
 				{
-					mesh->addTriangle(j - 2, j - 1, j);
+					for (int32_t j = 2; j < vertCount; ++j)
+					{
+						mesh->addTriangle(j - 2, j - 1, j);
+					}
+					container.addChild(mesh);
 				}
-				container.addChild(mesh);
 				break;
 			}
 			case ESRI_PART_TYPE::TRIANGLE_FAN:
 			{
-				ccMesh *mesh = CreateMesh(points, scalarValues, firstIndex, lastIndex);
-				for (int32_t j = 2; j < vertCount; ++j)
+				ccMesh* mesh = CreateMesh(points, scalarValues, firstIndex, lastIndex);
+				if (mesh)
 				{
-					mesh->addTriangle(0, j - 1, j);
+					for (int32_t j = 2; j < vertCount; ++j)
+					{
+						mesh->addTriangle(0, j - 1, j);
+					}
+					container.addChild(mesh);
 				}
-				container.addChild(mesh);
 				break;
 			}
 			default:
@@ -1013,15 +1013,15 @@ static void Save3DCloud(QDataStream& stream, const ccGenericPointCloud* cloud, c
 static inline bool IsTriangleStrip(const CCCoreLib::VerticesIndexes* idx)
 {
 	return		idx != nullptr
-			&&	(idx->i3 - 1) == idx->i2
-			&&	(idx->i3 - 2) == idx->i1;
+			&&	std::abs(static_cast<int>(idx->i3) - static_cast<int>(idx->i2)) == 1
+			&&	std::abs(static_cast<int>(idx->i3) - static_cast<int>(idx->i1)) == 2;
 }
 
 static inline bool IsTriangleFan(const CCCoreLib::VerticesIndexes* idx)
 {
 	return		idx != nullptr
 			&&	idx->i1 == 0
-			&&	idx->i2 == (idx->i3 - 1);
+			&&	std::abs(static_cast<int>(idx->i3) - static_cast<int>(idx->i2)) == 1;
 }
 
 /**
@@ -1030,20 +1030,20 @@ static inline bool IsTriangleFan(const CCCoreLib::VerticesIndexes* idx)
  * @param[out] type
  * @return CC_FERR_BAD_ENTITY_TYPE if the mesh is neither a triangle fan or triangle strip
  */
-static CC_FILE_ERROR FindTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type)
+static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE &type)
 {
-	const CCCoreLib::VerticesIndexes *firstVert = mesh->getNextTriangleVertIndexes();
-	if (!IsTriangleFan(firstVert) && !IsTriangleStrip(firstVert))
+	const CCCoreLib::VerticesIndexes* firstTriangle = mesh->getNextTriangleVertIndexes();
+	if (!IsTriangleFan(firstTriangle) && !IsTriangleStrip(firstTriangle))
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	const CCCoreLib::VerticesIndexes *secondVert = mesh->getNextTriangleVertIndexes();
-	if (IsTriangleStrip(secondVert))
+	const CCCoreLib::VerticesIndexes* secondTriangle = mesh->getNextTriangleVertIndexes();
+	if (IsTriangleStrip(secondTriangle))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
-			CCCoreLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
+			CCCoreLib::VerticesIndexes* idx = mesh->getNextTriangleVertIndexes();
 			if (!IsTriangleStrip(idx))
 			{
 				return CC_FERR_BAD_ENTITY_TYPE;
@@ -1053,11 +1053,11 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh *mesh, ESRI_PART_TYPE &type
 		return CC_FERR_NO_ERROR;
 
 	}
-	else if (IsTriangleFan(secondVert))
+	else if (IsTriangleFan(secondTriangle))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
-			CCCoreLib::VerticesIndexes *idx = mesh->getNextTriangleVertIndexes();
+			CCCoreLib::VerticesIndexes* idx = mesh->getNextTriangleVertIndexes();
 			if (!IsTriangleFan(idx))
 			{
 				return CC_FERR_BAD_ENTITY_TYPE;
@@ -1077,12 +1077,13 @@ static CC_FILE_ERROR SaveMesh(ccMesh* mesh, QDataStream& stream, int32_t recordN
 	ESRI_PART_TYPE triangleType;
 	if (FindTriangleOrganisation(mesh, triangleType) == CC_FERR_BAD_ENTITY_TYPE)
 	{
+		ccLog::Warning("[SHP] A mesh has to be organized as a triangle fan or a triangle trip (see MultiPatch geometry specifications)");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
 	ccLog::Print(QString("[SHP] Triangle type: %1").arg(ToString(triangleType)));
 
-	ccGenericPointCloud *vertices = mesh->getAssociatedCloud();
+	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	int32_t numParts = 1;
 	unsigned numPoints = vertices->size();
 	recordSize16bits = SizeofMultipatch16Bits(numPoints, numParts);
@@ -1404,7 +1405,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
 		for (int32_t i = 0; i < numPoints; ++i)
 		{
 			int32_t ii = (inverseOrder ? numPoints - 1 - i : i);
-			const CCVector3 *P = vertices->getPoint(ii % iRealVertexCount); //warning: handle loop if polyline is closed
+			const CCVector3* P = vertices->getPoint(ii % iRealVertexCount); //warning: handle loop if polyline is closed
 			CCVector3d Pg = poly->toGlobal3d(*P);
 			out << Pg.u[Z];
 		}
@@ -1724,7 +1725,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	// Promote to polygon
 	if (m_closedPolylinesAsPolygons && outputShapeType == ESRI_SHAPE_TYPE::POLYLINE_Z)
 	{
-		auto isClosed = [](const ccHObject *obj) { return static_cast<const ccPolyline*>(obj)->isClosed(); };
+		auto isClosed = [](const ccHObject* obj) { return obj ? static_cast<const ccPolyline*>(obj)->isClosed() : false; };
 		bool allClosed = std::all_of(toSave.begin(), toSave.end(), isClosed);
 		if (allClosed)
 		{
@@ -1735,7 +1736,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 	// Demote to 2D polyline/polygon and remove "measure" dimension if not needed
 	if (save3DPolysAs2D)
 	{
-		auto hasSF = [](const ccHObject *obj) { return static_cast<const ccPolyline*>(obj)->isScalarFieldEnabled(); };
+		auto hasSF = [](const ccHObject* obj) { return static_cast<const ccPolyline*>(obj)->isScalarFieldEnabled(); };
 		bool anyHasSF = std::any_of(toSave.begin(), toSave.end(), hasSF);
 		if (anyHasSF)
 		{
@@ -1796,7 +1797,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 	//save shapes
 	unsigned shapeIndex = 1;
-	for (ccHObject *child : toSave)
+	for (ccHObject* child : toSave)
 	{
 		//check entity eligibility
 		if (child->isA(CC_TYPES::POLY_LINE))
@@ -1821,7 +1822,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 			case ESRI_SHAPE_TYPE::POLYGON_Z:
 			case ESRI_SHAPE_TYPE::POLYGON_M:
 				assert(child->isKindOf(CC_TYPES::POLY_LINE));
-				error = SavePolyline(static_cast<ccPolyline *>(child), shpStream, recordSize16bits, shapeIndex,
+				error = SavePolyline(static_cast<ccPolyline*>(child), shpStream, recordSize16bits, shapeIndex,
 				                     outputShapeType, s_poly2DVertDim);
 				break;
 			case ESRI_SHAPE_TYPE::MULTI_POINT_Z:

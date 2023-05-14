@@ -2058,6 +2058,49 @@ static std::pair<ScalarType, ScalarType> GetSFRange(const CCCoreLib::ScalarField
 	return { thisMinVal, thisMaxVal };
 }
 
+static USE_SPECIAL_SF_VALUE ToSpecialSFValue(QString valString)
+{
+	valString = valString.toUpper();
+
+	if (valString == "MIN")
+	{
+		return USE_MIN;
+	}
+	else if (valString == "DISP_MIN")
+	{
+		return USE_DISP_MIN;
+	}
+	else if (valString == "SAT_MIN")
+	{
+		return USE_SAT_MIN;
+	}
+	else if (valString == "N_SIGMA_MIN")
+	{
+		return USE_N_SIGMA_MIN;
+	}
+	else if (valString == "MAX")
+	{
+		return USE_MAX;
+	}
+	else if (valString == "DISP_MAX")
+	{
+		return USE_DISP_MAX;
+	}
+	else if (valString == "SAT_MAX")
+	{
+		return USE_SAT_MAX;
+	}
+	else if (valString == "N_SIGMA_MAX")
+	{
+		return USE_N_SIGMA_MAX;
+	}
+	else
+	{
+		return USE_NONE;
+	}
+}
+
+
 bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 {
 	cmd.print(QObject::tr("[FILTER BY VALUE]"));
@@ -2073,21 +2116,11 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 		
 		bool paramOk = false;
 		minValStr = cmd.arguments().takeFirst();
-		if (minValStr.toUpper() == "MIN")
+
+		useValForMin = ToSpecialSFValue(minValStr);
+
+		if (useValForMin == USE_N_SIGMA_MIN)
 		{
-			useValForMin = USE_MIN;
-		}
-		else if (minValStr.toUpper() == "DISP_MIN")
-		{
-			useValForMin = USE_DISP_MIN;
-		}
-		else if (minValStr.toUpper() == "SAT_MIN")
-		{
-			useValForMin = USE_SAT_MIN;
-		}
-		else if (minValStr.toUpper() == "N_SIGMA_MIN")
-		{
-			useValForMin = USE_N_SIGMA_MIN;
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
@@ -2099,7 +2132,20 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(minValStr));
 			}
 		}
-		else
+		else if (useValForMin == USE_N_SIGMA_MAX)
+		{
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			minValStr = cmd.arguments().takeFirst();
+			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(minValStr));
+			}
+		}
+		else if (useValForMin == USE_NONE)
 		{
 			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 			if (!paramOk)
@@ -2120,24 +2166,27 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 		
 		bool paramOk = false;
 		maxValStr = cmd.arguments().takeFirst();
-		if (maxValStr.toUpper() == "MAX")
+
+		useValForMax = ToSpecialSFValue(maxValStr);
+
+		if (useValForMax == USE_N_SIGMA_MIN)
 		{
-			useValForMax = USE_MAX;
-		}
-		else if (maxValStr.toUpper() == "DISP_MAX")
-		{
-			useValForMax = USE_DISP_MAX;
-		}
-		else if (maxValStr.toUpper() == "SAT_MAX")
-		{
-			useValForMax = USE_SAT_MAX;
-		}
-		else if (maxValStr.toUpper() == "N_SIGMA_MAX")
-		{
-			useValForMax = USE_N_SIGMA_MAX;
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 XXX N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+			}
+			maxValStr = cmd.arguments().takeFirst();
+			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
+			if (!paramOk)
+			{
+				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(maxValStr));
+			}
+		}
+		else if (useValForMax == USE_N_SIGMA_MAX)
+		{
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 XXX N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
 			}
 			maxValStr = cmd.arguments().takeFirst();
 			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
@@ -2146,7 +2195,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(maxValStr));
 			}
 		}
-		else
+		else if (useValForMin == USE_NONE)
 		{
 			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 			if (!paramOk)

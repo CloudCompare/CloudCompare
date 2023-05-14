@@ -227,6 +227,9 @@ v2.13.alpha (???) - (??/??/????)
 	- CSF plugin
 		- the CSF filter can now be applied on multiple clouds at once (both in the GUI and the command line version)
 
+	* qEllipser plugin:
+		- option to export the polyline (and its major and minor axes) as polylines
+
 	- Some more basic statistics are displayed in the Console when using the 'Edit > SF > Compute stat. params' tool
 		- number of valid values, sum of all valid values and squared values, average, RMS
 

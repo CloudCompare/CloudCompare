@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_ALIGN_DLG_HEADER
-#define CC_ALIGN_DLG_HEADER
 
 #include <QDialog>
 
@@ -79,5 +78,3 @@ protected:
 
 	Ui::AlignDialog* m_ui;
 };
-
-#endif //CC_ALIGN_DLG_HEADER

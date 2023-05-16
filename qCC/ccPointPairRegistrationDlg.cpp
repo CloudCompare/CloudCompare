@@ -1475,12 +1475,12 @@ void ccPointPairRegistrationDlg::apply()
 		}
 		m_alignedPoints.setGLTransformation(transMat);
 		summary << QString("Transformation matrix");
-		summary << transMat.toString(3,'\t'); //low precision, just for display
+		summary << transMat.toString(3, '\t'); //low precision, just for display
 		summary << "----------------";
 
 		ccLog::Print("[PointPairRegistration] Applied transformation matrix:");
-		ccLog::Print(transMat.toString(12,' ')); //full precision
-		
+		ccLog::Print(transMat.toString(12, ' ')); //full precision
+
 		if (adjustScale)
 		{
 			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(trans.s);
@@ -1508,6 +1508,12 @@ void ccPointPairRegistrationDlg::apply()
 			referenceIsShifted = m_referenceEntities.isShifted;
 			referenceShift = m_referenceEntities.shift;
 			referenceScale = m_referenceEntities.scale;
+
+			ccGLMatrixd transMatD = FromCCLibMatrix<double, double>(trans.R, trans.T);
+			transMatD.scale(1.0 / referenceScale);
+			transMatD.setTranslation(transMatD.getTranslationAsVec3D() - referenceShift);
+			ccLog::Print("[PointPairRegistration] Transformation to global coordinates:");
+			ccLog::Print(transMatD.toString(12, ' ')); //full precision
 		}
 		else if (m_refPoints.isShifted())
 		{
@@ -1571,7 +1577,7 @@ void ccPointPairRegistrationDlg::apply()
 		settings.beginGroup("PointPairAlign");
 		settings.setValue("PickSpheres",  useSphereToolButton->isChecked());
 		settings.setValue("SphereRadius", radiusDoubleSpinBox->value());
-		settings.setValue("MaxRMS", maxRmsSpinBox->value());
+		settings.setValue("MaxRMS",       maxRmsSpinBox->value());
 		settings.setValue("AdjustScale",  adjustScaleCheckBox->isChecked());
 		settings.setValue("AutoUpdateZom",autoZoomCheckBox->isChecked());
 		settings.endGroup();

@@ -3832,10 +3832,17 @@ void MainWindow::doActionRegister()
 				if (refPC->isShifted())
 				{
 					const CCVector3d& Pshift = refPC->getGlobalShift();
-					const double& scale = refPC->getGlobalScale();
+					double scale = refPC->getGlobalScale();
 					pc->setGlobalShift(Pshift);
 					pc->setGlobalScale(scale);
 					ccLog::Warning(tr("[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+
+					ccGLMatrixd transMatD(transMat.data());
+					transMatD.scale(1.0 / scale);
+					transMatD.setTranslation(transMatD.getTranslationAsVec3D() - Pshift);
+					ccLog::Print("[ICP] Transformation to global coordinates:");
+					ccLog::Print(transMatD.toString(12, ' ')); //full precision
+
 				}
 				else if (pc->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
 				{

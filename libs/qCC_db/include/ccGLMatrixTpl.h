@@ -1166,6 +1166,16 @@ public:
 		return t;
 	}
 
+	//! Scales the rotation and the translation (but not the the last row)
+	/**	\param coef scaling coef.
+	**/
+	inline void scale(T coef)
+	{
+		CC_MAT_R11 *= coef; CC_MAT_R12 *= coef; CC_MAT_R13 *= coef; CC_MAT_R14 *= coef;
+		CC_MAT_R21 *= coef; CC_MAT_R22 *= coef; CC_MAT_R23 *= coef; CC_MAT_R24 *= coef;
+		CC_MAT_R31 *= coef; CC_MAT_R32 *= coef; CC_MAT_R33 *= coef; CC_MAT_R34 *= coef;
+	}
+
 	//! Scales the rotation part of the matrix
 	/**	\param coef scaling coef.
 	**/

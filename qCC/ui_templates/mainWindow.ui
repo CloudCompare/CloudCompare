@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -473,6 +473,7 @@
      </property>
      <addaction name="actionFitPlane"/>
      <addaction name="actionFitSphere"/>
+     <addaction name="actionFitCircle"/>
      <addaction name="actionFitFacet"/>
      <addaction name="actionFitQuadric"/>
     </widget>
@@ -3157,6 +3158,14 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="toolTip">
     <string>Shift the points of the selected cloud along their normals</string>
+   </property>
+  </action>
+  <action name="actionFitCircle">
+   <property name="text">
+    <string>Circle</string>
+   </property>
+   <property name="toolTip">
+    <string>Fits a circle on the selected cloud</string>
    </property>
   </action>
  </widget>

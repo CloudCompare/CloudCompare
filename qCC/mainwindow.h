@@ -42,7 +42,7 @@ class ccComparisonDlg;
 class ccDBRoot;
 class ccDrawableObject;
 class ccGamepadManager;
-class ccGLWindowInterface;
+class ccGLWindow;
 class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
 class ccHObject;
@@ -80,17 +80,17 @@ public:
 	static MainWindow* TheInstance();
 
 	//! Static shortcut to MainWindow::getActiveGLWindow
-	static ccGLWindowInterface* GetActiveGLWindow();
+	static ccGLWindow* GetActiveGLWindow();
 
 	//! Returns a given GL sub-window (determined by its title)
 	/** \param title window title
 	**/
-	static ccGLWindowInterface* GetGLWindow(const QString& title);
+	static ccGLWindow* GetGLWindow(const QString& title);
 
 	//! Returns all GL sub-windows
 	/** \param[in,out] glWindows vector to store all sub-windows
 	**/
-	static void GetGLWindows(std::vector<ccGLWindowInterface*>& glWindows);
+	static void GetGLWindows(std::vector<ccGLWindow*>& glWindows);
 
 	//! Static shortcut to MainWindow::refreshAll
 	static void RefreshAllGLWindow(bool only2D = false);
@@ -102,13 +102,13 @@ public:
 	static void DestroyInstance();
 
 	//! Returns active GL sub-window (if any)
-	ccGLWindowInterface* getActiveGLWindow() override;
+	ccGLWindow* getActiveGLWindow() override;
 	
 	//! Returns MDI area subwindow corresponding to a given 3D view
-	QMdiSubWindow* getMDISubWindow(ccGLWindowInterface* win);
+	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
 	//! Returns a given views
-	ccGLWindowInterface* getGLWindow(int index) const;
+	ccGLWindow* getGLWindow(int index) const;
 
 	//! Returns the number of 3D views
 	int getGLWindowCount() const;
@@ -120,7 +120,7 @@ public:
 	**/
 	virtual void addToDB( const QStringList& filenames,
 						  QString fileFilter = QString(),
-						  ccGLWindowInterface* destWin = nullptr );
+						  ccGLWindow* destWin = nullptr );
 	
 	//inherited from ccMainAppInterface
 	void addToDB( ccHObject* obj,
@@ -139,9 +139,9 @@ public:
 	ccHObject* dbRootObject() override;
 	inline  QMainWindow* getMainWindow() override { return this; }
 	ccHObject* loadFile(QString filename, bool silent) override;
-	inline const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
-	void createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const override;
-	void destroyGLWindow(ccGLWindowInterface*) const override;
+	inline  const ccHObject::Container& getSelectedEntities() const override { return m_selectedEntities; }
+	void createGLWindow(ccGLWindow*& window, QWidget*& widget) const override;
+	void destroyGLWindow(ccGLWindow*) const override;
 	ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 	ccColorScalesManager* getColorScalesManager() override;
 	void spawnHistogramDialog(	const std::vector<unsigned>& histoValues,
@@ -153,10 +153,7 @@ public:
 	
 	//! Inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
-
-	//! Similar to getSelectedEntities, but makes sure no children of another selected entity is in the output selection
-	ccHObject::Container getTopLevelSelectedEntities() const;
-
+	
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
@@ -174,9 +171,9 @@ public:
 	
 private:
 	//! Creates a new 3D GL sub-window
-	ccGLWindowInterface* new3DView() { return new3DViewInternal(true); }
+	ccGLWindow* new3DView() { return new3DViewInternal(true); }
 	//! Creates a new 3D GL sub-window (choose whether entity selection is allowed or not)
-	ccGLWindowInterface* new3DViewInternal(bool allowEntitySelection);
+	ccGLWindow* new3DViewInternal(bool allowEntitySelection);
 
 	//! Zooms in (current 3D view)
 	void zoomIn();
@@ -200,7 +197,7 @@ private:
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
 	**/
-	void prepareWindowDeletion(ccGLWindowInterface* glWindow);
+	void prepareWindowDeletion(QObject* glWindow);
 
 	//! Slot called when the exclusive fullscreen mode is toggled on a window
 	void onExclusiveFullScreenToggled(bool);
@@ -211,7 +208,7 @@ private:
 	void refreshAll(bool only2D = false) override;
 	void enableAll() override;
 	void disableAll() override;
-	void disableAllBut(ccGLWindowInterface* win) override;
+	void disableAllBut(ccGLWindow* win) override;
 	void updateUI() override;
 	
 	virtual void toggleActiveWindowStereoVision(bool);
@@ -285,6 +282,7 @@ private:
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
 	void doActionFitSphere();
+	void doActionFitCircle();
 	void doActionFitFacet();
 	void doActionFitQuadric();
 	void doShowPrimitiveFactory();
@@ -310,7 +308,7 @@ private:
 	void doActionFilterByValue();
 	
 	// Picking operations
-	void enablePickingOperation(ccGLWindowInterface* win, QString message);
+	void enablePickingOperation(ccGLWindow* win, QString message);
 	void cancelPreviousPickingOperation(bool aborted);
 
 	// For rotation center picking
@@ -482,7 +480,7 @@ private:
 	void setView( CC_VIEW_ORIENTATION view ) override;
 	
 	//! Apply transformation to the selected entities
-	void applyTransformation(const ccGLMatrixd& transMat, bool applyToGlobal);
+	void applyTransformation(const ccGLMatrixd& transMat);
 
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud* cloud,
@@ -495,9 +493,9 @@ private:
 	//! Saves position and state of all GUI elements
 	void saveGUIElementsPos();
 
-	void setOrthoView(ccGLWindowInterface* win);
-	void setCenteredPerspectiveView(ccGLWindowInterface* win, bool autoRedraw = true);
-	void setViewerPerspectiveView(ccGLWindowInterface* win);
+	void setOrthoView(ccGLWindow* win);
+	void setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw = true);
+	void setViewerPerspectiveView(ccGLWindow* win);
 	
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
@@ -539,16 +537,19 @@ private:
 	void enableUIItems(dbTreeSelectionInfo& selInfo);
 
 	//! Updates the view mode pop-menu based for a given window (or an absence of!)
-	void updateViewModePopUpMenu(ccGLWindowInterface* win);
+	void updateViewModePopUpMenu(ccGLWindow* win);
 
 	//! Updates the pivot visibility pop-menu based for a given window (or an absence of!)
-	void updatePivotVisibilityPopUpMenu(ccGLWindowInterface* win);
+	void updatePivotVisibilityPopUpMenu(ccGLWindow* win);
 
 	//! Checks whether stereo mode can be stopped (if necessary) or not
-	bool checkStereoMode(ccGLWindowInterface* win);
+	bool checkStereoMode(ccGLWindow* win);
 
 	//! Adds a single value SF to the active point cloud
 	void addConstantSF(ccPointCloud* cloud, QString sfName, bool integerValue);
+
+
+
 
 private: //members
 

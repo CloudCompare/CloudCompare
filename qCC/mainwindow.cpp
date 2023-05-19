@@ -40,6 +40,7 @@
 #include <ccCameraSensor.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
+#include <ccTorus.h>
 #include <ccFacet.h>
 #include <ccFileUtils.h>
 #include <ccGBLSensor.h>
@@ -58,7 +59,7 @@
 #include <DepthMapFileFilter.h>
 
 //QCC_glWindow
-#include <ccGLWindowInterface.h>
+#include <ccGLWindow.h>
 #include <ccRenderingTools.h>
 
 //local includes
@@ -164,7 +165,7 @@ enum PickingOperation {	NO_PICKING_OPERATION,
 						PICKING_ROTATION_CENTER,
 						PICKING_LEVEL_POINTS,
 					  };
-static ccGLWindowInterface* s_pickingWindow = nullptr;
+static ccGLWindow* s_pickingWindow = nullptr;
 static PickingOperation s_currentPickingOperation = NO_PICKING_OPERATION;
 static std::vector<cc2DLabel*> s_levelLabels;
 static ccPointCloud* s_levelMarkersCloud = nullptr;
@@ -174,7 +175,6 @@ static QFileDialog::Options CCFileDialogOptions()
 {
 	//dialog options
 	QFileDialog::Options dialogOptions = QFileDialog::Options();
-	dialogOptions |= QFileDialog::DontResolveSymlinks;
 	if (!ccOptions::Instance().useNativeDialogs)
 	{
 		dialogOptions |= QFileDialog::DontUseNativeDialog;
@@ -314,6 +314,13 @@ MainWindow::MainWindow()
 #endif
 	
 	ccConsole::Print(tr("CloudCompare started!"));
+
+
+	//custom
+	ccHObject* cloudContainer = this->loadFile("F:\\prj\\CC\\data\\treeiso_demo_ring.las", true);
+	this->addToDB(cloudContainer);
+
+
 }
 
 MainWindow::~MainWindow()
@@ -393,6 +400,8 @@ void MainWindow::initPlugins( )
 
 	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowMainPluginToolbar() );
 	m_UI->menuToolbars->addAction( m_pluginUIManager->actionShowGLFilterToolbar() );
+
+
 }
 
 void MainWindow::doEnableQtWarnings(bool state)
@@ -403,7 +412,7 @@ void MainWindow::doEnableQtWarnings(bool state)
 void MainWindow::increasePointSize()
 {
 	//active window?
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setPointSize(win->getViewportParameters().defaultPointSize + 1);
@@ -414,7 +423,7 @@ void MainWindow::increasePointSize()
 void MainWindow::decreasePointSize()
 {
 	//active window?
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setPointSize(win->getViewportParameters().defaultPointSize - 1);
@@ -674,6 +683,7 @@ void MainWindow::connectActions()
 	//"Tools > Fit" menu
 	connect(m_UI->actionFitPlane,					&QAction::triggered, this, &MainWindow::doActionFitPlane);
 	connect(m_UI->actionFitSphere,					&QAction::triggered, this, &MainWindow::doActionFitSphere);
+	connect(m_UI->actionFitCircle,					&QAction::triggered, this, &MainWindow::doActionFitCircle);
 	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
 	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
 	//"Tools > Batch export" menu
@@ -1064,69 +1074,36 @@ void MainWindow::doActionApplyTransformation()
 	if (!dlg.exec())
 		return;
 
-	bool applyToGlobal = false;
-	ccGLMatrixd transMat = dlg.getTransformation(applyToGlobal);
-	applyTransformation(transMat, applyToGlobal);
+	ccGLMatrixd transMat = dlg.getTransformation();
+	applyTransformation(transMat);
 }
 
-ccHObject::Container MainWindow::getTopLevelSelectedEntities() const
-{
-	ccHObject::Container topLevelSelectedEntities;
-	for (size_t i = 0; i < m_selectedEntities.size(); ++i)
-	{
-		ccHObject* entity = m_selectedEntities[i];
-		bool hasParentsInselection = false;
-		for (size_t j = 0; j < m_selectedEntities.size(); ++j)
-		{
-			if (i == j)
-				continue;
-
-			ccHObject* otherEntity = m_selectedEntities[j];
-			if (otherEntity->isAncestorOf(entity))
-			{
-				hasParentsInselection = true;
-				break;
-			}
-		}
-
-		if (!hasParentsInselection)
-		{
-			topLevelSelectedEntities.push_back(entity);
-		}
-	}
-
-	return topLevelSelectedEntities;
-}
-
-void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
+void MainWindow::applyTransformation(const ccGLMatrixd& mat)
 {
 	//if the transformation is partly converted to global shift/scale
-	bool autoApplyPreviousGlobalShiftAndScale = false;
-	double previousScale = 1.0;
-	CCVector3d previousShift(0, 0, 0);
+	bool updateGlobalShiftAndScale = false;
+	double scaleChange = 1.0;
+	CCVector3d shiftChange(0, 0, 0);
+	ccGLMatrixd transMat = mat;
 
-	//we don't want any entity that would be the children of other selected entitiesmust backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
-	ccHObject::Container selectedEntities = getTopLevelSelectedEntities();
+	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
+	ccHObject::Container selectedEntities = getSelectedEntities();
 
-	for (ccHObject* entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
+	//special case: the selected entity is a group
+	//if (selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	//{
+	//	ccHObject* ent = selectedEntities.front();
+	//	m_selectedEntities.clear();
+	//	for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
+	//	{
+	//		selectedEntities.push_back(ent->getChild(i));
+	//	}
+	//}
+
+	bool firstCloud = true;
+
+	for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 	{
-		ccGLMatrixd transMat = mat;
-
-		if (applyToGlobal && nullptr != dynamic_cast<ccShiftedObject*>(entity))
-		{
-			// the user wants to apply the transformation to the global coordinates
-			ccShiftedObject* shiftedEntity = static_cast<ccShiftedObject*>(entity);
-			CCVector3d globalShift = shiftedEntity->getGlobalShift();
-			double globalScale = shiftedEntity->getGlobalScale();
-
-			// we compute the impact to the local coordinate system without changing the
-			// actual Global Shift & Scale parameters (for now)
-			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
-
-			// we switch to a local transformation matrix
-			transMat.setTranslation(localTranslation);
-		}
-
 		//we don't test primitives (it's always ok while the 'vertices lock' test would fail)
 		if (!entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
@@ -1141,54 +1118,45 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 					continue;
 				}
 
-				//test if the translated cloud coordinates were already "too large"
-				//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
-				ccBBox localBBox = entity->getOwnBB();
-				CCVector3d Pl = localBBox.minCorner();
-				double Dl = localBBox.getDiagNormd();
-
-				//if the cloud is alright
-				if (	!ccGlobalShiftManager::NeedShift(Pl)
-					&&	!ccGlobalShiftManager::NeedRescale(Dl) )
+				if (firstCloud)
 				{
-					//test if the translated cloud coordinates are too large (in local coordinate space)
-					ccBBox transformedBox = entity->getOwnBB() * transMat;
-					CCVector3d transformedPl = transformedBox.minCorner();
-					double transformedDl = transformedBox.getDiagNormd();
+					//test if the translated cloud was already "too big"
+					//(in which case we won't bother the user about the fact
+					//that the transformed cloud will be too big...)
+					ccBBox localBBox = entity->getOwnBB();
+					CCVector3d Pl = localBBox.minCorner();
+					double Dl = localBBox.getDiagNormd();
 
-					bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
-					if (needShift)
+					//the cloud was alright
+					if (	!ccGlobalShiftManager::NeedShift(Pl)
+						&&	!ccGlobalShiftManager::NeedRescale(Dl))
 					{
-						//existing shift information
-						CCVector3d globalShift = cloud->getGlobalShift();
-						double globalScale = cloud->getGlobalScale();
+						//test if the translated cloud is not "too big" (in local coordinate space)
+						ccBBox rotatedBox = entity->getOwnBB() * transMat;
+						double Dl2 = rotatedBox.getDiagNorm();
+						CCVector3d Pl2 = rotatedBox.getCenter();
 
-						//we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
-						CCVector3d Pg = cloud->toGlobal3d(transformedPl);
-						double Dg = transformedDl / globalScale;
+						bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
+						bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
 
-						//let's try to find better Global Shift and Scale values
-						CCVector3d newShift(0.0, 0.0, 0.0);
-						double newScale = 1.0;
-
-						//should we try to use the previous Global Shift and Scale values?
-						if (autoApplyPreviousGlobalShiftAndScale)
+						if (needShift || needRescale)
 						{
-							if (	!ccGlobalShiftManager::NeedShift(Pg + previousShift)
-								&&	!ccGlobalShiftManager::NeedRescale(Dg * previousScale))
-							{
-								newScale = previousScale;
-								newShift = previousShift;
-								needShift = false;
-							}
-						}
+							//existing shift information
+							CCVector3d globalShift = cloud->getGlobalShift();
+							double globalScale = cloud->getGlobalScale();
 
-						//if we still need to define new Global Shift and Scale
-						if (needShift)
-						{
+							//we compute the transformation matrix in the global coordinate space
+							ccGLMatrixd globalTransMat = transMat;
+							globalTransMat.scaleRotation(1.0 / globalScale);
+							globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
+							//and we apply it to the cloud bounding-box
+							ccBBox rotatedBox = cloud->getOwnBB() * globalTransMat;
+							double Dg = rotatedBox.getDiagNorm();
+							CCVector3d Pg = rotatedBox.getCenter();
+
 							//ask the user the right values!
-							ccShiftAndScaleCloudDlg sasDlg(transformedPl, transformedDl, Pg, Dg, this);
-							sasDlg.showApplyAllButton(selectedEntities.size() > 1);
+							ccShiftAndScaleCloudDlg sasDlg(Pl2, Dl2, Pg, Dg, this);
+							sasDlg.showApplyAllButton(false);
 							sasDlg.showTitle(true);
 							sasDlg.setKeepGlobalPos(true);
 							sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
@@ -1196,52 +1164,34 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 
 							//add "original" entry
 							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
-							//add "previous" entry (if any)
-							if (autoApplyPreviousGlobalShiftAndScale)
-							{
-								index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Previous"), previousShift, previousScale));
-							}
+							//sasDlg.setCurrentProfile(index);
+							//add "suggested" entry
+							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+							double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
+							sasDlg.setCurrentProfile(index);
 							//add "last" entries (if any)
-							int matchingIndex = -1;
-							const auto& previousEntries = ccGlobalShiftManager::GetLast();
-							for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : previousEntries)
-							{
-								index = sasDlg.addShiftInfo(shiftInfo);
+							sasDlg.addShiftInfo(ccGlobalShiftManager::GetLast());
 
-								if (matchingIndex < 0)
-								{
-									if (	!ccGlobalShiftManager::NeedShift(Pg + shiftInfo.shift)
-										&&	!ccGlobalShiftManager::NeedRescale(Dg * shiftInfo.scale) )
-									{
-										matchingIndex = index;
-									}
-								}
-							}
-
-							//if not good solution found...
-							if (matchingIndex < 0)
-							{
-								//add "suggested" entry
-								CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
-								double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-								matchingIndex = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
-							}
-
-							sasDlg.setCurrentProfile(matchingIndex);
 							if (sasDlg.exec())
 							{
-								newScale = sasDlg.getScale();
-								newShift = sasDlg.getShift();
-								needShift = false;
-
 								//store the shift for next time!
+								double newScale = sasDlg.getScale();
+								CCVector3d newShift = sasDlg.getShift();
 								ccGlobalShiftManager::StoreShift(newShift, newScale);
 
-								if (sasDlg.applyAll())
+								//get the relative modification to existing global shift/scale info
+								assert(cloud->getGlobalScale() != 0);
+								scaleChange = newScale / cloud->getGlobalScale();
+								shiftChange = newShift - cloud->getGlobalShift();
+
+								updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
+
+								//update transformation matrix accordingly
+								if (updateGlobalShiftAndScale)
 								{
-									autoApplyPreviousGlobalShiftAndScale = true;
-									previousScale = newScale;
-									previousShift = newShift;
+									transMat.scaleRotation(scaleChange);
+									transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
 								}
 							}
 							else if (sasDlg.cancelled())
@@ -1250,49 +1200,44 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 								return;
 							}
 						}
-
-						assert(!needShift);
-
-						//get the relative modification to existing global shift/scale info
-						assert(globalScale != 0);
-						double scaleChange = newScale / globalScale;
-						CCVector3d shiftChange = newShift - globalShift;
-
-						if (scaleChange != 1.0 || shiftChange.norm2() != 0)
-						{
-							//apply translation as global shift
-							cloud->setGlobalShift(newShift);
-							cloud->setGlobalScale(newScale);
-							ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
-
-							transMat.scaleRotation(scaleChange);
-							transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
-						}
 					}
+
+					firstCloud = false;
+				}
+
+				if (updateGlobalShiftAndScale)
+				{
+					//apply translation as global shift
+					cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
+					cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
+					const CCVector3d& T = cloud->getGlobalShift();
+					double scale = cloud->getGlobalScale();
+					ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
 				}
 			}
 		}
 
-		//we temporarily detach the entity, as it may undergo
+		//we temporarily detach entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->setGLTransformation(ccGLMatrix(transMat.data()));
-
 		//DGM FIXME: we only test the entity own bounding box (and we update its shift & scale info) but we apply the transformation to all its children?!
 		entity->applyGLTransformation_recursive();
 		entity->prepareDisplayForRefresh_recursive();
-		putObjectBackIntoDBTree(entity, objContext);
+		putObjectBackIntoDBTree(entity,objContext);
 	}
-
-	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
-	ccLog::Print(mat.toString(12, ' ')); //full precision
-	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
 	//reselect previously selected entities!
 	if (m_ccRoot)
 		m_ccRoot->selectEntities(selectedEntities);
 
-	zoomOnSelectedEntities();
+	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
+	ccLog::Print(transMat.toString(12,' ')); //full precision
+	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
+
+	//reselect previously selected entities!
+	if (m_ccRoot)
+		m_ccRoot->selectEntities(selectedEntities);
 
 	refreshAll();
 }
@@ -1418,7 +1363,7 @@ void MainWindow::doActionApplyScale()
 				C = cloud->getOwnBB().getCenter();
 			}
 
-			//we temporarily detach the entity, as it may undergo
+			//we temporarily detach entity, as it may undergo
 			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::scale
 			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 
@@ -1438,16 +1383,6 @@ void MainWindow::doActionApplyScale()
 				cloud->setGlobalShift( CCVector3d(	shift.x*scales.x,
 													shift.y*scales.y,
 													shift.z*scales.z) );
-			}
-
-			//specific case for polyline vertices
-			if (cloud->getParent() && cloud->getParent()->isA(CC_TYPES::POLY_LINE))
-			{
-				ccPolyline* poly = static_cast<ccPolyline*>(cloud->getParent());
-				if (poly->getAssociatedCloud() == cloud)
-				{
-					poly->invalidateBoundingBox();
-				}
 			}
 
 			ent->prepareDisplayForRefresh_recursive();
@@ -1682,7 +1617,7 @@ void MainWindow::doComputeBestFitBB()
 					cloud->setGLTransformation(trans);
 					trans.invert();
 
-					//we temporarily detach the entity, as it may undergo
+					//we temporarily detach entity, as it may undergo
 					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 					ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 					static_cast<ccPointCloud*>(cloud)->applyRigidTransformation(trans);
@@ -2089,7 +2024,7 @@ void MainWindow::doActionCreateGBLSensor()
 				//ccIndexedTransformation trans;
 				//sensor->addPosition(trans,0);
 
-				ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(cloud->getDisplay());
+				ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
 				if (win)
 				{
 					sensor->setDisplay_recursive(win);
@@ -2149,11 +2084,11 @@ void MainWindow::doActionCreateCameraSensor()
 	}
 	spDlg.updateCamSensor(sensor);
 
-	ccGLWindowInterface* win = nullptr;
+	ccGLWindow* win = nullptr;
 	if (ent)
 	{
 		ent->addChild(sensor);
-		win = static_cast<ccGLWindowInterface*>(ent->getDisplay());
+		win = static_cast<ccGLWindow*>(ent->getDisplay());
 	}
 	else
 	{
@@ -3620,7 +3555,7 @@ void MainWindow::doActionMerge()
 
 void MainWindow::zoomOn(ccHObject* object)
 {
-	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(object->getDisplay());
+	ccGLWindow* win = static_cast<ccGLWindow*>(object->getDisplay());
 	if (win)
 	{
 		ccBBox box = object->getDisplayBB_recursive(false,win);
@@ -4702,7 +4637,7 @@ void MainWindow::doActionRasterize()
 	}
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-	ccRasterizeTool rasterizeTool(cloud, this);
+	ccRasterizeTool rasterizeTool(cloud,this);
 	rasterizeTool.exec();
 }
 
@@ -5410,7 +5345,7 @@ void MainWindow::doActionFastRegistration(FastRegistrationMode mode)
 		ccConsole::Print(glTrans.toString(12, ' ')); //full precision
 		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
-		//we temporarily detach the entity, as it may undergo
+		//we temporarily detach entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
@@ -5457,7 +5392,7 @@ void MainWindow::doActionMatchBBCenters()
 		ccConsole::Print(glTrans.toString(12,' ')); //full precision
 		ccConsole::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
 
-		//we temporarily detach the entity, as it may undergo
+		//we temporarily detach entity, as it may undergo
 		//'severe' modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 		entity->applyGLTransformation_recursive(&glTrans);
@@ -5776,7 +5711,7 @@ void MainWindow::doActionUnroll()
 	}
 	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-	ccUnrollDlg unrollDlg(m_ccRoot ? m_ccRoot->getRootEntity() : nullptr, this);
+	ccUnrollDlg unrollDlg(this);
 	unrollDlg.fromPersistentSettings();
 	if (!unrollDlg.exec())
 		return;
@@ -5784,9 +5719,8 @@ void MainWindow::doActionUnroll()
 
 	ccPointCloud::UnrollMode mode = unrollDlg.getType();
 	PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	CCVector3d axisDir = unrollDlg.getAxis();
+	unsigned char dim = static_cast<unsigned char>(unrollDlg.getAxisDimension());
 	bool exportDeviationSF = unrollDlg.exportDeviationSF();
-	bool arbitraryOutputCS = unrollDlg.useArbitraryOutputCS();
 	CCVector3 center = unrollDlg.getAxisPosition();
 
 	//let's rock unroll ;)
@@ -5808,27 +5742,26 @@ void MainWindow::doActionUnroll()
 	{
 		ccPointCloud::UnrollCylinderParams params;
 		params.radius = radius;
-		params.axisDir = CCVector3::fromArray(axisDir.u);
+		params.axisDim = dim;
 		if (unrollDlg.isAxisPositionAuto())
 		{
 			center = pc->getOwnBB().getCenter();
 		}
 		params.center = center;
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
 	}
 	break;
 
-	case ccPointCloud::CONE_CONICAL:
-	case ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS:
-	case ccPointCloud::CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
+	case ccPointCloud::CONE:
+	case ccPointCloud::STRAIGHTENED_CONE:
+	case ccPointCloud::STRAIGHTENED_CONE2:
 	{
 		ccPointCloud::UnrollConeParams params;
-		params.radius = (mode == ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS ? radius : 0);
+		params.radius = (mode == ccPointCloud::CONE ? 0 : radius);
 		params.apex = center;
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
-		params.axisDir = CCVector3::fromArray(axisDir.u);
-		params.spanRatio = unrollDlg.getConicalProjSpanRatio();
-		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		params.axisDim = dim;
+		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, &pDlg);
 	}
 	break;
 	
@@ -5864,7 +5797,7 @@ void MainWindow::doActionUnroll()
 	}
 }
 
-ccGLWindowInterface* MainWindow::getActiveGLWindow()
+ccGLWindow* MainWindow::getActiveGLWindow()
 {
 	if (!m_mdiArea)
 	{
@@ -5874,26 +5807,26 @@ ccGLWindowInterface* MainWindow::getActiveGLWindow()
 	QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
 	if (activeSubWindow)
 	{
-		return ccGLWindowInterface::FromWidget(activeSubWindow->widget());
+		return GLWindowFromWidget(activeSubWindow->widget());
 	}
 	else
 	{
 		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 		if (!subWindowList.isEmpty())
 		{
-			return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
+			return GLWindowFromWidget(subWindowList[0]->widget());
 		}
 	}
 
 	return nullptr;
 }
 
-QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
+QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 	for (int i = 0; i < subWindowList.size(); ++i)
 	{
-		if (ccGLWindowInterface::FromWidget(subWindowList[i]->widget()) == win)
+		if (GLWindowFromWidget(subWindowList[i]->widget()) == win)
 			return subWindowList[i];
 	}
 
@@ -5901,12 +5834,12 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
 	return nullptr;
 }
 
-ccGLWindowInterface* MainWindow::getGLWindow(int index) const
+ccGLWindow* MainWindow::getGLWindow(int index) const
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();	
 	if (index >= 0 && index < subWindowList.size())
 	{
-		ccGLWindowInterface* win = ccGLWindowInterface::FromWidget(subWindowList[index]->widget());
+		ccGLWindow* win = GLWindowFromWidget(subWindowList[index]->widget());
 		assert(win);
 		return win;
 	}
@@ -5924,7 +5857,7 @@ int MainWindow::getGLWindowCount() const
 
 void MainWindow::zoomIn()
 {
-	ccGLWindowInterface* win = MainWindow::getActiveGLWindow();
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
 	if (win)
 	{
 		//we simulate a real wheel event
@@ -5934,7 +5867,7 @@ void MainWindow::zoomIn()
 
 void MainWindow::zoomOut()
 {
-	ccGLWindowInterface* win = MainWindow::getActiveGLWindow();
+	ccGLWindow* win = MainWindow::getActiveGLWindow();
 	if (win)
 	{
 		//we simulate a real wheel event
@@ -5942,12 +5875,12 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
+ccGLWindow* MainWindow::new3DViewInternal( bool allowEntitySelection )
 {
 	assert(m_ccRoot && m_mdiArea);
 
 	QWidget* viewWidget = nullptr;
-	ccGLWindowInterface* view3D = nullptr;
+	ccGLWindow* view3D = nullptr;
 	
 	createGLWindow(view3D, viewWidget);
 	if (!viewWidget || !view3D)
@@ -5970,30 +5903,30 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 
 	if ( allowEntitySelection )
 	{
-		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitySelectionChanged, this, [=] (ccHObject *entity) {
+		connect(view3D, &ccGLWindow::entitySelectionChanged, this, [=] (ccHObject *entity) {
 			m_ccRoot->selectEntity( entity );
 		});
 		
-		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
+		connect(view3D, &ccGLWindow::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
 			m_ccRoot->selectEntities( entities );
 		});
 	}
 
 	//'echo' mode
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::mouseWheelRotated,			this, &MainWindow::echoMouseWheelRotate);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::viewMatRotated,				this, &MainWindow::echoBaseViewMatRotation);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged,				this, &MainWindow::echoCameraPosChanged);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged,			this, &MainWindow::echoPivotPointChanged);
+	connect(view3D,	&ccGLWindow::mouseWheelRotated, this, &MainWindow::echoMouseWheelRotate);
+	connect(view3D,	&ccGLWindow::viewMatRotated, this, &MainWindow::echoBaseViewMatRotation);
+	connect(view3D,	&ccGLWindow::cameraPosChanged, this, &MainWindow::echoCameraPosChanged);
+	connect(view3D,	&ccGLWindow::pivotPointChanged, this, &MainWindow::echoPivotPointChanged);
 
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::aboutToClose,					this, &MainWindow::prepareWindowDeletion);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::filesDropped,					this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::newLabel,						this, &MainWindow::handleNewLabel);
-	connect(view3D->signalEmitter(),	&ccGLWindowSignalEmitter::exclusiveFullScreenToggled,	this, &MainWindow::onExclusiveFullScreenToggled);
+	connect(view3D,	&QObject::destroyed, this, &MainWindow::prepareWindowDeletion);
+	connect(view3D,	&ccGLWindow::filesDropped, this, &MainWindow::addToDBAuto, Qt::QueuedConnection); //DGM: we don't want to block the 'dropEvent' method of ccGLWindow instances!
+	connect(view3D,	&ccGLWindow::newLabel, this, &MainWindow::handleNewLabel);
+	connect(view3D,	&ccGLWindow::exclusiveFullScreenToggled, this, &MainWindow::onExclusiveFullScreenToggled);
 
 	if (m_pickingHub)
 	{
 		//we must notify the picking hub as well if the window is destroyed
-		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
+		connect(view3D, &QObject::destroyed, m_pickingHub, &ccPickingHub::onActiveWindowDeleted);
 	}
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
@@ -6008,21 +5941,17 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 	return view3D;
 }
 
-void MainWindow::prepareWindowDeletion(ccGLWindowInterface* glWindow)
+void MainWindow::prepareWindowDeletion(QObject* glWindow)
 {
 	if (!m_ccRoot)
 		return;
 
-	if (glWindow)
-	{
-		m_ccRoot->hidePropertiesView();
-		m_ccRoot->getRootEntity()->removeFromDisplay_recursive(glWindow);
-		m_ccRoot->updatePropertiesView();
-	}
-	else
-	{
-		assert(false);
-	}
+	//we assume only ccGLWindow can be connected to this slot!
+	ccGLWindow* win = qobject_cast<ccGLWindow*>(glWindow);
+
+	m_ccRoot->hidePropertiesView();
+	m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
+	m_ccRoot->updatePropertiesView();
 }
 
 static bool s_autoSaveGuiElementPos = true;
@@ -6301,7 +6230,7 @@ void MainWindow::repositionOverlayDialog(ccMDIDialogs& mdiDlg)
 
 void MainWindow::toggleVisualDebugTraces()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleDebugTrace();
@@ -6330,7 +6259,7 @@ void MainWindow::toggleFullScreen(bool state)
 
 void MainWindow::toggleExclusiveFullScreen(bool state)
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleExclusiveFullScreen(state);
@@ -6456,7 +6385,7 @@ void MainWindow::activateRegisterPointPairTool()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindowInterface* win = new3DView();
+	ccGLWindow* win = new3DView();
 	if (!win)
 	{
 		ccLog::Error(tr("[PointPairRegistration] Failed to create dedicated 3D view!"));
@@ -6519,7 +6448,7 @@ void MainWindow::activateSectionExtractionMode()
 	}
 
 	//add clouds
-	ccGLWindowInterface* firstDisplay = nullptr;
+	ccGLWindow* firstDisplay = nullptr;
 	{
 		unsigned validCount = 0;
 		for (ccHObject *entity : getSelectedEntities())
@@ -6530,7 +6459,7 @@ void MainWindow::activateSectionExtractionMode()
 				{
 					if (!firstDisplay && entity->getDisplay())
 					{
-						firstDisplay = static_cast<ccGLWindowInterface*>(entity->getDisplay());
+						firstDisplay = static_cast<ccGLWindow*>(entity->getDisplay());
 					}
 					
 					++validCount;
@@ -6551,7 +6480,7 @@ void MainWindow::activateSectionExtractionMode()
 		m_ccRoot->unselectAllEntities();
 	}
 
-	ccGLWindowInterface* win = new3DViewInternal(false);
+	ccGLWindow* win = new3DViewInternal(false);
 	if (!win)
 	{
 		ccLog::Error(tr("[SectionExtraction] Failed to create dedicated 3D view!"));
@@ -6593,14 +6522,14 @@ void MainWindow::deactivateSectionExtractionMode(bool state)
 
 	updateUI();
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 		win->redraw();
 }
 
 void MainWindow::activateSegmentationMode()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6674,7 +6603,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 	updateUI();
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->redraw();
@@ -6683,7 +6612,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 void MainWindow::activateTracePolylineMode()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6719,7 +6648,7 @@ void MainWindow::deactivateTracePolylineMode(bool)
 
 	updateUI();
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->redraw();
@@ -6728,7 +6657,7 @@ void MainWindow::deactivateTracePolylineMode(bool)
 
 void MainWindow::activatePointListPickingMode()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6794,7 +6723,7 @@ void MainWindow::deactivatePointListPickingMode(bool state)
 
 void MainWindow::activatePointPickingMode()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6848,7 +6777,7 @@ void MainWindow::activateClippingBoxMode()
 		return;
 	}
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
 		return;
@@ -6906,7 +6835,7 @@ void MainWindow::activateTranslateRotateMode()
 	if (!haveSelection())
 		return;
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -6984,7 +6913,7 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 
 void MainWindow::testFrameRate()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 		win->startFrameRateTest();
 }
@@ -7001,7 +6930,7 @@ void MainWindow::showDisplayOptions()
 
 void MainWindow::doActionRenderToFile()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7041,7 +6970,7 @@ void MainWindow::doActionEditCamera()
 void MainWindow::doActionAdjustZoom()
 {
 	//current active MDI area
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7066,7 +6995,7 @@ void MainWindow::doActionAdjustZoom()
 static unsigned s_viewportIndex = 0;
 void MainWindow::doActionSaveViewportAsCamera()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 		return;
 
@@ -7079,7 +7008,7 @@ void MainWindow::doActionSaveViewportAsCamera()
 
 void MainWindow::zoomOnSelectedEntities()
 {
-	ccGLWindowInterface* win = nullptr;
+	ccGLWindow* win = nullptr;
 
 	ccHObject tempGroup("TempGroup");
 	size_t selNum = m_selectedEntities.size();
@@ -7090,7 +7019,7 @@ void MainWindow::zoomOnSelectedEntities()
 		if (i == 0 || !win)
 		{
 			//take the first valid window as reference
-			win = static_cast<ccGLWindowInterface*>(entity->getDisplay());
+			win = static_cast<ccGLWindow*>(entity->getDisplay());
 		}
 
 		if (win)
@@ -7128,17 +7057,17 @@ void MainWindow::zoomOnSelectedEntities()
 
 void MainWindow::setGlobalZoom()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 		win->zoomGlobal();
 }
 
 void MainWindow::setPivotAlwaysOn()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindowInterface::PIVOT_ALWAYS_SHOW);
+		win->setPivotVisibility(ccGLWindow::PIVOT_ALWAYS_SHOW);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7149,10 +7078,10 @@ void MainWindow::setPivotAlwaysOn()
 
 void MainWindow::setPivotRotationOnly()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindowInterface::PIVOT_SHOW_ON_MOVE);
+		win->setPivotVisibility(ccGLWindow::PIVOT_SHOW_ON_MOVE);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7163,10 +7092,10 @@ void MainWindow::setPivotRotationOnly()
 
 void MainWindow::setPivotOff()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
-		win->setPivotVisibility(ccGLWindowInterface::PIVOT_HIDE);
+		win->setPivotVisibility(ccGLWindow::PIVOT_HIDE);
 		win->redraw();
 
 		//update pop-up menu 'top' icon
@@ -7175,7 +7104,7 @@ void MainWindow::setPivotOff()
 	}
 }
 
-void MainWindow::setOrthoView(ccGLWindowInterface* win)
+void MainWindow::setOrthoView(ccGLWindow* win)
 {
 	if (win)
 	{
@@ -7194,7 +7123,7 @@ void MainWindow::setOrthoView(ccGLWindowInterface* win)
 	}
 }
 
-void MainWindow::setCenteredPerspectiveView(ccGLWindowInterface* win, bool autoRedraw/*=true*/)
+void MainWindow::setCenteredPerspectiveView(ccGLWindow* win, bool autoRedraw/*=true*/)
 {
 	if (win)
 	{
@@ -7210,7 +7139,7 @@ void MainWindow::setCenteredPerspectiveView(ccGLWindowInterface* win, bool autoR
 	}
 }
 
-void MainWindow::setViewerPerspectiveView(ccGLWindowInterface* win)
+void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
 {
 	if (win)
 	{
@@ -7225,7 +7154,7 @@ void MainWindow::setViewerPerspectiveView(ccGLWindowInterface* win)
 	}
 }
 
-void MainWindow::enablePickingOperation(ccGLWindowInterface* win, QString message)
+void MainWindow::enablePickingOperation(ccGLWindow* win, QString message)
 {
 	if (!win)
 	{
@@ -7245,7 +7174,7 @@ void MainWindow::enablePickingOperation(ccGLWindowInterface* win, QString messag
 	//	m_pprDlg->pause(true);
 
 	s_pickingWindow = win;
-	win->displayNewMessage(message, ccGLWindowInterface::LOWER_LEFT_MESSAGE, true, 24 * 3600);
+	win->displayNewMessage(message, ccGLWindow::LOWER_LEFT_MESSAGE, true, 24 * 3600);
 	win->redraw(true, false);
 
 	freezeUI(true);
@@ -7276,8 +7205,8 @@ void MainWindow::cancelPreviousPickingOperation(bool aborted)
 
 	if (aborted)
 	{
-		s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE); //clear previous messages
-		s_pickingWindow->displayNewMessage(tr("Picking operation aborted"), ccGLWindowInterface::LOWER_LEFT_MESSAGE);
+		s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
+		s_pickingWindow->displayNewMessage(tr("Picking operation aborted"), ccGLWindow::LOWER_LEFT_MESSAGE);
 	}
 	s_pickingWindow->redraw(false);
 
@@ -7372,13 +7301,11 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				Z.normalize();
 
 				ccGLMatrixd trans;
-				{
-					double* mat = trans.data();
-					mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0.0;
-					mat[1] = Y.x; mat[5] = Y.y; mat[9]  = Y.z; mat[13] = 0.0;
-					mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0.0;
-					mat[3] = 0.0; mat[7] = 0.0; mat[11] = 0.0; mat[15] = 1.0;
-				}
+				double* mat = trans.data();
+				mat[0] = X.x; mat[4] = X.y; mat[8]  = X.z; mat[12] = 0;
+				mat[1] = Y.x; mat[5] = Y.y; mat[9]  = Y.z; mat[13] = 0;
+				mat[2] = Z.x; mat[6] = Z.y; mat[10] = Z.z; mat[14] = 0;
+				mat[3] = 0  ; mat[7] = 0  ; mat[11] = 0  ; mat[15] = 1;
 
 				CCVector3d T = -A->toDouble();
 				trans.apply(T);
@@ -7386,10 +7313,10 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 				trans.setTranslation(T);
 
 				assert(haveOneSelection() && m_selectedEntities.front() == s_levelEntity);
-				applyTransformation(trans, false);
+				applyTransformation(trans);
 
 				//clear message
-				s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
 				s_pickingWindow->setView(CC_TOP_VIEW);
 			}
 			else
@@ -7411,12 +7338,12 @@ void MainWindow::onItemPicked(const PickedItem& pi)
 			{
 				m_transTool->setRotationCenter(newPivot);
 				const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString(), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false); //clear previous message
+				s_pickingWindow->displayNewMessage(QString(), ccGLWindow::LOWER_LEFT_MESSAGE, false); //clear previous message
 				s_pickingWindow->displayNewMessage(QString("Point (%1 ; %2 ; %3) set as rotation center for interactive transformation")
 					.arg(pickedPoint.x, 0, 'f', precision)
 					.arg(pickedPoint.y, 0, 'f', precision)
 					.arg(pickedPoint.z, 0, 'f', precision),
-					ccGLWindowInterface::LOWER_LEFT_MESSAGE, true);
+					ccGLWindow::LOWER_LEFT_MESSAGE, true);
 			}
 			else
 			{
@@ -7456,7 +7383,7 @@ void MainWindow::doLevel()
 		return;
 	}
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
 		ccConsole::Error(tr("No active 3D view!"));
@@ -7504,7 +7431,7 @@ void MainWindow::doPickRotationCenter()
 		return;
 	}
 
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (!win)
 	{
 		ccConsole::Error(tr("No active 3D view!"));
@@ -7580,7 +7507,7 @@ void MainWindow::clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY p
 
 void MainWindow::setView( CC_VIEW_ORIENTATION view )
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setView(view);
@@ -8032,6 +7959,56 @@ void MainWindow::doActionFitSphere()
 
 	refreshAll();
 }
+
+// customized fit circle
+void MainWindow::doActionFitCircle()
+{
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (ccHObject* entity : getSelectedEntities())
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud)
+			continue;
+
+		CCVector3 center;
+		CCVector3 direction;
+		PointCoordinateType radius;
+		if (CCCoreLib::GeometricalAnalysisTools::DetectCircleRobust(cloud,
+			center,
+			direction,
+			radius,
+			&pDlg) != CCCoreLib::GeometricalAnalysisTools::NoError)
+		{
+			ccLog::Warning(tr("[Fit circle] Failed to fit a circle on cloud '%1'").arg(cloud->getName()));
+			continue;
+		}
+
+		ccLog::Print(tr("[Fit circle] Cloud '%1': center (%2,%3,%4) - radius = %5")
+			.arg(cloud->getName())
+			.arg(center.x)
+			.arg(center.y)
+			.arg(center.z)
+			.arg(radius));
+
+		ccGLMatrix trans;
+
+		CCVector3 z_ax(0, 0, 1);
+		trans=trans.FromToRotation(z_ax, direction);
+		trans.setTranslation(center);
+
+		ccTorus* circle = new ccTorus(radius,radius*1.01, 2.0 * M_PI,false,0, &trans, tr("Circle r=%1").arg(radius));
+
+		cloud->addChild(circle);
+		circle->prepareDisplayForRefresh();
+		circle->copyGlobalShiftAndScale(*cloud);
+		addToDB(circle, false, false, false);
+	}
+
+	refreshAll();
+}
+//
 
 void MainWindow::doActionFitPlane()
 {
@@ -9355,7 +9332,7 @@ void MainWindow::deactivateComparisonMode(int result)
 
 void MainWindow::toggleActiveWindowSunLight()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleSunLight();
@@ -9365,7 +9342,7 @@ void MainWindow::toggleActiveWindowSunLight()
 
 void MainWindow::toggleActiveWindowCustomLight()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->toggleCustomLight();
@@ -9375,7 +9352,7 @@ void MainWindow::toggleActiveWindowCustomLight()
 
 void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setAutoPickPivotAtCenter(state);
@@ -9390,7 +9367,7 @@ void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 
 void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->showCursorCoordinates(state);
@@ -9399,7 +9376,7 @@ void MainWindow::toggleActiveWindowShowCursorCoords(bool state)
 
 void MainWindow::toggleActiveWindowStereoVision(bool state)
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		bool isActive = win->stereoModeIsEnabled();
@@ -9413,8 +9390,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 		{
 			win->disableStereoMode();
 
-			if (	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-				||	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+			if (	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+				||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//disable (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -9434,18 +9411,19 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				return;
 			}
 
-			ccGLWindowInterface::StereoParams params = smDlg.getParameters();
-			ccLog::WarningDebug("Stereo strength: " + QString::number(params.stereoStrength));
-
-			if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
+			ccGLWindow::StereoParams params = smDlg.getParameters();
+			ccLog::Warning(QString::number(params.stereoStrength));
+#ifndef CC_GL_WINDOW_USE_QWINDOW
+			if (!params.isAnaglyph())
 			{
-				ccLog::Error(tr("It seems your graphic card doesn't support Quad Buffered Stereo rendering"));
+				ccLog::Error(tr("This version doesn't handle stereo glasses and headsets.\nUse the 'Stereo' version instead."));
 				//activation of the stereo mode failed: cancel selection
 				m_UI->actionEnableStereo->blockSignals(true);
 				m_UI->actionEnableStereo->setChecked(false);
 				m_UI->actionEnableStereo->blockSignals(false);
 				return;
 			}
+#endif
 
 			//force perspective state!
 			if (!win->getViewportParameters().perspectiveView)
@@ -9453,8 +9431,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 				setCenteredPerspectiveView(win, false);
 			}
 
-			if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-				||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+			if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+				||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 			{
 				//force (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(true);
@@ -9470,8 +9448,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 
 			if (!win->enableStereoMode(params))
 			{
-				if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-					||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+				if (	params.glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+					||	params.glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY)
 				{
 					//disable (exclusive) full screen
 					m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -9487,13 +9465,13 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 	}
 }
 
-bool MainWindow::checkStereoMode(ccGLWindowInterface* win)
+bool MainWindow::checkStereoMode(ccGLWindow* win)
 {
 	assert(win);
 
 	if (win && win->getViewportParameters().perspectiveView && win->stereoModeIsEnabled())
 	{
-		ccGLWindowInterface::StereoParams params = win->getStereoParams();
+		ccGLWindow::StereoParams params = win->getStereoParams();
 		bool wasExclusiveFullScreen = win->exclusiveFullScreen();
 		if (wasExclusiveFullScreen)
 		{
@@ -9535,7 +9513,7 @@ bool MainWindow::checkStereoMode(ccGLWindowInterface* win)
 
 void MainWindow::toggleActiveWindowCenteredPerspective()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		const ccViewportParameters& params = win->getViewportParameters();
@@ -9552,7 +9530,7 @@ void MainWindow::toggleActiveWindowCenteredPerspective()
 
 void MainWindow::toggleActiveWindowViewerBasedPerspective()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		const ccViewportParameters& params = win->getViewportParameters();
@@ -9710,7 +9688,7 @@ void MainWindow::createPointCloudFromClipboard()
 
 void MainWindow::toggleLockRotationAxis()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		bool wasLocked = win->isRotationAxisLocked();
@@ -9736,11 +9714,11 @@ void MainWindow::toggleLockRotationAxis()
 
 		if (isLocked)
 		{
-			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindow::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
-			win->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(QString(), ccGLWindow::UPPER_CENTER_MESSAGE, false, 0, ccGLWindow::ROTAION_LOCK_MESSAGE);
 		}
 		win->redraw(true, false);
 	}
@@ -9781,7 +9759,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 	}
 
 	//otherwise we simply enable the bubble view mode in the active 3D view
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setBubbleViewMode(true);
@@ -9791,7 +9769,7 @@ void MainWindow::doActionEnableBubbleViewMode()
 
 void MainWindow::doActionDeleteShader()
 {
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	if (win)
 	{
 		win->setShader(nullptr);
@@ -9904,7 +9882,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	//we can now set destination display (if none already)
 	if (!obj->getDisplay())
 	{
-		ccGLWindowInterface* activeWin = getActiveGLWindow();
+		ccGLWindow* activeWin = getActiveGLWindow();
 		if (!activeWin)
 		{
 			//no active GL window?!
@@ -9917,7 +9895,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 	assert(obj->getDisplay());
 	if (updateZoom)
 	{
-		static_cast<ccGLWindowInterface*>(obj->getDisplay())->zoomGlobal(); //automatically calls ccGLWindowInterface::redraw
+		static_cast<ccGLWindow*>(obj->getDisplay())->zoomGlobal(); //automatically calls ccGLWindow::redraw
 	}
 	else if (autoRedraw)
 	{
@@ -9928,7 +9906,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 void MainWindow::onExclusiveFullScreenToggled(bool state)
 {
 	//we simply update the fullscreen action method icon (whatever the window)
-	ccGLWindowInterface* win = getActiveGLWindow();
+	ccGLWindow* win = getActiveGLWindow();
 	
 	if ( win == nullptr )
 		return;
@@ -9939,8 +9917,8 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 
 	if (	!state
 		&&	win->stereoModeIsEnabled()
-		&&	(	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			||	win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY ))
+		&&	(	win->getStereoParams().glassType == ccGLWindow::StereoParams::NVIDIA_VISION
+			||	win->getStereoParams().glassType == ccGLWindow::StereoParams::GENERIC_STEREO_DISPLAY ))
 	{
 		//auto disable stereo mode as NVidia Vision only works in full screen mode!
 		m_UI->actionEnableStereo->setChecked(false);
@@ -9965,20 +9943,14 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
-	ccGLWindowInterface* win = ccGLWindowInterface::FromEmitter(sender());
-	if (win)
-	{
-		addToDB(filenames, QString(), win);
-	}
-	else
-	{
-		assert(false);
-	}
+	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
+
+	addToDB(filenames, QString(), win);
 }
 
 void MainWindow::addToDB(	const QStringList& filenames,
 							QString fileFilter/*=QString()*/,
-							ccGLWindowInterface* destWin/*=nullptr*/)
+							ccGLWindow* destWin/*=nullptr*/)
 {
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0, 0, 0);
@@ -10314,7 +10286,7 @@ void MainWindow::doActionSaveFile()
 	//default filter
 	QString selectedFilter = fileFilters.first();
 	if (hasCloud)
-		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(), selectedFilter).toString();
+		selectedFilter = settings.value(ccPS::SelectedOutputFilterCloud(),selectedFilter).toString();
 	else if (hasMesh)
 		selectedFilter = settings.value(ccPS::SelectedOutputFilterMesh(), selectedFilter).toString();
 	else if (hasImages)
@@ -10458,7 +10430,7 @@ void MainWindow::doActionSaveFile()
 
 void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 {
-	ccGLWindowInterface* win = mdiWin ? ccGLWindowInterface::FromWidget(mdiWin->widget()) : nullptr;
+	ccGLWindow* win = mdiWin ? GLWindowFromWidget(mdiWin->widget()) : nullptr;
 	if (win)
 	{
 		updateViewModePopUpMenu(win);
@@ -10490,7 +10462,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }
 
-void MainWindow::updateViewModePopUpMenu(ccGLWindowInterface* win)
+void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
 {
 	if (!m_viewModePopupButton)
 		return;
@@ -10526,7 +10498,7 @@ void MainWindow::updateViewModePopUpMenu(ccGLWindowInterface* win)
 	}
 }
 
-void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindowInterface* win)
+void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
 {
 	if (!m_pivotVisibilityPopupButton)
 		return;
@@ -10537,13 +10509,13 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindowInterface* win)
 		QAction* visibilityAction = nullptr;
 		switch(win->getPivotVisibility())
 		{
-		case ccGLWindowInterface::PIVOT_HIDE:
+		case ccGLWindow::PIVOT_HIDE:
 			visibilityAction = m_UI->actionSetPivotOff;
 			break;
-		case ccGLWindowInterface::PIVOT_SHOW_ON_MOVE:
+		case ccGLWindow::PIVOT_SHOW_ON_MOVE:
 			visibilityAction = m_UI->actionSetPivotRotationOnly;
 			break;
-		case ccGLWindowInterface::PIVOT_ALWAYS_SHOW:
+		case ccGLWindow::PIVOT_ALWAYS_SHOW:
 			visibilityAction = m_UI->actionSetPivotAlwaysOn;
 			break;
 		default:
@@ -10567,7 +10539,7 @@ void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindowInterface* win)
 
 void MainWindow::updateMenus()
 {
-	ccGLWindowInterface* active3DView = getActiveGLWindow();
+	ccGLWindow* active3DView = getActiveGLWindow();
 	bool hasMdiChild = (active3DView != nullptr);
 	int mdiChildCount = getGLWindowCount();
 	bool hasLoadedEntities = (m_ccRoot && m_ccRoot->getRootEntity() && m_ccRoot->getRootEntity()->getChildrenNumber() != 0);
@@ -10635,11 +10607,11 @@ void MainWindow::update3DViewsMenu()
 
 		int i = 0;
 		
-		for ( QMdiSubWindow* window : windows )
+		for ( QMdiSubWindow *window : windows )
 		{
-			ccGLWindowInterface *child = ccGLWindowInterface::FromWidget(window->widget());
+			ccGLWindow *child = GLWindowFromWidget(window->widget());
 
-			QString text = QString("&%1 %2").arg(++i).arg(child->getWindowTitle());
+			QString text = QString("&%1 %2").arg(++i).arg(child->windowTitle());
 			QAction *action = m_UI->menu3DViews->addAction(text);
 			
 			action->setCheckable(true);
@@ -10656,22 +10628,22 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 {
 	if (!window || !m_mdiArea)
 		return;
-	m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow*>(window));
+	m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
 void MainWindow::redrawAll(bool only2D/*=false*/)
 {
-	for (QMdiSubWindow* window : m_mdiArea->subWindowList())
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindowInterface::FromWidget(window->widget())->redraw(only2D);
+		GLWindowFromWidget(window->widget())->redraw(only2D);
 	}
 }
 
 void MainWindow::refreshAll(bool only2D/*=false*/)
 {
-	for (QMdiSubWindow* window : m_mdiArea->subWindowList())
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindowInterface::FromWidget(window->widget())->refresh(only2D);
+		GLWindowFromWidget(window->widget())->refresh(only2D);
 	}
 }
 
@@ -10706,7 +10678,7 @@ void MainWindow::updateUIWithSelection()
 
 void MainWindow::enableAll()
 {
-	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
 		window->setEnabled( true );
 	}
@@ -10714,18 +10686,18 @@ void MainWindow::enableAll()
 
 void MainWindow::disableAll()
 {
-	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
 		window->setEnabled( false );
 	}
 }
 
-void MainWindow::disableAllBut(ccGLWindowInterface* win)
+void MainWindow::disableAllBut(ccGLWindow* win)
 {
 	//we disable all other windows
-	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		if (ccGLWindowInterface::FromWidget(window->widget()) != win)
+		if (GLWindowFromWidget(window->widget()) != win)
 		{
 			window->setEnabled(false);
 		}
@@ -10789,6 +10761,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
 	m_UI->actionFitPlaneProxy->setEnabled(atLeastOneEntity);
 	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);
+	m_UI->actionFitCircle->setEnabled(atLeastOneCloud);//customed
 	m_UI->actionLevel->setEnabled(atLeastOneEntity);
 	m_UI->actionFitFacet->setEnabled(atLeastOneEntity);
 	m_UI->actionFitQuadric->setEnabled(atLeastOneCloud);
@@ -10930,18 +10903,18 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
+	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
 	if (!sendingWindow)
 		return;
 
-	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
+		ccGLWindow *child = GLWindowFromWidget(window->widget());
 		if (child != sendingWindow)
 		{
-			child->signalEmitter()->blockSignals(true);
+			child->blockSignals(true);
 			child->onWheelEvent(wheelDelta_deg);
-			child->signalEmitter()->blockSignals(false);
+			child->blockSignals(false);
 			child->redraw();
 		}
 	}
@@ -10952,18 +10925,18 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	if (!m_UI->actionEnableCameraLink->isChecked())
 		return;
 
-	ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
+	ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
 	if (!sendingWindow)
 		return;
 
-	for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	{
-		ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
+		ccGLWindow *child = GLWindowFromWidget(window->widget());
 		if (child != sendingWindow)
 		{
-			child->signalEmitter()->blockSignals(true);
+			child->blockSignals(true);
 			child->rotateBaseViewMat(rotMat);
-			child->signalEmitter()->blockSignals(false);
+			child->blockSignals(false);
 			child->redraw();
 		}
 	}
@@ -10974,19 +10947,19 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
+	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
 	 if (!sendingWindow)
 		 return;
 
 
-	 for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
+		 ccGLWindow *child = GLWindowFromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
-			 child->signalEmitter()->blockSignals(true);
+			 child->blockSignals(true);
 			 child->setCameraPos(P);
-			 child->signalEmitter()->blockSignals(false);
+			 child->blockSignals(false);
 			 child->redraw();
 		 }
 	 }
@@ -10997,18 +10970,18 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 	 if (!m_UI->actionEnableCameraLink->isChecked())
 		 return;
 
-	 ccGLWindowInterface* sendingWindow = ccGLWindowInterface::FromEmitter(sender());
+	 ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
 	 if (!sendingWindow)
 		 return;
 
-	 for ( QMdiSubWindow* window : m_mdiArea->subWindowList() )
+	 for ( QMdiSubWindow *window : m_mdiArea->subWindowList() )
 	 {
-		 ccGLWindowInterface* child = ccGLWindowInterface::FromWidget(window->widget());
+		 ccGLWindow *child = GLWindowFromWidget(window->widget());
 		 if (child != sendingWindow)
 		 {
-			 child->signalEmitter()->blockSignals(true);
+			 child->blockSignals(true);
 			 child->setPivotPoint(P);
-			 child->signalEmitter()->blockSignals(false);
+			 child->blockSignals(false);
 			 child->redraw();
 		 }
 	 }
@@ -11060,7 +11033,7 @@ void MainWindow::DestroyInstance()
 	s_instance=nullptr;
 }
 
-void MainWindow::GetGLWindows(std::vector<ccGLWindowInterface*>& glWindows)
+void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 {
 	const QList<QMdiSubWindow*> windows = TheInstance()->m_mdiArea->subWindowList();
 
@@ -11070,28 +11043,28 @@ void MainWindow::GetGLWindows(std::vector<ccGLWindowInterface*>& glWindows)
 	glWindows.clear();
 	glWindows.reserve( windows.size() );
 
-	for ( QMdiSubWindow* window : windows )
+	for ( QMdiSubWindow *window : windows )
 	{
-		glWindows.push_back(ccGLWindowInterface::FromWidget(window->widget()));
+		glWindows.push_back(GLWindowFromWidget(window->widget()));
 	}
 }
 
-ccGLWindowInterface* MainWindow::GetActiveGLWindow()
+ccGLWindow* MainWindow::GetActiveGLWindow()
 {
 	return TheInstance()->getActiveGLWindow();
 }
 
-ccGLWindowInterface* MainWindow::GetGLWindow(const QString& title)
+ccGLWindow* MainWindow::GetGLWindow(const QString& title)
 {
 	const QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
 
 	if ( windows.empty() )
 		return nullptr;
 
-	for ( QMdiSubWindow* window : windows )
+	for ( QMdiSubWindow *window : windows )
 	{
-		ccGLWindowInterface* win = ccGLWindowInterface::FromWidget(window->widget());
-		if (win->getWindowTitle() == title)
+		ccGLWindow* win = GLWindowFromWidget(window->widget());
+		if (win->windowTitle() == title)
 			return win;
 	}
 
@@ -11128,19 +11101,19 @@ ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()
 	return ccObject::GetUniqueIDGenerator();
 }
 
-void MainWindow::createGLWindow(ccGLWindowInterface*& window, QWidget*& widget) const
+void MainWindow::createGLWindow(ccGLWindow*& window, QWidget*& widget) const
 {
-	bool stereoMode = ccGLWindowInterface::TestStereoSupport();
+	bool stereoMode = QSurfaceFormat::defaultFormat().stereo();
 
-	ccGLWindowInterface::Create(window, widget, stereoMode);
+	CreateGLWindow(window, widget, stereoMode);
 	assert(window && widget);
 }
 
-void MainWindow::destroyGLWindow(ccGLWindowInterface* view3D) const
+void MainWindow::destroyGLWindow(ccGLWindow* view3D) const
 {
 	if (view3D)
 	{
-		view3D->asQObject()->setParent(nullptr);
+		view3D->setParent(nullptr);
 		delete view3D;
 	}
 }

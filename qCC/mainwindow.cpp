@@ -674,6 +674,7 @@ void MainWindow::connectActions()
 	//"Tools > Fit" menu
 	connect(m_UI->actionFitPlane,					&QAction::triggered, this, &MainWindow::doActionFitPlane);
 	connect(m_UI->actionFitSphere,					&QAction::triggered, this, &MainWindow::doActionFitSphere);
+	connect(m_UI->actionFitCircle,					&QAction::triggered, this, &MainWindow::doActionFitCircle);
 	connect(m_UI->actionFitFacet,					&QAction::triggered, this, &MainWindow::doActionFitFacet);
 	connect(m_UI->actionFitQuadric,					&QAction::triggered, this, &MainWindow::doActionFitQuadric);
 	//"Tools > Batch export" menu
@@ -4895,7 +4896,7 @@ void MainWindow::doActionFitQuadric()
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
 			double rms = 0.0;
-			ccQuadric* quadric = ccQuadric::Fit(cloud,&rms);
+			ccQuadric* quadric = ccQuadric::Fit(cloud, &rms);
 			if (quadric)
 			{
 				cloud->addChild(quadric);
@@ -8005,8 +8006,8 @@ void MainWindow::doActionFitSphere()
 			continue;
 
 		CCVector3 center;
-		PointCoordinateType radius;
-		double rms;
+		PointCoordinateType radius = 0;
+		double rms = std::numeric_limits<double>::quiet_NaN();
 		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
 			outliersRatio,
 			center,
@@ -8029,12 +8030,66 @@ void MainWindow::doActionFitSphere()
 
 		ccGLMatrix trans;
 		trans.setTranslation(center);
-		ccSphere* sphere = new ccSphere(radius, &trans, tr("Sphere r=%1 [rms %2]").arg(radius).arg(rms));
+		ccSphere* sphere = new ccSphere(radius, &trans, tr("Sphere r=%1").arg(radius));
 		cloud->addChild(sphere);
 		//sphere->setDisplay(cloud->getDisplay());
 		sphere->prepareDisplayForRefresh();
 		sphere->copyGlobalShiftAndScale(*cloud);
+		sphere->setMetaData("RMS", rms);
 		addToDB(sphere, false, false, false);
+	}
+
+	refreshAll();
+}
+
+void MainWindow::doActionFitCircle()
+{
+	ccProgressDialog pDlg(true, this);
+	pDlg.setAutoClose(false);
+
+	for (ccHObject* entity : getSelectedEntities())
+	{
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud)
+			continue;
+
+		CCVector3 center;
+		CCVector3 normal;
+		PointCoordinateType radius = 0;
+		double rms = std::numeric_limits<double>::quiet_NaN();
+		if (CCCoreLib::GeometricalAnalysisTools::DetectCircleRobust(cloud,
+																	center,
+																	normal,
+																	radius,
+																	&rms,
+																	&pDlg) != CCCoreLib::GeometricalAnalysisTools::NoError)
+		{
+			ccLog::Warning(tr("[Fit circle] Failed to fit a circle on cloud '%1'").arg(cloud->getName()));
+			continue;
+		}
+
+		ccLog::Print(tr("[Fit circle] Cloud '%1': center (%2,%3,%4) - radius = %5 [RMS = %6]")
+						.arg(cloud->getName())
+						.arg(center.x)
+						.arg(center.y)
+						.arg(center.z)
+						.arg(radius)
+						.arg(rms));
+
+		ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), normal);
+		trans.setTranslation(center);
+
+		// create the circle representation as a polyline
+		ccPolyline* circle = ccPolyline::Circle(center, radius, 128);
+		if (circle)
+		{
+			circle->setName(QObject::tr("Circle r=%1").arg(radius));
+			cloud->addChild(circle);
+			circle->prepareDisplayForRefresh();
+			circle->copyGlobalShiftAndScale(*cloud);
+			circle->setMetaData("RMS", rms);
+			addToDB(circle, false, false, false);
+		}
 	}
 
 	refreshAll();
@@ -10796,6 +10851,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionFitPlane->setEnabled(atLeastOneEntity);
 	m_UI->actionFitPlaneProxy->setEnabled(atLeastOneEntity);
 	m_UI->actionFitSphere->setEnabled(atLeastOneCloud);
+	m_UI->actionFitCircle->setEnabled(atLeastOneCloud);
 	m_UI->actionLevel->setEnabled(atLeastOneEntity);
 	m_UI->actionFitFacet->setEnabled(atLeastOneEntity);
 	m_UI->actionFitQuadric->setEnabled(atLeastOneCloud);

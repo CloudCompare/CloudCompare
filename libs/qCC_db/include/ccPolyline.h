@@ -170,6 +170,9 @@ public:
 	//! Helper to determine if the input cloud acts as vertices of a polyline
 	static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline = nullptr);
 
+	//! Creates a circle as a polyline
+	static ccPolyline* Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution = 48);
+
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)

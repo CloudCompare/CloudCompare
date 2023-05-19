@@ -67,6 +67,10 @@ v2.13.alpha (???) - (??/??/????)
 			and it prevents loss of information when printing in black and white")
 			See https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf (and thanks to Louis Gagnon)
 
+	- Tools > Fit > circle
+		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
+		- works also on cylinders
+
 - Improvements:
 
 	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified

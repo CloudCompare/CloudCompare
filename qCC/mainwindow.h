@@ -285,6 +285,7 @@ private:
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
 	void doActionFitSphere();
+	void doActionFitCircle();
 	void doActionFitFacet();
 	void doActionFitQuadric();
 	void doShowPrimitiveFactory();

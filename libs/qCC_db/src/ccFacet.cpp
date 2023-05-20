@@ -171,6 +171,7 @@ ccFacet* ccFacet::Create(	CCCoreLib::GenericIndexedCloudPersist* cloud,
 		}
 
 		facet->setDisplay_recursive(pc->getDisplay());
+		facet->setMetaData("RMS", facet->getRMS());
 	}
 
 	return facet;

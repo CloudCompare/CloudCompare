@@ -31,8 +31,14 @@
 #include <QtConcurrentRun>
 
 //Cork
-#define SUPPORT_TOPO_STREAM_OPERATORS
+#ifdef _MSC_VER
+#pragma warning( push )
+#pragma warning( disable: 4005 ) // maco redefinition warnings
+#endif
 #include <mesh/corkMesh.h>
+#ifdef _MSC_VER
+#pragma warning( pop )
+#endif
 
 //system
 #if defined(CC_WINDOWS)

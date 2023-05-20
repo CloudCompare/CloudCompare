@@ -71,6 +71,10 @@ v2.13.alpha (???) - (??/??/????)
 		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
 		- works also on cylinders
 
+	- New plugin: qTreeIso
+		- A 3D graph-based individual-tree isolator (treeiso) from Terrestrial Laser Scanning point clouds
+		- by Zhouxin Xi and Chris Hopkinson, Artemis Lab, Department of Geography & Environment, University of Lethbridge (Canada)
+
 - Improvements:
 
 	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified

@@ -8057,12 +8057,12 @@ void MainWindow::doActionFitCircle()
 		CCVector3 normal;
 		PointCoordinateType radius = 0;
 		double rms = std::numeric_limits<double>::quiet_NaN();
-		if (CCCoreLib::GeometricalAnalysisTools::DetectCircleRobust(cloud,
-																	center,
-																	normal,
-																	radius,
-																	&rms,
-																	&pDlg) != CCCoreLib::GeometricalAnalysisTools::NoError)
+		if (CCCoreLib::GeometricalAnalysisTools::DetectCircle(	cloud,
+																center,
+																normal,
+																radius,
+																rms,
+																&pDlg) != CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
 			ccLog::Warning(tr("[Fit circle] Failed to fit a circle on cloud '%1'").arg(cloud->getName()));
 			continue;

@@ -182,7 +182,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					newPoly->setName(QString(QString("Polyline #%1").arg(++index)));
 					newPoly->addChild(currentVertices);
 					newPoly->set2DMode(false);
-					newPoly->setClosed(true);
+					newPoly->setClosed(isClosed);
 
 					if (!newPoly->reserve(currentVertices->size()))
 					{

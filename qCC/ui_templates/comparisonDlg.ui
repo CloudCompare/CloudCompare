@@ -579,5 +579,21 @@ to help advanced users setting the general parameters</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>multiThreadedCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>threadCountFrame</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>251</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>251</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

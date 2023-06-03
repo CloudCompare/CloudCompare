@@ -6067,6 +6067,36 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	return mesh;
 };
 
+bool ccPointCloud::setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf, PointCoordinateType defaultValueForNaN)
+{
+	unsigned pointCount = size();
+
+	if (!sf || sf->size() < pointCount)
+	{
+		ccLog::Error("Invalid scalar field");
+		return false;
+	}
+
+	for (unsigned i = 0; i < pointCount; ++i)
+	{
+		CCVector3& P = m_points[i];
+		ScalarType s = sf->getValue(i);
+
+		//handle NaN values
+		PointCoordinateType coord = CCCoreLib::ScalarField::ValidValue(s) ? static_cast<PointCoordinateType>(s) : defaultValueForNaN;
+
+		//test each dimension
+		if (importDims[0])
+			P.x = coord;
+		if (importDims[1])
+			P.y = coord;
+		if (importDims[2])
+			P.z = coord;
+	}
+
+	invalidateBoundingBox();
+}
+
 bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 {
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
@@ -6076,7 +6106,7 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 		return true;
 	}
 
-	const QString defaultSFName[3] = { "Coord. X", "Coord. Y", "Coord. Z" };
+	const QString defaultSFName[3] { "Coord. X", "Coord. Y", "Coord. Z" };
 
 	unsigned ptsCount = size();
 

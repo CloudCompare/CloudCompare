@@ -6,13 +6,15 @@ v2.13.alpha (???) - (??/??/????)
 - - New features:
 	- New command line option:
 		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
-		- SF_OP_SF {SF 1} {operation} {SF 2}
+		- SF_OP_SF {SF 1 name or index} {operation} {SF 2 name or index}
 			- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
 			- works on clouds and meshes
-		- SF_INTERP {SF index} with sub-option -DEST_IS_FIRST
+		- SF_INTERP {SF name or index} with sub-option -DEST_IS_FIRST
 			- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
 		- SF_ADD_CONST {SF name} {const value}
 			- to add a constant scalar field to a cloud
+		- SF_TO_COORD {SF name or index} {X, Y or Z}
+			- to set the values of a scalar field as the X, Y or Z coordinates
 		- CLEVELS
 			- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
 			- syntax: -CLEVELS BANDS INPUT_RANGE_MIN INPUT_RANGE_MAX OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX
@@ -198,6 +200,7 @@ v2.13.alpha (???) - (??/??/????)
 		- New sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
+		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

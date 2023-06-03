@@ -316,6 +316,13 @@ struct CommandCoordToSF : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandSFToCoord : public ccCommandLineInterface::Command
+{
+	CommandSFToCoord();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandCrop2D : public ccCommandLineInterface::Command
 {
 	CommandCrop2D();

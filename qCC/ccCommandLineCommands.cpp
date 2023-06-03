@@ -118,6 +118,7 @@ constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
 constexpr char COMMAND_SF_ADD_CONST[]                   = "SF_ADD_CONST";
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
+constexpr char COMMAND_SF_TO_COORD[]					= "SF_TO_COORD";
 constexpr char COMMAND_EXTRACT_VERTICES[]				= "EXTRACT_VERTICES";
 constexpr char COMMAND_ICP[]							= "ICP";
 constexpr char COMMAND_ICP_REFERENCE_IS_FIRST[]			= "REFERENCE_IS_FIRST";
@@ -187,6 +188,55 @@ static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString&
 			cmd.print(QObject::tr("Set active SF name: '%1'").arg(sfName));
 			sfIndex = -1;
 		}
+	}
+}
+
+int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return -1;
+	}
+	if (!cloud->hasScalarFields())
+	{
+		return -1;
+	}
+
+	if (sfIndex == -2)
+	{
+		return static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
+	}
+
+	if (sfIndex == -1)
+	{
+		//check if this cloud has a scalar field with the input name
+		sfIndex = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		if (sfIndex < 0)
+		{
+			ccLog::Warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(cloud->getName()).arg(sfName));
+			return -1;
+		}
+	}
+	else if (sfIndex >= static_cast<int>(cloud->getNumberOfScalarFields()))
+	{
+		ccLog::Warning(QObject::tr("Cloud %1 has less scalar fields than the SF index (%2/%3)").arg(cloud->getName()).arg(sfIndex).arg(cloud->getNumberOfScalarFields()));
+		return -1;
+	}
+
+	return sfIndex;
+}
+
+CCCoreLib::ScalarField* GetScalarField(ccPointCloud* cloud, int sfIndex, const QString& sfName)
+{
+	sfIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+	if (sfIndex < 0)
+	{
+		return nullptr;
+	}
+	else
+	{
+		return cloud->getScalarField(sfIndex);
 	}
 }
 
@@ -2515,7 +2565,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
 	}
 	
-	int sfIndex;
+	int sfIndex = -1;
 	QString sfName;
 	GetSFIndexOrName(cmd, sfIndex, sfName);
 	
@@ -2526,30 +2576,12 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 	
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		if (desc.pc && desc.pc->hasScalarFields())
+		if (desc.pc)
 		{
-			if (sfIndex < static_cast<int>(desc.pc->getNumberOfScalarFields()))
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				int thisSFIndex = sfIndex;
-				if (sfIndex == -2)
-				{
-					thisSFIndex = static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1;
-				}
-				else if (sfIndex == -1)
-				{
-					//check if this cloud has a scalar field with the input name
-					thisSFIndex = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
-					if (thisSFIndex < 0)
-					{
-						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(desc.pc->getName()).arg(sfName));
-						continue;
-					}
-				}
 				desc.pc->setCurrentScalarField(thisSFIndex);
-			}
-			else
-			{
-				cmd.warning(QObject::tr("Cloud '%1' has less scalar fields than the index to select!").arg(desc.pc->getName()));
 			}
 		}
 	}
@@ -2559,28 +2591,10 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(desc.mesh);
 		if (pc)
 		{
-			if (sfIndex < static_cast<int>(pc->getNumberOfScalarFields()))
+			int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				int thisSFIndex = sfIndex;
-				if (sfIndex == -2)
-				{
-					thisSFIndex = static_cast<int>(pc->getNumberOfScalarFields()) - 1;
-				}
-				else if (sfIndex == -1)
-				{
-					//check if this cloud has a scalar field with the input name
-					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfName));
-					if (thisSFIndex < 0)
-					{
-						cmd.warning(QObject::tr("Mesh '%1' vertices have no SF named '%2'").arg(desc.mesh->getName()).arg(sfName));
-						continue;
-					}
-				}
 				pc->setCurrentScalarField(thisSFIndex);
-			}
-			else
-			{
-				cmd.warning(QObject::tr("Mesh '%1' vertices have less scalar fields than the index to select!").arg(desc.mesh->getName()));
 			}
 		}
 	}
@@ -2626,7 +2640,7 @@ CommandRemoveSF::CommandRemoveSF()
 
 bool CommandRemoveSF::removeSF(int sfIndex, ccPointCloud& pc)
 {
-	if (pc.getNumberOfScalarFields() > static_cast<unsigned>(sfIndex))
+	if (sfIndex < static_cast<int>(pc.getNumberOfScalarFields()))
 	{
 		pc.deleteScalarField(sfIndex);
 		if (pc.getNumberOfScalarFields() == 0)
@@ -2653,7 +2667,7 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter: SF index after %1").arg(COMMAND_REMOVE_SF));
 	}
 
-	int sfIndex;
+	int sfIndex = -1;
 	QString sfName;
 	GetSFIndexOrName(cmd, sfIndex, sfName);
 
@@ -2661,21 +2675,11 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = sfIndex;
-			if (sfIndex == -2)
-				thisSFIndex = static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1;
-			else if (sfIndex == -1)
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				//check if this cloud has a scalar field with the input name
-				thisSFIndex = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
-				if (thisSFIndex < 0)
-				{
-					cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(desc.pc->getName()).arg(sfName));
-					continue;
-				}
+				removeSF(thisSFIndex, *desc.pc);
 			}
-			if (!removeSF(thisSFIndex, *desc.pc))
-				cmd.warning(QObject::tr("Cloud '%1' has not enough SFs").arg(desc.pc->getName()));
 		}
 	}
 
@@ -2688,21 +2692,15 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-				int thisSFIndex = sfIndex;
-				if (sfIndex == -2)
-					thisSFIndex = static_cast<int>(pc->getNumberOfScalarFields()) - 1;
-				else if (sfIndex == -1)
+				int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName);
+				if (thisSFIndex >= 0)
 				{
-					//check if this cloud has a scalar field with the input name
-					thisSFIndex = pc->getScalarFieldIndexByName(qPrintable(sfName));
-					if (thisSFIndex < 0)
+					removeSF(thisSFIndex, *pc);
+					if (pc->getNumberOfScalarFields() == 0)
 					{
-						cmd.warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(pc->getName()).arg(sfName));
-						continue;
+						desc.mesh->showSF(false);
 					}
 				}
-				if (!removeSF(thisSFIndex, *pc))
-					cmd.warning(QObject::tr("Mesh '%1' vertices have not enough SFs").arg(desc.mesh->getName()));
 			}
 		}
 	}
@@ -3714,8 +3712,69 @@ bool CommandCrop::process(ccCommandLineInterface& cmd)
 	return true;
 }
 
+
+CommandSFToCoord::CommandSFToCoord()
+	: ccCommandLineInterface::Command(QObject::tr("SF to Coord"), COMMAND_SF_TO_COORD)
+{}
+
+bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[SF TO COORD]"));
+
+	if (cmd.arguments().size() < 2)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (SF INDEX OR NAME) (DIMENSION)").arg(COMMAND_SF_TO_COORD));
+	}
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+	}
+
+	int sfIndex = -1;
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
+
+	//dimension
+	QString dimStr = cmd.arguments().takeFirst().toUpper();
+	bool exportDims[3] { dimStr == "X", dimStr == "Y", dimStr == "Z" };
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
+	{
+		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_SF_TO_COORD));
+	}
+
+	//now we can export the corresponding coordinate
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		if (desc.pc)
+		{
+			CCCoreLib::ScalarField* sf = GetScalarField(desc.pc, sfIndex, sfName);
+			if (sf)
+			{
+				if (desc.pc->setCoordFromSF(exportDims, sf, std::numeric_limits<PointCoordinateType>::quiet_NaN()))
+				{
+					desc.basename += QObject::tr("_SF_TO_COORD_%1").arg(dimStr);
+					if (cmd.autoSaveMode())
+					{
+						QString errorStr = cmd.exportEntity(desc);
+						if (!errorStr.isEmpty())
+						{
+							return cmd.error(errorStr);
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			return cmd.error(QObject::tr("Failed to set SF %1 as coord %2 on cloud '%3'!").arg(sfName).arg(dimStr).arg(desc.pc->getName()));
+		}
+	}
+
+	return true;
+}
+
 CommandCoordToSF::CommandCoordToSF()
-	: ccCommandLineInterface::Command(QObject::tr("Crop"), COMMAND_COORD_TO_SF)
+	: ccCommandLineInterface::Command(QObject::tr("Coord to SF"), COMMAND_COORD_TO_SF)
 {}
 
 bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
@@ -3732,27 +3791,13 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 	}
 	
 	//dimension
-	bool exportDims[3] = { false, false, false };
 	QString dimStr = cmd.arguments().takeFirst().toUpper();
+	bool exportDims[3]{ dimStr == "X", dimStr == "Y", dimStr == "Z" };
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
-		if (dimStr == "X")
-		{
-			exportDims[0] = true;
-		}
-		else if (dimStr == "Y")
-		{
-			exportDims[1] = true;
-		}
-		else if (dimStr == "Z")
-		{
-			exportDims[2] = true;
-		}
-		else
-		{
-			return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
-		}
+		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
 	}
-	
+
 	//now we can export the corresponding coordinate
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
@@ -3778,7 +3823,7 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 }
 
 CommandCrop2D::CommandCrop2D()
-	: ccCommandLineInterface::Command(QObject::tr("Crop"), COMMAND_CROP_2D)
+	: ccCommandLineInterface::Command(QObject::tr("Crop 2D"), COMMAND_CROP_2D)
 {}
 
 bool CommandCrop2D::process(ccCommandLineInterface& cmd)
@@ -4876,23 +4921,11 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation after '%1' (2 values expected)").arg(COMMAND_SF_ARITHMETIC));
 	}
 	
-	//read sf index
+	//read SF index
 	int sfIndex = -1;
-	bool ok = true;
-	QString sfIndexStr = cmd.arguments().takeFirst();
-	if (sfIndexStr.toUpper() == OPTION_LAST)
-	{
-		sfIndex = -2;
-	}
-	else
-	{
-		sfIndex = sfIndexStr.toInt(&ok);
-	}
-	if (!ok || sfIndex == -1)
-	{
-		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_ARITHMETIC));
-	}
-	
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
+
 	//read operation type
 	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
 	{
@@ -4930,18 +4963,22 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		if (desc.pc && desc.pc->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(desc.pc->getNumberOfScalarFields()))
+		if (desc.pc)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, sfIndex < 0 ? static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1 : sfIndex, inPlace))
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(desc, "SF_ARITHMETIC");
-				if (!errorStr.isEmpty())
+				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, inPlace))
 				{
-					return cmd.error(errorStr);
+					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(desc, "SF_ARITHMETIC");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -4953,18 +4990,22 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 		bool isLocked = false;
 		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
-		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		if (cloud && !isLocked)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, inPlace))
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_ARITHMETIC");
-				if (!errorStr.isEmpty())
+				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, inPlace))
 				{
-					return cmd.error(errorStr);
+					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_ARITHMETIC");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -4986,24 +5027,11 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
 	}
 	
-	//read sf index
+	//read SF index
 	int sfIndex = -1;
-	bool ok = true;
-	QString sfIndexStr = cmd.arguments().takeFirst();
-	if (sfIndexStr.toUpper() == OPTION_LAST)
-	{
-		sfIndex = -2;
-	}
-	else
-	{
-		sfIndex = sfIndexStr.toInt(&ok);
-	}
-	
-	if (!ok || sfIndex == -1)
-	{
-		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
-	}
-	
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
+
 	//read operation type
 	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
 	{
@@ -5039,18 +5067,22 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		if (desc.pc && desc.pc->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(desc.pc->getNumberOfScalarFields()))
+		if (desc.pc)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, sfIndex < 0 ? static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(desc, "SF_OP");
-				if (!errorStr.isEmpty())
+				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, true, &sf2))
 				{
-					return cmd.error(errorStr);
+					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(desc, "SF_OP");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5062,18 +5094,22 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		bool isLocked = false;
 		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
-		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		if (cloud && !isLocked)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP");
-				if (!errorStr.isEmpty())
+				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, true, &sf2))
 				{
-					return cmd.error(errorStr);
+					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5092,25 +5128,13 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 
     if (cmd.arguments().size() < 3)
     {
-        return cmd.error(QObject::tr("Missing parameter(s): SF index and operation and SF index '%1' (3 values expected)").arg(COMMAND_SF_OP));
+        return cmd.error(QObject::tr("Missing parameter(s): SF index and operation and SF index '%1' (3 values expected)").arg(COMMAND_SF_OP_SF));
     }
 
-    //read sf index 1
-    int sfIndex = -1;
-    bool ok = true;
-    QString sfIndexStr = cmd.arguments().takeFirst();
-    if (sfIndexStr.toUpper() == OPTION_LAST)
-    {
-        sfIndex = -2;
-    }
-    else
-    {
-        sfIndex = sfIndexStr.toInt(&ok);
-    }
-    if (!ok || sfIndex == -1)
-    {
-        return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
-    }
+    //read SF index 1
+	int sfIndex = -1;
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
 
     //read operation type
     ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
@@ -5123,48 +5147,41 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
         }
         else if (operation > ccScalarFieldArithmeticsDlg::MAX)
         {
-            return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP));
+            return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP_SF));
         }
     }
 
-    //read sf index 2
-    int sfIndex2 = -1;
-    ok = true;
-    sfIndexStr = cmd.arguments().takeFirst();
-    if (sfIndexStr.toUpper() == OPTION_LAST)
-    {
-        sfIndex2 = -2;
-    }
-    else
-    {
-        sfIndex2 = sfIndexStr.toInt(&ok);
-    }
-    if (!ok || sfIndex2 == -1)
-    {
-        return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
-    }
-
-    ccScalarFieldArithmeticsDlg::SF2 sf2;
-    {
-        sf2.isConstantValue = false;
-        sf2.sfIndex = sfIndex2;
-    }
+    //read SF index 2
+	int sfIndex2 = -1;
+	QString sfName2;
+	GetSFIndexOrName(cmd, sfIndex2, sfName2);
 
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		if (desc.pc && desc.pc->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(desc.pc->getNumberOfScalarFields()))
+		if (desc.pc)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, sfIndex < 0 ? static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
+			int thisSFFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFFIndex2 = GetScalarFieldIndex(desc.pc, sfIndex2, sfName2);
+			if (thisSFFIndex >= 0 && thisSFFIndex2 >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(desc, "SF_OP_SF");
-				if (!errorStr.isEmpty())
+				ccScalarFieldArithmeticsDlg::SF2 sf2;
 				{
-					return cmd.error(errorStr);
+					sf2.isConstantValue = false;
+					sf2.sfIndex = thisSFFIndex2;
+				}
+
+				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFFIndex, true, &sf2))
+				{
+					return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(desc, "SF_OP_SF");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5176,18 +5193,29 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 		bool isLocked = false;
 		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
-		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		if (cloud && !isLocked)
 		{
-			if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex, true, &sf2))
+			int thisSFFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			int thisSFFIndex2 = GetScalarFieldIndex(cloud, sfIndex2, sfName2);
+			if (thisSFFIndex >= 0 && thisSFFIndex2 >= 0)
 			{
-				return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
-			}
-			else if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP_SF");
-				if (!errorStr.isEmpty())
+				ccScalarFieldArithmeticsDlg::SF2 sf2;
 				{
-					return cmd.error(errorStr);
+					sf2.isConstantValue = false;
+					sf2.sfIndex = thisSFFIndex2;
+				}
+
+				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFFIndex, true, &sf2))
+				{
+					return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+				}
+				else if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP_SF");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5210,19 +5238,10 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
     if (cmd.clouds().size() < 2)
         return cmd.error(QObject::tr("Unexpected number of clouds for '%1' (at least 2 clouds expected: first = source, second = dest)").arg(COMMAND_SF_INTERP));
 
-    //read sf index
-    int sfIndex = -1;
-    bool ok = true;
-    QString sfIndexStr = cmd.arguments().takeFirst();
-    if (sfIndexStr.toUpper() == OPTION_LAST)
-    {
-        cmd.print(QObject::tr("[OPTION_LAST]"));
-        sfIndex = -2;
-    }
-    else
-    {
-        sfIndex = sfIndexStr.toInt(&ok);
-    }
+    //read sf index or name
+	int sfIndex = -1;
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
 
     bool destIsFirst = false;
     while (!cmd.arguments().empty())
@@ -5249,13 +5268,13 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 		dest = cmd.clouds()[0].pc;
     }
 
-    if (!ok || sfIndex == -1)
+	sfIndex = GetScalarFieldIndex(source, sfIndex, sfName);
+	if (sfIndex < 0)
 	{
-        return cmd.error(QObject::tr("[CommandSFInterpolation::process] Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
+		return false;
 	}
 
-	sfIndex = sfIndex < 0 ? source->getNumberOfScalarFields() - 1 : sfIndex;
-    cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + source->getScalarField(sfIndex)->getName());
+	cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + source->getScalarField(sfIndex)->getName());
 
 	//semi-persistent parameters
 	ccPointCloudInterpolator::Parameters params;
@@ -5283,52 +5302,42 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or scalar field name after '%1' (2 values expected)").arg(COMMAND_RENAME_SF));
 	}
 
-	//read sf index
+	//read SF index
 	int sfIndex = -1;
-	bool ok = true;
-	QString sfIndexStr = cmd.arguments().takeFirst();
-	if (sfIndexStr.toUpper() == OPTION_LAST)
-	{
-		sfIndex = -2;
-	}
-	else
-	{
-		sfIndex = sfIndexStr.toInt(&ok);
-	}
-
-	if (!ok || sfIndex == -1)
-	{
-		return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_SF_OP));
-	}
+	QString sfName;
+	GetSFIndexOrName(cmd, sfIndex, sfName);
 
 	//read the SF name
-	QString sfName = cmd.arguments().takeFirst();
+	QString newSFName = cmd.arguments().takeFirst();
 
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		if (desc.pc && desc.pc->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(desc.pc->getNumberOfScalarFields()))
+		if (desc.pc)
 		{
-			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(desc.pc->getNumberOfScalarFields()) - 1 : sfIndex);
-			int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
-			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error("A SF with the same name is already defined on cloud " + desc.pc->getName());
-			}
-			CCCoreLib::ScalarField* sf = desc.pc->getScalarField(thisSFIndex);
-			if (!sf)
-			{
-				assert(false);
-				return cmd.error("Internal error: invalid SF index");
-			}
-			sf->setName(qPrintable(sfName));
-
-			if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(desc, "SF_RENAMED");
-				if (!errorStr.isEmpty())
+				int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(qPrintable(newSFName));
+				if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
 				{
-					return cmd.error(errorStr);
+					return cmd.error("A SF with the same name is already defined on cloud " + desc.pc->getName());
+				}
+				CCCoreLib::ScalarField* sf = desc.pc->getScalarField(thisSFIndex);
+				if (!sf)
+				{
+					assert(false);
+					return cmd.error("Internal error: invalid SF index");
+				}
+				sf->setName(qPrintable(newSFName));
+
+				if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(desc, "SF_RENAMED");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5339,28 +5348,31 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 	{
 		bool isLocked = false;
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(desc.mesh, &isLocked);
-		if (cloud && !isLocked && cloud->getNumberOfScalarFields() != 0 && sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
+		if (cloud && !isLocked)
 		{
-			int thisSFIndex = (sfIndex < 0 ? static_cast<int>(cloud->getNumberOfScalarFields()) - 1 : sfIndex);
-			int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(sfName));
-			if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			if (thisSFIndex >= 0)
 			{
-				return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
-			}
-			CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
-			if (!sf)
-			{
-				assert(false);
-				return cmd.error("Internal error: invalid SF index");
-			}
-			sf->setName(qPrintable(sfName));
-
-			if (cmd.autoSaveMode())
-			{
-				QString errorStr = cmd.exportEntity(desc, "SF_RENAMED");
-				if (!errorStr.isEmpty())
+				int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(newSFName));
+				if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
 				{
-					return cmd.error(errorStr);
+					return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
+				}
+				CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+				if (!sf)
+				{
+					assert(false);
+					return cmd.error("Internal error: invalid SF index");
+				}
+				sf->setName(qPrintable(newSFName));
+
+				if (cmd.autoSaveMode())
+				{
+					QString errorStr = cmd.exportEntity(desc, "SF_RENAMED");
+					if (!errorStr.isEmpty())
+					{
+						return cmd.error(errorStr);
+					}
 				}
 			}
 		}
@@ -5437,7 +5449,7 @@ CommandICP::CommandICP()
 bool CommandICP::process(ccCommandLineInterface& cmd)
 {
 	cmd.print(QObject::tr("[ICP]"));
-	
+
 	//look for local options
 	bool referenceIsFirst = false;
 	bool adjustScale = false;
@@ -5446,11 +5458,13 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	unsigned iterationCount = 0;
 	unsigned randomSamplingLimit = 20000;
 	unsigned overlap = 100;
-	int modelSFAsWeights = -1;
-	int dataSFAsWeights = -1;
+	int modelWeightsSFIndex = -1;
+	QString modelWeightsSFIndexName;
+	int dataWeightsSFIndex = -1;
+	QString dataWeightsSFIndexName;
 	int maxThreadCount = 0;
 	int transformationFilters = CCCoreLib::RegistrationTools::SKIP_NONE;
-	
+
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -5458,28 +5472,28 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			referenceIsFirst = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ADJUST_SCALE))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			adjustScale = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			enableFarthestPointRemoval = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_MIN_ERROR_DIIF))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF));
@@ -5495,7 +5509,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT));
@@ -5510,7 +5524,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP));
@@ -5527,7 +5541,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
@@ -5543,60 +5557,38 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
 			}
-			QString sfIndex = cmd.arguments().takeFirst();
-			if (sfIndex.toUpper() == OPTION_LAST)
-			{
-				modelSFAsWeights = -2;
-			}
-			else
-			{
-				bool ok;
-				modelSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || modelSFAsWeights == -1)
-				{
-					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
-				}
-			}
+
+			//read SF index
+			GetSFIndexOrName(cmd, modelWeightsSFIndex, modelWeightsSFIndexName);
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
 			}
-			QString sfIndex = cmd.arguments().takeFirst();
-			if (sfIndex.toUpper() == OPTION_LAST)
-			{
-				dataSFAsWeights = -2;
-			}
-			else
-			{
-				bool ok;
-				dataSFAsWeights = sfIndex.toInt(&ok);
-				if (!ok || dataSFAsWeights == -1)
-				{
-					return cmd.error(QObject::tr("Invalid SF index! (after %1)").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
-				}
-			}
+
+			//read SF index
+			GetSFIndexOrName(cmd, dataWeightsSFIndex, dataWeightsSFIndexName);
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
 			}
-			
+
 			bool ok;
 			maxThreadCount = cmd.arguments().takeFirst().toInt(&ok);
 			if (!ok || maxThreadCount < 0)
@@ -5608,7 +5600,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			
+
 			if (!cmd.arguments().empty())
 			{
 				QString rotation = cmd.arguments().takeFirst().toUpper();
@@ -5647,9 +5639,9 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 		}
 	}
-	
+
 	//we'll get the first two entities
-	CLEntityDesc* dataAndModel[2] = { nullptr, nullptr };
+	CLEntityDesc* dataAndModel[2]{ nullptr, nullptr };
 	{
 		int index = 0;
 		if (!cmd.clouds().empty())
@@ -5668,53 +5660,45 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				dataAndModel[index++] = &cmd.meshes()[1];
 			}
 		}
-		
+
 		if (index < 2)
 		{
 			return cmd.error(QObject::tr("Not enough loaded entities (expect at least 2!)"));
 		}
 	}
-	
+
 	//put them in the right order (data first, model next)
 	if (referenceIsFirst)
 	{
 		std::swap(dataAndModel[0], dataAndModel[1]);
 	}
-	
-	//check that the scalar fields (weights) exist
-	if (dataSFAsWeights != -1)
+
+	//check that the weights (scalar fields) exist
+	if (dataWeightsSFIndex >= 0 || !dataWeightsSFIndexName.isEmpty())
 	{
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
-		if (!cloud || cloud->getNumberOfScalarFields() == 0 || dataSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		ccPointCloud* dataAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
+		if (!dataAsCloud)
 		{
-			return cmd.error(QObject::tr("Invalid SF index for data entity! (%1)").arg(dataSFAsWeights));
-		}
-		else
-		{
-			if (dataSFAsWeights < 0) //last SF
+			dataWeightsSFIndex = GetScalarFieldIndex(dataAsCloud, dataWeightsSFIndex, dataWeightsSFIndexName);
+			if (dataWeightsSFIndex >= 0)
 			{
-				dataSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
+				cmd.print(QObject::tr("[ICP] SF #%1 (data entity) will be used as weights").arg(dataWeightsSFIndex));
+				dataAsCloud->setCurrentDisplayedScalarField(dataWeightsSFIndex);
 			}
-			cmd.print(QObject::tr("[ICP] SF #%1 (data entity) will be used as weights").arg(dataSFAsWeights));
-			cloud->setCurrentDisplayedScalarField(dataSFAsWeights);
 		}
 	}
-	
-	if (modelSFAsWeights != -1)
+
+	if (modelWeightsSFIndex >= 0 || !modelWeightsSFIndexName.isEmpty())
 	{
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
-		if (!cloud || cloud->getNumberOfScalarFields() == 0 || modelSFAsWeights >= static_cast<int>(cloud->getNumberOfScalarFields()))
+		ccPointCloud* modelAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
+		if (!modelAsCloud)
 		{
-			return cmd.error(QObject::tr("Invalid SF index for model entity! (%1)").arg(modelSFAsWeights));
-		}
-		else
-		{
-			if (modelSFAsWeights < 0) //last SF
+			modelWeightsSFIndex = GetScalarFieldIndex(modelAsCloud, modelWeightsSFIndex, modelWeightsSFIndexName);
+			if (modelWeightsSFIndex >= 0)
 			{
-				modelSFAsWeights = static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
+				cmd.print(QObject::tr("[ICP] SF #%1 (model entity) will be used as weights").arg(modelWeightsSFIndex));
+				modelAsCloud->setCurrentDisplayedScalarField(modelWeightsSFIndex);
 			}
-			cmd.print(QObject::tr("[ICP] SF #%1 (model entity) will be used as weights").arg(modelSFAsWeights));
-			cloud->setCurrentDisplayedScalarField(modelSFAsWeights);
 		}
 	}
 	
@@ -5745,8 +5729,8 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 									finalError,
 									finalPointCount,
 									parameters,
-									dataSFAsWeights >= 0,
-									modelSFAsWeights >= 0,
+									dataWeightsSFIndex >= 0,
+									modelWeightsSFIndex >= 0,
 									cmd.widgetParent()))
 	{
 		ccHObject* data = dataAndModel[0]->getEntity();

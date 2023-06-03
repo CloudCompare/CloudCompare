@@ -728,6 +728,9 @@ public: //other methods
 	//! Exports the specified coordinate dimension(s) to scalar field(s)
 	bool exportCoordToSF(bool exportDims[3]);
 
+	//! Sets coordinate(s) from a scalar field
+	bool setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf, PointCoordinateType defaultValueForNaN);
+
 	//! Exports the specified normal dimension(s) to scalar field(s)
 	bool exportNormalToSF(bool exportDims[3]);
 

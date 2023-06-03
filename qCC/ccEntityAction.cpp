@@ -1306,11 +1306,15 @@ namespace ccEntityAction
 		ectsDlg.setWindowTitle(QObject::tr("Export SF to coordinate(s)"));
 		
 		if (!ectsDlg.exec())
+		{
 			return false;
+		}
 		
-		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
-		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		bool importDim[3] { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
+		if (!importDim[0] && !importDim[1] && !importDim[2]) //nothing to do?!
+		{
 			return false;
+		}
 		
 		//for each selected cloud (or vertices set)
 		for (ccHObject* ent : selectedEntities)
@@ -1324,9 +1328,11 @@ namespace ccEntityAction
 				if (sf != nullptr)
 				{
 					unsigned ptsCount = pc->size();
-					bool hasDefaultValueForNaN = false;
+					assert(sf->size() == pc->size());
+
 					ScalarType defaultValueForNaN = sf->getMin();
-					
+
+					// look for NaN values first
 					for (unsigned i = 0; i < ptsCount; ++i)
 					{
 						ScalarType s = sf->getValue(i);
@@ -1334,38 +1340,29 @@ namespace ccEntityAction
 						//handle NaN values
 						if (!CCCoreLib::ScalarField::ValidValue(s))
 						{
-							if (!hasDefaultValueForNaN)
+							bool ok = false;
+							double out = QInputDialog::getDouble(	parent,
+																	QObject::tr("SF --> coordinate"),
+																	QObject::tr("Enter the coordinate equivalent to NaN values:"),
+																	defaultValueForNaN,
+																	-1.0e9,
+																	1.0e9,
+																	6,
+																	&ok);
+							if (ok)
 							{
-								bool ok = false;
-								double out = QInputDialog::getDouble(	parent,
-																		QObject::tr("SF --> coordinate"),
-																		QObject::tr("Enter the coordinate equivalent for NaN values:"),
-																		defaultValueForNaN,
-																		-1.0e9,
-																		1.0e9,
-																		6,
-																		&ok);
-								if (ok)
-									defaultValueForNaN = static_cast<ScalarType>(out);
-								else
-									ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value"));
-								hasDefaultValueForNaN = true;
+								defaultValueForNaN = static_cast<ScalarType>(out);
 							}
-							s = defaultValueForNaN;
+							else
+							{
+								ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
+							}
+
+							break;
 						}
-						
-						CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
-						
-						//test each dimension
-						if (exportDim[0])
-							P->x = s;
-						if (exportDim[1])
-							P->y = s;
-						if (exportDim[2])
-							P->z = s;
 					}
 					
-					pc->invalidateBoundingBox();
+					pc->setCoordFromSF(importDim, sf, defaultValueForNaN);
 				}
 			}
 		}

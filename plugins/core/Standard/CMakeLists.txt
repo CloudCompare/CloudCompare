@@ -15,8 +15,6 @@ add_subdirectory( qPoissonRecon )
 add_subdirectory( qRANSAC_SD )
 add_subdirectory( qSRA )
 add_subdirectory( qMeshBoolean )
-add_subdirectory( qTreeIso )
-add_subdirectory( q3DMASC )
 
 #plugins integrated as submodules
 set( submod_plugins
@@ -24,6 +22,8 @@ set( submod_plugins
 		${CMAKE_CURRENT_SOURCE_DIR}/qMasonry
 		${CMAKE_CURRENT_SOURCE_DIR}/qMPlane
 		${CMAKE_CURRENT_SOURCE_DIR}/qJSonRPCPlugin
+		${CMAKE_CURRENT_SOURCE_DIR}/qTreeIso
+		${CMAKE_CURRENT_SOURCE_DIR}/q3DMASC
 )
 
 foreach( dir ${submod_plugins} )

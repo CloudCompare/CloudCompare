@@ -55,6 +55,7 @@ qAnimation plugin:
 [*] It would be great to specify the resolution.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 [*] Generate side-by-side stereo animations (for Google cardboard, etc.) with the qAnimation plugin
+[*] Use a point cloud (e.g. sensor positions / trajectory) to make the virtual camera move (https://www.cloudcompare.org/forum/viewtopic.php?t=6348)
 
 qFacets plugin:
 [*] Option to export 3D polygons (facets) in SHP files

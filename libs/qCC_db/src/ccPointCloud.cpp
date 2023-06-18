@@ -6095,6 +6095,8 @@ bool ccPointCloud::setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf
 	}
 
 	invalidateBoundingBox();
+	
+	return true;
 }
 
 bool ccPointCloud::exportCoordToSF(bool exportDims[3])

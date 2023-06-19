@@ -2407,7 +2407,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf(filename.toStdString(), "r", e57::CHECKSUM_POLICY_SPARSE);
+		e57::ImageFile imf(filename.toStdString(), "r", e57::ChecksumPolicy::Sparse);
 		
 		if (!imf.isOpen())
 		{

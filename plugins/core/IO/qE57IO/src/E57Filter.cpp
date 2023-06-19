@@ -746,9 +746,9 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		root.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));
 
 		// Get ASTM version number supported by library, so can write it into file
-		int astmMajor;
-		int astmMinor;
-		e57::ustring libraryId;
+		uint32_t astmMajor;
+		uint32_t astmMinor;
+		std::string libraryId;
 		e57::Version::get(astmMajor, astmMinor, libraryId);
 
 		root.set("versionMajor", e57::IntegerNode(imf, astmMajor));

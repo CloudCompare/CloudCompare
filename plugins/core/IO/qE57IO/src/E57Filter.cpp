@@ -23,6 +23,7 @@
 
 //libE57Format
 #include <E57Format.h>
+#include <E57Version.h>
 
 //qCC_db
 #include <ccCameraSensor.h>
@@ -748,7 +749,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		int astmMajor;
 		int astmMinor;
 		e57::ustring libraryId;
-		e57::Utilities::getVersions(astmMajor, astmMinor, libraryId);
+		e57::Version::get(astmMajor, astmMinor, libraryId);
 
 		root.set("versionMajor", e57::IntegerNode(imf, astmMajor));
 		root.set("versionMinor", e57::IntegerNode(imf, astmMinor));

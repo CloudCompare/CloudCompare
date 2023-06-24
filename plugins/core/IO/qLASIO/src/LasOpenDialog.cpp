@@ -20,6 +20,7 @@
 // Qt
 #include <QFileDialog>
 #include <QLocale>
+#include <QSettings>
 
 constexpr int TILLING_TAB_INDEX = 1;
 
@@ -81,6 +82,22 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	        { doSelectAllESF(true); });
 	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
 	        { doSelectAllESF(false); });
+
+	// reload the last tiling output path
+	{
+		QSettings settings;
+		settings.beginGroup("LasIO");
+		QString tilingPath   = settings.value("TilingPath", QCoreApplication::applicationDirPath()).toString();
+		int     tiling0Count = settings.value("Tiling0", 1).toInt();
+		int     tiling1Count = settings.value("Tiling1", 1).toInt();
+		int     tilingDim    = settings.value("TilingDim", 0).toInt();
+		settings.endGroup();
+
+		tilingDimensioncomboBox->setCurrentIndex(tilingDim);
+		tilingSpinBox0->setValue(tiling0Count);
+		tilingSpinBox1->setValue(tiling1Count);
+		tilingOutputPathLineEdit->setText(tilingPath);
+	}
 }
 
 void LasOpenDialog::doSelectAll(bool doSelect)
@@ -244,6 +261,14 @@ LasTilingOptions LasOpenDialog::tilingOptions() const
 	int numTiles0 = std::max(tilingSpinBox0->value(), 1);
 	int numTiles1 = std::max(tilingSpinBox1->value(), 1);
 
+	// Save the parameters for later
+	QSettings settings;
+	settings.beginGroup("LasIO");
+	settings.setValue("Tiling0", numTiles0);
+	settings.setValue("Tiling1", numTiles1);
+	settings.setValue("TilingDim", index);
+	settings.endGroup();
+
 	return LasTilingOptions{
 	    tilingOutputPathLineEdit->text(),
 	    dimensions,
@@ -255,7 +280,18 @@ LasTilingOptions LasOpenDialog::tilingOptions() const
 void LasOpenDialog::onBrowseTilingOutputDir()
 {
 	const QString outputDir = QFileDialog::getExistingDirectory(this, "Select output directory for tiles");
+	if (outputDir.isEmpty())
+	{
+		return;
+	}
+
+	// update output path
 	tilingOutputPathLineEdit->setText(outputDir);
+
+	QSettings settings;
+	settings.beginGroup("LasIO");
+	settings.setValue("TilingPath", outputDir);
+	settings.endGroup();
 }
 
 void LasOpenDialog::onCurrentTabChanged(int index)

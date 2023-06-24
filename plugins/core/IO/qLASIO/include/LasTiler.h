@@ -23,17 +23,17 @@
 
 enum class LasTilingDimensions
 {
-	XY,
-	XZ,
-	YZ,
+	XY = 0,
+	XZ = 1,
+	YZ = 2,
 };
 
 struct LasTilingOptions final
 {
 	QString             outputDir;
-	LasTilingDimensions dims;
-	unsigned            numTiles0;
-	unsigned            numTiles1;
+	LasTilingDimensions dims      = LasTilingDimensions::XY;
+	unsigned            numTiles0 = 0;
+	unsigned            numTiles1 = 0;
 
 	inline size_t index0() const
 	{

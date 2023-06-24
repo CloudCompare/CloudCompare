@@ -171,6 +171,7 @@ v2.13.alpha (???) - (??/??/????)
 		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value
 		- The shift value is now displayed as a property of the currently selected scalar field
 		- When using the standard LAS I/O filter (PDAL), the user can now set a custom shift for GPS time values
+		- The 'tiling' option will now remember the last used parameters (destination folder, dimension and number of tiles)
 
 	- E57 files:
 		- Images are now saved internally as JPEG files (faster and smaller)

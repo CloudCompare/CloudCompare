@@ -52,7 +52,6 @@ Big ones:
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 
 qAnimation plugin:
-
 [*] It would be great to specify the resolution.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 [*] Generate side-by-side stereo animations (for Google cardboard, etc.) with the qAnimation plugin
@@ -63,6 +62,7 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 
 Various:
+[*] Add 'drawing' tools (curve passing through 3 points, arc, circle, etc.) to be exported to DXF
 [*] Compute the distance/range from sensor center via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=27540)
 [*] Save or load preset format for the new LAS I/O plugin (https://www.cloudcompare.org/forum/viewtopic.php?t=6167)
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)

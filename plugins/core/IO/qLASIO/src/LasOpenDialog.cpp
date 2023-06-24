@@ -242,7 +242,7 @@ LasTilingOptions LasOpenDialog::tilingOptions() const
 	// Do these maxs for safety, but the UI should not allow
 	// users to enter values below 1
 	int numTiles0 = std::max(tilingSpinBox0->value(), 1);
-	int numTiles1 = std::max(tilingSpinBox0->value(), 1);
+	int numTiles1 = std::max(tilingSpinBox1->value(), 1);
 
 	return LasTilingOptions{
 	    tilingOutputPathLineEdit->text(),

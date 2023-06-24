@@ -45,6 +45,7 @@ Big ones:
 	- Colors level (https://www.cloudcompare.org/forum/viewtopic.php?t=5743)
 	- Fit > Sphere (https://www.cloudcompare.org/forum/viewtopic.php?p=25333)
 	- Edit > Colors > Enhance with intensities (https://www.cloudcompare.org/forum/viewtopic.php?t=5795)
+	- Set the random subsampling rate as a percentage (https://www.cloudcompare.org/forum/viewtopic.php?f=14&t=6357)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)

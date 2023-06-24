@@ -8076,11 +8076,13 @@ void MainWindow::doActionFitCircle()
 						.arg(radius)
 						.arg(rms));
 
-		ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), normal);
-		trans.setTranslation(center);
+		ccLog::Print(tr("[Fit circle] Normal (%1,%2,%3)")
+			.arg(normal.x)
+			.arg(normal.y)
+			.arg(normal.z));
 
 		// create the circle representation as a polyline
-		ccPolyline* circle = ccPolyline::Circle(center, radius, 128);
+		ccPolyline* circle = ccPolyline::Circle(CCVector3(0, 0, 0), radius, 128);
 		if (circle)
 		{
 			circle->setName(QObject::tr("Circle r=%1").arg(radius));
@@ -8088,6 +8090,12 @@ void MainWindow::doActionFitCircle()
 			circle->prepareDisplayForRefresh();
 			circle->copyGlobalShiftAndScale(*cloud);
 			circle->setMetaData("RMS", rms);
+
+			ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), normal);
+			trans.setTranslation(center);
+			circle->applyGLTransformation_recursive(&trans);
+
+
 			addToDB(circle, false, false, false);
 		}
 	}

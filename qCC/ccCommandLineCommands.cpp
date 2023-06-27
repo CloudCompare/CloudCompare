@@ -2245,7 +2245,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(maxValStr));
 			}
 		}
-		else if (useValForMin == USE_NONE)
+		else if (useValForMax == USE_NONE)
 		{
 			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 			if (!paramOk)

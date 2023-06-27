@@ -23,6 +23,8 @@ public:
 	//! Returns the entity normal
 	virtual CCVector3 getNormal() const = 0;
 
+	virtual ~ccPlanarEntityInterface() = default;
+
 protected: //members
 
 	//! Draws a normal vector (OpenGL)

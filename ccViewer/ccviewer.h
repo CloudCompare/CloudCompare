@@ -80,7 +80,7 @@ public: // ccMainInterface compliance
 	ccHObject* loadFile(QString filename, bool silent) override { return addToDB(QStringList{ filename }); }
 	void setSelectedInDB(ccHObject* obj, bool selected) override {}
 	const ccHObject::Container& getSelectedEntities() const override;
-	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE);
+	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
 	ccHObject* dbRootObject() override;
 	void redrawAll(bool only2D = false) override;
 	void refreshAll(bool only2D = false) override;

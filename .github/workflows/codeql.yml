@@ -1,0 +1,110 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ 'master' ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ 'master' ]
+  schedule:
+    - cron: '1 16 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp' ]
+        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
+        # Use only 'java' to analyze code written in Java, Kotlin or both
+        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
+        # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
+
+    env:
+      SCALAR_DOUBLE: ON
+      COMPILER: GCC
+      CC: gcc
+      CXX: g++
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -qy cmake ninja-build libqt5svg5-dev libqt5opengl5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev libtbb-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libboost-program-options-dev libboost-thread-dev libeigen3-dev libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
+
+    - name: Configure cmake
+      run: |
+        mkdir build
+
+        cmake \
+          -B build \
+          -S . \
+          -G Ninja \
+          -DEIGEN_ROOT_DIR=/usr/include/eigen3 \
+          -DJSON_ROOT_DIR=/usr/include/jsoncpp \
+          -DDLIB_ROOT=/usr/include \
+          -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} \
+          -DCCCORELIB_USE_TBB=ON \
+          -DPLUGIN_EXAMPLE_GL=ON \
+          -DPLUGIN_EXAMPLE_IO=ON \
+          -DPLUGIN_EXAMPLE_STANDARD=ON \
+          -DPLUGIN_GL_QEDL=ON \
+          -DPLUGIN_GL_QSSAO=ON \
+          -DPLUGIN_IO_QADDITIONAL=ON \
+          -DPLUGIN_IO_QCORE=ON \
+          -DPLUGIN_IO_QE57=ON \
+          -DPLUGIN_IO_QPHOTOSCAN=ON \
+          -DPLUGIN_IO_QLAS=ON \
+          -DPLUGIN_IO_QRDB=ON \
+          -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
+          -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
+          -DPLUGIN_STANDARD_QANIMATION=ON \
+          -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
+          -DPLUGIN_STANDARD_QBROOM=ON \
+          -DPLUGIN_STANDARD_QCANUPO=ON \
+          -DPLUGIN_STANDARD_QCOMPASS=ON \
+          -DPLUGIN_STANDARD_QCSF=ON \
+          -DPLUGIN_STANDARD_QFACETS=ON \
+          -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON \
+          -DPLUGIN_STANDARD_QHPR=ON \
+          -DPLUGIN_STANDARD_QM3C2=ON \
+          -DPLUGIN_STANDARD_QPCV=ON \
+          -DPLUGIN_STANDARD_QPOISSON_RECON=ON \
+          -DPLUGIN_STANDARD_QSRA=ON \
+          -DPLUGIN_STANDARD_QRANSAC_SD=ON \
+          -DPLUGIN_STANDARD_QPCL=ON \
+          -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
+          -DBUILD_TESTING=ON
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        # If you wish to specify custom queries, you can do so here or in a config file.
+        # By default, queries listed here will override any specified in a config file.
+        # Prefix the list here with "+" to use these queries and those in the config file.
+
+        # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
+        # queries: security-extended,security-and-quality
+
+    - name: Build
+      run: cmake --build build --parallel
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"

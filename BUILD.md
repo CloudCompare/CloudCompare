@@ -1,10 +1,10 @@
-# Compilation of CloudCompare 2.11+
+# Compilation of CloudCompare 2.13+
 
 ## 1. Base dependencies
 
 CloudCompare requires [CMake](http://www.cmake.org) to be built.
 
-The main dependency of CloudCompare is Qt. CloudCompare 2.11+ requires 5.9 <= Qt < 6.0.
+The main dependency of CloudCompare is Qt. CloudCompare 2.13+ requires 5.12 <= Qt < 6.0.
 
 - On Windows it is recommended to use the installer from the [Qt website](https://www.qt.io/).
 - On macOs you can also use the installer from Qt's website, or use homebrew.

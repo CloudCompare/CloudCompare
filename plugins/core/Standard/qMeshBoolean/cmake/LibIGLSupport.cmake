@@ -23,7 +23,7 @@ else()
 	target_include_directories( ${PROJECT_NAME} PRIVATE ${EIGEN_ROOT_DIR} )
 endif()
 
-find_package( CGAL REQUIRED )
+find_package( CGAL REQUIRED COMPONENTS Core )
 
 # Link project with libigl library
 function( target_link_libIGL ) # 1 argument: ARGV0 = project name

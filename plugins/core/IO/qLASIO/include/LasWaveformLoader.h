@@ -33,8 +33,8 @@ struct LasWaveformLoader
 
 	void loadWaveform(ccPointCloud& pointCloud, const laszip_point& currentPoint) const;
 
-	unsigned                       fwfDataCount{0};
-	unsigned                       fwfDataOffset{0};
+	long long                       fwfDataCount{0};
+	long long                       fwfDataOffset{0};
 	bool                           isPointFormatExtended{false};
 	ccPointCloud::FWFDescriptorSet descriptors;
 };

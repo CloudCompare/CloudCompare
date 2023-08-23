@@ -60,6 +60,7 @@ qAnimation plugin:
 qFacets plugin:
 [*] Option to export 3D polygons (facets) in SHP files
 [*] Add the facet perimeter to the set of exported values
+[*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
 [*] Batch export several polylines CSV 'height profiles' (see https://www.cloudcompare.org/forum/viewtopic.php?p=28189)

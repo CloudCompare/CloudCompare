@@ -125,7 +125,7 @@ class LasExtraScalarField
 	uint8_t noData[MAX_DIM_SIZE][8]           = {0};
 	uint8_t mins[MAX_DIM_SIZE][8]             = {0};
 	uint8_t maxs[MAX_DIM_SIZE][8]             = {0};
-	double  scales[MAX_DIM_SIZE]              = {0.0};
+	double  scales[MAX_DIM_SIZE]              = {1.0};
 	double  offsets[MAX_DIM_SIZE]             = {0.0};
 
 	// These are added by us

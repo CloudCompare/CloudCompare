@@ -108,7 +108,7 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct& laszipHeader,
 			return;
 		}
 		fwfDataCount  = evlrHeader.recordLength;
-		fwfDataOffset = 0;
+		fwfDataOffset = LasDetails::EvlrHeader::SIZE;
 		if (fwfDataCount == 0)
 		{
 			ccLog::Warning(QString("[LAS] Invalid waveform data packet size (0). We'll load all the "

@@ -599,7 +599,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		params.lasOffset = lasOffset;
 	}
 
-	// In case of command line call, add automatically all remaining scalar fiels as extra scalar fields
+	// In case of command line call, add automatically all remaining scalar fields as extra scalar fields
 	if (!parameters.alwaysDisplaySaveDialog)
 	{
 		uint sfCount = pointCloud->getNumberOfScalarFields();

@@ -89,6 +89,7 @@ constexpr char COMMAND_NOISE_FILTER_ABS[]				= "ABS";
 constexpr char COMMAND_NOISE_FILTER_RIP[]				= "RIP";
 constexpr char COMMAND_REMOVE_DUPLICATE_POINTS[]	    = "RDP";
 constexpr char COMMAND_SAMPLE_MESH[]					= "SAMPLE_MESH";
+constexpr char COMMAND_COMPRESS_FWF[]					= "COMPRESS_FWF";
 constexpr char COMMAND_CROP[]							= "CROP";
 constexpr char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 constexpr char COMMAND_CROP_2D[]						= "CROP2D";
@@ -3562,6 +3563,27 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 		QCoreApplication::processEvents();
 	}
 	
+	return true;
+}
+
+CommandCompressFWF::CommandCompressFWF()
+	: ccCommandLineInterface::Command(QObject::tr("Sample mesh"), COMMAND_COMPRESS_FWF)
+{}
+
+bool CommandCompressFWF::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[COMPRESS FWF]"));
+
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+	}
+
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		desc.pc->compressFWFData();
+	}
+
 	return true;
 }
 

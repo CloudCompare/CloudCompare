@@ -302,6 +302,13 @@ struct CommandSampleMesh : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandCompressFWF : public ccCommandLineInterface::Command
+{
+	CommandCompressFWF();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandCrop : public ccCommandLineInterface::Command
 {
 	CommandCrop();

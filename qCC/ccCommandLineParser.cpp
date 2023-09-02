@@ -714,6 +714,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandNoiseFilter));
 	registerCommand(Command::Shared(new CommandRemoveDuplicatePoints));
 	registerCommand(Command::Shared(new CommandSampleMesh));
+	registerCommand(Command::Shared(new CommandCompressFWF));
 	registerCommand(Command::Shared(new CommandExtractVertices));
 	registerCommand(Command::Shared(new CommandCrossSection));
 	registerCommand(Command::Shared(new CommandCrop));

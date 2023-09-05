@@ -20,6 +20,7 @@
 
 //Local
 #include "ccPickingListener.h"
+#include "cc2DLabel.h"
 
 //Qt
 #include <QDialog>
@@ -124,6 +125,7 @@ public:
 protected:
 
 	void onPointIndexChanged(int);
+	bool add2DLabel(ccPointCloud* cloud, unsigned int pointIndex);
 	void updateCurrentWaveform();
 	void onPointPickingButtonToggled(bool);
 	void onExportWaveAsCSV();
@@ -144,6 +146,9 @@ protected: //members
 
 	//! Maximum wave amplitude (for all points)
 	double m_waveMax;
+
+	std::shared_ptr<cc2DLabel> m_label;
+	ccGenericGLDisplay* m_display;
 };
 
 #endif //CC_WAVEFORM_DIALOG_HEADER

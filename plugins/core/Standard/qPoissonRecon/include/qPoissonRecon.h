@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                  CLOUDCOMPARE PLUGIN: qPoissonRecon                    #
@@ -14,9 +16,6 @@
 //#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 //#                                                                        #
 //##########################################################################
-
-#ifndef Q_POISSON_RECON_PLUGIN_HEADER
-#define Q_POISSON_RECON_PLUGIN_HEADER
 
 #include "ccStdPluginInterface.h"
 
@@ -54,5 +53,3 @@ protected:
 	QAction* m_action;
 
 };
-
-#endif

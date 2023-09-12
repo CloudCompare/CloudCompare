@@ -3168,6 +3168,14 @@ The active scalar field should have integer values.</string>
     <string>Fits a circle on the selected cloud</string>
    </property>
   </action>
+  <action name="actionDrawNormals">
+   <property name="text">
+    <string>Draw normals</string>
+   </property>
+   <property name="toolTip">
+    <string>Draw normals</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3182,7 +3190,6 @@ The active scalar field should have integer values.</string>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections>

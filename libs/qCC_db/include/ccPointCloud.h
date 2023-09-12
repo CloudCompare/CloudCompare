@@ -32,6 +32,7 @@
 
 //Qt
 #include <QGLBuffer>
+#include "QOpenGLShaderProgram"
 
 class ccScalarField;
 class ccPolyline;
@@ -163,7 +164,7 @@ public: //features deletion/clearing
 	//! Notify a modification of color / scalar field display parameters or contents
 	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; updateDecompressedNormals();}
 	//! Notify a modification of points display parameters or contents
 	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
 
@@ -361,6 +362,27 @@ public: //normals computation/orientation
 	//! Orient normals with Fast Marching
 	bool orientNormalsWithFM(		unsigned char level,
 									ccProgressDialog* pDlg = nullptr);
+
+	//! Toggle the drawing of normals as small lines
+	bool setNormalsAreDrawn(bool state);
+
+	//! Are normals drawn as vectors?
+	bool normalsAreDrawn();
+
+	//! Set the length of the normals
+	void setNormalLength(float value);
+
+	//! Set the length of the normals
+	void setNormalColor(QColor color);
+
+	//! Do the drawing of normals
+	bool drawNormals(CC_DRAW_CONTEXT &context);
+
+	//! When normals are drawn, a widget is open to set somme parameters
+	void setDrawNormalsWidget(QSharedPointer<QWidget> &&widget);
+
+	//! Update the drawing of normals
+	void updateDecompressedNormals();
 
 public: //waveform (e.g. from airborne scanners)
 
@@ -766,6 +788,7 @@ protected:
 
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;
+	std::vector<CCVector3> m_decompressed_normals; // used for drawing normals if needed
 
 	//! Specifies whether current scalar field color scale should be displayed or not
 	bool m_sfColorScaleDisplayed;
@@ -877,4 +900,18 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
+	bool m_normalsAreDrawn;
+	float m_normalLength;
+	QColor m_normalColor;
+
+	QSharedPointer<QOpenGLShaderProgram> m_programDrawNormals;
+
+	struct programDrawNormalsParameters{
+		programDrawNormalsParameters() {}
+		int vertexLocation;
+		int normalLocation;
+		int normalLengthLocation;
+		int matrixLocation;
+		int colorLocation;
+	} m_programParameters;
 };

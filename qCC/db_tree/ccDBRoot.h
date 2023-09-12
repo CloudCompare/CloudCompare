@@ -19,12 +19,16 @@
 #define CC_DB_ROOT_HEADER
 
 //Qt
+#include "ccPointCloud.h"
 #include <QAbstractItemModel>
 #include <QPoint>
 #include <QTreeView>
 
 //qCC_db
 #include <ccHObject.h>
+
+//qCC
+#include "ccDrawNormalsWidget.h"
 
 //System
 #include <unordered_set>
@@ -216,6 +220,13 @@ private:
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 	void enableBubbleViewMode();
 	void editLabelScalarValue();
+	void drawNormals();
+
+	//! Show the dialog to set the normal length
+	void openDrawNormalsWidget(ccPointCloud *cloud);
+
+	//! Close the dialog to set the normal length
+	void closeDrawNormalsWidget(ccPointCloud *cloud);
 
 Q_SIGNALS:
 	void selectionChanged();
@@ -301,9 +312,13 @@ protected:
 	QAction* m_enableBubbleViewMode;
 	//! Context menu action: change current scalar value (via a 2D label)
 	QAction* m_editLabelScalarValue;
+	//! Context menu action: draw normals
+	QAction* m_drawNormals;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;
+
+	std::map<ccPointCloud*, ccDrawNormalsWidget*> map_cloud_drawNormalsWidget;
 };
 
 #endif

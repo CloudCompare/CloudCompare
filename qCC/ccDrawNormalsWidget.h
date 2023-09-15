@@ -22,7 +22,6 @@ public:
 
 	enum normalColor {YELLOW, RED, GREEN, BLUE, BLACK};
 
-public slots:
 	void normalLengthValueChanged(double value);
 	void setNormalColor();
 

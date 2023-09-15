@@ -19,8 +19,8 @@ ccDrawNormalsWidget::ccDrawNormalsWidget(ccPointCloud* cloud, QWidget* parent)
 	buttonGroup->addButton(this->ui->pushButtonBlue);
 	buttonGroup->addButton(this->ui->pushButtonBlack);
 
-	connect(this->ui->doubleSpinBox_normalLength, SIGNAL(valueChanged(double)), this, SLOT(normalLengthValueChanged(double)));
-	connect(this->ui->pushButtonYellow,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->doubleSpinBox_normalLength, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDrawNormalsWidget::normalLengthValueChanged);
+	connect(this->ui->pushButtonYellow,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
 	connect(this->ui->pushButtonRed,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
 	connect(this->ui->pushButtonGreen,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
 	connect(this->ui->pushButtonBlue,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);

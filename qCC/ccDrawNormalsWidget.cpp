@@ -3,28 +3,28 @@
 
 #include <QSettings>
 
-ccDrawNormalsWidget::ccDrawNormalsWidget(ccPointCloud *cloud, QWidget *parent) :
-	QWidget(parent),
-	ui(new Ui::ccDrawNormalsWidget),
-	m_cloud(cloud)
+ccDrawNormalsWidget::ccDrawNormalsWidget(ccPointCloud* cloud, QWidget* parent)
+	: QWidget(parent)
+	, ui(new Ui::ccDrawNormalsWidget)
+	, m_cloud(cloud)
 {
 	ui->setupUi(this);
 
 	ui->label_cloudName->setText(m_cloud->getName());
 
 	buttonGroup = new QButtonGroup();
-	buttonGroup->addButton(this->ui->pushButton_yellow);
-	buttonGroup->addButton(this->ui->pushButton_red);
-	buttonGroup->addButton(this->ui->pushButton_green);
-	buttonGroup->addButton(this->ui->pushButton_blue);
-	buttonGroup->addButton(this->ui->pushButton_black);
+	buttonGroup->addButton(this->ui->pushButtonYellow);
+	buttonGroup->addButton(this->ui->pushButtonRed);
+	buttonGroup->addButton(this->ui->pushButtonGreen);
+	buttonGroup->addButton(this->ui->pushButtonBlue);
+	buttonGroup->addButton(this->ui->pushButtonBlack);
 
 	connect(this->ui->doubleSpinBox_normalLength, SIGNAL(valueChanged(double)), this, SLOT(normalLengthValueChanged(double)));
-	connect(this->ui->pushButton_yellow,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButton_red,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButton_green,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButton_blue,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButton_black,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonYellow,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonRed,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonGreen,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonBlue,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonBlack,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
 
 	readSettings();
 
@@ -45,65 +45,76 @@ ccDrawNormalsWidget::~ccDrawNormalsWidget()
 
 void ccDrawNormalsWidget::readSettings()
 {
-	QSettings settings("OSUR/CloudCompare", "drawNormals");
+	QSettings settings;
 
-	double normalLength = settings.value("normalLength", 1.).toDouble();
-	normalColor color = static_cast<normalColor>(settings.value("normalColor", YELLOW).toUInt());
+	double normalLength = settings.value("PointCloudNormals/normalLength", 1.).toDouble();
+	normalColor color = static_cast<normalColor>(settings.value("PointCloudNormals/normalColor", YELLOW).toUInt());
 
 	ui->doubleSpinBox_normalLength->setValue(normalLength);
 
-	switch (color) {
+	switch (color)
+	{
 	case RED:
-		this->ui->pushButton_red->setChecked(true);
+		this->ui->pushButtonRed->setChecked(true);
 		break;
 	case GREEN:
-		this->ui->pushButton_red->setChecked(true);
+		this->ui->pushButtonGreen->setChecked(true);
 		break;
 	case BLUE:
-		this->ui->pushButton_red->setChecked(true);
+		this->ui->pushButtonBlue->setChecked(true);
 		break;
 	case BLACK:
-		this->ui->pushButton_red->setChecked(true);
+		this->ui->pushButtonBlack->setChecked(true);
 		break;
 	default:
-		this->ui->pushButton_yellow->setChecked(true);
+		this->ui->pushButtonYellow->setChecked(true);
 		break;
 	}
+
+	settings.endGroup();
 }
 
 void ccDrawNormalsWidget::writeSettings()
 {
-	QSettings settings("OSUR/CloudCompare", "drawNormals");
+	QSettings settings;
+	settings.beginGroup("PointCloudNormals");
 
 	settings.setValue("normalLength", ui->doubleSpinBox_normalLength->value());
 
-	if (this->ui->pushButton_red->isChecked())
+	if (this->ui->pushButtonRed->isChecked())
 		settings.setValue("normalColor", RED);
-	else if (this->ui->pushButton_green->isChecked())
+	else if (this->ui->pushButtonGreen->isChecked())
 		settings.setValue("normalColor", GREEN);
-	else if (this->ui->pushButton_blue->isChecked())
+	else if (this->ui->pushButtonBlue->isChecked())
 		settings.setValue("normalColor", BLUE);
-	else if (this->ui->pushButton_black->isChecked())
+	else if (this->ui->pushButtonBlack->isChecked())
 		settings.setValue("normalColor", BLACK);
 	else
 		settings.setValue("normalColor", YELLOW);
+
+	settings.endGroup();
 }
 
 void ccDrawNormalsWidget::normalLengthValueChanged(double value)
 {
 	m_cloud->setNormalLength(value);
+	if (m_cloud->getDisplay())
+		m_cloud->redrawDisplay();
 }
 
 void ccDrawNormalsWidget::setNormalColor()
 {
-	if (this->ui->pushButton_red->isChecked())
-		m_cloud->setNormalColor(QColorConstants::Red);
-	else if (this->ui->pushButton_green->isChecked())
-		m_cloud->setNormalColor(QColorConstants::Green);
-	else if (this->ui->pushButton_blue->isChecked())
-		m_cloud->setNormalColor(QColorConstants::Blue);
-	else if (this->ui->pushButton_black->isChecked())
-		m_cloud->setNormalColor(QColorConstants::Black);
+	if (this->ui->pushButtonRed->isChecked())
+		m_cloud->setNormalLineColor(ccColor::red);
+	else if (this->ui->pushButtonGreen->isChecked())
+		m_cloud->setNormalLineColor(ccColor::green);
+	else if (this->ui->pushButtonBlue->isChecked())
+		m_cloud->setNormalLineColor(ccColor::blue);
+	else if (this->ui->pushButtonBlack->isChecked())
+		m_cloud->setNormalLineColor(ccColor::black);
 	else
-		m_cloud->setNormalColor(QColorConstants::Yellow);
+		m_cloud->setNormalLineColor(ccColor::yellow);
+
+	if (m_cloud->getDisplay())
+		m_cloud->redrawDisplay();
 }

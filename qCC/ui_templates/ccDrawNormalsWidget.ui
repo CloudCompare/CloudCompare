@@ -45,7 +45,7 @@
    <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButton_yellow">
+      <widget class="QPushButton" name="pushButtonYellow">
        <property name="styleSheet">
         <string notr="true">background-color:yellow</string>
        </property>
@@ -58,7 +58,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_red">
+      <widget class="QPushButton" name="pushButtonRed">
        <property name="styleSheet">
         <string notr="true">background-color:red</string>
        </property>
@@ -71,7 +71,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_green">
+      <widget class="QPushButton" name="pushButtonGreen">
        <property name="styleSheet">
         <string notr="true">background-color:green</string>
        </property>
@@ -84,7 +84,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_blue">
+      <widget class="QPushButton" name="pushButtonBlue">
        <property name="styleSheet">
         <string notr="true">background-color:blue</string>
        </property>
@@ -97,7 +97,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_black">
+      <widget class="QPushButton" name="pushButtonBlack">
        <property name="styleSheet">
         <string notr="true">background-color:black</string>
        </property>

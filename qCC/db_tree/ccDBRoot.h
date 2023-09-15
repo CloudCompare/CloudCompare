@@ -220,13 +220,13 @@ private:
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 	void enableBubbleViewMode();
 	void editLabelScalarValue();
-	void drawNormals();
+	void showPointCloudNormalAsLine();
 
 	//! Show the dialog to set the normal length
-	void openDrawNormalsWidget(ccPointCloud *cloud);
+	void openPointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud);
 
 	//! Close the dialog to set the normal length
-	void closeDrawNormalsWidget(ccPointCloud *cloud);
+	void closePointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud);
 
 Q_SIGNALS:
 	void selectionChanged();
@@ -313,12 +313,12 @@ protected:
 	//! Context menu action: change current scalar value (via a 2D label)
 	QAction* m_editLabelScalarValue;
 	//! Context menu action: draw normals
-	QAction* m_drawNormals;
+	QAction* m_showPointCloudNormalAsLine;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;
 
-	std::map<ccPointCloud*, ccDrawNormalsWidget*> map_cloud_drawNormalsWidget;
+	QSharedPointer<ccDrawNormalsWidget> m_normalLineParametersWidget;
 };
 
 #endif

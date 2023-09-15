@@ -34,6 +34,7 @@
 
 // qCC_db
 #include "ccMaterial.h"
+#include <ccPointCloud.h>
 
 // qCC_glWindow
 #include "ccGLWindowInterface.h"
@@ -129,6 +130,7 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	settings.endGroup();
 
 	ccGLWindowInterface::SetShaderPath(m_shaderPath);
+	ccPointCloud::SetShaderPath(m_shaderPath);
 	ccPluginManager::Get().setPaths(m_pluginPaths);
 
 	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("qt"), m_translationPath);

@@ -32,7 +32,7 @@
 
 //Qt
 #include <QGLBuffer>
-#include "QOpenGLShaderProgram"
+#include <QOpenGLShaderProgram>
 
 class ccScalarField;
 class ccPolyline;
@@ -364,24 +364,21 @@ public: //normals computation/orientation
 									ccProgressDialog* pDlg = nullptr);
 
 	//! Toggle the drawing of normals as small lines
-	bool setNormalsAreDrawn(bool state);
+	void showNormalsAsLines(bool state);
 
 	//! Are normals drawn as vectors?
-	bool normalsAreDrawn();
+	const bool normalsAreDrawn();
 
 	//! Set the length of the normals
 	void setNormalLength(float value);
 
-	//! Set the length of the normals
-	void setNormalColor(QColor color);
+	//! Set the color of the normals
+	void setNormalLineColor(ccColor::Rgba color);
 
 	//! Do the drawing of normals
-	bool drawNormals(CC_DRAW_CONTEXT &context);
+	bool drawNormalsAsLines(CC_DRAW_CONTEXT &context);
 
-	//! When normals are drawn, a widget is open to set somme parameters
-	void setDrawNormalsWidget(QSharedPointer<QWidget> &&widget);
-
-	//! Update the drawing of normals
+	//! Update the decompressed normals which are used by drawNormalsAsLines
 	void updateDecompressedNormals();
 
 public: //waveform (e.g. from airborne scanners)
@@ -768,6 +765,9 @@ public: //other methods
 	//! Shift the points of a given quantity along their normals
 	bool shiftPointsAlongNormals(PointCoordinateType shift);
 
+	//! Set the path for shaders
+	static void SetShaderPath(const QString &path);
+
 protected:
 
 	//inherited from ccHObject
@@ -788,7 +788,9 @@ protected:
 
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;
-	std::vector<CCVector3> m_decompressed_normals; // used for drawing normals if needed
+
+	//! Used for drawing normals if needed
+	std::vector<CCVector3> m_decompressedNormals;
 
 	//! Specifies whether current scalar field color scale should be displayed or not
 	bool m_sfColorScaleDisplayed;
@@ -900,18 +902,21 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
-	bool m_normalsAreDrawn;
-	float m_normalLength;
-	QColor m_normalColor;
+	bool m_normalsDrawnAsLines;
+
+	struct normalLineParameters
+	{
+		float length = 1.;
+		ccColor::Rgba color = ccColor::yellow;
+	} m_normalLineParameters;
 
 	QSharedPointer<QOpenGLShaderProgram> m_programDrawNormals;
 
 	struct programDrawNormalsParameters{
-		programDrawNormalsParameters() {}
-		int vertexLocation;
-		int normalLocation;
-		int normalLengthLocation;
-		int matrixLocation;
-		int colorLocation;
+		int vertexLocation = 0;
+		int normalLocation = 0;
+		int normalLengthLocation = 0;
+		int matrixLocation = 0;
+		int colorLocation = 0;
 	} m_programParameters;
 };

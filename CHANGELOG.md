@@ -247,12 +247,15 @@ v2.13.alpha (???) - (??/??/????)
 	- qEllipser plugin:
 		- option to export the polyline (and its major and minor axes) as polylines
 
+	- Animation plugin:
+		- option to export the trajectory as a polyline
+
 	- ICP and Align tools:
 		- when using a reference entity having a defined Global Shift & Scale the registration matrix
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
 
-	- Slome/.poly files:
+	- Salome/.poly files:
 		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
 			the polyline
 

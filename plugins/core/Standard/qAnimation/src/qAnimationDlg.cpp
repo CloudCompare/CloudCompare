@@ -674,8 +674,50 @@ void qAnimationDlg::onSmoothRatioChanged(double ratio)
 
 ccPolyline* qAnimationDlg::getTrajectory()
 {
-	//TODO
-	return nullptr;
+	const Trajectory& trajectory = smoothTrajectoryGroupBox->isChecked() ? m_smoothVideoSteps : m_videoSteps;
+	if (trajectory.size() < 2)
+	{
+		ccLog::Error("Not enough steps");
+		return nullptr;
+	}
+
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	if (!vertices->reserve(static_cast<unsigned>(trajectory.size())))
+	{
+		ccLog::Error("Not enough memory");
+		delete vertices;
+		return nullptr;
+	}
+
+	for (const Step& step : trajectory)
+	{
+		CCVector3 C = step.cameraCenter.toPC();
+
+		if (vertices->size() != 0)
+		{
+			// check that the camera has moved
+			if (!CCCoreLib::GreaterThanEpsilon((*vertices->getPoint(vertices->size() - 1) - C).norm()))
+			{
+				continue;
+			}
+		}
+		vertices->addPoint(C);
+	}
+	vertices->shrinkToFit();
+
+	ccPolyline* polyline = new ccPolyline(vertices);
+	polyline->addChild(vertices);
+	vertices->setVisible(false);
+	if (!polyline->addPointIndex(0, static_cast<unsigned>(vertices->size())))
+	{
+		ccLog::Error("Not enough memory");
+		delete vertices;
+		return nullptr;
+	}
+	polyline->setClosed(loopCheckBox->isChecked());
+	polyline->setDisplay_recursive(m_videoSteps.front().viewport->getDisplay()); // warning the smoothed version has no valid 'viewport'
+
+	return polyline;
 }
 
 bool qAnimationDlg::exportTrajectoryOnExit()

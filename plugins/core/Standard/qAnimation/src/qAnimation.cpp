@@ -123,18 +123,14 @@ void qAnimation::doAction()
 	videoDlg.exec();
 
 	//Export trajectory (for debug)
-	if (videoDlg.exportTrajectoryOnExit() && videoDlg.getTrajectory())
+	if (videoDlg.exportTrajectoryOnExit())
 	{
-		ccPolyline* trajectory = new ccPolyline(*videoDlg.getTrajectory());
-		if (!trajectory)
+		ccPolyline* trajectory = videoDlg.getTrajectory();
+		if (trajectory)
 		{
-			ccLog::Error("Not enough memory");
-		}
-		else
-		{
-			trajectory->setColor(ccColor::yellow);
-			trajectory->showColors(true);
+			trajectory->setTempColor(ccColor::red);
 			trajectory->setWidth(2);
+			//trajectory->prepareDisplayForRefresh();
 
 			getMainAppInterface()->addToDB(trajectory);
 		}

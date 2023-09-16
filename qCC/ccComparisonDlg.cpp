@@ -858,6 +858,7 @@ bool ccComparisonDlg::computeDistances()
 		if (multiThread && maxDistCheckBox->isChecked())
 		{
 			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
+			multiThread = false;
 		}
 
 		//setup parameters

@@ -158,6 +158,7 @@ v2.13.alpha (???) - (??/??/????)
 		- the user can now configure the name suffix for the remaining and segmented cloud
 		- the display should be faster until the first segmentation is performed
 		- unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
+		- Polygon mode: use ALT + left click to remove the last vertex
 
 	- Color scales / Color scale editor
 		- it is now possible to override a custom label value by a text
@@ -247,12 +248,15 @@ v2.13.alpha (???) - (??/??/????)
 	- qEllipser plugin:
 		- option to export the polyline (and its major and minor axes) as polylines
 
+	- Animation plugin:
+		- option to export the trajectory as a polyline
+
 	- ICP and Align tools:
 		- when using a reference entity having a defined Global Shift & Scale the registration matrix
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
 
-	- Slome/.poly files:
+	- Salome/.poly files:
 		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
 			the polyline
 
@@ -288,6 +292,8 @@ v2.13.alpha (???) - (??/??/????)
 	- Glitch fix: extracting a single slice via the Contour extraction option of the 'Cross Section' tool would not work
 	- Fix the Support for High DPI screens (4K) on Windows
 	- Allow OBJ files with symlinks to properly load material files
+	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
+
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

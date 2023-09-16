@@ -1396,11 +1396,6 @@ void ccGLWindowInterface::setSceneDB(ccHObject* root)
 	zoomGlobal();
 }
 
-float ccGLWindowInterface::computeTrihedronLength() const
-{
-	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN) * m_captureMode.zoomFactor + QFontMetrics(getTextDisplayFont()).width('X');
-}
-
 void ccGLWindowInterface::computeColorRampAreaLimits(int& yStart, int& yStop) const
 {
 	const int defaultMargin = static_cast<int>(5 * m_captureMode.zoomFactor);
@@ -2783,7 +2778,9 @@ void ccGLWindowInterface::setFontPointSize(int pointSize)
 
 QFont ccGLWindowInterface::getTextDisplayFont() const
 {
-	return m_font;
+	QFont font = m_font;
+	font.setPointSize(getFontPointSize());
+	return font;
 }
 
 int ccGLWindowInterface::getLabelFontPointSize() const
@@ -3467,7 +3464,7 @@ void ccGLWindowInterface::displayText(	QString text,
 	//actual text color
 	const ccColor::Rgba& rgba = (color ? *color : getDisplayParameters().textDefaultCol);
 
-	QFont textFont = (font ? *font : m_font);
+	QFont textFont = (font ? *font : getTextDisplayFont());
 
 	QFontMetrics fm(textFont);
 	int textDescent = fm.descent();
@@ -4113,22 +4110,24 @@ void ccGLWindowInterface::drawCross()
 	glFunc->glPopAttrib(); //GL_LINE_BIT
 }
 
+float ccGLWindowInterface::computeTrihedronLength() const
+{
+	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).width('X')) * m_captureMode.zoomFactor;
+}
+
 void ccGLWindowInterface::drawTrihedron()
 {
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
-	QFont textFont = getTextDisplayFont(); //we take rendering zoom into account!
-	QFontMetrics fm(textFont);
-	QRect rectX = fm.boundingRect('X');
 	float trihedronEdgeLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
-	float trihedronLength = trihedronEdgeLength + CC_TRIHEDRON_TEXT_MARGIN * m_captureMode.zoomFactor + rectX.width();
+	float trihedronLength = computeTrihedronLength();
 
 	float halfW = glWidth() / 2.0f;
 	float halfH = glHeight() / 2.0f;
 
-	float trihedronCenterX = halfW - trihedronLength - 10.0f;
-	float trihedronCenterY = halfH - trihedronLength - 5.0f;
+	float trihedronCenterX = halfW - trihedronLength - 10.0f * m_captureMode.zoomFactor;
+	float trihedronCenterY = halfH - trihedronLength - 5.0f * m_captureMode.zoomFactor;
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -4186,10 +4185,14 @@ void ccGLWindowInterface::drawTrihedron()
 		CCVector3d tipY2D = m_viewportParams.viewMat * tipY;
 		CCVector3d tipZ2D = m_viewportParams.viewMat * tipZ;
 
-		double radius = std::max(rectX.width(), rectX.height()) / 2.0 + CC_TRIHEDRON_TEXT_MARGIN * m_captureMode.zoomFactor;
+		QRect rectX = QFontMetrics(m_font).boundingRect('X'); //rect X ignores the rendering zoom!
+
+		double radius = (std::max(rectX.width(), rectX.height()) / 2.0 + CC_TRIHEDRON_TEXT_MARGIN) * m_captureMode.zoomFactor;
 
 		CCVector2d toTrihedronOrigin(trihedronCenterX, -trihedronCenterY);
-		CCVector2d toCharOrigin(-(rectX.x() + rectX.width() / 2.0), rectX.y() + rectX.height() / 4.0); // rectX.height() should be divided by 2, but it looks better with 4 !
+		CCVector2d toCharOrigin = CCVector2d(-(rectX.x() + rectX.width() / 2.0), rectX.y() + rectX.height() / 4.0) * m_captureMode.zoomFactor; // rectX.height() should be divided by 2, but it looks better with 4 !
+
+		QFont textFont = getTextDisplayFont(); //we take rendering zoom into account!
 
 		ccGL::Color(glFunc, ccColor::red);
 		{
@@ -4239,22 +4242,16 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 
 	//we first compute the width equivalent to 25% of horizontal screen width
 	//(this is why it's only valid in orthographic mode !)
-	//DGM: in 'capture mode', we have to fall back to the case 'render zoom = 1' (otherwise we might not get the exact same aspect)
-	double equivalentWidth = RoundScale(scaleMaxW * pixelSize / (m_captureMode.enabled ? m_captureMode.zoomFactor : 1.0f));
+	double equivalentWidth = RoundScale(scaleMaxW * pixelSize);
 
 	QFont font = getTextDisplayFont(); //we take rendering zoom into account!
 	QFontMetrics fm(font);
 
 	//we deduce the scale drawing width
 	float scaleW_pix = static_cast<float>(equivalentWidth / pixelSize);
-	if (m_captureMode.enabled)
-	{
-		//we can now safely apply the rendering zoom
-		scaleW_pix *= m_captureMode.zoomFactor;
-	}
 	float trihedronLength = computeTrihedronLength();
-	float dW = 2.0f * trihedronLength + 20.0f;
-	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f);
+	float dW = 2.0f * trihedronLength + 20.0f * m_captureMode.zoomFactor;
+	float dH = std::max(fm.height() * 1.25f, trihedronLength + 5.0f * m_captureMode.zoomFactor);
 	float w = glWidth() / 2.0f - dW;
 	float h = glHeight() / 2.0f - dH;
 	float tick = 3.0f * m_captureMode.zoomFactor;
@@ -4553,9 +4550,6 @@ void ccGLWindowInterface::doPaintGL()
 		//scheduled redraw is (about to be) done
 		cancelScheduledRedraw();
 	}
-
-	//we update font size (for text display)
-	setFontPointSize(getFontPointSize());
 
 	//context initialization
 	CC_DRAW_CONTEXT CONTEXT;
@@ -5447,7 +5441,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 							borderHeight - CC_GL_FILTER_BANNER_MARGIN - CC_GL_FILTER_BANNER_MARGIN / 2,
 							QString("[GL filter] ") + m_activeGLFilter->getDescription(),
 							static_cast<uint16_t>(RenderTextReservedIDs::GLFilterLabel)
-							/*, m_font*/); //we ignore the custom font size
+							/*, getTextDisplayFont()*/); //we ignore the custom font (size)
 
 				yStart += borderHeight;
 			}
@@ -5459,6 +5453,8 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 
 				int ll_currentHeight = glHeight() - 10; //lower left
 				int uc_currentHeight = 10; //upper center
+
+				QFont font = getTextDisplayFont();
 
 				for (const auto& message : m_messagesToDisplay)
 				{
@@ -5472,15 +5468,15 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 					{
 					case LOWER_LEFT_MESSAGE:
 					{
-						renderText(10, ll_currentHeight, message.message, textureID, m_font);
-						int messageHeight = QFontMetrics(m_font).height();
+						renderText(10, ll_currentHeight, message.message, textureID, font);
+						int messageHeight = QFontMetrics(font).height();
 						ll_currentHeight -= (messageHeight * 5) / 4; //add a 25% margin
 					}
 					break;
 
 					case UPPER_CENTER_MESSAGE:
 					{
-						QRect rect = QFontMetrics(m_font).boundingRect(message.message);
+						QRect rect = QFontMetrics(font).boundingRect(message.message);
 						//take the GL filter banner into account!
 						int x = (glWidth() - rect.width()) / 2;
 						int y = uc_currentHeight + rect.height();
@@ -5488,14 +5484,14 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 						{
 							y += getGlFilterBannerHeight();
 						}
-						renderText(x, y, message.message, textureID, m_font);
+						renderText(x, y, message.message, textureID, font);
 						uc_currentHeight += (rect.height() * 5) / 4; //add a 25% margin
 					}
 					break;
 
 					case SCREEN_CENTER_MESSAGE:
 					{
-						QFont newFont(m_font); //no need to take zoom into account!
+						QFont newFont(font); //no need to take zoom into account!
 						newFont.setPointSize(12 * getDevicePixelRatio());
 						QRect rect = QFontMetrics(newFont).boundingRect(message.message);
 						//only one message supported in the screen center (for the moment ;)
@@ -5668,8 +5664,6 @@ QImage ccGLWindowInterface::renderToImage(	float zoomFactor/*=1.0f*/,
 		setPointSize(_defaultPointSize * zoomFactor, true);
 		//we update line width (for bounding-boxes, etc.)
 		setLineWidth(_defaultLineWidth * zoomFactor);
-		//we update font size (for text display)
-		setFontPointSize(getFontPointSize());
 	}
 
 	ccFrameBufferObject* fbo = nullptr;
@@ -5871,7 +5865,6 @@ QImage ccGLWindowInterface::renderToImage(	float zoomFactor/*=1.0f*/,
 	setLineWidth(_defaultLineWidth);
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;
-	setFontPointSize(getFontPointSize());
 
 	invalidateViewport();
 	invalidateVisualization();

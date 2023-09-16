@@ -291,6 +291,8 @@ v2.13.alpha (???) - (??/??/????)
 	- Glitch fix: extracting a single slice via the Contour extraction option of the 'Cross Section' tool would not work
 	- Fix the Support for High DPI screens (4K) on Windows
 	- Allow OBJ files with symlinks to properly load material files
+	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
+
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

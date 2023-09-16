@@ -641,8 +641,12 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 	unsigned vertCount = m_polyVertices->size();
 
 	//particular case: we close the rectangular selection by a 2nd click
-	if (m_rectangularSelection && vertCount == 4 && (m_state & RUNNING))
+	if (	m_rectangularSelection
+		&&	(vertCount == 4)
+		&&	(m_state & RUNNING) )
+	{
 		return;
+	}
 
 	//new point
 	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
@@ -685,24 +689,48 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 		//we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			if (!m_polyVertices->reserve(vertCount+1))
+			//ALT key pressed at the same time?
+			bool altKeyPressed = ((QApplication::keyboardModifiers() & Qt::AltModifier) == Qt::AltModifier);
+			if (altKeyPressed)
 			{
-				ccLog::Error("Out of memory!");
-				allowPolylineExport(false);
-				return;
-			}
+				// reverse logic: we remove the last point
+				if (vertCount > 2)
+				{
+					m_polyVertices->resize(vertCount - 1);
+					m_segmentationPoly->resize(m_segmentationPoly->size() - 1);
 
-			//we replace last point by the current one
-			CCVector3 *lastP = const_cast<CCVector3 *>(m_polyVertices->getPointPersistentPtr(vertCount-1));
-			*lastP = P;
-			//and add a new (equivalent) one
-			m_polyVertices->addPoint(P);
-			if (!m_segmentationPoly->addPointIndex(vertCount))
-			{
-				ccLog::Error("Out of memory!");
-				return;
+					//we replace last but one point by the current one
+					CCVector3 *lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 2));
+					*lastP = P;
+					m_polyVertices->invalidateBoundingBox();
+
+				}
+				else
+				{
+					// nothing to do
+				}
 			}
-			m_segmentationPoly->setClosed(true);
+			else
+			{
+				if (!m_polyVertices->reserve(vertCount + 1))
+				{
+					ccLog::Error("Out of memory!");
+					allowPolylineExport(false);
+					return;
+				}
+
+				//we replace last point by the current one
+				CCVector3 *lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
+				*lastP = P;
+				//and add a new (equivalent) one
+				m_polyVertices->addPoint(P);
+				if (!m_segmentationPoly->addPointIndex(vertCount))
+				{
+					ccLog::Error("Out of memory!");
+					return;
+				}
+				m_segmentationPoly->setClosed(true);
+			}
 		}
 		else //we must change mode
 		{
@@ -1024,7 +1052,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 		else
 		{
 			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
-			m_associatedWin->displayNewMessage("Left click: add contour points / Right click: close", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Left click: add contour points / ALT + left click: remove last / Right click: close", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 		}
 	}
 

@@ -158,6 +158,7 @@ v2.13.alpha (???) - (??/??/????)
 		- the user can now configure the name suffix for the remaining and segmented cloud
 		- the display should be faster until the first segmentation is performed
 		- unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
+		- Polygon mode: use ALT + left click to remove the last vertex
 
 	- Color scales / Color scale editor
 		- it is now possible to override a custom label value by a text

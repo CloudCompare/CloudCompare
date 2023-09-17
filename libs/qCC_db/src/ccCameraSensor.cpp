@@ -2243,11 +2243,11 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 			QTextStream stream(&f);
 			stream.setRealNumberNotation(QTextStream::FixedNotation);
 			stream.setRealNumberPrecision(6);
-			stream << "PixelSize" << ' ' << pixelSize << endl;
-			stream << "Global3DBBox" << ' ' << globalCorners[0] << ' ' << globalCorners[1] << ' ' << globalCorners[2] << ' ' << globalCorners[3] << endl;
+			stream << "PixelSize" << ' ' << pixelSize << Qt::endl;
+			stream << "Global3DBBox" << ' ' << globalCorners[0] << ' ' << globalCorners[1] << ' ' << globalCorners[2] << ' ' << globalCorners[3] << Qt::endl;
 			int globalWidth = static_cast<int>(ceil((globalCorners[2] - globalCorners[0]) / pixelSize));
 			int globalHeight = static_cast<int>(ceil((globalCorners[3] - globalCorners[1]) / pixelSize));
-			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth - 1 << ' ' << globalHeight - 1 << endl;
+			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth - 1 << ' ' << globalHeight - 1 << Qt::endl;
 		}
 	}
 
@@ -2350,7 +2350,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images,
 				stream.setRealNumberPrecision(6);
 				stream << "Image" << ' ' << exportFilename << ' ';
 				stream << "Local3DBBox" << ' ' << minC[0] << ' ' << minC[1] << ' ' << maxC[0] << ' ' << maxC[1] << ' ';
-				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal << ' ' << xShiftGlobal + static_cast<double>(w - 1) << ' ' << yShiftGlobal + static_cast<double>(h - 1) << endl;
+				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal << ' ' << xShiftGlobal + static_cast<double>(w - 1) << ' ' << yShiftGlobal + static_cast<double>(h - 1) << Qt::endl;
 				f.close();
 			}
 		}

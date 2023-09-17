@@ -1129,11 +1129,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			QTextStream stream(&f);
 			stream.setRealNumberNotation(QTextStream::FixedNotation);
 			stream.setRealNumberPrecision(12);
-			stream << "PixelSize" << ' ' << OR_pixelSize << endl;
-			stream << "Global3DBBox" << ' ' << OR_globalCorners[0] << ' ' << OR_globalCorners[1] << ' ' << OR_globalCorners[2] << ' ' << OR_globalCorners[3] << endl;
+			stream << "PixelSize" << ' ' << OR_pixelSize << Qt::endl;
+			stream << "Global3DBBox" << ' ' << OR_globalCorners[0] << ' ' << OR_globalCorners[1] << ' ' << OR_globalCorners[2] << ' ' << OR_globalCorners[3] << Qt::endl;
 			int globalWidth = static_cast<int>((OR_globalCorners[2]-OR_globalCorners[0])/OR_pixelSize);
 			int globalHeight = static_cast<int>((OR_globalCorners[3]-OR_globalCorners[1])/OR_pixelSize);
-			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth-1 << ' ' << globalHeight-1 << endl;
+			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth-1 << ' ' << globalHeight-1 << Qt::endl;
 
 			for (unsigned i=0; i<OR_infos.size(); ++i)
 			{
@@ -1141,7 +1141,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				stream << "Local3DBBox" << ' ' << OR_infos[i].minC[0] << ' ' << OR_infos[i].minC[1] << ' ' << OR_infos[i].maxC[0] << ' ' << OR_infos[i].maxC[1] << ' ';
 				int xShiftGlobal = static_cast<int>((OR_infos[i].minC[0]-OR_globalCorners[0])/OR_pixelSize);
 				int yShiftGlobal = static_cast<int>((OR_globalCorners[3]-OR_infos[i].maxC[1])/OR_pixelSize);
-				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal <<  ' ' << xShiftGlobal+(static_cast<int>(OR_infos[i].w)-1) << ' ' << yShiftGlobal+(static_cast<int>(OR_infos[i].h)-1) << endl;
+				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal <<  ' ' << xShiftGlobal+(static_cast<int>(OR_infos[i].w)-1) << ' ' << yShiftGlobal+(static_cast<int>(OR_infos[i].h)-1) << Qt::endl;
 			}
 		}
 		else

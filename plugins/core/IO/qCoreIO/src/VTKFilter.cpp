@@ -106,10 +106,10 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
 
 	//write header
-	outFile << "# vtk DataFile Version 3.0" << endl;
-	outFile << "vtk output" << endl;
-	outFile << "ASCII" << endl;
-	outFile << "DATASET " << (mesh ? "POLYDATA" : "UNSTRUCTURED_GRID") << endl;
+	outFile << "# vtk DataFile Version 3.0" << Qt::endl;
+	outFile << "vtk output" << Qt::endl;
+	outFile << "ASCII" << Qt::endl;
+	outFile << "DATASET " << (mesh ? "POLYDATA" : "UNSTRUCTURED_GRID") << Qt::endl;
 
 	//data type
 	QString floatType = (sizeof(PointCoordinateType) == 4 ? "float" : "double");
@@ -118,38 +118,38 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	// write the points
 	{
-		outFile << "POINTS " << ptsCount << " " << floatType << endl;
+		outFile << "POINTS " << ptsCount << " " << floatType << Qt::endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
 			const CCVector3* P = vertices->getPoint(i);
 			CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
 			outFile << Pglobal.x << " "
 					<< Pglobal.y << " "
-					<< Pglobal.z << endl;
+					<< Pglobal.z << Qt::endl;
 		}
 	}
 
 	// write triangles
 	if (mesh)
 	{
-		outFile << "POLYGONS " << triCount << " " << 4 * triCount << endl;
+		outFile << "POLYGONS " << triCount << " " << 4 * triCount << Qt::endl;
 		mesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < triCount; ++i)
 		{
 			const CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
-			outFile << "3 " << tsi->i1 << " " << tsi->i2 << " " << tsi->i3 << endl;
+			outFile << "3 " << tsi->i1 << " " << tsi->i2 << " " << tsi->i3 << Qt::endl;
 		}
 	}
 	else
 	{
 		// write cell data
-		outFile << "CELLS " << ptsCount << " " << 2 * ptsCount << endl;
+		outFile << "CELLS " << ptsCount << " " << 2 * ptsCount << Qt::endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
-			outFile << "1 " << i << endl;
+			outFile << "1 " << i << Qt::endl;
 
-		outFile << "CELL_TYPES " << ptsCount << endl;
+		outFile << "CELL_TYPES " << ptsCount << Qt::endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
-			outFile << "1 " << endl;
+			outFile << "1 " << Qt::endl;
 	}
 
 	
@@ -157,24 +157,24 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	// write normals
 	if (vertices->hasNormals())
 	{
-		outFile << "POINT_DATA " << ptsCount << endl;
-		outFile << "NORMALS Normals " << floatType << endl;
+		outFile << "POINT_DATA " << ptsCount << Qt::endl;
+		outFile << "NORMALS Normals " << floatType << Qt::endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
 			const CCVector3& N = vertices->getPointNormal(i);
-			outFile << N.x << " " << N.y << " " << N.z << endl;
+			outFile << N.x << " " << N.y << " " << N.z << Qt::endl;
 		}
 	}
 
 	// write colors
 	if (vertices->hasColors())
 	{
-		outFile << "POINT_DATA " << ptsCount << endl;
-		outFile << "COLOR_SCALARS RGB 3" << endl;
+		outFile << "POINT_DATA " << ptsCount << Qt::endl;
+		outFile << "COLOR_SCALARS RGB 3" << Qt::endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
 			const ccColor::Rgb& C = vertices->getPointColor(i);
-			outFile << static_cast<float>(C.r) / ccColor::MAX << " " << static_cast<float>(C.g) / ccColor::MAX << " " << static_cast<float>(C.b) / ccColor::MAX << endl;
+			outFile << static_cast<float>(C.r) / ccColor::MAX << " " << static_cast<float>(C.g) / ccColor::MAX << " " << static_cast<float>(C.b) / ccColor::MAX << Qt::endl;
 		}
 	}
 
@@ -186,13 +186,13 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
-			outFile << "POINT_DATA " << ptsCount << endl;
-			outFile << "SCALARS " << QString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
-			outFile << "LOOKUP_TABLE default" << endl;
+			outFile << "POINT_DATA " << ptsCount << Qt::endl;
+			outFile << "SCALARS " << QString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << Qt::endl;
+			outFile << "LOOKUP_TABLE default" << Qt::endl;
 
 			for (unsigned j = 0; j < ptsCount; ++j)
 			{
-				outFile << sf->getGlobalShift() + sf->getValue(j) << endl;
+				outFile << sf->getGlobalShift() + sf->getValue(j) << Qt::endl;
 			}
 		}
 	}
@@ -200,12 +200,12 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		if (vertices->hasScalarFields())
 		{
-			outFile << "POINT_DATA " << ptsCount << endl;
-			outFile << "SCALARS ScalarField" << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
-			outFile << "LOOKUP_TABLE default" << endl;
+			outFile << "POINT_DATA " << ptsCount << Qt::endl;
+			outFile << "SCALARS ScalarField" << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << Qt::endl;
+			outFile << "LOOKUP_TABLE default" << Qt::endl;
 
 			for (unsigned j = 0; j < ptsCount; ++j)
-				outFile << vertices->getPointDisplayedDistance(j) << endl;
+				outFile << vertices->getPointDisplayedDistance(j) << Qt::endl;
 		}
 	}
 

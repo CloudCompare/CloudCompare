@@ -495,7 +495,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 
 		stream	<< static_cast<double>(P.x) / scale - shift.x << ','
 				<< static_cast<double>(P.y) / scale - shift.y << ','
-				<< static_cast<double>(P.z) / scale - shift.z << endl;
+				<< static_cast<double>(P.z) / scale - shift.z << Qt::endl;
 	}
 
 	ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));

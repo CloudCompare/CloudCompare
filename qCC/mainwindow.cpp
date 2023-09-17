@@ -8810,7 +8810,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << ';';
 					stream << cloud->getName();
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			//rows
@@ -8823,7 +8823,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << rmsMatrix[j*cloudCount+i];
 					stream << ';';
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			ccLog::Print(tr("[DoActionComputeBestICPRmsMatrix] Job done"));
@@ -8905,7 +8905,7 @@ void MainWindow::doActionExportPlaneInfo()
 	csvStream << "Nz;";
 	csvStream << "Dip;";
 	csvStream << "Dip dir;";
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	QChar separator(';');
 
@@ -8931,7 +8931,7 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << N.z << separator;					//Nz
 		csvStream << dip_deg << separator;				//Dip
 		csvStream << dipDir_deg << separator;			//Dip direction
-		csvStream << endl;
+		csvStream << Qt::endl;
 	}
 
 	ccConsole::Print(tr("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
@@ -9020,7 +9020,7 @@ void MainWindow::doActionExportCloudInfo()
 			csvStream << sfIndex << " sum;";
 		}
 	}
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	//write one line per cloud
 	{
@@ -9058,7 +9058,7 @@ void MainWindow::doActionExportCloudInfo()
 				csvStream << sqrt(std::abs(sfSum2/validCount - mean*mean)) << ';' /*"SF std.dev.;"*/;
 				csvStream << sfSum << ';' /*"SF sum;"*/;
 			}
-			csvStream << endl;
+			csvStream << Qt::endl;
 		}
 	}
 

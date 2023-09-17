@@ -217,11 +217,11 @@ bool ccWaveform::ToASCII(const QString& filename, std::vector<double>& values, u
 	QTextStream stream(&file);
 	stream.setRealNumberPrecision(6);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
-	stream << "//time(ps);intensity" << endl;
+	stream << "//time(ps);intensity" << Qt::endl;
 
 	for (uint32_t i = 0; i < values.size(); ++i)
 	{
-		stream << i * samplingRate_ps << ";" << values[i] << endl;
+		stream << i * samplingRate_ps << ";" << values[i] << Qt::endl;
 	}
 
 	file.close();

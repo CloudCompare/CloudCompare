@@ -368,7 +368,8 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(	ccRasterGrid& grid,
 											vertDim,
 											gridBox,
 											0,
-											exportToOriginalCS);
+											exportToOriginalCS,
+											false);
 
 		if (rasterCloud && rasterCloud->hasScalarFields())
 		{
@@ -412,6 +413,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 																nullptr,
                                                                 0.0,
 																exportToOriginalCS,
+																false,
 																nullptr );
 
 		if (rasterCloud)

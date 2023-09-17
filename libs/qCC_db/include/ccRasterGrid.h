@@ -142,6 +142,7 @@ struct QCC_DB_LIB_API ccRasterGrid
 									const ccBBox& box,
 									double percentileValue,
 									bool exportToOriginalCS,
+									bool appendGridSizeToSFNames,
 									ccProgressDialog* progressDialog = nullptr ) const;
 
 	//! Types of projection

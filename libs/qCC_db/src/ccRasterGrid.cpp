@@ -1377,6 +1377,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 											const ccBBox& box,
 											double percentileValue,
 											bool exportToOriginalCS,
+											bool appendGridSizeToSFNames,
 											ccProgressDialog* progressDialog/*=nullptr*/ ) const
 {
 	if (Z > 2 || !box.isValid())
@@ -1477,10 +1478,19 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 	{
 		numberOfExportedHeightStatisticsFields = exportedStatistics.size();
 	}
+	size_t maxNumberOfExportedSfStatisticsFields = 0;
 	size_t numberOfExportedSfStatisticsFields = 0;
-	if (exportSFStats && inputCloudAsPC)
+	size_t sfStatCount = exportedStatistics.size();
+	if (exportSFStats && inputCloudAsPC && sfStatCount != 0)
 	{
-        numberOfExportedSfStatisticsFields = inputCloudAsPC->getNumberOfScalarFields() * exportedStatistics.size();
+		maxNumberOfExportedSfStatisticsFields = inputCloudAsPC->getNumberOfScalarFields() * exportedStatistics.size();
+
+		if (std::find(exportedStatistics.begin(), exportedStatistics.end(), PER_CELL_VALUE) != exportedStatistics.end())
+		{
+			// we ignore 'per cell value' which is not a statistic
+			--sfStatCount;
+		}
+        numberOfExportedSfStatisticsFields = inputCloudAsPC->getNumberOfScalarFields() * sfStatCount;
     }
     
     std::vector<CCCoreLib::ScalarField*> exportedSFs;
@@ -1491,34 +1501,50 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
     }
 	
 	//create some new SFs if needed (for the various statistics to compute)
-	for (size_t k = 0; k < totalNumberOfExportedFields; ++k)
+	for (size_t k = 0; k < numberOfExportedHeightStatisticsFields + maxNumberOfExportedSfStatisticsFields; ++k)
 	{
 		size_t statIndex = 0;
 		QString sfName;
 		if (k < numberOfExportedHeightStatisticsFields)
 		{
 			statIndex = k;
-			sfName = GetDefaultFieldName(exportedStatistics[statIndex]);
 
-			if (exportedStatistics[statIndex] != PER_CELL_VALUE)
-			{
-				sfName = "Height " + sfName;
-			}
+			static const char* XYZ = "XYZ";
+			sfName = XYZ[Z];
+
+			if (exportedStatistics[k] == PER_CELL_VALUE)
+				sfName += " values"; // use a simpler name
+			else
+				sfName += QChar(' ') + GetDefaultFieldName(exportedStatistics[statIndex]);
 		}
 		else
 		{
+			assert(sfStatCount != 0);
 			assert(exportedStatistics.size() != 0);
+
 			size_t indexOfSFStatsField = k - numberOfExportedHeightStatisticsFields;
 			size_t sfIndex = indexOfSFStatsField / exportedStatistics.size();
 
-			assert(exportedStatistics[statIndex] != PER_CELL_VALUE);
 			statIndex = indexOfSFStatsField - sfIndex * exportedStatistics.size();
+
+			if (exportedStatistics[statIndex] == PER_CELL_VALUE)
+			{
+				// ignored
+				continue;
+			}
+
 			sfName = inputCloudAsPC->getScalarFieldName(static_cast<int>(sfIndex)) + QString(" ") + GetDefaultFieldName(exportedStatistics[statIndex]);
 		}
 
+		assert(statIndex < exportedStatistics.size());
 		if (exportedStatistics[statIndex] == PER_CELL_PERCENTILE_VALUE)
 		{
 			sfName += QString(" P%1").arg(percentileValue);
+		}
+
+		if (appendGridSizeToSFNames)
+		{
+			sfName.append(QString(" (%1)").arg(gridStep));
 		}
 
 		// get or create the corresponding scalar field
@@ -1573,8 +1599,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 	}
 
 	//horizontal dimensions
-	const unsigned char X = (Z == 2 ? 0 : Z +1);
-	const unsigned char Y = (X == 2 ? 0 : X +1);
+	const unsigned char X = (Z == 2 ? 0 : Z + 1);
+	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	const unsigned char outX = (exportToOriginalCS ? X : 0);
 	const unsigned char outY = (exportToOriginalCS ? Y : 1);
@@ -1665,9 +1691,10 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 					assert(exportedSFs.size() >= numberOfExportedHeightStatisticsFields);
 
 					bool cellPointIndexesBuilt = false;
-					for (size_t k = 0; k < totalNumberOfExportedFields; ++k)
+					size_t sfIndex = 0;
+					for (size_t k = 0; k < numberOfExportedHeightStatisticsFields + maxNumberOfExportedSfStatisticsFields; ++k)
 					{
-						CCCoreLib::ScalarField* sf = exportedSFs[k];
+						CCCoreLib::ScalarField* sf = exportedSFs[sfIndex];
 						ScalarType sVal = CCCoreLib::NAN_VALUE;
 
 						// specific case: PER_CELL_VALUE
@@ -1704,6 +1731,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 								size_t sfIndex = indexOfSFStatsField / exportedStatistics.size();
 
 								statIndex = indexOfSFStatsField - sfIndex * exportedStatistics.size();
+
+								if (exportedStatistics[statIndex] == PER_CELL_VALUE)
+								{
+									// ignored
+									continue;
+								}
 
 								// Get input scalar field for statistics
 								CCCoreLib::ScalarField* inputScalarField = inputCloudAsPC->getScalarField(static_cast<int>(sfIndex));
@@ -1821,6 +1854,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 							assert(sf->size() < sf->capacity());
 							sf->addElement(sVal);
 						}
+
+						++sfIndex;
 					}
 
 					if (aCell->nbPoints != 0)

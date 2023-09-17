@@ -207,6 +207,7 @@ protected: //raster grid related stuff
 										const QString& activeSFName,
 										double percentileValue,
 										bool exportToOriginalCS,
+										bool appendGridSizeToSFNames,
 										ccProgressDialog* progressDialog = nullptr ) const;
 
 private: //members

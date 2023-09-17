@@ -92,6 +92,7 @@ protected: //raster grid related stuff
 										ccGenericPointCloud* inputCloud,
 										double percentileValue,
 										bool exportToOriginalCS,
+										bool appendGridSizeToSFNames,
 										ccProgressDialog* progressDialog = nullptr) const;
 
 protected: //members

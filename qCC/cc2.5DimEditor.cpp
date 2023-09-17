@@ -217,6 +217,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	bool exportHeightStats,
 														ccGenericPointCloud* inputCloud,
 														double percentileValue,
 														bool exportToOriginalCS,
+														bool appendGridSizeToSFNames,
 														ccProgressDialog* progressDialog/*=nullptr*/) const
 {
 	//projection dimension
@@ -239,6 +240,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	bool exportHeightStats,
 									box,
 									percentileValue,
 									exportToOriginalCS,
+									appendGridSizeToSFNames,
 									progressDialog );
 }
 

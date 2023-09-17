@@ -478,6 +478,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 													gridBBox,
 													0.0,
 													true,
+													true,
 													nullptr
 												);
 

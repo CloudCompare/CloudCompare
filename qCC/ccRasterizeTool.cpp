@@ -669,6 +669,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 													const QString& activeSFName,
 													double percentileValue,
 													bool exportToOriginalCS,
+													bool appendGridSizeToSFNames,
 													ccProgressDialog* progressDialog/*=nullptr*/ ) const
 {
 	if (!m_cloud || !m_grid.isValid())
@@ -685,6 +686,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 																		/*inputCloud=*/m_cloud,
                                             							percentileValue,
 																		exportToOriginalCS,
+																		appendGridSizeToSFNames,
 																		progressDialog );
 
 	//success?
@@ -717,7 +719,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 		if (activeSFIndex < 0 && cloudGrid->getNumberOfScalarFields() != 0)
 		{
 			//if no SF is displayed, we should at least set a valid one (for later)
-			activeSFIndex = static_cast<int>(cloudGrid->getNumberOfScalarFields()) - 1;
+			activeSFIndex = 0;
 		}
 		cloudGrid->setCurrentDisplayedScalarField(activeSFIndex);
 
@@ -781,7 +783,17 @@ void ccRasterizeTool::updateGridAndDisplay()
 												activeLayerName,
 												getStatisticsPercentileValue(),
 												false,
+												false,
 												nullptr );
+
+			// Special case: the 'LAYER_HEIGHT' field has now a dynamic name
+			if (m_UI->activeLayerComboBox->currentIndex() == 0
+				&& m_rasterCloud
+				&& m_rasterCloud->getNumberOfScalarFields() != 0 )
+			{
+				assert(m_UI->activeLayerComboBox->itemData(0).toInt() == LAYER_HEIGHT);
+				m_UI->activeLayerComboBox->setItemText(0, QString(m_rasterCloud->getScalarField(0)->getName()));
+			}
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -989,6 +1001,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport/*=true*/)
 													activeLayerName,
 													getStatisticsPercentileValue(),
 													true,
+													true, // we want nicer SF names
                                                     &pDlg );
 
 	if (rasterCloud && autoExport)

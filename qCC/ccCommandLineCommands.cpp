@@ -115,6 +115,7 @@ constexpr char COMMAND_SF_ARITHMETIC_IN_PLACE[]			= "IN_PLACE";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
 constexpr char COMMAND_SF_OP_SF[]						= "SF_OP_SF";
 constexpr char COMMAND_SF_INTERP[]						= "SF_INTERP";
+constexpr char COMMAND_COLOR_INTERP[]					= "COLOR_INTERP";
 constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
 constexpr char COMMAND_SF_ADD_CONST[]                   = "SF_ADD_CONST";
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
@@ -2643,6 +2644,7 @@ bool CommandRemoveSF::removeSF(int sfIndex, ccPointCloud& pc)
 {
 	if (sfIndex < static_cast<int>(pc.getNumberOfScalarFields()))
 	{
+		ccLog::Print("[REMOVE_SF] " + QString(pc.getScalarFieldName(sfIndex)));
 		pc.deleteScalarField(sfIndex);
 		if (pc.getNumberOfScalarFields() == 0)
 		{
@@ -5309,6 +5311,24 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 	}
 
 	return ccEntityAction::interpolateSFs(source, dest, sfIndex, params, cmd.widgetParent());
+}
+
+CommandColorInterpolation::CommandColorInterpolation()
+	: ccCommandLineInterface::Command(QObject::tr("Color interpolation"), COMMAND_COLOR_INTERP)
+{}
+
+bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[COLOR INTERPOLATION]"));
+
+	if (cmd.clouds().size() < 2)
+		return cmd.error(QObject::tr("Unexpected number of clouds for '%1' (at least 2 clouds expected: first = source, second = dest)").arg(COMMAND_COLOR_INTERP));
+
+	ccHObject::Container entities;
+	entities.push_back(cmd.clouds()[0].pc);
+	entities.push_back(cmd.clouds()[1].pc);
+
+	return 	ccEntityAction::interpolateColors(entities, cmd.widgetParent());
 }
 
 CommandSFRename::CommandSFRename()

@@ -720,6 +720,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandCrop));
 	registerCommand(Command::Shared(new CommandCrop2D));
 	registerCommand(Command::Shared(new CommandCoordToSF));
+	registerCommand(Command::Shared(new CommandSFToCoord));
 	registerCommand(Command::Shared(new CommandColorBanding));
 	registerCommand(Command::Shared(new CommandColorLevels));
 	registerCommand(Command::Shared(new CommandC2MDist));
@@ -731,6 +732,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSFOperation));
     registerCommand(Command::Shared(new CommandSFOperationSF));
     registerCommand(Command::Shared(new CommandSFInterpolation));
+    registerCommand(Command::Shared(new CommandColorInterpolation));
 	registerCommand(Command::Shared(new CommandSFRename));
     registerCommand(Command::Shared(new CommandSFAddConst));
 	registerCommand(Command::Shared(new CommandICP));

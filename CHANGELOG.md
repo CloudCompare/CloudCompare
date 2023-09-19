@@ -15,6 +15,8 @@ v2.13.alpha (???) - (??/??/????)
 			- to add a constant scalar field to a cloud
 		- SF_TO_COORD {SF name or index} {X, Y or Z}
 			- to set the values of a scalar field as the X, Y or Z coordinates
+		- COLOR_INTERP
+			- to interpolate the colors from one cloud to another cloud
 		- CLEVELS
 			- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
 			- syntax: -CLEVELS BANDS INPUT_RANGE_MIN INPUT_RANGE_MAX OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX

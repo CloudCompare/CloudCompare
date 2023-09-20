@@ -57,13 +57,13 @@ bool QuaGzipFilePrivate::open(FileId id, QIODevice::OpenMode mode,
     char modeString[2];
     modeString[0] = modeString[1] = '\0';
     if ((mode & QIODevice::Append) != 0) {
-        error = QuaGzipFile::trUtf8("QIODevice::Append is not "
+        error = QuaGzipFile::tr("QIODevice::Append is not "
                 "supported for GZIP");
         return false;
     }
     if ((mode & QIODevice::ReadOnly) != 0
             && (mode & QIODevice::WriteOnly) != 0) {
-        error = QuaGzipFile::trUtf8("Opening gzip for both reading"
+        error = QuaGzipFile::tr("Opening gzip for both reading"
             " and writing is not supported");
         return false;
     } else if ((mode & QIODevice::ReadOnly) != 0) {
@@ -71,13 +71,13 @@ bool QuaGzipFilePrivate::open(FileId id, QIODevice::OpenMode mode,
     } else if ((mode & QIODevice::WriteOnly) != 0) {
         modeString[0] = 'w';
     } else {
-        error = QuaGzipFile::trUtf8("You can open a gzip either for reading"
+        error = QuaGzipFile::tr("You can open a gzip either for reading"
             " or for writing. Which is it?");
         return false;
     }
     gzd = open(id, modeString);
     if (gzd == NULL) {
-        error = QuaGzipFile::trUtf8("Could not gzopen() file");
+        error = QuaGzipFile::tr("Could not gzopen() file");
         return false;
     }
     return true;

@@ -1486,7 +1486,7 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		bool error = false;
 		while (!currentLine.isNull())
 		{
-			QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.size() == 4)
 			{
 				bool okX = false;

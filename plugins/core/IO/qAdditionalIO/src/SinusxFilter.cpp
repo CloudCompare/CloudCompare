@@ -211,7 +211,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 
 			}
 			//read type
-			QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.size() < 2 || tokens[1].length() > 1)
 			{
 				ccLog::Warning(QString("[SinusX] Line %1 is corrupted").arg(lineNumber));
@@ -260,7 +260,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 			}
 			else if (currentLine.startsWith("CP"))
 			{
-				QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+				QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 
 				switch (cpIndex)
 				{
@@ -337,7 +337,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 							{
 								currentLine = stream.readLine();
 								++lineNumber;
-								tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+								tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 								skipped += tokens.size();
 							}
 							assert(skipped == 16); //no more than 16 normally!
@@ -391,7 +391,7 @@ CC_FILE_ERROR SinusxFilter::loadFile(const QString& filename, ccHObject& contain
 				assert(currentVertices);
 
 				//shoud be a point!
-				QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+				QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 				bool ok = (tokens.size() == 4);
 				if (ok)
 				{

@@ -61,13 +61,13 @@ namespace ccUtils
 			return false;
 		}
 
-		QStringList tokens = text.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+		QStringList tokens = text.split(QRegExp("\\s+"), Qt::SkipEmptyParts);
 		if (tokens.size() != 3)
 		{
-			tokens = text.split(';', QString::SkipEmptyParts);
+			tokens = text.split(';', Qt::SkipEmptyParts);
 			if (tokens.size() != 3)
 			{
-				tokens = text.split(',', QString::SkipEmptyParts);
+				tokens = text.split(',', Qt::SkipEmptyParts);
 				if (tokens.size() != 3)
 				{
 					if (text.length() > 64)

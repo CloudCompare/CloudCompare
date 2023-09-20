@@ -514,7 +514,7 @@ QString ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet&
 	labels.clear();
 
 	QString fullText = m_ui->customLabelsPlainTextEdit->toPlainText();
-	QStringList lines = fullText.split(QRegExp("[\r\n]"), QString::SkipEmptyParts);
+	QStringList lines = fullText.split(QRegExp("[\r\n]"), Qt::SkipEmptyParts);
 	if (lines.size() < 2)
 	{
 		return "Need at least 2 custom values";

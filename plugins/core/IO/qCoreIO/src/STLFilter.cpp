@@ -417,7 +417,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		{
 			return CC_FERR_READING;
 		}
-		QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+		QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 		if (tokens.empty() || tokens[0].toUpper() != "SOLID")
 		{
 			ccLog::Warning("[STL] File should begin by 'solid [name]'!");
@@ -475,7 +475,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			}
 			++lineCount;
 
-			QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
+			QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.empty() || tokens[0].toUpper() != "FACET")
 			{
 				if (tokens[0].toUpper() != "ENDSOLID")
@@ -549,7 +549,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			}
 			++lineCount;
 
-			QStringList tokens = QString(currentLine).simplified().split(QChar(' '), QString::SkipEmptyParts);
+			QStringList tokens = QString(currentLine).simplified().split(QChar(' '), Qt::SkipEmptyParts);
 			if (tokens.size() < 4)
 			{
 				ccLog::Warning("[STL] Error on line #%i: incomplete 'vertex' description!", lineCount);

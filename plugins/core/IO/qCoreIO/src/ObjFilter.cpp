@@ -597,7 +597,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 
-			const QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts );
+			const QStringList tokens = currentLine.simplified().split(QChar(' '), Qt::SkipEmptyParts );
 
 			//skip comments & empty lines
 			if (tokens.empty() || tokens.front().startsWith('/', Qt::CaseInsensitive) || tokens.front().startsWith('#', Qt::CaseInsensitive))

@@ -10404,7 +10404,7 @@ void MainWindow::doActionSaveFile()
 		QString defaultFileName(m_selectedEntities.front()->getName());
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];

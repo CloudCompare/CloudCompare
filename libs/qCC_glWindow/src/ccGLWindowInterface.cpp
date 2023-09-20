@@ -4281,7 +4281,7 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	double textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text = QString::number(textEquivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
-	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+	renderText(	glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.horizontalAdvance(text) / 2,
 				glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 				text,
 				static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),

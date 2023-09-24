@@ -532,9 +532,12 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	if (hasScaleMetaData)
 	{
 		// We may not be able to use the previous LAS scale
-		canUseOriginalScale = (originalScale.x >= optimalScale.x
-		                       && originalScale.y >= optimalScale.y
-		                       && originalScale.z >= optimalScale.z);
+		canUseOriginalScale = (std::abs(originalScale.x) >= optimalScale.x // DGM: some LAS files have negative scales?!
+		                       && std::abs(originalScale.y) >= optimalScale.y
+		                       && std::abs(originalScale.z) >= optimalScale.z);
+
+		// If we can use the original scale, it will become the default scale
+		saveDialog.setOriginalScale(originalScale, canUseOriginalScale, true);
 	}
 
 	// Uniformize the optimal scale to make it less disturbing to some lastools users ;)
@@ -545,12 +548,6 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
 	}
 	saveDialog.setOptimalScale(optimalScale);
-
-	if (hasScaleMetaData)
-	{
-		// If we can use the original scale, it will be come the default scale
-		saveDialog.setOriginalScale(originalScale, canUseOriginalScale, true);
-	}
 
 	// Find the best version for the file or try to use the one from original file
 	LasDetails::LasVersion bestVersion = LasDetails::SelectBestVersion(*pointCloud);

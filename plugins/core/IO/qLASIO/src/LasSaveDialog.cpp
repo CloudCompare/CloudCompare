@@ -28,6 +28,9 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
+//! Default LAS scale
+static const double DefaultLASScale = 1.0e-3;
+
 //! Widget to map a predefined scalar field 'role' with a particular scalar field (combo box)
 class MappingLabel : public QWidget
 {
@@ -119,13 +122,15 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	{
 		QDoubleSpinBox* spinBox = scaleButtons[i];
 		spinBox->setDecimals(8);
-		spinBox->setMinimum(0.0);
+		spinBox->setMinimum(1.0e-8);
 		spinBox->setMaximum(100.0);
-		spinBox->setValue(0.001);
-		spinBox->setSingleStep(0.001);
+		spinBox->setValue(DefaultLASScale);
+		spinBox->setSingleStep(DefaultLASScale);
 		spinBox->setEnabled(false);
 	}
 	connect(customScaleRadioButton, &QRadioButton::toggled, this, &LasSaveDialog::handleCustomScaleButtontoggled);
+
+	customScaleRadioButton->setChecked(true); // should be checked by default, as it's the only one enabled by default
 
 	for (const char* versionStr : LasDetails::AvailableVersions())
 	{
@@ -134,12 +139,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -465,7 +470,7 @@ void LasSaveDialog::setOriginalScale(const CCVector3d& scale, bool canUseScale, 
 	{
 		labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); // add two whitespaces to avoid issues with italic characters justification
 		labelOriginal->setStyleSheet("color: red;");
-		originalScaleRadioButton->setChecked(false);
+		customScaleRadioButton->setChecked(true); // revert to the custom scale by default
 	}
 	else if (autoCheck)
 	{
@@ -523,26 +528,28 @@ bool LasSaveDialog::shouldSaveWaveform() const
 
 CCVector3d LasSaveDialog::chosenScale() const
 {
-	if (bestScaleRadioButton->isChecked())
+	if (bestScaleRadioButton->isChecked() && bestScaleRadioButton->isEnabled())
 	{
 		assert(std::isfinite(m_optimalScale.x) && std::isfinite(m_optimalScale.y) && std::isfinite(m_optimalScale.z));
 		return m_optimalScale;
 	}
-	else if (originalScaleRadioButton->isChecked())
+	else if (originalScaleRadioButton->isChecked() && originalScaleRadioButton->isEnabled())
 	{
 		assert(std::isfinite(m_originalScale.x) && std::isfinite(m_originalScale.y) && std::isfinite(m_originalScale.z));
 		return m_originalScale;
 	}
-	else if (customScaleRadioButton->isChecked())
+	else if (customScaleRadioButton->isChecked() && customScaleRadioButton->isEnabled())
 	{
-		double customScaleX = customScaleXDoubleSpinBox->value();
-		double customScaleY = customScaleYDoubleSpinBox->value();
-		double customScaleZ = customScaleZDoubleSpinBox->value();
-		return {customScaleX, customScaleY, customScaleZ};
+		return {customScaleXDoubleSpinBox->value(),
+		        customScaleYDoubleSpinBox->value(),
+		        customScaleZDoubleSpinBox->value()};
 	}
-
-	assert(false);
-	return {1.0, 1.0, 1.0};
+	else
+	{
+		ccLog::Error("Inconsistency detected: scale option is checked but not enabled");
+		assert(false);
+		return {DefaultLASScale, DefaultLASScale, DefaultLASScale};
+	}
 }
 
 std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const

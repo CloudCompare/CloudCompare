@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>662</width>
+    <width>664</width>
     <height>416</height>
    </rect>
   </property>
@@ -237,7 +237,7 @@ font: italic;</string>
 font: italic;</string>
             </property>
             <property name="text">
-             <string>        (*) potential accuracy loss if chosen too low</string>
+             <string>        (*) potential accuracy loss if resolution is too low (= scale is too large)</string>
             </property>
            </widget>
           </item>
@@ -332,8 +332,8 @@ font: italic;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>784</width>
-            <height>288</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">

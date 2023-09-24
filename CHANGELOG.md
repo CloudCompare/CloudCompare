@@ -185,6 +185,11 @@ v2.13.alpha (???) - (??/??/????)
 			This is useful to compute clean and fast normals.
 			(note that they are still not exported)
 
+	- PCD files:
+		- Better management of PCD files with large coordinates (the Global Shift & Scale dialog will appear)
+		- At export time, if the previous sensor is too far from the points, it sensor might not be saved to preserve numeric accuracy
+			(the previous sensor will be replaced by a default one positionned accordingly to the Global shift)
+
 	- PLY dialog:
 		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
 

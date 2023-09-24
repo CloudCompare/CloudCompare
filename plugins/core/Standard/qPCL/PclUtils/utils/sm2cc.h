@@ -23,17 +23,28 @@
 //qCC_db
 #include <ccPointCloud.h>
 
+//qCC_io
+#include <FileIOFilter.h>
+
+class ccGLMatrixd;
+
 //! PCL to CC cloud converter
 class pcl2cc
 {
 public:
 
 	//! Converts a PCL point cloud to a ccPointCloud
-	static ccPointCloud* Convert(const PCLCloud& pclCloud);
+	static ccPointCloud* Convert(	const PCLCloud& pclCloud,
+									ccGLMatrixd* _transform = nullptr,
+									FileIOFilter::LoadParameters* _loadParameters = nullptr );
 
 public: // other related utility functions
 
-	static bool CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t coordinateType);
+	static bool CopyXYZ(const PCLCloud& pclCloud,
+						ccPointCloud& ccCloud,
+						uint8_t coordinateType,
+						ccGLMatrixd* _transform = nullptr,
+						FileIOFilter::LoadParameters* _loadParameters = nullptr);
 	static bool CopyNormals(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
 	static bool CopyRGB(const PCLCloud& pclCloud, ccPointCloud& ccCloud);
 	static bool CopyScalarField(const PCLCloud& pclCloud, const std::string& sfName, ccPointCloud& ccCloud, bool overwriteIfExist = true);

@@ -91,23 +91,69 @@ static bool ExistField(const PCLCloud& pclCloud, std::string fieldName)
 	return false;
 }
 
-template<class T> void PCLCloudToCCCloud(const PCLCloud& pclCloud, ccPointCloud& ccCloud)
+template<class T> void PCLCloudToCCCloud(	const PCLCloud& pclCloud,
+											ccPointCloud& ccCloud,
+											ccGLMatrixd* _transform = nullptr,
+											FileIOFilter::LoadParameters* _loadParameters = nullptr )
 {
 	size_t pointCount = GetNumberOfPoints(pclCloud);
 
 	pcl::PointCloud<T> pcl_cloud;
 	FROM_PCL_CLOUD(pclCloud, pcl_cloud);
+
+	CCVector3d Pshift(0, 0, 0);
+
 	for (size_t i = 0; i < pointCount; ++i)
 	{
-		CCVector3 P(pcl_cloud.at(i).x,
-					pcl_cloud.at(i).y,
-					pcl_cloud.at(i).z);
+		CCVector3d P(	pcl_cloud.at(i).x,
+						pcl_cloud.at(i).y,
+						pcl_cloud.at(i).z );
 
-		ccCloud.addPoint(P);
+		if (_transform)
+		{
+			P = (*_transform) * P;
+		}
+
+		if (_loadParameters)
+		{
+			if (i == 0) // first point
+			{
+				bool preserveCoordinateShift = true;
+				if (FileIOFilter::HandleGlobalShift(P, Pshift, preserveCoordinateShift, *_loadParameters))
+				{
+					if (preserveCoordinateShift)
+					{
+						ccCloud.setGlobalShift(Pshift);
+					}
+					ccLog::Warning("[PCL-to-CC] PCL cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+
+					if (_transform)
+					{
+						// we update the input transform so as to shift the points already 'at the source'
+						_transform->setTranslation(_transform->getTranslationAsVec3D() + Pshift);
+
+						// and the first point has to be shifted only this time
+						P += Pshift;
+					}
+				}
+			}
+
+			if (nullptr == _transform)
+			{
+				// we have to apply the shift locally
+				P += Pshift;
+			}
+		}
+
+		ccCloud.addPoint(P.toPC());
 	}
 }
 
-bool pcl2cc::CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t coordinateType)
+bool pcl2cc::CopyXYZ(	const PCLCloud& pclCloud,
+						ccPointCloud& ccCloud,
+						uint8_t coordinateType,
+						ccGLMatrixd* _transform/*=nullptr*/,
+						FileIOFilter::LoadParameters* _loadParameters/*=nullptr*/)
 {
 	size_t pointCount = GetNumberOfPoints(pclCloud);
 	if (pointCount == 0)
@@ -125,16 +171,16 @@ bool pcl2cc::CopyXYZ(const PCLCloud& pclCloud, ccPointCloud& ccCloud, uint8_t co
 	switch (coordinateType)
 	{
 		case pcl::PCLPointField::INT16:
-			PCLCloudToCCCloud<PointXYZTpl<std::int16_t>>(pclCloud, ccCloud);
+			PCLCloudToCCCloud<PointXYZTpl<std::int16_t>>(pclCloud, ccCloud, _transform, _loadParameters);
 			break;
 		case pcl::PCLPointField::INT32:
-			PCLCloudToCCCloud<PointXYZTpl<std::int32_t>>(pclCloud, ccCloud);
+			PCLCloudToCCCloud<PointXYZTpl<std::int32_t>>(pclCloud, ccCloud, _transform, _loadParameters);
 			break;
 		case pcl::PCLPointField::FLOAT32:
-			PCLCloudToCCCloud<pcl::PointXYZ>(pclCloud, ccCloud);
+			PCLCloudToCCCloud<pcl::PointXYZ>(pclCloud, ccCloud, _transform, _loadParameters);
 			break;
 		case pcl::PCLPointField::FLOAT64:
-			PCLCloudToCCCloud<PointXYZTpl<double>>(pclCloud, ccCloud);
+			PCLCloudToCCCloud< PointXYZTpl<double>>(pclCloud, ccCloud, _transform, _loadParameters);
 			break;
 		default:
 			ccLog::Warning("[PCL] Unsupported coordinate type " + QString::number(coordinateType));
@@ -350,7 +396,9 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 	return true;
 }
 
-ccPointCloud* pcl2cc::Convert(const PCLCloud& pclCloud)
+ccPointCloud* pcl2cc::Convert(	const PCLCloud& pclCloud,
+								ccGLMatrixd* _transform/*=nullptr*/,
+								FileIOFilter::LoadParameters* _loadParameters/*=nullptr*/)
 {
 	//retrieve the valid fields
 	std::list<std::string> fields;
@@ -383,7 +431,7 @@ ccPointCloud* pcl2cc::Convert(const PCLCloud& pclCloud)
 	if (expectedPointCount != 0)
 	{
 		//push points inside
-		if (!CopyXYZ(pclCloud, *ccCloud, coordinateType))
+		if (!CopyXYZ(pclCloud, *ccCloud, coordinateType, _transform, _loadParameters))
 		{
 			delete ccCloud;
 			return nullptr;

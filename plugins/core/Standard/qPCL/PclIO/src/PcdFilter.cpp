@@ -93,6 +93,8 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
+	const CCVector3d& globalShift = ccCloud->getGlobalShift();
+
 	Eigen::Vector4f pos = Eigen::Vector4f::Zero();
 	Eigen::Quaternionf ori = Eigen::Quaternionf::Identity();
 	PCLCloud::Ptr pclCloud;
@@ -100,35 +102,56 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (sensor)
 	{
 		//get sensor data
-		ccGLMatrix sensorMatrix = sensor->getRigidTransformation();
+		const ccGLMatrix& sensorMatrix = sensor->getRigidTransformation();
 
 		//translation
 		CCVector3 trans = sensorMatrix.getTranslationAsVec3D();
-		pos(0) = trans.x;
-		pos(1) = trans.y;
-		pos(2) = trans.z;
 
-		//rotation
-		Eigen::Matrix3f eigrot;
-		for (int i = 0; i < 3; ++i)
-			for (int j = 0; j < 3; ++j)
-				eigrot(i, j) = sensorMatrix.getColumn(j)[i];
-
-		//now translate to a quaternion
-		ori = Eigen::Quaternionf(eigrot);
-
-		// we have to project the cloud to the sensor CS
-		ccPointCloud* tempCloud = ccCloud->cloneThis(nullptr, true);
-		if (!tempCloud)
+		//check that the sensor is not too far from the points
+		CCVector3 bbMin, bbMax;
+		ccCloud->getBoundingBox(bbMin, bbMax);
+		CCVector3 bbCenter = (bbMin + bbMax) / 2.0;
+		if (ccGlobalShiftManager::NeedShift(trans - bbCenter))
 		{
-			return CC_FILE_ERROR::CC_FERR_NOT_ENOUGH_MEMORY;
+			ccLog::Warning("Sensor center is too far from the points. Can't restore it without losing numerical accuracy...");
+			pclCloud = cc2smReader(ccCloud).getAsSM();
+
+			pos(0) = -static_cast<float>(globalShift.x);
+			pos(1) = -static_cast<float>(globalShift.y);
+			pos(2) = -static_cast<float>(globalShift.z);
 		}
-		tempCloud->applyRigidTransformation(sensorMatrix.inverse());
+		else
+		{
+			pos(0) = trans.x;
+			pos(1) = trans.y;
+			pos(2) = trans.z;
 
-		pclCloud = cc2smReader(tempCloud).getAsSM();
+			//rotation
+			Eigen::Matrix3f eigrot;
+			for (int i = 0; i < 3; ++i)
+				for (int j = 0; j < 3; ++j)
+					eigrot(i, j) = sensorMatrix.getColumn(j)[i];
 
-		delete tempCloud;
-		tempCloud = nullptr;
+			//now translate to a quaternion
+			ori = Eigen::Quaternionf(eigrot);
+
+			// we have to project the cloud to the sensor CS
+			ccPointCloud* tempCloud = ccCloud->cloneThis(nullptr, true);
+			if (!tempCloud)
+			{
+				return CC_FILE_ERROR::CC_FERR_NOT_ENOUGH_MEMORY;
+			}
+			tempCloud->applyRigidTransformation(sensorMatrix.inverse());
+
+			pclCloud = cc2smReader(tempCloud).getAsSM();
+
+			pos(0) = static_cast<float>(pos(0) - globalShift.x);
+			pos(1) = static_cast<float>(pos(1) - globalShift.y);
+			pos(2) = static_cast<float>(pos(2) - globalShift.z);
+
+			delete tempCloud;
+			tempCloud = nullptr;
+		}
 	}
 	else
 	{
@@ -167,6 +190,32 @@ static int FieldIndex(const PCLCloud& pclCloud, std::string fieldName)
 			return static_cast<int>(index);
 
 	return -1;
+}
+
+static double ReadValue(const uint8_t* data, const pcl::PCLPointField& field)
+{
+	switch (field.datatype)
+	{
+	case pcl::PCLPointField::INT8:
+		return static_cast<double>(*(reinterpret_cast<const int8_t*>(data)));
+	case pcl::PCLPointField::UINT8:
+		return static_cast<double>(*(reinterpret_cast<const uint8_t*>(data)));
+	case pcl::PCLPointField::INT16:
+		return static_cast<double>(*(reinterpret_cast<const int16_t*>(data)));
+	case pcl::PCLPointField::UINT16:
+		return static_cast<double>(*(reinterpret_cast<const uint16_t*>(data)));
+	case pcl::PCLPointField::INT32:
+		return static_cast<double>(*(reinterpret_cast<const int32_t*>(data)));
+	case pcl::PCLPointField::UINT32:
+		return static_cast<double>(*(reinterpret_cast<const uint32_t*>(data)));
+	case pcl::PCLPointField::FLOAT32:
+		return *(reinterpret_cast<const float*>(data));
+	case pcl::PCLPointField::FLOAT64:
+		return *(reinterpret_cast<const double*>(data));
+	default:
+		assert(false);
+		return std::numeric_limits<double>::quiet_NaN();
+	}
 }
 
 CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
@@ -236,17 +285,21 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 						grid->minValidIndex = pointCount;
 						grid->maxValidIndex = 0;
 
+						const pcl::PCLPointField& fieldX = inputCloud->fields[xIndex];
+						const pcl::PCLPointField& fieldY = inputCloud->fields[yIndex];
+						const pcl::PCLPointField& fieldZ = inputCloud->fields[zIndex];
+
 						// Determine the offsets to the X, Y and Z coordinates
-						const uint8_t* dataX = inputCloud->data.data() + inputCloud->fields[xIndex].offset;
-						const uint8_t* dataY = inputCloud->data.data() + inputCloud->fields[yIndex].offset;
-						const uint8_t* dataZ = inputCloud->data.data() + inputCloud->fields[zIndex].offset;
+						const uint8_t* dataX = inputCloud->data.data() + fieldX.offset;
+						const uint8_t* dataY = inputCloud->data.data() + fieldY.offset;
+						const uint8_t* dataZ = inputCloud->data.data() + fieldZ.offset;
 
 						// reproduce the process of pcl::PassThrough (see below)
 						for (unsigned i = 0; i < pointCount; ++i)
 						{
-							float x = *(reinterpret_cast<const float*>(dataX));
-							float y = *(reinterpret_cast<const float*>(dataY));
-							float z = *(reinterpret_cast<const float*>(dataZ));
+							double x = ReadValue(dataX, fieldX);
+							double y = ReadValue(dataY, fieldY);
+							double z = ReadValue(dataZ, fieldZ);
 
 							dataX += inputCloud->point_step;
 							dataY += inputCloud->point_step;
@@ -284,8 +337,26 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 			passFilter.filter(*inputCloud);
 		}
 
+		// get orientation as rot matrix and copy it into a ccGLMatrix
+		ccGLMatrixd ccRot;
+		{
+			Eigen::Matrix3f eigRot = orientation.toRotationMatrix();
+			double* X = ccRot.getColumn(0);
+			double* Y = ccRot.getColumn(1);
+			double* Z = ccRot.getColumn(2);
+
+			X[0] = eigRot(0, 0); X[1] = eigRot(1, 0); X[2] = eigRot(2, 0);
+			Y[0] = eigRot(0, 1); Y[1] = eigRot(1, 1); Y[2] = eigRot(2, 1);
+			Z[0] = eigRot(0, 2); Z[1] = eigRot(1, 2); Z[2] = eigRot(2, 2);
+
+			ccRot.getColumn(3)[3] = 1.0;
+			ccRot.setTranslation(origin.data());
+		}
+
 		//convert to CC cloud
-		ccPointCloud* ccCloud = pcl2cc::Convert(*inputCloud);
+		// DGM: it appears that the sensor orientation/translation has to be applied manually to the points
+		// (probably because they just correspond to the raw scan grid in the general case)
+		ccPointCloud* ccCloud = pcl2cc::Convert(*inputCloud, &ccRot, &parameters);
 		if (!ccCloud)
 		{
 			ccLog::Warning("[PCL] An error occurred while converting PCD cloud to CloudCompare cloud!");
@@ -307,28 +378,13 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 
 		//now we can construct a ccGBLSensor
 		{
-			// get orientation as rot matrix and copy it into a ccGLMatrix
-			ccGLMatrix ccRot;
-			{
-				Eigen::Matrix3f eigRot = orientation.toRotationMatrix();
-				float* X = ccRot.getColumn(0);
-				float* Y = ccRot.getColumn(1);
-				float* Z = ccRot.getColumn(2);
-
-				X[0] = eigRot(0, 0); X[1] = eigRot(1, 0); X[2] = eigRot(2, 0);
-				Y[0] = eigRot(0, 1); Y[1] = eigRot(1, 1); Y[2] = eigRot(2, 1);
-				Z[0] = eigRot(0, 2); Z[1] = eigRot(1, 2); Z[2] = eigRot(2, 2);
-
-				ccRot.getColumn(3)[3] = 1.0f;
-				ccRot.setTranslation(origin.data());
-			}
 			if (grid)
 			{
-				grid->sensorPosition = ccGLMatrixd(ccRot.data());
+				grid->sensorPosition = ccRot;
 			}
 
 			ccGBLSensor* sensor = new ccGBLSensor;
-			sensor->setRigidTransformation(ccRot);
+			sensor->setRigidTransformation(ccGLMatrix(ccRot.data()));
 			sensor->setYawStep(static_cast<PointCoordinateType>(0.05));
 			sensor->setPitchStep(static_cast<PointCoordinateType>(0.05));
 			sensor->setVisible(true);
@@ -342,10 +398,6 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 			sensor->computeAutoParameters(pc);
 
 			sensor->setEnabled(false);
-
-			// DGM: it appears that the sensor orientation/translation has to be applied manually to the points
-			// (probably because they just correspond to the raw scan grid in the general case)
-			ccCloud->applyGLTransformation_recursive(&ccRot);
 
 			ccCloud->addChild(sensor);
 		}

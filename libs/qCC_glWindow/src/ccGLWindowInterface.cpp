@@ -46,6 +46,7 @@
 #include <QSettings>
 #include <QTouchEvent>
 #include <QWheelEvent>
+#include <QNativeGestureEvent>
 
 //STL
 #include <array>
@@ -4358,6 +4359,35 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 {
 	switch (evt->type())
 	{
+
+	case QEvent::NativeGesture:
+	{
+		QNativeGestureEvent* gestEvent = static_cast<QNativeGestureEvent*>(evt);
+		Qt::NativeGestureType gestype = gestEvent->gestureType();
+		double value = gestEvent->value();
+		switch (gestype)
+		{
+		case Qt::PanNativeGesture:
+			break;
+		case Qt::ZoomNativeGesture:
+#if defined(Q_OS_MAC)
+			onWheelEvent(value);
+			Q_EMIT m_signalEmitter->mouseWheelRotated(value);
+			evt->accept();
+#endif
+			break;
+		case Qt::SmartZoomNativeGesture:
+			break;
+		case Qt::RotateNativeGesture:
+			break;
+		case Qt::SwipeNativeGesture:
+			break;
+		default:
+			break;
+		}
+	}
+	break;
+
 		//Gesture start/stop
 	case QEvent::TouchBegin:
 	case QEvent::TouchEnd:
@@ -4410,9 +4440,10 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 				if (m_touchBaseDist != 0.0)
 				{
 					float pseudo_wheelDelta_deg = dist < m_touchBaseDist ? -15.0f : 15.0f;
+#if !defined(Q_OS_MAC)
 					onWheelEvent(pseudo_wheelDelta_deg);
-
 					Q_EMIT m_signalEmitter->mouseWheelRotated(pseudo_wheelDelta_deg);
+#endif
 				}
 				m_touchBaseDist = dist;
 				evt->accept();
@@ -6749,12 +6780,17 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		//see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		float wheelDelta_deg = event->delta() / 8.0f;
-		onWheelEvent(wheelDelta_deg);
+		int padDelta = event->delta();
+		if (padDelta != 0)
+		{
+		    float wheelDelta_deg = event->delta() / 8.0f;
 
-		Q_EMIT m_signalEmitter->mouseWheelRotated(wheelDelta_deg);
+		    onWheelEvent(wheelDelta_deg);
 
-		doRedraw = true;
+		    Q_EMIT m_signalEmitter->mouseWheelRotated(wheelDelta_deg);
+
+		    doRedraw = true;
+		}
 	}
 
 	if (doRedraw)

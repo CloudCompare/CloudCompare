@@ -2202,10 +2202,9 @@ void ccDBRoot::showPointCloudNormalAsLine()
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
 			if (cloud->normalsAreDrawn())
 			{
-				closePointCloudNormalsDisplayParametersWidget(cloud);
+				closePointCloudNormalsDisplayParametersWidget();
 				cloud->showNormalsAsLines(false);
-				if (cloud->getDisplay())
-					cloud->redrawDisplay();
+				cloud->redrawDisplay();
 			}
 			else
 			{
@@ -2214,8 +2213,7 @@ void ccDBRoot::showPointCloudNormalAsLine()
 					openPointCloudNormalsDisplayParametersWidget(cloud);
 					QApplication::processEvents();
 					cloud->showNormalsAsLines(true);
-					if (cloud->getDisplay())
-						cloud->redrawDisplay();
+					cloud->redrawDisplay();
 				}
 				else
 					ccLog::Warning("[ccPointCloud::toggleDrawNormals] cloud should have normals if you want to draw them!");
@@ -2387,7 +2385,7 @@ void ccDBRoot::openPointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud)
 	m_normalLineParametersWidget.reset(new ccDrawNormalsWidget(cloud, MainWindow::TheInstance()));
 }
 
-void ccDBRoot::closePointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud)
+void ccDBRoot::closePointCloudNormalsDisplayParametersWidget()
 {
 	m_normalLineParametersWidget.clear();
 }

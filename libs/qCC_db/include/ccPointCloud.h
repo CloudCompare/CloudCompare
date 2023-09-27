@@ -164,7 +164,7 @@ public: //features deletion/clearing
 	//! Notify a modification of color / scalar field display parameters or contents
 	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; updateDecompressedNormals();}
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; decompressNormals();}
 	//! Notify a modification of points display parameters or contents
 	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
 
@@ -367,19 +367,22 @@ public: //normals computation/orientation
 	void showNormalsAsLines(bool state);
 
 	//! Are normals drawn as vectors?
-	const bool normalsAreDrawn();
+	bool normalsAreDrawn() const;
 
 	//! Set the length of the normals
 	void setNormalLength(float value);
 
 	//! Set the color of the normals
-	void setNormalLineColor(ccColor::Rgba color);
+	void setNormalLineColor(const ccColor::Rgba& color);
+
+	//! Init shader program for drawing normals
+	bool initProgramDrawNormals(CC_DRAW_CONTEXT& context);
 
 	//! Do the drawing of normals
-	bool drawNormalsAsLines(CC_DRAW_CONTEXT &context);
+	void drawNormalsAsLines(CC_DRAW_CONTEXT& context);
 
 	//! Update the decompressed normals which are used by drawNormalsAsLines
-	void updateDecompressedNormals();
+	void decompressNormals();
 
 public: //waveform (e.g. from airborne scanners)
 
@@ -904,19 +907,9 @@ protected: //waveform (e.g. from airborne scanners)
 
 	bool m_normalsDrawnAsLines;
 
-	struct normalLineParameters
+	struct NormalLineParameters
 	{
-		float length = 1.;
+		float length = 1.0f;
 		ccColor::Rgba color = ccColor::yellow;
 	} m_normalLineParameters;
-
-	QSharedPointer<QOpenGLShaderProgram> m_programDrawNormals;
-
-	struct programDrawNormalsParameters{
-		int vertexLocation = 0;
-		int normalLocation = 0;
-		int normalLengthLocation = 0;
-		int matrixLocation = 0;
-		int colorLocation = 0;
-	} m_programParameters;
 };

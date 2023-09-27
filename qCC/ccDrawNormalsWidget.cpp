@@ -98,8 +98,7 @@ void ccDrawNormalsWidget::writeSettings()
 void ccDrawNormalsWidget::normalLengthValueChanged(double value)
 {
 	m_cloud->setNormalLength(value);
-	if (m_cloud->getDisplay())
-		m_cloud->redrawDisplay();
+	m_cloud->redrawDisplay();
 }
 
 void ccDrawNormalsWidget::setNormalColor()

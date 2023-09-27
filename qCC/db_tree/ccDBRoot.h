@@ -226,7 +226,7 @@ private:
 	void openPointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud);
 
 	//! Close the dialog to set the normal length
-	void closePointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud);
+	void closePointCloudNormalsDisplayParametersWidget();
 
 Q_SIGNALS:
 	void selectionChanged();

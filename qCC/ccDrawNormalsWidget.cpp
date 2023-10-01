@@ -46,9 +46,10 @@ ccDrawNormalsWidget::~ccDrawNormalsWidget()
 void ccDrawNormalsWidget::readSettings()
 {
 	QSettings settings;
+	settings.beginGroup("PointCloudNormals");
 
-	double normalLength = settings.value("PointCloudNormals/normalLength", 1.).toDouble();
-	normalColor color = static_cast<normalColor>(settings.value("PointCloudNormals/normalColor", YELLOW).toUInt());
+	double normalLength = settings.value("normalLength", 1.).toDouble();
+	normalColor color = static_cast<normalColor>(settings.value("normalColor", YELLOW).toUInt());
 
 	ui->doubleSpinBox_normalLength->setValue(normalLength);
 

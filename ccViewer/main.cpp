@@ -29,6 +29,7 @@
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 #include <ccMaterial.h>
+#include <ccPointCloud.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -177,6 +178,7 @@ int main(int argc, char *argv[])
 
 	//release global structures
 	FileIOFilter::UnregisterAll();
+	ccPointCloud::ReleaseShaders();
 
 	return result;
 }

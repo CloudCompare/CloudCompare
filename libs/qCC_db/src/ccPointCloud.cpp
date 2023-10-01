@@ -59,21 +59,86 @@
 
 static const char s_deviationSFName[] = "Deviation";
 
+// 'Draw normals' shader program
 static QSharedPointer<QOpenGLShaderProgram> s_programDrawNormals;
-static struct ProgramDrawNormalsParameters{
+// 'Draw normals' shader parameters
+static struct DrawNormalsShaderParameters
+{
 	int vertexLocation = 0;
 	int normalLocation = 0;
 	int normalLengthLocation = 0;
 	int matrixLocation = 0;
 	int colorLocation = 0;
-} s_programParameters;
-
-// Shader path
+} s_drawNormalsShaderParameters;
+// Default path to the shader files
 static QString s_shaderPath;
 
 void ccPointCloud::SetShaderPath(const QString& path)
 {
 	s_shaderPath = path;
+}
+
+void ccPointCloud::ReleaseShaders()
+{
+	s_programDrawNormals.clear();
+}
+
+static bool InitProgramDrawNormals(QOpenGLContext* context)
+{
+	if (s_programDrawNormals.isNull())
+	{
+		QString error;
+
+		if (!context)
+		{
+			assert(false);
+			return false;
+		}
+
+		s_programDrawNormals.reset(new QOpenGLShaderProgram(context));
+
+		// create vertex shader
+		QString vertexShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.vs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		// create geometry shader
+		QString geometryShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.gs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Geometry, geometryShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		// create fragment shader
+		QString fragmentShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.fs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		if (!s_programDrawNormals->link())
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		s_drawNormalsShaderParameters.vertexLocation = s_programDrawNormals->attributeLocation("vertexIn");
+		s_drawNormalsShaderParameters.normalLocation = s_programDrawNormals->attributeLocation("normal");
+		s_drawNormalsShaderParameters.normalLengthLocation = s_programDrawNormals->uniformLocation("normalLength");
+		s_drawNormalsShaderParameters.matrixLocation = s_programDrawNormals->uniformLocation("modelViewProjectionMatrix");
+		s_drawNormalsShaderParameters.colorLocation = s_programDrawNormals->uniformLocation("color");
+	}
+
+	return true;
 }
 
 ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/) throw()
@@ -5799,58 +5864,13 @@ void ccPointCloud::setNormalLineColor(const ccColor::Rgba& color)
 	m_normalLineParameters.color = color;
 }
 
-bool ccPointCloud::initProgramDrawNormals(CC_DRAW_CONTEXT& context)
-{
-	QString error;
-
-	s_programDrawNormals.reset(new QOpenGLShaderProgram(context.qGLContext));
-
-	// create vertex shader
-	QString vertexShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.vs");
-	if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFile))
-	{
-		error = s_programDrawNormals->log();
-		ccLog::Error(error);
-		return false;
-	}
-
-	// create geometry shader
-	QString geometryShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.gs");
-	if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Geometry, geometryShaderFile))
-	{
-		error = s_programDrawNormals->log();
-		ccLog::Error(error);
-		return false;
-	}
-
-	// create fragment shader
-	QString fragmentShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.fs");
-	if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShaderFile))
-	{
-		error = s_programDrawNormals->log();
-		ccLog::Error(error);
-		return false;
-	}
-
-	if (!s_programDrawNormals->link())
-	{
-		error = s_programDrawNormals->log();
-		ccLog::Error(error);
-		return false;
-	}
-
-	s_programParameters.vertexLocation = s_programDrawNormals->attributeLocation("vertexIn");
-	s_programParameters.normalLocation = s_programDrawNormals->attributeLocation("normal");
-	s_programParameters.normalLengthLocation = s_programDrawNormals->uniformLocation("normalLength");
-	s_programParameters.matrixLocation = s_programDrawNormals->uniformLocation("modelViewProjectionMatrix");
-	s_programParameters.colorLocation = s_programDrawNormals->uniformLocation("color");
-
-	return true;
-}
-
 void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 {
-	QString error;
+	if (!InitProgramDrawNormals(context.qGLContext))
+	{
+		ccLog::Warning("[ccPointCloud::drawNormalsAsLines] impossible to init shader program");
+		return;
+	}
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
@@ -5861,36 +5881,29 @@ void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 	glFunc->glGetFloatv(GL_MODELVIEW_MATRIX, modelView.data());
 	QMatrix4x4 projectionModelView = projection * modelView; // QMatrix4x4 expects row major data
 
-	if (s_programDrawNormals.isNull())
-		if (!initProgramDrawNormals(context))
-		{
-			ccLog::Warning("[ccPointCloud::drawNormalsAsLines] impossible to init shader program");
-			return;
-		}
-
 	s_programDrawNormals->bind();
 	// set uniforms
-	s_programDrawNormals->setUniformValue(s_programParameters.matrixLocation, projectionModelView);
-	s_programDrawNormals->setUniformValue(s_programParameters.normalLengthLocation, GLfloat(m_normalLineParameters.length));
-	s_programDrawNormals->setUniformValue(s_programParameters.colorLocation,
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.matrixLocation, projectionModelView);
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.normalLengthLocation, GLfloat(m_normalLineParameters.length));
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.colorLocation,
 										  m_normalLineParameters.color.r,
 										  m_normalLineParameters.color.g,
 										  m_normalLineParameters.color.b,
 										  m_normalLineParameters.color.a);
 
 	// set the vertex locations array
-	s_programDrawNormals->setAttributeArray(s_programParameters.vertexLocation, static_cast< GLfloat*>(m_points.front().u), 3);
+	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.vertexLocation, static_cast<GLfloat*>(m_points.front().u), 3);
 	// set the normals array
-	s_programDrawNormals->setAttributeArray(s_programParameters.normalLocation, static_cast< GLfloat*>(m_decompressedNormals.front().u), 3);
+	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.normalLocation, static_cast<GLfloat*>(m_decompressedNormals.front().u), 3);
 	// enable the vertex locations array
-	s_programDrawNormals->enableAttributeArray(s_programParameters.vertexLocation);
+	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
 	// enable the normals array
-	s_programDrawNormals->enableAttributeArray(s_programParameters.normalLocation);
+	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
 
 	glFunc->glDrawArrays(GL_POINTS, 0, size());
 
-	s_programDrawNormals->disableAttributeArray(s_programParameters.vertexLocation);
-	s_programDrawNormals->disableAttributeArray(s_programParameters.normalLocation);
+	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
+	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
 
 	s_programDrawNormals->release();
 }

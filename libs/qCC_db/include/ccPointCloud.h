@@ -32,7 +32,6 @@
 
 //Qt
 #include <QGLBuffer>
-#include <QOpenGLShaderProgram>
 
 class ccScalarField;
 class ccPolyline;
@@ -374,9 +373,6 @@ public: //normals computation/orientation
 
 	//! Set the color of the normals
 	void setNormalLineColor(const ccColor::Rgba& color);
-
-	//! Init shader program for drawing normals
-	bool initProgramDrawNormals(CC_DRAW_CONTEXT& context);
 
 	//! Do the drawing of normals
 	void drawNormalsAsLines(CC_DRAW_CONTEXT& context);
@@ -770,6 +766,11 @@ public: //other methods
 
 	//! Set the path for shaders
 	static void SetShaderPath(const QString &path);
+
+	//! Release shaders (if any)
+	/** Must be called before the OpenGL context is released.
+	**/
+	static void ReleaseShaders();
 
 protected:
 

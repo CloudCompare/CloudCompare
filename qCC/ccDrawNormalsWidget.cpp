@@ -10,7 +10,7 @@ ccDrawNormalsWidget::ccDrawNormalsWidget(ccPointCloud* cloud, QWidget* parent)
 {
 	ui->setupUi(this);
 
-	ui->label_cloudName->setText(m_cloud->getName());
+	ui->cloudNameLabel->setText(m_cloud->getName());
 
 	buttonGroup = new QButtonGroup();
 	buttonGroup->addButton(this->ui->pushButtonYellow);
@@ -19,16 +19,16 @@ ccDrawNormalsWidget::ccDrawNormalsWidget(ccPointCloud* cloud, QWidget* parent)
 	buttonGroup->addButton(this->ui->pushButtonBlue);
 	buttonGroup->addButton(this->ui->pushButtonBlack);
 
-	connect(this->ui->doubleSpinBox_normalLength, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDrawNormalsWidget::normalLengthValueChanged);
-	connect(this->ui->pushButtonYellow,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButtonRed,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButtonGreen,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButtonBlue,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
-	connect(this->ui->pushButtonBlack,		&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->normalLengthDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ccDrawNormalsWidget::normalLengthValueChanged);
+	connect(this->ui->pushButtonYellow,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonRed,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonGreen,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonBlue,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
+	connect(this->ui->pushButtonBlack,	&QPushButton::clicked, this, &ccDrawNormalsWidget::setNormalColor);
 
 	readSettings();
 
-	normalLengthValueChanged(ui->doubleSpinBox_normalLength->value());
+	normalLengthValueChanged(ui->normalLengthDoubleSpinBox->value());
 	setNormalColor();
 
 	setWindowFlag(Qt::WindowStaysOnTopHint);
@@ -51,7 +51,7 @@ void ccDrawNormalsWidget::readSettings()
 	double normalLength = settings.value("normalLength", 1.).toDouble();
 	normalColor color = static_cast<normalColor>(settings.value("normalColor", YELLOW).toUInt());
 
-	ui->doubleSpinBox_normalLength->setValue(normalLength);
+	ui->normalLengthDoubleSpinBox->setValue(normalLength);
 
 	switch (color)
 	{
@@ -80,7 +80,7 @@ void ccDrawNormalsWidget::writeSettings()
 	QSettings settings;
 	settings.beginGroup("PointCloudNormals");
 
-	settings.setValue("normalLength", ui->doubleSpinBox_normalLength->value());
+	settings.setValue("normalLength", ui->normalLengthDoubleSpinBox->value());
 
 	if (this->ui->pushButtonRed->isChecked())
 		settings.setValue("normalColor", RED);

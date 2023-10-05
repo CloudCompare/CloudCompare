@@ -44,8 +44,8 @@
 #pragma warning( disable: 4129 )
 #pragma warning( disable: 4267 )
 #pragma warning( disable: 4566 )
-#include <igl/copyleft/cgal/mesh_boolean.h>
 #endif
+#include <igl/copyleft/cgal/mesh_boolean.h>
 
 //! ligIGL mesh
 struct IGLMesh

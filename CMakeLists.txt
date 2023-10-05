@@ -75,3 +75,5 @@ add_subdirectory( qCC )
 if( OPTION_BUILD_CCVIEWER )
 	add_subdirectory( ccViewer )
 endif()
+
+add_subdirectory( postInstall )

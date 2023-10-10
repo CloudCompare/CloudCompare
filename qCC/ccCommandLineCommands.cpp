@@ -119,6 +119,7 @@ constexpr char COMMAND_COLOR_INTERP[]					= "COLOR_INTERP";
 constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
 constexpr char COMMAND_SF_ADD_CONST[]					= "SF_ADD_CONST";
 constexpr char COMMAND_SF_ADD_ID[]						= "SF_ADD_ID";
+constexpr char COMMAND_SF_ADD_ID_AS_INT[]				= "AS_INT";
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_SF_TO_COORD[]					= "SF_TO_COORD";
@@ -5491,16 +5492,33 @@ CommandSFAddId::CommandSFAddId()
 
 bool CommandSFAddId::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[ADD ID]"));
+	cmd.print(QObject::tr("[SF_ADD_ID]"));
 
 	ccHObject::Container selectedEntities;
+
+	bool addIdAsInt = false;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_ADD_ID_AS_INT))
+		{
+			cmd.print(QObject::tr("[AS_INT]"));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			addIdAsInt = true;
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
 
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		selectedEntities.push_back(desc.getEntity());
 	}
 
-	if ( !ccEntityAction::sfAddIdField(selectedEntities) )
+	if ( !ccEntityAction::sfAddIdField(selectedEntities, addIdAsInt) )
 		return false;
 
 	return true;

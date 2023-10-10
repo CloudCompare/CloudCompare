@@ -42,7 +42,7 @@ namespace ccEntityAction
 	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent);
 	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent);
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfAddIdField(const ccHObject::Container &selectedEntities);
+	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt=false);
     bool	sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app);
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent);

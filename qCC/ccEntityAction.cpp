@@ -1087,7 +1087,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfAddIdField(const ccHObject::Container &selectedEntities)
+	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1107,11 +1107,39 @@ namespace ccEntityAction
 				
 				CCCoreLib::ScalarField* sf = pc->getScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
-				
-				for (unsigned j=0 ; j<cloud->size(); j++)
+
+				for (size_t j=0 ; j<cloud->size(); j++)
 				{
-					ScalarType idValue = static_cast<ScalarType>(j);
-					sf->setValue(j, idValue);
+					ScalarType idValue;
+					if (false)
+					{
+						idValue = static_cast<ScalarType>(j);
+						sf->setValue(j, idValue);
+					}
+					else
+					{
+#if defined CC_CORE_LIB_USES_DOUBLE
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[7] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[6] = static_cast<unsigned char>(j >> 8 & 0xff);
+						valuePtr[5] = static_cast<unsigned char>(j >> 16 & 0xff);
+						valuePtr[4] = static_cast<unsigned char>(j >> 24 & 0xff);
+						valuePtr[3] = static_cast<unsigned char>(j >> 32 & 0xff);
+						valuePtr[2] = static_cast<unsigned char>(j >> 40 & 0xff);
+						valuePtr[1] = static_cast<unsigned char>(j >> 48 & 0xff);
+						valuePtr[0] = static_cast<unsigned char>(j >> 56 & 0xff);
+						sf->setValue(j, idValue);
+#elif defined CC_CORE_LIB_USES_FLOAT
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[1] = static_cast<unsigned char>((j >> 8) & 0xff);
+						valuePtr[2] = static_cast<unsigned char>((j >> 16) & 0xff);
+						valuePtr[3] = static_cast<unsigned char>((j >> 24) & 0xff);
+						sf->setValue(j, idValue);
+#else
+						static_assert(false, "type for ScalarType has not been declared");
+#endif
+					}
 				}
 				
 				sf->computeMinAndMax();

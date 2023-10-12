@@ -5556,7 +5556,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="875"/>
         <source>Help</source>
-        <translation>帮忙</translation>
+        <translation>帮助</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="878"/>

@@ -25,7 +25,7 @@ Big ones:
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
-	- option to set the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959)
+	- option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 	- SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
@@ -63,6 +63,8 @@ qFacets plugin:
 [*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
+[*]Add more controls and a preview option to the 'Color Levels' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6629)
+[*] Option 'no to all' for the Global Shift dialog (https://www.cloudcompare.org/forum/viewtopic.php?t=6628)
 [*] Batch export several polylines CSV 'height profiles' (see https://www.cloudcompare.org/forum/viewtopic.php?p=28189)
 [*] Rasterize tool (GUI)
 	- choose the exported raster format (https://www.cloudcompare.org/forum/viewtopic.php?t=6378)
@@ -96,7 +98,6 @@ Various:
 [*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
 [*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
 [*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)
-[*] Option to ADD a global shift at saving time via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] Let the user choose the color scale in the '2.5D Volume computation' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4196)
 [*] Update the two-point-distance label 'in real time' when the mouse hovers points (https://www.cloudcompare.org/forum/viewtopic.php?t=3765)
 [*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)

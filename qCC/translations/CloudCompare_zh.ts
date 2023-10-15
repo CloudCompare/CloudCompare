@@ -5181,7 +5181,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
-        <source>Use Polynomial 
+        <source>Use Polynomial
 (instead of tangent)</source>
         <translation></translation>
     </message>
@@ -5192,7 +5192,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
-        <source>Squared Gaussian 
+        <source>Squared Gaussian
 Parameter</source>
         <translation></translation>
     </message>
@@ -5556,7 +5556,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="875"/>
         <source>Help</source>
-        <translation>帮忙</translation>
+        <translation>帮助</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="878"/>
@@ -5708,7 +5708,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1054"/>
         <source>Del</source>
-        <translation type="unfinished">删除</translation>
+        <translation type="unfinished">Del</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1066"/>
@@ -15195,7 +15195,7 @@ replaced by the cell&apos;s average height!</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
-        <source>might not preserve data accuracy  
+        <source>might not preserve data accuracy
 (especially if you have transformed the original data)  </source>
         <translation></translation>
     </message>
@@ -15675,7 +15675,7 @@ multiplier threshold (nSigma)</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
-        <source>Number of points to use for 
+        <source>Number of points to use for
 mean distance estimation</source>
         <translation></translation>
     </message>

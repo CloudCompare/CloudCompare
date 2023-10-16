@@ -2099,7 +2099,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="48"/>
         <source>Show/hide interactors</source>
-        <translation>インタラクターの表示/隠す</translation>
+        <translation>显示/隐藏交互器</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="84"/>
@@ -2143,7 +2143,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ui_templates/clippingBoxDlg.ui" line="286"/>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="289"/>
         <source>Removes last extracted contour</source>
-        <translation>最後に抽出した等高線を削除</translation>
+        <translation>删除最后提取的轮廓</translation>
     </message>
     <message>
         <location filename="../ui_templates/clippingBoxDlg.ui" line="303"/>
@@ -2523,7 +2523,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="26"/>
         <source>Default</source>
-        <translation>初期設定</translation>
+        <translation>默认</translation>
     </message>
     <message>
         <location filename="../ui_templates/colorGradientDlg.ui" line="36"/>
@@ -2740,7 +2740,7 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="478"/>
         <source>Compute</source>
-        <translation>演算</translation>
+        <translation>计算</translation>
     </message>
     <message>
         <location filename="../ui_templates/comparisonDlg.ui" line="488"/>
@@ -2806,7 +2806,7 @@ to help advanced users setting the general parameters</source>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="33"/>
         <source>Default</source>
-        <translation>初期設定</translation>
+        <translation>默认</translation>
     </message>
     <message>
         <location filename="../ui_templates/computeOctreeDlg.ui" line="43"/>
@@ -3589,7 +3589,7 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="44"/>
         <source>Message</source>
-        <translation>メッセージ</translation>
+        <translation>消息</translation>
     </message>
     <message>
         <location filename="../ui_templates/envelopeExtractorDlg.ui" line="57"/>
@@ -3617,12 +3617,12 @@ The bigger the more accurate the map will be
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="14"/>
         <source>Export coordinates to SF</source>
-        <translation>スカラー領域への段彩出力</translation>
+        <translation>导出坐标到标量字段（SF）</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="29"/>
         <source>Export</source>
-        <translation></translation>
+        <translation>导出</translation>
     </message>
     <message>
         <location filename="../ui_templates/exportCoordToSFDlg.ui" line="71"/>
@@ -3748,22 +3748,22 @@ the other with the points falling outside.</source>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="96"/>
         <source>sensor front direction (yaw = 0)</source>
-        <translation type="unfinished">传感器的前方向(Yaw=0)</translation>
+        <translation type="unfinished">传感器前侧方向(Yaw=0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="127"/>
         <source>sensor lateral direction</source>
-        <translation>センサー横方向</translation>
+        <translation>传感器侧向方向</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="158"/>
         <source>sensor vertical direction (pitch = 0)</source>
-        <translation type="unfinished">传感器垂直方式(Pitch=0)</translation>
+        <translation type="unfinished">传感器垂直方向(Pitch=0)</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="202"/>
         <source>sensor center</source>
-        <translation>センサー中央</translation>
+        <translation>传感器中心</translation>
     </message>
     <message>
         <location filename="../ui_templates/gblSensorProjectDlg.ui" line="234"/>
@@ -4858,7 +4858,7 @@ Note: the diagonal is not tested at loading time.</source>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="120"/>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="302"/>
         <source>Normals</source>
-        <translation>法線</translation>
+        <translation>法向量</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="149"/>
@@ -4929,7 +4929,7 @@ Note: the diagonal is not tested at loading time.</source>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="334"/>
         <source>Default</source>
-        <translation>初期設定</translation>
+        <translation>默认</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qM3C2/ui/qM3C2Dialog.ui" line="344"/>
@@ -5582,7 +5582,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="895"/>
         <source>Set unique</source>
-        <translation>设置独特的</translation>
+        <translation>设置为唯一</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="898"/>
@@ -5730,7 +5730,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1081"/>
         <source>Cloud/Cloud Dist.</source>
-        <translation>云/云距离</translation>
+        <translation>点云/点云距离</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1084"/>
@@ -7232,7 +7232,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="2718"/>
         <source>+</source>
         <extracomment>Zoom in shortcut</extracomment>
-        <translatorcomment>拡大のショートカットキー</translatorcomment>
+        <translatorcomment>快捷键：放大</translatorcomment>
         <translation>+</translation>
     </message>
     <message>
@@ -7249,7 +7249,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="2729"/>
         <source>=</source>
         <extracomment>Zoom in shortcut</extracomment>
-        <translatorcomment>縮小のショートカットキー</translatorcomment>
+        <translatorcomment>快捷键：放大</translatorcomment>
         <translation>=</translation>
     </message>
     <message>
@@ -8603,7 +8603,7 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="6288"/>
         <source>Not enough memory</source>
-        <translation>记忆力不够</translation>
+        <translation>内存不足</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="6294"/>
@@ -9317,7 +9317,7 @@ Use the &apos;Stereo&apos; version instead.</source>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="14"/>
         <source>Match scales</source>
-        <translation>スケールを合わせる</translation>
+        <translation>匹配尺寸</translation>
     </message>
     <message>
         <location filename="../ui_templates/matchScalesDlg.ui" line="20"/>
@@ -11847,7 +11847,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2570"/>
         <source>Orient normals</source>
-        <translation>法線方向</translation>
+        <translation>法线方向</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2575"/>
@@ -11992,7 +11992,7 @@ p, li { white-space: pre-wrap; }
         <location filename="../ccCommandLineCommands.cpp" line="3028"/>
         <location filename="../ccCommandLineCommands.cpp" line="3092"/>
         <source>Crop</source>
-        <translation>切り取り</translation>
+        <translation>裁剪</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="2886"/>
@@ -12422,7 +12422,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="3988"/>
         <source>SF arithmetic</source>
-        <translation>スカラー領域の演算</translation>
+        <translation>标量字段（SF）运算</translation>
     </message>
     <message>
         <location filename="../ccCommandLineCommands.cpp" line="3993"/>
@@ -16801,7 +16801,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="439"/>
         <source>Normals</source>
-        <translation>法線</translation>
+        <translation>法向量</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="443"/>
@@ -16811,7 +16811,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="448"/>
         <source>Colors</source>
-        <translation>色</translation>
+        <translation>颜色</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="471"/>
@@ -16962,7 +16962,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="619"/>
         <source>Scalar Field</source>
-        <translation>スカラー領域</translation>
+        <translation>标量字段（SF）</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="622"/>
@@ -17088,17 +17088,17 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="759"/>
         <source>Mesh</source>
-        <translation>メッシュ</translation>
+        <translation>网格模型</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="762"/>
         <source>Faces</source>
-        <translation></translation>
+        <translation>面</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="766"/>
         <source>Materials/textures</source>
-        <translation>マテリアル/テクスチャ</translation>
+        <translation>材质/纹理</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="769"/>
@@ -17113,7 +17113,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="794"/>
         <source>Polyline</source>
-        <translation>ポリライン</translation>
+        <translation>折线</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="797"/>

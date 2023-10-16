@@ -5414,7 +5414,7 @@ Parameter</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="398"/>
         <source>Projection</source>
-        <translation>预测</translation>
+        <translation>投影</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="408"/>
@@ -5446,7 +5446,7 @@ Parameter</source>
         <location filename="../ui_templates/mainWindow.ui" line="467"/>
         <location filename="../ui_templates/mainWindow.ui" line="2896"/>
         <source>Fit</source>
-        <translation type="unfinished">适配</translation>
+        <translation type="unfinished">拟合</translation>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="476"/>
@@ -7525,7 +7525,7 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="956"/>
         <source>An error occurred</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">发生错误</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="974"/>
@@ -7771,7 +7771,7 @@ Parameter</source>
         <location filename="../mainwindow.cpp" line="2268"/>
         <location filename="../mainwindow.cpp" line="7947"/>
         <source>An error occurred! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">发生错误 (查看控制台)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2262"/>
@@ -7926,7 +7926,7 @@ Parameter</source>
     <message>
         <location filename="../mainwindow.cpp" line="2868"/>
         <source>An error occurred! (Not enough memory?)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">发生错误 (内存不足?)</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="2876"/>
@@ -10064,72 +10064,72 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="14"/>
         <source>Ply File Open</source>
-        <translation></translation>
+        <translation>打开Ply文件</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="22"/>
         <source>Type</source>
-        <translation></translation>
+        <translation>文件类型</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="43"/>
         <source>Elements</source>
-        <translation></translation>
+        <translation>元素</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="69"/>
         <source>Properties</source>
-        <translation>プロパティ</translation>
+        <translation>属性</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="95"/>
         <source>Textures</source>
-        <translation></translation>
+        <translation>纹理</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="131"/>
         <source>Point X</source>
-        <translation></translation>
+        <translation>点的 X 坐标</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="141"/>
         <source>Point Y</source>
-        <translation></translation>
+        <translation>点的 Y 坐标</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="151"/>
         <source>Point Z</source>
-        <translation></translation>
+        <translation>点的 Z 坐标</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="161"/>
         <source>Red</source>
-        <translation></translation>
+        <translation>颜色的R分量</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="171"/>
         <source>Green</source>
-        <translation></translation>
+        <translation>颜色的G分量</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="181"/>
         <source>Blue</source>
-        <translation></translation>
+        <translation>颜色的B分量</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="191"/>
         <source>Intensity</source>
-        <translation></translation>
+        <translation>反射强度</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="231"/>
         <source>Faces</source>
-        <translation></translation>
+        <translation>面</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="241"/>
         <source>Texture coordinates</source>
-        <translation></translation>
+        <translation>纹理坐标</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="254"/>
@@ -10139,12 +10139,12 @@ It will be saved as multiple tiles on the disk.</source>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="261"/>
         <source>Texture index</source>
-        <translation></translation>
+        <translation>纹理索引</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="273"/>
         <source>Add Scalar field</source>
-        <translation></translation>
+        <translation>添加色阶域</translation>
     </message>
     <message>
         <location filename="../../libs/qCC_io/ui/openPlyFileDlg.ui" line="327"/>
@@ -13391,7 +13391,7 @@ Cells: %L2 x %L3</source>
         <location filename="../ccEntityAction.cpp" line="373"/>
         <location filename="../ccEntityAction.cpp" line="507"/>
         <source>An error occurred! (see console)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">发生错误 (查看控制台)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="410"/>
@@ -13612,7 +13612,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../ccEntityAction.cpp" line="1287"/>
         <source>An error occurred (see Console for more details)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">发生错误(请查看控制台以获取更多详情)</translation>
     </message>
     <message>
         <location filename="../ccEntityAction.cpp" line="1336"/>
@@ -13859,7 +13859,7 @@ or use the actual one (no)?</source>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="133"/>
         <source>Process has been cancelled by the user</source>
-        <translation></translation>
+        <translation>用户已取消该进程</translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="203"/>

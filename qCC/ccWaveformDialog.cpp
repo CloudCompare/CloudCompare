@@ -365,7 +365,7 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 	, m_gui(new Ui_WaveDialog)
 	, m_waveMax(0)
 	, m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
-	, m_display(cloud->getDisplay())
+	, m_display(cloud ? cloud->getDisplay() : nullptr)
 {
 	m_gui->setupUi(this);
 	
@@ -406,7 +406,8 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 ccWaveDialog::~ccWaveDialog()
 {
 	delete m_gui;
-	m_display->redraw();
+	if (m_display)
+		m_display->redraw();
 }
 
 void ccWaveDialog::onPointIndexChanged(int index)
@@ -429,12 +430,14 @@ void ccWaveDialog::onPointIndexChanged(int index)
 	m_widget->refresh();
 }
 
-bool ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
+void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 {
 	ccGLCameraParameters camera;
+	if (m_display == nullptr)
+		return;
 	m_display->getGLCameraParameters(camera);
 
-	CCVector3 P = *cloud->getPoint(pointIndex);
+	const CCVector3& P = *cloud->getPoint(pointIndex);
 	CCVector3d Y;
 	camera.project(P, Y);
 	Y.y = m_display->getScreenSize().height() - Y.y;
@@ -452,7 +455,7 @@ bool ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 
 	m_display->redraw();
 
-	return true;
+	return;
 }
 
 void ccWaveDialog::onItemPicked(const PickedItem& pi)

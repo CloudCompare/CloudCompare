@@ -26,7 +26,6 @@
 #include <ReferenceCloud.h>
 
 //local
-#include "cc2DLabel.h"
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
 #include "ccColorScalesManager.h"
@@ -5846,7 +5845,10 @@ void ccPointCloud::showNormalsAsLines(bool state)
 	if (state == false)
 		m_decompressedNormals.clear();
 	else
+	{
 		decompressNormals();
+		redrawDisplay();
+	}
 }
 
 bool ccPointCloud::normalsAreDrawn() const
@@ -5854,14 +5856,35 @@ bool ccPointCloud::normalsAreDrawn() const
 	return m_normalsDrawnAsLines;
 }
 
-void  ccPointCloud::setNormalLength(float value)
+void  ccPointCloud::setNormalLength(const float& value)
 {
 	m_normalLineParameters.length = value;
 }
 
-void ccPointCloud::setNormalLineColor(const ccColor::Rgba& color)
+void ccPointCloud::setNormalLineColor(int colorIdx)
 {
-	m_normalLineParameters.color = color;
+	m_normalLineParameters.colorIdx = colorIdx;
+
+	switch (colorIdx) {
+	case ccPointCloud::YELLOW:
+		m_normalLineParameters.color = ccColor::yellow;
+		break;
+	case ccPointCloud::RED:
+		m_normalLineParameters.color = ccColor::red;
+		break;
+	case ccPointCloud::GREEN:
+		m_normalLineParameters.color = ccColor::green;
+		break;
+	case ccPointCloud::BLUE:
+		m_normalLineParameters.color = ccColor::blue;
+		break;
+	case ccPointCloud::BLACK:
+		m_normalLineParameters.color = ccColor::black;
+		break;
+	default:
+		m_normalLineParameters.color = ccColor::yellow;
+		break;
+	}
 }
 
 void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)

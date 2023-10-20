@@ -369,10 +369,25 @@ public: //normals computation/orientation
 	bool normalsAreDrawn() const;
 
 	//! Set the length of the normals
-	void setNormalLength(float value);
+	void setNormalLength(const float& value);
+
+	//! Get the length of the normals
+	const float& getNormalLength() {return m_normalLineParameters.length;}
+
+	//! Colors of the normals when they are displayed
+	enum NormalLineColors{
+		YELLOW,
+		RED,
+		GREEN,
+		BLUE,
+		BLACK
+	};
 
 	//! Set the color of the normals
-	void setNormalLineColor(const ccColor::Rgba& color);
+	void setNormalLineColor(int colorIdx);
+
+	//! Get the color of the normals
+	const int& getNormalLineColor() {return m_normalLineParameters.colorIdx;}
 
 	//! Do the drawing of normals
 	void drawNormalsAsLines(CC_DRAW_CONTEXT& context);
@@ -912,5 +927,6 @@ protected: //waveform (e.g. from airborne scanners)
 	{
 		float length = 1.0f;
 		ccColor::Rgba color = ccColor::yellow;
+		int colorIdx = YELLOW;
 	} m_normalLineParameters;
 };

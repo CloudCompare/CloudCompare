@@ -271,7 +271,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
 	m_enableBubbleViewMode = new QAction("Bubble-view", this);
 	m_editLabelScalarValue = new QAction("Edit scalar value", this);
-	m_showPointCloudNormalAsLine = new QAction("Toggle draw normals as lines", this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -297,7 +296,6 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_alignCameraWithEntityReverse,		&QAction::triggered,					this, &ccDBRoot::alignCameraWithEntityIndirect);
 	connect(m_enableBubbleViewMode,				&QAction::triggered,					this, &ccDBRoot::enableBubbleViewMode);
 	connect(m_editLabelScalarValue,				&QAction::triggered,					this, &ccDBRoot::editLabelScalarValue);
-	connect(m_showPointCloudNormalAsLine,						&QAction::triggered,					this, &ccDBRoot::showPointCloudNormalAsLine);
 
 	//other DB tree signals/slots connection
 	connect(m_dbTreeWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ccDBRoot::changeSelection);
@@ -2159,69 +2157,6 @@ void ccDBRoot::editLabelScalarValue()
 	}
 }
 
-void ccDBRoot::showPointCloudNormalAsLine()
-{
-	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
-	QModelIndexList selectedIndexes = qism->selectedIndexes();
-	int selCount = selectedIndexes.size();
-	if (selCount == 0)
-		return;
-
-	//init the list of entities to process
-	ccHObject::Container toProcess;
-	try
-	{
-		toProcess.resize(selCount);
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Error("Not engough memory");
-		return;
-	}
-
-	for (int i = 0; i < selCount; ++i)
-	{
-		toProcess[i] = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-	}
-
-	ccHObject::Container alreadyProcessed;
-	while (!toProcess.empty())
-	{
-		ccHObject* ent = toProcess.back();
-		toProcess.pop_back();
-
-		//we don't process entities twice!
-		if (std::find(alreadyProcessed.begin(), alreadyProcessed.end(), ent) != alreadyProcessed.end())
-		{
-			continue;
-		}
-
-		//gather information from current entity
-		if (ent->isA(CC_TYPES::POINT_CLOUD))
-		{
-			ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
-			if (cloud->normalsAreDrawn())
-			{
-				closePointCloudNormalsDisplayParametersWidget();
-				cloud->showNormalsAsLines(false);
-				cloud->redrawDisplay();
-			}
-			else
-			{
-				if (cloud->hasNormals())
-				{
-					openPointCloudNormalsDisplayParametersWidget(cloud);
-					QApplication::processEvents();
-					cloud->showNormalsAsLines(true);
-					cloud->redrawDisplay();
-				}
-				else
-					ccLog::Warning("[ccPointCloud::toggleDrawNormals] cloud should have normals if you want to draw them!");
-			}
-		}
-	}
-}
-
 void ccDBRoot::showContextMenu(const QPoint& menuPos)
 {
 	m_contextMenuPos = menuPos;
@@ -2334,7 +2269,6 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_toggleSelectedEntitiesColor);
 				menu.addAction(m_toggleSelectedEntitiesNormals);
 				menu.addAction(m_toggleSelectedEntitiesSF);
-				menu.addAction(m_showPointCloudNormalAsLine);
 			}
 			if (toggleMaterials)
 			{
@@ -2378,16 +2312,6 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 	}
 
 	menu.exec(m_dbTreeWidget->mapToGlobal(menuPos));
-}
-
-void ccDBRoot::openPointCloudNormalsDisplayParametersWidget(ccPointCloud *cloud)
-{
-	m_normalLineParametersWidget.reset(new ccDrawNormalsWidget(cloud, MainWindow::TheInstance()));
-}
-
-void ccDBRoot::closePointCloudNormalsDisplayParametersWidget()
-{
-	m_normalLineParametersWidget.clear();
 }
 
 QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& idx, const QEvent* event/*=nullptr*/) const

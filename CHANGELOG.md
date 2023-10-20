@@ -117,6 +117,9 @@ v2.13.alpha (???) - (??/??/????)
 		- ability to paste the axes, triplet of angles and translation vectors from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- the tool now tries to handle rotation scaling separately (with a dedicated field, assuming it's the same scaling for all dimensions)
 
+	- Edit > Waveform > 2D Waveform viewer
+		- the point which waveform is edited is now spoted in the 3D view and information is displayed as in with the pickin tool
+
 	- Multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath
 		  (warning: some dialogs may keep the previous value as it's stored in the system registry)

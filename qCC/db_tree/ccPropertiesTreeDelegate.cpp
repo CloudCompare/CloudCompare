@@ -617,10 +617,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 			double dataSize_mb = (cloud->fwfData() ? cloud->fwfData()->size() : 0) / static_cast<double>(1 << 20);
 			appendRow(ITEM( tr( "Data size" ) ), ITEM(QStringLiteral("%1 Mb").arg(dataSize_mb, 0, 'f', 2)));
 		}
-	}
 
-	//draw normals
-	fillWithDrawNormals(_obj);
+		//normals
+		if (cloud->hasNormals())
+			fillWithDrawNormals(_obj);
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)

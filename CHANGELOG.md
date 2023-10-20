@@ -4,6 +4,13 @@ CloudCompare Version History
 v2.13.alpha (???) - (??/??/????)
 ----------------------
 - - New features:
+
+	- New section in the Properties when a cloud is selected: "Draw normals as lines"
+		- one check box to toggle the display
+		- one double spin box to choose the length of the normals (1 by default)
+		- one combo box to choose the color of the normals
+	
+
 	- New command line option:
 		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 		- SF_OP_SF {SF 1 name or index} {operation} {SF 2 name or index}

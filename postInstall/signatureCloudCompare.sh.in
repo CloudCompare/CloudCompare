@@ -49,8 +49,5 @@ find "${APP}" -name "*.so" -print -exec codesign -s ${SIGNATURE} -f --timestamp 
 
 echo "--- signature app---"
 codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/app.entitlements"   "${APP}"
-# Create a disk image from our disk image root directory.
-hdiutil create -ov -srcFolder "${WORKDIR}" -quiet -o "${DMG}"
-# Sign that.
-codesign -s ${SIGNATURE} --timestamp -i fr.openfields.CloudCompare.DiskImage "${DMG}"
-echo "${DMG}"
+
+# Notarization and staple process for the app and dmg to do when all the tests are OK (requires an upload and a long process on Apple servers)

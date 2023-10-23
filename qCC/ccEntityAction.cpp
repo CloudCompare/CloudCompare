@@ -1111,10 +1111,9 @@ namespace ccEntityAction
 				for (size_t j=0 ; j<cloud->size(); j++)
 				{
 					ScalarType idValue;
-					if (false)
+					if (!storeAsInt)
 					{
 						idValue = static_cast<ScalarType>(j);
-						sf->setValue(j, idValue);
 					}
 					else
 					{
@@ -1135,11 +1134,11 @@ namespace ccEntityAction
 						valuePtr[1] = static_cast<unsigned char>((j >> 8) & 0xff);
 						valuePtr[2] = static_cast<unsigned char>((j >> 16) & 0xff);
 						valuePtr[3] = static_cast<unsigned char>((j >> 24) & 0xff);
-						sf->setValue(j, idValue);
 #else
 						static_assert(false, "type for ScalarType has not been declared");
 #endif
 					}
+					sf->setValue(j, idValue);
 				}
 				
 				sf->computeMinAndMax();

@@ -19,6 +19,7 @@
 #define CC_DB_ROOT_HEADER
 
 //Qt
+#include "ccPointCloud.h"
 #include <QAbstractItemModel>
 #include <QPoint>
 #include <QTreeView>

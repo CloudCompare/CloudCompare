@@ -124,13 +124,14 @@
 
 //other
 #include "ccCropTool.h"
-#include "ccGLPluginInterface.h"
 #include "ccPersistentSettings.h"
 #include "ccRecentFiles.h"
 #include "ccRegistrationTools.h"
 #include "ccUtils.h"
 #include "db_tree/ccDBRoot.h"
 #include "pluginManager/ccPluginUIManager.h"
+
+#include "ccGlFilter.h"
 
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
@@ -144,6 +145,7 @@
 
 //Qt
 #include <QClipboard>
+#include <QGLShader>
 
 //Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -9396,7 +9398,6 @@ void MainWindow::doActionCloudPrimitiveDist()
 		MainWindow::RefreshAllGLWindow(false);
 	}
 }
-
 
 void MainWindow::deactivateComparisonMode(int result)
 {

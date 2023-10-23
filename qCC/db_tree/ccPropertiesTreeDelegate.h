@@ -20,6 +20,7 @@
 
 //qCC_db
 #include <ccArray.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QStyledItemDelegate>
@@ -107,6 +108,9 @@ public:
 							OBJECT_COORDINATE_SYSTEM_AXES_WIDTH		,
 							OBJECT_COORDINATE_SYSTEM_DISP_SCALE		,
 							TREE_VIEW_HEADER						,
+							OBJECT_CLOUD_NORMAL_COLOR				,
+							OBJECT_CLOUD_NORMAL_LENGTH				,
+							OBJECT_CLOUD_DRAW_NORMALS				,
 	};
 
 	//! Default constructor
@@ -169,6 +173,8 @@ private:
 	void polyineWidthChanged(int);
 	void coordinateSystemAxisWidthChanged(int);
 	void trihedronsScaleChanged(double);
+	void normalColorChanged(int colorIdx);
+	void normalLengthChanged(double length);
 
 	void addSeparator(const QString& title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
@@ -176,6 +182,7 @@ private:
 
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
+	void fillWithDrawNormals(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);
 	void fillWithMesh(const ccGenericMesh*);
 	void fillWithFacet(const ccFacet*);

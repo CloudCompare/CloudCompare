@@ -163,7 +163,7 @@ public: //features deletion/clearing
 	//! Notify a modification of color / scalar field display parameters or contents
 	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; decompressNormals();}
 	//! Notify a modification of points display parameters or contents
 	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
 
@@ -361,6 +361,39 @@ public: //normals computation/orientation
 	//! Orient normals with Fast Marching
 	bool orientNormalsWithFM(		unsigned char level,
 									ccProgressDialog* pDlg = nullptr);
+
+	//! Toggle the drawing of normals as small lines
+	void showNormalsAsLines(bool state);
+
+	//! Are normals drawn as vectors?
+	bool normalsAreDrawn() const;
+
+	//! Set the length of the normals
+	void setNormalLength(const float& value);
+
+	//! Get the length of the normals
+	const float& getNormalLength() {return m_normalLineParameters.length;}
+
+	//! Colors of the normals when they are displayed
+	enum NormalLineColors{
+		YELLOW,
+		RED,
+		GREEN,
+		BLUE,
+		BLACK
+	};
+
+	//! Set the color of the normals
+	void setNormalLineColor(int colorIdx);
+
+	//! Get the color of the normals
+	const int& getNormalLineColor() {return m_normalLineParameters.colorIdx;}
+
+	//! Do the drawing of normals
+	void drawNormalsAsLines(CC_DRAW_CONTEXT& context);
+
+	//! Update the decompressed normals which are used by drawNormalsAsLines
+	void decompressNormals();
 
 public: //waveform (e.g. from airborne scanners)
 
@@ -746,6 +779,14 @@ public: //other methods
 	//! Shift the points of a given quantity along their normals
 	bool shiftPointsAlongNormals(PointCoordinateType shift);
 
+	//! Set the path for shaders
+	static void SetShaderPath(const QString &path);
+
+	//! Release shaders (if any)
+	/** Must be called before the OpenGL context is released.
+	**/
+	static void ReleaseShaders();
+
 protected:
 
 	//inherited from ccHObject
@@ -766,6 +807,9 @@ protected:
 
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;
+
+	//! Used for drawing normals if needed
+	std::vector<CCVector3> m_decompressedNormals;
 
 	//! Specifies whether current scalar field color scale should be displayed or not
 	bool m_sfColorScaleDisplayed;
@@ -877,4 +921,12 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
+	bool m_normalsDrawnAsLines;
+
+	struct NormalLineParameters
+	{
+		float length = 1.0f;
+		ccColor::Rgba color = ccColor::yellow;
+		int colorIdx = YELLOW;
+	} m_normalLineParameters;
 };

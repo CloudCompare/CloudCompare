@@ -617,7 +617,39 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 			double dataSize_mb = (cloud->fwfData() ? cloud->fwfData()->size() : 0) / static_cast<double>(1 << 20);
 			appendRow(ITEM( tr( "Data size" ) ), ITEM(QStringLiteral("%1 Mb").arg(dataSize_mb, 0, 'f', 2)));
 		}
+
+		//normals
+		if (cloud->hasNormals())
+		{
+			fillWithDrawNormals(_obj);
+		}
 	}
+}
+
+void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
+{
+	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
+	assert(_obj->isA(CC_TYPES::POINT_CLOUD));
+	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		return;
+	}
+
+	addSeparator( tr( "Draw normals as lines" ) );
+
+	//visibility
+	const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+	appendRow(ITEM(tr("Draw")), CHECKABLE_ITEM(cloud->normalsAreDrawn(), OBJECT_CLOUD_DRAW_NORMALS));
+
+	//normals length
+	appendRow(ITEM(tr("Length")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_LENGTH), true);
+
+	//normals color
+	appendRow(ITEM(tr("Color")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_COLOR), true);
 }
 
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
@@ -1629,6 +1661,35 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CLOUD_NORMAL_COLOR:
+	{
+		QComboBox *comboBox = new QComboBox(parent);
+
+		comboBox->addItem("Yellow");
+		comboBox->addItem("Red");
+		comboBox->addItem("Green");
+		comboBox->addItem("Blue");
+		comboBox->addItem("Black");
+
+		connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+				this, &ccPropertiesTreeDelegate::normalColorChanged);
+
+		outputWidget = comboBox;
+	}
+	break;
+	case OBJECT_CLOUD_NORMAL_LENGTH:
+	{
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(ccColorScale::MIN_STEPS, ccColorScale::MAX_STEPS);
+		spinBox->setSingleStep(0.1);
+		spinBox->setMinimum(0);
+
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+				this, &ccPropertiesTreeDelegate::normalLengthChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	default:
 		return QStyledItemDelegate::createEditor(parent, option, index);
 	}
@@ -2012,6 +2073,28 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetComboBoxIndex(editor, currentIndex);
 		break;
 	}
+	case OBJECT_CLOUD_NORMAL_COLOR:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		assert(cloud);
+		if (!cloud)
+		{
+			return;
+		}
+		SetComboBoxIndex(editor, static_cast<ccPointCloud*>(cloud)->getNormalLineColor());
+		break;
+	}
+	case OBJECT_CLOUD_NORMAL_LENGTH:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		assert(cloud);
+		if (!cloud)
+		{
+			return;
+		}
+		SetDoubleSpinBoxValue(editor, static_cast<ccPointCloud*>(cloud)->getNormalLength());
+		break;
+	}
 	default:
 		QStyledItemDelegate::setEditorData(editor, index);
 		break;
@@ -2174,6 +2257,17 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	{
 		ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
 		sensor->drawFrustumPlanes(item->checkState() == Qt::Checked);
+	}
+	redraw = true;
+	break;
+	case OBJECT_CLOUD_DRAW_NORMALS:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		bool isChecked = (item->checkState() == Qt::Checked);
+		if (cloud)
+		{
+			static_cast<ccPointCloud*>(cloud)->showNormalsAsLines(isChecked);
+		}
 	}
 	redraw = true;
 	break;
@@ -2673,7 +2767,6 @@ void ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged(double val)
 	}
 }
 
-
 void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 {
 	if (!m_currentObject)
@@ -2708,6 +2801,42 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 		{
 			updateDisplay();
 		}
+	}
+}
+
+void ccPropertiesTreeDelegate::normalColorChanged(int colorIdx)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+	assert(cloud);
+
+	if (cloud)
+	{
+		static_cast<ccPointCloud*>(cloud)->setNormalLineColor(colorIdx);
+		cloud->redrawDisplay();
+		updateDisplay();
+	}
+}
+
+void ccPropertiesTreeDelegate::normalLengthChanged(double length)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
+	assert(cloud);
+
+	if (cloud)
+	{
+		static_cast<ccPointCloud*>(cloud)->setNormalLength(length);
+		cloud->redrawDisplay();
+		updateDisplay();
 	}
 }
 

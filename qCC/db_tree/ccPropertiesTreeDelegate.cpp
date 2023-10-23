@@ -620,7 +620,9 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 
 		//normals
 		if (cloud->hasNormals())
+		{
 			fillWithDrawNormals(_obj);
+		}
 	}
 }
 
@@ -631,10 +633,17 @@ void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
 	{
 		return;
 	}
+	assert(_obj->isA(CC_TYPES::POINT_CLOUD));
+	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		return;
+	}
+
 	addSeparator( tr( "Draw normals as lines" ) );
 
 	//visibility
-	appendRow(ITEM(tr("Draw")), CHECKABLE_ITEM(false, OBJECT_CLOUD_DRAW_NORMALS));
+	const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+	appendRow(ITEM(tr("Draw")), CHECKABLE_ITEM(cloud->normalsAreDrawn(), OBJECT_CLOUD_DRAW_NORMALS));
 
 	//normals length
 	appendRow(ITEM(tr("Length")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_LENGTH), true);

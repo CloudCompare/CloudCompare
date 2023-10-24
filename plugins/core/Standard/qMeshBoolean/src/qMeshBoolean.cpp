@@ -39,13 +39,13 @@
 #endif
 
 //libIGL
-#include <igl/copyleft/cgal/mesh_boolean.h>
 #ifdef _MSC_VER
 #pragma warning( disable: 4018 )
 #pragma warning( disable: 4129 )
 #pragma warning( disable: 4267 )
 #pragma warning( disable: 4566 )
 #endif
+#include <igl/copyleft/cgal/mesh_boolean.h>
 
 //! ligIGL mesh
 struct IGLMesh

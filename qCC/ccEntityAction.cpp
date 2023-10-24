@@ -1118,6 +1118,7 @@ namespace ccEntityAction
 					else
 					{
 #if defined CC_CORE_LIB_USES_DOUBLE
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 						unsigned char *valuePtr = (unsigned char *)(&idValue);
 						valuePtr[7] = static_cast<unsigned char>(j & 0xff);
 						valuePtr[6] = static_cast<unsigned char>(j >> 8 & 0xff);
@@ -1127,13 +1128,31 @@ namespace ccEntityAction
 						valuePtr[2] = static_cast<unsigned char>(j >> 40 & 0xff);
 						valuePtr[1] = static_cast<unsigned char>(j >> 48 & 0xff);
 						valuePtr[0] = static_cast<unsigned char>(j >> 56 & 0xff);
-						sf->setValue(j, idValue);
+#else
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[1] = static_cast<unsigned char>(j >> 8 & 0xff);
+						valuePtr[2] = static_cast<unsigned char>(j >> 16 & 0xff);
+						valuePtr[3] = static_cast<unsigned char>(j >> 24 & 0xff);
+						valuePtr[4] = static_cast<unsigned char>(j >> 32 & 0xff);
+						valuePtr[5] = static_cast<unsigned char>(j >> 40 & 0xff);
+						valuePtr[6] = static_cast<unsigned char>(j >> 48 & 0xff);
+						valuePtr[7] = static_cast<unsigned char>(j >> 56 & 0xff);
+#endif
 #elif defined CC_CORE_LIB_USES_FLOAT
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 						unsigned char *valuePtr = (unsigned char *)(&idValue);
 						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
 						valuePtr[1] = static_cast<unsigned char>((j >> 8) & 0xff);
 						valuePtr[2] = static_cast<unsigned char>((j >> 16) & 0xff);
 						valuePtr[3] = static_cast<unsigned char>((j >> 24) & 0xff);
+#else
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[3] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[2] = static_cast<unsigned char>((j >> 8) & 0xff);
+						valuePtr[1] = static_cast<unsigned char>((j >> 16) & 0xff);
+						valuePtr[0] = static_cast<unsigned char>((j >> 24) & 0xff);
+#endif
 #else
 						static_assert(false, "type for ScalarType has not been declared");
 #endif

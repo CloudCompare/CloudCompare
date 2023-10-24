@@ -12,6 +12,8 @@ v2.13.alpha (???) - (??/??/????)
 	
 
 	- New command line option:
+		- SF_ADD_ID allows to add the index of the point as a scalar field (initially as a float32, so there is a loss of accuracy for values above 16777215)
+			- the AS_INT parameter allows to store the index as a raw uint32, allowing index values from 0 up to (2**32-1)
 		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
 		- SF_OP_SF {SF 1 name or index} {operation} {SF 2 name or index}
 			- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)

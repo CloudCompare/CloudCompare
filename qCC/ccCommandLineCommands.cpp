@@ -87,7 +87,7 @@ constexpr char COMMAND_NOISE_FILTER_RADIUS[]			= "RADIUS";
 constexpr char COMMAND_NOISE_FILTER_REL[]				= "REL";
 constexpr char COMMAND_NOISE_FILTER_ABS[]				= "ABS";
 constexpr char COMMAND_NOISE_FILTER_RIP[]				= "RIP";
-constexpr char COMMAND_REMOVE_DUPLICATE_POINTS[]	    = "RDP";
+constexpr char COMMAND_REMOVE_DUPLICATE_POINTS[]		= "RDP";
 constexpr char COMMAND_SAMPLE_MESH[]					= "SAMPLE_MESH";
 constexpr char COMMAND_COMPRESS_FWF[]					= "COMPRESS_FWF";
 constexpr char COMMAND_CROP[]							= "CROP";
@@ -99,9 +99,9 @@ constexpr char COMMAND_C2M_DIST[]						= "C2M_DIST";
 constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 constexpr char COMMAND_C2M_DIST_UNSIGNED[]				= "UNSIGNED";
 constexpr char COMMAND_C2C_DIST[]						= "C2C_DIST";
-constexpr char COMMAND_CLOSEST_POINT_SET[]              = "CLOSEST_POINT_SET";
+constexpr char COMMAND_CLOSEST_POINT_SET[]				= "CLOSEST_POINT_SET";
 constexpr char COMMAND_C2C_SPLIT_XYZ[]					= "SPLIT_XYZ";
-constexpr char COMMAND_C2C_SPLIT_XY_Z[]                 = "SPLIT_XY_Z";
+constexpr char COMMAND_C2C_SPLIT_XY_Z[]					= "SPLIT_XY_Z";
 constexpr char COMMAND_C2C_LOCAL_MODEL[]				= "MODEL";
 constexpr char COMMAND_C2X_MAX_DISTANCE[]				= "MAX_DIST";
 constexpr char COMMAND_C2X_OCTREE_LEVEL[]				= "OCTREE_LEVEL";
@@ -117,7 +117,9 @@ constexpr char COMMAND_SF_OP_SF[]						= "SF_OP_SF";
 constexpr char COMMAND_SF_INTERP[]						= "SF_INTERP";
 constexpr char COMMAND_COLOR_INTERP[]					= "COLOR_INTERP";
 constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
-constexpr char COMMAND_SF_ADD_CONST[]                   = "SF_ADD_CONST";
+constexpr char COMMAND_SF_ADD_CONST[]					= "SF_ADD_CONST";
+constexpr char COMMAND_SF_ADD_ID[]						= "SF_ADD_ID";
+constexpr char COMMAND_SF_ADD_ID_AS_INT[]				= "AS_INT";
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_SF_TO_COORD[]					= "SF_TO_COORD";
@@ -5482,6 +5484,44 @@ bool CommandSFAddConst::process(ccCommandLineInterface& cmd)
     }
 
     return true;
+}
+
+CommandSFAddId::CommandSFAddId()
+    : ccCommandLineInterface::Command(QObject::tr("Add point indexes as scalar field"), COMMAND_SF_ADD_ID)
+{}
+
+bool CommandSFAddId::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[SF_ADD_ID]"));
+
+	ccHObject::Container selectedEntities;
+
+	bool addIdAsInt = false;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_ADD_ID_AS_INT))
+		{
+			cmd.print(QObject::tr("[AS_INT]"));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			addIdAsInt = true;
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
+
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		selectedEntities.push_back(desc.getEntity());
+	}
+
+	if ( !ccEntityAction::sfAddIdField(selectedEntities, addIdAsInt) )
+		return false;
+
+	return true;
 }
 
 CommandICP::CommandICP()

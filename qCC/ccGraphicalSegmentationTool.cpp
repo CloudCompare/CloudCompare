@@ -77,13 +77,14 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 
 	connect(inButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
+	connect(cloneSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::cloneSelection);
 	connect(razButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
 	connect(optionsButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
 	connect(validAndDeleteButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::applyAndDelete);
 	connect(cancelButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::cancel);
 	connect(pauseButton,			&QToolButton::toggled, this, &ccGraphicalSegmentationTool::pauseSegmentationMode);
-	connect(addClassToolButton,	 &	QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
+	connect(addClassToolButton,		&QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
 
 	//selection modes
 	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetPolylineSelection);
@@ -828,7 +829,12 @@ void ccGraphicalSegmentationTool::segmentOut()
 	segment(false);
 }
 
-void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue/*=CCCoreLib::NAN_VALUE*/)
+void ccGraphicalSegmentationTool::cloneSelection()
+{
+	segment(true, CCCoreLib::NAN_VALUE, true);
+}
+
+void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue/*=CCCoreLib::NAN_VALUE*/, bool cloneSelection/*=false*/)
 {
 	if (!m_associatedWin)
 	{
@@ -896,6 +902,13 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			continue;
 		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
+
+		ccGenericPointCloud::VisibilityTableType outVisiblityArray;
+		if (cloneSelection) // simply copy the incoming visibility array
+		{
+			outVisiblityArray = visibilityArray;
+		}
+
 		assert(!visibilityArray.empty());
 
 		int cloudSize = static_cast<int>(cloud->size());
@@ -908,7 +921,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(*p);
 			if (!pc)
 			{
-				ccLog::Warning("Can't apply classification to cloud " + (*p)->getName());
+				ccLog::Warning("Can't apply classification to object " + (*p)->getName());
 				continue;
 			}
 
@@ -935,7 +948,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		#pragma omp parallel for
 #endif
 		for (int i = 0; i < cloudSize; ++i)
-		{
+		{	
 			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
@@ -953,18 +966,21 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 				}
 
-				if (classifSF)
+				if (classifSF) // classification mode
 				{
-					// classification mode
 					if (pointInside)
 					{
 						classifSF->setValue(i, classificationValue);
 					}
 				}
-				else
+				else // standard segmentation mode
 				{
-					// standard segmentation mode
 					visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
+					// if we want to simply clone the selected region, we have to be able to restore the original visibilty, except for the selection which will be cloned
+					if (!outVisiblityArray.empty())
+					{
+						outVisiblityArray[i] = pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE;
+					}
 				}
 			}
 		}
@@ -972,6 +988,18 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		if (classifSF)
 		{
 			classifSF->computeMinAndMax();
+		}
+
+		if (cloneSelection)
+		{
+			ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection();
+			if (segmentedCloud->size() !=0)
+			{
+				segmentedCloud->setName(cloud->getName() + ".part");
+				MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);
+				// inverse visibility array to show remaning points
+				visibilityArray = outVisiblityArray;
+			}
 		}
 	}
 
@@ -987,9 +1015,9 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		}
 	}
 
-	if (classificationMode)
+	if (classificationMode || cloneSelection)
 	{
-		m_associatedWin->redraw(false);
+		m_associatedWin->redraw();
 	}
 	else
 	{

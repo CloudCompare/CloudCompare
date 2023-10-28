@@ -47,6 +47,10 @@ add_definitions( -DQT_USE_QSTRINGBUILDER )
 # ------------------------------------------------------------------------------
 # OpenGL
 # ------------------------------------------------------------------------------
+if ( UNIX )
+	set(OpenGL_GL_PREFERENCE GLVND)
+endif()
+
 if ( MSVC )
 	# Where to find OpenGL libraries
 	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )

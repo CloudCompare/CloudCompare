@@ -6256,11 +6256,9 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 				else if (m_customLightEnabled)
 				{
 					//update custom light position
-					m_customLightPos[0] += static_cast<float>(u.x);
-					m_customLightPos[1] += static_cast<float>(u.y);
-					m_customLightPos[2] += static_cast<float>(u.z);
-					invalidateViewport();
-					deprecate3DLayer();
+					setCustomLightPosition(CCVector3f(	m_customLightPos[0] + u.x,
+														m_customLightPos[1] + u.y,
+														m_customLightPos[2] + u.z) );
 				}
 			}
 			else //camera moving mode
@@ -7111,3 +7109,11 @@ bool ccGLWindowInterface::TestStereoSupport(bool forceRetest/*=false*/)
 	return s_stereoSupported;
 }
 
+void ccGLWindowInterface::setCustomLightPosition(const CCVector3f& pos)
+{
+	m_customLightPos[0] = pos.x;
+	m_customLightPos[1] = pos.y;
+	m_customLightPos[2] = pos.z;
+	invalidateViewport();
+	deprecate3DLayer();
+}

@@ -19,17 +19,21 @@
 
 //Local
 #include "qAnimationDlg.h"
+#include "ExtendedViewport.h"
 
 //qCC_db
 #include <cc2DViewportObject.h>
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
 
+//qCC_gl
+#include <ccGLWindowInterface.h>
+
 //Qt
 #include <QtGui>
 #include <QMainWindow>
 
-typedef std::vector<cc2DViewportObject*> ViewPortList;
+typedef std::vector<ExtendedViewport> ViewPortList;
 
 static ViewPortList GetSelectedViewPorts( const ccHObject::Container &selectedEntities )
 {
@@ -93,10 +97,12 @@ QList<QAction *> qAnimation::getActions()
 void qAnimation::doAction()
 {
 	//m_app should have already been initialized by CC when plugin is loaded!
-	//(--> pure internal check)
-	assert(m_app);
-	if (!m_app)
+	//(--> purely internal check)
+	if (nullptr == m_app)
+	{
+		assert(false);
 		return;
+	}
 
 	//get active GL window
 	ccGLWindowInterface* glWindow = m_app->getActiveGLWindow();
@@ -105,6 +111,11 @@ void qAnimation::doAction()
 		m_app->dispToConsole("No active 3D view!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
+
+	// backup the view parameters before running the plugin
+	ExtendedViewportParameters evp(glWindow->getViewportParameters());
+	evp.customLightEnabled = glWindow->customLightEnabled();
+	evp.customLightPos = glWindow->getCustomLightPosition();
 
 	ViewPortList viewports = GetSelectedViewPorts( m_app->getSelectedEntities() );
 
@@ -121,6 +132,12 @@ void qAnimation::doAction()
 	}
 	
 	videoDlg.exec();
+
+	// restore the view parameters after running the plugin
+	glWindow->setViewportParameters(evp.params);
+	glWindow->setCustomLight(evp.customLightEnabled);
+	glWindow->setCustomLightPosition(evp.customLightPos);
+	glWindow->redraw();
 
 	//Export trajectory (for debug)
 	if (videoDlg.exportTrajectoryOnExit())

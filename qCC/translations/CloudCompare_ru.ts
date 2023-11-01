@@ -3097,32 +3097,32 @@ to help advanced users setting the general parameters</source>
 <context>
     <name>ComponentType</name>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1181"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1213"/>
         <source>Array</source>
         <translation>Массив</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1184"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1216"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1184"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1216"/>
         <source>undefined</source>
         <translation>неопределенный</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1187"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1219"/>
         <source>Elements</source>
         <translation>Элементы</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1190"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1222"/>
         <source>Capacity</source>
         <translation>Емкость</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1193"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1225"/>
         <source>Memory</source>
         <translation>Память</translation>
     </message>
@@ -6982,7 +6982,7 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="328"/>
-        <location filename="../mainwindow.cpp" line="9341"/>
+        <location filename="../mainwindow.cpp" line="9343"/>
         <source>Polyline</source>
         <translation>Полилиния</translation>
     </message>
@@ -7018,7 +7018,7 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="429"/>
-        <location filename="../mainwindow.cpp" line="3767"/>
+        <location filename="../mainwindow.cpp" line="3769"/>
         <source>Registration</source>
         <translation>Привязка</translation>
     </message>
@@ -7124,7 +7124,7 @@ Parameter</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="840"/>
-        <location filename="../mainwindow.cpp" line="6145"/>
+        <location filename="../mainwindow.cpp" line="6147"/>
         <source>Quit</source>
         <translation>Выйти</translation>
     </message>
@@ -8355,7 +8355,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="1954"/>
-        <location filename="../mainwindow.cpp" line="8344"/>
+        <location filename="../mainwindow.cpp" line="8346"/>
         <source>SNE test</source>
         <translation>Тест извлечения сферич. окрестности</translation>
     </message>
@@ -8725,7 +8725,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2408"/>
-        <location filename="../mainwindow.cpp" line="933"/>
+        <location filename="../mainwindow.cpp" line="935"/>
         <source>Compute Kd-tree</source>
         <translation>Вычислить Kd-дерево</translation>
     </message>
@@ -8771,7 +8771,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2447"/>
-        <location filename="../mainwindow.cpp" line="10144"/>
+        <location filename="../mainwindow.cpp" line="10145"/>
         <source>Close all</source>
         <translation>Закрыть все</translation>
     </message>
@@ -8850,7 +8850,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2528"/>
-        <location filename="../mainwindow.cpp" line="2859"/>
+        <location filename="../mainwindow.cpp" line="2861"/>
         <source>Remove duplicate points</source>
         <translation>Удалить дубликаты точек</translation>
     </message>
@@ -8987,7 +8987,7 @@ The active scalar field should have integer values.</source>
     </message>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="2705"/>
-        <location filename="../mainwindow.cpp" line="9278"/>
+        <location filename="../mainwindow.cpp" line="9280"/>
         <source>Sphere</source>
         <translation>Сфера</translation>
     </message>
@@ -9131,1828 +9131,1828 @@ The active scalar field should have integer values.</source>
         <translation>Вставка данных из текста/ASCII, содержащихся в буфере обмена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="220"/>
-        <location filename="../mainwindow.cpp" line="6334"/>
+        <location filename="../mainwindow.cpp" line="222"/>
+        <location filename="../mainwindow.cpp" line="6336"/>
         <source>Enter Full Screen</source>
         <translation>Переключиться на полный экран</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="243"/>
+        <location filename="../mainwindow.cpp" line="245"/>
         <source>Set current view mode</source>
         <translation>Выбрать проекцию текущего вида</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="259"/>
+        <location filename="../mainwindow.cpp" line="261"/>
         <source>Set pivot visibility</source>
         <translation>Настройка точки вращения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="309"/>
+        <location filename="../mainwindow.cpp" line="311"/>
         <source>Ready</source>
         <translation>Готово</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="316"/>
+        <location filename="../mainwindow.cpp" line="318"/>
         <source>CloudCompare started!</source>
         <translation>CloudCompare запущен!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="928"/>
+        <location filename="../mainwindow.cpp" line="930"/>
         <source>Selected one and only one point cloud or mesh!</source>
         <translation>Выбрано одно и только одно облако или модель!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="933"/>
+        <location filename="../mainwindow.cpp" line="935"/>
         <source>Max error per leaf cell:</source>
         <translation>Макс. ошибка на базовую ячейку:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="967"/>
+        <location filename="../mainwindow.cpp" line="969"/>
         <source>An error occurred</source>
         <translation>Возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="985"/>
+        <location filename="../mainwindow.cpp" line="987"/>
         <source>Resample with octree</source>
         <translation>Прореживание октодеревом</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="985"/>
+        <location filename="../mainwindow.cpp" line="987"/>
         <source>Points (approx.)</source>
         <translation>Точек (примерно)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1017"/>
+        <location filename="../mainwindow.cpp" line="1019"/>
         <source>Could not compute octree for cloud &apos;%1&apos;</source>
         <translation>Нельзя вычислить октодерево для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1057"/>
+        <location filename="../mainwindow.cpp" line="1059"/>
         <source>[ResampleWithOctree] Errors occurred during the process, result may be incomplete</source>
         <translation>[ResampleWithOctree] Возникли ошибки в процессе расчета, результат может быть неполным</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1199"/>
-        <location filename="../mainwindow.cpp" line="1572"/>
+        <location filename="../mainwindow.cpp" line="1201"/>
+        <location filename="../mainwindow.cpp" line="1574"/>
         <source>Original</source>
         <translation>Исходное</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1203"/>
+        <location filename="../mainwindow.cpp" line="1205"/>
         <source>Previous</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1228"/>
+        <location filename="../mainwindow.cpp" line="1230"/>
         <source>Suggested</source>
         <translation>Предложенное</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1250"/>
+        <location filename="../mainwindow.cpp" line="1252"/>
         <source>[ApplyTransformation] Process cancelled by user</source>
         <translation>[ПрименениеТрансформации] Обработка отменена пользователем</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1267"/>
+        <location filename="../mainwindow.cpp" line="1269"/>
         <source>[ApplyTransformation] Cloud &apos;%1&apos; global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5</source>
         <translation>[ApplyTransformation] Обновлена информация о глобальном сдвиге/масштабе облака &apos;%1&apos; : сдвиг = (%2,%3,%4) / масштаб = %5</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1288"/>
+        <location filename="../mainwindow.cpp" line="1290"/>
         <source>[ApplyTransformation] Applied transformation matrix:</source>
         <translation>[ApplyTransformation] Примененная матрица трансформации:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1290"/>
-        <location filename="../mainwindow.cpp" line="3725"/>
-        <location filename="../mainwindow.cpp" line="3931"/>
-        <location filename="../mainwindow.cpp" line="5419"/>
-        <location filename="../mainwindow.cpp" line="5466"/>
+        <location filename="../mainwindow.cpp" line="1292"/>
+        <location filename="../mainwindow.cpp" line="3727"/>
+        <location filename="../mainwindow.cpp" line="3933"/>
+        <location filename="../mainwindow.cpp" line="5421"/>
+        <location filename="../mainwindow.cpp" line="5468"/>
         <source>Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the &apos;Edit &gt; Apply transformation&apos; tool</source>
         <translation>Совет: скопируйте матрицу (CTRL+C) и примените ее или обратную ей к любому объекту через меню &apos;Правка &gt; Применить трансформацию&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1337"/>
+        <location filename="../mainwindow.cpp" line="1339"/>
         <source>[Apply scale] Entity &apos;%1&apos; can&apos;t be scaled this way</source>
         <translation>[Apply scale] Нельзя отмасштабировать объект &apos;%1&apos; таким способом</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1381"/>
+        <location filename="../mainwindow.cpp" line="1383"/>
         <source>Big coordinates</source>
         <translation>Большие координаты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1382"/>
+        <location filename="../mainwindow.cpp" line="1384"/>
         <source>Resutling coordinates will be too big (original precision may be lost!). Proceed anyway?</source>
         <translation>Результирующие координаты будут очень большими (исходная точность может быть потеряна!). Продолжить?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1405"/>
+        <location filename="../mainwindow.cpp" line="1407"/>
         <source>[Apply scale] No eligible entities (point clouds or meshes) were selected!</source>
         <translation>[Применение масштаба] Подходящие объекты (облака точек или модели) не выбраны!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1584"/>
+        <location filename="../mainwindow.cpp" line="1586"/>
         <source>[Global Shift/Scale] New shift: (%1, %2, %3)</source>
         <translation>[Глобальный сдвиг/масштаб] Новый сдвиг: (%1, %2, %3)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1585"/>
+        <location filename="../mainwindow.cpp" line="1587"/>
         <source>[Global Shift/Scale] New scale: %1</source>
         <translation>[Глобальный сдвиг/масштаб] Новый масштаб: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1616"/>
+        <location filename="../mainwindow.cpp" line="1618"/>
         <source>[Global Shift/Scale] To preserve its original position, the entity &apos;%1&apos; has been translated of (%2 ; %3 ; %4) and rescaled of a factor %5</source>
         <translation>[Global Shift/Scale] Для сохранения исходного положения, объект &apos;%1&apos; получил смещение (%2 ; %3 ; %4) в масштабе %5</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1636"/>
+        <location filename="../mainwindow.cpp" line="1638"/>
         <source>This method is for test purpose only</source>
         <translation>Этот метод только для тестирования</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1637"/>
+        <location filename="../mainwindow.cpp" line="1639"/>
         <source>Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?</source>
         <translation>Облака будут повернуты, но останутся отображаться в своем прежнем положении! Продолжить?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1721"/>
-        <location filename="../mainwindow.cpp" line="1750"/>
+        <location filename="../mainwindow.cpp" line="1723"/>
+        <location filename="../mainwindow.cpp" line="1752"/>
         <source>Not enough memory to flag the vertices of mesh &apos;%1&apos;!</source>
         <translation>Недостаточно памяти для пометки вершин модели &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1744"/>
+        <location filename="../mainwindow.cpp" line="1746"/>
         <source>[Mesh Quality] Mesh &apos;%1&apos; edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)</source>
         <translation>[Качество модели] Ребра модели &apos;%1&apos;: всего %2 (нормальные: %3 / на краях дыр: %4 / неоднородные: %5)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1768"/>
+        <location filename="../mainwindow.cpp" line="1770"/>
         <source>[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD</source>
         <translation>[Качество модели] Флаги СП: %1 (НОРМАЛЬНЫЕ) / %2 (КРАЯ) / %3 (НЕОДНОРОДНЫЕ)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1773"/>
+        <location filename="../mainwindow.cpp" line="1775"/>
         <source>Error(s) occurred! Check the console...</source>
         <translation>Возникла ошибка(и)! Информация в консоли...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1790"/>
+        <location filename="../mainwindow.cpp" line="1792"/>
         <source>[Mesh Volume] Mesh &apos;%1&apos;: V=%2 (cube units)</source>
         <translation>[Объем модели] Модель &apos;%1&apos;: V=%2 (куб. единиц)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1798"/>
+        <location filename="../mainwindow.cpp" line="1800"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has holes)</source>
         <translation>[Mesh Volume] Полученный выше объем может быть ошибочным (модель с дырами)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1802"/>
+        <location filename="../mainwindow.cpp" line="1804"/>
         <source>[Mesh Volume] The above volume might be invalid (mesh has non-manifold edges)</source>
         <translation>[Mesh Volume] Полученный выше объем может быть ошибочным (модель с неоднородными ребрами)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1807"/>
+        <location filename="../mainwindow.cpp" line="1809"/>
         <source>[Mesh Volume] The above volume might be invalid (not enough memory to check if the mesh is closed)</source>
         <translation>[Mesh Volume] Полученный выше объем может быть ошибочным (мало памяти для проверки замкнутости модели)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1830"/>
+        <location filename="../mainwindow.cpp" line="1832"/>
         <source>[Mesh Surface] Mesh &apos;%1&apos;: S=%2 (square units)</source>
         <translation>[Модель поверхности] Модель &apos;%1&apos;: S=%2 (кв. единиц)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1833"/>
+        <location filename="../mainwindow.cpp" line="1835"/>
         <source>[Mesh Surface] Average triangle surface: %1 (square units)</source>
         <translation>[Модель поверхности] Средняя площадь треугольника: %1 (кв. единиц)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1849"/>
+        <location filename="../mainwindow.cpp" line="1851"/>
         <source>Select at least one sensor</source>
         <translation>Выберите хотя бы один датчик</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1867"/>
-        <location filename="../mainwindow.cpp" line="1931"/>
-        <location filename="../mainwindow.cpp" line="2280"/>
+        <location filename="../mainwindow.cpp" line="1869"/>
+        <location filename="../mainwindow.cpp" line="1933"/>
+        <location filename="../mainwindow.cpp" line="2282"/>
         <source>Select a cloud on which to project the uncertainty:</source>
         <translation>Выберите облако, на которое проецировать неопределенности:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1889"/>
-        <location filename="../mainwindow.cpp" line="1956"/>
-        <location filename="../mainwindow.cpp" line="2289"/>
-        <location filename="../mainwindow.cpp" line="2298"/>
-        <location filename="../mainwindow.cpp" line="3446"/>
-        <location filename="../mainwindow.cpp" line="4061"/>
-        <location filename="../mainwindow.cpp" line="4474"/>
-        <location filename="../mainwindow.cpp" line="4532"/>
-        <location filename="../mainwindow.cpp" line="4581"/>
-        <location filename="../mainwindow.cpp" line="4650"/>
-        <location filename="../mainwindow.cpp" line="5007"/>
-        <location filename="../mainwindow.cpp" line="5030"/>
-        <location filename="../mainwindow.cpp" line="5043"/>
-        <location filename="../mainwindow.cpp" line="5051"/>
-        <location filename="../mainwindow.cpp" line="5142"/>
-        <location filename="../mainwindow.cpp" line="5247"/>
-        <location filename="../mainwindow.cpp" line="5512"/>
-        <location filename="../mainwindow.cpp" line="7486"/>
-        <location filename="../mainwindow.cpp" line="8302"/>
-        <location filename="../mainwindow.cpp" line="8436"/>
-        <location filename="../mainwindow.cpp" line="8464"/>
-        <location filename="../mainwindow.cpp" line="8543"/>
-        <location filename="../mainwindow.cpp" line="8602"/>
-        <location filename="../mainwindow.cpp" line="8654"/>
-        <location filename="../mainwindow.cpp" line="8698"/>
-        <location filename="../mainwindow.cpp" line="9659"/>
+        <location filename="../mainwindow.cpp" line="1891"/>
+        <location filename="../mainwindow.cpp" line="1958"/>
+        <location filename="../mainwindow.cpp" line="2291"/>
+        <location filename="../mainwindow.cpp" line="2300"/>
+        <location filename="../mainwindow.cpp" line="3448"/>
+        <location filename="../mainwindow.cpp" line="4063"/>
+        <location filename="../mainwindow.cpp" line="4476"/>
+        <location filename="../mainwindow.cpp" line="4534"/>
+        <location filename="../mainwindow.cpp" line="4583"/>
+        <location filename="../mainwindow.cpp" line="4652"/>
+        <location filename="../mainwindow.cpp" line="5009"/>
+        <location filename="../mainwindow.cpp" line="5032"/>
+        <location filename="../mainwindow.cpp" line="5045"/>
+        <location filename="../mainwindow.cpp" line="5053"/>
+        <location filename="../mainwindow.cpp" line="5144"/>
+        <location filename="../mainwindow.cpp" line="5249"/>
+        <location filename="../mainwindow.cpp" line="5514"/>
+        <location filename="../mainwindow.cpp" line="7488"/>
+        <location filename="../mainwindow.cpp" line="8304"/>
+        <location filename="../mainwindow.cpp" line="8438"/>
+        <location filename="../mainwindow.cpp" line="8466"/>
+        <location filename="../mainwindow.cpp" line="8545"/>
+        <location filename="../mainwindow.cpp" line="8604"/>
+        <location filename="../mainwindow.cpp" line="8656"/>
+        <location filename="../mainwindow.cpp" line="8700"/>
+        <location filename="../mainwindow.cpp" line="9660"/>
         <source>Not enough memory!</source>
         <translation>Недостаточно памяти!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1917"/>
+        <location filename="../mainwindow.cpp" line="1919"/>
         <source>Select one and only one GBL sensor!</source>
         <translation>Выберите только один сканер!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="1938"/>
+        <location filename="../mainwindow.cpp" line="1940"/>
         <source>The cloud must have normals!</source>
         <translation>Облако должно иметь нормали!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2002"/>
-        <location filename="../mainwindow.cpp" line="2185"/>
+        <location filename="../mainwindow.cpp" line="2004"/>
+        <location filename="../mainwindow.cpp" line="2187"/>
         <source>Select one and only one sensor!</source>
         <translation>Выберите только один датчик!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2106"/>
+        <location filename="../mainwindow.cpp" line="2108"/>
         <source>Failed to create sensor</source>
         <translation>Не удалось создать датчик</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2242"/>
+        <location filename="../mainwindow.cpp" line="2244"/>
         <source>Can&apos;t modify this kind of sensor!</source>
         <translation>Датчик такого рода нельзя изменить!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2260"/>
+        <location filename="../mainwindow.cpp" line="2262"/>
         <source>Select one and only one camera (projective) sensor!</source>
         <translation>Выберите только один датчик камеры (проективный)!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2274"/>
+        <location filename="../mainwindow.cpp" line="2276"/>
         <source>Sensor has no associated uncertainty model! (Brown, etc.)</source>
         <translation>Датчик не имеет связанной модели неопределенности (например, Brown)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2309"/>
+        <location filename="../mainwindow.cpp" line="2311"/>
         <source>[%1] Uncertainty (%2)</source>
         <translation>[%1] Неопределенность (%2)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2315"/>
-        <location filename="../mainwindow.cpp" line="2344"/>
+        <location filename="../mainwindow.cpp" line="2317"/>
+        <location filename="../mainwindow.cpp" line="2346"/>
         <source>An error occurred! (see console)</source>
         <translation>Возникла ошибка (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2338"/>
+        <location filename="../mainwindow.cpp" line="2340"/>
         <source>[%1] Uncertainty (3D)</source>
         <translation>[%1] Неопределенность (3D)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2373"/>
+        <location filename="../mainwindow.cpp" line="2375"/>
         <source>Select one and only one camera sensor!</source>
         <translation>Выберите только один датчик камеры!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2383"/>
-        <location filename="../mainwindow.cpp" line="2571"/>
+        <location filename="../mainwindow.cpp" line="2385"/>
+        <location filename="../mainwindow.cpp" line="2573"/>
         <source>Select a cloud to filter:</source>
         <translation>Выберите облако для фильтрации:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2396"/>
+        <location filename="../mainwindow.cpp" line="2398"/>
         <source>Failed to compute the octree!</source>
         <translation>Не удалось вычислить октодерево!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2406"/>
+        <location filename="../mainwindow.cpp" line="2408"/>
         <source>Failed to intersect sensor frustum with octree!</source>
         <translation>Не удалось получить пересечение пирамиды датчика и октодерева!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2416"/>
+        <location filename="../mainwindow.cpp" line="2418"/>
         <source>No point fell inside the frustum!</source>
         <translation>Точки не попадают в пирамиду!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2426"/>
-        <location filename="../mainwindow.cpp" line="2617"/>
+        <location filename="../mainwindow.cpp" line="2428"/>
+        <location filename="../mainwindow.cpp" line="2619"/>
         <source>Failed to allocate memory for output scalar field!</source>
         <translation>Не удалось выделить память под вывод скалярного поля!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2480"/>
+        <location filename="../mainwindow.cpp" line="2482"/>
         <source>Internal error: sensor (&apos;%1&apos;) parent is not a point cloud!</source>
         <translation>Внутренняя ошибка: датчик (&apos;%1&apos;) не является облаком точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2501"/>
-        <location filename="../mainwindow.cpp" line="8792"/>
-        <location filename="../mainwindow.cpp" line="8872"/>
-        <location filename="../mainwindow.cpp" line="8976"/>
+        <location filename="../mainwindow.cpp" line="2503"/>
+        <location filename="../mainwindow.cpp" line="8794"/>
+        <location filename="../mainwindow.cpp" line="8874"/>
+        <location filename="../mainwindow.cpp" line="8978"/>
         <source>Select output file</source>
         <translation>Выберите выходной файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2542"/>
+        <location filename="../mainwindow.cpp" line="2544"/>
         <source>saving</source>
         <translation>сохранение</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2546"/>
+        <location filename="../mainwindow.cpp" line="2548"/>
         <source>[I/O] File &apos;%1&apos; saved successfully</source>
         <translation>[I/O] Файл &apos;%1&apos; успешно сохранен</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2561"/>
+        <location filename="../mainwindow.cpp" line="2563"/>
         <source>Select one and only one GBL/TLS sensor!</source>
         <translation>Выберите только один сканер (GBL/TLS)!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2583"/>
+        <location filename="../mainwindow.cpp" line="2585"/>
         <source>Depth buffer</source>
         <translation>Буфер глубины</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2584"/>
+        <location filename="../mainwindow.cpp" line="2586"/>
         <source>Sensor has no depth buffer: do you want to compute it now?</source>
         <translation>Датчик не имеет буфера глубины: вычислить его сейчас?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2605"/>
+        <location filename="../mainwindow.cpp" line="2607"/>
         <source>Sensor has no depth buffer (and no associated cloud?)</source>
         <translation>Датчик не имеет буфера глубины (и нет связанного с ним облака?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2630"/>
+        <location filename="../mainwindow.cpp" line="2632"/>
         <source>Compute visibility</source>
         <translation>Вычислить видимость</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2631"/>
+        <location filename="../mainwindow.cpp" line="2633"/>
         <source>Points: %L1</source>
         <translation>Точек: %L1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2658"/>
+        <location filename="../mainwindow.cpp" line="2660"/>
         <source>Visibility computed for cloud &apos;%1&apos;</source>
         <translation>Вычислена видимость для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2659"/>
+        <location filename="../mainwindow.cpp" line="2661"/>
         <source>	Visible = %1</source>
         <translation>	Видимый = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2660"/>
+        <location filename="../mainwindow.cpp" line="2662"/>
         <source>	Hidden = %1</source>
         <translation>	Скрытый = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2661"/>
+        <location filename="../mainwindow.cpp" line="2663"/>
         <source>	Out of range = %1</source>
         <translation>	Вне диапазона = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2662"/>
+        <location filename="../mainwindow.cpp" line="2664"/>
         <source>	Out of fov = %1</source>
         <translation>	Вне поля зрения = %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2735"/>
+        <location filename="../mainwindow.cpp" line="2737"/>
         <source>[doActionSamplePointsOnMesh] Errors occurred during the process! Result may be incomplete!</source>
         <translation>[doActionSamplePointsOnMesh] Во время обработки возникли ошибки! Результат может быть неполным!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2859"/>
+        <location filename="../mainwindow.cpp" line="2861"/>
         <source>Min distance between points:</source>
         <translation>Мин. расстояние между точками:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2900"/>
-        <location filename="../mainwindow.cpp" line="3072"/>
-        <location filename="../mainwindow.cpp" line="5608"/>
-        <location filename="../mainwindow.cpp" line="5729"/>
+        <location filename="../mainwindow.cpp" line="2902"/>
+        <location filename="../mainwindow.cpp" line="3074"/>
+        <location filename="../mainwindow.cpp" line="5610"/>
+        <location filename="../mainwindow.cpp" line="5731"/>
         <source>Previously selected entities (sources) have been hidden!</source>
         <translation>Ранее выделенные объекты (источники) были скрыты!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3121"/>
-        <location filename="../mainwindow.cpp" line="7906"/>
-        <location filename="../mainwindow.cpp" line="7950"/>
+        <location filename="../mainwindow.cpp" line="3123"/>
+        <location filename="../mainwindow.cpp" line="7908"/>
+        <location filename="../mainwindow.cpp" line="7952"/>
         <source>Select only one cloud or one mesh!</source>
         <translation>Выберите только одно облако или модель!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3151"/>
+        <location filename="../mainwindow.cpp" line="3153"/>
         <source>No active scalar field on entity &apos;%1&apos;</source>
         <translation>Нет активного скалярного поля в объекте &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3252"/>
+        <location filename="../mainwindow.cpp" line="3254"/>
         <source>Subdivide mesh</source>
         <translation>Сгустить модель</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3252"/>
+        <location filename="../mainwindow.cpp" line="3254"/>
         <source>Max area per triangle:</source>
         <translation>Макс. площадь треугольника:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3276"/>
+        <location filename="../mainwindow.cpp" line="3278"/>
         <source>[Subdivide] An error occurred while trying to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
         <translation>[Subdivide] Возникла ошибка во время сгущения модели &apos;%1&apos; (мало памяти?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3289"/>
+        <location filename="../mainwindow.cpp" line="3291"/>
         <source>[Subdivide] Failed to subdivide mesh &apos;%1&apos; (not enough memory?)</source>
         <translation>[Subdivide] Не удалось сгустить модель &apos;%1&apos; (мало памяти?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3294"/>
+        <location filename="../mainwindow.cpp" line="3296"/>
         <source>[Subdivide] Works only on real meshes!</source>
         <translation>[Subdivide] Использует только действительные модели!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3320"/>
+        <location filename="../mainwindow.cpp" line="3322"/>
         <source>[Flip triangles] Works only on real meshes!</source>
         <translation>[Flip triangles] Использует только действительные модели!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3335"/>
-        <location filename="../mainwindow.cpp" line="3338"/>
+        <location filename="../mainwindow.cpp" line="3337"/>
+        <location filename="../mainwindow.cpp" line="3340"/>
         <source>Smooth mesh</source>
         <translation>Сглаживание модели</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3335"/>
+        <location filename="../mainwindow.cpp" line="3337"/>
         <source>Iterations:</source>
         <translation>Итераций:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3338"/>
+        <location filename="../mainwindow.cpp" line="3340"/>
         <source>Smoothing factor:</source>
         <translation>Коэффициент слаживания:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3359"/>
+        <location filename="../mainwindow.cpp" line="3361"/>
         <source>Failed to apply Laplacian smoothing to mesh &apos;%1&apos;</source>
         <translation>Не удалось применить сглаживание Лапласа к облаку &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3435"/>
+        <location filename="../mainwindow.cpp" line="3437"/>
         <source>Only meshes with standard vertices are handled for now! Can&apos;t merge entity &apos;%1&apos;...</source>
         <translation>На данный момент обрабатываются модели только со стандартными вершинами! Нельзя объединить объект &apos;%1&apos;...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3440"/>
+        <location filename="../mainwindow.cpp" line="3442"/>
         <source>Entity &apos;%1&apos; is neither a cloud nor a mesh, can&apos;t merge it!</source>
         <translation>Объект &apos;%1&apos; не облако и не модель. Объединять его нельзя!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3452"/>
+        <location filename="../mainwindow.cpp" line="3454"/>
         <source>Select only clouds or meshes!</source>
         <translation>Выберите только облака или модели!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3457"/>
+        <location filename="../mainwindow.cpp" line="3459"/>
         <source>Can&apos;t mix point clouds and meshes!</source>
         <translation>Нельзя смешивать облака с моделями!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3492"/>
+        <location filename="../mainwindow.cpp" line="3494"/>
         <source>Original cloud index</source>
         <translation>Исходные индексы точек</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3492"/>
+        <location filename="../mainwindow.cpp" line="3494"/>
         <source>Do you want to generate a scalar field with the original cloud index?</source>
         <translation>Создать скалярное поле с исходными индексами точек?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3501"/>
+        <location filename="../mainwindow.cpp" line="3503"/>
         <source>Couldn&apos;t allocate a new scalar field for storing the original cloud index! Try to free some memory ...</source>
         <translation>Нет памяти для создания скаларного поля по исх. индексам точек! Попробуйте освободить больше памяти...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3544"/>
-        <location filename="../mainwindow.cpp" line="3605"/>
+        <location filename="../mainwindow.cpp" line="3546"/>
+        <location filename="../mainwindow.cpp" line="3607"/>
         <source>Fusion failed! (not enough memory?)</source>
         <translation>Слияние не удалось! (мало памяти?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3638"/>
+        <location filename="../mainwindow.cpp" line="3640"/>
         <source>Select 2 point clouds or meshes!</source>
         <translation>Выберите 2 облака или модели!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3661"/>
+        <location filename="../mainwindow.cpp" line="3663"/>
         <source>Invalid minimum RMS decrease value</source>
         <translation>Неверное наименьшее значение сокращения СКО</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3667"/>
+        <location filename="../mainwindow.cpp" line="3669"/>
         <source>Minimum RMS decrease value is too small.
 %1 will be used instead (numerical accuracy limit).</source>
         <translation>Наименьшее значение сокращения СКО слишком мало.
 Взамен будет использовано %1 (числовой порог точности).</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3723"/>
+        <location filename="../mainwindow.cpp" line="3725"/>
         <source>[Register] Applied transformation matrix:</source>
         <translation>[Register] Примененная матрица трансформации:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3730"/>
+        <location filename="../mainwindow.cpp" line="3732"/>
         <source>Scale: %1 (already integrated in above matrix!)</source>
         <translation>Масштаб: %1 (уже учтен в матрице выше!)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3736"/>
+        <location filename="../mainwindow.cpp" line="3738"/>
         <source>[Register] Scale: fixed (1.0)</source>
         <translation>[Register] Масштаб: фиксирован (1.0)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3737"/>
+        <location filename="../mainwindow.cpp" line="3739"/>
         <source>Scale: fixed (1.0)</source>
         <translation>Масштаб: фиксирован (1.0)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3742"/>
+        <location filename="../mainwindow.cpp" line="3744"/>
         <source>Theoretical overlap: %1%</source>
         <translation>Зона перекрытия: %1%</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3747"/>
+        <location filename="../mainwindow.cpp" line="3749"/>
         <source>This report has been output to Console (F8)</source>
         <translation>Этот отчет выведен в консоль (F8)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3768"/>
+        <location filename="../mainwindow.cpp" line="3770"/>
         <source>Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?</source>
         <translation>Данные вершин модели заблокированы (они могут быть доступны в других моделях): Создать дубликат модели для применения трансформации?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3781"/>
+        <location filename="../mainwindow.cpp" line="3783"/>
         <source>Doesn&apos;t work on sub-meshes yet!</source>
         <translation>Пока не работает с субмоделями!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3793"/>
+        <location filename="../mainwindow.cpp" line="3795"/>
         <source>Failed to clone &apos;data&apos; mesh! (not enough memory?)</source>
         <translation>Не удалось дублировать данные модели! (не хватает памяти?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3812"/>
+        <location filename="../mainwindow.cpp" line="3814"/>
         <source>[ICP] The reference entity is a child of the aligned one! CC will move only the aligned entity, and not its children</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3839"/>
+        <location filename="../mainwindow.cpp" line="3841"/>
         <source>[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]</source>
         <translation>[ICP] Глобальный сдвиг совмещаемого объекта обновлен до соответствия опорному: (%1,%2,%3) [x%4]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3850"/>
+        <location filename="../mainwindow.cpp" line="3852"/>
         <source>Drop shift information?</source>
         <translation>Отбросить информацию сдвига?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3850"/>
+        <location filename="../mainwindow.cpp" line="3852"/>
         <source>Aligned entity is shifted but reference cloud is not: drop global shift information?</source>
         <translation>Совмещаемый объект смещен, а опорный нет: отбросить информацию о глобальном сдвиге?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3854"/>
+        <location filename="../mainwindow.cpp" line="3856"/>
         <source>[ICP] Aligned entity global shift has been reset to match the reference!</source>
         <translation>[ICP] Глобальный сдвиг совмещаемого объекта сброшен до соответствия опорному!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3865"/>
+        <location filename="../mainwindow.cpp" line="3867"/>
         <source>Registration info</source>
         <translation>Данные привязки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3877"/>
+        <location filename="../mainwindow.cpp" line="3879"/>
         <source>Work in progress</source>
         <translation>Идет обработка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3878"/>
+        <location filename="../mainwindow.cpp" line="3880"/>
         <source>This method is still under development: are you sure you want to use it? (a crash may likely happen)</source>
         <translation>Этот метод пока в разработке: хотите его попробовать? (возможны сбои)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3884"/>
-        <location filename="../mainwindow.cpp" line="3891"/>
-        <location filename="../mainwindow.cpp" line="5208"/>
-        <location filename="../mainwindow.cpp" line="5215"/>
-        <location filename="../mainwindow.cpp" line="9073"/>
-        <location filename="../mainwindow.cpp" line="9080"/>
+        <location filename="../mainwindow.cpp" line="3886"/>
+        <location filename="../mainwindow.cpp" line="3893"/>
+        <location filename="../mainwindow.cpp" line="5210"/>
+        <location filename="../mainwindow.cpp" line="5217"/>
+        <location filename="../mainwindow.cpp" line="9075"/>
+        <location filename="../mainwindow.cpp" line="9082"/>
         <source>Select 2 point clouds!</source>
         <translation>Выберите 2 облака точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3929"/>
+        <location filename="../mainwindow.cpp" line="3931"/>
         <source>[Align] Resulting matrix:</source>
         <translation>[Align] Результирующая матрица:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3951"/>
+        <location filename="../mainwindow.cpp" line="3953"/>
         <source>[Align] Registration failed!</source>
         <translation>[Align] Привязка не выполнена!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3997"/>
-        <location filename="../mainwindow.cpp" line="8966"/>
+        <location filename="../mainwindow.cpp" line="3999"/>
+        <location filename="../mainwindow.cpp" line="8968"/>
         <source>Select at least one point cloud!</source>
         <translation>Выберите минимум одно облако точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4015"/>
+        <location filename="../mainwindow.cpp" line="4017"/>
         <source>Subsampling</source>
         <translation>Прореживание</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4028"/>
+        <location filename="../mainwindow.cpp" line="4030"/>
         <source>[Subsampling] Failed to subsample cloud &apos;%1&apos;!</source>
         <translation>[Subsampling] Не удалось проредить облако &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4055"/>
+        <location filename="../mainwindow.cpp" line="4057"/>
         <source>[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!</source>
         <translation>[Subsampling] Мало памяти: цвета, нормали и скалярные поля могут отсутствовать!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4070"/>
+        <location filename="../mainwindow.cpp" line="4072"/>
         <source>Errors occurred (see console)</source>
         <translation>Возникли ошибки (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4128"/>
+        <location filename="../mainwindow.cpp" line="4130"/>
         <source>[CreateComponentsClouds] Not enough memory to sort components by size!</source>
         <translation>[CreateComponentsClouds] Не хватает памяти для сортировки компонент по размеру!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4202"/>
+        <location filename="../mainwindow.cpp" line="4204"/>
         <source>No component was created! Check the minimum size...</source>
         <translation>Компонент не создан! Проверьте минимальный размер...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4274"/>
-        <location filename="../mainwindow.cpp" line="8380"/>
+        <location filename="../mainwindow.cpp" line="4276"/>
+        <location filename="../mainwindow.cpp" line="8382"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
         <translation>Нельзя вычислить октодерево для облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4287"/>
+        <location filename="../mainwindow.cpp" line="4289"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
         <translation>Невозможно выделить новое скалярное поле для расчета меток СК! Необходимо больше свободной памяти...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4319"/>
+        <location filename="../mainwindow.cpp" line="4321"/>
         <source>Many components</source>
         <translation>Много компонент</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4319"/>
+        <location filename="../mainwindow.cpp" line="4321"/>
         <source>Do you really expect up to %1 components?
 (this may take a lot of time to process and display)</source>
         <translation>Хотите получить до %1 компонент?
 (может потребоваться много времени для обработки и отображения)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4403"/>
+        <location filename="../mainwindow.cpp" line="4405"/>
         <source>Select 2 and only 2 polylines</source>
         <translation>Выберите только 2 полилинии</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4412"/>
+        <location filename="../mainwindow.cpp" line="4414"/>
         <source>Projection method</source>
         <translation>Метод проекции</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4412"/>
+        <location filename="../mainwindow.cpp" line="4414"/>
         <source>Use best fit plane (yes) or the current viewing direction (no)</source>
         <translation>Использовать вписанную плоскость (да) или текущий ракурс (нет)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4429"/>
+        <location filename="../mainwindow.cpp" line="4431"/>
         <source>[Mesh two polylines] Failed to compute normals!</source>
         <translation>[Mesh two polylines] Не удалось вычислить нормали!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4439"/>
+        <location filename="../mainwindow.cpp" line="4441"/>
         <source>Failed to create mesh (see Console)</source>
         <translation>Не удалось создать модель (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4480"/>
+        <location filename="../mainwindow.cpp" line="4482"/>
         <source>Select a group of polylines or multiple polylines (contour plot)!</source>
         <translation>Выберите группу полилиний или несколько полилиний (контурное изображение)!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4484"/>
+        <location filename="../mainwindow.cpp" line="4486"/>
         <source>Projection dimension</source>
         <translation>Размеры проекции</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4484"/>
+        <location filename="../mainwindow.cpp" line="4486"/>
         <source>Contour plot to mesh</source>
         <translation>Контурное изображение в модель</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4517"/>
+        <location filename="../mainwindow.cpp" line="4519"/>
         <source>Not enough segments!</source>
         <translation>Мало сегментов!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4572"/>
+        <location filename="../mainwindow.cpp" line="4574"/>
         <source>Third party library error: %1</source>
         <translation>Ошибка сторонней библиотеки: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4637"/>
+        <location filename="../mainwindow.cpp" line="4639"/>
         <source>[Contour plot to mesh] Failed to compute normals!</source>
         <translation>[Contour plot to mesh] Не удалось вычислить нормали!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4660"/>
+        <location filename="../mainwindow.cpp" line="4662"/>
         <source>Select one or two point clouds!</source>
         <translation>Выберите одно или два облака точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4669"/>
-        <location filename="../mainwindow.cpp" line="4684"/>
+        <location filename="../mainwindow.cpp" line="4671"/>
+        <location filename="../mainwindow.cpp" line="4686"/>
         <source>Select point clouds only!</source>
         <translation>Выберите только облака точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4701"/>
+        <location filename="../mainwindow.cpp" line="4703"/>
         <source>Select only one point cloud!</source>
         <translation>Выберите только одно облако точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4708"/>
+        <location filename="../mainwindow.cpp" line="4710"/>
         <source>Select a point cloud!</source>
         <translation>Выберите облако точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4746"/>
-        <location filename="../mainwindow.cpp" line="4804"/>
+        <location filename="../mainwindow.cpp" line="4748"/>
+        <location filename="../mainwindow.cpp" line="4806"/>
         <source>Triangulate</source>
         <translation>Триангуляция</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4746"/>
+        <location filename="../mainwindow.cpp" line="4748"/>
         <source>Min triangle angle (in degrees)</source>
         <translation>Мин. угол треугольника (°)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4804"/>
-        <location filename="../mainwindow.cpp" line="8126"/>
+        <location filename="../mainwindow.cpp" line="4806"/>
+        <location filename="../mainwindow.cpp" line="8128"/>
         <source>Max edge length (0 = no limit)</source>
         <translation>Макс. длина ребра (0 = не ограничена)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4832"/>
+        <location filename="../mainwindow.cpp" line="4834"/>
         <source>Keep old normals?</source>
         <translation>Использовать старые нормали?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4833"/>
+        <location filename="../mainwindow.cpp" line="4835"/>
         <source>Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?</source>
         <translation>Облако(а) уже имеют нормали. Обновить их (да) или использовать старые (нет)?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4840"/>
+        <location filename="../mainwindow.cpp" line="4842"/>
         <source>Triangulation</source>
         <translation>Триангуляция</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4841"/>
+        <location filename="../mainwindow.cpp" line="4843"/>
         <source>Triangulation in progress...</source>
         <translation>Выполняется построение триангуляции...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4879"/>
+        <location filename="../mainwindow.cpp" line="4881"/>
         <source>Error(s) occurred! See the Console messages</source>
         <translation>Возникла ошибка(и). Подробности в консоли</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4946"/>
+        <location filename="../mainwindow.cpp" line="4948"/>
         <source>Failed to compute quadric on cloud &apos;%1&apos;</source>
         <translation>Не удалось вычислить полином для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4954"/>
+        <location filename="../mainwindow.cpp" line="4956"/>
         <source>Error(s) occurred: see console</source>
         <translation>Возникла ошибка(и): Подробности в консоли</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5079"/>
+        <location filename="../mainwindow.cpp" line="5081"/>
         <source>[DistanceMap] Cloud &apos;%1&apos;: no point falls inside the specified range</source>
         <translation>[DistanceMap] Облако &apos;%1&apos;: нет точек, попадающих в указанный диапазон</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5101"/>
+        <location filename="../mainwindow.cpp" line="5103"/>
         <source>Distance to best fit quadric (3D)</source>
         <translation>Отклонения от вписанной поверхности второго порядка (3D)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5101"/>
+        <location filename="../mainwindow.cpp" line="5103"/>
         <source>Steps (per dim.)</source>
         <translation>Шагов (на коорд.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5130"/>
+        <location filename="../mainwindow.cpp" line="5132"/>
         <source>Failed to get the center of gravity of cloud &apos;%1&apos;!</source>
         <translation>Не удалось определить центр тяжести облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5151"/>
-        <location filename="../mainwindow.cpp" line="5241"/>
+        <location filename="../mainwindow.cpp" line="5153"/>
+        <location filename="../mainwindow.cpp" line="5243"/>
         <source>Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
         <translation>Нельзя выделить новое скалярное поле для расчета расстояний! Попробуйте освободить память...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5188"/>
+        <location filename="../mainwindow.cpp" line="5190"/>
         <source>Distance map to 3D quadric</source>
         <translation>Карта отклонений от 3D-поверхности 2-го порядка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5196"/>
+        <location filename="../mainwindow.cpp" line="5198"/>
         <source>Failed to compute 3D quadric on cloud &apos;%1&apos;</source>
         <translation>Не удалось вычислить поверхность 2-го порядка к облаку &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5219"/>
-        <location filename="../mainwindow.cpp" line="9084"/>
-        <location filename="../mainwindow.cpp" line="9158"/>
+        <location filename="../mainwindow.cpp" line="5221"/>
+        <location filename="../mainwindow.cpp" line="9086"/>
+        <location filename="../mainwindow.cpp" line="9160"/>
         <source>Compared</source>
         <translation>Сравниваемое</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5220"/>
-        <location filename="../mainwindow.cpp" line="9085"/>
-        <location filename="../mainwindow.cpp" line="9159"/>
+        <location filename="../mainwindow.cpp" line="5222"/>
+        <location filename="../mainwindow.cpp" line="9087"/>
+        <location filename="../mainwindow.cpp" line="9161"/>
         <source>Reference</source>
         <translation>Опорное</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5230"/>
+        <location filename="../mainwindow.cpp" line="5232"/>
         <source>Compared cloud must be a real point cloud!</source>
         <translation>Сравниваемый объект должен быть облаком точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5330"/>
+        <location filename="../mainwindow.cpp" line="5332"/>
         <source>Shift along normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5330"/>
+        <location filename="../mainwindow.cpp" line="5332"/>
         <source>Shift quantity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5355"/>
-        <location filename="../mainwindow.cpp" line="11321"/>
+        <location filename="../mainwindow.cpp" line="5357"/>
+        <location filename="../mainwindow.cpp" line="11322"/>
         <source>Select one point cloud!</source>
         <translation>Выберите одно облако точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5361"/>
+        <location filename="../mainwindow.cpp" line="5363"/>
         <source>Dimension</source>
         <translation>Размеры</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5361"/>
+        <location filename="../mainwindow.cpp" line="5363"/>
         <source>Orthogonal dim (X=0 / Y=1 / Z=2)</source>
         <translation>Ортогональ. разм.  (X=0 / Y=1 / Z=2)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5417"/>
+        <location filename="../mainwindow.cpp" line="5419"/>
         <source>[Synchronize] Transformation matrix (%1):</source>
         <translation>[Synchronize] Матрица трансформации (%1):</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5464"/>
+        <location filename="../mainwindow.cpp" line="5466"/>
         <source>[Synchronize] Transformation matrix (%1 --&gt; %2):</source>
         <translation>[Synchronize] Матрица трансформации (%1 --&gt; %2):</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5766"/>
-        <location filename="../mainwindow.cpp" line="6746"/>
+        <location filename="../mainwindow.cpp" line="5768"/>
+        <location filename="../mainwindow.cpp" line="6748"/>
         <source>Select one and only one entity!</source>
         <translation>Выберите только один объект!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5782"/>
+        <location filename="../mainwindow.cpp" line="5784"/>
         <source>Method can&apos;t be applied on locked vertices or virtual point clouds!</source>
         <translation>Метод не применяется к заблокированным вершинам виртуального облака точек!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5808"/>
+        <location filename="../mainwindow.cpp" line="5810"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5808"/>
+        <location filename="../mainwindow.cpp" line="5810"/>
         <source>Invalid angular range</source>
         <translation>Неверный угловой диапазон</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5854"/>
+        <location filename="../mainwindow.cpp" line="5856"/>
         <source>[Unroll] Original mesh has been automatically hidden</source>
         <translation>[Unroll] Исходная модель была автоматически скрыта</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5864"/>
+        <location filename="../mainwindow.cpp" line="5866"/>
         <source>[Unroll] Original cloud has been automatically hidden</source>
         <translation>[Unroll] Исходное облако было автоматически скрыто</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5963"/>
+        <location filename="../mainwindow.cpp" line="5965"/>
         <source>Failed to create the 3D view</source>
         <translation>Не удалось создать 3D-вид</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6011"/>
+        <location filename="../mainwindow.cpp" line="6013"/>
         <source>New 3D View</source>
         <translation>Новый 3D-вид</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6047"/>
+        <location filename="../mainwindow.cpp" line="6049"/>
         <source>Restart</source>
         <translation>Перезапуск</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6048"/>
+        <location filename="../mainwindow.cpp" line="6050"/>
         <source>To finish the process, you&apos;ll have to close and restart CloudCompare</source>
         <translation>Для завершения обработки Вам нужно перезапустить CloudCompare</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6078"/>
+        <location filename="../mainwindow.cpp" line="6080"/>
         <source>All VBOs have been released (%1 Mb)</source>
         <translation>Все объекты буфера вершин освобождены (%1 МБ)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6081"/>
+        <location filename="../mainwindow.cpp" line="6083"/>
         <source>You might want to disable the &apos;use VBOs&apos; option in the Display Settings to keep the GPU memory empty</source>
         <translation>Возможно будет лучше отключить опцию &apos;Использовать VBO&apos; в настройках отображения, чтобы не нагружать видеопамять</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6086"/>
+        <location filename="../mainwindow.cpp" line="6088"/>
         <source>No VBO allocated</source>
         <translation>VBO не зарезервирован</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6330"/>
+        <location filename="../mainwindow.cpp" line="6332"/>
         <source>Exit Full Screen</source>
         <translation>Выйти из полного экрана</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9512"/>
+        <location filename="../mainwindow.cpp" line="9513"/>
         <source>It seems your graphic card doesn&apos;t support Quad Buffered Stereo rendering</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6146"/>
+        <location filename="../mainwindow.cpp" line="6148"/>
         <source>Are you sure you want to quit?</source>
         <translation>Вы действительно хотите выйти?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6392"/>
+        <location filename="../mainwindow.cpp" line="6394"/>
         <source>Select at least one entity (point cloud or mesh)!</source>
         <translation>Выберите хотя бы один объект (облако точек или модель)!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6451"/>
+        <location filename="../mainwindow.cpp" line="6453"/>
         <source>Not enough memory</source>
         <translation>Недостаточно памяти</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6470"/>
+        <location filename="../mainwindow.cpp" line="6472"/>
         <source>[PointPairRegistration] Failed to create dedicated 3D view!</source>
         <translation>[PointPairRegistration] Не удалось создать соответствующий 3D-вид!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6551"/>
+        <location filename="../mainwindow.cpp" line="6553"/>
         <source>No cloud in selection!</source>
         <translation>В выборке нет облака!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6565"/>
+        <location filename="../mainwindow.cpp" line="6567"/>
         <source>[SectionExtraction] Failed to create dedicated 3D view!</source>
         <translation>[SectionExtraction] Не удалось создать соответствующий 3D-вид!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6635"/>
+        <location filename="../mainwindow.cpp" line="6637"/>
         <source>No segmentable entity in active window!</source>
         <translation>В текущем окне нет сегментируемого объекта!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6753"/>
+        <location filename="../mainwindow.cpp" line="6755"/>
         <source>Select a cloud or a mesh</source>
         <translation>Выберите облако или модель</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6759"/>
+        <location filename="../mainwindow.cpp" line="6761"/>
         <source>Entity must be visible!</source>
         <translation>Объект должен быть видимым!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6898"/>
-        <location filename="../mainwindow.cpp" line="6955"/>
+        <location filename="../mainwindow.cpp" line="6900"/>
+        <location filename="../mainwindow.cpp" line="6957"/>
         <source>Unexpected error!</source>
         <translation>Непредвиденная ошибка!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6935"/>
+        <location filename="../mainwindow.cpp" line="6937"/>
         <source>No entity eligible for manual transformation! (see console)</source>
         <translation>Нет подходящего объекта для ручной трансформации! (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6940"/>
+        <location filename="../mainwindow.cpp" line="6942"/>
         <source>Some entities were ignored! (see console)</source>
         <translation>Некоторые объекты проигнорированы! (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7059"/>
+        <location filename="../mainwindow.cpp" line="7061"/>
         <source>Orthographic mode only!</source>
         <translation>Только ортографическая проекция!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7112"/>
+        <location filename="../mainwindow.cpp" line="7114"/>
         <source>All selected entities must be displayed in the same 3D view!</source>
         <translation>Все выделенные объекты должны отображаться в том же 3D-виде!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7123"/>
+        <location filename="../mainwindow.cpp" line="7125"/>
         <source>Selected entities have no valid bounding-box!</source>
         <translation>Неверные границы выделенных объектов!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7247"/>
+        <location filename="../mainwindow.cpp" line="7249"/>
         <source>Can&apos;t start the picking mechanism (another tool is already using it)</source>
         <translation>Нельзя запустить процедуру выборки (она уже используется другим инструментом)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7288"/>
+        <location filename="../mainwindow.cpp" line="7290"/>
         <source>Picking operation aborted</source>
         <translation>Процедура указания прервана</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7345"/>
+        <location filename="../mainwindow.cpp" line="7347"/>
         <source>[Level] Point is too close from the others!</source>
         <translation>[Level] Точка слишком близка к другим!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7462"/>
-        <location filename="../mainwindow.cpp" line="7510"/>
+        <location filename="../mainwindow.cpp" line="7464"/>
+        <location filename="../mainwindow.cpp" line="7512"/>
         <source>Stop the other picking operation first!</source>
         <translation>Сначала остановите другую операцию выборки!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7470"/>
-        <location filename="../mainwindow.cpp" line="7518"/>
+        <location filename="../mainwindow.cpp" line="7472"/>
+        <location filename="../mainwindow.cpp" line="7520"/>
         <source>No active 3D view!</source>
         <translation>Нет активного 3D-вида!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7476"/>
+        <location filename="../mainwindow.cpp" line="7478"/>
         <source>Select an entity!</source>
         <translation>Выберите объект!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7496"/>
+        <location filename="../mainwindow.cpp" line="7498"/>
         <source>Pick three points on the floor plane (click the Level button or press Escape to cancel)</source>
         <translation>Выберите три точки нижней плоскости (щелкните кнопку Отгоризонтировать или Escape для отмены)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7526"/>
+        <location filename="../mainwindow.cpp" line="7528"/>
         <source>Perspective mode is viewer-centered: can&apos;t use a point as rotation center!</source>
         <translation>Вид перспективы (центр-камера): нельзя использовать точку в качестве центра вращения!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7531"/>
+        <location filename="../mainwindow.cpp" line="7533"/>
         <source>Pick a point to be used as rotation center (click on icon again to cancel)</source>
         <translation>Выберите точку в качестве центра вращения (щелкните опять на иконку для отмены)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7540"/>
+        <location filename="../mainwindow.cpp" line="7542"/>
         <source>No cloud in database!</source>
         <translation>В базе данных нет облака!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7602"/>
+        <location filename="../mainwindow.cpp" line="7604"/>
         <source>Histogram</source>
         <translation>Гистограмма</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7608"/>
-        <location filename="../mainwindow.cpp" line="7643"/>
+        <location filename="../mainwindow.cpp" line="7610"/>
+        <location filename="../mainwindow.cpp" line="7645"/>
         <source>Count</source>
         <translation>Кол-во</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7629"/>
+        <location filename="../mainwindow.cpp" line="7631"/>
         <source>Histogram [%1]</source>
         <translation>Гистограмма [%1]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7640"/>
+        <location filename="../mainwindow.cpp" line="7642"/>
         <source>%1 (%2 values) </source>
         <translation>%1 (%2 значений) </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7672"/>
+        <location filename="../mainwindow.cpp" line="7674"/>
         <source>[Crop] No eligible candidate found!</source>
         <translation>[Crop] Подходящий кандидат не найден!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7724"/>
+        <location filename="../mainwindow.cpp" line="7726"/>
         <source>[Crop] Selected entities have been hidden</source>
         <translation>[Crop] Выбранные объекты были скрыты</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7726"/>
+        <location filename="../mainwindow.cpp" line="7728"/>
         <source>Error(s) occurred! See the Console</source>
         <translation>Возникла ошибка! См. консоль</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7745"/>
+        <location filename="../mainwindow.cpp" line="7747"/>
         <source>An error occurred while cloning cloud %1</source>
         <translation>Во время дублирования облака %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7753"/>
+        <location filename="../mainwindow.cpp" line="7755"/>
         <source>An error occurred while cloning primitive %1</source>
         <translation>Во время дублирования примитива %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7761"/>
+        <location filename="../mainwindow.cpp" line="7763"/>
         <source>An error occurred while cloning mesh %1</source>
         <translation>Во время дублирования модели %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7769"/>
+        <location filename="../mainwindow.cpp" line="7771"/>
         <source>An error occurred while cloning polyline %1</source>
         <translation>Во время дублирования полилинии %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7777"/>
+        <location filename="../mainwindow.cpp" line="7779"/>
         <source>An error occurred while cloning facet %1</source>
         <translation>Во время дублирования грани %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7793"/>
+        <location filename="../mainwindow.cpp" line="7795"/>
         <source>An error occurred while cloning camera sensor %1</source>
         <translation>Во время дублирования датчика камеры %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7809"/>
+        <location filename="../mainwindow.cpp" line="7811"/>
         <source>An error occurred while cloning GBL sensor %1</source>
         <translation>Во время дублирования сканера GBL %1 возникла ошибка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7878"/>
+        <location filename="../mainwindow.cpp" line="7880"/>
         <source>Entity &apos;%1&apos; can&apos;t be cloned (type not supported yet!)</source>
         <translation>Нельзя дублировать объект &apos;%1&apos; (тип еще не поддерживается!)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7929"/>
+        <location filename="../mainwindow.cpp" line="7931"/>
         <source>Constant #%1</source>
         <translation>Константа  #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7934"/>
+        <location filename="../mainwindow.cpp" line="7936"/>
         <source>New SF name</source>
         <translation>Имя нового СП</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7934"/>
+        <location filename="../mainwindow.cpp" line="7936"/>
         <source>SF name (must be unique)</source>
         <translation>Имя СП (должно быть уникально)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8019"/>
+        <location filename="../mainwindow.cpp" line="8021"/>
         <source>[Fit sphere] Failed to fit a sphere on cloud &apos;%1&apos;</source>
         <translation>[Fit sphere] Не удалось вписать сферу в облако &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8023"/>
+        <location filename="../mainwindow.cpp" line="8025"/>
         <source>[Fit sphere] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
         <translation>[Fit sphere] Облако &apos;%1&apos;: центр (%2,%3,%4) - радиус = %5 [СКО = %6]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8126"/>
+        <location filename="../mainwindow.cpp" line="8128"/>
         <source>Fit facet</source>
         <translation>Вписать грань</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8218"/>
+        <location filename="../mainwindow.cpp" line="8220"/>
         <source>[Orientation] Entity &apos;%1&apos;</source>
         <translation>[Orientation] Объект &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8238"/>
+        <location filename="../mainwindow.cpp" line="8240"/>
         <source>[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:</source>
         <translation>[Orientation] Матрица при которой плоскость будет горизонтальной (нормаль направдена Z+):</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8240"/>
+        <location filename="../mainwindow.cpp" line="8242"/>
         <source>[Orientation] You can copy this matrix values (CTRL+C) and paste them in the &apos;Apply transformation tool&apos; dialog</source>
         <translation>[Orientation] Можете скопировать матрицу (CTRL+C) и вставить ее в диалог &apos;Применить трансформацию&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8260"/>
+        <location filename="../mainwindow.cpp" line="8262"/>
         <source>Failed to fit a plane/facet on entity &apos;%1&apos;</source>
         <translation>Не удалось вписать плоскость/грань в объект &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8339"/>
+        <location filename="../mainwindow.cpp" line="8341"/>
         <source>Invalid kernel size!</source>
         <translation>Неверный размер ядра!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8344"/>
+        <location filename="../mainwindow.cpp" line="8346"/>
         <source>Radius:</source>
         <translation>Радиус:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8349"/>
+        <location filename="../mainwindow.cpp" line="8351"/>
         <source>Spherical extraction test (%1)</source>
         <translation>Тест на извлечение сферической окрестности (%1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8368"/>
+        <location filename="../mainwindow.cpp" line="8370"/>
         <source>Failed to create scalar field on cloud &apos;%1&apos; (not enough memory?)</source>
         <translation>Не удалось создать скалярное поле для облака &apos;%1&apos; (мало памяти?)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8424"/>
-        <location filename="../mainwindow.cpp" line="8428"/>
+        <location filename="../mainwindow.cpp" line="8426"/>
+        <location filename="../mainwindow.cpp" line="8430"/>
         <source>CNE Test</source>
         <translation>Тест извлечения цилиндрич. окрестности</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8424"/>
+        <location filename="../mainwindow.cpp" line="8426"/>
         <source>radius</source>
         <translation>радиус</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8428"/>
+        <location filename="../mainwindow.cpp" line="8430"/>
         <source>height</source>
         <translation>высота</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8432"/>
+        <location filename="../mainwindow.cpp" line="8434"/>
         <source>cube</source>
         <translation>куб</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8521"/>
+        <location filename="../mainwindow.cpp" line="8523"/>
         <source>Failed to compute octree!</source>
         <translation>Не удалось вычислить октодерево!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8540"/>
+        <location filename="../mainwindow.cpp" line="8542"/>
         <source>centers</source>
         <translation>центры</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8572"/>
+        <location filename="../mainwindow.cpp" line="8574"/>
         <source>No cloud in selection?!</source>
         <translation>В выборке нет облака?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8609"/>
+        <location filename="../mainwindow.cpp" line="8611"/>
         <source>Need at least two clouds!</source>
         <translation>Нужно хотя бы два облака!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8661"/>
+        <location filename="../mainwindow.cpp" line="8663"/>
         <source>Testing all possible positions</source>
         <translation>Тестирование всех возможных позиций</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8662"/>
+        <location filename="../mainwindow.cpp" line="8664"/>
         <source>%1 clouds and %2 positions</source>
         <translation>%1 облаков и %2 позиций</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8723"/>
+        <location filename="../mainwindow.cpp" line="8725"/>
         <source>An error occurred while performing ICP!</source>
         <translation>Во время выполнения привязки ICP возникла ошибка!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8759"/>
+        <location filename="../mainwindow.cpp" line="8761"/>
         <source>Best case #%1 / #%2 - RMS = %3</source>
         <translation>Лучший вариант #%1 / #%2 - СКО = %3</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2021"/>
+        <location filename="../mainwindow.cpp" line="2023"/>
         <source>[DoActionSetViewFromSensor] Viewport applied</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2786"/>
+        <location filename="../mainwindow.cpp" line="2788"/>
         <source>[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2840"/>
+        <location filename="../mainwindow.cpp" line="2842"/>
         <source>[DoActionSmoohPolyline] Errors occurred during the process! Result may be incomplete!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2879"/>
+        <location filename="../mainwindow.cpp" line="2881"/>
         <source>Process failed (see Console)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="2925"/>
+        <location filename="../mainwindow.cpp" line="2927"/>
         <source>Entity [%1] has no active scalar field!</source>
         <translation type="unfinished">Объект [%1] не имеет активного скалярного поля!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3707"/>
+        <location filename="../mainwindow.cpp" line="3709"/>
         <source>Final RMS*: %1 (computed on %2 points)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="3708"/>
+        <location filename="../mainwindow.cpp" line="3710"/>
         <source>(* RMS is potentially weighted, depending on the selected options)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4190"/>
+        <location filename="../mainwindow.cpp" line="4192"/>
         <source>[CreateComponentsClouds] Failed to create component #%1! (not enough memory)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4211"/>
+        <location filename="../mainwindow.cpp" line="4213"/>
         <source>[CreateComponentsClouds] %1 component(s) were created from cloud &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4220"/>
+        <location filename="../mainwindow.cpp" line="4222"/>
         <source>[CreateComponentsClouds] Original cloud has been automatically hidden</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4339"/>
-        <location filename="../mainwindow.cpp" line="4344"/>
+        <location filename="../mainwindow.cpp" line="4341"/>
+        <location filename="../mainwindow.cpp" line="4346"/>
         <source>[DoActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4909"/>
+        <location filename="../mainwindow.cpp" line="4911"/>
         <source>[DoActionFitQuadric] Quadric local coordinate system:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="4911"/>
+        <location filename="../mainwindow.cpp" line="4913"/>
         <source>[DoActionFitQuadric] Quadric equation (in local coordinate system): </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5592"/>
+        <location filename="../mainwindow.cpp" line="5594"/>
         <source>[DoActionSORFilter] No points were removed from cloud &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5615"/>
+        <location filename="../mainwindow.cpp" line="5617"/>
         <source>[DoActionSORFilter] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5627"/>
+        <location filename="../mainwindow.cpp" line="5629"/>
         <source>[DoActionSORFilter] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5631"/>
+        <location filename="../mainwindow.cpp" line="5633"/>
         <source>[DoActionSORFilter] Trying to apply the noise filter to null cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5713"/>
+        <location filename="../mainwindow.cpp" line="5715"/>
         <source>[DoActionFilterNoise] No points were removed from cloud &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5736"/>
+        <location filename="../mainwindow.cpp" line="5738"/>
         <source>[DoActionFilterNoise] Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5748"/>
+        <location filename="../mainwindow.cpp" line="5750"/>
         <source>[DoActionFilterNoise] Failed to apply the noise filter to cloud &apos;%1&apos;! (not enough memory?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5752"/>
+        <location filename="../mainwindow.cpp" line="5754"/>
         <source>[DoActionFilterNoise] Trying to apply the noise filter to null cloud</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6424"/>
+        <location filename="../mainwindow.cpp" line="6426"/>
         <source>Select to-be-aligned entities</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="6457"/>
+        <location filename="../mainwindow.cpp" line="6459"/>
         <source>No to-be-aligned entity selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7318"/>
+        <location filename="../mainwindow.cpp" line="7320"/>
         <source>The point was picked in the wrong window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7825"/>
+        <location filename="../mainwindow.cpp" line="7827"/>
         <source>An error occurred while cloning image %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7841"/>
+        <location filename="../mainwindow.cpp" line="7843"/>
         <source>An error occurred while cloning label %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="7857"/>
-        <location filename="../mainwindow.cpp" line="7873"/>
+        <location filename="../mainwindow.cpp" line="7859"/>
+        <location filename="../mainwindow.cpp" line="7875"/>
         <source>An error occurred while cloning viewport %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8033"/>
+        <location filename="../mainwindow.cpp" line="8035"/>
         <source>Sphere r=%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8067"/>
+        <location filename="../mainwindow.cpp" line="8069"/>
         <source>[Fit circle] Failed to fit a circle on cloud &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8071"/>
+        <location filename="../mainwindow.cpp" line="8073"/>
         <source>[Fit circle] Cloud &apos;%1&apos;: center (%2,%3,%4) - radius = %5 [RMS = %6]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8079"/>
+        <location filename="../mainwindow.cpp" line="8081"/>
         <source>[Fit circle] Normal (%1,%2,%3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8219"/>
+        <location filename="../mainwindow.cpp" line="8221"/>
         <source>	- plane fitting RMS: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8224"/>
+        <location filename="../mainwindow.cpp" line="8226"/>
         <source>	- normal: (%1, %2, %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8409"/>
+        <location filename="../mainwindow.cpp" line="8411"/>
         <source>[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8517"/>
+        <location filename="../mainwindow.cpp" line="8519"/>
         <source>[CNE_TEST] Mean extraction time = %1 ms (radius = %2, height = %3, mean (neighbours) = %4))</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8763"/>
+        <location filename="../mainwindow.cpp" line="8765"/>
         <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: min RMS = %3 (phi = %4 / theta = %5 deg.)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8768"/>
+        <location filename="../mainwindow.cpp" line="8770"/>
         <source>[DoActionComputeBestICPRmsMatrix] Comparison #%1 / #%2: INVALID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8829"/>
+        <location filename="../mainwindow.cpp" line="8831"/>
         <source>[DoActionComputeBestICPRmsMatrix] Job done</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8833"/>
+        <location filename="../mainwindow.cpp" line="8835"/>
         <source>Failed to save output file?!</source>
         <translation>Не удалось сохранить выходной файл?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8862"/>
+        <location filename="../mainwindow.cpp" line="8864"/>
         <source>No plane in selection</source>
         <translation>В выборке нет плоскости</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8887"/>
-        <location filename="../mainwindow.cpp" line="8990"/>
+        <location filename="../mainwindow.cpp" line="8889"/>
+        <location filename="../mainwindow.cpp" line="8992"/>
         <source>Failed to open file for writing! (check file permissions)</source>
         <translation>Не удалось открыть файл для записи! (проверьте разрешения)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8937"/>
+        <location filename="../mainwindow.cpp" line="8939"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 plane(s))</source>
         <translation>[I/O] Файл &apos;%1&apos; успешно сохранен (%2 плоскостей)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9065"/>
+        <location filename="../mainwindow.cpp" line="9067"/>
         <source>[I/O] File &apos;%1&apos; successfully saved (%2 cloud(s))</source>
         <translation>[I/O] Файл &apos;%1&apos; успешно сохранен (%2 облака(ов))</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9100"/>
-        <location filename="../mainwindow.cpp" line="9174"/>
+        <location filename="../mainwindow.cpp" line="9102"/>
+        <location filename="../mainwindow.cpp" line="9176"/>
         <source>Failed to initialize comparison dialog</source>
         <translation>Не удалось запустить диалог сравнения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9117"/>
+        <location filename="../mainwindow.cpp" line="9119"/>
         <source>Select 2 entities!</source>
         <translation>Выберите 2 объекта!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9139"/>
+        <location filename="../mainwindow.cpp" line="9141"/>
         <source>Select at least one mesh!</source>
         <translation>Выберите хотя бы одну модель!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9144"/>
+        <location filename="../mainwindow.cpp" line="9146"/>
         <source>Select one mesh and one cloud or two meshes!</source>
         <translation>Выберите одну модель и одно облако или две модели!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9192"/>
+        <location filename="../mainwindow.cpp" line="9194"/>
         <source>[Compute Primitive Distances] Cloud to %1 failed, error code = %2!</source>
         <translation>[Compute Primitive Distances] Отклонения облака от %1 не вычислены, код ошибки = %2!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9208"/>
+        <location filename="../mainwindow.cpp" line="9210"/>
         <source>[Compute Primitive Distances] Select only a single Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive</source>
         <translation>[Compute Primitive Distances] Выберите только один объект Плоскость/Короб/Сфера/Цилиндр/Конус/Полилиния и Примитив</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9224"/>
+        <location filename="../mainwindow.cpp" line="9226"/>
         <source>[Compute Primitive Distances] Select at least one Plane/Box/Sphere/Cylinder/Cone/Polyline Primitive!</source>
         <translation>[Compute Primitive Distances] Выберите минимум один объект Плоскость/Короб/Сфера/Цилиндр/Конус/Полилиния и Примитив!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9229"/>
+        <location filename="../mainwindow.cpp" line="9231"/>
         <source>[Compute Primitive Distances] Select at least one cloud!</source>
         <translation>[Compute Primitive Distances] Выберите минимум одно облако!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9259"/>
+        <location filename="../mainwindow.cpp" line="9261"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Couldn&apos;t allocate a new scalar field for computing distances! Try to free some memory ...</source>
         <translation>[Compute Primitive Distances] [Cloud: %1] Невозможно выделить новое скалярное поле для расчета отклонений! Попробуйте освободить больше памяти ...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9267"/>
+        <location filename="../mainwindow.cpp" line="9269"/>
         <source>[Compute Primitive Distances] [Cloud: %1] Not enough memory</source>
         <translation>[Compute Primitive Distances] [Облако: %1] Не хватает памяти</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9289"/>
+        <location filename="../mainwindow.cpp" line="9291"/>
         <source>Bounded Plane</source>
         <translation>Ограниченная плоскость</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9297"/>
+        <location filename="../mainwindow.cpp" line="9299"/>
         <source>Infinite Plane</source>
         <translation>Бесконечная плоскость</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9307"/>
+        <location filename="../mainwindow.cpp" line="9309"/>
         <source>Cylinder</source>
         <translation>Цилиндр</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9316"/>
+        <location filename="../mainwindow.cpp" line="9318"/>
         <source>Cone</source>
         <translation>Конус</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9328"/>
+        <location filename="../mainwindow.cpp" line="9330"/>
         <source>Box</source>
         <translation>Короб</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9348"/>
+        <location filename="../mainwindow.cpp" line="9350"/>
         <source>[Compute Primitive Distances] Unsupported primitive type</source>
         <translation>[Compute Primitive Distances] Неподдерживаемый тип примитива</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9377"/>
+        <location filename="../mainwindow.cpp" line="9379"/>
         <source>[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5</source>
         <translation>[Compute Primitive Distances] [Примитив: %1] [Облако: %2] [%3] Ср. отклонение = %4 / станд.отклонение = %5</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9391"/>
+        <location filename="../mainwindow.cpp" line="9393"/>
         <source>%1 error(s) occurred: refer to the Console (F8)</source>
         <translation>%1 ошибка(ок): детали в консоли (F8)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9537"/>
+        <location filename="../mainwindow.cpp" line="9538"/>
         <source>[Stereo] F.O.V. forced to %1 deg.</source>
         <translation>[Stereo] Назначен угол поля зрения %1 °.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9575"/>
+        <location filename="../mainwindow.cpp" line="9576"/>
         <source>Stereo mode</source>
         <translation>Стерео-режим</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9576"/>
+        <location filename="../mainwindow.cpp" line="9577"/>
         <source>Stereo-mode only works in perspective mode. Do you want to disable it?</source>
         <translation>Стерео-режим работает только в перспективной проекции. Отключить?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9645"/>
+        <location filename="../mainwindow.cpp" line="9646"/>
         <source>Point coordinates</source>
         <translation>Координаты точки</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9662"/>
+        <location filename="../mainwindow.cpp" line="9663"/>
         <source>Point #%1</source>
         <translation>Точка #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9681"/>
+        <location filename="../mainwindow.cpp" line="9682"/>
         <source>Clipboard is empty</source>
         <translation>Буфер обмена пуст</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9701"/>
-        <location filename="../mainwindow.cpp" line="9744"/>
+        <location filename="../mainwindow.cpp" line="9702"/>
+        <location filename="../mainwindow.cpp" line="9745"/>
         <source>Clipboard</source>
         <translation>Буфер обмена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9704"/>
+        <location filename="../mainwindow.cpp" line="9705"/>
         <source>loading</source>
         <translation>загрузка</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9704"/>
+        <location filename="../mainwindow.cpp" line="9705"/>
         <source>from the clipboard</source>
         <translation>из буфера обмена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9713"/>
+        <location filename="../mainwindow.cpp" line="9714"/>
         <source>No cloud loaded</source>
         <translation>Облако не загружено</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9757"/>
+        <location filename="../mainwindow.cpp" line="9758"/>
         <source>Cloud #%1</source>
         <translation>Облако #%1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9778"/>
+        <location filename="../mainwindow.cpp" line="9779"/>
         <source>%1 cloud(s) loaded from the clipboard</source>
         <translation>%1 облако(в) загружено из буфера обмена</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9792"/>
+        <location filename="../mainwindow.cpp" line="9793"/>
         <source>Lock rotation axis</source>
         <translation>Блокировка оси вращения</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9809"/>
+        <location filename="../mainwindow.cpp" line="9810"/>
         <source>[ROTATION LOCKED]</source>
         <translation>[ВРАЩЕНИЕ ЗАБЛОКИРОВАНО]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9928"/>
+        <location filename="../mainwindow.cpp" line="9929"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4) and rescaled of a factor %5 [original position will be restored when saving]</source>
         <translation>Объект &apos;%1&apos; получил смещение: (%2,%3,%4) и масштаб %5 [исходное положение будет восстановлено при сохранении]</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="9970"/>
+        <location filename="../mainwindow.cpp" line="9971"/>
         <source>[MainWindow::addToDB] Internal error: no associated DB?!</source>
         <translation>[MainWindow::addToDB] Внутренняя ошибка: нет связанной БД?!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10106"/>
+        <location filename="../mainwindow.cpp" line="10107"/>
         <source>%1 file(s) loaded</source>
         <translation>Загружено %1 файл(ов)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10145"/>
+        <location filename="../mainwindow.cpp" line="10146"/>
         <source>Are you sure you want to remove all loaded entities?</source>
         <translation>Вы действительно хотите удалить все загруженные элементы?</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10178"/>
+        <location filename="../mainwindow.cpp" line="10179"/>
         <source>Open file(s)</source>
         <translation>Открыть файл(ы)</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10279"/>
+        <location filename="../mainwindow.cpp" line="10280"/>
         <source>Can&apos;t save selected entity(ies) this way!</source>
         <translation>Нельзя сохранить выбранный объект(ы) таким способом!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10419"/>
+        <location filename="../mainwindow.cpp" line="10420"/>
         <source>[I/O] First entity&apos;s name would make an invalid filename! Can&apos;t use it...</source>
         <translation>[Ввод/Вывод] Имя первого объекта даст недопустимое имя файла! Его нельзя использовать.</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10428"/>
+        <location filename="../mainwindow.cpp" line="10429"/>
         <source>Save file</source>
         <translation>Сохранить файл</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10443"/>
+        <location filename="../mainwindow.cpp" line="10444"/>
         <source>[I/O] The following selected entities won&apos;t be saved:</source>
         <translation>[Ввод/Вывод] Следующие выбранные объекты не будут сохранены:</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="10475"/>
+        <location filename="../mainwindow.cpp" line="10476"/>
         <source>[I/O] None of the selected entities can be saved this way...</source>
         <translation>[Ввод/Вывод] Ни один из выбранных объектов не может быть сохранен таким способом...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11106"/>
-        <location filename="../mainwindow.cpp" line="11111"/>
-        <location filename="../mainwindow.cpp" line="11116"/>
+        <location filename="../mainwindow.cpp" line="11107"/>
+        <location filename="../mainwindow.cpp" line="11112"/>
+        <location filename="../mainwindow.cpp" line="11117"/>
         <source>Not yet implemented! Sorry ...</source>
         <translation>Пока не реализовано! Простите...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11285"/>
+        <location filename="../mainwindow.cpp" line="11286"/>
         <source>[Global Shift] Max abs. coord = %1 / max abs. diag = %2</source>
         <translation>[Global Shift] Мкас. абс. коорд = %1 / макс. абс. диаг = %2</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11328"/>
+        <location filename="../mainwindow.cpp" line="11329"/>
         <source>Cloud has no associated waveform information</source>
         <translation>Облако не имеет информацию о форме волны</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11390"/>
-        <location filename="../mainwindow.cpp" line="11397"/>
+        <location filename="../mainwindow.cpp" line="11391"/>
+        <location filename="../mainwindow.cpp" line="11398"/>
         <source>Select 2 planes!</source>
         <translation>Выберите 2 плоскости!</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11405"/>
+        <location filename="../mainwindow.cpp" line="11406"/>
         <source>Plane 1: %1</source>
         <translation>Плоскость 1: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11406"/>
-        <location filename="../mainwindow.cpp" line="11409"/>
-        <location filename="../mainwindow.cpp" line="11420"/>
-        <location filename="../mainwindow.cpp" line="11427"/>
-        <location filename="../mainwindow.cpp" line="11432"/>
+        <location filename="../mainwindow.cpp" line="11407"/>
+        <location filename="../mainwindow.cpp" line="11410"/>
+        <location filename="../mainwindow.cpp" line="11421"/>
+        <location filename="../mainwindow.cpp" line="11428"/>
+        <location filename="../mainwindow.cpp" line="11433"/>
         <source>[Compare] </source>
         <translation>[Compare] </translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11408"/>
+        <location filename="../mainwindow.cpp" line="11409"/>
         <source>Plane 2: %1</source>
         <translation>Плоскость 2: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11419"/>
+        <location filename="../mainwindow.cpp" line="11420"/>
         <source>Angle P1/P2: %1 deg.</source>
         <translation>Угол P1/P2: %1 °</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11426"/>
+        <location filename="../mainwindow.cpp" line="11427"/>
         <source>Distance Center(P1)/P2: %1</source>
         <translation>Дистанция центр (P1)/P2: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11431"/>
+        <location filename="../mainwindow.cpp" line="11432"/>
         <source>Distance Center(P2)/P1: %1</source>
         <translation>Дистанция центр (P2)/P1: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="11435"/>
+        <location filename="../mainwindow.cpp" line="11436"/>
         <source>Plane comparison</source>
         <translation>Сравнение плоскостей</translation>
     </message>
@@ -12074,6 +12074,136 @@ It will be saved as multiple tiles on the disk.</source>
     </message>
 </context>
 <context>
+    <name>PoissonReconParamDialog</name>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="14"/>
+        <source>Poisson Surface Reconstruction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="23"/>
+        <source>Octree depth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="33"/>
+        <source>The maximum depth of the tree that will be used for surface reconstruction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="49"/>
+        <source>Resolution</source>
+        <translation type="unfinished">Разрешение</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="78"/>
+        <source>interpolate cloud colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="92"/>
+        <source>Density</source>
+        <translation type="unfinished">Плотность</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="98"/>
+        <source>If this flag is enabled, the sampling density is output as a scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="101"/>
+        <source>output density as SF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="111"/>
+        <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Density is useful to reduce the extents of the output mesh to fit as much as possible the input point cloud.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;On the output mesh:&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Change the SF &apos;&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;min displayed&apos;&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;&apos; value (in the mesh properties) until the visible part meets your expectations&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;- Eventually export this mesh as a new one with &apos;&lt;/span&gt;&lt;span style=&quot; font-size:8pt; font-style:italic;&quot;&gt;Edit &amp;gt; Scalar fields &amp;gt; Filter by Value&lt;/span&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;&apos; (you can delete the &apos;density&apos; scalar field afterwards) &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="127"/>
+        <source>Advanced</source>
+        <translation type="unfinished">Дополнительно</translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="133"/>
+        <source>boundary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="144"/>
+        <source>Free</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="149"/>
+        <source>Dirichlet</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="154"/>
+        <source>Neumann</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="162"/>
+        <source>The importance that interpolation of the point samples is given in the formulation of the screened Poisson equation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="165"/>
+        <source>point weight</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="172"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Interpolation weight (twice the b-spline degree by default)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="185"/>
+        <source>Enabling this flag has the reconstructor use linear interpolation to estimate the positions of iso-vertices.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="188"/>
+        <source>Linear fit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="198"/>
+        <source>The minimum number of sample points that should fall within an octree node
+as the octree construction is adapted to sampling density. For noise-free
+samples, small values in the range [1.0 - 5.0] can be used. For more noisy
+samples, larger values in the range [15.0 - 20.0] may be needed to provide
+a smoother, noise-reduced, reconstruction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="205"/>
+        <source>samples per node</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="212"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Minimum number of sample points that should fall within an octree node as the octree construction is adapted to sampling density.&lt;/p&gt;&lt;p&gt;For noise-free samples, small values in the range [1.0 - 5.0] can be used.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;For more noisy samples&lt;/span&gt;, larger values in the range [15.0 - 20.0] may be needed to provide a smoother, noise-reduced, reconstruction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/ui/poissonReconParamDlg.ui" line="234"/>
+        <source>threads</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>PrimitiveFactoryDlg</name>
     <message>
         <location filename="../ui_templates/primitiveFactoryDlg.ui" line="14"/>
@@ -12417,503 +12547,503 @@ p, li { white-space: pre-wrap; }
         <translation>Ячеек: %1 x %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="276"/>
+        <location filename="../ccCommandLineCommands.cpp" line="278"/>
         <source>Unhandled format specifier (%1)</source>
         <translation>Необработанный спецификатор формата (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="281"/>
+        <location filename="../ccCommandLineCommands.cpp" line="283"/>
         <source>Missing file format specifier!</source>
         <translation>Отсутствует спецификатор формата файла!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="288"/>
+        <location filename="../ccCommandLineCommands.cpp" line="290"/>
         <source>Change cloud output format</source>
         <translation>Изменить выходной формат облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="301"/>
+        <location filename="../ccCommandLineCommands.cpp" line="303"/>
         <source>Output export format (clouds) set to: %1</source>
         <translation>Назначен формат экспорта: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="325"/>
-        <location filename="../ccCommandLineCommands.cpp" line="457"/>
-        <location filename="../ccCommandLineCommands.cpp" line="500"/>
+        <location filename="../ccCommandLineCommands.cpp" line="327"/>
+        <location filename="../ccCommandLineCommands.cpp" line="459"/>
+        <location filename="../ccCommandLineCommands.cpp" line="502"/>
         <source>Missing parameter: extension after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: расширение после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="329"/>
+        <location filename="../ccCommandLineCommands.cpp" line="331"/>
         <source>New output extension for clouds: %1</source>
         <translation>Новое расширение для вывода облаков: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="338"/>
+        <location filename="../ccCommandLineCommands.cpp" line="340"/>
         <source>Missing parameter: precision value after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: значение точности после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="346"/>
         <source>Invalid value for precision! (%1)</source>
         <translation>Неверное значение точности! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="349"/>
-        <location filename="../ccCommandLineCommands.cpp" line="367"/>
-        <location filename="../ccCommandLineCommands.cpp" line="403"/>
-        <location filename="../ccCommandLineCommands.cpp" line="415"/>
+        <location filename="../ccCommandLineCommands.cpp" line="351"/>
+        <location filename="../ccCommandLineCommands.cpp" line="369"/>
+        <location filename="../ccCommandLineCommands.cpp" line="405"/>
+        <location filename="../ccCommandLineCommands.cpp" line="417"/>
         <source>Argument &apos;%1&apos; is only applicable to ASCII format!</source>
         <translation>Аргумент &apos;%1&apos; применим только к формату ASCII!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="362"/>
+        <location filename="../ccCommandLineCommands.cpp" line="364"/>
         <source>Missing parameter: separator character after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: символ разделителя после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="391"/>
+        <location filename="../ccCommandLineCommands.cpp" line="393"/>
         <source>Invalid separator! (&apos;%1&apos;)</source>
         <translation>Неверный разделитель! (&apos;%1&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="430"/>
+        <location filename="../ccCommandLineCommands.cpp" line="432"/>
         <source>Change mesh output format</source>
         <translation>Изменить выходной формат модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="443"/>
+        <location filename="../ccCommandLineCommands.cpp" line="445"/>
         <source>Output export format (meshes) set to: %1</source>
         <translation>Формат экспорта (ЦМР) назначен: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="461"/>
+        <location filename="../ccCommandLineCommands.cpp" line="463"/>
         <source>New output extension for meshes: %1</source>
         <translation>Новое расширение для вывода ЦМР: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="473"/>
+        <location filename="../ccCommandLineCommands.cpp" line="475"/>
         <source>Change hierarchy output format</source>
         <translation>Изменить формат вывода иерархии</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="486"/>
+        <location filename="../ccCommandLineCommands.cpp" line="488"/>
         <source>Output export format (hierarchy) set to: %1</source>
         <translation>Формат экспорта (иерархии) установлен как: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="504"/>
+        <location filename="../ccCommandLineCommands.cpp" line="506"/>
         <source>New output extension for hierarchies: %1</source>
         <translation>Новое расширение для вывода иерархий: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="516"/>
+        <location filename="../ccCommandLineCommands.cpp" line="518"/>
         <source>Load</source>
         <translation>Загрузить</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="521"/>
+        <location filename="../ccCommandLineCommands.cpp" line="523"/>
         <source>[LOADING]</source>
         <translation>[Загрузка]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="524"/>
+        <location filename="../ccCommandLineCommands.cpp" line="526"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="37"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="59"/>
         <source>Missing parameter: filename after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: имя файла после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="541"/>
+        <location filename="../ccCommandLineCommands.cpp" line="543"/>
         <source>Missing parameter: number of lines after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: число строк после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="548"/>
+        <location filename="../ccCommandLineCommands.cpp" line="550"/>
         <source>Invalid parameter: number of lines after &apos;%1&apos;</source>
         <translation>Неверный параметр: число строк после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="551"/>
+        <location filename="../ccCommandLineCommands.cpp" line="553"/>
         <source>Will skip %1 lines</source>
         <translation>Будет пропущено строк %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="594"/>
+        <location filename="../ccCommandLineCommands.cpp" line="596"/>
         <source>No entity loaded (be sure to open at least one file with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет загруженных объектов (убедитесь, что открыт хотя бы один файл с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="586"/>
+        <location filename="../ccCommandLineCommands.cpp" line="588"/>
         <source>Clears normals</source>
         <translation>Удалить нормали</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="591"/>
+        <location filename="../ccCommandLineCommands.cpp" line="593"/>
         <source>[CLEAR NORMALS]</source>
         <translation>[Удаление нормалей]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="701"/>
+        <location filename="../ccCommandLineCommands.cpp" line="703"/>
         <source>Compute normals with octree</source>
         <translation>Вычислить нормали с октадеревом</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="706"/>
+        <location filename="../ccCommandLineCommands.cpp" line="708"/>
         <source>[OCTREE NORMALS CALCULATION]</source>
         <translation>[Расчет нормалей октадерева]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="709"/>
+        <location filename="../ccCommandLineCommands.cpp" line="711"/>
         <source>No point cloud to compute normals (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака точек для расчета нормалей (убедитесь, что открыто &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="714"/>
+        <location filename="../ccCommandLineCommands.cpp" line="716"/>
         <source>Missing parameter: radius after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: радиус после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="725"/>
+        <location filename="../ccCommandLineCommands.cpp" line="727"/>
         <source>Invalid radius</source>
         <translation>Неверный радиус</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="728"/>
+        <location filename="../ccCommandLineCommands.cpp" line="730"/>
         <source>	Radius: %1</source>
         <translation>	Радиус: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="796"/>
+        <location filename="../ccCommandLineCommands.cpp" line="798"/>
         <source>Invalid parameter: unknown orientation &apos;%1&apos;</source>
         <translation>Неверный параметр: неизвестная ориентация &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="801"/>
+        <location filename="../ccCommandLineCommands.cpp" line="803"/>
         <source>Missing orientation</source>
         <translation>Отсутствует ориентация</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="824"/>
+        <location filename="../ccCommandLineCommands.cpp" line="826"/>
         <source>Invalid parameter: unknown model &apos;%1&apos;</source>
         <translation>Неверный параметр: неизвестная модель &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="829"/>
+        <location filename="../ccCommandLineCommands.cpp" line="831"/>
         <source>Missing model</source>
         <translation>Отсутствует модель</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="853"/>
+        <location filename="../ccCommandLineCommands.cpp" line="855"/>
         <source>Failed to compute octree for cloud &apos;%1&apos;</source>
         <translation>Не удалось вычислить октадерево для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="870"/>
+        <location filename="../ccCommandLineCommands.cpp" line="872"/>
         <source>Failed to determine best normal radius for cloud &apos;%1&apos;</source>
         <translation>Не удалось определить наилучший радиус нормали для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="872"/>
+        <location filename="../ccCommandLineCommands.cpp" line="874"/>
         <source>	Cloud %1 radius = %2</source>
         <translation>	Облако %1 радиус = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="875"/>
+        <location filename="../ccCommandLineCommands.cpp" line="877"/>
         <source>computeNormalsWithOctree started...</source>
         <translation>расчетНормалейСОктадеревом запущен...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="879"/>
+        <location filename="../ccCommandLineCommands.cpp" line="881"/>
         <source>computeNormalsWithOctree success</source>
         <translation>расчетНормалейСОктадеревом выполнен</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="883"/>
+        <location filename="../ccCommandLineCommands.cpp" line="885"/>
         <source>computeNormalsWithOctree failed</source>
         <translation>расчетНормалейСОктадеревом не выполнен</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="886"/>
+        <location filename="../ccCommandLineCommands.cpp" line="888"/>
         <source>.OctreeNormal</source>
         <translation>.НормальОктодерево</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="902"/>
+        <location filename="../ccCommandLineCommands.cpp" line="904"/>
         <source>Convert normals to dip and dip. dir.</source>
         <translation>Конвертировать нормали в УголПадения/Азимут</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="907"/>
+        <location filename="../ccCommandLineCommands.cpp" line="909"/>
         <source>[CONVERT NORMALS TO DIP/DIP DIR]</source>
         <translation>[Конвертация нормалей в УголПадения/Азимут]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="910"/>
-        <location filename="../ccCommandLineCommands.cpp" line="952"/>
-        <location filename="../ccCommandLineCommands.cpp" line="996"/>
+        <location filename="../ccCommandLineCommands.cpp" line="912"/>
+        <location filename="../ccCommandLineCommands.cpp" line="954"/>
+        <location filename="../ccCommandLineCommands.cpp" line="998"/>
         <source>No input point cloud (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет входного облака (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="655"/>
-        <location filename="../ccCommandLineCommands.cpp" line="919"/>
-        <location filename="../ccCommandLineCommands.cpp" line="961"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1005"/>
+        <location filename="../ccCommandLineCommands.cpp" line="657"/>
+        <location filename="../ccCommandLineCommands.cpp" line="921"/>
+        <location filename="../ccCommandLineCommands.cpp" line="963"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1007"/>
         <source>Cloud %1 has no normals</source>
         <translation>Облако %1 не имеет нормалей</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="637"/>
+        <location filename="../ccCommandLineCommands.cpp" line="639"/>
         <source>Invert normals</source>
         <translation>Инвертировать нормали</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="642"/>
+        <location filename="../ccCommandLineCommands.cpp" line="644"/>
         <source>[INVERT NORMALS]</source>
         <translation>[ИНВЕРСИЯ НОРМАЛЕЙ]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="646"/>
+        <location filename="../ccCommandLineCommands.cpp" line="648"/>
         <source>No input point cloud or mesh (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака точек или модели (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;) )</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="682"/>
+        <location filename="../ccCommandLineCommands.cpp" line="684"/>
         <source>Mesh %1 has no normals</source>
         <translation>В модели %1 нет нормалей</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="927"/>
+        <location filename="../ccCommandLineCommands.cpp" line="929"/>
         <source>Failed to convert normals to dip and dip direction</source>
         <translation>Не удалось конвертировать нормали в УголПадения/Азимут</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="944"/>
+        <location filename="../ccCommandLineCommands.cpp" line="946"/>
         <source>Convert normals to scalar fields</source>
         <translation>Преобразовать нормали в скалярные поля</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="949"/>
+        <location filename="../ccCommandLineCommands.cpp" line="951"/>
         <source>[CONVERT NORMALS TO SCALAR FIELD(S)]</source>
         <translation>[Конвертация нормалей в скалярное поле(я)]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="971"/>
+        <location filename="../ccCommandLineCommands.cpp" line="973"/>
         <source>Failed to convert normals to scalar fields</source>
         <translation>Не удалось преобразовать нормали в скалярные поля</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="988"/>
+        <location filename="../ccCommandLineCommands.cpp" line="990"/>
         <source>Convert normals to HSV colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="993"/>
+        <location filename="../ccCommandLineCommands.cpp" line="995"/>
         <source>[CONVERT NORMALS TO HSV COLORS]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1013"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1015"/>
         <source>Failed to convert normals to HSV colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1030"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1032"/>
         <source>Subsample</source>
         <translation>Проредить</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1035"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1037"/>
         <source>[SUBSAMPLING]</source>
         <translation>[Прореживание]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1038"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1040"/>
         <source>No point cloud to resample (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для прореживания (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1043"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1045"/>
         <source>Missing parameter: resampling method after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: метод прореживания после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1047"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1049"/>
         <source>	Method: </source>
         <translation>	Метод: </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1052"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1054"/>
         <source>Missing parameter: number of points after &quot;-%1 RANDOM&quot;</source>
         <translation>Отсутствует параметр: кол-во точек после &quot;-%1 RANDOM&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1059"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1061"/>
         <source>Invalid number of points for random resampling!</source>
         <translation>Неправильное кол-во точек для случайного прореживания!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1061"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1063"/>
         <source>	Output points: %1</source>
         <translation>	Вывод точек : %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1070"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1194"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1072"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1196"/>
         <source>Subsampling process failed!</source>
         <translation>Сбой процесса прореживания!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1072"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1129"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1196"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1074"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1131"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1198"/>
         <source>	Result: %1 points</source>
         <translation>	Результат: %1 точек</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1081"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1138"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1205"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1083"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1140"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1207"/>
         <source>.subsampled</source>
         <translation>.прорежен</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1095"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1152"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1219"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1097"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1154"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1221"/>
         <source>_SUBSAMPLED</source>
         <translation>_ПРОРЕЖЕН</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1101"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1158"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1225"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3908"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1103"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1160"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1227"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3910"/>
         <location filename="../ccEntityAction.cpp" line="472"/>
         <location filename="../ccEntityAction.cpp" line="991"/>
         <location filename="../ccEntityAction.cpp" line="1023"/>
         <location filename="../ccEntityAction.cpp" line="1104"/>
-        <location filename="../ccEntityAction.cpp" line="1753"/>
+        <location filename="../ccEntityAction.cpp" line="1799"/>
         <source>Not enough memory!</source>
         <translation>Недостаточно памяти!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1109"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1111"/>
         <source>Missing parameter: spatial step after &quot;-%1 SPATIAL&quot;</source>
         <translation>Отсутствует параметр: интервал после &quot;-%1 SPATIAL&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1115"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1117"/>
         <source>Invalid step value for spatial resampling!</source>
         <translation>Неверный параметр интервала (шаг) для пространственного прореживания!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1117"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1119"/>
         <source>	Spatial step: %1</source>
         <translation>	Интервал: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1166"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1168"/>
         <source>Missing parameter: octree level after &quot;-%1 OCTREE&quot;</source>
         <translation>Отсутствует параметр: уровень октодерева после &quot;-%1 OCTREE&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1173"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1264"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1175"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1266"/>
         <source>Invalid octree level!</source>
         <translation>Неверный уровень октадерева!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1175"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1266"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1177"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1268"/>
         <source>	Octree level: %1</source>
         <translation>	Уровень октодерева: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1209"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1211"/>
         <source>OCTREE_LEVEL_%1_SUBSAMPLED</source>
         <translation>УРОВЕНЬ_ОКТОДЕРЕВА_%1_ПРОРЕЖЕН</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1237"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1239"/>
         <source>Unknown method!</source>
         <translation>Неизвестный метод!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1244"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1246"/>
         <source>ExtractCCs</source>
         <translation>Выделение Связных Компонент</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1249"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1251"/>
         <source>[CONNECTED COMPONENTS EXTRACTION]</source>
         <translation>[Выделение связных компонент]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1252"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1254"/>
         <source>No point cloud loaded (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет загруженного облака (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1258"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1260"/>
         <source>Missing parameter: octree level after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: уровень октодерева после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1271"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1273"/>
         <source>Missing parameter: minimum number of points per component after &quot;-%1 [octree level]&quot;</source>
         <translation>Отсутствует параметр: минимальное кол-во точек на компонент после &quot;-%1 [уровень октодерева]&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1276"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1278"/>
         <source>Invalid min. number of points!</source>
         <translation>Неверное минимальное число точек!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1278"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1280"/>
         <source>	Min number of points per component: %1</source>
         <translation>	Мин. кол-во точек на компонент: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1303"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1305"/>
         <source>Couldn&apos;t allocate a new scalar field for computing CC labels! Try to free some memory ...</source>
         <translation>Невозможно выделить новое скалярное поле для расчета меток СК! Надо предоставить больше свободной памяти...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1316"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1318"/>
         <source>No component found!</source>
         <translation>Компонент не найден!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1328"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1330"/>
         <source>An error occurred (failed to finish the extraction)</source>
         <translation>Произошел сбой (расчет не может быть выполнен)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1349"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1351"/>
         <source>_COMPONENT_%1</source>
         <translation>_КОМПОНЕНТ_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1363"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1365"/>
         <source>Failed to create component #%1! (not enough memory)</source>
         <translation>Не удалось создать компонент #%1! (недостаточно памяти)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1375"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1377"/>
         <source>No component was created! Check the minimum size...</source>
         <translation>Компонент не создан! Проверьте минимальный размер...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1379"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1381"/>
         <source>%1 component(s) were created</source>
         <translation>%1 компонент(ов) создано</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1391"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4066"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4092"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1393"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4068"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4094"/>
         <location filename="../../plugins/core/Standard/q3DMASC/q3DMASCClassifier.cpp" line="159"/>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="216"/>
         <location filename="../../libs/qCC_db/src/ccPolyline.cpp" line="1055"/>
@@ -12921,1192 +13051,1192 @@ p, li { white-space: pre-wrap; }
         <translation>Недостаточно памяти</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1399"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1401"/>
         <source>Curvature</source>
         <translation>Кривизна</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1404"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1406"/>
         <source>[CURVATURE]</source>
         <translation>[Кривизна]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1408"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1410"/>
         <source>Missing parameter: curvature type after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: тип кривизны после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1429"/>
         <source>Invalid curvature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of MEAN or GAUSS.</source>
         <translation>Неверный тип кривизны после &quot;-%1&quot;. Использован &apos;%2&apos; вместо MEAN или GAUSS.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1432"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1434"/>
         <source>Missing parameter: kernel size after curvature type</source>
         <translation>Отсутствует параметр: размер ядра после типа кривизны</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1440"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1442"/>
         <source>Failed to read a numerical parameter: kernel size (after curvature type). Got &apos;%1&apos; instead.</source>
         <translation>Не удалось получить числовой параметр : размер ядра (после типа кривизны). Использован &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1442"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1709"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6185"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6314"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1444"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1711"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6225"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6354"/>
         <source>	Kernel size: %1</source>
         <translation>	Размер ядра: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1446"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1448"/>
         <source>No point cloud on which to compute curvature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета кривизны! (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1460"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1462"/>
         <source>%1_CURVATURE_KERNEL_%2</source>
         <translation>%1_КРИВИЗНА_ЯДРО_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1472"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1528"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1583"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1474"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1530"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1585"/>
         <source>Missing parameter: density type after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
         <translation>Отсутствует параметр: тип плотности после  &quot;-%1&quot; (KNN/ПЛОЩАДЬ/ОБЪЕМ)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1491"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1493"/>
         <source>Invalid parameter: density type is expected after &quot;-%1&quot; (KNN/SURFACE/VOLUME)</source>
         <translation>Неверный  параметр: необходим тип плотности после  &quot;-%1&quot; (KNN/ПЛОЩАДЬ/ОБЪЕМ)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1498"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1500"/>
         <source>ApproxDensity</source>
         <translation>Примерная плотность</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1503"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1505"/>
         <source>[APPROX DENSITY]</source>
         <translation>[Примерная плотность]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1506"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1508"/>
         <source>No point cloud on which to compute approx. density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета примерной плотности! (откройте его &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1551"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1553"/>
         <source>Density</source>
         <translation>Плотность</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1556"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1558"/>
         <source>[DENSITY]</source>
         <translation>[Плотность]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1560"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1562"/>
         <source>Missing parameter: sphere radius after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: радиус сферы после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1568"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1570"/>
         <source>Failed to read a numerical parameter: sphere radius (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Не удалось получить числовой параметр : радиус сферы (после &quot;-%1&quot;). Взамен использован &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1570"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1572"/>
         <source>	Sphere radius: %1</source>
         <translation>	Радиус сферы: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1595"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1597"/>
         <source>No point cloud on which to compute density! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета плотности! (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1619"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1621"/>
         <source>SF gradient</source>
         <translation>Градиент СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1624"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1626"/>
         <source>[SF GRADIENT]</source>
         <translation>[Градиент СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1628"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1630"/>
         <source>Missing parameter: boolean (whether SF is euclidean or not) after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: логический (является ли СП евклидовым или нет) после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1639"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1947"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1641"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1949"/>
         <source>Invalid boolean value after &quot;-%1&quot;. Got &apos;%2&apos; instead of TRUE or FALSE.</source>
         <translation>Неверное логическое значение после &quot;-%1&quot;. Использован &apos;%2&apos; вместо ИСТИНА или ЛОЖЬ.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1644"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1646"/>
         <source>No point cloud on which to compute SF gradient! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета СП градиента! (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1656"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1962"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1658"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1964"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no scalar field (it will be ignored)</source>
         <translation>cmd.warning: облако &apos;%1&apos; не имеет скалярного поля(будет игнорировано)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1662"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1664"/>
         <source>cmd.warning: cloud &apos;%1&apos; has several scalar fields (the active one will be used by default, or the first one if none is active)</source>
         <translation>cmd.warning: облако &apos;%1&apos; имеет несколько скалярных полей (активное будет использовано по умолчанию или первое, если ни одно не активно)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1690"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1692"/>
         <source>Roughness</source>
         <translation>Неровность</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1695"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1697"/>
         <source>[ROUGHNESS]</source>
         <translation>[Неровность]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1699"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1701"/>
         <source>Missing parameter: kernel size after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: размер ядра после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1707"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1709"/>
         <source>Failed to read a numerical parameter: kernel size (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Не удалось получить числовой параметр : размер ядра (после &quot;-%1&quot;). Взамен использован &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1730"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1732"/>
         <source>Invalid &apos;up direction&apos; vector after option -%1 (3 coordinates expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1738"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1740"/>
         <source>No point cloud on which to compute roughness! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета неровности! (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1752"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1754"/>
         <source>ROUGHNESS_KERNEL_%2</source>
         <translation>НЕРОВНОСТЬ_ЯДРО_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1762"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1764"/>
         <source>Apply Transformation</source>
         <translation>Применить трансформацию</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1767"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1769"/>
         <source>[APPLY TRANSFORMATION]</source>
         <translation>[Применить трансформацию]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1771"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1773"/>
         <source>Missing parameter: transformation file after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: файл трансформации после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1778"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1780"/>
         <source>Failed to read transformation matrix file &apos;%1&apos;!</source>
         <translation>Не удалось получить файл с матрицей трансформации &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1781"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1783"/>
         <source>Transformation:
 </source>
         <translation>Преобразование:
 </translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1785"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1787"/>
         <source>No entity on which to apply the transformation! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет объектов для применения трансформации! (откройте его с &quot;-%1 [имя файла]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1821"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1823"/>
         <source>Drop global shift</source>
         <translation>Отбросить глобальный сдвиг</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1826"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1828"/>
         <source>[DROP GLOBAL SHIFT]</source>
         <translation>[Отбросить глобальный сдвиг]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1830"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1832"/>
         <source>No loaded entity! (be sure to open one with &quot;-%1 [filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет загруженного объекта (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1853"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1855"/>
         <source>SF color scale</source>
         <translation>Цветовая гамма СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1858"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1860"/>
         <source>[SF COLOR SCALE]</source>
         <translation>[Цветовая гамма СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1862"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1864"/>
         <source>Missing parameter: color scale file after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: файл цветовой гаммы после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1871"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1873"/>
         <source>Failed to read color scale file &apos;%1&apos;!</source>
         <translation>Не удалось прочитать файл с цветовой гаммой &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1927"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1929"/>
         <source>SF convert to RGB</source>
         <translation>Преобразовать СП в RGB</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1932"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1934"/>
         <source>[SF CONVERT TO RGB]</source>
         <translation>[Преобразовать СП в RGB]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1936"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1938"/>
         <source>Missing parameter: boolean (whether to mix with existing colors or not) after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: логический (смешивать ли с существующими цветами или нет) после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1952"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1954"/>
         <source>No point cloud on which to convert SF to RGB! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для конвертации СП в RGB! (откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1966"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1968"/>
         <source>cmd.warning: cloud &apos;%1&apos; has no active scalar field (it will be ignored)</source>
         <translation>cmd.warning: облако &apos;%1&apos; не имеет активного скалярного поля (и будет игнорировано)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1980"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1982"/>
         <source>cmd.warning: cloud &apos;%1&apos; failed to convert SF to RGB</source>
         <translation>cmd.warning: облако &apos;%1&apos; не удалось конвертировать СП в RGB</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1996"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1998"/>
         <source>RGB convert to SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2001"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2003"/>
         <source>[RGB CONVERT TO SF]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2004"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2006"/>
         <source>No point cloud on which to convert RGB to SF! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2011"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2013"/>
         <source>Cloud %1 has no colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2019"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2021"/>
         <source>Failed to convert RGB to scalar fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2037"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2039"/>
         <source>Filter by SF value</source>
         <translation>Фильтр по значению СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2158"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2160"/>
         <source>[FILTER BY VALUE]</source>
         <translation>[Фильтр по значению СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2166"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2168"/>
         <source>Missing parameter: min value after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: мин. значение после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2178"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2180"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MIN&quot;).</source>
         <translation>Отсутствует параметр: значение N (после &quot;-%1 N_SIGMA_MIN&quot;).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2184"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2234"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2186"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2236"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MIN&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Не удалось прочитать числовой параметр : значение N (после &quot;N_SIGMA_MIN&quot;). Взамен использован &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2205"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2207"/>
         <source>Failed to read a numerical parameter: min value (after &quot;-%1&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Не удалось прочитать числовой параметр : мин. значение (после &quot;-%1&quot;). Вместо него использовано &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2216"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2218"/>
         <source>Missing parameter: max value after &quot;-%1&quot; {min}</source>
         <translation>Отсутствует параметр: макс. значение после &quot;-%1&quot; {min}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2191"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2193"/>
         <source>Missing parameter: N value (after &quot;-%1 N_SIGMA_MAX&quot;).</source>
         <translation>Отсутствует параметр: значение N (после &quot;-%1 N_SIGMA_MAX&quot;).</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2197"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2247"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2199"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2249"/>
         <source>Failed to read a numerical parameter: N value (after &quot;N_SIGMA_MAX&quot;). Got &apos;%2&apos; instead.</source>
         <translation>Не удалось прочитать числовой параметр : значение N (после &quot;N_SIGMA_MAX&quot;). Взамен использован &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2255"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2257"/>
         <source>Failed to read a numerical parameter: max value (after min value). Got &apos;%1&apos; instead.</source>
         <translation>Не удалось получить числовой параметр : макс. значение (после минимального). Вместо него использован &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2260"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2262"/>
         <source>	Interval: [%1 - %2]</source>
         <translation>	Интервал: [%1 - %2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2278"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2280"/>
         <source>		Cloud &apos;%1&apos; --&gt; %2/%3 points remaining</source>
         <translation>		Облако &apos;%1&apos; --&gt; %2/%3 точек осталось</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2286"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2339"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2288"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2341"/>
         <source>_FILTERED_[%1_%2]</source>
         <translation>_ОТФИЛЬТРОВАНО_[%1_%2]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2357"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2359"/>
         <source>Compute mesh volume</source>
         <translation>Вычислить объем модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2362"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2364"/>
         <source>[COMPUTE MESH VOLUME]</source>
         <translation>[Вычислить объем модели]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2366"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2368"/>
         <source>No mesh loaded! Nothing to do...</source>
         <translation>Модель не загружена. Нечего делать...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2384"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2386"/>
         <source>Volume report file: %1</source>
         <translation>Файл протокола расчета объема: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2388"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2390"/>
         <source>Missing argument: filename after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: имя файла после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2400"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2402"/>
         <source>Failed to create/open volume report file</source>
         <translation>Не удалось создать/открыть файл протокола расчета объема</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2410"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2412"/>
         <source>Mesh &apos;%1&apos;</source>
         <translation>ЦМР &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2413"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2415"/>
         <source> (#%2)</source>
         <translation> (#%2)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2416"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2418"/>
         <source>V = %2</source>
         <translation>V = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2430"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2432"/>
         <source>Merge meshes</source>
         <translation>Объединить модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2435"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2437"/>
         <source>[MERGE MESHES]</source>
         <translation>[Объединение моделей]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2439"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2441"/>
         <source>Less than 2 meshes are loaded! Nothing to do...</source>
         <translation>Загружено менее 2-х моделей! Нечего делать...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2460"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2462"/>
         <source>Can&apos;t merge mesh &apos;%1&apos; (unhandled type)</source>
         <translation>Нельзя объединить ЦМР &apos;%1&apos; (необработанный тип)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2475"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2477"/>
         <source>Merge operation failed</source>
         <translation>Операция объединения не удалась</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2484"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2486"/>
         <source>Result is empty</source>
         <translation>Результат пуст</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2490"/>
-        <location filename="../ccCommandLineCommands.cpp" line="2547"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2492"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2549"/>
         <source>_MERGED</source>
         <translation>_ОБЪЕДИНЕНО</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2507"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2509"/>
         <source>Merge clouds</source>
         <translation>Объединить облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2512"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2514"/>
         <source>[MERGE CLOUDS]</source>
         <translation>[Объединить облака]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2516"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2518"/>
         <source>Less than 2 clouds are loaded! Nothing to do...</source>
         <translation>Загружено менее 2-х облаков! Нечего делать...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2539"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2541"/>
         <source>Fusion failed! (not enough memory?)</source>
         <translation>Слияние не удалось! (недостаточно памяти?)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2560"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2562"/>
         <source>Set active SF</source>
         <translation>Установить активное СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2567"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2569"/>
         <source>Missing parameter: scalar field index after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: индекс скалярного поля после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="219"/>
+        <location filename="../ccCommandLineCommands.cpp" line="221"/>
         <source>Cloud %1 has no SF named &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3444"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3446"/>
         <source>Flip the vertices order of all opened mesh triangles</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3449"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3451"/>
         <source>[FLIP TRIANGLES]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3467"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3469"/>
         <source>_FLIPPED_TRIANGLES</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5146"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5148"/>
         <source>SF (add, sub, mult, div) SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5151"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5153"/>
         <source>[SF OP [ADD | SUB | MULT | DIV] SF]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5155"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5157"/>
         <source>Missing parameter(s): SF index and operation and SF index &apos;%1&apos; (3 values expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4997"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5101"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4999"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5103"/>
         <source>Failed to apply operation on cloud &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5252"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5254"/>
         <source>SF interpolation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5257"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5259"/>
         <source>[SF INTERPOLATION]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5260"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5262"/>
         <source>Missing parameter(s): SF index after &apos;%1&apos; (1 value expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5276"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5278"/>
         <source>[DEST_IS_FIRST]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5427"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5429"/>
         <source>SF add constant scalar field</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5432"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5434"/>
         <source>[ADD CONST SF] Note: this operation is only done on clouds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5436"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5438"/>
         <source>Missing parameter(s): SF name and value after &apos;%1&apos; (2 values expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5447"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5449"/>
         <source>Invalid constant value! (after %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6175"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6215"/>
         <source>Missing parameter: kernel size after %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1876"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1878"/>
         <source>No point cloud or mesh on which to set the SF color scale! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2264"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2266"/>
         <source>No point cloud nor mesh on which to filter SF! (be sure to open one or generate one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2330"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2332"/>
         <source>		Mesh &apos;%1&apos; --&gt; %2/%3 triangles remaining</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2608"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2610"/>
         <source>Remove all SF</source>
         <translation>Удалить все СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2715"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2717"/>
         <source>Remove RGB</source>
         <translation>Удалить RGB</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2748"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2750"/>
         <source>Remove normals</source>
         <translation>Удалить нормали</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2785"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2787"/>
         <source>Remove scan grids</source>
         <translation>Удалить сетки сканов</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2815"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2817"/>
         <source>Match B.B. centers</source>
         <translation>Совместить центры границ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2820"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2822"/>
         <source>[MATCH B.B. CENTERS]</source>
         <translation>[Совместить центры границ]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2855"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2857"/>
         <source>Entity &apos;%1&apos; has been translated: (%2,%3,%4)</source>
         <translation>Объект &apos;%1&apos; был перемещен: (%2,%3,%4)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2870"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2872"/>
         <source>Match best fit plane</source>
         <translation>Расчет вписанной плоскости</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2875"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2877"/>
         <source>[COMPUTE BEST FIT PLANE]</source>
         <translation>[Расчет вписанной плоскости]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2906"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3031"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3112"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4750"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2908"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3033"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3114"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4752"/>
         <source>No cloud available. Be sure to open one first!</source>
         <translation>Нет доступных облаков. Сначала откройте его!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2916"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2918"/>
         <source>Plane successfully fitted: rms = %1</source>
         <translation>Плоскость успешно вписана: ско = %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2935"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2937"/>
         <source>%1/%2_BEST_FIT_PLANE_INFO</source>
         <translation>%1/%2_ВПИСАННАЯ_ПЛОСКОСТЬ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2938"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5788"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2940"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5828"/>
         <source>_%1</source>
         <translation>_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2940"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5789"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2942"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5829"/>
         <source>.txt</source>
         <translation>.txt</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2945"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2947"/>
         <source>Filename: %1</source>
         <translation>Имя файла: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2946"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2948"/>
         <source>Fitting RMS: %1</source>
         <translation>СКО вписывания: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2955"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2957"/>
         <source>Normal: (%1,%2,%3)</source>
         <translation>Нормаль: (%1,%2,%3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2987"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2989"/>
         <source>Cloud &apos;%1&apos; has been transformed with the above matrix</source>
         <translation>Облако &apos;%1&apos; было преобразовано с матрицей выше</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2988"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2990"/>
         <source>_HORIZ</source>
         <translation>_ГОРИЗ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3001"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3003"/>
         <source>Failed to compute best fit plane for cloud &apos;%1&apos;</source>
         <translation>Не удалось вычислить вписанную плоскость для облака &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3009"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3011"/>
         <source>Orient normals</source>
         <translation>Ориентировать нормали</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3016"/>
         <source>[ORIENT NORMALS (MST)]</source>
         <translation>[Ориентирование нормалей (MST)]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3018"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3020"/>
         <source>Missing parameter: number of neighbors after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: число соседей после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3026"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3096"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3028"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3098"/>
         <source>Invalid parameter: number of neighbors (%1)</source>
         <translation>Неверный параметр: число соседей (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3053"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3055"/>
         <source>_NORMS_REORIENTED</source>
         <translation>_НОРМАЛ_ПЕРЕОРИЕНТИР</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3065"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3067"/>
         <source>Failed to orient the normals of cloud &apos;%1&apos;!</source>
         <translation>Не удалось сориентировать нормали облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3079"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3081"/>
         <source>S.O.R. filter</source>
         <translation>Фильтр SOR</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3084"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3086"/>
         <source>[SOR FILTER]</source>
         <translation>[Фильтр SOR]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3088"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3090"/>
         <source>Missing parameter: number of neighbors mode after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: режим числа соседей после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3101"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3103"/>
         <source>Missing parameter: sigma multiplier after number of neighbors (SOR)</source>
         <translation>Отсутствует параметр: множитель сигма после числа соседей (SOR)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3107"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3109"/>
         <source>Invalid parameter: sigma multiplier (%1)</source>
         <translation>Неверный параметр: множитель сигма (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3138"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3289"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3140"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3291"/>
         <source>.clean</source>
         <translation>.очищен</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3152"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3154"/>
         <source>_SOR</source>
         <translation>_SOR</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3158"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3309"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3160"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3311"/>
         <source>Not enough memory to create a clean version of cloud &apos;%1&apos;!</source>
         <translation>Недостаточно памяти для создания чистой версии облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3392"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3394"/>
         <source>Extract vertices (as a standalone &apos;cloud&apos;)</source>
         <translation>Извлечь вершины (как отдельное &apos;облако&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3397"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3399"/>
         <source>[EXTRACT VERTICES]</source>
         <translation>[Извлечение вершин]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3401"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3453"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3528"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4268"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3403"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3455"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3530"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4270"/>
         <source>No mesh available. Be sure to open one first!</source>
         <translation>Нет доступных ЦМР. Сначала откройте одну!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3417"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3419"/>
         <source>.vertices</source>
         <translation>.вершины</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3486"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3572"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3488"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3574"/>
         <source>Sample mesh</source>
         <translation>Проредить модель</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3491"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3493"/>
         <source>[SAMPLE POINTS ON MESH]</source>
         <translation>[Прореживание точек модели]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3495"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3497"/>
         <source>Missing parameter: sampling mode after &quot;-%1&quot; (POINTS/DENSITY)</source>
         <translation>Отсутствует параметр: режим прореживания после  &quot;-%1&quot; (ТОЧКИ/ПЛОТНОСТЬ)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3512"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3514"/>
         <source>Invalid parameter: unknown sampling mode &quot;%1&quot;</source>
         <translation>Неверный параметр: неизвестный режим прореживания &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3517"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3519"/>
         <source>Missing parameter: value after sampling mode</source>
         <translation>Отсутствует параметр: значение после режима прореживания</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3523"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3525"/>
         <source>Invalid parameter: value after sampling mode</source>
         <translation>Неверный параметр: значение после режима прореживания</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3544"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3546"/>
         <source>Cloud sampling failed!</source>
         <translation>Не удалось проредить облако!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3548"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3550"/>
         <source>Sampled cloud created: %1 points</source>
         <translation>Прореженное облако создано: %1 точек</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3549"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3551"/>
         <source>_SAMPLED_POINTS</source>
         <translation>_ПРОРЕЖ_ТОЧКИ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3593"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3595"/>
         <source>Crop</source>
         <translation>Обрезать</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3598"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3600"/>
         <source>[CROP]</source>
         <translation>[Обрезка]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3602"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3604"/>
         <source>Missing parameter: box extents after &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</source>
         <translation>Отсутствует параметр: границы объекта после &quot;-%1&quot; (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3606"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3608"/>
         <source>No point cloud or mesh available. Be sure to open or generate one first!</source>
         <translation>Нет доступного облака или ЦМР. Сначала откройте или создайте одну!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3617"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3619"/>
         <source>Invalid parameter: box extents (expected format is &apos;Xmin:Ymin:Zmin:Xmax:Ymax:Zmax&apos;)</source>
         <translation>Неверный параметр: границы объекта (требуемый формат: Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3627"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3629"/>
         <source>Invalid parameter: box extents (component #%1 is not a valid number)</source>
         <translation>Неверный параметр: границы объекта (компонент #%1 не является правильным числом)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3806"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3808"/>
         <source>[COORD TO SF]</source>
         <translation>[XYZ в СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3810"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3812"/>
         <source>Missing parameter after &quot;-%1&quot; (DIMENSION)</source>
         <translation>Отсутствует параметр после &quot;-%1&quot; (РАЗМЕРЫ)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3581"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3754"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3814"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3863"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4238"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3583"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3756"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3816"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3865"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4240"/>
         <source>No point cloud available. Be sure to open or generate one first!</source>
         <translation>Нет доступного облака точек. Сначала откройте или создайте одно!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="178"/>
+        <location filename="../ccCommandLineCommands.cpp" line="180"/>
         <source>Set active SF index: LAST</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="186"/>
+        <location filename="../ccCommandLineCommands.cpp" line="188"/>
         <source>Set active SF index: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="190"/>
+        <location filename="../ccCommandLineCommands.cpp" line="192"/>
         <source>Set active SF name: &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="225"/>
+        <location filename="../ccCommandLineCommands.cpp" line="227"/>
         <source>Cloud %1 has less scalar fields than the SF index (%2/%3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="1065"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1121"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1186"/>
-        <location filename="../ccCommandLineCommands.cpp" line="1293"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4887"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1067"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1123"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1188"/>
+        <location filename="../ccCommandLineCommands.cpp" line="1295"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4889"/>
         <source>	Processing cloud %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2228"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2230"/>
         <source>Missing parameter: N value (after &quot;-%1 XXX N_SIGMA_MIN&quot;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2241"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2243"/>
         <source>Missing parameter: N value (after &quot;-%1 XXX N_SIGMA_MAX&quot;).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2576"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2578"/>
         <source>No point cloud nor mesh loaded! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3332"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3334"/>
         <source>Remove duplicate points</source>
         <translation type="unfinished">Удалить дубликаты точек</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3337"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3339"/>
         <source>[REMOVE DUPLICATE POINTS]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3350"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3352"/>
         <source>Invalid argument: &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3358"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3360"/>
         <source>Minimum distance between points: &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3373"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3375"/>
         <source>Process failed (see log)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3379"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3381"/>
         <source>_REMOVED_DUPLICATE_POINTS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3577"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3579"/>
         <source>[COMPRESS FWF]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3741"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3743"/>
         <source>SF to Coord</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3746"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3748"/>
         <source>[SF TO COORD]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3750"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3752"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (SF INDEX OR NAME) (DIMENSION)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3766"/>
-        <location filename="../ccCommandLineCommands.cpp" line="3822"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4040"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3768"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3824"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4042"/>
         <source>Invalid parameter: dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
         <translation>Неверный  параметр: размеры после &quot;-%1&quot; (требуется: X,Y или Z)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3779"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3781"/>
         <source>_SF_TO_COORD_%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3793"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3795"/>
         <source>Failed to set SF %1 as coord %2 on cloud &apos;%3&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3801"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3803"/>
         <source>Coord to SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3830"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3832"/>
         <source>_%1_TO_SF</source>
         <translation>_%1_В_СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3842"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3844"/>
         <source>Failed to export coord. %1 to SF on cloud &apos;%2&apos;!</source>
         <translation>Не удалось экспортировать координаты. %1 в СП для облака &apos;%2&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3850"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3852"/>
         <source>Crop 2D</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3855"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3857"/>
         <source>[CROP 2D]</source>
         <translation>[Обрезка 2D]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3859"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3861"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</source>
         <translation>Отсутствует параметр(ы) после  &quot;-%1&quot; (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3888"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3890"/>
         <source>Invalid parameter: orthogonal dimension after &quot;-%1&quot; (expected: X, Y or Z)</source>
         <translation>Неверный  параметр: ортогональные размеры после &quot;-%1&quot; (требуется: X,Y или Z)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3900"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3902"/>
         <source>Invalid parameter: number of vertices for the 2D polyline after &quot;-%1&quot;</source>
         <translation>Неверный параметр: число узлов 2D-полилинии после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3915"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3917"/>
         <source>Missing parameter(s): vertex #%1 data and following</source>
         <translation>Отсутствует параметр(ы): данные о вершине #%1 и следующие</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3924"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3926"/>
         <source>Invalid parameter: X-coordinate of vertex #%1</source>
         <translation>Неверный параметр: координата X узла #%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3930"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3932"/>
         <source>Invalid parameter: Y-coordinate of vertex #%1</source>
         <translation>Неверный параметр: координата Y узла #%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3972"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3974"/>
         <source>.cropped</source>
         <translation>.обрезано</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3985"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3987"/>
         <source>Not enough memory to crop cloud &apos;%1&apos;!</source>
         <translation>Недостаточно памяти для обрезки облака  &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3992"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3994"/>
         <source>No point of cloud &apos;%1&apos; falls inside the input box!</source>
         <translation>Нет точек облака &apos;%1&apos;, попадающих внутрь указанных границ!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3997"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3999"/>
         <source>Crop process failed! (not enough memory)</source>
         <translation>Не удалось выполнить обрезку (недостаточно памяти)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4005"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4007"/>
         <source>Color banding</source>
         <translation>Цветовая заливка</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4010"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4012"/>
         <source>[COLOR BANDING]</source>
         <translation>[Цветовая заливка]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4014"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4016"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (DIM FREQUENCY)</source>
         <translation>Отсутствует параметр(ы) после &quot;-%1&quot; (DIM FREQUENCY)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4018"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4130"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4020"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4132"/>
         <source>No entity available. Be sure to open or generate one first!</source>
         <translation>Нет доступных объектов. Сначала откройте или создайте один!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4052"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4054"/>
         <source>Invalid parameter: frequency after &quot;-%1 DIM&quot; (in Hz, integer value)</source>
         <translation>Неверный  параметр: частота после &quot;-%1 DIM&quot; (в Гц, целое число)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4076"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4107"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4078"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4109"/>
         <source>COLOR_BANDING_%1_%2</source>
         <translation>ЦВЕТОВАЯ_ЗАЛИВКА_%1_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4102"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4205"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4104"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4207"/>
         <source>Vertices of mesh &apos;%1&apos; are locked (they may be shared by multiple entities for instance). Can&apos;t apply the current command on them.</source>
         <translation>Узлы ЦМР &apos;%1 &apos;заблокированы (они могут совместно использоваться несколькими объектами). Нельзя применить к ним текущую команду.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4117"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4119"/>
         <source>Color levels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4122"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4124"/>
         <source>[COLOR LEVELS]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4126"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4128"/>
         <source>Missing parameter(s) after &quot;-%1&quot; (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4143"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4145"/>
         <source>Invalid parameter: bands after &quot;-%1&quot; (expected: any combination of R, G or B)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4156"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4158"/>
         <source>Invalid parameter: color level after &quot;-%1 COLOR-BANDS&quot; (integer value between 0 and 255 expected)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4170"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4172"/>
         <source>Failed to scale the color band(s) of cloud &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4180"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4210"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4182"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4212"/>
         <source>COLOR_LEVELS_%1_%2_%3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4196"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4198"/>
         <source>Failed to scale the color band(s) of mesh &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4226"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4228"/>
         <source>[DISTANCE COMPUTATION]</source>
         <translation>[Расчет отклонений]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4242"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4244"/>
         <source>No point cloud available. Will use the first mesh vertices as compared cloud.</source>
         <translation>Нет доступного облака. Будут использоваться вершины первой модели как сравниваемое облако.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4247"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4249"/>
         <source>Unhandled mesh vertices type</source>
         <translation>Необработанный тип вершин модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4255"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4257"/>
         <source>[C2M] Multiple point clouds loaded! Will take the first one by default.</source>
         <translation>[C2M] Загружено несколько облаков! По умолчанию выбирается первое из них.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4280"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4282"/>
         <source>Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!</source>
         <translation>Только одно облако доступно. Сначала откройте или создайте еще одно перед выполнением сравнения облаков!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4284"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4586"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4286"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4588"/>
         <source>More than 3 point clouds loaded! We take the second one as reference by default</source>
         <translation>Загружено более 3-х облаков! Второе выбирается как опорное</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4314"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4326"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4316"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4328"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2M distance!</source>
         <translation>Параметр &quot;-%1&quot; игнорирован: только для расчета C2M!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4336"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4352"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4338"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4354"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="68"/>
         <source>Missing parameter: value after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: значение после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4342"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4358"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4360"/>
         <location filename="../../plugins/core/IO/qAdditionalIO/src/BundlerCommand.cpp" line="72"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="119"/>
         <location filename="../../plugins/core/Standard/qCSF/include/qCSFCommands.h" line="130"/>
@@ -14126,618 +14256,633 @@ p, li { white-space: pre-wrap; }
         <translation>Неверный параметр: значение после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4370"/>
-        <location filename="../ccCommandLineCommands.cpp" line="4383"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4372"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4385"/>
         <source>Parameter &quot;-%1&quot; ignored: only for C2C distance!</source>
         <translation>Параметр &quot;-%1&quot; игнорирован: только для расчета C2С!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4408"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4410"/>
         <source>Invalid parameter: unknown model type &quot;%1&quot;</source>
         <translation>Неверный параметр: неизвестный тип модели &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4413"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4415"/>
         <source>Missing parameter: model type after &quot;-%1&quot; (LS/TRI/HF)</source>
         <translation>Отсутствует параметр: тип модели после &quot;-%1&quot; (LS/TRI/HF)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4429"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4431"/>
         <source>Invalid parameter: unknown neighborhood type &quot;%1&quot;</source>
         <translation>Неверный параметр: неизвестный тип окружения &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4434"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4436"/>
         <source>Missing parameter: expected neighborhood type after model type (KNN/SPHERE)</source>
         <translation>Отсутствует параметр: требуется тип окружения после типа модели (KNN/СФЕРА)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4444"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4446"/>
         <source>Invalid parameter: neighborhood size</source>
         <translation>Неверный параметр: размер окружения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4449"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4451"/>
         <source>Missing parameter: expected neighborhood size after neighborhood type (neighbor count/sphere radius)</source>
         <translation>Отсутствует параметр: требуется размер окружения после типа окружения (число соседей/радиус сферы)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4459"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5631"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4461"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5671"/>
         <source>Missing parameter: max thread count after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: макс. кол-во потоков после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4466"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5638"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4468"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5678"/>
         <source>Invalid thread count! (after %1)</source>
         <translation>Неверное количество потоков! (после %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4484"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4486"/>
         <source>Failed to initialize comparison dialog</source>
         <translation>Не удалось запустить диалог сравнения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4539"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4541"/>
         <source>An error occurred during distances computation!</source>
         <translation>В процессе расчета отклонений произошла ошибка!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4547"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4549"/>
         <source>_MAX_DIST_%1</source>
         <translation>_МАКС_ДИСТ_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4565"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4567"/>
         <source>C2M distance</source>
         <translation>Расчет C2M</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4569"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4571"/>
         <source>C2C distance</source>
         <translation>Расчет C2C</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4573"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4575"/>
         <source>Closest Point Set</source>
         <translation type="unfinished">Набор ближайших точек</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4578"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4580"/>
         <source>[CLOSEST POINT SET]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4582"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4584"/>
         <source>At least two point clouds are needed to compute the closest point set!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4627"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4629"/>
         <source>Statistical test</source>
         <translation>Статистический тест</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4632"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4634"/>
         <source>[STATISTICAL TEST]</source>
         <translation>[Статистический тест]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4639"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4641"/>
         <source>Missing parameter: distribution type after &quot;-%1&quot; (GAUSS/WEIBULL)</source>
         <translation>Отсутствует параметр: тип распределения после &quot;-%1&quot; (GAUSS/WEIBULL)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4648"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4650"/>
         <source>Missing parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>Отсутствует параметр: ср. значение после &quot;GAUSS&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4654"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4656"/>
         <source>Invalid parameter: mean value after &quot;GAUSS&quot;</source>
         <translation>Неверный параметр: ср. значение после &quot;GAUSS&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4659"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4661"/>
         <source>Missing parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>Отсутствует параметр: значение сигма после &quot;GAUSS&quot; {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4665"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4667"/>
         <source>Invalid parameter: sigma value after &quot;GAUSS&quot; {mu}</source>
         <translation>Неверный параметр: значение сигма после &quot;GAUSS&quot; {mu}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4677"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4679"/>
         <source>Missing parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>Отсутствует параметр: значение после &quot;WEIBULL&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4683"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4685"/>
         <source>Invalid parameter: a value after &quot;WEIBULL&quot;</source>
         <translation>Неверный параметр: значение после &quot;WEIBULL&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4688"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4690"/>
         <source>Missing parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>Отсутствует параметр: значение b после &quot;WEIBULL&quot; {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4694"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4696"/>
         <source>Invalid parameter: b value after &quot;WEIBULL&quot; {a}</source>
         <translation>Неверный параметр: значение b после &quot;WEIBULL&quot; {a}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4699"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4701"/>
         <source>Missing parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>Отсутствует параметр: значение сдвига после &quot;WEIBULL&quot; {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4705"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4707"/>
         <source>Invalid parameter: shift value after &quot;WEIBULL&quot; {a} {b}</source>
         <translation>Неверный параметр: значение сдвига после &quot;WEIBULL&quot; {a} {b}</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4714"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4716"/>
         <source>Invalid parameter: unknown distribution &quot;%1&quot;</source>
         <translation>Неверный параметр: неизвестное распределение &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4723"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4725"/>
         <source>Missing parameter: p-value after distribution</source>
         <translation>Отсутствует параметр: p-значение после распределения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4729"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4731"/>
         <source>Invalid parameter: p-value after distribution</source>
         <translation>Неверный параметр: p-значение после распределения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4738"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4740"/>
         <source>Missing parameter: neighbors after p-value</source>
         <translation>Отсутствует параметр: соседи после p-значения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4744"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4746"/>
         <source>Invalid parameter: neighbors after p-value</source>
         <translation>Неверный параметр: соседи после p-значения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4777"/>
-        <location filename="../ccEntityAction.cpp" line="2607"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4779"/>
+        <location filename="../ccEntityAction.cpp" line="2653"/>
         <source>Couldn&apos;t allocate a new scalar field for computing chi2 distances! Try to free some memory ...</source>
         <translation>Невозможно выделить новое скалярное поле для расчета отклонений Chi2! Надо предоставить больше свободной памяти...</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4789"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4791"/>
         <location filename="../ccEntityAction.cpp" line="765"/>
         <location filename="../ccEntityAction.cpp" line="888"/>
-        <location filename="../ccEntityAction.cpp" line="2619"/>
+        <location filename="../ccEntityAction.cpp" line="2665"/>
         <source>Couldn&apos;t compute octree for cloud &apos;%1&apos;!</source>
         <translation>Не удалось вычислить октодерево для облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4796"/>
-        <location filename="../ccEntityAction.cpp" line="2630"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4798"/>
+        <location filename="../ccEntityAction.cpp" line="2676"/>
         <source>[Chi2 Test] %1 test result = %2</source>
         <translation>[Тест Chi2] %1 результат теста = %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4812"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4814"/>
         <source>_STAT_TEST_%1</source>
         <translation>_СТАТ_ТЕСТ_%1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4834"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4836"/>
         <source>Delaunay triangulation</source>
         <translation>Триангуляция Делоне</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4839"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4841"/>
         <source>[DELAUNAY TRIANGULATION]</source>
         <translation>[Триангуляция Делоне]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4866"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4868"/>
         <source>Missing parameter: max edge length value after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: макс. длина стороны после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4872"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4874"/>
         <source>Invalid value for max edge length! (after %1)</source>
         <translation>Неверное значение для макс. длины стороны! (после %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4873"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4875"/>
         <source>Max edge length: %1</source>
         <translation>Макс. длина стороны: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4882"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4884"/>
         <source>Axis aligned: %1</source>
         <translation>Ось сориентирована: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4898"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4900"/>
         <source>	Resulting mesh: #%1 faces, %2 vertices</source>
         <translation>	Результирующая модель: #%1 граней, %2 вершин</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4936"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4938"/>
         <source>SF arithmetic</source>
         <translation>Арифметические операции со СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4941"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4943"/>
         <source>[SF ARITHMETIC]</source>
         <translation>[Арифметические операции со СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4945"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4947"/>
         <source>Missing parameter(s): SF index and/or operation after &apos;%1&apos; (2 values expected)</source>
         <translation>Отсутствует параметр(ы): индекс СП и/или операция после  &apos;%1&apos; (необходимо 2 значения)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6341"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5490"/>
+        <source>Add point indexes as scalar field</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="5495"/>
+        <source>[SF_ADD_ID]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="5505"/>
+        <source>[AS_INT]</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ccCommandLineCommands.cpp" line="6381"/>
         <source>Debug Command Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6362"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6402"/>
         <source>Global shift set: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6363"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6403"/>
         <source>Global shift: (%1, %2, %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6373"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6413"/>
         <source>Silent mode: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6374"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6414"/>
         <source>Auto save: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6375"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6415"/>
         <source>Auto add timestamp: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6376"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6416"/>
         <source>Numerical precision: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2640"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2642"/>
         <source>Remove a specific SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="2670"/>
+        <location filename="../ccCommandLineCommands.cpp" line="2672"/>
         <source>Missing parameter: SF index after %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3167"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3169"/>
         <source>Failed to apply SOR filter on cloud &apos;%1&apos;! (empty output or not enough memory?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3181"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3183"/>
         <source>Noise filter</source>
         <translation type="unfinished">Убрать шум</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3186"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3188"/>
         <source>[NOISE FILTER]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3190"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3192"/>
         <source>Missing parameters: &apos;KNN/RADIUS {value} REL/ABS {value}&apos; expected after &quot;-%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3204"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3206"/>
         <source>Invalid parameter: number of neighbors after KNN (got &apos;%1&apos; instead)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3214"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3216"/>
         <source>Invalid parameter: radius after RADIUS (got &apos;%1&apos; instead)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3219"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3221"/>
         <source>Invalid parameter: KNN or RADIUS expected after &quot;-%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3234"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3236"/>
         <source>Invalid parameter: REL or ABS expected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3244"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3246"/>
         <source>Invalid parameter: relative or absolute error expected after KNN (got &apos;%1&apos; instead)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3303"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3305"/>
         <source>_DENOISED</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="3318"/>
+        <location filename="../ccCommandLineCommands.cpp" line="3320"/>
         <source>Failed to apply Noise filter on cloud &apos;%1&apos;! (empty output or not enough memory?)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4960"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5066"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5170"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4962"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5068"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5172"/>
         <source>Unknown operation! (%1)</source>
         <translation>Неизвестная операция! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5174"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5176"/>
         <source>Operation %1 can&apos;t be applied with %2</source>
         <translation>Операция %1 не может быть выполнена с %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5200"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5202"/>
         <source>Failed top apply operation on cloud &apos;%1&apos;</source>
         <translation>Не удалось применить операцию к облаку &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5234"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5236"/>
         <source>Failed top apply operation on mesh &apos;%1&apos;</source>
         <translation>Не удалось применить операцию к модели &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5042"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5044"/>
         <source>SF operation</source>
         <translation>Операция со СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="4964"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5070"/>
+        <location filename="../ccCommandLineCommands.cpp" line="4966"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5072"/>
         <source>Operation %1 can&apos;t be applied with %2. Consider using the %3 command</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5024"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5128"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5026"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5130"/>
         <source>Failed to apply operation on mesh &apos;%1&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5047"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5049"/>
         <source>[SF OPERATION]</source>
         <translation>[Операция со СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5051"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5053"/>
         <source>Missing parameter(s): SF index and/or operation and/or scalar value after &apos;%1&apos; (3 values expected)</source>
         <translation>Отсутствует параметр(ы): индекс СП и/или операция и/или значение масштаба после &apos;%1&apos; (необходимо 3 значения)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5081"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5083"/>
         <source>Invalid scalar value! (after %1)</source>
         <translation>Неверное скалярное значение! (после %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5263"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5325"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5265"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5327"/>
         <source>Unexpected number of clouds for &apos;%1&apos; (at least 2 clouds expected: first = source, second = dest)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5317"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5319"/>
         <source>Color interpolation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5322"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5324"/>
         <source>[COLOR INTERPOLATION]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5335"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5337"/>
         <source>Rename SF</source>
         <translation>Переименовать СП</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5340"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5342"/>
         <source>[RENAME SF]</source>
         <translation>[ПЕРЕИМЕН СП]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5344"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5346"/>
         <source>Missing parameter(s): SF index and/or scalar field name after &apos;%1&apos; (2 values expected)</source>
         <translation>Отсутствует параметр(ы): индекс СП и/или имя поля после &apos;%1&apos; (необходимо 2 значения)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5493"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5533"/>
         <source>[ICP]</source>
         <translation>[ICP]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5541"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5581"/>
         <source>Missing parameter: min error difference after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: разница мин. ошибки после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5547"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5587"/>
         <source>Invalid value for min. error difference! (after %1)</source>
         <translation>Неверный параметр: разница мин. ошибки! ( после %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5557"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5597"/>
         <source>Missing parameter: number of iterations after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: число итераций после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5563"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5603"/>
         <source>Invalid number of iterations! (%1)</source>
         <translation>Неверное число итераций! (%1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5572"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5612"/>
         <source>Missing parameter: overlap percentage after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: зона перекрытия после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5579"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5619"/>
         <source>Invalid overlap value! (%1 --&gt; should be between 10 and 100)</source>
         <translation>Неверное значение перекрытия! (%1 --&gt; должно быть в пределах 10 и 100)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5589"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5629"/>
         <source>Missing parameter: random sampling limit value after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: значение допуска случайного прореживания после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5595"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5635"/>
         <source>Invalid random sampling limit! (after %1)</source>
         <translation>Неверное значение порога случайного прореживания (после %1)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5605"/>
-        <location filename="../ccCommandLineCommands.cpp" line="5618"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5645"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5658"/>
         <source>Missing parameter: SF index after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: индекс СП после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5671"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5711"/>
         <source>Invalid parameter: unknown rotation filter &quot;%1&quot;</source>
         <translation>Неверный параметр: неизвестный фильтр вращения &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5676"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5716"/>
         <source>Missing parameter: rotation filter after &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</source>
         <translation>Отсутствует параметр: фильтр вращения после &quot;-%1&quot; (XYZ/X/Y/Z/NONE)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5708"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5748"/>
         <source>Not enough loaded entities (expect at least 2!)</source>
         <translatorcomment>Загружено недостаточно элементов (нужно минимум 2!)</translatorcomment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5727"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5767"/>
         <source>[ICP] SF #%1 (data entity) will be used as weights</source>
         <translation>[ICP] СП #%1 (элемент данных) будут использоваться как веса</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5741"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5781"/>
         <source>[ICP] SF #%1 (model entity) will be used as weights</source>
         <translation>[ICP] СП #%1 (элемент модели) будут использоваться как веса</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5780"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5820"/>
         <source>Entity &apos;%1&apos; has been registered</source>
         <translation>Объект &apos;%1&apos; привязан</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5781"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5821"/>
         <source>RMS: %1</source>
         <translation>СКО: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5782"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5822"/>
         <source>Number of points used for final step: %1</source>
         <translation>Кол-во точек, использованных в последнем шаге: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5786"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5826"/>
         <source>%1/%2_REGISTRATION_MATRIX</source>
         <translation>%1/%2_МАТРИЦА_СОВМЕШЕНИЯ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5797"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5837"/>
         <source>_REGISTERED</source>
         <translation>_ПРИВЯЗАН</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5816"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5856"/>
         <source>Change PLY output format</source>
         <translation>Изменить формат вывода PLY</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6107"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6147"/>
         <source>Clear</source>
         <translation>Очистить</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6118"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6158"/>
         <source>Clear clouds</source>
         <translation>Очистить облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6128"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6168"/>
         <source>Pop clouds</source>
         <translation>Грохнуть облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6138"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6178"/>
         <source>Clear meshes</source>
         <translation>Очистить модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6148"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6188"/>
         <source>Pop meshes</source>
         <translation>Грохнуть модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6158"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6198"/>
         <source>No timestamp</source>
         <translation>Нет врем. меток</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6168"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6208"/>
         <source>1st order moment</source>
         <translation>Момент 1-го порядка</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6183"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6312"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6223"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6352"/>
         <source>Failed to read a numerical parameter: kernel size. Got &apos;%1&apos; instead.</source>
         <translation>Не удалось прочитать числовой параметр: размер ядра. Использован &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6189"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6229"/>
         <source>No point cloud on which to compute first order moment! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака для расчета момента первого порядка! (Откройте его с &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6203"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6243"/>
         <source>MOMENT_KERNEL_%2</source>
         <translation>Ядро_Момента_%2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6212"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6252"/>
         <source>Feature</source>
         <translation>Характеристика</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6217"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6257"/>
         <source>[FEATURE]</source>
         <translation>[Характеристика]</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6221"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6261"/>
         <source>Missing parameter: feature type after &quot;-%1&quot;</source>
         <translation>Отсутствует параметр: тип характеристики после &quot;-%1&quot;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6285"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6325"/>
         <source>Invalid feature type after &quot;-%1&quot;. Got &apos;%2&apos; instead of:
 - SUM_OF_EIGENVALUES
 - OMNIVARIANCE
@@ -14770,17 +14915,17 @@ p, li { white-space: pre-wrap; }
 - Собств.значение3</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6304"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6344"/>
         <source>Missing parameter: kernel size after feature type</source>
         <translation>Отсутствует параметр: размер ядра после типа характеристики</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6318"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6358"/>
         <source>No point cloud on which to compute feature! (be sure to open one with &quot;-%1 [cloud filename]&quot; before &quot;-%2&quot;)</source>
         <translation>Нет облака точек для расчета характеристики! (откройте одно &quot;-%1 [имя файла облака]&quot; перед &quot;-%2&quot;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6332"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6372"/>
         <source>%1_FEATURE_KERNEL_%2</source>
         <translation>%1_Ядро_характеристики_%2</translation>
     </message>
@@ -14795,83 +14940,83 @@ p, li { white-space: pre-wrap; }
         <translation>Формат FBX: %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5823"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5863"/>
         <source>Missing parameter: format (ASCII, BINARY_LE, or BINARY_BE) after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: формат (ASCII, BINARY_LE, or BINARY_BE) после &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5846"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5886"/>
         <source>Invalid PLY format! (&apos;%1&apos;)</source>
         <translation>Неверный формат PLY! (&apos;%1&apos;)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5853"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5893"/>
         <source>Compute structured cloud normals</source>
         <translation>Расчет структурных нормалей облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5882"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5922"/>
         <source>A file starting with %1 does not have a closing %1</source>
         <translation>Файл, начинающийся с %1, не имеет закрывающего %1</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5914"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5954"/>
         <source>Save clouds</source>
         <translation>Сохранить облака</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5950"/>
-        <location filename="../ccCommandLineCommands.cpp" line="6021"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5990"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6061"/>
         <source>Invalid parameter: specified %1 file names, but ALL_AT_ONCE is on</source>
         <translation>Неверный параметр: указано %1 имен файлов, но включено ВСЕ_ЗА_РАЗ</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5954"/>
+        <location filename="../ccCommandLineCommands.cpp" line="5994"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 clouds</source>
         <translation>Неверный параметр: указано %1 имен файлов, но облаков всего %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="5985"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6025"/>
         <source>Save meshes</source>
         <translation>Сохранить модели</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6025"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6065"/>
         <source>Invalid parameter: specified %1 file names, but there are %2 meshes</source>
         <translation>Неверный параметр: указано %1 имен файлов, но моделей всего %2</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6056"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6096"/>
         <source>Auto save state</source>
         <translation>Статус автосохранения</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6063"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6103"/>
         <source>Missing parameter: option after &apos;%1&apos; (%2/%3)</source>
         <translation>Отсутствует параметр: опция после &apos;%1&apos; (%2/%3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6069"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6109"/>
         <source>Auto-save is enabled</source>
         <translation>Автосохранение включено</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6074"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6114"/>
         <source>Auto-save is disabled</source>
         <translation>Автосохранение выключено</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6079"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6119"/>
         <source>Unrecognized option after &apos;%1&apos; (%2 or %3 expected)</source>
         <translation>Нераспознанная опция после &apos;%1&apos; (требуется %2 или %3)</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6086"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6126"/>
         <source>Set log file</source>
         <translation>Задать файл журнала</translation>
     </message>
     <message>
-        <location filename="../ccCommandLineCommands.cpp" line="6093"/>
+        <location filename="../ccCommandLineCommands.cpp" line="6133"/>
         <source>Missing parameter: filename after &apos;%1&apos;</source>
         <translation>Отсутствует параметр: имя файла после &apos;%1&apos;</translation>
     </message>
@@ -14932,7 +15077,7 @@ Points: %2</source>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1157"/>
         <location filename="../../plugins/core/IO/qPDALIO/src/LASFilter.cpp" line="1227"/>
         <location filename="../../libs/qCC_db/src/ccGBLSensor.cpp" line="715"/>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5570"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5657"/>
         <source>Points: %L1</source>
         <translation>Точек: %L1</translation>
     </message>
@@ -15099,54 +15244,54 @@ Points: %1</source>
 Точек: %1</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5353"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5440"/>
         <source>Normals computation</source>
         <translation>Расчет нормалей</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5381"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5468"/>
         <source>Grid: %1 x %2</source>
         <translation>Сетка: %1 x %2</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5569"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5656"/>
         <source>Orienting normals</source>
         <translation>Ориентирование нормалей</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5828"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6025"/>
         <source>FWF amplitude</source>
         <translation>Амплитуда ФПВ (формы полной волны)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="5829"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6026"/>
         <source>Determining min and max FWF values
 Points: </source>
         <translation>Определение мин. и макс. значений ФПВ
 Точек: </translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6230"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6427"/>
         <source>Couldn&apos;t create temporary scalar field! Not enough memory?</source>
         <translation type="unfinished">Нельзя создать временное скалярное поле! Мало памяти?</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6244"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6441"/>
         <source>An error occurred! (Not enough memory?)</source>
         <translation type="unfinished">Возникла ошибка! (Мало памяти?)</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6269"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6466"/>
         <source>Cloud &apos;%1&apos; has no duplicate points</source>
         <translation type="unfinished">Облако &apos;%1&apos; не имеет дубликатов точек</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6274"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6471"/>
         <source>Cloud &apos;%1&apos; has %2 duplicate point(s)</source>
         <translation type="unfinished">Облако &apos;%1&apos; имеет %2 дубликатов точек</translation>
     </message>
     <message>
-        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6282"/>
+        <location filename="../../libs/qCC_db/src/ccPointCloud.cpp" line="6479"/>
         <source>Not enough memory to create the filtered cloud</source>
         <translation type="unfinished"></translation>
     </message>
@@ -15764,68 +15909,68 @@ or use the actual one (no)?</source>
         <translation>неизвестно</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1198"/>
+        <location filename="../ccEntityAction.cpp" line="1244"/>
         <source>New scalar field &apos;%1&apos; added to %2 (value = %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1306"/>
+        <location filename="../ccEntityAction.cpp" line="1352"/>
         <source>Export SF to coordinate(s)</source>
         <translation>Экспорт СП в координату(ы)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1345"/>
+        <location filename="../ccEntityAction.cpp" line="1391"/>
         <source>SF --&gt; coordinate</source>
         <translation>СП --&gt; координата</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1403"/>
-        <location filename="../ccEntityAction.cpp" line="1465"/>
+        <location filename="../ccEntityAction.cpp" line="1449"/>
+        <location filename="../ccEntityAction.cpp" line="1511"/>
         <source>The process failed!</source>
         <translation>Обработка не удалась!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1430"/>
+        <location filename="../ccEntityAction.cpp" line="1476"/>
         <source>Export normals to SF(s)</source>
         <translation>Экспорт нормалей в скалярное поле(я)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1459"/>
+        <location filename="../ccEntityAction.cpp" line="1505"/>
         <source>Cloud &apos;%1&apos; has no normals</source>
         <translation>Облако &apos;%1&apos; не имеет нормалей</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1505"/>
+        <location filename="../ccEntityAction.cpp" line="1551"/>
         <source>An error occurred (see Console for more details)</source>
         <translation>Возникла ошибка (информация в консоли)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1560"/>
+        <location filename="../ccEntityAction.cpp" line="1606"/>
         <source>[SfFromColor] Not enough memory to instantiate SF &apos;%1&apos; on cloud &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1617"/>
+        <location filename="../ccEntityAction.cpp" line="1663"/>
         <source>[SfFromColor] Failed to add scalar field &apos;%1&apos; to cloud &apos;%2&apos;?!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1624"/>
+        <location filename="../ccEntityAction.cpp" line="1670"/>
         <source>[SfFromColor] New scalar fields (%1) added to &apos;%2&apos;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2273"/>
+        <location filename="../ccEntityAction.cpp" line="2319"/>
         <source>[DoActionComputeOctree] No eligible entities in selection!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2402"/>
+        <location filename="../ccEntityAction.cpp" line="2448"/>
         <source>[DoActionClearNormals] Can&apos;t remove normals per-vertex on a sub mesh!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1659"/>
+        <location filename="../ccEntityAction.cpp" line="1705"/>
         <source>Mesh [%1] vertices have no activated scalar field!</source>
         <translation>У вершин модели [%1] нет скалярного поля!</translation>
     </message>
@@ -15871,234 +16016,234 @@ Sigma at +inf uses the whole range of scalars</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1346"/>
+        <location filename="../ccEntityAction.cpp" line="1392"/>
         <source>Enter the coordinate equivalent to NaN values:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1358"/>
+        <location filename="../ccEntityAction.cpp" line="1404"/>
         <source>[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1675"/>
-        <location filename="../ccEntityAction.cpp" line="1993"/>
-        <location filename="../ccEntityAction.cpp" line="2057"/>
+        <location filename="../ccEntityAction.cpp" line="1721"/>
+        <location filename="../ccEntityAction.cpp" line="2039"/>
+        <location filename="../ccEntityAction.cpp" line="2103"/>
         <source>Select at least one point cloud</source>
         <translation>Выберите минимум одно облако точек</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1745"/>
+        <location filename="../ccEntityAction.cpp" line="1791"/>
         <source>Can&apos;t compute normals on sub-meshes! Select the parent mesh instead</source>
         <translation>Не удалось вычислить нормали для субмодели! Выберите родительскую модель</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1906"/>
+        <location filename="../ccEntityAction.cpp" line="1952"/>
         <source>Failed to compute or orient the normals on some clouds! (see console)</source>
         <translation>Не удалось вычислить или ориентировать нормали нескольких облаков (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1908"/>
+        <location filename="../ccEntityAction.cpp" line="1954"/>
         <source>Failed to compute or orient the normals! (see console)</source>
         <translation>Не удалось вычислить или ориентировать нормали! (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1916"/>
+        <location filename="../ccEntityAction.cpp" line="1962"/>
         <source>Mesh normals</source>
         <translation>Нормали модели</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1917"/>
+        <location filename="../ccEntityAction.cpp" line="1963"/>
         <source>Compute per-vertex normals (smooth) or per-triangle (faceted)?</source>
         <translation>Вычислить нормали к вершинам (сглаженно) или к треугольникам (структурно)?</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1921"/>
+        <location filename="../ccEntityAction.cpp" line="1967"/>
         <source>Per-vertex</source>
         <translation>К вершинам</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1922"/>
+        <location filename="../ccEntityAction.cpp" line="1968"/>
         <source>Per-triangle</source>
         <translation>К треугольникам</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1945"/>
+        <location filename="../ccEntityAction.cpp" line="1991"/>
         <source>Failed to compute normals on mesh &apos;%1&apos;</source>
         <translation>Не удалось вычислить нормали к модели &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2000"/>
+        <location filename="../ccEntityAction.cpp" line="2046"/>
         <source>Orient normals (FM)</source>
         <translation>Ориентировать нормали (БСМ)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2001"/>
+        <location filename="../ccEntityAction.cpp" line="2047"/>
         <source>Octree level</source>
         <translation>Уровень октодерева</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2026"/>
-        <location filename="../ccEntityAction.cpp" line="2088"/>
+        <location filename="../ccEntityAction.cpp" line="2072"/>
+        <location filename="../ccEntityAction.cpp" line="2134"/>
         <source>Cloud &apos;%1&apos; has no normals!</source>
         <translation>Облако &apos;%1&apos; не имеет нормалей!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2043"/>
-        <location filename="../ccEntityAction.cpp" line="2106"/>
+        <location filename="../ccEntityAction.cpp" line="2089"/>
+        <location filename="../ccEntityAction.cpp" line="2152"/>
         <source>Process failed (check console)</source>
         <translation>Обработка не удалась (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2047"/>
-        <location filename="../ccEntityAction.cpp" line="2110"/>
+        <location filename="../ccEntityAction.cpp" line="2093"/>
+        <location filename="../ccEntityAction.cpp" line="2156"/>
         <source>Normals have been oriented: you may still have to globally invert the cloud normals however (Edit &gt; Normals &gt; Invert).</source>
         <translation>Нормали сориентированы: однако Вы все еще можете инвертировать их для всего облака (Правка &gt; Нормали &gt; Инвертировать).</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2064"/>
+        <location filename="../ccEntityAction.cpp" line="2110"/>
         <source>Neighborhood size</source>
         <translation>Размер окрестности</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2065"/>
+        <location filename="../ccEntityAction.cpp" line="2111"/>
         <source>Neighbors</source>
         <translation>Соседи</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2099"/>
+        <location filename="../ccEntityAction.cpp" line="2145"/>
         <source>Process failed on cloud &apos;%1&apos;</source>
         <translation>Обработка облака &apos;%1&apos; не удалась</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2162"/>
-        <location filename="../ccEntityAction.cpp" line="2174"/>
+        <location filename="../ccEntityAction.cpp" line="2208"/>
+        <location filename="../ccEntityAction.cpp" line="2220"/>
         <source>[ccEntityAction::convertNormalsTo] Not enough memory!</source>
         <translation>[ccEntityAction::convertNormalsTo] Недостаточно памяти!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2206"/>
+        <location filename="../ccEntityAction.cpp" line="2252"/>
         <source>[ccEntityAction::convertNormalsTo] Internal error: unhandled destination!</source>
         <translation>[ccEntityAction::convertNormalsTo] Внутренняя ошибка: необработанное назначение!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2227"/>
+        <location filename="../ccEntityAction.cpp" line="2273"/>
         <source>Error(s) occurred! (see console)</source>
         <translation>Возникла ошибка(и)! (см. консоль)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2358"/>
+        <location filename="../ccEntityAction.cpp" line="2404"/>
         <source>Octree computation on cloud &apos;%1&apos; failed!</source>
         <translation>Не удалось вычислить октодерево для облака &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2515"/>
-        <location filename="../ccEntityAction.cpp" line="2659"/>
+        <location filename="../ccEntityAction.cpp" line="2561"/>
+        <location filename="../ccEntityAction.cpp" line="2705"/>
         <source>Distribution</source>
         <translation>Распределение</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2515"/>
+        <location filename="../ccEntityAction.cpp" line="2561"/>
         <source>Choose distribution</source>
         <translation>Выберите распределение</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2530"/>
+        <location filename="../ccEntityAction.cpp" line="2576"/>
         <source>Local Statistical Test (Gauss)</source>
         <translation>Локальный статистический тест (Гаусс)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2533"/>
+        <location filename="../ccEntityAction.cpp" line="2579"/>
         <source>Local Statistical Test (Weibull)</source>
         <translation>Локальный статистический тест (Вейбулл)</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2536"/>
+        <location filename="../ccEntityAction.cpp" line="2582"/>
         <source>Invalid distribution!</source>
         <translation>Неверное распределение!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2659"/>
+        <location filename="../ccEntityAction.cpp" line="2705"/>
         <source>Distribution Fitting</source>
         <translation>Подбор распределения</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2704"/>
+        <location filename="../ccEntityAction.cpp" line="2750"/>
         <source>Scalar field &apos;%1&apos; of cloud %2 has no valid values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2719"/>
+        <location filename="../ccEntityAction.cpp" line="2765"/>
         <source>mean = %1 / std.dev. = %2</source>
         <translation>сред. = %1 / станд.отклон. = %2</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2730"/>
+        <location filename="../ccEntityAction.cpp" line="2776"/>
         <source>[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2</source>
         <translation>[Distribution fitting] Доп. параметры распределения по Вейбуллу: режим = %1 / асимметрия = %2</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2741"/>
+        <location filename="../ccEntityAction.cpp" line="2787"/>
         <source>[Distribution fitting] %1</source>
         <translation>[Distribution fitting] %1</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2753"/>
+        <location filename="../ccEntityAction.cpp" line="2799"/>
         <source>[Distribution fitting] Not enough memory!</source>
         <translation>[Distribution fitting] Недостаточно памяти!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2764"/>
+        <location filename="../ccEntityAction.cpp" line="2810"/>
         <source>[Distribution fitting] %1: Chi2 Distance = %2</source>
         <translation>[Distribution fitting] %1: Chi2 расстояние = %2</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2768"/>
+        <location filename="../ccEntityAction.cpp" line="2814"/>
         <source>[Distribution fitting] Failed to compute Chi2 distance?!</source>
         <translation>[Distribution fitting] Не удалось вычислить Chi2 расстояние?!</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2789"/>
+        <location filename="../ccEntityAction.cpp" line="2835"/>
         <source>Scalar field statistics:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2790"/>
+        <location filename="../ccEntityAction.cpp" line="2836"/>
         <source>Number of valid values = %1 / %2 (%3%)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2791"/>
+        <location filename="../ccEntityAction.cpp" line="2837"/>
         <source>Sum of all valid values = %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2792"/>
+        <location filename="../ccEntityAction.cpp" line="2838"/>
         <source>Sum of all valid squared values = %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2793"/>
+        <location filename="../ccEntityAction.cpp" line="2839"/>
         <source>Average value = %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2794"/>
+        <location filename="../ccEntityAction.cpp" line="2840"/>
         <source>RMS (Root Mean Square) = %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2799"/>
+        <location filename="../ccEntityAction.cpp" line="2845"/>
         <source>[Distribution fitting]</source>
         <translation>[Distribution fitting]</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2807"/>
+        <location filename="../ccEntityAction.cpp" line="2853"/>
         <source>Count</source>
         <translation>Кол-во</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="2814"/>
+        <location filename="../ccEntityAction.cpp" line="2860"/>
         <source>[Entity: %1]-[SF: %2] Couldn&apos;t compute distribution parameters!</source>
         <translation>[Объект: %1]-[СП: %2] Нельзя вычислить параметры распределения!</translation>
     </message>
@@ -16304,12 +16449,12 @@ Cells: %2 x %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="5323"/>
+        <location filename="../mainwindow.cpp" line="5325"/>
         <source>Select at least one point cloud with normals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="8088"/>
+        <location filename="../mainwindow.cpp" line="8090"/>
         <source>Circle r=%1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -19621,40 +19766,58 @@ You should fill the empty cells...</source>
     </message>
 </context>
 <context>
+    <name>ccDrawNormalsWidget</name>
+    <message>
+        <location filename="../ui_templates/ccDrawNormalsWidget.ui" line="14"/>
+        <source>Normals as lines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/ccDrawNormalsWidget.ui" line="20"/>
+        <source>-</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui_templates/ccDrawNormalsWidget.ui" line="29"/>
+        <source>Normal length</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ccEntityAction</name>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1137"/>
+        <location filename="../ccEntityAction.cpp" line="1183"/>
         <source>Invalid name</source>
         <translation type="unfinished">Неверное имя</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1143"/>
+        <location filename="../ccEntityAction.cpp" line="1189"/>
         <source>A SF with a similar name already exists!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1152"/>
+        <location filename="../ccEntityAction.cpp" line="1198"/>
         <source>Add classification SF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1152"/>
-        <location filename="../ccEntityAction.cpp" line="1162"/>
+        <location filename="../ccEntityAction.cpp" line="1198"/>
+        <location filename="../ccEntityAction.cpp" line="1208"/>
         <source>value</source>
         <translation type="unfinished">значение</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1162"/>
+        <location filename="../ccEntityAction.cpp" line="1208"/>
         <source>Add constant value</source>
         <translation type="unfinished">Добавить значение константы</translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1181"/>
+        <location filename="../ccEntityAction.cpp" line="1227"/>
         <source>An error occurred! (see console)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ccEntityAction.cpp" line="1287"/>
+        <location filename="../ccEntityAction.cpp" line="1333"/>
         <source>Not enough memory</source>
         <translation type="unfinished">Недостаточно памяти</translation>
     </message>
@@ -19992,13 +20155,13 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="450"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="979"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1011"/>
         <source>Name</source>
         <translation>Имя</translation>
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="455"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="669"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="701"/>
         <source>Visible</source>
         <translation>Видимый</translation>
     </message>
@@ -20109,7 +20272,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="573"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1343"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1375"/>
         <source>Points</source>
         <translation>Точек</translation>
     </message>
@@ -20159,511 +20322,527 @@ p, li { white-space: pre-wrap; }
         <translation>Размер данных</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="641"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="673"/>
         <source>Scalar Fields</source>
         <translation>Скалярные поля</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="641"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="673"/>
         <source>Scalar Field</source>
         <translation>Скалярное поле</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="644"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1000"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1034"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1151"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="676"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1032"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1066"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1183"/>
         <source>Count</source>
         <translation>Кол-во</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="647"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="679"/>
         <source>Active</source>
         <translation>Активное</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="657"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="689"/>
         <source>Shift</source>
         <translation type="unfinished">Сдвиг</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="663"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="695"/>
         <source>Current</source>
         <translation>Текущий</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="666"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="698"/>
         <source>Steps</source>
         <translation>Дискретность</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="671"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="703"/>
         <source>SF display params</source>
         <translation>Параметры показа СП</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="687"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="719"/>
         <source>Primitive</source>
         <translation>Примитив</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="690"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="722"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="695"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="727"/>
         <source>Drawing precision</source>
         <translation>Точность отрисовки</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="700"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="707"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="732"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="739"/>
         <source>Radius</source>
         <translation>Радиус</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="704"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="934"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="736"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="966"/>
         <source>Height</source>
         <translation>Высота</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="711"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="743"/>
         <source>Bottom radius</source>
         <translation>Нижний радиус</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="712"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="744"/>
         <source>Top radius</source>
         <translation>Верхний радиус</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="717"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="749"/>
         <source>Apex</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="720"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="752"/>
         <source>Half angle</source>
         <translation type="unfinished">Угол полураствора</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="737"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="769"/>
         <source>Facet</source>
         <translation>Грань</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="743"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="775"/>
         <source>Surface</source>
         <translation>Поверхность</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="746"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="897"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="778"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="929"/>
         <source>RMS</source>
         <translation>СКО</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="749"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="781"/>
         <source>Center</source>
         <translation>Центр</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="754"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="786"/>
         <source>Show contour</source>
         <translation>Показать контур</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="760"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="792"/>
         <source>Show polygon</source>
         <translation>Показать полигон</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="772"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="804"/>
         <source>Normal</source>
         <translation>Нормаль</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="778"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="810"/>
         <source>Dip / Dip dir. (integer)</source>
         <translation>Падение/Азим.(целое)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="779"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="811"/>
         <source>Dip / Dip dir.</source>
         <translation>Падение/Азим.</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="782"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="814"/>
         <source>Show normal vector</source>
         <translation>Показать вектор нормали</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="795"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="827"/>
         <source>Sub-mesh</source>
         <translation>Части ЦМР</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="795"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="827"/>
         <source>Mesh</source>
         <translation>Цифровая модель</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="798"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="830"/>
         <source>Faces</source>
         <translation>Грани</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="802"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="834"/>
         <source>Materials/textures</source>
         <translation>Материалы/текстуры</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="805"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="837"/>
         <source>Wireframe</source>
         <translation>Каркас</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="809"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="841"/>
         <source>Stippling</source>
         <translation>Зернение</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="830"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="862"/>
         <source>Polyline</source>
         <translation>Полилиния</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="833"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="865"/>
         <source>Vertices</source>
         <translation>Вершины</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="836"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="649"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="868"/>
         <source>Length</source>
         <translation>Длина</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="839"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="642"/>
+        <source>Draw normals as lines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="646"/>
+        <source>Draw</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="652"/>
+        <source>Color</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="871"/>
         <source>Line width</source>
         <translation>Толщина линий</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="853"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="885"/>
         <source>Octree</source>
         <translation>Октодерево</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="856"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="888"/>
         <source>Display mode</source>
         <translation>Показывать как</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="859"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="891"/>
         <source>Display level</source>
         <translation>Показать уровень</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="861"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="893"/>
         <source>Current level</source>
         <translation>Текущий уровень</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="869"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="901"/>
         <source>Cell size</source>
         <translation>Размер ячейки</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="873"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="905"/>
         <source>Cell count</source>
         <translation>Кол-во ячеек</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="876"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="908"/>
         <source>Filled volume</source>
         <translation>Объем заполнения</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="887"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="919"/>
         <source>Kd-tree</source>
         <translation>K-мерное дерево</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="890"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="922"/>
         <source>Max Error</source>
         <translation>Макс. ошибка</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="900"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="932"/>
         <source>Max dist @ 68%</source>
         <translation>Макс. дист. @ 68%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="903"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="935"/>
         <source>Max dist @ 95%</source>
         <translation>Макс. дист. @ 95%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="906"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="938"/>
         <source>Max dist @ 99%</source>
         <translation>Макс. дист. @ 99%</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="909"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="941"/>
         <source>Max distance</source>
         <translation>Макс. дистанция</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="913"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="945"/>
         <source>unknown</source>
         <translation>неизвестно</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="916"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="948"/>
         <source>Error measure</source>
         <translation>Ошибка измерения</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="928"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="960"/>
         <source>Image</source>
         <translation>Изображение</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="931"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="963"/>
         <source>Width</source>
         <translation>Ширина</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="937"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="969"/>
         <source>Alpha</source>
         <translation>Альфа</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="941"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="973"/>
         <source>Sensor</source>
         <translation>Датчик</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="943"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1024"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="975"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1056"/>
         <source>Apply Viewport</source>
         <translation>Применить точку обзора</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="955"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="987"/>
         <source>Label</source>
         <translation>Метка</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="959"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="991"/>
         <source>Body</source>
         <translation>Тело</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="962"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="994"/>
         <source>Show 2D label</source>
         <translation>Показать 2D-метки</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="965"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="997"/>
         <source>Show legend(s)</source>
         <translation>Показать легенду</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="976"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1008"/>
         <source>Viewport</source>
         <translation>Точка обзора</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="979"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1011"/>
         <source>undefined</source>
         <translation>не задано</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="982"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1014"/>
         <source>Apply viewport</source>
         <translation>Применить точку обзора</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="985"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1017"/>
         <source>Update viewport</source>
         <translation>Обновить точку обзора</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="997"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1029"/>
         <source>Trans. buffer</source>
         <translation>Транс. буфер</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1003"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1035"/>
         <source>Show path</source>
         <translation>Показать трассу</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1006"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1038"/>
         <source>Show trihedrons</source>
         <translation>Показать трехгранники</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1009"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1041"/>
         <source>Scale</source>
         <translation>Масштаб</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1021"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1053"/>
         <source>Drawing scale</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1027"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1059"/>
         <source>Position/Orientation</source>
         <translation>Положение/Ориентация</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1031"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1063"/>
         <source>Associated positions</source>
         <translation>Связанные позиции</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1042"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1074"/>
         <source>Indices</source>
         <translation>Индексы</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1045"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1077"/>
         <source>Active index</source>
         <translation>Активный индекс</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1057"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1089"/>
         <source>TLS/GBL Sensor</source>
         <translation>Сканер</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1060"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1092"/>
         <source>Uncertainty</source>
         <translation>Точность</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1063"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1095"/>
         <source>Angular viewport (degrees)</source>
         <translation>Ось визирования (градусы)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1068"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1100"/>
         <source>Yaw span</source>
         <translation>Аз. сектор</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1075"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1107"/>
         <source>Yaw step</source>
         <translation>Аз. шаг</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1082"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1114"/>
         <source>Pitch span</source>
         <translation>Сектор тангажа</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1089"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1121"/>
         <source>Pitch step</source>
         <translation>Шаг тангажа</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1106"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1138"/>
         <source>Camera Sensor</source>
         <translation>Камера</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1111"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1143"/>
         <source>Vert. focal</source>
         <translation>Верт. фокус</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1114"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1146"/>
         <source>Array size</source>
         <translation>Размер массива</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1117"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1149"/>
         <source>Principal point</source>
         <translation>Главная точка</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1122"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1154"/>
         <source>Pixel size</source>
         <translation>Размер пикселя</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1126"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1158"/>
         <source>Field of view</source>
         <translation>Поле зрения</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1129"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1161"/>
         <source>Skew</source>
         <translation>Завал</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1131"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1163"/>
         <source>Frustum display</source>
         <translation>Сектор показа</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1134"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1166"/>
         <source>Show lines</source>
         <translation>Показать линии</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1135"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1167"/>
         <source>Show side planes</source>
         <translation>Показать стороны плоск-ей</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1148"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1180"/>
         <source>Material set</source>
         <translation>Материал</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1165"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1197"/>
         <source>Array</source>
         <translation>Массив</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1169"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1201"/>
         <source>Shared</source>
         <translation>В доступе</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1169"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1201"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1169"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1201"/>
         <source>Yes (%1)</source>
         <translation>Да (%1)</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1342"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1374"/>
         <source>Wire</source>
         <translation>Каркас</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1344"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1376"/>
         <source>Plain cubes</source>
         <translation>Кубы</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1476"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1486"/>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1496"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1508"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1518"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1528"/>
         <source>Apply</source>
         <translation>Применить</translation>
     </message>
     <message>
-        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1505"/>
+        <location filename="../db_tree/ccPropertiesTreeDelegate.cpp" line="1537"/>
         <source>Update</source>
         <translation>Обновить</translation>
     </message>
@@ -21210,6 +21389,14 @@ At least 2 viewports must be selected.</source>
         <location filename="../../plugins/core/Standard/qPCV/src/PCVCommand.cpp" line="148"/>
         <source>No entity is loaded.</source>
         <translation>Нет загруженного объекта.</translation>
+    </message>
+</context>
+<context>
+    <name>qPoissonRecon</name>
+    <message>
+        <location filename="../../plugins/core/Standard/qPoissonRecon/src/qPoissonRecon.cpp" line="418"/>
+        <source>Initialization</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

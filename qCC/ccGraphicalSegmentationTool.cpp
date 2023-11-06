@@ -60,6 +60,9 @@
 #include <omp.h>
 #endif
 
+std::set<ccHObject*> enableAtTheClose;
+std::set<ccHObject*> disableAtTheClose;
+
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()
@@ -335,6 +338,24 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	}
 
 	ccOverlayDialog::stop(accepted);
+
+	for (auto item : enableAtTheClose) // in export mode, all parts are enabled at the close
+	{
+		if (item != nullptr)
+		{
+			item->setEnabled(true);
+		}
+	}
+	enableAtTheClose.clear();
+
+	for (auto item : disableAtTheClose) // in export mode, the original entities are disabled at the close to show the parts
+	{
+		if (item != nullptr)
+		{
+			item->setEnabled(false);
+		}
+	}
+	disableAtTheClose.clear();
 }
 
 void ccGraphicalSegmentationTool::reset()
@@ -892,6 +913,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	int errorCount = 0;
 	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
+		ccHObject* entity = (*p);
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
 
@@ -902,11 +924,10 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			continue;
 		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
-
-		ccGenericPointCloud::VisibilityTableType outVisiblityArray;
+		ccGenericPointCloud::VisibilityTableType outVisibilityArray;
 		if (cloneSelection) // simply copy the incoming visibility array
 		{
-			outVisiblityArray = visibilityArray;
+			outVisibilityArray = visibilityArray;
 		}
 
 		assert(!visibilityArray.empty());
@@ -944,7 +965,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 		// we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
-        omp_set_num_threads(omp_get_max_threads());
+		omp_set_num_threads(omp_get_max_threads());
 		#pragma omp parallel for
 #endif
 		for (int i = 0; i < cloudSize; ++i)
@@ -975,11 +996,26 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				}
 				else // standard segmentation mode
 				{
-					visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
-					// if we want to simply clone the selected region, we have to be able to restore the original visibilty, except for the selection which will be cloned
-					if (!outVisiblityArray.empty())
+					unsigned char visibility = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
+					visibilityArray[i] = visibility;
+
+					if (cloneSelection) // specify an output visibility array for the export mode (exported points will be hidden until the Segment tool is closed)
 					{
-						outVisiblityArray[i] = pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE;
+						if (outVisibilityArray[i] == CCCoreLib::POINT_VISIBLE)
+						{
+							switch (visibility) {
+							case CCCoreLib::POINT_VISIBLE:
+								outVisibilityArray[i] = CCCoreLib::POINT_HIDDEN;
+								break;
+							default:
+								outVisibilityArray[i] = CCCoreLib::POINT_VISIBLE;
+								break;
+							}
+						}
+						else
+						{
+							outVisibilityArray[i] = CCCoreLib::POINT_HIDDEN;
+						}
 					}
 				}
 			}
@@ -992,14 +1028,57 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 		if (cloneSelection)
 		{
-			ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection();
-			if (segmentedCloud->size() != 0)
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				segmentedCloud->setName(cloud->getName() + ".part");
-				MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);
-				// inverse visibility array to show remaning points
-				visibilityArray = outVisiblityArray;
+				ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection();
+				if (segmentedCloud != nullptr)
+				{
+					if (segmentedCloud->size() != 0)
+					{
+						segmentedCloud->setName(cloud->getName() + ".part");
+						MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);
+						segmentedCloud->setEnabled(false);
+						enableAtTheClose.insert(segmentedCloud);
+						disableAtTheClose.insert(entity);
+					}
+					else // empty result: we ignore it
+					{
+						delete segmentedCloud;
+						segmentedCloud = nullptr;
+					}
+				}
+				else
+				{
+					return;
+				}
 			}
+			else if (entity->isKindOf(CC_TYPES::MESH))
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
+				ccMesh* segmentedMesh = mesh->createNewMeshFromSelection(false);
+
+				if (segmentedMesh != nullptr)
+				{
+					if (segmentedMesh->size() != 0)
+					{
+						segmentedMesh->setName(cloud->getName() + ".part");
+						MainWindow::TheInstance()->addToDB(segmentedMesh, false, true, false, false);
+						segmentedMesh->setEnabled(false);
+						enableAtTheClose.insert(segmentedMesh);
+						disableAtTheClose.insert(entity);
+					}
+					else // empty result: we ignore it
+					{
+						delete segmentedMesh;
+						segmentedMesh = nullptr;
+					}
+				}
+				else
+				{
+					return;
+				}
+			}
+			visibilityArray = outVisibilityArray; // show only the remaining points
 		}
 	}
 
@@ -1373,8 +1452,6 @@ void ccGraphicalSegmentationTool::options()
 	if (!optionsDlg.exec())
 		return;
 }
-
-
 
 void ccGraphicalSegmentationTool::apply()
 {

@@ -993,7 +993,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		if (cloneSelection)
 		{
 			ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection();
-			if (segmentedCloud->size() !=0)
+			if (segmentedCloud->size() != 0)
 			{
 				segmentedCloud->setName(cloud->getName() + ".part");
 				MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);

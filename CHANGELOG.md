@@ -5,6 +5,9 @@ v2.13.alpha (???) - (??/??/????)
 ----------------------
 - - New features:
 
+	- Segment
+		- possibility to clone the current selection
+
 	- New section in the Properties when a cloud is selected: "Draw normals as lines"
 		- one check box to toggle the display
 		- one double spin box to choose the length of the normals (1 by default)

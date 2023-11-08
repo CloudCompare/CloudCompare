@@ -86,7 +86,7 @@ protected:
 
 	void segmentIn();
 	void segmentOut();
-	void cloneSelection();
+	void exportSelection();
 	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE, bool cloneSelection = false);
 	void reset();
 	void options();

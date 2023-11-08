@@ -80,7 +80,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 
 	connect(inButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
-	connect(cloneSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::cloneSelection);
+	connect(cloneSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
 	connect(razButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
 	connect(optionsButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
@@ -105,6 +105,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverriddenShortcut(Qt::Key_I);		//'I' key for the "segment in" button
 	addOverriddenShortcut(Qt::Key_O);		//'O' key for the "segment out" button
 	addOverriddenShortcut(Qt::Key_C);		//'C' key for the "classify" button
+	addOverriddenShortcut(Qt::Key_E);		//'E' key for the "export" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu *selectionModeMenu = new QMenu(this);
@@ -171,6 +172,10 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 
 	case Qt::Key_C:
 		setClassificationValue();
+		return;
+
+	case Qt::Key_E:
+		exportSelection();
 		return;
 
 	case Qt::Key_Return:
@@ -850,7 +855,7 @@ void ccGraphicalSegmentationTool::segmentOut()
 	segment(false);
 }
 
-void ccGraphicalSegmentationTool::cloneSelection()
+void ccGraphicalSegmentationTool::exportSelection()
 {
 	segment(true, CCCoreLib::NAN_VALUE, true);
 }

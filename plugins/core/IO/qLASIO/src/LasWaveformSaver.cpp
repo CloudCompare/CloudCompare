@@ -47,7 +47,6 @@ void LasWaveformSaver::handlePoint(size_t index, laszip_point& point)
 		array[3] = w.beamDir().z;
 
 		memcpy(&m_array.data()[13], array, 4 * 4);
-
 	}
 
 	memcpy(point.wave_packet, m_array.constData(), 29);

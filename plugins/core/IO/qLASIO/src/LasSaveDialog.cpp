@@ -139,12 +139,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -163,6 +163,9 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
 
 	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
+
+	normalsCheckBox->setEnabled(cloud->hasNormals());
+	normalsCheckBox->setCheckState(Qt::CheckState::Checked);
 }
 
 /// When the selected version changes, we need to update the combo box
@@ -524,6 +527,11 @@ bool LasSaveDialog::shouldSaveRGB() const
 bool LasSaveDialog::shouldSaveWaveform() const
 {
 	return waveformCheckBox->isChecked();
+}
+
+bool LasSaveDialog::shouldSaveNormalsAsExtraScalarField() const
+{
+	return normalsCheckBox->isChecked();
 }
 
 CCVector3d LasSaveDialog::chosenScale() const

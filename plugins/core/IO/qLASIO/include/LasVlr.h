@@ -52,7 +52,7 @@ struct LasVlr
 		arch << static_cast<quint64>(object.vlrs.size());
 		for (const laszip_vlr_struct& v : object.vlrs)
 		{
-			//arch << v;
+			// arch << v;
 			arch << v.reserved;
 			arch.writeRawData(v.user_id, 16 * sizeof(laszip_CHAR));
 			arch << v.record_id;
@@ -64,7 +64,7 @@ struct LasVlr
 		arch << static_cast<quint64>(object.extraScalarFields.size());
 		for (const LasExtraScalarField& e : object.extraScalarFields)
 		{
-			//arch << e;
+			// arch << e;
 			arch.writeRawData((const char*)&e, sizeof(LasExtraScalarField));
 		}
 		return arch;
@@ -78,7 +78,7 @@ struct LasVlr
 		for (quint64 i = 0; i < vlrSize; ++i)
 		{
 			laszip_vlr_struct v;
-			//arch >> v;
+			// arch >> v;
 			arch >> v.reserved;
 			arch.readRawData((char*)v.user_id, 16 * sizeof(laszip_CHAR));
 			arch >> v.record_id;
@@ -88,7 +88,7 @@ struct LasVlr
 				v.data = new laszip_U8[v.record_length_after_header]; // TODO: potential memory leak
 				arch.readRawData((char*)v.data, v.record_length_after_header);
 			}
-			//arch >> QByteArray((const char*)v.data, v.record_length_after_header);
+			// arch >> QByteArray((const char*)v.data, v.record_length_after_header);
 			object.vlrs.push_back(v);
 		}
 
@@ -98,7 +98,7 @@ struct LasVlr
 		for (quint64 i = 0; i < extraScalarFieldCount; ++i)
 		{
 			LasExtraScalarField e;
-			//arch >> e;
+			// arch >> e;
 			{
 				char* data = (char*)&e;
 				uint  len  = sizeof(LasExtraScalarField);

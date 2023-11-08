@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QLocale>
 #include <QSettings>
+#include <QStringListModel>
 
 constexpr int TILLING_TAB_INDEX = 1;
 
@@ -82,6 +83,18 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	        { doSelectAllESF(true); });
 	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
 	        { doSelectAllESF(false); });
+	connect(xNormalComboBox,
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        this,
+	        &LasOpenDialog::onNormalComboBoxChanged);
+	connect(yNormalComboBox,
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        this,
+	        &LasOpenDialog::onNormalComboBoxChanged);
+	connect(zNormalComboBox,
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        this,
+	        &LasOpenDialog::onNormalComboBoxChanged);
 
 	// reload the last tiling output path
 	{
@@ -160,12 +173,38 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 	if (!extraScalarFields.empty())
 	{
 		extraScalarFieldsFrame->show();
+		QStringList availableExtraScalarFieldsName;
+		availableExtraScalarFieldsName << QString(); // Use empty string to denote selecting none
 		for (const LasExtraScalarField& lasExtraScalarField : extraScalarFields)
 		{
 			availableExtraScalarFields->addItem(CreateItem(lasExtraScalarField.name));
+			availableExtraScalarFieldsName.append(lasExtraScalarField.name);
 		}
 		int height = availableExtraScalarFields->frameWidth() + (availableExtraScalarFields->sizeHintForRow(0) + availableExtraScalarFields->frameWidth()) * availableExtraScalarFields->count();
 		availableExtraScalarFields->setMaximumHeight(height);
+
+		auto* model = new QStringListModel;
+		model->setStringList(availableExtraScalarFieldsName);
+		xNormalComboBox->setModel(model);
+		yNormalComboBox->setModel(model);
+		zNormalComboBox->setModel(model);
+
+		// Pre-select some normals if name matches
+		for (const LasExtraScalarField& lasExtraScalarField : extraScalarFields)
+		{
+			if (strncmp(lasExtraScalarField.name, "NormalX", LasExtraScalarField::MAX_NAME_SIZE) == 0)
+			{
+				xNormalComboBox->setCurrentText("NormalX");
+			}
+			else if (strncmp(lasExtraScalarField.name, "NormalY", LasExtraScalarField::MAX_NAME_SIZE) == 0)
+			{
+				yNormalComboBox->setCurrentText("NormalY");
+			}
+			else if (strncmp(lasExtraScalarField.name, "NormalZ", LasExtraScalarField::MAX_NAME_SIZE) == 0)
+			{
+				zNormalComboBox->setCurrentText("NormalZ");
+			}
+		}
 	}
 	else
 	{
@@ -181,6 +220,31 @@ void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField>&      scalar
 
 	RemoveFalse(scalarFields, isFieldSelected);
 	RemoveFalse(extraScalarFields, isFieldSelected);
+}
+
+std::array<LasExtraScalarField, 3> LasOpenDialog::getExtraFieldsToBeLoadedAsNormals(const std::vector<LasExtraScalarField>& extraScalarFields) const
+{
+	std::array<LasExtraScalarField, 3> array;
+	const std::array<const QComboBox*, 3>    boxes{xNormalComboBox, yNormalComboBox, zNormalComboBox};
+
+	for (size_t i = 0; i < 3; ++i)
+	{
+		const QComboBox* comboBox = boxes[i];
+		if (comboBox->currentIndex() != 0)
+		{
+			const std::string name = comboBox->currentText().toStdString();
+			const auto        it   = std::find_if(
+                extraScalarFields.begin(),
+                extraScalarFields.end(),
+                [&name](const LasExtraScalarField& e)
+                { return e.name == name; });
+			assert(it != extraScalarFields.end());
+
+			array[i] = *it;
+		}
+	}
+
+	return array;
 }
 
 bool LasOpenDialog::shouldIgnoreFieldsWithDefaultValues() const
@@ -232,6 +296,19 @@ void LasOpenDialog::onApplyAll()
 {
 	m_shouldSkipDialog = true;
 	accept();
+}
+
+void LasOpenDialog::onNormalComboBoxChanged(const QString& name)
+{
+	for (int i = 0; i < availableExtraScalarFields->count(); ++i)
+	{
+		QListWidgetItem* item = availableExtraScalarFields->item(i);
+		if (item->text() == name)
+		{
+			item->setCheckState(Qt::CheckState::Unchecked);
+			break;
+		}
+	}
 }
 
 LasOpenDialog::Action LasOpenDialog::action() const

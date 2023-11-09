@@ -60,9 +60,6 @@
 #include <omp.h>
 #endif
 
-std::set<ccHObject*> enableAtTheClose;
-std::set<ccHObject*> disableAtTheClose;
-
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()
@@ -80,7 +77,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 
 	connect(inButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
-	connect(cloneSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
+	connect(exportSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
 	connect(razButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
 	connect(optionsButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
@@ -344,23 +341,23 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 
 	ccOverlayDialog::stop(accepted);
 
-	for (auto item : enableAtTheClose) // in export mode, all parts are enabled at the close
+	for (auto item : m_enableAtTheClose) // in export mode, all parts are enabled at the close
 	{
 		if (item != nullptr)
 		{
 			item->setEnabled(true);
 		}
 	}
-	enableAtTheClose.clear();
+	m_enableAtTheClose.clear();
 
-	for (auto item : disableAtTheClose) // in export mode, the original entities are disabled at the close to show the parts
+	for (auto item : m_disableAtTheClose) // in export mode, the original entities are disabled at the close to show the parts
 	{
 		if (item != nullptr)
 		{
 			item->setEnabled(false);
 		}
 	}
-	disableAtTheClose.clear();
+	m_disableAtTheClose.clear();
 }
 
 void ccGraphicalSegmentationTool::reset()
@@ -860,7 +857,7 @@ void ccGraphicalSegmentationTool::exportSelection()
 	segment(true, CCCoreLib::NAN_VALUE, true);
 }
 
-void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue/*=CCCoreLib::NAN_VALUE*/, bool cloneSelection/*=false*/)
+void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue/*=CCCoreLib::NAN_VALUE*/, bool exportSelection/*=false*/)
 {
 	if (!m_associatedWin)
 	{
@@ -930,7 +927,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		ccGenericPointCloud::VisibilityTableType outVisibilityArray;
-		if (cloneSelection) // simply copy the incoming visibility array
+		if (exportSelection) // simply copy the incoming visibility array
 		{
 			outVisibilityArray = visibilityArray;
 		}
@@ -947,7 +944,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(*p);
 			if (!pc)
 			{
-				ccLog::Warning("Can't apply classification to object " + (*p)->getName());
+				ccLog::Warning("Can't apply classification to entity " + (*p)->getName());
 				continue;
 			}
 
@@ -971,10 +968,10 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		// we project each point and we check if it falls inside the segmentation polyline
 #if defined(_OPENMP)
 		omp_set_num_threads(omp_get_max_threads());
-		#pragma omp parallel for
+#pragma omp parallel for
 #endif
 		for (int i = 0; i < cloudSize; ++i)
-		{	
+		{
 			if (visibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P3D = cloud->getPoint(i);
@@ -999,12 +996,12 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						classifSF->setValue(i, classificationValue);
 					}
 				}
-				else // standard segmentation mode
+				else // standard segmentation mode + export mode
 				{
 					unsigned char visibility = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 					visibilityArray[i] = visibility;
 
-					if (cloneSelection) // specify an output visibility array for the export mode (exported points will be hidden until the Segment tool is closed)
+					if (exportSelection) // specify an output visibility array for the export mode (exported points will be hidden until the Segment tool is closed)
 					{
 						if (outVisibilityArray[i] == CCCoreLib::POINT_VISIBLE)
 						{
@@ -1031,7 +1028,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			classifSF->computeMinAndMax();
 		}
 
-		if (cloneSelection)
+		if (exportSelection)
 		{
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
@@ -1043,8 +1040,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						segmentedCloud->setName(cloud->getName() + ".part");
 						MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);
 						segmentedCloud->setEnabled(false);
-						enableAtTheClose.insert(segmentedCloud);
-						disableAtTheClose.insert(entity);
+						m_enableAtTheClose.insert(segmentedCloud);
+						m_disableAtTheClose.insert(entity);
 					}
 					else // empty result: we ignore it
 					{
@@ -1069,8 +1066,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						segmentedMesh->setName(cloud->getName() + ".part");
 						MainWindow::TheInstance()->addToDB(segmentedMesh, false, true, false, false);
 						segmentedMesh->setEnabled(false);
-						enableAtTheClose.insert(segmentedMesh);
-						disableAtTheClose.insert(entity);
+						m_enableAtTheClose.insert(segmentedMesh);
+						m_disableAtTheClose.insert(entity);
 					}
 					else // empty result: we ignore it
 					{
@@ -1099,7 +1096,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		}
 	}
 
-	if (classificationMode || cloneSelection)
+	if (classificationMode || exportSelection)
 	{
 		m_associatedWin->redraw();
 	}

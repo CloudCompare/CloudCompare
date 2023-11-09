@@ -148,7 +148,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="cloneSelectionButton">
+       <widget class="QToolButton" name="exportSelectionButton">
         <property name="toolTip">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection (E)&lt;/p&gt;&lt;p&gt;Note: the original cloud/mesh is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>

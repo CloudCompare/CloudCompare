@@ -49,9 +49,14 @@ namespace GfxTL
 				return *m_children[i];
 			}
 
-			const ThisType &operator[](unsigned int i) const
+            const ThisType &operator[](unsigned int i) const
+            {
+                return *m_children[i];
+            }
+
+			const ThisType* addr(unsigned int i) const
 			{
-				return *m_children[i];
+				return m_children[i];
 			}
 
 			void Child(unsigned int i, ThisType *cell)

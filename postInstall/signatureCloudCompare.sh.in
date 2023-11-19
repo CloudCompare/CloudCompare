@@ -1,0 +1,56 @@
+#!/bin/sh
+# Fail if any command fails.
+set -e
+#
+ARCHIVE="@CMAKE_INSTALL_PREFIX@"
+# Establish a work directory, create a disk image root directory within 
+# that, and then copy the app there.
+#
+# Note we use `-R`, not `-r`, to preserve symlinks.
+#WORKDIR="CloudCompare-`date '+%Y-%m-%d_%H.%M.%S'`"
+WORKDIR="${ARCHIVE}"
+APP="${WORKDIR}/CloudCompare/CloudCompare.app"
+DMG="${WORKDIR}/../CloudCompare.dmg"
+SIGNATURE="5XUC29Y5KK"
+#cp -R "${ARCHIVE}" "${WORKDIR}"
+#mv "${ARCHIVE}" "${ARCHIVE}_moved" 
+# Create various entitlement files from 'here' documents.
+cat > "${WORKDIR}/app.entitlements" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    <key>com.apple.security.network.server</key>
+    <true/>
+</dict>
+</plist>
+EOF
+cat > "${WORKDIR}/tool.entitlements" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.inherit</key>
+    <true/>
+</dict>
+</plist>
+EOF
+# Sign the app from the inside out.
+#
+echo "--- signature dylib ---"
+find "${APP}" -name "*.dylib" -print -exec codesign -s ${SIGNATURE} -f --timestamp {} \;
+find "${APP}" -name "*.so" -print -exec codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/app.entitlements" {} \;
+
+echo "--- signature app---"
+codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/app.entitlements"   "${APP}"
+# Create a disk image from our disk image root directory.
+hdiutil create -ov -srcFolder "${WORKDIR}" -quiet -o "${DMG}"
+# Sign that.
+codesign -s ${SIGNATURE} --timestamp -i fr.openfields.CloudCompare.DiskImage "${DMG}"
+echo "${DMG}"

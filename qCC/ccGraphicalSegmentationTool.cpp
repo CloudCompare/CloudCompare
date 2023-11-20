@@ -341,23 +341,23 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 
 	ccOverlayDialog::stop(accepted);
 
-	for (auto item : m_enableAtTheClose) // in export mode, all parts are enabled at the close
+	for (auto item : m_enableOnClose) // in export mode, all parts are enabled at the close
 	{
 		if (item != nullptr)
 		{
 			item->setEnabled(true);
 		}
 	}
-	m_enableAtTheClose.clear();
+	m_enableOnClose.clear();
 
-	for (auto item : m_disableAtTheClose) // in export mode, the original entities are disabled at the close to show the parts
+	for (auto item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
 	{
 		if (item != nullptr)
 		{
 			item->setEnabled(false);
 		}
 	}
-	m_disableAtTheClose.clear();
+	m_disableOnClose.clear();
 }
 
 void ccGraphicalSegmentationTool::reset()
@@ -1040,8 +1040,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						segmentedCloud->setName(cloud->getName() + ".part");
 						MainWindow::TheInstance()->addToDB(segmentedCloud, false, true, false, false);
 						segmentedCloud->setEnabled(false);
-						m_enableAtTheClose.insert(segmentedCloud);
-						m_disableAtTheClose.insert(entity);
+						m_enableOnClose.insert(segmentedCloud);
+						m_disableOnClose.insert(entity);
 					}
 					else // empty result: we ignore it
 					{
@@ -1066,8 +1066,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						segmentedMesh->setName(cloud->getName() + ".part");
 						MainWindow::TheInstance()->addToDB(segmentedMesh, false, true, false, false);
 						segmentedMesh->setEnabled(false);
-						m_enableAtTheClose.insert(segmentedMesh);
-						m_disableAtTheClose.insert(entity);
+						m_enableOnClose.insert(segmentedMesh);
+						m_disableOnClose.insert(entity);
 					}
 					else // empty result: we ignore it
 					{

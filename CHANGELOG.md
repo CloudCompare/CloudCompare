@@ -6,7 +6,7 @@ v2.13.alpha (???) - (??/??/????)
 - - New features:
 
 	- Segment
-		- new button in the toolbar to export the current selection
+		- new button in the toolbar to export the current selection as a new cloud or mesh (without needing to close the tool)
 
 	- New section in the Properties when a cloud is selected: "Draw normals as lines"
 		- one check box to toggle the display

@@ -152,11 +152,11 @@ protected:
 	//! Whether to delete hidden parts after segmentation
 	bool m_deleteHiddenParts;
 
-	//! In export mode, it switches the visibility of the exported parts
-	std::set<ccHObject*> m_enableAtTheClose;
+	//! In export mode, entities in this set will be enabled/visible
+	std::set<ccHObject*> m_enableOnClose;
 
-	//! In export mode, it switches off the original cloud to show the exported parts
-	std::set<ccHObject*> m_disableAtTheClose;
+	//! In export mode, entities in this set will be disabled/invisible
+	std::set<ccHObject*> m_disableOnClose;
 };
 
 #endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

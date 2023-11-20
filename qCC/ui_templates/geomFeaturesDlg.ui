@@ -312,7 +312,7 @@
              <string>(L1 * L2 * L3)^(1/3)</string>
             </property>
             <property name="text">
-             <string>Ominvariance</string>
+             <string>Omnivariance</string>
             </property>
            </widget>
           </item>

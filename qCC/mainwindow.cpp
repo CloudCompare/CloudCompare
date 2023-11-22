@@ -4240,15 +4240,24 @@ void MainWindow::doActionLabelConnectedComponents()
 	if (count == 0)
 		return;
 
+	static int s_octreeLevel = 8;
+	static unsigned s_minComponentSize = 10;
+	static bool s_randomColors = false;
+
 	ccLabelingDlg dlg(this);
 	if (count == 1)
 		dlg.octreeLevelSpinBox->setCloud(clouds.front());
+
+	dlg.setOctreeLevel(s_octreeLevel);
+	dlg.setMinPointsNb(s_minComponentSize);
+	dlg.setRandomColors(s_randomColors);
+
 	if (!dlg.exec())
 		return;
 
-	int octreeLevel = dlg.getOctreeLevel();
-	unsigned minComponentSize = static_cast<unsigned>(std::max(0, dlg.getMinPointsNb()));
-	bool randColors = dlg.randomColors();
+	s_octreeLevel = dlg.getOctreeLevel();
+	s_minComponentSize = static_cast<unsigned>(std::max(0, dlg.getMinPointsNb()));
+	s_randomColors = dlg.randomColors();
 
 	ccProgressDialog pDlg(false, this);
 	pDlg.setAutoClose(false);
@@ -4294,7 +4303,7 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we try to label all CCs
 			CCCoreLib::ReferenceCloudContainer components;
 			int componentCount = CCCoreLib::AutoSegmentationTools::labelConnectedComponents(cloud,
-																						static_cast<unsigned char>(octreeLevel),
+																						static_cast<unsigned char>(s_octreeLevel),
 																						false,
 																						&pDlg,
 																						theOctree.data());
@@ -4308,7 +4317,7 @@ void MainWindow::doActionLabelConnectedComponents()
 				{
 					for (size_t i = 0; i < components.size(); ++i)
 					{
-						if (components[i]->size() >= minComponentSize)
+						if (components[i]->size() >= s_minComponentSize)
 						{
 							++realComponentCount;
 						}
@@ -4353,7 +4362,7 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we create "real" point clouds for all CCs
 			if (!components.empty())
 			{
-				createComponentsClouds(cloud, components, minComponentSize, randColors, true);
+				createComponentsClouds(cloud, components, s_minComponentSize, s_randomColors, true);
 			}
 		}
 	}

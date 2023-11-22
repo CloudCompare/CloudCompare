@@ -283,6 +283,9 @@ v2.13.alpha (???) - (??/??/????)
 	- Some more basic statistics are displayed in the Console when using the 'Edit > SF > Compute stat. params' tool
 		- number of valid values, sum of all valid values and squared values, average, RMS
 
+	- Connected Components Extraction:
+		- the parameters are now semi-persistent (= maintained as long as CC is running)
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

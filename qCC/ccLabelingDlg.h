@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_CC_LABELING_DLG_HEADER
-#define CC_CC_LABELING_DLG_HEADER
 
 #include <ui_labelingDlg.h>
 
@@ -38,6 +37,13 @@ public:
 
 	//! Specifies whether each extracted CC should get a random color
 	bool randomColors();
-};
 
-#endif
+	//! Sets the octree level (defines grid step)
+	void setOctreeLevel(int octreeLevel);
+
+	//! Sets the min number of points per extracted CC
+	void setMinPointsNb(int minPointsNb);
+
+	//! Specifies whether each extracted CC should get a random color
+	void setRandomColors(bool state);
+};

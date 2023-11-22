@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="basicParamTab">
       <attribute name="title">
@@ -289,6 +289,16 @@ font: italic;</string>
            <widget class="QCheckBox" name="rgbCheckBox">
             <property name="text">
              <string>RGB</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="normalsCheckBox">
+            <property name="toolTip">
+             <string>Saves normals as extra scalar field using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.</string>
+            </property>
+            <property name="text">
+             <string>Normals (As Extra Scalarfield)</string>
             </property>
            </widget>
           </item>

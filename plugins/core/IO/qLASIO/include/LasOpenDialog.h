@@ -66,6 +66,9 @@ class LasOpenDialog : public QDialog
 	void filterOutNotChecked(std::vector<LasScalarField>&      scalarFields,
 	                         std::vector<LasExtraScalarField>& extraScalarFields);
 
+	/// Returns the array of extra scalar fields to be used as normals
+	std::array<LasExtraScalarField, 3> getExtraFieldsToBeLoadedAsNormals(const std::vector<LasExtraScalarField>& extraScalarFields) const ;
+
 	/// Returns whether the user wants to ignore (not load)
 	/// fields for which values are all default values.
 	bool shouldIgnoreFieldsWithDefaultValues() const;
@@ -111,6 +114,8 @@ class LasOpenDialog : public QDialog
 	void onAutomaticTimeShiftToggle(bool checked);
 
 	void onApplyAll();
+
+	void onNormalComboBoxChanged(const QString& name);
 
 	void onBrowseTilingOutputDir();
 

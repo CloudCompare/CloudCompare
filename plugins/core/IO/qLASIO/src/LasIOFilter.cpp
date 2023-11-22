@@ -202,6 +202,15 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return TileLasReader(laszipReader, fileName, m_openDialog.tilingOptions());
 	}
 
+	std::array<LasExtraScalarField, 3> extraScalarFieldsToLoadAsNormals = m_openDialog.getExtraFieldsToBeLoadedAsNormals(availableEXtraScalarFields);
+	bool                               haveToLoadNormals                = std::any_of(extraScalarFieldsToLoadAsNormals.begin(),
+                                         extraScalarFieldsToLoadAsNormals.end(),
+                                         [](const LasExtraScalarField& e)
+                                         {
+                                             return e.type != LasExtraScalarField::DataType::Undocumented;
+                                         });
+	m_openDialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
+
 	auto pointCloud = std::make_unique<ccPointCloud>(QFileInfo(fileName).fileName());
 	if (!pointCloud->reserve(pointCount))
 	{
@@ -211,7 +220,16 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	m_openDialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
+	if (haveToLoadNormals)
+	{
+		if (!pointCloud->reserveTheNormsTable())
+		{
+			laszip_close_reader(laszipReader);
+			laszip_clean(laszipReader);
+			laszip_destroy(laszipReader);
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+	}
 
 	laszip_F64    laszipCoordinates[3] = {0};
 	laszip_point* laszipPoint{nullptr};
@@ -314,7 +332,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 			break;
 		}
 
-		error = loader.handleExtraScalarFields(*pointCloud, *laszipPoint);
+		error = loader.handleExtraScalarFields(*laszipPoint);
 		if (error != CC_FERR_NO_ERROR)
 		{
 			break;
@@ -332,6 +350,31 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		if (waveformLoader)
 		{
 			waveformLoader->loadWaveform(*pointCloud, *laszipPoint);
+		}
+
+		if (haveToLoadNormals)
+		{
+			CCVector3 normal{};
+			// Here, the array has 3 values, not because normals have 3 dimensions (x, y, z)
+			// but because extra scalar field may have 3 dimensions.
+			// Regardless of whether the extra scalar field has more than 1 dimensions
+			// we only use the first one for each normal dimension.
+			for (unsigned int normalIndex = 0; normalIndex < 3; ++normalIndex)
+			{
+				const LasExtraScalarField& extraField = extraScalarFieldsToLoadAsNormals[normalIndex];
+				if (extraField.type == LasExtraScalarField::DataType::Undocumented)
+				{
+					continue;
+				}
+				ScalarType normalsValues[3] = {0.0};
+				error                       = loader.parseExtraScalarField(extraField, *laszipPoint, normalsValues);
+				if (error != CC_FERR_NO_ERROR)
+				{
+					break;
+				}
+				normal[normalIndex] = normalsValues[0];
+			}
+			pointCloud->addNorm(normal);
 		}
 
 		normProgress.oneStep();
@@ -471,7 +514,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	{
 		if (pointCloud->size() != 0)
 		{
-			//it can only be acceptable if the cloud is empty
+			// it can only be acceptable if the cloud is empty
 			//(yes, some people expect to save empty clouds!)
 			return CC_FERR_NO_SAVE;
 		}
@@ -543,7 +586,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	// Uniformize the optimal scale to make it less disturbing to some lastools users ;)
 	{
 		double maxScale = std::max(optimalScale.x, std::max(optimalScale.y, optimalScale.z));
-		double n        = ceil(log10(maxScale)); //ceil because n should be negative
+		double n        = ceil(log10(maxScale)); // ceil because n should be negative
 		maxScale        = pow(10.0, n);
 		optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
 	}
@@ -584,10 +627,11 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	LasSaver::Parameters params;
 	{
-		params.standardFields     = saveDialog.fieldsToSave();
-		params.extraFields        = saveDialog.extraFieldsToSave();
-		params.shouldSaveRGB      = saveDialog.shouldSaveRGB();
-		params.shouldSaveWaveform = saveDialog.shouldSaveWaveform();
+		params.standardFields                      = saveDialog.fieldsToSave();
+		params.extraFields                         = saveDialog.extraFieldsToSave();
+		params.shouldSaveRGB                       = saveDialog.shouldSaveRGB();
+		params.shouldSaveNormalsAsExtraScalarField = saveDialog.shouldSaveNormalsAsExtraScalarField();
+		params.shouldSaveWaveform                  = saveDialog.shouldSaveWaveform();
 
 		saveDialog.selectedVersion(params.versionMajor, params.versionMinor);
 		params.pointFormat = saveDialog.selectedPointFormat();

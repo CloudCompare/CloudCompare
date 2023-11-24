@@ -165,7 +165,7 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
 
 	normalsCheckBox->setEnabled(cloud->hasNormals());
-	normalsCheckBox->setCheckState(Qt::CheckState::Checked);
+	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked:Qt::Unchecked);
 }
 
 /// When the selected version changes, we need to update the combo box

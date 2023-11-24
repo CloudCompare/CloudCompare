@@ -19,7 +19,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 	// restore the project UUID (if any)
 	LasMetadata::LoadProjectUUID(cloud, m_laszipHeader);
 
-	if (parameters.shouldSaveNormalsAsExtraScalarField)
+	if (parameters.shouldSaveNormalsAsExtraScalarField && cloud.hasNormals())
 	{
 		// We export normals to extra scalar fields,
 		// the easiest way to integrate that into the LasScalarFieldSaver system

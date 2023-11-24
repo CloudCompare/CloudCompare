@@ -85,7 +85,7 @@ protected: //rendering
 	//reimplemented from QOpenGLWidget
 	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
 	//we need to automatically bind our own afterwards!
-	//(Sadly QOpenGLWidget::makeCurrentmakeCurrent is not virtual)
+	//(Sadly QOpenGLWidget::makeCurrent is not virtual)
 	void makeCurrent();
 
 protected: //other methods

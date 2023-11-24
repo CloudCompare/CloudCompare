@@ -241,9 +241,16 @@ std::array<LasExtraScalarField, 3> LasOpenDialog::getExtraFieldsToBeLoadedAsNorm
                     extraScalarFields.end(),
                     [&name](const LasExtraScalarField& e)
                     { return e.name == name; });
-				assert(it != extraScalarFields.end());
 
-				array[i] = *it;
+				// safeguard
+				if (it != extraScalarFields.end())
+				{
+					array[i] = *it;
+				}
+				else
+				{
+					assert(false);
+				}
 			}
 		}
 	}

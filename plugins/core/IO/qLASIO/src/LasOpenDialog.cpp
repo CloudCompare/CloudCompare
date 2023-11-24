@@ -84,15 +84,15 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
 	        { doSelectAllESF(false); });
 	connect(xNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(yNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(zNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 
@@ -225,22 +225,26 @@ void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField>&      scalar
 std::array<LasExtraScalarField, 3> LasOpenDialog::getExtraFieldsToBeLoadedAsNormals(const std::vector<LasExtraScalarField>& extraScalarFields) const
 {
 	std::array<LasExtraScalarField, 3> array;
-	const std::array<const QComboBox*, 3>    boxes{xNormalComboBox, yNormalComboBox, zNormalComboBox};
 
-	for (size_t i = 0; i < 3; ++i)
+	if (!extraScalarFields.empty())
 	{
-		const QComboBox* comboBox = boxes[i];
-		if (comboBox->currentIndex() != 0)
-		{
-			const std::string name = comboBox->currentText().toStdString();
-			const auto        it   = std::find_if(
-                extraScalarFields.begin(),
-                extraScalarFields.end(),
-                [&name](const LasExtraScalarField& e)
-                { return e.name == name; });
-			assert(it != extraScalarFields.end());
+		const std::array<const QComboBox*, 3> boxes{xNormalComboBox, yNormalComboBox, zNormalComboBox};
 
-			array[i] = *it;
+		for (size_t i = 0; i < 3; ++i)
+		{
+			const QComboBox* comboBox = boxes[i];
+			if (comboBox && comboBox->currentIndex() > 0)
+			{
+				const std::string name = comboBox->currentText().toStdString();
+				const auto        it   = std::find_if(
+                    extraScalarFields.begin(),
+                    extraScalarFields.end(),
+                    [&name](const LasExtraScalarField& e)
+                    { return e.name == name; });
+				assert(it != extraScalarFields.end());
+
+				array[i] = *it;
+			}
 		}
 	}
 

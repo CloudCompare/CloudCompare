@@ -198,7 +198,7 @@ CC_FILE_ERROR LasScalarFieldLoader::handleExtraScalarFields(const laszip_point& 
 
 	for (const LasExtraScalarField& extraField : m_extraScalarFields)
 	{
-		ScalarType finalValues[3] {0.0};
+		ScalarType finalValues[3]{0.0};
 
 		const CC_FILE_ERROR err = parseExtraScalarField(extraField, currentPoint, finalValues);
 		if (err != CC_FERR_NO_ERROR)
@@ -416,6 +416,10 @@ void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraFiel
 			if (noDataValue == inputValues[dimIndex])
 			{
 				outputValues[dimIndex] = ccScalarField::NaN();
+			}
+			else
+			{
+				outputValues[dimIndex] = static_cast<ScalarType>(inputValues[dimIndex]);
 			}
 		}
 		else if (extraField.scaleIsRelevant())

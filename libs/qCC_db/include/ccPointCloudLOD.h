@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_POINT_CLOUD_LOD
-#define CC_POINT_CLOUD_LOD
 
 //qCC_db
 #include <ccOctree.h>
@@ -316,5 +315,3 @@ public:
 	ccPointCloudLOD& m_lod;
 	unsigned char m_maxLevel;
 };
-
-#endif //CC_POINT_CLOUD_LOD

@@ -20,6 +20,7 @@
 
 //Local
 #include "E57Header.h"
+#include "E57Version.h"
 
 //libE57Format
 #include <E57Format.h>
@@ -745,14 +746,9 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		root.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));
 
 		// Get ASTM version number supported by library, so can write it into file
-		int astmMajor;
-		int astmMinor;
-		e57::ustring libraryId;
-		e57::Utilities::getVersions(astmMajor, astmMinor, libraryId);
-
-		root.set("versionMajor", e57::IntegerNode(imf, astmMajor));
-		root.set("versionMinor", e57::IntegerNode(imf, astmMinor));
-		root.set("e57LibraryVersion", e57::StringNode(imf, libraryId));
+		root.set("versionMajor", e57::IntegerNode(imf, e57::Version::astmMajor()));
+		root.set("versionMinor", e57::IntegerNode(imf, e57::Version::astmMinor()));
+		root.set("e57LibraryVersion", e57::StringNode(imf, e57::Version::library()));
 
 		// Save a dummy string for coordinate system.
 		/// Really should be a valid WKT string identifying the coordinate reference system (CRS).

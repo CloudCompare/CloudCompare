@@ -206,6 +206,7 @@ jobs:
           -DPLUGIN_IO_QADDITIONAL=ON
           -DPLUGIN_IO_QCORE=ON
           -DPLUGIN_IO_QE57=ON
+          -DE57_RELEASE_LTO=OFF
           -DPLUGIN_IO_QPHOTOSCAN=ON
           -DPLUGIN_IO_QLAS=ON
           -DPLUGIN_IO_QRDB=ON

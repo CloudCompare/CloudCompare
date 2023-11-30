@@ -927,7 +927,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
 		ccGenericPointCloud::VisibilityTableType outVisibilityArray;
-		if (exportSelection) // simply copy the incoming visibility array
+		if (exportSelection) // simply copy the current visibility array
 		{
 			outVisibilityArray = visibilityArray;
 		}
@@ -996,29 +996,22 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 						classifSF->setValue(i, classificationValue);
 					}
 				}
-				else // standard segmentation mode + export mode
+				else if (exportSelection)
 				{
-					unsigned char visibility = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
-					visibilityArray[i] = visibility;
+					// 'export inside selection' mode
+					assert(keepPointsInside == true);
+					visibilityArray[i] = (pointInside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 
-					if (exportSelection) // specify an output visibility array for the export mode (exported points will be hidden until the Segment tool is closed)
+					if (pointInside)
 					{
-						if (outVisibilityArray[i] == CCCoreLib::POINT_VISIBLE)
-						{
-							switch (visibility) {
-							case CCCoreLib::POINT_VISIBLE:
-								outVisibilityArray[i] = CCCoreLib::POINT_HIDDEN;
-								break;
-							default:
-								outVisibilityArray[i] = CCCoreLib::POINT_VISIBLE;
-								break;
-							}
-						}
-						else
-						{
-							outVisibilityArray[i] = CCCoreLib::POINT_HIDDEN;
-						}
+						// (exported points or triangles will be hidden until the Segment tool is closed)
+						outVisibilityArray[i] = CCCoreLib::POINT_HIDDEN;
 					}
+				}
+				else
+				{
+					// standard segmentation mode
+					visibilityArray[i] = (keepPointsInside != pointInside ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE);
 				}
 			}
 		}
@@ -1051,6 +1044,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				}
 				else
 				{
+					ccLog::Warning("Nothing to export, selection is empty");
 					return;
 				}
 			}
@@ -1077,8 +1071,14 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				}
 				else
 				{
+					ccLog::Warning("Nothing to export, selection is empty");
 					return;
 				}
+			}
+			else
+			{
+				ccLog::Warning("Entity type is not supported in 'export selection' mode, only points clouds and meshes are accepted");
+				return;
 			}
 			visibilityArray = outVisibilityArray; // show only the remaining points
 		}

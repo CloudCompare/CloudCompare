@@ -148,16 +148,22 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="exportSelectionButton">
+       <widget class="QToolButton" name="razButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection (E)&lt;/p&gt;&lt;p&gt;Note: the original cloud/mesh is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Clear segmentation</string>
+        </property>
+        <property name="statusTip">
+         <string>Clear segmentation</string>
         </property>
         <property name="text">
-         <string>...</string>
+         <string>raz</string>
         </property>
         <property name="icon">
          <iconset resource="../icons.qrc">
-          <normaloff>:/CC/images/ccClone.png</normaloff>:/CC/images/ccClone.png</iconset>
+          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
         </property>
        </widget>
       </item>
@@ -177,22 +183,16 @@ The classification SF will be directly updated (and created if needed).</string>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="razButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
+       <widget class="QToolButton" name="exportSelectionButton">
         <property name="toolTip">
-         <string>Clear segmentation</string>
-        </property>
-        <property name="statusTip">
-         <string>Clear segmentation</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection (E)&lt;/p&gt;&lt;p&gt;Note: the original cloud/mesh is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
-         <string>raz</string>
+         <string>...</string>
         </property>
         <property name="icon">
          <iconset resource="../icons.qrc">
-          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
+          <normaloff>:/CC/images/exportIcon.png</normaloff>:/CC/images/exportIcon.png</iconset>
         </property>
        </widget>
       </item>

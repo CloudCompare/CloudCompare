@@ -289,6 +289,11 @@ v2.13.alpha (???) - (??/??/????)
 	- Connected Components Extraction:
 		- the parameters are now semi-persistent (= maintained as long as CC is running)
 
+	- Cloud-to-primitive distances:
+		- refreshed dialog
+		- when launching the Cloud-to-mesh distance tool with a primitive as mesh, CC will now suggest the user to use
+			the Cloud-to-primitive distance tool instead
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,21 +17,12 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_PRIMITIVE_DISTANCE_DIALOG_HEADER
-#define CC_PRIMITIVE_DISTANCE_DIALOG_HEADER
-
 //Qt
 #include <QDialog>
-#include <QString>
 
 #include <ui_primitiveDistanceDlg.h>
 
-class ccHObject;
-class ccPointCloud;
-class ccGenericPointCloud;
-class ccGenericMesh;
-
-//! Dialog for cloud sphere or cloud plane comparison setting
+//! Dialog for cloud-to-primitive distances setting
 class ccPrimitiveDistanceDlg: public QDialog, public Ui::primitiveDistanceDlg
 {
 	Q_OBJECT
@@ -39,19 +32,7 @@ public:
 	//! Default constructor
 	ccPrimitiveDistanceDlg(QWidget* parent = nullptr);
 
-	//! Default destructor
-	~ccPrimitiveDistanceDlg() = default;
-
-	bool signedDistances() { return signedDistCheckBox->isChecked(); }
-	bool flipNormals() { return flipNormalsCheckBox->isChecked(); }
-	bool treatPlanesAsBounded() { return treatPlanesAsBoundedCheckBox->isChecked(); }
-public:
-	void applyAndExit();
-	void cancelAndExit();
-
-
-protected:
-	void toggleSigned(bool);
+	inline bool signedDistances() const { return signedDistCheckBox->isChecked(); }
+	inline bool flipNormals() const { return flipNormalsCheckBox->isChecked(); }
+	inline bool treatPlanesAsBounded() const { return treatPlanesAsBoundedCheckBox->isChecked(); }
 };
-
-#endif

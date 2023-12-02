@@ -13,39 +13,38 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                   COPYRIGHT: CloudCompare project                      #
 //#                                                                        #
 //##########################################################################
 
-#include <ui_askThreeDoubleValuesDlg.h>
+#include <ui_setSFAsNormalsDlg.h>
 
 //Qt
-#include <QString>
+#include <QDialog>
 
-//! Generic dialog to query 3 (double) values
-class ccAskThreeDoubleValuesDlg : public QDialog, public Ui::AskThreeDoubleValuesDialog
+class ccPointCloud;
+
+//! Let the user choose up to 3 scalar fields (to be used as Normal components)
+class ccSetSFsAsNormalDialog : public QDialog, public Ui::SetSFsAsNormalDialog
 {
 	Q_OBJECT
 
 public:
 	
 	//! Default constructor
-	ccAskThreeDoubleValuesDlg(	const QString& vName1,
-								const QString& vName2,
-								const QString& vName3,
-								double minVal,
-								double maxVal,
-								double defaultVal1,
-								double defaultVal2,
-								double defaultVal3,
-								int precision = 6,
-								const QString windowTitle = QString(),
-								QWidget* parent = nullptr);
+	ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidget* parent = nullptr);
 
-	//! Enable the checkbox (bottom-left)
-	void showCheckbox(const QString& label, bool state, QString tooltip = QString());
+	//! No SF index
+	static const int SF_INDEX_NO   = -1;
+	//! 'Zero' SF index
+	static const int SF_INDEX_ZERO = -2;
+	//! 'One' SF index
+	static const int SF_INDEX_ONE  = -3;
 
-	//! Returns the checkbox state
-	bool getCheckboxState() const;
+	//! Sets the 3 SF indexes
+	void setSFIndexes(int sf1Index, int sf2Index, int sf3Index);
+
+	//! Returns the 3 SF indexes
+	void getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const;
 };
 

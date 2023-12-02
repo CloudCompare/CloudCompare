@@ -84,6 +84,9 @@ v2.13.alpha (???) - (??/??/????)
 		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
 		- works also on cylinders
 
+	- Edit > Normals > Set SF(s) as normal (or Edit > Scalar fields > Set SF(s) as normal)
+		- allows to set normals from scalar fields (or 0 or 1)
+
 	- New plugin: q3DMASC
 		- 3DMASC is an advanced plugin for 3D point cloud classification, that uses Multiple Attributes, Scales and Clouds.
 		  It is possible to use it with the GUI but also to call it with the command line.

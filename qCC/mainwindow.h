@@ -375,6 +375,7 @@ private:
 	void doMeshTwoPolylines();
 	void doActionExportCoordToSF();
 	void doActionExportNormalToSF();
+	void doActionSetSFsAsNormal();
 	void doComputeBestFitBB();
 	void doActionCrop();
 

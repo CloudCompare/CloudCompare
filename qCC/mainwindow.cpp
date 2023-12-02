@@ -531,6 +531,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionConvertNormalToHSV,			&QAction::triggered, this, &MainWindow::doActionConvertNormalsToHSV);
 	connect(m_UI->actionConvertNormalToDipDir,		&QAction::triggered, this, &MainWindow::doActionConvertNormalsToDipDir);
 	connect(m_UI->actionExportNormalToSF,			&QAction::triggered, this, &MainWindow::doActionExportNormalToSF);
+	connect(m_UI->actionSetSFsAsNormal,				&QAction::triggered, this, &MainWindow::doActionSetSFsAsNormal);
 	connect(m_UI->actionOrientNormalsMST,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsMST);
 	connect(m_UI->actionOrientNormalsFM,			&QAction::triggered, this, &MainWindow::doActionOrientNormalsFM);
 	connect(m_UI->actionShiftPointsAlongNormals,	&QAction::triggered, this, &MainWindow::doActionShiftPointsAlongNormals);
@@ -4394,6 +4395,26 @@ void MainWindow::doActionExportCoordToSF()
 void MainWindow::doActionExportNormalToSF()
 {
 	if (!ccEntityAction::exportNormalToSF(m_selectedEntities, this))
+	{
+		return;
+	}
+
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionSetSFsAsNormal()
+{
+	if (!haveOneSelection())
+	{
+		if (haveSelection())
+			ccConsole::Error(tr("Select only one cloud or one mesh!"));
+		return;
+	}
+
+	ccHObject* ent = m_selectedEntities.front();
+
+	if (!ccEntityAction::setSFsAsNormal(ent, this))
 	{
 		return;
 	}
@@ -10955,6 +10976,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionAddClassificationSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionSetSFsAsNormal->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionShowWaveDialog->setEnabled(exactlyOneCloud);
 	m_UI->actionCompressFWFData->setEnabled(atLeastOneCloud);
 

@@ -58,7 +58,7 @@
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
-#include "ccSetSFsAsNormalDlg.h""
+#include "ccSetSFsAsNormalDlg.h"
 #include "ccStatisticalTestDlg.h"
 
 #include "ccCommon.h"

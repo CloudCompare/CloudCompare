@@ -47,4 +47,3 @@ public:
 	//! Returns the 3 SF indexes
 	void getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const;
 };
-

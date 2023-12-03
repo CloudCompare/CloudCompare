@@ -10886,7 +10886,6 @@ void MainWindow::disableAllBut(ccGLWindowInterface* win)
 
 void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 {
-	ccLog::Print(QString("primitiveCount = %1").arg(selInfo.primitiveCount));
 	bool dbIsEmpty = (!m_ccRoot || !m_ccRoot->getRootEntity() || m_ccRoot->getRootEntity()->getChildrenNumber() == 0);
 	bool atLeastOneEntity = (selInfo.selCount > 0);
 	bool atLeastOneCloud = (selInfo.cloudCount > 0);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>310</width>
-    <height>24</height>
+    <width>411</width>
+    <height>26</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,7 +43,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -148,21 +148,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="addClassToolButton">
-        <property name="toolTip">
-         <string>Set the class of points inside the polyline (C).
-The classification SF will be directly updated (and created if needed).</string>
-        </property>
-        <property name="statusTip">
-         <string>Set the class of points inside the polyline (C)</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../icons.qrc">
-          <normaloff>:/CC/images/hashtag.png</normaloff>:/CC/images/hashtag.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QToolButton" name="razButton">
         <property name="enabled">
          <bool>false</bool>
@@ -183,7 +168,42 @@ The classification SF will be directly updated (and created if needed).</string>
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="addClassToolButton">
+        <property name="toolTip">
+         <string>Set the class of points inside the polyline (C).
+The classification SF will be directly updated (and created if needed).</string>
+        </property>
+        <property name="statusTip">
+         <string>Set the class of points inside the polyline (C)</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/hashtag.png</normaloff>:/CC/images/hashtag.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="exportSelectionButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection (E)&lt;/p&gt;&lt;p&gt;Note: the original cloud/mesh is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/exportIcon.png</normaloff>:/CC/images/exportIcon.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="optionsButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="toolTip">
          <string>Segmentation Options</string>
         </property>
@@ -299,6 +319,7 @@ The classification SF will be directly updated (and created if needed).</string>
   </action>
  </widget>
  <resources>
+  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections/>

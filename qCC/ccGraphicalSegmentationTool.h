@@ -30,6 +30,8 @@
 //GUI
 #include <ui_graphicalSegmentationDlg.h>
 
+#include <set>
+
 class ccPolyline;
 class ccPointCloud;
 class ccGLWindowInterface;
@@ -86,7 +88,8 @@ protected:
 
 	void segmentIn();
 	void segmentOut();
-	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE);
+	void exportSelection();
+	void segment(bool keepPointsInside, ScalarType classificationValue = CCCoreLib::NAN_VALUE, bool exportSelection = false);
 	void reset();
 	void options();
 	void apply();
@@ -148,6 +151,12 @@ protected:
 
 	//! Whether to delete hidden parts after segmentation
 	bool m_deleteHiddenParts;
+
+	//! In export mode, entities in this set will be enabled/visible
+	std::set<ccHObject*> m_enableOnClose;
+
+	//! In export mode, entities in this set will be disabled/invisible
+	std::set<ccHObject*> m_disableOnClose;
 };
 
 #endif //CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

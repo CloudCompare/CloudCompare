@@ -1198,8 +1198,16 @@ void ccPointPairRegistrationDlg::showReferenceEntities(bool state)
 	}
 }
 
-bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab)
+bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
+														double& rms,
+														bool autoUpdateTab,
+														QStringList* report/*=nullptr*/ )
 {
+	if (report)
+	{
+		report->clear();
+	}
+
 	if (m_alignedEntities.empty())
 	{
 		assert(false);
@@ -1258,12 +1266,19 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjection
 	//compute RMS
 	rms = CCCoreLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
 
-	if (autoUpdateTab)
+	if (autoUpdateTab || report)
 	{
-		//display resulting RMS in colums
+		//display resulting RMS in the right column
 		if (rms >= 0)
 		{
 			assert(m_alignedPoints.size() == m_refPoints.size());
+
+			if (report)
+			{
+				// add header
+				report->append("Ref.name, Ref.x, Ref.y, Ref.z, Aligned.name, Aligned.x, Aligned.y, Aligned.z, Distance");
+			}
+
 			for (unsigned i = 0; i < m_alignedPoints.size(); ++i)
 			{
 				const CCVector3* Ri = m_refPoints.getPoint(i);
@@ -1271,12 +1286,57 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjection
 				CCVector3d Lit = trans.apply(*Li);
 				double dist = (Ri->toDouble() - Lit).norm();
 
-				QTableWidgetItem* itemA = new QTableWidgetItem();
-				itemA->setData(Qt::EditRole, dist);
-				alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
-				QTableWidgetItem* itemR = new QTableWidgetItem();
-				itemR->setData(Qt::EditRole, dist);
-				refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
+				if (report)
+				{
+					// create a new line in the report
+					QString alignedName;
+					auto* alignedHeader = alignedPointsTableWidget->verticalHeaderItem(static_cast<int>(i));
+					if (alignedHeader)
+					{
+						alignedName = alignedHeader->text();
+					}
+					else
+					{
+						assert(false);
+						alignedName = QString("A%1").arg(i);
+					}
+
+					QString refName;
+					auto* refHeader = refPointsTableWidget->verticalHeaderItem(static_cast<int>(i));
+					if (refHeader)
+					{
+						refName = refHeader->text();
+					}
+					else
+					{
+						assert(false);
+						refName = QString("R%1").arg(i);
+					}
+
+					QString reportLine = QString("%1; %2; %3; %4").arg(refName)
+						.arg(Ri->x)
+						.arg(Ri->y)
+						.arg(Ri->z);
+
+					reportLine += QString("; %1; %2; %3; %4").arg(alignedName)
+						.arg(Lit.x)
+						.arg(Lit.y)
+						.arg(Lit.z);
+
+					reportLine += QString("; %1").arg(dist);
+
+					report->append(reportLine);
+				}
+
+				if (autoUpdateTab)
+				{
+					QTableWidgetItem* itemA = new QTableWidgetItem();
+					itemA->setData(Qt::EditRole, dist);
+					alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
+					QTableWidgetItem* itemR = new QTableWidgetItem();
+					itemR->setData(Qt::EditRole, dist);
+					refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
+				}
 			}
 		}
 		else
@@ -1291,10 +1351,10 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCCoreLib::PointProjection
 
 void ccPointPairRegistrationDlg::clearRMSColumns()
 {
-	for (int i=0; alignedPointsTableWidget->rowCount(); ++i)
-		alignedPointsTableWidget->setItem(i,RMS_COL_INDEX,new QTableWidgetItem());
-	for (int i=0; refPointsTableWidget->rowCount(); ++i)
-		refPointsTableWidget->setItem(i,RMS_COL_INDEX,new QTableWidgetItem());
+	for (int i = 0; alignedPointsTableWidget->rowCount(); ++i)
+		alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, new QTableWidgetItem());
+	for (int i = 0; refPointsTableWidget->rowCount(); ++i)
+		refPointsTableWidget->setItem(i, RMS_COL_INDEX, new QTableWidgetItem());
 }
 
 void ccPointPairRegistrationDlg::resetTitle()
@@ -1335,7 +1395,8 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 void ccPointPairRegistrationDlg::align()
 {
 	CCCoreLib::PointProjectionTools::Transformation trans;
-	double rms;
+	double rms = std::numeric_limits<double>::quiet_NaN();
+
 
 	//reset title
 	resetTitle();
@@ -1363,17 +1424,19 @@ void ccPointPairRegistrationDlg::align()
 				trans.R.scale(trans.s);
 
 			QString scaleString = QString("Scale: %1").arg(trans.s);
-			ccLog::Print(QString("[PointPairRegistration] ")+scaleString);
+			ccLog::Print(QString("[PointPairRegistration] ") + scaleString);
 		}
 		else
 		{
-			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
+			ccLog::Print(tr("[PointPairRegistration] Scale: fixed (1.0)"));
 		}
 
 		ccGLMatrix transMat = FromCCLibMatrix<double, float>(trans.R, trans.T);
 		//...virtually
 		for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
+		{
 			it.key()->setGLTransformation(transMat);
+		}
 		m_alignedPoints.setGLTransformation(transMat);
 		//DGM: we have to 'counter-scale' the markers (otherwise they might appear very big or very small!)
 		for (unsigned i = 0; i < m_alignedPoints.getChildrenNumber(); ++i)
@@ -1381,7 +1444,7 @@ void ccPointPairRegistrationDlg::align()
 			ccHObject* child = m_alignedPoints.getChild(i);
 			if (child->isA(CC_TYPES::LABEL_2D))
 			{
-				static_cast<cc2DLabel*>(child)->setRelativeMarkerScale(1.0f/static_cast<float>(trans.s));
+				static_cast<cc2DLabel*>(child)->setRelativeMarkerScale(static_cast<float>(1.0 / trans.s));
 			}
 		}
 
@@ -1441,16 +1504,24 @@ void ccPointPairRegistrationDlg::apply()
 {
 	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms = -1.0;
-	
-	if (callHornRegistration(trans, rms, false))
+	QStringList report;
+
+	if (callHornRegistration(trans, rms, false, &report))
 	{
 		QStringList summary;
 		if (rms >= 0)
 		{
 			QString rmsString = QString("Final RMS: %1").arg(rms);
-			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
+			report << rmsString;
 			summary << rmsString;
 			summary << "----------------";
+
+			//output the report to the Console/Log
+			ccLog::Print("[PointPairRegistration] Final alignment report:");
+			for (const QString& line : report)
+			{
+				ccLog::Print(line);
+			}
 		}
 
 		//apply (scaled) transformation (if not fixed)

@@ -281,6 +281,7 @@ v2.13.alpha (???) - (??/??/????)
 		- when using a reference entity having a defined Global Shift & Scale the registration matrix
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
+		- the Align tool will now output the list of points used and the final distance between them in the Console
 
 	- Salome/.poly files:
 		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close

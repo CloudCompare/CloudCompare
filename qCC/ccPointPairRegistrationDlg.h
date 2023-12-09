@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef POINT_PAIR_REGISTRATION_DIALOG_HEADER
-#define POINT_PAIR_REGISTRATION_DIALOG_HEADER
-
 //Local
 #include "ccMainAppInterface.h"
 #include "ccOverlayDialog.h"
@@ -32,12 +31,12 @@
 //Qt generated dialog
 #include <ui_pointPairRegistrationDlg.h>
 
-
 class ccGenericPointCloud;
 class ccGenericGLDisplay;
 class ccGLWindowInterface;
 class cc2DLabel;
 class ccPickingHub;
+class QStringList;
 
 //Dialog for the point-pair registration algorithm (Horn)
 class ccPointPairRegistrationDlg : public ccOverlayDialog, public ccPickingListener, Ui::pointPairRegistrationDlg
@@ -112,7 +111,10 @@ protected:
 	void onPointCountChanged();
 
 	//! Calls Horn registration (CCCoreLib::HornRegistrationTools)
-	bool callHornRegistration(CCCoreLib::PointProjectionTools::Transformation& trans, double& rms, bool autoUpdateTab);
+	bool callHornRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
+								double& rms,
+								bool autoUpdateTab,
+								QStringList* report = nullptr);
 
 	//! Clears the RMS rows
 	void clearRMSColumns();
@@ -197,5 +199,3 @@ protected: //members
 	//! Main application interface
 	ccMainAppInterface* m_app;
 };
-
-#endif //POINT_PAIR_REGISTRATION_DIALOG_HEADER

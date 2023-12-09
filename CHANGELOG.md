@@ -298,6 +298,9 @@ v2.13.alpha (???) - (??/??/????)
 		- when launching the Cloud-to-mesh distance tool with a primitive as mesh, CC will now suggest the user to use
 			the Cloud-to-primitive distance tool instead
 
+	- Display options:
+		- the default thresholds to activate the LoD mechanism are now 100M. points and 5M. triangles
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

@@ -137,6 +137,8 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 
 	if (primitive)
 	{
+		primitive->setDrawingPrecision(precisionSpinBox->value());
+
 		m_win->addToDB(primitive, true, true, true);
 	}
 }

@@ -4,10 +4,13 @@ option( PLUGIN_IO_QSTEP "Check to install the STEP reading file plugin" OFF )
 
 if ( PLUGIN_IO_QSTEP )
 
-	set( OPENCASCADE_INC_DIR "" CACHE PATH "OpenCascade include dir" )
-	set( OPENCASCADE_LIB_DIR "" CACHE PATH "OpenCascade library dir" )
-	set( OPENCASCADE_DLL_DIR "" CACHE PATH "OpenCascade dll dir (Windows)" )
-	set( OPENCASCADE_TBB_DLL_DIR "" CACHE PATH "TBB dll dir (Windows)" )
+	if( UNIX )
+		set( OPENCASCADE_INC_DIR "" CACHE PATH "OpenCascade include dir" )
+		set( OPENCASCADE_LIB_DIR "" CACHE PATH "OpenCascade library dir" )
+	elseif( WIN32 )
+		set( OPENCASCADE_DLL_DIR "" CACHE PATH "OpenCascade dll dir" )
+		set( OPENCASCADE_TBB_DLL_DIR "" CACHE PATH "TBB dll dir" )
+	endif()
 	
 	if( NOT OPENCASCADE_INC_DIR )
 		message( FATAL_ERROR "OpenCascade include dir not specified (OPENCASCADE_INC_DIR)" )
@@ -27,8 +30,8 @@ if ( PLUGIN_IO_QSTEP )
 	
 	set( OC_LIBRARIES TKSTEP TKSTEPBase TKSTEPAttr TKSTEP209 TKShHealing TKTopAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKernel TKXSBase TKGeomAlgo TKMesh )
 	
-    target_link_directories( ${PROJECT_NAME} PRIVATE ${OPENCASCADE_LIB_DIR} )
-	target_link_libraries( ${PROJECT_NAME} ${OC_LIBRARIES} )
+    	target_link_directories( ${PROJECT_NAME} PRIVATE ${OPENCASCADE_LIB_DIR} )
+		target_link_libraries( ${PROJECT_NAME} ${OC_LIBRARIES} )
 
 	if( WIN32 )
 		if( NOT OPENCASCADE_DLL_DIR )

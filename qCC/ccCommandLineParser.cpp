@@ -733,6 +733,7 @@ void ccCommandLineParser::registerBuiltInCommands()
     registerCommand(Command::Shared(new CommandSFOperationSF));
     registerCommand(Command::Shared(new CommandSFInterpolation));
     registerCommand(Command::Shared(new CommandColorInterpolation));
+	registerCommand(Command::Shared(new CommandRenameEntities));
 	registerCommand(Command::Shared(new CommandSFRename));
 	registerCommand(Command::Shared(new CommandSFAddConst));
 	registerCommand(Command::Shared(new CommandSFAddId));

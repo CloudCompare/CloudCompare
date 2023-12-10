@@ -426,6 +426,13 @@ struct CommandColorInterpolation : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandRenameEntities : public ccCommandLineInterface::Command
+{
+	CommandRenameEntities();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandSFRename : public ccCommandLineInterface::Command
 {
 	CommandSFRename();

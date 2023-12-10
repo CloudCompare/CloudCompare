@@ -120,6 +120,7 @@ constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]		= "DEST_IS_FIRST";
 constexpr char COMMAND_SF_ADD_CONST[]					= "SF_ADD_CONST";
 constexpr char COMMAND_SF_ADD_ID[]						= "SF_ADD_ID";
 constexpr char COMMAND_SF_ADD_ID_AS_INT[]				= "AS_INT";
+constexpr char COMMAND_RENAME_ENTITIES[]				= "RENAME_ENTITIES"; //+ base name
 constexpr char COMMAND_RENAME_SF[]						= "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]					= "COORD_TO_SF";
 constexpr char COMMAND_SF_TO_COORD[]					= "SF_TO_COORD";
@@ -5331,6 +5332,73 @@ bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
 	entities.push_back(cmd.clouds()[1].pc);
 
 	return 	ccEntityAction::interpolateColors(entities, cmd.widgetParent());
+}
+
+CommandRenameEntities::CommandRenameEntities()
+	: ccCommandLineInterface::Command(QObject::tr("Rename entities"), COMMAND_RENAME_ENTITIES)
+{}
+
+bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[RENAME ENTITIES]"));
+
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: Name after \"-%1\"").arg(COMMAND_RENAME_ENTITIES));
+	}
+
+	QString newBaseName = cmd.arguments().takeFirst();
+	//Validate if the given name contains any breaking characters for NTFS filesystem at least
+	QRegExp rx("[^:/\\\\*?\"|<>]*");
+	QRegExpValidator v(rx, 0);
+	int pos = 0;
+	if (!v.validate(newBaseName, pos))
+	{
+		assert(false);
+		return cmd.error("Name cannot contain any of these characters: :/\\\*?\"|<>");
+	}
+
+	//apply operation on clouds
+	int index = 1;
+	size_t nrOfEntities = cmd.clouds().size() + cmd.meshes().size();
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		if (desc.pc)
+		{
+			QString currentCloudName = newBaseName;
+			if (nrOfEntities > 1)
+			{
+				currentCloudName += "-" + QString::number(index).rightJustified(3, '0');
+			}
+			cmd.print("Cloud '" + desc.pc->getName() + "' renamed to '" + currentCloudName + "'");
+			//rename the Point Cloud entity
+			desc.pc->setName(currentCloudName);
+			//rename the Root entity
+			desc.basename = currentCloudName;
+			++index;
+		}
+	}
+
+	//apply operation on meshes
+	for (CLMeshDesc& desc : cmd.meshes())
+	{
+		if (desc.mesh)
+		{
+			QString currentMeshName  = newBaseName;
+			if (nrOfEntities > 1)
+			{
+				currentMeshName += "-" + QString::number(index).rightJustified(3, '0');
+			}
+			cmd.error("Mesh '" + desc.mesh->getName() + "' renamed to '" + currentMeshName + "'");
+			//rename the Mesh entity
+			desc.mesh->setName(currentMeshName);
+			//rename the Root entity
+			desc.basename = currentMeshName;
+			++index;
+		}
+	}
+
+	return true;
 }
 
 CommandSFRename::CommandSFRename()

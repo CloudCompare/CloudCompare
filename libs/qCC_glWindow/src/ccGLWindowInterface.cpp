@@ -5203,7 +5203,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	bool oculusMode = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS);
 	if (currentFBO && renderingParams.useFBO)
 	{
-		//we disable fbo (if any)
+		//we disable the FBO (if any)
 		if (renderingParams.drawBackground || renderingParams.draw3DPass)
 		{
 			logGLError("ccGLWindow::fullRenderingPass (FBO stop)");
@@ -5229,7 +5229,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 				//apply shader
 				m_activeGLFilter->shade(depthTex, colorTex, parameters);
 				logGLError("ccGLWindow::paintGL/glFilter shade");
-				bindFBO(nullptr); //in case the active filter has used a FBOs!
+				bindFBO(nullptr); //in case the active filter has used a FBO!
 
 				//if capture mode is ON: we only want to capture it, not to display it
 				if (!m_captureMode.enabled)

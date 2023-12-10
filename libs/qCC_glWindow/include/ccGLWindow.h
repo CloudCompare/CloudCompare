@@ -42,7 +42,7 @@ public:
 	inline QFont getFont() const override { return font(); }
 	inline QOpenGLContext* getOpenGLContext() const override { return context(); }
 	inline void setWindowCursor(const QCursor& cursor) override { setCursor(cursor); }
-	inline void doMakeCurrent() override { makeCurrent();  }
+	void doMakeCurrent() override;
 	inline QObject* asQObject() override { return this; }
 	inline const QObject* asQObject() const override { return this; }
 	inline QString getWindowTitle() const override { return windowTitle(); }
@@ -64,13 +64,13 @@ public:
 	inline QSize qtSize() const override { return QOpenGLWidget::size(); }
 	bool enableStereoMode(const StereoParams& params) override;
 
-public:
-
 	//inherited from ccGenericGLDisplay
 	void requestUpdate() override;
-	
+
+	//! Creates an instance
 	static void Create(ccGLWindow*& window, QWidget*& widget, bool silentInitialization = false);
 
+	//! Casts a widget to a ccGLWindow instance (if possible)
 	static ccGLWindow* FromWidget(QWidget* widget);
 
 protected: //rendering
@@ -82,11 +82,10 @@ protected: //rendering
 	inline void doShowFullScreen() override { showFullScreen(); }
 	inline void doShowNormal() override { showNormal(); }
 	
-	//reimplemented from QOpenGLWidget
-	//Because QOpenGLWidget::makeCurrent silently binds the widget's own FBO,
-	//we need to automatically bind our own afterwards!
-	//(Sadly QOpenGLWidget::makeCurrent is not virtual)
-	void makeCurrent();
+	//! Don't call makeCurrent() on this instance, as the FBO would not properly be managed
+	/** Use doMakeCurrent() instaad.
+	**/
+	void makeCurrent() = delete;
 
 protected: //other methods
 

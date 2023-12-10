@@ -72,7 +72,9 @@ ccGLWindowStereo::~ccGLWindowStereo()
 	uninitializeGL();
 
 	if (m_context)
+	{
 		m_context->doneCurrent();
+	}
 
 	delete m_device;
 	m_device = nullptr;
@@ -103,7 +105,7 @@ void ccGLWindowStereo::setParentWidget(QWidget* widget)
 	}
 }
 
-void ccGLWindowStereo::makeCurrent()
+void ccGLWindowStereo::doMakeCurrent()
 {
 	if (m_context)
 	{
@@ -227,8 +229,8 @@ bool ccGLWindowStereo::initPaintGL()
 	{
 		return false;
 	}
-	assert(m_context);
-	makeCurrent();
+
+	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
@@ -247,7 +249,14 @@ void ccGLWindowStereo::swapGLBuffers()
 #endif
 		)
 	{
-		m_context->swapBuffers(this);
+		if (m_context)
+		{
+			m_context->swapBuffers(this);
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 }
 

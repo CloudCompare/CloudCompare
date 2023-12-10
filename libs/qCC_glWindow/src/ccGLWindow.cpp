@@ -71,7 +71,7 @@ ccGLWindow::~ccGLWindow()
 	cancelScheduledRedraw();
 }
 
-void ccGLWindow::makeCurrent()
+void ccGLWindow::doMakeCurrent()
 {
 	QOpenGLWidget::makeCurrent();
 

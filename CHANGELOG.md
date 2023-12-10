@@ -42,6 +42,9 @@ v2.13.alpha (???) - (??/??/????)
 		- DEBUG
 			- display various information to help one debug and tweak the command line
 			- can be placed at difference positions
+		- RENAME_ENTITIES {base name}
+			- rename all loaded entities (clouds or meshes) with the provided base name.
+				A numerical suffix is added if multiple entities are loaded.
 
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

@@ -5355,7 +5355,7 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 	if (!v.validate(newBaseName, pos))
 	{
 		assert(false);
-		return cmd.error("Name cannot contain any of these characters: :/\\\*?\"|<>");
+		return cmd.error("Name cannot contain any of these characters: :/\\*?\"|<>");
 	}
 
 	//apply operation on clouds

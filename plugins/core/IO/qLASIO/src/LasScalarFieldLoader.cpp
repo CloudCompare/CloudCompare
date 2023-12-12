@@ -422,7 +422,8 @@ void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraFiel
 				outputValues[dimIndex] = static_cast<ScalarType>(inputValues[dimIndex]);
 			}
 		}
-		else if (extraField.scaleIsRelevant())
+
+		if (extraField.scaleIsRelevant())
 		{
 			double scaledValue     = (inputValues[dimIndex] * extraField.scales[dimIndex]) + (extraField.offsets[dimIndex]);
 			outputValues[dimIndex] = static_cast<ScalarType>(scaledValue);

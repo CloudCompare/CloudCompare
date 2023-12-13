@@ -689,6 +689,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 {
 	registerCommand(Command::Shared(new CommandDebugCmdLine));
 	registerCommand(Command::Shared(new CommandLoad));
+	registerCommand(Command::Shared(new CommandLoadCommandFile));
 	registerCommand(Command::Shared(new CommandSubsample));
 	registerCommand(Command::Shared(new CommandExtractCCs));
 	registerCommand(Command::Shared(new CommandCurvature));

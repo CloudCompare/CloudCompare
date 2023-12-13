@@ -53,6 +53,7 @@ constexpr char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 constexpr char COMMAND_HIERARCHY_EXPORT_FORMAT[]		= "H_EXPORT_FMT";
 constexpr char COMMAND_OPEN[]							= "O";				//+file name
 constexpr char COMMAND_OPEN_SKIP_LINES[]				= "SKIP";			//+number of lines to skip
+constexpr char COMMAND_COMMAND_FILE[]					= "COMMAND_FILE";	//+file name
 constexpr char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 constexpr char COMMAND_EXTRACT_CC[]						= "EXTRACT_CC";
 constexpr char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS)
@@ -580,6 +581,134 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 	if (!cmd.importFile(filename, globalShiftOptions))
 	{
 		return false;
+	}
+
+	return true;
+}
+
+CommandLoadCommandFile::CommandLoadCommandFile()
+	: ccCommandLineInterface::Command(QObject::tr("CommandFile"), COMMAND_COMMAND_FILE)
+{}
+
+bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[LOADING COMMANDS FROM FILE]"));
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_COMMAND_FILE));
+	}
+	QString commandFilePath = cmd.arguments().takeFirst();
+
+	//check if file exists
+	if (!QFileInfo::exists(commandFilePath))
+	{
+		return cmd.error(QObject::tr("Command file not exists \"-%1\"").arg(commandFilePath));
+	}
+
+	QFile commandFile(commandFilePath);
+	if (commandFile.open(QIODevice::ReadOnly))
+	{
+		int insertingIndex = 0;
+		QTextStream in(&commandFile);
+		while (!in.atEnd())
+		{
+			QString line = in.readLine();
+			QStringList argumentsInLine = line.split(" ");
+			QStringList processedArguments;
+
+			// 'massage' the arguments to handle single/double quotes
+			//TODO handle escaped quotes/spaces
+			{
+				bool insideSingleQuoteSection = false;
+				bool insideDoubleQuoteSection = false;
+				QString buffer;
+
+				static const QChar SingleQuote{ '\'' };
+				static const QChar DoubleQuote{ '"' };
+				for (int currentArgIndex = 0; currentArgIndex < argumentsInLine.size(); ++currentArgIndex)
+				{
+					QString arg = argumentsInLine[currentArgIndex];
+					//handle singleQuotes
+					{
+						// argument starts with a single quote and not inside double quotes
+						if (!insideSingleQuoteSection && !insideDoubleQuoteSection && arg.startsWith(SingleQuote))
+						{
+							if (arg.endsWith(SingleQuote))
+							{
+								arg=arg.replace(SingleQuote,"");
+								// nothing to do, non*truncated argument
+							}
+							else
+							{
+								// we'll collect the next pieces to get the full argument
+								insideSingleQuoteSection = true;
+								buffer = arg.mid(1); // remove the single quote
+							}
+						}
+						else if (insideSingleQuoteSection)
+						{
+							buffer += QChar(' ') + arg; // append the current argument to the previous one(s)
+							if (arg.endsWith(SingleQuote))
+							{
+								insideSingleQuoteSection = false;
+								arg = buffer.left(buffer.length() - 1); // remove the single quote
+								arg.replace(SingleQuote, "");
+							}
+						}
+					}
+					//handle doubleQuotes
+					{
+						// argument starts with a double quote and not inside single quotes
+						if (!insideSingleQuoteSection && !insideDoubleQuoteSection && arg.startsWith(DoubleQuote))
+						{
+							if (arg.endsWith(DoubleQuote))
+							{
+								arg = arg.replace(DoubleQuote, "");
+								// nothing to do, non*truncated argument
+							}
+							else
+							{
+								// we'll collect the next pieces to get the full argument
+								insideDoubleQuoteSection = true;
+								buffer = arg.mid(1); // remove the double quote
+							}
+						}
+						else if (insideDoubleQuoteSection)
+						{
+							buffer += QChar(' ') + arg; // append the current argument to the previous one(s)
+							if (arg.endsWith(DoubleQuote))
+							{
+								insideDoubleQuoteSection = false;
+								arg = buffer.left(buffer.length() - 1); // remove the double quote
+								arg.replace(DoubleQuote, "");
+							}
+						}
+					}
+					if (!insideSingleQuoteSection && !insideDoubleQuoteSection)
+					{
+						processedArguments.append(arg);
+					}
+				}
+				if (insideSingleQuoteSection||insideDoubleQuoteSection)
+				{
+					// the single/double quote section was not closed...
+					cmd.warning("Probably malformed command (missing closing quote)");
+					// ...still, we'll try to proceed
+					processedArguments.append(buffer);
+				}
+			}
+
+			//inject back all the arguments to the cmd.arguments()
+			while (!processedArguments.isEmpty()) {
+				QString processedArg = processedArguments.takeFirst();
+				if (processedArg != "") {
+					cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex).arg(processedArg));
+					cmd.arguments().insert(insertingIndex, processedArg);
+					insertingIndex++;
+				}
+			}
+		}
+		commandFile.close();
 	}
 
 	return true;

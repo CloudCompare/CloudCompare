@@ -12,7 +12,6 @@ v2.13.alpha (???) - (??/??/????)
 		- one check box to toggle the display
 		- one double spin box to choose the length of the normals (1 by default)
 		- one combo box to choose the color of the normals
-	
 
 	- New command line option:
 		- SF_ADD_ID allows to add the index of the point as a scalar field (initially as a float32, so there is a loss of accuracy for values above 16777215)
@@ -51,7 +50,6 @@ v2.13.alpha (???) - (??/??/????)
 				multiple arguments in each line allowed
 				handle quoted arguments
 				commands after this one will run after all commands in the file have been processed
-
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
@@ -110,6 +108,11 @@ v2.13.alpha (???) - (??/??/????)
 		- by Zhouxin Xi and Chris Hopkinson, Artemis Lab, Department of Geography & Environment, University of Lethbridge (Canada)
 
 - Improvements:
+
+	- The ASCII file loading dialog has been improved:
+		- a 'reset all' button was added to reset all column roles at once
+		- the dialog should be smarter when restoring the previously set configuration
+		- the 'Apply All' button should now work for more than two files ;)
 
 	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified
 		- no need to manage/compile 2 different versions anymore

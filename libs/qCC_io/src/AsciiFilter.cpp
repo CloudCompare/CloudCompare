@@ -175,14 +175,14 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 					ccHObject* child = entity->getChild(i);
 					if (child->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
-						QString subFilename = path+QString("/");
+						QString subFilename = path + QString("/");
 						subFilename += QString(baseName).replace("cloudname", child->getName(), Qt::CaseInsensitive);
 						counter++;
 						assert(counter <= cloudCount);
 						subFilename += QString("_%1").arg(cloudCount - counter, 6, 10, QChar('0'));
 						if (!extension.isEmpty())
 							subFilename += QString(".") + extension;
-						
+
 						CC_FILE_ERROR result = saveToFile(entity->getChild(i), subFilename, parameters);
 						if (result != CC_FERR_NO_ERROR)
 						{
@@ -190,7 +190,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 						}
 						else
 						{
-							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName(),subFilename));
+							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName(), subFilename));
 						}
 					}
 					else
@@ -449,32 +449,13 @@ CC_FILE_ERROR AsciiFilter::loadStream(	QTextStream& stream,
 		return CC_FERR_NO_LOAD;
 	}
 
-	AsciiOpenDlg openDialog(parameters.parentWidget);
-	openDialog.setInput(filenameOrTitle, &stream);
-
 	bool forceDialogDisplay = parameters.alwaysDisplayLoadDialog;
-	//if we should try to avoid displaying the dialog
-	//DGM: actually, we respect the wish of the caller by default ;)
-	//if (!forceDialogDisplay)
-	//{
-	//	//we must check that the automatically guessed sequence is ok
-	//	if (!openDialog.safeSequence())
-	//	{
-	//		forceDialogDisplay = true;
-	//	}
-	//}
 
-	if (openDialog.restorePreviousContext())
+	AsciiOpenDlg openDialog(parameters.parentWidget);
+	if (openDialog.setInput(filenameOrTitle, &stream))
 	{
-		//if we can/should use the previous sequence ('Apply all')
+		//if we should use the previous sequence ('Apply all')
 		forceDialogDisplay = false;
-	}
-
-	if (parameters.sessionStart)
-	{
-		//we do this AFTER calling restorePreviousContext because it may still be good that the previous
-		//configuration is restored even though the user needs to confirm it
-		AsciiOpenDlg::ResetApplyAll();
 	}
 
 	QString dummyStr;

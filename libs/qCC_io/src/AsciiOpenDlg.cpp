@@ -78,7 +78,6 @@ struct AsciiOpenContext
 	//! Restores state
 	void load(Ui_AsciiOpenDialog* ui) const
 	{
-		ui->extractSFNamesFrom1stLineCheckBox->setChecked(extractSFNameFrom1stLine);
 		ui->maxCloudSizeDoubleSpinBox->setValue(maxPointCountPerCloud);
 		ui->lineEditSeparator->blockSignals(true);
 		ui->lineEditSeparator->setText(separator);
@@ -86,6 +85,8 @@ struct AsciiOpenContext
 		ui->spinBoxSkipLines->blockSignals(true);
 		ui->spinBoxSkipLines->setValue(skipLines);
 		ui->spinBoxSkipLines->blockSignals(false);
+		ui->extractSFNamesFrom1stLineCheckBox->setChecked(extractSFNameFrom1stLine);
+		ui->extractSFNamesFrom1stLineCheckBox->setEnabled(skipLines > 0);
 		ui->commaDecimalCheckBox->blockSignals(true);
 		ui->commaDecimalCheckBox->setChecked(commaDecimal);
 		ui->commaDecimalCheckBox->setEnabled(separator != ',');
@@ -102,27 +103,26 @@ struct AsciiOpenContext
 };
 
 //! Semi-persistent loading context
-static AsciiOpenContext s_asciiOpenContext;
+static QScopedPointer<AsciiOpenContext> s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	: QDialog(parent)
 	, m_ui(new Ui_AsciiOpenDialog)
-	, m_skippedLines(0)
 	, m_separator(' ')
 	, m_averageLineSize(-1.0)
 	, m_columnsCount(0)
 {
 	m_ui->setupUi(this);
 
-	//spinBoxSkipLines->setValue(0);
 	m_ui->commentLinesSkippedLabel->hide();
 
-	connect(m_ui->applyButton,		&QPushButton::clicked,		this, &AsciiOpenDlg::apply);
-	connect(m_ui->applyAllButton,	&QPushButton::clicked,		this, &AsciiOpenDlg::applyAll);
-	connect(m_ui->cancelButton,		&QPushButton::clicked,		this, &AsciiOpenDlg::reject);
-	connect(m_ui->lineEditSeparator, &QLineEdit::textChanged,	this, &AsciiOpenDlg::onSeparatorChange);
-	connect(m_ui->commaDecimalCheckBox, &QCheckBox::toggled,	this, &AsciiOpenDlg::commaDecimalCheckBoxToggled);
-	connect(m_ui->spinBoxSkipLines,	qOverload<int>(&QSpinBox::valueChanged), this, &AsciiOpenDlg::setSkippedLines);
+	connect(m_ui->applyButton,				&QPushButton::clicked,						this, &AsciiOpenDlg::apply);
+	connect(m_ui->applyAllButton,			&QPushButton::clicked,						this, &AsciiOpenDlg::applyAll);
+	connect(m_ui->cancelButton,				&QPushButton::clicked,						this, &AsciiOpenDlg::reject);
+	connect(m_ui->lineEditSeparator,		&QLineEdit::textChanged,					this, &AsciiOpenDlg::onSeparatorChange);
+	connect(m_ui->commaDecimalCheckBox,		&QCheckBox::toggled,						this, &AsciiOpenDlg::commaDecimalCheckBoxToggled);
+	connect(m_ui->spinBoxSkipLines,			qOverload<int>(&QSpinBox::valueChanged),	this, &AsciiOpenDlg::onSkippedLinesChanged);
+	connect(m_ui->resetColumnsToolButton,	&QToolButton::clicked,						this, &AsciiOpenDlg::resetColumnRoles);
 
 	//shortcut buttons
 	connect(m_ui->toolButtonShortcutSpace,		&QToolButton::clicked, this, &AsciiOpenDlg::shortcutButtonPressed);
@@ -145,7 +145,7 @@ AsciiOpenDlg::~AsciiOpenDlg()
 	m_ui = nullptr;
 }
 
-void AsciiOpenDlg::setInput(const QString &filename, QTextStream* stream/*=nullptr*/)
+bool AsciiOpenDlg::setInput(const QString& filename, QTextStream* stream/*=nullptr*/)
 {
 	m_filename = filename;
 	m_stream = stream;
@@ -153,9 +153,16 @@ void AsciiOpenDlg::setInput(const QString &filename, QTextStream* stream/*=nullp
 	// update title
 	m_ui->lineEditFileName->setText(m_filename);
 
-	updateTable();
+	// try to restore the previous context
+	if (s_asciiOpenContext && restorePreviousContext())
+	{
+		return s_asciiOpenContext->applyAll;
+	}
 
+	// else try to find the file format automatically
 	autoFindBestSeparator();
+
+	return false; // the current configuration shouldn't be applied automatically ('apply all' is false, or the configuration is different from the previous one)
 }
 
 void AsciiOpenDlg::autoFindBestSeparator()
@@ -172,7 +179,6 @@ void AsciiOpenDlg::autoFindBestSeparator()
 	{
 		setSeparator(sep); //this eventually calls 'updateTable'
 
-		//...until we find one that gives us at least 3 valid colums
 		size_t validColumnCount = 0;
 		for (ColumnType type : m_columnType)
 		{
@@ -182,28 +188,24 @@ void AsciiOpenDlg::autoFindBestSeparator()
 			}
 		}
 
-		if (validColumnCount > 2)
-		{
-			return;
-		}
-		else if (validColumnCount > maxValidColumnCount)
+		//...and look for the separator that yields the best results
+		if (validColumnCount > maxValidColumnCount)
 		{
 			maxValidColumnCount = validColumnCount;
 			bestSep = sep;
 		}
 	}
 
-	//if we are here, it means that we couldn't find a configuration
-	//with 3 valid columns (we use the best guess in this case)
 	setSeparator(bestSep); //this eventually calls 'updateTable'
 }
 
-void AsciiOpenDlg::setSkippedLines(int linesCount)
+void AsciiOpenDlg::onSkippedLinesChanged(int lineCount)
 {
-	if (linesCount < 0)
+	if (lineCount < 0)
+	{
+		assert(false);
 		return;
-
-	m_skippedLines = static_cast<unsigned>(linesCount);
+	}
 
 	updateTable();
 }
@@ -294,15 +296,15 @@ void AsciiOpenDlg::commaDecimalCheckBoxToggled(bool)
 void AsciiOpenDlg::updateTable()
 {
 	m_ui->tableWidget->setEnabled(false);
-	//m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false); //we can't do that here (as we may have restored the state of this checkbox before calling updateTable)
+	m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 
 	bool hadValidHeader = !m_headerLine.isEmpty();
 	m_headerLine.clear();
+	m_ui->headerLabel->setVisible(false);
 
 	if (m_filename.isEmpty() && m_stream == nullptr)
 	{
 		m_ui->tableWidget->clear();
-		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 		return;
 	}
 
@@ -315,7 +317,6 @@ void AsciiOpenDlg::updateTable()
 		{
 			m_ui->tableWidget->clear();
 			m_columnType.clear();
-			m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
 			return;
 		}
 		m_stream = new QTextStream(&file);
@@ -323,22 +324,23 @@ void AsciiOpenDlg::updateTable()
 	assert(m_stream);
 	m_stream->seek(0);
 
-	//we skip first lines (if needed)
+	//we skip the first lines (if requested)
 	{
-		for (unsigned i = 0; i < m_skippedLines;)
+		for (int i = 0; i < m_ui->spinBoxSkipLines->value(); )
 		{
 			QString currentLine = m_stream->readLine();
 			if (currentLine.isNull())
 			{
 				//end of file reached
+				assert(m_stream->atEnd());
 				break;
 			}
 			if (currentLine.isEmpty())
 			{
-				//empty lines are ignored
+				//empty lines are simply ignored
 				continue;
 			}
-			//we keep track of the first line
+			//we keep track of the first skipped line (= potential header)
 			if (i == 0)
 			{
 				m_headerLine = currentLine;
@@ -465,13 +467,12 @@ void AsciiOpenDlg::updateTable()
 		}
 		else
 		{
-			if (m_skippedLines == 0 && commentLines == 0)
+			if (m_ui->spinBoxSkipLines->value() == 0 && commentLines == 0)
 			{
-				//if the very first line is a comment, then we force the user to skip it!
+				//if the very first line is a comment, then we automatically skip it!
 				//this way it will be considered as a header
-				m_ui->spinBoxSkipLines->setMinimum(1);
-				m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
-				return;
+				m_headerLine = currentLine;
+				setSkippedLines(1, true);
 			}
 			++commentLines;
 		}
@@ -506,16 +507,13 @@ void AsciiOpenDlg::updateTable()
 		}
 		m_ui->headerLabel->setText(QString("Header: ") + displayHeader);
 		m_ui->headerLabel->setVisible(true);
-	}
-	else
-	{
-		m_ui->headerLabel->setVisible(false);
+		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(true);
 	}
 
-	m_ui->commentLinesSkippedLabel->setVisible(commentLines != 0);
 	if (commentLines)
 	{
 		m_ui->commentLinesSkippedLabel->setText(QString("+ %1 comment line(s) skipped").arg(commentLines));
+		m_ui->commentLinesSkippedLabel->setVisible(true);
 	}
 
 	if (lineCount == 0 || columnsCount == 0)
@@ -1087,7 +1085,9 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 bool AsciiOpenDlg::apply()
 {
 	QString errorMessage;
-	if (!CheckOpenSequence(getOpenSequence(),errorMessage))
+	auto sequence = getOpenSequence();
+
+	if (!CheckOpenSequence(sequence, errorMessage))
 	{
 		QMessageBox::warning(nullptr, "Error", errorMessage);
 		return false;
@@ -1098,6 +1098,14 @@ bool AsciiOpenDlg::apply()
 		s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
 		s_csEntitiesScale = m_ui->quatCSScaleDoubleSpinBox->value();
 		
+		if (!s_asciiOpenContext)
+		{
+			s_asciiOpenContext.reset(new AsciiOpenContext);
+		}
+		s_asciiOpenContext->save(m_ui);
+		s_asciiOpenContext->sequence = sequence;
+		s_asciiOpenContext->applyAll = false;
+
 		accept();
 		
 		return true;
@@ -1106,57 +1114,70 @@ bool AsciiOpenDlg::apply()
 
 void AsciiOpenDlg::applyAll()
 {
-	if (!apply())
-		return;
-
-	//backup current open sequence
-	s_asciiOpenContext.save(m_ui);
-	s_asciiOpenContext.sequence = getOpenSequence();
-	s_asciiOpenContext.applyAll = true;
+	if (apply())
+	{
+		//backup current open sequence
+		if (s_asciiOpenContext)
+		{
+			s_asciiOpenContext->applyAll = true;
+		}
+		else
+		{
+			assert(false);
+		}
+	}
 }
 
 void AsciiOpenDlg::ResetApplyAll()
 {
-	s_asciiOpenContext.applyAll = false;
+	if (s_asciiOpenContext)
+	{
+		s_asciiOpenContext->applyAll = false;
+	}
 }
 
 bool AsciiOpenDlg::restorePreviousContext()
 {
-	if (!s_asciiOpenContext.applyAll)
-		return false;
-
-	//restore previous dialog state
-	s_asciiOpenContext.load(m_ui);
-	m_separator = s_asciiOpenContext.separator;
-	m_skippedLines = static_cast<unsigned>(std::max(0, s_asciiOpenContext.skipLines));
-	updateTable();
-
-	//saved sequence and cloud content don't match!!!
-	if (static_cast<size_t>(m_columnsCount) != s_asciiOpenContext.sequence.size())
+	if (!s_asciiOpenContext)
 	{
-		s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
 		return false;
 	}
 
-	//Restore columns attributes
+	//restore previous dialog state
+	s_asciiOpenContext->load(m_ui);
+	m_separator = s_asciiOpenContext->separator;
+	setSkippedLines(s_asciiOpenContext->skipLines, true);
+	updateTable();
+
+	//saved sequence and cloud content don't match!!!
+	if (static_cast<size_t>(m_columnsCount) != s_asciiOpenContext->sequence.size())
+	{
+		s_asciiOpenContext->applyAll = false; //cancel the 'Apply All' effect
+		setSkippedLines(0, true);
+		autoFindBestSeparator();
+		return false;
+	}
+
+	//restore columns attributes
 	for (unsigned i = 0; i < m_columnsCount; i++)
 	{
 		QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
 		if (!combo) //yes, it happens if all lines are skipped!
 		{
-			s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
+			s_asciiOpenContext->applyAll = false; //cancel the 'Apply All' effect
 			return false;
 		}
-		SequenceItem& item = s_asciiOpenContext.sequence[i];
+		SequenceItem& item = s_asciiOpenContext->sequence[i];
 		combo->setCurrentIndex(item.type);
 	}
 
 	QString errorMessage;
-	if (!CheckOpenSequence(s_asciiOpenContext.sequence, errorMessage))
+	if (!CheckOpenSequence(s_asciiOpenContext->sequence, errorMessage))
 	{
-		s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
+		s_asciiOpenContext->applyAll = false; //cancel the 'Apply All' effect
 	}
-	return s_asciiOpenContext.applyAll;
+
+	return true;
 }
 
 AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence() const
@@ -1460,4 +1481,43 @@ unsigned AsciiOpenDlg::getMaxCloudSize() const
 bool AsciiOpenDlg::showLabelsIn2D() const
 {
 	return m_ui->show2DLabelsCheckBox->isEnabled() && m_ui->show2DLabelsCheckBox->isChecked();
+}
+
+void AsciiOpenDlg::resetColumnRoles()
+{
+	//restore columns attributes
+	for (unsigned i = 0; i < m_columnsCount; i++)
+	{
+		QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0, i));
+		if (combo) //yes, it happens if all lines are skipped!
+		{
+			combo->setCurrentIndex(0);
+		}
+	}
+
+	checkSelectedColumnsValidity();
+}
+
+void AsciiOpenDlg::setSkippedLines(int lineCount, bool blockSignal/*=true*/)
+{
+	if (lineCount < 0)
+	{
+		assert(false);
+		lineCount = 0;
+	}
+
+	if (lineCount == 0)
+	{
+		m_headerLine.clear();
+		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
+	}
+
+	m_ui->spinBoxSkipLines->blockSignals(blockSignal);
+	m_ui->spinBoxSkipLines->setValue(lineCount);
+	m_ui->spinBoxSkipLines->blockSignals(false);
+}
+
+unsigned AsciiOpenDlg::getSkippedLinesCount() const
+{
+	return static_cast<unsigned>(std::max(0, m_ui->spinBoxSkipLines->value()));
 }

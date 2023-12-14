@@ -40,17 +40,17 @@ v2.13.alpha (???) - (??/??/????)
         	- removes duplicate points of all loaded clouds
 			- the min distance between points to consider them as duplicated can be set (1e-8 by default)
 		- DEBUG
-			- display various information to help one debug and tweak the command line
-			- can be placed at difference positions
+			- display various pieces of information to help one debug and tweak the command line
+			- can be placed at different positions
 		- RENAME_ENTITIES {base name}
 			- rename all loaded entities (clouds or meshes) with the provided base name.
 				A numerical suffix is added if multiple entities are loaded.
 		- COMMAND_FILE {file}
-			- loads commands from file
-				multiple line allowed
+			- loads commands from a file
+				multiple lines allowed
 				multiple arguments in each line allowed
 				handle quoted arguments
-				commands after this will run after every commands finished in the file
+				commands after this one will run after all commands in the file have been processed
 
 		
 	- New display feature: near and far clipping planes in 3D views

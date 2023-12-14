@@ -614,7 +614,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 		{
 			QString line = in.readLine();
 			QStringList argumentsInLine = line.split(" ");
-			QStringList processedArguments;
+			QStringList processedArgs;
 
 			// 'massage' the arguments to handle single/double quotes
 			//TODO handle escaped quotes/spaces
@@ -635,7 +635,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 						{
 							if (arg.endsWith(SingleQuote))
 							{
-								arg=arg.replace(SingleQuote,"");
+								arg.remove(SingleQuote);
 								// nothing to do, non*truncated argument
 							}
 							else
@@ -652,7 +652,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 							{
 								insideSingleQuoteSection = false;
 								arg = buffer.left(buffer.length() - 1); // remove the single quote
-								arg.replace(SingleQuote, "");
+								arg.remove(SingleQuote);
 							}
 						}
 					}
@@ -663,7 +663,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 						{
 							if (arg.endsWith(DoubleQuote))
 							{
-								arg = arg.replace(DoubleQuote, "");
+								arg.remove(DoubleQuote);
 								// nothing to do, non*truncated argument
 							}
 							else
@@ -680,13 +680,13 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 							{
 								insideDoubleQuoteSection = false;
 								arg = buffer.left(buffer.length() - 1); // remove the double quote
-								arg.replace(DoubleQuote, "");
+								arg.remove(DoubleQuote);
 							}
 						}
 					}
 					if (!insideSingleQuoteSection && !insideDoubleQuoteSection)
 					{
-						processedArguments.append(arg);
+						processedArgs.append(arg);
 					}
 				}
 				if (insideSingleQuoteSection||insideDoubleQuoteSection)
@@ -694,14 +694,14 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 					// the single/double quote section was not closed...
 					cmd.warning("Probably malformed command (missing closing quote)");
 					// ...still, we'll try to proceed
-					processedArguments.append(buffer);
+					processedArgs.append(buffer);
 				}
 			}
 
 			//inject back all the arguments to the cmd.arguments()
-			while (!processedArguments.isEmpty()) {
-				QString processedArg = processedArguments.takeFirst();
-				if (processedArg != "") {
+			while (!processedArgs.isEmpty()) {
+				QString processedArg = processedArgs.takeFirst();
+				if (!processedArg.isEmpty()) {
 					cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex).arg(processedArg));
 					cmd.arguments().insert(insertingIndex, processedArg);
 					insertingIndex++;

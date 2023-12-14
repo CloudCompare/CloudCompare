@@ -41,6 +41,13 @@ struct CommandLoad : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandLoadCommandFile : public ccCommandLineInterface::Command
+{
+	CommandLoadCommandFile();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandClearNormals : public ccCommandLineInterface::Command
 {
 	CommandClearNormals();

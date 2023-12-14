@@ -45,7 +45,14 @@ v2.13.alpha (???) - (??/??/????)
 		- RENAME_ENTITIES {base name}
 			- rename all loaded entities (clouds or meshes) with the provided base name.
 				A numerical suffix is added if multiple entities are loaded.
+		- COMMAND_FILE {file}
+			- loads commands from file
+				multiple line allowed
+				multiple arguments in each line allowed
+				handle quoted arguments
+				commands after this will run after every commands finished in the file
 
+		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
 		- can be enabled and modifed in the Camera Parameters dialog or via

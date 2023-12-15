@@ -6561,8 +6561,8 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 	QString fileNameExt = QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize);
 	for (size_t i = 0; i < cmd.clouds().size(); ++i)
 	{
-		entities[i] = cmd.clouds()[i].pc;
 		CLCloudDesc& desc = cmd.clouds()[i];
+		entities[i] = desc.pc;
 		desc.basename += "_" + fileNameExt;
 		entities[i]->setName(entities[i]->getName() + "_" + fileNameExt);
 	}

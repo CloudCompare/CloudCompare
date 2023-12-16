@@ -6558,15 +6558,19 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 	//Call MainWindow generic method
 	ccHObject::Container entities;
 	entities.resize(cmd.clouds().size());
+	QString fileNameExt = QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize);
 	for (size_t i = 0; i < cmd.clouds().size(); ++i)
 	{
-		entities[i] = cmd.clouds()[i].pc;
+		CLCloudDesc& desc = cmd.clouds()[i];
+		entities[i] = desc.pc;
+		desc.basename += "_" + fileNameExt;
+		entities[i]->setName(entities[i]->getName() + "_" + fileNameExt);
 	}
 
 	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, nullptr, cmd.widgetParent()))
 	{
 		//save output
-		if (cmd.autoSaveMode() && !cmd.saveClouds(QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize)))
+		if (cmd.autoSaveMode() && !cmd.saveClouds(fileNameExt))
 		{
 			return false;
 		}

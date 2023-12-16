@@ -345,6 +345,7 @@ v2.13.alpha (???) - (??/??/????)
 	- Allow OBJ files with symlinks to properly load material files
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
+	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

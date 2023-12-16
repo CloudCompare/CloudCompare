@@ -267,19 +267,17 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Loading LAS points");
 	progressDialog.setInfo("Loading points");
-	CCCoreLib::NormalizedProgress normProgress(&progressDialog, pointCount);
-	progressDialog.start();
+	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	if (parameters.parentWidget)
+	{
+		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCount));
+		progressDialog.start();
+	}
 
 	CC_FILE_ERROR error{CC_FERR_NO_ERROR};
 	CCVector3d    globalShift(0, 0, 0);
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
-		if (progressDialog.isCancelRequested())
-		{
-			error = CC_FERR_CANCELED_BY_USER;
-			break;
-		}
-
 		if (laszip_read_point(laszipReader))
 		{
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE; // error will be logged later
@@ -366,18 +364,27 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 				{
 					continue;
 				}
-				ScalarType normalsValues[3] = {0.0};
-				error                       = loader.parseExtraScalarField(extraField, *laszipPoint, normalsValues);
+				ScalarType normalsValues[3]{0, 0, 0};
+				error = loader.parseExtraScalarField(extraField, *laszipPoint, normalsValues);
 				if (error != CC_FERR_NO_ERROR)
 				{
 					break;
 				}
 				normal[normalIndex] = normalsValues[0];
 			}
+
+			if (error != CC_FERR_NO_ERROR)
+			{
+				break;
+			}
 			pointCloud->addNorm(normal);
 		}
 
-		normProgress.oneStep();
+		if (normProgress && !normProgress->oneStep())
+		{
+			error = CC_FERR_CANCELED_BY_USER;
+			break;
+		}
 	}
 
 	for (const LasScalarField& field : loader.standardFields())

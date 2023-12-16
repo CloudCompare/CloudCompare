@@ -83,7 +83,8 @@ public:
 
 			CCCoreLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
-			if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
+			CCCoreLib::SquareMatrixd covarianceMatrix = Z.computeCovarianceMatrix();
+			if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(covarianceMatrix, eigVectors, eigValues, true))
 			{
 				CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //decreasing order of their associated eigenvalues
 
@@ -218,7 +219,8 @@ public:
 
 			CCCoreLib::SquareMatrixd eigVectors;
 			std::vector<double> eigValues;
-			if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(Z.computeCovarianceMatrix(), eigVectors, eigValues, true))
+			CCCoreLib::SquareMatrixd covarianceMatrix = Z.computeCovarianceMatrix();
+			if (CCCoreLib::Jacobi<double>::ComputeEigenValuesAndVectors(covarianceMatrix, eigVectors, eigValues, true))
 			{
 				CCCoreLib::Jacobi<double>::SortEigenValuesAndVectors(eigVectors, eigValues); //decreasing order of their associated eigenvalues
 

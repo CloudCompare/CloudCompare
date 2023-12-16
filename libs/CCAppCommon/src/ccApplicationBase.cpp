@@ -65,7 +65,10 @@ void ccApplicationBase::InitOpenGL()
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setStencilBufferSize(0);
+#ifndef CC_LINUX // seems to cause some big issues on Linux if Quad-buffering is not supported
+				// we would need to find a way to check whether it's supported or not in advance...
 		format.setStereo(true); //we request stereo support by default, but this may not be supported!
+#endif
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
 #ifdef Q_OS_MAC
@@ -290,3 +293,4 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 
 	return true;
 }
+

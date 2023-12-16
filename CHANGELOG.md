@@ -117,6 +117,7 @@ v2.13.alpha (???) - (??/??/????)
 	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified
 		- no need to manage/compile 2 different versions anymore
 		- CC and ccViewer will automatically detect if Quad Buffer Stereo is supported, and use it when needed
+		- (currently, stereo mode is disabled on Linux due to various display issues)
 
 	- Gamepad support
 		- ccViewer now supports gamepads

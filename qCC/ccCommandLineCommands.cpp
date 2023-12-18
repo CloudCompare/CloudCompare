@@ -2691,7 +2691,7 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 }
 
 CommandSetGlobalShift::CommandSetGlobalShift()
-	: ccCommandLineInterface::Command(QObject::tr("Set active SF"), COMMAND_SET_GLOBAL_SHIFT)
+	: ccCommandLineInterface::Command(QObject::tr("Set global shift"), COMMAND_SET_GLOBAL_SHIFT)
 {}
 
 bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)

@@ -209,6 +209,14 @@ struct CommandSetActiveSF : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandSetGlobalShift : public ccCommandLineInterface::Command
+{
+	CommandSetGlobalShift();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+
 struct CommandRemoveAllSFs : public ccCommandLineInterface::Command
 {
 	CommandRemoveAllSFs();

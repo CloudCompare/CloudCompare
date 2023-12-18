@@ -50,6 +50,9 @@ v2.13.alpha (???) - (??/??/????)
 				multiple arguments in each line allowed
 				handle quoted arguments
 				commands after this one will run after all commands in the file have been processed
+		- SET_GLOBAL_SHIFT -KEEP_ORIGIN {TRUE/FALSE} {x} {y} {z}
+			- set global shift on all entities, if KEEP_ORIGIN set to TRUE then apply transformation to keep it in the same place. (it will warn if coordinate transformation is too big.)
+			- KEEP_ORIGIN is optional, default value is FALSE
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

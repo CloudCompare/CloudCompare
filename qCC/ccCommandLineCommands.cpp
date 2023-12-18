@@ -71,6 +71,8 @@ constexpr char COMMAND_FILTER_SF_BY_VALUE[]				= "FILTER_SF";
 constexpr char COMMAND_MERGE_CLOUDS[]					= "MERGE_CLOUDS";
 constexpr char COMMAND_MERGE_MESHES[]                   = "MERGE_MESHES";
 constexpr char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
+constexpr char COMMAND_SET_GLOBAL_SHIFT[]				= "SET_GLOBAL_SHIFT"; // + global shift {x,y,z}
+constexpr char COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIGIN[]	= "KEEP_ORIGIN";
 constexpr char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 constexpr char COMMAND_REMOVE_SF[]						= "REMOVE_SF";
 constexpr char COMMAND_REMOVE_SCAN_GRIDS[]				= "REMOVE_SCAN_GRIDS";
@@ -2688,6 +2690,144 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 	return true;
 }
 
+CommandSetGlobalShift::CommandSetGlobalShift()
+	: ccCommandLineInterface::Command(QObject::tr("Set active SF"), COMMAND_SET_GLOBAL_SHIFT)
+{}
+
+bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[SET GLOBAL SHIFT]"));
+
+	if (cmd.clouds().empty() && cmd.meshes().empty())
+	{
+		return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_GLOBAL_SHIFT));
+	}
+	ccCommandLineInterface::GlobalShiftOptions globalShiftOptions;
+
+	//handle keepOrigin command option
+	bool keepOrigin = false;
+	if (!cmd.arguments().empty() && ccCommandLineInterface::IsCommand(cmd.arguments().front(), COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIGIN)) {
+
+		//local option confirmed, pop that from front
+		cmd.arguments().pop_front();
+
+		QString	keepOriginStr = cmd.arguments().takeFirst();
+		if (keepOriginStr == "TRUE")
+		{
+			keepOrigin = true;
+		}
+		else if (keepOriginStr != "FALSE")
+		{
+			return cmd.error(QObject::tr("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIGIN, keepOriginStr));
+		}
+		if (keepOrigin) {
+			cmd.print("Current origin will be preserved.");
+		}
+	}
+
+	cmd.processGlobalShiftCommand(globalShiftOptions);
+	if (globalShiftOptions.mode != ccCommandLineInterface::GlobalShiftOptions::Mode::CUSTOM_GLOBAL_SHIFT) {
+		return cmd.error(QObject::tr("Global shift must be in the form of three coordinate 'x y z'."));
+	}
+	CCVector3d newShift = globalShiftOptions.customGlobalShift;
+
+	//process clouds
+	for (const CLCloudDesc& desc : cmd.clouds())
+	{
+		CCVector3d originalShift = desc.pc->getGlobalShift();
+		cmd.print(QObject::tr("\t[%4 - %5] Original global shift {%1,%2,%3}")
+			.arg(originalShift.x)
+			.arg(originalShift.y)
+			.arg(originalShift.z)
+			.arg(desc.basename)
+			.arg(desc.pc->getName()));
+
+		if (keepOrigin) {
+			//translate cloud to keep the same origin
+			CCVector3d T = newShift - originalShift;
+			ccGLMatrix transMat;
+			double maxCoordValue = ccGlobalShiftManager::MaxCoordinateAbsValue();
+			if ( T.x > maxCoordValue || T.y > maxCoordValue || T.z > maxCoordValue)
+			{
+				cmd.warning(QObject::tr("\t[%5 - %6] Applied transformation is bigger {%1,%2,%3} then the treshold {%4}, precision loss could occured.")
+					.arg(T.x)
+					.arg(T.y)
+					.arg(T.z)
+					.arg(maxCoordValue)
+					.arg(desc.basename)
+					.arg(desc.pc->getName()));
+			}
+			cmd.print(QObject::tr("\t[%4 - %5] Applied Transformation {%1,%2,%3}")
+				.arg(T.x)
+				.arg(T.y)
+				.arg(T.z)
+				.arg(desc.basename)
+				.arg(desc.pc->getName()));
+			transMat.toIdentity();
+			transMat.setTranslation(T);
+			desc.pc->applyGLTransformation_recursive(&transMat);
+		}
+		desc.pc->setGlobalShift(newShift.x, newShift.y, newShift.z);
+		cmd.print(QObject::tr("\t[%4 - %5] Global shift set to {%1,%2,%3}")
+			.arg(newShift.x)
+			.arg(newShift.y)
+			.arg(newShift.z)
+			.arg(desc.basename)
+			.arg(desc.pc->getName()));
+	}
+
+	for (const CLMeshDesc& desc : cmd.meshes())
+	{
+		bool isLocked = false;
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
+		if (shifted && !isLocked)
+		{
+			CCVector3d originalShift = shifted->getGlobalShift();
+			cmd.print(QObject::tr("\t[%4 - %5] Original global shift {%1,%2,%3}")
+				.arg(originalShift.x)
+				.arg(originalShift.y)
+				.arg(originalShift.z)
+				.arg(desc.basename)
+				.arg(desc.mesh->getName()));
+
+			if (keepOrigin) {
+				//translate shifted mesh object to keep the same origin
+				CCVector3d T = newShift - originalShift;
+				ccGLMatrix transMat;
+				double maxCoordValue = ccGlobalShiftManager::MaxCoordinateAbsValue();
+				if (T.x > maxCoordValue || T.y > maxCoordValue || T.z > maxCoordValue)
+				{
+					cmd.warning(QObject::tr("\t[%5 - %6] Applied transformation is bigger {%1,%2,%3} then the treshold {%4}, precision loss could occured.")
+						.arg(T.x)
+						.arg(T.y)
+						.arg(T.z)
+						.arg(maxCoordValue)
+						.arg(desc.basename)
+						.arg(desc.mesh->getName()));
+				}
+				cmd.print(QObject::tr("\t[%4 - %5] Applied Transformation {%1,%2,%3}")
+					.arg(T.x)
+					.arg(T.y)
+					.arg(T.z)
+					.arg(desc.basename)
+					.arg(desc.mesh->getName()));
+				transMat.toIdentity();
+				transMat.setTranslation(T);
+				shifted->applyGLTransformation_recursive(&transMat);
+			}
+			shifted->setGlobalShift(newShift.x, newShift.y, newShift.z);
+			cmd.print(QObject::tr("\t[%4 - %5] Global shift set to {%1,%2,%3}")
+				.arg(newShift.x)
+				.arg(newShift.y)
+				.arg(newShift.z)
+				.arg(desc.basename)
+				.arg(desc.mesh->getName()));
+		}
+	}
+
+	return true;
+}
+
 CommandSetActiveSF::CommandSetActiveSF()
 	: ccCommandLineInterface::Command(QObject::tr("Set active SF"), COMMAND_SET_ACTIVE_SF)
 {}
@@ -2698,16 +2838,16 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
 	}
-	
+
 	int sfIndex = -1;
 	QString sfName;
 	GetSFIndexOrName(cmd, sfIndex, sfName);
-	
+
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud nor mesh loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
 	}
-	
+
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		if (desc.pc)
@@ -2719,7 +2859,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 			}
 		}
 	}
-	
+
 	for (CLMeshDesc& desc : cmd.meshes())
 	{
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(desc.mesh);

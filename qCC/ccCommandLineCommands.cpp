@@ -2732,7 +2732,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 	CCVector3d newShift = globalShiftOptions.customGlobalShift;
 
 	//process clouds
-	for (const CLCloudDesc& desc : cmd.clouds())
+	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		CCVector3d originalShift = desc.pc->getGlobalShift();
 		cmd.print(QObject::tr("\t[%4 - %5] Original global shift {%1,%2,%3}")
@@ -2774,9 +2774,18 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.z)
 			.arg(desc.basename)
 			.arg(desc.pc->getName()));
+		QString nameExtension = QObject::tr("_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6")
+			.arg(originalShift.x)
+			.arg(originalShift.y)
+			.arg(originalShift.z)
+			.arg(newShift.x)
+			.arg(newShift.y)
+			.arg(newShift.z);
+		desc.pc->setName(QObject::tr("%1%2").arg(desc.pc->getName()).arg(nameExtension));
+		desc.basename += nameExtension;
 	}
 
-	for (const CLMeshDesc& desc : cmd.meshes())
+	for (CLMeshDesc& desc : cmd.meshes())
 	{
 		bool isLocked = false;
 		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
@@ -2822,6 +2831,15 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 				.arg(newShift.z)
 				.arg(desc.basename)
 				.arg(desc.mesh->getName()));
+			QString nameExtension = QObject::tr("_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6")
+				.arg(originalShift.x)
+				.arg(originalShift.y)
+				.arg(originalShift.z)
+				.arg(newShift.x)
+				.arg(newShift.y)
+				.arg(newShift.z);
+			desc.mesh->setName(QObject::tr("%1%2").arg(desc.mesh->getName()).arg(nameExtension));
+			desc.basename += nameExtension;
 		}
 	}
 

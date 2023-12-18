@@ -2783,6 +2783,15 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.z);
 		desc.pc->setName(QObject::tr("%1%2").arg(desc.pc->getName()).arg(nameExtension));
 		desc.basename += nameExtension;
+		//save it as well
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(desc);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
 	}
 
 	for (CLMeshDesc& desc : cmd.meshes())
@@ -2840,6 +2849,15 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 				.arg(newShift.z);
 			desc.mesh->setName(QObject::tr("%1%2").arg(desc.mesh->getName()).arg(nameExtension));
 			desc.basename += nameExtension;
+		}
+		//save it as well
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(desc);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
 		}
 	}
 

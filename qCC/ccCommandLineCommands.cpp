@@ -1928,7 +1928,8 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("Failed to read transformation matrix file '%1'!").arg(filename));
 	}
-	if (inverse) {
+	if (inverse)
+	{
 		cmd.print(QObject::tr("Transformation before inverse:\n") + mat.toString(6));
 		mat=mat.inverse();
 	}

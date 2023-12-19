@@ -1930,7 +1930,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	}
 	if (inverse)
 	{
-		cmd.print(QObject::tr("Transformation before inverse:\n") + mat.toString(6));
+		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString(6));
 		mat = mat.inverse();
 	}
 	

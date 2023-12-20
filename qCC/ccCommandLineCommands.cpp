@@ -2726,7 +2726,8 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			keepOrigFixed = true;
 			cmd.print(QObject::tr("[%1]").arg(COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIG_FIXED));
 		}
-		else {
+		else
+		{
 			break;
 		}
 	}
@@ -2763,7 +2764,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 	//process both clouds and meshes
 	for (size_t i = 0; i < nrOfEntities; i++)
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity=entities[i];
+		QPair<ccShiftedObject*, CLEntityDesc*> entity = entities[i];
 		CLEntityDesc& desc = *entity.second;
 		ccShiftedObject* shiftedObject = entity.first;
 		CCVector3d originalShift = shiftedObject->getGlobalShift();
@@ -2774,7 +2775,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(desc.basename)
 			.arg(shiftedObject->getName()));
 
-		//translate entity to keep the same origin
+		//translate entity to keep the initial global origin
 		if (keepOrigFixed)
 		{
 			CCVector3d T = newShift - originalShift;
@@ -2782,7 +2783,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			double maxCoordValue = ccGlobalShiftManager::MaxCoordinateAbsValue();
 			if (T.x > maxCoordValue || T.y > maxCoordValue || T.z > maxCoordValue)
 			{
-				cmd.warning(QObject::tr("\t[%5 - %6] Applied transformation is bigger {%1,%2,%3} than the threshold {%4}, precision loss may occure.")
+				cmd.warning(QObject::tr("\t[%5 - %6] Applied transformation is bigger {%1,%2,%3} than the threshold {%4}, precision loss may occur.")
 					.arg(T.x)
 					.arg(T.y)
 					.arg(T.z)
@@ -2821,8 +2822,6 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 		{
 			//set the mesh name instead of the vertices cloud inside the mesh
 			ccHObject* parent = shiftedObject->getParent();
-
-			//do i really need this check? all the mesh vertices cloud should have a parent...
 			if (parent)
 			{
 				parent->setName(QObject::tr("%1%2").arg(parent->getName()).arg(nameSuffix));

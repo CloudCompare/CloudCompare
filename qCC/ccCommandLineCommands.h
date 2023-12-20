@@ -216,7 +216,6 @@ struct CommandSetGlobalShift : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
-
 struct CommandRemoveAllSFs : public ccCommandLineInterface::Command
 {
 	CommandRemoveAllSFs();

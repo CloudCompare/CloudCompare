@@ -251,6 +251,7 @@ v2.13.alpha (???) - (??/??/????)
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
+		- New sub-option for -APPLY_TRANS command: -INVERSE to inverse the transformation matrix before it is applied.
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

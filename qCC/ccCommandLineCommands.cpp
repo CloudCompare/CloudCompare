@@ -64,6 +64,7 @@ constexpr char COMMAND_SF_GRADIENT[]					= "SF_GRAD";
 constexpr char COMMAND_ROUGHNESS[]						= "ROUGH";
 constexpr char COMMAND_ROUGHNESS_UP_DIR[]				= "UP_DIR";
 constexpr char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
+constexpr char COMMAND_APPLY_TRANS_INVERSE[]			= "INVERSE";
 constexpr char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 constexpr char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
 constexpr char COMMAND_SF_CONVERT_TO_RGB[]				= "SF_CONVERT_TO_RGB";
@@ -1899,7 +1900,25 @@ CommandApplyTransformation::CommandApplyTransformation()
 bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 {
 	cmd.print(QObject::tr("[APPLY TRANSFORMATION]"));
-	
+
+	//optional parameters
+	bool inverse = false;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_APPLY_TRANS_INVERSE))
+		{
+			//local option confirmed, we can move on
+			inverse = true;
+			cmd.arguments().pop_front();
+			cmd.print("Transformation matrix will be inversed");
+		}
+		else
+		{
+			break;
+		}
+	}
+
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: transformation file after \"-%1\"").arg(COMMAND_APPLY_TRANSFORMATION));
@@ -1910,6 +1929,11 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	if (!mat.fromAsciiFile(filename))
 	{
 		return cmd.error(QObject::tr("Failed to read transformation matrix file '%1'!").arg(filename));
+	}
+	if (inverse)
+	{
+		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString(6));
+		mat = mat.inverse();
 	}
 	
 	cmd.print(QObject::tr("Transformation:\n") + mat.toString(6));

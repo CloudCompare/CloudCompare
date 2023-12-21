@@ -50,6 +50,9 @@ v2.13.alpha (???) - (??/??/????)
 				multiple arguments in each line allowed
 				handle quoted arguments
 				commands after this one will run after all commands in the file have been processed
+		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
+			- set global shift on all entities
+			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

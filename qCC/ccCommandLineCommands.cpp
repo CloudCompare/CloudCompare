@@ -1296,18 +1296,44 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	}
 	else if (method == "OCTREE")
 	{
-		if (cmd.arguments().empty())
+		int octreeLevel;
+		double cellSize;
+		bool byCellSize = false;
+		if (cmd.arguments().front() == "CELL_SIZE")
 		{
-			return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: octree cell size after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+			}
+
+			bool ok = false;
+			cellSize  = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid parameter: octree cell size after \"-%1 OCTREE CELL_SIZE \"").arg(COMMAND_SUBSAMPLE));
+			}
+			byCellSize = true;
+			cmd.print(QObject::tr("\tOctree cell size: %1").arg(cellSize));
 		}
-		
-		bool ok = false;
-		int octreeLevel = cmd.arguments().takeFirst().toInt(&ok);
-		if (!ok || octreeLevel < 1 || octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+
+		if(!byCellSize)
 		{
-			return cmd.error(QObject::tr("Invalid octree level!"));
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+			}
+
+			bool ok = false;
+			octreeLevel = cmd.arguments().takeFirst().toInt(&ok);
+			if (!ok || octreeLevel < 1 || octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+			{
+				return cmd.error(QObject::tr("Invalid octree level!"));
+			}
+			cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
 		}
-		cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
+
 		
 		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
@@ -1319,7 +1345,23 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-			
+
+			if (byCellSize)
+			{
+				//calculate OCTREE level for each cloud based on required grid size
+				octreeLevel=ceil(log(desc.pc->getOwnBB().getMaxBoxDim() /cellSize)/log(2));
+				if ( octreeLevel < 1 )
+				{
+					//overwrite with min value instead of throwing an error
+					octreeLevel = 1;
+				}
+				if (octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+				{
+					//overwrite with max value instead of throwing an error
+					octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
+				}
+				cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
+			}
 			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,
 																													static_cast<unsigned char>(octreeLevel),
 																													CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,

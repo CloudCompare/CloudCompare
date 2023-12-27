@@ -64,6 +64,7 @@ constexpr char COMMAND_SF_GRADIENT[]					= "SF_GRAD";
 constexpr char COMMAND_ROUGHNESS[]						= "ROUGH";
 constexpr char COMMAND_ROUGHNESS_UP_DIR[]				= "UP_DIR";
 constexpr char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
+constexpr char COMMAND_APPLY_TRANS_NOT_APPLY_TO_GLOBAL[]= "NOT_APPLY_TO_GLOBAL";
 constexpr char COMMAND_APPLY_TRANS_INVERSE[]			= "INVERSE";
 constexpr char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 constexpr char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
@@ -2085,6 +2086,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 	//optional parameters
 	bool inverse = false;
+	bool applyToGlobal = true;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -2094,6 +2096,13 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			inverse = true;
 			cmd.arguments().pop_front();
 			cmd.print("Transformation matrix will be inversed");
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_APPLY_TRANS_NOT_APPLY_TO_GLOBAL))
+		{
+			//local option confirmed, we can move on
+			applyToGlobal = false;
+			cmd.arguments().pop_front();
+			cmd.print("GLOBAL SHIFT is not used to minimize precision loss");
 		}
 		else
 		{
@@ -2124,36 +2133,171 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
 	}
-	
-	//apply transformation
-	if (!cmd.clouds().empty())
+
+	//create an entity vector
+	size_t nrOfClouds = cmd.clouds().size();
+	size_t nrOfMeshes = cmd.meshes().size();
+
+	//HeadLessHUN: nrOfEntities could overflow (highly unlikely), should we do something about it
+	size_t nrOfEntities = nrOfClouds + nrOfMeshes;
+	std::vector<std::pair<ccShiftedObject*, CLEntityDesc*>> entities;
+	entities.reserve(nrOfEntities);
+
+	//add clouds to the vector
+	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		for (const CLCloudDesc& desc : cmd.clouds())
+		entities.push_back({ desc.pc, &desc });
+	}
+
+	//add meshes to the vector
+	for (CLMeshDesc& desc : cmd.meshes())
+	{
+		bool isLocked = false;
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
+		if (shifted && !isLocked)
 		{
-			desc.pc->applyGLTransformation_recursive(&mat);
-			desc.pc->setName(desc.pc->getName() + ".transformed");
-		}
-		//save output
-		if (cmd.autoSaveMode() && !cmd.saveClouds("TRANSFORMED"))
-		{
-			return false;
+			entities.push_back({ shifted, &desc });
 		}
 	}
 
-	if (!cmd.meshes().empty())
+	//if the transformation is partly converted to global shift/scale
+	bool autoApplyPreviousGlobalShiftAndScale = false;
+	double previousScale = 1.0;
+	CCVector3d previousShift(0, 0, 0);
+
+	//process both clouds and meshes
+	for (size_t i = 0; i < nrOfEntities; i++)
 	{
-		for (const CLMeshDesc& desc : cmd.meshes())
+		CLEntityDesc& desc = *entities[i].second;
+		ccShiftedObject* shiftedEntity = entities[i].first;
+
+		ccGLMatrixd transMat = ccGLMatrixd(mat.data());
+		if (applyToGlobal)
 		{
-			desc.mesh->applyGLTransformation_recursive(&mat);
-			desc.mesh->setName(desc.mesh->getName() + ".transformed");
+			//HeadLessHUN
+			//this part were picked from mainwindow::applyTransformation with comments
+			//removed dialogs
+			//few changes to accomodate the new environment.
+
+			// the user wants to apply the transformation to the global coordinates
+			CCVector3d globalShift = shiftedEntity->getGlobalShift();
+			double globalScale = shiftedEntity->getGlobalScale();
+
+			// we compute the impact to the local coordinate system without changing the
+			// actual Global Shift & Scale parameters (for now)
+			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
+
+			// we switch to a local transformation matrix
+			transMat.setTranslation(localTranslation);
+
+			//test if the translated cloud coordinates were already "too large"
+			//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
+
+			//HeadLessHUN
+			//Does this really an issue if we apply shift even there are already precision loss?
+			//if the floats gets higher then the precision loss is also higher
+			//And with 10^4 default threshold. We will loose possibilties to save few clouds from precisions loss
+			//I'd remove this check from here and even from the gui version, or at least warn the user about it.
+
+			ccBBox localBBox = shiftedEntity->getOwnBB();
+			//HeadLessHUN
+			//shouldn't we check the maxCorner, instead of minCorner?
+			CCVector3d Pl = localBBox.minCorner();
+			double Dl = localBBox.getDiagNormd();
+			if (!ccGlobalShiftManager::NeedShift(Pl)
+				&& !ccGlobalShiftManager::NeedRescale(Dl))
+			{
+				//test if the translated cloud coordinates are too large (in local coordinate space)
+				ccBBox transformedBox = shiftedEntity->getOwnBB() * transMat;
+				//HeadLessHUN
+				//shouldn't we check the maxCorner, instead of minCorner?
+				CCVector3d transformedPl = transformedBox.minCorner();
+				double transformedDl = transformedBox.getDiagNormd();
+
+				bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+				if (needShift)
+				{
+					//existing shift information
+					CCVector3d globalShift = shiftedEntity->getGlobalShift();
+					double globalScale = shiftedEntity->getGlobalScale();
+
+					//we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
+					CCVector3d Pg = shiftedEntity->toGlobal3d(transformedPl);
+					double Dg = transformedDl / globalScale;
+
+					//let's try to find better Global Shift and Scale values
+					CCVector3d newShift(0.0, 0.0, 0.0);
+					double newScale = 1.0;
+
+					//should we try to use the previous Global Shift and Scale values?
+					if (autoApplyPreviousGlobalShiftAndScale)
+					{
+						if (!ccGlobalShiftManager::NeedShift(Pg + previousShift)
+							&& !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
+						{
+							newScale = previousScale;
+							newShift = previousShift;
+							needShift = false;
+						}
+					}
+
+					if (needShift)
+					{
+						//don't bother the user as we are running in command line, use the best possible solution
+						newShift = ccGlobalShiftManager::BestShift(Pg);
+						newScale = ccGlobalShiftManager::BestScale(Dg);
+						needShift = false;
+						//force this shift for upcoming entities
+						autoApplyPreviousGlobalShiftAndScale = true;
+						previousShift = newShift;
+						previousScale = newScale;
+					}
+
+					//get the relative modification to existing global shift/scale info
+					double scaleChange = newScale / globalScale;
+					CCVector3d shiftChange = newShift - globalShift;
+
+					if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+					{
+						//apply translation as global shift
+						shiftedEntity->setGlobalShift(newShift);
+						shiftedEntity->setGlobalScale(newScale);
+						cmd.warning(QObject::tr("[ApplyTransformation] Entity '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(shiftedEntity->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+
+						transMat.scaleRotation(scaleChange);
+						transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+					}
+				}
+			}
 		}
-		//save output
-		if (cmd.autoSaveMode() && !cmd.saveMeshes("TRANSFORMED"))
+
+		shiftedEntity->applyGLTransformation_recursive(&ccGLMatrix(transMat.data()));
+		QString nameSuffix = "_TRANSFORMED";
+		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)
 		{
-			return false;
+			//set the mesh name instead of the vertices cloud inside the mesh
+			ccHObject* parent = shiftedEntity->getParent();
+			if (parent)
+			{
+				parent->setName(QObject::tr("%1%2").arg(parent->getName()).arg(nameSuffix));
+			}
+		}
+		else
+		{
+			shiftedEntity->setName(QObject::tr("%1%2").arg(shiftedEntity->getName()).arg(nameSuffix));
+		}
+		desc.basename += nameSuffix;
+
+		//save it as well
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(desc);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
 		}
 	}
-	
 	return true;
 }
 

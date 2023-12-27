@@ -2271,7 +2271,8 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			}
 		}
 
-		shiftedEntity->applyGLTransformation_recursive(&ccGLMatrix(transMat.data()));
+		ccGLMatrix matrixToApply = ccGLMatrix(transMat.data());
+		shiftedEntity->applyGLTransformation_recursive(&matrixToApply);
 		QString nameSuffix = "_TRANSFORMED";
 		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)
 		{

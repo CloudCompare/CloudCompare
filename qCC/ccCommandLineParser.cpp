@@ -390,6 +390,200 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
+bool ccCommandLineParser::selectClouds(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+{
+	if (selectRegex && !regex.isValid())
+	{
+		return error(QObject::tr("Regex string invalid: %1").arg(regex.errorString()));
+	}
+
+	//store everthyng in the rest vector
+	while (!m_clouds.empty())
+	{
+		m_clouds_rest.push_back(m_clouds.front());
+		m_clouds.erase(m_clouds.begin());
+	}
+
+	//sort the rest clouds by uniqueID (it will sort the clouds as it were loaded/created)
+	std::sort(m_clouds_rest.begin(), m_clouds_rest.end(), [](CLCloudDesc a, CLCloudDesc b) { return (a.pc->getUniqueID() < b.pc->getUniqueID()); });
+
+	//put elements to the front facing vector
+	int index = 0;
+	size_t lastIndex = m_clouds_rest.size() - 1;
+	for (std::vector<CLCloudDesc>::iterator it = m_clouds_rest.begin(); it != m_clouds_rest.end();)
+	{
+		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->pc->getName());
+		bool required = false;
+		if (!not)
+		{
+			//first {n}
+			if (selectFirst && index < firstNr)
+			{
+				required = true;
+			}
+
+			//last {n}
+			if (selectLast && index > lastIndex - lastNr)
+			{
+				required = true;
+			}
+		}
+		else
+		{
+			//not first {n}
+			if (selectFirst && index >= firstNr && !selectLast)
+			{
+				required = true;
+			}
+
+			//not last {n}
+			if (selectLast && index <= lastIndex - lastNr && !selectFirst)
+			{
+				required = true;
+			}
+
+			//not first and not last
+			if (selectFirst && selectLast && index >= firstNr && index <= lastIndex - lastNr)
+			{
+				required = true;
+			}
+		}
+
+		//regex has higher priority than first/last overwrite
+		if (selectRegex)
+		{
+			if (regex.indexIn(nameToValidate) > -1)
+			{
+				//regex matched
+				required = !not;
+			}
+			else
+			{
+				//regex not matched
+				required = not;
+			}
+		}
+
+		//selectAll has higher priority than first/last/regex overwrite
+		if (selectAll)
+		{
+			required = !not;
+		}
+
+		if (required)
+		{
+			print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->pc->getUniqueID()));
+			m_clouds.push_back(*it);
+			it = m_clouds_rest.erase(it);
+		}
+		else
+		{
+			print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->pc->getUniqueID()));
+			++it;
+		}
+		index++;
+	}
+	return true;
+}
+
+bool ccCommandLineParser::selectMeshes(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+{
+	//HeadLessHUN: i don't really know if it is possible or worth it to make selectClouds and selectMeshes one function.
+	//"Only" difference between the two function is the two vector, and the differences between CLCLoudDesc and CLMeshDesc.
+	if (selectRegex && !regex.isValid())
+	{
+		return error(QObject::tr("Regex string invalid: %1").arg(regex.errorString()));
+	}
+
+	//store everthyng in the rest vector
+	while (!m_meshes.empty())
+	{
+		m_meshes_rest.push_back(m_meshes.front());
+		m_meshes.erase(m_meshes.begin());
+	}
+
+	//sort the rest clouds by ->mesh->uniqueID (it will sort the clouds as it were loaded/created)
+	std::sort(m_meshes_rest.begin(), m_meshes_rest.end(), [](CLMeshDesc a, CLMeshDesc b) { return (a.mesh->getUniqueID() < b.mesh->getUniqueID()); });
+
+	//put elements to the front facing vector
+	int index = 0;
+	size_t lastIndex = m_meshes_rest.size() - 1;
+	for (std::vector<CLMeshDesc>::iterator it = m_meshes_rest.begin(); it != m_meshes_rest.end();)
+	{
+		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->mesh->getName());
+		bool required = false;
+		if (!not)
+		{
+			//first {n}
+			if (selectFirst && index < firstNr)
+			{
+				required = true;
+			}
+
+			//last {n}
+			if (selectLast && index > lastIndex - lastNr)
+			{
+				required = true;
+			}
+		}
+		else
+		{
+			//not first {n}
+			if (selectFirst && index >= firstNr && !selectLast)
+			{
+				required = true;
+			}
+
+			//not last {n}
+			if (selectLast && index <= lastIndex - lastNr && !selectFirst)
+			{
+				required = true;
+			}
+
+			//not first and not last
+			if (selectFirst && selectLast && index >= firstNr && index <= lastIndex - lastNr)
+			{
+				required = true;
+			}
+		}
+
+		//regex has higher priority than first/last overwrite
+		if (selectRegex)
+		{
+			if (regex.indexIn(nameToValidate) > -1)
+			{
+				//regex matched
+				required = !not;
+			}
+			else
+			{
+				//regex not matched
+				required = not;
+			}
+		}
+
+		//selectAll has higher priority than first/last/regex overwrite
+		if (selectAll)
+		{
+			required = !not;
+		}
+
+		if (required)
+		{
+			print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->mesh->getUniqueID()));
+			m_meshes.push_back(*it);
+			it = m_meshes_rest.erase(it);
+		}
+		else
+		{
+			print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->mesh->getUniqueID()));
+			++it;
+		}
+		index++;
+	}
+	return true;
+}
+
 void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
 {
 	while (!m_clouds.empty())
@@ -749,6 +943,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSaveMeshes));
 	registerCommand(Command::Shared(new CommandAutoSave));
 	registerCommand(Command::Shared(new CommandLogFile));
+	registerCommand(Command::Shared(new CommandSelectEntities));
 	registerCommand(Command::Shared(new CommandClear));
 	registerCommand(Command::Shared(new CommandClearClouds));
 	registerCommand(Command::Shared(new CommandPopClouds));

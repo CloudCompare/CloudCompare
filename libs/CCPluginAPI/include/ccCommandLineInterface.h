@@ -211,6 +211,12 @@ public: //virtual methods
 	//! Removes all meshes (or only the last one ;)
 	virtual void removeMeshes(bool onlyLast = false) = 0;
 
+	//! moves the clouds to a storage and only keep the selected ones in the cloud array
+	virtual bool selectClouds(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+
+	//! moves the meshes to a storage and only keep the selected ones in the cloud array
+	virtual bool selectMeshes(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+
 	//! Returns the list of arguments
 	virtual QStringList& arguments() = 0;
 	//! Returns the list of arguments (const version)
@@ -323,11 +329,17 @@ public: //Global shift management
 
 protected: //members
 
-	//! Currently opened point clouds and their filename
+	//! Currently opened point clouds and their filename SELECTED
 	std::vector< CLCloudDesc > m_clouds;
 
-	//! Currently opened meshes and their filename
+	//! Currently opened point clouds and their filename NOT SELECTED
+	std::vector< CLCloudDesc > m_clouds_rest;
+
+	//! Currently opened meshes and their filename SELECTED
 	std::vector< CLMeshDesc > m_meshes;
+
+	//! Currently opened meshes and their filename NOT SELECTED
+	std::vector< CLMeshDesc > m_meshes_rest;
 
 	//! Silent mode
 	bool m_silentMode;

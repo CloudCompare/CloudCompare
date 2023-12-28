@@ -154,6 +154,7 @@ constexpr char COMMAND_SAVE_CLOUDS[]					= "SAVE_CLOUDS";
 constexpr char COMMAND_SAVE_MESHES[]					= "SAVE_MESHES";
 constexpr char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
 constexpr char COMMAND_LOG_FILE[]						= "LOG_FILE";
+constexpr char COMMAND_SELECT_ENTITIES[]				= "SELECT_ENTITIES";
 constexpr char COMMAND_CLEAR[]							= "CLEAR";
 constexpr char COMMAND_CLEAR_CLOUDS[]					= "CLEAR_CLOUDS";
 constexpr char COMMAND_POP_CLOUDS[]						= "POP_CLOUDS";
@@ -171,10 +172,16 @@ constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
 constexpr char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 constexpr char OPTION_ON[]								= "ON";
 constexpr char OPTION_OFF[]								= "OFF";
-constexpr char OPTION_LAST[]							= "LAST";
 constexpr char OPTION_FILE_NAMES[]						= "FILE";
 constexpr char OPTION_ORIENT[]							= "ORIENT";
 constexpr char OPTION_MODEL[]							= "MODEL";
+constexpr char OPTION_FIRST[]							= "FIRST";
+constexpr char OPTION_LAST[]							= "LAST";
+constexpr char OPTION_ALL[]								= "ALL";
+constexpr char OPTION_REGEX[]							= "REGEX";
+constexpr char OPTION_NOT[]								= "NOT";
+constexpr char OPTION_CLOUD[]							= "CLOUD";
+constexpr char OPTION_MESH[]							= "MESH";
 
 static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
 {
@@ -6523,12 +6530,233 @@ bool CommandLogFile::process(ccCommandLineInterface& cmd)
 	return ccConsole::TheInstance()->setLogFile(filename);
 }
 
+CommandSelectEntities::CommandSelectEntities()
+	: ccCommandLineInterface::Command(QObject::tr("SELECT_ENTITIES"), COMMAND_SELECT_ENTITIES)
+{}
+
+bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[SELECT ENTITIES]"));
+
+	//option handling
+	//look for additional parameters
+	bool not = false;
+	bool selectRegex = false;
+	bool selectFirst = false;
+	bool selectLast = false;
+	bool selectAll = false;
+	bool selectMeshes = false;
+	bool selectClouds = false;
+	int firstNr = 0;
+	int lastNr = 0;
+	QRegExp regex;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front().toUpper();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_ALL))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectAll = true;
+			//no other params needed
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FIRST))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			//it requires a number after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_FIRST));
+			}
+			bool ok;
+			firstNr = cmd.arguments().takeFirst().toInt(&ok);
+			if (!ok || firstNr < 0)
+			{
+				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_FIRST));
+			}
+			selectFirst = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_LAST))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			//it requires a number after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_LAST));
+			}
+			bool ok;
+			lastNr = cmd.arguments().takeFirst().toInt(&ok);
+			if (!ok || lastNr < 0)
+			{
+				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_LAST));
+			}
+			selectLast = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_REGEX))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectRegex = true;
+			//it requires a string after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: regex string after %1").arg(OPTION_REGEX));
+			}
+			QString regexString = cmd.arguments().takeFirst();
+			regex.setPattern(regexString);
+			if (!regex.isValid())
+			{
+				return cmd.error(QObject::tr("Invalid regex pattern: %1").arg(regex.errorString()));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_NOT))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			not = true;
+			//no other params needed
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_CLOUD))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectClouds = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MESH))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectMeshes = true;
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
+
+	if (selectAll)
+	{
+		//overwrite any other mode (first/last/regex)
+		selectFirst = false;
+		selectLast = false;
+		selectRegex = false;
+		if (not)
+		{
+			//NONE
+			cmd.print("No entities will be selected.");
+		}
+		else
+		{
+			//ALL
+			cmd.print("All entities will be selected. Rest of the options disabled except not.");
+		}
+	}
+
+	if (selectFirst)
+	{
+		if (not)
+		{
+			if (selectLast)
+			{
+				//not first {nr} and not last {nr}
+				cmd.print(QObject::tr("First {%1} entities and last {%2} will not be selected").arg(firstNr).arg(lastNr));
+			}
+			else
+			{
+				//not first {nr}
+				cmd.print(QObject::tr("First {%1} entities will not be selected").arg(firstNr));
+			}
+		}
+		else
+		{
+			//first {nr}
+			cmd.print(QObject::tr("First {%1} entities will be selected").arg(firstNr));
+		}
+
+	}
+
+	if (selectLast)
+	{
+		if (not)
+		{
+			if (!selectFirst)
+			{
+				//not last {nr}
+				cmd.print(QObject::tr("Last {%1} entities will not be selected").arg(lastNr));
+			}
+		}
+		else
+		{
+			//last {nr}
+			cmd.print(QObject::tr("Last {%1} entities will be selected").arg(lastNr));
+		}
+	}
+
+	if (selectRegex)
+	{
+		if (not)
+		{
+			//regex not matches
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will not be selected.").arg(regex.pattern()));
+		}
+		else
+		{
+			//regex matches
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will be selected.").arg(regex.pattern()));
+
+		}
+	}
+
+	//there are no options given
+	if (!selectFirst && !selectLast && !selectRegex && !selectAll)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s): any of the option (%1,%2,%3,%4) found after %5")
+			.arg(OPTION_ALL)
+			.arg(OPTION_FIRST)
+			.arg(OPTION_LAST)
+			.arg(OPTION_REGEX)
+			.arg(COMMAND_SELECT_ENTITIES));
+	}
+
+	//no entity type was selected so select both clouds and meshes
+	if (!selectClouds && !selectMeshes)
+	{
+		selectClouds = true;
+		selectMeshes = true;
+	}
+
+	if (selectClouds)
+	{
+		cmd.print(QObject::tr("[Select clouds]"));
+		if (!cmd.selectClouds(selectAll, not, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		{
+			//error message already sent
+			return false;
+		}
+	}
+
+	if (selectMeshes)
+	{
+		cmd.print(QObject::tr("[Select meshes]"));
+		if (!cmd.selectMeshes(selectAll, not, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		{
+			//error message already sent
+			return false;
+		}
+	}
+
+	return true;
+}
+
 CommandClear::CommandClear()
 	: ccCommandLineInterface::Command(QObject::tr("Clear"), COMMAND_CLEAR)
 {}
 
 bool CommandClear::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR]"));
 	cmd.removeClouds(false);
 	cmd.removeMeshes(false);
 	return true;
@@ -6540,6 +6768,7 @@ CommandClearClouds::CommandClearClouds()
 
 bool CommandClearClouds::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR CLOUDS]"));
 	cmd.removeClouds(false);
 	return true;
 }
@@ -6550,6 +6779,7 @@ CommandPopClouds::CommandPopClouds()
 
 bool CommandPopClouds::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[POP CLOUD]"));
 	cmd.removeClouds(true);
 	return true;
 }
@@ -6560,6 +6790,7 @@ CommandClearMeshes::CommandClearMeshes()
 
 bool CommandClearMeshes::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR MESHES]"));
 	cmd.removeMeshes(false);
 	return true;
 }
@@ -6570,6 +6801,7 @@ CommandPopMeshes::CommandPopMeshes()
 
 bool CommandPopMeshes::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[POP MESH]"));
 	cmd.removeMeshes(true);
 	return true;
 }

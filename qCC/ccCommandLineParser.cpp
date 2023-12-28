@@ -390,7 +390,7 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
-bool ccCommandLineParser::selectClouds(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
 {
 	if (selectRegex && !regex.isValid())
 	{
@@ -414,7 +414,7 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool not, bool selectFirs
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->pc->getName());
 		bool required = false;
-		if (!not)
+		if (!reverse)
 		{
 			//first {n}
 			if (selectFirst && index < firstNr)
@@ -455,19 +455,19 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool not, bool selectFirs
 			if (regex.indexIn(nameToValidate) > -1)
 			{
 				//regex matched
-				required = !not;
+				required = !reverse;
 			}
 			else
 			{
 				//regex not matched
-				required = not;
+				required = reverse;
 			}
 		}
 
 		//selectAll has higher priority than first/last/regex overwrite
 		if (selectAll)
 		{
-			required = !not;
+			required = !reverse;
 		}
 
 		if (required)
@@ -486,7 +486,7 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool not, bool selectFirs
 	return true;
 }
 
-bool ccCommandLineParser::selectMeshes(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
 {
 	//HeadLessHUN: i don't really know if it is possible or worth it to make selectClouds and selectMeshes one function.
 	//"Only" difference between the two function is the two vector, and the differences between CLCLoudDesc and CLMeshDesc.
@@ -512,7 +512,7 @@ bool ccCommandLineParser::selectMeshes(bool selectAll, bool not, bool selectFirs
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->mesh->getName());
 		bool required = false;
-		if (!not)
+		if (!reverse)
 		{
 			//first {n}
 			if (selectFirst && index < firstNr)
@@ -553,19 +553,19 @@ bool ccCommandLineParser::selectMeshes(bool selectAll, bool not, bool selectFirs
 			if (regex.indexIn(nameToValidate) > -1)
 			{
 				//regex matched
-				required = !not;
+				required = !reverse;
 			}
 			else
 			{
 				//regex not matched
-				required = not;
+				required = reverse;
 			}
 		}
 
 		//selectAll has higher priority than first/last/regex overwrite
 		if (selectAll)
 		{
-			required = !not;
+			required = !reverse;
 		}
 
 		if (required)

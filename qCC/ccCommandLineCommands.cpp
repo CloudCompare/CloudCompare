@@ -6540,7 +6540,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 
 	//option handling
 	//look for additional parameters
-	bool not = false;
+	bool reverse = false;
 	bool selectRegex = false;
 	bool selectFirst = false;
 	bool selectLast = false;
@@ -6615,7 +6615,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			not = true;
+			reverse = true;
 			//no other params needed
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_CLOUD))
@@ -6642,7 +6642,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		selectFirst = false;
 		selectLast = false;
 		selectRegex = false;
-		if (not)
+		if (reverse)
 		{
 			//NONE
 			cmd.print("No entities will be selected.");
@@ -6656,7 +6656,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 
 	if (selectFirst)
 	{
-		if (not)
+		if (reverse)
 		{
 			if (selectLast)
 			{
@@ -6679,7 +6679,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 
 	if (selectLast)
 	{
-		if (not)
+		if (reverse)
 		{
 			if (!selectFirst)
 			{
@@ -6696,7 +6696,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 
 	if (selectRegex)
 	{
-		if (not)
+		if (reverse)
 		{
 			//regex not matches
 			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will not be selected.").arg(regex.pattern()));
@@ -6730,7 +6730,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 	if (selectClouds)
 	{
 		cmd.print(QObject::tr("[Select clouds]"));
-		if (!cmd.selectClouds(selectAll, not, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		if (!cmd.selectClouds(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
 		{
 			//error message already sent
 			return false;
@@ -6740,7 +6740,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 	if (selectMeshes)
 	{
 		cmd.print(QObject::tr("[Select meshes]"));
-		if (!cmd.selectMeshes(selectAll, not, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		if (!cmd.selectMeshes(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
 		{
 			//error message already sent
 			return false;

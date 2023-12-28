@@ -212,10 +212,10 @@ public: //virtual methods
 	virtual void removeMeshes(bool onlyLast = false) = 0;
 
 	//! moves the clouds to a storage and only keep the selected ones in the cloud array
-	virtual bool selectClouds(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+	virtual bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
 
 	//! moves the meshes to a storage and only keep the selected ones in the cloud array
-	virtual bool selectMeshes(bool selectAll, bool not, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+	virtual bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
 
 	//! Returns the list of arguments
 	virtual QStringList& arguments() = 0;

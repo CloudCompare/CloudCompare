@@ -254,6 +254,7 @@ v2.13.alpha (???) - (??/??/????)
 		- New sub-option for -APPLY_TRANS command: -INVERSE to inverse the transformation matrix before it is applied.
 		- New sub-option for -SS OCTREE command: MAX_NUMBER_OF_POINTS {number} to subsample with the highest octree number where the the resulting point count won't exceed the given number of points
 		- New sub-option for -SS OCTREE command: CELL_SIZE {size} to calculate octree number from bounding box, and the given cell_size
+		- New sub-option for -SS RANDOM command: PERCENT {number} to calculate count from number. Number should be a decimal number between 0 and 100.
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

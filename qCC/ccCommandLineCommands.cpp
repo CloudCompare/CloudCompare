@@ -1186,19 +1186,51 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
 		}
-		
-		bool ok;
-		unsigned count = cmd.arguments().takeFirst().toUInt(&ok);
-		if (!ok)
+		bool isPercent = false;
+		double percent;
+		unsigned count;
+
+		//handle percent argument
+		if (cmd.arguments().front() == "PERCENT")
 		{
-			return cmd.error(QObject::tr("Invalid number of points for random resampling!"));
+			//local option verified
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: percent after \"-%1 RANDOM PERCENT\"").arg(COMMAND_SUBSAMPLE));
+			}
+
+			bool ok;
+			percent = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok || percent < 0 || percent > 100)
+			{
+				return cmd.error(QObject::tr("Invalid percent for random resampling, must be a decimal number between [0-100]!"));
+			}
+
+			isPercent = true;
 		}
-		cmd.print(QObject::tr("\tOutput points: %1").arg(count));
+		else
+		{
+			bool ok;
+			count = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid number of points for random resampling!"));
+			}
+			cmd.print(QObject::tr("\tOutput points: %1").arg(count));
+		}
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-			
+
+			if (isPercent)
+			{
+				size_t nrOfPoints = desc.pc->size();
+				count = ceil(nrOfPoints * percent / 100);
+				cmd.print(QObject::tr("\tOutput points: %1 * %2% = %3").arg(nrOfPoints).arg(percent).arg(count));
+			}
+
 			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(desc.pc, count, cmd.progressDialog());
 			if (!refCloud)
 			{

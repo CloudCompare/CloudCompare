@@ -175,6 +175,8 @@ constexpr char OPTION_LAST[]							= "LAST";
 constexpr char OPTION_FILE_NAMES[]						= "FILE";
 constexpr char OPTION_ORIENT[]							= "ORIENT";
 constexpr char OPTION_MODEL[]							= "MODEL";
+constexpr char OPTION_PERCENT[]							= "PERCENT";
+constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 
 static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
 {
@@ -1184,27 +1186,27 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	{
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
+			return cmd.error(QObject::tr("Missing parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 		}
 		bool isPercent = false;
 		double percent;
 		unsigned count;
 
 		//handle percent argument
-		if (cmd.arguments().front() == "PERCENT")
+		if (cmd.arguments().front() == OPTION_PERCENT)
 		{
 			//local option verified
 			cmd.arguments().pop_front();
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: percent after \"-%1 RANDOM PERCENT\"").arg(COMMAND_SUBSAMPLE));
+				return cmd.error(QObject::tr("Missing parameter: number after \"-%1 RANDOM %2\"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 
 			bool ok;
 			percent = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok || percent < 0 || percent > 100)
 			{
-				return cmd.error(QObject::tr("Invalid percent for random resampling, must be a decimal number between [0-100]!"));
+				return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 RANDOM %2\" must be decimal between [0-100]!").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 
 			isPercent = true;
@@ -1215,7 +1217,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			count = cmd.arguments().takeFirst().toUInt(&ok);
 			if (!ok)
 			{
-				return cmd.error(QObject::tr("Invalid number of points for random resampling!"));
+				return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 			cmd.print(QObject::tr("\tOutput points: %1").arg(count));
 		}
@@ -1333,6 +1335,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		bool byCellSize = false;
 		bool byMaxNumberOfPoints = false;
 		unsigned maxNumberOfPoints;
+		bool isPercent = false;
+		double percent;
 
 		if (!cmd.arguments().empty()) {
 			//params for automatic OCTREE level calculation based on cell size
@@ -1356,23 +1360,46 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				cmd.print(QObject::tr("\tOctree cell size: %1").arg(cellSize));
 			}
 			//params for automatic OCTREE level calculation based on number of points
-			else if (cmd.arguments().front() == "MAX_NUMBER_OF_POINTS")
+			else if (cmd.arguments().front() == OPTION_NUMBER_OF_POINTS)
 			{
+				//local option verified
+				byMaxNumberOfPoints = true;
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
 				{
-					return cmd.error(QObject::tr("Missing parameter: number of points after \"-%1 OCTREE MAX_NUMBER_OF_POINTS \"").arg(COMMAND_SUBSAMPLE));
+					return cmd.error(QObject::tr("Missing parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
 				}
 
-				bool ok = false;
-				maxNumberOfPoints = cmd.arguments().takeFirst().toInt(&ok);
-				if (!ok)
+				//handle percent argument
+				if (cmd.arguments().front() == OPTION_PERCENT)
 				{
-					return cmd.error(QObject::tr("Invalid parameter: number of points after \"-%1 OCTREE MAX_NUMBER_OF_POINTS \"").arg(COMMAND_SUBSAMPLE));
+					//local option verified
+					cmd.arguments().pop_front();
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 OCTREE %2 %3\"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+
+					bool ok;
+					percent = cmd.arguments().takeFirst().toDouble(&ok);
+					if (!ok || percent < 0 || percent > 100)
+					{
+						return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 OCTREE %2 %3\" must be decimal between [0-100]!").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+
+					isPercent = true;
 				}
-				byMaxNumberOfPoints = true;
-				cmd.print(QObject::tr("\tOctree target number of points: %1").arg(maxNumberOfPoints));
+				else
+				{
+					bool ok = false;
+					maxNumberOfPoints = cmd.arguments().takeFirst().toInt(&ok);
+					if (!ok)
+					{
+						return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+					cmd.print(QObject::tr("\tOctree target number of points: %1").arg(maxNumberOfPoints));
+				}
 			}
 			//params for original version octree calculation based on given level
 			else
@@ -1402,6 +1429,10 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
+			CCCoreLib::ReferenceCloud* refCloud;
+			ccPointCloud* result;
+			unsigned sizeOfInputCloud = desc.pc->size();
+
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
 
 			if (byCellSize)
@@ -1412,13 +1443,15 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 
 			if (byMaxNumberOfPoints)
 			{
+				if (isPercent)
+				{
+					maxNumberOfPoints = ceil(sizeOfInputCloud * percent / 100);
+					cmd.print(QObject::tr("\tOutput point target: %1 * %2% = %3").arg(sizeOfInputCloud).arg(percent).arg(maxNumberOfPoints));
+				}
 				//calculate OCTREE level for each cloud based on required number of points
 				octreeLevel = ceil(log(maxNumberOfPoints) / (3.0 * log(2)));
 			}
 
-			CCCoreLib::ReferenceCloud* refCloud;
-			ccPointCloud* result;
-			unsigned sizeOfInputCloud = desc.pc->size();
 			//only process further if CELL_SIZE or octree level was given, or the numberOfPoints smaller than the input cloud
 			if (!byMaxNumberOfPoints || (byMaxNumberOfPoints && sizeOfInputCloud > maxNumberOfPoints))
 			{

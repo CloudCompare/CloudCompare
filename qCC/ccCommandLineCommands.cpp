@@ -2137,8 +2137,6 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	//create an entity vector
 	size_t nrOfClouds = cmd.clouds().size();
 	size_t nrOfMeshes = cmd.meshes().size();
-
-	//HeadLessHUN: nrOfEntities could overflow (highly unlikely), should we do something about it
 	size_t nrOfEntities = nrOfClouds + nrOfMeshes;
 	std::vector<std::pair<ccShiftedObject*, CLEntityDesc*>> entities;
 	entities.reserve(nrOfEntities);
@@ -2171,14 +2169,9 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 		CLEntityDesc& desc = *entities[i].second;
 		ccShiftedObject* shiftedEntity = entities[i].first;
 
-		ccGLMatrixd transMat = ccGLMatrixd(mat.data());
+		ccGLMatrixd transMat(mat.data());
 		if (applyToGlobal)
 		{
-			//HeadLessHUN
-			//this part were picked from mainwindow::applyTransformation with comments
-			//removed dialogs
-			//few changes to accomodate the new environment.
-
 			// the user wants to apply the transformation to the global coordinates
 			CCVector3d globalShift = shiftedEntity->getGlobalShift();
 			double globalScale = shiftedEntity->getGlobalScale();
@@ -2192,16 +2185,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 			//test if the translated cloud coordinates were already "too large"
 			//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
-
-			//HeadLessHUN
-			//Does this really an issue if we apply shift even there are already precision loss?
-			//if the floats gets higher then the precision loss is also higher
-			//And with 10^4 default threshold. We will loose possibilties to save few clouds from precisions loss
-			//I'd remove this check from here and even from the gui version, or at least warn the user about it.
-
 			ccBBox localBBox = shiftedEntity->getOwnBB();
-			//HeadLessHUN
-			//shouldn't we check the maxCorner, instead of minCorner?
 			CCVector3d Pl = localBBox.minCorner();
 			double Dl = localBBox.getDiagNormd();
 			if (!ccGlobalShiftManager::NeedShift(Pl)
@@ -2209,8 +2193,6 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			{
 				//test if the translated cloud coordinates are too large (in local coordinate space)
 				ccBBox transformedBox = shiftedEntity->getOwnBB() * transMat;
-				//HeadLessHUN
-				//shouldn't we check the maxCorner, instead of minCorner?
 				CCVector3d transformedPl = transformedBox.minCorner();
 				double transformedDl = transformedBox.getDiagNormd();
 
@@ -2271,7 +2253,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			}
 		}
 
-		ccGLMatrix matrixToApply = ccGLMatrix(transMat.data());
+		ccGLMatrix matrixToApply(transMat.data());
 		shiftedEntity->applyGLTransformation_recursive(&matrixToApply);
 		QString nameSuffix = "_TRANSFORMED";
 		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)

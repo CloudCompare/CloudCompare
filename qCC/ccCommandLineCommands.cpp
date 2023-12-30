@@ -1476,17 +1476,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//overwrite and print out finalized OCTREE level.
 				if (byCellSize || byMaxNumberOfPoints)
 				{
-
-					if (octreeLevel < 1)
-					{
-						//overwrite with min value instead of throwing an error
-						octreeLevel = 1;
-					}
-					else if (octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
-					{
-						//overwrite with max value instead of throwing an error
-						octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
-					}
+					//clamp octree level
+					octreeLevel = std::max(std::min(octreeLevel, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL), 1);
 					cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
 				}
 				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,

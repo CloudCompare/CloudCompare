@@ -1478,16 +1478,16 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				{
 					//predict a new octree level based on new information. It is faster than going through one by one. And it is predicting on the safe side. It will not overshoot in any circumstances.
 					unsigned sampledNumOfPoints = refCloud->size();
-					unsigned sampledNumOfCells = pow(2, 3 * octreeLevel);
+					unsigned sampledNumOfCells = static_cast<unsigned>(pow(2, 3 * octreeLevel));
 					unsigned predictedNumOfPoints = sampledNumOfPoints;
 					int octreeInc = 0;
 					while (predictedNumOfPoints < maxNumberOfPoints && octreeInc + octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 					{
 						octreeInc++;
-						unsigned newNumOfCells = pow(2, 3 * (octreeLevel + octreeInc));
-						predictedNumOfPoints = static_cast<unsigned>((newNumOfCells * sampledNumOfPoints) / sampledNumOfCells);
+						unsigned newNumOfCells = static_cast<unsigned>(pow(2, 3 * (octreeLevel + octreeInc)));
+						predictedNumOfPoints = static_cast<unsigned>((static_cast<double>(newNumOfCells) * static_cast<double>(sampledNumOfPoints) / static_cast<double>(sampledNumOfCells)));
 						
-						cmd.print(QObject::tr("\t\tNumber of predicted points at octree %3 : %1 / %2 = %4").arg(predictedNumOfPoints).arg(maxNumberOfPoints).arg(octreeLevel+octreeInc).arg(predictedNumOfPoints/maxNumberOfPoints));
+						cmd.print(QObject::tr("\t\tNumber of predicted points at octree %3 : %1 / %2 = %4").arg(predictedNumOfPoints).arg(maxNumberOfPoints).arg(octreeLevel+octreeInc).arg((double)predictedNumOfPoints / (double)maxNumberOfPoints));
 					}
 					octreeLevel += octreeInc;
 					refCloud2 = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(desc.pc,
@@ -1503,7 +1503,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					{
 						delete refCloud;
 						refCloud = refCloud2;
-						if (((double)pointCount2 / (double)pointCount) < 1.05)
+						if ((static_cast<double>(pointCount2) / static_cast<double>(pointCount)) < 1.05)
 						{
 							cmd.print("Not enough point in the input cloud");
 							//do not process further if the current cloud is only 5% larger (hard code maybe param?)

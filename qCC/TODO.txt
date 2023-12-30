@@ -63,6 +63,7 @@ qFacets plugin:
 [*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
+[*] Converting viewports to sensors, or creating sensors from current viewport (https://www.cloudcompare.org/forum/viewtopic.php?t=6722)
 [*] Coloring brush (https://www.cloudcompare.org/forum/viewtopic.php?t=6672)
 [*] Shortcut to translate the cloud (relative to the drawn polygon/rectangle) in graphical segmentation mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6658)
 [*] Add more controls and a preview option to the 'Color Levels' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6629)

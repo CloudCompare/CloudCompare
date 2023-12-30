@@ -1189,8 +1189,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			return cmd.error(QObject::tr("Missing parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 		}
 		bool isPercent = false;
-		double percent;
-		unsigned count;
+		double percent = 0.0;
+		unsigned count = 0;
 
 		//handle percent argument
 		if (cmd.arguments().front() == OPTION_PERCENT)
@@ -1206,7 +1206,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			percent = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok || percent < 0 || percent > 100)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 RANDOM %2\" must be decimal between [0-100]!").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
+				return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 RANDOM %2\" must be decimal between 0 and 100").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 
 			isPercent = true;
@@ -1229,7 +1229,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			if (isPercent)
 			{
 				size_t nrOfPoints = desc.pc->size();
-				count = ceil(nrOfPoints * percent / 100);
+				count = static_cast<unsigned>(ceil(nrOfPoints * percent / 100));
 				cmd.print(QObject::tr("\tOutput points: %1 * %2% = %3").arg(nrOfPoints).arg(percent).arg(count));
 			}
 
@@ -1262,8 +1262,6 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				delete desc.pc;
 				desc.pc = result;
 				desc.basename += QObject::tr("_SUBSAMPLED");
-				//delete result;
-				//result = 0;
 			}
 			else
 			{
@@ -1330,19 +1328,19 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	}
 	else if (method == "OCTREE")
 	{
-		int octreeLevel;
-		double cellSize;
+		int octreeLevel = 1;
+		double cellSize = 0.0;
 		bool byCellSize = false;
 		bool byMaxNumberOfPoints = false;
-		unsigned maxNumberOfPoints;
+		unsigned maxNumberOfPoints = 0;
 		bool isPercent = false;
-		double percent;
+		double percent = 0.0;
 
-		if (!cmd.arguments().empty()) {
+		if (!cmd.arguments().empty())
+		{
 			//params for automatic OCTREE level calculation based on cell size
 			if (cmd.arguments().front() == "CELL_SIZE")
 			{
-
 				cmd.arguments().pop_front();
 
 				if (cmd.arguments().empty())
@@ -1381,11 +1379,11 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 OCTREE %2 %3\"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
 					}
 
-					bool ok;
+					bool ok = false;
 					percent = cmd.arguments().takeFirst().toDouble(&ok);
 					if (!ok || percent < 0 || percent > 100)
 					{
-						return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 OCTREE %2 %3\" must be decimal between [0-100]!").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+						return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 OCTREE %2 %3\" must be decimal between 0 and 100").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
 					}
 
 					isPercent = true;
@@ -1393,7 +1391,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				else
 				{
 					bool ok = false;
-					maxNumberOfPoints = cmd.arguments().takeFirst().toInt(&ok);
+					maxNumberOfPoints = cmd.arguments().takeFirst().toUInt(&ok);
 					if (!ok)
 					{
 						return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
@@ -1429,8 +1427,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
-			CCCoreLib::ReferenceCloud* refCloud;
-			ccPointCloud* result;
+			CCCoreLib::ReferenceCloud* refCloud = nullptr;
+			ccPointCloud* result = nullptr;
 			unsigned sizeOfInputCloud = desc.pc->size();
 
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
@@ -1438,18 +1436,18 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			if (byCellSize)
 			{
 				//calculate OCTREE level for each cloud based on required octree cell size
-				octreeLevel = ceil(log(desc.pc->getOwnBB().getMaxBoxDim() / cellSize) / log(2));
+				octreeLevel = static_cast<int>(ceil(log(desc.pc->getOwnBB().getMaxBoxDim() / cellSize) / log(2.0)));
 			}
 
 			if (byMaxNumberOfPoints)
 			{
 				if (isPercent)
 				{
-					maxNumberOfPoints = ceil(sizeOfInputCloud * percent / 100);
+					maxNumberOfPoints = static_cast<unsigned>(ceil(sizeOfInputCloud * percent / 100));
 					cmd.print(QObject::tr("\tOutput point target: %1 * %2% = %3").arg(sizeOfInputCloud).arg(percent).arg(maxNumberOfPoints));
 				}
 				//calculate OCTREE level for each cloud based on required number of points
-				octreeLevel = ceil(log(maxNumberOfPoints) / (3.0 * log(2)));
+				octreeLevel = static_cast<int>(ceil(log(maxNumberOfPoints) / (3.0 * log(2.0))));
 			}
 
 			//only process further if CELL_SIZE or octree level was given, or the numberOfPoints smaller than the input cloud
@@ -1463,7 +1461,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 						//overwrite with min value instead of throwing an error
 						octreeLevel = 1;
 					}
-					if (octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+					else if (octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 					{
 						//overwrite with max value instead of throwing an error
 						octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
@@ -1478,16 +1476,16 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//predict and calculate new octree levels to match target number only if NUMBER_OF_POINTS is defined
 				while (byMaxNumberOfPoints && refCloud->size() < maxNumberOfPoints && octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 				{
-					//predict a new octree lvl based on new informations, it is faster then go through one by one. And it is predicting on the safe side, will not overshoot at any circumstance
-					double sampledNumOfPoints = refCloud->size();
-					double sampledNumOfCells = pow(2, 3 * octreeLevel);
-					double predictedNumOfPoints = sampledNumOfPoints;
+					//predict a new octree level based on new information. It is faster than going through one by one. And it is predicting on the safe side. It will not overshoot in any circumstances.
+					unsigned sampledNumOfPoints = refCloud->size();
+					unsigned sampledNumOfCells = pow(2, 3 * octreeLevel);
+					unsigned predictedNumOfPoints = sampledNumOfPoints;
 					int octreeInc = 0;
-					while (predictedNumOfPoints < (double)maxNumberOfPoints && octreeInc + octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+					while (predictedNumOfPoints < maxNumberOfPoints && octreeInc + octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
 					{
 						octreeInc++;
-						double newNumOfCells = pow(2, 3 * (octreeLevel + octreeInc));
-						predictedNumOfPoints = (newNumOfCells * sampledNumOfPoints) / sampledNumOfCells;
+						unsigned newNumOfCells = pow(2, 3 * (octreeLevel + octreeInc));
+						predictedNumOfPoints = static_cast<unsigned>((newNumOfCells * sampledNumOfPoints) / sampledNumOfCells);
 						
 						cmd.print(QObject::tr("\t\tNumber of predicted points at octree %3 : %1 / %2 = %4").arg(predictedNumOfPoints).arg(maxNumberOfPoints).arg(octreeLevel+octreeInc).arg(predictedNumOfPoints/maxNumberOfPoints));
 					}
@@ -1533,7 +1531,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				//no subsampling happaned so result="input cloud"
+				//no subsampling happened so result="input cloud"
 				result = desc.pc;
 				//set octreeLevel to indicate it was not subsampled at all
 				octreeLevel = -1;

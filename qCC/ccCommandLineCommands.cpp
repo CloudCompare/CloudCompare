@@ -1335,6 +1335,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		unsigned maxNumberOfPoints = 0;
 		bool isPercent = false;
 		double percent = 0.0;
+		const int maxOctreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
 
 		if (!cmd.arguments().empty())
 		{
@@ -1410,7 +1411,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 
 				bool ok = false;
 				octreeLevel = cmd.arguments().takeFirst().toInt(&ok);
-				if (!ok || octreeLevel < 1 || octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
+				if (!ok || octreeLevel < 1 || octreeLevel > maxOctreeLevel)
 				{
 					return cmd.error(QObject::tr("Invalid octree level!"));
 				}
@@ -1455,10 +1456,10 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				}
 
 				//calculate OCTREE level for each cloud based on required number of points
-				octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
+				octreeLevel = maxOctreeLevel;
 				unsigned numberOfPoints = sizeOfInputCloud;
 				//go through max->min until previous point count and current point count is different then break
-				for (int currentOctreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; currentOctreeLevel > 0; --currentOctreeLevel)
+				for (int currentOctreeLevel = maxOctreeLevel; currentOctreeLevel > 0; --currentOctreeLevel)
 				{
 					unsigned currentNumberOfPoints = octree->getCellNumber(currentOctreeLevel);
 					if (currentNumberOfPoints != numberOfPoints && numberOfPoints < maxNumberOfPoints)
@@ -1477,7 +1478,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				if (byCellSize || byMaxNumberOfPoints)
 				{
 					//clamp octree level
-					octreeLevel = std::max(std::min(octreeLevel, CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL), 1);
+					octreeLevel = std::max(std::min(octreeLevel, maxOctreeLevel), 1);
 					cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
 				}
 				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,

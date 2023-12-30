@@ -1357,6 +1357,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				byCellSize = true;
 				cmd.print(QObject::tr("\tOctree cell size: %1").arg(cellSize));
 			}
+
 			//params for automatic OCTREE level calculation based on number of points
 			else if (cmd.arguments().front() == OPTION_NUMBER_OF_POINTS)
 			{
@@ -1427,6 +1428,12 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
+			//calculate octree before subsampling, it is passed to subsampling, so it won't be recalculated there.
+			CCCoreLib::DgmOctree* octree = desc.pc->computeOctree(nullptr, false).data();
+			if (!octree)
+			{
+				return cmd.error("Octree calculation failed, not enough memory?");
+			}
 			CCCoreLib::ReferenceCloud* refCloud = nullptr;
 			ccPointCloud* result = nullptr;
 			unsigned sizeOfInputCloud = desc.pc->size();
@@ -1446,8 +1453,23 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					maxNumberOfPoints = static_cast<unsigned>(ceil(sizeOfInputCloud * percent / 100));
 					cmd.print(QObject::tr("\tOutput point target: %1 * %2% = %3").arg(sizeOfInputCloud).arg(percent).arg(maxNumberOfPoints));
 				}
+
 				//calculate OCTREE level for each cloud based on required number of points
-				octreeLevel = static_cast<int>(ceil(log(maxNumberOfPoints) / (3.0 * log(2.0))));
+				octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
+				unsigned numberOfPoints = sizeOfInputCloud;
+				//go through max->min untill previous ptsCount and current ptsCount is different then break;
+				do
+				{
+					unsigned currentNumberOfPoints = octree->getCellNumber(octreeLevel);
+					octreeLevel--;
+					if (currentNumberOfPoints != numberOfPoints && numberOfPoints < maxNumberOfPoints)
+					{
+						break;
+					}
+					numberOfPoints = currentNumberOfPoints;
+				}
+				while (numberOfPoints > maxNumberOfPoints && octreeLevel > 0);
+				octreeLevel++;
 			}
 
 			//only process further if CELL_SIZE or octree level was given, or the numberOfPoints smaller than the input cloud
@@ -1471,52 +1493,8 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,
 																							static_cast<unsigned char>(octreeLevel),
 																							CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																							progressDialog.data());
-				CCCoreLib::ReferenceCloud* refCloud2;
-				//predict and calculate new octree levels to match target number only if NUMBER_OF_POINTS is defined
-				while (byMaxNumberOfPoints && refCloud->size() < maxNumberOfPoints && octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
-				{
-					//predict a new octree level based on new information. It is faster than going through one by one. And it is predicting on the safe side. It will not overshoot in any circumstances.
-					unsigned sampledNumOfPoints = refCloud->size();
-					unsigned sampledNumOfCells = static_cast<unsigned>(pow(2, 3 * octreeLevel));
-					unsigned predictedNumOfPoints = sampledNumOfPoints;
-					int octreeInc = 0;
-					while (predictedNumOfPoints < maxNumberOfPoints && octreeInc + octreeLevel < CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
-					{
-						octreeInc++;
-						unsigned newNumOfCells = static_cast<unsigned>(pow(2, 3 * (octreeLevel + octreeInc)));
-						predictedNumOfPoints = static_cast<unsigned>((static_cast<double>(newNumOfCells) * static_cast<double>(sampledNumOfPoints) / static_cast<double>(sampledNumOfCells)));
-						
-						cmd.print(QObject::tr("\t\tNumber of predicted points at octree %3 : %1 / %2 = %4").arg(predictedNumOfPoints).arg(maxNumberOfPoints).arg(octreeLevel+octreeInc).arg((double)predictedNumOfPoints / (double)maxNumberOfPoints));
-					}
-					octreeLevel += octreeInc;
-					refCloud2 = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(desc.pc,
-						static_cast<unsigned char>(octreeLevel),
-						CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-						progressDialog.data());
-
-					unsigned int pointCount = refCloud->size();
-					unsigned int pointCount2 = refCloud2->size();
-					cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
-					cmd.print(QObject::tr("\tCurrent number of points: %1").arg(pointCount2));
-					if (pointCount2 < maxNumberOfPoints)
-					{
-						delete refCloud;
-						refCloud = refCloud2;
-						if ((static_cast<double>(pointCount2) / static_cast<double>(pointCount)) < 1.05)
-						{
-							cmd.print("Not enough point in the input cloud");
-							//do not process further if the current cloud is only 5% larger (hard code maybe param?)
-							break;
-						}
-					}
-					else
-					{
-						//the processed cloud would be bigger than the target number.
-						octreeLevel--;
-						break;
-					}
-				}
+																							progressDialog.data(),
+																							octree);
 
 				if (!refCloud)
 				{
@@ -1531,6 +1509,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
+				cmd.print("\tNot subsampled, point count is smaller than max number of points");
 				//no subsampling happened so result="input cloud"
 				result = desc.pc;
 				//set octreeLevel to indicate it was not subsampled at all
@@ -1558,8 +1537,6 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					delete desc.pc;
 					desc.pc = result;
 					desc.basename += QObject::tr("_SUBSAMPLED");
-					//delete result;
-					//result = 0;
 				}
 			}
 			else

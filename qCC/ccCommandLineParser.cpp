@@ -419,7 +419,7 @@ template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEn
 	//put elements to the front facing vector
 	unsigned index = 0;
 	size_t lastIndex = unselectedEntities.size() - 1;
-	for (std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
+	for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
 		bool toBeSelected = false;

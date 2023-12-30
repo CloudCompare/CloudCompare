@@ -1457,18 +1457,17 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//calculate OCTREE level for each cloud based on required number of points
 				octreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
 				unsigned numberOfPoints = sizeOfInputCloud;
-				//go through max->min untill previous ptsCount and current ptsCount is different then break;
-				do
+				//go through max->min until previous point count and current point count is different then break
+				for (int currentOctreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL; currentOctreeLevel > 1; --currentOctreeLevel)
 				{
-					unsigned currentNumberOfPoints = octree->getCellNumber(octreeLevel);
-					octreeLevel--;
+					octreeLevel = currentOctreeLevel;
+					unsigned currentNumberOfPoints = octree->getCellNumber(currentOctreeLevel);
 					if (currentNumberOfPoints != numberOfPoints && numberOfPoints < maxNumberOfPoints)
 					{
 						break;
 					}
 					numberOfPoints = currentNumberOfPoints;
 				}
-				while (numberOfPoints > maxNumberOfPoints && octreeLevel > 0);
 				octreeLevel++;
 			}
 
@@ -1478,6 +1477,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//overwrite and print out finalized OCTREE level.
 				if (byCellSize || byMaxNumberOfPoints)
 				{
+
 					if (octreeLevel < 1)
 					{
 						//overwrite with min value instead of throwing an error

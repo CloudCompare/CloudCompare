@@ -389,7 +389,7 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
-template<class EntityDesc > bool SelectEntities(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex,ccCommandLineParser cmd, std::vector<EntityDesc>& selectedEntities, std::vector<EntityDesc>& unselectedEntities,CL_ENTITY_TYPE entityType)
+template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options, ccCommandLineParser cmd, std::vector<EntityDesc>& selectedEntities, std::vector<EntityDesc>& unselectedEntities, CL_ENTITY_TYPE entityType)
 {
 	//early abort if no clouds found
 	if (selectedEntities.empty() && unselectedEntities.empty())
@@ -399,9 +399,9 @@ template<class EntityDesc > bool SelectEntities(bool selectAll, bool reverse, bo
 		return true;
 	}
 
-	if (selectRegex && !regex.isValid())
+	if (options.selectRegex && !options.regex.isValid())
 	{
-		return cmd.error(QObject::tr("Regex string invalid: %1").arg(regex.errorString()));
+		return cmd.error(QObject::tr("Regex string invalid: %1").arg(options.regex.errorString()));
 	}
 
 	//store everthyng in the unselected vector
@@ -423,16 +423,16 @@ template<class EntityDesc > bool SelectEntities(bool selectAll, bool reverse, bo
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
 		bool toBeSelected = false;
-		if (!reverse)
+		if (!options.reverse)
 		{
 			//first {n}
-			if (selectFirst && index < firstNr)
+			if (options.selectFirst && index < options.firstNr)
 			{
 				toBeSelected = true;
 			}
 
 			//last {n}
-			if (selectLast && index > lastIndex - lastNr)
+			if (options.selectLast && index > lastIndex - options.lastNr)
 			{
 				toBeSelected = true;
 			}
@@ -440,43 +440,43 @@ template<class EntityDesc > bool SelectEntities(bool selectAll, bool reverse, bo
 		else
 		{
 			//not first {n}
-			if (selectFirst && index >= firstNr && !selectLast)
+			if (options.selectFirst && index >= options.firstNr && !options.selectLast)
 			{
 				toBeSelected = true;
 			}
 
 			//not last {n}
-			if (selectLast && index <= lastIndex - lastNr && !selectFirst)
+			if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
 			{
 				toBeSelected = true;
 			}
 
 			//not first and not last
-			if (selectFirst && selectLast && index >= firstNr && index <= lastIndex - lastNr)
+			if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
 			{
 				toBeSelected = true;
 			}
 		}
 
 		//regex has higher priority than first/last overwrite
-		if (selectRegex)
+		if (options.selectRegex)
 		{
-			if (regex.indexIn(nameToValidate) > -1)
+			if (options.regex.indexIn(nameToValidate) > -1)
 			{
 				//regex matched
-				toBeSelected = !reverse;
+				toBeSelected = !options.reverse;
 			}
 			else
 			{
 				//regex not matched
-				toBeSelected = reverse;
+				toBeSelected = options.reverse;
 			}
 		}
 
 		//selectAll has higher priority than first/last/regex overwrite
-		if (selectAll)
+		if (options.selectAll)
 		{
-			toBeSelected = !reverse;
+			toBeSelected = !options.reverse;
 		}
 
 		if (toBeSelected)
@@ -495,14 +495,14 @@ template<class EntityDesc > bool SelectEntities(bool selectAll, bool reverse, bo
 	return true;
 }
 
-bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex)
+bool ccCommandLineParser::selectClouds(ccCommandLineInterface::SelectEntitiesOptions options)
 {
-	return SelectEntities(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex, *this, m_clouds, m_unselectedClouds, CL_ENTITY_TYPE::CLOUD);
+	return SelectEntities(options, *this, m_clouds, m_unselectedClouds, CL_ENTITY_TYPE::CLOUD);
 }
 
-bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex)
+bool ccCommandLineParser::selectMeshes(ccCommandLineInterface::SelectEntitiesOptions options)
 {
-	return SelectEntities(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex, *this, m_meshes, m_unselectedMeshes, CL_ENTITY_TYPE::MESH);
+	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, CL_ENTITY_TYPE::MESH);
 }
 
 void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)

@@ -135,6 +135,19 @@ public: //constructor
 	
 	virtual ~ccCommandLineInterface() = default;
 
+	//! Select Entities options
+	struct SelectEntitiesOptions
+	{
+		bool reverse = false;
+		bool selectRegex = false;
+		bool selectFirst = false;
+		bool selectLast = false;
+		bool selectAll = false;
+		unsigned firstNr = 0;
+		unsigned lastNr = 0;
+		QRegExp regex;
+	};
+
 	enum class ExportOption {
 		NoOptions = 0x0,
 		ForceCloud = 0x1,
@@ -212,10 +225,10 @@ public: //virtual methods
 	virtual void removeMeshes(bool onlyLast = false) = 0;
 
 	//! Keep only the selected clouds in the active set (m_clouds) and stores the others in an separate set (m_unselectedClouds)
-	virtual bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) = 0;
+	virtual bool selectClouds(ccCommandLineInterface::SelectEntitiesOptions options) = 0;
 
 	//! Keep only the selected meshes in the active set (m_meshes) and stores the others in an separate set (m_unselectedMeshes)
-	virtual bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) = 0;
+	virtual bool selectMeshes(ccCommandLineInterface::SelectEntitiesOptions options) = 0;
 
 	//! Returns the list of arguments
 	virtual QStringList& arguments() = 0;

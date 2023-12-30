@@ -6540,16 +6540,9 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 
 	//option handling
 	//look for additional parameters
-	bool reverse = false;
-	bool selectRegex = false;
-	bool selectFirst = false;
-	bool selectLast = false;
-	bool selectAll = false;
+	ccCommandLineInterface::SelectEntitiesOptions options;
 	bool selectMeshes = false;
 	bool selectClouds = false;
-	unsigned firstNr = 0;
-	unsigned lastNr = 0;
-	QRegExp regex;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front().toUpper();
@@ -6557,7 +6550,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			selectAll = true;
+			options.selectAll = true;
 			//no other params needed
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FIRST))
@@ -6570,12 +6563,12 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_FIRST));
 			}
 			bool ok;
-			firstNr = cmd.arguments().takeFirst().toUInt(&ok);
+			options.firstNr = cmd.arguments().takeFirst().toUInt(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_FIRST));
 			}
-			selectFirst = true;
+			options.selectFirst = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_LAST))
 		{
@@ -6587,35 +6580,35 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_LAST));
 			}
 			bool ok;
-			lastNr = cmd.arguments().takeFirst().toUInt(&ok);
+			options.lastNr = cmd.arguments().takeFirst().toUInt(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_LAST));
 			}
-			selectLast = true;
+			options.selectLast = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_REGEX))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			selectRegex = true;
+			options.selectRegex = true;
 			//it requires a string after the argument
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: regex string after %1").arg(OPTION_REGEX));
 			}
 			QString regexString = cmd.arguments().takeFirst();
-			regex.setPattern(regexString);
-			if (!regex.isValid())
+			options.regex.setPattern(regexString);
+			if (!options.regex.isValid())
 			{
-				return cmd.error(QObject::tr("Invalid regex pattern: %1").arg(regex.errorString()));
+				return cmd.error(QObject::tr("Invalid regex pattern: %1").arg(options.regex.errorString()));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_NOT))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
-			reverse = true;
+			options.reverse = true;
 			//no other params needed
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_CLOUD))
@@ -6636,13 +6629,13 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (selectAll)
+	if (options.selectAll)
 	{
 		//overwrite any other mode (first/last/regex)
-		selectFirst = false;
-		selectLast = false;
-		selectRegex = false;
-		if (reverse)
+		options.selectFirst = false;
+		options.selectLast = false;
+		options.selectRegex = false;
+		if (options.reverse)
 		{
 			//NONE
 			cmd.print("No entities will be selected.");
@@ -6654,63 +6647,63 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (selectFirst)
+	if (options.selectFirst)
 	{
-		if (reverse)
+		if (options.reverse)
 		{
-			if (selectLast)
+			if (options.selectLast)
 			{
 				//not first {nr} and not last {nr}
-				cmd.print(QObject::tr("First %1 and last %2 entity(ies) will not be selected").arg(firstNr).arg(lastNr));
+				cmd.print(QObject::tr("First %1 and last %2 entity(ies) will not be selected").arg(options.firstNr).arg(options.lastNr));
 			}
 			else
 			{
 				//not first {nr}
-				cmd.print(QObject::tr("First %1 entity(ies) will not be selected").arg(firstNr));
+				cmd.print(QObject::tr("First %1 entity(ies) will not be selected").arg(options.firstNr));
 			}
 		}
 		else
 		{
 			//first {nr}
-			cmd.print(QObject::tr("First %1 entity(ies) will be selected").arg(firstNr));
+			cmd.print(QObject::tr("First %1 entity(ies) will be selected").arg(options.firstNr));
 		}
 
 	}
 
-	if (selectLast)
+	if (options.selectLast)
 	{
-		if (reverse)
+		if (options.reverse)
 		{
-			if (!selectFirst)
+			if (!options.selectFirst)
 			{
 				//not last {nr}
-				cmd.print(QObject::tr("Last %1 entity(ies) will not be selected").arg(lastNr));
+				cmd.print(QObject::tr("Last %1 entity(ies) will not be selected").arg(options.lastNr));
 			}
 		}
 		else
 		{
 			//last {nr}
-			cmd.print(QObject::tr("Last %1 entity(ies) will be selected").arg(lastNr));
+			cmd.print(QObject::tr("Last %1 entity(ies) will be selected").arg(options.lastNr));
 		}
 	}
 
-	if (selectRegex)
+	if (options.selectRegex)
 	{
-		if (reverse)
+		if (options.reverse)
 		{
 			//regex not matches
-			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will not be selected.").arg(regex.pattern()));
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will not be selected.").arg(options.regex.pattern()));
 		}
 		else
 		{
 			//regex matches
-			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will be selected.").arg(regex.pattern()));
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will be selected.").arg(options.regex.pattern()));
 
 		}
 	}
 
 	//no option was set
-	if (!selectFirst && !selectLast && !selectRegex && !selectAll)
+	if (!options.selectFirst && !options.selectLast && !options.selectRegex && !options.selectAll)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s): any of the option (%1,%2,%3,%4) expected after %5")
 			.arg(OPTION_ALL)
@@ -6730,7 +6723,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 	if (selectClouds)
 	{
 		cmd.print(QObject::tr("[Select clouds]"));
-		if (!cmd.selectClouds(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		if (!cmd.selectClouds(options))
 		{
 			//error message already sent
 			return false;
@@ -6740,7 +6733,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 	if (selectMeshes)
 	{
 		cmd.print(QObject::tr("[Select meshes]"));
-		if (!cmd.selectMeshes(selectAll, reverse, selectFirst, selectLast, selectRegex, firstNr, lastNr, regex))
+		if (!cmd.selectMeshes(options))
 		{
 			//error message already sent
 			return false;

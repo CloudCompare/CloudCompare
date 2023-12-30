@@ -390,42 +390,52 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
-bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex)
 {
+	//early abort if no clouds found
+	if (m_clouds.empty() && m_unselectedClouds.empty())
+	{
+		//do not stop execution, just warn the user and return
+		warning("\tNot found any opened clouds. Open one with -O command");
+		return true;
+	}
+
 	if (selectRegex && !regex.isValid())
 	{
 		return error(QObject::tr("Regex string invalid: %1").arg(regex.errorString()));
 	}
 
-	//store everthyng in the rest vector
-	while (!m_clouds.empty())
+	//store everthyng in the unselected vector
+	m_unselectedClouds.insert(m_unselectedClouds.end(), m_clouds.begin(),m_clouds.end());
+	m_clouds.clear();
+
+	//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
+	std::sort(m_unselectedClouds.begin(), m_unselectedClouds.end(), [](const CLCloudDesc& a, const CLCloudDesc& b) { return (a.pc->getUniqueID() < b.pc->getUniqueID()); });
+
+	if (m_unselectedClouds.empty())
 	{
-		m_clouds_rest.push_back(m_clouds.front());
-		m_clouds.erase(m_clouds.begin());
+		return error("There is no unselected cloud to select from.");
 	}
 
-	//sort the rest clouds by uniqueID (it will sort the clouds as it were loaded/created)
-	std::sort(m_clouds_rest.begin(), m_clouds_rest.end(), [](CLCloudDesc a, CLCloudDesc b) { return (a.pc->getUniqueID() < b.pc->getUniqueID()); });
-
 	//put elements to the front facing vector
-	int index = 0;
-	size_t lastIndex = m_clouds_rest.size() - 1;
-	for (std::vector<CLCloudDesc>::iterator it = m_clouds_rest.begin(); it != m_clouds_rest.end();)
+	unsigned index = 0;
+	size_t lastIndex = m_unselectedClouds.size() - 1;
+	for (std::vector<CLCloudDesc>::iterator it = m_unselectedClouds.begin(); it != m_unselectedClouds.end();)
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->pc->getName());
-		bool required = false;
+		bool toBeSelected = false;
 		if (!reverse)
 		{
 			//first {n}
 			if (selectFirst && index < firstNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//last {n}
 			if (selectLast && index > lastIndex - lastNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 		}
 		else
@@ -433,19 +443,19 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool select
 			//not first {n}
 			if (selectFirst && index >= firstNr && !selectLast)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//not last {n}
 			if (selectLast && index <= lastIndex - lastNr && !selectFirst)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//not first and not last
 			if (selectFirst && selectLast && index >= firstNr && index <= lastIndex - lastNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 		}
 
@@ -455,26 +465,26 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool select
 			if (regex.indexIn(nameToValidate) > -1)
 			{
 				//regex matched
-				required = !reverse;
+				toBeSelected = !reverse;
 			}
 			else
 			{
 				//regex not matched
-				required = reverse;
+				toBeSelected = reverse;
 			}
 		}
 
 		//selectAll has higher priority than first/last/regex overwrite
 		if (selectAll)
 		{
-			required = !reverse;
+			toBeSelected = !reverse;
 		}
 
-		if (required)
+		if (toBeSelected)
 		{
 			print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->pc->getUniqueID()));
 			m_clouds.push_back(*it);
-			it = m_clouds_rest.erase(it);
+			it = m_unselectedClouds.erase(it);
 		}
 		else
 		{
@@ -486,44 +496,55 @@ bool ccCommandLineParser::selectClouds(bool selectAll, bool reverse, bool select
 	return true;
 }
 
-bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex)
+bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex)
 {
 	//HeadLessHUN: i don't really know if it is possible or worth it to make selectClouds and selectMeshes one function.
 	//"Only" difference between the two function is the two vector, and the differences between CLCLoudDesc and CLMeshDesc.
+
+	//early abort if no meshes found
+	if (m_meshes.empty() && m_unselectedMeshes.empty())
+	{
+		//do not stop execution, just warn the user and return
+		warning("\tNot found any opened meshes. Open one with -O command");
+		return true;
+	}
+
 	if (selectRegex && !regex.isValid())
 	{
 		return error(QObject::tr("Regex string invalid: %1").arg(regex.errorString()));
 	}
 
-	//store everthyng in the rest vector
-	while (!m_meshes.empty())
+	//store everthyng in the unselected vector
+	m_unselectedMeshes.insert(m_unselectedMeshes.end(), m_meshes.begin(), m_meshes.end());
+	m_meshes.clear();
+
+	//sort the unselected meshes by uniqueID (so as to restore the order in which they were loaded/created)
+	std::sort(m_unselectedMeshes.begin(), m_unselectedMeshes.end(), [](const CLMeshDesc& a, const CLMeshDesc& b) { return (a.mesh->getUniqueID() < b.mesh->getUniqueID()); });
+
+	if (m_unselectedMeshes.empty())
 	{
-		m_meshes_rest.push_back(m_meshes.front());
-		m_meshes.erase(m_meshes.begin());
+		return error("There is no unselected mesh to select from.");
 	}
 
-	//sort the rest clouds by ->mesh->uniqueID (it will sort the clouds as it were loaded/created)
-	std::sort(m_meshes_rest.begin(), m_meshes_rest.end(), [](CLMeshDesc a, CLMeshDesc b) { return (a.mesh->getUniqueID() < b.mesh->getUniqueID()); });
-
 	//put elements to the front facing vector
-	int index = 0;
-	size_t lastIndex = m_meshes_rest.size() - 1;
-	for (std::vector<CLMeshDesc>::iterator it = m_meshes_rest.begin(); it != m_meshes_rest.end();)
+	unsigned index = 0;
+	size_t lastIndex = m_unselectedMeshes.size() - 1;
+	for (std::vector<CLMeshDesc>::iterator it = m_unselectedMeshes.begin(); it != m_unselectedMeshes.end();)
 	{
 		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->mesh->getName());
-		bool required = false;
+		bool toBeSelected = false;
 		if (!reverse)
 		{
 			//first {n}
 			if (selectFirst && index < firstNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//last {n}
 			if (selectLast && index > lastIndex - lastNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 		}
 		else
@@ -531,19 +552,19 @@ bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool select
 			//not first {n}
 			if (selectFirst && index >= firstNr && !selectLast)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//not last {n}
 			if (selectLast && index <= lastIndex - lastNr && !selectFirst)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 
 			//not first and not last
 			if (selectFirst && selectLast && index >= firstNr && index <= lastIndex - lastNr)
 			{
-				required = true;
+				toBeSelected = true;
 			}
 		}
 
@@ -553,26 +574,26 @@ bool ccCommandLineParser::selectMeshes(bool selectAll, bool reverse, bool select
 			if (regex.indexIn(nameToValidate) > -1)
 			{
 				//regex matched
-				required = !reverse;
+				toBeSelected = !reverse;
 			}
 			else
 			{
 				//regex not matched
-				required = reverse;
+				toBeSelected = reverse;
 			}
 		}
 
 		//selectAll has higher priority than first/last/regex overwrite
 		if (selectAll)
 		{
-			required = !reverse;
+			toBeSelected = !reverse;
 		}
 
-		if (required)
+		if (toBeSelected)
 		{
 			print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->mesh->getUniqueID()));
 			m_meshes.push_back(*it);
-			it = m_meshes_rest.erase(it);
+			it = m_unselectedMeshes.erase(it);
 		}
 		else
 		{

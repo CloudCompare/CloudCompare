@@ -33,8 +33,8 @@ public:
 							ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) override;
 	void removeClouds(bool onlyLast = false) override;
 	void removeMeshes(bool onlyLast = false) override;
-	bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) override;
-	bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) override;
+	bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) override;
+	bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) override;
 	QStringList& arguments() override { return m_arguments; }
 	const QStringList& arguments() const override { return m_arguments; }
 	bool registerCommand(Command::Shared command) override;

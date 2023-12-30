@@ -211,11 +211,11 @@ public: //virtual methods
 	//! Removes all meshes (or only the last one ;)
 	virtual void removeMeshes(bool onlyLast = false) = 0;
 
-	//! moves the clouds to a storage and only keep the selected ones in the cloud array
-	virtual bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+	//! Keep only the selected clouds in the active set (m_clouds) and stores the others in an separate set (m_unselectedClouds)
+	virtual bool selectClouds(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) = 0;
 
-	//! moves the meshes to a storage and only keep the selected ones in the cloud array
-	virtual bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, int firstNr, int lastNr, QRegExp regex) = 0;
+	//! Keep only the selected meshes in the active set (m_meshes) and stores the others in an separate set (m_unselectedMeshes)
+	virtual bool selectMeshes(bool selectAll, bool reverse, bool selectFirst, bool selectLast, bool selectRegex, unsigned firstNr, unsigned lastNr, QRegExp regex) = 0;
 
 	//! Returns the list of arguments
 	virtual QStringList& arguments() = 0;
@@ -329,17 +329,17 @@ public: //Global shift management
 
 protected: //members
 
-	//! Currently opened point clouds and their filename SELECTED
+	//! Currently opened AND SELECTED point clouds and their respective filename
 	std::vector< CLCloudDesc > m_clouds;
 
-	//! Currently opened point clouds and their filename NOT SELECTED
-	std::vector< CLCloudDesc > m_clouds_rest;
+	//! Currently opened BUT NOT SELECTED point clouds and their respective filename
+	std::vector< CLCloudDesc > m_unselectedClouds;
 
-	//! Currently opened meshes and their filename SELECTED
+	//! Currently opened AND SELECTED meshes and their respective filename
 	std::vector< CLMeshDesc > m_meshes;
 
-	//! Currently opened meshes and their filename NOT SELECTED
-	std::vector< CLMeshDesc > m_meshes_rest;
+	//! Currently opened BUT NOT SELECTED meshes and their respective filename
+	std::vector< CLMeshDesc > m_unselectedMeshes;
 
 	//! Silent mode
 	bool m_silentMode;

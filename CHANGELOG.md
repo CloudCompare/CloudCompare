@@ -53,22 +53,22 @@ v2.13.alpha (???) - (??/??/????)
 		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
 			- set global shift on all entities
 			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
-		- SELECT_ENTITIES -{FIRST/LAST} {nr} {-ALL} {-NOT} {-REGEX} {regex_pattern}
-			-sub-option -FIRST {nr}: if set, first nr of entities will be selected (optional). example: xx.....
-			-sub-option -LAST {nr}: if set, last nr of entities will be selected (optional). example: .....xx
-			-sub-option -ALL: if set, all entities will be selected. It has higher priority than FIRST/LAST/REGEX. (optional). example: xxxxxxx
-			-sub-option -REGEX {regex_pattern}: if set, all entities with matching names will be selected. It has higher priority than FIRST/LAST. (optional). example: x(merged)..x(merged)...
-			-sub-option -NOT: if set, all condition will be reversed (optional)
-				- first {nr} -> except first {nr} (optional). example: ..xxxxx
-				- last {nr} -> except last {nr} (optional). example: xxxxx..
+		- SELECT_ENTITIES -{FIRST/LAST} {count} {-ALL} {-NOT} {-REGEX} {regex_pattern}
+			- sub-option -FIRST {count}: if set, first count of entities will be selected (optional). example: xx.....
+			- sub-option -LAST {count}: if set, last count of entities will be selected (optional). example: .....xx
+			- sub-option -ALL: if set, all entities will be selected. It has higher priority than FIRST/LAST/REGEX. (optional). example: xxxxxxx
+			- sub-option -REGEX {regex_pattern}: if set, all entities with matching names will be selected. It has higher priority than FIRST/LAST. (optional). example: x(merged)..x(merged)...
+			- sub-option -NOT: if set, all condition will be reversed (optional)
+				- first {count} -> except first {count} (optional). example: ..xxxxx
+				- last {count} -> except last {count} (optional). example: xxxxx..
 				- all -> none (optional). example: .......
 				- regex matched -> regex not matched (optional). example: .(merged)xx.(merged)xxx
-				- special case: first and last set -> all except first {nr} AND last {nr}. example: ..xxx..
-			-sub-option -CLOUD: if set, clouds will be affected (optional)
-			-sub-option -MESH: if set, meshes will be affected (optional)
-			-if -CLOUD and -MESH is not set then both of them affected
-			-sub-options can be set in any order
-			-if FIRST,LAST set both of them select entities. example: xx...xx
+				- special case: first and last set -> all except first {count} AND last {count}. example: ..xxx..
+			- sub-option -CLOUD: if set, clouds will be selected (optional)
+			- sub-option -MESH: if set, meshes will be selected (optional)
+			- if neither -CLOUD nor -MESH are set then both of them will be selected
+			- sub-options can be set in any order
+			- it is possible to use FIRST and LAST at the same time. example: xx...xx
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

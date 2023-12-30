@@ -6547,8 +6547,8 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 	bool selectAll = false;
 	bool selectMeshes = false;
 	bool selectClouds = false;
-	int firstNr = 0;
-	int lastNr = 0;
+	unsigned firstNr = 0;
+	unsigned lastNr = 0;
 	QRegExp regex;
 	while (!cmd.arguments().empty())
 	{
@@ -6570,8 +6570,8 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_FIRST));
 			}
 			bool ok;
-			firstNr = cmd.arguments().takeFirst().toInt(&ok);
-			if (!ok || firstNr < 0)
+			firstNr = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_FIRST));
 			}
@@ -6587,8 +6587,8 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_LAST));
 			}
 			bool ok;
-			lastNr = cmd.arguments().takeFirst().toInt(&ok);
-			if (!ok || lastNr < 0)
+			lastNr = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_LAST));
 			}
@@ -6650,7 +6650,7 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		else
 		{
 			//ALL
-			cmd.print("All entities will be selected. Rest of the options disabled except not.");
+			cmd.print("All entities will be selected. Other options will be ignored except -NOT.");
 		}
 	}
 
@@ -6661,18 +6661,18 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 			if (selectLast)
 			{
 				//not first {nr} and not last {nr}
-				cmd.print(QObject::tr("First {%1} entities and last {%2} will not be selected").arg(firstNr).arg(lastNr));
+				cmd.print(QObject::tr("First %1 and last %2 entity(ies) will not be selected").arg(firstNr).arg(lastNr));
 			}
 			else
 			{
 				//not first {nr}
-				cmd.print(QObject::tr("First {%1} entities will not be selected").arg(firstNr));
+				cmd.print(QObject::tr("First %1 entity(ies) will not be selected").arg(firstNr));
 			}
 		}
 		else
 		{
 			//first {nr}
-			cmd.print(QObject::tr("First {%1} entities will be selected").arg(firstNr));
+			cmd.print(QObject::tr("First %1 entity(ies) will be selected").arg(firstNr));
 		}
 
 	}
@@ -6684,13 +6684,13 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 			if (!selectFirst)
 			{
 				//not last {nr}
-				cmd.print(QObject::tr("Last {%1} entities will not be selected").arg(lastNr));
+				cmd.print(QObject::tr("Last %1 entity(ies) will not be selected").arg(lastNr));
 			}
 		}
 		else
 		{
 			//last {nr}
-			cmd.print(QObject::tr("Last {%1} entities will be selected").arg(lastNr));
+			cmd.print(QObject::tr("Last %1 entity(ies) will be selected").arg(lastNr));
 		}
 	}
 
@@ -6709,10 +6709,10 @@ bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	//there are no options given
+	//no option was set
 	if (!selectFirst && !selectLast && !selectRegex && !selectAll)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s): any of the option (%1,%2,%3,%4) found after %5")
+		return cmd.error(QObject::tr("Missing parameter(s): any of the option (%1,%2,%3,%4) expected after %5")
 			.arg(OPTION_ALL)
 			.arg(OPTION_FIRST)
 			.arg(OPTION_LAST)

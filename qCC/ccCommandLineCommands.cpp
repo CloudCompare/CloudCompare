@@ -182,6 +182,8 @@ constexpr char OPTION_REGEX[]							= "REGEX";
 constexpr char OPTION_NOT[]								= "NOT";
 constexpr char OPTION_CLOUD[]							= "CLOUD";
 constexpr char OPTION_MESH[]							= "MESH";
+constexpr char OPTION_PERCENT[]							= "PERCENT";
+constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 
 static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
 {
@@ -1191,21 +1193,53 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	{
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: number of points after \"-%1 RANDOM\"").arg(COMMAND_SUBSAMPLE));
+			return cmd.error(QObject::tr("Missing parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 		}
-		
-		bool ok;
-		unsigned count = cmd.arguments().takeFirst().toUInt(&ok);
-		if (!ok)
+		bool isPercent = false;
+		double percent = 0.0;
+		unsigned count = 0;
+
+		//handle percent argument
+		if (cmd.arguments().front() == OPTION_PERCENT)
 		{
-			return cmd.error(QObject::tr("Invalid number of points for random resampling!"));
+			//local option verified
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: number after \"-%1 RANDOM %2\"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
+			}
+
+			bool ok;
+			percent = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok || percent < 0 || percent > 100)
+			{
+				return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 RANDOM %2\" must be decimal between 0 and 100").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
+			}
+
+			isPercent = true;
 		}
-		cmd.print(QObject::tr("\tOutput points: %1").arg(count));
+		else
+		{
+			bool ok;
+			count = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
+			}
+			cmd.print(QObject::tr("\tOutput points: %1").arg(count));
+		}
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-			
+
+			if (isPercent)
+			{
+				size_t nrOfPoints = desc.pc->size();
+				count = static_cast<unsigned>(ceil(nrOfPoints * percent / 100));
+				cmd.print(QObject::tr("\tOutput points: %1 * %2% = %3").arg(nrOfPoints).arg(percent).arg(count));
+			}
+
 			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(desc.pc, count, cmd.progressDialog());
 			if (!refCloud)
 			{
@@ -1235,8 +1269,6 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				delete desc.pc;
 				desc.pc = result;
 				desc.basename += QObject::tr("_SUBSAMPLED");
-				//delete result;
-				//result = 0;
 			}
 			else
 			{
@@ -1303,18 +1335,97 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	}
 	else if (method == "OCTREE")
 	{
-		if (cmd.arguments().empty())
+		int octreeLevel = 1;
+		double cellSize = 0.0;
+		bool byCellSize = false;
+		bool byMaxNumberOfPoints = false;
+		unsigned maxNumberOfPoints = 0;
+		bool isPercent = false;
+		double percent = 0.0;
+		const int maxOctreeLevel = CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL;
+
+		if (!cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+			//params for automatic OCTREE level calculation based on cell size
+			if (cmd.arguments().front() == "CELL_SIZE")
+			{
+				cmd.arguments().pop_front();
+
+				if (cmd.arguments().empty())
+				{
+					return cmd.error(QObject::tr("Missing parameter: octree cell size after \"-%1 OCTREE CELL_SIZE \"").arg(COMMAND_SUBSAMPLE));
+				}
+
+				bool ok = false;
+				cellSize = cmd.arguments().takeFirst().toDouble(&ok);
+				if (!ok)
+				{
+					return cmd.error(QObject::tr("Invalid parameter: octree cell size after \"-%1 OCTREE CELL_SIZE \"").arg(COMMAND_SUBSAMPLE));
+				}
+				byCellSize = true;
+				cmd.print(QObject::tr("\tOctree cell size: %1").arg(cellSize));
+			}
+
+			//params for automatic OCTREE level calculation based on number of points
+			else if (cmd.arguments().front() == OPTION_NUMBER_OF_POINTS)
+			{
+				//local option verified
+				byMaxNumberOfPoints = true;
+				cmd.arguments().pop_front();
+
+				if (cmd.arguments().empty())
+				{
+					return cmd.error(QObject::tr("Missing parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+				}
+
+				//handle percent argument
+				if (cmd.arguments().front() == OPTION_PERCENT)
+				{
+					//local option verified
+					cmd.arguments().pop_front();
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 OCTREE %2 %3\"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+
+					bool ok = false;
+					percent = cmd.arguments().takeFirst().toDouble(&ok);
+					if (!ok || percent < 0 || percent > 100)
+					{
+						return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 OCTREE %2 %3\" must be decimal between 0 and 100").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+
+					isPercent = true;
+				}
+				else
+				{
+					bool ok = false;
+					maxNumberOfPoints = cmd.arguments().takeFirst().toUInt(&ok);
+					if (!ok)
+					{
+						return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_NUMBER_OF_POINTS).arg(OPTION_PERCENT));
+					}
+					cmd.print(QObject::tr("\tOctree target number of points: %1").arg(maxNumberOfPoints));
+				}
+			}
+			//params for original version octree calculation based on given level
+			else
+			{
+				if (cmd.arguments().empty())
+				{
+					return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1 OCTREE\"").arg(COMMAND_SUBSAMPLE));
+				}
+
+				bool ok = false;
+				octreeLevel = cmd.arguments().takeFirst().toInt(&ok);
+				if (!ok || octreeLevel < 1 || octreeLevel > maxOctreeLevel)
+				{
+					return cmd.error(QObject::tr("Invalid octree level!"));
+				}
+				cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
+			}
+
 		}
-		
-		bool ok = false;
-		int octreeLevel = cmd.arguments().takeFirst().toInt(&ok);
-		if (!ok || octreeLevel < 1 || octreeLevel > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL)
-		{
-			return cmd.error(QObject::tr("Invalid octree level!"));
-		}
-		cmd.print(QObject::tr("\tOctree level: %1").arg(octreeLevel));
 		
 		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
@@ -1325,22 +1436,85 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
-			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-			
-			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,
-																													static_cast<unsigned char>(octreeLevel),
-																													CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																													progressDialog.data());
-			if (!refCloud)
+			//calculate octree before subsampling, it is passed to subsampling, so it won't be recalculated there.
+			CCCoreLib::DgmOctree* octree = desc.pc->computeOctree(nullptr, false).data();
+			if (!octree)
 			{
-				return cmd.error(QObject::tr("Subsampling process failed!"));
+				return cmd.error("Octree calculation failed, not enough memory?");
 			}
-			cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
-			
-			//save output
-			ccPointCloud* result = desc.pc->partialClone(refCloud);
-			delete refCloud;
-			refCloud = nullptr;
+			CCCoreLib::ReferenceCloud* refCloud = nullptr;
+			ccPointCloud* result = nullptr;
+			unsigned sizeOfInputCloud = desc.pc->size();
+
+			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
+
+			if (byCellSize)
+			{
+				//calculate OCTREE level for each cloud based on required octree cell size
+				octreeLevel = static_cast<int>(ceil(log(desc.pc->getOwnBB().getMaxBoxDim() / cellSize) / log(2.0)));
+			}
+
+			if (byMaxNumberOfPoints)
+			{
+				if (isPercent)
+				{
+					maxNumberOfPoints = static_cast<unsigned>(ceil(sizeOfInputCloud * percent / 100));
+					cmd.print(QObject::tr("\tOutput point target: %1 * %2% = %3").arg(sizeOfInputCloud).arg(percent).arg(maxNumberOfPoints));
+				}
+
+				//calculate OCTREE level for each cloud based on required number of points
+				octreeLevel = maxOctreeLevel;
+				unsigned numberOfPoints = sizeOfInputCloud;
+				//go through max->min until previous point count and current point count is different then break
+				for (int currentOctreeLevel = maxOctreeLevel; currentOctreeLevel > 0; --currentOctreeLevel)
+				{
+					unsigned currentNumberOfPoints = octree->getCellNumber(currentOctreeLevel);
+					if (currentNumberOfPoints != numberOfPoints && numberOfPoints < maxNumberOfPoints)
+					{
+						break;
+					}
+					octreeLevel = currentOctreeLevel;
+					numberOfPoints = currentNumberOfPoints;
+				}
+			}
+
+			//only process further if CELL_SIZE or octree level was given, or the numberOfPoints smaller than the input cloud
+			if (!byMaxNumberOfPoints || (byMaxNumberOfPoints && sizeOfInputCloud > maxNumberOfPoints))
+			{
+				//overwrite and print out finalized OCTREE level.
+				if (byCellSize || byMaxNumberOfPoints)
+				{
+					//clamp octree level
+					octreeLevel = std::max(std::min(octreeLevel, maxOctreeLevel), 1);
+					cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
+				}
+				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,
+																							static_cast<unsigned char>(octreeLevel),
+																							CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																							progressDialog.data(),
+																							octree);
+
+				if (!refCloud)
+				{
+					return cmd.error(QObject::tr("Subsampling process failed!"));
+				}
+				cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
+
+				//save output
+				result = desc.pc->partialClone(refCloud);
+				delete refCloud;
+				refCloud = nullptr;
+			}
+			else
+			{
+				cmd.print("\tNot subsampled, point count is smaller than max number of points");
+				//no subsampling happened so result="input cloud"
+				result = desc.pc;
+				//set octreeLevel to indicate it was not subsampled at all
+				octreeLevel = -1;
+			}
+
+
 			
 			if (result)
 			{
@@ -1355,12 +1529,13 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 						return cmd.error(errorStr);
 					}
 				}
-				//replace current cloud by this one
-				delete desc.pc;
-				desc.pc = result;
-				desc.basename += QObject::tr("_SUBSAMPLED");
-				//delete result;
-				//result = 0;
+				if (desc.pc != result)
+				{
+					//replace current cloud by subsampled one if it was changed
+					delete desc.pc;
+					desc.pc = result;
+					desc.basename += QObject::tr("_SUBSAMPLED");
+				}
 			}
 			else
 			{

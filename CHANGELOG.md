@@ -268,6 +268,11 @@ v2.13.alpha (???) - (??/??/????)
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
 		- New sub-option for -APPLY_TRANS command: -INVERSE to inverse the transformation matrix before it is applied.
+		- New sub-options for -SS command:
+			* -SS OCTREE NUMBER_OF_POINTS {number} to subsample with the highest octree level for which the resulting point count won't exceed the given number of points
+			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
+			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
+			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

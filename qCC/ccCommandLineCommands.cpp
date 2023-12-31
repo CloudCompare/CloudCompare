@@ -154,6 +154,7 @@ constexpr char COMMAND_SAVE_CLOUDS[]					= "SAVE_CLOUDS";
 constexpr char COMMAND_SAVE_MESHES[]					= "SAVE_MESHES";
 constexpr char COMMAND_AUTO_SAVE[]						= "AUTO_SAVE";
 constexpr char COMMAND_LOG_FILE[]						= "LOG_FILE";
+constexpr char COMMAND_SELECT_ENTITIES[]				= "SELECT_ENTITIES";
 constexpr char COMMAND_CLEAR[]							= "CLEAR";
 constexpr char COMMAND_CLEAR_CLOUDS[]					= "CLEAR_CLOUDS";
 constexpr char COMMAND_POP_CLOUDS[]						= "POP_CLOUDS";
@@ -171,10 +172,16 @@ constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
 constexpr char OPTION_ALL_AT_ONCE[]						= "ALL_AT_ONCE";
 constexpr char OPTION_ON[]								= "ON";
 constexpr char OPTION_OFF[]								= "OFF";
-constexpr char OPTION_LAST[]							= "LAST";
 constexpr char OPTION_FILE_NAMES[]						= "FILE";
 constexpr char OPTION_ORIENT[]							= "ORIENT";
 constexpr char OPTION_MODEL[]							= "MODEL";
+constexpr char OPTION_FIRST[]							= "FIRST";
+constexpr char OPTION_LAST[]							= "LAST";
+constexpr char OPTION_ALL[]								= "ALL";
+constexpr char OPTION_REGEX[]							= "REGEX";
+constexpr char OPTION_NOT[]								= "NOT";
+constexpr char OPTION_CLOUD[]							= "CLOUD";
+constexpr char OPTION_MESH[]							= "MESH";
 constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 
@@ -2935,37 +2942,31 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 	size_t nrOfClouds = cmd.clouds().size();
 	size_t nrOfMeshes = cmd.meshes().size();
 	size_t nrOfEntities = nrOfClouds + nrOfMeshes;
-	QVector<QPair<ccShiftedObject*, CLEntityDesc*>> entities;
+	std::vector<std::pair<ccShiftedObject*, CLEntityDesc*>> entities;
+	entities.reserve(nrOfEntities);
 
 	//add clouds to the vector
-	for (size_t i = 0; i < nrOfClouds; i++)
+	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity;
-		entity.first = cmd.clouds()[i].pc;
-		entity.second = &cmd.clouds()[i];
-		entities.append(entity);
+		entities.push_back({ desc.pc, &desc });
 	}
 
 	//add meshes to the vector
-	for (size_t i = 0; i < nrOfMeshes; i++)
+	for (CLMeshDesc& desc : cmd.meshes())
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity;
 		bool isLocked = false;
-		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(cmd.meshes()[i].mesh, &isLocked);
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
 		if (shifted && !isLocked)
 		{
-			entity.first = shifted;
-			entity.second = &cmd.meshes()[i];
-			entities.append(entity);
+			entities.push_back({ shifted, &desc });
 		}
 	}
 
 	//process both clouds and meshes
-	for (size_t i = 0; i < nrOfEntities; i++)
+	for (const auto& pair : entities)
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity = entities[i];
-		CLEntityDesc& desc = *entity.second;
-		ccShiftedObject* shiftedObject = entity.first;
+		CLEntityDesc& desc = *pair.second;
+		ccShiftedObject* shiftedObject = pair.first;
 		CCVector3d originalShift = shiftedObject->getGlobalShift();
 		cmd.print(QObject::tr("\t[%4 - %5] Original global shift {%1,%2,%3}")
 			.arg(originalShift.x)
@@ -3010,6 +3011,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.z)
 			.arg(desc.basename)
 			.arg(shiftedObject->getName()));
+
 		QString nameSuffix = QObject::tr("_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6")
 			.arg(originalShift.x)
 			.arg(originalShift.y)
@@ -3017,6 +3019,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.x)
 			.arg(newShift.y)
 			.arg(newShift.z);
+
 		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)
 		{
 			//set the mesh name instead of the vertices cloud inside the mesh
@@ -6698,12 +6701,226 @@ bool CommandLogFile::process(ccCommandLineInterface& cmd)
 	return ccConsole::TheInstance()->setLogFile(filename);
 }
 
+CommandSelectEntities::CommandSelectEntities()
+	: ccCommandLineInterface::Command(QObject::tr("SELECT_ENTITIES"), COMMAND_SELECT_ENTITIES)
+{}
+
+bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[SELECT ENTITIES]"));
+
+	//option handling
+	//look for additional parameters
+	ccCommandLineInterface::SelectEntitiesOptions options;
+	bool selectMeshes = false;
+	bool selectClouds = false;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front().toUpper();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_ALL))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			options.selectAll = true;
+			//no other params needed
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FIRST))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			//it requires a number after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_FIRST));
+			}
+			bool ok;
+			options.firstNr = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_FIRST));
+			}
+			options.selectFirst = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_LAST))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			//it requires a number after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: number of entities after %1").arg(OPTION_LAST));
+			}
+			bool ok;
+			options.lastNr = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid number after -%1").arg(OPTION_LAST));
+			}
+			options.selectLast = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_REGEX))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			options.selectRegex = true;
+			//it requires a string after the argument
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: regex string after %1").arg(OPTION_REGEX));
+			}
+			QString regexString = cmd.arguments().takeFirst();
+			options.regex.setPattern(regexString);
+			if (!options.regex.isValid())
+			{
+				return cmd.error(QObject::tr("Invalid regex pattern: %1").arg(options.regex.errorString()));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_NOT))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			options.reverse = true;
+			//no other params needed
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_CLOUD))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectClouds = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MESH))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			selectMeshes = true;
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
+		}
+	}
+
+	if (options.selectAll)
+	{
+		//overwrite any other mode (first/last/regex)
+		options.selectFirst = false;
+		options.selectLast = false;
+		options.selectRegex = false;
+		if (options.reverse)
+		{
+			//NONE
+			cmd.print("No entities will be selected.");
+		}
+		else
+		{
+			//ALL
+			cmd.print("All entities will be selected. Other options will be ignored except -NOT.");
+		}
+	}
+
+	if (options.selectFirst)
+	{
+		if (options.reverse)
+		{
+			if (options.selectLast)
+			{
+				//not first {nr} and not last {nr}
+				cmd.print(QObject::tr("First %1 and last %2 entity(ies) will not be selected").arg(options.firstNr).arg(options.lastNr));
+			}
+			else
+			{
+				//not first {nr}
+				cmd.print(QObject::tr("First %1 entity(ies) will not be selected").arg(options.firstNr));
+			}
+		}
+		else
+		{
+			//first {nr}
+			cmd.print(QObject::tr("First %1 entity(ies) will be selected").arg(options.firstNr));
+		}
+
+	}
+
+	if (options.selectLast)
+	{
+		if (options.reverse)
+		{
+			if (!options.selectFirst)
+			{
+				//not last {nr}
+				cmd.print(QObject::tr("Last %1 entity(ies) will not be selected").arg(options.lastNr));
+			}
+		}
+		else
+		{
+			//last {nr}
+			cmd.print(QObject::tr("Last %1 entity(ies) will be selected").arg(options.lastNr));
+		}
+	}
+
+	if (options.selectRegex)
+	{
+		if (options.reverse)
+		{
+			//regex not matches
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will not be selected.").arg(options.regex.pattern()));
+		}
+		else
+		{
+			//regex matches
+			cmd.print(QObject::tr("Entities with name matches the regex /%1/ will be selected.").arg(options.regex.pattern()));
+
+		}
+	}
+
+	//no option was set
+	if (!options.selectFirst && !options.selectLast && !options.selectRegex && !options.selectAll)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s): any of the option (%1,%2,%3,%4) expected after %5")
+			.arg(OPTION_ALL)
+			.arg(OPTION_FIRST)
+			.arg(OPTION_LAST)
+			.arg(OPTION_REGEX)
+			.arg(COMMAND_SELECT_ENTITIES));
+	}
+
+	//no entity type was selected so select both clouds and meshes
+	if (!selectClouds && !selectMeshes)
+	{
+		selectClouds = true;
+		selectMeshes = true;
+	}
+
+	if (selectClouds)
+	{
+		cmd.print(QObject::tr("[Select clouds]"));
+		if (!cmd.selectClouds(options))
+		{
+			//error message already sent
+			return false;
+		}
+	}
+
+	if (selectMeshes)
+	{
+		cmd.print(QObject::tr("[Select meshes]"));
+		if (!cmd.selectMeshes(options))
+		{
+			//error message already sent
+			return false;
+		}
+	}
+
+	return true;
+}
+
 CommandClear::CommandClear()
 	: ccCommandLineInterface::Command(QObject::tr("Clear"), COMMAND_CLEAR)
 {}
 
 bool CommandClear::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR]"));
 	cmd.removeClouds(false);
 	cmd.removeMeshes(false);
 	return true;
@@ -6715,6 +6932,7 @@ CommandClearClouds::CommandClearClouds()
 
 bool CommandClearClouds::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR CLOUDS]"));
 	cmd.removeClouds(false);
 	return true;
 }
@@ -6725,6 +6943,7 @@ CommandPopClouds::CommandPopClouds()
 
 bool CommandPopClouds::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[POP CLOUD]"));
 	cmd.removeClouds(true);
 	return true;
 }
@@ -6735,6 +6954,7 @@ CommandClearMeshes::CommandClearMeshes()
 
 bool CommandClearMeshes::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[CLEAR MESHES]"));
 	cmd.removeMeshes(false);
 	return true;
 }
@@ -6745,6 +6965,7 @@ CommandPopMeshes::CommandPopMeshes()
 
 bool CommandPopMeshes::process(ccCommandLineInterface& cmd)
 {
+	cmd.print(QObject::tr("[POP MESH]"));
 	cmd.removeMeshes(true);
 	return true;
 }

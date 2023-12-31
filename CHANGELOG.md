@@ -53,6 +53,22 @@ v2.13.alpha (???) - (??/??/????)
 		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
 			- set global shift on all entities
 			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
+		- SELECT_ENTITIES -{FIRST} {first count} -{LAST} {last count} {-ALL} {-NOT} {-REGEX} {regex_pattern}
+			- sub-option -FIRST {count}: if set, first count of entities will be selected (optional). Example: xx.....
+			- sub-option -LAST {count}: if set, last count of entities will be selected (optional). Example: .....xx
+			- sub-option -ALL: if set, all entities will be selected (optional). It has higher priority than FIRST/LAST/REGEX. Example: xxxxxxx
+			- sub-option -REGEX {regex_pattern}: if set, all entities with matching names will be selected (optional). It has higher priority than FIRST/LAST. Example: x(merged)..x(merged)...
+			- sub-option -NOT: if set, all condition will be reversed (optional)
+				- -NOT -FIRST {count} -> all but first {count}. Example: ..xxxxx
+				- -NOT -LAST {count} -> all but last {count}. Example: xxxxx..
+				- -NOT -ALL -> none. Example: .......
+				- -NOT -REGEX matched -> regex not matched. Example: .(merged)xx.(merged)xxx
+				- special case: -NOT -FIRST c1 -LAST c2 -> all except first 'c1' AND last 'c2' entities. Example: ..xxx..
+			- sub-option -CLOUD: if set, only clouds will be selected (optional)
+			- sub-option -MESH: if set, only meshes will be selected (optional)
+			- if neither -CLOUD nor -MESH are set then both types of entities will be selected
+			- sub-options can be set in any order
+			- it is possible to use FIRST and LAST at the same time. Example: xx...xx
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

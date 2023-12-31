@@ -526,6 +526,13 @@ struct CommandLogFile : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandSelectEntities : public ccCommandLineInterface::Command
+{
+	CommandSelectEntities();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandClear : public ccCommandLineInterface::Command
 {
 	CommandClear();

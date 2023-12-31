@@ -390,6 +390,130 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
+template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options,
+												const ccCommandLineParser& cmd,
+												std::vector<EntityDesc>& selectedEntities,
+												std::vector<EntityDesc>& unselectedEntities,
+												QString entityType)
+{
+	//early abort if no cloud found
+	if (selectedEntities.empty() && unselectedEntities.empty())
+	{
+		//do not stop execution, just warn the user and return
+		cmd.warning(QObject::tr("\tNo %1 loaded. Load some with the -O command").arg(entityType));
+		return true;
+	}
+
+	if (options.selectRegex && !options.regex.isValid())
+	{
+		return cmd.error(QObject::tr("Regex string invalid: %1").arg(options.regex.errorString()));
+	}
+
+	try
+	{
+		//store everthyng in the unselected vector
+		unselectedEntities.insert(unselectedEntities.end(), selectedEntities.begin(), selectedEntities.end());
+		selectedEntities.clear();
+
+		//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
+		std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b) { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
+
+		//put elements to the front facing vector
+		unsigned index = 0;
+		assert(!unselectedEntities.empty()); // we have tested above that neither selectedEntities and unselectedEntities are both empty
+		size_t lastIndex = unselectedEntities.size() - 1;
+		for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
+		{
+			QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
+			bool toBeSelected = false;
+			if (!options.reverse)
+			{
+				//first {n}
+				if (options.selectFirst && index < options.firstNr)
+				{
+					toBeSelected = true;
+				}
+
+				//last {n}
+				if (options.selectLast && index > lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
+			}
+			else
+			{
+				//not first {n}
+				if (options.selectFirst && index >= options.firstNr && !options.selectLast)
+				{
+					toBeSelected = true;
+				}
+
+				//not last {n}
+				if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
+				{
+					toBeSelected = true;
+				}
+
+				//not first and not last
+				if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
+			}
+
+			//regex has higher priority than first/last overwrite
+			if (options.selectRegex)
+			{
+				if (options.regex.indexIn(nameToValidate) > -1)
+				{
+					//regex matched
+					toBeSelected = !options.reverse;
+				}
+				else
+				{
+					//regex not matched
+					toBeSelected = options.reverse;
+				}
+			}
+
+			//selectAll has higher priority than first/last/regex overwrite
+			if (options.selectAll)
+			{
+				toBeSelected = !options.reverse;
+			}
+
+			if (toBeSelected)
+			{
+				cmd.print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				selectedEntities.push_back(*it);
+				it = unselectedEntities.erase(it);
+			}
+			else
+			{
+				cmd.print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				++it;
+			}
+			index++;
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		return cmd.error(QObject::tr("Not enough memory"));
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::selectClouds(const SelectEntitiesOptions& options)
+{
+	return SelectEntities(options, *this, m_clouds, m_unselectedClouds, "cloud");
+}
+
+bool ccCommandLineParser::selectMeshes(const SelectEntitiesOptions& options)
+{
+	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, "mesh");
+}
+
 void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
 {
 	while (!m_clouds.empty())
@@ -749,6 +873,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSaveMeshes));
 	registerCommand(Command::Shared(new CommandAutoSave));
 	registerCommand(Command::Shared(new CommandLogFile));
+	registerCommand(Command::Shared(new CommandSelectEntities));
 	registerCommand(Command::Shared(new CommandClear));
 	registerCommand(Command::Shared(new CommandClearClouds));
 	registerCommand(Command::Shared(new CommandPopClouds));

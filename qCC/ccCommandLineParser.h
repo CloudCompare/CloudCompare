@@ -33,6 +33,8 @@ public:
 							ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) override;
 	void removeClouds(bool onlyLast = false) override;
 	void removeMeshes(bool onlyLast = false) override;
+	bool selectClouds(const SelectEntitiesOptions& options) override;
+	bool selectMeshes(const SelectEntitiesOptions& options) override;
 	QStringList& arguments() override { return m_arguments; }
 	const QStringList& arguments() const override { return m_arguments; }
 	bool registerCommand(Command::Shared command) override;

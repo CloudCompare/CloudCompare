@@ -133,9 +133,25 @@ public: //constructor
 	//! Default constructor
 	ccCommandLineInterface();
 	
+	//! Destructor
 	virtual ~ccCommandLineInterface() = default;
 
-	enum class ExportOption {
+	//! Select Entities options
+	struct SelectEntitiesOptions
+	{
+		bool reverse = false;
+		bool selectRegex = false;
+		bool selectFirst = false;
+		bool selectLast = false;
+		bool selectAll = false;
+		unsigned firstNr = 0;
+		unsigned lastNr = 0;
+		QRegExp regex;
+	};
+
+	//! Export options
+	enum class ExportOption
+	{
 		NoOptions = 0x0,
 		ForceCloud = 0x1,
 		ForceMesh = 0x2,
@@ -210,6 +226,12 @@ public: //virtual methods
 
 	//! Removes all meshes (or only the last one ;)
 	virtual void removeMeshes(bool onlyLast = false) = 0;
+
+	//! Keep only the selected clouds in the active set (m_clouds) and stores the others in an separate set (m_unselectedClouds)
+	virtual bool selectClouds(const SelectEntitiesOptions& options) = 0;
+
+	//! Keep only the selected meshes in the active set (m_meshes) and stores the others in an separate set (m_unselectedMeshes)
+	virtual bool selectMeshes(const SelectEntitiesOptions& options) = 0;
 
 	//! Returns the list of arguments
 	virtual QStringList& arguments() = 0;
@@ -323,11 +345,17 @@ public: //Global shift management
 
 protected: //members
 
-	//! Currently opened point clouds and their filename
+	//! Currently opened AND SELECTED point clouds and their respective filename
 	std::vector< CLCloudDesc > m_clouds;
 
-	//! Currently opened meshes and their filename
+	//! Currently opened BUT NOT SELECTED point clouds and their respective filename
+	std::vector< CLCloudDesc > m_unselectedClouds;
+
+	//! Currently opened AND SELECTED meshes and their respective filename
 	std::vector< CLMeshDesc > m_meshes;
+
+	//! Currently opened BUT NOT SELECTED meshes and their respective filename
+	std::vector< CLMeshDesc > m_unselectedMeshes;
 
 	//! Silent mode
 	bool m_silentMode;

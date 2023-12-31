@@ -2767,37 +2767,31 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 	size_t nrOfClouds = cmd.clouds().size();
 	size_t nrOfMeshes = cmd.meshes().size();
 	size_t nrOfEntities = nrOfClouds + nrOfMeshes;
-	QVector<QPair<ccShiftedObject*, CLEntityDesc*>> entities;
+	std::vector<std::pair<ccShiftedObject*, CLEntityDesc*>> entities;
+	entities.reserve(nrOfEntities);
 
 	//add clouds to the vector
-	for (size_t i = 0; i < nrOfClouds; i++)
+	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity;
-		entity.first = cmd.clouds()[i].pc;
-		entity.second = &cmd.clouds()[i];
-		entities.append(entity);
+		entities.push_back({ desc.pc, &desc });
 	}
 
 	//add meshes to the vector
-	for (size_t i = 0; i < nrOfMeshes; i++)
+	for (CLMeshDesc& desc : cmd.meshes())
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity;
 		bool isLocked = false;
-		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(cmd.meshes()[i].mesh, &isLocked);
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
 		if (shifted && !isLocked)
 		{
-			entity.first = shifted;
-			entity.second = &cmd.meshes()[i];
-			entities.append(entity);
+			entities.push_back({ shifted, &desc });
 		}
 	}
 
 	//process both clouds and meshes
-	for (size_t i = 0; i < nrOfEntities; i++)
+	for (const auto& pair : entities)
 	{
-		QPair<ccShiftedObject*, CLEntityDesc*> entity = entities[i];
-		CLEntityDesc& desc = *entity.second;
-		ccShiftedObject* shiftedObject = entity.first;
+		CLEntityDesc& desc = *pair.second;
+		ccShiftedObject* shiftedObject = pair.first;
 		CCVector3d originalShift = shiftedObject->getGlobalShift();
 		cmd.print(QObject::tr("\t[%4 - %5] Original global shift {%1,%2,%3}")
 			.arg(originalShift.x)
@@ -2842,6 +2836,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.z)
 			.arg(desc.basename)
 			.arg(shiftedObject->getName()));
+
 		QString nameSuffix = QObject::tr("_SHIFTED_FROM_%1_%2_%3_TO_%4_%5_%6")
 			.arg(originalShift.x)
 			.arg(originalShift.y)
@@ -2849,6 +2844,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			.arg(newShift.x)
 			.arg(newShift.y)
 			.arg(newShift.z);
+
 		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)
 		{
 			//set the mesh name instead of the vertices cloud inside the mesh

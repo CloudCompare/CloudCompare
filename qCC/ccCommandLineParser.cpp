@@ -389,13 +389,18 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
-template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options, ccCommandLineParser cmd, std::vector<EntityDesc>& selectedEntities, std::vector<EntityDesc>& unselectedEntities, CL_ENTITY_TYPE entityType)
+
+template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options,
+												const ccCommandLineParser& cmd,
+												std::vector<EntityDesc>& selectedEntities,
+												std::vector<EntityDesc>& unselectedEntities,
+												QString entityType)
 {
-	//early abort if no clouds found
+	//early abort if no cloud found
 	if (selectedEntities.empty() && unselectedEntities.empty())
 	{
 		//do not stop execution, just warn the user and return
-		cmd.warning(QObject::tr("\tNot found any opened %1. Open one with -O command").arg(entityType == CL_ENTITY_TYPE::CLOUD ? "cloud" : "mesh"));
+		cmd.warning(QObject::tr("\tNo %1 loaded. Load some with the -O command").arg(entityType));
 		return true;
 	}
 
@@ -404,105 +409,109 @@ template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEn
 		return cmd.error(QObject::tr("Regex string invalid: %1").arg(options.regex.errorString()));
 	}
 
-	//store everthyng in the unselected vector
-	unselectedEntities.insert(unselectedEntities.end(), selectedEntities.begin(), selectedEntities.end());
-	selectedEntities.clear();
-
-	//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
-	std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b) { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
-
-	if (unselectedEntities.empty())
+	try
 	{
-		return cmd.error(QObject::tr("There is no %1 to select from.").arg(entityType == CL_ENTITY_TYPE::CLOUD ? "cloud" : "mesh"));
-	}
+		//store everthyng in the unselected vector
+		unselectedEntities.insert(unselectedEntities.end(), selectedEntities.begin(), selectedEntities.end());
+		selectedEntities.clear();
 
-	//put elements to the front facing vector
-	unsigned index = 0;
-	size_t lastIndex = unselectedEntities.size() - 1;
-	for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
-	{
-		QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
-		bool toBeSelected = false;
-		if (!options.reverse)
+		//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
+		std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b) { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
+
+		//put elements to the front facing vector
+		unsigned index = 0;
+		assert(!unselectedEntities.empty()); // we have tested above that neither selectedEntities and unselectedEntities are both empty
+		size_t lastIndex = unselectedEntities.size() - 1;
+		for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
 		{
-			//first {n}
-			if (options.selectFirst && index < options.firstNr)
+			QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
+			bool toBeSelected = false;
+			if (!options.reverse)
 			{
-				toBeSelected = true;
-			}
+				//first {n}
+				if (options.selectFirst && index < options.firstNr)
+				{
+					toBeSelected = true;
+				}
 
-			//last {n}
-			if (options.selectLast && index > lastIndex - options.lastNr)
-			{
-				toBeSelected = true;
-			}
-		}
-		else
-		{
-			//not first {n}
-			if (options.selectFirst && index >= options.firstNr && !options.selectLast)
-			{
-				toBeSelected = true;
-			}
-
-			//not last {n}
-			if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
-			{
-				toBeSelected = true;
-			}
-
-			//not first and not last
-			if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
-			{
-				toBeSelected = true;
-			}
-		}
-
-		//regex has higher priority than first/last overwrite
-		if (options.selectRegex)
-		{
-			if (options.regex.indexIn(nameToValidate) > -1)
-			{
-				//regex matched
-				toBeSelected = !options.reverse;
+				//last {n}
+				if (options.selectLast && index > lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
 			}
 			else
 			{
-				//regex not matched
-				toBeSelected = options.reverse;
+				//not first {n}
+				if (options.selectFirst && index >= options.firstNr && !options.selectLast)
+				{
+					toBeSelected = true;
+				}
+
+				//not last {n}
+				if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
+				{
+					toBeSelected = true;
+				}
+
+				//not first and not last
+				if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
 			}
-		}
 
-		//selectAll has higher priority than first/last/regex overwrite
-		if (options.selectAll)
-		{
-			toBeSelected = !options.reverse;
-		}
+			//regex has higher priority than first/last overwrite
+			if (options.selectRegex)
+			{
+				if (options.regex.indexIn(nameToValidate) > -1)
+				{
+					//regex matched
+					toBeSelected = !options.reverse;
+				}
+				else
+				{
+					//regex not matched
+					toBeSelected = options.reverse;
+				}
+			}
 
-		if (toBeSelected)
-		{
-			cmd.print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
-			selectedEntities.push_back(*it);
-			it = unselectedEntities.erase(it);
+			//selectAll has higher priority than first/last/regex overwrite
+			if (options.selectAll)
+			{
+				toBeSelected = !options.reverse;
+			}
+
+			if (toBeSelected)
+			{
+				cmd.print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				selectedEntities.push_back(*it);
+				it = unselectedEntities.erase(it);
+			}
+			else
+			{
+				cmd.print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				++it;
+			}
+			index++;
 		}
-		else
-		{
-			cmd.print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
-			++it;
-		}
-		index++;
 	}
+	catch (const std::bad_alloc&)
+	{
+		return cmd.error(QObject::tr("Not enough memory"));
+	}
+
 	return true;
 }
 
-bool ccCommandLineParser::selectClouds(ccCommandLineInterface::SelectEntitiesOptions options)
+bool ccCommandLineParser::selectClouds(const SelectEntitiesOptions& options)
 {
-	return SelectEntities(options, *this, m_clouds, m_unselectedClouds, CL_ENTITY_TYPE::CLOUD);
+	return SelectEntities(options, *this, m_clouds, m_unselectedClouds, "cloud");
 }
 
-bool ccCommandLineParser::selectMeshes(ccCommandLineInterface::SelectEntitiesOptions options)
+bool ccCommandLineParser::selectMeshes(const SelectEntitiesOptions& options)
 {
-	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, CL_ENTITY_TYPE::MESH);
+	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, "mesh");
 }
 
 void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)

@@ -64,7 +64,7 @@ constexpr char COMMAND_SF_GRADIENT[]					= "SF_GRAD";
 constexpr char COMMAND_ROUGHNESS[]						= "ROUGH";
 constexpr char COMMAND_ROUGHNESS_UP_DIR[]				= "UP_DIR";
 constexpr char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
-constexpr char COMMAND_APPLY_TRANS_NOT_APPLY_TO_GLOBAL[]= "NOT_APPLY_TO_GLOBAL";
+constexpr char COMMAND_APPLY_TRANS_TO_GLOBAL[]          = "APPLY_TO_GLOBAL";
 constexpr char COMMAND_APPLY_TRANS_INVERSE[]			= "INVERSE";
 constexpr char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 constexpr char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
@@ -2086,7 +2086,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 	//optional parameters
 	bool inverse = false;
-	bool applyToGlobal = true;
+	bool applyToGlobal = false;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -2097,12 +2097,12 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			cmd.arguments().pop_front();
 			cmd.print("Transformation matrix will be inversed");
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_APPLY_TRANS_NOT_APPLY_TO_GLOBAL))
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_APPLY_TRANS_TO_GLOBAL))
 		{
 			//local option confirmed, we can move on
-			applyToGlobal = false;
+			applyToGlobal = true;
 			cmd.arguments().pop_front();
-			cmd.print("GLOBAL SHIFT is not used to minimize precision loss");
+			cmd.print("Transformation will be applied to the global coordinates (Global Shift may be automatically adjusted to preserve accuracy)");
 		}
 		else
 		{
@@ -2184,17 +2184,15 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			transMat.setTranslation(localTranslation);
 
 			//test if the translated cloud coordinates were already "too large"
-			//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
 			ccBBox localBBox = shiftedEntity->getOwnBB();
 			CCVector3d Pl = localBBox.minCorner();
 			double Dl = localBBox.getDiagNormd();
-			if (!ccGlobalShiftManager::NeedShift(Pl)
-				&& !ccGlobalShiftManager::NeedRescale(Dl))
+			if (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl))
 			{
-				//test if the translated cloud coordinates are too large (in local coordinate space)
-				ccBBox transformedBox = shiftedEntity->getOwnBB() * transMat;
-				CCVector3d transformedPl = transformedBox.minCorner();
-				double transformedDl = transformedBox.getDiagNormd();
+				//test if the translated (local) cloud coordinates are too large
+				ccBBox transformedLocalBox = localBBox * transMat;
+				CCVector3d transformedPl = transformedLocalBox.minCorner();
+				double transformedDl = transformedLocalBox.getDiagNormd();
 
 				bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
 				if (needShift)
@@ -2214,8 +2212,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 					//should we try to use the previous Global Shift and Scale values?
 					if (autoApplyPreviousGlobalShiftAndScale)
 					{
-						if (!ccGlobalShiftManager::NeedShift(Pg + previousShift)
-							&& !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
+						if (!ccGlobalShiftManager::NeedShift(Pg + previousShift) && !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
 						{
 							newScale = previousScale;
 							newShift = previousShift;
@@ -2244,12 +2241,33 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 						//apply translation as global shift
 						shiftedEntity->setGlobalShift(newShift);
 						shiftedEntity->setGlobalScale(newScale);
-						cmd.warning(QObject::tr("[ApplyTransformation] Entity '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(shiftedEntity->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+						cmd.warning(QObject::tr("Entity '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5")
+							.arg(shiftedEntity->getName())
+							.arg(newShift.x)
+							.arg(newShift.y)
+							.arg(newShift.z)
+							.arg(newScale));
 
 						transMat.scaleRotation(scaleChange);
 						transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
 					}
 				}
+			}
+			else
+			{
+				cmd.warning(QObject::tr("Entity '%1' has already very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy."));
+			}
+		}
+		else
+		{
+			// check if the transformed coordinates are too large
+			ccBBox transformedLocalBox = shiftedEntity->getOwnBB() * transMat;
+			CCVector3d transformedPl = transformedLocalBox.minCorner();
+			double transformedDl = transformedLocalBox.getDiagNormd();
+			bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+			if (needShift)
+			{
+				cmd.warning(QObject::tr("Entity '%1' will have very large local coordinates after transformation. Consider using the -%1 option to preserve accuracy.").arg(COMMAND_APPLY_TRANS_TO_GLOBAL));
 			}
 		}
 

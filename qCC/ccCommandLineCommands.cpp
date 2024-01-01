@@ -185,13 +185,13 @@ constexpr char OPTION_MESH[]							= "MESH";
 constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 
-static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
+static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
 	sfName = cmd.arguments().takeFirst();
 	if (sfName.toUpper() == OPTION_LAST)
 	{
 		sfIndex = -2;
-		cmd.print(QObject::tr("Set active SF index: LAST"));
+		cmd.print(QObject::tr("SF index: LAST"));
 	}
 	else
 	{
@@ -199,13 +199,34 @@ static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString&
 		sfIndex = sfName.toInt(&validInt);
 		if (validInt)
 		{
-			cmd.print(QObject::tr("Set active SF index: %1").arg(sfIndex));
+			sfName.clear(); //user has provided an index, not a name
+
+			if (sfIndex < 0)
+			{
+				if (allowMinusOne && sfIndex == -1)
+				{
+					// -1 means 'no active SF'
+					cmd.print(QObject::tr("SF index: none"));
+				}
+				else
+				{
+					// invalid index
+					cmd.warning(QObject::tr("Invalid SF index: %1").arg(sfIndex));
+					return false;
+				}
+			}
+			else
+			{
+				cmd.print(QObject::tr("SF index: %1").arg(sfIndex));
+			}
 		}
 		else
 		{
-			cmd.print(QObject::tr("Set active SF name: '%1'").arg(sfName));
+			cmd.print(QObject::tr("SF name: '%1'").arg(sfName));
 			sfIndex = -1;
 		}
+
+		return true;
 	}
 }
 
@@ -216,17 +237,15 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)
 		assert(false);
 		return -1;
 	}
-	if (!cloud->hasScalarFields())
+	else if (!cloud->hasScalarFields())
 	{
 		return -1;
 	}
-
-	if (sfIndex == -2)
+	else if (sfIndex == -2)
 	{
 		return static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
 	}
-
-	if (sfIndex == -1)
+	else if (sfIndex == -1 && !sfName.isEmpty()) // the user has provided a SF name instead of an index
 	{
 		//check if this cloud has a scalar field with the input name
 		sfIndex = cloud->getScalarFieldIndexByName(qPrintable(sfName));
@@ -3062,7 +3081,10 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
+	{
+		return false;
+	}
 
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -3074,10 +3096,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		if (desc.pc)
 		{
 			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
-			if (thisSFIndex >= 0)
-			{
-				desc.pc->setCurrentScalarField(thisSFIndex);
-			}
+			desc.pc->setCurrentScalarField(thisSFIndex);
 		}
 	}
 
@@ -3087,10 +3106,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		if (pc)
 		{
 			int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName);
-			if (thisSFIndex >= 0)
-			{
-				pc->setCurrentScalarField(thisSFIndex);
-			}
+			pc->setCurrentScalarField(thisSFIndex);
 		}
 	}
 
@@ -3165,7 +3181,10 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
 	for (auto& desc : cmd.clouds())
 	{
@@ -4249,7 +4268,10 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
 	//dimension
 	QString dimStr = cmd.arguments().takeFirst().toUpper();
@@ -5441,7 +5463,10 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
 	//read operation type
 	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
@@ -5547,7 +5572,10 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
 	//read operation type
 	ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
@@ -5651,7 +5679,10 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
     //read SF index 1
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
     //read operation type
     ccScalarFieldArithmeticsDlg::Operation operation = ccScalarFieldArithmeticsDlg::INVALID;
@@ -5671,7 +5702,10 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
     //read SF index 2
 	int sfIndex2 = -1;
 	QString sfName2;
-	GetSFIndexOrName(cmd, sfIndex2, sfName2);
+	if (!GetSFIndexOrName(cmd, sfIndex2, sfName2))
+	{
+		return false;
+	}
 
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -5758,7 +5792,10 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
     //read sf index or name
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
     bool destIsFirst = false;
     while (!cmd.arguments().empty())
@@ -5907,7 +5944,10 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	GetSFIndexOrName(cmd, sfIndex, sfName);
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	{
+		return false;
+	}
 
 	//read the SF name
 	QString newSFName = cmd.arguments().takeFirst();
@@ -6204,7 +6244,10 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			}
 
 			//read SF index
-			GetSFIndexOrName(cmd, modelWeightsSFIndex, modelWeightsSFIndexName);
+			if (!GetSFIndexOrName(cmd, modelWeightsSFIndex, modelWeightsSFIndexName))
+			{
+				return false;
+			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
 		{
@@ -6217,7 +6260,10 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			}
 
 			//read SF index
-			GetSFIndexOrName(cmd, dataWeightsSFIndex, dataWeightsSFIndexName);
+			if (!GetSFIndexOrName(cmd, dataWeightsSFIndex, dataWeightsSFIndexName))
+			{
+				return false;
+			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
 		{

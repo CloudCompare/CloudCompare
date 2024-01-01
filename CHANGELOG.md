@@ -259,6 +259,7 @@ v2.13.alpha (???) - (??/??/????)
 			(and can be used to set output filenames or scalar field names with space characters)
 		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
 			(use simple quotes if the scalar field name has spaces in it)
+		- It is now possible to pass -1 as index after -SET_ACTIVE_SF to disable the active SF
 		- The -SET_ACTIVE_SF command can now be applied to the loaded meshes
 		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
 		- The -FILTER_SF option now works on meshes as well

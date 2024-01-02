@@ -225,9 +225,9 @@ static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString&
 			cmd.print(QObject::tr("SF name: '%1'").arg(sfName));
 			sfIndex = -1;
 		}
-
-		return true;
 	}
+
+	return true;
 }
 
 int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)

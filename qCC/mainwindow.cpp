@@ -1301,7 +1301,6 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 	refreshAll();
 }
 
-typedef std::pair<ccHObject*, ccGenericPointCloud*> EntityCloudAssociation;
 void MainWindow::doActionApplyScale()
 {
 	ccScaleDlg dlg(this);
@@ -1318,10 +1317,9 @@ void MainWindow::doActionApplyScale()
 	ccHObject::Container selectedEntities = m_selectedEntities;
 
 	//first check that all coordinates are kept 'small'
-	std::vector< EntityCloudAssociation > candidates;
+	std::vector< std::pair<ccHObject*, ccGenericPointCloud*> > candidates;
 	{
 		bool testBigCoordinates = true;
-		//size_t processNum = 0;
 
 		for (ccHObject *entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
 		{
@@ -1333,7 +1331,9 @@ void MainWindow::doActionApplyScale()
 			{
 				cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(entity)->getAssociatedCloud());
 				if (!cloud || cloud->isAncestorOf(entity))
+				{
 					lockedVertices = true;
+				}
 			}
 			if (!cloud || !cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
@@ -1343,13 +1343,14 @@ void MainWindow::doActionApplyScale()
 			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
-				//++processNum;
 				continue;
 			}
 
 			CCVector3 C(0, 0, 0);
 			if (keepInPlace)
+			{
 				C = cloud->getOwnBB().getCenter();
+			}
 
 			//we must check that the resulting cloud coordinates are not too big
 			if (testBigCoordinates)
@@ -1411,7 +1412,7 @@ void MainWindow::doActionApplyScale()
 
 	//now do the real scaling work
 	{
-		for ( auto &candidate : candidates )
+		for ( auto& candidate : candidates )
 		{
 			ccHObject* ent = candidate.first;
 			ccGenericPointCloud* cloud = candidate.second;

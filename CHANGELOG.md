@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.13.alpha (???) - (??/??/????)
+v2.13.beta (???) - (??/??/2024)
 ----------------------
 - - New features:
 
@@ -164,6 +164,9 @@ v2.13.alpha (???) - (??/??/????)
 		- new tab to define the transformation as a rotation from a vector to another one (+ a translation)
 		- ability to paste the axes, triplet of angles and translation vectors from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- the tool now tries to handle rotation scaling separately (with a dedicated field, assuming it's the same scaling for all dimensions)
+
+	- Edit > Multiply/scale
+		- when using a negative scale on a point cloud, the normals will now be inverted accordingly
 
 	- Edit > Waveform > 2D Waveform viewer
 		- the point which waveform is edited is now spoted in the 3D view and information is displayed as in with the pickin tool

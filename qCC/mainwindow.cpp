@@ -1155,10 +1155,10 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 				if (	!ccGlobalShiftManager::NeedShift(Pl)
 					&&	!ccGlobalShiftManager::NeedRescale(Dl) )
 				{
-					//test if the translated cloud coordinates are too large (in local coordinate space)
-					ccBBox transformedBox = entity->getOwnBB() * transMat;
-					CCVector3d transformedPl = transformedBox.minCorner();
-					double transformedDl = transformedBox.getDiagNormd();
+					//test if the translated cloud (local) coordinates are too large
+					ccBBox transformedLocalBox = entity->getOwnBB() * transMat;
+					CCVector3d transformedPl = transformedLocalBox.minCorner();
+					double transformedDl = transformedLocalBox.getDiagNormd();
 
 					bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
 					if (needShift)

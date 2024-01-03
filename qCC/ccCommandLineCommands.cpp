@@ -140,6 +140,9 @@ constexpr char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]	= "FARTHEST_REMOVAL";
 constexpr char COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT[]		= "MODEL_SF_AS_WEIGHTS";
 constexpr char COMMAND_ICP_USE_DATA_SF_AS_WEIGHT[]		= "DATA_SF_AS_WEIGHTS";
 constexpr char COMMAND_ICP_ROT[]						= "ROT";
+constexpr char COMMAND_ICP_SKIP_TX[]					= "SKIP_TX";
+constexpr char COMMAND_ICP_SKIP_TY[]					= "SKIP_TY";
+constexpr char COMMAND_ICP_SKIP_TZ[]					= "SKIP_TZ";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
 constexpr char COMMAND_INVERT_NORMALS[]					= "INVERT_NORMALS";
@@ -6292,23 +6295,27 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				QString rotation = cmd.arguments().takeFirst().toUpper();
 				if (rotation == "XYZ")
 				{
-					transformationFilters = CCCoreLib::RegistrationTools::SKIP_NONE;
+					//keep this to not make breaking changes
 				}
 				else if (rotation == "X")
 				{
-					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RYZ;
+					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
+					cmd.print(QObject::tr("[ICP] Skip RYZ, current filter: %1").arg(transformationFilters));
 				}
 				else if (rotation == "Y")
 				{
-					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RXZ;
+					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
+					cmd.print(QObject::tr("[ICP] Skip RXZ, current filter: %1").arg(transformationFilters));
 				}
 				else if (rotation == "Z")
 				{
-					transformationFilters = CCCoreLib::RegistrationTools::SKIP_RXY;
+					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXY;
+					cmd.print(QObject::tr("[ICP] Skip RXY, current filter: %1").arg(transformationFilters));
 				}
 				else if (rotation == "NONE")
 				{
-					transformationFilters = CCCoreLib::RegistrationTools::SKIP_ROTATION;
+					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
+					cmd.print(QObject::tr("[ICP] Skip rotation, current filter: %1").arg(transformationFilters));
 				}
 				else
 				{
@@ -6319,6 +6326,27 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			{
 				return cmd.error(QObject::tr("Missing parameter: rotation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_ROT));
 			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TX))
+		{
+			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TX;
+			cmd.print(QObject::tr("[ICP] Skip TX, current filter: %1").arg(transformationFilters));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TY))
+		{
+			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TY;
+			cmd.print(QObject::tr("[ICP] Skip TY, current filter: %1").arg(transformationFilters));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TZ))
+		{
+			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TZ;
+			cmd.print(QObject::tr("[ICP] Skip TZ, current filter: %1").arg(transformationFilters));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
 		}
 		else
 		{

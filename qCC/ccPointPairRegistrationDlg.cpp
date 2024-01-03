@@ -52,8 +52,8 @@
 
 //default position of each columns in the to-be-aligned and ref. table widgets
 static const int XYZ_COL_INDEX			= 0;
-static const int RMS_COL_INDEX			= 3;
-static const int DEL_BUTTON_COL_INDEX	= 4;
+static const int RMS_COL_INDEX			= 6;
+static const int DEL_BUTTON_COL_INDEX	= 7;
 
 //minimum number of pairs to let the user click on the align button
 static const unsigned MIN_PAIRS_COUNT = 3;
@@ -1333,9 +1333,22 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 					QTableWidgetItem* itemA = new QTableWidgetItem();
 					itemA->setData(Qt::EditRole, dist);
 					alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
+
 					QTableWidgetItem* itemR = new QTableWidgetItem();
 					itemR->setData(Qt::EditRole, dist);
 					refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
+
+					//update errors along Axis
+					for (unsigned j = 0; j < 3; ++j) {
+						double diffAlongAxis = Lit[j] - Ri->toDouble()[j];
+						QTableWidgetItem* itemAAlongAxis = new QTableWidgetItem();
+						itemAAlongAxis->setData(Qt::EditRole, diffAlongAxis);
+						alignedPointsTableWidget->setItem(i, RMS_COL_INDEX - 3 + j, itemAAlongAxis);
+
+						QTableWidgetItem* itemRAlongAxis = new QTableWidgetItem();
+						itemRAlongAxis->setData(Qt::EditRole, diffAlongAxis);
+						refPointsTableWidget->setItem(i, RMS_COL_INDEX - 3 + j, itemRAlongAxis);
+					}
 				}
 			}
 		}

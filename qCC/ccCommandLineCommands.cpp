@@ -185,6 +185,7 @@ constexpr char OPTION_CLOUD[]							= "CLOUD";
 constexpr char OPTION_MESH[]							= "MESH";
 constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
+constexpr char OPTION_FORCE[]							= "FORCE";
 
 static void GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName)
 {
@@ -2087,6 +2088,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	//optional parameters
 	bool inverse = false;
 	bool applyToGlobal = false;
+	bool applyToGlobalForce = false;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -2104,6 +2106,13 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			cmd.arguments().pop_front();
 			cmd.print("Transformation will be applied to the global coordinates (Global Shift may be automatically adjusted to preserve accuracy)");
 		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FORCE))
+		{
+			//local option confirmed, we can move on
+			applyToGlobalForce = true;
+			cmd.arguments().pop_front();
+			cmd.print("Transformation will be applied to the global coordinates even if the entity already has large coordinates");
+		}
 		else
 		{
 			break;
@@ -2116,18 +2125,18 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	}
 	
 	QString filename = cmd.arguments().takeFirst();
-	ccGLMatrix mat;
+	ccGLMatrixd mat;
 	if (!mat.fromAsciiFile(filename))
 	{
 		return cmd.error(QObject::tr("Failed to read transformation matrix file '%1'!").arg(filename));
 	}
 	if (inverse)
 	{
-		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString(6));
+		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString());
 		mat = mat.inverse();
 	}
 	
-	cmd.print(QObject::tr("Transformation:\n") + mat.toString(6));
+	cmd.print(QObject::tr("Transformation:\n") + mat.toString());
 	
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -2169,7 +2178,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 		CLEntityDesc& desc = *entities[i].second;
 		ccShiftedObject* shiftedEntity = entities[i].first;
 
-		ccGLMatrixd transMat(mat.data());
+		ccGLMatrixd transMat(mat);
 		if (applyToGlobal)
 		{
 			// the user wants to apply the transformation to the global coordinates
@@ -2187,7 +2196,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			ccBBox localBBox = shiftedEntity->getOwnBB();
 			CCVector3d Pl = localBBox.minCorner();
 			double Dl = localBBox.getDiagNormd();
-			if (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl))
+			if (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl) || applyToGlobalForce)
 			{
 				//test if the translated (local) cloud coordinates are too large
 				ccBBox transformedLocalBox = localBBox * transMat;
@@ -2255,7 +2264,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				cmd.warning(QObject::tr("Entity '%1' has already very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy."));
+				cmd.warning(QObject::tr("Entity '%1' has already very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy. Consider using the -%2 option to force global shift/scale adjustment.").arg(shiftedEntity->getName()).arg(OPTION_FORCE));
 			}
 		}
 		else

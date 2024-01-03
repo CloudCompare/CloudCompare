@@ -403,6 +403,11 @@
          <string notr="true">Z</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string notr="true">NONE</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

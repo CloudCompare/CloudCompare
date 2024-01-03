@@ -1245,6 +1245,9 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 		case 3:
 			filters |= CCCoreLib::RegistrationTools::SKIP_RXY;
 			break;
+		case 4:
+			filters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
+			break;
 		default:
 			//nothing to do
 			break;

@@ -277,6 +277,9 @@ v2.13.beta (???) - (??/??/2024)
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
 			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
+		- Support comments inside COMMAND_FILE files
+			* whole line comments with # my comment here or // here
+			* comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking

@@ -720,7 +720,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 						processedArgs.append(arg);
 					}
 				}
-				if (insideSingleQuoteSection||insideDoubleQuoteSection)
+				if (insideSingleQuoteSection || insideDoubleQuoteSection)
 				{
 					// the single/double quote section was not closed...
 					cmd.warning("Probably malformed command (missing closing quote)");
@@ -730,31 +730,36 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 			}
 
 			//inject back all the arguments to the cmd.arguments()
-			bool commentWholeLine = false;
+			bool isWholeLineComment = false;
 			while (!processedArgs.isEmpty())
 			{
 				QString processedArg = processedArgs.takeFirst();
 				if (!processedArg.isEmpty())
 				{
-					bool commentArgument = false;
-					QString commentStr = "[COMMENT] ";
-					if (processedArg.startsWith("//") || processedArg.startsWith("#"))
+					bool isComment = isWholeLineComment;
+					if (!isComment)
 					{
-						commentWholeLine = true;
-					}
-					if (processedArg.startsWith("/*") && processedArg.endsWith("*/"))
-					{
-						commentArgument = true;
+						if (processedArg.startsWith("//") || processedArg.startsWith("#"))
+						{
+							isComment = isWholeLineComment = true;
+						}
+						else
+						{
+							isComment = (processedArg.startsWith("/*") && processedArg.endsWith("*/"));
+						}
 					}
 
-					if (!commentArgument && !commentWholeLine)
+					if (!isComment)
 					{
-						//argument is not a comment add it to the arguments
-						commentStr = "";
+						//standard argument
 						cmd.arguments().insert(insertingIndex, processedArg);
 						insertingIndex++;
+						cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex - 1).arg(processedArg));
 					}
-					cmd.print(QObject::tr("\t%3[%1] %2").arg(insertingIndex - 1).arg(processedArg).arg(commentStr));
+					else
+					{
+						cmd.print(QObject::tr("\t[COMMENT] [%1] %2").arg(insertingIndex - 1).arg(processedArg));
+					}
 				}
 			}
 		}

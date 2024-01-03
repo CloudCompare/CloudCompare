@@ -2124,13 +2124,15 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			applyToGlobal = true;
 			cmd.arguments().pop_front();
 			cmd.print("Transformation will be applied to the global coordinates (Global Shift may be automatically adjusted to preserve accuracy)");
-		}
-		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FORCE))
-		{
-			//local option confirmed, we can move on
-			forceApplyToGlobal = true;
-			cmd.arguments().pop_front();
-			cmd.print("Transformation will be applied to the global coordinates even if the entity already has large coordinates");
+
+			//look for the 'FORCE' sub-option
+			if (!cmd.arguments().empty() && cmd.arguments().front().toUpper() == OPTION_FORCE)
+			{
+				//local option confirmed, we can move on
+				forceApplyToGlobal = true;
+				cmd.arguments().pop_front();
+				cmd.print("Transformation will be applied to the global coordinates even if the entity already has large coordinates");
+			}
 		}
 		else
 		{

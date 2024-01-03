@@ -271,11 +271,12 @@ v2.13.beta (???) - (??/??/2024)
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
-		- Changes to the -APPLY_TRANS command:
-			- -APPLY_TRANS will now apply the transformation to the global coordinate system by default
-				Warning: the Global Shift may be automatically updated to maintain precision
-			- -NOT_APPLY_TO_GLOBAL: to force CC to apply the transformation to the local coordinate system
-				(i.e. after the Global Shift has been applied)
+		- New sub-optiopns for the -APPLY_TRANS command:
+			- -APPLY_TO_GLOBAL {FORCE}
+				* to apply the transformation to the global coordinate system instead of the local coordinate system
+				* warning: the Global Shift might be automatically adjusted to preserve accuracy (and small local coordinates)
+				* by default, the Global Shift won't be automatically adjusted if the local coordinates are already large.
+					Use 'FORCE' after -APPLY_TO_GLOBAL to force CC to adjust the Global Shift in any case.
 			- -INVERSE: to inverse the transformation matrix before applying it.
 		- New sub-options for -SS command:
 			* -SS OCTREE NUMBER_OF_POINTS {number} to subsample with the highest octree level for which the resulting point count won't exceed the given number of points

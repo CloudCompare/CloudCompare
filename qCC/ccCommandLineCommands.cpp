@@ -2088,7 +2088,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	//optional parameters
 	bool inverse = false;
 	bool applyToGlobal = false;
-	bool applyToGlobalForce = false;
+	bool forceApplyToGlobal = false;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -2109,7 +2109,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_FORCE))
 		{
 			//local option confirmed, we can move on
-			applyToGlobalForce = true;
+			forceApplyToGlobal = true;
 			cmd.arguments().pop_front();
 			cmd.print("Transformation will be applied to the global coordinates even if the entity already has large coordinates");
 		}
@@ -2196,7 +2196,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			ccBBox localBBox = shiftedEntity->getOwnBB();
 			CCVector3d Pl = localBBox.minCorner();
 			double Dl = localBBox.getDiagNormd();
-			if (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl) || applyToGlobalForce)
+			if (forceApplyToGlobal || (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl)))
 			{
 				//test if the translated (local) cloud coordinates are too large
 				ccBBox transformedLocalBox = localBBox * transMat;
@@ -2264,7 +2264,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				cmd.warning(QObject::tr("Entity '%1' has already very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy. Consider using the -%2 option to force global shift/scale adjustment.").arg(shiftedEntity->getName()).arg(OPTION_FORCE));
+				cmd.warning(QObject::tr("Entity '%1' already has very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy. Consider using the -%2 option to force global shift/scale adjustment.").arg(shiftedEntity->getName()).arg(OPTION_FORCE));
 			}
 		}
 		else

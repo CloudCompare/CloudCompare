@@ -6295,27 +6295,28 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				QString rotation = cmd.arguments().takeFirst().toUpper();
 				if (rotation == "XYZ")
 				{
-					//keep this to not make breaking changes
+					transformationFilters &= (~CCCoreLib::RegistrationTools::SKIP_ROTATION);
+					cmd.print(QObject::tr("[ICP] Use all rotations"));
 				}
 				else if (rotation == "X")
 				{
 					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
-					cmd.print(QObject::tr("[ICP] Skip RYZ, current filter: %1").arg(transformationFilters));
+					cmd.print(QObject::tr("[ICP] Skip RYZ"));
 				}
 				else if (rotation == "Y")
 				{
 					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
-					cmd.print(QObject::tr("[ICP] Skip RXZ, current filter: %1").arg(transformationFilters));
+					cmd.print(QObject::tr("[ICP] Skip RXZ"));
 				}
 				else if (rotation == "Z")
 				{
 					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXY;
-					cmd.print(QObject::tr("[ICP] Skip RXY, current filter: %1").arg(transformationFilters));
+					cmd.print(QObject::tr("[ICP] Skip RXY"));
 				}
 				else if (rotation == "NONE")
 				{
 					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
-					cmd.print(QObject::tr("[ICP] Skip rotation, current filter: %1").arg(transformationFilters));
+					cmd.print(QObject::tr("[ICP] Skip rotation"));
 				}
 				else
 				{
@@ -6330,21 +6331,21 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TX))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TX;
-			cmd.print(QObject::tr("[ICP] Skip TX, current filter: %1").arg(transformationFilters));
+			cmd.print(QObject::tr("[ICP] Skip TX"));
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TY))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TY;
-			cmd.print(QObject::tr("[ICP] Skip TY, current filter: %1").arg(transformationFilters));
+			cmd.print(QObject::tr("[ICP] Skip TY"));
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TZ))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TZ;
-			cmd.print(QObject::tr("[ICP] Skip TZ, current filter: %1").arg(transformationFilters));
+			cmd.print(QObject::tr("[ICP] Skip TZ"));
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 		}
@@ -6353,6 +6354,8 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 		}
 	}
+
+	cmd.printDebug(QObject::tr("[ICP] Transfromation filter: %1").arg(transformationFilters));
 
 	//we'll get the first two entities
 	CLEntityDesc* dataAndModel[2]{ nullptr, nullptr };

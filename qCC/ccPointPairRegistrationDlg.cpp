@@ -1299,9 +1299,10 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 			for (unsigned i = 0; i < m_alignedPoints.size(); ++i)
 			{
 				const CCVector3* Ri = m_refPoints.getPoint(i);
+				CCVector3d Rid = Ri->toDouble();
 				const CCVector3* Li = m_alignedPoints.getPoint(i);
 				CCVector3d Lit = trans.apply(*Li);
-				double dist = (Ri->toDouble() - Lit).norm();
+				double dist = (Rid - Lit).norm();
 
 				if (report)
 				{
@@ -1344,7 +1345,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 					//errors along axis
 					for (unsigned coordIndex = 0; coordIndex < 3; ++coordIndex)
 					{
-						reportLine += QString("; %1").arg(Lit[coordIndex]-Ri->toDouble()[coordIndex]);
+						reportLine += QString("; %1").arg(Lit[coordIndex]- Rid[coordIndex]);
 					}
 
 					reportLine += QString("; %1").arg(dist);
@@ -1364,7 +1365,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 
 					//update errors along Axis
 					for (unsigned j = 0; j < 3; ++j) {
-						double diffAlongAxis = Lit[j] - Ri->toDouble()[j];
+						double diffAlongAxis = Lit[j] - Rid[j];
 						QTableWidgetItem* itemAAlongAxis = new QTableWidgetItem();
 						itemAAlongAxis->setData(Qt::EditRole, diffAlongAxis);
 						alignedPointsTableWidget->setItem(i, RMS_COL_INDEX - 3 + j, itemAAlongAxis);

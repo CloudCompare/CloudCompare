@@ -1263,6 +1263,20 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 		if (filters != 0)
 		{
 			CCCoreLib::RegistrationTools::FilterTransformation(trans, filters, trans);
+
+			//if any rotation is constrained, then fix the translation caused by FilterTransformation
+			if (rotComboBox->currentIndex() != 0)
+			{
+				CCVector3 alignedCenter = trans.apply(m_alignedPoints.computeGravityCenter());
+				CCVector3 refCenter = m_refPoints.computeGravityCenter();
+				trans.T += (refCenter - alignedCenter);
+				if (filters & CCCoreLib::RegistrationTools::SKIP_TX)
+					trans.T.x = 0;
+				if (filters & CCCoreLib::RegistrationTools::SKIP_TY)
+					trans.T.y = 0;
+				if (filters & CCCoreLib::RegistrationTools::SKIP_TZ)
+					trans.T.z = 0;
+			}
 		}
 	}
 

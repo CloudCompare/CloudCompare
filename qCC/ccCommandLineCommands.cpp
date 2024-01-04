@@ -6293,9 +6293,13 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			if (!cmd.arguments().empty())
 			{
 				QString rotation = cmd.arguments().takeFirst().toUpper();
+
+				//invalidate all previous rotations in case -ROT used twice
+				cmd.print(QObject::tr("[ICP] Reset rotation constraints if any. Only one -%1 argument allowed").arg(COMMAND_ICP_ROT));
+				transformationFilters &= (~CCCoreLib::RegistrationTools::SKIP_ROTATION);
+
 				if (rotation == "XYZ")
 				{
-					transformationFilters &= (~CCCoreLib::RegistrationTools::SKIP_ROTATION);
 					cmd.print(QObject::tr("[ICP] Use all rotations"));
 				}
 				else if (rotation == "X")

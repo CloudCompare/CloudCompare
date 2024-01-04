@@ -41,16 +41,31 @@ void ccCommandLineParser::print(const QString& message) const
 	ccConsole::Print(message);
 }
 
+void ccCommandLineParser::printDebug(const QString& message) const
+{
+	ccConsole::PrintDebug(message);
+}
+
 void ccCommandLineParser::warning(const QString& message) const
 {
 	ccConsole::Warning(message);
-	
+}
+
+void ccCommandLineParser::warningDebug(const QString& message) const
+{
+	ccConsole::WarningDebug(message);
 }
 
 bool ccCommandLineParser::error(const QString& message) const
 {
 	ccConsole::Error(message);
-	
+
+	return false;
+}
+
+bool ccCommandLineParser::errorDebug(const QString& message) const
+{
+	ccConsole::ErrorDebug(message);
 
 	return false;
 }

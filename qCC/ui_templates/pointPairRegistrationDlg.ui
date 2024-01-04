@@ -181,17 +181,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Error X</string>
+       <string>Delta X</string>
       </property>
      </column>
        <column>
       <property name="text">
-       <string>Error Y</string>
+       <string>Delta Y</string>
       </property>
      </column>
        <column>
       <property name="text">
-       <string>Error Z</string>
+       <string>Delta Z</string>
       </property>
      </column>
      <column>
@@ -306,17 +306,17 @@
      </column>
      <column>
       <property name="text">
-       <string>Error X</string>
+       <string>Delta X</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Error Y</string>
+       <string>Delta Y</string>
       </property>
      </column>
      <column>
       <property name="text">
-       <string>Error Z</string>
+       <string>Delta Z</string>
       </property>
      </column>
      <column>

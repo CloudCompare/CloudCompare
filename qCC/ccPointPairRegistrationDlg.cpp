@@ -1292,8 +1292,8 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 
 			if (report)
 			{
-				// add header
-				report->append("Ref.name, Ref.x, Ref.y, Ref.z, Aligned.name, Aligned.x, Aligned.y, Aligned.z, Distance");
+				// add header (first column is the timestamp)
+				report->append("; Ref.name; Ref.x; Ref.y; Ref.z; Aligned.name; Aligned.x; Aligned.y; Aligned.z; Delta X; Delta Y; Delta Z; Distance");
 			}
 
 			for (unsigned i = 0; i < m_alignedPoints.size(); ++i)
@@ -1330,7 +1330,8 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 						refName = QString("R%1").arg(i);
 					}
 
-					QString reportLine = QString("%1; %2; %3; %4").arg(refName)
+					//first column timestamp
+					QString reportLine = QString(";%1; %2; %3; %4").arg(refName)
 						.arg(Ri->x)
 						.arg(Ri->y)
 						.arg(Ri->z);
@@ -1339,6 +1340,12 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 						.arg(Lit.x)
 						.arg(Lit.y)
 						.arg(Lit.z);
+
+					//errors along axis
+					for (unsigned coordIndex = 0; coordIndex < 3; ++coordIndex)
+					{
+						reportLine += QString("; %1").arg(Lit[coordIndex]-Ri->toDouble()[coordIndex]);
+					}
 
 					reportLine += QString("; %1").arg(dist);
 

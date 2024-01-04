@@ -64,6 +64,7 @@ constexpr char COMMAND_SF_GRADIENT[]					= "SF_GRAD";
 constexpr char COMMAND_ROUGHNESS[]						= "ROUGH";
 constexpr char COMMAND_ROUGHNESS_UP_DIR[]				= "UP_DIR";
 constexpr char COMMAND_APPLY_TRANSFORMATION[]			= "APPLY_TRANS";
+constexpr char COMMAND_APPLY_TRANS_TO_GLOBAL[]          = "APPLY_TO_GLOBAL";
 constexpr char COMMAND_APPLY_TRANS_INVERSE[]			= "INVERSE";
 constexpr char COMMAND_DROP_GLOBAL_SHIFT[]				= "DROP_GLOBAL_SHIFT";
 constexpr char COMMAND_SF_COLOR_SCALE[]					= "SF_COLOR_SCALE";
@@ -187,6 +188,7 @@ constexpr char OPTION_CLOUD[]							= "CLOUD";
 constexpr char OPTION_MESH[]							= "MESH";
 constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
+constexpr char OPTION_FORCE[]							= "FORCE";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -646,7 +648,15 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 		QTextStream in(&commandFile);
 		while (!in.atEnd())
 		{
-			QString line = in.readLine();
+			QString line = in.readLine().trimmed();
+
+			//early abort whole line comments
+			if (line.startsWith("#") || line.startsWith("//"))
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(line));
+				continue;
+			}
+
 			QStringList argumentsInLine = line.split(" ");
 			QStringList processedArgs;
 
@@ -723,7 +733,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 						processedArgs.append(arg);
 					}
 				}
-				if (insideSingleQuoteSection||insideDoubleQuoteSection)
+				if (insideSingleQuoteSection || insideDoubleQuoteSection)
 				{
 					// the single/double quote section was not closed...
 					cmd.warning("Probably malformed command (missing closing quote)");
@@ -733,13 +743,35 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 			}
 
 			//inject back all the arguments to the cmd.arguments()
-			while (!processedArgs.isEmpty()) {
+			while (!processedArgs.isEmpty())
+			{
 				QString processedArg = processedArgs.takeFirst();
-				if (!processedArg.isEmpty()) {
-					cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex).arg(processedArg));
-					cmd.arguments().insert(insertingIndex, processedArg);
-					insertingIndex++;
+				if (!processedArg.isEmpty())
+				{
+					if (processedArg.startsWith("//") || processedArg.startsWith("#"))
+					{
+						//abort and keep the rest in processedArgs
+						break;
+					}
+
+					if (!(processedArg.startsWith("/*") && processedArg.endsWith("*/")))
+					{
+						//standard argument
+						cmd.arguments().insert(insertingIndex, processedArg);
+						insertingIndex++;
+						cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex - 1).arg(processedArg));
+					}
+					else
+					{
+						cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArg));
+					}
 				}
+			}
+
+			//if any arguments left, then it is a comment
+			if (!processedArgs.isEmpty())
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArgs.join(" ")));
 			}
 		}
 		commandFile.close();
@@ -2107,6 +2139,8 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 	//optional parameters
 	bool inverse = false;
+	bool applyToGlobal = false;
+	bool forceApplyToGlobal = false;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -2116,6 +2150,22 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 			inverse = true;
 			cmd.arguments().pop_front();
 			cmd.print("Transformation matrix will be inversed");
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_APPLY_TRANS_TO_GLOBAL))
+		{
+			//local option confirmed, we can move on
+			applyToGlobal = true;
+			cmd.arguments().pop_front();
+			cmd.print("Transformation will be applied to the global coordinates (Global Shift may be automatically adjusted to preserve accuracy)");
+
+			//look for the 'FORCE' sub-option
+			if (!cmd.arguments().empty() && cmd.arguments().front().toUpper() == OPTION_FORCE)
+			{
+				//local option confirmed, we can move on
+				forceApplyToGlobal = true;
+				cmd.arguments().pop_front();
+				cmd.print("Transformation will be applied to the global coordinates even if the entity already has large coordinates");
+			}
 		}
 		else
 		{
@@ -2129,53 +2179,189 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	}
 	
 	QString filename = cmd.arguments().takeFirst();
-	ccGLMatrix mat;
+	ccGLMatrixd mat;
 	if (!mat.fromAsciiFile(filename))
 	{
 		return cmd.error(QObject::tr("Failed to read transformation matrix file '%1'!").arg(filename));
 	}
 	if (inverse)
 	{
-		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString(6));
+		cmd.print(QObject::tr("Transformation before inversion:\n") + mat.toString());
 		mat = mat.inverse();
 	}
 	
-	cmd.print(QObject::tr("Transformation:\n") + mat.toString(6));
+	cmd.print(QObject::tr("Transformation:\n") + mat.toString());
 	
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
 	}
-	
-	//apply transformation
-	if (!cmd.clouds().empty())
+
+	//create an entity vector
+	size_t nrOfClouds = cmd.clouds().size();
+	size_t nrOfMeshes = cmd.meshes().size();
+	size_t nrOfEntities = nrOfClouds + nrOfMeshes;
+	std::vector<std::pair<ccShiftedObject*, CLEntityDesc*>> entities;
+	entities.reserve(nrOfEntities);
+
+	//add clouds to the vector
+	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		for (const CLCloudDesc& desc : cmd.clouds())
+		entities.push_back({ desc.pc, &desc });
+	}
+
+	//add meshes to the vector
+	for (CLMeshDesc& desc : cmd.meshes())
+	{
+		bool isLocked = false;
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
+		if (shifted && !isLocked)
 		{
-			desc.pc->applyGLTransformation_recursive(&mat);
-			desc.pc->setName(desc.pc->getName() + ".transformed");
-		}
-		//save output
-		if (cmd.autoSaveMode() && !cmd.saveClouds("TRANSFORMED"))
-		{
-			return false;
+			entities.push_back({ shifted, &desc });
 		}
 	}
 
-	if (!cmd.meshes().empty())
+	//if the transformation is partly converted to global shift/scale
+	bool autoApplyPreviousGlobalShiftAndScale = false;
+	double previousScale = 1.0;
+	CCVector3d previousShift(0, 0, 0);
+
+	//process both clouds and meshes
+	for (size_t i = 0; i < nrOfEntities; i++)
 	{
-		for (const CLMeshDesc& desc : cmd.meshes())
+		CLEntityDesc& desc = *entities[i].second;
+		ccShiftedObject* shiftedEntity = entities[i].first;
+
+		ccGLMatrixd transMat(mat);
+		if (applyToGlobal)
 		{
-			desc.mesh->applyGLTransformation_recursive(&mat);
-			desc.mesh->setName(desc.mesh->getName() + ".transformed");
+			// the user wants to apply the transformation to the global coordinates
+			CCVector3d globalShift = shiftedEntity->getGlobalShift();
+			double globalScale = shiftedEntity->getGlobalScale();
+
+			// we compute the impact to the local coordinate system without changing the
+			// actual Global Shift & Scale parameters (for now)
+			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
+
+			// we switch to a local transformation matrix
+			transMat.setTranslation(localTranslation);
+
+			//test if the translated cloud coordinates were already "too large"
+			ccBBox localBBox = shiftedEntity->getOwnBB();
+			CCVector3d Pl = localBBox.minCorner();
+			double Dl = localBBox.getDiagNormd();
+			if (forceApplyToGlobal || (!ccGlobalShiftManager::NeedShift(Pl) && !ccGlobalShiftManager::NeedRescale(Dl)))
+			{
+				//test if the translated (local) cloud coordinates are too large
+				ccBBox transformedLocalBox = localBBox * transMat;
+				CCVector3d transformedPl = transformedLocalBox.minCorner();
+				double transformedDl = transformedLocalBox.getDiagNormd();
+
+				bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+				if (needShift)
+				{
+					//existing shift information
+					CCVector3d globalShift = shiftedEntity->getGlobalShift();
+					double globalScale = shiftedEntity->getGlobalScale();
+
+					//we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
+					CCVector3d Pg = shiftedEntity->toGlobal3d(transformedPl);
+					double Dg = transformedDl / globalScale;
+
+					//let's try to find better Global Shift and Scale values
+					CCVector3d newShift(0.0, 0.0, 0.0);
+					double newScale = 1.0;
+
+					//should we try to use the previous Global Shift and Scale values?
+					if (autoApplyPreviousGlobalShiftAndScale)
+					{
+						if (!ccGlobalShiftManager::NeedShift(Pg + previousShift) && !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
+						{
+							newScale = previousScale;
+							newShift = previousShift;
+							needShift = false;
+						}
+					}
+
+					if (needShift)
+					{
+						//don't bother the user as we are running in command line, use the best possible solution
+						newShift = ccGlobalShiftManager::BestShift(Pg);
+						newScale = ccGlobalShiftManager::BestScale(Dg);
+						needShift = false;
+						//force this shift for upcoming entities
+						autoApplyPreviousGlobalShiftAndScale = true;
+						previousShift = newShift;
+						previousScale = newScale;
+					}
+
+					//get the relative modification to existing global shift/scale info
+					double scaleChange = newScale / globalScale;
+					CCVector3d shiftChange = newShift - globalShift;
+
+					if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+					{
+						//apply translation as global shift
+						shiftedEntity->setGlobalShift(newShift);
+						shiftedEntity->setGlobalScale(newScale);
+						cmd.warning(QObject::tr("Entity '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5")
+							.arg(shiftedEntity->getName())
+							.arg(newShift.x)
+							.arg(newShift.y)
+							.arg(newShift.z)
+							.arg(newScale));
+
+						transMat.scaleRotation(scaleChange);
+						transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+					}
+				}
+			}
+			else
+			{
+				cmd.warning(QObject::tr("Entity '%1' already has very large local coordinates. Global shift/scale won't be automatically adjusted to preserve accuracy. Consider using the -%2 option to force global shift/scale adjustment.").arg(shiftedEntity->getName()).arg(OPTION_FORCE));
+			}
 		}
-		//save output
-		if (cmd.autoSaveMode() && !cmd.saveMeshes("TRANSFORMED"))
+		else
 		{
-			return false;
+			// check if the transformed coordinates are too large
+			ccBBox transformedLocalBox = shiftedEntity->getOwnBB() * transMat;
+			CCVector3d transformedPl = transformedLocalBox.minCorner();
+			double transformedDl = transformedLocalBox.getDiagNormd();
+			bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+			if (needShift)
+			{
+				cmd.warning(QObject::tr("Entity '%1' will have very large local coordinates after transformation. Consider using the -%1 option to preserve accuracy.").arg(COMMAND_APPLY_TRANS_TO_GLOBAL));
+			}
+		}
+
+		ccGLMatrix matrixToApply(transMat.data());
+		shiftedEntity->applyGLTransformation_recursive(&matrixToApply);
+		QString nameSuffix = "_TRANSFORMED";
+		if ((&desc)->getCLEntityType() == CL_ENTITY_TYPE::MESH)
+		{
+			//set the mesh name instead of the vertices cloud inside the mesh
+			ccHObject* parent = shiftedEntity->getParent();
+			if (parent)
+			{
+				parent->setName(QObject::tr("%1%2").arg(parent->getName()).arg(nameSuffix));
+			}
+		}
+		else
+		{
+			shiftedEntity->setName(QObject::tr("%1%2").arg(shiftedEntity->getName()).arg(nameSuffix));
+		}
+		desc.basename += nameSuffix;
+
+		//save it as well
+		if (cmd.autoSaveMode())
+		{
+			QString errorStr = cmd.exportEntity(desc);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
 		}
 	}
-	
 	return true;
 }
 

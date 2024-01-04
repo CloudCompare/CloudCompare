@@ -46,10 +46,12 @@ v2.13.beta (???) - (??/??/2024)
 				A numerical suffix is added if multiple entities are loaded.
 		- COMMAND_FILE {file}
 			- loads commands from a file
-				multiple lines allowed
-				multiple arguments in each line allowed
-				handle quoted arguments
-				commands after this one will run after all commands in the file have been processed
+			- multiple lines allowed
+			- multiple arguments in each line allowed
+			- handle quoted arguments
+			- commands after this one will run after all commands in the file have been processed
+			- whole line comments with # my comment here or // here
+			- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
 		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
 			- set global shift on all entities
 			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
@@ -271,7 +273,13 @@ v2.13.beta (???) - (??/??/2024)
 		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
 		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
 		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
-		- New sub-option for -APPLY_TRANS command: -INVERSE to inverse the transformation matrix before it is applied.
+		- New sub-optiopns for the -APPLY_TRANS command:
+			- -APPLY_TO_GLOBAL {FORCE}
+				* to apply the transformation to the global coordinate system instead of the local coordinate system
+				* warning: the Global Shift might be automatically adjusted to preserve accuracy (and small local coordinates)
+				* by default, the Global Shift won't be automatically adjusted if the local coordinates are already large.
+					Use 'FORCE' after -APPLY_TO_GLOBAL to force CC to adjust the Global Shift in any case.
+			- -INVERSE: to inverse the transformation matrix before applying it.
 		- New sub-options for -SS command:
 			* -SS OCTREE NUMBER_OF_POINTS {number} to subsample with the highest octree level for which the resulting point count won't exceed the given number of points
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
@@ -281,7 +289,8 @@ v2.13.beta (???) - (??/??/2024)
 			* -SKIP_TX to skip translation along X axis
 			* -SKIP_TY to skip translation along Y axis
 			* -SKIP_TZ to skip translation along Z axis
-	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
+
+  - New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
 	- New shortcut:

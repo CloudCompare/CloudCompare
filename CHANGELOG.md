@@ -386,7 +386,7 @@ v2.13.beta (???) - (??/??/2024)
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
 	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
-	- The Point Pair registration ('Align') tool would generate a sub-optimal translation if any rotation was constrained
+	- The Point Pair registration ('Align') or ICP tools could generate a sub-optimal translation if the rotation was constrained
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

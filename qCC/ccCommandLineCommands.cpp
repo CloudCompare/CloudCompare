@@ -645,7 +645,15 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 		QTextStream in(&commandFile);
 		while (!in.atEnd())
 		{
-			QString line = in.readLine();
+			QString line = in.readLine().trimmed();
+
+			//early abort whole line comments
+			if (line.startsWith("#") || line.startsWith("//"))
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(line));
+				continue;
+			}
+
 			QStringList argumentsInLine = line.split(" ");
 			QStringList processedArgs;
 
@@ -722,7 +730,7 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 						processedArgs.append(arg);
 					}
 				}
-				if (insideSingleQuoteSection||insideDoubleQuoteSection)
+				if (insideSingleQuoteSection || insideDoubleQuoteSection)
 				{
 					// the single/double quote section was not closed...
 					cmd.warning("Probably malformed command (missing closing quote)");
@@ -732,13 +740,35 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 			}
 
 			//inject back all the arguments to the cmd.arguments()
-			while (!processedArgs.isEmpty()) {
+			while (!processedArgs.isEmpty())
+			{
 				QString processedArg = processedArgs.takeFirst();
-				if (!processedArg.isEmpty()) {
-					cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex).arg(processedArg));
-					cmd.arguments().insert(insertingIndex, processedArg);
-					insertingIndex++;
+				if (!processedArg.isEmpty())
+				{
+					if (processedArg.startsWith("//") || processedArg.startsWith("#"))
+					{
+						//abort and keep the rest in processedArgs
+						break;
+					}
+
+					if (!(processedArg.startsWith("/*") && processedArg.endsWith("*/")))
+					{
+						//standard argument
+						cmd.arguments().insert(insertingIndex, processedArg);
+						insertingIndex++;
+						cmd.print(QObject::tr("\t[%1] %2").arg(insertingIndex - 1).arg(processedArg));
+					}
+					else
+					{
+						cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArg));
+					}
 				}
+			}
+
+			//if any arguments left, then it is a comment
+			if (!processedArgs.isEmpty())
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArgs.join(" ")));
 			}
 		}
 		commandFile.close();

@@ -644,6 +644,14 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 		while (!in.atEnd())
 		{
 			QString line = in.readLine().trimmed();
+
+			//early abort whole line comments
+			if (line.startsWith("#") || line.startsWith("//"))
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(line));
+				continue;
+			}
+
 			QStringList argumentsInLine = line.split(" ");
 			QStringList processedArgs;
 
@@ -730,26 +738,18 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 			}
 
 			//inject back all the arguments to the cmd.arguments()
-			bool isWholeLineComment = false;
 			while (!processedArgs.isEmpty())
 			{
 				QString processedArg = processedArgs.takeFirst();
 				if (!processedArg.isEmpty())
 				{
-					bool isComment = isWholeLineComment;
-					if (!isComment)
+					if (processedArg.startsWith("//") || processedArg.startsWith("#"))
 					{
-						if (processedArg.startsWith("//") || processedArg.startsWith("#"))
-						{
-							isComment = isWholeLineComment = true;
-						}
-						else
-						{
-							isComment = (processedArg.startsWith("/*") && processedArg.endsWith("*/"));
-						}
+						//abort and keep the rest in processedArgs
+						break;
 					}
 
-					if (!isComment)
+					if (!(processedArg.startsWith("/*") && processedArg.endsWith("*/")))
 					{
 						//standard argument
 						cmd.arguments().insert(insertingIndex, processedArg);
@@ -758,9 +758,15 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 					}
 					else
 					{
-						cmd.print(QObject::tr("\t[COMMENT] [%1] %2").arg(insertingIndex - 1).arg(processedArg));
+						cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArg));
 					}
 				}
+			}
+
+			//if any arguments left, then it is a comment
+			if (!processedArgs.isEmpty())
+			{
+				cmd.print(QObject::tr("\t[COMMENT] %1").arg(processedArgs.join(" ")));
 			}
 		}
 		commandFile.close();

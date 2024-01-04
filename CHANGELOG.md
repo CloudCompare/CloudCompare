@@ -325,7 +325,7 @@ v2.13.beta (???) - (??/??/2024)
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
 		- the Align tool will now output the list of points used and the final distance between them in the Console
-		- the Align tool shows error along X,Y,Z axis in the Widget.
+		- the Align tool will now show errors along X, Y and Z axes in dedicated columns.
 
 	- Salome/.poly files:
 		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
@@ -377,7 +377,7 @@ v2.13.beta (???) - (??/??/2024)
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
 	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
-	- Fix PointPairRegistration applied wrong transformation if any rotation was constrained
+	- The Point Pair registration ('Align') tool would generate a sub-optimal translation if any rotation was constrained
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

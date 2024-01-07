@@ -46,10 +46,12 @@ v2.13.beta (???) - (??/??/2024)
 				A numerical suffix is added if multiple entities are loaded.
 		- COMMAND_FILE {file}
 			- loads commands from a file
-				multiple lines allowed
-				multiple arguments in each line allowed
-				handle quoted arguments
-				commands after this one will run after all commands in the file have been processed
+			- multiple lines allowed
+			- multiple arguments in each line allowed
+			- handle quoted arguments
+			- commands after this one will run after all commands in the file have been processed
+			- whole line comments with # my comment here or // here
+			- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
 		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
 			- set global shift on all entities
 			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
@@ -283,13 +285,17 @@ v2.13.beta (???) - (??/??/2024)
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
 			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
+		- New sub-options for -ICP command:
+			* -SKIP_TX to skip translation along X axis
+			* -SKIP_TY to skip translation along Y axis
+			* -SKIP_TZ to skip translation along Z axis
 		- Support comments inside COMMAND_FILE files
 			* whole line comments with # my comment here or // here
 			* comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces
 		- The current/default active scalar field can now be designated by index '-1' with the following commands:
 			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
 
-	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
+  - New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
 	- New shortcut:

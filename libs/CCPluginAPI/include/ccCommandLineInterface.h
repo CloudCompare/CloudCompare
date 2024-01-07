@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                            CLOUDCOMPARE                                #
@@ -11,12 +13,9 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                   COPYRIGHT: CloudCompare project                      #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_COMMAND_LINE_INTERFACE_HEADER
-#define CC_COMMAND_LINE_INTERFACE_HEADER
 
 #include "CCPluginAPI.h"
 
@@ -297,8 +296,11 @@ public: //logging
 
 	//logging
 	virtual void print(const QString& message) const = 0;
+	virtual void printDebug(const QString& message) const = 0;
 	virtual void warning(const QString& message) const = 0;
+	virtual void warningDebug(const QString& message) const = 0;
 	virtual bool error(const QString& message) const = 0; //must always return false!
+	virtual bool errorDebug(const QString& message) const = 0; //must always return false!
 
 public: //access to data
 
@@ -372,5 +374,3 @@ protected: //members
 	//! File loading parameters
 	CLLoadParameters m_loadingParameters;
 };
-
-#endif //CC_COMMAND_LINE_INTERFACE_HEADER

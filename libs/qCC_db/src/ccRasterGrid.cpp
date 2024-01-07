@@ -884,9 +884,19 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 		return false;
 	}
 
+	if (maxSquareEdgeLength > 0.0)
+	{
+		// we have to scale the maxSquareEdgeLength parameters as we will consider now 'cells' and not real units
+		maxSquareEdgeLength /= (gridStep * gridStep);
+	}
+
 	//now we are going to 'project' all triangles on the grid
 	delaunayMesh.placeIteratorAtBeginning();
 	unsigned triNum = delaunayMesh.size();
+#ifdef _DEBUG
+	size_t interpolatedCells = 0;
+	size_t toolLongEdgeCount = 0;
+#endif
 	for (unsigned k = 0; k < triNum; ++k)
 	{
 		const CCCoreLib::VerticesIndexes* tsi = delaunayMesh.getNextTriangleVertIndexes();
@@ -898,6 +908,9 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 
 			if ((B2D - A2D).norm2() > maxSquareEdgeLength)
 			{
+#ifdef _DEBUG
+				++toolLongEdgeCount;
+#endif
 				continue;
 			}
 
@@ -905,6 +918,9 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 			if (	(C2D - A2D).norm2() > maxSquareEdgeLength
 				||	(C2D - B2D).norm2() > maxSquareEdgeLength)
 			{
+#ifdef _DEBUG
+				++toolLongEdgeCount;
+#endif
 				continue;
 			}
 		}
@@ -915,10 +931,10 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 		int yMin = 0;
 		int xMax = 0;
 		int yMax = 0;
-		//std::vector< uint8_t> onBottomBorder;
-		std::vector< uint8_t> onTopBorder;
-		//std::vector< uint8_t> onLeftBorder;
-		std::vector< uint8_t> onRightBorder;
+		//std::vector<uint8_t> onBottomBorder;
+		std::vector<uint8_t> onTopBorder;
+		//std::vector<uint8_t> onLeftBorder;
+		std::vector<uint8_t> onRightBorder;
 		{
 			for (uint8_t k = 0; k < 3; ++k)
 			{
@@ -957,7 +973,7 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 				for (int i = xMin; i <= xMax; ++i)
 				{
 					//if the cell is empty
-					if (!row[i].nbPoints)
+					if (!row[i].nbPoints && !std::isfinite(row[i].h))
 					{
 						//we test if it's included or not in the current triangle
 						//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
@@ -985,42 +1001,35 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 							double l1 = ((P[1].y - P[2].y)*(i - P[2].x) - (P[1].x - P[2].x)*(j - P[2].y)) / static_cast<double>(det);
 							double l2 = ((P[2].y - P[0].y)*(i - P[2].x) - (P[2].x - P[0].x)*(j - P[2].y)) / static_cast<double>(det);
 							double l3 = 1.0 - l1 - l2;
-							//if (l3 < 0.0 || l3 > 1.0)
-							//{
-							//	// shouldn't happen
-							//	assert(false);
-							//	inside = false;
-							//}
-							//else
+
+							row[i].h = l1 * valA + l2 * valB + l3 * valC;
+							//assert(std::isfinite(row[i].h)); //it can happen with the inv. var. projection mode
+#ifdef _DEBUG
+							++interpolatedCells;
+#endif
+
+							//interpolate color as well!
+							if (hasColors)
 							{
-								row[i].h = l1 * valA + l2 * valB + l3 * valC;
-								//assert(std::isfinite(row[i].h)); //it can happen with the inv. var. projection mode
+								const CCVector3d& colA = rows[P[0].y][P[0].x].color;
+								const CCVector3d& colB = rows[P[1].y][P[1].x].color;
+								const CCVector3d& colC = rows[P[2].y][P[2].x].color;
+								row[i].color = l1 * colA + l2 * colB + l3 * colC;
+							}
 
-								//interpolate color as well!
-								if (hasColors)
-								{
-									const CCVector3d& colA = rows[P[0].y][P[0].x].color;
-									const CCVector3d& colB = rows[P[1].y][P[1].x].color;
-									const CCVector3d& colC = rows[P[2].y][P[2].x].color;
-									row[i].color = l1 * colA + l2 * colB + l3 * colC;
-								}
+							//interpolate the SFs as well!
+							for (auto &gridSF : scalarFields)
+							{
+								assert(!gridSF.empty());
 
-								//interpolate the SFs as well!
-								for (auto &gridSF : scalarFields)
-								{
-									assert(!gridSF.empty());
-
-									double sfValA = gridSF[P[0].x + P[0].y * width];
-									double sfValB = gridSF[P[1].x + P[1].y * width];
-									double sfValC = gridSF[P[2].x + P[2].y * width];
-									assert(i + j * width < gridSF.size());
-									gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
-								}
+								double sfValA = gridSF[P[0].x + P[0].y * width];
+								double sfValB = gridSF[P[1].x + P[1].y * width];
+								double sfValC = gridSF[P[2].x + P[2].y * width];
+								assert(i + j * width < gridSF.size());
+								gridSF[i + j * width] = l1 * sfValA + l2 * sfValB + l3 * sfValC;
 							}
 						}
-
-						// second test for the borders (only the top and right borders have this issue in fact)
-						if (!inside)
+						else // second test for the borders (only the top and right borders have this issue in fact)
 						{
 							/*if (i == 0 && onLeftBorder.size() > 1)
 							{
@@ -1282,6 +1291,7 @@ void ccRasterGrid::updateCellStats()
 	maxHeight = 0;
 	meanHeight = 0;
 	validCellCount = 0;
+	size_t emptyCellCount = 0;
 
 	for (unsigned i = 0; i < height; ++i)
 	{
@@ -1306,6 +1316,10 @@ void ccRasterGrid::updateCellStats()
 					meanHeight = minHeight = maxHeight = h;
 				}
 				++validCellCount;
+			}
+			else
+			{
+				++emptyCellCount;
 			}
 		}
 	}

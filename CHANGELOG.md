@@ -289,6 +289,11 @@ v2.13.beta (???) - (??/??/2024)
 			* -SKIP_TX to skip translation along X axis
 			* -SKIP_TY to skip translation along Y axis
 			* -SKIP_TZ to skip translation along Z axis
+		- Support comments inside COMMAND_FILE files
+			* whole line comments with # my comment here or // here
+			* comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces
+		- The current/default active scalar field can now be designated by index '-1' with the following commands:
+			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
 
   - New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
@@ -337,6 +342,7 @@ v2.13.beta (???) - (??/??/2024)
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
 		- the Align tool will now output the list of points used and the final distance between them in the Console
+		- the Align tool will now show errors along X, Y and Z axes in dedicated columns.
 
 	- Salome/.poly files:
 		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
@@ -388,6 +394,7 @@ v2.13.beta (???) - (??/??/2024)
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
 	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
+	- The Point Pair registration ('Align') or ICP tools could generate a sub-optimal translation if the rotation was constrained
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

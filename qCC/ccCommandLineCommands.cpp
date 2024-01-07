@@ -235,7 +235,7 @@ static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString&
 	return true;
 }
 
-int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)
+int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName, bool minusOneMeansCurrent = false)
 {
 	if (!cloud)
 	{
@@ -250,13 +250,25 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)
 	{
 		return static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
 	}
-	else if (sfIndex == -1 && !sfName.isEmpty()) // the user has provided a SF name instead of an index
+	else if (sfIndex == -1)
 	{
-		//check if this cloud has a scalar field with the input name
-		sfIndex = cloud->getScalarFieldIndexByName(qPrintable(sfName));
-		if (sfIndex < 0)
+		if (!sfName.isEmpty()) // the user has provided a SF name instead of an index
 		{
-			ccLog::Warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(cloud->getName()).arg(sfName));
+			//check if this cloud has a scalar field with the input name
+			sfIndex = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			if (sfIndex < 0)
+			{
+				ccLog::Warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(cloud->getName()).arg(sfName));
+				return -1;
+			}
+		}
+		else if (minusOneMeansCurrent)
+		{
+			return cloud->getCurrentInScalarFieldIndex();
+		}
+		else
+		{
+			ccLog::Warning(QObject::tr("Input scalar field index is invalid: %1").arg(sfIndex));
 			return -1;
 		}
 	}
@@ -269,9 +281,9 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName)
 	return sfIndex;
 }
 
-CCCoreLib::ScalarField* GetScalarField(ccPointCloud* cloud, int sfIndex, const QString& sfName)
+CCCoreLib::ScalarField* GetScalarField(ccPointCloud* cloud, int sfIndex, const QString& sfName, bool minusOneMeansCurrent = false)
 {
-	sfIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+	sfIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, minusOneMeansCurrent);
 	if (sfIndex < 0)
 	{
 		return nullptr;
@@ -3284,7 +3296,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, false);
 			desc.pc->setCurrentScalarField(thisSFIndex);
 		}
 	}
@@ -3294,7 +3306,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(desc.mesh);
 		if (pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName, false);
 			pc->setCurrentScalarField(thisSFIndex);
 		}
 	}
@@ -3370,7 +3382,7 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 
 	int sfIndex = -1;
 	QString sfName;
-	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
 	{
 		return false;
 	}
@@ -3379,7 +3391,7 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				removeSF(thisSFIndex, *desc.pc);
@@ -3396,7 +3408,7 @@ bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-				int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName);
+				int thisSFIndex = GetScalarFieldIndex(pc, sfIndex, sfName, true);
 				if (thisSFIndex >= 0)
 				{
 					removeSF(thisSFIndex, *pc);
@@ -4475,7 +4487,7 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			CCCoreLib::ScalarField* sf = GetScalarField(desc.pc, sfIndex, sfName);
+			CCCoreLib::ScalarField* sf = GetScalarField(desc.pc, sfIndex, sfName, true);
 			if (sf)
 			{
 				if (desc.pc->setCoordFromSF(exportDims, sf, std::numeric_limits<PointCoordinateType>::quiet_NaN()))
@@ -5652,7 +5664,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
 	{
 		return false;
 	}
@@ -5696,7 +5708,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, inPlace))
@@ -5723,7 +5735,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
 		if (cloud && !isLocked)
 		{
-			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, inPlace))
@@ -5761,7 +5773,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
 	{
 		return false;
 	}
@@ -5803,7 +5815,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, true, &sf2))
@@ -5830,7 +5842,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
 		if (cloud && !isLocked)
 		{
-			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, true, &sf2))
@@ -5981,7 +5993,7 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
     //read sf index or name
 	int sfIndex = -1;
 	QString sfName;
-	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
 	{
 		return false;
 	}
@@ -6011,7 +6023,7 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 		dest = cmd.clouds()[0].pc;
     }
 
-	sfIndex = GetScalarFieldIndex(source, sfIndex, sfName);
+	sfIndex = GetScalarFieldIndex(source, sfIndex, sfName, true);
 	if (sfIndex < 0)
 	{
 		return false;
@@ -6133,7 +6145,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
-	if (!GetSFIndexOrName(cmd, sfIndex, sfName))
+	if (!GetSFIndexOrName(cmd, sfIndex, sfName, true))
 	{
 		return false;
 	}
@@ -6146,7 +6158,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(qPrintable(newSFName));
@@ -6181,7 +6193,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(desc.mesh, &isLocked);
 		if (cloud && !isLocked)
 		{
-			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName);
+			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
 				int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(newSFName));
@@ -6433,7 +6445,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			}
 
 			//read SF index
-			if (!GetSFIndexOrName(cmd, modelWeightsSFIndex, modelWeightsSFIndexName))
+			if (!GetSFIndexOrName(cmd, modelWeightsSFIndex, modelWeightsSFIndexName, true))
 			{
 				return false;
 			}
@@ -6449,7 +6461,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			}
 
 			//read SF index
-			if (!GetSFIndexOrName(cmd, dataWeightsSFIndex, dataWeightsSFIndexName))
+			if (!GetSFIndexOrName(cmd, dataWeightsSFIndex, dataWeightsSFIndexName, true))
 			{
 				return false;
 			}
@@ -6586,7 +6598,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		ccPointCloud* dataAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
 		if (!dataAsCloud)
 		{
-			dataWeightsSFIndex = GetScalarFieldIndex(dataAsCloud, dataWeightsSFIndex, dataWeightsSFIndexName);
+			dataWeightsSFIndex = GetScalarFieldIndex(dataAsCloud, dataWeightsSFIndex, dataWeightsSFIndexName, true);
 			if (dataWeightsSFIndex >= 0)
 			{
 				cmd.print(QObject::tr("[ICP] SF #%1 (data entity) will be used as weights").arg(dataWeightsSFIndex));
@@ -6600,7 +6612,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		ccPointCloud* modelAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
 		if (!modelAsCloud)
 		{
-			modelWeightsSFIndex = GetScalarFieldIndex(modelAsCloud, modelWeightsSFIndex, modelWeightsSFIndexName);
+			modelWeightsSFIndex = GetScalarFieldIndex(modelAsCloud, modelWeightsSFIndex, modelWeightsSFIndexName, true);
 			if (modelWeightsSFIndex >= 0)
 			{
 				cmd.print(QObject::tr("[ICP] SF #%1 (model entity) will be used as weights").arg(modelWeightsSFIndex));

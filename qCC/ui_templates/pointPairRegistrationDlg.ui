@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>508</width>
+    <width>600</width>
     <height>380</height>
    </rect>
   </property>
@@ -139,7 +139,7 @@
       <enum>QAbstractItemView::NoSelection</enum>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>80</number>
+      <number>70</number>
      </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
       <number>18</number>
@@ -177,6 +177,21 @@
      <column>
       <property name="text">
        <string notr="true">Z</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delta X</string>
+      </property>
+     </column>
+       <column>
+      <property name="text">
+       <string>Delta Y</string>
+      </property>
+     </column>
+       <column>
+      <property name="text">
+       <string>Delta Z</string>
       </property>
      </column>
      <column>
@@ -249,7 +264,7 @@
       <enum>QAbstractItemView::NoSelection</enum>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
-      <number>80</number>
+      <number>70</number>
      </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
       <number>18</number>
@@ -287,6 +302,21 @@
      <column>
       <property name="text">
        <string notr="true">Z</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delta X</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delta Y</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Delta Z</string>
       </property>
      </column>
      <column>
@@ -371,6 +401,11 @@
        <item>
         <property name="text">
          <string notr="true">Z</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string notr="true">NONE</string>
         </property>
        </item>
       </widget>

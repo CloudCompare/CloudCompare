@@ -189,6 +189,7 @@ constexpr char OPTION_MESH[]							= "MESH";
 constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 constexpr char OPTION_FORCE[]							= "FORCE";
+constexpr char OPTION_USE_ACTIVE_SF[]					= "USE_ACTIVE_SF";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -1348,19 +1349,114 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Missing parameter: spatial step after \"-%1 SPATIAL\"").arg(COMMAND_SUBSAMPLE));
 		}
+
 		bool ok;
 		double step = cmd.arguments().takeFirst().toDouble(&ok);
 		if (!ok || step <= 0)
 		{
-			return cmd.error(QObject::tr("Invalid step value for spatial resampling!"));
+			return cmd.error(QObject::tr("Invalid step value for spatial subsampling!"));
 		}
 		cmd.print(QObject::tr("\tSpatial step: %1").arg(step));
-		
+
+		double sfMinSpacing = 0;
+		double sfMaxSpacing = 0;
+		bool useActiveSF = false;
+		if (!cmd.arguments().empty())
+		{
+			if (cmd.arguments().front().toUpper() == OPTION_USE_ACTIVE_SF)
+			{
+				//enable USE_ACTIVE_SF
+				useActiveSF = true;
+				cmd.arguments().pop_front();
+				if (cmd.arguments().size() >= 2)
+				{
+					bool validMin;
+					sfMinSpacing = cmd.arguments().takeFirst().toDouble(&validMin);
+					bool validMax;
+					sfMaxSpacing = cmd.arguments().takeFirst().toDouble(&validMax);
+					if (!(validMin&&validMax) || sfMinSpacing < 0 || sfMaxSpacing < 0)
+					{
+						return cmd.error(QObject::tr("Invalid parameters: Two positive decimal number required after '%1'").arg(OPTION_USE_ACTIVE_SF));
+					}
+				}
+				else
+				{
+					return cmd.error(QObject::tr("Missing parameters: Two positive decimal number required after '%1'").arg(OPTION_USE_ACTIVE_SF));
+				}
+			}
+		}
+
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-			
+
 			CCCoreLib::CloudSamplingTools::SFModulationParams modParams(false);
+
+			//handle Use Active SF on each cloud
+			if (useActiveSF)
+			{
+				//look for the min and max sf values
+				ccScalarField* sf = desc.pc->getCurrentDisplayedScalarField();
+				if (!sf)
+				{
+					//warn the user, not use active SF and keep going
+					cmd.warning(QObject::tr("\tUse active SF error: not found active scalar field. Set one with '-%1'").arg(COMMAND_SET_ACTIVE_SF));
+				}
+				else
+				{
+					//found active scalar field
+					ScalarType sfMin = CCCoreLib::NAN_VALUE;
+					ScalarType sfMax = CCCoreLib::NAN_VALUE;
+					if (sf->countValidValues() > 0)
+					{
+						if (!ccScalarField::ValidValue(sfMin) || sfMin > sf->getMin())
+							sfMin = sf->getMin();
+						if (!ccScalarField::ValidValue(sfMax) || sfMax < sf->getMax())
+							sfMax = sf->getMax();
+						if( !(ccScalarField::ValidValue(sfMin) && ccScalarField::ValidValue(sfMax)) )
+						{
+							//warn the user, not use Use Active SF and keep going
+							cmd.warning(QObject::tr("\tUse active SF error: scalar field (%1) has invalid min/max values.").arg(sf->getName()));
+						}
+						else
+						{
+							//everything validated use acitve SF for modulation
+							//implementation of modParams.a/b values come from MainWindow::doActionSubsample()
+							modParams.enabled = true;
+
+							double deltaSF = static_cast<double>(sfMax) - static_cast<double>(sfMin);
+
+							if (CCCoreLib::GreaterThanEpsilon(deltaSF))
+							{
+								modParams.a = (sfMaxSpacing - sfMinSpacing) / deltaSF;
+								modParams.b = sfMinSpacing - modParams.a * sfMin;
+							}
+							else
+							{
+								modParams.a = 0.0;
+								modParams.b = sfMin;
+							}
+							cmd.print(QObject::tr("\tUse active SF: enabled\n\t\tSpacing at SF min (%1): %2\n\t\tSpacing at SF max (%3): %4")
+								.arg(sfMin)
+								.arg(sfMinSpacing)
+								.arg(sfMax)
+								.arg(sfMaxSpacing));
+						}
+					}
+					else
+					{
+						//warn the user, not use Use Active SF and keep going
+						cmd.warning(QObject::tr("\tUse active SF error: scalar field (%2) does not have any valid values.").arg(COMMAND_SET_ACTIVE_SF).arg(sf->getName()));
+
+					}
+				}
+			}
+
+			if (useActiveSF && !modParams.enabled)
+			{
+				cmd.print(QObject::tr("\tUse active SF: disabled and fall back to static spacing."));
+			}
+
 			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::resampleCloudSpatially(desc.pc, static_cast<PointCoordinateType>(step), modParams, nullptr, cmd.progressDialog());
 			if (!refCloud)
 			{

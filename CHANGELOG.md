@@ -285,6 +285,7 @@ v2.13.beta (???) - (??/??/2024)
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
 			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
+			* -SS SPATIAL {fall_back_step} USE_ACTIVE_SF {value_at_SF_min} {value_at_SF_max} to use spatial step interpolation on active scalar field
 		- New sub-options for -ICP command:
 			* -SKIP_TX to skip translation along X axis
 			* -SKIP_TY to skip translation along Y axis
@@ -295,7 +296,6 @@ v2.13.beta (???) - (??/??/2024)
 		- The current/default active scalar field can now be designated by index '-1' with the following commands:
 			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
 		- The logging should be more responsive (both in the standard console-based mode and the silent mode)
-
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 

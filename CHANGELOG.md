@@ -294,8 +294,9 @@ v2.13.beta (???) - (??/??/2024)
 			* comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces
 		- The current/default active scalar field can now be designated by index '-1' with the following commands:
 			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
+		- The logging should be more responsive (both in the standard console-based mode and the silent mode)
 
-  - New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
+	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
 	- New shortcut:

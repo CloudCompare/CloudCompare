@@ -83,6 +83,8 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	
 	parser->registerBuiltInCommands();
 
+	ccConsole::SetRefreshCycle(200);
+
 	// 'massage' the arguments to properly handle single quotes
 	{
 		bool insideSingleQuoteSection = false;
@@ -96,7 +98,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 			{
 				if (arg.endsWith(SingleQuote))
 				{
-					// nothing to do, non*truncated argument
+					// nothing to do, non-truncated argument
 				}
 				else
 				{
@@ -151,8 +153,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	}
 	else
 	{
-		//allows ccLog ccConsole or ccCommandLineParser (print,warning,error) 
-		//to output to the console 
+		//allows ccLog/ccConsole or ccCommandLineParser (print, warning, error) to output to the console 
 		ccConsole::Init(nullptr, nullptr, nullptr, true); 
 	}
 

@@ -285,7 +285,7 @@ v2.13.beta (???) - (??/??/2024)
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
 			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
-			* -SS SPATIAL {fall_back_step} USE_ACTIVE_SF {value_at_SF_min} {value_at_SF_max} to use spatial step interpolation on active scalar field
+			* -SS SPATIAL {fallback_step} USE_ACTIVE_SF {step_at_SF_min} {step_at_SF_max} to use spatial step interpolation on active scalar field (fallback step will be used if active SF has invalid values)
 		- New sub-options for -ICP command:
 			* -SKIP_TX to skip translation along X axis
 			* -SKIP_TY to skip translation along Y axis

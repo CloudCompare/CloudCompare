@@ -2706,6 +2706,18 @@ void ccPropertiesTreeDelegate::updateLabelViewport()
 	}
 
 	viewport->setParameters(win->getViewportParameters());
+
+	// Update the custom light position as well
+	{
+		bool customLightEnabled = win->customLightEnabled();
+		CCVector3f customLightPos = win->getCustomLightPosition();
+
+		viewport->setMetaData("CustomLightEnabled", customLightEnabled);
+		viewport->setMetaData("CustomLightPosX", customLightPos.x);
+		viewport->setMetaData("CustomLightPosY", customLightPos.y);
+		viewport->setMetaData("CustomLightPosZ", customLightPos.z);
+	}
+
 	ccLog::Print(QString("Viewport '%1' has been updated").arg(viewport->getName()));
 }
 

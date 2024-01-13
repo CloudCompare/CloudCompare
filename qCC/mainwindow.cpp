@@ -7115,6 +7115,17 @@ void MainWindow::doActionSaveViewportAsCamera()
 	viewportObject->setParameters(win->getViewportParameters());
 	viewportObject->setDisplay(win);
 
+	// Save the custom light position as well
+	{
+		bool customLightEnabled = win->customLightEnabled();
+		CCVector3f customLightPos = win->getCustomLightPosition();
+
+		viewportObject->setMetaData("CustomLightEnabled", customLightEnabled);
+		viewportObject->setMetaData("CustomLightPosX", customLightPos.x);
+		viewportObject->setMetaData("CustomLightPosY", customLightPos.y);
+		viewportObject->setMetaData("CustomLightPosZ", customLightPos.z);
+	}
+
 	addToDB(viewportObject);
 }
 

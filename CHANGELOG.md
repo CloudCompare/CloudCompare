@@ -337,6 +337,9 @@ v2.13.beta (???) - (??/??/2024)
 
 	- Animation plugin:
 		- option to export the trajectory as a polyline
+		- the Animation plugin will now restore the custom light position (and activation state) if the viewports are saved
+			with this version of CloudCompare. This allows to render animations of still objects but with a moving light source
+			for instance.
 
 	- ICP and Align tools:
 		- when using a reference entity having a defined Global Shift & Scale the registration matrix

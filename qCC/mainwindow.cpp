@@ -507,6 +507,7 @@ void MainWindow::connectActions()
 	//"File" menu
 	connect(m_UI->actionOpen,						&QAction::triggered, this, &MainWindow::doActionLoadFile);
 	connect(m_UI->actionSave,						&QAction::triggered, this, &MainWindow::doActionSaveFile);
+	connect(m_UI->actionSaveProject,				&QAction::triggered, this, &MainWindow::doActionSaveProject);
 	connect(m_UI->actionGlobalShiftSettings,		&QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
 	connect(m_UI->actionPrimitiveFactory,			&QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
 	connect(m_UI->actionCloseAll,					&QAction::triggered, this, &MainWindow::closeAll);
@@ -10347,7 +10348,7 @@ void MainWindow::doActionSaveFile()
 
 			assert(dest);
 
-			//we don't want double insertions if the user has clicked both the father and child
+			//we don't want double insertions if the user has highlighted both the father and the child
 			if (!dest->find(child->getUniqueID()))
 			{
 				dest->addChild(child, ccHObject::DP_NONE);
@@ -10378,7 +10379,7 @@ void MainWindow::doActionSaveFile()
 	//entities type (cloud, mesh, etc.).
 	QStringList fileFilters;
 	{
-		for ( const FileIOFilter::Shared &filter : FileIOFilter::GetFilters() )
+		for ( const FileIOFilter::Shared& filter : FileIOFilter::GetFilters() )
 		{
 			bool atLeastOneExclusive = false;
 
@@ -10494,7 +10495,7 @@ void MainWindow::doActionSaveFile()
 	{
 		//hierarchy objects have generally as name: 'filename.ext (fullpath)'
 		//so we must only take the first part! (otherwise this type of name
-		//with a path inside perturbs the QFileDialog a lot ;))
+		//with a path inside disturbs QFileDialog a lot ;))
 		QString defaultFileName(m_selectedEntities.front()->getName());
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
@@ -10617,6 +10618,100 @@ void MainWindow::doActionSaveFile()
 	//we update current file path
 	currentPath = QFileInfo(selectedFilename).absolutePath();
 	settings.setValue(ccPS::CurrentPath(),currentPath);
+	settings.endGroup();
+}
+
+void MainWindow::doActionSaveProject()
+{
+	if (!m_ccRoot || !m_ccRoot->getRootEntity())
+	{
+		assert(false);
+		return;
+	}
+
+	ccHObject* rootEntity = m_ccRoot->getRootEntity();
+	if (rootEntity->getChildrenNumber() == 0)
+	{
+		return;
+	}
+
+	//default output path (+ filename)
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+	ccLog::PrintDebug(currentPath);
+	QString fullPathName = currentPath;
+
+	static QString s_previousProjectName{ "project" };
+	QString defaultFileName = s_previousProjectName;
+	if (rootEntity->getChildrenNumber() == 1)
+	{
+		// If there's only on top entity, we can try to use its name as the project name.
+		ccHObject* topEntity = rootEntity->getChild(0);
+		defaultFileName = topEntity->getName();
+		if (topEntity->isA(CC_TYPES::HIERARCHY_OBJECT))
+		{
+			// Hierarchy objects have generally as name: 'filename.ext (fullpath)'
+			// so we must only take the first part! (otherwise this type of name
+			// with a path inside disturbs the QFileDialog a lot ;))
+			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			if (!parts.empty())
+			{
+				defaultFileName = parts[0];
+			}
+		}
+
+		//we remove the extension
+		defaultFileName = QFileInfo(defaultFileName).completeBaseName();
+
+		if (!IsValidFileName(defaultFileName))
+		{
+			ccLog::Warning(tr("[I/O] Top entity's name would make an invalid filename! Can't use it..."));
+			defaultFileName = "project";
+		}
+	}
+	fullPathName += QString("/") + defaultFileName;
+
+	QString binFilter = BinFilter::GetFileFilter();
+
+	//ask the user for the output filename
+	QString selectedFilename = QFileDialog::getSaveFileName(this,
+		tr("Save file"),
+		fullPathName,
+		binFilter,
+		&binFilter,
+		CCFileDialogOptions());
+
+	if (selectedFilename.isEmpty())
+	{
+		//process cancelled by the user
+		return;
+	}
+
+	FileIOFilter::SaveParameters parameters;
+	{
+		parameters.alwaysDisplaySaveDialog = true;
+		parameters.parentWidget = this;
+	}
+
+	CC_FILE_ERROR result = FileIOFilter::SaveToFile(rootEntity->getChildrenNumber() == 1 ? rootEntity->getChild(0) : rootEntity, selectedFilename, parameters, binFilter);
+
+	if (result == CC_FERR_NO_ERROR)
+	{
+		//only for BIN files: display the compatible CC version
+		short fileVersion = BinFilter::GetLastSavedFileVersion();
+		if (0 != fileVersion)
+		{
+			QString minCCVersion = ccApplication::GetMinCCVersionForFileVersion(fileVersion);
+			ccLog::Print(QString("This file can be loaded by CloudCompare version %1 and later").arg(minCCVersion));
+		}
+	}
+
+	//we update the current 'save' path
+	QFileInfo fi(selectedFilename);
+	s_previousProjectName = fi.fileName();
+	currentPath = fi.absolutePath();
+	settings.setValue(ccPS::CurrentPath(), currentPath);
 	settings.endGroup();
 }
 
@@ -10921,6 +11016,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionTracePolyline->setEnabled(!dbIsEmpty);
 	m_UI->actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionSave->setEnabled(atLeastOneEntity);
+	m_UI->actionSaveProject->setEnabled(!dbIsEmpty);
 	m_UI->actionClone->setEnabled(atLeastOneEntity);
 	m_UI->actionDelete->setEnabled(atLeastOneEntity);
 	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);

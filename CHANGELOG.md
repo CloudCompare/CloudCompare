@@ -128,6 +128,10 @@ v2.13.beta (???) - (??/??/2024)
 		- A 3D graph-based individual-tree isolator (treeiso) from Terrestrial Laser Scanning point clouds
 		- by Zhouxin Xi and Chris Hopkinson, Artemis Lab, Department of Geography & Environment, University of Lethbridge (Canada)
 
+	- New menu entry: Save project
+		- File > Save project (or CTRL+SHIFT+S)
+		- Saves all entitites in the DB as a bin file
+
 - Improvements:
 
 	- The ASCII file loading dialog has been improved:

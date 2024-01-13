@@ -48,6 +48,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSaveProject"/>
     <addaction name="actionGlobalShiftSettings"/>
     <addaction name="separator"/>
     <addaction name="actionPrimitiveFactory"/>
@@ -701,6 +702,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    </attribute>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
+   <addaction name="actionSaveProject"/>
    <addaction name="separator"/>
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
@@ -810,8 +812,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    <property name="text">
     <string>&amp;Open</string>
    </property>
+   <property name="toolTip">
+    <string>Open one or severa files</string>
+   </property>
    <property name="statusTip">
-    <string>Open</string>
+    <string>Open one or severa files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -824,6 +829,9 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>&amp;Save</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current entity</string>
    </property>
    <property name="statusTip">
     <string>Save current entity</string>
@@ -3174,6 +3182,32 @@ The active scalar field should have integer values.</string>
   <action name="actionSetSFsAsNormal">
    <property name="text">
     <string>Set SF(s) as normal</string>
+   </property>
+  </action>
+  <action name="actionOpen_project">
+   <property name="text">
+    <string>Open project</string>
+   </property>
+  </action>
+  <action name="actionSaveProject">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccSaveProject.png</normaloff>:/CC/images/ccSaveProject.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save project</string>
+   </property>
+   <property name="iconText">
+    <string>Save project (BIN)</string>
+   </property>
+   <property name="toolTip">
+    <string>Save all entities in a BIN file</string>
+   </property>
+   <property name="statusTip">
+    <string>Save all entities in a BIN file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
    </property>
   </action>
  </widget>

@@ -183,12 +183,14 @@ private:
 	//! Zooms out (current 3D view)
 	void zoomOut();
 
-	//! Displays 'help' dialog
+	//! Displays the 'help' dialog
 	void doActionShowHelpDialog();
-	//! Displays file open dialog
+	//! Loads one or several files
 	void doActionLoadFile();
-	//! Displays file save dialog
+	//! Save the currently selected entities
 	void doActionSaveFile();
+	//! Save all the entities at once, BIN format forced
+	void doActionSaveProject();
 	//! Displays the Global Shift settings dialog
 	void doActionGlobalShiftSeetings();
 	//! Toggles the 'show Qt warnings in Console' option

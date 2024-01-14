@@ -59,7 +59,6 @@ Basically, you have to:
 - launch CMake (from the trunk root)
 - enjoy!
 
-
 Contributing to CloudCompare
 ----------------------------
 
@@ -68,7 +67,7 @@ If you want to help us improve CloudCompare or create a new plugin you can start
 Supporting the project
 ----------------------
 
-If you want to help us in another way, you can make donations via [donorbox](https://donorbox.org/support-cloudcompare)
+If you want to help us in another way, you can make donations via <a href='https://donorbox.org/support-cloudcompare' target="_blank"><img src="https://donorbox.org/images/red_logo.png"></a> [donorbox](https://donorbox.org/support-cloudcompare)
+
 Thanks!
 
-<a href='https://donorbox.org/support-cloudcompare' target="_blank"><img src="https://d1iczxrky3cnb2.cloudfront.net/button-medium-blue.png"></a>

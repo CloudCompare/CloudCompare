@@ -150,6 +150,10 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
+			else if (upperArgument == "-MAX")
+			{
+				w.showMaximized();
+			}
 			else if (upperArgument == "-TOP")
 			{
 				w.setWindowFlags(w.windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);

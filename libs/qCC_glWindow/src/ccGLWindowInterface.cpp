@@ -2416,7 +2416,7 @@ void ccGLWindowInterface::processPickingResult(	const PickingParameters& params,
 				Q_EMIT m_signalEmitter->newLabel(static_cast<ccHObject*>(label));
 				QCoreApplication::processEvents();
 
-				toBeRefreshed();
+				redraw(false, false);
 			}
 		}
 	}

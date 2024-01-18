@@ -10205,7 +10205,7 @@ void MainWindow::handleNewLabel(ccHObject* entity)
 {
 	if (entity)
 	{
-		addToDB(entity);
+		addToDB(entity, false, true, false, false);
 	}
 	else
 	{

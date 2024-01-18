@@ -204,6 +204,10 @@ v2.13.beta (???) - (??/??/2024)
 		- new command line sub-option:
 		    - -EMPTY_FILL KRIGING
 			- -KRIGING_KNN {value} (to set the number of neighbors for the Kriging algorithm)
+		- when exporting Geotiff files, CC will now use NaN as the value for invalid pixels (no data)
+
+	- Raster file format:
+		- when loading a raster file, CC should now be able to detect the Z band more robustly (even if it's labeled as 'grey indexes' by GDAL)
 
 	- Edit > Color > Set unique & Edit > Color > Colorize
 		- CC will now remember the last input color

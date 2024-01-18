@@ -1316,7 +1316,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
 	const char pszFormat[] = "GTiff";
-	GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
+	GDALDriver* poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
 	if (!poDriver)
 	{
 		ccLog::Error("[GDAL] Driver %s is not supported", pszFormat);
@@ -1346,12 +1346,12 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 
 	poDstDS->SetMetadataItem("AREA_OR_POINT", "AREA");
 
-	double adfGeoTransform[6] = {	shiftX,		//top left x
-									stepX,		//w-e pixel resolution (can be negative)
-									0,			//0
-									shiftY,		//top left y
-									0,			//0
-									-stepY		//n-s pixel resolution (can be negative)
+	double adfGeoTransform[6] {	shiftX,		//top left x
+								stepX,		//w-e pixel resolution (can be negative)
+								0,			//0
+								shiftY,		//top left y
+								0,			//0
+								-stepY		//n-s pixel resolution (can be negative)
 	};
 
 	poDstDS->SetGeoTransform( adfGeoTransform );
@@ -1369,7 +1369,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	//exort RGB band?
 	if (exportBands.rgb)
 	{
-		GDALRasterBand* rgbBands[3] = { poDstDS->GetRasterBand(++currentBand),
+		GDALRasterBand* rgbBands[3] {	poDstDS->GetRasterBand(++currentBand),
 										poDstDS->GetRasterBand(++currentBand),
 										poDstDS->GetRasterBand(++currentBand) };
 		rgbBands[0]->SetColorInterpretation(GCI_RedBand);
@@ -1415,10 +1415,10 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 			aBand->SetColorInterpretation(GCI_AlphaBand);
 			aBand->SetStatistics(0, 255, 255, 0); //warning: arbitrary average and std. dev. values
 
-			for (unsigned j = 0; j<grid.height; ++j)
+			for (unsigned j = 0; j < grid.height; ++j)
 			{
 				const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
-				for (unsigned i = 0; i<grid.width; ++i)
+				for (unsigned i = 0; i < grid.width; ++i)
 				{
 					cLine[i] = (std::isfinite(row[i].h) ? 255 : 0);
 				}
@@ -1456,13 +1456,18 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 		assert(poBand);
 		poBand->SetColorInterpretation(GCI_Undefined);
 
-		double emptyCellHeight = 0;
+		double emptyCellHeight = 0.0;
 		switch (fillEmptyCellsStrategy)
 		{
 		case ccRasterGrid::LEAVE_EMPTY:
-			emptyCellHeight = grid.minHeight - 1.0;
-			poBand->SetNoDataValue(emptyCellHeight); //should be transparent!
+		{
+			emptyCellHeight = std::numeric_limits<double>::quiet_NaN();
+			if (CE_None != poBand->SetNoDataValue(emptyCellHeight))
+			{
+				ccLog::Warning("[GDAL] Failed to set the No Data value");
+			}
 			break;
+		}
 		case ccRasterGrid::FILL_MINIMUM_HEIGHT:
 			emptyCellHeight = grid.minHeight;
 			break;
@@ -1480,21 +1485,36 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 			assert(false);
 		}
 
-		emptyCellHeight += shiftZ;
+		if (fillEmptyCellsStrategy != ccRasterGrid::LEAVE_EMPTY)
+		{
+			emptyCellHeight += shiftZ;
+		}
 
 		for (unsigned j = 0; j < grid.height; ++j)
 		{
 			const ccRasterGrid::Row& row = grid.rows[grid.height - 1 - j];
-			for (unsigned i = 0; i<grid.width; ++i)
+			for (unsigned i = 0; i < grid.width; ++i)
 			{
 				scanline[i] = std::isfinite(row[i].h) ? row[i].h + shiftZ : emptyCellHeight;
 			}
 
-			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, scanline, static_cast<int>(grid.width), 1, GDT_Float64, 0, 0) != CE_None)
+			if (poBand->RasterIO(	GF_Write,
+									0,
+									static_cast<int>(j),
+									static_cast<int>(grid.width),
+									1,
+									scanline,
+									static_cast<int>(grid.width),
+									1,
+									GDT_Float64,
+									0,
+									0) != CE_None)
 			{
 				ccLog::Error("[GDAL] An error occurred while writing the height band!");
 				if (scanline)
+				{
 					CPLFree(scanline);
+				}
 				GDALClose(poDstDS);
 				return false;
 			}
@@ -1515,11 +1535,23 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 				scanline[i] = row[i].nbPoints;
 			}
 
-			if (poBand->RasterIO(GF_Write, 0, static_cast<int>(j), static_cast<int>(grid.width), 1, scanline, static_cast<int>(grid.width), 1, GDT_Float64, 0, 0) != CE_None)
+			if (poBand->RasterIO(	GF_Write,
+									0,
+									static_cast<int>(j),
+									static_cast<int>(grid.width),
+									1,
+									scanline,
+									static_cast<int>(grid.width),
+									1,
+									GDT_Float64,
+									0,
+									0) != CE_None)
 			{
-				ccLog::Error("[GDAL] An error occurred while writing the height band!");
+				ccLog::Error("[GDAL] An error occurred while writing the density band!");
 				if (scanline)
+				{
 					CPLFree(scanline);
+				}
 				GDALClose(poDstDS);
 				return false;
 			}
@@ -1559,7 +1591,9 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 											scanline,
 											static_cast<int>(grid.width),
 											1,
-											GDT_Float64, 0, 0 ) != CE_None)
+											GDT_Float64,
+											0,
+											0 ) != CE_None)
 					{
 						//the corresponding SF should exist on the input cloud
 						ccLog::Error(QString("[GDAL] An error occurred while writing a scalar field band!"));
@@ -1572,7 +1606,9 @@ bool ccRasterizeTool::ExportGeoTiff(const QString& outputFilename,
 	}
 
 	if (scanline)
+	{
 		CPLFree(scanline);
+	}
 	scanline = nullptr;
 
 	/* Once we're done, close properly the dataset */

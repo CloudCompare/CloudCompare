@@ -96,7 +96,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 			//first check if the raster actually has 'color' bands
 			int colorBands = 0;
+			bool hasUndefinedColorBands = false;
+			std::vector<bool> isColorBand(rasterCount, false);
 			{
+				int undefinedColorBandCount = 0;
 				for (int i = 1; i <= rasterCount; ++i)
 				{
 					GDALRasterBand* poBand = poDataset->GetRasterBand(i);
@@ -108,13 +111,46 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					case GCI_GreenBand:
 					case GCI_BlueBand:
 					case GCI_AlphaBand:
+						isColorBand[i - 1] = true;
 						++colorBands;
 						break;
+					case GCI_Undefined:
+					case GCI_GrayIndex:
+					{
+						// Sometimes GDAL fails to recognize color bands as such, or it can flag a Z band as gray values if altitudes are between 0 and 255...
+						int bGotMin = 0, bGotMax = 0;
+						double adfMinMax[2]{ poBand->GetMinimum(&bGotMin), poBand->GetMaximum(&bGotMax) };
+						if (0 == bGotMin || 0 == bGotMax)
+						{
+							//DGM FIXME: if the file is corrupted (e.g. ASCII ArcGrid with missing rows) this method will enter in a infinite loop!
+							GDALComputeRasterMinMax((GDALRasterBandH)poBand, TRUE, adfMinMax);
+						}
+
+						int minVal = static_cast<int>(adfMinMax[0]);
+						int maxVal = static_cast<int>(adfMinMax[1]);
+						if (	adfMinMax[0] == static_cast<double>(minVal)
+							&&	adfMinMax[1] == static_cast<double>(maxVal)
+							&&	minVal >= 0
+							&&	maxVal <= 255)
+						{
+							// integer range limits within [0 255]?
+							// (we will still load this band as a scalar field though!)
+							isColorBand[i - 1] = true;
+							if (colorInterp == GCI_Undefined)
+							{
+								++undefinedColorBandCount;
+							}
+						}
+					}
+					break;
+
 					default:
 						break;
 					}
 				}
+				hasUndefinedColorBands = (colorBands == 0 && (undefinedColorBandCount == 3 || undefinedColorBandCount == 4));
 			}
+
 
 			bool loadAsTexturedQuad = false;
 			if (colorBands >= 3)
@@ -148,7 +184,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 			}
 
 			//create blank raster 'grid'
-			ccMesh* quad = 0;
+			ccMesh* quad = nullptr;
 			QImage quadTexture;
 			if (loadAsTexturedQuad)
 			{
@@ -211,7 +247,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 			//fetch raster bands
 			bool zRasterProcessed = false;
 			CCCoreLib::ReferenceCloud validPoints(pc);
-			double zMinMax[2] = { 0, 0 };
+			double zMinMax[2] { 0, 0 };
 
 			for (int i = 1; i <= rasterCount; ++i)
 			{
@@ -220,7 +256,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 				GDALColorInterp colorInterp = poBand->GetColorInterpretation();
 
-				int nBlockXSize, nBlockYSize;
+				int nBlockXSize = 0, nBlockYSize = 0;
 				poBand->GetBlockSize( &nBlockXSize, &nBlockYSize );
 				ccLog::Print( "[GDAL] Block=%dx%d, Type=%s, ColorInterp=%s", nBlockXSize, nBlockYSize, GDALGetDataTypeName(poBand->GetRasterDataType()), GDALGetColorInterpretationName(colorInterp) );
 
@@ -230,37 +266,47 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				assert(nXSize == rasterX);
 				assert(nYSize == rasterY);
 			
-				int bGotMin, bGotMax;
-				double adfMinMax[2] = {0, 0};
-				adfMinMax[0] = poBand->GetMinimum( &bGotMin );
-				adfMinMax[1] = poBand->GetMaximum( &bGotMax );
+				int bGotMin = 0, bGotMax = 0;
+				double adfMinMax[2]{ poBand->GetMinimum(&bGotMin), poBand->GetMaximum(&bGotMax) };
 				if (!bGotMin || !bGotMax)
 				{
 					//DGM FIXME: if the file is corrupted (e.g. ASCII ArcGrid with missing rows) this method will enter in a infinite loop!
-					GDALComputeRasterMinMax((GDALRasterBandH)poBand, TRUE, adfMinMax);
+					poBand->ComputeRasterMinMax(FALSE, adfMinMax);
 				}
 				ccLog::Print( "[GDAL] Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1] );
 
 				GDALColorTable* colTable = poBand->GetColorTable();
-				if( colTable != nullptr )
-					printf( "[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount() );
+				if (colTable != nullptr)
+				{
+					ccLog::Print("[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount());
+				}
 
-				if( poBand->GetOverviewCount() > 0 )
-					printf( "[GDAL] Band has %d overviews", poBand->GetOverviewCount() );
+				if (poBand->GetOverviewCount() > 0)
+				{
+					ccLog::Print("[GDAL] Band has %d overviews", poBand->GetOverviewCount());
+				}
 
-				if (	colorInterp == GCI_Undefined //probably heights? DGM: no GDAL is lost if the bands are coded with 64 bits values :(
-					&&	!zRasterProcessed
-					&&	(colorBands >= 3 || rasterCount < 4 || i > (rasterCount == 4 ? 3 : 4))
+				if (colorInterp == GCI_GrayIndex && !isColorBand[i-1])
+				{
+					// Sometimes, GDAL flags a band as 'gray index' just because its values are between 0 and 255...
+					colorInterp = GCI_Undefined;
+				}
+
+				if (	!zRasterProcessed
+					&&	colorInterp == GCI_Undefined //probably heights? DGM: not sufficient since GDAL is sometimes lost if the bands are coded with 64 bits values :(
+					&& (!hasUndefinedColorBands || !isColorBand[i - 1])
 					&&	!loadAsTexturedQuad
 					/*&& !colTable*/)
 				{
+					ccLog::Print("[GDAL] We will load this band to set Z coordinates");
+
 					zRasterProcessed = true;
 					zMinMax[0] = adfMinMax[0];
 					zMinMax[1] = adfMinMax[1];
 
-					double* scanline = (double*)CPLMalloc(sizeof(double)*nXSize);
-					//double* scanline = new double[nXSize];
-					memset(scanline, 0, sizeof(double)*nXSize);
+					size_t byteCount = sizeof(double)*static_cast<size_t>(nXSize);
+					double* scanline = static_cast<double*>(CPLMalloc(byteCount));
+					memset(scanline, 0, byteCount);
 
 					if (!validPoints.reserve(pc->capacity()))
 					{
@@ -271,8 +317,17 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 						return CC_FERR_READING;
 					}
 
+					int hasNoDataValue = 0;
+					double noDataValue = poBand->GetNoDataValue(&hasNoDataValue);
+					if (hasNoDataValue != 0)
+					{
+						ccLog::Print(QString("[GDAL] No data value = %1").arg(noDataValue));
+					}
+
 					for (int j = 0; j < nYSize; ++j)
 					{
+						poBand->SetColorInterpretation(GCI_Undefined);
+
 						if (poBand->RasterIO(	GF_Read,
 												/*xOffset=*/0,
 												/*yOffset=*/j,
@@ -311,10 +366,12 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					pc->invalidateBoundingBox();
 
 					if (scanline)
+					{
 						CPLFree(scanline);
+					}
 					scanline = 0;
 				}
-				else //colors
+				else //colors or scalars
 				{
 					bool isRGB = false;
 					bool isScalar = false;
@@ -323,6 +380,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					switch(colorInterp)
 					{
 					case GCI_Undefined:
+					case GCI_GrayIndex:
 						isScalar = true;
 						break;
 					case GCI_PaletteIndex:
@@ -369,13 +427,23 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 							{
 								assert(poBand->GetRasterDataType() <= GDT_Int32);
 
-								int* colIndexes = (int*)CPLMalloc(sizeof(int)*nXSize);
-								//double* scanline = new double[nXSize];
-								memset(colIndexes, 0, sizeof(int)*nXSize);
+								size_t byteCount = sizeof(int)*static_cast<size_t>(nXSize);
+								int* colIndexes = static_cast<int*>(CPLMalloc(byteCount));
+								memset(colIndexes, 0, byteCount);
 
 								for (int j = 0; j < nYSize; ++j)
 								{
-									if (poBand->RasterIO( GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/colIndexes, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Int32, /*x_offset=*/0, /*y_offset=*/0 ) != CE_None)
+									if (poBand->RasterIO(	GF_Read,
+															/*xOffset=*/0,
+															/*yOffset=*/j,
+															/*xSize=*/nXSize,
+															/*ySize=*/1,
+															/*buffer=*/colIndexes,
+															/*bufferSizeX=*/nXSize,
+															/*bufferSizeY=*/1,
+															/*bufferType=*/GDT_Int32,
+															/*x_offset=*/0,
+															/*y_offset=*/0 ) != CE_None)
 									{
 										CPLFree(colIndexes);
 										if (quad)
@@ -408,24 +476,24 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 												{
 													GDALColorEntry col;
 													colTable->GetColorEntryAsRGB(colIndexes[k], &col);
-													C.r = static_cast<ColorCompType>(col.c1 & ccColor::MAX);
-													C.g = static_cast<ColorCompType>(col.c2 & ccColor::MAX);
-													C.b = static_cast<ColorCompType>(col.c3 & ccColor::MAX);
+													C.r = static_cast<ColorCompType>(col.c1 & 255);
+													C.g = static_cast<ColorCompType>(col.c2 & 255);
+													C.b = static_cast<ColorCompType>(col.c3 & 255);
 												}
 												break;
 
 											case GCI_RedBand:
-												C.r = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.r = static_cast<ColorCompType>(colIndexes[k] & 255);
 												break;
 											case GCI_GreenBand:
-												C.g = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.g = static_cast<ColorCompType>(colIndexes[k] & 255);
 												break;
 											case GCI_BlueBand:
-												C.b = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.b = static_cast<ColorCompType>(colIndexes[k] & 255);
 												break;
 
 											case GCI_AlphaBand:
-												C.a = static_cast<ColorCompType>(colIndexes[k] & ccColor::MAX);
+												C.a = static_cast<ColorCompType>(colIndexes[k] & 255);
 												break;
 
 											default:
@@ -446,8 +514,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 								}
 
 								if (colIndexes)
+								{
 									CPLFree(colIndexes);
-								colIndexes = 0;
+								}
+								colIndexes = nullptr;
 							}
 						}
 					}
@@ -463,13 +533,23 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 						}
 						else
 						{
-							double* colValues = (double*)CPLMalloc(sizeof(double)*nXSize);
-							//double* scanline = new double[nXSize];
-							memset(colValues, 0, sizeof(double)*nXSize);
+							size_t byteCount = sizeof(double)*static_cast<size_t>(nXSize);
+							double* colValues = static_cast<double*>(CPLMalloc(byteCount));
+							memset(colValues, 0, byteCount);
 
 							for (int j = 0; j < nYSize; ++j)
 							{
-								if (poBand->RasterIO(GF_Read, /*xOffset=*/0, /*yOffset=*/j, /*xSize=*/nXSize, /*ySize=*/1, /*buffer=*/colValues, /*bufferSizeX=*/nXSize, /*bufferSizeY=*/1, /*bufferType=*/GDT_Float64, /*x_offset=*/0, /*y_offset=*/0) != CE_None)
+								if (poBand->RasterIO(GF_Read,
+													/*xOffset=*/0,
+													/*yOffset=*/j,
+													/*xSize=*/nXSize,
+													/*ySize=*/1,
+													/*buffer=*/colValues,
+													/*bufferSizeX=*/nXSize,
+													/*bufferSizeY=*/1,
+													/*bufferType=*/GDT_Float64,
+													/*x_offset=*/0,
+													/*y_offset=*/0) != CE_None)
 								{
 									CPLFree(colValues);
 									delete pc;
@@ -488,8 +568,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 							}
 
 							if (colValues)
+							{
 								CPLFree(colValues);
-							colValues = 0;
+							}
+							colValues = nullptr;
 
 							sf->computeMinAndMax();
 							pc->addScalarField(sf);
@@ -520,13 +602,24 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					int result = QMessageBox::Yes;
 					if (parameters.parentWidget) //otherwise it means we are in command line mode --> no popup
 					{
-						result = (s_alwaysRemoveInvalidHeights ? QMessageBox::Yes : QMessageBox::question(0, "Remove invalid points?", "This raster has pixels with invalid heights. Shall we remove them?", QMessageBox::Yes, QMessageBox::YesToAll, QMessageBox::No));
+						result = (s_alwaysRemoveInvalidHeights
+							? QMessageBox::Yes
+							: QMessageBox::question(nullptr,
+													"Remove invalid points?",
+													"This raster has pixels with invalid heights. Shall we remove them?",
+													QMessageBox::Yes,
+													QMessageBox::YesToAll,
+													QMessageBox::No)
+							);
 					}
 					if (result != QMessageBox::No) //Yes = let's remove them
 					{
 						if (result == QMessageBox::YesToAll)
+						{
 							s_alwaysRemoveInvalidHeights = true;
+						}
 
+						ccLog::PrintDebug(QString("Removing %1 invalid points out of %2 points...").arg(pc->size() - validPoints.size()).arg(pc->size()));
 						ccPointCloud* newPC = pc->partialClone(&validPoints);
 						if (newPC)
 						{

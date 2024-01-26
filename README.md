@@ -40,10 +40,7 @@ Linux:
   ```
   flatpak install flathub org.cloudcompare.CloudCompare
   ```
-- snapcraft: https://snapcraft.io/cloudcompare
-  ```
-  sudo snap install cloudcompare
-  ```
+
 
 Compilation
 -----------

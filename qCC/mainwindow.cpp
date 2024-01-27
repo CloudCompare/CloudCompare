@@ -3939,7 +3939,9 @@ void MainWindow::doAction4pcsRegister()
 		ccPointCloud* newDataCloud = data->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(data)->cloneThis() : ccPointCloud::From(data, data);
 
 		if (data->getParent())
+		{
 			data->getParent()->addChild(newDataCloud);
+		}
 		newDataCloud->setName(data->getName() + QString(".registered"));
 		transform.apply(*newDataCloud);
 		newDataCloud->invalidateBoundingBox(); //invalidate bb
@@ -3974,7 +3976,7 @@ void MainWindow::doActionSubsample()
 	ScalarType sfMin = CCCoreLib::NAN_VALUE;
 	ScalarType sfMax = CCCoreLib::NAN_VALUE;
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		for ( ccHObject* entity : getSelectedEntities() )
 		{
 			if (entity->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -4005,11 +4007,19 @@ void MainWindow::doActionSubsample()
 
 	//Display dialog
 	ccSubsamplingDlg sDlg(maxPointCount, maxCloudRadius, this);
+	sDlg.loadFromPersistentSettings();
+
 	bool hasValidSF = ccScalarField::ValidValue(sfMin) && ccScalarField::ValidValue(sfMax);
 	if (hasValidSF)
-		sDlg.enableSFModulation(sfMin,sfMax);
+	{
+		sDlg.enableSFModulation(sfMin, sfMax);
+	}
 	if (!sDlg.exec())
+	{
 		return;
+	}
+
+	sDlg.saveToPersistentSettings();
 
 	//process clouds
 	ccHObject::Container resultingClouds;

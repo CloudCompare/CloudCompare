@@ -491,7 +491,11 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 			//Box dimensions
 			CCVector3 bboxDiag = box.getDiagVec();
 			appendRow(ITEM(fitBBox ? tr( "Local box dimensions" ) : tr( "Box dimensions" )),
-				ITEM(QStringLiteral("X: %0\nY: %1\nZ: %2").arg(bboxDiag.x).arg(bboxDiag.y).arg(bboxDiag.z)));
+				ITEM(QStringLiteral("X: %1 (%2 : %3)\nY: %4 (%5 : %6)\nZ: %7 (%8 : %9)")
+					.arg(bboxDiag.x).arg(box.minCorner().x).arg(box.maxCorner().x)
+					.arg(bboxDiag.y).arg(box.minCorner().y).arg(box.maxCorner().y)
+					.arg(bboxDiag.z).arg(box.minCorner().z).arg(box.maxCorner().z)
+				));
 
 
 			//Box center

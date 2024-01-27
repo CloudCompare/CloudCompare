@@ -374,6 +374,9 @@ v2.13.beta (???) - (??/??/2024)
 	- Display options:
 		- the default thresholds to activate the LoD mechanism are now 100M. points and 5M. triangles
 
+	- Entity properties:
+		- the 'Bounding Box dimensions' field will now also show the min and max coordinates
+
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate

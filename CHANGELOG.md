@@ -71,6 +71,8 @@ v2.13.beta (???) - (??/??/2024)
 			- if neither -CLOUD nor -MESH are set then both types of entities will be selected
 			- sub-options can be set in any order
 			- it is possible to use FIRST and LAST at the same time. Example: xx...xx
+		- REMOVE_SENSORS
+			- removes all the sensors (both TLS and cameras, directly under clouds, meshes or mesh vertices)
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane

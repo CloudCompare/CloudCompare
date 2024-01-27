@@ -251,7 +251,14 @@ struct CommandRemoveScanGrids : public ccCommandLineInterface::Command
 	CommandRemoveScanGrids();
 
 	bool process(ccCommandLineInterface& cmd) override;
-}; 
+};
+
+struct CommandRemoveSensors : public ccCommandLineInterface::Command
+{
+	CommandRemoveSensors();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
 
 struct CommandMatchBBCenters : public ccCommandLineInterface::Command
 {

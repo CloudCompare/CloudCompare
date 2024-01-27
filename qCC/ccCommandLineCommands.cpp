@@ -78,6 +78,7 @@ constexpr char COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIG_FIXED[]= "KEEP_ORIG_FIXED";
 constexpr char COMMAND_REMOVE_ALL_SFS[]					= "REMOVE_ALL_SFS";
 constexpr char COMMAND_REMOVE_SF[]						= "REMOVE_SF";
 constexpr char COMMAND_REMOVE_SCAN_GRIDS[]				= "REMOVE_SCAN_GRIDS";
+constexpr char COMMAND_REMOVE_SENSORS[]					= "REMOVE_SENSORS";
 constexpr char COMMAND_REMOVE_RGB[]						= "REMOVE_RGB";
 constexpr char COMMAND_REMOVE_NORMALS[]					= "REMOVE_NORMALS";
 constexpr char COMMAND_MATCH_BB_CENTERS[]				= "MATCH_CENTERS";
@@ -3617,6 +3618,53 @@ bool CommandRemoveScanGrids::process(ccCommandLineInterface& cmd)
 		}
 	}
 	
+	return true;
+}
+
+CommandRemoveSensors::CommandRemoveSensors()
+	: ccCommandLineInterface::Command(QObject::tr("Remove sensors"), COMMAND_REMOVE_SENSORS)
+{}
+
+static void RemoveSensors(ccHObject* entity)
+{
+	if (!entity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccHObject::Container sensors;
+	entity->filterChildren(sensors, false, CC_TYPES::SENSOR, false); // direct children only
+
+	for (ccHObject* sensor : sensors)
+	{
+		ccLog::Print(QString("Removing sensor '%1' from entity '%2'").arg(sensor->getName()).arg(entity->getName()));
+		entity->removeChild(sensor);
+	}
+}
+
+bool CommandRemoveSensors::process(ccCommandLineInterface& cmd)
+{
+	//no argument required
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		if (desc.pc)
+		{
+			RemoveSensors(desc.pc);
+		}
+	}
+
+	for (CLMeshDesc& desc : cmd.meshes())
+	{
+		if (desc.mesh)
+		{
+			RemoveSensors(desc.mesh);
+
+			ccGenericPointCloud* cloud = desc.mesh->getAssociatedCloud();
+			RemoveSensors(cloud);
+		}
+	}
+
 	return true;
 }
 

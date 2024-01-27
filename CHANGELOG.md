@@ -373,6 +373,10 @@ v2.13.beta (???) - (??/??/2024)
 		- when launching the Cloud-to-mesh distance tool with a primitive as mesh, CC will now suggest the user to use
 			the Cloud-to-primitive distance tool instead
 
+	- Edit > Subsample:
+		- new option to set the number of randomly sampled points as a percentage
+		- the dialog will now remember the previous settings (last method used, sampling value, etc.)
+
 	- Display options:
 		- the default thresholds to activate the LoD mechanism are now 100M. points and 5M. triangles
 

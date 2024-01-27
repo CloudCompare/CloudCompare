@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.13.beta (9-16-2023)"
+#define MyAppVersion "2.13.beta (1-27-2024)"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
@@ -58,7 +58,7 @@ Name: "python_plugin_support" ; Description: "Install the Python and 3DFin plugi
 
 [Files]
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll,PythonPlugin.dll,plugins-python,Python"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll,PythonRuntime.dll,plugins-python,Python"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Unknown dependency support:)
 Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
 ; All other Visual Studio dependencies at once: 2015, 2017 and 2019
@@ -67,7 +67,7 @@ Source: "{#MyVCRedistPath}\vcredist_all_x64.exe"; DestDir: {tmp}; Flags: deletea
 Source: "{#MyFaroRedistPath}\x64\{#MyFaroRedistExe}"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
 Source: "{#MyFaroRedistPath}\x64\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
 Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithFaro
-Source: "{#MyCCPath}\plugins\PythonPlugin.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithPythonPlugin
+Source: "{#MyCCPath}\plugins\PythonRuntime.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithPythonPlugin
 Source: "{#MyCCPath}\plugins\Python\*"; DestDir: "{app}\plugins\Python"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: WithPythonPlugin
 Source: "{#MyCCPath}\plugins-python\*"; DestDir: "{app}\plugins-python"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: WithPythonPlugin
 

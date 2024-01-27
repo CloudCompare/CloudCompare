@@ -165,9 +165,9 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		return false;
 	}
 
-	ccGLMatrixd localPoseMat;
-	ccGLMatrixd shiftedPoseMat;
-	bool hasPoseMat = false;
+	ccGLMatrixd toSensorCS; // 'Sensor' output coordinate system (no Global Shift applied)
+	toSensorCS.toIdentity();
+	bool hasSensorPoseMat = false;
 
 	double globalScale = 1.0;
 	bool isScaled = false;
@@ -176,61 +176,82 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		assert(globalScale != 0);
 		isScaled = (globalScale != 1.0);
 
-		//restore initial pose (if any)
+		//restore original sensor pose (if any)
 		QString poseStr = cloud->getMetaData(s_e57PoseKey).toString();
 		if (!poseStr.isEmpty())
 		{
-			localPoseMat = ccGLMatrixd::FromString(poseStr, hasPoseMat);
-			if (hasPoseMat)
+			toSensorCS = ccGLMatrixd::FromString(poseStr, hasSensorPoseMat);
+			if (hasSensorPoseMat)
 			{
-				//apply transformation history
-				localPoseMat = ccGLMatrixd(cloud->getGLTransformationHistory().data()) * localPoseMat;
+				//apply transformation history (i.e. transformations applied after the entity has been loaded)
+				//--> we assume they have been implicitly applied to the sensor as well
+				toSensorCS = ccGLMatrixd(cloud->getGLTransformationHistory().data()) * toSensorCS;
 			}
 			else
 			{
-				ccLog::Warning("[E57Filter::saveFile] Pose meta-data is invalid");
+				ccLog::Warning("[E57Filter::saveFile] Sernsor pose meta-data is invalid");
 			}
 		}
 
-		//we apply the global shift as a pose matrix
-		CCVector3d Tshift = cloud->getGlobalShift();
-		if (Tshift.norm2d() != 0)
+		//we eventually add the global shift to the E57 file pose matrix
+		CCVector3d globalShift = cloud->getGlobalShift();
+		if (globalShift.norm2d() != 0)
 		{
-			shiftedPoseMat = localPoseMat;
-			shiftedPoseMat.setTranslation((localPoseMat.getTranslationAsVec3D() - Tshift).u);
-			SavePoseInformation(scanNode, imf, shiftedPoseMat);
+			//add the Global Shift to the 'pose' matrix
+			ccGLMatrixd toGlobalCS = toSensorCS;
+			toGlobalCS.setTranslation((toSensorCS.getTranslationAsVec3D() - globalShift).u);
+			SavePoseInformation(scanNode, imf, toGlobalCS);
 		}
-		else if (hasPoseMat)
+		else if (hasSensorPoseMat)
 		{
-			shiftedPoseMat = localPoseMat;
-			SavePoseInformation(scanNode, imf, shiftedPoseMat);
+			//simply save the sensor pose matrix
+			SavePoseInformation(scanNode, imf, toSensorCS);
 		}
+	}
+
+	ccGLMatrix fromSensorToLocalCS;
+	if (hasSensorPoseMat)
+	{
+		//inverse transformation: from the sensor output CS to the local/input CS
+		fromSensorToLocalCS = ccGLMatrix(toSensorCS.inverse().data());
 	}
 
 	CCVector3d bbMin;
 	CCVector3d bbMax;
-	if (hasPoseMat)
+	if (hasSensorPoseMat)
 	{
 		//we have to compute the rotated cloud bounding-box!
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const CCVector3* Plocal = cloud->getPointPersistentPtr(i);
-			CCVector3d Pg = Plocal->toDouble() / globalScale;
-			//Pg = shiftedPoseMat * Pg; //DGM: according to E57 specifications, the bounding-box is local
-			if (i != 0)
+			//we apply the Global Scale but not the Global Shift (already incorporated in the 'pose' matrix above)
+			CCVector3d Psensor = cloud->getPointPersistentPtr(i)->toDouble() / globalScale;
+
+			//DGM: according to E57 specifications, the bounding-box is local
+			//(i.e. in the sensor 'input' coordinate system)
+			CCVector3d Plocal;
+			if (hasSensorPoseMat)
 			{
-				bbMin.x = std::min(bbMin.x, Pg.x);
-				bbMin.y = std::min(bbMin.y, Pg.y);
-				bbMin.z = std::min(bbMin.z, Pg.z);
-				bbMax.x = std::max(bbMax.x, Pg.x);
-				bbMax.y = std::max(bbMax.y, Pg.y);
-				bbMax.z = std::max(bbMax.z, Pg.z);
+				Plocal = fromSensorToLocalCS * Psensor;
 			}
 			else
 			{
-				bbMax.x = bbMin.x = Pg.x;
-				bbMax.y = bbMin.y = Pg.y;
-				bbMax.z = bbMin.z = Pg.z;
+				Plocal = Psensor;
+			}
+
+			if (i != 0)
+			{
+				bbMin.x = std::min(bbMin.x, Plocal.x);
+				bbMin.y = std::min(bbMin.y, Plocal.y);
+				bbMin.z = std::min(bbMin.z, Plocal.z);
+				bbMax.x = std::max(bbMax.x, Plocal.x);
+				bbMax.y = std::max(bbMax.y, Plocal.y);
+				bbMax.z = std::max(bbMax.z, Plocal.z);
+			}
+			else
+			{
+				bbMax.x = bbMin.x = Plocal.x;
+				bbMax.y = bbMin.y = Plocal.y;
+				bbMax.z = bbMin.z = Plocal.z;
 			}
 		}
 	}
@@ -529,12 +550,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		QApplication::processEvents();
 	}
 
-	ccGLMatrix inversePoseMat;
-	if (hasPoseMat)
-	{
-		inversePoseMat = ccGLMatrix(localPoseMat.inverse().data());
-	}
-
 	unsigned index = 0;
 	unsigned remainingPointCount = pointCount;
 	while (remainingPointCount != 0)
@@ -544,16 +559,24 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		//load arrays
 		for (unsigned i = 0; i < thisChunkSize; ++i, ++index)
 		{
-			const CCVector3* P = cloud->getPointPersistentPtr(index);
-			//CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
-			CCVector3d Pglobal = P->toDouble() / globalScale;
-			if (hasPoseMat)
+			//we apply the Global Scale but not the Global Shift (already incorporated in the 'pose' matrix above)
+			CCVector3d Psensor = cloud->getPointPersistentPtr(i)->toDouble() / globalScale;
+
+			//DGM: according to E57 specifications, the points are saved in the local CS
+			//(i.e. in the sensor 'input' coordinate system)
+			CCVector3d Plocal;
+			if (hasSensorPoseMat)
 			{
-				Pglobal = inversePoseMat * Pglobal;
+				Plocal = fromSensorToLocalCS * Psensor;
 			}
-			arrays.xData[i] = Pglobal.x;
-			arrays.yData[i] = Pglobal.y;
-			arrays.zData[i] = Pglobal.z;
+			else
+			{
+				Plocal = Psensor;
+			}
+
+			arrays.xData[i] = Plocal.x;
+			arrays.yData[i] = Plocal.y;
+			arrays.zData[i] = Plocal.z;
 
 			if (intensitySF)
 			{
@@ -561,7 +584,9 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 				ScalarType sfVal = intensitySF->getValue(index);
 				arrays.intData[i] = static_cast<double>(sfVal);
 				if (!arrays.isInvalidIntData.empty())
+				{
 					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? VALID_DATA : INVALID_DATA;
+				}
 			}
 
 			if (hasNormals)

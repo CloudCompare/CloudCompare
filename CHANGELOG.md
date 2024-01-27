@@ -71,6 +71,8 @@ v2.13.beta (???) - (??/??/2024)
 			- if neither -CLOUD nor -MESH are set then both types of entities will be selected
 			- sub-options can be set in any order
 			- it is possible to use FIRST and LAST at the same time. Example: xx...xx
+		- REMOVE_SENSORS
+			- removes all the sensors (both TLS and cameras, directly under clouds, meshes or mesh vertices)
 		
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
@@ -371,8 +373,15 @@ v2.13.beta (???) - (??/??/2024)
 		- when launching the Cloud-to-mesh distance tool with a primitive as mesh, CC will now suggest the user to use
 			the Cloud-to-primitive distance tool instead
 
+	- Edit > Subsample:
+		- new option to set the number of randomly sampled points as a percentage
+		- the dialog will now remember the previous settings (last method used, sampling value, etc.)
+
 	- Display options:
 		- the default thresholds to activate the LoD mechanism are now 100M. points and 5M. triangles
+
+	- Entity properties:
+		- the 'Bounding Box dimensions' field will now also show the min and max coordinates
 
 - Bug fix:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
@@ -391,6 +400,7 @@ v2.13.beta (???) - (??/??/2024)
 	- With a lot of NaN values in a scalar field, the Edit > Scalar field > Compute Stat Params tool could show wrong abscissa values below the histogram and curve.
 		(note that the average, standard deviation, RMS and Chi2 distance values displayed either above the histogram or in the Console were correct)
 	- When loading E57s file with large coordinates, and applying a Global Shift, the associated image sensors were not translated of the same Global Shift
+	- The 'cartesian bounds' of E57 files saved by CC were expressed in the global coordinate system instead of the local one
 	- When applying the viewport of a calibrated image (= image with an associated sensor), the camera f.o.v. was applied instead of a smarter value,
 		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
 	- The PCL plugin's 'MLS' tool dialog was broken

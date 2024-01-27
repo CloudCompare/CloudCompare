@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_TRACE_POLY_LINE_TOOL_HEADER
-#define CC_TRACE_POLY_LINE_TOOL_HEADER
-
 //Local
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
@@ -33,7 +32,8 @@ class ccPointCloud;
 class ccGLWindowInterface;
 class ccPickingHub;
 
-namespace Ui {
+namespace Ui
+{
 	class TracePolyLineDlg;
 }
 
@@ -110,5 +110,3 @@ protected:
 
 	Ui::TracePolyLineDlg* m_ui;
 };
-
-#endif //CC_TRACE_POLY_LINE_TOOL_HEADER

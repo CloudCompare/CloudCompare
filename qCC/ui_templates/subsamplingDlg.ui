@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>377</height>
+    <width>350</width>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="samplingMethod"/>
+         <widget class="QComboBox" name="samplingMethodComboBox"/>
         </item>
        </layout>
       </item>
@@ -110,18 +110,12 @@
         <item>
          <widget class="QLabel" name="valueLabel">
           <property name="text">
-           <string>value</string>
+           <string>type of value:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="samplingValue">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>25</height>
-           </size>
-          </property>
+         <widget class="QDoubleSpinBox" name="valueDoubleSpinBox">
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
@@ -313,7 +307,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>samplingMethod</tabstop>
+  <tabstop>samplingMethodComboBox</tabstop>
   <tabstop>slider</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
@@ -354,7 +348,7 @@
   <connection>
    <sender>sfGroupBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>samplingValue</receiver>
+   <receiver>valueDoubleSpinBox</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">

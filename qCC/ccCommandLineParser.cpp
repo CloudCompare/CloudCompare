@@ -849,6 +849,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandRemoveRGB));
 	registerCommand(Command::Shared(new CommandRemoveNormals));
 	registerCommand(Command::Shared(new CommandRemoveScanGrids));
+	registerCommand(Command::Shared(new CommandRemoveSensors));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));
 	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));

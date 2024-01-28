@@ -213,12 +213,17 @@ namespace LasMetadata
 		{
 			return false;
 		}
-		if (globalEncoding > 65535)
+
+		if (globalEncoding <= 65535)
+		{
+			outGlobalEncoding = static_cast<uint16_t>(globalEncoding);
+			return true;
+		}
+		else
 		{
 			ccLog::Warning("[LAS] Invalid global encoding value: " + QString::number(globalEncoding));
+			return false;
 		}
-		outGlobalEncoding = static_cast<uint16_t>(globalEncoding);
-		return true;
 	}
 
 } // namespace LasMetadata

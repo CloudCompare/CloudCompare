@@ -192,10 +192,10 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 	QByteArray                       data(reinterpret_cast<char*>(extraBytesVlr.data), extraBytesVlr.record_length_after_header);
 	QDataStream                      dataStream(data);
 
-	int numExtraFields = extraBytesVlr.record_length_after_header / 192;
+	uint16_t numExtraFields = extraBytesVlr.record_length_after_header / 192;
 
 	unsigned byteOffset{0};
-	for (int j = 0; j < numExtraFields; ++j)
+	for (uint16_t j = 0; j < numExtraFields; ++j)
 	{
 		LasExtraScalarField ebInfo;
 		dataStream >> ebInfo;
@@ -213,7 +213,7 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 		byteOffset += ebInfo.byteSize();
 		ccLog::Print("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
 		             ebInfo.name,
-		             ebInfo.typeName(),
+		             ebInfo.typeName().c_str(),
 		             ebInfo.byteSize(),
 		             ebInfo.byteOffset);
 	}
@@ -320,7 +320,7 @@ uint8_t LasExtraScalarField::typeCode() const
 	return code;
 }
 
-const char* LasExtraScalarField::typeName() const
+std::string LasExtraScalarField::typeName() const
 {
 	switch (type)
 	{
@@ -386,6 +386,12 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 	{
 		if (extraScalarField.numElements() > 1)
 		{
+			if (extraScalarField.numElements() > MAX_DIM_SIZE)
+			{
+				assert(false);
+				continue;
+			}
+
 			// Array fields are split into multiple ccScalarField
 			// and each of them has the index appended to the name
 			char     name[50];
@@ -396,8 +402,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 				int pos = pointCloud.getScalarFieldIndexByName(name);
 				if (pos >= 0)
 				{
-					extraScalarField.scalarFields[i] =
-					    dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+					extraScalarField.scalarFields[i] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
 					found++;
 					ccLog::Warning("[LAS] field %s found", name);
 				}
@@ -410,7 +415,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 		}
 		else
 		{
-			const char* nameToSearch;
+			const char* nameToSearch = nullptr;
 			if (extraScalarField.ccName[0] != 0)
 			{
 				// This field's name clashed with existing ccScalarField when created
@@ -423,8 +428,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 			int pos = pointCloud.getScalarFieldIndexByName(nameToSearch);
 			if (pos >= 0)
 			{
-				extraScalarField.scalarFields[0] =
-				    dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+				extraScalarField.scalarFields[0] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
 			}
 			else
 			{
@@ -437,13 +441,15 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarFie
 	const auto notAllScalarFieldWereFound = [](const LasExtraScalarField& extraScalarField)
 	{
 		const auto ptrIsNull = [](const ccScalarField* ptr)
-		{ return ptr == nullptr; };
+		{
+			return ptr == nullptr;
+		};
 		return std::any_of(extraScalarField.scalarFields,
 		                   extraScalarField.scalarFields + extraScalarField.numElements(),
 		                   ptrIsNull);
 	};
 
-	auto firstToRemove =
-	    std::remove_if(extraScalarFields.begin(), extraScalarFields.end(), notAllScalarFieldWereFound);
+	auto firstToRemove = std::remove_if(extraScalarFields.begin(), extraScalarFields.end(), notAllScalarFieldWereFound);
+
 	extraScalarFields.erase(firstToRemove, extraScalarFields.end());
 }

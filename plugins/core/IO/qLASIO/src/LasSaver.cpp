@@ -225,12 +225,7 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 	const CCVector3* point       = m_cloudToSave.getPoint(m_currentPointIndex);
 	const CCVector3d globalPoint = m_cloudToSave.toGlobal3d<PointCoordinateType>(*point);
 
-	laszip_F64 coords[3];
-	coords[0] = globalPoint.x;
-	coords[1] = globalPoint.y;
-	coords[2] = globalPoint.z;
-
-	if (laszip_set_coordinates(m_laszipWriter, coords))
+	if (laszip_set_coordinates(m_laszipWriter, globalPoint.u))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
 		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);

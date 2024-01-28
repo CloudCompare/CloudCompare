@@ -213,7 +213,7 @@ namespace LasDetails
 			if (returnNumberIdx != -1)
 			{
 				const CCCoreLib::ScalarField* returnNumber = cloud.getScalarField(returnNumberIdx);
-				if (returnNumber->getMax() > LasScalarField::ValueRange(LasScalarField::LasScalarField::ReturnNumber).max)
+				if (returnNumber->getMax() > LasScalarField::ValueRange(LasScalarField::ReturnNumber).max)
 				{
 					isExtendedRequired = true;
 				}
@@ -269,9 +269,13 @@ namespace LasDetails
 			{
 				minorVersion = 3;
 				if (hasGpsTime)
+				{
 					pointFormat = 4;
+				}
 				else if (hasRGB)
+				{
 					pointFormat = 5;
+				}
 			}
 			else
 			{

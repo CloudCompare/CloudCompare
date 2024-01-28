@@ -25,7 +25,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 		// the easiest way to integrate that into the LasScalarFieldSaver system
 		// is to temporarily export normals to scalar fields.
 		m_originallySelectedScalarField = cloud.getCurrentDisplayedScalarFieldIndex();
-		bool exportOptions[3]           {false, false, false}; // Export all
+		bool exportOptions[3]{false, false, false}; // Export all
 		for (size_t i = 0; i < 3; ++i)
 		{
 			int idx          = cloud.getScalarFieldIndexByName(CC_NORMAL_NAMES[i]);
@@ -37,7 +37,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 		{
 			throw std::runtime_error("Failed to export normals to SF");
 		}
-		constexpr const char* const exportedNormalNames[3] {"NormalX", "NormalY", "NormalZ"};
+		constexpr const char* const exportedNormalNames[3]{"NormalX", "NormalY", "NormalZ"};
 
 		for (size_t i = 0; i < 3; ++i)
 		{
@@ -215,11 +215,11 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 	laszip_CHAR* errorMsg{nullptr};
 
 	// reset point
-	int        totalExtraByteSize      = m_laszipPoint->num_extra_bytes;
+	laszip_I32 num_extra_bytes         = m_laszipPoint->num_extra_bytes;
 	laszip_U8* extra_bytes             = m_laszipPoint->extra_bytes;
 	*m_laszipPoint                     = {};
 	m_laszipPoint->extra_bytes         = extra_bytes;
-	m_laszipPoint->num_extra_bytes     = totalExtraByteSize;
+	m_laszipPoint->num_extra_bytes     = num_extra_bytes;
 	m_laszipPoint->extended_point_type = m_laszipHeader.point_data_format >= 6;
 
 	const CCVector3* point       = m_cloudToSave.getPoint(m_currentPointIndex);
@@ -268,11 +268,12 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
-	m_currentPointIndex++;
+	++m_currentPointIndex;
+
 	return CC_FERR_NO_ERROR;
 }
 
-bool LasSaver::savesWaveforms() const
+bool LasSaver::canSaveWaveforms() const
 {
 	return m_waveformSaver != nullptr;
 }

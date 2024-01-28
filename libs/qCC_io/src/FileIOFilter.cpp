@@ -577,7 +577,7 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 	bool applyAll = false;
 	if (	sizeof(PointCoordinateType) < 8
 		&&	ccGlobalShiftManager::Handle(	P,
-											0,
+											0.0,
 											loadParameters.shiftHandlingMode,
 											shiftAlreadyEnabled || useInputCoordinatesShiftIfPossible,
 											Pshift,

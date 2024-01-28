@@ -105,16 +105,16 @@ namespace LasDetails
 
 	/// Returns the size for the given point format id
 	///
-	/// Returns a size of 0 if the point format does not exists or is not handled
+	/// Returns a size of 0 if the point format does not exist or is not handled
 	///
 	/// \param pointFormat the point format
-	/// \return
+	///
 	uint16_t PointFormatSize(unsigned pointFormat);
 
 	/// Returns the header size for the given minor version of the standard used
 	uint16_t HeaderSize(unsigned versionMinor);
 
-	/// Returns whether the point format supports Gps Time
+	/// Returns whether the point format supports GPS Time
 	inline bool HasGpsTime(unsigned pointFormatId)
 	{
 		return pointFormatId == 1
@@ -140,15 +140,15 @@ namespace LasDetails
 		       || pointFormatId >= 9;
 	}
 
-	/// Returns whether the point format support Near Infrared
+	/// Returns whether the point format supports Near Infrared
 	inline bool HasNearInfrared(unsigned pointFormatId)
 	{
 		return pointFormatId == 8
 		       || pointFormatId == 10;
 	}
 
-	/// Returns the number of bytes the vlrs amounts to.
-	/// This includes the headers of each vlrs.
+	/// Returns the number of bytes the VLRs amounts to.
+	/// This includes the headers of each VLRs.
 	unsigned SizeOfVlrs(const laszip_vlr_struct* vlrs, unsigned numVlrs);
 
 	/// Returns whether the vlr is the vlr for/of LASzip compression.
@@ -175,8 +175,7 @@ namespace LasDetails
 
 	/// This function looks into the point cloud
 	/// and returns a LAS version + point format
-	/// that best matches what the point cloud contains
-	/// as scalar fields.
+	/// that best matches what the point cloud contains.
 	LasVersion SelectBestVersion(const ccPointCloud& cloud);
 
 	/// Clones the content of the `src` vlr into the `dst` vlr.

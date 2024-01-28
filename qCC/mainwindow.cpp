@@ -10018,7 +10018,14 @@ void MainWindow::addToDB(	ccHObject* obj,
 		bool preserveCoordinateShift = true;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really doesn't like big ones (even if we work with GLdoubles :( ).
-		if (ccGlobalShiftManager::Handle(P, diag, ccGlobalShiftManager::DIALOG_IF_NECESSARY, false, Pshift, &preserveCoordinateShift, &scale))
+		if (ccGlobalShiftManager::Handle(	P,
+											diag,
+											ccGlobalShiftManager::DIALOG_IF_NECESSARY,
+											false,
+											Pshift,
+											&preserveCoordinateShift,
+											&scale)
+			)
 		{
 			bool needRescale = (scale != 1.0);
 			bool needShift = (Pshift.norm2() > 0);

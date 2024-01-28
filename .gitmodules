@@ -21,7 +21,7 @@
 	url = https://gitlab.com/theadib/JSonRPCPlugin.git
 [submodule "plugins/core/Standard/qCanupo/contrib/dlib"]
 	path = plugins/core/Standard/qCanupo/contrib/dlib
-	url = https://github.com/prascle/dlib.git
+	url = https://github.com/davisking/dlib.git
 [submodule "plugins/core/Standard/cc-treeiso-plugin"]
 	path = plugins/core/Standard/qTreeIso
 	url = https://github.com/truebelief/cc-treeiso-plugin

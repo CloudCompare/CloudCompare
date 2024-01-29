@@ -968,7 +968,14 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccHObject* e
 				bool shiftEnabled = m_alignedEntities.isShifted;
 				CCVector3d Pshift = m_alignedEntities.shift;
 				double scale = 1.0;
-				if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT, shiftEnabled, Pshift,  nullptr, &scale))
+				if (ccGlobalShiftManager::Handle(	Pin,
+													0.0,
+													ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT,
+													shiftEnabled,
+													Pshift,
+													nullptr,
+													&scale)
+					)
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);
@@ -1620,7 +1627,14 @@ void ccPointPairRegistrationDlg::apply()
 			CCVector3d Pshift = m_refPoints.getGlobalShift();
 			double scale = m_refPoints.getGlobalScale();
 			CCVector3d Pin = m_refPoints.toGlobal3d(*m_refPoints.getPoint(0));
-			if (ccGlobalShiftManager::Handle(Pin, 0, ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG, true, Pshift, nullptr, &scale))
+			if (ccGlobalShiftManager::Handle(	Pin,
+												0.0,
+												ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG,
+												true,
+												Pshift,
+												nullptr,
+												&scale)
+				)
 			{
 				referenceIsShifted = true;
 				referenceShift = Pshift;

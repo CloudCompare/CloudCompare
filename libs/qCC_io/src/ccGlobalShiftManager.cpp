@@ -109,6 +109,14 @@ bool ccGlobalShiftManager::NeedRescale(double d)
 	return std::abs(d) >= MAX_DIAGONAL_LENGTH;
 }
 
+static bool ShiftAndScaleAreSimilar(double scale1,
+									const CCVector3d& shift1,
+									double scale2,
+									const CCVector3d& shift2)
+{
+	return ((shift1 - shift2).norm() <= CCCoreLib::ZERO_TOLERANCE_D) && (std::abs(scale1 - scale2) <= CCCoreLib::ZERO_TOLERANCE_D);
+}
+
 bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 									double diagonal,
 									Mode mode,
@@ -137,6 +145,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 	bool needRescale = false;
 
 	// if shift info was provided as input (typically from a previous entity)
+	bool canUseInputCoordinatesShift = false;
+	CCVector3d inputCoordinatesShift(0, 0, 0);
+	double inputScale = 1.0;
 	if (useInputCoordinatesShiftIfPossible)
 	{
 		if (nullptr != _coordinatesScale)
@@ -146,20 +157,26 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			scale = *_coordinatesScale;
 		}
 
+		inputCoordinatesShift = coordinatesShift;
+		inputScale = scale;
+
 		if (mode == NO_DIALOG)
 		{
 			// without a dialog, we don't have the choice, we will use the input shift...
+			//canUseInputCoordinatesShift = true;
 			return true;
 		}
 		else
 		{
 			needShift = NeedShift(P*scale + coordinatesShift);
 			needRescale = NeedRescale(diagonal*scale);
+
+			canUseInputCoordinatesShift = (!needShift && !needRescale);
 		}
 	}
 	else
 	{
-		// no shift by default
+		// no shift was provided
 		coordinatesShift = CCVector3d(0, 0, 0);
 		if (nullptr != _coordinatesScale)
 		{
@@ -198,21 +215,30 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			// at this point, we will display the dialog since the input info doesn't work
 			mode = ALWAYS_DISPLAY_DIALOG;
 		}
+	}
 
-		const std::vector<ShiftInfo>& lastInfoBuffer = ccGlobalShiftManager::GetLast();
+	const std::vector<ShiftInfo>& lastInfoBuffer = ccGlobalShiftManager::GetLast();
 
+	if (needShift || needRescale || mode == ALWAYS_DISPLAY_DIALOG)
+	{
 		// try to find an already used Global Shift that would work
 		for (size_t i = 0; i < lastInfoBuffer.size(); ++i)
 		{
 			const ShiftInfo& shiftInfo = lastInfoBuffer[i];
-			needShift = NeedShift(P*shiftInfo.scale + shiftInfo.shift);
-			needRescale = NeedRescale(diagonal*shiftInfo.scale);
-			if (!needShift && !needRescale)
+			bool tempNeedShift = NeedShift(P*shiftInfo.scale + shiftInfo.shift);
+			bool tempNeedRescale = NeedRescale(diagonal*shiftInfo.scale);
+			if (!tempNeedShift && !tempNeedRescale)
 			{
 				// we found a valid candidate
-				coordinatesShift = shiftInfo.shift;
-				scale = shiftInfo.scale;
 				bestPreviousShiftIndex = static_cast<int>(i);
+				if (!canUseInputCoordinatesShift)
+				{
+					// use this shift & scale if the input one was not working
+					coordinatesShift = shiftInfo.shift;
+					scale = shiftInfo.scale;
+					needShift = tempNeedShift;
+					needRescale = tempNeedRescale;
+				}
 				break;
 			}
 		}
@@ -246,41 +272,47 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		// always add the "suggested" entry
 		CCVector3d suggestedShift = BestShift(P);
 		double suggestedScale = BestScale(diagonal);
-		int index = sasDlg.addShiftInfo(ShiftInfo("Suggested", suggestedShift, suggestedScale));
+		int index = sasDlg.addShiftInfo(ShiftInfo("Automatic", suggestedShift, suggestedScale));
 
-		const std::vector<ShiftInfo>& lastInfoBuffer = ccGlobalShiftManager::GetLast();
-
-		// potentially add the input shift if it's different from the others
-		if (	useInputCoordinatesShiftIfPossible
-			&& (!needShift && !needRescale)
-			&&	bestPreviousShiftIndex < 0 )
+		// add the input shift if any, and if it's different from the others
+		if (useInputCoordinatesShiftIfPossible)
 		{
-			// let's check if the solution we found was part of the previous shifts anyway
+			bool alreadyRegistered = false;
 			for (size_t i = 0; i < lastInfoBuffer.size(); ++i)
 			{
 				const ShiftInfo& shiftInfo = lastInfoBuffer[i];
-				if ((	shiftInfo.shift - coordinatesShift).norm() <= CCCoreLib::ZERO_TOLERANCE_D
-					&&	std::abs(shiftInfo.scale - scale) <= CCCoreLib::ZERO_TOLERANCE_D )
+				if (ShiftAndScaleAreSimilar(shiftInfo.scale, shiftInfo.shift, inputScale, inputCoordinatesShift))
 				{
 					// found the same shift
-					bestPreviousShiftIndex = static_cast<int>(i);
+					alreadyRegistered = true;
+					if (canUseInputCoordinatesShift && bestPreviousShiftIndex < 0)
+					{
+						// we want to select this shift as we didn't find any better
+						bestPreviousShiftIndex = static_cast<int>(i);
+					}
 					break;
 				}
 			}
 
-			if (bestPreviousShiftIndex < 0)
+			if (!alreadyRegistered)
 			{
-				index = sasDlg.addShiftInfo(ShiftInfo("Input", coordinatesShift, scale));
+				// we need to add it to the list (and use it by default)
+				int addedEntryIndex = sasDlg.addShiftInfo(ShiftInfo("Input", coordinatesShift, scale));
+				if (canUseInputCoordinatesShift)
+				{
+					index = addedEntryIndex;
+				}
 			}
 		}
 		
 		// add the previous entries (if any)
 		if (!lastInfoBuffer.empty())
 		{
+			size_t countBefore = sasDlg.infoCount();
 			sasDlg.addShiftInfo(lastInfoBuffer);
 			if (bestPreviousShiftIndex >= 0)
 			{
-				index = bestPreviousShiftIndex + 1; // + 1 because of the 'suggested' shift
+				index = static_cast<int>(countBefore) + bestPreviousShiftIndex;
 			}
 		}
 		sasDlg.setCurrentProfile(index);

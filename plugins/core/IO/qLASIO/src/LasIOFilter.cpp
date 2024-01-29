@@ -151,17 +151,17 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 	std::vector<LasScalarField> availableScalarFields = LasScalarField::ForPointFormat(laszipHeader->point_data_format);
 
-	std::vector<LasExtraScalarField> availableEXtraScalarFields = LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
+	std::vector<LasExtraScalarField> availableExtraScalarFields = LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
 
 	std::unique_ptr<FileInfo> infoOfCurrentFile = std::make_unique<FileInfo>();
 	infoOfCurrentFile->version.minorVersion     = laszipHeader->version_minor;
 	infoOfCurrentFile->version.pointFormat      = laszipHeader->point_data_format;
-	infoOfCurrentFile->extraScalarFields        = availableEXtraScalarFields;
+	infoOfCurrentFile->extraScalarFields        = availableExtraScalarFields;
 
 	bool fileContentIsDifferentFromPrevious = (m_infoOfLastOpened && (*m_infoOfLastOpened != *infoOfCurrentFile));
 
 	m_openDialog.setInfo(laszipHeader->version_minor, laszipHeader->point_data_format, pointCount);
-	m_openDialog.setAvailableScalarFields(availableScalarFields, availableEXtraScalarFields);
+	m_openDialog.setAvailableScalarFields(availableScalarFields, availableExtraScalarFields);
 	m_infoOfLastOpened = std::move(infoOfCurrentFile);
 
 	// The idea is that when Loading a file (as opposed to tiling one)
@@ -202,14 +202,14 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return TileLasReader(laszipReader, fileName, m_openDialog.tilingOptions());
 	}
 
-	std::array<LasExtraScalarField, 3> extraScalarFieldsToLoadAsNormals = m_openDialog.getExtraFieldsToBeLoadedAsNormals(availableEXtraScalarFields);
+	std::array<LasExtraScalarField, 3> extraScalarFieldsToLoadAsNormals = m_openDialog.getExtraFieldsToBeLoadedAsNormals(availableExtraScalarFields);
 	bool                               haveToLoadNormals                = std::any_of(extraScalarFieldsToLoadAsNormals.begin(),
                                          extraScalarFieldsToLoadAsNormals.end(),
                                          [](const LasExtraScalarField& e)
                                          {
                                              return e.type != LasExtraScalarField::DataType::Undocumented;
                                          });
-	m_openDialog.filterOutNotChecked(availableScalarFields, availableEXtraScalarFields);
+	m_openDialog.filterOutNotChecked(availableScalarFields, availableExtraScalarFields);
 
 	auto pointCloud = std::make_unique<ccPointCloud>(QFileInfo(fileName).fileName());
 	if (!pointCloud->reserve(pointCount))
@@ -247,7 +247,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	}
 
 	LasScalarFieldLoader loader(availableScalarFields,
-	                            availableEXtraScalarFields,
+	                            availableExtraScalarFields,
 	                            *pointCloud);
 
 	loader.setIgnoreFieldsWithDefaultValues(m_openDialog.shouldIgnoreFieldsWithDefaultValues());
@@ -465,12 +465,12 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	pointCloud->showColors(pointCloud->hasColors());
 	pointCloud->showSF(!pointCloud->hasColors() && pointCloud->hasDisplayedScalarField());
 
-	for (LasExtraScalarField& extraField : availableEXtraScalarFields)
+	for (LasExtraScalarField& extraField : availableExtraScalarFields)
 	{
 		extraField.resetScalarFieldsPointers();
 	}
 
-	LasMetadata::SaveMetadataInto(*laszipHeader, *pointCloud, availableEXtraScalarFields);
+	LasMetadata::SaveMetadataInto(*laszipHeader, *pointCloud, availableExtraScalarFields);
 
 	container.addChild(pointCloud.release());
 
@@ -657,18 +657,24 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			const char*    sfName = sf->getName();
 			bool           found  = false;
 			for (auto& el : params.standardFields)
+			{
 				if (strcmp(sfName, el.name()) == 0)
 				{
 					found = true;
 					break;
 				}
+			}
 			if (!found)
+			{
 				for (auto& el : params.extraFields)
+				{
 					if (strcmp(sfName, el.scalarFields[0]->getName()) == 0)
 					{
 						found = true;
 						break;
 					}
+				}
+			}
 			if (!found)
 			{
 				ccLog::Print("[LAS] scalar field " + QString(sfName) + " will be saved automatically in the extra fields of the output file");
@@ -728,7 +734,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		return error;
 	}
 
-	if (saver.savesWaveforms())
+	if (saver.canSaveWaveforms())
 	{
 		const ccPointCloud::SharedFWFDataContainer& fwfData = pointCloud->fwfData();
 		QFileInfo                                   info(filename);

@@ -100,7 +100,7 @@ class LasExtraScalarField
 	unsigned    numElements() const;
 	unsigned    byteSize() const;
 	Kind        kind() const;
-	const char* typeName() const;
+	std::string typeName() const;
 
 	// Properties we can derive from the type options attribute
 	bool noDataIsRelevant() const;

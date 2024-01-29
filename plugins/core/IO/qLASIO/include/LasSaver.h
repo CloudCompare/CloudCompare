@@ -55,7 +55,7 @@ class LasSaver
 
 	CC_FILE_ERROR saveNextPoint();
 
-	bool savesWaveforms() const;
+	bool canSaveWaveforms() const;
 
 	QString getLastError() const;
 

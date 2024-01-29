@@ -21,7 +21,6 @@
 #include "LasExtraScalarField.h"
 #include "LasScalarField.h"
 
-class ccPointCloud;
 struct laszip_point;
 
 /// Class with the logic to save a point clouds

@@ -29,6 +29,7 @@
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 #include <ccMaterial.h>
+#include <ccPointCloud.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -43,6 +44,12 @@
 
 int main(int argc, char *argv[])
 {
+
+#ifdef Q_OS_WIN
+	//enables automatic scaling based on the monitor's pixel density
+	ccViewerApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
 	ccViewerApplication::InitOpenGL();
 	
 	// Convert the input arguments to QString before the application is initialized
@@ -54,6 +61,14 @@ int main(int argc, char *argv[])
 	}
 
 	ccViewerApplication a(argc, argv, false);
+
+#ifdef CC_GAMEPAD_SUPPORT
+#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+	QGamepadManager::instance(); //potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
+#endif
+#endif
+#endif
 
 #ifdef USE_VLD
 	VLDEnable();
@@ -135,6 +150,10 @@ int main(int argc, char *argv[])
 					break;
 				}
 			}
+			else if (upperArgument == "-MAX")
+			{
+				w.showMaximized();
+			}
 			else if (upperArgument == "-TOP")
 			{
 				w.setWindowFlags(w.windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
@@ -163,6 +182,7 @@ int main(int argc, char *argv[])
 
 	//release global structures
 	FileIOFilter::UnregisterAll();
+	ccPointCloud::ReleaseShaders();
 
 	return result;
 }

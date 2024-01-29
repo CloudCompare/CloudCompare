@@ -135,13 +135,9 @@ public:
 	//! Sets the input filename or text stream
 	/** \param filename filename
 		\param stream text stream
+		\return whether a previous context was saved or not and it can be safely applied again to this file
 	**/
-	void setInput(const QString &filename, QTextStream* stream = nullptr);
-
-	//! Restores the previous context ('Apply all' button)
-	/** \return whether a context was saved or not
-	**/
-	bool restorePreviousContext();
+	bool setInput(const QString &filename, QTextStream* stream = nullptr);
 
 	//! ASCII open sequence item
 	struct SequenceItem
@@ -169,7 +165,7 @@ public:
 	Sequence getOpenSequence() const;
 
 	//! Returns number of lines to skip
-	unsigned getSkippedLinesCount() const { return m_skippedLines; }
+	unsigned getSkippedLinesCount() const;
 
 	//! Returns user selected separator
 	unsigned char getSeparator() const { return m_separator.cell(); }
@@ -211,8 +207,8 @@ public:
 	void onSeparatorChange(const QString& separator);
 	//! Forces the table to update itself
 	void updateTable();
-	//! Sets the number of lines to skip
-	void setSkippedLines(int linesCount);
+	//! Slot called when  the number of lines to skip is changed
+	void onSkippedLinesChanged(int);
 	//! Slot called when the 'comma as decimal' checkbox is toggled
 	void commaDecimalCheckBoxToggled(bool);
 
@@ -225,16 +221,26 @@ protected:
 
 protected:
 
+	//! Restores the previous context ('Apply all' button)
+	/** \return whether a previous context was saved or not and it can be safely applied again to this file
+	**/
+	bool restorePreviousContext();
+
 	//! Tries to guess the best separator automagically
 	void autoFindBestSeparator();
 
 	//! Sets the current separator
 	void setSeparator(QChar);
 
+	//! Sets the number of lines to skip
+	void setSkippedLines(int lineCount, bool blockSignal = true);
+
+	//! Resest all column roles
+	void resetColumnRoles();
+
 	//associated UI
 	Ui_AsciiOpenDialog* m_ui;
 
-	unsigned m_skippedLines;
 	QChar m_separator;
 	double m_averageLineSize;
 	QString m_filename;

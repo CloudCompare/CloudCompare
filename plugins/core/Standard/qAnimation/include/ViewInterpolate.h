@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE PLUGIN: qAnimation                      #
@@ -16,13 +18,8 @@
 //##########################################################################
 
 
-#ifndef VIEWINTERPOLATE_H
-#define VIEWINTERPOLATE_H
+#include "ExtendedViewport.h"
 
-//qCC_db
-#include <ccViewportParameters.h>
-
-class ccViewportParameters;
 class ccPolyline;
 
 //! The ViewInterpolate class
@@ -33,7 +30,7 @@ class ViewInterpolate
 public:
 
 	//! Constructor from two viewports and a number of steps
-    ViewInterpolate( const ccViewportParameters& view1,  const ccViewportParameters& view2, unsigned int stepCount = 0 );
+    ViewInterpolate( const ExtendedViewportParameters& view1,  const ExtendedViewportParameters& view2, unsigned int stepCount = 0 );
 
 	//! Sets the smooth trajectory (optional)
 	void setSmoothTrajectory(	ccPolyline* smoothTrajectory,
@@ -43,15 +40,15 @@ public:
 								PointCoordinateType length);
 
     //! Returns the first viewport object
-	inline const ccViewportParameters& view1 () const { return m_view1; }
+	inline const ccViewportParameters& view1 () const { return m_view1.params; }
     // Returns the second viewport object
-	inline const ccViewportParameters& view2 () const { return m_view2; }
+	inline const ccViewportParameters& view2 () const { return m_view2.params; }
 
 	//! Interpolates the 2 viewports at a given (relative) position
-	bool interpolate(ccViewportParameters& a_returned_viewport, double ratio ) const;
+	bool interpolate(ExtendedViewportParameters& viewport, double ratio ) const;
 	
 	//! Returns the next viewport
-    bool nextView (ccViewportParameters& a_returned_viewport );
+    bool nextView (ExtendedViewportParameters& viewport );
 
     //! Returns the current step
 	inline unsigned int currentStep () { return m_currentStep; }
@@ -68,8 +65,8 @@ public:
 
 private:
 
-	const ccViewportParameters& m_view1;
-	const ccViewportParameters& m_view2;
+	ExtendedViewportParameters m_view1;
+	ExtendedViewportParameters m_view2;
 
     unsigned int m_totalSteps;
     unsigned int m_currentStep;
@@ -79,5 +76,3 @@ private:
 	PointCoordinateType smoothSegmentLength, smoothCurrentLength;
 
 };
-
-#endif // VIEWINTERPOLATE_H

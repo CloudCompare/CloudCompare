@@ -25,7 +25,7 @@ Big ones:
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
 [*] Command line mode could be extended
-	- option to set the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959)
+	- option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 	- SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
 	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
 	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
@@ -45,22 +45,38 @@ Big ones:
 	- Colors level (https://www.cloudcompare.org/forum/viewtopic.php?t=5743)
 	- Fit > Sphere (https://www.cloudcompare.org/forum/viewtopic.php?p=25333)
 	- Edit > Colors > Enhance with intensities (https://www.cloudcompare.org/forum/viewtopic.php?t=5795)
+	- Set the random subsampling rate as a percentage (https://www.cloudcompare.org/forum/viewtopic.php?f=14&t=6357)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
 
 qAnimation plugin:
-
 [*] It would be great to specify the resolution.
 [*] Have different levels of smoothing between each viewport.  This way the turns and translations are not as abrupt.
 [*] Generate side-by-side stereo animations (for Google cardboard, etc.) with the qAnimation plugin
+[*] Use a point cloud (e.g. sensor positions / trajectory) to make the virtual camera move (https://www.cloudcompare.org/forum/viewtopic.php?t=6348)
 
 qFacets plugin:
 [*] Option to export 3D polygons (facets) in SHP files
 [*] Add the facet perimeter to the set of exported values
+[*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
+[*] Converting viewports to sensors, or creating sensors from current viewport (https://www.cloudcompare.org/forum/viewtopic.php?t=6722)
+[*] Coloring brush (https://www.cloudcompare.org/forum/viewtopic.php?t=6672)
+[*] Shortcut to translate the cloud (relative to the drawn polygon/rectangle) in graphical segmentation mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6658)
+[*] Add more controls and a preview option to the 'Color Levels' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6629)
+[*] Option 'no to all' for the Global Shift dialog (https://www.cloudcompare.org/forum/viewtopic.php?t=6628)
+[*] Batch export several polylines CSV 'height profiles' (see https://www.cloudcompare.org/forum/viewtopic.php?p=28189)
+[*] Rasterize tool (GUI)
+	- choose the exported raster format (https://www.cloudcompare.org/forum/viewtopic.php?t=6378)
+	- export images in the Rasterize tool with a custom color ramp (https://www.cloudcompare.org/forum/viewtopic.php?f=10&t=6023)
+	- additional options to the Rasterize 'resample input cloud' mode (original mix/max position, average position - https://www.cloudcompare.org/forum/viewtopic.php?p=24953)
+	- export other fields than the height field (SFs, colors, etc.) when exporting the grid to an image or a matrix file (http://www.cloudcompare.org/forum/viewtopic.php?t=1800)
+[*] Dark mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6369)
+[*] Add 'drawing' tools (curve passing through 3 points, arc, circle, etc.) to be exported to DXF
+[*] Compute the distance/range from sensor center via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=27540)
 [*] Save or load preset format for the new LAS I/O plugin (https://www.cloudcompare.org/forum/viewtopic.php?t=6167)
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 [*] Being able to select only the visible or the enabled clouds with the  'Select children by type and/or name' feature (https://www.cloudcompare.org/forum/viewtopic.php?p=27159)
@@ -69,7 +85,6 @@ Various:
 [*] Option to automatically deleted the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
 [*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
 [*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)
-[*] Export images in the Rasterize tool with a custom color ramp (https://www.cloudcompare.org/forum/viewtopic.php?f=10&t=6023)
 [*] Create Height / Surface / Volume chart for bathymetry jobs (https://www.cloudcompare.org/forum/viewtopic.php?p=26787)
 [*] Add options to compute the local average and std.dev. (and maybe medoid) of a SF (https://www.cloudcompare.org/forum/viewtopic.php?t=5700)
 [*] Add a 'Set value' operation to the SF arithmetics tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5933)
@@ -78,7 +93,6 @@ Various:
 [*] Add a confirmation popup when exiting from the Segmentation tool with 'ESC' (https://www.cloudcompare.org/forum/viewtopic.php?t=5793)
 [*] Add a confirmation popup when deleting an entity in the DB tree (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
 [*] Shortcut to the 'Edit > Scalar fields > Export coordinate(s) to SF' (https://github.com/CloudCompare/CloudCompare/issues/1607)
-[*] Additional options to the Rasterize 'resample input cloud' mode (original mix/max position, average position - https://www.cloudcompare.org/forum/viewtopic.php?p=24953)
 [*] Option to input the rotation point for the Translate/Rotate tool (https://www.cloudcompare.org/forum/viewtopic.php?p=24572)
 [*] Extract E57 images (as standard image files) via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=24493)
 [*] Compute the distance from sensor via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=3786)
@@ -87,7 +101,6 @@ Various:
 [*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
 [*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
 [*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)
-[*] Option to ADD a global shift at saving time via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] Let the user choose the color scale in the '2.5D Volume computation' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4196)
 [*] Update the two-point-distance label 'in real time' when the mouse hovers points (https://www.cloudcompare.org/forum/viewtopic.php?t=3765)
 [*] Ability to change the mouse buttons mapping (http://www.cloudcompare.org/forum/viewtopic.php?t=2676)
@@ -99,14 +112,12 @@ Various:
 [*] Read PTS files as multiple clouds (http://www.cloudcompare.org/forum/viewtopic.php?t=2004)
 [*] Generate side-by-side OpenGL views for Sony or Epson AR glasses (http://www.cloudcompare.org/forum/viewtopic.php?t=2011)
 [*] Add GeoJSON format support for vector data... and a lot of other ideas (http://www.danielgm.net/cc/forum/viewtopic.php?t=1845)
-[*] Rasterize: export other fields than the height field (SFs, colors, etc.) when exporting the grid to an image or a matrix file (http://www.cloudcompare.org/forum/viewtopic.php?t=1800)
 [*] Export grid structure in E57 files (http://www.cloudcompare.org/forum/viewtopic.php?t=1134)
 [*] Auto-save function (http://www.danielgm.net/cc/forum/viewtopic.php?t=1292)
 [*] Spherical projection of 360 degrees images to color a point cloud (http://www.danielgm.net/cc/forum/viewtopic.php?t=1268&p=4709#p4709)
 [*] Load georeferenced images (ecw+ers, jpg+jgw) (http://www.cloudcompare.org/forum/viewtopic.php?t=1244)
 [*] Add a check box to turn on and off gradient colors in the Color Scale Editor
 [*] Add the distance 'units' as a parameter for the color ramp
-[*] Median Calculation in Rasterize (http://www.cloudcompare.org/forum/viewtopic.php?t=1610)
 [*] Add key bindings to pan the active 3D view (so as to be able to pan even in segmentation / polyline tracing mode - http://www.cloudcompare.org/forum/viewtopic.php?t=1714)
 [*] Choose the columns to export for ASCII files (http://www.cloudcompare.org/forum/viewtopic.php?t=1449)
 [*] Handle arc-polylines (Autocad - http://www.cloudcompare.org/forum/viewtopic.php?t=1413)
@@ -136,11 +147,12 @@ Various:
 [*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
 [*] Overlay grid (for 3D views - http://www.cloudcompare.org/forum/viewtopic.php?t=926) 
 
-From Pablo V.
-[*] Improve the raster interpolation algorithm of the Rasterize tool (https://www.cloudcompare.org/forum/viewtopic.php?p=25155#p25155)
+From Florian W.
+[*] Adding an option in front of RANSAC to specify the angular position in space to a reference point would also be very useful. This could perhaps be set so that the program only finds shapes that lie vertically or horizontally in space. Sometimes it happens that cylinders are found which are arranged obliquely and do not exist at all. This is probably due to the density of the point cloud (in my case it has to be thinned out because it is too computationally intensive).
+[*] Adding the length setting for the cylinders before RANSAC could also reduce the frequency of errors. 
+[*] When sorting incorrectly recognized shapes according to RANSAC, there is unfortunately no "Back function / Back button". An accidental deletion of an actual shape would then no longer be tragic.
 
 From Dimitri L.
-[*] Access to the Rasterize tool through the command line (with XML parameter file)
 [*] Advanced maths on scalar fields (http://www.danielgm.net/cc/forum/viewtopic.php?t=1277)
 [*] Interactive modification of scalar vlaues (http://www.cloudcompare.org/forum/viewtopic.php?t=1331)
 [*] Being able to apply various methods based on a sub-sampled cloud

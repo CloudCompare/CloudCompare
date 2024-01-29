@@ -37,10 +37,11 @@
 //qCC_io
 #include <AsciiFilter.h>
 
-//local
-#include "ccGLWindow.h"
-#include "mainwindow.h"
+//qCC_gl
+#include <ccGLWindowInterface.h>
 
+//local
+#include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
 
 //system

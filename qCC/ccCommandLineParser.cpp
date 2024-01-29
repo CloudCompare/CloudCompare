@@ -41,16 +41,31 @@ void ccCommandLineParser::print(const QString& message) const
 	ccConsole::Print(message);
 }
 
+void ccCommandLineParser::printDebug(const QString& message) const
+{
+	ccConsole::PrintDebug(message);
+}
+
 void ccCommandLineParser::warning(const QString& message) const
 {
 	ccConsole::Warning(message);
-	
+}
+
+void ccCommandLineParser::warningDebug(const QString& message) const
+{
+	ccConsole::WarningDebug(message);
 }
 
 bool ccCommandLineParser::error(const QString& message) const
 {
 	ccConsole::Error(message);
-	
+
+	return false;
+}
+
+bool ccCommandLineParser::errorDebug(const QString& message) const
+{
+	ccConsole::ErrorDebug(message);
 
 	return false;
 }
@@ -68,6 +83,8 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	
 	parser->registerBuiltInCommands();
 
+	ccConsole::SetRefreshCycle(200);
+
 	// 'massage' the arguments to properly handle single quotes
 	{
 		bool insideSingleQuoteSection = false;
@@ -81,7 +98,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 			{
 				if (arg.endsWith(SingleQuote))
 				{
-					// nothing to do, non*truncated argument
+					// nothing to do, non-truncated argument
 				}
 				else
 				{
@@ -136,8 +153,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	}
 	else
 	{
-		//allows ccLog ccConsole or ccCommandLineParser (print,warning,error) 
-		//to output to the console 
+		//allows ccLog/ccConsole or ccCommandLineParser (print, warning, error) to output to the console 
 		ccConsole::Init(nullptr, nullptr, nullptr, true); 
 	}
 
@@ -388,6 +404,130 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	}
 
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
+}
+
+template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options,
+												const ccCommandLineParser& cmd,
+												std::vector<EntityDesc>& selectedEntities,
+												std::vector<EntityDesc>& unselectedEntities,
+												QString entityType)
+{
+	//early abort if no cloud found
+	if (selectedEntities.empty() && unselectedEntities.empty())
+	{
+		//do not stop execution, just warn the user and return
+		cmd.warning(QObject::tr("\tNo %1 loaded. Load some with the -O command").arg(entityType));
+		return true;
+	}
+
+	if (options.selectRegex && !options.regex.isValid())
+	{
+		return cmd.error(QObject::tr("Regex string invalid: %1").arg(options.regex.errorString()));
+	}
+
+	try
+	{
+		//store everthyng in the unselected vector
+		unselectedEntities.insert(unselectedEntities.end(), selectedEntities.begin(), selectedEntities.end());
+		selectedEntities.clear();
+
+		//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
+		std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b) { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
+
+		//put elements to the front facing vector
+		unsigned index = 0;
+		assert(!unselectedEntities.empty()); // we have tested above that neither selectedEntities and unselectedEntities are both empty
+		size_t lastIndex = unselectedEntities.size() - 1;
+		for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
+		{
+			QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
+			bool toBeSelected = false;
+			if (!options.reverse)
+			{
+				//first {n}
+				if (options.selectFirst && index < options.firstNr)
+				{
+					toBeSelected = true;
+				}
+
+				//last {n}
+				if (options.selectLast && index > lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
+			}
+			else
+			{
+				//not first {n}
+				if (options.selectFirst && index >= options.firstNr && !options.selectLast)
+				{
+					toBeSelected = true;
+				}
+
+				//not last {n}
+				if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
+				{
+					toBeSelected = true;
+				}
+
+				//not first and not last
+				if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
+				{
+					toBeSelected = true;
+				}
+			}
+
+			//regex has higher priority than first/last overwrite
+			if (options.selectRegex)
+			{
+				if (options.regex.indexIn(nameToValidate) > -1)
+				{
+					//regex matched
+					toBeSelected = !options.reverse;
+				}
+				else
+				{
+					//regex not matched
+					toBeSelected = options.reverse;
+				}
+			}
+
+			//selectAll has higher priority than first/last/regex overwrite
+			if (options.selectAll)
+			{
+				toBeSelected = !options.reverse;
+			}
+
+			if (toBeSelected)
+			{
+				cmd.print(QObject::tr("\t[*] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				selectedEntities.push_back(*it);
+				it = unselectedEntities.erase(it);
+			}
+			else
+			{
+				cmd.print(QObject::tr("\t[ ] UID: %2 name: %1").arg(nameToValidate).arg(it->getEntity()->getUniqueID()));
+				++it;
+			}
+			index++;
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		return cmd.error(QObject::tr("Not enough memory"));
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::selectClouds(const SelectEntitiesOptions& options)
+{
+	return SelectEntities(options, *this, m_clouds, m_unselectedClouds, "cloud");
+}
+
+bool ccCommandLineParser::selectMeshes(const SelectEntitiesOptions& options)
+{
+	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, "mesh");
 }
 
 void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
@@ -689,6 +829,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 {
 	registerCommand(Command::Shared(new CommandDebugCmdLine));
 	registerCommand(Command::Shared(new CommandLoad));
+	registerCommand(Command::Shared(new CommandLoadCommandFile));
 	registerCommand(Command::Shared(new CommandSubsample));
 	registerCommand(Command::Shared(new CommandExtractCCs));
 	registerCommand(Command::Shared(new CommandCurvature));
@@ -702,11 +843,13 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandMergeClouds));
 	registerCommand(Command::Shared(new CommandMergeMeshes));
 	registerCommand(Command::Shared(new CommandSetActiveSF));
+	registerCommand(Command::Shared(new CommandSetGlobalShift));
 	registerCommand(Command::Shared(new CommandRemoveAllSFs));
 	registerCommand(Command::Shared(new CommandRemoveSF));
 	registerCommand(Command::Shared(new CommandRemoveRGB));
 	registerCommand(Command::Shared(new CommandRemoveNormals));
 	registerCommand(Command::Shared(new CommandRemoveScanGrids));
+	registerCommand(Command::Shared(new CommandRemoveSensors));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));
 	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));
@@ -714,11 +857,13 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandNoiseFilter));
 	registerCommand(Command::Shared(new CommandRemoveDuplicatePoints));
 	registerCommand(Command::Shared(new CommandSampleMesh));
+	registerCommand(Command::Shared(new CommandCompressFWF));
 	registerCommand(Command::Shared(new CommandExtractVertices));
 	registerCommand(Command::Shared(new CommandCrossSection));
 	registerCommand(Command::Shared(new CommandCrop));
 	registerCommand(Command::Shared(new CommandCrop2D));
 	registerCommand(Command::Shared(new CommandCoordToSF));
+	registerCommand(Command::Shared(new CommandSFToCoord));
 	registerCommand(Command::Shared(new CommandColorBanding));
 	registerCommand(Command::Shared(new CommandColorLevels));
 	registerCommand(Command::Shared(new CommandC2MDist));
@@ -730,8 +875,11 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSFOperation));
     registerCommand(Command::Shared(new CommandSFOperationSF));
     registerCommand(Command::Shared(new CommandSFInterpolation));
+    registerCommand(Command::Shared(new CommandColorInterpolation));
+	registerCommand(Command::Shared(new CommandRenameEntities));
 	registerCommand(Command::Shared(new CommandSFRename));
-    registerCommand(Command::Shared(new CommandSFAddConst));
+	registerCommand(Command::Shared(new CommandSFAddConst));
+	registerCommand(Command::Shared(new CommandSFAddId));
 	registerCommand(Command::Shared(new CommandICP));
 	registerCommand(Command::Shared(new CommandChangeCloudOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
@@ -742,6 +890,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandSaveMeshes));
 	registerCommand(Command::Shared(new CommandAutoSave));
 	registerCommand(Command::Shared(new CommandLogFile));
+	registerCommand(Command::Shared(new CommandSelectEntities));
 	registerCommand(Command::Shared(new CommandClear));
 	registerCommand(Command::Shared(new CommandClearClouds));
 	registerCommand(Command::Shared(new CommandPopClouds));

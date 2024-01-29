@@ -18,7 +18,6 @@
 #include "ccPointPickingGenericInterface.h"
 
 //Local
-#include "ccGLWindow.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
 
@@ -29,6 +28,9 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
+//qCCC_gl
+#include <ccGLWindowInterface.h>
+
 ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent/*=nullptr*/)
 	: ccOverlayDialog(parent)
 	, m_pickingHub(pickingHub)
@@ -36,14 +38,14 @@ ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pic
 	assert(m_pickingHub);
 }
 
-bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
+bool ccPointPickingGenericInterface::linkWith(ccGLWindowInterface* win)
 {
 	if (win == m_associatedWin)
 	{
 		//nothing to do
 		return false;
 	}
-	ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 
 	//just in case
 	if (m_pickingHub)
@@ -59,7 +61,7 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindow* win)
 	//if the dialog is already linked to a window, we must disconnect the 'point picked' signal
 	if (oldWin)
 	{
-		oldWin->disconnect(this);
+		oldWin->signalEmitter()->disconnect(this);
 	}
 
 	return true;
@@ -74,7 +76,7 @@ bool ccPointPickingGenericInterface::start()
 	}
 
 	//activate "point picking mode" in associated GL window
-	if (!m_pickingHub->addListener(this, true, true, ccGLWindow::POINT_PICKING))
+	if (!m_pickingHub->addListener(this, true, true, ccGLWindowInterface::POINT_PICKING))
 	{
 		ccLog::Error("Picking mechanism already in use. Close the tool using it first.");
 		return false;

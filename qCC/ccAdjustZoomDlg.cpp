@@ -18,9 +18,9 @@
 #include "ccAdjustZoomDlg.h"
 
 //local
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
-ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=nullptr*/)
+ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::AdjustZoomDialog()
 	, m_windowWidth_pix(0)
@@ -30,7 +30,7 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=nullptr*/)
 
 	if (win)
 	{
-		windowLabel->setText(QString("%1 [%2 x %3]").arg(win->windowTitle()).arg(win->glWidth()).arg(win->glHeight()));
+		windowLabel->setText(QString("%1 [%2 x %3]").arg(win->getWindowTitle()).arg(win->glWidth()).arg(win->glHeight()));
 		
 		const ccViewportParameters& params = win->getViewportParameters();
 		assert(!params.perspectiveView);
@@ -61,7 +61,7 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=nullptr*/)
 
 	connect(focalDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onFocalChanged);
 	connect(pixelSizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),	this, &ccAdjustZoomDlg::onPixelSizeChanged);
-	connect(pixelCountSpinBox,		qOverload<int>(&QSpinBox::valueChanged),					this, &ccAdjustZoomDlg::onPixelCountChanged);
+	connect(pixelCountSpinBox,		qOverload<int>(&QSpinBox::valueChanged),			this, &ccAdjustZoomDlg::onPixelCountChanged);
 }
 
 double ccAdjustZoomDlg::getFocalDistance() const

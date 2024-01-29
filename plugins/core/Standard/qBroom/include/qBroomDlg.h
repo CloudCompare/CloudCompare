@@ -34,7 +34,7 @@ class ccHObject;
 class ccGenericPointCloud;
 class ccPointCloud;
 class ccPolyline;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccBox;
 class cc2DLabel;
 class ccScalarField;
@@ -225,7 +225,7 @@ protected: //members
 	CloudBackup m_cloud;
 
 	//! Dialog's own 3D view
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 
 	//! Broom box
 	ccBox* m_broomBox;

@@ -19,7 +19,7 @@
 #include "mainwindow.h"
 
 #include <ccGLUtils.h>
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -109,13 +109,13 @@ void ccGraphicalTransformationTool::pause(bool state)
 
 	if (state)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->displayNewMessage("Transformation [PAUSED]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->displayNewMessage("Unpause to transform again", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->displayNewMessage("Transformation [PAUSED]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Unpause to transform again", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	else
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_ENTITIES);
 		updateDisplayMessage();
 	}
 
@@ -748,7 +748,7 @@ unsigned ccGraphicalTransformationTool::getNumberOfValidEntities() const
 	return m_toTransform.getChildrenNumber();
 }
 
-bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
+bool ccGraphicalTransformationTool::linkWith(ccGLWindowInterface* win)
 {
 	if (!ccOverlayDialog::linkWith(win))
 	{
@@ -769,13 +769,13 @@ void ccGraphicalTransformationTool::updateDisplayMessage()
 	}
 	if (advPushButton->isChecked())
 	{
-		m_associatedWin->displayNewMessage("[Advanced mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->displayNewMessage("[Select Plane or Line to translate along/rotate around]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->displayNewMessage("[If plane selected, rotation will be around normal vector]", ccGLWindow::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[Advanced mode]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[Select Plane or Line to translate along/rotate around]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[If plane selected, rotation will be around normal vector]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	else
 	{
-		m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 	}
 	m_associatedWin->redraw(true, false);
 }
@@ -796,13 +796,13 @@ bool ccGraphicalTransformationTool::start()
 	m_rotationCenter = m_toTransform.getBB_recursive().getCenter(); //m_rotation center == selected entities center
 
 	//activate "moving mode" in associated GL window
-	m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_ENTITIES);
-	m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING, Qt::OpenHandCursor);
+	m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_ENTITIES);
+	m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING, Qt::OpenHandCursor);
 	//the user must not close this window!
 	m_associatedWin->setUnclosable(true);
-	connect(m_associatedWin, &ccGLWindow::rotation, this, &ccGraphicalTransformationTool::glRotate);
-	connect(m_associatedWin, &ccGLWindow::translation, this, &ccGraphicalTransformationTool::glTranslate);
-	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rotation, this, &ccGraphicalTransformationTool::glRotate);
+	connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::translation, this, &ccGraphicalTransformationTool::glTranslate);
+	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
 	pauseButton->setChecked(false);
 	m_advancedModeObjectList.clear();
 	populateAdvModeItems();
@@ -819,11 +819,11 @@ void ccGraphicalTransformationTool::stop(bool state)
 	if (m_associatedWin)
 	{
 		//deactivate "moving mode" in associated GL window
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setPickingMode(ccGLWindowInterface::DEFAULT_PICKING);
 		m_associatedWin->setUnclosable(false);
-		m_associatedWin->disconnect(this);
-		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]", ccGLWindow::UPPER_CENTER_MESSAGE, false, 2, ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->signalEmitter()->disconnect(this);
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 2, ccGLWindowInterface::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->redraw(false, false); //we have to redraw the 3D layer for labels!
 	}
 

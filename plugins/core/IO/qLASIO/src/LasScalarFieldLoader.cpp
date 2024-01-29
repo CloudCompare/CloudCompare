@@ -112,6 +112,40 @@ CC_FILE_ERROR LasScalarFieldLoader::handleScalarFields(ccPointCloud&       point
 
 	return CC_FERR_NO_ERROR;
 }
+CC_FILE_ERROR LasScalarFieldLoader::parseExtraScalarField(
+    const LasExtraScalarField& extraField,
+    const laszip_point&        currentPoint,
+    ScalarType                 outputValues[3])
+{
+
+	if (currentPoint.num_extra_bytes <= 0 || currentPoint.extra_bytes == nullptr)
+	{
+		return CC_FERR_NO_ERROR;
+	}
+
+	if (extraField.byteOffset + extraField.byteSize() > static_cast<unsigned>(currentPoint.num_extra_bytes))
+	{
+		assert(false);
+		return CC_FERR_READING;
+	}
+
+	laszip_U8* dataStart = currentPoint.extra_bytes + extraField.byteOffset;
+	parseRawValues(extraField, dataStart);
+	switch (extraField.kind())
+	{
+	case LasExtraScalarField::Unsigned:
+		handleOptionsFor(extraField, m_rawValues.unsignedValues, outputValues);
+		break;
+	case LasExtraScalarField::Signed:
+		handleOptionsFor(extraField, m_rawValues.signedValues, outputValues);
+		break;
+	case LasExtraScalarField::Floating:
+		handleOptionsFor(extraField, m_rawValues.floatingValues, outputValues);
+		break;
+	}
+
+	return CC_FERR_NO_ERROR;
+}
 
 CC_FILE_ERROR LasScalarFieldLoader::handleRGBValue(ccPointCloud& pointCloud, const laszip_point& currentPoint)
 {
@@ -155,8 +189,7 @@ CC_FILE_ERROR LasScalarFieldLoader::handleRGBValue(ccPointCloud& pointCloud, con
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR LasScalarFieldLoader::handleExtraScalarFields(ccPointCloud&       pointCloud,
-                                                            const laszip_point& currentPoint)
+CC_FILE_ERROR LasScalarFieldLoader::handleExtraScalarFields(const laszip_point& currentPoint)
 {
 	if (currentPoint.num_extra_bytes <= 0 || currentPoint.extra_bytes == nullptr)
 	{
@@ -165,25 +198,17 @@ CC_FILE_ERROR LasScalarFieldLoader::handleExtraScalarFields(ccPointCloud&       
 
 	for (const LasExtraScalarField& extraField : m_extraScalarFields)
 	{
-		if (extraField.byteOffset + extraField.byteSize() > static_cast<unsigned>(currentPoint.num_extra_bytes))
+		ScalarType finalValues[3]{0.0};
+
+		const CC_FILE_ERROR err = parseExtraScalarField(extraField, currentPoint, finalValues);
+		if (err != CC_FERR_NO_ERROR)
 		{
-			assert(false);
-			return CC_FERR_READING;
+			return err;
 		}
 
-		laszip_U8* dataStart = currentPoint.extra_bytes + extraField.byteOffset;
-		parseRawValues(extraField, dataStart);
-		switch (extraField.kind())
+		for (unsigned dimIndex = 0; dimIndex < extraField.numElements(); ++dimIndex)
 		{
-		case LasExtraScalarField::Unsigned:
-			handleOptionsFor(extraField, m_rawValues.unsignedValues);
-			break;
-		case LasExtraScalarField::Signed:
-			handleOptionsFor(extraField, m_rawValues.signedValues);
-			break;
-		case LasExtraScalarField::Floating:
-			handleOptionsFor(extraField, m_rawValues.floatingValues);
-			break;
+			extraField.scalarFields[dimIndex]->addElement(finalValues[dimIndex]);
 		}
 	}
 	return CC_FERR_NO_ERROR;
@@ -380,7 +405,7 @@ void LasScalarFieldLoader::parseRawValues(const LasExtraScalarField& extraField,
 }
 
 template <typename T>
-void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraField, T values[3])
+void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraField, T inputValues[3], ScalarType outputValues[3])
 {
 	assert(extraField.numElements() <= 3);
 	for (unsigned dimIndex = 0; dimIndex < extraField.numElements(); ++dimIndex)
@@ -388,19 +413,24 @@ void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraFiel
 		if (extraField.noDataIsRelevant())
 		{
 			auto noDataValue = ParseValueOfTypeAs<T, T>(static_cast<const uint8_t*>(extraField.noData[dimIndex]));
-			if (noDataValue == values[dimIndex])
+			if (noDataValue == inputValues[dimIndex])
 			{
-				extraField.scalarFields[dimIndex]->addElement(ccScalarField::NaN());
+				outputValues[dimIndex] = ccScalarField::NaN();
+			}
+			else
+			{
+				outputValues[dimIndex] = static_cast<ScalarType>(inputValues[dimIndex]);
 			}
 		}
-		else if (extraField.scaleIsRelevant())
+
+		if (extraField.scaleIsRelevant())
 		{
-			double scaledValue = (values[dimIndex] * extraField.scales[dimIndex]) + (extraField.offsets[dimIndex]);
-			extraField.scalarFields[dimIndex]->addElement(static_cast<ScalarType>(scaledValue));
+			double scaledValue     = (inputValues[dimIndex] * extraField.scales[dimIndex]) + (extraField.offsets[dimIndex]);
+			outputValues[dimIndex] = static_cast<ScalarType>(scaledValue);
 		}
 		else
 		{
-			extraField.scalarFields[dimIndex]->addElement(static_cast<ScalarType>(values[dimIndex]));
+			outputValues[dimIndex] = static_cast<ScalarType>(inputValues[dimIndex]);
 		}
 	}
 }

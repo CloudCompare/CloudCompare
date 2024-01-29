@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_HISTOGRAM_WINDOW_HEADER
-#define CC_HISTOGRAM_WINDOW_HEADER
 
 //Always first
 #include <ccIncludeGL.h>
@@ -46,7 +45,7 @@ class ccHistogramWindow : public QCustomPlot
 public:
 
 	//! Default constructor
-	explicit ccHistogramWindow(QWidget *parent = 0);
+	explicit ccHistogramWindow(QWidget* parent = nullptr);
 
 	//! Destructor
 	virtual ~ccHistogramWindow();
@@ -85,27 +84,38 @@ public:
 	**/
 	void fromBinArray(	const std::vector<unsigned>& histoValues,
 						ccScalarField* sf );
+
 	//! Sets overlay curve values
 	/** The curve will only appear over an histogram
 		\param curveValues curve points 'Y' coordinates only (regularly sampled between the min and max histogram values)
 	**/
 	void setCurveValues(const std::vector<double>& curveValues);
 
-	enum HISTOGRAM_COLOR_SCHEME { USE_SOLID_COLOR, USE_CUSTOM_COLOR_SCALE, USE_SF_SCALE };
+	//! Color scheme
+	enum HISTOGRAM_COLOR_SCHEME
+	{
+		USE_SOLID_COLOR,
+		USE_CUSTOM_COLOR_SCALE,
+		USE_SF_SCALE
+	};
+
 	//! Sets how the gradient bars should be colored
 	void setColorScheme(HISTOGRAM_COLOR_SCHEME scheme) { m_colorScheme = scheme; }
 
 	//! Sets solid color
 	/** Only used if color scheme is set to USE_SOLID_COLOR. **/
 	void setSolidColor(QColor color) { m_solidColor = color; }
+
 	//! Sets gradient color scale
 	/** Only used if color scheme is set to USE_CUSTOM_COLOR_SCALE. **/
 	void setColorScale(ccColorScale::Shared scale) { m_colorScale = scale; }
 	
 	//! Clears the display
 	void clear();
+
 	//! Updates the display
 	void refresh();
+
 	//! Updates the histogram bars only
 	/** Only works if a SF is associated and color scheme is USE_SF_SCALE.
 	**/
@@ -113,13 +123,18 @@ public:
 
 	//! Returns the current histogram bins
 	inline const std::vector<unsigned>& histoValues() const { return m_histoValues; }
+
 	//! Returns the current histogram min value
 	inline double minVal() const { return m_minVal; }
+
 	//! Returns the current histogram max value
 	inline double maxVal() const { return m_maxVal; }
 
 public: //Axis label display Options
-	enum class AxisDisplayOption {
+
+	//! Axis display option
+	enum class AxisDisplayOption
+	{
 		None = 0x0,
 		XAxis = 0x01,
 		YAxis = 0x02,
@@ -127,8 +142,9 @@ public: //Axis label display Options
 	};
 	Q_DECLARE_FLAGS(AxisDisplayOptions, AxisDisplayOption)
 	
-	//SF interactor mode
-	enum class SFInteractionMode {
+	//! SF interactor mode
+	enum class SFInteractionMode
+	{
 		None = 0x0,
 		DisplayRange = 0x01,
 		SaturationRange = 0x02,
@@ -137,10 +153,12 @@ public: //Axis label display Options
 	Q_DECLARE_FLAGS(SFInteractionModes, SFInteractionMode)
 	
 	//! Enables SF interaction mode
-	void setSFInteractionMode( SFInteractionModes modes );
+	void setSFInteractionMode(SFInteractionModes modes);
+
 	void setAxisDisplayOption(AxisDisplayOptions axisOptions);
-	// Used to disable automatic refresh after resize event
-	// Must refresh manually from client code if this is set to false
+
+	//! Used to disable automatic refresh after resize event
+	/** Must refresh manually from client code if this is set to false **/
 	void setRefreshAfterResize(bool refreshAfterResize);
 
 	void setMinDispValue(double);
@@ -229,7 +247,17 @@ protected: //SF interactor mode
 	SFInteractionModes m_sfInteractionModes;
 
 	//! Selectable items in "SF interaction" mode
-	enum SELECTABLE_ITEMS { NONE, LEFT_AREA, RIGHT_AREA, BOTH_AREAS, LEFT_ARROW, RIGHT_ARROW, BOTH_ARROWS };
+	enum SELECTABLE_ITEMS
+	{
+		NONE,
+		LEFT_AREA,
+		RIGHT_AREA,
+		BOTH_AREAS,
+		LEFT_ARROW,
+		RIGHT_ARROW,
+		BOTH_ARROWS
+	};
+
 	//! Currently selected item
 	SELECTABLE_ITEMS m_selectedItem;
 
@@ -284,5 +312,3 @@ protected:
 	//! Associated widgets
 	Ui_HistogramDialog* m_gui;
 };
-
-#endif

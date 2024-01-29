@@ -29,6 +29,14 @@ else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
 endif()
 
+if( CCCORELIB_USE_QT_CONCURRENT )
+	# We want deployqt to handle this dependency, so instead of just copying the file
+	# link to the target.
+	target_link_libraries( ${PROJECT_NAME}
+		Qt5::Concurrent
+	)
+endif()
+
 if( WIN32 )
 	DeployQt(
 		TARGET
@@ -48,23 +56,6 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
 )
-
-if( CCCORELIB_USE_QT_CONCURRENT )
-	# We want *deployqt to handle this dependency, so instead of just copying the file
-	# link to the target.
-	target_link_libraries( ${PROJECT_NAME}
-		Qt5::Concurrent
-	)
-endif()
-
-# contrib. libraries support
-if ( APPLE )
-	target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_MAC_FRAMEWORK_DIR} )
-elseif( UNIX )
-	target_link_contrib( ${PROJECT_NAME} ${CMAKE_INSTALL_LIBDIR}/cloudcompare )
-else()
-	target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-endif()
 
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_VIEWER )
@@ -134,3 +125,7 @@ else()
 		SHADER_DEST_FOLDER "shaders"
 )
 endif()
+
+# Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to
+# always get an up-to-date version number (based on the current date)
+add_custom_target(CC_VIEWER_UPDATE_VERSION ALL COMMAND ${CMAKE_COMMAND} -E touch_nocreate ${CMAKE_CURRENT_SOURCE_DIR}/ccViewerApplication.cpp)

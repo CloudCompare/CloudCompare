@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_ASK_THREE_DOUBLE_VALUES_DIALOG_HEADER
-#define CC_ASK_THREE_DOUBLE_VALUES_DIALOG_HEADER
 
 #include <ui_askThreeDoubleValuesDlg.h>
 
@@ -46,8 +45,7 @@ public:
 	//! Enable the checkbox (bottom-left)
 	void showCheckbox(const QString& label, bool state, QString tooltip = QString());
 
-	//! Returns 
+	//! Returns the checkbox state
 	bool getCheckboxState() const;
 };
 
-#endif //CC_ASK_THREE_DOUBLE_VALUES_DIALOG_HEADER

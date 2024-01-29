@@ -40,6 +40,7 @@ class LasSaver
 		std::vector<LasExtraScalarField> extraFields;
 		bool                             shouldSaveRGB{false};
 		bool                             shouldSaveWaveform{false};
+		bool                             shouldSaveNormalsAsExtraScalarField{false};
 		uint8_t                          versionMajor{1};
 		uint8_t                          versionMinor{0};
 		uint8_t                          pointFormat{0};
@@ -47,7 +48,7 @@ class LasSaver
 		CCVector3d                       lasOffset;
 	};
 
-	LasSaver(ccPointCloud& cloud, Parameters& parameters);
+	LasSaver(ccPointCloud& cloud, Parameters parameters);
 	~LasSaver() noexcept;
 
 	CC_FILE_ERROR open(const QString filePath);
@@ -70,4 +71,8 @@ class LasSaver
 	bool                              m_shouldSaveRGB{false};
 	std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
 	laszip_point*                     m_laszipPoint{nullptr};
+	int                               m_originallySelectedScalarField = -1;
+	// contains for the x, y, z dims of the normals, whether it was temporarily
+	// exported to a scalar field. If true, then we have to remove the temporary sf.
+	bool m_normalDimWasTemporarillyExported[3] = {false, false, false};
 };

@@ -33,7 +33,7 @@
 
 static const std::vector<unsigned>      PointFormatForV1_2 = {0, 1, 2, 3};
 static const std::vector<unsigned>      PointFormatForV1_3 = {0, 1, 2, 3, 4, 5};
-static const std::vector<unsigned>      PointFormatForV1_4 = {6, 7, 8, 9, 10};
+static const std::vector<unsigned>      PointFormatForV1_4 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 static const std::array<const char*, 3> VersionsArray      = {"1.2", "1.3", "1.4"};
 
 namespace LasDetails
@@ -154,7 +154,8 @@ namespace LasDetails
 		return std::accumulate(vlrs,
 		                       vlrs + numVlrs,
 		                       0,
-		                       [=](laszip_U32 size, const laszip_vlr_struct& vlr) { return vlr.record_length_after_header + header_size + size; });
+		                       [=](laszip_U32 size, const laszip_vlr_struct& vlr)
+		                       { return vlr.record_length_after_header + header_size + size; });
 	}
 
 	const std::vector<unsigned>* PointFormatsAvailableForVersion(QString version)

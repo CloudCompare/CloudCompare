@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE LIGHT VIEWER                            #
@@ -17,26 +19,26 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CCVIEWER_H
-#define CCVIEWER_H
-
 //Qt
 #include <QMainWindow>
 #include <QStringList>
 
+//CCPluginAPI
+#include <ccMainAppInterface.h>
+
 //GUIs
 #include <ui_ccviewer.h>
-//#include <ui_ccviewerAbout.h>
 
 //System
 #include <set>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 class Mouse3DInput;
+class ccGamepadManager;
 
 //! Application main window
-class ccViewer : public QMainWindow
+class ccViewer : public QMainWindow, public ccMainAppInterface
 {
 	Q_OBJECT
 
@@ -45,10 +47,17 @@ public:
 	ccViewer(QWidget *parent = 0, Qt::WindowFlags flags = QFlags<Qt::WindowType>());
 
 	//! Default destructor
-	~ccViewer();
+	~ccViewer() override;
 
 	//! Adds entity to display db
-	void addToDB(ccHObject* entity);
+	void addToDB(	ccHObject* entity,
+					bool updateZoom = false,
+					bool autoExpandDBTree = true,
+					bool checkDimensions = false,
+					bool autoRedraw = true) override;
+
+	//! Removes an entity from display db
+	void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 
 	//! Checks for loaded entities
 	/** If none, a message is displayed to invite the user
@@ -60,8 +69,35 @@ public:
 
 	//! Tries to load (and then adds to main db) a list of entity (files)
 	/** \param filenames filenames to load
+		\return the first loaded entity/group
 	**/
-	void addToDB(QStringList filenames);
+	ccHObject* addToDB(QStringList filenames);
+
+public: // ccMainInterface compliance
+
+	QMainWindow* getMainWindow() override { return this; }
+	ccGLWindowInterface* getActiveGLWindow() override { return m_glWindow; }
+	ccHObject* loadFile(QString filename, bool silent) override { return addToDB(QStringList{ filename }); }
+	void setSelectedInDB(ccHObject* obj, bool selected) override {}
+	const ccHObject::Container& getSelectedEntities() const override;
+	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
+	ccHObject* dbRootObject() override;
+	void redrawAll(bool only2D = false) override;
+	void refreshAll(bool only2D = false) override;
+	void enableAll() override;
+	void disableAll() override;
+	void disableAllBut(ccGLWindowInterface* win) override;
+	void updateUI() override {}
+	void freezeUI(bool state) override {}
+	void setView(CC_VIEW_ORIENTATION view) override;
+	void toggleActiveWindowCenteredPerspective() override;
+	void toggleActiveWindowCustomLight() override;
+	void toggleActiveWindowSunLight() override;
+	void toggleActiveWindowViewerBasedPerspective() override;
+	void zoomOnSelectedEntities() override { zoomOnSelectedEntity(); }
+	void increasePointSize() override;
+	void decreasePointSize() override;
+	ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 
 protected:
 
@@ -94,7 +130,7 @@ protected:
 	void setOrthoView();
 	void setCenteredPerspectiveView();
 	void setViewerPerspectiveView();
-	void setGlobalZoom();
+	void setGlobalZoom() override;
 	void zoomOnSelectedEntity();
 
 	//default views
@@ -154,7 +190,7 @@ protected: //members
 	void release3DMouse();
 
 	//! Associated GL context
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 
 	//! Currently selected object
 	ccHObject* m_selectedObject;
@@ -162,9 +198,10 @@ protected: //members
 	//! 3D mouse handler
 	Mouse3DInput* m_3dMouseInput;
 
+	//! Gamepad handler
+	ccGamepadManager* m_gamepadManager;
+
 private:
 	//! Associated GUI
 	Ui::ccViewerClass ui;
 };
-
-#endif // CCVIEWER_H

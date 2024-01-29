@@ -3,6 +3,9 @@ target_sources( ${PROJECT_NAME}
 	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/ccGLUtils.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLWindow.h
+		${CMAKE_CURRENT_LIST_DIR}/ccGLWindowInterface.h
+		${CMAKE_CURRENT_LIST_DIR}/ccGLWindowSignalEmitter.h
+		${CMAKE_CURRENT_LIST_DIR}/ccGLWindowStereo.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGuiParameters.h
 		${CMAKE_CURRENT_LIST_DIR}/ccRenderingTools.h
 		${CMAKE_CURRENT_LIST_DIR}/qCC_glWindow.h

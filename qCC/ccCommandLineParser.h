@@ -1,5 +1,21 @@
-#ifndef CC_COMMAND_LINE_PARSER_HEADER
-#define CC_COMMAND_LINE_PARSER_HEADER
+#pragma once
+
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                   COPYRIGHT: CloudCompare project                      #
+//#                                                                        #
+//##########################################################################
 
 //interface
 #include "ccCommandLineInterface.h"
@@ -33,13 +49,18 @@ public:
 							ccCommandLineInterface::ExportOptions options = ExportOption::NoOptions) override;
 	void removeClouds(bool onlyLast = false) override;
 	void removeMeshes(bool onlyLast = false) override;
+	bool selectClouds(const SelectEntitiesOptions& options) override;
+	bool selectMeshes(const SelectEntitiesOptions& options) override;
 	QStringList& arguments() override { return m_arguments; }
 	const QStringList& arguments() const override { return m_arguments; }
 	bool registerCommand(Command::Shared command) override;
 	QDialog* widgetParent() override { return m_parentWidget; }
 	void print(const QString& message) const override;
+	void printDebug(const QString& message) const override;
 	void warning(const QString& message) const override;
+	void warningDebug(const QString& message) const override;
 	bool error(const QString& message) const override; //must always return false!
+	bool errorDebug(const QString& message) const override; //must always return false!
 	bool saveClouds(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) override;
 	bool saveMeshes(QString suffix = QString(), bool allAtOnce = false, const QString* allAtOnceFileName = nullptr) override;
 	bool importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) override;
@@ -100,5 +121,3 @@ private: //members
 	//! Widget parent
 	QDialog* m_parentWidget;
 };
-
-#endif

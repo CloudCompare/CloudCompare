@@ -40,5 +40,20 @@ int ccLabelingDlg::getMinPointsNb()
 
 bool ccLabelingDlg::randomColors()
 {
-	return (randomColorsCheckBox->checkState()==Qt::Checked);
+	return (randomColorsCheckBox->checkState() == Qt::Checked);
+}
+
+void ccLabelingDlg::setOctreeLevel(int octreeLevel)
+{
+	octreeLevelSpinBox->setValue(octreeLevel);
+}
+
+void ccLabelingDlg::setMinPointsNb(int minPointsNb)
+{
+	minPtsSpinBox->setValue(minPointsNb);
+}
+
+void ccLabelingDlg::setRandomColors(bool state)
+{
+	randomColorsCheckBox->setChecked(state);
 }

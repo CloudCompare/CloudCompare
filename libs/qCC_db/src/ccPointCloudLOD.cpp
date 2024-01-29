@@ -21,8 +21,9 @@
 #include "ccPointCloud.h"
 
 //Qt
-#include <QThread>
+#include <QAtomicInt>
 #include <QElapsedTimer>
+#include <QThread>
 
 //! Thread for background computation
 class ccPointCloudLODThread : public QThread
@@ -39,13 +40,34 @@ public:
 		, m_octree(nullptr)
 		, m_maxCountPerCell(maxCountPerCell)
 		, m_maxLevel(0)
+		, m_earlyStop(0)
 	{
 	}
 	
-	//!Destructor
+	//! Destructor
 	virtual ~ccPointCloudLODThread()
 	{
-		terminate();
+		if (isRunning())
+		{
+			ccLog::Warning("[ccPointCloudLODThread] Destructor called when the thread is still running: will have to terminate it...");
+			terminate();
+		}
+	}
+
+	//! Stops the thread
+	void stop()
+	{
+		if (m_octree && m_octree->isBuildInProgress())
+		{
+			m_octree->cancelBuild();
+		}
+
+		m_earlyStop = 1;
+		if (!wait(500))
+		{
+			ccLog::Warning("[ccPointCloudLODThread] Failed to stop the thread properly, will have to terminate it...");
+			terminate();
+		}
 	}
 	
 protected:
@@ -170,6 +192,8 @@ protected:
 	//reimplemented from QThread
 	virtual void run()
 	{
+		m_earlyStop = 0;
+
 		//reset structure
 		m_lod.clearData();
 		m_lod.setState(ccPointCloudLOD::UNDER_CONSTRUCTION);
@@ -189,16 +213,28 @@ protected:
 		m_octree = m_cloud.getOctree();
 		if (!m_octree)
 		{
-			m_octree = ccOctree::Shared(new ccOctree(&m_cloud));
+			m_octree.reset(new ccOctree(&m_cloud));
 			if (m_octree->build(nullptr/*progressCallback*/) <= 0)
 			{
-				//not enough memory
-				ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
-				m_lod.setState(ccPointCloudLOD::BROKEN);
+				if (0 == m_earlyStop)
+				{
+					//not enough memory
+					ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+					m_lod.setState(ccPointCloudLOD::BROKEN);
+				}
+				m_octree.clear();
 				return;
 			}
 
-			if (!m_cloud.getOctree()) //be sure that it hasn't been built in the meantime!
+			if (m_earlyStop)
+			{
+				// abort requested
+				m_octree.clear();
+				m_lod.clear();
+				return;
+			}
+
+			if (!m_cloud.getOctree()) //make sure that it hasn't been built in the meantime!
 			{
 				m_cloud.setOctree(m_octree);
 			}
@@ -210,6 +246,13 @@ protected:
 			//not enough memory
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
 			m_lod.setState(ccPointCloudLOD::BROKEN);
+			return;
+		}
+
+		if (m_earlyStop)
+		{
+			// abort requested
+			m_lod.clear();
 			return;
 		}
 
@@ -236,6 +279,14 @@ protected:
 
 		//init with root node
 		fillNode_flat(m_lod.root());
+
+		if (m_earlyStop)
+		{
+			// abort requested
+			m_octree.clear();
+			m_lod.clear();
+			return;
+		}
 
 		//first we allow the division of nodes as deep as possible but with a minimum number of points per cell
 		for (uint8_t currentLevel = 0; currentLevel < m_maxLevel; ++currentLevel)
@@ -272,6 +323,14 @@ protected:
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
+							if (m_earlyStop)
+							{
+								// abort requested
+								m_octree.clear();
+								m_lod.clear();
+								return;
+							}
+
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
 							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
@@ -284,6 +343,14 @@ protected:
 					}
 				}
 			}
+		}
+
+		if (m_earlyStop)
+		{
+			// abort requested
+			m_octree.clear();
+			m_lod.clear();
+			return;
 		}
 
 		m_lod.shrink_to_fit();
@@ -330,6 +397,14 @@ protected:
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
+							if (m_earlyStop)
+							{
+								// abort requested
+								m_octree.clear();
+								m_lod.clear();
+								return;
+							}
+
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
 							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
@@ -344,6 +419,14 @@ protected:
 
 				size_t cellCountAfter = m_lod.m_levels[currentLevel+1].data.size();
 				ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel+1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
+
+				if (m_earlyStop)
+				{
+					// abort requested
+					m_octree.clear();
+					m_lod.clear();
+					return;
+				}
 			}
 
 			m_lod.shrink_to_fit();
@@ -365,6 +448,7 @@ protected:
 	ccOctree::Shared m_octree;
 	uint32_t m_maxCountPerCell;
 	uint8_t m_maxLevel;
+	QAtomicInt m_earlyStop;
 };
 
 ccPointCloudLOD::ccPointCloudLOD()
@@ -518,8 +602,7 @@ void ccPointCloudLOD::clear()
 {
 	if (m_thread && m_thread->isRunning())
 	{
-		m_thread->terminate();
-		m_thread->wait();
+		m_thread->stop();
 	}
 	
 	m_mutex.lock();

@@ -28,39 +28,40 @@ class ccMainAppInterface;
 namespace ccEntityAction
 {
 	// Colours
-	bool	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent);
+	bool	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent = nullptr);
 	bool	rgbToGreyScale(const ccHObject::Container &selectedEntities);
-	bool	setColorGradient(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent);
-	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	setColorGradient(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent = nullptr);
+	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	
 	// Scalar Fields
-	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfAddIdField(const ccHObject::Container &selectedEntities);
+	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt = false);
     bool	sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app);
-	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	exportNormalToSF(const ccHObject::Container &selectedEntities, QWidget* parent, bool* exportDimensions = nullptr);
-	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	setSFsAsNormal(ccHObject* entity, QWidget* parent = nullptr);
+	bool	exportNormalToSF(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr, bool* exportDimensions = nullptr);
+	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfFromColor(const ccHObject::Container &selectedEntities, bool exportR, bool exportG, bool exportB, bool exportAlpha, bool exportComposite);
     bool	interpolateSFs(const ccHObject::Container &selectedEntities, ccMainAppInterface *parent);
     bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dst, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent = nullptr);
-	bool    sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent);
+	bool    sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent = nullptr);
 
-	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent);
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent = nullptr);
 	
 	// Normals
-	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	invertNormals(const ccHObject::Container &selectedEntities);
-	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	
 	//! Normals conversion destinations
 	enum class NORMAL_CONVERSION_DEST {
@@ -71,7 +72,7 @@ namespace ccEntityAction
 	bool	convertNormalsTo(const ccHObject::Container &selectedEntities, NORMAL_CONVERSION_DEST dest);
 	
 	// Octrees
-	bool	computeOctree(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	computeOctree(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	
 	// Properties
 	enum class CLEAR_PROPERTY {
@@ -80,7 +81,7 @@ namespace ccEntityAction
 		CURRENT_SCALAR_FIELD,
 		ALL_SCALAR_FIELDS
 	};
-	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget* parent);	
+	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget* parent = nullptr);
 	
 	enum class TOGGLE_PROPERTY {
 		ACTIVE = 0,
@@ -94,6 +95,6 @@ namespace ccEntityAction
 	bool	toggleProperty(const ccHObject::Container &selectedEntities, TOGGLE_PROPERTY property);
 	
 	// Stats
-	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent);
-	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent);
+	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 }

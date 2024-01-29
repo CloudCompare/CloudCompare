@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_POINT_CLOUD_HEADER
-#define CC_POINT_CLOUD_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the warnings about dominant inheritance
@@ -164,7 +163,7 @@ public: //features deletion/clearing
 	//! Notify a modification of color / scalar field display parameters or contents
 	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; }
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; decompressNormals();}
 	//! Notify a modification of points display parameters or contents
 	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
 
@@ -362,6 +361,39 @@ public: //normals computation/orientation
 	//! Orient normals with Fast Marching
 	bool orientNormalsWithFM(		unsigned char level,
 									ccProgressDialog* pDlg = nullptr);
+
+	//! Toggle the drawing of normals as small lines
+	void showNormalsAsLines(bool state);
+
+	//! Are normals drawn as vectors?
+	bool normalsAreDrawn() const;
+
+	//! Set the length of the normals
+	void setNormalLength(const float& value);
+
+	//! Get the length of the normals
+	const float& getNormalLength() {return m_normalLineParameters.length;}
+
+	//! Colors of the normals when they are displayed
+	enum NormalLineColors{
+		YELLOW,
+		RED,
+		GREEN,
+		BLUE,
+		BLACK
+	};
+
+	//! Set the color of the normals
+	void setNormalLineColor(int colorIdx);
+
+	//! Get the color of the normals
+	const int& getNormalLineColor() {return m_normalLineParameters.colorIdx;}
+
+	//! Do the drawing of normals
+	void drawNormalsAsLines(CC_DRAW_CONTEXT& context);
+
+	//! Update the decompressed normals which are used by drawNormalsAsLines
+	void decompressNormals();
 
 public: //waveform (e.g. from airborne scanners)
 
@@ -646,13 +678,13 @@ public: //other methods
 	void hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
 	//! Unrolling mode (see ccPointCloud::unroll)
-	enum UnrollMode { CYLINDER = 0, CONE = 1, STRAIGHTENED_CONE = 2, STRAIGHTENED_CONE2 = 3 };
+	enum UnrollMode { CYLINDER = 0, CONE_CONICAL = 1, CONE_CYLINDRICAL_FIXED_RADIUS = 2, CONE_CYLINDRICAL_ADAPTIVE_RADIUS = 3 };
 
 	//! Base unrolling parameters
 	struct UnrollBaseParams
 	{
-		PointCoordinateType radius;	//!< Unrolling cylinder radius (or cone base radius)
-		CCVector3 axisDir;			//!< Unrolling cylinder/cone axis direction
+		PointCoordinateType radius = 0;	//!< Unrolling cylinder radius (or cone base radius)
+		CCVector3 axisDir;				//!< Unrolling cylinder/cone axis direction
 	};
 
 	//! Cylinder unrolling parameters
@@ -665,7 +697,8 @@ public: //other methods
 	struct UnrollConeParams : public UnrollBaseParams
 	{
 		CCVector3 apex;				//!< Cone apex
-		double coneAngle_deg;		//!< Cone aperture angle (in degrees)
+		double coneAngle_deg = 0.0;	//!< Cone aperture angle (in degrees)
+		double spanRatio = 0.5;		//!< Conical projection span ratio
 	};
 
 	//! Unrolls the cloud and its normals on a cylinder or a cone
@@ -728,6 +761,9 @@ public: //other methods
 	//! Exports the specified coordinate dimension(s) to scalar field(s)
 	bool exportCoordToSF(bool exportDims[3]);
 
+	//! Sets coordinate(s) from a scalar field
+	bool setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf, PointCoordinateType defaultValueForNaN);
+
 	//! Exports the specified normal dimension(s) to scalar field(s)
 	bool exportNormalToSF(bool exportDims[3]);
 
@@ -742,6 +778,14 @@ public: //other methods
 
 	//! Shift the points of a given quantity along their normals
 	bool shiftPointsAlongNormals(PointCoordinateType shift);
+
+	//! Set the path for shaders
+	static void SetShaderPath(const QString &path);
+
+	//! Release shaders (if any)
+	/** Must be called before the OpenGL context is released.
+	**/
+	static void ReleaseShaders();
 
 protected:
 
@@ -763,6 +807,9 @@ protected:
 
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;
+
+	//! Used for drawing normals if needed
+	std::vector<CCVector3> m_decompressedNormals;
 
 	//! Specifies whether current scalar field color scale should be displayed or not
 	bool m_sfColorScaleDisplayed;
@@ -874,6 +921,12 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
-};
+	bool m_normalsDrawnAsLines;
 
-#endif //CC_POINT_CLOUD_HEADER
+	struct NormalLineParameters
+	{
+		float length = 1.0f;
+		ccColor::Rgba color = ccColor::yellow;
+		int colorIdx = YELLOW;
+	} m_normalLineParameters;
+};

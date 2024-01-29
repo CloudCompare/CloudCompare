@@ -1158,7 +1158,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					//in perspective view, the actual scale depends on the distance to the camera!
 					double d = (camera.modelViewMat * P).norm();
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindow::computeActualPixelSize())
+					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 				}
 				glFunc->glScalef(scale, scale, scale);
 				m_pickedPoints[i].markerScale = scale;

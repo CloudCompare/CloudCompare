@@ -22,7 +22,7 @@
 #include <QDialog>
 #include <QList>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 
 //! Generic overlay dialog interface
 class CCPLUGIN_LIB_API ccOverlayDialog : public QDialog
@@ -41,7 +41,7 @@ public:
 	/** Warning: link can't be modified while dialog is displayed/process is running!
 		\return success
 	**/
-	virtual bool linkWith(ccGLWindow* win);
+	virtual bool linkWith(ccGLWindowInterface* win);
 
 	//! Starts process
 	/** \return success
@@ -83,7 +83,7 @@ Q_SIGNALS:
 protected:
 
 	//! Slot called when the linked window is deleted (calls 'onClose')
-	virtual void onLinkedWindowDeletion(QObject* object = nullptr);
+	virtual void onLinkedWindowDeletion(ccGLWindowInterface* object = nullptr);
 
 protected:
 
@@ -91,7 +91,7 @@ protected:
 	bool eventFilter(QObject *obj, QEvent *e) override;
 
 	//! Associated (MDI) window
-	ccGLWindow* m_associatedWin;
+	ccGLWindowInterface* m_associatedWin;
 
 	//! Running/processing state
 	bool m_processing;

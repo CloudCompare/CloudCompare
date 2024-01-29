@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                   CLOUDCOMPARE PLUGIN: qAnimation                      #
@@ -15,16 +17,11 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_ANIMATION_PLUGIN_HEADER
-#define Q_ANIMATION_PLUGIN_HEADER
-
 //qCC
 #include "ccStdPluginInterface.h"
 
 //Qt
 #include <QObject>
-
-class ccGLWindow;
 
 // Animation plugin
 class qAnimation : public QObject, public ccStdPluginInterface
@@ -51,5 +48,3 @@ private:
 
 	QAction* m_action;
 };
-
-#endif

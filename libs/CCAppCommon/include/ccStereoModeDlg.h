@@ -19,7 +19,7 @@
 #include "CCAppCommon.h"
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QDialog>
@@ -41,10 +41,10 @@ public:
 	~ccStereoModeDlg() override;
 
 	//! Returns the current parameters
-	ccGLWindow::StereoParams getParameters() const;
+	ccGLWindowInterface::StereoParams getParameters() const;
 
 	//! Sets the current parameters
-	void setParameters(const ccGLWindow::StereoParams& params);
+	void setParameters(const ccGLWindowInterface::StereoParams& params);
 
 	//! Returns whether the FOV should be updated or not
 	bool updateFOV() const;

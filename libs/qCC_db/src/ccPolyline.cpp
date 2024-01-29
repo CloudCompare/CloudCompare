@@ -1039,3 +1039,36 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 
 	return success;
 }
+
+ccPolyline* ccPolyline::Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution/*=48*/)
+{
+	if (resolution < 4)
+	{
+		ccLog::Warning("[ccPolyline::Circle] Resolution is too small");
+		return nullptr;
+	}
+
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	ccPolyline* circle = new ccPolyline(vertices);
+	if (!vertices->reserve(resolution) || !circle->reserve(resolution))
+	{
+		ccLog::Error(QObject::tr("Not enough memory"));
+		delete circle;
+		return nullptr;
+	}
+
+	double angleStep_rad = 2 * M_PI / resolution;
+	for (unsigned i = 0; i < resolution; ++i)
+	{
+		CCVector3 P = center + CCVector3(cos(i * angleStep_rad) * radius, sin(i * angleStep_rad) * radius, 0);
+		vertices->addPoint(P);
+	}
+
+	vertices->setEnabled(false);
+	circle->addChild(vertices);
+	circle->addPointIndex(0, resolution);
+	circle->setClosed(true);
+	circle->setName("Circle");
+
+	return circle;
+}

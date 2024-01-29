@@ -96,6 +96,20 @@ struct UShortScalar
 
 };
 
+struct Int8Scalar
+{
+	std::int8_t S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+};
+
+struct UInt8Scalar
+{
+	std::uint8_t S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+};
+
 //! PCL custom point type used for reading intensity data
 struct OnlyNormals
 {
@@ -208,6 +222,14 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (ShortScalar,
 
 POINT_CLOUD_REGISTER_POINT_STRUCT (UShortScalar,
 	(unsigned short, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (Int8Scalar,
+	(std::int8_t, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (UInt8Scalar,
+	(std::uint8_t, S5c4laR, S5c4laR)
 	)
 
 POINT_CLOUD_REGISTER_POINT_STRUCT (OnlyNormals,

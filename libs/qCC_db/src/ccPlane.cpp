@@ -180,7 +180,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* rms/
 	if (rms)
 	{
 		*rms = CCCoreLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSPlane);
-		plane->setMetaData(QString("RMS"), QVariant(*rms));
+		plane->setMetaData("RMS", *rms);
 	}
 
 	return plane;

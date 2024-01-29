@@ -50,9 +50,10 @@ static ccSingleton<ccConsole> s_console;
 
 bool ccConsole::s_showQtMessagesInConsole = false;
 bool ccConsole::s_redirectToStdOut = false;
+static int s_refreshCycle_ms = 1000;
 
+/*** ccCustomQListWidget ***/
 
-// ccCustomQListWidget
 ccCustomQListWidget::ccCustomQListWidget(QWidget *parent)
 	: QListWidget(parent)
 {
@@ -80,8 +81,30 @@ void ccCustomQListWidget::keyPressEvent(QKeyEvent *event)
 	}
 }
 
+/*** ccConsole ***/
 
-// ccConsole
+void ccConsole::SetRefreshCycle(int cycle_ms/*=1000*/)
+{
+	if (cycle_ms <= 0)
+	{
+		//invalid
+		Warning("Invalid refresh cycle (can't be zero of negative)");
+		return;
+	}
+
+	if (cycle_ms != s_refreshCycle_ms)
+	{
+		s_refreshCycle_ms = cycle_ms;
+
+		if (s_console.instance && s_console.instance->autoRefresh())
+		{
+			// force the internal timer update
+			s_console.instance->setAutoRefresh(false);
+			s_console.instance->setAutoRefresh(true);
+		}
+	}
+}
+
 ccConsole* ccConsole::TheInstance(bool autoInit/*=true*/)
 {
 	if (!s_console.instance && autoInit)
@@ -117,7 +140,7 @@ ccConsole::~ccConsole()
 	setLogFile(QString()); //to close/delete any active stream
 }
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+static void MyMessageOutput(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
 #ifndef QT_DEBUG
 	if (!ccConsole::QtMessagesEnabled())
@@ -205,6 +228,13 @@ void ccConsole::Init(	QListWidget* textDisplay/*=nullptr*/,
 	s_console.instance->m_parentWidget = parentWidget;
 	s_console.instance->m_parentWindow = parentWindow;
 	s_redirectToStdOut = redirectToStdOut;
+
+	if (s_redirectToStdOut)
+	{
+		// make the system console/terminal more responsive by removing any buffering
+		setbuf(stdout, NULL);
+	}
+
 	//auto-start
 	if (textDisplay)
 	{
@@ -215,11 +245,16 @@ void ccConsole::Init(	QListWidget* textDisplay/*=nullptr*/,
 		settings.endGroup();
 
 		//install : set the callback for Qt messages
-		qInstallMessageHandler(myMessageOutput);
+		qInstallMessageHandler(MyMessageOutput);
 
 		s_console.instance->setAutoRefresh(true);
 	}
 	ccLog::RegisterInstance(s_console.instance);
+}
+
+bool ccConsole::autoRefresh() const
+{
+	return m_timer.isActive();
 }
 
 void ccConsole::setAutoRefresh(bool state)
@@ -227,7 +262,7 @@ void ccConsole::setAutoRefresh(bool state)
 	if (state)
 	{
 		connect(&m_timer, &QTimer::timeout, this, &ccConsole::refresh);
-		m_timer.start(1000);
+		m_timer.start(s_refreshCycle_ms);
 	}
 	else
 	{
@@ -240,62 +275,62 @@ void ccConsole::refresh()
 {
 	m_mutex.lock();
 	
-	if ((m_textDisplay || m_logStream) && !m_queue.isEmpty())
+	if (!m_queue.isEmpty())
 	{
-		for (QVector<ConsoleItemType>::const_iterator it=m_queue.constBegin(); it!=m_queue.constEnd(); ++it)
+		if (m_textDisplay || m_logStream)
 		{
-			 //it->second = message severity
-			bool debugMessage = (it->second & LOG_DEBUG);
-#ifndef QT_DEBUG
-			//skip debug message in release mode
-			if (debugMessage)
-				continue;
+			for (auto messagePair : m_queue)
+			{
+				//destination: log file
+				if (m_logStream)
+				{
+					*m_logStream << messagePair.first << endl;
+				}
+
+				//destination: console widget
+				if (m_textDisplay)
+				{
+					//messagePair.first = message text
+					QListWidgetItem* item = new QListWidgetItem(messagePair.first);
+
+					//set color based on the message severity
+					if (messagePair.second & LOG_ERROR) // Error
+					{
+						item->setForeground(Qt::red);
+					}
+					else if (messagePair.second & LOG_WARNING) // Warning
+					{
+						item->setForeground(Qt::darkRed);
+						//we also force the console visibility if a warning message arrives!
+						if (m_parentWindow)
+						{
+							m_parentWindow->forceConsoleDisplay();
+						}
+					}
+#ifdef QT_DEBUG
+					else if (messagePair.second & LOG_DEBUG) // Debug
+					{
+						item->setForeground(Qt::blue);
+					}
 #endif
 
-			//destination: log file
-			if (m_logStream)
-			{
-				*m_logStream << it->first << Qt::endl;
+					m_textDisplay->addItem(item);
+				}
 			}
 
-			//destination: console widget
+			if (m_logStream)
+			{
+				m_logFile.flush();
+			}
+
 			if (m_textDisplay)
 			{
-				//it->first = message text
-				QListWidgetItem* item = new QListWidgetItem(it->first);
-
-				//set color based on the message severity
-				//Error
-				if (it->second & LOG_ERROR)
-				{
-					item->setForeground(Qt::red);
-				}
-				//Warning
-				else if (it->second & LOG_WARNING)
-				{
-					item->setForeground(Qt::darkRed);
-					//we also force the console visibility if a warning message arrives!
-					if (m_parentWindow)
-						m_parentWindow->forceConsoleDisplay();
-				}
-#ifdef QT_DEBUG
-				else if (debugMessage) {
-					item->setForeground(Qt::blue);
-				}
-#endif
-
-				m_textDisplay->addItem(item);
+				m_textDisplay->scrollToBottom();
 			}
 		}
 
-		if (m_logStream)
-			m_logFile.flush();
-
-		if (m_textDisplay)
-			m_textDisplay->scrollToBottom();
+		m_queue.clear();
 	}
-
-	m_queue.clear();
 
 	m_mutex.unlock();
 }
@@ -313,12 +348,12 @@ void ccConsole::logMessage(const QString& message, int level)
 	QString formatedMessage = QStringLiteral("[") + QTime::currentTime().toString() + QStringLiteral("] ") + message;
 	if (s_redirectToStdOut)
 	{
-		printf("%s\n", qPrintable(message));
+		printf("%s\n", qPrintable(formatedMessage));
 	}
 	if (m_textDisplay || m_logStream)
 	{
 		m_mutex.lock();
-		m_queue.push_back(ConsoleItemType(formatedMessage,level));
+		m_queue.push_back(ConsoleItemType(formatedMessage, level));
 		m_mutex.unlock();
 	}
 #ifdef QT_DEBUG
@@ -348,7 +383,7 @@ void ccConsole::logMessage(const QString& message, int level)
 			else
 				printf("MSG: ");
 		}
-		printf(" %s\n",qPrintable(formatedMessage));
+		printf(" %s\n", qPrintable(formatedMessage));
 	}
 #endif
 

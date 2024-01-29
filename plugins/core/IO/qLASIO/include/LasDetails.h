@@ -40,7 +40,7 @@ struct laszip_vlr;
 typedef laszip_vlr laszip_vlr_struct;
 
 constexpr size_t LAS_VLR_HEADER_SIZE = 54;
-constexpr double SCAN_ANGLE_SCALE    = 0.06;
+constexpr double SCAN_ANGLE_SCALE    = 0.006;
 
 /// This namespace regroups constants for all the names we use
 /// in CloudCompare's ScalarField system for the standard dimensions defined by the LAS Spec.

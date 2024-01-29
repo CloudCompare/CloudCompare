@@ -26,7 +26,7 @@
 
 class ccGenericPointCloud;
 class ccPointCloud;
-class ccGLWindow;
+class ccGLWindowInterface;
 
 namespace Ui
 {
@@ -56,7 +56,7 @@ public:
 	void removeAllEntities();
 	
 	//inherited from ccOverlayDialog
-	bool linkWith(ccGLWindow* win) override;
+	bool linkWith(ccGLWindowInterface* win) override;
 	bool start() override;
 	void stop(bool accepted) override;
 

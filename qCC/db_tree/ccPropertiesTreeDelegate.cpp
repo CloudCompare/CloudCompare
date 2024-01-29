@@ -25,7 +25,7 @@
 #include "sfEditDlg.h"
 
 //qCC_glWindow
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 #include <ccGuiParameters.h>
 
 //qCC_db
@@ -491,7 +491,11 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 			//Box dimensions
 			CCVector3 bboxDiag = box.getDiagVec();
 			appendRow(ITEM(fitBBox ? tr( "Local box dimensions" ) : tr( "Box dimensions" )),
-				ITEM(QStringLiteral("X: %0\nY: %1\nZ: %2").arg(bboxDiag.x).arg(bboxDiag.y).arg(bboxDiag.z)));
+				ITEM(QStringLiteral("X: %1 (%2 : %3)\nY: %4 (%5 : %6)\nZ: %7 (%8 : %9)")
+					.arg(bboxDiag.x).arg(box.minCorner().x).arg(box.maxCorner().x)
+					.arg(bboxDiag.y).arg(box.minCorner().y).arg(box.maxCorner().y)
+					.arg(bboxDiag.z).arg(box.minCorner().z).arg(box.maxCorner().z)
+				));
 
 
 			//Box center
@@ -617,7 +621,39 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 			double dataSize_mb = (cloud->fwfData() ? cloud->fwfData()->size() : 0) / static_cast<double>(1 << 20);
 			appendRow(ITEM( tr( "Data size" ) ), ITEM(QStringLiteral("%1 Mb").arg(dataSize_mb, 0, 'f', 2)));
 		}
+
+		//normals
+		if (cloud->hasNormals())
+		{
+			fillWithDrawNormals(_obj);
+		}
 	}
+}
+
+void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
+{
+	assert(_obj && m_model);
+	if (!_obj || !m_model)
+	{
+		return;
+	}
+	assert(_obj->isA(CC_TYPES::POINT_CLOUD));
+	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		return;
+	}
+
+	addSeparator( tr( "Draw normals as lines" ) );
+
+	//visibility
+	const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+	appendRow(ITEM(tr("Draw")), CHECKABLE_ITEM(cloud->normalsAreDrawn(), OBJECT_CLOUD_DRAW_NORMALS));
+
+	//normals length
+	appendRow(ITEM(tr("Length")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_LENGTH), true);
+
+	//normals color
+	appendRow(ITEM(tr("Color")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_COLOR), true);
 }
 
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
@@ -711,6 +747,13 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(const ccGenericPrimitive* _obj)
 			appendRow(ITEM( tr( "Bottom radius" ) ), PERSISTENT_EDITOR(OBJECT_CONE_BOTTOM_RADIUS), true);
 			appendRow(ITEM( tr( "Top radius" ) ), PERSISTENT_EDITOR(OBJECT_CONE_TOP_RADIUS), true);
 		}
+
+		const ccCone* cone = static_cast<const ccCone*>(_obj);
+		CCVector3 apex = cone->computeApex();
+		appendRow(ITEM(tr("Apex")), ITEM(QStringLiteral("X: %0\nY: %1\nZ: %2").arg(apex.x).arg(apex.y).arg(apex.z)));
+
+		double angle_deg = cone->computeHalfAngle_deg();
+		appendRow(ITEM(tr("Half angle")), ITEM(QStringLiteral("%1 deg.").arg(angle_deg)));
 	}
 	else if (_obj->isKindOf(CC_TYPES::PLANE))
 	{
@@ -1233,14 +1276,14 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		QComboBox *comboBox = new QComboBox(parent);
 
-		std::vector<ccGLWindow*> glWindows;
+		std::vector<ccGLWindowInterface*> glWindows;
 		MainWindow::GetGLWindows(glWindows);
 
 		comboBox->addItem( tr( s_noneString ) );
 
 		for (auto &glWindow : glWindows)
 		{
-			comboBox->addItem(glWindow->windowTitle());
+			comboBox->addItem(glWindow->getWindowTitle());
 		}
 
 		connect(comboBox, &QComboBox::currentTextChanged, this, &ccPropertiesTreeDelegate::objectDisplayChanged);
@@ -1528,7 +1571,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		comboBox->addItem( tr( s_defaultPointSizeString ) ); //size = 0
 		
-		for (int i = static_cast<int>(ccGLWindow::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindow::MAX_POINT_SIZE_F); ++i)
+		for (int i = static_cast<int>(ccGLWindowInterface::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindowInterface::MAX_POINT_SIZE_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
 		}
@@ -1545,7 +1588,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		comboBox->addItem( tr( s_defaultPolyWidthSizeString ) ); //size = 0
 				
-		for (int i = static_cast<int>(ccGLWindow::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindow::MAX_LINE_WIDTH_F); ++i)
+		for (int i = static_cast<int>(ccGLWindowInterface::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindowInterface::MAX_LINE_WIDTH_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
 		}
@@ -1615,6 +1658,35 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
+	case OBJECT_CLOUD_NORMAL_COLOR:
+	{
+		QComboBox *comboBox = new QComboBox(parent);
+
+		comboBox->addItem("Yellow");
+		comboBox->addItem("Red");
+		comboBox->addItem("Green");
+		comboBox->addItem("Blue");
+		comboBox->addItem("Black");
+
+		connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+				this, &ccPropertiesTreeDelegate::normalColorChanged);
+
+		outputWidget = comboBox;
+	}
+	break;
+	case OBJECT_CLOUD_NORMAL_LENGTH:
+	{
+		QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
+		spinBox->setRange(ccColorScale::MIN_STEPS, ccColorScale::MAX_STEPS);
+		spinBox->setSingleStep(0.1);
+		spinBox->setMinimum(0);
+
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+				this, &ccPropertiesTreeDelegate::normalLengthChanged);
 
 		outputWidget = spinBox;
 	}
@@ -1725,8 +1797,8 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			return;
 		}
 
-		ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-		int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
+		ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(m_currentObject->getDisplay());
+		int pos = (win ? comboBox->findText(win->getWindowTitle()) : 0);
 
 		comboBox->setCurrentIndex(std::max(pos, 0)); //0 = "NONE"
 		break;
@@ -2002,6 +2074,28 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetComboBoxIndex(editor, currentIndex);
 		break;
 	}
+	case OBJECT_CLOUD_NORMAL_COLOR:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		assert(cloud);
+		if (!cloud)
+		{
+			return;
+		}
+		SetComboBoxIndex(editor, static_cast<ccPointCloud*>(cloud)->getNormalLineColor());
+		break;
+	}
+	case OBJECT_CLOUD_NORMAL_LENGTH:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		assert(cloud);
+		if (!cloud)
+		{
+			return;
+		}
+		SetDoubleSpinBoxValue(editor, static_cast<ccPointCloud*>(cloud)->getNormalLength());
+		break;
+	}
 	default:
 		QStyledItemDelegate::setEditorData(editor, index);
 		break;
@@ -2167,6 +2261,17 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	}
 	redraw = true;
 	break;
+	case OBJECT_CLOUD_DRAW_NORMALS:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		bool isChecked = (item->checkState() == Qt::Checked);
+		if (cloud)
+		{
+			static_cast<ccPointCloud*>(cloud)->showNormalsAsLines(isChecked);
+		}
+	}
+	redraw = true;
+	break;
 	}
 
 	if (redraw)
@@ -2253,11 +2358,11 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr);
 	if (sf)
 	{
-		ccGLWindow* glWindow = static_cast<ccGLWindow*>(cloud->getDisplay());
-		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(ccColorScalesManager::GetUniqueInstance(),
-			MainWindow::TheInstance(),
-			sf->getColorScale(),
-			glWindow ? glWindow->asWidget() : nullptr);
+		ccGLWindowInterface* glWindow = static_cast<ccGLWindowInterface*>(cloud->getDisplay());
+		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(	ccColorScalesManager::GetUniqueInstance(),
+																				MainWindow::TheInstance(),
+																				sf->getColorScale(),
+																				glWindow ? glWindow->asWidget() : nullptr);
 		editorDialog->setAssociatedScalarField(sf);
 		if (editorDialog->exec())
 		{
@@ -2573,7 +2678,7 @@ void ccPropertiesTreeDelegate::applyLabelViewport()
 		return;
 	}
 
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::GetActiveGLWindow();
 	if (!win)
 		return;
 
@@ -2595,13 +2700,25 @@ void ccPropertiesTreeDelegate::updateLabelViewport()
 		return;
 	}
 
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	ccGLWindowInterface* win = MainWindow::GetActiveGLWindow();
 	if (!win)
 	{
 		return;
 	}
 
 	viewport->setParameters(win->getViewportParameters());
+
+	// Update the custom light position as well
+	{
+		bool customLightEnabled = win->customLightEnabled();
+		CCVector3f customLightPos = win->getCustomLightPosition();
+
+		viewport->setMetaData("CustomLightEnabled", customLightEnabled);
+		viewport->setMetaData("CustomLightPosX", customLightPos.x);
+		viewport->setMetaData("CustomLightPosY", customLightPos.y);
+		viewport->setMetaData("CustomLightPosZ", customLightPos.z);
+	}
+
 	ccLog::Print(QString("Viewport '%1' has been updated").arg(viewport->getName()));
 }
 
@@ -2663,7 +2780,6 @@ void ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged(double val)
 	}
 }
 
-
 void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 {
 	if (!m_currentObject)
@@ -2698,6 +2814,42 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 		{
 			updateDisplay();
 		}
+	}
+}
+
+void ccPropertiesTreeDelegate::normalColorChanged(int colorIdx)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+	assert(cloud);
+
+	if (cloud)
+	{
+		static_cast<ccPointCloud*>(cloud)->setNormalLineColor(colorIdx);
+		cloud->redrawDisplay();
+		updateDisplay();
+	}
+}
+
+void ccPropertiesTreeDelegate::normalLengthChanged(double length)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
+	assert(cloud);
+
+	if (cloud)
+	{
+		static_cast<ccPointCloud*>(cloud)->setNormalLength(length);
+		cloud->redrawDisplay();
+		updateDisplay();
 	}
 }
 
@@ -2761,10 +2913,10 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 
 	QString actualDisplayTitle;
 
-	ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
+	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(m_currentObject->getDisplay());
 	if (win)
 	{
-		actualDisplayTitle = win->windowTitle();
+		actualDisplayTitle = win->getWindowTitle();
 	}
 	else
 	{
@@ -2777,7 +2929,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 		//to be sure that they will also be redrawn!
 		m_currentObject->prepareDisplayForRefresh_recursive();
 
-		ccGLWindow* win = MainWindow::GetGLWindow(newDisplayTitle);
+		ccGLWindowInterface* win = MainWindow::GetGLWindow(newDisplayTitle);
 		m_currentObject->setDisplay_recursive(win);
 		if (win)
 		{

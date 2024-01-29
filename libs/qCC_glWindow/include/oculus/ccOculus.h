@@ -104,7 +104,8 @@ struct OculusHMD
 			desc.Height = bufferSize.h;
 			desc.MipLevels = 1;
 			desc.SampleCount = 1;
-			desc.StaticImage = ovrFalse;
+			desc.StaticImage = ovrFalse;
+
 			if (!ovr_CreateTextureSwapChainGL(session,
 				&desc,
 				&textureSwapChain) == ovrSuccess)
@@ -129,13 +130,15 @@ struct OculusHMD
 			assert(depthTextures.empty());
 
 			int textureCount = 0;
-			ovr_GetTextureSwapChainLength(session, textureSwapChain, &textureCount);			depthTextures.resize(textureCount, 0);
+			ovr_GetTextureSwapChainLength(session, textureSwapChain, &textureCount);
+			depthTextures.resize(textureCount, 0);
 			for (int i = 0; i < textureCount; ++i)
 			{
 				//set the color texture
 				{
 					unsigned int texId;
-					ovr_GetTextureSwapChainBufferGL(session, textureSwapChain, 0, &texId);					glFunc->glBindTexture(GL_TEXTURE_2D, texId);
+					ovr_GetTextureSwapChainBufferGL(session, textureSwapChain, 0, &texId);
+					glFunc->glBindTexture(GL_TEXTURE_2D, texId);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR/*GL_LINEAR_MIPMAP_LINEAR*/);
@@ -348,8 +351,8 @@ static ccGLMatrixd FromOVRMat(const OVR::Matrix4f& ovrMat)
 {
 	ccGLMatrixd ccMat;
 	double* data = ccMat.data();
-	data[0] = ovrMat.M[0][0]; data[4] = ovrMat.M[0][1]; data[ 8] = ovrMat.M[0][2]; data[12] = ovrMat.M[0][3];
-	data[1] = ovrMat.M[1][0]; data[5] = ovrMat.M[1][1];	data[9] = ovrMat.M[1][2]; data[13] = ovrMat.M[1][3];
+	data[0] = ovrMat.M[0][0]; data[4] = ovrMat.M[0][1]; data[8]  = ovrMat.M[0][2]; data[12] = ovrMat.M[0][3];
+	data[1] = ovrMat.M[1][0]; data[5] = ovrMat.M[1][1];	data[9]  = ovrMat.M[1][2]; data[13] = ovrMat.M[1][3];
 	data[2] = ovrMat.M[2][0]; data[6] = ovrMat.M[2][1];	data[10] = ovrMat.M[2][2]; data[14] = ovrMat.M[2][3];
 	data[3] = ovrMat.M[3][0]; data[7] = ovrMat.M[3][1];	data[11] = ovrMat.M[3][2]; data[15] = ovrMat.M[3][3];
 
@@ -359,10 +362,10 @@ static ccGLMatrixd FromOVRMat(const OVR::Matrix4f& ovrMat)
 static OVR::Matrix4f ToOVRMat(const ccGLMatrixd& ccMat)
 {
 	const double* M = ccMat.data();
-	return OVR::Matrix4f(M[0], M[4], M[8], M[12],
-		M[1], M[5], M[9], M[13],
-		M[2], M[6], M[10], M[14],
-		M[3], M[7], M[11], M[15]);
+	return OVR::Matrix4f(	M[0], M[4], M[8],  M[12],
+							M[1], M[5], M[9],  M[13],
+							M[2], M[6], M[10], M[14],
+							M[3], M[7], M[11], M[15]);
 }
 
 static void OVR_CDECL LogCallback(uintptr_t /*userData*/, int level, const char* message)

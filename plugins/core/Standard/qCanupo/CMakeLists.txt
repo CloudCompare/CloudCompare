@@ -18,6 +18,8 @@ if( PLUGIN_STANDARD_QCANUPO )
 		target_compile_definitions( ${PROJECT_NAME} PRIVATE COMPILE_PRIVATE_CANUPO )
 	endif()
 	
+	target_compile_definitions( ${PROJECT_NAME} PUBLIC DLIB_NO_GUI_SUPPORT)
+	
 	add_subdirectory( include )
 	add_subdirectory( src )
 	add_subdirectory( ui )

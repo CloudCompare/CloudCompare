@@ -364,6 +364,8 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 	, m_pickingHub(pickingHub)
 	, m_gui(new Ui_WaveDialog)
 	, m_waveMax(0)
+	, m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
+	, m_display(cloud ? cloud->getDisplay() : nullptr)
 {
 	m_gui->setupUi(this);
 	
@@ -397,15 +399,15 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 	connect(m_gui->saveWaveToolButton,		&QToolButton::clicked,	this,	&ccWaveDialog::onExportWaveAsCSV);
 	connect(this, &QDialog::finished, [&]() { m_gui->pointPickingToolButton->setChecked(false); }); //auto disable picking mode when the dialog is closed
 
-
 	//force update
 	onPointIndexChanged(0);
 }
 
 ccWaveDialog::~ccWaveDialog()
 {
-
 	delete m_gui;
+	if (m_display)
+		m_display->redraw();
 }
 
 void ccWaveDialog::onPointIndexChanged(int index)
@@ -422,7 +424,38 @@ void ccWaveDialog::onPointIndexChanged(int index)
 	}
 
 	m_widget->init(m_cloud, static_cast<unsigned>(index), m_gui->logScaleCheckBox->isChecked(), m_gui->fixedAmplitudeCheckBox->isChecked() ? m_waveMax : 0.0);
+
+	add2DLabel(m_cloud, index);
+
 	m_widget->refresh();
+}
+
+void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
+{
+	ccGLCameraParameters camera;
+	if (m_display == nullptr)
+		return;
+	m_display->getGLCameraParameters(camera);
+
+	const CCVector3& P = *cloud->getPoint(pointIndex);
+	CCVector3d Y;
+	camera.project(P, Y);
+	Y.y = m_display->getScreenSize().height() - Y.y;
+
+	m_label->clear();
+	m_label->addPickedPoint(cloud, pointIndex, false);
+	m_label->setVisible(true);
+	m_label->setPosition(static_cast<float>(Y.x + 20) / m_display->getScreenSize().width(),
+						 static_cast<float>(Y.y + 20) / m_display->getScreenSize().height());
+
+	m_label->setDisplayedIn2D(true);
+	m_label->displayPointLegend(false);
+	m_label->setDisplay(m_display);
+	cloud->addChild(m_label.get());
+
+	m_display->redraw();
+
+	return;
 }
 
 void ccWaveDialog::onItemPicked(const PickedItem& pi)

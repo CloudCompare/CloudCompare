@@ -34,8 +34,8 @@ class CCAPPCOMMON_LIB_API ccGamepadManager : public QObject
 	Q_OBJECT
 	
 public:
-	ccGamepadManager( ccMainAppInterface *appInterface, QObject *parent );
-	~ccGamepadManager();
+	ccGamepadManager(ccMainAppInterface* appInterface, QObject* parent);
+	~ccGamepadManager() override;
 	
 	//! Returns the menu associated with gamepads
 	QMenu* menu() { return m_menu; }

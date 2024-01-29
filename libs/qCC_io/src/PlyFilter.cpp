@@ -1129,11 +1129,11 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
 			QString propName = QString(pp.propName).toUpper();
 
-			if (nxIndex == 0 && (propName.contains("NX") || (elementName.contains("NORM") && propName.endsWith("X"))))
+			if (nxIndex == 0 && (propName.contains("NX") || (elementName.contains("NORM") && propName.endsWith("X")) || (propName.contains("NORM") && propName.endsWith("X"))))
 				nxIndex = i;
-			else if (nyIndex == 0 && (propName.contains("NY") || (elementName.contains("NORM") && propName.endsWith("Y"))))
+			else if (nyIndex == 0 && (propName.contains("NY") || (elementName.contains("NORM") && propName.endsWith("Y")) || (propName.contains("NORM") && propName.endsWith("Y"))))
 				nyIndex = i;
-			else if (nzIndex == 0 && (propName.contains("NZ") || (elementName.contains("NORM") && propName.endsWith("Z"))))
+			else if (nzIndex == 0 && (propName.contains("NZ") || (elementName.contains("NORM") && propName.endsWith("Z")) || (propName.contains("NORM") && propName.endsWith("Z"))))
 				nzIndex = i;
 			else if (rIndex == 0 && (propName.contains("RED") || (elementName.contains("COL") && propName.endsWith("R"))))
 				rIndex = i;
@@ -1142,8 +1142,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			else if (bIndex == 0 && (propName.contains("BLUE") || (elementName.contains("COL") && propName.endsWith("B"))))
 				bIndex = i;
 			else if (iIndex == 0 && (propName.contains("INTENSITY") || propName.contains("GRAY") || propName.contains("GREY") || (elementName.contains("COL") && propName.endsWith("I"))))
-				//iIndex = i; //DGM: we don't load the intensities as RGB colors anymore!
-				sfPropIndexes.push_back(i);
+			{
+				sfPropIndexes.push_back(i); //DGM: we don't load the intensities as RGB colors anymore but as a scalar field
+			}
 			else if (elementName.contains("VERT") || elementName.contains("POINT"))
 			{
 				if (propName.contains("SCAL"))
@@ -1156,7 +1157,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 					zIndex = i;
 			}
 			else if (propName.contains("SCAL") || propName.contains("VAL"))
+			{
 				sfPropIndexes.push_back(i);
+			}
 		}
 	}
 

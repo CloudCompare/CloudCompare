@@ -19,8 +19,10 @@
 
 //Local
 #include "ccCommon.h"
-#include "ccGLWindow.h"
-#include "ccGuiParameters.h"
+
+//qCC_gl
+#include <ccGLWindowInterface.h>
+#include <ccGuiParameters.h>
 
 //qCC_db
 #include <ccLog.h>
@@ -74,11 +76,11 @@ ccPointPropertiesDlg::~ccPointPropertiesDlg()
 	m_rect2DLabel = nullptr;
 }
 
-bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
+bool ccPointPropertiesDlg::linkWith(ccGLWindowInterface* win)
 {
 	assert(m_label && m_rect2DLabel);
 
-	ccGLWindow* oldWin = m_associatedWin;
+	ccGLWindowInterface* oldWin = m_associatedWin;
 
 	if (!ccPointPickingGenericInterface::linkWith(win))
 	{
@@ -90,8 +92,8 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	{
 		oldWin->removeFromOwnDB(m_label);
 		oldWin->removeFromOwnDB(m_rect2DLabel);
-		oldWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
-		oldWin->disconnect(this);
+		oldWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
+		oldWin->signalEmitter()->disconnect(this);
 	}
 
 	m_rect2DLabel->setVisible(false);	//=invalid
@@ -103,9 +105,9 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 	{
 		m_associatedWin->addToOwnDB(m_label);
 		m_associatedWin->addToOwnDB(m_rect2DLabel);
-		connect(m_associatedWin, &ccGLWindow::mouseMoved,		 this, &ccPointPropertiesDlg::update2DZone);
-		connect(m_associatedWin, &ccGLWindow::leftButtonClicked, this, &ccPointPropertiesDlg::processClickedPoint);
-		connect(m_associatedWin, &ccGLWindow::buttonReleased,	 this, &ccPointPropertiesDlg::close2DZone);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &ccPointPropertiesDlg::update2DZone);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,	this, &ccPointPropertiesDlg::processClickedPoint);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased,		this, &ccPointPropertiesDlg::close2DZone);
 	}
 
 	return true;
@@ -127,7 +129,7 @@ void ccPointPropertiesDlg::stop(bool state)
 	m_rect2DLabel->setSelected(true);	//=closed
 
 	if (m_associatedWin)
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 
 	ccPointPickingGenericInterface::stop(state);
 }
@@ -140,7 +142,7 @@ void ccPointPropertiesDlg::onClose()
 void ccPointPropertiesDlg::activatePointPropertiesDisplay()
 {
 	if (m_associatedWin)
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 
 	m_pickingMode = POINT_INFO;
 	pointPropertiesButton->setDown(true);
@@ -163,7 +165,7 @@ void ccPointPropertiesDlg::activateDistanceDisplay()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->redraw(false);
 	}
 }
@@ -180,7 +182,7 @@ void ccPointPropertiesDlg::activateAngleDisplay()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::MODE_TRANSFORM_CAMERA);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->redraw(false);
 	}
 }
@@ -197,7 +199,7 @@ void ccPointPropertiesDlg::activate2DZonePicking()
 
 	if (m_associatedWin)
 	{
-		m_associatedWin->setInteractionMode(ccGLWindow::INTERACT_SEND_ALL_SIGNALS);
+		m_associatedWin->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
 		m_associatedWin->redraw(false);
 	}
 }

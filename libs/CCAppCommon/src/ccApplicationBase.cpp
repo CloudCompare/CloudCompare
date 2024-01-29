@@ -34,9 +34,10 @@
 
 // qCC_db
 #include "ccMaterial.h"
+#include <ccPointCloud.h>
 
 // qCC_glWindow
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 // Common
 #include "ccApplicationBase.h"
@@ -45,6 +46,9 @@
 
 // ccPluginAPI
 #include <ccPersistentSettings.h>
+
+// Qt
+#include <QOpenGLWidget>
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
 #error CloudCompare does not support versions of Qt prior to 5.5
@@ -60,16 +64,15 @@ void ccApplicationBase::InitOpenGL()
 	**/
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
-
-		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 		format.setStencilBufferSize(0);
-
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-		format.setStereo(true);
+#ifndef CC_LINUX // seems to cause some big issues on Linux if Quad-buffering is not supported
+				// we would need to find a way to check whether it's supported or not in advance...
+		format.setStereo(true); //we request stereo support by default, but this may not be supported!
 #endif
+		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
 #ifdef Q_OS_MAC
-		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindow::functions()
+		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindowInterface::functions()
 		format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
 
@@ -93,11 +96,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	setOrganizationName("CCCorp");
 
 	setupPaths();
-
-#ifdef Q_OS_WIN
-	//enables automatic scaling based on the monitor's pixel density
-	setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
 
 #ifdef Q_OS_MAC
 	// Mac OS X apps don't show icons in menus
@@ -134,7 +132,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	}
 	settings.endGroup();
 
-	ccGLWindow::setShaderPath(m_shaderPath);
+	ccGLWindowInterface::SetShaderPath(m_shaderPath);
+	ccPointCloud::SetShaderPath(m_shaderPath);
 	ccPluginManager::Get().setPaths(m_pluginPaths);
 
 	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("qt"), m_translationPath);
@@ -147,10 +146,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 QString ccApplicationBase::versionLongStr(bool includeOS) const
 {
 	QString verStr = m_versionStr;
-
-#ifdef CC_GL_WINDOW_USE_QWINDOW
-	verStr += QStringLiteral(" Stereo");
-#endif
 
 #if defined(CC_ENV_64)
 	const QString arch("64-bit");

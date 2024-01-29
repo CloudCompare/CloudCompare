@@ -351,12 +351,12 @@ bool ccComparisonDlg::computeApproxDistances()
 	case CLOUDCLOUD_DIST: //cloud-cloud
 		{
 			approxResult = CCCoreLib::DistanceComputationTools::computeApproxCloud2CloudDistance(	m_compCloud,
-																								m_refCloud,
-																								DEFAULT_OCTREE_LEVEL,
-																								0,
-																								progressDlg.data(),
-																								m_compOctree.data(),
-																								m_refOctree.data());
+																									m_refCloud,
+																									DEFAULT_OCTREE_LEVEL,
+																									0,
+																									progressDlg.data(),
+																									m_compOctree.data(),
+																									m_refOctree.data());
 		}
 		break;
 	
@@ -854,11 +854,6 @@ bool ccComparisonDlg::computeDistances()
 		break;
 
 	case CLOUDMESH_DIST: //cloud-mesh
-
-		if (multiThread && maxDistCheckBox->isChecked())
-		{
-			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
-		}
 
 		//setup parameters
 		{

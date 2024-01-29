@@ -58,6 +58,7 @@
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
+#include "ccSetSFsAsNormalDlg.h"
 #include "ccStatisticalTestDlg.h"
 
 #include "ccCommon.h"
@@ -97,7 +98,7 @@ namespace ccEntityAction
 	
 	//////////
 	// Colours
-	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent)
+	bool setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent/*=nullptr*/)
 	{
 		static QColor s_lastColor = Qt::white;
 		QColor colour = QColorDialog::getColor(s_lastColor, parent, QString(), QColorDialog::ShowAlphaChannel);
@@ -228,7 +229,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool setColorGradient(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool setColorGradient(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{	
 		ccColorGradientDlg dlg(parent);
 		if (!dlg.exec())
@@ -288,7 +289,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	changeColorLevels(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.size() != 1)
 		{
@@ -318,7 +319,7 @@ namespace ccEntityAction
 	}
 	
 	//! Interpolate colors from on entity and transfer them to another one
-	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.size() != 2)
 		{
@@ -517,7 +518,7 @@ namespace ccEntityAction
 	}
 	
     //! Interpolate scalar fields from one entity and transfer them to another one without the dialog
-    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent)
+    bool	interpolateSFs(ccPointCloud *source, ccPointCloud *dest, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent/*=nullptr*/)
     {
         if (!source || !dest)
         {
@@ -551,7 +552,7 @@ namespace ccEntityAction
 		return true;
     }
 
-	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent)
+	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
 	{	
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -595,7 +596,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	enhanceRGBWithIntensities(const ccHObject::Container& selectedEntities, QWidget* parent)
+	bool	enhanceRGBWithIntensities(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		QString defaultSFName("Intensity");
 
@@ -695,7 +696,7 @@ namespace ccEntityAction
 	//////////
 	// Scalar Fields
 	
-	bool sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 			return false;
@@ -799,7 +800,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfBilateralFilter(const ccHObject::Container& selectedEntities, QWidget* parent)
+	bool	sfBilateralFilter(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 			return false;
@@ -922,7 +923,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		//we first ask the user if the SF colors should be mixed with existing colors
 		bool mixWithExistingColors = false;
@@ -968,7 +969,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		static int s_randomColorsNumber = 256;
 		
@@ -1054,7 +1055,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool sfRename(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool sfRename(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1087,7 +1088,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfAddIdField(const ccHObject::Container &selectedEntities)
+	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1107,10 +1108,56 @@ namespace ccEntityAction
 				
 				CCCoreLib::ScalarField* sf = pc->getScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
-				
-				for (unsigned j=0 ; j<cloud->size(); j++)
+
+				for (size_t j=0 ; j<cloud->size(); j++)
 				{
-					ScalarType idValue = static_cast<ScalarType>(j);
+					ScalarType idValue;
+					if (!storeAsInt)
+					{
+						idValue = static_cast<ScalarType>(j);
+					}
+					else
+					{
+#if defined CC_CORE_LIB_USES_DOUBLE
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[7] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[6] = static_cast<unsigned char>(j >> 8 & 0xff);
+						valuePtr[5] = static_cast<unsigned char>(j >> 16 & 0xff);
+						valuePtr[4] = static_cast<unsigned char>(j >> 24 & 0xff);
+						valuePtr[3] = static_cast<unsigned char>(j >> 32 & 0xff);
+						valuePtr[2] = static_cast<unsigned char>(j >> 40 & 0xff);
+						valuePtr[1] = static_cast<unsigned char>(j >> 48 & 0xff);
+						valuePtr[0] = static_cast<unsigned char>(j >> 56 & 0xff);
+#else
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[1] = static_cast<unsigned char>(j >> 8 & 0xff);
+						valuePtr[2] = static_cast<unsigned char>(j >> 16 & 0xff);
+						valuePtr[3] = static_cast<unsigned char>(j >> 24 & 0xff);
+						valuePtr[4] = static_cast<unsigned char>(j >> 32 & 0xff);
+						valuePtr[5] = static_cast<unsigned char>(j >> 40 & 0xff);
+						valuePtr[6] = static_cast<unsigned char>(j >> 48 & 0xff);
+						valuePtr[7] = static_cast<unsigned char>(j >> 56 & 0xff);
+#endif
+#elif defined CC_CORE_LIB_USES_FLOAT
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[1] = static_cast<unsigned char>((j >> 8) & 0xff);
+						valuePtr[2] = static_cast<unsigned char>((j >> 16) & 0xff);
+						valuePtr[3] = static_cast<unsigned char>((j >> 24) & 0xff);
+#else
+						unsigned char *valuePtr = (unsigned char *)(&idValue);
+						valuePtr[3] = static_cast<unsigned char>(j & 0xff);
+						valuePtr[2] = static_cast<unsigned char>((j >> 8) & 0xff);
+						valuePtr[1] = static_cast<unsigned char>((j >> 16) & 0xff);
+						valuePtr[0] = static_cast<unsigned char>((j >> 24) & 0xff);
+#endif
+#else
+						static_assert(false, "type for ScalarType has not been declared");
+#endif
+					}
 					sf->setValue(j, idValue);
 				}
 				
@@ -1124,7 +1171,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent)
+	bool sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent/*=nullptr*/)
 	{
 		if (!cloud)
 		{
@@ -1299,18 +1346,22 @@ namespace ccEntityAction
         return true;
     }
 
-	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 		ectsDlg.warningLabel->setVisible(false);
 		ectsDlg.setWindowTitle(QObject::tr("Export SF to coordinate(s)"));
 		
 		if (!ectsDlg.exec())
+		{
 			return false;
+		}
 		
-		bool exportDim[3] = { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
-		if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		bool importDim[3] { ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ() };
+		if (!importDim[0] && !importDim[1] && !importDim[2]) //nothing to do?!
+		{
 			return false;
+		}
 		
 		//for each selected cloud (or vertices set)
 		for (ccHObject* ent : selectedEntities)
@@ -1324,9 +1375,11 @@ namespace ccEntityAction
 				if (sf != nullptr)
 				{
 					unsigned ptsCount = pc->size();
-					bool hasDefaultValueForNaN = false;
+					assert(sf->size() == pc->size());
+
 					ScalarType defaultValueForNaN = sf->getMin();
-					
+
+					// look for NaN values first
 					for (unsigned i = 0; i < ptsCount; ++i)
 					{
 						ScalarType s = sf->getValue(i);
@@ -1334,38 +1387,29 @@ namespace ccEntityAction
 						//handle NaN values
 						if (!CCCoreLib::ScalarField::ValidValue(s))
 						{
-							if (!hasDefaultValueForNaN)
+							bool ok = false;
+							double out = QInputDialog::getDouble(	parent,
+																	QObject::tr("SF --> coordinate"),
+																	QObject::tr("Enter the coordinate equivalent to NaN values:"),
+																	defaultValueForNaN,
+																	-1.0e9,
+																	1.0e9,
+																	6,
+																	&ok);
+							if (ok)
 							{
-								bool ok = false;
-								double out = QInputDialog::getDouble(	parent,
-																		QObject::tr("SF --> coordinate"),
-																		QObject::tr("Enter the coordinate equivalent for NaN values:"),
-																		defaultValueForNaN,
-																		-1.0e9,
-																		1.0e9,
-																		6,
-																		&ok);
-								if (ok)
-									defaultValueForNaN = static_cast<ScalarType>(out);
-								else
-									ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value"));
-								hasDefaultValueForNaN = true;
+								defaultValueForNaN = static_cast<ScalarType>(out);
 							}
-							s = defaultValueForNaN;
+							else
+							{
+								ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
+							}
+
+							break;
 						}
-						
-						CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
-						
-						//test each dimension
-						if (exportDim[0])
-							P->x = s;
-						if (exportDim[1])
-							P->y = s;
-						if (exportDim[2])
-							P->z = s;
 					}
 					
-					pc->invalidateBoundingBox();
+					pc->setCoordFromSF(importDim, sf, defaultValueForNaN);
 				}
 			}
 		}
@@ -1373,7 +1417,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 
@@ -1417,9 +1461,111 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	exportNormalToSF(const ccHObject::Container& selectedEntities, QWidget* parent, bool* exportDimensions/*=nullptr*/)
+	bool	setSFsAsNormal(ccHObject* entity, QWidget* parent/*=nullptr*/)
 	{
-		bool exportDims[3] = { false, false, false };
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (cloud == nullptr)
+		{
+			// unhandled entity
+			return false;
+		}
+
+		ccSetSFsAsNormalDialog dlg(cloud, parent);
+
+		static int nxIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
+		static int nyIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
+		static int nzIndex = ccSetSFsAsNormalDialog::SF_INDEX_ONE;
+
+		dlg.setSFIndexes(nxIndex, nyIndex, nzIndex);
+
+		if (!dlg.exec())
+		{
+			return false;
+		}
+
+		dlg.getSFIndexes(nxIndex, nyIndex, nzIndex);
+
+		if (!cloud->resizeTheNormsTable())
+		{
+			ccLog::Error("Not enough memory");
+		}
+
+		CCCoreLib::ScalarField* sfX = (nxIndex >= 0 ? cloud->getScalarField(nxIndex) : nullptr);
+		CCCoreLib::ScalarField* sfY = (nyIndex >= 0 ? cloud->getScalarField(nyIndex) : nullptr);
+		CCCoreLib::ScalarField* sfZ = (nzIndex >= 0 ? cloud->getScalarField(nzIndex) : nullptr);
+
+		auto toValidCoord = [](ScalarType val)
+		{
+			if (CCCoreLib::ScalarField::ValidValue(val))
+			{
+				return static_cast<PointCoordinateType>(val);
+			}
+			else
+			{
+				return static_cast<PointCoordinateType>(0);
+			}
+		};
+
+		CCVector3f N(	nxIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
+						nyIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
+						nzIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0 );
+
+		if (sfX || sfY || sfZ)
+		{
+			// normals based on at least one SF
+			for (unsigned i = 0; i < cloud->size(); ++i)
+			{
+				if (sfX)
+				{
+					N.x = toValidCoord(sfX->getValue(i));
+				}
+				if (sfY)
+				{
+					N.y = toValidCoord(sfY->getValue(i));
+				}
+				if (sfZ)
+				{
+					N.z = toValidCoord(sfZ->getValue(i));
+				}
+
+				N.normalize();
+				cloud->setPointNormal(i, N);
+			}
+		}
+		else
+		{
+			// Constant normal
+			N.normalize();
+
+			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N);
+
+			for (unsigned i = 0; i < cloud->size(); ++i)
+			{
+				cloud->setPointNormalIndex(i, nIndex);
+			}
+		}
+
+		cloud->showNormals(true);
+		cloud->prepareDisplayForRefresh();
+
+		if (entity != cloud)
+		{
+			entity->showNormals(true);
+			entity->prepareDisplayForRefresh();
+
+			if (entity->isKindOf(CC_TYPES::MESH))
+			{
+				static_cast<ccGenericMesh*>(entity)->showTriNorms(false); // hide the per-triangle normals (if any)
+			}
+		}
+
+		return true;
+	}
+
+	bool	exportNormalToSF(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/, bool* exportDimensions/*=nullptr*/)
+	{
+		bool exportDims[3] { false, false, false };
+
 		if (exportDimensions)
 		{
 			exportDims[0] = exportDimensions[0];
@@ -1479,7 +1625,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	sfArithmetic(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		Q_ASSERT(!selectedEntities.empty());
 		
@@ -1514,7 +1660,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	sfFromColor(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccScalarFieldFromColorDlg dialog(parent);
 		if (!dialog.exec())
@@ -1630,7 +1776,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent)
+	bool	processMeshSF(const ccHObject::Container &selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent/*=nullptr*/)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1671,7 +1817,7 @@ namespace ccEntityAction
 	//////////
 	// Normals
 	
-	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	computeNormals(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 		{
@@ -1989,7 +2135,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	orientNormalsFM(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 		{
@@ -2053,7 +2199,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr)
+	bool	orientNormalsMST(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 		{
@@ -2236,7 +2382,7 @@ namespace ccEntityAction
 	//////////
 	// Octree
 
-	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool computeOctree(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccBBox bbox;
 		std::unordered_set<ccGenericPointCloud*> clouds;
@@ -2368,7 +2514,7 @@ namespace ccEntityAction
 	//////////
 	// Properties
 	
-	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget* parent)
+	bool	clearProperty(ccHObject::Container selectedEntities, CLEAR_PROPERTY property, QWidget* parent/*=nullptr*/)
 	{	
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -2513,7 +2659,7 @@ namespace ccEntityAction
 	//////////
 	// Stats
 	
-	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	statisticalTest(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccPickOneElementDlg poeDlg(QObject::tr("Distribution"), QObject::tr("Choose distribution"), parent);
 		poeDlg.addElement("Gauss");
@@ -2657,7 +2803,7 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent)
+	bool	computeStatParams(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccPickOneElementDlg pDlg(QObject::tr("Distribution"), QObject::tr("Distribution Fitting"), parent);
 		pDlg.addElement("Gauss");
@@ -2777,17 +2923,24 @@ namespace ccEntityAction
 				{
 					unsigned n = pc->size();
 					double squareSum = 0;
+					double sum = 0;
 					for (unsigned i = 0; i < n; ++i)
 					{
 						ScalarType v = pc->getPointScalarValue(i);
 						if (CCCoreLib::ScalarField::ValidValue(v))
 						{
+							sum += static_cast<double>(v);
 							squareSum += static_cast<double>(v) * v;
 						}
 					}
 
 					double rms = sqrt(squareSum / sfValidCount);
-					ccConsole::Print(QObject::tr("Scalar field RMS = %1").arg(rms));
+					ccConsole::Print(QObject::tr("Scalar field statistics:"));
+					ccConsole::Print(QObject::tr("Number of valid values = %1 / %2 (%3%)").arg(sfValidCount).arg(pc->size()).arg((100.0 * sfValidCount) / pc->size(), 0, 'f', 2));
+					ccConsole::Print(QObject::tr("Sum of all valid values = %1").arg(QString::number(sum, 'f', 6)));
+					ccConsole::Print(QObject::tr("Sum of all valid squared values = %1").arg(QString::number(squareSum, 'f', 6)));
+					ccConsole::Print(QObject::tr("Average value = %1").arg(sum / sfValidCount));
+					ccConsole::Print(QObject::tr("RMS (Root Mean Square) = %1").arg(rms));
 				}
 
 				//show histogram

@@ -664,7 +664,7 @@
         <string>f.o.v. (perspective mode only)</string>
        </property>
        <property name="text">
-        <string>Field of view</string>
+        <string>Horizontal field of view</string>
        </property>
       </widget>
      </item>
@@ -683,6 +683,9 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="fovDoubleSpinBox">
+       <property name="toolTip">
+        <string>Horizontal field of view (in degrees)</string>
+       </property>
        <property name="suffix">
         <string notr="true">°</string>
        </property>

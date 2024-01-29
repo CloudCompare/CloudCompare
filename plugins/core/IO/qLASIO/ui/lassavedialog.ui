@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>662</width>
+    <width>664</width>
     <height>416</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="basicParamTab">
       <attribute name="title">
@@ -173,7 +173,7 @@ font: italic;</string>
              </widget>
             </item>
             <item>
-             <widget class="QDoubleSpinBox" name="customScaleDoubleSpinBox">
+             <widget class="QDoubleSpinBox" name="customScaleXDoubleSpinBox">
               <property name="enabled">
                <bool>false</bool>
               </property>
@@ -193,6 +193,16 @@ font: italic;</string>
                <double>0.001000000000000</double>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="customScaleYDoubleSpinBox">
+              <property name="value">
+               <double>0.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="customScaleZDoubleSpinBox"/>
             </item>
             <item>
              <spacer name="horizontalSpacer_9">
@@ -227,7 +237,7 @@ font: italic;</string>
 font: italic;</string>
             </property>
             <property name="text">
-             <string>        (*) potential accuracy loss if chosen too low</string>
+             <string>        (*) potential accuracy loss if resolution is too low (= scale is too large)</string>
             </property>
            </widget>
           </item>
@@ -283,6 +293,16 @@ font: italic;</string>
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="normalsCheckBox">
+            <property name="toolTip">
+             <string>Saves normals as extra scalar field using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.</string>
+            </property>
+            <property name="text">
+             <string>Normals (As Extra Scalarfield)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="waveformCheckBox">
             <property name="text">
              <string>Waveform</string>
@@ -322,8 +342,8 @@ font: italic;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>618</width>
-            <height>292</height>
+            <width>98</width>
+            <height>28</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">

@@ -30,7 +30,7 @@
 #include <cc2DViewportObject.h>
 
 //qCC
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //CCCoreLib
 #include <CloudSamplingTools.h>
@@ -228,7 +228,7 @@ void qHPR::doAction()
 
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(selectedEntities[0]);
 
-	ccGLWindow* win = m_app->getActiveGLWindow();
+	ccGLWindowInterface* win = m_app->getActiveGLWindow();
 	if (!win)
 	{
 		m_app->dispToConsole("No active window!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

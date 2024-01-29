@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccSaveProject.png</file>
     <file>images/clipboard.png</file>
     <file>images/gearIcon.png</file>
     <file>images/hashtag.png</file>
@@ -149,6 +150,7 @@
     <file>images/monitor.svg</file>
     <file>images/photo-camera.svg</file>
     <file>images/search.svg</file>
+    <file>images/exportIcon.png</file>
   </qresource>
   <qresource prefix="/CC/Icons">
     <file>images/icon/cc_viewer_icon_16.png</file>

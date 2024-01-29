@@ -1,10 +1,10 @@
-# Compilation of CloudCompare 2.11+
+# Compilation of CloudCompare 2.13+
 
 ## 1. Base dependencies
 
 CloudCompare requires [CMake](http://www.cmake.org) to be built.
 
-The main dependency of CloudCompare is Qt. CloudCompare 2.11+ requires 5.9 <= Qt < 6.0.
+The main dependency of CloudCompare is Qt. CloudCompare 2.13+ requires 5.12 <= Qt < 6.0.
 
 - On Windows it is recommended to use the installer from the [Qt website](https://www.qt.io/).
 - On macOs you can also use the installer from Qt's website, or use homebrew.
@@ -105,14 +105,15 @@ The available plugins are
 
 |       Plugin Name       |         CMake Option                     | Default Value | Description
 |-------------------------|------------------------------------------|---------------|-------------
-| qCoreIO                 | PLUGIN_IO_QCORE                          | ON            |
 | qAdditionalIO           | PLUGIN_IO_QADDITIONAL                    | OFF           |
+| qCoreIO                 | PLUGIN_IO_QCORE                          | ON            |
 | qCSVMatrixIO            | PLUGIN_IO_QCSV_MATRIX                    | OFF           | Add support for CSV matrix files.
 | qDraco                  | PLUGIN_IO_QDRACO                         | OFF           | Add support force draco files
 | qE57IO                  | PLUGIN_IO_QE57                           | OFF           | Add support for e57 files using **libE57**.
 | qFBXIO                  | PLUGIN_IO_QFBX                           | OFF           | Add support for AutoDesk FBX files using the official **FBX SDK**
-| qLASFWIO                | PLUGIN_IO_QLAS_FWF                       | OFF           | Windows only. Support for LAS/LAZ with and without waveform.
-| qPDALIO                 | PLUGIN_IO_QPDAL                          | OFF           | Add support for LAS/LAZ files using **PDAL**.
+| qLASFWIO                | PLUGIN_IO_QLAS_FWF                       | OFF           | Windows only. Support for LAS/LAZ with and without waveform using LIBlas (***deprecated, consider using qLASIO instead***).
+| qLASIO                  | PLUGIN_IO_QLAS                           | OFF           | Support for LAS/LAZ with and without waveform (all platforms) using **LASZIP**.
+| qPDALIO                 | PLUGIN_IO_QPDAL                          | OFF           | Add support for LAS/LAZ files using PDAL (***deprecated, consider using qLASIO instead***).
 | qPhotoscanIO            | PLUGIN_IO_QPHOTOSCAN                     | OFF           | 
 | qRDBIO                  | PLUGIN_IO_QRDB                           | OFF           | Add support for RDB.
 | qStepCADImport          | PLUGIN_IO_QSTEP                          | OFF           | Add support for STEP files.
@@ -121,26 +122,31 @@ The available plugins are
 
 |       Plugin Name       |         CMake Option                     | Default Value | Description
 |-------------------------|------------------------------------------|---------------|-------------
-| qAnimation              | PLUGIN_STANDARD_QANIMATION               | OFF           | Plugin to create videos.
-| qBroom                  | PLUGIN_STANDARD_QBROOM                   | OFF           |
-| qCanupo                 | PLUGIN_STANDARD_QCANUPO                  | OFF           |
-| qColorimetricSegmenter  | PLUGIN_STANDARD_QCOLORIMETRIC_SEGMENTER  | OFF           |
-| qCompass                | PLUGIN_STANDARD_QCOMPASS                 | OFF           |
-| qCork                   | PLUGIN_STANDARD_QCORK                    | OFF           |
-| qCSF                    | PLUGIN_STANDARD_QCSF                     | OFF           |
-| qFacets                 | PLUGIN_STANDARD_QFACETS                  | OFF           |
-| qHoughNormals           | PLUGIN_STANDARD_QHOUGH_NORMALS           | OFF           |
-| qHPR                    | PLUGIN_STANDARD_QHPR                     | OFF           |
-| qJSonRPCPlugin          | PLUGIN_STANDARD_QJSONRPC                 | OFF           |
-| qM3C2                   | PLUGIN_STANDARD_QM3C2                    | OFF           |
-| qMPlane                 | PLUGIN_STANDARD_QMPLANE                  | OFF           |
-| qPCL                    | PLUGIN_STANDARD_QPCL                     | OFF           |
-| qPCV                    | PLUGIN_STANDARD_QPCV                     | OFF           |
-| qPoissonRecon           | PLUGIN_STANDARD_QPOISSON_RECON           | OFF           |
-| qRANSAC_SD              | PLUGIN_STANDARD_QRANSAC_SD               | OFF           |
-| qSRA                    | PLUGIN_STANDARD_QSRA                     | OFF           |
-| qAutoSeg                | PLUGIN_STANDARD_MASONRY_QAUTO_SEG        | OFF           |
-| qManualSeg              | PLUGIN_STANDARD_MASONRY_QMANUAL_SEG      | OFF           |
+| q3DMASC                 | PLUGIN_STANDARD_3DMASC                   | OFF           | Automatic point cloud classification: https://lidar.univ-rennes.fr/en/3dmasc
+| qAnimation              | PLUGIN_STANDARD_QANIMATION               | OFF           | Plugin to create videos: https://www.cloudcompare.org/doc/wiki/index.php/Animation_(plugin).
+| qBroom                  | PLUGIN_STANDARD_QBROOM                   | OFF           | Interactive cloud cleaning tool: https://www.cloudcompare.org/doc/wiki/index.php/Virtual_broom_(plugin)
+| qCanupo                 | PLUGIN_STANDARD_QCANUPO                  | OFF           | Automatic point cloud classification: https://www.cloudcompare.org/doc/wiki/index.php/CANUPO_(plugin)
+| qCloudLayers            | PLUGIN_STANDARD_QCLOUDLAYERS             | OFF           | Manual point cloud classification/labelling: https://www.cloudcompare.org/doc/wiki/index.php/QCloudLayers_(plugin)
+| qColorimetricSegmenter  | PLUGIN_STANDARD_QCOLORIMETRIC_SEGMENTER  | OFF           | Point cloud color-based segmentation: https://www.cloudcompare.org/doc/wiki/index.php/Colorimetric_Segmenter_(plugin)
+| qCompass                | PLUGIN_STANDARD_QCOMPASS                 | OFF           | Digitization of geological structures and structural traces on point clouds: https://www.cloudcompare.org/doc/wiki/index.php/Compass_(plugin)
+| qCork                   | PLUGIN_STANDARD_QCORK                    | OFF           | Mesh Boolean Operations: https://www.cloudcompare.org/doc/wiki/index.php/Cork_(plugin)
+| qCSF                    | PLUGIN_STANDARD_QCSF                     | OFF           | Automatic ground/non-ground classification: https://www.cloudcompare.org/doc/wiki/index.php/CSF_(plugin)
+| qFacets                 | PLUGIN_STANDARD_QFACETS                  | OFF           | Structural geology plugin: https://www.cloudcompare.org/doc/wiki/index.php/Facets_(plugin)
+| qHoughNormals           | PLUGIN_STANDARD_QHOUGH_NORMALS           | OFF           | Normals computation: https://www.cloudcompare.org/doc/wiki/index.php/HoughNormals_(plugin)
+| qHPR                    | PLUGIN_STANDARD_QHPR                     | OFF           | Hidden Point Removal: https://www.cloudcompare.org/doc/wiki/index.php/Hidden_Point_Removal_(plugin)
+| qJSonRPCPlugin          | PLUGIN_STANDARD_QJSONRPC                 | OFF           | Json/RPC control plugin
+| qM3C2                   | PLUGIN_STANDARD_QM3C2                    | OFF           | Robust point cloud distances computation: https://www.cloudcompare.org/doc/wiki/index.php/M3C2_(plugin)
+| qMasonry                |                                          |               | Segmentation of masonry structures: https://www.cloudcompare.org/doc/wiki/index.php/Masonry_Segmentation_(plugin)
+|  - qAutoSeg             | PLUGIN_STANDARD_MASONRY_QAUTO_SEG        | OFF           |
+|  - qManualSeg           | PLUGIN_STANDARD_MASONRY_QMANUAL_SEG      | OFF           |
+| qMeshBoolean            | PLUGIN_STANDARD_QMESH_BOOLEAN            | OFF           | Mesh Boolean Operations: https://www.cloudcompare.org/doc/wiki/index.php/Mesh_Boolean_(plugin)
+| qMPlane                 | PLUGIN_STANDARD_QMPLANE                  | OFF           | Normal distance measurements against a defined plane: https://www.cloudcompare.org/doc/wiki/index.php/MPlane_(plugin)
+| qPCL                    | PLUGIN_STANDARD_QPCL                     | OFF           | Interface to some algorithms of the PCL library: https://www.cloudcompare.org/doc/wiki/index.php/Point_Cloud_Library_Wrapper_(plugin)
+| qPCV                    | PLUGIN_STANDARD_QPCV                     | OFF           | Ambient Occlusion for meshes or point clouds: https://www.cloudcompare.org/doc/wiki/index.php/ShadeVis_(plugin)
+| qPoissonRecon           | PLUGIN_STANDARD_QPOISSON_RECON           | OFF           | Surface Mesh Reconstruction: https://www.cloudcompare.org/doc/wiki/index.php/Poisson_Surface_Reconstruction_(plugin)
+| qRANSAC_SD              | PLUGIN_STANDARD_QRANSAC_SD               | OFF           | Automatic RANSAC shape detection: https://www.cloudcompare.org/doc/wiki/index.php/RANSAC_Shape_Detection_(plugin)
+| qSRA                    | PLUGIN_STANDARD_QSRA                     | OFF           | Surface of Revolution Analysis: https://www.cloudcompare.org/doc/wiki/index.php/Surface_of_Revolution_Analysis_(plugin)
+| qTreeIso                | PLUGIN_STANDARD_QTREEISO                 | OFF           | Individual Tree Isolation: https://www.cloudcompare.org/doc/wiki/index.php/Treeiso_(plugin)
 
 ## Additional Instructions
 
@@ -191,16 +197,22 @@ Then, the CloudCompare CMake project will request that you set the 3 following v
 2. `FBX_SDK_LIBRARY_FILE`: main FBX SDK library (e.g. `libfbxsdk-md.lib`)
 3. `FBX_SDK_LIBRARY_FILE_DEBUG`: main FBX SDK library for debug mode (if any)
 
-### qPDALIO
+### qLASIO
 
 If you want to compile CloudCompare (and ccViewer) with LAS/LAZ files support,
+you'll need [LASZip](https://laszip.org/).
+
+### qPDALIO [deprecated]
+
+If you want to compile the deprecated PDAL I/O plugin to load LAS/LAZ files,
 you'll need [PDAL](https://pdal.io/).
 
-### qLASFWIO
+### qLASFWIO [deprecated]
 
-LAS/LAZ file support on Windows can also be achieved by compiling
-[LASlib](https://github.com/CloudCompare/LAStools) and setting the following variables:
+The deprecated LAS FWF I/O plugin can also be compiled on Windows with
+[LASlib](https://github.com/CloudCompare/LAStools).
 
+You'll have to set the following variables:
 -   `LASLIB_INCLUDE_DIR`: LAStools/LASlib/inc
 -   `LASZIP_INCLUDE_DIR`: LAStools/LASzip/src
 -   `LASLIB_RELEASE_LIBRARY` or `LASLIB_DEBUG_LIBRARY`, depending on build type: the compiled library, e.g. `LAStools/LASlib/VC14/lib/x64/LASlibVC14.lib`
@@ -208,12 +220,12 @@ LAS/LAZ file support on Windows can also be achieved by compiling
 ### GDAL support
 
 If you want to compile CloudCompare (and ccViewer) with GDAL (raster) files support, you'll need a compiled version of
-the [GDAL library](http://www.gdal.org/) (last tested version: 1.10 on Windows, 2.0.2 on Mac OS X)
+the [GDAL library](http://www.gdal.org/) (last tested version: 2.2.1 on Windows, 2.0.2 on Mac OS X)
 
-Then, the CloudCompare CMake project will request that you set the 2 following variables:
-
+Then, the CloudCompare CMake project will request that you set the following variables:
 1. `GDAL_INCLUDE_DIR`: GDAL include directory (pretty straightforward ;)
 2. `GDAL_LIBRARY`: the static library (e.g. `gdal_i.lib`)
+3. `GDAL_BIN_DIR`: on Windows, the folder with DLL files
 
 ### qCork + MPIR support
 
@@ -256,9 +268,11 @@ you will have to create a `shaders` folder in the build directory and copy the s
 
 ## Working with Visual Studio on Windows
 
-As all the files (executables, plugins and other DLLs) are copied in the `CMAKE_INSTALL_PREFIX` directory, the standard project launch/debug mechanism is broken.
-Therefore, by default you won't be able to 'run' the CloudCompare or ccViewer projects as is (with F5 or Ctrl + F5 for instance).
-See [this post](http://www.danielgm.net/cc/forum/viewtopic.php?t=992) on the forum to setup Visual correctly.
+As all the files (executables, plugins and other DLLs) must be copied in the `CMAKE_INSTALL_PREFIX` directory prior to execution,
+the standard project launch/debug mechanism is broken. Therefore, by default you won't be able to 'run' the CloudCompare or ccViewer
+projects as is (with F5 or Ctrl + F5 for instance).
+
+See [this post](http://www.danielgm.net/cc/forum/viewtopic.php?t=992) on the CloudCompare forum to setup Visual Studio correctly.
 
 ## Debugging plugins
 

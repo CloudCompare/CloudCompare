@@ -28,7 +28,8 @@
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-static constexpr int ExtraScalarFieldsTabIndex = 2;
+//! Default LAS scale
+static const double DefaultLASScale = 1.0e-3;
 
 //! Widget to map a predefined scalar field 'role' with a particular scalar field (combo box)
 class MappingLabel : public QWidget
@@ -113,8 +114,23 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 
 	bestScaleRadioButton->setChecked(false);
 	originalScaleRadioButton->setEnabled(false);
+
 	customScaleRadioButton->setEnabled(true);
-	customScaleRadioButton->setChecked(true);
+	customScaleRadioButton->setChecked(false);
+	QDoubleSpinBox* scaleButtons[3] = {customScaleXDoubleSpinBox, customScaleYDoubleSpinBox, customScaleZDoubleSpinBox};
+	for (size_t i = 0; i < 3; i++)
+	{
+		QDoubleSpinBox* spinBox = scaleButtons[i];
+		spinBox->setDecimals(8);
+		spinBox->setMinimum(1.0e-8);
+		spinBox->setMaximum(100.0);
+		spinBox->setValue(DefaultLASScale);
+		spinBox->setSingleStep(DefaultLASScale);
+		spinBox->setEnabled(false);
+	}
+	connect(customScaleRadioButton, &QRadioButton::toggled, this, &LasSaveDialog::handleCustomScaleButtontoggled);
+
+	customScaleRadioButton->setChecked(true); // should be checked by default, as it's the only one enabled by default
 
 	for (const char* versionStr : LasDetails::AvailableVersions())
 	{
@@ -123,12 +139,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -147,6 +163,9 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
 
 	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
+
+	normalsCheckBox->setEnabled(cloud->hasNormals());
+	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked:Qt::Unchecked);
 }
 
 /// When the selected version changes, we need to update the combo box
@@ -189,7 +208,8 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	size_t   senderIndex  = std::distance(m_scalarFieldMapping.begin(),
                                        std::find_if(m_scalarFieldMapping.begin(),
                                                     m_scalarFieldMapping.end(),
-                                                    [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair) { return pair.second == senderObject; }));
+                                                    [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
+                                                    { return pair.second == senderObject; }));
 
 	if (qobject_cast<QComboBox*>(senderObject)->itemText(index).isEmpty())
 	{
@@ -226,7 +246,8 @@ void LasSaveDialog::handleComboBoxChange(int index)
 
 	size_t numWarnings = std::count_if(m_scalarFieldMapping.begin(),
 	                                   m_scalarFieldMapping.end(),
-	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair) { return pair.first->hasWarning(); });
+	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair)
+	                                   { return pair.first->hasWarning(); });
 
 	if (numWarnings > 0)
 	{
@@ -352,6 +373,13 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 	}
 }
 
+void LasSaveDialog::handleCustomScaleButtontoggled(bool checked)
+{
+	customScaleXDoubleSpinBox->setEnabled(checked);
+	customScaleYDoubleSpinBox->setEnabled(checked);
+	customScaleZDoubleSpinBox->setEnabled(checked);
+}
+
 LasExtraScalarFieldCard* LasSaveDialog::createCard() const
 {
 	auto* card = new LasExtraScalarFieldCard;
@@ -443,9 +471,9 @@ void LasSaveDialog::setOriginalScale(const CCVector3d& scale, bool canUseScale, 
 	originalScaleRadioButton->setEnabled(canUseScale);
 	if (!canUseScale)
 	{
-		labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); //add two whitespaces to avoid issues with italic characters justification
+		labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); // add two whitespaces to avoid issues with italic characters justification
 		labelOriginal->setStyleSheet("color: red;");
-		originalScaleRadioButton->setChecked(false);
+		customScaleRadioButton->setChecked(true); // revert to the custom scale by default
 	}
 	else if (autoCheck)
 	{
@@ -501,26 +529,35 @@ bool LasSaveDialog::shouldSaveWaveform() const
 	return waveformCheckBox->isChecked();
 }
 
+bool LasSaveDialog::shouldSaveNormalsAsExtraScalarField() const
+{
+	return normalsCheckBox->isChecked();
+}
+
 CCVector3d LasSaveDialog::chosenScale() const
 {
-	if (bestScaleRadioButton->isChecked())
+	if (bestScaleRadioButton->isChecked() && bestScaleRadioButton->isEnabled())
 	{
 		assert(std::isfinite(m_optimalScale.x) && std::isfinite(m_optimalScale.y) && std::isfinite(m_optimalScale.z));
 		return m_optimalScale;
 	}
-	else if (originalScaleRadioButton->isChecked())
+	else if (originalScaleRadioButton->isChecked() && originalScaleRadioButton->isEnabled())
 	{
 		assert(std::isfinite(m_originalScale.x) && std::isfinite(m_originalScale.y) && std::isfinite(m_originalScale.z));
 		return m_originalScale;
 	}
-	else if (customScaleRadioButton->isChecked())
+	else if (customScaleRadioButton->isChecked() && customScaleRadioButton->isEnabled())
 	{
-		double customScale = customScaleDoubleSpinBox->value();
-		return {customScale, customScale, customScale};
+		return {customScaleXDoubleSpinBox->value(),
+		        customScaleYDoubleSpinBox->value(),
+		        customScaleZDoubleSpinBox->value()};
 	}
-
-	assert(false);
-	return {};
+	else
+	{
+		ccLog::Error("Inconsistency detected: scale option is checked but not enabled");
+		assert(false);
+		return {DefaultLASScale, DefaultLASScale, DefaultLASScale};
+	}
 }
 
 std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const

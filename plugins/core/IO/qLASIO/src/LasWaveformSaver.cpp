@@ -38,8 +38,15 @@ void LasWaveformSaver::handlePoint(size_t index, laszip_point& point)
 		stream << w.descriptorID();
 		stream << static_cast<quint64>(w.dataOffset() + LasDetails::EvlrHeader::SIZE);
 		stream << w.byteCount();
-		stream << w.echoTime_ps();
-		stream << w.beamDir().x << w.beamDir().y << w.beamDir().z;
+
+		float array[4];
+
+		array[0] = w.echoTime_ps();
+		array[1] = w.beamDir().x;
+		array[2] = w.beamDir().y;
+		array[3] = w.beamDir().z;
+
+		memcpy(&m_array.data()[13], array, 4 * 4);
 	}
 
 	memcpy(point.wave_packet, m_array.constData(), 29);

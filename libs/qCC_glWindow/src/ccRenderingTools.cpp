@@ -18,7 +18,7 @@
 #include "ccRenderingTools.h"
 
 //qCC
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 //qCC_db
 #include <ccColorScalesManager.h>
@@ -205,7 +205,7 @@ void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 {
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
-	ccGLWindow* display = static_cast<ccGLWindow*>(context.display);
+	ccGLWindowInterface* display = static_cast<ccGLWindowInterface*>(context.display);
 
 	DrawColorRamp(context, sf, display, context.glW, context.glH, context.renderZoom);
 }
@@ -220,7 +220,7 @@ template<class OpenGLFunc> static void DrawRectangleAsQuad(OpenGLFunc& glFunc, i
 	glFunc.glEnd();
 }
 
-void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom/*=1.0f*/)
+void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccScalarField* sf, ccGLWindowInterface* win, int glW, int glH, float renderZoom/*=1.0f*/)
 {
 	if (!sf || !sf->getColorScale() || !win)
 	{
@@ -544,15 +544,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		//we try to center the title
 		int xMiddle = xStart + scaleWidth / 2;
 		int xText = xMiddle;
-		unsigned char align = ccGLWindow::ALIGN_HMIDDLE;
+		unsigned char align = ccGLWindowInterface::ALIGN_HMIDDLE;
 		int leftMargin = static_cast<int>(5 * renderZoom);
 		if (xMiddle + titleRect.width() / 2 + leftMargin >= glW)
 		{
 			//we will have to align to the right most position
 			xText = glW - 1 - leftMargin;
-			align = ccGLWindow::ALIGN_HRIGHT;
+			align = ccGLWindowInterface::ALIGN_HRIGHT;
 		}
-		align |= ccGLWindow::ALIGN_VTOP;
+		align |= ccGLWindowInterface::ALIGN_VTOP;
 
 		win->displayText(sfTitle, xText, glH - 1 - yStart + titleMargin, align, 0.0f, nullptr, &font);
 	}
@@ -641,20 +641,20 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			++itNext;
 			
 			//position
-			unsigned char align = ccGLWindow::ALIGN_HRIGHT;
+			unsigned char align = ccGLWindowInterface::ALIGN_HRIGHT;
 			if (it == drawnLabels.begin())
 			{
 				//specific case: first label
-				align |= ccGLWindow::ALIGN_VTOP;
+				align |= ccGLWindowInterface::ALIGN_VTOP;
 			}
 			else if (itNext == drawnLabels.end())
 			{
 				//specific case: last label
-				align |= ccGLWindow::ALIGN_VBOTTOM;
+				align |= ccGLWindowInterface::ALIGN_VBOTTOM;
 			}
 			else
 			{
-				align |= ccGLWindow::ALIGN_VMIDDLE;
+				align |= ccGLWindowInterface::ALIGN_VMIDDLE;
 			}
 
 			QString numberStr;

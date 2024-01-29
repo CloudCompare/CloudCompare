@@ -60,13 +60,12 @@ QStatusBar
        </sizepolicy>
       </property>
       <property name="styleSheet">
-       <string notr="true">QFrame{
+       <string notr="true">QFrame#GLframe
+{
 	border: 2px solid white;
 	border-radius: 10px;
 	background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(10,102,151), stop:1 rgb(0,0,0));
- }
-
-</string>
+}</string>
       </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>

@@ -25,9 +25,6 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-//qCC_gl
-#include <ccGLWindow.h>
-
 //CCCoreLib
 #include <DistanceComputationTools.h>
 #include <Neighbourhood.h>

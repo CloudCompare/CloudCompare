@@ -22,7 +22,7 @@
 #include <ccRasterGrid.h>
 
 class ccBoundingBoxEditorDlg;
-class ccGLWindow;
+class ccGLWindowInterface;
 class QWidget;
 class QFrame;
 class QComboBox;
@@ -92,6 +92,7 @@ protected: //raster grid related stuff
 										ccGenericPointCloud* inputCloud,
 										double percentileValue,
 										bool exportToOriginalCS,
+										bool appendGridSizeToSFNames,
 										ccProgressDialog* progressDialog = nullptr) const;
 
 protected: //members
@@ -103,7 +104,7 @@ protected: //members
 	ccBoundingBoxEditorDlg* m_bbEditorDlg;
 
 	//! 2D display
-	ccGLWindow* m_glWindow;
+	ccGLWindowInterface* m_glWindow;
 
 	//! 'Raster' cloud
 	ccPointCloud* m_rasterCloud;

@@ -18,7 +18,7 @@
 #include "ccDBRoot.h"
 
 //Local
-#include "ccGLWindow.h"
+#include "ccGLWindowInterface.h"
 
 //Qt
 #include <QApplication>
@@ -1176,7 +1176,7 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 
 	if (info)
 	{
-		info->reset();
+		*info = {};
 		info->selCount = selectedIndexes.size();
 
 		for (size_t i = 0; i < info->selCount; ++i)
@@ -1203,8 +1203,13 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			{
 				info->meshCount++;
 
-				if (obj->isKindOf(CC_TYPES::PLANE))
-					info->planeCount++;
+				if (obj->isKindOf(CC_TYPES::PRIMITIVE))
+				{
+					info->primitiveCount++;
+
+					if (obj->isKindOf(CC_TYPES::PLANE))
+						info->planeCount++;
+				}
 			}
 			else if (obj->isKindOf(CC_TYPES::POLY_LINE))
 			{
@@ -1553,8 +1558,8 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccLog::Warning("[alignCameraWithEntity] Selected entity has no associated display");
 		return;
 	}
-	assert(display);
-	ccGLWindow* win = static_cast<ccGLWindow*>(display);
+	ccGLWindowInterface* win = static_cast<ccGLWindowInterface*>(display);
+	assert(win);
 
 	//plane normal
 	CCVector3d planeNormal;
@@ -1649,24 +1654,22 @@ void ccDBRoot::gatherRecursiveInformation()
 	struct GlobalInfo
 	{
 		//properties
-		unsigned pointCount;
-		unsigned triangleCount;
-		unsigned colorCount;
-		unsigned normalCount;
-		unsigned materialCount;
-		unsigned scalarFieldCount;
+		unsigned pointCount = 0;
+		unsigned triangleCount = 0;
+		unsigned colorCount = 0;
+		unsigned normalCount = 0;
+		unsigned materialCount = 0;
+		unsigned scalarFieldCount = 0;
 
 		//entities
-		unsigned cloudCount;
-		unsigned meshCount;
-		unsigned octreeCount;
-		unsigned imageCount;
-		unsigned sensorCount;
-		unsigned labelCount;
-	}
-	info;
-
-	memset(&info, 0, sizeof(GlobalInfo));
+		unsigned cloudCount = 0;
+		unsigned meshCount = 0;
+		unsigned primitiveCount = 0;
+		unsigned octreeCount = 0;
+		unsigned imageCount = 0;
+		unsigned sensorCount = 0;
+		unsigned labelCount = 0;
+	} info;
 
 	//init the list of entities to process
 	ccHObject::Container toProcess;
@@ -1718,6 +1721,11 @@ void ccDBRoot::gatherRecursiveInformation()
 			info.triangleCount += meshSize;
 			info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
 			info.materialCount += (mesh->getMaterialSet() ? static_cast<unsigned>(mesh->getMaterialSet()->size()) : 0);
+
+			if (ent->isKindOf(CC_TYPES::PRIMITIVE))
+			{
+				info.primitiveCount++;
+			}
 		}
 		else if (ent->isKindOf(CC_TYPES::LABEL_2D))
 		{
@@ -1774,6 +1782,8 @@ void ccDBRoot::gatherRecursiveInformation()
 		infoStr << separator;
 		infoStr << QString("Cloud(s):\t\t%L1").arg(info.cloudCount);
 		infoStr << QString("Mesh(es):\t\t%L1").arg(info.meshCount);
+		infoStr << QString(" - Pritmitive(s):\t%L1").arg(info.primitiveCount);
+
 		if (info.octreeCount)
 			infoStr << QString("Octree(s):\t\t%L1").arg(info.octreeCount);
 		if (info.imageCount)

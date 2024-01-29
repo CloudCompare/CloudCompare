@@ -22,7 +22,7 @@
 #include <QMessageBox>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //qCC_db
 #include <ccSphere.h>
@@ -34,13 +34,13 @@ ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=nullptr*/)
 	: QObject(parent)
 	, m_app(app)
 	, m_activeGLWindow(nullptr)
-	, m_pickingMode(ccGLWindow::POINT_OR_TRIANGLE_PICKING)
+	, m_pickingMode(ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING)
 	, m_autoEnableOnActivatedWindow(true)
 	, m_exclusive(false)
 {
 }
 
-//void ccPickingHub::setPickingMode(ccGLWindow::PICKING_MODE mode, bool autoEnableOnActivatedWindow/*=true*/)
+//void ccPickingHub::setPickingMode(ccGLWindowInterface::PICKING_MODE mode, bool autoEnableOnActivatedWindow/*=true*/)
 //{
 //	m_pickingMode = mode;
 //	m_autoEnableOnActivatedWindow = autoEnableOnActivatedWindow;
@@ -51,13 +51,13 @@ void ccPickingHub::togglePickingMode(bool state)
 	//ccLog::Warning(QString("Toggle picking mode: ") + (state ? "ON" : "OFF") + " --> " + (m_activeGLWindow ? QString("View ") + QString::number(m_activeGLWindow->getUniqueID()) : QString("no view")));
 	if (m_activeGLWindow)
 	{
-		m_activeGLWindow->setPickingMode(state ? m_pickingMode : ccGLWindow::DEFAULT_PICKING);
+		m_activeGLWindow->setPickingMode(state ? m_pickingMode : ccGLWindowInterface::DEFAULT_PICKING);
 	}
 }
 
 void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 {
-	ccGLWindow* glWindow = (mdiSubWindow ? GLWindowFromWidget(mdiSubWindow->widget()) : nullptr);
+	ccGLWindowInterface* glWindow = (mdiSubWindow ? ccGLWindowInterface::FromWidget(mdiSubWindow->widget()) : nullptr);
 	//if (glWindow)
 	//	ccLog::Warning("New active GL window: " + QString::number(glWindow->getUniqueID()));
 	//else
@@ -73,15 +73,15 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	{
 		//take care of the previously linked window
 		togglePickingMode(false);
-		disconnect(m_activeGLWindow);
+		disconnect(m_activeGLWindow->signalEmitter());
 		m_activeGLWindow = nullptr;
 	}
 
 	if (glWindow)
 	{
 		//link this new window
-		connect(glWindow, &ccGLWindow::itemPicked, this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
-		connect(glWindow, &QObject::destroyed, this, &ccPickingHub::onActiveWindowDeleted);
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::itemPicked,	this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose,	this, &ccPickingHub::onActiveWindowDeleted);
 		m_activeGLWindow = glWindow;
 
 		if (m_autoEnableOnActivatedWindow && !m_listeners.empty())
@@ -91,9 +91,9 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 	}
 }
 
-void ccPickingHub::onActiveWindowDeleted(QObject* obj)
+void ccPickingHub::onActiveWindowDeleted(ccGLWindowInterface* glWindow)
 {
-	if (obj == m_activeGLWindow)
+	if (m_activeGLWindow && glWindow == m_activeGLWindow)
 	{
 		m_activeGLWindow = nullptr;
 	}
@@ -146,7 +146,7 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 bool ccPickingHub::addListener(	ccPickingListener* listener,
 								bool exclusive/*=false*/,
 								bool autoStartPicking/*=true*/,
-								ccGLWindow::PICKING_MODE mode/*=ccGLWindow::POINT_OR_TRIANGLE_PICKING*/)
+								ccGLWindowInterface::PICKING_MODE mode/*=ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING*/)
 {
 	if (!listener)
 	{

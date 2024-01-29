@@ -30,7 +30,7 @@
 #include <ccColorTypes.h>
 
 //qCC_gl
-#include <ccGLWindow.h>
+#include <ccGLWindowInterface.h>
 
 //Qt
 #include <QFrame>
@@ -90,7 +90,7 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 	if (!m_glWindow)
 	{
 		QWidget* glWidget = nullptr;
-		CreateGLWindow(m_glWindow, glWidget, false, true);
+		ccGLWindowInterface::Create(m_glWindow, glWidget, false, true);
 		assert(m_glWindow && glWidget);
 		
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
@@ -103,8 +103,8 @@ void cc2Point5DimEditor::create2DView(QFrame* parentFrame)
 		params.colorScaleUseShader = false;
 		m_glWindow->setDisplayParameters(params, true);
 		m_glWindow->setPerspectiveState(false, true);
-		m_glWindow->setInteractionMode(ccGLWindow::INTERACT_PAN | ccGLWindow::INTERACT_ZOOM_CAMERA | ccGLWindow::INTERACT_CLICKABLE_ITEMS);
-		m_glWindow->setPickingMode(ccGLWindow::NO_PICKING);
+		m_glWindow->setInteractionMode(ccGLWindowInterface::INTERACT_PAN | ccGLWindowInterface::INTERACT_ZOOM_CAMERA | ccGLWindowInterface::INTERACT_CLICKABLE_ITEMS);
+		m_glWindow->setPickingMode(ccGLWindowInterface::NO_PICKING);
 		m_glWindow->displayOverlayEntities(true, false);
 		m_glWindow->setSunLight(true);
 		m_glWindow->setCustomLight(false);
@@ -217,6 +217,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	bool exportHeightStats,
 														ccGenericPointCloud* inputCloud,
 														double percentileValue,
 														bool exportToOriginalCS,
+														bool appendGridSizeToSFNames,
 														ccProgressDialog* progressDialog/*=nullptr*/) const
 {
 	//projection dimension
@@ -239,6 +240,7 @@ ccPointCloud* cc2Point5DimEditor::convertGridToCloud(	bool exportHeightStats,
 									box,
 									percentileValue,
 									exportToOriginalCS,
+									appendGridSizeToSFNames,
 									progressDialog );
 }
 

@@ -329,10 +329,17 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		return cmd.error(QString("Grid step value not defined (use %1)").arg(COMMAND_GRID_STEP));
 	}
 
-	if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT && std::isnan(customHeight))
+	if (std::isnan(customHeight))
 	{
-		cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but no custom height was defined...");
-		emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
+		if (emptyCellFillStrategy == ccRasterGrid::FILL_CUSTOM_HEIGHT)
+		{
+			cmd.warning("[Rasterize] The filling stragety is set to 'fill with custom height' but no custom height was defined...");
+			emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
+		}
+		else if (emptyCellFillStrategy == ccRasterGrid::INTERPOLATE_DELAUNAY)
+		{
+			cmd.warning("[Rasterize] The filling stragety is set to 'Delaunay' but no custom height was defined. Some holes may remain (outside of the convex hull).");
+		}
 	}
 
 	if (!outputCloud && !outputMesh && !outputRasterZ && !outputRasterRGB)
@@ -477,6 +484,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 													vertDir,
 													gridBBox,
 													0.0,
+													true,
 													true,
 													nullptr
 												);

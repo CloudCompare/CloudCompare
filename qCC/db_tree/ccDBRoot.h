@@ -19,6 +19,7 @@
 #define CC_DB_ROOT_HEADER
 
 //Qt
+#include "ccPointCloud.h"
 #include <QAbstractItemModel>
 #include <QPoint>
 #include <QTreeView>
@@ -38,27 +39,23 @@ class ccHObject;
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
 {
-	size_t selCount;
-	size_t sfCount;
-	size_t colorCount;
-	size_t normalsCount;
-	size_t octreeCount;
-	size_t cloudCount;
-	size_t gridCound;
-	size_t groupCount;
-	size_t polylineCount;
-	size_t planeCount;
-	size_t meshCount;
-	size_t imageCount;
-	size_t sensorCount;
-	size_t gblSensorCount;
-	size_t cameraSensorCount;
-	size_t kdTreeCount;
-
-	void reset()
-	{
-		memset(this, 0, sizeof(dbTreeSelectionInfo));
-	}
+	size_t selCount = 0;
+	size_t sfCount = 0;
+	size_t colorCount = 0;
+	size_t normalsCount = 0;
+	size_t octreeCount = 0;
+	size_t cloudCount = 0;
+	size_t gridCound = 0;
+	size_t groupCount = 0;
+	size_t polylineCount = 0;
+	size_t planeCount = 0;
+	size_t meshCount = 0;
+	size_t primitiveCount = 0;
+	size_t imageCount = 0;
+	size_t sensorCount = 0;
+	size_t gblSensorCount = 0;
+	size_t cameraSensorCount = 0;
+	size_t kdTreeCount = 0;
 };
 
 //! Custom QTreeView widget (for advanced selection behavior)

@@ -19,15 +19,16 @@
 #include <QFileInfo>
 #include <QXmlStreamWriter>
 
+#include <ccMainAppInterface.h>
+#include <ccGLWindowInterface.h>
+
+#include <ccFacet.h>
+#include <ccPointCloud.h>
+
 #include "ccCompassExport.h"
-
-#include "ccMainAppInterface.h"
-
-#include "ccFacet.h"
 #include "ccFitPlane.h"
 #include "ccGeoObject.h"
 #include "ccLineation.h"
-#include "ccPointCloud.h"
 #include "ccSNECloud.h"
 #include "ccThickness.h"
 #include "ccTrace.h"

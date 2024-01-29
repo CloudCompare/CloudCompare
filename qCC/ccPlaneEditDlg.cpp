@@ -27,9 +27,6 @@
 #include <ccPlane.h>
 #include <ccNormalVectors.h>
 
-//qCC_gl
-#include <ccGLWindow.h>
-
 //Qt
 #include <QDoubleValidator>
 

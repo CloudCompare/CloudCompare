@@ -175,39 +175,47 @@ public: //children management
 		Removes any dependency between the flag and this object
 	**/
 	void detachChild(ccHObject* child);
+
+	//! Detaches all children
+	void detachAllChildren();
+
 	//! Removes a specific child
 	/** \warning This method may delete the child if the DP_PARENT_OF_OTHER
 		dependency flag is set for this child (use detachChild if you
 		want to avoid deletion).
 	**/
-	//! Detaches all children
-	void detachAllChildren();
-
 	void removeChild(ccHObject* child);
+
 	//! Removes a specific child given its index
 	/** \warning This method may delete the child if the DP_PARENT_OF_OTHER
 		dependency flag is set for this child (use detachChild if you
 		want to avoid deletion).
 	**/
 	void removeChild(int pos);
+
 	//! Removes all children
 	void removeAllChildren();
+
 	//! Returns child index
 	int getChildIndex(const ccHObject* aChild) const;
+
 	//! Swaps two children
 	void swapChildren(unsigned firstChildIndex, unsigned secondChildIndex);
+
 	//! Returns index relatively to its parent or -1 if no parent
 	int getIndex() const;
 
 	//! Transfer a given child to another parent
 	void transferChild(ccHObject* child, ccHObject& newParent);
+
 	//! Transfer all children to another parent
 	void transferChildren(ccHObject& newParent, bool forceFatherDependent = false);
 
 	//! Shortcut: returns first child
-	ccHObject* getFirstChild() const { return (m_children.empty() ? nullptr : m_children.front()); }
+	inline ccHObject* getFirstChild() const { return (m_children.empty() ? nullptr : m_children.front()); }
+
 	//! Shortcut: returns last child
-	ccHObject* getLastChild() const { return (m_children.empty() ? nullptr : m_children.back()); }
+	inline ccHObject* getLastChild() const { return (m_children.empty() ? nullptr : m_children.back()); }
 
 	//! Returns true if the current object is an ancestor of the specified one
 	bool isAncestorOf(const ccHObject *anObject) const;

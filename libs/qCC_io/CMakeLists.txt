@@ -30,9 +30,6 @@ if( OPTION_USE_GDAL )
 	target_link_GDAL( ${PROJECT_NAME} )
 endif()
 
-# contrib. libraries support
-target_link_contrib( ${PROJECT_NAME} )
-
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 

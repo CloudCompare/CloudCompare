@@ -41,6 +41,7 @@ ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent/*=nullptr*/)
 
 	connect(m_ui->checkBoxAuto, &QCheckBox::stateChanged, this, &ccUnrollDlg::axisAutoStateChanged);
 	connect(m_ui->comboBoxUnrollShapeType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::shapeTypeChanged);
+	connect(m_ui->comboBoxProjectionType, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::projectionTypeChanged);
 	connect(m_ui->comboBoxAxisDimension, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccUnrollDlg::axisDimensionChanged);
 	connect(m_ui->flipxAxisToolButton, &QToolButton::clicked, [this] {	m_ui->axisXDoubleSpinBox->setValue(-m_ui->axisXDoubleSpinBox->value());
 																		m_ui->axisYDoubleSpinBox->setValue(-m_ui->axisYDoubleSpinBox->value());
@@ -70,7 +71,31 @@ ccUnrollDlg::~ccUnrollDlg()
 
 ccPointCloud::UnrollMode ccUnrollDlg::getType() const
 {
-	return static_cast<ccPointCloud::UnrollMode>(m_ui->comboBoxUnrollShapeType->currentIndex());
+	switch (m_ui->comboBoxUnrollShapeType->currentIndex())
+	{
+	case 0:
+		return ccPointCloud::CYLINDER;
+	case 1:
+		switch (m_ui->comboBoxProjectionType->currentIndex())
+		{
+		case 0:
+			return ccPointCloud::CONE_CONICAL;
+		case 1:
+			return ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS;
+		case 2:
+			return ccPointCloud::CONE_CYLINDRICAL_ADAPTIVE_RADIUS;
+		default:
+			assert(false);
+			break;
+		}
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	assert(false);
+	return ccPointCloud::CYLINDER;
 }
 
 CCVector3d ccUnrollDlg::getAxis() const
@@ -128,6 +153,11 @@ double ccUnrollDlg::getConeHalfAngle() const
 	return m_ui->halfAngleDoubleSpinBox->value();
 }
 
+double ccUnrollDlg::getConicalProjSpanRatio() const
+{
+	return m_ui->conicalProjSpanRatioDoubleSpinBox->value();
+}
+
 bool ccUnrollDlg::exportDeviationSF() const
 {
 	return m_ui->exportDeviationSFCheckBox->isChecked();
@@ -137,45 +167,66 @@ void ccUnrollDlg::shapeTypeChanged(int index)
 {
 	switch (index)
 	{
-	case ccPointCloud::CYLINDER: //cylinder
+	case 0: //cylinder
 	{
+		m_ui->conicalProjectionFrame->setVisible(false);
 		m_ui->angleFrame->setVisible(false);
 		m_ui->autoCenterFrame->setVisible(true);
 		m_ui->radiusFrame->setVisible(true);
 		m_ui->axisPositionGroupBox->setTitle("Axis position");
 		m_ui->radiusLabel->setText("Radius");
 		axisAutoStateChanged(m_ui->checkBoxAuto->checkState());
-		m_ui->fromEntityToolButton->setEnabled(true);
 	}
 	break;
-	case ccPointCloud::CONE: //cone
+
+	case 1: //cone
 	{
+		m_ui->conicalProjectionFrame->setVisible(true);
 		m_ui->angleFrame->setVisible(true);
 		m_ui->autoCenterFrame->setVisible(false);
+		//m_ui->radiusFrame->setVisible(false); // will depend on the projection type
+		m_ui->radiusLabel->setText("Fixed radius");
+		m_ui->axisPositionGroupBox->setTitle("Cone apex");
+		axisAutoStateChanged(Qt::Unchecked);
+		//may be disabled if we were in cylinder mode previously
+		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
+		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
+		projectionTypeChanged(m_ui->comboBoxProjectionType->currentIndex());
+	}
+	break;
+
+	default:
+	{
+		assert(false);
+	}
+	break;
+	};
+}
+
+void ccUnrollDlg::projectionTypeChanged(int index)
+{
+	switch (index)
+	{
+	case 0: //conical
+	{
+		m_ui->spanRatioFrame->setVisible(true);
 		m_ui->radiusFrame->setVisible(false);
-		m_ui->radiusLabel->setText("Base radius");
-		m_ui->axisPositionGroupBox->setTitle("Cone apex");
-		axisAutoStateChanged(Qt::Unchecked);
-		//may be disabled if we were in cylinder mode previously
-		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
-		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
-		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
-		m_ui->fromEntityToolButton->setEnabled(false); // not supported for now
 	}
 	break;
-	case ccPointCloud::STRAIGHTENED_CONE: //straightened cone (fixed radius)
-	case ccPointCloud::STRAIGHTENED_CONE2: //straightened cone 2
+
+	case 1: //cylindrical (fixed radius)
 	{
-		m_ui->angleFrame->setVisible(true);
-		m_ui->radiusFrame->setVisible(true);
-		m_ui->autoCenterFrame->setVisible(false);
-		m_ui->axisPositionGroupBox->setTitle("Cone apex");
-		axisAutoStateChanged(Qt::Unchecked);
-		//may be disabled if we were in cylinder mode previously
-		m_ui->axisCenterXDoubleSpinBox->setDisabled(false);
-		m_ui->axisCenterYDoubleSpinBox->setDisabled(false);
-		m_ui->axisCenterZDoubleSpinBox->setDisabled(false);
-		m_ui->fromEntityToolButton->setEnabled(false); // not supported for now
+		m_ui->spanRatioFrame->setVisible(false);
+		m_ui->radiusFrame->setVisible(true); // for fixed radius only
+		m_ui->radiusLabel->setText("Fixed radius");
+	}
+	break;
+
+	case 2: //cylindrical (adaptive radius)
+	{
+		m_ui->spanRatioFrame->setVisible(false);
+		m_ui->radiusFrame->setVisible(false);
 	}
 	break;
 	};
@@ -214,6 +265,8 @@ void ccUnrollDlg::toPersistentSettings() const
 	settings.beginGroup("Unroll");
 	{
 		settings.setValue("shapeType",			m_ui->comboBoxUnrollShapeType->currentIndex());
+		settings.setValue("projectionType",		m_ui->comboBoxProjectionType->currentIndex());
+		settings.setValue("spanRatio",          m_ui->conicalProjSpanRatioDoubleSpinBox->value());
 		settings.setValue("axisDimension",		m_ui->comboBoxAxisDimension->currentIndex());
 		settings.setValue("angle",				m_ui->halfAngleDoubleSpinBox->value());
 		settings.setValue("radius",				m_ui->radiusDoubleSpinBox->value());
@@ -239,11 +292,33 @@ void ccUnrollDlg::fromPersistentSettings()
 	settings.beginGroup("Unroll");
 	{
 		int shapeType          = settings.value("shapeType",         m_ui->comboBoxUnrollShapeType->currentIndex()).toInt();
+		int projectionType     = settings.value("projectionType",    -1).toInt();
 		int axisDim            = settings.value("axisDimension",     m_ui->comboBoxAxisDimension->currentIndex()).toInt();
 		double angle           = settings.value("angle",             m_ui->halfAngleDoubleSpinBox->value()).toDouble();
 		double radius          = settings.value("radius",            m_ui->radiusDoubleSpinBox->value()).toDouble();
 		bool autoCenter        = settings.value("autoCenter",        m_ui->checkBoxAuto->isChecked()).toBool();
 		bool exportDeviationSF = settings.value("exportDeviationSF", m_ui->exportDeviationSFCheckBox->isChecked()).toBool();
+		bool spanRatio         = settings.value("spanRatio",         m_ui->conicalProjSpanRatioDoubleSpinBox->value()).toDouble();
+
+		// compatibility with older versions
+		if (projectionType < 0 || shapeType > 1)
+		{
+			if (shapeType == ccPointCloud::CONE_CONICAL)
+			{
+				shapeType = 1;
+				projectionType = 0;
+			}
+			else if (shapeType == ccPointCloud::CONE_CYLINDRICAL_FIXED_RADIUS)
+			{
+				shapeType = 1;
+				projectionType = 1;
+			}
+			else if (shapeType == ccPointCloud::CONE_CYLINDRICAL_ADAPTIVE_RADIUS)
+			{
+				shapeType = 1;
+				projectionType = 2;
+			}
+		}
 
 		CCVector3d axis;
 		axis.x = settings.value("axis.x", m_ui->axisXDoubleSpinBox->value()).toDouble();
@@ -256,6 +331,8 @@ void ccUnrollDlg::fromPersistentSettings()
 		axisCenter.z = settings.value("axisCenter.z", m_ui->axisCenterZDoubleSpinBox->value()).toDouble();
 
 		m_ui->comboBoxUnrollShapeType->setCurrentIndex(shapeType);
+		m_ui->comboBoxProjectionType->setCurrentIndex(projectionType);
+		m_ui->conicalProjSpanRatioDoubleSpinBox->setValue(spanRatio);
 		m_ui->comboBoxAxisDimension->setCurrentIndex(axisDim);
 		m_ui->halfAngleDoubleSpinBox->setValue(angle);
 		m_ui->radiusDoubleSpinBox->setValue(radius);
@@ -285,34 +362,76 @@ void ccUnrollDlg::loadParametersFromEntity()
 		return;
 	}
 
-	ccHObject::Container cylinders;
-	m_dbRootEntity->filterChildren(cylinders, true, CC_TYPES::CYLINDER, false);
-
-	if (cylinders.empty())
+	if (m_ui->comboBoxUnrollShapeType->currentIndex() == 0) // Cylinder
 	{
-		ccLog::Error("No cylinder in DB");
-		return;
+		ccHObject::Container cylinders;
+		m_dbRootEntity->filterChildren(cylinders, true, CC_TYPES::CYLINDER, false);
+
+		if (cylinders.empty())
+		{
+			ccLog::Error("No cylinder in DB");
+			return;
+		}
+		int selectedIndex = ccEntitySelectionDialog::SelectEntity(cylinders, -1, this, tr("Select a cylinder entity"));
+		if (selectedIndex < 0)
+		{
+			//process cancelled by the user
+			return;
+		}
+
+		const ccCylinder* cylinder = static_cast<const ccCylinder*>(cylinders[selectedIndex]);
+		CCVector3 axis = cylinder->getTransformation().getColumnAsVec3D(2); // Z axis is the cylinder axis
+		CCVector3 origin = cylinder->getTransformation().getTranslationAsVec3D();
+		PointCoordinateType radius = cylinder->getBottomRadius();
+
+		m_ui->comboBoxAxisDimension->setCurrentIndex(3); // custom
+		m_ui->axisXDoubleSpinBox->setValue(axis.x);
+		m_ui->axisYDoubleSpinBox->setValue(axis.y);
+		m_ui->axisZDoubleSpinBox->setValue(axis.z);
+		m_ui->axisCenterXDoubleSpinBox->setValue(origin.x);
+		m_ui->axisCenterYDoubleSpinBox->setValue(origin.y);
+		m_ui->axisCenterZDoubleSpinBox->setValue(origin.z);
+		m_ui->radiusDoubleSpinBox->setValue(radius);
+		m_ui->checkBoxAuto->setChecked(false);
 	}
-	int selectedIndex = ccEntitySelectionDialog::SelectEntity(cylinders, -1, this, tr("Select a cylinder entity"));
-	if (selectedIndex < 0)
+	else if (m_ui->comboBoxUnrollShapeType->currentIndex() == 1) // Cone
 	{
-		//process cancelled by the user
-		return;
+		ccHObject::Container cones;
+		m_dbRootEntity->filterChildren(cones, true, CC_TYPES::CONE, false);
+
+		if (cones.empty())
+		{
+			ccLog::Error("No cone in DB");
+			return;
+		}
+		int selectedIndex = ccEntitySelectionDialog::SelectEntity(cones, -1, this, tr("Select a cone entity"));
+		if (selectedIndex < 0)
+		{
+			//process cancelled by the user
+			return;
+		}
+
+		const ccCone* cone = static_cast<const ccCone*>(cones[selectedIndex]);
+		CCVector3 axis = cone->getTransformation().getColumnAsVec3D(2); // Z axis is the cylinder axis
+		CCVector3 apex = cone->computeApex();
+		double angle_deg = cone->computeHalfAngle_deg();
+		PointCoordinateType radius = cone->getLargeRadius();
+
+		m_ui->comboBoxAxisDimension->setCurrentIndex(3); // custom
+		m_ui->axisXDoubleSpinBox->setValue(axis.x);
+		m_ui->axisYDoubleSpinBox->setValue(axis.y);
+		m_ui->axisZDoubleSpinBox->setValue(axis.z);
+		m_ui->axisCenterXDoubleSpinBox->setValue(apex.x);
+		m_ui->axisCenterYDoubleSpinBox->setValue(apex.y);
+		m_ui->axisCenterZDoubleSpinBox->setValue(apex.z);
+		m_ui->radiusDoubleSpinBox->setValue(radius);
+		m_ui->halfAngleDoubleSpinBox->setValue(angle_deg);
+		m_ui->checkBoxAuto->setChecked(false);
 	}
-
-	const ccCylinder* cylinder = static_cast<const ccCylinder*>(cylinders[selectedIndex]);
-	CCVector3 axis = cylinder->getTransformation().getColumnAsVec3D(2); // Z axis is the cylinder axis
-	CCVector3 origin = cylinder->getTransformation().getTranslationAsVec3D();
-	PointCoordinateType radius = cylinder->getBottomRadius();
-
-	m_ui->comboBoxAxisDimension->setCurrentIndex(3); // custom
-	m_ui->axisXDoubleSpinBox->setValue(axis.x);
-	m_ui->axisYDoubleSpinBox->setValue(axis.y);
-	m_ui->axisZDoubleSpinBox->setValue(axis.z);
-	m_ui->axisCenterXDoubleSpinBox->setValue(origin.x);
-	m_ui->axisCenterYDoubleSpinBox->setValue(origin.y);
-	m_ui->axisCenterZDoubleSpinBox->setValue(origin.z);
-	m_ui->checkBoxAuto->setChecked(false);
+	else
+	{
+		assert(false);
+	}
 }
 
 void ccUnrollDlg::axisFromClipboard()

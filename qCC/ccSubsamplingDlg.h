@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,23 +17,25 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SAMPLE_DLG_HEADER
-#define CC_SAMPLE_DLG_HEADER
-
 //Qt
 #include <QDialog>
 
 //CCCoreLib
 #include <CCTypes.h>
 
+//System
+#include <array>
+
 class ccGenericPointCloud;
 
-namespace CCCoreLib {
+namespace CCCoreLib
+{
 	class GenericProgressCallback;
 	class ReferenceCloud;
 }
 
-namespace Ui {
+namespace Ui
+{
 	class SubsamplingDialog;
 }
 
@@ -45,27 +49,36 @@ public:
 	//! Sub-sampling method
 	enum CC_SUBSAMPLING_METHOD
 	{
-		RANDOM  = 0,
-		SPACE   = 1,
-		OCTREE  = 2,
+		RANDOM         = 0,
+		RANDOM_PERCENT = 1,
+		SPATIAL        = 2,
+		OCTREE         = 3,
+		COUNT          = 4 //Should always be the last one
 	};
 
 	//! Default constructor
 	ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent = nullptr);
-	~ccSubsamplingDlg();
 
-	//! Returns subsampled version of a cloud according to current parameters
-	/** Should be called only once the dialog has been validated.
+	//! Destructor
+	~ccSubsamplingDlg() override;
+
+	//! Returns the subsampled version of a cloud according to the current parameters
+	/** Should only be called after the dialog has been validated.
 	**/
 	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Enables the SF modulation option (SPATIAL method)
 	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);
 
+	//! Saves the current state to persistent settings
+	void saveToPersistentSettings() const;
+	//! Loads the state from persistent settings
+	void loadFromPersistentSettings();
+
 protected:
 
 	void sliderMoved(int sliderPos);
-	void samplingRateChanged(double value);
+	void valueChanged(double value);
 	void changeSamplingMethod(int index);
 
 protected: //methods
@@ -88,7 +101,9 @@ protected: //members
 	//! Scalar modulation (max SF value)
 	ScalarType m_sfMax;
 
+	//! Last known sampling values (per method)
+	std::array<double, CC_SUBSAMPLING_METHOD::COUNT> m_lastUsedValues;
+
+	//! Associated UI
 	Ui::SubsamplingDialog* m_ui;
 };
-
-#endif

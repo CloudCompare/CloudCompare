@@ -31,7 +31,7 @@
 #include <map>
 
 class QMdiSubWindow;
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccHObject;
 class ccPickingHub;
 
@@ -61,7 +61,7 @@ public:
 
 	//inherited from ccOverlayDialog
 	bool start() override;
-	bool linkWith(ccGLWindow* win) override;
+	bool linkWith(ccGLWindowInterface* win) override;
 
 	//inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
@@ -132,12 +132,12 @@ protected:
 protected:
 
 	//! Inits dialog values with specified window
-	void initWith(ccGLWindow* win);
+	void initWith(ccGLWindowInterface* win);
 
 	//! Type of the pushed matrices map structure
-	using PushedMatricesMapType = std::map<ccGLWindow*,ccGLMatrixd>;
+	using PushedMatricesMapType = std::map<ccGLWindowInterface*, ccGLMatrixd>;
 	//! Type of an element of the pushed matrices map structure
-	using PushedMatricesMapElement = std::pair<ccGLWindow*,ccGLMatrixd>;
+	using PushedMatricesMapElement = std::pair<ccGLWindowInterface*, ccGLMatrixd>;
 
 	//! Pushed camera matrices (per window)
 	PushedMatricesMapType pushedMatrices;

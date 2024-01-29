@@ -483,7 +483,7 @@ struct facetElement
 
 CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
-	ccLog::Print(QString("[OBJ] ") + filename);
+	ccLog::Print(QString("[OBJ] Loading ") + filename);
 
 	//open file
 	QFile file(filename);
@@ -1134,16 +1134,17 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						mtlFilename = mtlFilename.left(mtlFilename.size() - 1);
 					}
 					ccLog::Print(QString("[OBJ] Material file: ") + mtlFilename);
-					QString mtlPath = QFileInfo(filename).canonicalPath();
+
 					//we try to load it
 					if (!materials)
 					{
 						materials = new ccMaterialSet("materials");
 						materials->link();
 					}
-
 					size_t oldSize = materials->size();
+
 					QStringList errors;
+					QString mtlPath = QFileInfo(filename).absolutePath();
 					if (ccMaterialSet::ParseMTL(mtlPath, mtlFilename, *materials, errors))
 					{
 						ccLog::Print("[OBJ] %i materials loaded", materials->size() - oldSize);

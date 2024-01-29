@@ -47,12 +47,14 @@ public:
 	double getRadius() const;
 	double getConeHalfAngle() const;
 	bool exportDeviationSF() const;
+	double getConicalProjSpanRatio() const;
 
 	void toPersistentSettings() const;
 	void fromPersistentSettings();
 
 protected:
 	void shapeTypeChanged(int index);
+	void projectionTypeChanged(int index);
 	void axisDimensionChanged(int index);
 	void axisAutoStateChanged(int checkState);
 	void loadParametersFromEntity();

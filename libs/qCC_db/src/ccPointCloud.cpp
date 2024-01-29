@@ -26,7 +26,6 @@
 #include <ReferenceCloud.h>
 
 //local
-#include "cc2DLabel.h"
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
 #include "ccColorScalesManager.h"
@@ -59,6 +58,88 @@
 
 static const char s_deviationSFName[] = "Deviation";
 
+// 'Draw normals' shader program
+static QSharedPointer<QOpenGLShaderProgram> s_programDrawNormals;
+// 'Draw normals' shader parameters
+static struct DrawNormalsShaderParameters
+{
+	int vertexLocation = 0;
+	int normalLocation = 0;
+	int normalLengthLocation = 0;
+	int matrixLocation = 0;
+	int colorLocation = 0;
+} s_drawNormalsShaderParameters;
+// Default path to the shader files
+static QString s_shaderPath;
+
+void ccPointCloud::SetShaderPath(const QString& path)
+{
+	s_shaderPath = path;
+}
+
+void ccPointCloud::ReleaseShaders()
+{
+	s_programDrawNormals.clear();
+}
+
+static bool InitProgramDrawNormals(QOpenGLContext* context)
+{
+	if (s_programDrawNormals.isNull())
+	{
+		QString error;
+
+		if (!context)
+		{
+			assert(false);
+			return false;
+		}
+
+		s_programDrawNormals.reset(new QOpenGLShaderProgram(context));
+
+		// create vertex shader
+		QString vertexShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.vs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		// create geometry shader
+		QString geometryShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.gs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Geometry, geometryShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		// create fragment shader
+		QString fragmentShaderFile(s_shaderPath + "/DrawNormals/DrawNormals.fs");
+		if (!s_programDrawNormals->addShaderFromSourceFile(QOpenGLShader::Fragment, fragmentShaderFile))
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		if (!s_programDrawNormals->link())
+		{
+			error = s_programDrawNormals->log();
+			ccLog::Error(error);
+			return false;
+		}
+
+		s_drawNormalsShaderParameters.vertexLocation = s_programDrawNormals->attributeLocation("vertexIn");
+		s_drawNormalsShaderParameters.normalLocation = s_programDrawNormals->attributeLocation("normal");
+		s_drawNormalsShaderParameters.normalLengthLocation = s_programDrawNormals->uniformLocation("normalLength");
+		s_drawNormalsShaderParameters.matrixLocation = s_programDrawNormals->uniformLocation("modelViewProjectionMatrix");
+		s_drawNormalsShaderParameters.colorLocation = s_programDrawNormals->uniformLocation("color");
+	}
+
+	return true;
+}
+
 ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/) throw()
 	: BaseClass(name, uniqueID)
 	, m_rgbaColors(nullptr)
@@ -69,6 +150,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
 	, m_fwfData(nullptr)
+	, m_normalsDrawnAsLines(false)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
 	showSF(false);
@@ -1979,6 +2061,31 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 	invalidateBoundingBox();
 
+	//update the normals (if any)
+	if (hasNormals())
+	{
+		//only if one of the scale coefficients is negative
+		if (fx < 0 || fy < 0 || fz < 0)
+		{
+			PointCoordinateType signX = (fx < 0 ? -CCCoreLib::PC_ONE : CCCoreLib::PC_ONE);
+			PointCoordinateType signY = (fy < 0 ? -CCCoreLib::PC_ONE : CCCoreLib::PC_ONE);
+			PointCoordinateType signZ = (fz < 0 ? -CCCoreLib::PC_ONE : CCCoreLib::PC_ONE);
+
+			for (CompressedNormType& n : *m_normals)
+			{
+				CCVector3 N;
+				ccNormalCompressor::Decompress(n, N.u);
+				N.x *= signX;
+				N.y *= signY;
+				N.z *= signZ;
+				n = ccNormalCompressor::Compress(N.u);
+			}
+
+			//we must update the VBOs
+			normalsHaveChanged();
+		}
+	}
+
 	//same thing for the octree
 	ccOctree::Shared octree = getOctree();
 	if (octree)
@@ -2083,16 +2190,16 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 
 void ccPointCloud::invertNormals()
 {
-	if (!hasNormals())
-		return;
-
-	for (CompressedNormType& n : *m_normals)
+	if (hasNormals())
 	{
-		ccNormalCompressor::InvertNormal(n);
-	}
+		for (CompressedNormType& n : *m_normals)
+		{
+			ccNormalCompressor::InvertNormal(n);
+		}
 
-	//We must update the VBOs
-	normalsHaveChanged();
+		//we must update the VBOs
+		normalsHaveChanged();
+	}
 }
 
 void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
@@ -3198,6 +3305,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
+		
+		if (m_normalsDrawnAsLines)
+		{
+			drawNormalsAsLines(context);
+		}
 	}
 	else if (MACRO_Draw2D(context))
 	{
@@ -3684,7 +3796,7 @@ static void ProjectOnCone(	const CCVector3& AP,
 	//3D distance to the apex
 	PointCoordinateType normAP = AP.norm();
 	//2D distance to the apex (XY plane)
-	PointCoordinateType AP2Dnorm = sqrt(x*x + y * y);
+	PointCoordinateType AP2Dnorm = sqrt(x*x + y*y);
 
 	//angle between +Z and AP
 	PointCoordinateType beta_rad = atan2(AP2Dnorm, -z);
@@ -3695,7 +3807,7 @@ static void ProjectOnCone(	const CCVector3& AP,
 	{
 		//longitude (0 = +X = east)
 		phi_rad = atan2(y, x);
-		//curvilinear distance from the Apex
+		//distance from the Apex along the axis
 		s = normAP * cos(gamma_rad);
 		//(normal) deviation
 		delta = normAP * sin(gamma_rad);
@@ -3728,13 +3840,16 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		modeStr = "Cylinder";
 		cylParams = static_cast<UnrollCylinderParams*>(params);
 		break;
-	case CONE:
-		modeStr = "Cone";
+	case CONE_CONICAL:
+		modeStr = "Cone (Conical)";
 		coneParams = static_cast<UnrollConeParams*>(params);
 		break;
-	case STRAIGHTENED_CONE:
-	case STRAIGHTENED_CONE2:
-		modeStr = "Straightened cone";
+	case CONE_CYLINDRICAL_FIXED_RADIUS:
+		modeStr = "Cone (Cylindrical - straight radius)";
+		coneParams = static_cast<UnrollConeParams*>(params);
+		break;
+	case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
+		modeStr = "Cone (Cylindrical - adaptive radius)";
 		coneParams = static_cast<UnrollConeParams*>(params);
 		break;
 	default:
@@ -3833,14 +3948,14 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		return nullptr;
 	}
 
-	double startAngle_rad = CCCoreLib::DegreesToRadians( startAngle_deg );
-	double stopAngle_rad = CCCoreLib::DegreesToRadians( stopAngle_deg );
+	double startAngle_rad = CCCoreLib::DegreesToRadians(startAngle_deg);
+	double stopAngle_rad = CCCoreLib::DegreesToRadians(stopAngle_deg);
 
 	PointCoordinateType alpha_rad = 0;
 	PointCoordinateType sin_alpha = 0;
 	if (mode != CYLINDER)
 	{
-		alpha_rad = CCCoreLib::DegreesToRadians( coneParams->coneAngle_deg );
+		alpha_rad = CCCoreLib::DegreesToRadians(coneParams->coneAngle_deg);
 		sin_alpha = static_cast<PointCoordinateType>(sin(alpha_rad));
 	}
 
@@ -3855,7 +3970,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		CCVector3 Pout(0, 0, 0);
 		PointCoordinateType longitude_rad = 0; //longitude (rad)
 		PointCoordinateType delta = 0; //distance to the cone/cylinder surface
-		PointCoordinateType coneAbscissa = 0;
+		PointCoordinateType posAlongAxis = 0;
 
 		switch (mode)
 		{
@@ -3865,46 +3980,34 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			ProjectOnCylinder(AP, xDir, yDir, params->radius, delta, longitude_rad);
 
 			//we project the point
-			//Pout.x = longitude_rad * radius;
+			//Pout.x = longitude_rad * radius; // will be set later
 			Pout.y = -delta;
 			Pout.z = AP.dot(axisDir);
 		}
 		break;
 
-		case STRAIGHTENED_CONE:
+		case CONE_CONICAL:
 		{
 			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
-			//we simply develop the cone as a cylinder
-			//Pout.x = phi_rad * params->radius;
-			Pout.y = -delta;
-			//Pout.z = Pin->dot(axisDir);
-			Pout.z = coneParams->apex.dot(axisDir) - coneAbscissa;
-		}
-		break;
-
-		case STRAIGHTENED_CONE2:
-		{
-			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
-			//we simply develop the cone as a cylinder
-			//Pout.x = phi_rad * coneAbscissa * sin_alpha;
-			Pout.y = -delta;
-			//Pout.z = Pin->dot(axisDir);
-			Pout.z = coneParams->apex.dot(axisDir) - coneAbscissa;
-		}
-		break;
-
-		case CONE:
-		{
-			AP = *Pin - coneParams->apex;
-			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, coneAbscissa, delta, longitude_rad);
+			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, posAlongAxis, delta, longitude_rad);
 			//unrolling
-			PointCoordinateType theta_rad = longitude_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
-			//project the point
-			Pout.x =  coneAbscissa * sin(theta_rad);
-			Pout.y = -coneAbscissa * cos(theta_rad);
+			//PointCoordinateType theta_rad = longitude_rad * coneParams->spanRatio;
+			//Pout.x = posAlongAxis * sin(theta_rad); // will be set later
+			//Pout.y = -posAlongAxis * cos(theta_rad); // will be set later
 			Pout.z = delta;
+		}
+		break;
+
+		case CONE_CYLINDRICAL_FIXED_RADIUS:
+		case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
+		{
+			AP = *Pin - coneParams->apex;
+			ProjectOnCone(AP, alpha_rad, axisDir, xDir, yDir, posAlongAxis, delta, longitude_rad);
+			//we simply develop the cone as a cylinder
+			//Pout.x = phi_rad * params->radius; // will be set later
+			Pout.y = -delta;
+			//Pout.z = Pin->dot(axisDir);
+			Pout.z = -posAlongAxis;
 		}
 		break;
 
@@ -3912,12 +4015,6 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			assert(false);
 		}
 
-		if (!arbitraryOutputCS)
-		{
-			// projects the output point to a coordinate system linked to the input cylinder/cone CS
-			Pout = cylParams->center + (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
-		}
-		
 		// first unroll its normal if necessary
 		if (withNormals)
 		{
@@ -3939,47 +4036,43 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			}
 			break;
 
-			case STRAIGHTENED_CONE:
+			case CONE_CONICAL:
 			{
-				PointCoordinateType coneAbscissa2 = 0;
+				PointCoordinateType posAlongAxis2 = 0;
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
+				//unrolling
+				PointCoordinateType theta_rad = longitude_rad * coneParams->spanRatio;
+				PointCoordinateType theta2_rad = longitude2_rad * coneParams->spanRatio;
+				N2.x = posAlongAxis2 * sin(theta2_rad) - posAlongAxis * sin(theta_rad);
+				N2.y = -(posAlongAxis2 * cos(theta2_rad) - posAlongAxis * cos(theta_rad));
+				N2.z = delta2 - delta;
+			}
+			break;
+
+			case CONE_CYLINDRICAL_FIXED_RADIUS:
+			{
+				PointCoordinateType posAlongAxis2 = 0;
+				PointCoordinateType delta2 = 0;
+				PointCoordinateType longitude2_rad = 0;
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
 				//we simply develop the cone as a cylinder
 				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
 				N2.y = -(delta2 - delta);
-				N2.z = coneAbscissa - coneAbscissa2;
+				N2.z = posAlongAxis - posAlongAxis2;
 			}
 			break;
 
-			case STRAIGHTENED_CONE2:
+			case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
 			{
-				PointCoordinateType coneAbscissa2 = 0;
+				PointCoordinateType posAlongAxis2 = 0;
 				PointCoordinateType delta2 = 0;
 				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
-				//we simply develop the cone as a cylinder
-				N2.x = static_cast<PointCoordinateType>((longitude2_rad * coneAbscissa - longitude_rad * coneAbscissa2) * sin_alpha);
+				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
+				N2.x = static_cast<PointCoordinateType>((longitude2_rad * posAlongAxis2 - longitude_rad * posAlongAxis) * sin_alpha);
 				N2.y = -(delta2 - delta);
-				N2.z = coneAbscissa - coneAbscissa2;
-			}
-			break;
-
-			case CONE:
-			{
-				PointCoordinateType coneAbscissa2 = 0;
-				PointCoordinateType delta2 = 0;
-				PointCoordinateType longitude2_rad = 0;
-				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, coneAbscissa2, delta2, longitude2_rad);
-				//unrolling
-				PointCoordinateType theta2_rad = longitude2_rad * sin_alpha; //sin_alpha is a bit arbitrary here. The aim is mostly to reduce the angular range
-				//project the point
-				CCVector3 P2out;
-				P2out.x =  coneAbscissa2 * sin(theta2_rad);
-				P2out.y = -coneAbscissa2 * cos(theta2_rad);
-				P2out.z = delta2;
-				P2out = cylParams->center + (P2out.x * xDir) + (P2out.y * yDir) + (P2out.z * axisDir);
-				N2 = P2out - Pout;
+				N2.z = posAlongAxis - posAlongAxis2;
 			}
 			break;
 
@@ -3995,6 +4088,28 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			}
 			N2.normalize();
 			unrolledNormals[i] = N2;
+		}
+
+		if (!arbitraryOutputCS)
+		{
+			// projects the output point to a coordinate system linked to the input cylinder/cone CS
+			switch (mode)
+			{
+			case CYLINDER:
+				Pout = cylParams->center /*+ (Pout.x * xDir)*/ + (Pout.y * yDir) + (Pout.z * axisDir);
+				break;
+
+			case CONE_CONICAL:
+				// we'll do that later
+				break;
+			case CONE_CYLINDRICAL_FIXED_RADIUS:
+			case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
+				Pout = coneParams->apex + (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
+				break;
+
+			default:
+				assert(false);
+			}
 		}
 
 		//then compute the deviation (if necessary)
@@ -4013,6 +4128,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 		dLongitude_rad += 2 * M_PI;
 
 		//2) repeat the unrolling process
+		CCVector3 Pout2 = Pout;
 		for (; dLongitude_rad < stopAngle_rad; dLongitude_rad += 2 * M_PI)
 		{
 			//do we need to reserve more memory?
@@ -4039,25 +4155,37 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 			//add the point
 			switch (mode)
 			{
+			case CONE_CONICAL:
+			{
+				PointCoordinateType theta_rad = dLongitude_rad * coneParams->spanRatio;
+				//project the point
+				Pout.x = posAlongAxis * sin(theta_rad);
+				Pout.y = -posAlongAxis * cos(theta_rad);
+				if (!arbitraryOutputCS)
+				{
+					Pout2 = coneParams->apex + (Pout.x * xDir) + (Pout.y * yDir) + (Pout.z * axisDir);
+				}
+				else
+				{
+					Pout2 = Pout;
+				}
+			}
+			break;
+
 			case CYLINDER:
-			case STRAIGHTENED_CONE:
+			case CONE_CYLINDRICAL_FIXED_RADIUS:
 				Pout += static_cast<PointCoordinateType>(dLongitude_rad * params->radius) * xDir2;
+				Pout2 = Pout;
 				break;
-			case STRAIGHTENED_CONE2:
-				Pout += static_cast<PointCoordinateType>(dLongitude_rad * coneAbscissa * sin_alpha) * xDir2;
+			case CONE_CYLINDRICAL_ADAPTIVE_RADIUS:
+				Pout += static_cast<PointCoordinateType>(dLongitude_rad * posAlongAxis * sin_alpha) * xDir2;
+				Pout2 = Pout;
 				break;
-
-			case CONE:
-				Pout += static_cast<PointCoordinateType>(coneAbscissa * sin(dLongitude_rad)) * xDir2;
-				Pout += static_cast<PointCoordinateType>(-coneAbscissa * cos(dLongitude_rad)) * xDir2;
-				//Pout = coneParams->apex + Pout; //nope, this projection is arbitrary and should be centered on (0, 0, 0)
-				break;
-
 			default:
 				assert(false);
 			}
 
-			unrolledPoints.push_back(Pout);
+			unrolledPoints.push_back(Pout2);
 			duplicatedPoints.addPointIndex(i);
 		}
 
@@ -5732,6 +5860,116 @@ bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
 	return ccFastMarchingForNormsDirection::OrientNormals(this, level, pDlg);
 }
 
+void ccPointCloud::showNormalsAsLines(bool state)
+{
+	if (!hasNormals())
+		return;
+	
+	m_normalsDrawnAsLines = state;
+
+	if (state == false)
+		m_decompressedNormals.clear();
+	else
+	{
+		decompressNormals();
+		redrawDisplay();
+	}
+}
+
+bool ccPointCloud::normalsAreDrawn() const
+{
+	return m_normalsDrawnAsLines;
+}
+
+void  ccPointCloud::setNormalLength(const float& value)
+{
+	m_normalLineParameters.length = value;
+}
+
+void ccPointCloud::setNormalLineColor(int colorIdx)
+{
+	m_normalLineParameters.colorIdx = colorIdx;
+
+	switch (colorIdx) {
+	case ccPointCloud::YELLOW:
+		m_normalLineParameters.color = ccColor::yellow;
+		break;
+	case ccPointCloud::RED:
+		m_normalLineParameters.color = ccColor::red;
+		break;
+	case ccPointCloud::GREEN:
+		m_normalLineParameters.color = ccColor::green;
+		break;
+	case ccPointCloud::BLUE:
+		m_normalLineParameters.color = ccColor::blue;
+		break;
+	case ccPointCloud::BLACK:
+		m_normalLineParameters.color = ccColor::black;
+		break;
+	default:
+		m_normalLineParameters.color = ccColor::yellow;
+		break;
+	}
+}
+
+void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
+{
+	if (!InitProgramDrawNormals(context.qGLContext))
+	{
+		ccLog::Warning("[ccPointCloud::drawNormalsAsLines] impossible to init shader program");
+		return;
+	}
+
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	QMatrix4x4 projection;
+	QMatrix4x4 modelView;
+	glFunc->glGetFloatv(GL_PROJECTION_MATRIX, projection.data());
+	glFunc->glGetFloatv(GL_MODELVIEW_MATRIX, modelView.data());
+	QMatrix4x4 projectionModelView = projection * modelView; // QMatrix4x4 expects row major data
+
+	s_programDrawNormals->bind();
+	// set uniforms
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.matrixLocation, projectionModelView);
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.normalLengthLocation, GLfloat(m_normalLineParameters.length));
+	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.colorLocation,
+										  m_normalLineParameters.color.r,
+										  m_normalLineParameters.color.g,
+										  m_normalLineParameters.color.b,
+										  m_normalLineParameters.color.a);
+
+	// set the vertex locations array
+	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.vertexLocation, static_cast<GLfloat*>(m_points.front().u), 3);
+	// set the normals array
+	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.normalLocation, static_cast<GLfloat*>(m_decompressedNormals.front().u), 3);
+	// enable the vertex locations array
+	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
+	// enable the normals array
+	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
+
+	glFunc->glDrawArrays(GL_POINTS, 0, size());
+
+	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
+	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
+
+	s_programDrawNormals->release();
+}
+
+void ccPointCloud::decompressNormals()
+{
+	// if the normals are drawn and they have changed, we need to update the array
+	if (m_normalsDrawnAsLines)
+	{
+		// we need to decompress the normals
+		m_decompressedNormals.resize(size());
+		for (unsigned idx = 0; idx < size(); idx++)
+		{
+			m_decompressedNormals[idx] = getPointNormal(idx);
+		}
+	}
+}
+
 bool ccPointCloud::hasSensor() const
 {
 	for (size_t i = 0; i < m_children.size(); ++i)
@@ -6051,6 +6289,38 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	return mesh;
 };
 
+bool ccPointCloud::setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf, PointCoordinateType defaultValueForNaN)
+{
+	unsigned pointCount = size();
+
+	if (!sf || sf->size() < pointCount)
+	{
+		ccLog::Error("Invalid scalar field");
+		return false;
+	}
+
+	for (unsigned i = 0; i < pointCount; ++i)
+	{
+		CCVector3& P = m_points[i];
+		ScalarType s = sf->getValue(i);
+
+		//handle NaN values
+		PointCoordinateType coord = CCCoreLib::ScalarField::ValidValue(s) ? static_cast<PointCoordinateType>(s) : defaultValueForNaN;
+
+		//test each dimension
+		if (importDims[0])
+			P.x = coord;
+		if (importDims[1])
+			P.y = coord;
+		if (importDims[2])
+			P.z = coord;
+	}
+
+	invalidateBoundingBox();
+	
+	return true;
+}
+
 bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 {
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
@@ -6060,7 +6330,7 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 		return true;
 	}
 
-	const QString defaultSFName[3] = { "Coord. X", "Coord. Y", "Coord. Z" };
+	const QString defaultSFName[3] { "Coord. X", "Coord. Y", "Coord. Z" };
 
 	unsigned ptsCount = size();
 

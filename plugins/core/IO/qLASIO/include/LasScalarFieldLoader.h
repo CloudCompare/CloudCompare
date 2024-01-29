@@ -44,11 +44,14 @@ class LasScalarFieldLoader
 
 	CC_FILE_ERROR handleScalarFields(ccPointCloud& pointCloud, const laszip_point& currentPoint);
 
+	/// Parses the extra scalar field described by extraField, from currentPoint, into outputValues
+	CC_FILE_ERROR parseExtraScalarField(const LasExtraScalarField& extraField, const laszip_point& currentPoint, ScalarType outputValues[3]);
+
 	/// In LAS files, the red, green and blue channels are normal LAS fields,
 	/// however in CloudCompare RGB is handled differently.
 	CC_FILE_ERROR handleRGBValue(ccPointCloud& pointCloud, const laszip_point& currentPoint);
 
-	CC_FILE_ERROR handleExtraScalarFields(ccPointCloud& pointCloud, const laszip_point& currentPoint);
+	CC_FILE_ERROR handleExtraScalarFields(const laszip_point& currentPoint);
 
 	inline void setIgnoreFieldsWithDefaultValues(bool state)
 	{
@@ -109,7 +112,7 @@ class LasScalarFieldLoader
 	void parseRawValues(const LasExtraScalarField& extraField, const uint8_t* dataStart);
 
 	template <typename T>
-	void handleOptionsFor(const LasExtraScalarField& extraField, T values[3]);
+	void handleOptionsFor(const LasExtraScalarField& extraField, T inputValues[3], ScalarType outputValues[3]);
 
   private:
 	bool                              m_force8bitRgbMode{false};
@@ -124,5 +127,5 @@ class LasScalarFieldLoader
 		uint64_t unsignedValues[LasExtraScalarField::MAX_DIM_SIZE];
 		int64_t  signedValues[LasExtraScalarField::MAX_DIM_SIZE];
 		double   floatingValues[LasExtraScalarField::MAX_DIM_SIZE];
-	} m_rawValues;
+	} m_rawValues{};
 };

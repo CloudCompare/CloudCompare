@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_LOG_HEADER
-#define CC_LOG_HEADER
 
 //Local
 #include "qCC_db.h"
@@ -124,5 +123,3 @@ public:
 	//! QString version of ccLog::ErrorDebug
 	static bool ErrorDebug(const QString& message) { LogMessage(message, LOG_ERROR | LOG_DEBUG); return false; }
 };
-
-#endif //CC_LOG_HEADER

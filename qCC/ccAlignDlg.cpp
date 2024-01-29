@@ -31,7 +31,7 @@
 #include <ccGenericPointCloud.h>
 #include <ccProgressDialog.h>
 
-ccAlignDlg::ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent)
+ccAlignDlg::ccAlignDlg(ccGenericPointCloud* data, ccGenericPointCloud* model, QWidget* parent)
 	: QDialog(parent, Qt::Tool)
 	, m_ui( new Ui::AlignDialog )
 {
@@ -86,12 +86,12 @@ double ccAlignDlg::getDelta()
 	return m_ui->delta->value();
 }
 
-ccGenericPointCloud *ccAlignDlg::getModelObject()
+ccGenericPointCloud* ccAlignDlg::getModelObject()
 {
 	return modelObject;
 }
 
-ccGenericPointCloud *ccAlignDlg::getDataObject()
+ccGenericPointCloud* ccAlignDlg::getDataObject()
 {
 	return dataObject;
 }
@@ -111,7 +111,7 @@ unsigned ccAlignDlg::getMaxNumberOfCandidates()
 	return m_ui->nbMaxCandidates->value();
 }
 
-CCCoreLib::ReferenceCloud *ccAlignDlg::getSampledModel()
+CCCoreLib::ReferenceCloud* ccAlignDlg::getSampledModel()
 {
 	CCCoreLib::ReferenceCloud* sampledCloud = nullptr;
 
@@ -161,7 +161,7 @@ CCCoreLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 	return sampledCloud;
 }
 
-CCCoreLib::ReferenceCloud *ccAlignDlg::getSampledData()
+CCCoreLib::ReferenceCloud* ccAlignDlg::getSampledData()
 {
 	CCCoreLib::ReferenceCloud* sampledCloud = nullptr;
 
@@ -236,8 +236,8 @@ void ccAlignDlg::swapModelAndData()
 
 void ccAlignDlg::modelSliderReleased()
 {
-	double rate = static_cast<double>(m_ui->modelSample->sliderPosition())/m_ui->modelSample->maximum();
-	if ( getSamplingMethod() == SPACE)
+	double rate = static_cast<double>(m_ui->modelSample->sliderPosition()) / m_ui->modelSample->maximum();
+	if (getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
 	rate *= m_ui->modelSamplingRate->maximum();
 	m_ui->modelSamplingRate->setValue(rate);
@@ -246,7 +246,7 @@ void ccAlignDlg::modelSliderReleased()
 
 void ccAlignDlg::dataSliderReleased()
 {
-	double rate = static_cast<double>(m_ui->dataSample->sliderPosition())/m_ui->dataSample->maximum();
+	double rate = static_cast<double>(m_ui->dataSample->sliderPosition()) / m_ui->dataSample->maximum();
 	if (getSamplingMethod() == SPACE)
 		rate = 1.0 - rate;
 	rate *= m_ui->dataSamplingRate->maximum();
@@ -259,15 +259,15 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	float rate = static_cast<float>(m_ui->modelSamplingRate->value())/m_ui->modelSamplingRate->maximum();
+	float rate = static_cast<float>(m_ui->modelSamplingRate->value()) / m_ui->modelSamplingRate->maximum();
 	if (method == SPACE)
-		rate = 1.0f-rate;
+		rate = 1.0f - rate;
 	m_ui->modelSample->setSliderPosition(static_cast<int>(rate * m_ui->modelSample->maximum()));
 
-	switch(method)
+	switch (method)
 	{
 	case SPACE:
-		{
+	{
 			CCCoreLib::ReferenceCloud* tmpCloud = getSampledModel(); //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
 			if (tmpCloud)
 			{
@@ -307,12 +307,12 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 	QString message("An error occurred");
 
 	CC_SAMPLING_METHOD method = getSamplingMethod();
-	double rate = static_cast<float>(m_ui->dataSamplingRate->value()/m_ui->dataSamplingRate->maximum());
+	double rate = static_cast<float>(m_ui->dataSamplingRate->value() / m_ui->dataSamplingRate->maximum());
 	if (method == SPACE)
 		rate = 1.0 - rate;
 	m_ui->dataSample->setSliderPosition(static_cast<int>(rate * m_ui->dataSample->maximum()));
 
-	switch(method)
+	switch (method)
 	{
 	case SPACE:
 		{
@@ -326,7 +326,7 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 		break;
 	case RANDOM:
 		{
-			message = QString("remaining points (%1%)").arg(rate*100.0,0,'f',1);
+			message = QString("remaining points (%1%)").arg(rate*100.0, 0, 'f', 1);
 		}
 		break;
 	case OCTREE:
@@ -352,9 +352,9 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 
 void ccAlignDlg::estimateDelta()
 {
-	ccProgressDialog pDlg(false,this);
+	ccProgressDialog pDlg(false, this);
 
-	CCCoreLib::ReferenceCloud *sampledData = getSampledData();
+	CCCoreLib::ReferenceCloud* sampledData = getSampledData();
 
 	//we have to work on a copy of the cloud in order to prevent the algorithms from modifying the original cloud.
 	CCCoreLib::PointCloud cloud;

@@ -1,20 +1,61 @@
 #include "LasSaver.h"
 
+#include "LasExtraScalarField.h"
 #include "LasMetadata.h"
 
-//Qt
+// Qt
 #include <QDate>
 // qCC_db
 #include <ccGlobalShiftManager.h>
 #include <ccPointCloud.h>
 
-LasSaver::LasSaver(ccPointCloud& cloud, Parameters& parameters)
+constexpr const char* const CC_NORMAL_NAMES[3] = {"Nx", "Ny", "Nz"};
+
+LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
     : m_cloudToSave(cloud)
 {
 	// restore the global encoding (if any) - must be done before calling initLaszipHeader
 	LasMetadata::LoadGlobalEncoding(cloud, m_laszipHeader.global_encoding);
 	// restore the project UUID (if any)
 	LasMetadata::LoadProjectUUID(cloud, m_laszipHeader);
+
+	if (parameters.shouldSaveNormalsAsExtraScalarField && cloud.hasNormals())
+	{
+		// We export normals to extra scalar fields,
+		// the easiest way to integrate that into the LasScalarFieldSaver system
+		// is to temporarily export normals to scalar fields.
+		m_originallySelectedScalarField = cloud.getCurrentDisplayedScalarFieldIndex();
+		bool exportOptions[3]           {false, false, false}; // Export all
+		for (size_t i = 0; i < 3; ++i)
+		{
+			int idx          = cloud.getScalarFieldIndexByName(CC_NORMAL_NAMES[i]);
+			exportOptions[i] = (idx == -1); // Only export if not already exported
+		}
+
+		bool needsToExportAtLeastOne = (exportOptions[0] | exportOptions[1] | exportOptions[2]);
+		if (needsToExportAtLeastOne && !cloud.exportNormalToSF(exportOptions))
+		{
+			throw std::runtime_error("Failed to export normals to SF");
+		}
+		constexpr const char* const exportedNormalNames[3] {"NormalX", "NormalY", "NormalZ"};
+
+		for (size_t i = 0; i < 3; ++i)
+		{
+			int idx = cloud.getScalarFieldIndexByName(CC_NORMAL_NAMES[i]);
+			assert(idx != -1);
+			auto* sf = dynamic_cast<ccScalarField*>(cloud.getScalarField(idx));
+			assert(sf != nullptr);
+
+			LasExtraScalarField field;
+			strncpy(field.name, exportedNormalNames[i], LasExtraScalarField::MAX_NAME_SIZE);
+			field.type            = LasExtraScalarField::DataType::f64;
+			field.dimensions      = LasExtraScalarField::DimensionSize::One;
+			field.scalarFields[0] = sf;
+
+			parameters.extraFields.push_back(field);
+			m_normalDimWasTemporarillyExported[i] = exportOptions[i];
+		}
+	}
 
 	initLaszipHeader(parameters);
 
@@ -105,6 +146,25 @@ LasSaver::~LasSaver() noexcept
 		laszip_close_writer(m_laszipWriter);
 		laszip_clean(m_laszipWriter);
 		laszip_destroy(m_laszipWriter);
+	}
+
+	if (m_originallySelectedScalarField != -1)
+	{
+		m_cloudToSave.setCurrentDisplayedScalarField(m_originallySelectedScalarField);
+
+		// m_originallySelectedScalarField it means we did create temporary
+		// Nx, Ny, Nz scalar fields, so we remove them
+		for (size_t i = 0; i < 3; ++i)
+		{
+			if (m_normalDimWasTemporarillyExported[i])
+			{
+				const int idx = m_cloudToSave.getScalarFieldIndexByName(CC_NORMAL_NAMES[i]);
+				if (idx != -1)
+				{
+					m_cloudToSave.deleteScalarField(idx);
+				}
+			}
+		}
 	}
 }
 

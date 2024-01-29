@@ -29,7 +29,7 @@
 //system
 #include <vector>
 
-class ccGLWindow;
+class ccGLWindowInterface;
 class ccPointCloud;
 class ccHObject;
 class ccPickingHub;
@@ -48,7 +48,7 @@ public:
 	~ccPointPickingGenericInterface() override = default;
 
 	//inherited from ccOverlayDialog
-	bool linkWith(ccGLWindow* win) override;
+	bool linkWith(ccGLWindowInterface* win) override;
 	bool start() override;
 	void stop(bool state) override;
 

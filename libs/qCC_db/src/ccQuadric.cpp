@@ -234,19 +234,19 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 
 		*rms = 0;
 
-		for (unsigned k=0; k<count; ++k)
+		for (unsigned k = 0; k < count; ++k)
 		{
 			//projection into local 2D plane ref.
 			const CCVector3* P = tempCloud.getPoint(k);
 
-			PointCoordinateType z = eq[0] + eq[1]*P->u[dX] + eq[2]*P->u[dY] + eq[3]*P->u[dX]*P->u[dX] + eq[4]*P->u[dX]*P->u[dY] + eq[5]*P->u[dY]*P->u[dY];
-			*rms += (z-P->z)*(z-P->z);
+			PointCoordinateType z = eq[0] + eq[1] * P->u[dX] + eq[2] * P->u[dY] + eq[3] * P->u[dX] * P->u[dX] + eq[4] * P->u[dX] * P->u[dY] + eq[5] * P->u[dY] * P->u[dY];
+			*rms += (z - P->z)*(z - P->z);
 		}
 
 		if (count)
 		{
 			*rms = sqrt(*rms / count);
-			quadric->setMetaData(QString("RMS"),QVariant(*rms));
+			quadric->setMetaData("RMS", *rms);
 		}
 	}
 	

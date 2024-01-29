@@ -64,6 +64,8 @@ class LasSaveDialog : public QDialog
 	bool shouldSaveRGB() const;
 	/// Returns whether the user wants to save the Waveforms
 	bool shouldSaveWaveform() const;
+	/// Returns whether the user wants to save normals as extra las scalar field
+	bool shouldSaveNormalsAsExtraScalarField() const;
 	/// Returns the vector of LAS scalar fields the user wants to save.
 	///
 	/// Each LAS scalar fields is mapped to an existing point cloud's ccScalarField.
@@ -75,6 +77,7 @@ class LasSaveDialog : public QDialog
 	void handleSelectedVersionChange(const QString&);
 	void handleSelectedPointFormatChange(int index);
 	void handleComboBoxChange(int index);
+	void handleCustomScaleButtontoggled(bool checked);
 	void addExtraScalarFieldCard();
 
   private:

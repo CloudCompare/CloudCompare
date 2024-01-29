@@ -530,6 +530,7 @@ public:
 		\param[in] theta_rad Theta angle (in radians)
 		\param[in] psi_rad Psi angle (in radians)
 		\param[in] t3D translation
+		\param[in] scale rotation scale
 	**/
 	void initFromParameters(	T phi_rad,
 								T theta_rad,
@@ -573,12 +574,27 @@ public:
 	/** \param[out] alpha_rad rotation angle in radians (in [0;pi])
 		\param[out] axis3D unit rotation axis
 		\param[out] t3D translation
+		\param[out] scale [optional] scale
 	**/
 	void getParameters(	T& alpha_rad,
 						Vector3Tpl<T>& axis3D,
-						Vector3Tpl<T>& t3D) const
+						Vector3Tpl<T>& t3D,
+						T* scale = nullptr) const
 	{
 		T trace = CC_MAT_R11 + CC_MAT_R22 + CC_MAT_R33;
+
+		// we arbitrarily consider the first column to read the scale
+		Vector3Tpl<T> rotX = getColumnAsVec3D(0);
+		T _scale = rotX.norm();
+		if (scale)
+		{
+			*scale = _scale;
+		}
+		if (_scale != static_cast<T>(1) && CCCoreLib::GreaterThanEpsilon(_scale))
+		{
+			trace /= _scale;
+		}
+
 		T cos_t = (trace - 1) / 2;
 		if (std::abs(cos_t) <= 1)
 		{
@@ -616,38 +632,57 @@ public:
 		\param[out] theta_rad Theta angle (in radians)
 		\param[out] psi_rad Psi angle (in radians)
 		\param[out] t3D translation
+		\param[out] scale [optional] scale
 	**/
 	void getParameters(	T &phi_rad,
 						T &theta_rad,
 						T &psi_rad,
-						Vector3Tpl<T>& t3D) const
+						Vector3Tpl<T>& t3D,
+						T* scale = nullptr) const
 	{
-		if (std::abs(CC_MAT_R31) != 1)
+		Vector3Tpl<T> rotX = getColumnAsVec3D(0);
+		Vector3Tpl<T> rotY = getColumnAsVec3D(1);
+		Vector3Tpl<T> rotZ = getColumnAsVec3D(2);
+
+		// we arbitrarily consider the first column to read the scale
+		T _scale = rotX.norm();
+		if (scale)
 		{
-			theta_rad = -asin(CC_MAT_R31);
+			*scale = _scale;
+		}
+		if (_scale != static_cast<T>(1) && CCCoreLib::GreaterThanEpsilon(_scale))
+		{
+			rotX /= _scale;
+			rotY /= _scale;
+			rotZ /= _scale;
+		}
+
+		if (std::abs(rotX.z) != 1)
+		{
+			theta_rad = -asin(rotX.z);
 			T cos_theta = cos(theta_rad);
-			psi_rad = atan2(CC_MAT_R32 / cos_theta, CC_MAT_R33 / cos_theta);
-			phi_rad = atan2(CC_MAT_R21 / cos_theta, CC_MAT_R11 / cos_theta);
+			psi_rad = atan2(rotY.z / cos_theta, rotZ.z / cos_theta);
+			phi_rad = atan2(rotX.y / cos_theta, rotX.x / cos_theta);
 
 			//Other solution
-			//theta = M_PI + asin(CC_MAT_R31);
+			//theta = M_PI + asin(rotX.z);
 			//T cos_theta = cos(theta);
-			//psi = atan2(CC_MAT_R32 / cos_theta, CC_MAT_R33 / cos_theta);
-			//phi = atan2(CC_MAT_R21 / cos_theta, CC_MAT_R11 / cos_theta);
+			//psi = atan2(rotY.z / cos_theta, rotZ.z / cos_theta);
+			//phi = atan2(rotX.y / cos_theta, rotX.x / cos_theta);
 		}
 		else
 		{
 			phi_rad = 0;
 
-			if (CC_MAT_R31 == -1)
+			if (rotX.z == -1)
 			{
 				theta_rad = static_cast<T>(M_PI_2);
-				psi_rad = atan2(CC_MAT_R12, CC_MAT_R13);
+				psi_rad = atan2(rotY.x, rotZ.x);
 			}
 			else
 			{
 				theta_rad = -static_cast<T>(M_PI_2);
-				psi_rad = -atan2(CC_MAT_R12, CC_MAT_R13);
+				psi_rad = -atan2(rotY.x, rotZ.x);
 			}
 		}
 
@@ -1131,6 +1166,16 @@ public:
 		return t;
 	}
 
+	//! Scales the rotation and the translation (but not the the last row)
+	/**	\param coef scaling coef.
+	**/
+	inline void scale(T coef)
+	{
+		CC_MAT_R11 *= coef; CC_MAT_R12 *= coef; CC_MAT_R13 *= coef; CC_MAT_R14 *= coef;
+		CC_MAT_R21 *= coef; CC_MAT_R22 *= coef; CC_MAT_R23 *= coef; CC_MAT_R24 *= coef;
+		CC_MAT_R31 *= coef; CC_MAT_R32 *= coef; CC_MAT_R33 *= coef; CC_MAT_R34 *= coef;
+	}
+
 	//! Scales the rotation part of the matrix
 	/**	\param coef scaling coef.
 	**/
@@ -1220,7 +1265,7 @@ protected:
 	//! Transfers the homogenous coordinate (scale) to the whole matrix
 	void internalRescale()
 	{
-		if (CC_MAT_R44 != static_cast<T>(1) && CC_MAT_R44 != 0)
+		if (CC_MAT_R44 != static_cast<T>(1) && CCCoreLib::GreaterThanEpsilon(CC_MAT_R44))
 		{
 			scaleRotation(1.0 / CC_MAT_R44);
 			CC_MAT_R44 = static_cast<T>(1);

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_GL_POLYLINE_HEADER
-#define CC_GL_POLYLINE_HEADER
 
 //CCCoreLib
 #include <Polyline.h>
@@ -171,6 +170,9 @@ public:
 	//! Helper to determine if the input cloud acts as vertices of a polyline
 	static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline = nullptr);
 
+	//! Creates a circle as a polyline
+	static ccPolyline* Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution = 48);
+
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)
@@ -229,5 +231,3 @@ protected:
 	//! Arrow index
 	unsigned m_arrowIndex;
 };
-
-#endif //CC_GL_POLYLINE_HEADER

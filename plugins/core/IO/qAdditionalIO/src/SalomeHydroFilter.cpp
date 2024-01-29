@@ -161,6 +161,20 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 				}
 				else
 				{
+					bool isClosed = false;
+					if (currentVertices->size() > 2)
+					{
+						const CCVector3* firstVertex = currentVertices->getPoint(0);
+						const CCVector3* lastVertex = currentVertices->getPoint(currentVertices->size() - 1);
+
+						// close the polyline
+						if (CCCoreLib::LessThanEpsilon((*lastVertex - *firstVertex).norm2()))
+						{
+							isClosed = true;
+							currentVertices->resize(currentVertices->size() - 1);
+						}
+					}
+
 					currentVertices->shrinkToFit();
 					
 					//create the corresponding polyline
@@ -168,6 +182,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					newPoly->setName(QString(QString("Polyline #%1").arg(++index)));
 					newPoly->addChild(currentVertices);
 					newPoly->set2DMode(false);
+					newPoly->setClosed(isClosed);
 
 					if (!newPoly->reserve(currentVertices->size()))
 					{

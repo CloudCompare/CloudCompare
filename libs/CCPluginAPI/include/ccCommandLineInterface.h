@@ -28,6 +28,8 @@
 //Qt
 #include <QSharedPointer>
 #include <QString>
+#include <QRegularExpression>
+
 
 //System
 #include <vector>
@@ -36,7 +38,6 @@ class ccGenericMesh;
 class ccProgressDialog;
 
 class QDialog;
-class QStringList;
 
 enum class CL_ENTITY_TYPE {
 	GROUP,
@@ -145,7 +146,7 @@ public: //constructor
 		bool selectAll = false;
 		unsigned firstNr = 0;
 		unsigned lastNr = 0;
-		QRegExp regex;
+		QRegularExpression regex;
 	};
 
 	//! Export options

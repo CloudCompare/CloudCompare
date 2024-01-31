@@ -30,9 +30,9 @@
 
 //Qt
 #include <QElapsedTimer>
-#include <QOpenGLExtensions>
 #include <QOpenGLTexture>
 #include <QTimer>
+#include <QOpenGLFunctions_3_3_Compatibility>
 
 //system
 #include <list>
@@ -1285,7 +1285,7 @@ protected: //members
 	int m_pickRadius;
 
 	//! FBO support
-	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
+	QOpenGLFunctions_3_3_Compatibility	m_glExtFunc;
 
 	//! Whether FBO support is on
 	bool m_glExtFuncSupported;

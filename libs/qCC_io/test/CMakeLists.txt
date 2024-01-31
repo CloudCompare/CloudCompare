@@ -1,4 +1,4 @@
-find_package( Qt5Test REQUIRED )
+find_package( Qt6Test REQUIRED )
 
 if ( OPTION_USE_SHAPE_LIB )
     add_executable( TestShpFilter )
@@ -12,7 +12,7 @@ if ( OPTION_USE_SHAPE_LIB )
 
     target_link_libraries( TestShpFilter
         QCC_IO_LIB
-        Qt5::Test
+        Qt6::Test
     )
 
     if ( WIN32 )

@@ -10,6 +10,7 @@ add_subdirectory( extern/CCCoreLib EXCLUDE_FROM_ALL )
 target_link_libraries( ${PROJECT_NAME}
     CCCoreLib
     CC_FBO_LIB
+    Qt6::Widgets
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_DB_LIBRARY_BUILD QT_NO_KEYWORDS )

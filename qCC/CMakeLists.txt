@@ -21,8 +21,8 @@ add_subdirectory( pluginManager )
 
 add_subdirectory( extern/QCustomPlot EXCLUDE_FROM_ALL )
 
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-qt5_add_resources( generated_qrc_list ${qrc_list} )
+qt6_wrap_ui( generated_ui_list ${ui_list} )
+qt6_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
@@ -40,14 +40,15 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
     CCAppCommon
     QCustomPlot
-    Qt5::PrintSupport
+    Qt6::PrintSupport
+	Qt6::Widgets
 )
 
 if( CCCORELIB_USE_QT_CONCURRENT )
 	# We want *deployqt to handle this dependency, so instead of just copying the file
 	# link to the target.
 	target_link_libraries( ${PROJECT_NAME}
-		Qt5::Concurrent
+		Qt6::Concurrent
 	)
 endif()
 

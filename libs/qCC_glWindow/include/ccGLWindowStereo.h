@@ -99,7 +99,7 @@ public:
 protected: //rendering
 
 	//inherited from ccGLWindowInterface
-	inline ccQOpenGLFunctions* functions() const override { return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : nullptr; }
+	inline ccQOpenGLFunctions* functions() const override { return context() ? QOpenGLVersionFunctionsFactory::get<ccQOpenGLFunctions>(context()) : nullptr; }
 	inline QSurfaceFormat getSurfaceFormat() const override { return format(); }
 	void doSetMouseTracking(bool enable) override;
 	void doShowFullScreen() override { showFullScreen(); }

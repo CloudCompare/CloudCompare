@@ -3,7 +3,7 @@
 project( quazip )
 
 find_package( ZLIB REQUIRED )
-find_package( Qt5 COMPONENTS Core REQUIRED )
+find_package( Qt6 COMPONENTS Core REQUIRED )
 
 add_library( ${PROJECT_NAME} STATIC )
 
@@ -48,4 +48,4 @@ target_include_directories( ${PROJECT_NAME}
 
 target_compile_definitions( ${PROJECT_NAME} PUBLIC QUAZIP_STATIC )
 
-target_link_libraries( ${PROJECT_NAME} Qt5::Core ZLIB::ZLIB )
+target_link_libraries( ${PROJECT_NAME} Qt6::Core ZLIB::ZLIB )

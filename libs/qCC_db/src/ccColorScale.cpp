@@ -513,7 +513,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 
 		//read version number
 		QXmlStreamAttributes attributes = stream.attributes();
-		if (attributes.size() == 0 || attributes[0].name() != "version")
+		if (attributes.size() == 0 || attributes[0].name() != QString("version"))
 		{
 			break;
 		}
@@ -541,37 +541,37 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 		while (!stream.atEnd() && missingItems > 0)
 		{
 			stream.readNextStartElement();
-			QStringRef itemName = stream.name();
+			QStringView itemName = stream.name();
 			QString itemValue = stream.readElementText();
 			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString(), itemValue));
 
-			if (itemName == "name")
+			if (itemName == QString("name"))
 			{
 				scale->setName(itemValue);
 				--missingItems;
 			}
-			else if (itemName == "uuid")
+			else if (itemName == QString("uuid"))
 			{
 				scale->setUuid(itemValue);
 				--missingItems;
 			}
-			else if (itemName == "absolute")
+			else if (itemName == QString("absolute"))
 			{
-				if (itemValue == "1")
+				if (itemValue == QString("1"))
 				{
 					scale->setAbsolute(0, 1); //the true values will be updated afterwards
 					missingItems += 2; //we need the minValue and range items!
 				}
 				--missingItems;
 			}
-			else if (itemName == "minValue")
+			else if (itemName == QString("minValue"))
 			{
 				scale->m_absoluteMinValue = itemValue.toDouble(&ok);
 				if (!ok)
 					break;
 				--missingItems;
 			}
-			else if (itemName == "range")
+			else if (itemName == QString("range"))
 			{
 				scale->m_absoluteRange = itemValue.toDouble(&ok);
 				if (!ok)
@@ -603,7 +603,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 			{
 				if (!stream.readNextStartElement())
 					break;
-				if (stream.name() == "step")
+				if (stream.name() == QString("step"))
 				{
 					QXmlStreamAttributes attributes = stream.attributes();
 					int attributeCount = attributes.size();
@@ -640,7 +640,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 
 					scale->insert(ccColorScaleElement(pos, rgb), false);
 				}
-				else if (stream.name() == "label")
+				else if (stream.name() == QString("label"))
 				{
 					QXmlStreamAttributes attributes = stream.attributes();
 					int attributeCount = attributes.size();

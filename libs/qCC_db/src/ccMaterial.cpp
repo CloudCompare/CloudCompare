@@ -24,6 +24,7 @@
 
 //Qt
 #include <QUuid>
+#include <QOpenGLVersionFunctionsFactory>
 
 //Textures DB
 static ccMaterialDB s_materialDB;
@@ -85,10 +86,10 @@ void ccMaterial::setTransparency(float val)
 	m_emission.a     = val;
 }
 
-void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool skipDiffuse) const
+void ccMaterial::applyGL(QOpenGLContext* context, bool lightEnabled, bool skipDiffuse) const
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -222,10 +223,10 @@ bool ccMaterial::hasTexture() const
 	return m_textureFilename.isEmpty() ? false : s_materialDB.hasTexture(m_textureFilename) && !s_materialDB.getTexture(m_textureFilename).isNull();
 }
 
-void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
+void ccMaterial::MakeLightsNeutral(QOpenGLContext* context)
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)

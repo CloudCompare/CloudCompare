@@ -61,7 +61,7 @@ namespace ccUtils
 			return false;
 		}
 
-		QStringList tokens = text.split(QRegExp("\\s+"), Qt::SkipEmptyParts);
+		QStringList tokens = text.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 		if (tokens.size() != 3)
 		{
 			tokens = text.split(';', Qt::SkipEmptyParts);

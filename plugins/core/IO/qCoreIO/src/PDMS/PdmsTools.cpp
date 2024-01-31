@@ -207,7 +207,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 	{
 		if (s_elementsStack.size() < 2)
 			return false;
-		ElementsStack::iterator it = s_elementsStack.end(); --it;
+		ElementsStack::iterator it = s_elementsStack.end(); //--it; TODO RJ
 		if (isSet() == 1)
 		{
 			while (true)
@@ -218,7 +218,7 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 					break;
 				if (it == s_elementsStack.begin())
 					return false;
-				--it;
+				//--it; TODO RJ
 			}
 		}
 		item = *it;

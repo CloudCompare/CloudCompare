@@ -29,6 +29,7 @@
 
 //Qt
 #include <QSharedPointer>
+#include <QFontMetrics>
 
 //System
 #include <assert.h>
@@ -1741,7 +1742,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				int height = rowHeight + 2 * tabMarginY;
 
 				int yRow = yStartRel;
-				int actualRowCount = std::min(tab.rowCount, tab.colContent[c].size());
+				int actualRowCount = std::min(tab.rowCount, static_cast<int>(tab.colContent[c].size()));
 
 				bool labelCol = ((c & 1) == 0);
 				const ccColor::Rgba* textColor = labelCol ? &ccColor::white : &defaultTextColor;

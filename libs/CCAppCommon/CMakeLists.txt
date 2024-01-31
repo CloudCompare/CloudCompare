@@ -18,16 +18,6 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 )
 
-if( OPTION_SUPPORT_GAMEPADS )
-	find_package( Qt5
-		COMPONENTS
-			Gamepad
-		REQUIRED
-	)
-
-	target_link_libraries( ${PROJECT_NAME} Qt5::Gamepad )
-endif()
-
 if( OPTION_SUPPORT_3DCONNEXION_DEVICES )
 	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()

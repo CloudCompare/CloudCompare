@@ -6221,8 +6221,8 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 
 	QString newBaseName = cmd.arguments().takeFirst();
 	//Validate if the given name contains any breaking characters for NTFS filesystem at least
-	QRegExp rx("[^:/\\\\*?\"|<>]*");
-	QRegExpValidator v(rx, 0);
+	QRegularExpression rx("[^:/\\\\*?\"|<>]*");
+	QRegularExpressionValidator v(rx, 0);
 	int pos = 0;
 	if (!v.validate(newBaseName, pos))
 	{

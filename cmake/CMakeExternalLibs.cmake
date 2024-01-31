@@ -8,39 +8,39 @@ set( CMAKE_AUTORCC ON )
 # FIXME Eventually turn this on when we've completed the move to targets
 #set( CMAKE_AUTOUIC ON )
 
-set( QT5_ROOT_PATH CACHE PATH "Qt5 root directory (i.e. where the 'bin' folder lies)" )
-if ( QT5_ROOT_PATH )
-	list( APPEND CMAKE_PREFIX_PATH ${QT5_ROOT_PATH} )
+set( QT6_ROOT_PATH CACHE PATH "Qt6 root directory (i.e. where the 'bin' folder lies)" )
+if ( QT6_ROOT_PATH )
+	list( APPEND CMAKE_PREFIX_PATH ${QT6_ROOT_PATH} )
 endif()
 
-find_package( Qt5
+find_package( Qt6
     COMPONENTS
         Concurrent
         Core
         Gui
         OpenGL
-        OpenGLExtensions
+        OpenGLWidgets
         PrintSupport
         Svg
         Widgets
     REQUIRED
 )
 
-# in the case no Qt5Config.cmake file could be found, cmake will explicitly ask the user for the QT5_DIR containing it!
+# in the case no Qt6Config.cmake file could be found, cmake will explicitly ask the user for the QT6_DIR containing it!
 # thus no need to keep additional variables and checks
 
 # Starting with the QtCore lib, find the bin and root directories
-get_target_property( Qt5_LIB_LOCATION Qt5::Core LOCATION_${CMAKE_BUILD_TYPE} )
-get_filename_component( Qt5_LIB_LOCATION ${Qt5_LIB_LOCATION} DIRECTORY )
+get_target_property( Qt6_LIB_LOCATION Qt6::Core LOCATION_${CMAKE_BUILD_TYPE} )
+get_filename_component( Qt6_LIB_LOCATION ${Qt6_LIB_LOCATION} DIRECTORY )
 
 if ( WIN32 )
-    get_target_property( QMAKE_LOCATION Qt5::qmake IMPORTED_LOCATION )
-    get_filename_component( Qt5_BIN_DIR ${QMAKE_LOCATION} DIRECTORY )
-    get_filename_component( QT5_ROOT_PATH "${Qt5_BIN_DIR}/.." ABSOLUTE )
+    get_target_property( QMAKE_LOCATION Qt6::qmake IMPORTED_LOCATION )
+    get_filename_component( Qt6_BIN_DIR ${QMAKE_LOCATION} DIRECTORY )
+    get_filename_component( QT6_ROOT_PATH "${Qt6_BIN_DIR}/.." ABSOLUTE )
 endif()
 
 # turn on QStringBuilder for more efficient string construction
-#	see https://doc.qt.io/qt-5/qstring.html#more-efficient-string-construction
+#	https://doc.qt.io/qt-6/qstring.html#more-efficient-string-construction
 add_definitions( -DQT_USE_QSTRINGBUILDER )
 				
 

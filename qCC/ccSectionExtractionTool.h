@@ -156,7 +156,7 @@ protected:
 			}
 		}
 
-		bool operator ==(const ImportedEntity& ie) { return entity == ie.entity; }
+		bool operator ==(const ImportedEntity& ie) const { return entity == ie.entity; }
 		
 		EntityType* entity;
 		ccGenericGLDisplay* originalDisplay;

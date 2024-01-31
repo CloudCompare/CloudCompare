@@ -24,7 +24,6 @@
 class QAction;
 class QMenu;
 class QString;
-class QStringList;
 
 
 class ccRecentFiles : public QObject

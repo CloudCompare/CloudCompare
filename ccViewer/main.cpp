@@ -19,7 +19,6 @@
 
 //Qt
 #include <QDir>
-#include <QGLFormat>
 
 //Local
 #include "ccviewerlog.h"
@@ -87,17 +86,17 @@ int main(int argc, char *argv[])
 #endif
 	
 	QDir::setCurrent(workingDir.absolutePath());
-	
-	if (!QGLFormat::hasOpenGL())
-	{
-		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL to run!");
-		return EXIT_FAILURE;
-	}
-	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
-	{
-		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
-		return EXIT_FAILURE;
-	}
+	// TODO RJ
+	//if (!QGLFormat::hasOpenGL())
+	// {
+	// 	QMessageBox::critical(nullptr, "Error", "This application needs OpenGL to run!");
+	// 	return EXIT_FAILURE;
+	// }
+	// if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+	// {
+	// 	QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
+	// 	return EXIT_FAILURE;
+	// }
 
 	//common data initialization
 	FileIOFilter::InitInternalFilters(); //load all known I/O filters (plugins will come later!)

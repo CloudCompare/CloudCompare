@@ -19,8 +19,8 @@
 #include "CCFbo.h"
 
 //Qt
-#include <QOpenGLExtensions>
 #include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_3_Compatibility>
 
 //! F.B.O. encapsulation
 /** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
@@ -103,5 +103,7 @@ protected: //members
 
 	// For portability, we need to use 2.1 + extensions to get FBOs
 	QOpenGLFunctions_2_1 m_glFunc;
-	QOpenGLExtension_ARB_framebuffer_object	m_glExtFunc;
+	// TODO RJ: We use 3.3 compatibility profile to get FBO
+	// I think we can use 3.0 to get FBO with compatibility profile
+	QOpenGLFunctions_3_3_Compatibility m_glExtFunc;
 };

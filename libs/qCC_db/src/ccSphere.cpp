@@ -20,6 +20,9 @@
 //Local
 #include "ccPointCloud.h"
 
+//Qt
+#include <QFontMetrics>
+
 
 ccSphere::ccSphere(	PointCoordinateType radius,
 					const ccGLMatrix* transMat/*=nullptr*/,

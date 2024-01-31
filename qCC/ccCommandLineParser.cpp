@@ -480,7 +480,7 @@ template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEn
 			//regex has higher priority than first/last overwrite
 			if (options.selectRegex)
 			{
-				if (options.regex.indexIn(nameToValidate) > -1)
+				if (options.regex.match(nameToValidate).hasMatch()) // TODO RJ
 				{
 					//regex matched
 					toBeSelected = !options.reverse;

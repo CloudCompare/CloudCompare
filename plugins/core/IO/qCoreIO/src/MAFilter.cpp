@@ -169,7 +169,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		{fclose(fp);return CC_FERR_WRITING;}
 	if (fprintf(fp,"//Name: %s\n", qPrintable(baseFilename)) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
-	if (fprintf(fp,"//Last modified: %s\n", qPrintable( QDateTime::currentDateTime().toString( Qt::SystemLocaleShortDate ) )) < 0)
+	if (fprintf(fp,"//Last modified: %s\n", qPrintable( QDateTime::currentDateTime().toString( Qt::ISODateWithMs ) )) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 	if (fprintf(fp,"requires maya \"4.0\";\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}

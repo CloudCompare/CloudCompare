@@ -2,7 +2,7 @@ project( CCPluginAPI )
 
 add_library( ${PROJECT_NAME} SHARED )
 
-find_package( Qt5
+find_package( Qt6
 	COMPONENTS
 		Gui
 	REQUIRED

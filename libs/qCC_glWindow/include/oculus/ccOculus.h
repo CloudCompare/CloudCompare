@@ -125,7 +125,7 @@ struct OculusHMD
 				return false;
 			}
 
-			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+			QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 			//we create a depth texture for each color texture
 			assert(depthTextures.empty());
 
@@ -292,7 +292,7 @@ struct OculusHMD
 			QOpenGLContext* context = QOpenGLContext::currentContext();
 			if (context)
 			{
-				QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+				QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 				for (size_t i = 0; i < depthTextures.size(); ++i)
 				{
 					glFunc->glDeleteTextures(1, &(depthTextures[i]));

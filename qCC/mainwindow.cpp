@@ -145,7 +145,6 @@
 
 //Qt
 #include <QClipboard>
-#include <QGLShader>
 
 //Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -10312,7 +10311,7 @@ static bool IsValidFileName(QString filename)
 	QString sPattern("^(([a-zA-Z]:|\\\\)\\\\)?(((\\.)|(\\.\\.)|([^\\\\/:\\*\\?""\\|<>\\. ](([^\\\\/:\\*\\?""\\|<>\\. ])|([^\\\\/:\\*\\?""\\|<>]*[^\\\\/:\\*\\?""\\|<>\\. ]))?))\\\\)*[^\\\\/:\\*\\?""\\|<>\\. ](([^\\\\/:\\*\\?""\\|<>\\. ])|([^\\\\/:\\*\\?""\\|<>]*[^\\\\/:\\*\\?""\\|<>\\. ]))?$");
 #endif
 
-	return QRegExp(sPattern).exactMatch(filename);
+	return QRegularExpression(sPattern).match(filename).hasMatch(); //TODO RJ
 }
 
 void MainWindow::doActionSaveFile()
@@ -10664,7 +10663,7 @@ void MainWindow::doActionSaveProject()
 			// Hierarchy objects have generally as name: 'filename.ext (fullpath)'
 			// so we must only take the first part! (otherwise this type of name
 			// with a path inside disturbs the QFileDialog a lot ;))
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];

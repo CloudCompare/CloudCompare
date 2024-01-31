@@ -5340,7 +5340,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 			return -1;
 		}
 		
-		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
+		setUsagePattern(QOpenGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
 													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
 	}
 

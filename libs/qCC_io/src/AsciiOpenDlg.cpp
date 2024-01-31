@@ -38,7 +38,6 @@
 #include <QTableWidgetItem>
 #include <QTextStream>
 #include <QToolButton>
-#include <QDesktopWidget>
 
 //system
 #include <cassert>
@@ -135,7 +134,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 
 	m_ui->quaternionFrame->setVisible(false);
 	m_ui->quatCSScaleDoubleSpinBox->setValue(s_csEntitiesScale);
-	QSize screenSize = QGuiApplication::screens().at(QApplication::desktop()->screenNumber(this))->size();
+	QSize screenSize = QGuiApplication::primaryScreen()->geometry().size(); //TODO RJ
 	setMaximumSize(screenSize);
 }
 
@@ -1460,7 +1459,7 @@ void AsciiOpenDlg::shortcutButtonPressed()
 void AsciiOpenDlg::setSeparator(QChar sep)
 {
 	m_ui->commaDecimalCheckBox->blockSignals(true);
-	if (sep == 44) //comma
+	if (sep == QChar(44)) //comma
 	{
 		m_ui->commaDecimalCheckBox->setEnabled(false);
 		//m_ui->commaDecimalCheckBox->setChecked(false);

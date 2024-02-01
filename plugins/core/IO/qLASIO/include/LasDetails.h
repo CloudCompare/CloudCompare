@@ -176,7 +176,8 @@ namespace LasDetails
 	/// This function looks into the point cloud
 	/// and returns a LAS version + point format
 	/// that best matches what the point cloud contains.
-	LasVersion SelectBestVersion(const ccPointCloud& cloud);
+	/// If a previous minor version is provided, this method won't downgrade it
+	LasVersion SelectBestVersion(const ccPointCloud& cloud, int previousMinorVersion = 0);
 
 	/// Clones the content of the `src` vlr into the `dst` vlr.
 	void CloneVlrInto(const laszip_vlr_struct& src, laszip_vlr_struct& dst);

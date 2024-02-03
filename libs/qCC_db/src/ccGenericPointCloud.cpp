@@ -139,7 +139,7 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	}
 	else
 	{
-		return ccOctree::Shared(nullptr);
+		return {};
 	}
 }
 
@@ -167,7 +167,7 @@ ccOctree::Shared ccGenericPointCloud::computeOctree(CCCoreLib::GenericProgressCa
 {
 	deleteOctree();
 	
-	ccOctree::Shared octree = ccOctree::Shared(new ccOctree(this));
+	ccOctree::Shared octree(new ccOctree(this));
 	if (octree->build(progressCb) > 0)
 	{
 		setOctree(octree, autoAddChild);

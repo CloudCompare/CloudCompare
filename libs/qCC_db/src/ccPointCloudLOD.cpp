@@ -45,7 +45,7 @@ public:
 	}
 	
 	//! Destructor
-	virtual ~ccPointCloudLODThread()
+	~ccPointCloudLODThread() override
 	{
 		if (isRunning())
 		{
@@ -57,109 +57,25 @@ public:
 	//! Stops the thread
 	void stop()
 	{
-		if (!m_octree && m_octree->isBuildInProgress())
+		if (m_octree && m_octree->isBuildInProgress())
 		{
 			m_octree->cancelBuild();
-			m_earlyStop = 1;
-			if (!wait(500))
-			{
-				ccLog::Warning("[ccPointCloudLODThread] Failed to stop the octree computation properly, will have to terminate it...");
-				terminate();
-			}
-			m_octree.clear();
 		}
-		else
+
+		m_earlyStop = 1;
+		if (!wait(5000))
 		{
-			m_earlyStop = 1;
-			if (!wait(500))
-			{
-				ccLog::Warning("[ccPointCloudLODThread] Failed to stop the thread properly, will have to terminate it...");
-				terminate();
-			}
-			m_octree.clear();
+			ccLog::Warning("[ccPointCloudLODThread] Failed to stop the thread properly, will have to terminate it...");
+			terminate();
 		}
+
+		m_octree.clear();
 		m_earlyStop = 0;
 	}
 	
 protected:
 
-	//! Fills a node (and returns its relative position) + recursive
-	uint8_t fillNode(ccPointCloudLOD::Node& node) const
-	{
-		assert(m_octree);
-
-		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
-		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(node.level);
-		const CCCoreLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
-
-		//first count the number of points and compute their center
-		{
-			node.pointCount = 0;
-#ifdef COMPUTE_REAL_RADIUS
-			CCVector3d sumP(0, 0, 0);
-#else //otherwise we use the bounding box
-			ccBBox bbox;
-#endif
-			for (uint32_t codeIndex = node.firstCodeIndex; codeIndex < cellCodes.size() && (cellCodes[codeIndex].theCode >> bitDec) == currentTruncatedCellCode; ++codeIndex)
-			{
-				++node.pointCount;
-				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
-#ifdef COMPUTE_REAL_RADIUS
-				sumP += *P;
-#else
-				bbox.add(*P);
-#endif
-			}
-
-			//compute the radius
-#ifdef COMPUTE_REAL_RADIUS
-			if (node.pointCount > 1)
-			{
-				sumP /= node.pointCount;
-				double maxSquareRadius = 0;
-				for (uint32_t i = 0; i < node.pointCount; ++i)
-				{
-					const CCVector3* P = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
-					double squareRadius = (P->toDouble() - sumP).norm2();
-					if (squareRadius > maxSquareRadius)
-					{
-						maxSquareRadius = squareRadius;
-					}
-				}
-				node.radius = static_cast<float>(sqrt(maxSquareRadius));
-			}
-			//update the center
-			node.center = sumP.toFloat();
-#else
-			if (node.pointCount > 1)
-			{
-				node.radius = static_cast<float>(bbox.getDiagNormd());
-			}
-			node.center = bbox.getCenter().toFloat();
-#endif
-		}
-
-		//do we need to subdivide this cell?
-		if (node.pointCount > m_maxCountPerCell && node.level+1 <= m_maxLevel)
-		{
-			for (uint32_t i = 0; i < node.pointCount; )
-			{
-				int32_t childNodeIndex = m_lod.newCell(node.level + 1);
-				ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
-				childNode.firstCodeIndex = node.firstCodeIndex + i;
-
-				uint8_t childIndex = fillNode(childNode);
-				node.childIndexes[childIndex] = childNodeIndex;
-				node.childCount++;
-				i += childNode.pointCount;
-			}
-		}
-
-		//return the node relative position
-		return static_cast<uint8_t>(currentTruncatedCellCode & 7);
-	}
-
-	//! Fills a node (and returns its relative position)
+	//! Fills a node (and returns its relative position) - no recurrence
 	uint8_t fillNode_flat(ccPointCloudLOD::Node& node) const
 	{
 		assert(m_octree);
@@ -177,6 +93,11 @@ protected:
 				++node.pointCount;
 				const CCVector3* P = m_cloud.getPoint(cellCodes[codeIndex].theIndex);
 				sumP += *P;
+
+				if (m_earlyStop)
+				{
+					return 0;
+				}
 			}
 
 			//compute the radius
@@ -192,6 +113,11 @@ protected:
 					{
 						maxSquareRadius = squareRadius;
 					}
+
+					if (m_earlyStop)
+					{
+						return 0;
+					}
 				}
 				node.radius = static_cast<float>(sqrt(maxSquareRadius));
 			}
@@ -204,28 +130,39 @@ protected:
 		return static_cast<uint8_t>(currentTruncatedCellCode & 7);
 	}
 
-	//reimplemented from QThread
-	virtual void run()
+	//! Called by run() before quiting (in case the process has to be aborted)
+	void abortConstruction()
 	{
+		m_lod.setState(ccPointCloudLOD::BROKEN);
+		m_octree.clear();
+		m_lod.clearData();
+		m_earlyStop = 0;
+	}
+
+	//reimplemented from QThread
+	void run() override
+	{
+		m_lod.setState(ccPointCloudLOD::NOT_INITIALIZED);
+
 		if (m_earlyStop != 0)
 		{
 			ccLog::Error("[LoD] Thread not properly terminated previously... can't run it again");
 			return;
 		}
 
-		//reset structure
-		m_lod.clearData();
-		m_lod.setState(ccPointCloudLOD::UNDER_CONSTRUCTION);
-
 		unsigned pointCount = m_cloud.size();
 		if (pointCount == 0)
 		{
-			m_lod.setState(ccPointCloudLOD::BROKEN);
-			m_earlyStop = 0;
+			abortConstruction();
 			return;
 		}
 
+		//reset structure
+		m_lod.setState(ccPointCloudLOD::UNDER_CONSTRUCTION);
+		m_lod.clearData();
+
 		ccLog::Print(QString("[LoD] Preparing LoD acceleration structure for cloud '%1' [%2 points]...").arg(m_cloud.getName()).arg(pointCount));
+
 		QElapsedTimer timer;
 		timer.start();
 
@@ -233,6 +170,7 @@ protected:
 		m_octree = m_cloud.getOctree();
 		if (!m_octree)
 		{
+			//we have to compute the octree
 			m_octree.reset(new ccOctree(&m_cloud));
 			if (m_octree->build(nullptr) <= 0)
 			{
@@ -242,17 +180,17 @@ protected:
 					ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
 					m_lod.setState(ccPointCloudLOD::BROKEN);
 				}
-				m_octree.clear();
-				m_earlyStop = 0;
-				return;
+				else
+				{
+					//we have cancelled the octree computation process (see the stop() method)
+				}
+				m_earlyStop = 1;
 			}
 
 			if (m_earlyStop)
 			{
 				// abort requested
-				m_octree.clear();
-				m_lod.clear();
-				m_earlyStop = 0;
+				abortConstruction();
 				return;
 			}
 
@@ -267,18 +205,13 @@ protected:
 		{
 			//not enough memory
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
-			m_octree.clear();
-			m_lod.setState(ccPointCloudLOD::BROKEN);
-			m_earlyStop = 0;
-			return;
+			m_earlyStop = 1;
 		}
 
 		if (m_earlyStop)
 		{
 			// abort requested
-			m_octree.clear();
-			m_lod.clear();
-			m_earlyStop = 0;
+			abortConstruction();
 			return;
 		}
 
@@ -288,30 +221,13 @@ protected:
 		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 		assert(m_maxLevel <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-#if 0 //recursive path
-		//recursive
-		fillNode(m_lod.root());
-
-		m_lod.shrink_to_fit();
-		//m_lod.updateMaxRadii();
-		//m_lod.setMaxLevel(m_maxLevel);
-
-		for (size_t i = 1; i < m_lod.m_levels.size(); ++i)
-		{
-			ccLog::Print(QString("[LoD] Level %1: %2 cells").arg(i).arg(m_lod.m_levels[i].data.size()));
-		}
-
-#else //layer by layer
-
 		//init with root node
 		fillNode_flat(m_lod.root());
 
 		if (m_earlyStop)
 		{
 			// abort requested
-			m_octree.clear();
-			m_lod.clear();
-			m_earlyStop = 0;
+			abortConstruction();
 			return;
 		}
 
@@ -324,23 +240,10 @@ protected:
 				break;
 			}
 
-			//update maxRadius for the previous level
-			//{
-			//	float maxRadius = 0;
-			//	for (ccPointCloudLOD::Node& n : level.data)
-			//	{
-			//		if (n.radius > maxRadius)
-			//		{
-			//			maxRadius = n.radius;
-			//		}
-			//	}
-			//	level.maxRadius = maxRadius;
-			//}
-
 			//the previous level is now ready!
 			ccLog::Print(QString("[LoD] Level %1: %2 cells").arg(currentLevel).arg(level.data.size()));
 
-			//now we can create the next level
+			//now we can prepare the next level
 			if (currentLevel + 1 < m_maxLevel)
 			{
 				for (ccPointCloudLOD::Node& node : level.data)
@@ -350,20 +253,18 @@ protected:
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
-							if (m_earlyStop)
-							{
-								// abort requested
-								m_octree.clear();
-								m_lod.clear();
-								m_earlyStop = 0;
-								return;
-							}
-
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
 							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
+							if (m_earlyStop)
+							{
+								// abort requested
+								abortConstruction();
+								return;
+							}
+
 							node.childIndexes[childIndex] = childNodeIndex;
 							node.childCount++;
 							i += childNode.pointCount;
@@ -376,9 +277,7 @@ protected:
 		if (m_earlyStop)
 		{
 			// abort requested
-			m_octree.clear();
-			m_lod.clear();
-			m_earlyStop = 0;
+			abortConstruction();
 			return;
 		}
 
@@ -388,7 +287,7 @@ protected:
 		//refinement step
 		if (true)
 		{
-			//we look at the 'main' depth level (with the most point)
+			//we look at the 'main' depth level (with the most points)
 			uint8_t biggestLevel = 0;
 			for (uint8_t i = 1; i <= m_maxLevel; ++i)
 			{
@@ -398,27 +297,14 @@ protected:
 				}
 			}
 
-			//now compute the mean radius for this level
-			//double meanRadius = 0;
-			//{
-			//	const ccPointCloudLOD::Level& level = m_lod.m_levels[biggestLevel];
-			//	size_t cellCount = level.data.size();
-			//	for (size_t i = 0; i < cellCount; ++i)
-			//	{
-			//		meanRadius += level.data[i].radius;
-			//	}
-
-			//	meanRadius /= cellCount;
-			//}
-
-			//and divide again the cells (with a lower limit on the number of points)
+			//divide again the cells (with a lower limit on the number of points)
 			biggestLevel = std::min<uint8_t>(biggestLevel, 10);
 			for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
 			{
 				ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 				assert(!level.data.empty());
 
-				size_t cellCountBefore = m_lod.m_levels[currentLevel+1].data.size();
+				size_t cellCountBefore = m_lod.m_levels[currentLevel + 1].data.size();
 				for (ccPointCloudLOD::Node& node : level.data)
 				{
 					//do we need to subdivide this cell?
@@ -426,20 +312,18 @@ protected:
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
-							if (m_earlyStop)
-							{
-								// abort requested
-								m_octree.clear();
-								m_lod.clear();
-								m_earlyStop = 0;
-								return;
-							}
-
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
 							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
+							if (m_earlyStop)
+							{
+								// abort requested
+								abortConstruction();
+								return;
+							}
+
 							node.childIndexes[childIndex] = childNodeIndex;
 							node.childCount++;
 							i += childNode.pointCount;
@@ -447,23 +331,20 @@ protected:
 					}
 				}
 
-				size_t cellCountAfter = m_lod.m_levels[currentLevel+1].data.size();
-				ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel+1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
+				size_t cellCountAfter = m_lod.m_levels[currentLevel + 1].data.size();
+				ccLog::Print(QString("[LoD][pass 2] Level %1: %2 cells (+%3)").arg(currentLevel + 1).arg(cellCountAfter).arg(cellCountAfter - cellCountBefore));
 
 				if (m_earlyStop)
 				{
 					// abort requested
-					m_octree.clear();
-					m_lod.clear();
-					m_earlyStop = 0;
+					abortConstruction();
 					return;
 				}
 			}
 
 			m_lod.shrink_to_fit();
-			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size()))-1;
+			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 		}
-#endif
 
 		m_lod.setState(ccPointCloudLOD::INITIALIZED);
 
@@ -548,6 +429,8 @@ void ccPointCloudLOD::clearData()
 	m_levels.resize(1);
 	m_levels.front().data.resize(1);
 	m_levels.front().data.front() = Node();
+
+	m_octree.clear();
 }
 
 bool ccPointCloudLOD::initInternal(ccOctree::Shared octree)
@@ -589,27 +472,6 @@ int32_t ccPointCloudLOD::newCell(unsigned char level)
 
 	return static_cast<int32_t>(l.data.size()) - 1;
 }
-
-//void ccPointCloudLOD::updateMaxRadii()
-//{
-//	QMutexLocker locker(&m_mutex);
-//
-//	for (size_t i = 0; i < m_levels.size(); ++i)
-//	{
-//		if (!m_levels[i].data.empty())
-//		{
-//			float maxRadius = 0;
-//			for (Node& n : m_levels[i].data)
-//			{
-//				if (n.radius > maxRadius)
-//				{
-//					maxRadius = n.radius;
-//				}
-//			}
-//			m_levels[i].maxRadius = m_levels[i].data.front().radius;
-//		}
-//	}
-//}
 
 void ccPointCloudLOD::shrink_to_fit()
 {
@@ -662,9 +524,9 @@ void ccPointCloudLOD::resetVisibility()
 
 	m_currentState = RenderParams();
 
-	for (size_t l = 0; l < m_levels.size(); ++l)
+	for (Level& level : m_levels)
 	{
-		for (Node& n : m_levels[l].data)
+		for (Node& n : level.data)
 		{
 			n.displayedPointCount = 0;
 			n.intersection = Frustum::INSIDE;
@@ -720,12 +582,14 @@ public:
 		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
 		if (m_hasClipPlanes && node.intersection != Frustum::OUTSIDE)
 		{
-			for (size_t i = 0; i < m_clipPlanes.size(); ++i)
+			for (const ccClipPlane& clipPlane : m_clipPlanes)
 			{
 				//distance from center to clip plane
 				//we assume the plane normal (= 3 first coefficients) is normalized!
-				const Tuple4Tpl<double>& eq = m_clipPlanes[i].equation;
-				double dist = eq.x * node.center.x + eq.y * node.center.y + eq.z * node.center.z + eq.w /* / CCVector3d::vnorm(eq.u) */;
+				double dist = clipPlane.equation.x * node.center.x
+							+ clipPlane.equation.y * node.center.y
+							+ clipPlane.equation.z * node.center.z
+							+ clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
 
 				if (dist < node.radius)
 				{

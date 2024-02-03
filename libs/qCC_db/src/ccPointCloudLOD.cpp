@@ -57,17 +57,28 @@ public:
 	//! Stops the thread
 	void stop()
 	{
-		if (m_octree && m_octree->isBuildInProgress())
+		if (!m_octree && m_octree->isBuildInProgress())
 		{
 			m_octree->cancelBuild();
+			m_earlyStop = 1;
+			if (!wait(500))
+			{
+				ccLog::Warning("[ccPointCloudLODThread] Failed to stop the octree computation properly, will have to terminate it...");
+				terminate();
+			}
+			m_octree.clear();
 		}
-
-		m_earlyStop = 1;
-		if (!wait(500))
+		else
 		{
-			ccLog::Warning("[ccPointCloudLODThread] Failed to stop the thread properly, will have to terminate it...");
-			terminate();
+			m_earlyStop = 1;
+			if (!wait(500))
+			{
+				ccLog::Warning("[ccPointCloudLODThread] Failed to stop the thread properly, will have to terminate it...");
+				terminate();
+			}
+			m_octree.clear();
 		}
+		m_earlyStop = 0;
 	}
 	
 protected:
@@ -75,6 +86,8 @@ protected:
 	//! Fills a node (and returns its relative position) + recursive
 	uint8_t fillNode(ccPointCloudLOD::Node& node) const
 	{
+		assert(m_octree);
+
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
 		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(node.level);
 		const CCCoreLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
@@ -149,6 +162,8 @@ protected:
 	//! Fills a node (and returns its relative position)
 	uint8_t fillNode_flat(ccPointCloudLOD::Node& node) const
 	{
+		assert(m_octree);
+
 		const ccOctree::cellsContainer& cellCodes = m_octree->pointsAndTheirCellCodes();
 		const unsigned char bitDec = CCCoreLib::DgmOctree::GET_BIT_SHIFT(node.level);
 		const CCCoreLib::DgmOctree::CellCode currentTruncatedCellCode = (cellCodes[node.firstCodeIndex].theCode >> bitDec);
@@ -192,7 +207,11 @@ protected:
 	//reimplemented from QThread
 	virtual void run()
 	{
-		m_earlyStop = 0;
+		if (m_earlyStop != 0)
+		{
+			ccLog::Error("[LoD] Thread not properly terminated previously... can't run it again");
+			return;
+		}
 
 		//reset structure
 		m_lod.clearData();
@@ -202,6 +221,7 @@ protected:
 		if (pointCount == 0)
 		{
 			m_lod.setState(ccPointCloudLOD::BROKEN);
+			m_earlyStop = 0;
 			return;
 		}
 
@@ -214,7 +234,7 @@ protected:
 		if (!m_octree)
 		{
 			m_octree.reset(new ccOctree(&m_cloud));
-			if (m_octree->build(nullptr/*progressCallback*/) <= 0)
+			if (m_octree->build(nullptr) <= 0)
 			{
 				if (0 == m_earlyStop)
 				{
@@ -223,6 +243,7 @@ protected:
 					m_lod.setState(ccPointCloudLOD::BROKEN);
 				}
 				m_octree.clear();
+				m_earlyStop = 0;
 				return;
 			}
 
@@ -231,6 +252,7 @@ protected:
 				// abort requested
 				m_octree.clear();
 				m_lod.clear();
+				m_earlyStop = 0;
 				return;
 			}
 
@@ -245,14 +267,18 @@ protected:
 		{
 			//not enough memory
 			ccLog::Warning(QString("[LoD] Failed to compute LOD structure on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
+			m_octree.clear();
 			m_lod.setState(ccPointCloudLOD::BROKEN);
+			m_earlyStop = 0;
 			return;
 		}
 
 		if (m_earlyStop)
 		{
 			// abort requested
+			m_octree.clear();
 			m_lod.clear();
+			m_earlyStop = 0;
 			return;
 		}
 
@@ -285,6 +311,7 @@ protected:
 			// abort requested
 			m_octree.clear();
 			m_lod.clear();
+			m_earlyStop = 0;
 			return;
 		}
 
@@ -328,6 +355,7 @@ protected:
 								// abort requested
 								m_octree.clear();
 								m_lod.clear();
+								m_earlyStop = 0;
 								return;
 							}
 
@@ -350,6 +378,7 @@ protected:
 			// abort requested
 			m_octree.clear();
 			m_lod.clear();
+			m_earlyStop = 0;
 			return;
 		}
 
@@ -402,6 +431,7 @@ protected:
 								// abort requested
 								m_octree.clear();
 								m_lod.clear();
+								m_earlyStop = 0;
 								return;
 							}
 
@@ -425,6 +455,7 @@ protected:
 					// abort requested
 					m_octree.clear();
 					m_lod.clear();
+					m_earlyStop = 0;
 					return;
 				}
 			}
@@ -441,6 +472,8 @@ protected:
 			.arg(m_maxLevel)
 			.arg(m_lod.memory() / static_cast<double>(1 << 20), 0, 'f', 2)
 			.arg(timer.elapsed() / 1000.0, 0, 'f', 1));
+
+		m_earlyStop = 0;
 	}
 
 	ccPointCloud& m_cloud;
@@ -614,6 +647,7 @@ void ccPointCloudLOD::clear()
 	}
 
 	m_levels.clear();
+	m_octree.clear();
 	m_state = NOT_INITIALIZED;
 
 	m_mutex.unlock();
@@ -784,7 +818,7 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet*
 
 uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
-	if (m_indexMap.capacity() == 0)
+	if (m_indexMap.capacity() == 0 || m_octree.isNull())
 	{
 		assert(false);
 		return 0;
@@ -862,7 +896,7 @@ LODIndexSet& ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 	remainingPointsAtThisLevel = 0;
 	m_lastIndexMap.clear();
 
-	if (!m_octree || level >= m_levels.size())
+	if (m_octree.isNull() || level >= m_levels.size())
 	{
 		assert(false);
 		maxCount = 0;

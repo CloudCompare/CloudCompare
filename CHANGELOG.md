@@ -418,6 +418,7 @@ v2.13.beta (???) - (??/??/2024)
 	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
 	- The Point Pair registration ('Align') or ICP tools could generate a sub-optimal translation if the rotation was constrained
 	- The C2M distance could crash if forcing the octree level above 11 or 12 (which would likely require a grid of more than 2 billion cells)
+	- Translating or rotating the cloud while the LoD structure was built could lead to a hang or a crash of CC
 
 v2.12.4 (Kyiv) - (14/07/2022)
 ----------------------

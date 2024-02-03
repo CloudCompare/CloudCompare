@@ -604,6 +604,9 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 
 const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore, bool ignoreChildren/*=false*/)
 {
+	//Clears the LOD structure (and potentially stop its construction)
+	clearLOD();
+
 	assert(addedCloud);
 
 	unsigned addedPoints = addedCloud->size();
@@ -1106,8 +1109,6 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 	//We should update the VBOs (just in case)
 	releaseVBOs();
-	//As well as the LOD structure
-	clearLOD();
 
 	return *this;
 }
@@ -1923,6 +1924,9 @@ void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 {
+	//Clears the LOD structure (and potentially stop its construction)
+	clearLOD();
+
 	//transparent call
 	ccGenericPointCloud::applyGLTransformation(trans);
 

@@ -64,18 +64,33 @@ public:
 	bool init(ccPointCloud* cloud);
 
 	//! Locks the structure
-	inline void lock() { m_mutex.lock(); }
+	inline void lock()
+	{
+		m_mutex.lock();
+	}
 	//! Unlocks the structure
-	inline void unlock() { m_mutex.unlock(); }
+	inline void unlock()
+	{
+		m_mutex.unlock();
+	}
 
 	//! Returns the current state
-	inline State getState() { lock(); State state = m_state; unlock(); return state; }
+	inline State getState()
+	{
+		lock();
+		State state = m_state;
+		unlock();
+		return state;
+	}
 
 	//! Clears the structure
 	void clear();
 
 	//! Returns the associated octree
-	const ccOctree::Shared& octree() const { return m_octree; }
+	const ccOctree::Shared& octree() const
+	{
+		return m_octree;
+	}
 
 	//! Returns whether the structure is null (i.e. not under construction or initialized) or not
 	inline bool isNull() { return getState() == NOT_INITIALIZED; }
@@ -90,7 +105,11 @@ public:
 	inline bool isBroken() { return getState() == BROKEN; }
 
 	//! Returns the maximum accessible level
-	inline unsigned char maxLevel() { QMutexLocker locker(&m_mutex); return (m_state == INITIALIZED ? static_cast<unsigned char>(std::max<size_t>(1, m_levels.size()))-1 : 0); }
+	inline unsigned char maxLevel()
+	{
+		QMutexLocker locker(&m_mutex);
+		return (m_state == INITIALIZED ? static_cast<unsigned char>(std::max<size_t>(1, m_levels.size())) - 1 : 0);
+	}
 
 	//! Undefined visibility flag
 	static const unsigned char UNDEFINED = 255;
@@ -116,13 +135,13 @@ public:
 			: pointCount(0)
 			, radius(0)
 			, center(0, 0, 0)
+			, childIndexes{-1, -1, -1, -1, -1, -1, -1, -1}
 			, firstCodeIndex(0)
 			, displayedPointCount(0)
 			, level(_level)
 			, childCount(0)
 			, intersection(UNDEFINED)
 		{
-			childIndexes.fill(-1);
 		}
 	};
 
@@ -175,9 +194,6 @@ protected: //methods
 	//! Sets the current state
 	inline void setState(State state) { lock(); m_state = state; unlock(); }
 
-	//! Clears the structure (with more options)
-	void clearExtended(bool autoStopThread, State newState);
-
 	//! Clears the internal (nodes) data
 	void clearData();
 
@@ -189,9 +205,6 @@ protected: //methods
 	//! Shrinks the internal data to its minimum size
 	void shrink_to_fit();
 
-	//! Updates the max radius per level FOR ALL CELLS
-	//void updateMaxRadii();
-
 	//! Resets the internal visibility flags
 	/** All nodes are flagged as 'INSIDE' (= visible) and their 'visibleCount' attribute is set to 0.
 	**/
@@ -202,14 +215,10 @@ protected: //methods
 
 protected: //members
 
+	//! Level data
 	struct Level
 	{
-		Level()
-			//: maxRadius(0)
-		{}
-		
 		std::vector<Node> data;
-		//float maxRadius;
 	};
 
 	//! Per-level cells data

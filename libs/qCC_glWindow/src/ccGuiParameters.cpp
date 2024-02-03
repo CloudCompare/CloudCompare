@@ -83,7 +83,7 @@ void ccGui::ParamStruct::reset()
 	decimateMeshOnMove			= true;
 	minLoDMeshSize				= 2500000;
 	decimateCloudOnMove			= true;
-	minLoDCloudSize				= 10000000;
+	minLoDCloudSize				= 50000000;
 	useVBOs						= true;
 	displayCross				= true;
 	pickingCursorShape			= Qt::CrossCursor;
@@ -140,7 +140,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	decimateMeshOnMove			=                                      settings.value("meshDecimation",          true ).toBool();
 	minLoDMeshSize				=                                      settings.value("minLoDMeshSize",       2500000 ).toUInt();
 	decimateCloudOnMove			=                                      settings.value("cloudDecimation",         true ).toBool();
-	minLoDCloudSize				=                                      settings.value("minLoDCloudSize",     10000000 ).toUInt();
+	minLoDCloudSize				=                                      settings.value("minLoDCloudSize",     50000000 ).toUInt();
 	useVBOs						=                                      settings.value("useVBOs",                 true ).toBool();
 	displayCross				=                                      settings.value("crossDisplayed",          true ).toBool();
 	labelMarkerSize				= static_cast<unsigned>(std::max(0,    settings.value("labelMarkerSize",         5    ).toInt()));

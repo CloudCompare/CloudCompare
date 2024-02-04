@@ -1365,7 +1365,7 @@ protected: //members
 	CCVector3d m_lockedRotationAxis;
 
 	//! Shared texture type
-	using SharedTexture = QSharedPointer< QOpenGLTexture>;
+	using SharedTexture = QSharedPointer<QOpenGLTexture>;
 
 	//! Reserved textures (for renderText)
 	QMap<uint16_t, SharedTexture> m_uniqueTextures;

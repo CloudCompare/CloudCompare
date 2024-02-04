@@ -5,75 +5,25 @@ v2.13.beta (???) - (??/??/2024)
 ----------------------
 - - New features:
 
-	- Segment
-		- new button in the toolbar to export the current selection as a new cloud or mesh (without needing to close the tool)
+	- New menu entry: Save project
+		- File > Save project (or CTRL+SHIFT+S)
+		- Saves all entitites in the DB as a bin file
+
+	- Tools > Fit > circle
+		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
+		- works also on cylinders
+
+	- Edit > Normals > Set SF(s) as normal (or Edit > Scalar fields > Set SF(s) as normal)
+		- allows to set normals from scalar fields (or 0 or 1)
 
 	- New section in the Properties when a cloud is selected: "Draw normals as lines"
 		- one check box to toggle the display
 		- one double spin box to choose the length of the normals (1 by default)
 		- one combo box to choose the color of the normals
 
-	- New command line option:
-		- SF_ADD_ID allows to add the index of the point as a scalar field (initially as a float32, so there is a loss of accuracy for values above 16777215)
-			- the AS_INT parameter allows to store the index as a raw uint32, allowing index values from 0 up to (2**32-1)
-		- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
-		- SF_OP_SF {SF 1 name or index} {operation} {SF 2 name or index}
-			- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
-			- works on clouds and meshes
-		- SF_INTERP {SF name or index} with sub-option -DEST_IS_FIRST
-			- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
-		- SF_ADD_CONST {SF name} {const value}
-			- to add a constant scalar field to a cloud
-		- SF_TO_COORD {SF name or index} {X, Y or Z}
-			- to set the values of a scalar field as the X, Y or Z coordinates
-		- COLOR_INTERP
-			- to interpolate the colors from one cloud to another cloud
-		- CLEVELS
-			- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
-			- syntax: -CLEVELS BANDS INPUT_RANGE_MIN INPUT_RANGE_MAX OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX
-				- band can be any mix of 'R', 'G' and 'B' (ex: 'G' or 'RB' or 'RGB')
-				- selected color component values will be scaled so that
-					[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
-					(values ouside of the input range will also be scaled)
-        - RDP {opt: min distance between points}
-        	- removes duplicate points of all loaded clouds
-			- the min distance between points to consider them as duplicated can be set (1e-8 by default)
-		- DEBUG
-			- display various pieces of information to help one debug and tweak the command line
-			- can be placed at different positions
-		- RENAME_ENTITIES {base name}
-			- rename all loaded entities (clouds or meshes) with the provided base name.
-				A numerical suffix is added if multiple entities are loaded.
-		- COMMAND_FILE {file}
-			- loads commands from a file
-			- multiple lines allowed
-			- multiple arguments in each line allowed
-			- handle quoted arguments
-			- commands after this one will run after all commands in the file have been processed
-			- whole line comments with # my comment here or // here
-			- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
-		- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
-			- set global shift on all entities
-			- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
-		- SELECT_ENTITIES -{FIRST} {first count} -{LAST} {last count} {-ALL} {-NOT} {-REGEX} {regex_pattern}
-			- sub-option -FIRST {count}: if set, first count of entities will be selected (optional). Example: xx.....
-			- sub-option -LAST {count}: if set, last count of entities will be selected (optional). Example: .....xx
-			- sub-option -ALL: if set, all entities will be selected (optional). It has higher priority than FIRST/LAST/REGEX. Example: xxxxxxx
-			- sub-option -REGEX {regex_pattern}: if set, all entities with matching names will be selected (optional). It has higher priority than FIRST/LAST. Example: x(merged)..x(merged)...
-			- sub-option -NOT: if set, all condition will be reversed (optional)
-				- -NOT -FIRST {count} -> all but first {count}. Example: ..xxxxx
-				- -NOT -LAST {count} -> all but last {count}. Example: xxxxx..
-				- -NOT -ALL -> none. Example: .......
-				- -NOT -REGEX matched -> regex not matched. Example: .(merged)xx.(merged)xxx
-				- special case: -NOT -FIRST c1 -LAST c2 -> all except first 'c1' AND last 'c2' entities. Example: ..xxx..
-			- sub-option -CLOUD: if set, only clouds will be selected (optional)
-			- sub-option -MESH: if set, only meshes will be selected (optional)
-			- if neither -CLOUD nor -MESH are set then both types of entities will be selected
-			- sub-options can be set in any order
-			- it is possible to use FIRST and LAST at the same time. Example: xx...xx
-		- REMOVE_SENSORS
-			- removes all the sensors (both TLS and cameras, directly under clouds, meshes or mesh vertices)
-		
+	- Edit > Normals > Shift points along normals
+		- to shift the points of a given quantity along their associated normal
+	
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
 		- can be enabled and modifed in the Camera Parameters dialog or via
@@ -84,10 +34,18 @@ v2.13.beta (???) - (??/??/2024)
 		- taken into account when using interactive segmentation or point picking
 		- not compatible with the Cross Section tool
 
-	- ASCII files:
-		- ability to load quaternion coordinates (qw, qx, qy and qz) that will be loaded as individual 'Coordinate System' objects
-		- once 4 columns are assigned to one of the 4 quaternion components (w,x,y,z), the user can elect the display scale of the
-			'Coordinate System' objects
+	- New 'Display > Display settings' options:
+		- Restore window geometry on startup
+			- option to control whether the previous window geometry (size and position) should be restored or not
+		- Picking cursor ('Cross' or 'Pointing hand')
+			- default mouse cursor for picking points will now be a cross
+
+	- New default color ramp: Cividis
+		- to flatten the perceptual delta perceived by people with color vision deficiency,
+			and prevent loss of information when printing in black and white"
+		- see https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf (and thanks to Louis Gagnon)
+
+- New plugins
 
 	- New unified plugin to load LAS files (by Thomas Montaigu)
 		- based on LASzip
@@ -96,50 +54,90 @@ v2.13.beta (???) - (??/??/2024)
 		- gives much more control over extended fields (EVLR) as well as custom mapping between
 			the existing fields of a cloud and their destination in the LAS file
 
-	- Display > Restore window geometry on startup
-		- Option to control whether the previous window geometry (size and position) should be restored or not
-	
-	- Display > Display settings > Picking cursor ('Cross' or 'Pointing hand')
-		- Default mouse cursor for picking points will now be the cross
-		- This can be changed in the 'Display options' dialog
-
-	- Edit > Normals > Shift points along normals
-		- to shift the points of a given quantity along their associated normal
-	
-	- Edit > Translate/Rotate: 
-		- In advanced section, added an option to rotate / translate entities of a small increment, with button or using left/right arrows (Thanks to [Lighpoint Scientific](https://lightpointdata.com)!)
-
-	- New default color ramp:
-		- Cividis ("to flatten the perceptual delta perceived by people with color vision deficiency,
-			and it prevents loss of information when printing in black and white")
-			See https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf (and thanks to Louis Gagnon)
-
-	- Tools > Fit > circle
-		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
-		- works also on cylinders
-
-	- Edit > Normals > Set SF(s) as normal (or Edit > Scalar fields > Set SF(s) as normal)
-		- allows to set normals from scalar fields (or 0 or 1)
-
 	- New plugin: q3DMASC
 		- 3DMASC is an advanced plugin for 3D point cloud classification, that uses Multiple Attributes, Scales and Clouds.
 		  It is possible to use it with the GUI but also to call it with the command line.
 		- See https://lidar.univ-rennes.fr/en/3dmasc
 
 	- New plugin: qTreeIso
-		- A 3D graph-based individual-tree isolator (treeiso) from Terrestrial Laser Scanning point clouds
+		- a 3D graph-based individual-tree isolator (treeiso) from Terrestrial Laser Scanning point clouds
 		- by Zhouxin Xi and Chris Hopkinson, Artemis Lab, Department of Geography & Environment, University of Lethbridge (Canada)
 
-	- New menu entry: Save project
-		- File > Save project (or CTRL+SHIFT+S)
-		- Saves all entitites in the DB as a bin file
+	- New Python-based plugin: 3DFin (3D Forest Inventory)
+		- automatic computation of tree parameters in terrestrial point clouds
+		- accessible via the Python plugin (check the option to install it via the Windows installer)
+		- see https://github.com/3DFin/3DFin
+		- developed at the Centre of Wildfire Research of Swansea University (UK) in collaboration with the
+			Research Institute of Biodiversity (CSIC, Spain) and the Department of Mining Exploitation of
+			the University of Oviedo (Spain)
+
+- New command line options
+
+	- SF_ADD_ID allows to add the index of the point as a scalar field (initially as a float32, so there is a loss of accuracy for values above 16777215)
+		- the AS_INT parameter allows to store the index as a raw uint32, allowing index values from 0 up to (2**32-1)
+	- FLIP_TRI (to flip the order of the triangle vertices of all opened meshes)
+	- SF_OP_SF {SF 1 name or index} {operation} {SF 2 name or index}
+		- to compute an arithmetic operation between two scalar fields (add, sub, mult, div)
+		- works on clouds and meshes
+	- SF_INTERP {SF name or index} with sub-option -DEST_IS_FIRST
+		- to interpolate a scalar field from one cloud to another cloud (use DEST_IS_FIRST if destination is first)
+	- SF_ADD_CONST {SF name} {const value}
+		- to add a constant scalar field to a cloud
+	- SF_TO_COORD {SF name or index} {X, Y or Z}
+		- to set the values of a scalar field as the X, Y or Z coordinates
+	- COLOR_INTERP
+		- to interpolate the colors from one cloud to another cloud
+	- CLEVELS
+		- to edit the color bands histogram of a cloud or a mesh (https://www.cloudcompare.org/doc/wiki/index.php/Colors%5CLevels)
+		- syntax: -CLEVELS BANDS INPUT_RANGE_MIN INPUT_RANGE_MAX OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX
+			- band can be any mix of 'R', 'G' and 'B' (ex: 'G' or 'RB' or 'RGB')
+			- selected color component values will be scaled so that
+				[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
+				(values ouside of the input range will also be scaled)
+    - RDP {opt: min distance between points}
+    	- removes duplicate points of all loaded clouds
+		- the min distance between points to consider them as duplicated can be set (1e-8 by default)
+	- DEBUG
+		- display various pieces of information to help one debug and tweak the command line
+		- can be placed at different positions
+	- RENAME_ENTITIES {base name}
+		- rename all loaded entities (clouds or meshes) with the provided base name.
+			A numerical suffix is added if multiple entities are loaded.
+	- COMMAND_FILE {file}
+		- loads commands from a file
+		- multiple lines allowed
+		- multiple arguments in each line allowed
+		- handle quoted arguments
+		- commands after this one will run after all commands in the file have been processed
+		- whole line comments with # my comment here or // here
+		- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
+	- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
+		- set global shift on all entities
+		- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
+	- SELECT_ENTITIES -{FIRST} {first count} -{LAST} {last count} {-ALL} {-NOT} {-REGEX} {regex_pattern}
+		- sub-option -FIRST {count}: if set, first count of entities will be selected (optional). Example: xx.....
+		- sub-option -LAST {count}: if set, last count of entities will be selected (optional). Example: .....xx
+		- sub-option -ALL: if set, all entities will be selected (optional). It has higher priority than FIRST/LAST/REGEX. Example: xxxxxxx
+		- sub-option -REGEX {regex_pattern}: if set, all entities with matching names will be selected (optional). It has higher priority than FIRST/LAST. Example: x(merged)..x(merged)...
+		- sub-option -NOT: if set, all condition will be reversed (optional)
+			- -NOT -FIRST {count} -> all but first {count}. Example: ..xxxxx
+			- -NOT -LAST {count} -> all but last {count}. Example: xxxxx..
+			- -NOT -ALL -> none. Example: .......
+			- -NOT -REGEX matched -> regex not matched. Example: .(merged)xx.(merged)xxx
+			- special case: -NOT -FIRST c1 -LAST c2 -> all except first 'c1' AND last 'c2' entities. Example: ..xxx..
+		- sub-option -CLOUD: if set, only clouds will be selected (optional)
+		- sub-option -MESH: if set, only meshes will be selected (optional)
+		- if neither -CLOUD nor -MESH are set then both types of entities will be selected
+		- sub-options can be set in any order
+		- it is possible to use FIRST and LAST at the same time. Example: xx...xx
+	- REMOVE_SENSORS
+		- removes all the sensors (both TLS and cameras, directly under clouds, meshes or mesh vertices)
 
 - Improvements:
 
-	- The ASCII file loading dialog has been improved:
-		- a 'reset all' button was added to reset all column roles at once
-		- the dialog should be smarter when restoring the previously set configuration
-		- the 'Apply All' button should now work for more than two files ;)
+	- Edit > Translate/Rotate: 
+		- In the 'advanced' section, added an option to rotate/translate entities by a small increment, with buttons or using left/right arrows
+		- Thanks to [Lighpoint Scientific](https://lightpointdata.com)
 
 	- The stereo and the non-stereo versions of CloudCompare and ccViewer are now unified
 		- no need to manage/compile 2 different versions anymore
@@ -157,8 +155,8 @@ v2.13.beta (???) - (??/??/2024)
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- the cone projection type is now set in a separate combo-box to make things clearer
-		- Cone projection methods are 'Conical', 'Cylidrical (fixed radius)' and 'Cylidrical (adaptive radius)'
-		- The conical projection method now takes a an additional 'span ratio' parameter as input (to reduce or increase the conical projection angular span)
+		- cone projection methods are 'Conical', 'Cylidrical (fixed radius)' and 'Cylidrical (adaptive radius)'
+		- the conical projection method now takes an additional 'span ratio' parameter as input (to reduce or increase the conical projection angular span)
 		- button to flip the 3D axis
 		- ability to paste the axis and the axis point from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- option to choose an existing cylinder or cone entity in the DB tree, and use it to set the unrolling parameters
@@ -187,7 +185,15 @@ v2.13.beta (???) - (??/??/2024)
 		- CC will now preserve some children entities (labels, sensors, etc.) when segmenting clouds or meshes:
 			with graphical segmentation, cross section tool (for clouds only), subsampling, filter by SF value, etc.
 
-	- Rasterize:
+	- Interactive segmentation tool ('scissors' tool)
+		- new button in the toolbar to export the current selection as a new cloud or mesh (without having to close the tool)
+			- shortcut: E (for 'Export')
+		- the user can now configure the name suffix for the remaining and segmented cloud
+		- the display should be faster until the first segmentation is performed
+		- for meshes: unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
+		- Polygon mode: use ALT + left click to remove the last vertex
+
+	- Rasterize
 		- new option to fill the empty cells with Kriging
 		- various improvements and glitch fixes
 		- better naming of the scalar fields generated by the tool when exporting the grid to a cloud (with statistics)
@@ -199,138 +205,140 @@ v2.13.beta (???) - (??/??/2024)
 								The weights are equal to the inverse variance (= 1/std_dev^2). Standard deviation values (std_dev) are
 								obtained from an already existing scalar field, which must be selected by the user)
 		- statistics can now be computed on the altitudes and/or all scalar fields
-		- new statistics: median, percentile (with custom percentage) and nuùber of unique values inside a cell
-		- new command line sub-options to be used after -PROJ or -SF_PROJ:
-			- MED 
-			- INV_VAR (+ std. dev. SF index or name)
-		- new command line sub-option:
-		    - -EMPTY_FILL KRIGING
-			- -KRIGING_KNN {value} (to set the number of neighbors for the Kriging algorithm)
+		- new statistics: median, percentile (with custom percentage) and number of unique values inside a cell
+		- new command line sub-options (see below)
 		- when exporting Geotiff files, CC will now use NaN as the value for invalid pixels (no data)
 
-	- Raster file format:
+	- Raster file format
 		- when loading a raster file, CC should now be able to detect the Z band more robustly (even if it's labeled as 'grey indexes' by GDAL)
 
 	- Edit > Color > Set unique & Edit > Color > Colorize
 		- CC will now remember the last input color
 
-	- Global Shift:
+	- Global Shift
 		- the suggested global shift will now be rounded to the nearest thousand (so as to suggest values in kilometers, easier to manage)
 
-	- PoissonRecon plugin:
+	- PoissonRecon plugin
 		- the user can now choose the number of threads
 
-	- Edit > Cloud > Paste from clipboard:
+	- Edit > Cloud > Paste from clipboard
 		- the shortcut has been changed to ALT+P (so as to not conflict with the already existing CTRL+P shortcut for the 'Trace polyline' tool)
 		
-	- Graphical Segmentation Tool:
-		- the user can now configure the name suffix for the remaining and segmented cloud
-		- the display should be faster until the first segmentation is performed
-		- unused mesh vertices should now be properly removed from both the segmented and the remaining mesh parts
-		- Polygon mode: use ALT + left click to remove the last vertex
-
 	- Color scales / Color scale editor
 		- it is now possible to override a custom label value by a text
 			(in the custom labels definition field, add a text between double quotes, after the numerical value)
 
-	- BIN files:
+	- ASCII files
+		- ability to load quaternion coordinates (qw, qx, qy and qz) that will be loaded as individual 'Coordinate System' objects
+		- once 4 columns are assigned to one of the 4 quaternion components (w,x,y,z), the user can elect the display scale of the
+			'Coordinate System' objects
+
+	- The ASCII file loading dialog has been improved
+		- a 'reset all' button was added to reset all column roles at once
+		- the dialog should be smarter when restoring the previously set configuration
+		- the 'Apply All' button should now work for more than two files ;)
+
+	- BIN files
 		- CC is now able to create BIN files with the lowest version as possible (depending on the selected entities)
 			so that the resulting file may potentially be opened by earlier versions
 
-	- LAS files:
-		- The default shift for (GPS) time values is now rounded to the nearest 10^5 value
-		- The shift value is now displayed as a property of the currently selected scalar field
-		- When using the standard LAS I/O filter (PDAL), the user can now set a custom shift for GPS time values
-		- The 'tiling' option will now remember the last used parameters (destination folder, dimension and number of tiles)
+	- LAS files
+		- the default shift for (GPS) time values is now rounded to the nearest 10^5 value
+		- the shift value is now displayed as a property of the currently selected scalar field
+		- the user can now set a custom shift for GPS time values
+		- the 'tiling' option will now remember the last used parameters (destination folder, dimension and number of tiles)
 
-	- E57 files:
-		- Images are now saved internally as JPEG files (faster and smaller)
-		- Sensors associated to images should now be properly shifted if the associated cloud is shifted,
+	- E57 files
+		- images are now saved internally as JPEG files (faster and smaller)
+		- sensors associated to images should now be properly shifted if the associated cloud is shifted,
 			or if they are not associated to a cloud
-		- Scan grids ('groupingByLine' scheme) will now be loaded by CloudCompare.
+		- scan grids ('groupingByLine' scheme) will now be loaded by CloudCompare.
 			This is useful to compute clean and fast normals.
 			(note that they are still not exported)
 
-	- PCD files:
-		- Better management of PCD files with large coordinates (the Global Shift & Scale dialog will appear)
-		- At export time, if the previous sensor is too far from the points, it sensor might not be saved to preserve numeric accuracy
+	- PCD files
+		- better management of PCD files with large coordinates (the Global Shift & Scale dialog will appear)
+		- at export time, if the previous sensor is too far from the points, it might not be saved to preserve numerical accuracy
 			(the previous sensor will be replaced by a default one positionned accordingly to the Global shift)
 
-	- PLY dialog:
-		- the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
+	- STP files
+		- the triangles of meshes tesselated from STEP files should now all be properly oriented
+		- the linear deflection is asked only once when multiple files are loaded at the same time
 
-	- SF Arithmetic tool:
-		- New operation: 'MIN' (to get the minimum values between 2 scalar fields)
-			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
-		- New operation: 'MAX' (to get the maximum values between 2 scalar fields)
-			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
-		- New operation: 'SET' (to set a constant value)
-			- this operation is also accessible via the command line (with the -SF_OP command)
-		- New operation: 'ABS' (to compute the absolue value)
-			- this operation is also accessible via the command line (with the -SF_ARITHMETIC command)
+	- PLY files
+		- loading dialog: the scalar fields are now displayed in a 'list widget' in case there are too many to fit in the screen
 
-	- Command line:
-		- Simple quotes should now be properly handled
+	- Salome/.poly files:
+		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
+			the polyline
+
+	- SF Arithmetic tool
+		- new operation: 'MIN' (to get the minimum values between 2 scalar fields)
+		- new operation: 'MAX' (to get the maximum values between 2 scalar fields)
+		- new operation: 'SET' (to set a constant value)
+		- new operation: 'ABS' (to compute the absolue value)
+
+	- Command line
+		- logging should be more responsive (both in the standard console-based mode and the silent mode)
+		- simple quotes should now be properly handled
 			(and can be used to set output filenames or scalar field names with space characters)
-		- It is now possible to pass a SF name after -SET_ACTIVE_SF  instead of the field index
+		- most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
 			(use simple quotes if the scalar field name has spaces in it)
-		- It is now possible to pass -1 as index after -SET_ACTIVE_SF to disable the active SF
-		- The -SET_ACTIVE_SF command can now be applied to the loaded meshes
-		- The -SF_COLOR_SCALE option now works on meshes (vertices) as well
-		- The -FILTER_SF option now works on meshes as well
-		- The -FILTER_SF option can now be used with the special values in any order (MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX)
-		- New sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component
-		- New sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
-		- New sub-option for the -SF_ARITHMETIC command: -IN_PLACE, to update the scalar field in place, without creating a new SF
-		- Most methods using scalar fields as input will now also accept the scalar field name (in lieu of the SF index)
-		- New sub-optiopns for the -APPLY_TRANS command:
+		- otherwise, the current/default active scalar field can now be designated by index '-1' with the following commands:
+			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
+		- it is now possible to pass -1 as index after -SET_ACTIVE_SF to disable the active SF
+		- the -SET_ACTIVE_SF command can now be applied to the loaded meshes
+		- the -SF_COLOR_SCALE option now works on meshes (vertices) as well
+		- the -FILTER_SF option now works on meshes as well
+		- the -FILTER_SF option can now be used with the special values in any order (MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX)
+		- new sub-option for the -C2C_DIST and -C2M_DIST commands: -SPLIT_XY_Z to split the distance between the z component and the xy plane component
+		- new sub-option for the -C2M_DIST command: -UNSIGNED, to compute unsigned distances
+		- new sub-option for the -SF_ARITHMETIC commands:
+			* new operations 'MIN', 'MAX' and 'ABS' (see above)
+			* -IN_PLACE, to update the scalar field in place, without creating a new SF
+		- new sub-option for the -SF_OP command:
+			* new operation 'SET' + constant value (see above)
+		- new sub-options for the -SF_OP_SF command:
+			* new operations 'MIN' and 'MAX' (see above)
+		- new sub-options for the -APPLY_TRANS command:
 			- -APPLY_TO_GLOBAL {FORCE}
 				* to apply the transformation to the global coordinate system instead of the local coordinate system
 				* warning: the Global Shift might be automatically adjusted to preserve accuracy (and small local coordinates)
 				* by default, the Global Shift won't be automatically adjusted if the local coordinates are already large.
 					Use 'FORCE' after -APPLY_TO_GLOBAL to force CC to adjust the Global Shift in any case.
 			- -INVERSE: to inverse the transformation matrix before applying it.
-		- New sub-options for -SS command:
+		- new sub-options for -SS command:
 			* -SS OCTREE NUMBER_OF_POINTS {number} to subsample with the highest octree level for which the resulting point count won't exceed the given number of points
 			* -SS OCTREE NUMBER_OF_POINTS PERCENT {number} to calculate NUMBER_OF_POINTS from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS OCTREE CELL_SIZE {size} to deduce the octree level from the given cell size.
 			* -SS RANDOM PERCENT {number} to calculate the number of sampled points from PERCENT. PERCENT should be a decimal number between 0 and 100.
 			* -SS SPATIAL {fallback_step} USE_ACTIVE_SF {step_at_SF_min} {step_at_SF_max} to use spatial step interpolation on active scalar field (fallback step will be used if active SF has invalid values)
-		- New sub-options for -ICP command:
+		- new sub-options for -ICP command:
 			* -SKIP_TX to skip translation along X axis
 			* -SKIP_TY to skip translation along Y axis
 			* -SKIP_TZ to skip translation along Z axis
-		- Support comments inside COMMAND_FILE files
-			* whole line comments with # my comment here or // here
-			* comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces
-		- The current/default active scalar field can now be designated by index '-1' with the following commands:
-			REMOVE_SF, SF_TO_COORD, SF_ARITHMETIC, SF_OP, SF_INTERP, RENAME_SF, ICP (USE_MODEL_SF_AS_WEIGHT/USE_DATA_SF_AS_WEIGHT)
-		- The logging should be more responsive (both in the standard console-based mode and the silent mode)
+		- new sub-options for the -RASTERIZE command:
+		    - -EMPTY_FILL KRIGING
+			- -KRIGING_KNN {value}
+				- to set the number of neighbors for the Kriging algorithm
+			- to be used adter -PROJ or -SF_PROJ
+				- MED 
+				- INV_VAR (+ std. dev. SF index or name)
+
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
 		- Should hopefully solve most of the random issues with picking
 
-	- New shortcut:
-		- use 'ALT + SHIFT + mouse wheel' to change the zFar value (perspective mode)
-		  (reminder: use 'ALT + mouse wheel' to change the zNear value)
-
-	- Cloning:
+	- Cloning
 		- ability to clone images
 		- ability to clone 2D labels
 		- ability to clone 2D viewport labels
 		- ability to clone viewport objects
 
-	- EDL shader:
+	- EDL shader
 		- contrast and rendering quality improved
 
-	- PCV plugin:
+	- PCV plugin
 		- the number of rays and the context resolution can now be set to up to 65536
-
-	- ICP:
-		- the computed registration transformation will now be applied to the aligned entity and all its children (if any)
-
-	- STP:
-		- the triangles of meshes tesselated from STEP files should now all be properly oriented
-		- the linear deflection is asked only once when multiple files are loaded at the same time
 
 	- Camera sensor edition dialog
 		- the user can now control whether the input 'center' is in the world C.S. or in the camera C.S.
@@ -351,26 +359,28 @@ v2.13.beta (???) - (??/??/2024)
 			with this version of CloudCompare. This allows to render animations of still objects but with a moving light source
 			for instance.
 
+	- ICP
+		- the computed registration transformation will now be applied to the aligned entity and all its children (if any)
+
+	- Align (point-air based registration):
+		- the Align tool will now output the list of points used and the final distance between them in the Console
+		- the Align tool will now show errors along X, Y and Z axes in dedicated columns.
+
 	- ICP and Align tools:
 		- when using a reference entity having a defined Global Shift & Scale the registration matrix
 			from the to-be-aligned local entity coordinate system to the reference entity global coordinate
 			system will be output in the Console
-		- the Align tool will now output the list of points used and the final distance between them in the Console
-		- the Align tool will now show errors along X, Y and Z axes in dedicated columns.
 
-	- Salome/.poly files:
-		- CC will now detect that the first and last vertices of a polyline are similar, and will automatically close
-			the polyline
-
-	- Some more basic statistics are displayed in the Console when using the 'Edit > SF > Compute stat. params' tool
-		- number of valid values, sum of all valid values and squared values, average, RMS
+	- Edit > SF > Compute stat. params
+		- some more basic statistics are displayed in the Console: number of valid values, sum of all valid values
+			and squared values, average, RMS
 
 	- Connected Components Extraction:
 		- the parameters are now semi-persistent (= maintained as long as CC is running)
 
 	- Cloud-to-primitive distances:
 		- refreshed dialog
-		- when launching the Cloud-to-mesh distance tool with a primitive as mesh, CC will now suggest the user to use
+		- when launching the Cloud-to-mesh distance tool with a primitive as the 'mesh' role, CC will now suggest the user to use
 			the Cloud-to-primitive distance tool instead
 
 	- Edit > Subsample:
@@ -378,12 +388,12 @@ v2.13.beta (???) - (??/??/2024)
 		- the dialog will now remember the previous settings (last method used, sampling value, etc.)
 
 	- Display options:
-		- the default thresholds to activate the LoD mechanism are now 100M. points and 5M. triangles
+		- the default threshold to activate the LoD mechanism is now 50M. points
 
 	- Entity properties:
 		- the 'Bounding Box dimensions' field will now also show the min and max coordinates
 
-- Bug fix:
+- Bug fixes:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
 		system (as if the transformation had been applied twice)
@@ -399,7 +409,7 @@ v2.13.beta (???) - (??/??/2024)
 	- The Registration tools (ICP and Point-pair based alignment) transformation filter mechanism would not let filter both translations and rotation at the same time
 	- With a lot of NaN values in a scalar field, the Edit > Scalar field > Compute Stat Params tool could show wrong abscissa values below the histogram and curve.
 		(note that the average, standard deviation, RMS and Chi2 distance values displayed either above the histogram or in the Console were correct)
-	- When loading E57s file with large coordinates, and applying a Global Shift, the associated image sensors were not translated of the same Global Shift
+	- When loading E57 files with large coordinates, and applying a Global Shift, the associated image sensors were not translated of the same Global Shift
 	- The 'cartesian bounds' of E57 files saved by CC were expressed in the global coordinate system instead of the local one
 	- When applying the viewport of a calibrated image (= image with an associated sensor), the camera f.o.v. was applied instead of a smarter value,
 		taking the 3D view dimensions into account (resulting in a bad match between the 3D scene and the overlaid image)
@@ -415,7 +425,7 @@ v2.13.beta (???) - (??/??/2024)
 	- Allow OBJ files with symlinks to properly load material files
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
-	- The command line -FEATURE now sets cloud name. So if it is saved with -SAVE_CLOUDS it will not overwrite the original cloud. 
+	- The command line -FEATURE now changes the cloud name so that if it is saved with -SAVE_CLOUDS later it will not overwrite the original cloud 
 	- The Point Pair registration ('Align') or ICP tools could generate a sub-optimal translation if the rotation was constrained
 	- The C2M distance could crash if forcing the octree level above 11 or 12 (which would likely require a grid of more than 2 billion cells)
 	- Translating or rotating the cloud while the LoD structure was built could lead to a hang or a crash of CC

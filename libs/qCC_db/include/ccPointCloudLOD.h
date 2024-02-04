@@ -58,24 +58,24 @@ public:
 	//! Default constructor
 	ccPointCloudLOD();
 	//! Destructor
-	virtual ~ccPointCloudLOD();
+	~ccPointCloudLOD();
 
 	//! Initializes the construction process (asynchronous)
 	bool init(ccPointCloud* cloud);
 
 	//! Locks the structure
-	inline void lock()
+	inline void lock() const
 	{
 		m_mutex.lock();
 	}
 	//! Unlocks the structure
-	inline void unlock()
+	inline void unlock() const
 	{
 		m_mutex.unlock();
 	}
 
 	//! Returns the current state
-	inline State getState()
+	inline State getState() const
 	{
 		lock();
 		State state = m_state;
@@ -93,19 +93,19 @@ public:
 	}
 
 	//! Returns whether the structure is null (i.e. not under construction or initialized) or not
-	inline bool isNull() { return getState() == NOT_INITIALIZED; }
+	inline bool isNull() const { return getState() == NOT_INITIALIZED; }
 
 	//! Returns whether the structure is initialized or not
-	inline bool isInitialized() { return getState() == INITIALIZED; }
+	inline bool isInitialized() const { return getState() == INITIALIZED; }
 
 	//! Returns whether the structure is initialized or not
-	inline bool isUnderConstruction() { return getState() == UNDER_CONSTRUCTION; }
+	inline bool isUnderConstruction() const { return getState() == UNDER_CONSTRUCTION; }
 
 	//! Returns whether the structure is broken or not
-	inline bool isBroken() { return getState() == BROKEN; }
+	inline bool isBroken() const { return getState() == BROKEN; }
 
 	//! Returns the maximum accessible level
-	inline unsigned char maxLevel()
+	inline unsigned char maxLevel() const
 	{
 		QMutexLocker locker(&m_mutex);
 		return (m_state == INITIALIZED ? static_cast<unsigned char>(std::max<size_t>(1, m_levels.size())) - 1 : 0);
@@ -160,12 +160,6 @@ public:
 	inline Node& root() { return node(0, 0); }
 
 	inline const Node& root() const { return node(0, 0); }
-
-	//inline float maxRadius(unsigned char level) const
-	//{
-	//	assert(level < m_levels.size());
-	//	return (level < m_levels.size() ? m_levels[level].maxRadius : 0);
-	//}
 
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
@@ -260,67 +254,8 @@ protected: //members
 	ccPointCloudLODThread* m_thread;
 
 	//! For concurrent access
-	QMutex m_mutex;
+	mutable QMutex m_mutex;
 
 	//! State
 	State m_state;
-};
-
-class PointCloudLODRenderer
-{
-public:
-	
-	typedef std::function<void(const ccPointCloudLOD::Node&)> RenderFunc;
-
-	PointCloudLODRenderer(	ccPointCloudLOD& lod,
-							RenderFunc &func,
-							const Frustum& frustum,
-							unsigned char maxLevel)
-		: m_func(func)
-		, m_frustum(frustum)
-		, m_lod(lod)
-		, m_maxLevel(maxLevel)
-	{}
-
-	void render(const ccPointCloudLOD::Node& node, bool testVisibility)
-	{
-		if (testVisibility)
-		{
-			switch (m_frustum.sphereInFrustum(node.center, node.radius))
-			{
-			case Frustum::INSIDE:
-				testVisibility = false;
-				break;
-
-			case Frustum::INTERSECT:
-				testVisibility = true;
-				break;
-
-			case Frustum::OUTSIDE:
-				return;
-			}
-		}
-
-		//go on with the display of the children first
-		if (node.childCount && node.level < m_maxLevel)
-		{
-			for (int i = 0; i < 8; ++i)
-			{
-				if (node.childIndexes[i] >= 0)
-				{
-					const ccPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
-					render(childNode, testVisibility);
-				}
-			}
-		}
-		else
-		{
-			m_func(node);
-		}
-	}
-
-	RenderFunc m_func;
-	const Frustum& m_frustum;
-	ccPointCloudLOD& m_lod;
-	unsigned char m_maxLevel;
 };

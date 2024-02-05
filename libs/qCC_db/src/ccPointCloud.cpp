@@ -1801,6 +1801,203 @@ bool ccPointCloud::colorize(float r, float g, float b, float a/*=1.0f*/)
 	return true;
 }
 
+bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
+	PointCoordinateType sigmaRGB,
+	CCCoreLib::GenericProgressCallback* progressCb
+	)
+{
+	if (!hasColors())
+		return false;
+
+	if (!this)
+		return false;
+
+	unsigned n = size();
+	if (n == 0)
+		return false;
+
+	ccOctree* theOctree = getOctree().data();
+	if (!theOctree)
+	{
+		if (!computeOctree(progressCb))
+		{
+			delete theOctree;
+			return false;
+		}
+		else
+		{
+			theOctree = getOctree().data();
+		}
+	}
+
+	//best octree level
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(3 * sigma);
+
+
+	if (progressCb)
+	{
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("Gaussian filter");
+			char infos[32];
+			snprintf(infos, 32, "Level: %i", level);
+			progressCb->setInfo(infos);
+		}
+		progressCb->update(0);
+	}
+
+	void* additionalParameters[2] = { reinterpret_cast<void*>(&sigma),
+										reinterpret_cast<void*>(&sigmaRGB)
+	};
+
+	bool success = true;
+
+	//here i have a build error
+	if (theOctree->executeFunctionForAllCellsAtLevel(level,
+		computeCellGaussianFilter,
+		additionalParameters,
+		true,
+		progressCb,
+		"Gaussian Filter computation") == 0)
+	{
+		//something went wrong
+		success = false;
+	}
+
+	return success;
+}
+
+//FONCTION "CELLULAIRE" DE CALCUL DU FILTRE GAUSSIEN (PAR PROJECTION SUR LE PLAN AUX MOINDRES CARRES)
+//DETAIL DES PARAMETRES ADDITIONNELS (2) :
+// [0] -> (PointCoordinateType*) sigma : gauss function sigma
+// [1] -> (PointCoordinateType*) sigmaSF : used when in "bilateral modality" - if -1 pure gaussian filtering is performed
+bool ccPointCloud::computeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& cell,
+	void** additionalParameters,
+	CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
+{
+	//variables additionnelles
+	PointCoordinateType sigma = *(static_cast<PointCoordinateType*>(additionalParameters[0]));
+	PointCoordinateType sigmaSF = *(static_cast<PointCoordinateType*>(additionalParameters[1]));
+
+	//we use only the squared value of sigma
+	PointCoordinateType sigma2 = 2 * sigma*sigma;
+	PointCoordinateType radius = 3 * sigma; //2.5 sigma > 99%
+
+	//we use only the squared value of sigmaSF
+	PointCoordinateType sigmaSF2 = 2 * sigmaSF*sigmaSF;
+
+	//number of points inside the current cell
+	unsigned n = cell.points->size();
+
+	//structures pour la recherche de voisinages SPECIFIQUES
+	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
+	nNSS.level = cell.level;
+	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos, cell.level, nNSS.cellCenter);
+
+	//we already know the points lying in the first cell (this is the one we are treating :)
+	try
+	{
+		nNSS.pointsInNeighbourhood.resize(n);
+	}
+	catch (.../*const std::bad_alloc&*/) //out of memory
+	{
+		return false;
+	}
+
+	CCCoreLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+	{
+		for (unsigned i = 0; i < n; ++i, ++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(i);
+			it->pointIndex = cell.points->getPointGlobalIndex(i);
+		}
+	}
+	nNSS.alreadyVisitedNeighbourhoodSize = 1;
+
+	const GenericIndexedCloudPersist* cloud = cell.points->getAssociatedCloud();
+
+	//Pure Gaussian Filtering
+	if (sigmaSF == -1)
+	{
+		for (unsigned i = 0; i < n; ++i) //for each point in cell
+		{
+			//we get the points inside a spherical neighbourhood (radius: '3*sigma')
+			cell.points->getPoint(i, nNSS.queryPoint);
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
+			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+
+			//each point adds a contribution weighted by its distance to the sphere center
+			it = nNSS.pointsInNeighbourhood.begin();
+			double meanValue = 0.0;
+			double wSum = 0.0;
+			for (unsigned j = 0; j < k; ++j, ++it)
+			{
+				double weight = exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
+				/*
+				TODO get color values for R,G,B
+
+				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
+				//scalar value must be valid
+				if (CCCoreLib::ScalarField::ValidValue(val))
+				{
+					meanValue += static_cast<double>(val) * weight;
+					wSum += weight;
+				}
+				*/
+			}
+
+			ScalarType newValue = (wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : CCCoreLib::NAN_VALUE);
+
+			cell.points->setPointScalarValue(i, newValue);
+
+			if (nProgress && !nProgress->oneStep())
+				return false;
+		}
+	}
+	//Bilateral Filtering using the second sigma parameters on values (when given)
+	else
+	{
+		for (unsigned i = 0; i < n; ++i) //for each point in cell
+		{
+			ScalarType queryValue = cell.points->getPointScalarValue(i); //scalar of the query point
+
+			//we get the points inside a spherical neighbourhood (radius: '3*sigma')
+			cell.points->getPoint(i, nNSS.queryPoint);
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
+			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+
+			//each point adds a contribution weighted by its distance to the sphere center
+			it = nNSS.pointsInNeighbourhood.begin();
+			double meanValue = 0.0;
+			double wSum = 0.0;
+			for (unsigned j = 0; j < k; ++j, ++it)
+			{
+				/*
+				TODO get color values for R,G,B
+
+				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
+				ScalarType dSF = queryValue - val;
+				double weight = exp(-(it->squareDistd) / sigma2) * exp(-(dSF*dSF) / sigmaSF2);
+				//scalar value must be valid
+				if (CCCoreLib::ScalarField::ValidValue(val))
+				{
+					meanValue += static_cast<double>(val) * weight;
+					wSum += weight;
+				}
+				*/
+			}
+
+			cell.points->setPointScalarValue(i, wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : CCCoreLib::NAN_VALUE);
+
+			if (nProgress && !nProgress->oneStep())
+				return false;
+		}
+	}
+
+	return true;
+}
+
 //Contribution from Michael J Smith
 bool ccPointCloud::setRGBColorByBanding(unsigned char dim, double freq)
 {

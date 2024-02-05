@@ -175,6 +175,7 @@ constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
 constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
 constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
+constexpr char COMMAND_FILTER[]							= "FILTER";
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -195,6 +196,10 @@ constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 constexpr char OPTION_FORCE[]							= "FORCE";
 constexpr char OPTION_USE_ACTIVE_SF[]					= "USE_ACTIVE_SF";
+constexpr char OPTION_SF[]								= "SF";
+constexpr char OPTION_RGB[]								= "RGB";
+constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
+constexpr char OPTION_BILATERAL[]						= "BILATERAL";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -6143,6 +6148,102 @@ bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
 	entities.push_back(cmd.clouds()[1].pc);
 
 	return 	ccEntityAction::interpolateColors(entities, cmd.widgetParent());
+}
+
+CommandFilter::CommandFilter()
+	: ccCommandLineInterface::Command(QObject::tr("FILTER"), COMMAND_FILTER)
+{}
+
+bool CommandFilter::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[FILTER]"));
+	bool applyToRGB = false;
+	bool applyToSF = false;
+	bool bilateral = false;
+	bool gaussian = false;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if(ccCommandLineInterface::IsCommand(argument,OPTION_SF))
+		{
+			cmd.arguments().pop_front();
+			if (!applyToRGB)
+			{
+				applyToSF = true;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_RGB))
+		{
+			cmd.arguments().pop_front();
+			if (!applyToSF)
+			{
+				applyToRGB = true;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BILATERAL))
+		{
+			cmd.arguments().pop_front();
+			if (!gaussian) {
+				bilateral = true;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_GAUSSIAN))
+		{
+			cmd.arguments().pop_front();
+			if (!bilateral) {
+				gaussian = true;
+			}
+		}
+		else
+		{
+			break;
+		}
+	}
+	if(!applyToRGB && !applyToSF)
+	{
+		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
+	}
+
+	if (!bilateral && !gaussian)
+	{
+		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
+	}
+
+	//apply operation on clouds
+	ccHObject::Container selectedEntities;
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		selectedEntities.push_back(thisCloudDesc.pc);
+	}
+
+	if (applyToSF)
+	{
+
+		if (gaussian)
+		{
+			return ccEntityAction::sfGaussianFilter(selectedEntities, cmd.widgetParent());
+		}
+		if (bilateral)
+		{
+			return ccEntityAction::sfBilateralFilter(selectedEntities, cmd.widgetParent());
+		}
+	}
+
+	if (applyToRGB)
+	{
+
+		if (gaussian)
+		{
+			return ccEntityAction::rgbGaussianFilter(selectedEntities, cmd.widgetParent());
+		}
+		if (bilateral)
+		{
+			return ccEntityAction::rgbBilateralFilter(selectedEntities, cmd.widgetParent());
+		}
+	}
+	
+	return true;
 }
 
 CommandRenameEntities::CommandRenameEntities()

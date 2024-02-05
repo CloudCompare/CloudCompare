@@ -268,6 +268,8 @@ private:
 	void doActionChangeColorLevels();
 	void doActionEnhanceRGBWithIntensities();
 	void doActionColorFromScalars();
+	void doActionRGBGaussianFilter();
+	void doActionRGBBilateralFilter();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();

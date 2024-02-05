@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SetSFsAsNormalDialog</class>
- <widget class="QDialog" name="SetSFsAsNormalDialog">
+ <class>SetSFsAsVec3Dialog</class>
+ <widget class="QDialog" name="SetSFsAsVec3Dialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,13 +11,13 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Set SFs as Normal</string>
+   <string>Set SFs as Vec3D</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="xLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -25,15 +25,15 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Nx</string>
+        <string>X</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxNx"/>
+      <widget class="QComboBox" name="xComboBox"/>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="yLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -41,15 +41,15 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Ny</string>
+        <string>Y</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxNy"/>
+      <widget class="QComboBox" name="yComboBox"/>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="zLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -57,12 +57,12 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Nz</string>
+        <string>Z</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBoxNz"/>
+      <widget class="QComboBox" name="zComboBox"/>
      </item>
     </layout>
    </item>
@@ -96,7 +96,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SetSFsAsNormalDialog</receiver>
+   <receiver>SetSFsAsVec3Dialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -112,7 +112,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SetSFsAsNormalDialog</receiver>
+   <receiver>SetSFsAsVec3Dialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

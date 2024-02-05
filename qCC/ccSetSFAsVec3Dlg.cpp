@@ -15,14 +15,18 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccSetSFsAsNormalDlg.h"
+#include "ccSetSFAsVec3Dlg.h"
 
 // qCC_db
 #include <ccPointCloud.h>
 
-ccSetSFsAsNormalDialog::ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidget* parent/*=nullptr*/)
+ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
+											const QString& xLabel,
+											const QString& yLabel,
+											const QString& zLabel,
+											QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
-	, Ui::SetSFsAsNormalDialog()
+	, Ui::SetSFsAsVec3Dialog()
 	, m_constFields(0)
 {
 	setupUi(this);
@@ -30,23 +34,27 @@ ccSetSFsAsNormalDialog::ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidge
 	QStringList fields{ "0", "1" };
 
 	// default fields ('0 0 1' by default)
-	int nxIndex = SF_INDEX_ZERO;
-	int nyIndex = SF_INDEX_ZERO;
-	int nzIndex = SF_INDEX_ONE;
+	int xIndex = SF_INDEX_ZERO;
+	int yIndex = SF_INDEX_ZERO;
+	int zIndex = SF_INDEX_ONE;
 
 	if (cloud->hasNormals())
 	{
 		fields << tr("Unchanged");
 
-		nxIndex = SF_INDEX_UNCHANGED;
-		nyIndex = SF_INDEX_UNCHANGED;
-		nzIndex = SF_INDEX_UNCHANGED;
+		xIndex = SF_INDEX_UNCHANGED;
+		yIndex = SF_INDEX_UNCHANGED;
+		zIndex = SF_INDEX_UNCHANGED;
 	}
 
 	m_constFields = fields.size();
 
 	if (cloud && cloud->hasScalarFields())
 	{
+		QString upperXLabel = xLabel.toUpper();
+		QString upperYLabel = yLabel.toUpper();
+		QString upperZLabel = zLabel.toUpper();
+
 		for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 		{
 			CCCoreLib::ScalarField* sf = cloud->getScalarField(i);
@@ -56,17 +64,17 @@ ccSetSFsAsNormalDialog::ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidge
 				fields << sfName;
 
 				sfName = sfName.toUpper();
-				if (nxIndex < m_constFields && sfName.contains("NX"))
+				if (xIndex < m_constFields && sfName.contains(upperXLabel))
 				{
-					nxIndex = static_cast<int>(i);
+					xIndex = static_cast<int>(i);
 				}
-				if (nyIndex < m_constFields && sfName.contains("NY"))
+				if (yIndex < m_constFields && sfName.contains(upperYLabel))
 				{
-					nyIndex = static_cast<int>(i);
+					yIndex = static_cast<int>(i);
 				}
-				if (nzIndex < m_constFields && sfName.contains("NZ"))
+				if (zIndex < m_constFields && sfName.contains(upperZLabel))
 				{
-					nzIndex = static_cast<int>(i);
+					zIndex = static_cast<int>(i);
 				}
 			}
 		}
@@ -76,20 +84,20 @@ ccSetSFsAsNormalDialog::ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidge
 		ccLog::Warning("Cloud has no scalar field");
 	}
 
-	comboBoxNx->addItems(fields);
-	comboBoxNy->addItems(fields);
-	comboBoxNz->addItems(fields);
+	xComboBox->addItems(fields);
+	yComboBox->addItems(fields);
+	zComboBox->addItems(fields);
 
-	setSFIndexes(nxIndex, nyIndex, nzIndex);
+	setSFIndexes(xIndex, yIndex, zIndex);
 }
 
-int ccSetSFsAsNormalDialog::toComboBoxIndex(int index) const
+int ccSetSFsAsVec3Dialog::toComboBoxIndex(int index) const
 {
 	if (index >= 0)
 	{
 		// valid SF index
 		index += m_constFields;
-		if (index >= comboBoxNx->count())
+		if (index >= xComboBox->count())
 		{
 			// we probably have less SFs as before
 			return 0;
@@ -99,19 +107,19 @@ int ccSetSFsAsNormalDialog::toComboBoxIndex(int index) const
 			return index;
 		}
 	}
-	else if (index == ccSetSFsAsNormalDialog::SF_INDEX_NO)
+	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_NO)
 	{
 		return -1;
 	}
-	else if (index == ccSetSFsAsNormalDialog::SF_INDEX_ZERO)
+	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ZERO)
 	{
 		return 0;
 	}
-	else if (index == ccSetSFsAsNormalDialog::SF_INDEX_ONE)
+	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ONE)
 	{
 		return 1;
 	}
-	else if (index == ccSetSFsAsNormalDialog::SF_INDEX_UNCHANGED)
+	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED)
 	{
 		if (m_constFields == 3)
 		{
@@ -125,24 +133,24 @@ int ccSetSFsAsNormalDialog::toComboBoxIndex(int index) const
 	}
 	else
 	{
-		ccLog::Warning("[ccSetSFsAsNormalDialog] Invalid SF index " + QString::number(index));
+		ccLog::Warning("[ccSetSFsAsVec3Dialog] Invalid SF index " + QString::number(index));
 		return -1;
 	}
 }
 
-int ccSetSFsAsNormalDialog::fromComboBoxIndex(int index) const
+int ccSetSFsAsVec3Dialog::fromComboBoxIndex(int index) const
 {
 	if (index == 0)
 	{
-		return ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
+		return ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
 	}
 	else if (index == 1)
 	{
-		return ccSetSFsAsNormalDialog::SF_INDEX_ONE;
+		return ccSetSFsAsVec3Dialog::SF_INDEX_ONE;
 	}
 	else if (index == 2 && m_constFields == 3)
 	{
-		return ccSetSFsAsNormalDialog::SF_INDEX_UNCHANGED;
+		return ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED;
 	}
 	else if (index >= m_constFields)
 	{
@@ -155,17 +163,17 @@ int ccSetSFsAsNormalDialog::fromComboBoxIndex(int index) const
 	}
 }
 
-void ccSetSFsAsNormalDialog::setSFIndexes(int sf1Index, int sf2Index, int sf3Index)
+void ccSetSFsAsVec3Dialog::setSFIndexes(int sf1Index, int sf2Index, int sf3Index)
 {
-	comboBoxNx->setCurrentIndex(toComboBoxIndex(sf1Index));
-	comboBoxNy->setCurrentIndex(toComboBoxIndex(sf2Index));
-	comboBoxNz->setCurrentIndex(toComboBoxIndex(sf3Index));
+	xComboBox->setCurrentIndex(toComboBoxIndex(sf1Index));
+	yComboBox->setCurrentIndex(toComboBoxIndex(sf2Index));
+	zComboBox->setCurrentIndex(toComboBoxIndex(sf3Index));
 }
 
 
-void ccSetSFsAsNormalDialog::getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const
+void ccSetSFsAsVec3Dialog::getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const
 {
-	sf1Index = fromComboBoxIndex(comboBoxNx->currentIndex());
-	sf2Index = fromComboBoxIndex(comboBoxNy->currentIndex());
-	sf3Index = fromComboBoxIndex(comboBoxNz->currentIndex());
+	sf1Index = fromComboBoxIndex(xComboBox->currentIndex());
+	sf2Index = fromComboBoxIndex(yComboBox->currentIndex());
+	sf3Index = fromComboBoxIndex(zComboBox->currentIndex());
 }

@@ -17,7 +17,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include <ui_setSFAsNormalsDlg.h>
+#include <ui_setSFAsVec3Dlg.h>
 
 //Qt
 #include <QDialog>
@@ -25,14 +25,18 @@
 class ccPointCloud;
 
 //! Let the user choose up to 3 scalar fields (to be used as Normal components)
-class ccSetSFsAsNormalDialog : public QDialog, public Ui::SetSFsAsNormalDialog
+class ccSetSFsAsVec3Dialog : public QDialog, public Ui::SetSFsAsVec3Dialog
 {
 	Q_OBJECT
 
 public:
 	
 	//! Default constructor
-	ccSetSFsAsNormalDialog(const ccPointCloud* cloud, QWidget* parent = nullptr);
+	ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
+							const QString& xLabel,
+							const QString& yLabel,
+							const QString& zLabel,
+							QWidget* parent = nullptr);
 
 	//! No SF index
 	static const int SF_INDEX_NO   = -1;
@@ -59,5 +63,4 @@ protected:
 
 	//! Number of constant fields at the beginning of each combo-box
 	int m_constFields;
-
 };

@@ -58,7 +58,7 @@
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
-#include "ccSetSFsAsNormalDlg.h"
+#include "ccSetSFAsVec3Dlg.h"
 #include "ccStatisticalTestDlg.h"
 
 #include "ccCommon.h"
@@ -1346,7 +1346,7 @@ namespace ccEntityAction
         return true;
     }
 
-	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
+	bool	sfSetAsCoord(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 		ectsDlg.warningLabel->setVisible(false);
@@ -1426,9 +1426,9 @@ namespace ccEntityAction
 			return false;
 		}
 
-		bool exportDims[3] = {	ectsDlg.exportX(),
-								ectsDlg.exportY(),
-								ectsDlg.exportZ() };
+		bool exportDims[3] { ectsDlg.exportX(),
+							 ectsDlg.exportY(),
+							 ectsDlg.exportZ() };
 
 		if (!exportDims[0] && !exportDims[1] && !exportDims[2]) //nothing to do?!
 		{
@@ -1471,16 +1471,16 @@ namespace ccEntityAction
 		{
 			switch (fieldIndex)
 			{
-			case ccSetSFsAsNormalDialog::SF_INDEX_ZERO:
+			case ccSetSFsAsVec3Dialog::SF_INDEX_ZERO:
 				Nd = 0;
 				break;
-			case ccSetSFsAsNormalDialog::SF_INDEX_ONE:
+			case ccSetSFsAsVec3Dialog::SF_INDEX_ONE:
 				Nd = static_cast<ScalarType>(1);
 				break;
-			case ccSetSFsAsNormalDialog::SF_INDEX_UNCHANGED:
+			case ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED:
 				// nothing to do
 				break;
-			case ccSetSFsAsNormalDialog::SF_INDEX_NO:
+			case ccSetSFsAsVec3Dialog::SF_INDEX_NO:
 			default:
 				assert(false);
 				Nd = 0;
@@ -1500,12 +1500,13 @@ namespace ccEntityAction
 
 		const bool cloudHadNormals = cloud->hasNormals();
 
-		ccSetSFsAsNormalDialog dlg(cloud, parent);
+		ccSetSFsAsVec3Dialog dlg(cloud, "Nx", "Ny", "Nz", parent);
+		dlg.setWindowTitle(QObject::tr("Set SFs as normals"));
 
 		static bool s_firstTime = true;
-		static int nxIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
-		static int nyIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
-		static int nzIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
+		static int nxIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
+		static int nyIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
+		static int nzIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
 
 		if (s_firstTime)
 		{
@@ -1532,18 +1533,6 @@ namespace ccEntityAction
 		CCCoreLib::ScalarField* sfX = (nxIndex >= 0 ? cloud->getScalarField(nxIndex) : nullptr);
 		CCCoreLib::ScalarField* sfY = (nyIndex >= 0 ? cloud->getScalarField(nyIndex) : nullptr);
 		CCCoreLib::ScalarField* sfZ = (nzIndex >= 0 ? cloud->getScalarField(nzIndex) : nullptr);
-
-		auto toValidCoord = [](ScalarType val)
-		{
-			if (CCCoreLib::ScalarField::ValidValue(val))
-			{
-				return static_cast<PointCoordinateType>(val);
-			}
-			else
-			{
-				return static_cast<PointCoordinateType>(0);
-			}
-		};
 
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{

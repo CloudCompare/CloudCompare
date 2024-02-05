@@ -1461,6 +1461,34 @@ namespace ccEntityAction
 		return true;
 	}
 
+	static void SetNormalCoordFromSF(PointCoordinateType& Nd, int fieldIndex, CCCoreLib::ScalarField* sf, unsigned pointIndex)
+	{
+		if (sf)
+		{
+			Nd = sf->getValue(pointIndex);
+		}
+		else
+		{
+			switch (fieldIndex)
+			{
+			case ccSetSFsAsNormalDialog::SF_INDEX_ZERO:
+				Nd = 0;
+				break;
+			case ccSetSFsAsNormalDialog::SF_INDEX_ONE:
+				Nd = static_cast<ScalarType>(1);
+				break;
+			case ccSetSFsAsNormalDialog::SF_INDEX_UNCHANGED:
+				// nothing to do
+				break;
+			case ccSetSFsAsNormalDialog::SF_INDEX_NO:
+			default:
+				assert(false);
+				Nd = 0;
+				break;
+			}
+		}
+	}
+
 	bool	setSFsAsNormal(ccHObject* entity, QWidget* parent/*=nullptr*/)
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
@@ -1470,13 +1498,24 @@ namespace ccEntityAction
 			return false;
 		}
 
+		const bool cloudHadNormals = cloud->hasNormals();
+
 		ccSetSFsAsNormalDialog dlg(cloud, parent);
 
+		static bool s_firstTime = true;
 		static int nxIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
 		static int nyIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
-		static int nzIndex = ccSetSFsAsNormalDialog::SF_INDEX_ONE;
+		static int nzIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
 
-		dlg.setSFIndexes(nxIndex, nyIndex, nzIndex);
+		if (s_firstTime)
+		{
+			s_firstTime = false;
+		}
+		else
+		{
+			// restore the previous parameters
+			dlg.setSFIndexes(nxIndex, nyIndex, nzIndex);
+		}
 
 		if (!dlg.exec())
 		{
@@ -1506,43 +1545,21 @@ namespace ccEntityAction
 			}
 		};
 
-		CCVector3f N(	nxIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
-						nyIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
-						nzIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0 );
-
-		if (sfX || sfY || sfZ)
+		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
-			// normals based on at least one SF
-			for (unsigned i = 0; i < cloud->size(); ++i)
+			CCVector3f N(0, 0, 0);
+
+			if (cloudHadNormals)
 			{
-				if (sfX)
-				{
-					N.x = toValidCoord(sfX->getValue(i));
-				}
-				if (sfY)
-				{
-					N.y = toValidCoord(sfY->getValue(i));
-				}
-				if (sfZ)
-				{
-					N.z = toValidCoord(sfZ->getValue(i));
-				}
-
-				N.normalize();
-				cloud->setPointNormal(i, N);
+				N = cloud->getPointNormal(i);
 			}
-		}
-		else
-		{
-			// Constant normal
+
+			SetNormalCoordFromSF(N.x, nxIndex, sfX, i);
+			SetNormalCoordFromSF(N.y, nyIndex, sfY, i);
+			SetNormalCoordFromSF(N.z, nzIndex, sfZ, i);
+
 			N.normalize();
-
-			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N);
-
-			for (unsigned i = 0; i < cloud->size(); ++i)
-			{
-				cloud->setPointNormalIndex(i, nIndex);
-			}
+			cloud->setPointNormal(i, N);
 		}
 
 		cloud->showNormals(true);

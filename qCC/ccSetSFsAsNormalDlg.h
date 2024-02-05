@@ -39,11 +39,25 @@ public:
 	//! 'Zero' SF index
 	static const int SF_INDEX_ZERO = -2;
 	//! 'One' SF index
-	static const int SF_INDEX_ONE  = -3;
+	static const int SF_INDEX_ONE = -3;
+	//! 'Unchanged' index
+	static const int SF_INDEX_UNCHANGED = -4;
 
 	//! Sets the 3 SF indexes
 	void setSFIndexes(int sf1Index, int sf2Index, int sf3Index);
 
 	//! Returns the 3 SF indexes
 	void getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const;
+
+protected:
+
+	//! Converts an input 'SF' index to a combo-box index
+	int toComboBoxIndex(int index) const;
+
+	//! Converts a combo-box index to a 'SF' index
+	int fromComboBoxIndex(int index) const;
+
+	//! Number of constant fields at the beginning of each combo-box
+	int m_constFields;
+
 };

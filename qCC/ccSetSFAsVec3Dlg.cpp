@@ -24,6 +24,7 @@ ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
 											const QString& xLabel,
 											const QString& yLabel,
 											const QString& zLabel,
+											bool allowUnchanged,
 											QWidget* parent/*=nullptr*/)
 	: QDialog(parent, Qt::Tool)
 	, Ui::SetSFsAsVec3Dialog()
@@ -38,7 +39,7 @@ ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
 	int yIndex = SF_INDEX_ZERO;
 	int zIndex = SF_INDEX_ONE;
 
-	if (cloud->hasNormals())
+	if (allowUnchanged)
 	{
 		fields << tr("Unchanged");
 

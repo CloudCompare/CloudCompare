@@ -14,7 +14,8 @@ v2.13.beta (???) - (??/??/2024)
 		- works also on cylinders
 
 	- Edit > Normals > Set SF(s) as normal (or Edit > Scalar fields > Set SF(s) as normal)
-		- allows to set normals from scalar fields (or 0 or 1)
+		- allows to set normals from one or several scalar fields (or 0 or 1,
+			or a pass-through option if the cloud already had normals)
 
 	- New section in the Properties when a cloud is selected: "Draw normals as lines"
 		- one check box to toggle the display
@@ -392,6 +393,11 @@ v2.13.beta (???) - (??/??/2024)
 
 	- Entity properties:
 		- the 'Bounding Box dimensions' field will now also show the min and max coordinates
+
+	- Edit > Scalar fields > Set SF as coordinate(s)
+		- if a single entity is selected (cloud or mesh), a new dialog will appear, that lets the user choose a (potentially) different
+			scalar field for each dimension, or a constant value (0 or 1) or a pass-through option.
+		- the dialog is similar to the 'Set SF(s) as normal' tool
 
 - Bug fixes:
 	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting

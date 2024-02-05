@@ -36,6 +36,7 @@ public:
 							const QString& xLabel,
 							const QString& yLabel,
 							const QString& zLabel,
+							bool allowUnchanged,
 							QWidget* parent = nullptr);
 
 	//! No SF index

@@ -4386,10 +4386,13 @@ void MainWindow::doActionLabelConnectedComponents()
 
 void MainWindow::doActionSetSFAsCoord()
 {
-	if ( !ccEntityAction::sfSetAsCoord(m_selectedEntities, this) )
+	if (!ccEntityAction::sfSetAsCoord(m_selectedEntities, this))
+	{
 		return;
+	}
 
-	refreshAll();
+	zoomOnSelectedEntities();
+
 	updateUI();
 }
 

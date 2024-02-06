@@ -58,7 +58,7 @@
 #include "ccProgressDialog.h"
 #include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
-#include "ccSetSFsAsNormalDlg.h"
+#include "ccSetSFAsVec3Dlg.h"
 #include "ccStatisticalTestDlg.h"
 
 #include "ccCommon.h"
@@ -71,8 +71,9 @@
 // This is included only for temporarily removing an object from the tree.
 #include "ccMainAppInterface.h"
 
+// System
 #include <unordered_set>
-
+#include <array>
 
 namespace ccEntityAction
 {
@@ -1346,8 +1347,154 @@ namespace ccEntityAction
         return true;
     }
 
-	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
+	static void SetValueFromSF(PointCoordinateType& value, int fieldIndex, CCCoreLib::ScalarField* sf, unsigned pointIndex, PointCoordinateType defaultValueForNaN)
 	{
+		if (sf)
+		{
+			ScalarType s = sf->getValue(pointIndex);
+			if (CCCoreLib::ScalarField::ValidValue(s))
+			{
+				value = s;
+			}
+			else
+			{
+				value = defaultValueForNaN;
+			}
+		}
+		else
+		{
+			switch (fieldIndex)
+			{
+			case ccSetSFsAsVec3Dialog::SF_INDEX_ZERO:
+				value = 0;
+				break;
+			case ccSetSFsAsVec3Dialog::SF_INDEX_ONE:
+				value = static_cast<ScalarType>(1);
+				break;
+			case ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED:
+				// nothing to do
+				break;
+			case ccSetSFsAsVec3Dialog::SF_INDEX_NO:
+			default:
+				assert(false);
+				value = defaultValueForNaN;
+				break;
+			}
+		}
+	}
+
+	static PointCoordinateType GetDefaultValueForNaN(PointCoordinateType minSFValue, QWidget* parent)
+	{
+		bool ok = false;
+		double out = QInputDialog::getDouble(	parent,
+												QObject::tr("SF --> coordinate"),
+												QObject::tr("Enter the coordinate equivalent to NaN values:"),
+												minSFValue,
+												-1.0e9,
+												1.0e9,
+												6,
+												&ok);
+
+		if (ok)
+		{
+			return static_cast<PointCoordinateType>(out);
+		}
+		else
+		{
+			ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
+			return minSFValue;
+		}
+	}
+
+	bool	sfSetAsCoord(ccHObject* entity, QWidget* parent/*=nullptr*/)
+	{
+		if (!entity)
+		{
+			assert(false);
+			return false;
+		}
+
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		if (!cloud || !cloud->isA(CC_TYPES::POINT_CLOUD))
+		{
+			assert(false);
+			ccLog::Warning("[sfSetAsCoord] Expecting a cloud or a mesh");
+			return false;
+		}
+
+		ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+
+		ccSetSFsAsVec3Dialog dlg(pc, "X", "Y", "Z", true, parent);
+		dlg.setWindowTitle(QObject::tr("Set SFs as coords"));
+
+		static bool s_firstTime = true;
+		static int xIndex = ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED;
+		static int yIndex = ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED;
+		static int zIndex = ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED;
+
+		// restore the previous parameters
+		dlg.setSFIndexes(xIndex, yIndex, zIndex);
+
+		if (!dlg.exec())
+		{
+			return false;
+		}
+
+		dlg.getSFIndexes(xIndex, yIndex, zIndex);
+
+		CCCoreLib::ScalarField* sfX = (xIndex >= 0 ? pc->getScalarField(xIndex) : nullptr);
+		CCCoreLib::ScalarField* sfY = (yIndex >= 0 ? pc->getScalarField(yIndex) : nullptr);
+		CCCoreLib::ScalarField* sfZ = (zIndex >= 0 ? pc->getScalarField(zIndex) : nullptr);
+
+		std::array<CCCoreLib::ScalarField*, 3> scalarFields{ sfX, sfY, sfZ };
+
+		PointCoordinateType defaultCoordForNaN = std::numeric_limits<PointCoordinateType>::quiet_NaN();
+		for (CCCoreLib::ScalarField* sf : scalarFields)
+		{
+			if (sf)
+			{
+				if (sf->countValidValues() < sf->size())
+				{
+					//we have some invalid values, let's ask the user what they should be replaced with
+					defaultCoordForNaN = GetDefaultValueForNaN(sf->getMin(), parent);
+					break;
+				}
+			}
+		}
+
+		unsigned ptsCount = pc->size();
+		for (unsigned i = 0; i < ptsCount; ++i)
+		{
+			const CCVector3* P = pc->getPoint(i);
+
+			CCVector3 newP = *P;
+			SetValueFromSF(newP.x, xIndex, sfX, i, defaultCoordForNaN);
+			SetValueFromSF(newP.y, yIndex, sfY, i, defaultCoordForNaN);
+			SetValueFromSF(newP.z, zIndex, sfZ, i, defaultCoordForNaN);
+
+			*const_cast<CCVector3*>(P) = newP;
+		}
+
+		pc->invalidateBoundingBox();
+
+		if (entity->isKindOf(CC_TYPES::MESH))
+		{
+			static_cast<ccGenericMesh*>(entity)->refreshBB();
+		}
+
+		entity->prepareDisplayForRefresh();
+
+		return true;
+	}
+
+	bool	sfSetAsCoord(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
+	{
+		if (selectedEntities.size() == 1)
+		{
+			// shortcut for single entities, with a smarter dialog
+			return sfSetAsCoord(selectedEntities.front(), parent);
+		}
+
 		ccExportCoordToSFDlg ectsDlg(parent);
 		ectsDlg.warningLabel->setVisible(false);
 		ectsDlg.setWindowTitle(QObject::tr("Export SF to coordinate(s)"));
@@ -1363,6 +1510,8 @@ namespace ccEntityAction
 			return false;
 		}
 		
+		ScalarType defaultValueForNaN = CCCoreLib::NAN_VALUE;
+
 		//for each selected cloud (or vertices set)
 		for (ccHObject* ent : selectedEntities)
 		{
@@ -1374,50 +1523,28 @@ namespace ccEntityAction
 				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 				if (sf != nullptr)
 				{
-					unsigned ptsCount = pc->size();
-					assert(sf->size() == pc->size());
-
-					ScalarType defaultValueForNaN = sf->getMin();
-
-					// look for NaN values first
-					for (unsigned i = 0; i < ptsCount; ++i)
+					if (std::isnan(defaultValueForNaN) && (sf->countValidValues() < sf->size()))
 					{
-						ScalarType s = sf->getValue(i);
-						
-						//handle NaN values
-						if (!CCCoreLib::ScalarField::ValidValue(s))
-						{
-							bool ok = false;
-							double out = QInputDialog::getDouble(	parent,
-																	QObject::tr("SF --> coordinate"),
-																	QObject::tr("Enter the coordinate equivalent to NaN values:"),
-																	defaultValueForNaN,
-																	-1.0e9,
-																	1.0e9,
-																	6,
-																	&ok);
-							if (ok)
-							{
-								defaultValueForNaN = static_cast<ScalarType>(out);
-							}
-							else
-							{
-								ccLog::Warning(QObject::tr("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
-							}
-
-							break;
-						}
+						//we have some invalid values, let's ask the user what they should be replaced with
+						defaultValueForNaN = GetDefaultValueForNaN(sf->getMin(), parent);
+						break;
 					}
-					
+
 					pc->setCoordFromSF(importDim, sf, defaultValueForNaN);
 				}
 			}
+
+			if (ent->isKindOf(CC_TYPES::MESH))
+			{
+				static_cast<ccGenericMesh*>(ent)->refreshBB();
+			}
+
 		}
 		
 		return true;
 	}
-	
-	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent/*=nullptr*/)
+
+	bool	exportCoordToSF(const ccHObject::Container& selectedEntities, QWidget* parent/*=nullptr*/)
 	{
 		ccExportCoordToSFDlg ectsDlg(parent);
 
@@ -1426,9 +1553,9 @@ namespace ccEntityAction
 			return false;
 		}
 
-		bool exportDims[3] = {	ectsDlg.exportX(),
-								ectsDlg.exportY(),
-								ectsDlg.exportZ() };
+		bool exportDims[3] { ectsDlg.exportX(),
+							 ectsDlg.exportY(),
+							 ectsDlg.exportZ() };
 
 		if (!exportDims[0] && !exportDims[1] && !exportDims[2]) //nothing to do?!
 		{
@@ -1470,13 +1597,25 @@ namespace ccEntityAction
 			return false;
 		}
 
-		ccSetSFsAsNormalDialog dlg(cloud, parent);
+		const bool cloudHadNormals = cloud->hasNormals();
 
-		static int nxIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
-		static int nyIndex = ccSetSFsAsNormalDialog::SF_INDEX_ZERO;
-		static int nzIndex = ccSetSFsAsNormalDialog::SF_INDEX_ONE;
+		ccSetSFsAsVec3Dialog dlg(cloud, "Nx", "Ny", "Nz", cloudHadNormals, parent);
+		dlg.setWindowTitle(QObject::tr("Set SFs as normals"));
 
-		dlg.setSFIndexes(nxIndex, nyIndex, nzIndex);
+		static bool s_firstTime = true;
+		static int nxIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
+		static int nyIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
+		static int nzIndex = ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
+
+		if (s_firstTime)
+		{
+			s_firstTime = false;
+		}
+		else
+		{
+			// restore the previous parameters
+			dlg.setSFIndexes(nxIndex, nyIndex, nzIndex);
+		}
 
 		if (!dlg.exec())
 		{
@@ -1494,55 +1633,21 @@ namespace ccEntityAction
 		CCCoreLib::ScalarField* sfY = (nyIndex >= 0 ? cloud->getScalarField(nyIndex) : nullptr);
 		CCCoreLib::ScalarField* sfZ = (nzIndex >= 0 ? cloud->getScalarField(nzIndex) : nullptr);
 
-		auto toValidCoord = [](ScalarType val)
+		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
-			if (CCCoreLib::ScalarField::ValidValue(val))
-			{
-				return static_cast<PointCoordinateType>(val);
-			}
-			else
-			{
-				return static_cast<PointCoordinateType>(0);
-			}
-		};
+			CCVector3f N(0, 0, 0);
 
-		CCVector3f N(	nxIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
-						nyIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0,
-						nzIndex == ccSetSFsAsNormalDialog::SF_INDEX_ONE ? 1 : 0 );
-
-		if (sfX || sfY || sfZ)
-		{
-			// normals based on at least one SF
-			for (unsigned i = 0; i < cloud->size(); ++i)
+			if (cloudHadNormals)
 			{
-				if (sfX)
-				{
-					N.x = toValidCoord(sfX->getValue(i));
-				}
-				if (sfY)
-				{
-					N.y = toValidCoord(sfY->getValue(i));
-				}
-				if (sfZ)
-				{
-					N.z = toValidCoord(sfZ->getValue(i));
-				}
-
-				N.normalize();
-				cloud->setPointNormal(i, N);
+				N = cloud->getPointNormal(i);
 			}
-		}
-		else
-		{
-			// Constant normal
+
+			SetValueFromSF(N.x, nxIndex, sfX, i, 0);
+			SetValueFromSF(N.y, nyIndex, sfY, i, 0);
+			SetValueFromSF(N.z, nzIndex, sfZ, i, 0);
+
 			N.normalize();
-
-			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N);
-
-			for (unsigned i = 0; i < cloud->size(); ++i)
-			{
-				cloud->setPointNormalIndex(i, nIndex);
-			}
+			cloud->setPointNormal(i, N);
 		}
 
 		cloud->showNormals(true);

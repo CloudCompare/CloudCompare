@@ -44,6 +44,7 @@ namespace ccEntityAction
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt = false);
     bool	sfSplitCloud(const ccHObject::Container &selectedEntities, ccMainAppInterface *app);
+	bool	sfSetAsCoord(ccHObject* entity, QWidget* parent = nullptr);
 	bool	sfSetAsCoord(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	exportCoordToSF(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	setSFsAsNormal(ccHObject* entity, QWidget* parent = nullptr);

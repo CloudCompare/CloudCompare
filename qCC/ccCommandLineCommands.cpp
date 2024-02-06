@@ -1591,11 +1591,11 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			//calculate octree before subsampling, it is passed to subsampling, so it won't be recalculated there.
-			CCCoreLib::DgmOctree* octree = desc.pc->computeOctree(nullptr, false).data();
+			CCCoreLib::DgmOctree* octree = desc.pc->getOctree().data();
 			if (!octree)
-			{
+				octree = desc.pc->computeOctree(nullptr, false).data();
+			if (!octree)
 				return cmd.error("Octree calculation failed, not enough memory?");
-			}
 			CCCoreLib::ReferenceCloud* refCloud = nullptr;
 			ccPointCloud* result = nullptr;
 			unsigned sizeOfInputCloud = desc.pc->size();

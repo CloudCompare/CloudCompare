@@ -4427,7 +4427,7 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 }
 
 CommandCompressFWF::CommandCompressFWF()
-	: ccCommandLineInterface::Command(QObject::tr("Sample mesh"), COMMAND_COMPRESS_FWF)
+	: ccCommandLineInterface::Command(QObject::tr("Compress FWF"), COMMAND_COMPRESS_FWF)
 {}
 
 bool CommandCompressFWF::process(ccCommandLineInterface& cmd)
@@ -6262,7 +6262,7 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 			{
 				currentMeshName += "-" + QString::number(index).rightJustified(3, '0');
 			}
-			cmd.error("Mesh '" + desc.mesh->getName() + "' renamed to '" + currentMeshName + "'");
+			cmd.print("Mesh '" + desc.mesh->getName() + "' renamed to '" + currentMeshName + "'");
 			//rename the Mesh entity
 			desc.mesh->setName(currentMeshName);
 			//rename the Root entity
@@ -7362,7 +7362,7 @@ bool CommandClearClouds::process(ccCommandLineInterface& cmd)
 }
 
 CommandPopClouds::CommandPopClouds()
-	: ccCommandLineInterface::Command(QObject::tr("Pop clouds"), COMMAND_POP_CLOUDS)
+	: ccCommandLineInterface::Command(QObject::tr("Pop cloud"), COMMAND_POP_CLOUDS)
 {}
 
 bool CommandPopClouds::process(ccCommandLineInterface& cmd)
@@ -7384,7 +7384,7 @@ bool CommandClearMeshes::process(ccCommandLineInterface& cmd)
 }
 
 CommandPopMeshes::CommandPopMeshes()
-	: ccCommandLineInterface::Command(QObject::tr("Pop meshes"), COMMAND_POP_MESHES)
+	: ccCommandLineInterface::Command(QObject::tr("Pop mesh"), COMMAND_POP_MESHES)
 {}
 
 bool CommandPopMeshes::process(ccCommandLineInterface& cmd)
@@ -7590,8 +7590,8 @@ bool CommandDebugCmdLine::process(ccCommandLineInterface& cmd)
 	cmd.print("[DEBUG]");
 
 	cmd.print("******************************************");
-	cmd.print("Number of clouds: " + QString::number(cmd.clouds().size()));
-	cmd.print("Number of meshes: " + QString::number(cmd.meshes().size()));
+	cmd.print("Number of selected clouds: " + QString::number(cmd.clouds().size()));
+	cmd.print("Number of selected meshes: " + QString::number(cmd.meshes().size()));
 
 	cmd.print("******************************************");
 	const QStringList& arguments = cmd.arguments();

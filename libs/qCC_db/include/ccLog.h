@@ -49,7 +49,6 @@ public:
 	**/
 	static void EnableMessageBackup(bool state);
 
-
 	//! Message level
 	enum MessageLevelFlags
 	{
@@ -59,7 +58,7 @@ public:
 		LOG_ERROR			= 4, /**< Error message (Error) **/
 	};
 
-
+	//! Sets the verbosity level
 	static void SetVerbosity(int level);
 
 	//! Static shortcut to ccLog::logMessage

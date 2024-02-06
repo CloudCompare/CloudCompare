@@ -118,16 +118,17 @@ int main(int argc, char **argv)
         }
 		if (argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-VERBOSITY")
 		{
+			//remove verified local option
+			argumentsLocal8Bit.removeAt(lastArgumentIndex);
 			bool ok = false;
 			int verbosityLevel = argumentsLocal8Bit[lastArgumentIndex + 1].toInt(&ok);
-			if (!ok) {
+			if (!ok)
+			{
 				ccLog::Error(QObject::tr("Invalid verbosity level %s").arg(verbosityLevel));
-				//return false;
 			}
 			else
 			{
-				//remove and set verbosity Level so SILENT could be the first...
-				argumentsLocal8Bit.removeAt(lastArgumentIndex);
+				//remove verified argument and set verbosity Level, so SILENT could be the first...
 				argumentsLocal8Bit.removeAt(lastArgumentIndex);
 				ccLog::SetVerbosity(verbosityLevel);
 			}

@@ -51,7 +51,7 @@ struct Message
 //message backup system
 static bool s_backupEnabled;
 
-//message verbosity system
+//message verbosity level
 static int s_verbosityLevel = 0;
 
 //backed up messages

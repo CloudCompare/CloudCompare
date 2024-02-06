@@ -49,6 +49,7 @@ public:
 	**/
 	static void EnableMessageBackup(bool state);
 
+
 	//! Message level
 	enum MessageLevelFlags
 	{
@@ -57,6 +58,9 @@ public:
 		LOG_WARNING			= 2, /**< Warning message (Warning) **/
 		LOG_ERROR			= 4, /**< Error message (Error) **/
 	};
+
+
+	static void SetVerbosity(int level);
 
 	//! Static shortcut to ccLog::logMessage
 	static void LogMessage(const QString& message, int level);

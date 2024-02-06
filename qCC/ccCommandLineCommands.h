@@ -603,4 +603,11 @@ struct CommandDebugCmdLine : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandSetVerbosity : public ccCommandLineInterface::Command
+{
+	CommandSetVerbosity();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 #endif //COMMAND_LINE_COMMANDS_HEADER

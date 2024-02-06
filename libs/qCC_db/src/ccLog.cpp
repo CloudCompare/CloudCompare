@@ -50,6 +50,10 @@ struct Message
 
 //message backup system
 static bool s_backupEnabled;
+
+//message verbosity system
+static int s_verbosityLevel = 0;
+
 //backed up messages
 static std::vector<Message> s_backupMessages;
 
@@ -66,8 +70,19 @@ void ccLog::EnableMessageBackup(bool state)
 	s_backupEnabled = state;
 }
 
+void ccLog::SetVerbosity(int level)
+{
+	s_verbosityLevel = level;
+}
+
+
 void ccLog::LogMessage(const QString& message, int level)
 {
+	//skip messages if verbosity set to higher...
+	if (s_verbosityLevel > level)
+	{
+		return;
+	}
 #ifndef QT_DEBUG
 	//skip debug messages in release mode as soon as possible
 	if (level & LOG_DEBUG)

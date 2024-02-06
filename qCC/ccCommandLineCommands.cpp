@@ -171,6 +171,7 @@ constexpr char COMMAND_FEATURE[]						= "FEATURE";
 constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
 constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
+constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -7617,6 +7618,31 @@ bool CommandDebugCmdLine::process(ccCommandLineInterface& cmd)
 	cmd.print(QObject::tr("Auto save: ") + (cmd.autoSaveMode() ? "ON" : "OFF"));
 	cmd.print(QObject::tr("Auto add timestamp: ") + (cmd.addTimestamp() ? "ON" : "OFF"));
 	cmd.print(QObject::tr("Numerical precision: %1").arg(cmd.numericalPrecision()));
+
+	return true;
+}
+
+CommandSetVerbosity::CommandSetVerbosity()
+	: ccCommandLineInterface::Command(QObject::tr("Set Verbosity"), COMMAND_VERBOSITY)
+{}
+
+bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
+{
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: verbosity level after: %s").arg(COMMAND_VERBOSITY));
+	}
+
+	bool ok = false;
+	int verbosityLevel = cmd.arguments().takeFirst().toInt(&ok);
+	if (!ok) {
+		return cmd.error(QObject::tr("Invalid verbosity level %s").arg(verbosityLevel));
+	}
+	else
+	{
+		cmd.print(QObject::tr("Set verbosity level to %i").arg(verbosityLevel));
+		ccLog::SetVerbosity(verbosityLevel);
+	}
 
 	return true;
 }

@@ -4648,7 +4648,6 @@ CommandCrop2D::CommandCrop2D()
 
 bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 {
-	
 	if (cmd.arguments().size() < 6)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
@@ -4802,7 +4801,6 @@ CommandColorBanding::CommandColorBanding()
 
 bool CommandColorBanding::process(ccCommandLineInterface& cmd)
 {
-	
 	if (cmd.arguments().size() < 2)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (DIM FREQUENCY)").arg(COMMAND_COLOR_BANDING));
@@ -4913,7 +4911,6 @@ CommandColorLevels::CommandColorLevels()
 
 bool CommandColorLevels::process(ccCommandLineInterface& cmd)
 {
-
 	if (cmd.arguments().size() < 5)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL)").arg(COMMAND_COLOR_LEVELS));
@@ -5016,7 +5013,6 @@ CommandDist::CommandDist(bool cloud2meshDist, const QString& name, const QString
 
 bool CommandDist::process(ccCommandLineInterface& cmd)
 {
-	
 	//compared cloud
 	CLEntityDesc* compEntity = nullptr;
 	ccHObject* compCloud = nullptr;
@@ -5367,7 +5363,6 @@ CommandCPS::CommandCPS()
 
 bool CommandCPS::process(ccCommandLineInterface& cmd)
 {
-
     if (cmd.clouds().size() < 2)
     {
         return cmd.error(QObject::tr("At least two point clouds are needed to compute the closest point set!"));
@@ -5420,7 +5415,6 @@ CommandStatTest::CommandStatTest()
 
 bool CommandStatTest::process(ccCommandLineInterface& cmd)
 {
-	
 	//distribution
 	CCCoreLib::GenericDistribution* distrib = nullptr;
 	{
@@ -5626,7 +5620,6 @@ CommandDelaunayTri::CommandDelaunayTri()
 
 bool CommandDelaunayTri::process(ccCommandLineInterface& cmd)
 {
-	
 	bool axisAligned = true;
 	double maxEdgeLength = 0;
 	
@@ -5727,7 +5720,6 @@ CommandSFArithmetic::CommandSFArithmetic()
 
 bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 {
-	
 	if (cmd.arguments().size() < 2)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation after '%1' (2 values expected)").arg(COMMAND_SF_ARITHMETIC));
@@ -5835,7 +5827,6 @@ CommandSFOperation::CommandSFOperation()
 
 bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 {
-	
 	if (cmd.arguments().size() < 3)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
@@ -5941,7 +5932,6 @@ CommandSFOperationSF::CommandSFOperationSF()
 
 bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 {
-
     if (cmd.arguments().size() < 3)
     {
         return cmd.error(QObject::tr("Missing parameter(s): SF index and operation and SF index '%1' (3 values expected)").arg(COMMAND_SF_OP_SF));
@@ -6052,7 +6042,6 @@ CommandSFInterpolation::CommandSFInterpolation()
 
 bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 {
-
     if (cmd.arguments().size() < 1)
         return cmd.error(QObject::tr("Missing parameter(s): SF index after '%1' (1 value expected)").arg(COMMAND_SF_INTERP));
 
@@ -6119,7 +6108,6 @@ CommandColorInterpolation::CommandColorInterpolation()
 
 bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
 {
-
 	if (cmd.clouds().size() < 2)
 		return cmd.error(QObject::tr("Unexpected number of clouds for '%1' (at least 2 clouds expected: first = source, second = dest)").arg(COMMAND_COLOR_INTERP));
 
@@ -6136,7 +6124,6 @@ CommandRenameEntities::CommandRenameEntities()
 
 bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 {
-
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: Name after \"-%1\"").arg(COMMAND_RENAME_ENTITIES));
@@ -6202,7 +6189,6 @@ CommandSFRename::CommandSFRename()
 
 bool CommandSFRename::process(ccCommandLineInterface& cmd)
 {
-
 	if (cmd.arguments().size() < 2)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or scalar field name after '%1' (2 values expected)").arg(COMMAND_RENAME_SF));
@@ -6393,7 +6379,6 @@ CommandICP::CommandICP()
 
 bool CommandICP::process(ccCommandLineInterface& cmd)
 {
-
 	//look for local options
 	bool referenceIsFirst = false;
 	bool adjustScale = false;
@@ -7049,7 +7034,6 @@ CommandSelectEntities::CommandSelectEntities()
 
 bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 {
-
 	//option handling
 	//look for additional parameters
 	ccCommandLineInterface::SelectEntitiesOptions options;

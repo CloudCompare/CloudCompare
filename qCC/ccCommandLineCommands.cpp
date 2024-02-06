@@ -573,7 +573,6 @@ CommandLoad::CommandLoad()
 
 bool CommandLoad::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[LOADING]"));
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
@@ -638,12 +637,11 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 }
 
 CommandLoadCommandFile::CommandLoadCommandFile()
-	: ccCommandLineInterface::Command(QObject::tr("CommandFile"), COMMAND_COMMAND_FILE)
+	: ccCommandLineInterface::Command(QObject::tr("Load commands from file"), COMMAND_COMMAND_FILE)
 {}
 
 bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[LOADING COMMANDS FROM FILE]"));
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_COMMAND_FILE));
@@ -801,7 +799,6 @@ CommandClearNormals::CommandClearNormals()
 
 bool CommandClearNormals::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CLEAR NORMALS]"));
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No entity loaded (be sure to open at least one file with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CLEAR_NORMALS));
@@ -852,8 +849,6 @@ CommandInvertNormal::CommandInvertNormal()
 
 bool CommandInvertNormal::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[INVERT NORMALS]"));
-
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No input point cloud or mesh (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_INVERT_NORMALS));
@@ -916,7 +911,6 @@ CommandOctreeNormal::CommandOctreeNormal()
 
 bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[OCTREE NORMALS CALCULATION]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud to compute normals (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
@@ -1117,7 +1111,6 @@ CommandConvertNormalsToDipAndDipDir::CommandConvertNormalsToDipAndDipDir()
 
 bool CommandConvertNormalsToDipAndDipDir::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CONVERT NORMALS TO DIP/DIP DIR]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_DIP));
@@ -1159,7 +1152,6 @@ CommandConvertNormalsToSFs::CommandConvertNormalsToSFs()
 
 bool CommandConvertNormalsToSFs::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CONVERT NORMALS TO SCALAR FIELD(S)]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_SFS));
@@ -1203,7 +1195,6 @@ CommandConvertNormalsToHSV::CommandConvertNormalsToHSV()
 
 bool CommandConvertNormalsToHSV::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CONVERT NORMALS TO HSV COLORS]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_HSV));
@@ -1245,7 +1236,6 @@ CommandSubsample::CommandSubsample()
 
 bool CommandSubsample::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SUBSAMPLING]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud to resample (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SUBSAMPLE));
@@ -1727,7 +1717,6 @@ CommandExtractCCs::CommandExtractCCs()
 
 bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CONNECTED COMPONENTS EXTRACTION]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud loaded (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_EXTRACT_CC));
@@ -1882,8 +1871,6 @@ CommandCurvature::CommandCurvature()
 
 bool CommandCurvature::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CURVATURE]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
@@ -1976,12 +1963,11 @@ static bool ReadDensityType(ccCommandLineInterface& cmd, CCCoreLib::GeometricalA
 }
 
 CommandApproxDensity::CommandApproxDensity()
-	: ccCommandLineInterface::Command(QObject::tr("ApproxDensity"), COMMAND_APPROX_DENSITY)
+	: ccCommandLineInterface::Command(QObject::tr("Approx Density"), COMMAND_APPROX_DENSITY)
 {}
 
 bool CommandApproxDensity::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[APPROX DENSITY]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud on which to compute approx. density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPROX_DENSITY));
@@ -2034,8 +2020,6 @@ CommandDensity::CommandDensity()
 
 bool CommandDensity::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[DENSITY]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: sphere radius after \"-%1\"").arg(COMMAND_DENSITY));
@@ -2102,8 +2086,6 @@ CommandSFGradient::CommandSFGradient()
 
 bool CommandSFGradient::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF GRADIENT]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: boolean (whether SF is euclidean or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
@@ -2173,8 +2155,6 @@ CommandRoughness::CommandRoughness()
 
 bool CommandRoughness::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[ROUGHNESS]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: kernel size after \"-%1\"").arg(COMMAND_ROUGHNESS));
@@ -2245,8 +2225,6 @@ CommandApplyTransformation::CommandApplyTransformation()
 
 bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[APPLY TRANSFORMATION]"));
-
 	//optional parameters
 	bool inverse = false;
 	bool applyToGlobal = false;
@@ -2481,8 +2459,6 @@ CommandDropGlobalShift::CommandDropGlobalShift()
 
 bool CommandDropGlobalShift::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[DROP GLOBAL SHIFT]"));
-	
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
@@ -2513,8 +2489,6 @@ CommandSFColorScale::CommandSFColorScale()
 
 bool CommandSFColorScale::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF COLOR SCALE]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: color scale file after \"-%1\"").arg(COMMAND_SF_COLOR_SCALE));
@@ -2587,8 +2561,6 @@ CommandSFConvertToRGB::CommandSFConvertToRGB()
 
 bool CommandSFConvertToRGB::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF CONVERT TO RGB]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: boolean (whether to mix with existing colors or not) after \"-%1\"").arg(COMMAND_SF_CONVERT_TO_RGB));
@@ -2656,7 +2628,6 @@ CommandRGBConvertToSF::CommandRGBConvertToSF()
 
 bool CommandRGBConvertToSF::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[RGB CONVERT TO SF]"));
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud on which to convert RGB to SF! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_RGB_CONVERT_TO_SF));
@@ -2813,8 +2784,6 @@ static USE_SPECIAL_SF_VALUE ToSpecialSFValue(QString valString)
 
 bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[FILTER BY VALUE]"));
-	
 	USE_SPECIAL_SF_VALUE useValForMin = USE_NONE;
 	ScalarType minVal = 0;
 	QString minValStr;
@@ -3017,8 +2986,6 @@ CommandComputeMeshVolume::CommandComputeMeshVolume()
 
 bool CommandComputeMeshVolume::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COMPUTE MESH VOLUME]"));
-	
 	if (cmd.meshes().empty())
 	{
 		cmd.warning(QObject::tr("No mesh loaded! Nothing to do..."));
@@ -3090,8 +3057,6 @@ CommandMergeMeshes::CommandMergeMeshes()
 
 bool CommandMergeMeshes::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[MERGE MESHES]"));
-	
 	if (cmd.meshes().size() < 2)
 	{
 		cmd.warning(QObject::tr("Less than 2 meshes are loaded! Nothing to do..."));
@@ -3167,8 +3132,6 @@ CommandMergeClouds::CommandMergeClouds()
 
 bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[MERGE CLOUDS]"));
-	
 	if (cmd.clouds().size() < 2)
 	{
 		cmd.warning(QObject::tr("Less than 2 clouds are loaded! Nothing to do..."));
@@ -3220,8 +3183,6 @@ CommandSetGlobalShift::CommandSetGlobalShift()
 
 bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SET GLOBAL SHIFT]"));
-
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
 		return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_GLOBAL_SHIFT));
@@ -3675,8 +3636,6 @@ CommandMatchBBCenters::CommandMatchBBCenters()
 
 bool CommandMatchBBCenters::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[MATCH B.B. CENTERS]"));
-	
 	std::vector<CLEntityDesc*> entities;
 	for (auto& cloud : cmd.clouds())
 	{
@@ -3725,13 +3684,11 @@ bool CommandMatchBBCenters::process(ccCommandLineInterface& cmd)
 }
 
 CommandMatchBestFitPlane::CommandMatchBestFitPlane()
-	: ccCommandLineInterface::Command(QObject::tr("Match best fit plane"), COMMAND_BEST_FIT_PLANE)
+	: ccCommandLineInterface::Command(QObject::tr("Compute best fit plane"), COMMAND_BEST_FIT_PLANE)
 {}
 
 bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COMPUTE BEST FIT PLANE]"));
-	
 	//look for local options
 	bool makeCloudsHoriz = false;
 	bool keepLoaded = false;
@@ -3869,8 +3826,6 @@ CommandOrientNormalsMST::CommandOrientNormalsMST()
 
 bool CommandOrientNormalsMST::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[ORIENT NORMALS (MST)]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: number of neighbors after \"-%1\"").arg(COMMAND_ORIENT_NORMALS));
@@ -3939,8 +3894,6 @@ CommandSORFilter::CommandSORFilter()
 
 bool CommandSORFilter::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SOR FILTER]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: number of neighbors mode after \"-%1\"").arg(COMMAND_SOR_FILTER));
@@ -4041,8 +3994,6 @@ CommandNoiseFilter::CommandNoiseFilter()
 
 bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[NOISE FILTER]"));
-
 	if (cmd.arguments().size() < 4)
 	{
 		return cmd.error(QObject::tr("Missing parameters: 'KNN/RADIUS {value} REL/ABS {value}' expected after \"-%1\"").arg(COMMAND_NOISE_FILTER));
@@ -4192,8 +4143,6 @@ CommandRemoveDuplicatePoints::CommandRemoveDuplicatePoints()
 
 bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 {
-    cmd.print(QObject::tr("[REMOVE DUPLICATE POINTS]"));
-
     double minDistanceBetweenPoints = std::numeric_limits<double>::epsilon();
 
     //get optional argument
@@ -4247,13 +4196,11 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 }
 
 CommandExtractVertices::CommandExtractVertices()
-	: ccCommandLineInterface::Command(QObject::tr("Extract vertices (as a standalone 'cloud')"), COMMAND_EXTRACT_VERTICES)
+	: ccCommandLineInterface::Command(QObject::tr("Extract vertices"), COMMAND_EXTRACT_VERTICES)
 {}
 
 bool CommandExtractVertices::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[EXTRACT VERTICES]"));
-	
 	if (cmd.meshes().empty())
 	{
 		cmd.warning(QObject::tr("No mesh available. Be sure to open one first!"));
@@ -4299,13 +4246,11 @@ bool CommandExtractVertices::process(ccCommandLineInterface& cmd)
 
 
 CommandFlipTriangles::CommandFlipTriangles()
-	: ccCommandLineInterface::Command(QObject::tr("Flip the vertices order of all opened mesh triangles"), COMMAND_FLIP_TRIANGLES)
+	: ccCommandLineInterface::Command(QObject::tr("Flip mesh triangles"), COMMAND_FLIP_TRIANGLES)
 {}
 
 bool CommandFlipTriangles::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[FLIP TRIANGLES]"));
-
 	if (cmd.meshes().empty())
 	{
 		cmd.warning(QObject::tr("No mesh available. Be sure to open one first!"));
@@ -4346,8 +4291,6 @@ CommandSampleMesh::CommandSampleMesh()
 
 bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SAMPLE POINTS ON MESH]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: sampling mode after \"-%1\" (POINTS/DENSITY)").arg(COMMAND_SAMPLE_MESH));
@@ -4432,8 +4375,6 @@ CommandCompressFWF::CommandCompressFWF()
 
 bool CommandCompressFWF::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COMPRESS FWF]"));
-
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
@@ -4453,8 +4394,6 @@ CommandCrop::CommandCrop()
 
 bool CommandCrop::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CROP]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
@@ -4601,8 +4540,6 @@ CommandSFToCoord::CommandSFToCoord()
 
 bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF TO COORD]"));
-
 	if (cmd.arguments().size() < 2)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (SF INDEX OR NAME) (DIMENSION)").arg(COMMAND_SF_TO_COORD));
@@ -4664,8 +4601,6 @@ CommandCoordToSF::CommandCoordToSF()
 
 bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COORD TO SF]"));
-	
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
@@ -4713,7 +4648,6 @@ CommandCrop2D::CommandCrop2D()
 
 bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CROP 2D]"));
 	
 	if (cmd.arguments().size() < 6)
 	{
@@ -4868,7 +4802,6 @@ CommandColorBanding::CommandColorBanding()
 
 bool CommandColorBanding::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COLOR BANDING]"));
 	
 	if (cmd.arguments().size() < 2)
 	{
@@ -4980,7 +4913,6 @@ CommandColorLevels::CommandColorLevels()
 
 bool CommandColorLevels::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COLOR LEVELS]"));
 
 	if (cmd.arguments().size() < 5)
 	{
@@ -5084,7 +5016,6 @@ CommandDist::CommandDist(bool cloud2meshDist, const QString& name, const QString
 
 bool CommandDist::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[DISTANCE COMPUTATION]"));
 	
 	//compared cloud
 	CLEntityDesc* compEntity = nullptr;
@@ -5436,7 +5367,6 @@ CommandCPS::CommandCPS()
 
 bool CommandCPS::process(ccCommandLineInterface& cmd)
 {
-    cmd.print(QObject::tr("[CLOSEST POINT SET]"));
 
     if (cmd.clouds().size() < 2)
     {
@@ -5490,7 +5420,6 @@ CommandStatTest::CommandStatTest()
 
 bool CommandStatTest::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[STATISTICAL TEST]"));
 	
 	//distribution
 	CCCoreLib::GenericDistribution* distrib = nullptr;
@@ -5697,7 +5626,6 @@ CommandDelaunayTri::CommandDelaunayTri()
 
 bool CommandDelaunayTri::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[DELAUNAY TRIANGULATION]"));
 	
 	bool axisAligned = true;
 	double maxEdgeLength = 0;
@@ -5799,7 +5727,6 @@ CommandSFArithmetic::CommandSFArithmetic()
 
 bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF ARITHMETIC]"));
 	
 	if (cmd.arguments().size() < 2)
 	{
@@ -5908,7 +5835,6 @@ CommandSFOperation::CommandSFOperation()
 
 bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF OPERATION]"));
 	
 	if (cmd.arguments().size() < 3)
 	{
@@ -6015,7 +5941,6 @@ CommandSFOperationSF::CommandSFOperationSF()
 
 bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 {
-    cmd.print(QObject::tr("[SF OP [ADD | SUB | MULT | DIV] SF]"));
 
     if (cmd.arguments().size() < 3)
     {
@@ -6127,7 +6052,6 @@ CommandSFInterpolation::CommandSFInterpolation()
 
 bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 {
-    cmd.print(QObject::tr("[SF INTERPOLATION]"));
 
     if (cmd.arguments().size() < 1)
         return cmd.error(QObject::tr("Missing parameter(s): SF index after '%1' (1 value expected)").arg(COMMAND_SF_INTERP));
@@ -6195,7 +6119,6 @@ CommandColorInterpolation::CommandColorInterpolation()
 
 bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[COLOR INTERPOLATION]"));
 
 	if (cmd.clouds().size() < 2)
 		return cmd.error(QObject::tr("Unexpected number of clouds for '%1' (at least 2 clouds expected: first = source, second = dest)").arg(COMMAND_COLOR_INTERP));
@@ -6213,7 +6136,6 @@ CommandRenameEntities::CommandRenameEntities()
 
 bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[RENAME ENTITIES]"));
 
 	if (cmd.arguments().empty())
 	{
@@ -6280,7 +6202,6 @@ CommandSFRename::CommandSFRename()
 
 bool CommandSFRename::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[RENAME SF]"));
 
 	if (cmd.arguments().size() < 2)
 	{
@@ -6370,12 +6291,12 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 }
 
 CommandSFAddConst::CommandSFAddConst()
-    : ccCommandLineInterface::Command(QObject::tr("SF add constant scalar field"), COMMAND_SF_ADD_CONST)
+    : ccCommandLineInterface::Command(QObject::tr("Add constant SF"), COMMAND_SF_ADD_CONST)
 {}
 
 bool CommandSFAddConst::process(ccCommandLineInterface& cmd)
 {
-    cmd.print(QObject::tr("[ADD CONST SF] Note: this operation is only done on clouds"));
+    cmd.print(QObject::tr("Note: this operation is only done on clouds"));
 
     if (cmd.arguments().size() < 2)
     {
@@ -6431,13 +6352,11 @@ bool CommandSFAddConst::process(ccCommandLineInterface& cmd)
 }
 
 CommandSFAddId::CommandSFAddId()
-    : ccCommandLineInterface::Command(QObject::tr("Add point indexes as scalar field"), COMMAND_SF_ADD_ID)
+    : ccCommandLineInterface::Command(QObject::tr("Add indexes as SF"), COMMAND_SF_ADD_ID)
 {}
 
 bool CommandSFAddId::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SF_ADD_ID]"));
-
 	ccHObject::Container selectedEntities;
 
 	bool addIdAsInt = false;
@@ -6474,7 +6393,6 @@ CommandICP::CommandICP()
 
 bool CommandICP::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[ICP]"));
 
 	//look for local options
 	bool referenceIsFirst = false;
@@ -7126,12 +7044,11 @@ bool CommandLogFile::process(ccCommandLineInterface& cmd)
 }
 
 CommandSelectEntities::CommandSelectEntities()
-	: ccCommandLineInterface::Command(QObject::tr("SELECT_ENTITIES"), COMMAND_SELECT_ENTITIES)
+	: ccCommandLineInterface::Command(QObject::tr("Select entities"), COMMAND_SELECT_ENTITIES)
 {}
 
 bool CommandSelectEntities::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[SELECT ENTITIES]"));
 
 	//option handling
 	//look for additional parameters
@@ -7344,7 +7261,6 @@ CommandClear::CommandClear()
 
 bool CommandClear::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CLEAR]"));
 	cmd.removeClouds(false);
 	cmd.removeMeshes(false);
 	return true;
@@ -7356,7 +7272,6 @@ CommandClearClouds::CommandClearClouds()
 
 bool CommandClearClouds::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CLEAR CLOUDS]"));
 	cmd.removeClouds(false);
 	return true;
 }
@@ -7367,7 +7282,6 @@ CommandPopClouds::CommandPopClouds()
 
 bool CommandPopClouds::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[POP CLOUD]"));
 	cmd.removeClouds(true);
 	return true;
 }
@@ -7378,7 +7292,6 @@ CommandClearMeshes::CommandClearMeshes()
 
 bool CommandClearMeshes::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[CLEAR MESHES]"));
 	cmd.removeMeshes(false);
 	return true;
 }
@@ -7389,7 +7302,6 @@ CommandPopMeshes::CommandPopMeshes()
 
 bool CommandPopMeshes::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[POP MESH]"));
 	cmd.removeMeshes(true);
 	return true;
 }
@@ -7454,8 +7366,6 @@ CommandFeature::CommandFeature()
 
 bool CommandFeature::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[FEATURE]"));
-
 	if (cmd.arguments().empty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: feature type after \"-%1\"").arg(COMMAND_FEATURE));
@@ -7587,8 +7497,6 @@ CommandDebugCmdLine::CommandDebugCmdLine()
 
 bool CommandDebugCmdLine::process(ccCommandLineInterface& cmd)
 {
-	cmd.print("[DEBUG]");
-
 	cmd.print("******************************************");
 	cmd.print("Number of selected clouds: " + QString::number(cmd.clouds().size()));
 	cmd.print("Number of selected meshes: " + QString::number(cmd.meshes().size()));

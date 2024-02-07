@@ -7538,7 +7538,7 @@ bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
 	else
 	{
 		cmd.print(QObject::tr("Set verbosity level to %1").arg(verbosityLevel));
-		ccLog::SetVerbosity(verbosityLevel);
+		ccLog::SetVerbosityLevel(verbosityLevel);
 	}
 
 	return true;

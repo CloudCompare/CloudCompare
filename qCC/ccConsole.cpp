@@ -294,11 +294,11 @@ void ccConsole::refresh()
 					QListWidgetItem* item = new QListWidgetItem(messagePair.first);
 
 					//set color based on the message severity
-					if (messagePair.second & LOG_ERROR) // Error
+					if ((messagePair.second & LOG_ERROR) == LOG_ERROR) // Error
 					{
 						item->setForeground(Qt::red);
 					}
-					else if (messagePair.second & LOG_WARNING) // Warning
+					else if ((messagePair.second & LOG_WARNING) == LOG_WARNING) // Warning
 					{
 						item->setForeground(Qt::darkRed);
 						//we also force the console visibility if a warning message arrives!
@@ -308,7 +308,7 @@ void ccConsole::refresh()
 						}
 					}
 #ifdef QT_DEBUG
-					else if (messagePair.second & LOG_DEBUG) // Debug
+					else if (messagePair.second & DEBUG_FLAG) // Debug
 					{
 						item->setForeground(Qt::blue);
 					}
@@ -337,13 +337,11 @@ void ccConsole::refresh()
 
 void ccConsole::logMessage(const QString& message, int level)
 {
-#ifndef QT_DEBUG
-	//skip debug messages in release mode
-	if (level & LOG_DEBUG)
+	//skip messages below the current 'verbosity' level
+	if ((level & 7) < ccLog::VerbosityLevel())
 	{
 		return;
 	}
-#endif
 
 	QString formatedMessage = QStringLiteral("[") + QTime::currentTime().toString() + QStringLiteral("] ") + message;
 	if (s_redirectToStdOut)
@@ -362,7 +360,7 @@ void ccConsole::logMessage(const QString& message, int level)
 		//Error
 		if (level & LOG_ERROR)
 		{
-			if (level & LOG_DEBUG)
+			if (level & DEBUG_FLAG)
 				printf("ERR-DBG: ");
 			else
 				printf("ERR: ");
@@ -370,7 +368,7 @@ void ccConsole::logMessage(const QString& message, int level)
 		//Warning
 		else if (level & LOG_WARNING)
 		{
-			if (level & LOG_DEBUG)
+			if (level & DEBUG_FLAG)
 				printf("WARN-DBG: ");
 			else
 				printf("WARN: ");
@@ -378,7 +376,7 @@ void ccConsole::logMessage(const QString& message, int level)
 		//Standard
 		else
 		{
-			if (level & LOG_DEBUG)
+			if (level & DEBUG_FLAG)
 				printf("MSG-DBG: ");
 			else
 				printf("MSG: ");

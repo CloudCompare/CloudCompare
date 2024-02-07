@@ -75,14 +75,8 @@ void ccLog::SetVerbosity(int level)
 	s_verbosityLevel = level;
 }
 
-
 void ccLog::LogMessage(const QString& message, int level)
 {
-	//skip messages if verbosity set to higher...
-	if (s_verbosityLevel > level)
-	{
-		return;
-	}
 #ifndef QT_DEBUG
 	//skip debug messages in release mode as soon as possible
 	if (level & LOG_DEBUG)
@@ -90,6 +84,12 @@ void ccLog::LogMessage(const QString& message, int level)
 		return;
 	}
 #endif
+
+	//skip messages if verbosity level is higher
+	if (s_verbosityLevel > level)
+	{
+		return;
+	}
 
 	if (s_instance)
 	{

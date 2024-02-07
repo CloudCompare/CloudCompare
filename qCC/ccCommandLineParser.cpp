@@ -961,9 +961,9 @@ int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 			QElapsedTimer eTimerSubProcess;
 			eTimerSubProcess.start();
 			QString processName = m_commands[keyword]->m_name.toUpper();
-			warning(QString("[%1]").arg(processName));
+			print(QString("[%1]").arg(processName));
 			success = m_commands[keyword]->process(*this);
-			warning(QString("[%2] finished in %1 s.").arg(eTimerSubProcess.elapsed() / 1.0e3, 0, 'f', 2).arg(processName));
+			print(QString("[%2] finished in %1 s.").arg(eTimerSubProcess.elapsed() / 1.0e3, 0, 'f', 2).arg(processName));
 		}
 		//silent mode (i.e. no console)
 		else if (keyword == COMMAND_SILENT_MODE)

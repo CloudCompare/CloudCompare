@@ -1593,9 +1593,13 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			//calculate octree before subsampling, it is passed to subsampling, so it won't be recalculated there.
 			CCCoreLib::DgmOctree* octree = desc.pc->getOctree().data();
 			if (!octree)
+			{
 				octree = desc.pc->computeOctree(nullptr, false).data();
+			}
 			if (!octree)
+			{
 				return cmd.error("Octree calculation failed, not enough memory?");
+			}
 			CCCoreLib::ReferenceCloud* refCloud = nullptr;
 			ccPointCloud* result = nullptr;
 			unsigned sizeOfInputCloud = desc.pc->size();
@@ -7522,17 +7526,18 @@ bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: verbosity level after: %s").arg(COMMAND_VERBOSITY));
+		return cmd.error(QObject::tr("Missing parameter: verbosity level after: %1").arg(COMMAND_VERBOSITY));
 	}
 
 	bool ok = false;
 	int verbosityLevel = cmd.arguments().takeFirst().toInt(&ok);
-	if (!ok) {
-		return cmd.error(QObject::tr("Invalid verbosity level %s").arg(verbosityLevel));
+	if (!ok)
+	{
+		return cmd.error(QObject::tr("Invalid verbosity level %1").arg(verbosityLevel));
 	}
 	else
 	{
-		cmd.print(QObject::tr("Set verbosity level to %i").arg(verbosityLevel));
+		cmd.print(QObject::tr("Set verbosity level to %1").arg(verbosityLevel));
 		ccLog::SetVerbosity(verbosityLevel);
 	}
 

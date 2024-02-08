@@ -295,7 +295,9 @@ public: //file I/O
 public: //logging
 
 	//logging
+	virtual void printVerbose(const QString& message) const = 0;
 	virtual void print(const QString& message) const = 0;
+	virtual void printHigh(const QString& message) const = 0;
 	virtual void printDebug(const QString& message) const = 0;
 	virtual void warning(const QString& message) const = 0;
 	virtual void warningDebug(const QString& message) const = 0;

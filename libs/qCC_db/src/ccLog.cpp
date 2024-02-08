@@ -50,6 +50,14 @@ struct Message
 
 //message backup system
 static bool s_backupEnabled;
+
+//message verbosity level
+#ifdef QT_DEBUG
+static int s_verbosityLevel = ccLog::LOG_VERBOSE;
+#else
+static int s_verbosityLevel = ccLog::LOG_STANDARD;
+#endif
+
 //backed up messages
 static std::vector<Message> s_backupMessages;
 
@@ -66,15 +74,23 @@ void ccLog::EnableMessageBackup(bool state)
 	s_backupEnabled = state;
 }
 
+int ccLog::VerbosityLevel()
+{
+	return s_verbosityLevel;
+}
+
+void ccLog::SetVerbosityLevel(int level)
+{
+	s_verbosityLevel = std::min(level, static_cast<int>(LOG_ERROR)); // can't ignore error messages
+}
+
 void ccLog::LogMessage(const QString& message, int level)
 {
-#ifndef QT_DEBUG
-	//skip debug messages in release mode as soon as possible
-	if (level & LOG_DEBUG)
+	//skip messages below the current 'verbosity' level
+	if ((level & 7) < s_verbosityLevel)
 	{
 		return;
 	}
-#endif
 
 	if (s_instance)
 	{
@@ -119,9 +135,39 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 		LogMessage(QString(s_buffer), flags);\
 	}\
 
+bool ccLog::PrintVerbose(const char* format, ...)
+{
+	LOG_ARGS(LOG_VERBOSE)
+	return true;
+}
+
+bool ccLog::PrintVerbose(const QString& message)
+{
+	LogMessage(message, LOG_VERBOSE);
+	return true;
+}
+
 bool ccLog::Print(const char* format, ...)
 {
 	LOG_ARGS(LOG_STANDARD)
+	return true;
+}
+
+bool ccLog::Print(const QString& message)
+{
+	LogMessage(message, LOG_STANDARD);
+	return true;
+}
+
+bool ccLog::PrintHigh(const char* format, ...)
+{
+	LOG_ARGS(LOG_IMPORTANT)
+	return true;
+}
+
+bool ccLog::PrintHigh(const QString& message)
+{
+	LogMessage(message, LOG_IMPORTANT);
 	return true;
 }
 
@@ -131,24 +177,52 @@ bool ccLog::Warning(const char* format, ...)
 	return false;
 }
 
+bool ccLog::Warning(const QString& message)
+{
+	LogMessage(message, LOG_WARNING);
+	return false;
+}
+
 bool ccLog::Error(const char* format, ...)
 {
 	LOG_ARGS(LOG_ERROR)
 	return false;
 }
 
+bool ccLog::Error(const QString& message)
+{
+	LogMessage(message, LOG_ERROR);
+	return false;
+}
+
 bool ccLog::PrintDebug(const char* format, ...)
 {
 #ifdef QT_DEBUG
-	LOG_ARGS(LOG_STANDARD | LOG_DEBUG)
+	LOG_ARGS(LOG_STANDARD | DEBUG_FLAG)
 #endif
-	return true;
+	return false;
+}
+
+bool ccLog::PrintDebug(const QString& message)
+{
+#ifdef QT_DEBUG
+	LogMessage(message, LOG_STANDARD | DEBUG_FLAG);
+#endif
+	return false;
 }
 
 bool ccLog::WarningDebug(const char* format, ...)
 {
 #ifdef QT_DEBUG
-	LOG_ARGS(LOG_WARNING | LOG_DEBUG)
+	LOG_ARGS(LOG_WARNING)
+#endif
+	return false;
+}
+
+bool ccLog::WarningDebug(const QString& message)
+{
+#ifdef QT_DEBUG
+	LogMessage(message, LOG_WARNING | DEBUG_FLAG);
 #endif
 	return false;
 }
@@ -156,7 +230,15 @@ bool ccLog::WarningDebug(const char* format, ...)
 bool ccLog::ErrorDebug(const char* format, ...)
 {
 #ifdef QT_DEBUG
-	LOG_ARGS(LOG_ERROR | LOG_DEBUG)
+	LOG_ARGS(LOG_ERROR)
+#endif
+	return false;
+}
+
+bool ccLog::ErrorDebug(const QString& message)
+{
+#ifdef QT_DEBUG
+	LogMessage(message, LOG_ERROR | DEBUG_FLAG);
 #endif
 	return false;
 }

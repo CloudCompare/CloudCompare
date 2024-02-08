@@ -36,9 +36,19 @@ constexpr char COMMAND_SILENT_MODE[]	= "SILENT";
 /*************** ccCommandLineParser *****************/
 /*****************************************************/
 
+void ccCommandLineParser::printVerbose(const QString& message) const
+{
+	ccConsole::PrintVerbose(message);
+}
+
 void ccCommandLineParser::print(const QString& message) const
 {
 	ccConsole::Print(message);
+}
+
+void ccCommandLineParser::printHigh(const QString& message) const
+{
+	ccConsole::PrintHigh(message);
 }
 
 void ccCommandLineParser::printDebug(const QString& message) const
@@ -556,7 +566,7 @@ void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
 
 bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter)
 {
-	print(QString("Opening file: '%1'").arg(filename));
+	printHigh(QString("Opening file: '%1'").arg(filename));
 
 	//whether Global (coordinate) shift has already been defined
 	static bool s_firstCoordinatesShiftEnabled = false;
@@ -912,6 +922,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandFeature));
 	registerCommand(Command::Shared(new CommandRGBConvertToSF));
 	registerCommand(Command::Shared(new CommandFlipTriangles));
+	registerCommand(Command::Shared(new CommandSetVerbosity));
 }
 
 void ccCommandLineParser::cleanup()
@@ -957,7 +968,12 @@ int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 		if (m_commands.contains(keyword))
 		{
 			assert(m_commands[keyword]);
+			QElapsedTimer eTimerSubProcess;
+			eTimerSubProcess.start();
+			QString processName = m_commands[keyword]->m_name.toUpper();
+			printHigh(QString("[%1]").arg(processName));
 			success = m_commands[keyword]->process(*this);
+			printHigh(QString("[%2] finished in %1 s.").arg(eTimerSubProcess.elapsed() / 1.0e3, 0, 'f', 2).arg(processName));
 		}
 		//silent mode (i.e. no console)
 		else if (keyword == COMMAND_SILENT_MODE)

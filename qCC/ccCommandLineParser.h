@@ -55,7 +55,9 @@ public:
 	const QStringList& arguments() const override { return m_arguments; }
 	bool registerCommand(Command::Shared command) override;
 	QDialog* widgetParent() override { return m_parentWidget; }
+	void printVerbose(const QString& message) const override;
 	void print(const QString& message) const override;
+	void printHigh(const QString& message) const override;
 	void printDebug(const QString& message) const override;
 	void warning(const QString& message) const override;
 	void warningDebug(const QString& message) const override;

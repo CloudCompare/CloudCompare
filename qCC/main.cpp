@@ -108,14 +108,51 @@ int main(int argc, char **argv)
     if (commandLine)
     {
         //translation file selection
-        if (argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-LANG")
+        if (	lastArgumentIndex < argumentsLocal8Bit.size()
+			&&	argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-LANG")
         {
-            QString langFilename = argumentsLocal8Bit[2];
+			//remove verified local option
+			argumentsLocal8Bit.removeAt(lastArgumentIndex);
+
+			if (lastArgumentIndex >= argumentsLocal8Bit.size())
+			{
+				ccLog::Error(QObject::tr("Missing argument after %1: language file").arg("-LANG"));
+				return EXIT_FAILURE;
+			}
+
+			//remove verified arguments so that -SILENT will be the first one (if present)...
+			QString langFilename = argumentsLocal8Bit.takeAt(lastArgumentIndex);
 
             ccTranslationManager::Get().loadTranslation(langFilename);
             commandLine = false;
-            lastArgumentIndex += 2;
         }
+
+		if (	lastArgumentIndex < argumentsLocal8Bit.size()
+			&&	argumentsLocal8Bit[lastArgumentIndex].toUpper() == "-VERBOSITY")
+		{
+			//remove verified local option
+			argumentsLocal8Bit.removeAt(lastArgumentIndex);
+
+			if (lastArgumentIndex >= argumentsLocal8Bit.size())
+			{
+				ccLog::Error(QObject::tr("Missing argument after %1: verbosity level").arg("-VERBOSITY"));
+				return EXIT_FAILURE;
+			}
+
+			//remove verified arguments so that -SILENT will be the first one (if present)...
+			QString verbosityLevelStr = argumentsLocal8Bit.takeAt(lastArgumentIndex);
+
+			bool ok = false;
+			int verbosityLevel = verbosityLevelStr.toInt(&ok);
+			if (!ok || verbosityLevel < 0)
+			{
+				ccLog::Warning(QObject::tr("Invalid verbosity level: %1").arg(verbosityLevelStr));
+			}
+			else
+			{
+				ccLog::SetVerbosityLevel(verbosityLevel);
+			}
+		}
     }
 
 #ifdef Q_OS_WIN

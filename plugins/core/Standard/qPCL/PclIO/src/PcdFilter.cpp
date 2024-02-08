@@ -259,7 +259,7 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 					grid.reset(new ccPointCloud::Grid);
 					grid->h = static_cast<unsigned>(inputCloud->height);
 					grid->w = static_cast<unsigned>(inputCloud->width);
-					grid->indexes.resize(grid->h * grid->w);
+					grid->indexes.resize(static_cast<size_t>(grid->h) * grid->w);
 					grid->minValidIndex = 0;
 					grid->maxValidIndex = pointCount;
 					grid->validCount = pointCount;
@@ -280,7 +280,7 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 						grid.reset(new ccPointCloud::Grid);
 						grid->h = static_cast<unsigned>(inputCloud->height);
 						grid->w = static_cast<unsigned>(inputCloud->width);
-						grid->indexes.resize(grid->h * grid->w, -1);
+						grid->indexes.resize(static_cast<size_t>(grid->h) * grid->w, -1);
 						grid->validCount = 0;
 						grid->minValidIndex = pointCount;
 						grid->maxValidIndex = 0;

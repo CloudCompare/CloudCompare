@@ -2249,12 +2249,12 @@ void ccCompass::estimateStrain()
 	}
 
 	//calculate bounding box of all traces
-	float minx = std::numeric_limits<float>::max();
-	float maxx = std::numeric_limits<float>::lowest();
-	float miny = std::numeric_limits<float>::max();
-	float maxy = std::numeric_limits<float>::lowest();
-	float minz = std::numeric_limits<float>::max();
-	float maxz = std::numeric_limits<float>::lowest();
+	double minx = std::numeric_limits<double>::max();
+	double maxx = std::numeric_limits<double>::lowest();
+	double miny = std::numeric_limits<double>::max();
+	double maxy = std::numeric_limits<double>::lowest();
+	double minz = std::numeric_limits<double>::max();
+	double maxz = std::numeric_limits<double>::lowest();
 
 	if (lines.empty())
 	{
@@ -2270,9 +2270,9 @@ void ccCompass::estimateStrain()
 		if (poly->size() > 0) //avoid (0,0,0),(0,0,0) bounding boxes...
 		{
 			poly->getBoundingBox(bbMin, bbMax);
-			minx = std::min(bbMin.x, minx); maxx = std::max(bbMax.x, maxx);
-			miny = std::min(bbMin.y, miny); maxy = std::max(bbMax.y, maxy);
-			minz = std::min(bbMin.z, minz); maxz = std::max(bbMax.z, maxz);
+			minx = std::min(static_cast<double>(bbMin.x), minx); maxx = std::max(static_cast<double>(bbMax.x), maxx);
+			miny = std::min(static_cast<double>(bbMin.y), miny); maxy = std::max(static_cast<double>(bbMax.y), maxy);
+			minz = std::min(static_cast<double>(bbMin.z), minz); maxz = std::max(static_cast<double>(bbMax.z), maxz);
 		}
 	}
 
@@ -2338,16 +2338,16 @@ void ccCompass::estimateStrain()
 	maxy += binSize;
 	maxz += binSize;
 
-	int nx = (maxx - minx) / binSize;
-	int ny = (maxy - miny) / binSize;
-	int nz = (maxz - minz) / binSize;
+	size_t nx = static_cast<size_t>((maxx - minx) / binSize);
+	size_t ny = static_cast<size_t>((maxy - miny) / binSize);
+	size_t nz = static_cast<size_t>((maxz - minz) / binSize);
 
 	//*********************************************
 	//Map geo-objects onto cells
 	//*********************************************
 	prg.setInfo("Gathering GeoObjects...");
 	std::vector< std::unordered_set<ccGeoObject*> > geoObjectBins(nx*ny*nz, std::unordered_set<ccGeoObject*>());
-	for (int i = 0; i < lines.size(); i++)
+	for (size_t i = 0; i < lines.size(); i++)
 	{
 		prg.update(100.0 * i / float(lines.size()));
 		if (prg.isCancelRequested())
@@ -2363,10 +2363,10 @@ void ccCompass::estimateStrain()
 				CCVector3 V = *lines[i]->getPoint(p);
 
 				//compute cell this point falls in
-				int x = (V.x - minx) / binSize;
-				int y = (V.y - miny) / binSize;
-				int z = (V.z - minz) / binSize;
-				int idx = x + nx * (y + ny * z);
+				size_t x = static_cast<size_t>((V.x - minx) / binSize);
+				size_t y = static_cast<size_t>((V.y - miny) / binSize);
+				size_t z = static_cast<size_t>((V.z - minz) / binSize);
+				size_t idx = x + nx * (y + ny * z);
 
 				//store reference to this geoobject
 				if (idx < geoObjectBins.size())
@@ -2406,15 +2406,15 @@ void ccCompass::estimateStrain()
 	CCCoreLib::SquareMatrixd I(3); I.toIdentity();
 	std::vector<CCCoreLib::SquareMatrixd> F(nx*ny*nz, CCCoreLib::SquareMatrixd(I)); //deformation gradient tensors
 
-	int validCells = 0;
+	size_t validCells = 0;
 	prg.setInfo("Calculating strain tensors...");
-	for (int x = 0; x < nx; x++)
+	for (size_t x = 0; x < nx; x++)
 	{
-		for (int y = 0; y < ny; y++)
+		for (size_t y = 0; y < ny; y++)
 		{
-			for (int z = 0; z < nz; z++)
+			for (size_t z = 0; z < nz; z++)
 			{
-				int idx = x + nx * (y + ny * z);
+				size_t idx = x + nx * (y + ny * z);
 				prg.update((100.0f * idx) / (nx*ny*nz));
 				if (prg.isCancelRequested())
 				{
@@ -2464,10 +2464,10 @@ void ccCompass::estimateStrain()
 										CCVector3 V = *s->getPoint(p);
 
 										//compute voxel that last vertex of this segment falls in
-										int _x = (V.x - minx) / binSize;
-										int _y = (V.y - miny) / binSize;
-										int _z = (V.z - minz) / binSize;
-										int _idx = _x + nx * (_y + ny * _z);
+										size_t _x = static_cast<size_t>((V.x - minx) / binSize);
+										size_t _y = static_cast<size_t>((V.y - miny) / binSize);
+										size_t _z = static_cast<size_t>((V.z - minz) / binSize);
+										size_t _idx = _x + nx * (_y + ny * _z);
 
 										if (_idx == idx)
 										{										
@@ -2539,7 +2539,7 @@ void ccCompass::estimateStrain()
 
 					//build local coordinate system relative to the dyke opening vector (opening vector N, strike vector S, dip vector D)
 					CCVector3 N = average_direction;
-					CCVector3 S = N.cross(CCVector3(0.0f, 0.0f, 1.0f));
+					CCVector3 S = N.cross(CCVector3(0, 0, CCCoreLib::PC_ONE));
 					CCVector3 D = N.cross(S);
 
 					//define basis matrix
@@ -2561,10 +2561,14 @@ void ccCompass::estimateStrain()
 					//build blocks for visualisation?
 					if (buildGraphics)
 					{
-						double gl16[16]; B.toGlMatrix(gl16);
-						gl16[12] = minx + (x+0.5) * binSize; gl16[13] = miny + (y+0.5) * binSize; gl16[14] = minz + (z+0.5)*binSize; gl16[15] = 1.0;
+						double gl16[16];
+						B.toGlMatrix(gl16);
+						gl16[12] = minx + (x + 0.5) * binSize;
+						gl16[13] = miny + (y + 0.5) * binSize;
+						gl16[14] = minz + (z + 0.5) * binSize;
+						gl16[15] = 1.0;
 						ccGLMatrix gl(gl16);
-						ccGenericPrimitive* box = new ccBox(CCVector3(average_thickness, binSize/2, binSize/2), &gl, "BlockStrain");
+						ccGenericPrimitive* box = new ccBox(CCVector3d(average_thickness, binSize / 2, binSize / 2).toPC(), &gl, "BlockStrain");
 						dataInCell[idx]->addChild(box);
 					}
 				}
@@ -2581,7 +2585,7 @@ void ccCompass::estimateStrain()
 	ccPointCloud* points = new ccPointCloud("Strain");
 	points->copyGlobalShiftAndScale(*lines[0]); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
 
-	points->reserve(validCells);
+	points->reserve(static_cast<unsigned>(validCells));
 	ccScalarField* nValidSF = new ccScalarField("nValid");
 	ccScalarField* nIgnoredSF = new ccScalarField("nIgnored");
 	ccScalarField* JSF = new ccScalarField("J");
@@ -2614,18 +2618,18 @@ void ccCompass::estimateStrain()
 	}
 
 	//loop through bins and build points/graphics where strain has been estimated
-	for (int x = 0; x < nx; x++)
+	for (size_t x = 0; x < nx; x++)
 	{
-		for (int y = 0; y < ny; y++)
+		for (size_t y = 0; y < ny; y++)
 		{
-			for (int z = 0; z < nz; z++)
+			for (size_t z = 0; z < nz; z++)
 			{
-				int idx = x + nx * (y + ny * z);
+				size_t idx = x + nx * (y + ny * z);
 				if (nStructures[idx] > 0)
 				{
 					//build point
-					CCVector3 p(minx + ((x + 0.5) * binSize), miny + ((y + 0.5) * binSize), minz + ((z + 0.5) * binSize));
-					points->addPoint(p);
+					CCVector3d p(minx + ((x + 0.5) * binSize), miny + ((y + 0.5) * binSize), minz + ((z + 0.5) * binSize));
+					points->addPoint(p.toPC());
 					nValidSF->addElement(nStructures[idx]);
 					nIgnoredSF->addElement(nIgnored[idx]);
 
@@ -2667,21 +2671,25 @@ void ccCompass::estimateStrain()
 
 						//transform back into global coords
 						transMat = eigVectors * (transMat * eigVectors.transposed());
-						double gl16[16]; transMat.toGlMatrix(gl16);
-						gl16[12] = p.x; gl16[13] = p.y; gl16[14] = p.z; gl16[15] = 1.0; //add translation to GL matrix
+						double gl16[16];
+						transMat.toGlMatrix(gl16);
+						gl16[12] = p.x;
+						gl16[13] = p.y;
+						gl16[14] = p.z;
+						gl16[15] = 1.0; //add translation to GL matrix
 						ccGLMatrix gl(gl16);
-						ccGenericPrimitive* ellipse = new ccSphere(binSize / 3, &gl, "StrainEllipse");
+						ccGenericPrimitive* ellipse = new ccSphere(static_cast<PointCoordinateType>(binSize / 3), &gl, "StrainEllipse");
 						ellipse->setColor(ccColor::blue);
 						ellipse->showColors(true);
 						ellipses->addChild(ellipse);
 
 						//store strain tensor on the graphic for reference
-						QVariantMap* map = new QVariantMap();
-						map->insert("Exx", U.getValue(0, 0) - 1.0); map->insert("Exy", U.getValue(0, 1)); map->insert("Exz", U.getValue(0, 2));
-						map->insert("Eyx", U.getValue(1, 0)); map->insert("Eyy", U.getValue(1, 1) - 1.0); map->insert("Eyz", U.getValue(1, 2));
-						map->insert("Ezx", U.getValue(2, 0)); map->insert("Ezy", U.getValue(2, 1)); map->insert("Ezz", U.getValue(2, 2) - 1.0);
-						map->insert("J", J);
-						ellipse->setMetaData(*map, true);
+						QVariantMap map;
+						map.insert("Exx", U.getValue(0, 0) - 1.0); map.insert("Exy", U.getValue(0, 1));       map.insert("Exz", U.getValue(0, 2));
+						map.insert("Eyx", U.getValue(1, 0));       map.insert("Eyy", U.getValue(1, 1) - 1.0); map.insert("Eyz", U.getValue(1, 2));
+						map.insert("Ezx", U.getValue(2, 0));       map.insert("Ezy", U.getValue(2, 1));       map.insert("Ezz", U.getValue(2, 2) - 1.0);
+						map.insert("J", J);
+						ellipse->setMetaData(map, true);
 
 						//create cubes to highlight gridding
 						ccGLMatrix T;

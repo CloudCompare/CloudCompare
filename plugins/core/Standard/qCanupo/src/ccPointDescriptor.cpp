@@ -510,7 +510,7 @@ QByteArray CorePointDescSet::toByteArray() const
 			for (int j = 0; j < descCount; ++j)
 			{
 				const CorePointDesc& desc = at(j);
-				assert(desc.params.size() == scaleCount * m_dimPerScale);
+				assert(desc.params.size() == static_cast<size_t>(scaleCount) * m_dimPerScale);
 				for (size_t i = 0; i < desc.params.size(); ++i)
 				{
 					*reinterpret_cast<float*>(buffer) = desc.params[i];
@@ -575,7 +575,7 @@ bool CorePointDescSet::fromByteArray(const QByteArray& data)
 
 	//scales
 	{
-		for (int i=0; i<scaleCount; ++i)
+		for (int i = 0; i < scaleCount; ++i)
 		{
 			scales[i] = *reinterpret_cast<const float*>(buffer);
 			buffer += sizeof(float);
@@ -591,8 +591,8 @@ bool CorePointDescSet::fromByteArray(const QByteArray& data)
 		for (int j=0; j<descCount; ++j)
 		{
 			CorePointDesc& desc = at(j);
-			assert(desc.params.size() == scaleCount * m_dimPerScale);
-			for (size_t i=0; i<scaleCount*m_dimPerScale; ++i)
+			assert(desc.params.size() == static_cast<size_t>(scaleCount) * m_dimPerScale);
+			for (size_t i = 0; i < static_cast<size_t>(scaleCount)*m_dimPerScale; ++i)
 			{
 				desc.params[i] = *reinterpret_cast<const float*>(buffer);
 				buffer += sizeof(float);
@@ -622,7 +622,9 @@ bool CorePointDescSet::setScales(const std::vector<float>& scales)
 		
 		size_t paramPerDesc = scaleCount*m_dimPerScale;
 		for (size_t i = 0; i < size(); ++i)
+		{
 			at(i).params.resize(paramPerDesc);
+		}
 	}
 	catch (const std::bad_alloc&)
 	{

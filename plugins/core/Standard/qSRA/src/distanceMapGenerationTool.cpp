@@ -353,7 +353,8 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 					double dist = radius - radius_th;
 
 					//we look at the closest segment (if the polyline is concave!)
-					if (!CCCoreLib::ScalarField::ValidValue(minDist) || dist * dist < minDist*minDist)
+					if (	!CCCoreLib::ScalarField::ValidValue(minDist)
+						||	(dist * dist) < (static_cast<double>(minDist) * minDist) )
 					{
 						minDist = static_cast<ScalarType>(dist);
 					}

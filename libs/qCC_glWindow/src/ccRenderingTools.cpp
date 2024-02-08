@@ -68,7 +68,7 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent/*=nu
 			if (*_zBuff > 0)
 			{
 				sumDist += *_zBuff;
-				sumDist2 += *_zBuff * *_zBuff;
+				sumDist2 += static_cast<double>(*_zBuff) * *_zBuff;
 				++count;
 			}
 		}

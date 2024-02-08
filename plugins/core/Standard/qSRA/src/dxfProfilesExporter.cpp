@@ -82,8 +82,8 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	CCVector3 profileBBMax;
 	profile->getAssociatedCloud()->getBoundingBox(profileBBMin,profileBBMax);
 	//Mix with the map's boundaries along 'Y'
-	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y)+heightShift);
-	double yMax = std::min(map->yMin + map->ySteps * map->yStep, static_cast<double>(profileBBMax.y)+heightShift);
+	double yMin = std::max(map->yMin, static_cast<double>(profileBBMin.y) + heightShift);
+	double yMax = std::min(map->yMin + map->ySteps * map->yStep, static_cast<double>(profileBBMax.y) + heightShift);
 	const double ySpan = yMax - yMin;
 	//For the 'X' dimension, it's easier to stick with the th. profile
 	const double xMin = profileBBMin.x;
@@ -93,7 +93,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	if (xSpan == 0.0 && ySpan == 0.0)
 	{
 		if (app)
-			app->dispToConsole(QString("Internal error: null profile?!"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("Internal error: null profile?!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -106,7 +106,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	if (!dw)
 	{
 		if (app)
-			app->dispToConsole(QString("Failed to open '%1' file for writing!").arg(filename),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("Failed to open '%1' file for writing!").arg(filename), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -289,7 +289,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 		{
 			unsigned vertexCount = profile->size();
 			dxf.writePolyline(	*dw,
-								DL_PolylineData(static_cast<int>(vertexCount),0,0,0),
+								DL_PolylineData(static_cast<int>(vertexCount), 0, 0, 0),
 								DL_Attributes(PROFILE_LAYER, DL_Codes::bylayer, -1, "BYLAYER", 1.0));
 
 			for (unsigned i = 0; i < vertexCount; ++i)
@@ -379,7 +379,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 				return false;
 			}
 
-			unsigned iMap = static_cast<unsigned>(static_cast<double>(angleStep * map->xSteps) / static_cast<double>(angularStepCount));
+			unsigned iMap = static_cast<unsigned>(static_cast<double>(angleStep * map->xSteps) / angularStepCount);
 			for (unsigned jMap = 0; jMap < map->ySteps; ++jMap)
 			{
 				const DistanceMapGenerationTool::MapCell& cell = map->at(iMap + jMap * map->xSteps);
@@ -396,7 +396,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 						const CCVector3* A = profile->getPoint(i - 1);
 						const CCVector3* B = profile->getPoint(i);
 
-						double alpha = static_cast<double>((step.height - A->y - heightShift) / (B->y - A->y));
+						double alpha = (step.height - A->y - heightShift) / (B->y - A->y);
 						if (alpha >= 0.0 && alpha <= 1.0)
 						{
 							//we deduce the right radius by linear interpolation
@@ -678,7 +678,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 			//if (params.profileTitles.size() == 1)
 			//{
 			//	//profile height
-			//	double height = yMin + static_cast<double>(i) / static_cast<double>(heightStepCount-1) * ySpan;
+			//	double height = yMin + (static_cast<double>(i) / (heightStepCount-1)) * ySpan;
 			//	layerName = QString(params.profileTitles[0]).arg(height,0,'f',params.precision);
 			//	layerName.replace(QChar(' '),QChar('_'));
 			//}
@@ -860,7 +860,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 		for (unsigned heightStep = 0; heightStep < heightStepCount; ++heightStep)
 		{			
 			//profile height
-			double height = yMin + static_cast<double>(heightStep) / static_cast<double>(heightStepCount-1) * ySpan;
+			double height = yMin + (static_cast<double>(heightStep) / (heightStepCount-1)) * ySpan;
 
 			//corresponding index in map
 			if (height < map->yMin || height >= map->yMin + static_cast<double>(map->ySteps) * map->yStep)
@@ -880,7 +880,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 					const CCVector3* A = profile->getPoint(i - 1);
 					const CCVector3* B = profile->getPoint(i);
 
-					double alpha = static_cast<double>((height - A->y - heightShift) / (B->y - A->y));
+					double alpha = (height - A->y - heightShift) / (B->y - A->y);
 					if (alpha >= 0.0 && alpha <= 1.0)
 					{
 						//we deduce the right radius by linear interpolation
@@ -922,11 +922,11 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 
 			assert(polySteps.size() == map->xSteps);
 			{
-				const DistanceMapGenerationTool::MapCell* cell = &map->at(jMap * map->xSteps);
-				for (unsigned iMap=0; iMap<map->xSteps; ++iMap, ++cell)
+				const DistanceMapGenerationTool::MapCell* cell = &map->at(static_cast<size_t>(jMap) * map->xSteps);
+				for (unsigned iMap = 0; iMap < map->xSteps; ++iMap, ++cell)
 				{
 					HorizStepData step;
-					step.angle_rad = 2.0*M_PI * static_cast<double>(iMap) / static_cast<double>(map->xSteps);
+					step.angle_rad = 2.0*M_PI * static_cast<double>(iMap) / map->xSteps;
 					step.deviation = cell->count ? cell->value : 0.0;
 					polySteps[iMap] = step;
 				}

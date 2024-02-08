@@ -688,7 +688,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 										if (ccScalarField::ValidValue(value))
 										{
 											ScalarType weight = 1.0 / (stdDev*stdDev);
-											scalarFieldWeightedSum += weight * value;
+											scalarFieldWeightedSum += static_cast<double>(weight) * value;
 											scalarFieldWeightSum += weight;
 										}
 									}

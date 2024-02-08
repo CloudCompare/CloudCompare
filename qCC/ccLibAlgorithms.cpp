@@ -73,7 +73,7 @@ namespace ccLibAlgorithms
 		return sfName;
 	}
 	
-	PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=12*/)
+	double GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn/*=12*/)
 	{
 		assert(cloud);
 		if (cloud && cloud->size() != 0)
@@ -87,29 +87,29 @@ namespace ccLibAlgorithms
 			
 			//new way
 			CCVector3 d = box.getDiagVec();
-			PointCoordinateType volume = d[0] * d[1] * d[2];
-			PointCoordinateType surface = pow(volume, static_cast<PointCoordinateType>(2.0/3.0));
-			PointCoordinateType surfacePerPoint = surface / cloud->size();
+			double volume = (static_cast<double>(d[0]) * d[1]) * d[2];
+			double surface = pow(volume, 2.0/3.0);
+			double surfacePerPoint = surface / cloud->size();
 			return sqrt(surfacePerPoint * knn);
 		}
 		
 		return -CCCoreLib::PC_ONE;
 	}
 	
-	PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=12*/)
+	double GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn/*=12*/)
 	{
-		PointCoordinateType sigma = -CCCoreLib::PC_ONE;
+		double sigma = std::numeric_limits<double>::max();
 		
-		size_t selNum = entities.size();
-		//computation of a first sigma guess
-		for (size_t i = 0; i < selNum; ++i)
+		for (ccHObject* entity : entities)
 		{
-			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entities[i]);
-			PointCoordinateType sigmaCloud = GetDefaultCloudKernelSize(pc);
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entity);
+			double sigmaCloud = GetDefaultCloudKernelSize(pc);
 			
 			//we keep the smallest value
-			if (sigma < 0 || sigmaCloud < sigma)
+			if (sigmaCloud < sigma)
+			{
 				sigma = sigmaCloud;
+			}
 		}
 		
 		return sigma;

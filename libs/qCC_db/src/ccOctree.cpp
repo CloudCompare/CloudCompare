@@ -903,7 +903,7 @@ PointCoordinateType ccOctree::GuessBestRadius(	ccGenericPointCloud* cloud,
 			}
 
 			//otherwise we have to find a better estimate for the radius
-			PointCoordinateType newRadius = radius;
+			double newRadius = radius;
 			//(warning: we consider below that the number of points is proportional to the SURFACE of the neighborhood)
 			assert(meanPop >= 1.0);
 			if (attempt == 0)
@@ -922,7 +922,7 @@ PointCoordinateType ccOctree::GuessBestRadius(	ccGenericPointCloud* cloud,
 				}
 
 				double slope = (radius*radius - lastRadius * lastRadius) / (meanPop - lastMeanPop);
-				PointCoordinateType newSquareRadius = lastRadius * lastRadius + (aimedPop - lastMeanPop) * slope;
+				double newSquareRadius = static_cast<double>(lastRadius) * lastRadius + (aimedPop - lastMeanPop) * slope;
 				if (newSquareRadius > 0)
 				{
 					newRadius = sqrt(newSquareRadius);
@@ -937,7 +937,7 @@ PointCoordinateType ccOctree::GuessBestRadius(	ccGenericPointCloud* cloud,
 			lastRadius = radius;
 			lastMeanPop = meanPop;
 
-			radius = newRadius;
+			radius = static_cast<PointCoordinateType>(newRadius);
 		}
 	}
 

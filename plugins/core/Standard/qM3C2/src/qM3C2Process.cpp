@@ -906,7 +906,7 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 		//get best levels for neighbourhood extraction on both octrees
 		assert(s_M3C2Params.cloud1Octree && s_M3C2Params.cloud2Octree);
-		PointCoordinateType equivalentRadius = pow(s_M3C2Params.projectionDepth * s_M3C2Params.projectionDepth * s_M3C2Params.projectionRadius, CCCoreLib::PC_ONE / 3);
+		PointCoordinateType equivalentRadius = static_cast<PointCoordinateType>(pow((static_cast<double>(s_M3C2Params.projectionDepth) * s_M3C2Params.projectionDepth) * s_M3C2Params.projectionRadius, 1.0 / 3.0));
 		s_M3C2Params.level1 = s_M3C2Params.cloud1Octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(equivalentRadius);
 		if (app)
 			app->dispToConsole(QString("[M3C2] Working subdivision level (cloud #1): %1").arg(s_M3C2Params.level1), ccMainAppInterface::STD_CONSOLE_MESSAGE);

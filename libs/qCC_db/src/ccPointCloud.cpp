@@ -4827,7 +4827,7 @@ bool ccPointCloud::Grid::fromFile(QFile& in, short dataVersion, int flags, Loade
 
 	try
 	{
-		indexes.resize(w*h);
+		indexes.resize(static_cast<size_t>(w)*h);
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -4836,7 +4836,7 @@ bool ccPointCloud::Grid::fromFile(QFile& in, short dataVersion, int flags, Loade
 
 	//indexes (dataVersion>=41)
 	int* _index = indexes.data();
-	for (uint32_t j = 0; j < w*h; ++j, ++_index)
+	for (size_t j = 0; j < static_cast<size_t>(w)*h; ++j, ++_index)
 	{
 		int32_t index = 0;
 		if (in.read((char*)&index, 4) < 0)
@@ -5484,7 +5484,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 			//empty grid, we skip it
 			continue;
 		}
-		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != scanGrid->h * scanGrid->w)
+		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != static_cast<size_t>(scanGrid->h) * scanGrid->w)
 		{
 			//invalid grid
 			ccLog::Warning(QString("[computeNormalsWithGrids] Grid structure #%i is invalid").arg(gi + 1));
@@ -5699,7 +5699,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=nullptr*/)
 			//empty grid, we skip it
 			continue;
 		}
-		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != scanGrid->h * scanGrid->w)
+		if (!scanGrid || scanGrid->h == 0 || scanGrid->w == 0 || scanGrid->indexes.size() != static_cast<size_t>(scanGrid->h) * scanGrid->w)
 		{
 			//invalid grid
 			ccLog::Warning(QString("[orientNormalsWithGrids] Grid structure #%i is invalid").arg(gi + 1));
@@ -6155,7 +6155,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 
 	ccMesh* mesh = new ccMesh(const_cast<ccPointCloud*>(this));
 	mesh->setName("Grid mesh");
-	if (!mesh->reserve(grid.h * grid.w * 2))
+	if (!mesh->reserve((static_cast<size_t>(grid.h) * grid.w) * 2))
 	{
 		ccLog::Warning("[ccPointCloud::triangulateGrid] Not enough memory");
 		return nullptr;
@@ -6559,7 +6559,7 @@ ccPointCloud::Grid::Grid()
 
 QImage ccPointCloud::Grid::toImage() const
 {
-	if (colors.size() == w * h)
+	if (colors.size() == static_cast<size_t>(w) * h)
 	{
 		QImage image(w, h, QImage::Format_ARGB32);
 		for (unsigned j = 0; j < h; ++j)
@@ -6583,7 +6583,7 @@ bool ccPointCloud::Grid::init(unsigned rowCount, unsigned colCount, bool withRGB
 	size_t scanSize = static_cast<size_t>(rowCount) * colCount;
 	try
 	{
-		indexes.resize(rowCount * colCount, -1);
+		indexes.resize(scanSize, -1);
 		if (withRGB)
 		{
 			colors.resize(scanSize, ccColor::Rgb(0, 0, 0));

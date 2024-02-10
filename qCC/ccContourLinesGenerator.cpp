@@ -306,7 +306,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 			xDim += 2;
 			yDim += 2;
 		}
-		std::vector<double> grid(xDim * yDim, 0);
+		std::vector<double> grid(static_cast<size_t>(xDim) * yDim, 0);
 
 		//fill grid
 		{

@@ -240,7 +240,7 @@ ccQuadric* ccQuadric::Fit(CCCoreLib::GenericIndexedCloudPersist *cloud, double* 
 			const CCVector3* P = tempCloud.getPoint(k);
 
 			PointCoordinateType z = eq[0] + eq[1] * P->u[dX] + eq[2] * P->u[dY] + eq[3] * P->u[dX] * P->u[dX] + eq[4] * P->u[dX] * P->u[dY] + eq[5] * P->u[dY] * P->u[dY];
-			*rms += (z - P->z)*(z - P->z);
+			*rms += static_cast<double>(z - P->z)*(z - P->z);
 		}
 
 		if (count)

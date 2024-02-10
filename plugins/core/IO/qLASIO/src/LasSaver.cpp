@@ -79,7 +79,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 		m_laszipHeader.vlrs                              = vlrs;
 		m_laszipHeader.number_of_variable_length_records = static_cast<laszip_U32>(newNumVlrs);
 
-		m_laszipHeader.offset_to_point_data += LasDetails::SizeOfVlrs(&m_laszipHeader.vlrs[newNumVlrs - 1], 1);
+		m_laszipHeader.offset_to_point_data += LasDetails::SizeOfVlrs(&vlrs[newNumVlrs - 1], 1);
 	}
 
 	m_fieldsSaver.setStandarFields(std::move(parameters.standardFields));

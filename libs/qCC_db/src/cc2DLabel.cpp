@@ -1879,7 +1879,7 @@ bool cc2DLabel::pointPicking(	const CCVector2d& clickPos,
 			CCVector3d XP = (P.toDouble() - X);
 			double squareDist = (XP - XP.dot(xy) * xy).norm2();
 
-			if (squareDist <= pp.markerScale * pp.markerScale)
+			if (squareDist <= static_cast<double>(pp.markerScale) * pp.markerScale)
 			{
 				if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
 				{

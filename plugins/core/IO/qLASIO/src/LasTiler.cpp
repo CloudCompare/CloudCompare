@@ -60,7 +60,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 	ccLog::Print(QString("Tiles: %1 x %2").arg(options.numTiles0).arg(options.numTiles1));
 
 	std::vector<laszip_POINTER> writers;
-	writers.resize(options.numTiles0 * options.numTiles1, nullptr);
+	writers.resize(static_cast<size_t>(options.numTiles0) * options.numTiles1, nullptr);
 
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 

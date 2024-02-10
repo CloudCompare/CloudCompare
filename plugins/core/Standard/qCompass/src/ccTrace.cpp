@@ -608,7 +608,7 @@ int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 				if ( CCCoreLib::GreaterThanSquareEpsilon( norm2 ) )
 				{
 					//color magnitude difference
-					int deltaValue = p_value - c_value;
+					double deltaValue = p_value - c_value;
 					//divide by norm^2 to get distance-weighted gradient
 					deltaValue /= norm2; //we divide by 'norm' to get the normalized direction, and by 'norm' again to get the gradient (hence we use the squared norm)
 					//sum stuff
@@ -1051,17 +1051,17 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					const CCVector3* P = m_cloud->getPoint(p);
 					ccGL::Translate(glFunc, P->x, P->y, P->z);
-					float scale = context.labelMarkerSize * m_relMarkerScale * fmin(pSize, 4) * 0.2;
+					double scale = context.labelMarkerSize * (m_relMarkerScale * (fmin(pSize, 4) * 0.2));
 					if (viewportParams.perspectiveView && viewportParams.zFar > 0)
 					{
 						//in perspective view, the actual scale depends on the distance to the camera!
 						const double* M = camera.modelViewMat.data();
 						double d = (camera.modelViewMat * (*P)).norm();
 						double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
-						scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
+						scale *= sqrt(d / unitD); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 					}
 
-					glFunc->glScalef(scale, scale, scale);
+					glFunc->glScaled(scale, scale, scale);
 					c_unitPointMarker->draw(markerContext);
 					glFunc->glPopMatrix();
 				}

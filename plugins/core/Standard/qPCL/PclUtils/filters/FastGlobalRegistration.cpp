@@ -64,12 +64,12 @@ void CApp::LoadFeature(const Points& pts, const Features& feat)
 template <typename T>
 static fgr::KDTree BuildKDTree(const vector<T>& data)
 {
-	const int rows = static_cast<int>(data.size());
-	const int dim = static_cast<int>(data.front().size());
+	const size_t rows = data.size();
+	const size_t dim = data.front().size();
 
 	Distances dataset(rows * dim);
-	for (int i = 0; i < rows; i++)
-		for (int j = 0; j < dim; j++)
+	for (size_t i = 0; i < rows; i++)
+		for (size_t j = 0; j < dim; j++)
 			dataset[i * dim + j] = static_cast<float>(data[i][j]);
 
 	flann::Matrix<float> dataset_mat(dataset.data(), rows, dim);

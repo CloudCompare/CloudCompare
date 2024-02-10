@@ -1651,55 +1651,53 @@ PointCoordinateType Dish::surface() const
 {
 	if ( CCCoreLib::GreaterThanEpsilon( radius ) )
 	{
-		PointCoordinateType r = static_cast<PointCoordinateType>(0.5f*diameter);
+		double r = 0.5*diameter;
 		if (CCCoreLib::LessThanEpsilon(std::abs(2 * height - diameter)))
 		{
-			return static_cast<PointCoordinateType>(2.0*M_PI)*PDMS_SQR(r);
+			return static_cast<PointCoordinateType>(2.0*M_PI*PDMS_SQR(r));
 		}
 		if (2 * height > diameter)
 		{
 			PointCoordinateType a = acos(r / height);
-			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r) + (a*r*height / sin(a)));
+			return static_cast<PointCoordinateType>(M_PI*(PDMS_SQR(r) + (a*r*height / sin(a))));
 		}
 		else
 		{
 			PointCoordinateType a = acos(height / r);
-			return static_cast<PointCoordinateType>(M_PI)*(PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a))*log((1 + sin(a)) / cos(a))));
+			return static_cast<PointCoordinateType>(M_PI*(PDMS_SQR(r) + ((PDMS_SQR(height) / sin(a))*log((1 + sin(a)) / cos(a)))));
 		}
 	}
-	return static_cast<PointCoordinateType>(M_PI)*diameter*height;
+	return static_cast<PointCoordinateType>(M_PI*diameter*height);
 }
 
 std::pair<int, int> Dish::write(std::ostream &output, int nbtabs) const
 {
-	int i;
-
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW DISH";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "RADIUS " << radius << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DIAMETER " << diameter << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
@@ -1720,8 +1718,8 @@ bool Cone::setValue(Token t, PointCoordinateType value)
 
 PointCoordinateType Cone::surface() const
 {
-	PointCoordinateType r1;
-	PointCoordinateType r2;
+	double r1 = 0;
+	double r2 = 0;
 	if (dtop < dbottom)
 	{
 		r1 = dtop;
@@ -1733,43 +1731,41 @@ PointCoordinateType Cone::surface() const
 		r2 = dtop;
 	}
 
-	PointCoordinateType h1 = (r1*height) / (r2 - r1);
-	PointCoordinateType a1 = static_cast<PointCoordinateType>(M_PI)*r1*sqrt(PDMS_SQR(r1) + PDMS_SQR(h1));
-	PointCoordinateType a2 = static_cast<PointCoordinateType>(M_PI)*r2*sqrt(PDMS_SQR(r2) + PDMS_SQR(h1 + height));
+	double h1 = (r1*height) / (r2 - r1);
+	double a1 = M_PI*r1*sqrt(PDMS_SQR(r1) + PDMS_SQR(h1));
+	double a2 = M_PI*r2*sqrt(PDMS_SQR(r2) + PDMS_SQR(h1 + height));
 
-	return a2 - a1;
+	return static_cast<PointCoordinateType>(a2 - a1);
 }
 
 std::pair<int, int> Cone::write(std::ostream &output, int nbtabs) const
 {
-	int i;
-
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "NEW CONE";
 	if (strlen(name))
 		output << " /" << name;
 	output << std::endl;
 
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "HEIGHT " << height << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DBOTTOM " << dbottom << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "DTOP " << dtop << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 
@@ -1806,9 +1802,7 @@ PointCoordinateType Box::surface() const
 
 std::pair<int, int> Box::write(std::ostream &output, int nbtabs) const
 {
-	int i;
-
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	if (negative)
 		output << "NEW NBOX";
@@ -1818,25 +1812,25 @@ std::pair<int, int> Box::write(std::ostream &output, int nbtabs) const
 		output << " /" << name;
 	output << std::endl;
 
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "XLENGTH " << lengths[0] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "YLENGTH " << lengths[1] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ZLENGTH " << lengths[2] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "AT X " << position[0] << " Y " << position[1] << " Z " << position[2] << std::endl;
-	for (i = 0; i <= nbtabs; i++)
+	for (int i = 0; i <= nbtabs; i++)
 		output << "\t";
 	output << "ORI ";
 	output << "X is X " << orientation[0][0] << " Y " << orientation[0][1] << " Z " << orientation[0][2];
 	output << " AND Z is X " << orientation[2][0] << " Y " << orientation[2][1] << " Z " << orientation[2][2] << std::endl;
 
-	for (i = 0; i < nbtabs; i++)
+	for (int i = 0; i < nbtabs; i++)
 		output << "\t";
 	output << "END" << std::endl;
 

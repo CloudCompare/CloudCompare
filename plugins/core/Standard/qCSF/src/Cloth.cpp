@@ -60,7 +60,7 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 	, step_x(_step_x)
 	, step_y(_step_y)
 {
-	particles.resize(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
+	particles.resize(static_cast<size_t>(num_particles_width)*static_cast<size_t>(num_particles_height)); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 
 	double squareTimeStep = time_step * time_step;
 

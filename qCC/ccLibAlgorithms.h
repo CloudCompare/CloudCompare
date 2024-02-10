@@ -29,10 +29,10 @@ class ccProgressDialog;
 namespace ccLibAlgorithms
 {
 	//! Returns a default first guess for algorithms kernel size (one cloud)
-	PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn = 12);
+	double GetDefaultCloudKernelSize(ccGenericPointCloud* cloud, unsigned knn = 12);
 	
 	//! Returns a default first guess for algorithms kernel size (several clouds)
-	PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
+	double GetDefaultCloudKernelSize(const ccHObject::Container& entities, unsigned knn = 12);
 	
 	/*** CCCoreLib "standalone" algorithms ***/
 

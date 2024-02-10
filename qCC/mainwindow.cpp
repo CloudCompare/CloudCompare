@@ -5686,7 +5686,7 @@ void MainWindow::doActionSORFilter()
 
 void MainWindow::doActionFilterNoise()
 {
-	PointCoordinateType kernelRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	double kernelRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
 
 	ccNoiseFilterDlg noiseDlg(this);
 
@@ -5715,7 +5715,7 @@ void MainWindow::doActionFilterNoise()
 		return;
 
 	//update semi-persistent/dynamic parameters
-	kernelRadius = static_cast<PointCoordinateType>(noiseDlg.radiusDoubleSpinBox->value());
+	kernelRadius = noiseDlg.radiusDoubleSpinBox->value();
 	s_noiseFilterUseKnn = noiseDlg.knnRadioButton->isChecked();
 	s_noiseFilterKnn = noiseDlg.knnSpinBox->value();
 	s_noiseFilterUseAbsError = noiseDlg.absErrorRadioButton->isChecked();
@@ -5743,7 +5743,7 @@ void MainWindow::doActionFilterNoise()
 
 		//computation
 		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::noiseFilter(	cloud,
-																							kernelRadius,
+																							static_cast<PointCoordinateType>(kernelRadius),
 																							s_noiseFilterNSigma,
 																							s_noiseFilterRemoveIsolatedPoints,
 																							s_noiseFilterUseKnn,
@@ -8391,7 +8391,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		return;
 
 	//spherical neighborhood extraction radius
-	PointCoordinateType sphereRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
+	double sphereRadius = ccLibAlgorithms::GetDefaultCloudKernelSize(m_selectedEntities);
 	if (sphereRadius < 0)
 	{
 		ccConsole::Error(tr("Invalid kernel size!"));
@@ -8399,10 +8399,10 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 	}
 
 	bool ok;
-	double val = QInputDialog::getDouble(this, tr("SNE test"), tr("Radius:"), static_cast<double>(sphereRadius), DBL_MIN, 1.0e9, 8, &ok);
+	double val = QInputDialog::getDouble(this, tr("SNE test"), tr("Radius:"), sphereRadius, DBL_MIN, 1.0e9, 8, &ok);
 	if (!ok)
 		return;
-	sphereRadius = static_cast<PointCoordinateType>(val);
+	sphereRadius = val;
 
 	QString sfName = tr("Spherical extraction test (%1)").arg(sphereRadius);
 
@@ -8448,7 +8448,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		eTimer.start();
 
 		size_t extractedPoints = 0;
-		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(sphereRadius);
+		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(sphereRadius));
 		std::random_device rd;   // non-deterministic generator
 		std::mt19937 gen(rd());  // to seed mersenne twister.
 		std::uniform_int_distribution<unsigned> dist(0, cloud->size() - 1);
@@ -8458,11 +8458,16 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		{
 			unsigned randIndex = dist(gen);
 			CCCoreLib::DgmOctree::NeighboursSet neighbours;
-			octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex), sphereRadius, neighbours, level);
+			octree->getPointsInSphericalNeighbourhood(	*cloud->getPoint(randIndex),
+														static_cast<PointCoordinateType>(sphereRadius),
+														neighbours,
+														level );
 			size_t neihgboursCount = neighbours.size();
 			extractedPoints += neihgboursCount;
 			for (size_t k = 0; k < neihgboursCount; ++k)
+			{
 				cloud->setPointScalarValue(neighbours[k].pointIndex, static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
+			}
 		}
 		ccConsole::Print(tr("[SNE_TEST] Mean extraction time = %1 ms (radius = %2, mean (neighbours) = %3)").arg(eTimer.elapsed()).arg(sphereRadius).arg(extractedPoints / static_cast<double>(samples), 0, 'f', 1));
 
@@ -9107,7 +9112,7 @@ void MainWindow::doActionExportCloudInfo()
 					{
 						++validCount;
 						sfSum += val;
-						sfSum2 += val*val;
+						sfSum2 += static_cast<double>(val)*val;
 					}
 				}
 				csvStream << validCount << ';' /*"SF valid values;"*/;

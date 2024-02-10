@@ -554,13 +554,13 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	unsigned remainingPointCount = pointCount;
 	while (remainingPointCount != 0)
 	{
-		unsigned thisChunkSize = std::min(remainingPointCount,chunkSize);
+		unsigned thisChunkSize = std::min(remainingPointCount, chunkSize);
 
 		//load arrays
 		for (unsigned i = 0; i < thisChunkSize; ++i, ++index)
 		{
 			//we apply the Global Scale but not the Global Shift (already incorporated in the 'pose' matrix above)
-			CCVector3d Psensor = cloud->getPointPersistentPtr(i)->toDouble() / globalScale;
+			CCVector3d Psensor = cloud->getPointPersistentPtr(index)->toDouble() / globalScale;
 
 			//DGM: according to E57 specifications, the points are saved in the local CS
 			//(i.e. in the sensor 'input' coordinate system)

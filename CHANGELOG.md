@@ -133,8 +133,8 @@ v2.13.beta (???) - (??/??/2024)
 		- it is possible to use FIRST and LAST at the same time. Example: xx...xx
 	- REMOVE_SENSORS
 		- removes all the sensors (both TLS and cameras, directly under clouds, meshes or mesh vertices)
-	- VERBOSITY [0-3] to set verbosity level (0 standard or higher, 1 debug or higher, 2 warning or higher,3 only error)
-		- to hide plugin messages it should be the first argument even before -SILENT, in this case -SILENT can be the second argument.
+	- VERBOSITY [0-4] to set verbosity level (0: verbose, 1: standard, 2: important, 3: warnings and errors only, 4: errors only)
+		- to hide plugin loading logs, it should be set as first argument (even before -SILENT, in which case -SILENT can be the second argument)
 
 - Improvements:
 

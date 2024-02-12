@@ -19,6 +19,7 @@
 #define Q_PCL_PLUGIN_MY_POINT_TYPES_H
 
 //PCL
+#include <pcl/pcl_config.h>
 #include <pcl/register_point_struct.h>
 #include <pcl/point_types.h>
 
@@ -109,6 +110,22 @@ struct UInt8Scalar
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 };
+
+#if PCL_VERSION_COMPARE(>=, 1, 13, 1)
+struct Int64Scalar
+{
+	std::int64_t S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+};
+
+struct UInt64Scalar
+{
+	std::uint64_t S5c4laR;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+};
+#endif // PCL_VERSION_COMPARE(>=, 1, 13, 1)
 
 //! PCL custom point type used for reading intensity data
 struct OnlyNormals
@@ -231,6 +248,16 @@ POINT_CLOUD_REGISTER_POINT_STRUCT (Int8Scalar,
 POINT_CLOUD_REGISTER_POINT_STRUCT (UInt8Scalar,
 	(std::uint8_t, S5c4laR, S5c4laR)
 	)
+
+#if PCL_VERSION_COMPARE(>=, 1, 13, 1)
+POINT_CLOUD_REGISTER_POINT_STRUCT (Int64Scalar,
+	(std::int64_t, S5c4laR, S5c4laR)
+	)
+
+POINT_CLOUD_REGISTER_POINT_STRUCT (UInt64Scalar,
+	(std::uint64_t, S5c4laR, S5c4laR)
+	)
+#endif // PCL_VERSION_COMPARE(>=, 1, 13, 1)
 
 POINT_CLOUD_REGISTER_POINT_STRUCT (OnlyNormals,
 	(float, normal_x, normal_x)

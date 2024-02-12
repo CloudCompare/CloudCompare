@@ -52,6 +52,11 @@
 #include <sstream>
 #include <iostream>
 
+#if defined(_OPENMP)
+//OpenMP
+#include <omp.h>
+#endif
+
 CSF::CSF(wl::PointCloud& cloud, const Parameters& params)
 	: m_pointCloud(cloud)
 	, m_params(params)
@@ -117,7 +122,9 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 		double squareTimeStep = m_params.time_step * m_params.time_step;
 
 #if defined(_OPENMP)
-        omp_set_num_threads(ccQtHelpers::GetMaxThreadCount_OMP());
+		//save the current max number of threads before changing it
+		int maxThreadCount = omp_get_max_threads();
+        omp_set_num_threads(ccQtHelpers::GetMaxThreadCount(maxThreadCount));
 #endif
 
 		//do the filtering
@@ -161,6 +168,10 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 
 		if (wasCancelled)
 		{
+#if defined(_OPENMP)
+			//restore the original max number of threads
+			omp_set_num_threads(maxThreadCount);
+#endif
 			return false;
 		}
 
@@ -186,6 +197,11 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 		{
 			clothMesh = cloth.toMesh();
 		}
+
+#if defined(_OPENMP)
+		//restore the original max number of threads
+		omp_set_num_threads(maxThreadCount);
+#endif
 
 		return result;
 	}

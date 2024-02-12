@@ -1082,8 +1082,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 #endif
 
 #if defined(_OPENMP) && !defined(_DEBUG) && !defined(TEST_PICKING)
-	omp_set_num_threads(omp_get_max_threads());
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int i = 0; i < static_cast<int>(size()); ++i)
 	{

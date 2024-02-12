@@ -568,8 +568,7 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 		ccGLMatrix transMat = m_glTrans.inverse();
 
 #if defined(_OPENMP)
-		omp_set_num_threads(omp_get_max_threads());
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 		for (int i = 0; i < count; ++i)
 		{
@@ -584,8 +583,7 @@ void ccClipBox::flagPointsInside(	ccGenericPointCloud* cloud,
 	else
 	{
 #if defined(_OPENMP)
-		omp_set_num_threads(omp_get_max_threads());
-		#pragma omp parallel for
+		#pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 		for (int i = 0; i < count; ++i)
 		{

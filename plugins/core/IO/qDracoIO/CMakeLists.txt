@@ -6,12 +6,15 @@ if( PLUGIN_IO_QDRACO )
 	find_package( Draco REQUIRED )
 
 	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
-	
-	target_include_directories( ${PROJECT_NAME} PRIVATE ${DRACO_INCLUDE_DIR} )
-	
+
 	if( MSVC )
+
+		target_include_directories( ${PROJECT_NAME} PRIVATE ${DRACO_INCLUDE_DIRS} )
 		target_link_libraries( ${PROJECT_NAME} ${Draco_DIR}/../../lib/${DRACO_LIBRARIES}.lib )
+
 	elseif( UNIX )
+
+		target_include_directories( ${PROJECT_NAME} PRIVATE ${DRACO_INCLUDE_DIR} )
 		set ( DRACO_INCLUDE_DIR "" CACHE PATH "Draco include dir" )
 		set ( DRACO_LIB_DIR "" CACHE PATH "Draco library dir" )
 		
@@ -23,8 +26,11 @@ if( PLUGIN_IO_QDRACO )
 		endif()
 		
 		target_link_libraries( ${PROJECT_NAME} ${DRACO_LIBRARIES} )
+
 	elseif()
+
 		target_link_libraries( ${PROJECT_NAME} ${DRACO_LIBRARIES} )
+
 	endif()
 
 	add_subdirectory( include )

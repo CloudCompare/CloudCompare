@@ -7,7 +7,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 
 	- New menu entry: Save project
 		- File > Save project (or CTRL+SHIFT+S)
-		- Saves all entitites in the DB as a bin file
+		- Saves all entities in the DB as a bin file
 
 	- Tools > Fit > circle
 		- fits a 2D circle on a 3D point cloud (thanks to https://github.com/truebelief)
@@ -27,7 +27,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 	
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
-		- can be enabled and modifed in the Camera Parameters dialog or via
+		- can be enabled and modified in the Camera Parameters dialog or via
 			CTRL + mouse wheel (near) or CTRL + SHIFT + mouse wheel (far)
 		- the user shall now input actual distances and not percentages
 		- works for all projection modes (orthographic and perspective)
@@ -94,7 +94,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 			- band can be any mix of 'R', 'G' and 'B' (ex: 'G' or 'RB' or 'RGB')
 			- selected color component values will be scaled so that
 				[INPUT_RANGE_MIN INPUT_RANGE_MAX] becomes [OUTPUT_RANGE_MIN OUTPUT_RANGE_MAX]
-				(values ouside of the input range will also be scaled)
+				(values outside of the input range will also be scaled)
     - RDP {opt: min distance between points}
     	- removes duplicate points of all loaded clouds
 		- the min distance between points to consider them as duplicated can be set (1e-8 by default)
@@ -158,14 +158,14 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 	- Tools > Projection > Unroll
 		- it is now possible to set any 3D axis for the cylinder or the cone
 		- the cone projection type is now set in a separate combo-box to make things clearer
-		- cone projection methods are 'Conical', 'Cylidrical (fixed radius)' and 'Cylidrical (adaptive radius)'
+		- cone projection methods are 'Conical', 'Cylindrical (fixed radius)' and 'Cylindrical (adaptive radius)'
 		- the conical projection method now takes an additional 'span ratio' parameter as input (to reduce or increase the conical projection angular span)
 		- button to flip the 3D axis
 		- ability to paste the axis and the axis point from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- option to choose an existing cylinder or cone entity in the DB tree, and use it to set the unrolling parameters
 		- option to output the unrolled cloud in an arbitrary coordinate system (X: unroll angle / Y = distance to primitive / Z = longitude)
 		
-	- Edit > Apply Tranformation
+	- Edit > Apply Transformation
 		- new shortcut buttons to set the rotation axis to I(1,0,0), J(0,1,0) or K(0,0,1)
 		- new option (checkbox): 'Apply to global coordinates'
 			- this allows to apply the transformation matrix to the original Global coordinates instead of the local ones.
@@ -178,7 +178,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- when using a negative scale on a point cloud, the normals will now be inverted accordingly
 
 	- Edit > Waveform > 2D Waveform viewer
-		- the point which waveform is edited is now spoted in the 3D view and information is displayed as in with the pickin tool
+		- the point which waveform is edited is now spotted in the 3D view and information is displayed as in with the picking tool
 
 	- Multi-threading
 		- If possible, CC will now try to use less threads/cores than the maximum number, so as to let the application breath
@@ -262,10 +262,10 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 	- PCD files
 		- better management of PCD files with large coordinates (the Global Shift & Scale dialog will appear)
 		- at export time, if the previous sensor is too far from the points, it might not be saved to preserve numerical accuracy
-			(the previous sensor will be replaced by a default one positionned accordingly to the Global shift)
+			(the previous sensor will be replaced by a default one positioned accordingly to the Global shift)
 
 	- STP files
-		- the triangles of meshes tesselated from STEP files should now all be properly oriented
+		- the triangles of meshes tessellated from STEP files should now all be properly oriented
 		- the linear deflection is asked only once when multiple files are loaded at the same time
 
 	- PLY files
@@ -279,7 +279,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- new operation: 'MIN' (to get the minimum values between 2 scalar fields)
 		- new operation: 'MAX' (to get the maximum values between 2 scalar fields)
 		- new operation: 'SET' (to set a constant value)
-		- new operation: 'ABS' (to compute the absolue value)
+		- new operation: 'ABS' (to compute the absolute value)
 
 	- Command line
 		- logging should be more responsive (both in the standard console-based mode and the silent mode)
@@ -324,7 +324,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		    - -EMPTY_FILL KRIGING
 			- -KRIGING_KNN {value}
 				- to set the number of neighbors for the Kriging algorithm
-			- to be used adter -PROJ or -SF_PROJ
+			- to be used after -PROJ or -SF_PROJ
 				- MED 
 				- INV_VAR (+ std. dev. SF index or name)
 
@@ -402,7 +402,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- the dialog is similar to the 'Set SF(s) as normal' tool
 
 - Bug fixes:
-	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Tranformation) and then exporting
+	- PCD: when transforming a cloud with a sensor (either manually, or via a registration tool, or via Edit > Apply Transformation) and then exporting
 		the cloud to a PCD file, both the points AND the sensor were transformed, resulting in the PCD file coordinates to be in the wrong coordinate
 		system (as if the transformation had been applied twice)
 	- The QTextStream::pos method is slow and unreliable. This could cause some issue when loading ASCII files.

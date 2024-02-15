@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="basicParamTab">
       <attribute name="title">
@@ -52,7 +52,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Point Fornat</string>
+             <string>Point Format</string>
             </property>
            </widget>
           </item>

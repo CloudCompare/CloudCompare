@@ -159,7 +159,7 @@ p, li { white-space: pre-wrap; }
             <enum>QFrame::NoFrame</enum>
            </property>
            <property name="pixmap">
-            <pixmap>:/CC/plugin/qCSF/pp.png</pixmap>
+            <pixmap resource="../qCSF.qrc">:/CC/plugin/qCSF/images/pp.png</pixmap>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

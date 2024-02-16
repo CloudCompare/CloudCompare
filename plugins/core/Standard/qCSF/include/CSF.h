@@ -33,7 +33,6 @@
 
 //system
 #include <vector>
-#include <string>
 
 class ccMainAppInterface;
 class ccPointCloud;
@@ -51,30 +50,26 @@ public:
 		bool smoothSlope = true;
 		double time_step = 0.65;
 		double class_threshold = 0.5;
-		double cloth_resolution = 1.5;
+		double cloth_resolution = 1.0;
 		int rigidness = 3;
 		int iterations = 500;
 
-		//  constants
-		double clothYHeight = 0.05; // origin cloth height
-		int clothBuffer = 2; // cloth buffer (grid margin size)
-		double gravity = 0.2;
+		// constants
+		const double clothYHeight = 0.05; // origin cloth height
+		const int clothBuffer = 2; // cloth buffer (grid margin size)
+		const double gravity = 0.2;
 	};
 
-	CSF(wl::PointCloud& cloud, const Parameters& params);
-	virtual ~CSF() = default;
-
-	//! The main program: Do filtering
-	bool do_filtering(	std::vector<unsigned>& groundIndexes,
-						std::vector<unsigned>& offGroundIndexes,
+	//! Main filtering routine
+	static bool Apply(	const wl::PointCloud& csfPointCloud,
+						const Parameters& params,
+						std::vector<bool>& isGround,
 						bool exportClothMesh,
 						ccMesh* &clothMesh,
 						ccMainAppInterface* app = nullptr,
 						QWidget* parent = nullptr);
 
-	//! Shortcut for CloudCompare clouds
-	/** \return the ground and off-ground clouds if successful
-	**/
+	//! Shortcut for CloudCompare
 	static bool Apply(	ccPointCloud* cloud,
 						const Parameters& params,
 						ccPointCloud*& groundCloud,
@@ -82,10 +77,4 @@ public:
 						bool exportClothMesh,
 						ccMesh*& clothMesh,
 						ccMainAppInterface* app = nullptr);
-
-public:
-
-private:
-	Parameters m_params;
-	wl::PointCloud& m_pointCloud;
 };

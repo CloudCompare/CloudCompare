@@ -1,3 +1,5 @@
+#pragma once
+
 //#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
@@ -43,9 +45,6 @@
 //using discrete steps (drop and pull) to approximate the physical process
 //Finding the max height value in nearest N points aroud every particles, as the lowest position where the particles can get.在每个不料点周围找最邻近的N个点，以高程最大值作为所能到达的最低点。
 
-#ifndef _CLOTH_H_
-#define _CLOTH_H_
-
 //local
 #include "Vec3.h"
 #include "Particle.h"
@@ -55,16 +54,6 @@
 #include <string>
 
 class ccMesh;
-
-struct XY
-{
-	XY(int x1, int y1)
-		: x(x1)
-		, y(y1)
-	{}
-	int x;
-	int y;
-};
 
 class Cloth
 {
@@ -130,7 +119,7 @@ public:
 		this->heightvals = heightvals;
 	}
 
-	/** This is an important methods where the time is progressed one time step for the entire cloth.
+	/** This is an important method where the time is progressed one time step for the entire cloth.
 		This includes calling satisfyConstraint() for every constraint, and calling timeStep() for all particles
 	**/
 	double timeStep();
@@ -143,12 +132,21 @@ public:
 
 	//implementing postpocessing to movable particles
 	void movableFilter();
-	//找到每组可移动点，这个连通分量周围的不可移动点。从四周向中间逼近
+
+	struct XY
+	{
+		XY(int x1, int y1)
+			: x(x1)
+			, y(y1)
+		{}
+		int x;
+		int y;
+	};
+
 	void findUnmovablePoint(const std::vector<XY>& connected,
 							const std::vector<double>& heightvals,
 							std::vector<int>& edgePoints);
 	
-	//直接对联通分量进行边坡处理
 	void handle_slop_connected(	const std::vector<int>& edgePoints,
 								const std::vector<XY>& connected,
 								const std::vector< std::vector<int> >& neighbors,
@@ -163,5 +161,3 @@ public:
 	ccMesh* toMesh() const;
 
 };
-
-#endif

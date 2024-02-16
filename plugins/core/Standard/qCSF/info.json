@@ -31,18 +31,18 @@
 			"name" : "Hongtao Wang"
 		}
 	],
-  "references": [
-    {
-      "text": "An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation",
-      "url": "http://www.mdpi.com/2072-4292/8/6/501"
-    },
-    {
-      "text": "RAMM laboratory, School of Geography, Beijing Normal University",
-      "url": "http://ramm.bnu.edu.cn/"
-    },
-    {
-      "text": "Documentation",
-      "url": "http://www.cloudcompare.org/doc/wiki/index.php?title=CSF_(plugin)"
-    }
-  ]
+	"references": [
+		{
+			"text": "An Easy-to-Use Airborne LiDAR Data Filtering Method Based on Cloth Simulation",
+			"url": "http://www.mdpi.com/2072-4292/8/6/501"
+		},
+		{
+			"text": "RAMM laboratory, School of Geography, Beijing Normal University",
+			"url": "http://ramm.bnu.edu.cn/"
+		},
+		{
+			"text": "Documentation",
+			"url": "http://www.cloudcompare.org/doc/wiki/index.php?title=CSF_(plugin)"
+		}
+	]
 }

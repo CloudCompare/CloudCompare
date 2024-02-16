@@ -1,6 +1,14 @@
 CloudCompare Version History
 ============================
 
+v2.13.1 (Kharkiv) - (??/??/2024)
+----------------------
+
+Bug fixes:
+- CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results
+- CSF: the acceleration component was wrongly multiplied twice by the square time increment, requiring much more
+	iterations for the algorithm to converge
+
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------
 - - New features:

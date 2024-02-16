@@ -39,8 +39,8 @@ class Particle
 private:
 	bool movable; // can the particle move or not ? used to pin parts of the cloth
 	//double mass; // the mass of the particle (is always 1 in this example)
-	double acceleration; // the current acceleration of the particle (along Y)
-	double time_step2; // square time step
+	double acceleration; // the current acceleration of the particle (along Y) - DGM: already multiplied by dt^²
+	//double time_step2; // square time step
 
 	Vec3 pos; // the current position of the particle in 3D space
 	double old_pos_y; // the altitude of the particle at the previous time step, used as part of the verlet numerical integration scheme
@@ -66,7 +66,7 @@ public:
 		: movable(true)
 		//, mass(1.0)
 		, acceleration(0)
-		, time_step2(0)
+		//, time_step2(0)
 		, isVisited(false)
 		, pos_x(0)
 		, pos_y(0)
@@ -77,12 +77,12 @@ public:
 		, nearestPointDist(std::numeric_limits<double>::max())
 	{}
 	
-	Particle(const Vec3& posVec, double squareTimeStep)
+	Particle(const Vec3& posVec/*, double squareTimeStep*/)
 		: Particle()
 	{
 		pos = posVec;
 		old_pos_y = posVec.y;
-		time_step2 = squareTimeStep;
+		//time_step2 = squareTimeStep;
 	}
 
 	inline const Vec3& getPos() const { return pos; }

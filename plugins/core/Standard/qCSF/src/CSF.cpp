@@ -39,6 +39,7 @@
 
 //qCC_db
 #include <ccPointCloud.h>
+#include <ccMesh.h>
 
 //Qt
 #include <QProgressDialog>
@@ -118,7 +119,7 @@ bool CSF::Apply(const wl::PointCloud& csfPointCloud,
 #if defined(_OPENMP)
 		//save the current max number of threads before changing it
 		int maxThreadCount = omp_get_max_threads();
-        omp_set_num_threads(ccQtHelpers::GetMaxThreadCount(maxThreadCount));
+		omp_set_num_threads(ccQtHelpers::GetMaxThreadCount(maxThreadCount));
 #endif
 
 		//do the filtering
@@ -130,7 +131,7 @@ bool CSF::Apply(const wl::PointCloud& csfPointCloud,
 		QCoreApplication::processEvents();
 
 		bool wasCancelled = false;
-		cloth.addForce(Vec3(0, -params.gravity, 0) * squareTimeStep);
+		cloth.addForce(-params.gravity * squareTimeStep);
 		for (int i = 0; i < params.iterations; i++)
 		{
 			double maxDiff = cloth.timeStep();

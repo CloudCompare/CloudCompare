@@ -51,7 +51,6 @@
 
 //system
 #include <vector>
-#include <string>
 
 class ccMesh;
 
@@ -90,7 +89,7 @@ public:
 	inline Particle& getParticle(int x, int y) { return particles[y*num_particles_width + x]; }
 	inline const Particle& getParticle(int x, int y) const { return particles[y*num_particles_width + x]; }
 	inline Particle& getParticleByIndex(int index) { return particles[index]; }
-	inline const Particle getParticleByIndex(int index) const { return particles[index]; }
+	inline const Particle& getParticleByIndex(int index) const { return particles[index]; }
 
 	int num_particles_width; // number of particles in "width" direction
 	int num_particles_height; // number of particles in "height" direction
@@ -124,8 +123,8 @@ public:
 	**/
 	double timeStep();
 
-	/* used to add gravity (or any other arbitrary vector) to all particles */
-	void addForce(const Vec3& direction);
+	/* used to add gravity to all particles */
+	void addForce(double f);
 
 	//detecting collision of cloth and terrain
 	void terrainCollision();
@@ -151,11 +150,6 @@ public:
 								const std::vector<XY>& connected,
 								const std::vector< std::vector<int> >& neighbors,
 								const std::vector<double> &heightvals);
-
-	//saving the cloth to file
-	void saveToFile(std::string path = "");
-	//saving the movable particles to file
-	void saveMovableToFile(std::string path = "");
 
 	//! Converts the cloth to a CC mesh structure
 	ccMesh* toMesh() const;

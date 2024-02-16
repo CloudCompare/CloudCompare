@@ -129,13 +129,12 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, unsign
 
 	try
 	{
-		//首先对每个lidar点找到在布料网格中对应的节点，并记录下来
 		//find the nearest cloth particle for each lidar point by Rounding operation
 		for (int i = 0; i < pc.size(); i++)
 		{
 			double pc_x = pc[i].x;
 			double pc_z = pc[i].z;
-			//将该坐标与布料的左上角坐标相减 minus the top-left corner of the cloth
+			//minus the top-left corner of the cloth
 			double deltaX = pc_x - cloth.origin_pos.x;
 			double deltaZ = pc_z - cloth.origin_pos.z;
 			int col = int(deltaX / cloth.step_x + 0.5);
@@ -143,11 +142,9 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, unsign
 			if (col >= 0 && row >= 0 )
 			{
 				Particle& pt = cloth.getParticle(col, row);
-				//Particle pt = cloth.getParticle(col, row); this give wrong results, since it made a copy
-				//pt.correspondingLidarPointList.push_back(i);
 
-				double dx = pt.pos.x - pc_x;
-				double dz = pt.pos.z - pc_z;
+				double dx = pt.getPos().x - pc_x;
+				double dz = pt.getPos().z - pc_z;
 				double pc2particleDist = dx * dx + dz * dz;
 
 				if (pc2particleDist < pt.nearestPointDist)
@@ -161,7 +158,7 @@ bool Rasterization::RasterTerrain(Cloth& cloth, const wl::PointCloud& pc, unsign
 		
 
 		heightVal.resize(cloth.getSize());
-		//#pragma omp parallel for
+
 		for (int i = 0; i < cloth.getSize(); i++)
 		{
 			Particle& pcur = cloth.getParticleByIndex(i);

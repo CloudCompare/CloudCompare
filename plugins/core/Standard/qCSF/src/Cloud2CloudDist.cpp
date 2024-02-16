@@ -77,10 +77,10 @@ bool Cloud2CloudDist::Compute(	const Cloth& cloth,
 
 		//bilinear interpolation;
 		//f(x,y)=f(0,0)(1-x)(1-y)+f(0,1)(1-x)y+f(1,1)xy+f(1,0)x(1-y)
-		double fxy =	cloth.getParticle(col0, row0).pos.y * (1.0 - subdeltaX) * (1.0 - subdeltaZ)
-					+	cloth.getParticle(col3, row3).pos.y * (1.0 - subdeltaX)  *subdeltaZ
-					+	cloth.getParticle(col2, row2).pos.y * subdeltaX * subdeltaZ
-					+	cloth.getParticle(col1, row1).pos.y * subdeltaX * (1.0 - subdeltaZ);
+		double fxy =	cloth.getParticle(col0, row0).getPos().y * (1.0 - subdeltaX) * (1.0 - subdeltaZ)
+					+	cloth.getParticle(col3, row3).getPos().y * (1.0 - subdeltaX)  *subdeltaZ
+					+	cloth.getParticle(col2, row2).getPos().y * subdeltaX * subdeltaZ
+					+	cloth.getParticle(col1, row1).getPos().y * subdeltaX * (1.0 - subdeltaZ);
 
 		double height_var = fxy - pc[i].y;
 

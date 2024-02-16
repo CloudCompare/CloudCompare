@@ -27,6 +27,10 @@
 //#######################################################################################
 
 #include "Particle.h"
+
+/* Some physics constants */
+constexpr double DAMPING = 0.01; // how much to damp the cloth simulation each frame
+
 /* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
 The method is called by Cloth.time_step()
 Given the equation "force = mass * acceleration" the next position is found through verlet integration*/

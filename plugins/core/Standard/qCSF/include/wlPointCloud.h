@@ -1,3 +1,5 @@
+#pragma once
+
 //#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
@@ -25,9 +27,6 @@
 //#                      contact us: 2009zwm@gmail.com; wpqjbzwm@126.com                #
 //#                                                                                     #
 //#######################################################################################
-
-#ifndef WL_PCL_POINT_CLOUD_H_
-#define WL_PCL_POINT_CLOUD_H_
 
 //system
 #include <vector>
@@ -67,9 +66,8 @@ namespace wl
 			}
 
 			bbMin = bbMax = at(0);
-			for (std::size_t i = 1; i < size(); ++i)
+			for (const wl::Point& P : *this)
 			{
-				const wl::Point& P = at(i);
 				for (int d = 0; d < 3; ++d)
 				{
 					if (P.u[d] < bbMin.u[d])
@@ -85,5 +83,3 @@ namespace wl
 		}
 	};
 }
-
-#endif //WL_POINT_CLOUD_H_

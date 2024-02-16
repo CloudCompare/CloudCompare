@@ -1,4 +1,6 @@
-﻿//#######################################################################################
+﻿#pragma once
+
+//#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
 //#                                                                                     #
@@ -28,9 +30,6 @@
 
 // A mex version for programming in Matlab is at File Exchange of Mathworks website:
 // http://www.mathworks.com/matlabcentral/fileexchange/58139-csf--ground-filtering-of-point-cloud-based-on-cloth-simulation
-
-#ifndef Q_CSF_PLUGIN_HEADER
-#define Q_CSF_PLUGIN_HEADER
 
 #include "ccStdPluginInterface.h"
 
@@ -64,5 +63,3 @@ protected:
 	//! Associated action
 	QAction* m_action;
 };
-
-#endif

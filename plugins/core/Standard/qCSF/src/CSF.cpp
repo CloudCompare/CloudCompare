@@ -57,20 +57,15 @@
 #include <omp.h>
 #endif
 
-CSF::CSF(wl::PointCloud& cloud, const Parameters& params)
-	: m_pointCloud(cloud)
-	, m_params(params)
+bool CSF::Apply(const wl::PointCloud& csfPointCloud,
+				const Parameters& params,
+				std::vector<bool>& isGround,
+				bool exportClothMesh,
+				ccMesh*& clothMesh,
+				ccMainAppInterface* app/*=nullptr*/,
+				QWidget* parent/*=nullptr*/)
 {
-}
-
-bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
-						std::vector<unsigned>& offGroundIndexes,
-						bool exportClothMesh,
-						ccMesh*& clothMesh,
-						ccMainAppInterface* app/*=nullptr*/,
-						QWidget* parent/*=nullptr*/)
-{
-	if (m_params.cloth_resolution < std::numeric_limits<double>::epsilon())
+	if (params.cloth_resolution < std::numeric_limits<double>::epsilon())
 	{
 		app->dispToConsole("[CSF] Input cloth resolution is too small");
 		return false;
@@ -83,43 +78,42 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 
 		//compute the terrain (cloud) bounding-box
 		wl::Point bbMin, bbMax;
-		m_pointCloud.computeBoundingBox(bbMin, bbMax);
+		csfPointCloud.computeBoundingBox(bbMin, bbMax);
 
 		//computing the number of cloth node
-		Vec3 origin_pos(	bbMin.x - m_params.clothBuffer * m_params.cloth_resolution,
-							bbMax.y + m_params.clothYHeight,
-							bbMin.z - m_params.clothBuffer * m_params.cloth_resolution);
+		Vec3 origin_pos(	bbMin.x - params.clothBuffer * params.cloth_resolution,
+							bbMax.y + params.clothYHeight,
+							bbMin.z - params.clothBuffer * params.cloth_resolution);
 	
-		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / m_params.cloth_resolution)) + 2 * m_params.clothBuffer;
-		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / m_params.cloth_resolution)) + 2 * m_params.clothBuffer;
+		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / params.cloth_resolution)) + 2 * params.clothBuffer;
+		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / params.cloth_resolution)) + 2 * params.clothBuffer;
 		
 		//Cloth object
 		Cloth cloth(origin_pos, 
 					width_num,
 					height_num,
-					m_params.cloth_resolution,
-					m_params.cloth_resolution,
+					params.cloth_resolution,
+					params.cloth_resolution,
 					0.3,
 					9999,
-					m_params.rigidness,
-					m_params.time_step);
+					params.rigidness,
+					params.time_step);
 		if (app)
 		{
 			app->dispToConsole(QString("[CSF] Cloth creation: %1 ms").arg(timer.restart()));
 		}
 
-		if (!Rasterization::RasterTerrain(cloth, m_pointCloud, cloth.getHeightvals(), m_params.k_nearest_points))
+		if (!Rasterization::RasterTerrain(cloth, csfPointCloud, params.k_nearest_points))
 		{
 			return false;
 		}
-		//app->dispToConsole("raster cloth", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	
 		if (app)
 		{
 			app->dispToConsole(QString("[CSF] Rasterization: %1 ms").arg(timer.restart()));
 		}
 
-		double squareTimeStep = m_params.time_step * m_params.time_step;
+		double squareTimeStep = params.time_step * params.time_step;
 
 #if defined(_OPENMP)
 		//save the current max number of threads before changing it
@@ -131,13 +125,13 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 		QProgressDialog pDlg(parent);
 		pDlg.setWindowTitle("CSF");
 		pDlg.setLabelText(QObject::tr("Cloth deformation\n%1 x %2 particles").arg(cloth.num_particles_width).arg(cloth.num_particles_height));
-		pDlg.setRange(0, m_params.iterations);
+		pDlg.setRange(0, params.iterations);
 		pDlg.show();
 		QCoreApplication::processEvents();
 
 		bool wasCancelled = false;
-		cloth.addForce(Vec3(0, -m_params.gravity, 0) * squareTimeStep);
-		for (int i = 0; i < m_params.iterations; i++)
+		cloth.addForce(Vec3(0, -params.gravity, 0) * squareTimeStep);
+		for (int i = 0; i < params.iterations; i++)
 		{
 			double maxDiff = cloth.timeStep();
 			cloth.terrainCollision();
@@ -176,7 +170,7 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 		}
 
 		//slope processing
-		if (m_params.smoothSlope)
+		if (params.smoothSlope)
 		{
 			cloth.movableFilter();
 
@@ -187,7 +181,7 @@ bool CSF::do_filtering(	std::vector<unsigned>& groundIndexes,
 		}
 	
 		//classification of the points
-		bool result = Cloud2CloudDist::Compute(cloth, m_pointCloud, m_params.class_threshold, groundIndexes, offGroundIndexes);
+		bool result = Cloud2CloudDist::Compute(cloth, csfPointCloud, params.class_threshold, isGround);
 		if (app)
 		{
 			app->dispToConsole(QString("[CSF] Distance computation: %1 ms").arg(timer.restart()));
@@ -225,6 +219,7 @@ bool CSF::Apply(ccPointCloud* cloud,
 	groundCloud = nullptr;
 	assert(offGroundCloud == nullptr);
 	offGroundCloud = nullptr;
+	assert(clothMesh == nullptr);
 
 	if (!cloud)
 	{
@@ -246,113 +241,126 @@ bool CSF::Apply(ccPointCloud* cloud,
 		return true;
 	}
 
-	//Convert CC point cloud to CSF type
-	wl::PointCloud csfPC;
+	try
 	{
-		try
+		// convert CC point cloud to CSF cloud
+		wl::PointCloud csfPC;
 		{
 			csfPC.resize(pointCount);
+
+			for (unsigned i = 0; i < pointCount; i++)
+			{
+				const CCVector3* P = cloud->getPoint(i);
+				wl::Point& tmpPoint = csfPC[i];
+				tmpPoint.x = P->x;
+				tmpPoint.y = -P->z;
+				tmpPoint.z = P->y;
+			}
 		}
-		catch (const std::bad_alloc&)
+
+		//filtering
+		std::vector<bool> isGround;
+		if (!CSF::Apply(csfPC, params, isGround, exportClothMesh, clothMesh, app))
 		{
 			if (app)
 			{
-				app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				app->dispToConsole("Process failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			}
 			return false;
 		}
 
-		for (unsigned i = 0; i < pointCount; i++)
+		//count the number of ground points
+		unsigned groundPointCount = 0;
+		for (size_t i = 0; i < isGround.size(); ++i)
 		{
-			const CCVector3* P = cloud->getPoint(i);
-			wl::Point& tmpPoint = csfPC[i];
-			tmpPoint.x = P->x;
-			tmpPoint.y = -P->z;
-			tmpPoint.z = P->y;
+			if (isGround[i])
+			{
+				++groundPointCount;
+			}
+		}
+
+		if (app)
+		{
+			app->dispToConsole(QString("[CSF] %1% of points classified as ground points").arg((groundPointCount * 100.0) / pointCount, 0, 'f', 2), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			app->dispToConsole(QString("[CSF] Timing: %1 s.").arg(timer.elapsed() / 1000.0, 0, 'f', 1), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		}
+
+		//extract ground subset
+		if (groundPointCount != 0)
+		{
+			CCCoreLib::ReferenceCloud groundRef(cloud);
+			if (!groundRef.reserve(groundPointCount))
+			{
+				if (app)
+				{
+					app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				}
+				return false;
+			}
+
+			for (size_t i = 0; i < isGround.size(); ++i)
+			{
+				if (isGround[i])
+				{
+					groundRef.addPointIndex(static_cast<unsigned>(i));
+				}
+			}
+
+			groundCloud = cloud->partialClone(&groundRef);
+			if (!groundCloud)
+			{
+				if (app)
+				{
+					app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				}
+				return false;
+			}
+		}
+
+		//extract off-ground subset
+		if (groundPointCount < cloud->size())
+		{
+			CCCoreLib::ReferenceCloud offgroundRef(cloud);
+			if (!offgroundRef.reserve(cloud->size() - groundPointCount))
+			{
+				if (app)
+				{
+					app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				}
+				return false;
+			}
+
+			for (size_t i = 0; i < isGround.size(); ++i)
+			{
+				if (!isGround[i])
+				{
+					offgroundRef.addPointIndex(static_cast<unsigned>(i));
+				}
+			}
+
+			offGroundCloud = cloud->partialClone(&offgroundRef);
+			if (!offGroundCloud)
+			{
+				if (groundCloud)
+				{
+					delete groundCloud;
+					groundCloud = nullptr;
+				}
+				if (app)
+				{
+					app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				}
+				return false;
+			}
 		}
 	}
-
-	//instantiation a CSF class
-	CSF csf(csfPC, params);
-
-	//to do filtering
-	std::vector<unsigned> groundIndexes;
-	std::vector<unsigned> offGroundIndexes;
-	assert(clothMesh == nullptr);
-	if (!csf.do_filtering(groundIndexes, offGroundIndexes, exportClothMesh, clothMesh, app))
+	catch (const std::bad_alloc&)
 	{
 		if (app)
 		{
-			app->dispToConsole("Process failed", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		}
 		return false;
-	}
-
-	if (app)
-	{
-		app->dispToConsole(QString("[CSF] %1% of points classified as ground points").arg((groundIndexes.size() * 100.0) / pointCount, 0, 'f', 2), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-		app->dispToConsole(QString("[CSF] Timing: %1 s.").arg(timer.elapsed() / 1000.0, 0, 'f', 1), ccMainAppInterface::STD_CONSOLE_MESSAGE);
-	}
-
-	//extract ground subset
-	{
-		CCCoreLib::ReferenceCloud groundRef(cloud);
-		if (!groundRef.reserve(static_cast<unsigned>(groundIndexes.size())))
-		{
-			if (app)
-			{
-				app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			}
-			return false;
-		}
-
-		for (unsigned j : groundIndexes)
-		{
-			groundRef.addPointIndex(j);
-		}
-
-		groundCloud = cloud->partialClone(&groundRef);
-		if (!groundCloud)
-		{
-			if (app)
-			{
-				app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			}
-			return false;
-		}
-	}
-
-	//extract off-ground subset
-	{
-		CCCoreLib::ReferenceCloud offgroundRef(cloud);
-		if (!offgroundRef.reserve(static_cast<unsigned>(offGroundIndexes.size())))
-		{
-			if (app)
-			{
-				app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			}
-			return false;
-		}
-
-		for (unsigned k : offGroundIndexes)
-		{
-			offgroundRef.addPointIndex(k);
-		}
-
-		offGroundCloud = cloud->partialClone(&offgroundRef);
-		if (!offGroundCloud)
-		{
-			if (groundCloud)
-			{
-				delete groundCloud;
-				groundCloud = nullptr;
-			}
-			if (app)
-			{
-				app->dispToConsole("Not enough memory", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			}
-			return false;
-		}
 	}
 
 	return true;

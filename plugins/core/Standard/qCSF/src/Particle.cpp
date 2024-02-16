@@ -45,7 +45,7 @@ void Particle::timeStep()
 	{
 		double deltaY = pos.y - old_pos_y;
 		old_pos_y = pos.y;
-		pos.y += deltaY * (1.0 - DAMPING) + acceleration * time_step2;
+		pos.y += deltaY * (1.0 - DAMPING) + acceleration/* * time_step2*/; // DGM: already done in CSF.cpp
 	}
 }
 

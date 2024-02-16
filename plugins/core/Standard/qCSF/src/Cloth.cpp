@@ -44,8 +44,8 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 				double _step_y,
 				double _smoothThreshold,
 				double _heightThreshold,
-				int rigidness,
-				double time_step)
+				int rigidness/*,
+				double time_step*/)
 	: constraint_iterations(rigidness)
 	, time_step(time_step)
 	, smoothThreshold(_smoothThreshold)
@@ -58,7 +58,7 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 {
 	particles.resize(static_cast<size_t>(num_particles_width)*static_cast<size_t>(num_particles_height)); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 
-	double squareTimeStep = time_step * time_step;
+	//double squareTimeStep = time_step * time_step;
 
 	// creating particles in a grid
 	for (int i = 0; i < num_particles_width; i++)
@@ -69,7 +69,7 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 						origin_pos.y,
 						origin_pos.z + j * step_y);
 
-			particles[j*num_particles_width + i] = Particle(pos, squareTimeStep); // insert particle in column i at j'th row
+			particles[j*num_particles_width + i] = Particle(pos/*, squareTimeStep*/); // insert particle in column i at j'th row
 			particles[j*num_particles_width + i].pos_x = i;
 			particles[j*num_particles_width + i].pos_y = j;
 		}

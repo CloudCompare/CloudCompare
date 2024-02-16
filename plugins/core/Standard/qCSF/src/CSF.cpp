@@ -97,8 +97,8 @@ bool CSF::Apply(const wl::PointCloud& csfPointCloud,
 					params.cloth_resolution,
 					0.3,
 					9999,
-					params.rigidness,
-					params.time_step);
+					params.rigidness/*,
+					params.time_step*/);
 		if (app)
 		{
 			app->dispToConsole(QString("[CSF] Cloth creation: %1 ms").arg(timer.restart()));
@@ -131,7 +131,7 @@ bool CSF::Apply(const wl::PointCloud& csfPointCloud,
 		QCoreApplication::processEvents();
 
 		bool wasCancelled = false;
-		cloth.addForce(-params.gravity * squareTimeStep);
+		cloth.addForce(-params.gravity * squareTimeStep); // DGM: warning, the force is already mutliplied by dt^2, no need to do it later (in Particle::timeStep())
 		for (int i = 0; i < params.iterations; i++)
 		{
 			double maxDiff = cloth.timeStep();

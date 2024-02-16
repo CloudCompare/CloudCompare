@@ -110,8 +110,8 @@ public:
 			double step_y,
 			double smoothThreshold,
 			double heightThreshold,
-			int rigidness,
-			double time_step);
+			int rigidness/*,
+			double time_step*/);
 
 	void setheightvals(const std::vector<double>& heightvals)
 	{

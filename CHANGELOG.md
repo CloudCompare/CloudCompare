@@ -8,6 +8,8 @@ Bug fixes:
 - CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results
 - CSF: the acceleration component was wrongly multiplied twice by the square time increment, requiring much more
 	iterations for the algorithm to converge
+- 3DMASC: when using a test cloud, the process was automatically terminated as if the user had clicked on the
+	'cancel' button
 
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------

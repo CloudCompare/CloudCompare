@@ -121,6 +121,7 @@ constexpr char COMMAND_DELAUNAY_MAX_EDGE_LENGTH[]		= "MAX_EDGE_LENGTH";
 constexpr char COMMAND_SF_ARITHMETIC[]					= "SF_ARITHMETIC";
 constexpr char COMMAND_SF_ARITHMETIC_IN_PLACE[]			= "IN_PLACE";
 constexpr char COMMAND_SF_OP[]							= "SF_OP";
+constexpr char COMMAND_SF_OP_NOT_IN_PLACE[]				= "NOT_IN_PLACE";
 constexpr char COMMAND_SF_OP_SF[]						= "SF_OP_SF";
 constexpr char COMMAND_SF_INTERP[]						= "SF_INTERP";
 constexpr char COMMAND_COLOR_INTERP[]					= "COLOR_INTERP";
@@ -2761,6 +2762,29 @@ static std::pair<ScalarType, ScalarType> GetSFRange(const CCCoreLib::ScalarField
 	}
 
 	return { thisMinVal, thisMaxVal };
+}
+
+static ScalarType GetSFValue(ccPointCloud* pc, int sfIndex, ScalarType value, USE_SPECIAL_SF_VALUE useVal)
+{
+	//should be handled way before this point this is just safety
+	if (pc)
+	{
+		CCCoreLib::ScalarField* sf = pc->getScalarField(sfIndex);
+		//should be handled way before this point this is just safety
+		if (sf)
+		{
+			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, value, useVal, value, useVal);
+			if (useVal <= USE_N_SIGMA_MIN)
+			{
+				return range.first;
+			}
+			else
+			{
+				return range.second;
+			}
+		}
+	}
+	return 1.0;
 }
 
 static USE_SPECIAL_SF_VALUE ToSpecialSFValue(QString valString)
@@ -5894,13 +5918,19 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	}
 	
 	//read scalar value
-	double value = 1.0;
+	ScalarType value = 1.0;
+	USE_SPECIAL_SF_VALUE specialValue = USE_SPECIAL_SF_VALUE::USE_NONE;
 	{
-		bool ok = true;
-		value = cmd.arguments().takeFirst().toDouble(&ok);
-		if (!ok)
+		QString valueStr = cmd.arguments().takeFirst();
+		specialValue = ToSpecialSFValue(valueStr);
+		if (specialValue == USE_NONE)
 		{
-			return cmd.error(QObject::tr("Invalid scalar value! (after %1)").arg(COMMAND_SF_OP));
+			bool ok = false;
+			value = valueStr.toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid scalar value! (after %1)").arg(COMMAND_SF_OP));
+			}
 		}
 	}
 	
@@ -5909,7 +5939,19 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		sf2.isConstantValue = true;
 		sf2.constantValue = value;
 	}
-	
+
+	//in place modifier, to keep old commands intact we should keep it in place by default. However it makes the command line inconsistence, because the SF_ARITHMETIC works the other way.
+	bool inPlace = true;
+	if (!cmd.arguments().empty())
+	{
+		if (cmd.IsCommand(cmd.arguments().front(),COMMAND_SF_OP_NOT_IN_PLACE))
+		{
+			//local arg detected
+			inPlace = false;
+			cmd.arguments().pop_front();
+		}
+	}
+
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
@@ -5918,7 +5960,9 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, true, &sf2))
+				sf2.constantValue = GetSFValue(desc.pc, thisSFIndex, value, specialValue);
+
+				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, inPlace, &sf2))
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
@@ -5945,7 +5989,9 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, true, &sf2))
+				sf2.constantValue = GetSFValue(cloud, thisSFIndex, value, specialValue);
+
+				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, inPlace, &sf2))
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}

@@ -1,5 +1,14 @@
 CloudCompare Version History
 ============================
+v2.14.beta
+----------------------
+- New features:
+	-Command line:
+		* add new option to SF_OP {sf} {operation} {value} -NOT_IN_PLACE, to create new scalar field during the operation
+
+- Improvements:
+	-Command line:
+		* -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as value
 
 v2.14.alpha (???) - (??/??/202?)
 ----------------------

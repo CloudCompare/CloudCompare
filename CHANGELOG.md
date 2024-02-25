@@ -4,7 +4,7 @@ v2.14.beta
 ----------------------
 - New features:
 	-Command line:
-		* add new option to SF_OP {sf} {operation} {value} -NOT_IN_PLACE, to create new scalar field during the operation
+		* add new option to SF_OP -NOT_IN_PLACE {sf} {operation} {value}, to create new scalar field during the operation.
 
 - Improvements:
 	-Command line:

@@ -2764,24 +2764,20 @@ static std::pair<ScalarType, ScalarType> GetSFRange(const CCCoreLib::ScalarField
 	return { thisMinVal, thisMaxVal };
 }
 
-static ScalarType GetSFValue(ccPointCloud* pc, int sfIndex, ScalarType value, USE_SPECIAL_SF_VALUE useVal)
+static ScalarType GetSFValue(const ccPointCloud& pc, int sfIndex, ScalarType value, USE_SPECIAL_SF_VALUE useVal)
 {
+	CCCoreLib::ScalarField* sf = pc.getScalarField(sfIndex);
 	//should be handled way before this point this is just safety
-	if (pc)
+	if (sf)
 	{
-		CCCoreLib::ScalarField* sf = pc->getScalarField(sfIndex);
-		//should be handled way before this point this is just safety
-		if (sf)
+		std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, value, useVal, value, useVal);
+		if (useVal <= USE_N_SIGMA_MIN)
 		{
-			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, value, useVal, value, useVal);
-			if (useVal <= USE_N_SIGMA_MIN)
-			{
-				return range.first;
-			}
-			else
-			{
-				return range.second;
-			}
+			return range.first;
+		}
+		else
+		{
+			return range.second;
 		}
 	}
 	return 1.0;
@@ -5889,11 +5885,23 @@ CommandSFOperation::CommandSFOperation()
 
 bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 {
+
+	//in place modifier, to keep old commands intact we should keep it in place by default. However it makes the command line inconsistent, because the SF_ARITHMETIC works the other way.
+	bool inPlace = true;
+	if (!cmd.arguments().empty())
+	{
+		if (cmd.IsCommand(cmd.arguments().front(), COMMAND_SF_OP_NOT_IN_PLACE))
+		{
+			//local arg detected
+			inPlace = false;
+			cmd.arguments().pop_front();
+		}
+	}
+
 	if (cmd.arguments().size() < 3)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s): SF index and/or operation and/or scalar value after '%1' (3 values expected)").arg(COMMAND_SF_OP));
 	}
-	
 	//read SF index
 	int sfIndex = -1;
 	QString sfName;
@@ -5918,7 +5926,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	}
 	
 	//read scalar value
-	ScalarType value = 1.0;
+	ScalarType value = static_cast<ScalarType>(1.0);
 	USE_SPECIAL_SF_VALUE specialValue = USE_SPECIAL_SF_VALUE::USE_NONE;
 	{
 		QString valueStr = cmd.arguments().takeFirst();
@@ -5940,18 +5948,6 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		sf2.constantValue = value;
 	}
 
-	//in place modifier, to keep old commands intact we should keep it in place by default. However it makes the command line inconsistence, because the SF_ARITHMETIC works the other way.
-	bool inPlace = true;
-	if (!cmd.arguments().empty())
-	{
-		if (cmd.IsCommand(cmd.arguments().front(),COMMAND_SF_OP_NOT_IN_PLACE))
-		{
-			//local arg detected
-			inPlace = false;
-			cmd.arguments().pop_front();
-		}
-	}
-
 	//apply operation on clouds
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
@@ -5960,7 +5956,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				sf2.constantValue = GetSFValue(desc.pc, thisSFIndex, value, specialValue);
+				sf2.constantValue = GetSFValue(*desc.pc, thisSFIndex, value, specialValue);
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFIndex, inPlace, &sf2))
 				{
@@ -5989,7 +5985,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				sf2.constantValue = GetSFValue(cloud, thisSFIndex, value, specialValue);
+				sf2.constantValue = GetSFValue(*cloud, thisSFIndex, value, specialValue);
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFIndex, inPlace, &sf2))
 				{

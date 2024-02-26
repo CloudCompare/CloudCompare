@@ -606,37 +606,21 @@ public: //other methods
 	**/
 	bool colorize(float r, float g, float b, float a = 1.0f);
 
-	//! Computes a spatial gaussian filter on a RGB colors
-	/** The "amplitutde" of the gaussian filter must be precised (sigma).
-		As 99% of the gaussian distribution is between -3*sigma and +3*sigma
-		around the mean value, this filter will only look for neighbouring
-		points (around each point) in a sphere of radius 3*sigma.
-		It also permits to use the filter as a bilateral filter. Where the wights are computed also considering the
-		distance of the neighbor's scalar value from the current point scalar value. (weighted with gaussian as distances are)
-		Warning: this method assumes the input scalar field is different from output.
+	//! Applies a spatial Gaussian filter on RGB colors
+	/** The "amplitutde" of the Gaussian filter must be specified (sigma).
+		As 99% of the Gaussian distribution is between -3*sigma and +3*sigma around the mean value,
+		this filter will only look for neighbors within a sphere of radius 3*sigma.
+		One can also use the filter as a Bilateral filter. In this case the weights are computed considering the
+		difference of the neighbors SF values with the current point SF value (also following a Gaussian distribution).
+		Warning: this method assumes the output scalar field is set.
 		\param sigma filter variance
-		\param sigmaRGB the sigma for the bilateral filter. when different than -1 turns the gaussian filter into a bilateral filter
+		\param sigmaRGB if strictly positive, the variance for the Bilateral filter
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return success
 	**/
-	bool applyGaussianFilterToRGB(PointCoordinateType sigma, PointCoordinateType sigmaRGB, CCCoreLib::GenericProgressCallback * progressCb);
-
-	//! "Cellular" function to apply a gaussian filter on the RGB values of points inside an octree cell
-	/** This function is meant to be applied to all cells of the octree
-		The method also permits to use a bilateral behaviour for the filter. This is automatically switched on
-		if its sigmaRGB parameter in additionalParameters is different than -1
-		(it is of the form DgmOctree::localFunctionPtr).
-		See ccPointCloud::applyScalarFieldGaussianFilter.
-		Method parameters (defined in "additionalParameters") are :
-		- (PointCoordinateType*) sigma
-		- (std::vector<ScalarType>*) the smoothed values
-		\param cell structure describing the cell on which processing is applied
-		\param additionalParameters see method description
-		\param nProgress optional (normalized) progress notification (per-point)
-	**/
-	bool computeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& cell,
-		void** additionalParameters,
-		CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/);
+	bool applyGaussianFilterToRGB(	PointCoordinateType sigma,
+									PointCoordinateType sigmaSF,
+									CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Assigns color to points proportionally to their 'height'
 	/** Height is defined wrt to the specified dimension (heightDim).
@@ -833,6 +817,8 @@ protected:
 	/** \warning Doesn't handle scan grids!
 	**/
 	void swapPoints(unsigned firstIndex, unsigned secondIndex) override;
+
+protected: // variable members
 
 	//! Colors
 	RGBAColorsTableType* m_rgbaColors;

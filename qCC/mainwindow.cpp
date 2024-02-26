@@ -525,8 +525,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionClearColor,					&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
-	connect(m_UI->actionRGBGaussianFilter, &QAction::triggered, this, &MainWindow::doActionRGBGaussianFilter);
-	connect(m_UI->actionRGBBilateralFilter, &QAction::triggered, this, &MainWindow::doActionRGBBilateralFilter);
+	connect(m_UI->actionRGBGaussianFilter,			&QAction::triggered, this, &MainWindow::doActionRGBGaussianFilter);
+	connect(m_UI->actionRGBBilateralFilter,			&QAction::triggered, this, &MainWindow::doActionRGBBilateralFilter);
 
 	//"Edit > Normals" menu
 	connect(m_UI->actionComputeNormals,				&QAction::triggered, this, &MainWindow::doActionComputeNormals);
@@ -3256,7 +3256,7 @@ void MainWindow::doActionSplitCloudUsingSF()
 
 void MainWindow::doActionRGBGaussianFilter()
 {
-	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, this))
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, false, this))
 		return;
 
 	refreshAll();
@@ -3265,7 +3265,7 @@ void MainWindow::doActionRGBGaussianFilter()
 
 void MainWindow::doActionRGBBilateralFilter()
 {
-	if (!ccEntityAction::rgbBilateralFilter(m_selectedEntities, this))
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, true, this))
 		return;
 
 	refreshAll();
@@ -3274,7 +3274,7 @@ void MainWindow::doActionRGBBilateralFilter()
 
 void MainWindow::doActionSFGaussianFilter()
 {
-	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, this) )
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, false, this) )
 		return;
 
 	refreshAll();
@@ -3283,7 +3283,7 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-	if ( !ccEntityAction::sfBilateralFilter(m_selectedEntities, this) )
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, true, this) )
 		return;
 
 	refreshAll();

@@ -1801,89 +1801,33 @@ bool ccPointCloud::colorize(float r, float g, float b, float a/*=1.0f*/)
 	return true;
 }
 
-bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
-	PointCoordinateType sigmaRGB,
-	CCCoreLib::GenericProgressCallback* progressCb
-	)
+//! "Cellular" function to apply a gaussian filter on the RGB values of points inside an octree cell
+/** This function is meant to be applied to all cells of the octree
+	The method also permits to use a bilateral behaviour for the filter. This is automatically switched on
+	if its sigmaSF parameter in additionalParameters is positive.
+
+	See ccPointCloud::applyScalarFieldGaussianFilter.
+	Method parameters (defined in "additionalParameters") are :
+	- (PointCoordinateType*) sigma
+	- (PointCoordinateType*) sigmaSF
+
+	\param cell structure describing the cell on which processing is applied
+	\param additionalParameters see method description
+	\param nProgress optional (normalized) progress notification (per-point)
+**/
+static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& cell,
+										void** additionalParameters,
+										CCCoreLib::NormalizedProgress* nProgress = nullptr )
 {
-	if (!hasColors())
-		return false;
-
-	if (!this)
-		return false;
-
-	unsigned n = size();
-	if (n == 0)
-		return false;
-
-	ccOctree* theOctree = getOctree().data();
-	if (!theOctree)
-	{
-		if (!computeOctree(progressCb))
-		{
-			delete theOctree;
-			return false;
-		}
-		else
-		{
-			theOctree = getOctree().data();
-		}
-	}
-
-	//best octree level
-	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(3 * sigma);
-
-
-	if (progressCb)
-	{
-		if (progressCb->textCanBeEdited())
-		{
-			progressCb->setMethodTitle("Gaussian filter");
-			char infos[32];
-			snprintf(infos, 32, "Level: %i", level);
-			progressCb->setInfo(infos);
-		}
-		progressCb->update(0);
-	}
-
-	void* additionalParameters[2] = { reinterpret_cast<void*>(&sigma),
-										reinterpret_cast<void*>(&sigmaRGB)
-	};
-
-	bool success = true;
-
-	//here i have a build error
-	if (theOctree->executeFunctionForAllCellsAtLevel(level,
-		computeCellGaussianFilter,
-		additionalParameters,
-		true,
-		progressCb,
-		"Gaussian Filter computation") == 0)
-	{
-		//something went wrong
-		success = false;
-	}
-
-	return success;
-}
-
-//FONCTION "CELLULAIRE" DE CALCUL DU FILTRE GAUSSIEN (PAR PROJECTION SUR LE PLAN AUX MOINDRES CARRES)
-//DETAIL DES PARAMETRES ADDITIONNELS (2) :
-// [0] -> (PointCoordinateType*) sigma : gauss function sigma
-// [1] -> (PointCoordinateType*) sigmaSF : used when in "bilateral modality" - if -1 pure gaussian filtering is performed
-bool ccPointCloud::computeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeCell& cell,
-	void** additionalParameters,
-	CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
-{
-	//variables additionnelles
+	//additional parameters
 	PointCoordinateType sigma = *(static_cast<PointCoordinateType*>(additionalParameters[0]));
 	PointCoordinateType sigmaSF = *(static_cast<PointCoordinateType*>(additionalParameters[1]));
 
-	//we use only the squared value of sigma
+	//we only use the squared value of sigma
 	PointCoordinateType sigma2 = 2 * sigma*sigma;
-	PointCoordinateType radius = 3 * sigma; //2.5 sigma > 99%
+	PointCoordinateType radius = 3 * sigma; //3 * sigma > 99.7%
 
-	//we use only the squared value of sigmaSF
+	//we only use the squared value of sigmaSF
 	PointCoordinateType sigmaSF2 = 2 * sigmaSF*sigmaSF;
 
 	//number of points inside the current cell
@@ -1915,87 +1859,157 @@ bool ccPointCloud::computeCellGaussianFilter(const CCCoreLib::DgmOctree::octreeC
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	const GenericIndexedCloudPersist* cloud = cell.points->getAssociatedCloud();
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(cell.points->getAssociatedCloud());
+	assert(cloud);
 
-	//Pure Gaussian Filtering
-	if (sigmaSF == -1)
+	bool bilateralFilter = (sigmaSF > 0.0);
+
+	for (unsigned i = 0; i < n; ++i) //for each point in cell
 	{
-		for (unsigned i = 0; i < n; ++i) //for each point in cell
+		ScalarType queryValue = 0; //scalar of the query point
+		unsigned queryPointIndex = cell.points->getPointGlobalIndex(i);
+
+		if (bilateralFilter)
 		{
-			//we get the points inside a spherical neighbourhood (radius: '3*sigma')
-			cell.points->getPoint(i, nNSS.queryPoint);
-			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
-			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+			queryValue = cell.points->getPointScalarValue(i);
 
-			//each point adds a contribution weighted by its distance to the sphere center
-			it = nNSS.pointsInNeighbourhood.begin();
-			double meanValue = 0.0;
-			double wSum = 0.0;
-			for (unsigned j = 0; j < k; ++j, ++it)
+			// check that the query SF value is valid, otherwise no need to compute anything
+			if (!CCCoreLib::ScalarField::ValidValue(queryValue))
 			{
-				double weight = exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
-				/*
-				TODO get color values for R,G,B
+				cloud->setPointColor(queryPointIndex, ccColor::Rgb(0, 0, 0));
+				continue;
+			}
+		}
 
+		//we retrieve the points inside a spherical neighbourhood (radius: '3*sigma')
+		cell.points->getPoint(i, nNSS.queryPoint);
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
+		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
+
+		//each point adds a contribution weighted by its distance to the sphere center
+		it = nNSS.pointsInNeighbourhood.begin();
+		ccColor::RgbTpl<double> rgbSum(0, 0, 0);
+		double wSum = 0.0;
+		for (unsigned j = 0; j < k; ++j, ++it)
+		{
+			double weight = exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
+
+			const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
+
+			if (bilateralFilter)
+			{
 				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
-				//scalar value must be valid
 				if (CCCoreLib::ScalarField::ValidValue(val))
 				{
-					meanValue += static_cast<double>(val) * weight;
-					wSum += weight;
+					ScalarType dSF = queryValue - val;
+					weight *= exp(-(dSF*dSF) / sigmaSF2);
 				}
-				*/
-			}
-
-			ScalarType newValue = (wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : CCCoreLib::NAN_VALUE);
-
-			cell.points->setPointScalarValue(i, newValue);
-
-			if (nProgress && !nProgress->oneStep())
-				return false;
-		}
-	}
-	//Bilateral Filtering using the second sigma parameters on values (when given)
-	else
-	{
-		for (unsigned i = 0; i < n; ++i) //for each point in cell
-		{
-			ScalarType queryValue = cell.points->getPointScalarValue(i); //scalar of the query point
-
-			//we get the points inside a spherical neighbourhood (radius: '3*sigma')
-			cell.points->getPoint(i, nNSS.queryPoint);
-			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
-			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS, radius, false);
-
-			//each point adds a contribution weighted by its distance to the sphere center
-			it = nNSS.pointsInNeighbourhood.begin();
-			double meanValue = 0.0;
-			double wSum = 0.0;
-			for (unsigned j = 0; j < k; ++j, ++it)
-			{
-				/*
-				TODO get color values for R,G,B
-
-				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
-				ScalarType dSF = queryValue - val;
-				double weight = exp(-(it->squareDistd) / sigma2) * exp(-(dSF*dSF) / sigmaSF2);
-				//scalar value must be valid
-				if (CCCoreLib::ScalarField::ValidValue(val))
+				else
 				{
-					meanValue += static_cast<double>(val) * weight;
-					wSum += weight;
+					continue;
 				}
-				*/
 			}
 
-			cell.points->setPointScalarValue(i, wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : CCCoreLib::NAN_VALUE);
+			rgbSum.r += weight * col.r;
+			rgbSum.g += weight * col.g;
+			rgbSum.b += weight * col.b;
+			wSum += weight;
+		}
 
-			if (nProgress && !nProgress->oneStep())
-				return false;
+		if (wSum != 0.0)
+		{
+			ccColor::Rgb avgCol(static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.r / wSum), 0.0)),
+								static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
+								static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
+
+			cloud->setPointColor(queryPointIndex, avgCol);
+		}
+		else
+		{
+			cloud->setPointColor(queryPointIndex, ccColor::Rgb(0, 0, 0));
+		}
+
+		if (nProgress && !nProgress->oneStep())
+		{
+			return false;
 		}
 	}
-
+	
 	return true;
+}
+
+bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
+											PointCoordinateType sigmaSF,
+											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
+{
+	unsigned n = size();
+	if (n == 0)
+	{
+		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Cloud is empty");
+		return false;
+	}
+
+	if (!hasColors())
+	{
+		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Cloud has no RGB color");
+		return false;
+	}
+
+	if ((sigmaSF > 0) && (nullptr == getCurrentOutScalarField()))
+	{
+		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] A non-zero scalar field variance was set without an active 'input' scalar-field");
+		return false;
+	}
+
+	ccOctree* theOctree = getOctree().data();
+	if (!theOctree)
+	{
+		if (!computeOctree(progressCb))
+		{
+			ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Failed to compute the octree");
+			delete theOctree;
+			return false;
+		}
+		else
+		{
+			theOctree = getOctree().data();
+		}
+	}
+
+	//best octree level
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(3 * sigma);
+
+	if (progressCb)
+	{
+		if (progressCb->textCanBeEdited())
+		{
+			progressCb->setMethodTitle("RGB Gaussian filter");
+			char infos[32];
+			snprintf(infos, 32, "Level: %i", level);
+			progressCb->setInfo(infos);
+		}
+		progressCb->update(0);
+	}
+
+	void* additionalParameters[2] {	reinterpret_cast<void*>(&sigma),
+									reinterpret_cast<void*>(&sigmaSF)
+	};
+
+	bool success = true;
+
+	//here i have a build error
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
+														ComputeCellGaussianFilter,
+														additionalParameters,
+														true,
+														progressCb,
+														"Gaussian Filter computation") == 0)
+	{
+		//something went wrong
+		success = false;
+	}
+
+	return success;
 }
 
 //Contribution from Michael J Smith

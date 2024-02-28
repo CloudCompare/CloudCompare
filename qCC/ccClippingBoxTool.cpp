@@ -401,7 +401,7 @@ void ccClippingBoxTool::removeLastContour()
 	removeLastContourToolButton->setEnabled(false);
 }
 
-ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
+ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent, bool invert)
 {
 	assert(clipBox);
 	if (!obj)
@@ -428,6 +428,12 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 			return nullptr;
 		}
 		clipBox->flagPointsInside(inputCloud, &selectionTable);
+
+		if (invert)
+		{
+			for (ccGenericPointCloud::VisibilityTableType::value_type &v : selectionTable)
+				v = v == CCCoreLib::POINT_VISIBLE ? CCCoreLib::POINT_HIDDEN : CCCoreLib::POINT_VISIBLE;
+		}
 		
 		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, nullptr, true);
 
@@ -488,7 +494,7 @@ void ccClippingBoxTool::exportSlice()
 			continue;
 		}
 
-		ccHObject* result = GetSlice(obj, m_clipBox, false);
+		ccHObject* result = GetSlice(obj, m_clipBox, false, invertSelectionButton->isChecked());
 
 		if (result)
 		{
@@ -633,7 +639,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 			outputSlices.reserve(clouds.size());
 			for (size_t ci = 0; ci != clouds.size(); ++ci)
 			{
-				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false);
+				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false, false);
 				if (slice)
 				{
 					slice->setName(clouds[ci]->getName() + QString(".slice"));

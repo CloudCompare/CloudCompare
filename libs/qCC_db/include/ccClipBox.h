@@ -121,7 +121,8 @@ class QCC_DB_LIB_API ccClipBox : public QObject
 	**/
 	void flagPointsInside(ccGenericPointCloud*                      cloud,
 	                      ccGenericPointCloud::VisibilityTableType* visTable,
-	                      bool                                      shrink = false) const;
+	                      bool                                      shrink = false
+	                      bool                                      inside = true) const;
 
 	//! Resets box
 	void reset();

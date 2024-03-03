@@ -30,7 +30,7 @@
 
 
 //! 26-connexity neighbouring cells positions (common edges)
-const int c_3dNeighboursPosShift[] = {-1,-1,-1,
+const int c_3dNeighboursPosShift[] {-1,-1,-1,
 									-1,-1, 0,
 									-1,-1, 1,
 									-1, 0,-1,
@@ -108,8 +108,7 @@ static bool ComputeCellStats(	CCCoreLib::ReferenceCloud* subset,
 	return true;
 }
 
-int FastMarchingForFacetExtraction::init(	ccGenericPointCloud* cloud,
-											CCCoreLib::DgmOctree* theOctree,
+int FastMarchingForFacetExtraction::init(	CCCoreLib::DgmOctree* theOctree,
 											unsigned char level,
 											ScalarType maxError,
 											CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
@@ -558,8 +557,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 	//Fast Marching propagation
 	FastMarchingForFacetExtraction fm;
 
-	int result = fm.init(	theCloud,
-							theOctree,
+	int result = fm.init(	theOctree,
 							octreeLevel,
 							maxError,
 							errorMeasure,
@@ -612,7 +610,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 		//we start the propagation from this point
 		//(from its corresponding cell in fact ;)
-		const CCVector3 *thePoint = theCloud->getPoint(lastProcessedPoint);
+		const CCVector3* thePoint = theCloud->getPoint(lastProcessedPoint);
 		Tuple3i pos;
 		theOctree->getTheCellPosWhichIncludesThePoint(thePoint, pos, octreeLevel);
 

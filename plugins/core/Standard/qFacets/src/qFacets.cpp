@@ -401,12 +401,12 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	m_app->redrawAll();
 }
 
-ccHObject* qFacets::createFacets(ccPointCloud* cloud,
-	CCCoreLib::ReferenceCloudContainer& components,
-	unsigned minPointsPerComponent,
-	double maxEdgeLength,
-	bool randomColors,
-	bool& error)
+ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
+									CCCoreLib::ReferenceCloudContainer& components,
+									unsigned minPointsPerComponent,
+									double maxEdgeLength,
+									bool randomColors,
+									bool& error )
 {
 	if (!cloud)
 	{
@@ -454,7 +454,7 @@ ccHObject* qFacets::createFacets(ccPointCloud* cloud,
 				ccFacet* facet = ccFacet::Create(facetCloud, static_cast<PointCoordinateType>(maxEdgeLength), true);
 				if (facet)
 				{
-					QString facetName = QString("facet %1 (rms=%2)").arg(ccGroup->getChildrenNumber()).arg(facet->getRMS());
+					QString facetName = QString("facet %1 (RMS=%2)").arg(ccGroup->getChildrenNumber()).arg(facet->getRMS());
 					facet->setName(facetName);
 					if (facet->getPolygon())
 					{
@@ -561,6 +561,7 @@ struct FacetMetaData
 {
 	int facetIndex;
 	CCVector3 center;
+	CCVector3d globalCenter;
 	CCVector3 normal;
 	double surface;
 	int dip_deg;
@@ -573,6 +574,7 @@ struct FacetMetaData
 	FacetMetaData()
 		: facetIndex(-1)
 		, center(0, 0, 0)
+		, globalCenter(0, 0, 0)
 		, normal(0, 0, 1)
 		, surface(0.0)
 		, dip_deg(0)
@@ -599,6 +601,20 @@ void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
 	}
 
 	data.center = facet->getCenter();
+
+	ccHObject::Container clouds;
+	if (facet->filterChildren(clouds, false, CC_TYPES::POINT_CLOUD, true) != 0)
+	{
+		// any cloud directly under the facet should have the right Global Shift information now (either the 'countour points' or the 'origin points')
+		data.globalCenter = static_cast<const ccGenericPointCloud*>(clouds.front())->toGlobal3d(data.center);
+	}
+	else
+	{
+		// we couldn't find the vertices?!
+		assert(false);
+		data.globalCenter = data.center.toDouble();
+	}
+
 	data.normal = facet->getNormal();
 	data.surface = facet->getSurface();
 	data.rms = facet->getRMS();
@@ -712,6 +728,7 @@ void qFacets::exportFacets()
 	IntegerDBFField  subfamilyIndex("subfam_ind");
 	DoubleDBFField3D facetNormal("normal");
 	DoubleDBFField3D facetBarycenter("center");
+	DoubleDBFField3D facetGlobalBarycenter("globalCenter");
 	DoubleDBFField   horizExtension("horiz_ext");
 	DoubleDBFField   vertExtension("vert_ext");
 	DoubleDBFField   surfaceExtension("surf_ext");
@@ -729,6 +746,7 @@ void qFacets::exportFacets()
 		subfamilyIndex.values.reserve(facetCount);
 		facetNormal.values.reserve(facetCount);
 		facetBarycenter.values.reserve(facetCount);
+		facetGlobalBarycenter.values.reserve(facetCount);
 		horizExtension.values.reserve(facetCount);
 		vertExtension.values.reserve(facetCount);
 		surfaceExtension.values.reserve(facetCount);
@@ -877,8 +895,9 @@ void qFacets::exportFacets()
 			facetDip.values.push_back(data.dip_deg);
 			familyIndex.values.push_back(data.familyIndex);
 			subfamilyIndex.values.push_back(data.subfamilyIndex);
-			facetNormal.values.push_back(CCVector3d(data.normal.x, data.normal.y, data.normal.z));
-			facetBarycenter.values.push_back(CCVector3d(data.center.x, data.center.y, data.center.z));
+			facetNormal.values.push_back(data.normal.toDouble());
+			facetBarycenter.values.push_back(data.center.toDouble());
+			facetGlobalBarycenter.values.push_back(data.globalCenter);
 			vertExtension.values.push_back(vertExt);
 			horizExtension.values.push_back(horizExt);
 			surfaceExtension.values.push_back(horizExt*vertExt);
@@ -1084,6 +1103,9 @@ void qFacets::exportFacetsInfo()
 	outStream << " CenterX;";
 	outStream << " CenterY;";
 	outStream << " CenterZ;";
+	outStream << " GlobalCenterX;";
+	outStream << " GlobalCenterY;";
+	outStream << " GlobalCenterZ;";
 	outStream << " NormalX;";
 	outStream << " NormalY;";
 	outStream << " NormalZ;";
@@ -1111,6 +1133,7 @@ void qFacets::exportFacetsInfo()
 
 		outStream << data.facetIndex << ";";
 		outStream << data.center.x << ";" << data.center.y << ";" << data.center.z << ";";
+		outStream << data.globalCenter.x << ";" << data.globalCenter.y << ";" << data.globalCenter.z << ";";
 		outStream << data.normal.x << ";" << data.normal.y << ";" << data.normal.z << ";";
 		outStream << data.rms << ";";
 		outStream << horizExt << ";";

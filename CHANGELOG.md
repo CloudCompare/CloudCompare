@@ -3,6 +3,9 @@ CloudCompare Version History
 
 v2.13.1 (Kharkiv) - (??/??/2024)
 ----------------------
+Improvement:
+- the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
+	also be exported when exporting facets info to CSV or SHP files
 
 Bug fixes:
 - CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results
@@ -16,7 +19,7 @@ Bug fixes:
 
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------
-- - New features:
+- New features:
 
 	- New menu entry: Save project
 		- File > Save project (or CTRL+SHIFT+S)

@@ -39,7 +39,7 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	, m_contourPolyline(nullptr)
 	, m_contourVertices(nullptr)
 	, m_originPoints(nullptr)
-	, m_center(0,0,0)
+	, m_center(0, 0, 0)
 	, m_rms(0.0)
 	, m_surface(0.0)
 	, m_maxEdgeLength(maxEdgeLength)
@@ -187,6 +187,8 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 	if (ptsCount < 3)
 		return false;
 
+	const ccGenericPointCloud* pointsAsGPC = dynamic_cast<const ccGenericPointCloud*>(points);
+
 	CCCoreLib::Neighbourhood Yk(points);
 
 	//get corresponding plane
@@ -256,6 +258,10 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
 			m_contourVertices->setEnabled(false);
+			if (pointsAsGPC)
+			{
+				m_contourVertices->copyGlobalShiftAndScale(*pointsAsGPC);
+			}
 			addChild(m_contourVertices);
 		}
 
@@ -272,6 +278,10 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 				m_contourVertices->addChild(m_contourPolyline);
 				m_contourVertices->setEnabled(true);
 				m_contourVertices->setVisible(false);
+				if (pointsAsGPC)
+				{
+					m_contourPolyline->copyGlobalShiftAndScale(*pointsAsGPC);
+				}
 			}
 			else
 			{
@@ -322,6 +332,10 @@ bool ccFacet::createInternalRepresentation(	CCCoreLib::GenericIndexedCloudPersis
 					}
 					m_polygonMesh->setVisible(true);
 					m_polygonMesh->enableStippling(true);
+					if (pointsAsGPC)
+					{
+						m_polygonMesh->copyGlobalShiftAndScale(*pointsAsGPC);
+					}
 
 					//unique normal for facets
 					if (m_polygonMesh->reservePerTriangleNormalIndexes())

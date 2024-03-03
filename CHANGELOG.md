@@ -10,6 +10,9 @@ Bug fixes:
 	iterations for the algorithm to converge
 - 3DMASC: when using a test cloud, the process was automatically terminated as if the user had clicked on the
 	'cancel' button
+- The DotPorduct (DP) file I/O filter was not able to load files with non latin characters. It was also wrongly
+	reporting its ability to export files while it is no longer the case.
+- Upgrading the DotProduct SDK to version 5.2 to avoid crashes when loading some DP files
 
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------

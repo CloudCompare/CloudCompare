@@ -1822,6 +1822,9 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	//additional parameters
 	PointCoordinateType sigma = *(static_cast<PointCoordinateType*>(additionalParameters[0]));
 	PointCoordinateType sigmaSF = *(static_cast<PointCoordinateType*>(additionalParameters[1]));
+	bool applyToSF = *(static_cast<bool*>(additionalParameters[2]));
+	double burntOutColorThresholdMin = *(static_cast<double*>(additionalParameters[3]));
+	double burntOutColorThresholdMax = 255 - burntOutColorThresholdMin;
 
 	//we only use the squared value of sigma
 	PointCoordinateType sigma2 = 2 * sigma*sigma;
@@ -1869,14 +1872,14 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 		ScalarType queryValue = 0; //scalar of the query point
 		unsigned queryPointIndex = cell.points->getPointGlobalIndex(i);
 
-		if (bilateralFilter)
+		if (bilateralFilter || applyToSF)
 		{
 			queryValue = cell.points->getPointScalarValue(i);
 
 			// check that the query SF value is valid, otherwise no need to compute anything
 			if (!CCCoreLib::ScalarField::ValidValue(queryValue))
 			{
-				cloud->setPointColor(queryPointIndex, ccColor::Rgb(0, 0, 0));
+				//leave original color
 				continue;
 			}
 		}
@@ -1890,30 +1893,42 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 		it = nNSS.pointsInNeighbourhood.begin();
 		ccColor::RgbTpl<double> rgbSum(0, 0, 0);
 		double wSum = 0.0;
+		double sfSum = 0.0;
+		double sfWSum = 0.0;
 		for (unsigned j = 0; j < k; ++j, ++it)
 		{
 			double weight = exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
 
 			const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
 
-			if (bilateralFilter)
+
+			if (bilateralFilter || applyToSF)
 			{
 				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
 				if (CCCoreLib::ScalarField::ValidValue(val))
 				{
-					ScalarType dSF = queryValue - val;
-					weight *= exp(-(dSF*dSF) / sigmaSF2);
+					if (bilateralFilter)
+					{
+						ScalarType dSF = queryValue - val;
+						weight *= exp(-(dSF*dSF) / sigmaSF2);
+					}
+					sfSum += weight * static_cast<double>(val);
+					sfWSum += weight;
 				}
 				else
 				{
 					continue;
 				}
 			}
-
-			rgbSum.r += weight * col.r;
-			rgbSum.g += weight * col.g;
-			rgbSum.b += weight * col.b;
-			wSum += weight;
+			if (col.r > burntOutColorThresholdMin && col.r < burntOutColorThresholdMax &&
+				col.g > burntOutColorThresholdMin && col.g < burntOutColorThresholdMax &&
+				col.b > burntOutColorThresholdMin && col.b < burntOutColorThresholdMax )
+			{
+				rgbSum.r += weight * col.r;
+				rgbSum.g += weight * col.g;
+				rgbSum.b += weight * col.b;
+				wSum += weight;
+			}
 		}
 
 		if (wSum != 0.0)
@@ -1924,9 +1939,13 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 
 			cloud->setPointColor(queryPointIndex, avgCol);
 		}
-		else
+
+		if (applyToSF)
 		{
-			cloud->setPointColor(queryPointIndex, ccColor::Rgb(0, 0, 0));
+			if (sfWSum != 0.0)
+			{
+					cloud->setPointScalarValue(queryPointIndex, static_cast<ScalarType>(sfSum / sfWSum));
+			}
 		}
 
 		if (nProgress && !nProgress->oneStep())
@@ -1940,6 +1959,8 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 
 bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 											PointCoordinateType sigmaSF,
+											bool applyToSF,
+											double burntOutColorThreshold,
 											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	unsigned n = size();
@@ -1991,13 +2012,14 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 		progressCb->update(0);
 	}
 
-	void* additionalParameters[2] {	reinterpret_cast<void*>(&sigma),
-									reinterpret_cast<void*>(&sigmaSF)
+	void* additionalParameters[4] {	reinterpret_cast<void*>(&sigma),
+									reinterpret_cast<void*>(&sigmaSF),
+									reinterpret_cast<void*>(&applyToSF),
+									reinterpret_cast<void*>(&burntOutColorThreshold)
 	};
 
 	bool success = true;
 
-	//here i have a build error
 	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
 														ComputeCellGaussianFilter,
 														additionalParameters,

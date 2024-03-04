@@ -3256,7 +3256,8 @@ void MainWindow::doActionSplitCloudUsingSF()
 
 void MainWindow::doActionRGBGaussianFilter()
 {
-	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, false, this))
+	ccEntityAction::GaussianFilterOptions(filterParams);
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
 		return;
 
 	refreshAll();
@@ -3265,7 +3266,9 @@ void MainWindow::doActionRGBGaussianFilter()
 
 void MainWindow::doActionRGBBilateralFilter()
 {
-	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, true, this))
+	ccEntityAction::GaussianFilterOptions(filterParams);
+	filterParams.bilateral = true;
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
 		return;
 
 	refreshAll();
@@ -3274,7 +3277,8 @@ void MainWindow::doActionRGBBilateralFilter()
 
 void MainWindow::doActionSFGaussianFilter()
 {
-	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, false, this) )
+	ccEntityAction::GaussianFilterOptions(filterParams);
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, filterParams, this) )
 		return;
 
 	refreshAll();
@@ -3283,7 +3287,9 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, true, this) )
+	ccEntityAction::GaussianFilterOptions(filterParams);
+	filterParams.bilateral = true;
+	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, filterParams, this) )
 		return;
 
 	refreshAll();

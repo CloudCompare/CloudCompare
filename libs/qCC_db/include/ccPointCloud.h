@@ -615,11 +615,15 @@ public: //other methods
 		Warning: this method assumes the output scalar field is set.
 		\param sigma filter variance
 		\param sigmaRGB if strictly positive, the variance for the Bilateral filter
+		\param applyToSF boolean if true, it will apply filter to the displayed scalarfield as well
+		\param burntOutColorThreshold if >0 then it will filter out color values which is outside of [threshold:255-threshold] range.
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return success
 	**/
 	bool applyGaussianFilterToRGB(	PointCoordinateType sigma,
 									PointCoordinateType sigmaSF,
+									bool applyToSF,
+									double burntOutColorThreshold,
 									CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Assigns color to points proportionally to their 'height'

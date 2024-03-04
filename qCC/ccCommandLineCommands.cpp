@@ -200,6 +200,9 @@ constexpr char OPTION_SF[]								= "SF";
 constexpr char OPTION_RGB[]								= "RGB";
 constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
 constexpr char OPTION_BILATERAL[]						= "BILATERAL";
+constexpr char OPTION_SIGMA[]							= "SIGMA";
+constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
+constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -6156,44 +6159,83 @@ CommandFilter::CommandFilter()
 
 bool CommandFilter::process(ccCommandLineInterface& cmd)
 {
-	cmd.print(QObject::tr("[FILTER]"));
 	bool applyToRGB = false;
 	bool applyToSF = false;
-	bool bilateral = false;
 	bool gaussian = false;
+	ccEntityAction::GaussianFilterOptions(filterParams);
+	filterParams.commandLine = true;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(argument, OPTION_SF))
 		{
 			cmd.arguments().pop_front();
-			if (!applyToRGB)
-			{
-				applyToSF = true;
-			}
+			applyToSF = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_RGB))
 		{
 			cmd.arguments().pop_front();
-			if (!applyToSF)
-			{
-				applyToRGB = true;
-			}
+			applyToRGB = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BILATERAL))
 		{
 			cmd.arguments().pop_front();
 			if (!gaussian)
 			{
-				bilateral = true;
+				filterParams.bilateral = true;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_GAUSSIAN))
 		{
 			cmd.arguments().pop_front();
-			if (!bilateral)
+			if (!filterParams.bilateral)
 			{
 				gaussian = true;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: spatial sigma after '-%1'").arg(OPTION_SIGMA));
+			}
+
+			bool ok = false;
+			filterParams.spatialSigma = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid value for spatial sigma after '%1'!").arg(OPTION_SIGMA));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA_SF))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: spatial sigma after '-%1'").arg(OPTION_SIGMA_SF));
+			}
+
+			bool ok = false;
+			filterParams.sigmaSF = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid value for spatial sigma after '%1'!").arg(OPTION_SIGMA_SF));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BURNT_COLOR_THRESHOLD))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: burnt color threshold after '-%1'").arg(OPTION_BURNT_COLOR_THRESHOLD));
+			}
+
+			bool ok = false;
+			filterParams.burntOutColorThreshold = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid value for burnt color threshold after '%1'!").arg(OPTION_BURNT_COLOR_THRESHOLD));
 			}
 		}
 		else
@@ -6206,7 +6248,7 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
 	}
 
-	if (!bilateral && !gaussian)
+	if (!filterParams.bilateral && !gaussian)
 	{
 		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
 	}
@@ -6219,13 +6261,18 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		selectedEntities.push_back(thisCloudDesc.pc);
 	}
 
+	if (applyToSF && applyToRGB)
+	{
+		applyToSF = false;
+		filterParams.applyToSFduringRGB = true;
+	}
 	if (applyToSF)
 	{
-		return ccEntityAction::sfGaussianFilter(selectedEntities, bilateral, cmd.widgetParent());
+		return ccEntityAction::sfGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
 	}
 	else if (applyToRGB)
 	{
-		return ccEntityAction::rgbGaussianFilter(selectedEntities, bilateral, cmd.widgetParent());
+		return ccEntityAction::rgbGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
 	}
 	
 	return true;

@@ -27,6 +27,15 @@ class ccMainAppInterface;
 
 namespace ccEntityAction
 {
+	struct GaussianFilterOptions {
+		bool applyToSFduringRGB = false;
+		bool bilateral = false;
+		double burntOutColorThreshold = -1;
+		bool commandLine = false;
+		double sigmaSF = -1;
+		double spatialSigma = -1;
+	};
+
 	// Colours
 	bool	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent = nullptr);
 	bool	rgbToGreyScale(const ccHObject::Container &selectedEntities);
@@ -35,10 +44,10 @@ namespace ccEntityAction
 	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent = nullptr);
 	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
-	bool	rgbGaussianFilter(const ccHObject::Container &selectedEntities, bool bilateral, QWidget* parent = nullptr);
+	bool	rgbGaussianFilter(const ccHObject::Container &selectedEntities, GaussianFilterOptions filterParams, QWidget* parent = nullptr);
 	
 	// Scalar Fields
-	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, bool bilateral, QWidget* parent = nullptr);
+	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, GaussianFilterOptions filterParams, QWidget* parent = nullptr);
 	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);

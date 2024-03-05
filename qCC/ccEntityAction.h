@@ -27,10 +27,20 @@ class ccMainAppInterface;
 
 namespace ccEntityAction
 {
-	struct GaussianFilterOptions {
+	enum GAUSSIAN_FILTER_TYPES
+	{
+		NONE		= 0,
+		MEDIAN		= 1,
+		GAUSSIAN	= 2,
+		BILATERAL	= 4,
+		ANY			= 7
+	};
+
+	struct GaussianFilterOptions
+	{
 		bool applyToSFduringRGB = false;
-		bool bilateral = false;
-		double burntOutColorThreshold = -1;
+		GAUSSIAN_FILTER_TYPES filterType = NONE;
+		unsigned char burntOutColorThreshold = 0;
 		bool commandLine = false;
 		double sigmaSF = -1;
 		double spatialSigma = -1;

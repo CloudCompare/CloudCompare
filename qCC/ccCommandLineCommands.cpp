@@ -200,6 +200,7 @@ constexpr char OPTION_SF[]								= "SF";
 constexpr char OPTION_RGB[]								= "RGB";
 constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
 constexpr char OPTION_BILATERAL[]						= "BILATERAL";
+constexpr char OPTION_MEDIAN[]							= "MEDIAN";
 constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
@@ -6180,17 +6181,25 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BILATERAL))
 		{
 			cmd.arguments().pop_front();
-			if (!gaussian)
+			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
 			{
-				filterParams.bilateral = true;
+				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_GAUSSIAN))
 		{
 			cmd.arguments().pop_front();
-			if (!filterParams.bilateral)
+			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
 			{
-				gaussian = true;
+				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::GAUSSIAN;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEDIAN))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::MEDIAN;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA))
@@ -6232,11 +6241,12 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 			}
 
 			bool ok = false;
-			filterParams.burntOutColorThreshold = cmd.arguments().takeFirst().toDouble(&ok);
-			if (!ok)
+			uint burntOutColorThreshold = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || burntOutColorThreshold>255)
 			{
-				return cmd.error(QObject::tr("Invalid value for burnt color threshold after '%1'!").arg(OPTION_BURNT_COLOR_THRESHOLD));
+				return cmd.error(QObject::tr("Invalid value for burnt color threshold after '%1', must be an integer between 0 and 255!").arg(OPTION_BURNT_COLOR_THRESHOLD));
 			}
+			filterParams.burntOutColorThreshold = static_cast<unsigned char>(burntOutColorThreshold);
 		}
 		else
 		{
@@ -6248,9 +6258,9 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
 	}
 
-	if (!filterParams.bilateral && !gaussian)
+	if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
 	{
-		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
+		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3' need to be set.").arg(OPTION_MEDIAN).arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
 	}
 
 	//apply operation on clouds

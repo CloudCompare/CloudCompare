@@ -3267,7 +3267,7 @@ void MainWindow::doActionRGBGaussianFilter()
 void MainWindow::doActionRGBBilateralFilter()
 {
 	ccEntityAction::GaussianFilterOptions(filterParams);
-	filterParams.bilateral = true;
+	filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
 	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
 		return;
 
@@ -3288,7 +3288,7 @@ void MainWindow::doActionSFGaussianFilter()
 void MainWindow::doActionSFBilateralFilter()
 {
 	ccEntityAction::GaussianFilterOptions(filterParams);
-	filterParams.bilateral = true;
+	filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
 	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, filterParams, this) )
 		return;
 

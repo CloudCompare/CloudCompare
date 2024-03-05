@@ -788,7 +788,7 @@ namespace ccEntityAction
 
 				dlg.doubleSpinBox1->setStatusTip(QObject::tr("3*sigma = 99.7% attenuation"));
 				dlg.doubleSpinBox2->setStatusTip(QObject::tr("Scalar sigma controls how much the filter behaves as a Gaussian Filter\nSigma at +inf uses the whole range of scalars"));
-				dlg.doubleSpinBox3->setStatusTip(QObject::tr("It will only use colors for averaging where all of the color components in the range of [threshold:255-threshold]"));
+				dlg.doubleSpinBox3->setStatusTip(QObject::tr("For averaging, it will only use colors for which all components are in the range[threshold:255 - threshold]"));
 				if (!dlg.exec())
 				{
 					return false;
@@ -813,7 +813,7 @@ namespace ccEntityAction
 				dlg.setWindowTitle(QObject::tr("RGB Gaussian filter"));
 
 				dlg.doubleSpinBox1->setStatusTip(QObject::tr("3*sigma = 99.7% attenuation"));
-				dlg.doubleSpinBox2->setStatusTip(QObject::tr("It will only use colors for averaging where all of the color components in the range of [threshold:255-threshold]"));
+				dlg.doubleSpinBox2->setStatusTip(QObject::tr("For averaging, it will only use colors for which all components are in the range [threshold:255-threshold]"));
 				if (!dlg.exec())
 				{
 					return false;
@@ -853,13 +853,13 @@ namespace ccEntityAction
 					{
 						sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(spatialSigma).arg(sigmaSF);
 					}
-					else if(filterParams.filterType & GAUSSIAN_FILTER_TYPES::GAUSSIAN)
+					else if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::GAUSSIAN)
 					{
 						sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 					}
 					else
 					{
-						sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+						sfName = QString("%1.avgsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 					}
 
 					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
@@ -889,7 +889,12 @@ namespace ccEntityAction
 
 			QElapsedTimer eTimer;
 			eTimer.start();
-			pc->applyGaussianFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams.applyToSFduringRGB,filterParams.filterType & GAUSSIAN_FILTER_TYPES::MEDIAN, filterParams.burntOutColorThreshold, parent ? pDlg.data() : nullptr);
+			pc->applyGaussianFilterToRGB(	static_cast<PointCoordinateType>(spatialSigma),
+											static_cast<PointCoordinateType>(sigmaSF),
+											filterParams.applyToSFduringRGB,
+											filterParams.filterType & GAUSSIAN_FILTER_TYPES::AVERAGE,
+											filterParams.burntOutColorThreshold,
+											parent ? pDlg.data() : nullptr);
 			ccConsole::Print("[RGBGaussianFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 			if (filterParams.applyToSFduringRGB)
@@ -1032,7 +1037,7 @@ namespace ccEntityAction
 				}
 				else
 				{
-					sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					sfName = QString("%1.avgsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 				}
 
 				int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
@@ -1066,11 +1071,11 @@ namespace ccEntityAction
 																					parent ? pDlg.data() : nullptr,
 																					octree.data()))
 				{
-					ccConsole::Warning(QObject::tr("[Median/Gaussian/BilateralFilter] Failed to apply filter"));
+					ccConsole::Warning(QObject::tr("[Average/Gaussian/BilateralFilter] Failed to apply filter"));
 					return false;
 				}
 				
-				ccConsole::Print("[Gaussian/BilateralFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+				ccConsole::Print("[Average/Gaussian/BilateralFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 				pc->setCurrentDisplayedScalarField(sfIdx);
 				pc->showSF(sfIdx >= 0);
 				sf = pc->getCurrentDisplayedScalarField();

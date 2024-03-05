@@ -200,7 +200,7 @@ constexpr char OPTION_SF[]								= "SF";
 constexpr char OPTION_RGB[]								= "RGB";
 constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
 constexpr char OPTION_BILATERAL[]						= "BILATERAL";
-constexpr char OPTION_MEDIAN[]							= "MEDIAN";
+constexpr char OPTION_AVERAGE[]							= "AVERAGE";
 constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
@@ -6194,12 +6194,12 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::GAUSSIAN;
 			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEDIAN))
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_AVERAGE))
 		{
 			cmd.arguments().pop_front();
 			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
 			{
-				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::MEDIAN;
+				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::AVERAGE;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA))
@@ -6242,7 +6242,7 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 
 			bool ok = false;
 			uint burntOutColorThreshold = cmd.arguments().takeFirst().toUInt(&ok);
-			if (!ok || burntOutColorThreshold>255)
+			if (!ok || burntOutColorThreshold > 255)
 			{
 				return cmd.error(QObject::tr("Invalid value for burnt color threshold after '%1', must be an integer between 0 and 255!").arg(OPTION_BURNT_COLOR_THRESHOLD));
 			}
@@ -6255,12 +6255,12 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 	}
 	if(!applyToRGB && !applyToSF)
 	{
-		return cmd.error(QObject::tr("Missing parameter -%1 or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
+		return cmd.error(QObject::tr("Missing parameter -%1 and/or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
 	}
 
 	if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
 	{
-		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3' need to be set.").arg(OPTION_MEDIAN).arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
+		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3' need to be set.").arg(OPTION_AVERAGE).arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
 	}
 
 	//apply operation on clouds

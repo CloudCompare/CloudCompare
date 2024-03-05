@@ -623,7 +623,7 @@ public: //other methods
 	bool applyGaussianFilterToRGB(	PointCoordinateType sigma,
 									PointCoordinateType sigmaSF,
 									bool applyToSF,
-									bool median,
+									bool useAverage,
 									unsigned char burntOutColorThreshold,
 									CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 

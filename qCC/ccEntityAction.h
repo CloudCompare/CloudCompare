@@ -30,7 +30,7 @@ namespace ccEntityAction
 	enum GAUSSIAN_FILTER_TYPES
 	{
 		NONE		= 0,
-		MEDIAN		= 1,
+		AVERAGE		= 1,
 		GAUSSIAN	= 2,
 		BILATERAL	= 4,
 		ANY			= 7

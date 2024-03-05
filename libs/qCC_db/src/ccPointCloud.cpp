@@ -1825,7 +1825,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	bool applyToSF = *(static_cast<bool*>(additionalParameters[2]));
 	unsigned char burntOutColorThresholdMin = *(static_cast<unsigned char*>(additionalParameters[3]));
 	unsigned char burntOutColorThresholdMax = 255 - burntOutColorThresholdMin;
-	bool median = *(static_cast<bool*>(additionalParameters[4]));
+	bool useAverage = *(static_cast<bool*>(additionalParameters[4]));
 
 	//we only use the squared value of sigma
 	PointCoordinateType sigma2 = 2 * sigma*sigma;
@@ -1866,7 +1866,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(cell.points->getAssociatedCloud());
 	assert(cloud);
 
-	bool bilateralFilter = (sigmaSF > 0.0) && !median;
+	bool bilateralFilter = (sigmaSF > 0.0) && !useAverage;
 
 	for (unsigned i = 0; i < n; ++i) //for each point in cell
 	{
@@ -1898,10 +1898,9 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 		double sfWSum = 0.0;
 		for (unsigned j = 0; j < k; ++j, ++it)
 		{
-			double weight = median ? 1 : exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
+			double weight = useAverage ? 1.0 : exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
 
 			const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
-
 
 			if (bilateralFilter || applyToSF)
 			{
@@ -1961,7 +1960,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 											PointCoordinateType sigmaSF,
 											bool applyToSF,
-											bool median,
+											bool useAverage,
 											unsigned char burntOutColorThreshold,
 											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
@@ -2014,11 +2013,11 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 		progressCb->update(0);
 	}
 
-	void* additionalParameters[5] {	reinterpret_cast<void*>(&sigma),
+	void* additionalParameters[] {	reinterpret_cast<void*>(&sigma),
 									reinterpret_cast<void*>(&sigmaSF),
 									reinterpret_cast<void*>(&applyToSF),
 									reinterpret_cast<void*>(&burntOutColorThreshold),
-									reinterpret_cast<void*>(&median)
+									reinterpret_cast<void*>(&useAverage)
 	};
 
 	bool success = true;

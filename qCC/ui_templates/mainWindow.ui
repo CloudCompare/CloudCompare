@@ -179,8 +179,10 @@
      <addaction name="actionScalarFieldFromColor"/>
      <addaction name="actionInterpolateColors"/>
      <addaction name="actionEnhanceRGBWithIntensities"/>
-     <addaction name="actionRGBGaussianFilter"/>
      <addaction name="actionRGBBilateralFilter"/>
+     <addaction name="actionRGBGaussianFilter"/>
+	 <addaction name="actionRGBMeanFilter"/>
+	 <addaction name="actionRGBMedianFilter"/>
      <addaction name="separator"/>
      <addaction name="actionClearColor"/>
     </widget>
@@ -1358,6 +1360,32 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Compute bilateral filter</string>
    </property>
   </action>
+   <action name="actionRGBMeanFilter">
+	 <property name="icon">
+	 </property>
+	 <property name="text">
+	   <string>Mean filter</string>
+	 </property>
+	 <property name="toolTip">
+	   <string>Compute mean filter</string>
+	 </property>
+	 <property name="statusTip">
+	   <string>Compute mean filter</string>
+	 </property>
+   </action>
+   <action name="actionRGBMedianFilter">
+	 <property name="icon">
+	 </property>
+	 <property name="text">
+	   <string>Median filter</string>
+	 </property>
+	 <property name="toolTip">
+	   <string>Compute median filter</string>
+	 </property>
+	 <property name="statusTip">
+	   <string>Compute median filter</string>
+	 </property>
+   </action>
   <action name="actionClearNormals">
    <property name="icon">
     <iconset resource="../icons.qrc">

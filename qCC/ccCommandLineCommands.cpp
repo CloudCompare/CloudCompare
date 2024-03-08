@@ -200,7 +200,8 @@ constexpr char OPTION_SF[]								= "SF";
 constexpr char OPTION_RGB[]								= "RGB";
 constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
 constexpr char OPTION_BILATERAL[]						= "BILATERAL";
-constexpr char OPTION_AVERAGE[]							= "AVERAGE";
+constexpr char OPTION_MEAN[]							= "MEAN";
+constexpr char OPTION_MEDIAN[]							= "MEDIAN";
 constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
@@ -6163,7 +6164,7 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 	bool applyToRGB = false;
 	bool applyToSF = false;
 	bool gaussian = false;
-	ccEntityAction::GaussianFilterOptions(filterParams);
+	ccPointCloud::RgbFilterOptions(filterParams);
 	filterParams.commandLine = true;
 	while (!cmd.arguments().empty())
 	{
@@ -6181,25 +6182,33 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BILATERAL))
 		{
 			cmd.arguments().pop_front();
-			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
 			{
-				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::BILATERAL;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_GAUSSIAN))
 		{
 			cmd.arguments().pop_front();
-			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
 			{
-				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::GAUSSIAN;
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN;
 			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, OPTION_AVERAGE))
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEAN))
 		{
 			cmd.arguments().pop_front();
-			if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
 			{
-				filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::AVERAGE;
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEAN;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEDIAN))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEDIAN;
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA))
@@ -6258,9 +6267,13 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Missing parameter -%1 and/or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
 	}
 
-	if (filterParams.filterType == ccEntityAction::GAUSSIAN_FILTER_TYPES::NONE)
+	if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
 	{
-		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3' need to be set.").arg(OPTION_AVERAGE).arg(OPTION_GAUSSIAN).arg(OPTION_BILATERAL));
+		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3', '-%4' need to be set.")
+			.arg(OPTION_MEAN)
+			.arg(OPTION_GAUSSIAN)
+			.arg(OPTION_BILATERAL)
+			.arg(OPTION_MEDIAN));
 	}
 
 	//apply operation on clouds

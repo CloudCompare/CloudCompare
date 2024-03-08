@@ -527,6 +527,8 @@ void MainWindow::connectActions()
 	});
 	connect(m_UI->actionRGBGaussianFilter,			&QAction::triggered, this, &MainWindow::doActionRGBGaussianFilter);
 	connect(m_UI->actionRGBBilateralFilter,			&QAction::triggered, this, &MainWindow::doActionRGBBilateralFilter);
+	connect(m_UI->actionRGBMeanFilter,				&QAction::triggered, this, &MainWindow::doActionRGBMeanFilter);
+	connect(m_UI->actionRGBMedianFilter,			&QAction::triggered, this, &MainWindow::doActionRGBMedianFilter);
 
 	//"Edit > Normals" menu
 	connect(m_UI->actionComputeNormals,				&QAction::triggered, this, &MainWindow::doActionComputeNormals);
@@ -3256,7 +3258,8 @@ void MainWindow::doActionSplitCloudUsingSF()
 
 void MainWindow::doActionRGBGaussianFilter()
 {
-	ccEntityAction::GaussianFilterOptions(filterParams);
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN;
 	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
 		return;
 
@@ -3266,8 +3269,8 @@ void MainWindow::doActionRGBGaussianFilter()
 
 void MainWindow::doActionRGBBilateralFilter()
 {
-	ccEntityAction::GaussianFilterOptions(filterParams);
-	filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::BILATERAL;
 	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
 		return;
 
@@ -3275,9 +3278,33 @@ void MainWindow::doActionRGBBilateralFilter()
 	updateUI();
 }
 
+void MainWindow::doActionRGBMeanFilter()
+{
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEAN;
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
+		return;
+
+	refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionRGBMedianFilter()
+{
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEDIAN;
+	if (!ccEntityAction::rgbGaussianFilter(m_selectedEntities, filterParams, this))
+		return;
+
+	refreshAll();
+	updateUI();
+}
+
+
 void MainWindow::doActionSFGaussianFilter()
 {
-	ccEntityAction::GaussianFilterOptions(filterParams);
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN;
 	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, filterParams, this) )
 		return;
 
@@ -3287,8 +3314,8 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-	ccEntityAction::GaussianFilterOptions(filterParams);
-	filterParams.filterType = ccEntityAction::GAUSSIAN_FILTER_TYPES::BILATERAL;
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::BILATERAL;
 	if ( !ccEntityAction::sfGaussianFilter(m_selectedEntities, filterParams, this) )
 		return;
 
@@ -11194,6 +11221,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionEnhanceRGBWithIntensities->setEnabled(atLeastOneColor);
 	m_UI->actionRGBGaussianFilter->setEnabled(atLeastOneColor);
 	m_UI->actionRGBBilateralFilter->setEnabled(atLeastOneColor);
+	m_UI->actionRGBMeanFilter->setEnabled(atLeastOneColor);
+	m_UI->actionRGBMedianFilter->setEnabled(atLeastOneColor);
 	m_UI->actionColorFromScalarField->setEnabled(atLeastOneSF);
 	// == 1
 	bool exactlyOneEntity = (selInfo.selCount == 1);

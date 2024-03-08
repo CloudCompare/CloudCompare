@@ -1822,10 +1822,12 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	//additional parameters
 	PointCoordinateType sigma = *(static_cast<PointCoordinateType*>(additionalParameters[0]));
 	PointCoordinateType sigmaSF = *(static_cast<PointCoordinateType*>(additionalParameters[1]));
-	bool applyToSF = *(static_cast<bool*>(additionalParameters[2]));
-	unsigned char burntOutColorThresholdMin = *(static_cast<unsigned char*>(additionalParameters[3]));
+	ccPointCloud::RgbFilterOptions filterParams= *(static_cast<ccPointCloud::RgbFilterOptions*>(additionalParameters[2]));
+	bool applyToSF = filterParams.applyToSFduringRGB;
+	unsigned char burntOutColorThresholdMin = filterParams.burntOutColorThreshold;
 	unsigned char burntOutColorThresholdMax = 255 - burntOutColorThresholdMin;
-	bool useAverage = *(static_cast<bool*>(additionalParameters[4]));
+	bool mean = filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEAN;
+	bool median = filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEDIAN;
 
 	//we only use the squared value of sigma
 	PointCoordinateType sigma2 = 2 * sigma*sigma;
@@ -1866,14 +1868,14 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(cell.points->getAssociatedCloud());
 	assert(cloud);
 
-	bool bilateralFilter = (sigmaSF > 0.0) && !useAverage;
+	bool bilateralFilter = (sigmaSF > 0.0) && !mean && !median;
 
 	for (unsigned i = 0; i < n; ++i) //for each point in cell
 	{
 		ScalarType queryValue = 0; //scalar of the query point
 		unsigned queryPointIndex = cell.points->getPointGlobalIndex(i);
 
-		if (bilateralFilter || applyToSF)
+		if (bilateralFilter)
 		{
 			queryValue = cell.points->getPointScalarValue(i);
 
@@ -1892,59 +1894,112 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 
 		//each point adds a contribution weighted by its distance to the sphere center
 		it = nNSS.pointsInNeighbourhood.begin();
-		ccColor::RgbTpl<double> rgbSum(0, 0, 0);
-		double wSum = 0.0;
-		double sfSum = 0.0;
-		double sfWSum = 0.0;
-		for (unsigned j = 0; j < k; ++j, ++it)
+		if (median)
 		{
-			double weight = useAverage ? 1.0 : exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
-
-			const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
-
-			if (bilateralFilter || applyToSF)
+			std::vector<unsigned char> rValues;
+			std::vector<unsigned char> gValues;
+			std::vector<unsigned char> bValues;
+			std::vector<ScalarType> sfValues;
+			for (unsigned j = 0; j < k; ++j, ++it)
 			{
-				ScalarType val = cloud->getPointScalarValue(it->pointIndex);
-				if (CCCoreLib::ScalarField::ValidValue(val))
+				const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
+				if (col.r >= burntOutColorThresholdMin && col.r <= burntOutColorThresholdMax &&
+					col.g >= burntOutColorThresholdMin && col.g <= burntOutColorThresholdMax &&
+					col.b >= burntOutColorThresholdMin && col.b <= burntOutColorThresholdMax)
 				{
-					if (bilateralFilter)
+					rValues.push_back(col.r);
+					gValues.push_back(col.g);
+					bValues.push_back(col.b);
+				}
+				if (applyToSF)
+				{
+					ScalarType val = cloud->getPointScalarValue(it->pointIndex);
+					if (CCCoreLib::ScalarField::ValidValue(val))
 					{
-						ScalarType dSF = queryValue - val;
-						weight *= exp(-(dSF*dSF) / sigmaSF2);
+						sfValues.push_back(val);
 					}
-					sfSum += weight * static_cast<double>(val);
-					sfWSum += weight;
 				}
-				else
+			}
+
+			if (rValues.size() > 0)
+			{
+				std::vector<unsigned char>::iterator medR = rValues.begin() + rValues.size() / 2;
+				std::nth_element(rValues.begin(), medR, rValues.end());
+				std::vector<unsigned char>::iterator medG = gValues.begin() + gValues.size() / 2;
+				std::nth_element(gValues.begin(), medG, gValues.end());
+				std::vector<unsigned char>::iterator medB = bValues.begin() + bValues.size() / 2;
+				std::nth_element(bValues.begin(), medB, bValues.end());
+
+				ccColor::Rgb medCol(static_cast<ColorCompType>(*medR),
+					static_cast<ColorCompType>(*medG),
+					static_cast<ColorCompType>(*medB));
+
+				cloud->setPointColor(queryPointIndex, medCol);
+			}
+
+			if (sfValues.size() > 0)
+			{
+				std::vector<ScalarType>::iterator medSF= sfValues.begin() + sfValues.size() / 2;
+				std::nth_element(sfValues.begin(), medSF, sfValues.end());
+				cloud->setPointScalarValue(queryPointIndex, static_cast<ScalarType>(*medSF));
+			}
+		}
+		else
+		{
+			ccColor::RgbTpl<double> rgbSum(0, 0, 0);
+			double wSum = 0.0;
+			double sfSum = 0.0;
+			double sfWSum = 0.0;
+			for (unsigned j = 0; j < k; ++j, ++it)
+			{
+				double weight = mean ? 1.0 : exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
+
+				const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
+
+				if (bilateralFilter || applyToSF)
 				{
-					continue;
+					ScalarType val = cloud->getPointScalarValue(it->pointIndex);
+					if (CCCoreLib::ScalarField::ValidValue(val))
+					{
+						if (bilateralFilter)
+						{
+							ScalarType dSF = queryValue - val;
+							weight *= exp(-(dSF*dSF) / sigmaSF2);
+						}
+						sfSum += weight * static_cast<double>(val);
+						sfWSum += weight;
+					}
+					else
+					{
+						continue;
+					}
+				}
+				if (col.r >= burntOutColorThresholdMin && col.r <= burntOutColorThresholdMax &&
+					col.g >= burntOutColorThresholdMin && col.g <= burntOutColorThresholdMax &&
+					col.b >= burntOutColorThresholdMin && col.b <= burntOutColorThresholdMax)
+				{
+					rgbSum.r += weight * col.r;
+					rgbSum.g += weight * col.g;
+					rgbSum.b += weight * col.b;
+					wSum += weight;
 				}
 			}
-			if (col.r >= burntOutColorThresholdMin && col.r <= burntOutColorThresholdMax &&
-				col.g >= burntOutColorThresholdMin && col.g <= burntOutColorThresholdMax &&
-				col.b >= burntOutColorThresholdMin && col.b <= burntOutColorThresholdMax )
+
+			if (wSum != 0.0)
 			{
-				rgbSum.r += weight * col.r;
-				rgbSum.g += weight * col.g;
-				rgbSum.b += weight * col.b;
-				wSum += weight;
+				ccColor::Rgb avgCol(static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.r / wSum), 0.0)),
+					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
+					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
+
+				cloud->setPointColor(queryPointIndex, avgCol);
 			}
-		}
 
-		if (wSum != 0.0)
-		{
-			ccColor::Rgb avgCol(static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.r / wSum), 0.0)),
-								static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
-								static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
-
-			cloud->setPointColor(queryPointIndex, avgCol);
-		}
-
-		if (applyToSF)
-		{
-			if (sfWSum != 0.0)
+			if (applyToSF)
 			{
+				if (sfWSum != 0.0)
+				{
 					cloud->setPointScalarValue(queryPointIndex, static_cast<ScalarType>(sfSum / sfWSum));
+				}
 			}
 		}
 
@@ -1957,29 +2012,27 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	return true;
 }
 
-bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
+bool ccPointCloud::applyFilterToRGB(PointCoordinateType sigma,
 											PointCoordinateType sigmaSF,
-											bool applyToSF,
-											bool useAverage,
-											unsigned char burntOutColorThreshold,
+											RgbFilterOptions filterParams,
 											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	unsigned n = size();
 	if (n == 0)
 	{
-		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Cloud is empty");
+		ccLog::Warning("[ccPointCloud::applyFilterToRGB] Cloud is empty");
 		return false;
 	}
 
 	if (!hasColors())
 	{
-		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Cloud has no RGB color");
+		ccLog::Warning("[ccPointCloud::applyFilterToRGB] Cloud has no RGB color");
 		return false;
 	}
 
 	if ((sigmaSF > 0) && (nullptr == getCurrentOutScalarField()))
 	{
-		ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] A non-zero scalar field variance was set without an active 'input' scalar-field");
+		ccLog::Warning("[ccPointCloud::applyFilterToRGB] A non-zero scalar field variance was set without an active 'input' scalar-field");
 		return false;
 	}
 
@@ -1988,7 +2041,7 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 	{
 		if (!computeOctree(progressCb))
 		{
-			ccLog::Warning("[ccPointCloud::applyGaussianFilterToRGB] Failed to compute the octree");
+			ccLog::Warning("[ccPointCloud::applyFilterToRGB] Failed to compute the octree");
 			delete theOctree;
 			return false;
 		}
@@ -2005,7 +2058,7 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 	{
 		if (progressCb->textCanBeEdited())
 		{
-			progressCb->setMethodTitle("RGB Gaussian filter");
+			progressCb->setMethodTitle("RGB filter");
 			char infos[32];
 			snprintf(infos, 32, "Level: %i", level);
 			progressCb->setInfo(infos);
@@ -2015,9 +2068,7 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 
 	void* additionalParameters[] {	reinterpret_cast<void*>(&sigma),
 									reinterpret_cast<void*>(&sigmaSF),
-									reinterpret_cast<void*>(&applyToSF),
-									reinterpret_cast<void*>(&burntOutColorThreshold),
-									reinterpret_cast<void*>(&useAverage)
+									reinterpret_cast<void*>(&filterParams)
 	};
 
 	bool success = true;
@@ -2027,7 +2078,7 @@ bool ccPointCloud::applyGaussianFilterToRGB(PointCoordinateType sigma,
 														additionalParameters,
 														true,
 														progressCb,
-														"Gaussian Filter computation") == 0)
+														"Filter computation") == 0)
 	{
 		//something went wrong
 		success = false;

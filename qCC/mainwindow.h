@@ -270,6 +270,8 @@ private:
 	void doActionColorFromScalars();
 	void doActionRGBGaussianFilter();
 	void doActionRGBBilateralFilter();
+	void doActionRGBMeanFilter();
+	void doActionRGBMedianFilter();
 
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();

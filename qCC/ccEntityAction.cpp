@@ -695,7 +695,7 @@ namespace ccEntityAction
 		return true;
 	}
 
-	bool	rgbGaussianFilter(const ccHObject::Container& selectedEntities, GaussianFilterOptions filterParams, QWidget* parent/*=nullptr*/)
+	bool	rgbGaussianFilter(const ccHObject::Container& selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 		{
@@ -719,7 +719,7 @@ namespace ccEntityAction
 			//check if the cloud has color
 			if (pc->hasColors())
 			{
-				if ((filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL) && !pc->hasDisplayedScalarField())
+				if ((filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL) && !pc->hasDisplayedScalarField())
 				{
 					continue;
 				}
@@ -743,7 +743,7 @@ namespace ccEntityAction
 
 		if (selectedCloudsWithColors.empty())
 		{
-			if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 				ccConsole::Error(QObject::tr("Select at least one cloud or mesh with RGB colors and an active scalar field"));
 			else
 				ccConsole::Error(QObject::tr("Select at least one cloud or mesh with RGB colors"));
@@ -751,7 +751,7 @@ namespace ccEntityAction
 		}
 
 		double sigmaSF = -1.0;
-		if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+		if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 		{
 			CCCoreLib::ScalarField* sf = selectedCloudsWithColors.front().second->getCurrentDisplayedScalarField();
 			if (sf)
@@ -770,7 +770,7 @@ namespace ccEntityAction
 		{
 			bool ok = false;
 
-			if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 			{
 				ccAskThreeDoubleValuesDlg dlg(	QObject::tr("Spatial sigma"),
 												QObject::tr("Scalar sigma"),
@@ -784,7 +784,7 @@ namespace ccEntityAction
 											nullptr,
 											parent);
 
-				dlg.setWindowTitle(QObject::tr("RGB Bilateral filter"));
+				dlg.setWindowTitle(QObject::tr("RGB bilateral filter"));
 
 				dlg.doubleSpinBox1->setStatusTip(QObject::tr("3*sigma = 99.7% attenuation"));
 				dlg.doubleSpinBox2->setStatusTip(QObject::tr("Scalar sigma controls how much the filter behaves as a Gaussian Filter\nSigma at +inf uses the whole range of scalars"));
@@ -810,7 +810,7 @@ namespace ccEntityAction
 					8,
 					nullptr,
 					parent);
-				dlg.setWindowTitle(QObject::tr("RGB Gaussian filter"));
+				dlg.setWindowTitle(QObject::tr("RGB gaussian/mean/median filter"));
 
 				dlg.doubleSpinBox1->setStatusTip(QObject::tr("3*sigma = 99.7% attenuation"));
 				dlg.doubleSpinBox2->setStatusTip(QObject::tr("For averaging, it will only use colors for which all components are in the range [threshold:255-threshold]"));
@@ -836,7 +836,7 @@ namespace ccEntityAction
 			ccPointCloud* pc = entAndPC.second;
 			assert(pc);
 			int sfIdx = 0;
-			if ((filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL) || filterParams.applyToSFduringRGB)
+			if ((filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL) || filterParams.applyToSFduringRGB)
 			{
 				//we set the displayed SF as "OUT" SF
 				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
@@ -849,17 +849,21 @@ namespace ccEntityAction
 					CCCoreLib::ScalarField* outSF = pc->getCurrentOutScalarField();
 					Q_ASSERT(outSF != nullptr);
 					QString sfName;
-					if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+					if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 					{
 						sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(spatialSigma).arg(sigmaSF);
 					}
-					else if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::GAUSSIAN)
+					else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN)
 					{
 						sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 					}
+					else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEAN)
+					{
+						sfName = QString("%1.meansmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					}
 					else
 					{
-						sfName = QString("%1.avgsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+						sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 					}
 
 					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
@@ -889,13 +893,11 @@ namespace ccEntityAction
 
 			QElapsedTimer eTimer;
 			eTimer.start();
-			pc->applyGaussianFilterToRGB(	static_cast<PointCoordinateType>(spatialSigma),
+			pc->applyFilterToRGB(	static_cast<PointCoordinateType>(spatialSigma),
 											static_cast<PointCoordinateType>(sigmaSF),
-											filterParams.applyToSFduringRGB,
-											filterParams.filterType & GAUSSIAN_FILTER_TYPES::AVERAGE,
-											filterParams.burntOutColorThreshold,
+											filterParams,
 											parent ? pDlg.data() : nullptr);
-			ccConsole::Print("[RGBGaussianFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+			ccConsole::Print("[RGBFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 			if (filterParams.applyToSFduringRGB)
 			{
@@ -918,7 +920,7 @@ namespace ccEntityAction
 	//////////
 	// Scalar Fields
 
-	bool	sfGaussianFilter(const ccHObject::Container& selectedEntities, GaussianFilterOptions filterParams, QWidget* parent/*=nullptr*/)
+	bool	sfGaussianFilter(const ccHObject::Container& selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent/*=nullptr*/)
 	{
 		if (selectedEntities.empty())
 			return false;
@@ -933,7 +935,7 @@ namespace ccEntityAction
 		//estimate a good value for scalar field sigma, based on the first cloud
 		//and its displayed scalar field
 		double scalarFieldSigma = -1.0;
-		if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+		if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 		{
 			ccPointCloud* testPC = ccHObjectCaster::ToPointCloud(selectedEntities.front());
 			CCCoreLib::ScalarField* testSF = testPC->getCurrentDisplayedScalarField();
@@ -956,7 +958,7 @@ namespace ccEntityAction
 		QScopedPointer<ccProgressDialog> pDlg;
 		if (!filterParams.commandLine)
 		{
-			if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 			{
 				ccAskTwoDoubleValuesDlg dlg(QObject::tr("Spatial sigma"),
 											QObject::tr("Scalar sigma"),
@@ -968,7 +970,7 @@ namespace ccEntityAction
 											nullptr,
 											parent);
 
-				dlg.setWindowTitle(QObject::tr("Bilateral filter"));
+				dlg.setWindowTitle(QObject::tr("SF bilateral filter"));
 
 				dlg.doubleSpinBox1->setStatusTip(QObject::tr("3*sigma = 99.7% attenuation"));
 				dlg.doubleSpinBox2->setStatusTip(QObject::tr("Scalar field's sigma controls how much the filter behaves as a Gaussian Filter\nSigma at +inf uses the whole range of scalars"));
@@ -984,7 +986,7 @@ namespace ccEntityAction
 				bool ok = false;
 
 				spatialSigma = QInputDialog::getDouble(	parent,
-														QObject::tr("Gaussian filter"),
+														QObject::tr("SF gaussian/mean/median filter"),
 														"sigma:",
 														spatialSigma,
 														DBL_MIN,
@@ -1027,17 +1029,21 @@ namespace ccEntityAction
 				Q_ASSERT(outSF != nullptr);
 				
 				QString sfName;
-				if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::BILATERAL)
+				if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 				{
 					sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(spatialSigma).arg(scalarFieldSigma);
 				}
-				else if (filterParams.filterType & GAUSSIAN_FILTER_TYPES::GAUSSIAN)
+				else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN)
 				{
 					sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 				}
+				else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEAN)
+				{
+					sfName = QString("%1.meansmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+				}
 				else
 				{
-					sfName = QString("%1.avgsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
 				}
 
 				int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
@@ -1071,11 +1077,11 @@ namespace ccEntityAction
 																					parent ? pDlg.data() : nullptr,
 																					octree.data()))
 				{
-					ccConsole::Warning(QObject::tr("[Average/Gaussian/BilateralFilter] Failed to apply filter"));
+					ccConsole::Warning(QObject::tr("[Bilateral/Gaussian/Mean/Median filter]  Failed to apply filter"));
 					return false;
 				}
 				
-				ccConsole::Print("[Average/Gaussian/BilateralFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+				ccConsole::Print("SF [Bilateral/Gaussian/Mean/Median filter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 				pc->setCurrentDisplayedScalarField(sfIdx);
 				pc->showSF(sfIdx >= 0);
 				sf = pc->getCurrentDisplayedScalarField();

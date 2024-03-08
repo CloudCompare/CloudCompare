@@ -606,6 +606,25 @@ public: //other methods
 	**/
 	bool colorize(float r, float g, float b, float a = 1.0f);
 
+	enum RGB_FILTER_TYPES
+	{
+		NONE,
+		BILATERAL,
+		GAUSSIAN,
+		MEAN,
+		MEDIAN
+	};
+
+	struct RgbFilterOptions
+	{
+		bool applyToSFduringRGB = false;
+		RGB_FILTER_TYPES filterType = RGB_FILTER_TYPES::NONE;
+		unsigned char burntOutColorThreshold = 0;
+		bool commandLine = false;
+		double sigmaSF = -1;
+		double spatialSigma = -1;
+	};
+
 	//! Applies a spatial Gaussian filter on RGB colors
 	/** The "amplitutde" of the Gaussian filter must be specified (sigma).
 		As 99% of the Gaussian distribution is between -3*sigma and +3*sigma around the mean value,
@@ -620,11 +639,9 @@ public: //other methods
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return success
 	**/
-	bool applyGaussianFilterToRGB(	PointCoordinateType sigma,
+	bool applyFilterToRGB(	PointCoordinateType sigma,
 									PointCoordinateType sigmaSF,
-									bool applyToSF,
-									bool useAverage,
-									unsigned char burntOutColorThreshold,
+									RgbFilterOptions filterParams,
 									CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Assigns color to points proportionally to their 'height'

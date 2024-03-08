@@ -19,6 +19,7 @@
 
 //qCC_db
 #include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccPointCloudInterpolator.h>
 
 class QWidget;
@@ -27,24 +28,6 @@ class ccMainAppInterface;
 
 namespace ccEntityAction
 {
-	enum GAUSSIAN_FILTER_TYPES
-	{
-		NONE		= 0,
-		AVERAGE		= 1,
-		GAUSSIAN	= 2,
-		BILATERAL	= 4,
-		ANY			= 7
-	};
-
-	struct GaussianFilterOptions
-	{
-		bool applyToSFduringRGB = false;
-		GAUSSIAN_FILTER_TYPES filterType = NONE;
-		unsigned char burntOutColorThreshold = 0;
-		bool commandLine = false;
-		double sigmaSF = -1;
-		double spatialSigma = -1;
-	};
 
 	// Colours
 	bool	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent = nullptr);
@@ -54,10 +37,10 @@ namespace ccEntityAction
 	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent = nullptr);
 	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
-	bool	rgbGaussianFilter(const ccHObject::Container &selectedEntities, GaussianFilterOptions filterParams, QWidget* parent = nullptr);
+	bool	rgbGaussianFilter(const ccHObject::Container &selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
 	
 	// Scalar Fields
-	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, GaussianFilterOptions filterParams, QWidget* parent = nullptr);
+	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
 	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);

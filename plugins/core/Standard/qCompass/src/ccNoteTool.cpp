@@ -28,7 +28,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	//get note text
 	QString note = QInputDialog::getText(m_app->getMainWindow(), "Note", "Contents:", QLineEdit::Normal, "Write note here.");
 
-	if (note == "")
+	if (note.isEmpty())
 	{
 		return;
 	}
@@ -74,7 +74,6 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	notesFolder->addChild(l);
 	m_app->addToDB(l);
 }
-
 
 //called when the tool is set to active (for initialization)
 void ccNoteTool::toolActivated()

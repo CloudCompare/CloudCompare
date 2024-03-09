@@ -25,50 +25,52 @@
 #include <ccColorTypes.h>
 #include <DistanceComputationTools.h>
 
-/*
-Tool used to create thickness measurements in qCompass
-*/
-class ccThicknessTool :
-	public ccTool
+//! Tool used to create thickness measurements in qCompass
+class ccThicknessTool :	public ccTool
 {
 public:
 	ccThicknessTool();
-	virtual ~ccThicknessTool() = default;
 
-	//called when the tool is set to active (for initialization)
-	virtual void toolActivated() override;
+	//! Called when the tool is set to active (for initialization)
+	void toolActivated() override;
 
-	//called when the tool is set to disactive (for cleanup)
-	virtual void toolDisactivated() override;
+	//! Called when the tool is set to disactive (for cleanup)
+	void toolDisactivated() override;
 
-	//called when the selection is changed while this tool is active
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	//! Called when the selection is changed while this tool is active
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
 
-	//called when a point in a point cloud gets picked while this tool is active
-	virtual void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccHObject* pickedObject, const CCVector3& P) override;
+	//! Called when a point in a point cloud gets picked while this tool is active
+	bool pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccHObject* pickedObject, const CCVector3& P) override;
 
-	//called when a point in a point cloud gets picked while this tool is active
+	//! Called when a point in a point cloud gets picked while this tool is active
 	void pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCloud* cloud, const CCVector3& P) override;
 
-	//called when "Return" or "Space" is pressed, or the "Accept Button" is clicked
+	//! Called when "Return" or "Space" is pressed, or the "Accept Button" is clicked
 	void accept() override; //do nothing
 
-	//called when the "Escape" is pressed, or the "Cancel" button is clicked
+	//! Called when the "Escape" is pressed, or the "Cancel" button is clicked
 	void cancel() override; //do nothing
-protected:
-	ccPlane* m_referencePlane = nullptr; //plane used to calculate thickness
-	CCVector3* m_startPoint = nullptr; //first point used to calculate thickness in two-point mode
-	std::vector<int> m_hiddenObjects; //used to hide all point clouds (first), then all planes (second).
-	int m_graphic_id = -1; //used to store partially completed lineation graphics
-private:
-	float planeToPointDistance(ccPlane* plane, CCVector3 P); //calculate point-to-plane distances
-	ccHObject* buildGraphic(CCVector3 endPoint, float thickness); //build a "thickness" graphic
 
-	//recurses children looking for point clouds & making them invisible
+protected:
+	ccPlane* m_referencePlane = nullptr; //!< Plane used to calculate thickness
+	CCVector3* m_startPoint = nullptr; //!< First point used to calculate thickness in two-point mode
+	std::vector<int> m_hiddenObjects; //!< Used to hide all point clouds (first), then all planes (second).
+	int m_graphic_id = -1; //!< Used to store partially completed lineation graphics
+
+private:
+	//! Calculates point-to-plane distances
+	float planeToPointDistance(ccPlane* plane, CCVector3 P);
+
+	//! Builds a "thickness" graphic
+	ccHObject* buildGraphic(CCVector3 endPoint, float thickness);
+
+	//! Recurses children looking for point clouds & making them invisible
 	void recurseChildren(ccHObject* obj, bool hidePointClouds, bool hidePlanes);
 
-	//gets the interior part of the currently selected GeoObject (or returns the insertPoint if it's not a GeoObject)
+	//! Gets the interior part of the currently selected GeoObject (or returns the insertPoint if it's not a GeoObject)
 	ccHObject* getInsertInterior(ccHObject* insertPoint);
+
 public:
 	static bool TWO_POINT_MODE; //if true, two points + planar orientation used to calculate thickness. If false, then point-to-plane distance
 	                            //is calculated for each point

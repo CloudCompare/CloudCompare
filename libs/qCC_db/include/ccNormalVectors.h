@@ -105,7 +105,7 @@ public:
 	**/
 	static void ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoordinateType& strike_deg, PointCoordinateType& dip_deg);
 
-	//! Converts a normal vector to geological 'dip direction & dip' parameters
+	//! Converts a normal vector to geological 'dip direction & dip' parameters (float version)
 	/** See http://en.wikipedia.org/wiki/Strike_and_dip
 		The dip direction is the azimuth of the direction (in [0,360[).
 		The dip is always in [0,90].
@@ -113,15 +113,33 @@ public:
 		\param[out] dip_deg value (in degrees)
 		\param[out] dipDir_deg dip direction value (in degrees)
 	**/
-	static void ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip_deg, PointCoordinateType& dipDir_deg);
+	static void ConvertNormalToDipAndDipDir(const CCVector3f& N, float& dip_deg, float& dipDir_deg);
 
-	//! Converts a couple of geological 'dip direction & dip' parameters to a unit normal vector
+	//! Converts a normal vector to geological 'dip direction & dip' parameters (double version)
+	/** See http://en.wikipedia.org/wiki/Strike_and_dip
+		The dip direction is the azimuth of the direction (in [0,360[).
+		The dip is always in [0,90].
+		\param[in] N normal (should be normalized!)
+		\param[out] dip_deg value (in degrees)
+		\param[out] dipDir_deg dip direction value (in degrees)
+	**/
+	static void ConvertNormalToDipAndDipDir(const CCVector3d& N, double& dip_deg, double& dipDir_deg);
+
+	//! Converts a couple of geological 'dip direction & dip' parameters to a unit normal vector (float version)
 	/** \param[in] dip_deg value (in degrees)
 		\param[in] dipDir_deg dip direction value(in degrees)
 		\param[in] upward whether the output normal vector should point towards Z+ (true) or Z- (false)
 		\return unit normal vector
 	**/
-	static CCVector3 ConvertDipAndDipDirToNormal(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg, bool upward = true);
+	static CCVector3f ConvertDipAndDipDirToNormal(float dip_deg, float dipDir_deg, bool upward = true);
+
+	//! Converts a couple of geological 'dip direction & dip' parameters to a unit normal vector (double version)
+	/** \param[in] dip_deg value (in degrees)
+		\param[in] dipDir_deg dip direction value(in degrees)
+		\param[in] upward whether the output normal vector should point towards Z+ (true) or Z- (false)
+		\return unit normal vector
+	**/
+	static CCVector3d ConvertDipAndDipDirToNormal(double dip_deg, double dipDir_deg, bool upward = true);
 
 	//! Converts geological 'strike & dip' parameters (N[dip]°E - [strike]°) to a string
 	/** \param[in] strike_deg strike value (in degrees)

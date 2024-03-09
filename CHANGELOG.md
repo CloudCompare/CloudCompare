@@ -22,6 +22,8 @@ Bug fixes:
 	originating from the same file. Now the component filenames will contain the cloud name and index in the file to
 	make sure they are unique.
 - The Global Shift information was not always saved when exporting to the PCD format
+- When refusing to change the Global Shift & Scale information after applying a transformation, the Global Shift & Scale
+	information could be reset
 
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------

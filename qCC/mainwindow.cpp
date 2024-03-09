@@ -1126,7 +1126,21 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 
 			// we compute the impact to the local coordinate system without changing the
 			// current Global Shift & Scale parameters (for now)
-			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
+			// Here is the formula, assuming:
+			// - the Global Shift is Ts
+			// - the Global scale is Sc
+			// - the transformation is (R, T)
+			// - the Global point coordinates Pg are derived from the local ones Pl with: Pg = Pl/Sc - Ts
+			// Therefore, Pg' = R * Pg + T
+			// i.e.       Pg' = R.(Pl/Sc - Ts) + T
+			// i.e.       Pg' = (R.Pl)/Sc - R.Ts + T
+			// i.e.       Pg' = (R.Pl)/Sc - R.Ts + T + Ts - Ts
+			// i.e.       Pg' = (R.Pl + Sc.[Ts - R.Ts + T])/Sc - Ts
+			// i.e.       Pl' = Sc.[Ts -R.Ts + T]
+			// i.e. the translation of the 'local' coordinate system is: Sc.[T + Ts - R.Ts]
+			CCVector3d rotatedGlobalShift = globalShift;
+			mat.applyRotation(rotatedGlobalShift);
+			CCVector3d localTranslation = globalScale * (globalShift - rotatedGlobalShift + mat.getTranslationAsVec3D());
 
 			// we switch to a local transformation matrix
 			transMat.setTranslation(localTranslation);
@@ -1175,6 +1189,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 						//let's try to find better Global Shift and Scale values
 						CCVector3d newShift(0.0, 0.0, 0.0);
 						double newScale = 1.0;
+						bool updateShiftAndscale = false;
 
 						//should we try to use the previous Global Shift and Scale values?
 						if (autoApplyPreviousGlobalShiftAndScale)
@@ -1185,6 +1200,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 								newScale = previousScale;
 								newShift = previousShift;
 								needShift = false;
+								updateShiftAndscale = true;
 							}
 						}
 
@@ -1223,10 +1239,10 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 								}
 							}
 
-							//if not good solution found...
+							//if no good solution was found...
 							if (matchingIndex < 0)
 							{
-								//add "suggested" entry
+								//add a "suggested" entry
 								CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
 								double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
 								matchingIndex = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
@@ -1238,6 +1254,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 								newScale = sasDlg.getScale();
 								newShift = sasDlg.getShift();
 								needShift = false;
+								updateShiftAndscale = true;
 
 								//store the shift for next time!
 								ccGlobalShiftManager::StoreShift(newShift, newScale);
@@ -1254,24 +1271,31 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 								ccLog::Warning(tr("[ApplyTransformation] Process cancelled by user"));
 								return;
 							}
+							else
+							{
+								// the user did not want to change the shift & scale
+							}
 						}
 
-						assert(!needShift);
-
-						//get the relative modification to existing global shift/scale info
-						assert(globalScale != 0);
-						double scaleChange = newScale / globalScale;
-						CCVector3d shiftChange = newShift - globalShift;
-
-						if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+						if (updateShiftAndscale)
 						{
-							//apply translation as global shift
-							cloud->setGlobalShift(newShift);
-							cloud->setGlobalScale(newScale);
-							ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+							assert(!needShift);
 
-							transMat.scaleRotation(scaleChange);
-							transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+							//get the relative modification to existing global shift/scale info
+							assert(globalScale != 0);
+							double scaleChange = newScale / globalScale;
+							CCVector3d shiftChange = newShift - globalShift;
+
+							if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+							{
+								//apply translation as global shift
+								cloud->setGlobalShift(newShift);
+								cloud->setGlobalScale(newScale);
+								ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+
+								transMat.scaleRotation(scaleChange);
+								transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+							}
 						}
 					}
 				}
@@ -1287,11 +1311,24 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 		entity->applyGLTransformation_recursive();
 		entity->prepareDisplayForRefresh_recursive();
 		putObjectBackIntoDBTree(entity, objContext);
+
+		if (applyToGlobal)
+		{
+			ccLog::Print(tr("[ApplyTransformation] Transformation matrix applied to the local coordinates of %1:").arg(entity->getName()));
+			ccLog::Print(transMat.toString(12, ' ')); //full precision
+		}
 	}
 
-	ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
+	if (!applyToGlobal)
+	{
+		ccLog::Print(tr("[ApplyTransformation] Applied transformation matrix:"));
+	}
+	else
+	{
+		ccLog::Print(tr("[ApplyTransformation] Global transformation matrix:"));
+	}
 	ccLog::Print(mat.toString(12, ' ')); //full precision
-	ccLog::Print(tr("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool"));
+	ccLog::Print(tr("Hint: you can copy a transformation matrix (CTRL+C) and apply it - or its inverse - to another entity with the 'Edit > Apply transformation' tool"));
 
 	//reselect previously selected entities!
 	if (m_ccRoot)

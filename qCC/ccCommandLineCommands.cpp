@@ -1819,8 +1819,14 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 						//'shift on load' information
 						compCloud->copyGlobalShiftAndScale(*desc.pc);
 						compCloud->setName(QString(desc.pc->getName() + "_CC#%1").arg(j + 1));
-						
-						CLCloudDesc newDesc(compCloud, desc.basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), desc.path);
+
+						QString filenameSuffix = QObject::tr("_COMPONENT_%1").arg(++realIndex);
+						if (desc.indexInFile >= 0)
+						{
+							// add the cloud name and its index in the file to avoid overwriting files if mutlitple clouds came from the same file
+							filenameSuffix.prepend(QObject::tr("_CLOUD_%1(%2)").arg(desc.pc->getName()).arg(desc.indexInFile));
+						}
+						CLCloudDesc newDesc(compCloud, desc.basename + filenameSuffix, desc.path);
 						if (cmd.autoSaveMode())
 						{
 							QString errorStr = cmd.exportEntity(newDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);

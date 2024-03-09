@@ -7,6 +7,7 @@ Improvements:
 - the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
 	also be exported when exporting facets info to CSV or SHP files
 - the Compass plugin will now warn the user if a wrong entity is picked
+- the 'Edit > Tools > Apply transformation' dialog accuracy has been improved (so as to properly handle small rotation angles)
 
 Bug fixes:
 - CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results

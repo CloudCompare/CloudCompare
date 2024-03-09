@@ -698,11 +698,50 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, PointCoord
 	}
 }
 
-void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip_deg, PointCoordinateType& dipDir_deg)
+void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3f& N, float& dip_deg, float& dipDir_deg)
 {
 	//http://en.wikipedia.org/wiki/Structural_geology#Geometries
 
-	if (N.norm2d() > std::numeric_limits<PointCoordinateType>::epsilon())
+	if (N.norm2() > std::numeric_limits<float>::epsilon())
+	{
+		// The dip direction must be the same for parallel facets, regardless
+		// of whether their normals point upwards or downwards.
+		//
+		// The formula using atan2() with the swapped N.x and N.y already
+		// gives the correct results for facets with the normal pointing
+		// upwards, so just use the sign of N.z to invert the normals if they
+		// point downwards.
+		float Nsign = N.z < 0 ? -1.0f : 1.0f; //DGM: copysign is not available on VS2012
+
+		//"Dip direction is measured in 360 degrees, generally clockwise from North"
+		float dipDir_rad = atan2(Nsign * N.x, Nsign * N.y); //result in [-pi,+pi]
+		if (dipDir_rad < 0)
+		{
+			dipDir_rad += static_cast<float>(2 * M_PI);
+		}
+
+		// Dip angle
+		//
+		// acos() returns values in [0, pi] but using std::abs() all the normals
+		// are considered pointing upwards, so the actual result will be in
+		// [0, pi/2] as required by the definition of dip.
+		// We skip the division by r because the normal is a unit vector.
+		float dip_rad = acos(std::abs(N.z));
+
+		dipDir_deg = CCCoreLib::RadiansToDegrees(dipDir_rad);
+		dip_deg = CCCoreLib::RadiansToDegrees(dip_rad);
+	}
+	else
+	{
+		dipDir_deg = dip_deg = std::numeric_limits<float>::quiet_NaN();
+	}
+}
+
+void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3d& N, double& dip_deg, double& dipDir_deg)
+{
+	//http://en.wikipedia.org/wiki/Structural_geology#Geometries
+
+	if (N.norm2d() > std::numeric_limits<double>::epsilon())
 	{
 		// The dip direction must be the same for parallel facets, regardless
 		// of whether their normals point upwards or downwards.
@@ -728,33 +767,62 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 		// We skip the division by r because the normal is a unit vector.
 		double dip_rad = acos(std::abs(N.z));
 
-		dipDir_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dipDir_rad ));
-		dip_deg = static_cast<PointCoordinateType>(CCCoreLib::RadiansToDegrees( dip_rad ));
+		dipDir_deg = CCCoreLib::RadiansToDegrees(dipDir_rad);
+		dip_deg = CCCoreLib::RadiansToDegrees(dip_rad);
 	}
 	else
 	{
-		dipDir_deg = dip_deg = std::numeric_limits<PointCoordinateType>::quiet_NaN();
+		dipDir_deg = dip_deg = std::numeric_limits<double>::quiet_NaN();
 	}
 }
 
-CCVector3 ccNormalVectors::ConvertDipAndDipDirToNormal(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg, bool upward/*=true*/)
+CCVector3f ccNormalVectors::ConvertDipAndDipDirToNormal(float dip_deg, float dipDir_deg, bool upward/*=true*/)
+{
+	//specific case
+	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
+	{
+		return CCVector3f(0, 0, 0);
+	}
+	
+	float Nz = cos(CCCoreLib::DegreesToRadians(dip_deg));
+	float Nxy = sqrt(1.0f - Nz * Nz);
+	float dipDir_rad = CCCoreLib::DegreesToRadians(dipDir_deg);
+	CCVector3f N(	Nxy * sin(dipDir_rad),
+					Nxy * cos(dipDir_rad),
+					Nz );
+
+#ifdef _DEBUG
+	//internal consistency test
+	float dip2, dipDir2;
+	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
+	assert(std::abs(dip2 - dip_deg) < 1.0e-3f && (dip2 == 0 || std::abs(dipDir2 - dipDir_deg) < 1.0e-3f));
+#endif
+
+	if (!upward)
+	{
+		N = -N;
+	}
+	return N;
+}
+
+CCVector3d ccNormalVectors::ConvertDipAndDipDirToNormal(double dip_deg, double dipDir_deg, bool upward/*=true*/)
 {
 	//specific case
 	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
 	{
 		return CCVector3(0, 0, 0);
 	}
-	
-	double Nz = cos( CCCoreLib::DegreesToRadians( dip_deg ) );
+
+	double Nz = cos(CCCoreLib::DegreesToRadians(dip_deg));
 	double Nxy = sqrt(1.0 - Nz * Nz);
-	double dipDir_rad = CCCoreLib::DegreesToRadians( dipDir_deg );
-	CCVector3 N(	static_cast<PointCoordinateType>(Nxy * sin(dipDir_rad)),
-					static_cast<PointCoordinateType>(Nxy * cos(dipDir_rad)),
-					static_cast<PointCoordinateType>(Nz) );
+	double dipDir_rad = CCCoreLib::DegreesToRadians(dipDir_deg);
+	CCVector3d N(	Nxy * sin(dipDir_rad),
+					Nxy * cos(dipDir_rad),
+					Nz );
 
 #ifdef _DEBUG
 	//internal consistency test
-	PointCoordinateType dip2, dipDir2;
+	double dip2, dipDir2;
 	ConvertNormalToDipAndDipDir(N, dip2, dipDir2);
 	assert(std::abs(dip2 - dip_deg) < 1.0e-3 && (dip2 == 0 || std::abs(dipDir2 - dipDir_deg) < 1.0e-3));
 #endif

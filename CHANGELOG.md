@@ -17,6 +17,9 @@ Bug fixes:
 - The DotPorduct (DP) file I/O filter was not able to load files with non latin characters. It was also wrongly
 	reporting its ability to export files while it is no longer the case.
 - Upgrading the DotProduct SDK to version 5.2 to avoid crashes when loading some DP files
+- The -EXTRACT_CC command line option could overwrite the automatically saved component clouds if multiple clouds were
+	originating from the same file. Now the component filenames will contain the cloud name and index in the file to
+	make sure they are unique.
 
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------

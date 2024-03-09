@@ -66,7 +66,7 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 		oct = cloud->computeOctree(); //if the user clicked "no" when asked to compute the octree then tough....
 		if (!oct)
 		{
-			ccLog::Warning("[ccFitPlaneTool] Failed to compute the cloud octree");
+			ccLog::Error("[ccFitPlaneTool] Failed to compute the cloud octree");
 			return;
 		}
 	}

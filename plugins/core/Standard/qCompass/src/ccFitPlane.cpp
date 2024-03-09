@@ -17,6 +17,7 @@
 
 #include "ccFitPlane.h"
 #include "ccCompass.h"
+
 ccFitPlane::ccFitPlane(ccPlane* p)
 	: ccPlane(p->getXWidth(), p->getYWidth(), &p->getTransformation(), p->getName()) //create an identical plane
 {
@@ -36,7 +37,7 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	float dip = 0.0f;
 	float dipdir = 0.0f;
 	ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipdir);
-	QString dipAndDipDirStr = QString("%1/%2").arg((int)dip, 2, 10, QChar('0')).arg((int)dipdir, 3, 10, QChar('0'));
+	QString dipAndDipDirStr = QString("%1/%2").arg(static_cast<int>(dip), 2, 10, QChar('0')).arg(static_cast<int>(dipdir), 3, 10, QChar('0'));
 
 	setName(dipAndDipDirStr);
 

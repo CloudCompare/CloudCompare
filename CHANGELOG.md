@@ -3,9 +3,10 @@ CloudCompare Version History
 
 v2.13.1 (Kharkiv) - (??/??/2024)
 ----------------------
-Improvement:
+Improvements:
 - the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
 	also be exported when exporting facets info to CSV or SHP files
+- the Compass plugin will now warn the user if a wrong entity is picked
 
 Bug fixes:
 - CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results

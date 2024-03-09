@@ -325,7 +325,7 @@ void ccCompass::tryLoading()
 	{
 		prg.setValue(static_cast<int>((50 * i) / nChildren));
 		ccHObject* c = m_app->dbRootObject()->getChild(i);
-		tryLoading(c, &originals, &replacements);
+		tryLoading(c, originals, replacements);
 	}
 
 	//replace all "originals" with their corresponding "duplicates"
@@ -373,7 +373,7 @@ void ccCompass::tryLoading()
 	prg.close();
 }
 
-void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements)
+void ccCompass::tryLoading(ccHObject* obj, std::vector<int>& originals, std::vector<ccHObject*>& replacements)
 {
 	//recurse on children
 	for (unsigned i = 0; i < obj->getChildrenNumber(); i++)
@@ -394,11 +394,11 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	//are we a geoObject
 	if (ccGeoObject::isGeoObject(obj))
 	{
-		ccHObject* geoObj = new ccGeoObject(obj,m_app);
+		ccHObject* geoObj = new ccGeoObject(obj, m_app);
 
 		//add to originals/duplicates list [these are used later to overwrite the originals]
-		originals->push_back(obj->getUniqueID());
-		replacements->push_back(geoObj);
+		originals.push_back(obj->getUniqueID());
+		replacements.push_back(geoObj);
 
 		return;
 	}
@@ -414,8 +414,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 			ccHObject* plane = new ccFitPlane(p);
 
 			//add to originals/duplicates list [these are used later to overwrite the originals]
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(plane);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(plane);
 			return;
 		}
 	}
@@ -424,8 +424,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 	if (ccSNECloud::isSNECloud(obj))
 	{
 		ccHObject* sneCloud = new ccSNECloud(static_cast<ccPointCloud*>(obj));
-		originals->push_back(obj->getUniqueID());
-		replacements->push_back(sneCloud);
+		originals.push_back(obj->getUniqueID());
+		replacements.push_back(sneCloud);
 		return;
 	}
 
@@ -440,8 +440,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 			ccTrace* trace = new ccTrace(p);
 			trace->setWidth(2);
 			//add to originals/duplicates list [these are used later to overwrite the originals]
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(trace);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(trace);
 			return;
 		}
 
@@ -449,8 +449,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		if (ccLineation::isLineation(obj))
 		{
 			ccHObject* lin = new ccLineation(p);
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(lin);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(lin);
 			return;
 		}
 
@@ -458,8 +458,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		if (ccThickness::isThickness(obj))
 		{
 			ccHObject* t = new ccThickness(p);
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(t);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(t);
 			return;
 		}
 
@@ -470,8 +470,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		if (ccPinchNode::isPinchNode(obj))
 		{
 			ccHObject* n = new ccPinchNode(p);
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(n);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(n);
 			return;
 		}
 
@@ -479,8 +479,8 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>* originals, std::vec
 		if (ccNote::isNote(obj))
 		{
 			ccHObject* n = new ccNote(p);
-			originals->push_back(obj->getUniqueID());
-			replacements->push_back(n);
+			originals.push_back(obj->getUniqueID());
+			replacements.push_back(n);
 			return;
 		}
 	}
@@ -722,22 +722,27 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 	parentNode->setEnabled(true); 
 
 	//call generic "point-picked" function of active tool
-	m_activeTool->pointPicked(parentNode, itemIdx, entity, P);
-
-	//have we picked a point cloud?
-	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	if (!m_activeTool->pointPicked(parentNode, itemIdx, entity, P))
 	{
-		//get point cloud
-		ccPointCloud* cloud = static_cast<ccPointCloud*>(entity); //cast to point cloud
-
-		if (!cloud)
+		//have we picked a point cloud?
+		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
-			ccLog::Warning("[Item picking] Shit's fubar (Picked point is not in pickable entities DB?)!");
-			return;
-		}
+			//get point cloud
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity); //cast to point cloud
 
-		//pass picked point, cloud & insert point to relevant tool
-		m_activeTool->pointPicked(parentNode, itemIdx, cloud, P);
+			if (!cloud)
+			{
+				ccLog::Warning("[Item picking] Shit's fubar (Picked point is not in pickable entities DB?)!");
+				return;
+			}
+
+			//pass picked point, cloud & insert point to relevant tool
+			m_activeTool->pointPicked(parentNode, itemIdx, cloud, P);
+		}
+		else
+		{
+			ccLog::Error("Invalid entity type");
+		}
 	}
 
 	//redraw
@@ -1091,7 +1096,6 @@ void ccCompass::fitPlaneToGeoObject()
 	//fit upper plane
 	ccHObject* upper = obj->getRegion(ccGeoObject::UPPER_BOUNDARY);
 	ccPointCloud* points = new ccPointCloud(); //create point cloud for storing points
-	double rms; //float for storing rms values
 	for (unsigned i = 0; i < upper->getChildrenNumber(); i++)
 	{
 		if (ccTrace::isTrace(upper->getChild(i)))
@@ -1113,6 +1117,7 @@ void ccCompass::fitPlaneToGeoObject()
 	//calculate and store upper fitplane
 	if (points->size() > 0)
 	{
+		double rms = 0.0;
 		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
 		if (p)
 		{
@@ -1154,6 +1159,7 @@ void ccCompass::fitPlaneToGeoObject()
 		//calculate and store lower fitplane
 		if (points->size() > 0)
 		{
+			double rms = 0.0;
 			ccFitPlane* p = ccFitPlane::Fit(points, &rms);
 			if (p)
 			{

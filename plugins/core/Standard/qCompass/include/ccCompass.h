@@ -19,7 +19,7 @@
 #define CC_COMPASS_HEADER
 
 //qCC
-#include "ccStdPluginInterface.h"
+#include <ccStdPluginInterface.h>
 #include <ccPickingListener.h>
 
 class ccCompassDlg;
@@ -149,7 +149,7 @@ protected:
 
 	//checks if the passed object, or any of it's children, represent unloaded ccCompass objects (e.g. traces, fitplanes etc).
 	void tryLoading();
-	void tryLoading(ccHObject* obj, std::vector<int>* originals, std::vector<ccHObject*>* replacements);
+	void tryLoading(ccHObject* obj, std::vector<int>& originals, std::vector<ccHObject*>& replacements);
 
 	//Action to start ccCompass
 	QAction* m_action = nullptr;

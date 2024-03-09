@@ -1110,7 +1110,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 	double previousScale = 1.0;
 	CCVector3d previousShift(0, 0, 0);
 
-	//we don't want any entity that would be the children of other selected entitiesmust backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
+	//we don't want any entity that would be the children of other selected entities
 	ccHObject::Container selectedEntities = getTopLevelSelectedEntities();
 
 	for (ccHObject* entity : selectedEntities) //warning, getSelectedEntites may change during this loop!
@@ -1125,7 +1125,7 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 			double globalScale = shiftedEntity->getGlobalScale();
 
 			// we compute the impact to the local coordinate system without changing the
-			// actual Global Shift & Scale parameters (for now)
+			// current Global Shift & Scale parameters (for now)
 			CCVector3d localTranslation = globalScale * (globalShift - transMat * globalShift + 2 * transMat.getTranslationAsVec3D());
 
 			// we switch to a local transformation matrix

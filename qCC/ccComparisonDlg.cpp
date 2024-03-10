@@ -695,6 +695,7 @@ bool ccComparisonDlg::computeDistances()
 	//options
 	bool signedDistances = signedDistCheckBox->isEnabled() && signedDistCheckBox->isChecked();
 	bool flipNormals = (signedDistances ? flipNormalsCheckBox->isChecked() : false);
+	bool robust = (signedDistances ? robustCheckBox->isChecked() : true);
 	bool split3D = split3DCheckBox->isEnabled() && split3DCheckBox->isChecked();
     bool mergeXY = compute2DCheckBox->isChecked();
 
@@ -863,6 +864,7 @@ bool ccComparisonDlg::computeDistances()
 			c2mParams.signedDistances = signedDistances;
 			c2mParams.flipNormals = flipNormals;
 			c2mParams.multiThread = multiThread;
+			c2mParams.robust = robust;
 		}
 		
 		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(	m_compCloud,

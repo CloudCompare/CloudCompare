@@ -3721,7 +3721,7 @@ void MainWindow::doActionRegister()
 		parameters.finalOverlapRatio		= rDlg.getFinalOverlap() / 100.0;
 		parameters.transformationFilters	= rDlg.getTransformationFilters();
 		parameters.maxThreadCount			= rDlg.getMaxThreadCount();
-		parameters.useC2MSignedDistances	= rDlg.useC2MSignedDistances();
+		parameters.useC2MSignedDistances	= rDlg.useC2MSignedDistances(parameters.robustC2MSignedDistances);
 		parameters.normalsMatching			= rDlg.normalsMatchingOption();
 	}
 	bool useDataSFAsWeights		= rDlg.useDataSFAsWeights();

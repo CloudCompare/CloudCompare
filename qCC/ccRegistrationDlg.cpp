@@ -54,6 +54,7 @@ static bool		s_pointsRemoval = false;
 static bool		s_useDataSFAsWeights = false;
 static bool		s_useModelSFAsWeights = false;
 static bool		s_useC2MSignedDistances = false;
+static bool		s_robustC2MSignedDistances = true;
 static int		s_normalsMatchingOption = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent/*=nullptr*/)
@@ -101,6 +102,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget*
 		checkBoxUseDataSFAsWeights->setChecked(s_useDataSFAsWeights);
 		checkBoxUseModelSFAsWeights->setChecked(s_useModelSFAsWeights);
 		useC2MSignedDistancesCheckBox->setChecked(s_useC2MSignedDistances);
+		robustC2MDistsCheckBox->setChecked(s_robustC2MSignedDistances);
 		normalsComboBox->setCurrentIndex(s_normalsMatchingOption);
 	}
 
@@ -140,6 +142,7 @@ void ccRegistrationDlg::saveParameters() const
 	s_useDataSFAsWeights = checkBoxUseDataSFAsWeights->isChecked();
 	s_useModelSFAsWeights = checkBoxUseModelSFAsWeights->isChecked();
 	s_useC2MSignedDistances = useC2MSignedDistancesCheckBox->isChecked();
+	s_robustC2MSignedDistances = robustC2MDistsCheckBox->isChecked();
 	s_normalsMatchingOption = normalsComboBox->currentIndex();
 }
 
@@ -163,8 +166,10 @@ bool ccRegistrationDlg::useModelSFAsWeights() const
 	return checkBoxUseModelSFAsWeights->isEnabled() && checkBoxUseModelSFAsWeights->isChecked();
 }
 
-bool ccRegistrationDlg::useC2MSignedDistances() const
+bool ccRegistrationDlg::useC2MSignedDistances(bool& robust) const
 {
+	robust = robustC2MDistsCheckBox->isChecked();
+
 	return useC2MSignedDistancesCheckBox->isEnabled() && useC2MSignedDistancesCheckBox->isChecked();
 }
 
@@ -299,7 +304,9 @@ void ccRegistrationDlg::updateGUI()
 	checkBoxUseDataSFAsWeights->setEnabled(dataEntity->hasDisplayedScalarField());
 	checkBoxUseModelSFAsWeights->setEnabled(modelEntity->isKindOf(CC_TYPES::POINT_CLOUD) && modelEntity->hasDisplayedScalarField()); //only supported for clouds
 
-	useC2MSignedDistancesCheckBox->setEnabled(modelEntity->isKindOf(CC_TYPES::MESH)); //only supported if a mesh is the reference cloud
+	bool hasRefMesh = modelEntity->isKindOf(CC_TYPES::MESH);
+	useC2MSignedDistancesCheckBox->setEnabled(hasRefMesh); //only supported if a mesh is the reference cloud
+	robustC2MDistsCheckBox->setEnabled(hasRefMesh);
 	normalsComboBox->setEnabled(dataEntity->hasNormals() && modelEntity->hasNormals()); //only supported if both the to-be-aligned and the reference entities have normals
 
 	MainWindow::RefreshAllGLWindow(false);

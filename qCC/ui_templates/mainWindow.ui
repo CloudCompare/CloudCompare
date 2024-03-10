@@ -1095,7 +1095,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      <normaloff>:/CC/images/ccCloudCloudDistance.png</normaloff>:/CC/images/ccCloudCloudDistance.png</iconset>
    </property>
    <property name="text">
-    <string>Cloud/Cloud Dist.</string>
+    <string>Cloud/Cloud Dist</string>
    </property>
    <property name="toolTip">
     <string>Compute cloud/cloud distance</string>

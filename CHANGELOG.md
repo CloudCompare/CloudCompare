@@ -6,8 +6,27 @@ v2.13.1 (Kharkiv) - (??/??/2024)
 Improvements:
 - the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
 	also be exported when exporting facets info to CSV or SHP files
+
 - the Compass plugin will now warn the user if a wrong entity is picked
+
 - the 'Edit > Tools > Apply transformation' dialog accuracy has been improved (so as to properly handle small rotation angles)
+
+- the 'Tools > Distances > Cloud/Mesh distances' tool will now use a smarter algorithm to avoid edge cases
+	when determining the sign of the distance.
+	- the dialog has a new 'robust' option (enabled by default) to control whether this new algorithm should be used,
+		or if the old algorithm should be used.
+	- the ICP tool dialog also has a 'robust' option (Research tab) to control this behavior when using C2M distances
+	- new command line option -NON_ROBUST to force the old behavior for both the C2M distances computation and the ICP
+		tools (see below)
+
+- Command line options
+	- New suboption for the -C2M_DIST command line option:
+		- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
+	- New suboptions for the -ICP command line option:
+		- -USE_C2M_DIST to force the computation of Cloud/Mesh distances (only if the reference entity is a mesh)
+		- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
+		- -NORMAL_MATCH {OPTION} to specify the normals matching mode (no normal matching is used by default).
+			{OPTION} can be OPPOSITE, SAME_SIDE or DOUBLE_SIDED
 
 Bug fixes:
 - CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results

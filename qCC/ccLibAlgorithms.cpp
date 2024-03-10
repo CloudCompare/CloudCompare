@@ -711,6 +711,7 @@ namespace ccLibAlgorithms
 							parameters.transformationFilters	= CCCoreLib::RegistrationTools::SKIP_NONE;
 							parameters.maxThreadCount			= 0;
 							parameters.useC2MSignedDistances	= false;
+							parameters.robustC2MSignedDistances = true;
 							parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 						}
 

@@ -154,6 +154,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 			c2mParams.signedDistances = false;
 			c2mParams.flipNormals = false;
 			c2mParams.multiThread = false;
+			c2mParams.robust = true;
 			result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(	dataCloud,
 																						modelMesh,
 																						c2mParams,

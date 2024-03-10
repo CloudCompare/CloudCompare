@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>442</width>
-    <height>458</height>
+    <width>450</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,7 @@
    <item>
     <widget class="QTabWidget" name="preciseResultsTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="generalParamsTab">
       <attribute name="title">
@@ -100,6 +100,57 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1">
+          <widget class="QFrame" name="signedDistFrame">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="flipNormalsCheckBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>flip normals</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="robustCheckBox">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>Reduces occurences of edge cases where the sign can be inverted.
+Uncheck to reproduce the old behavior.</string>
+              </property>
+              <property name="text">
+               <string>robust</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
          <item row="2" column="0">
           <widget class="QCheckBox" name="signedDistCheckBox">
            <property name="toolTip">
@@ -110,16 +161,6 @@
            </property>
            <property name="text">
             <string>signed distances</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QCheckBox" name="flipNormalsCheckBox">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>flip normals</string>
            </property>
           </widget>
          </item>
@@ -452,10 +493,13 @@ to help advanced users setting the general parameters</string>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>20</height>
           </size>
          </property>
         </spacer>
@@ -592,6 +636,22 @@ to help advanced users setting the general parameters</string>
     <hint type="destinationlabel">
      <x>345</x>
      <y>251</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>signedDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>robustCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>71</x>
+     <y>155</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>156</y>
     </hint>
    </hints>
   </connection>

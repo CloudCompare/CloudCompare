@@ -108,7 +108,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabStdParams">
       <attribute name="title">
@@ -603,15 +603,65 @@
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="useC2MSignedDistancesCheckBox">
-         <property name="toolTip">
-          <string>In combination with a small overlap, prevents
+        <widget class="QFrame" name="c2mDistancesFrame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="useC2MSignedDistancesCheckBox">
+            <property name="toolTip">
+             <string>In combination with a small overlap, prevents
 the cloud from sinking under the mesh surface.</string>
-         </property>
-         <property name="text">
-          <string>Use C2M signed distances (mesh as reference only)</string>
-         </property>
+            </property>
+            <property name="text">
+             <string>Use C2M signed distances (mesh as reference only)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="robustC2MDistsCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>robust</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -740,6 +790,22 @@ the cloud from sinking under the mesh surface.</string>
     <hint type="destinationlabel">
      <x>237</x>
      <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useC2MSignedDistancesCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>robustC2MDistsCheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>155</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>318</y>
     </hint>
    </hints>
   </connection>

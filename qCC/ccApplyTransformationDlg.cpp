@@ -252,6 +252,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->blockSignals(true);
 		tyAxisDoubleSpinBox->blockSignals(true);
 		tzAxisDoubleSpinBox->blockSignals(true);
+		scaleDoubleSpinBox ->blockSignals(true);
 
 		PointCoordinateType alpha = 0;
 		CCVector3 axis;
@@ -266,7 +267,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
-		scaleDoubleSpinBox->setValue(scale);
+		scaleDoubleSpinBox ->setValue(scale);
 
 		rxAxisDoubleSpinBox->blockSignals(false);
 		ryAxisDoubleSpinBox->blockSignals(false);
@@ -275,6 +276,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->blockSignals(false);
 		tyAxisDoubleSpinBox->blockSignals(false);
 		tzAxisDoubleSpinBox->blockSignals(false);
+		scaleDoubleSpinBox ->blockSignals(false);
 	}
 
 	if (eulerForm)
@@ -285,6 +287,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		etxAxisDoubleSpinBox->blockSignals(true);
 		etyAxisDoubleSpinBox->blockSignals(true);
 		etzAxisDoubleSpinBox->blockSignals(true);
+		eScaleDoubleSpinBox ->blockSignals(true);
 
 		PointCoordinateType phi = 0;
 		PointCoordinateType theta = 0;
@@ -307,6 +310,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		etxAxisDoubleSpinBox->blockSignals(false);
 		etyAxisDoubleSpinBox->blockSignals(false);
 		etzAxisDoubleSpinBox->blockSignals(false);
+		eScaleDoubleSpinBox ->blockSignals(false);
 	}
 
 	if (fromToForm)
@@ -320,6 +324,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		fromToTxAxisDoubleSpinBox->blockSignals(true);
 		fromToTyAxisDoubleSpinBox->blockSignals(true);
 		fromToTzAxisDoubleSpinBox->blockSignals(true);
+		fromToScaleDoubleSpinBox ->blockSignals(true);
 
 		CCVector3 from(0, 0, 1);
 		CCVector3 to = from;
@@ -347,6 +352,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		fromToTxAxisDoubleSpinBox->blockSignals(false);
 		fromToTyAxisDoubleSpinBox->blockSignals(false);
 		fromToTzAxisDoubleSpinBox->blockSignals(false);
+		fromToScaleDoubleSpinBox ->blockSignals(false);
 	}
 }
 
@@ -424,9 +430,13 @@ void ccApplyTransformationDlg::loadFromClipboard()
 	{
 		QString clipText = clipboard->text();
 		if (!clipText.isEmpty())
+		{
 			matrixTextEdit->setPlainText(clipText);
+		}
 		else
+		{
 			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
+		}
 	}
 }
 

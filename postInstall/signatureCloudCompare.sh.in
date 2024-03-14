@@ -9,6 +9,17 @@ CLOUDCOMPAREAPP="${WORKDIR}/CloudCompare/CloudCompare.app"
 PYTHONAPP="${CLOUDCOMPAREAPP}/Contents/Resources/python"
 SIGNATURE="5XUC29Y5KK"
 
+cat > "${WORKDIR}/hdapp.entitlements" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.hardened-runtime</key>
+    <true/>
+</dict>
+</plist>
+EOF
+
 cat > "${WORKDIR}/ccapp.entitlements" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -93,10 +104,10 @@ then
     find "${CLOUDCOMPAREAPP}" -path "${PYTHONAPP}" -prune -o -name "*.so"    -exec codesign -s ${SIGNATURE} -f --timestamp {} \;
     
     echo "--- signature executables CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/ccapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
     
     echo "--- signature CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/ccapp.entitlements" "${CLOUDCOMPAREAPP}"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}"
 else
     # --- Then, inside CloudCompare app
 
@@ -105,8 +116,11 @@ else
     find "${CLOUDCOMPAREAPP}" -path "${PYTHONAPP}" -prune -o -name "*.so"    -exec codesign -s ${SIGNATURE} -f --timestamp {} \;
     
     echo "--- signature executables CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/sbapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
+    # --- no entitlement: notarization error "The executable does not have the hardened runtime enabled."
+    #codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
     
     echo "--- signature CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/sbapp.entitlements" "${CLOUDCOMPAREAPP}"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}"
+    # --- use same entitlement as executable: supersede the executable entitlement?
 fi

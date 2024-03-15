@@ -1903,14 +1903,22 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 			for (unsigned j = 0; j < k; ++j, ++it)
 			{
 				const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
-				if (col.r >= burntOutColorThresholdMin && col.r <= burntOutColorThresholdMax &&
-					col.g >= burntOutColorThresholdMin && col.g <= burntOutColorThresholdMax &&
-					col.b >= burntOutColorThresholdMin && col.b <= burntOutColorThresholdMax)
+
+				if ((	col.r >= burntOutColorThresholdMax &&
+						col.g >= burntOutColorThresholdMax &&
+						col.b >= burntOutColorThresholdMax
+					) || (	col.r <= burntOutColorThresholdMin &&
+							col.g <= burntOutColorThresholdMin &&
+							col.b <= burntOutColorThresholdMin)
+					)
 				{
-					rValues.push_back(col.r);
-					gValues.push_back(col.g);
-					bValues.push_back(col.b);
+					continue;
 				}
+
+				rValues.push_back(col.r);
+				gValues.push_back(col.g);
+				bValues.push_back(col.b);
+
 				if (applyToSF)
 				{
 					ScalarType val = cloud->getPointScalarValue(it->pointIndex);
@@ -1950,6 +1958,11 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 			double wSum = 0.0;
 			double sfSum = 0.0;
 			double sfWSum = 0.0;
+			ccColor::RgbTpl<double> rgbGrayscaleSum(0, 0, 0);
+			double wGrayscaleSum = 0.0;
+			size_t nrOfGrayscale = 0;
+			size_t nrOfUsedNeighbours = 0;
+
 			for (unsigned j = 0; j < k; ++j, ++it)
 			{
 				double weight = mean ? 1.0 : exp(-(it->squareDistd) / sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
@@ -1974,14 +1987,37 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 						continue;
 					}
 				}
-				if (col.r >= burntOutColorThresholdMin && col.r <= burntOutColorThresholdMax &&
-					col.g >= burntOutColorThresholdMin && col.g <= burntOutColorThresholdMax &&
-					col.b >= burntOutColorThresholdMin && col.b <= burntOutColorThresholdMax)
+
+				if ((	col.r >= burntOutColorThresholdMax &&
+						col.g >= burntOutColorThresholdMax &&
+						col.b >= burntOutColorThresholdMax
+					) || (	col.r <= burntOutColorThresholdMin &&
+							col.g <= burntOutColorThresholdMin &&
+							col.b <= burntOutColorThresholdMin)
+					)
 				{
-					rgbSum.r += weight * col.r;
-					rgbSum.g += weight * col.g;
-					rgbSum.b += weight * col.b;
-					wSum += weight;
+					continue;
+				}
+
+				rgbSum.r += weight * col.r;
+				rgbSum.g += weight * col.g;
+				rgbSum.b += weight * col.b;
+				wSum += weight;
+				nrOfUsedNeighbours++;
+				if (filterParams.blendGrayscale)
+				{
+					double grayscaleMin = static_cast<double>(col.r)/3.0 + static_cast<double>(col.g) / 3.0 + static_cast<double>(col.b) / 3.0 - static_cast<double>(filterParams.blendGrayscaleThreshold);
+					double grayscaleMax = grayscaleMin + 2 * static_cast<double>(filterParams.blendGrayscaleThreshold);
+					if (static_cast<double>(col.r) >= grayscaleMin && static_cast<double>(col.g) >= grayscaleMin && static_cast<double>(col.b) >= grayscaleMin &&
+						static_cast<double>(col.r) <= grayscaleMax && static_cast<double>(col.g) <= grayscaleMax && static_cast<double>(col.b) <= grayscaleMax)
+					{
+						//grayscale color based on threshold value
+						rgbGrayscaleSum.r += weight * col.r;
+						rgbGrayscaleSum.g += weight * col.g;
+						rgbGrayscaleSum.b += weight * col.b;
+						wGrayscaleSum += weight;
+						nrOfGrayscale++;
+					}
 				}
 			}
 
@@ -1990,6 +2026,29 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 				ccColor::Rgb avgCol(static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.r / wSum), 0.0)),
 					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
 					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
+
+				//blend grayscale modifications
+				if (filterParams.blendGrayscale)
+				{
+
+					//contains more grayscale point than given percent, so use only grayscale points
+					if ((static_cast<double>(nrOfGrayscale) / static_cast<double>(nrOfUsedNeighbours) > filterParams.blendGrayscalePercent) && wGrayscaleSum != 0)
+					{
+						avgCol.r = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.r / wGrayscaleSum), 0.0));
+						avgCol.g = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.g / wGrayscaleSum), 0.0));
+						avgCol.b = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.b / wGrayscaleSum), 0.0));
+					}
+					//more true color than grayscale use only true color values
+					else
+					{
+						if (wSum - wGrayscaleSum != 0)
+						{
+							avgCol.r = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.r - rgbGrayscaleSum.r) / (wSum - wGrayscaleSum)), 0.0));
+							avgCol.g = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.g - rgbGrayscaleSum.g) / (wSum - wGrayscaleSum)), 0.0));
+							avgCol.b = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.b - rgbGrayscaleSum.b) / (wSum - wGrayscaleSum)), 0.0));
+						}
+					}
+				}
 
 				cloud->setPointColor(queryPointIndex, avgCol);
 			}

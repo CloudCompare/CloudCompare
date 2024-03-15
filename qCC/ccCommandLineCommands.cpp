@@ -205,6 +205,7 @@ constexpr char OPTION_MEDIAN[]							= "MEDIAN";
 constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
+constexpr char OPTION_BLEND_GRAYSCALE[]					= "BLEND_GRAYSCALE";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -6257,6 +6258,32 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 			}
 			filterParams.burntOutColorThreshold = static_cast<unsigned char>(burntOutColorThreshold);
 		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BLEND_GRAYSCALE))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().size() < 2)
+			{
+				return cmd.error(QObject::tr("Missing parameter: blend grayscale threshold and grayscale percent after '-%1'").arg(OPTION_BLEND_GRAYSCALE));
+			}
+
+			bool ok = false;
+			uint blendGrayscale = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || blendGrayscale > 255)
+			{
+				return cmd.error(QObject::tr("Invalid value for blend grayscale threshold after '%1', must be an integer between 0 and 255!").arg(OPTION_BLEND_GRAYSCALE));
+			}
+			filterParams.blendGrayscale = true;
+			filterParams.blendGrayscaleThreshold = static_cast<unsigned char>(blendGrayscale);
+
+			uint grayscalePercent = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || grayscalePercent > 100)
+			{
+				return cmd.error(QObject::tr("Invalid value for grayscale percent after '%1 %2', must be an integer between 0 and 100!").arg(OPTION_BLEND_GRAYSCALE).arg(filterParams.blendGrayscaleThreshold));
+			}
+			filterParams.blendGrayscalePercent = static_cast<double>(grayscalePercent) / 100;
+
+		}
+
 		else
 		{
 			break;

@@ -623,6 +623,9 @@ public: //other methods
 		bool commandLine = false;
 		double sigmaSF = -1;
 		double spatialSigma = -1;
+		bool blendGrayscale = false;
+		unsigned char blendGrayscaleThreshold = 0;
+		double blendGrayscalePercent = 0.5;
 	};
 
 	//! Applies a spatial Gaussian filter on RGB colors

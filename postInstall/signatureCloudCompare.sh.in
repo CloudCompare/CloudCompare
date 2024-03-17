@@ -27,8 +27,6 @@ cat > "${WORKDIR}/ccapp.entitlements" <<EOF
 <dict>
     <key>com.apple.security.hardened-runtime</key>
     <true/>
-    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-    <true/>
     <key>com.apple.security.cs.disable-library-validation</key>
     <true/>
 </dict>
@@ -104,12 +102,12 @@ then
     find "${CLOUDCOMPAREAPP}" -path "${PYTHONAPP}" -prune -o -name "*.so"    -exec codesign -s ${SIGNATURE} -f --timestamp {} \;
     
     echo "--- signature executables CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/ccapp.entitlements" "${CLOUDCOMPAREAPP}/Contents/MacOS/CloudCompare"
     
     echo "--- signature CloudCompare app ---"
-    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/hdapp.entitlements" "${CLOUDCOMPAREAPP}"
+    codesign -s ${SIGNATURE} -f --timestamp -i fr.openfields.CloudCompare -o runtime --entitlements "${WORKDIR}/ccapp.entitlements" "${CLOUDCOMPAREAPP}"
 else
-    # --- Then, inside CloudCompare app
+    # --- Inside CloudCompare app
 
     echo "--- signature dylib & so CloudCompare app ---"
     find "${CLOUDCOMPAREAPP}" -path "${PYTHONAPP}" -prune -o -name "*.dylib" -exec codesign -s ${SIGNATURE} -f --timestamp {} \;

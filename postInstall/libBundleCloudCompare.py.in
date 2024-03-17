@@ -15,8 +15,8 @@ mainprg =                CloudCompareApp + "/Contents/MacOS/CloudCompare"
 frameworkspath =         CloudCompareApp + '/Contents/Frameworks'
 pluginpath =             CloudCompareApp + '/Contents/PlugIns'
 embeddedPythonRootPath = CloudCompareApp + "/Contents/Resources/python"
-condaPython = "@CONDA_BIN@/python"          # "/Users/paul/miniconda3/envs/CloudComPy310/bin/python"
-condaPythonLibs = "@CONDA_LIBS@/python3.10" # "/Users/paul/miniconda3/envs/CloudComPy310/lib/python3.10"
+condaPython = "@CONDA_PYTHON_BIN@/python"          # "/Users/paul/miniconda3/envs/Bundled310/bin/python"
+condaPythonLibs = "@CONDA_PYTHON_LIBS@/python3.10" # "/Users/paul/miniconda3/envs/Bundled310/lib/python3.10"
 
 dependancies = {} # dictionary of lib dependancies : key depends on (list of libs) (not recursive)
 

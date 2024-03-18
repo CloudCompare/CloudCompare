@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.13.1 (Kharkiv) - (??/??/2024)
+v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------
 Improvements:
 	- the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
@@ -29,6 +29,8 @@ Improvements:
 			- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
 			- -NORMAL_MATCH {OPTION} to specify the normals matching mode (no normal matching is used by default).
 				{OPTION} can be OPPOSITE, SAME_SIDE or DOUBLE_SIDED
+
+	- The 3DFin plugin version has been bumped to 0.3.3
 
 Bug fixes:
 	- CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results

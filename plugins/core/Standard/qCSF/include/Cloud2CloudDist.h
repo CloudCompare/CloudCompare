@@ -1,3 +1,5 @@
+#pragma once
+
 //#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
@@ -26,9 +28,6 @@
 //#                                                                                     #
 //#######################################################################################
 
-#ifndef _C2CDIST_H_
-#define _C2CDIST_H_
-
 #include "Cloth.h"
 #include "wlPointCloud.h"
 
@@ -40,9 +39,5 @@ public:
 	static bool Compute(const Cloth& cloth,
 						const wl::PointCloud& pc,
 						double class_threshold,
-						std::vector<unsigned>& groundIndexes,
-						std::vector<unsigned>& offGroundIndexes,
-						unsigned N = 3);
+						std::vector<bool>& isGround);
 };
-
-#endif

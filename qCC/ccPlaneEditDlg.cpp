@@ -278,10 +278,10 @@ void ccPlaneEditDlg::updatePlane(ccPlane* plane)
 	bool upward = upwardCheckBox->isChecked();
 	PointCoordinateType width  = static_cast<PointCoordinateType>(wDoubleSpinBox->value());
 	PointCoordinateType height = static_cast<PointCoordinateType>(hDoubleSpinBox->value());
-	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipDir, upward);
-	CCVector3 Cd = {	static_cast<PointCoordinateType>(cxAxisDoubleSpinBox->value()),
-						static_cast<PointCoordinateType>(cyAxisDoubleSpinBox->value()),
-						static_cast<PointCoordinateType>(czAxisDoubleSpinBox->value()) };
+	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(dip), static_cast<PointCoordinateType>(dipDir), upward);
+	CCVector3 Cd {	static_cast<PointCoordinateType>(cxAxisDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(cyAxisDoubleSpinBox->value()),
+					static_cast<PointCoordinateType>(czAxisDoubleSpinBox->value()) };
 	
 	CCVector3 N = plane->getNormal();
 	CCVector3 C = plane->getCenter();

@@ -1,3 +1,5 @@
+#pragma once
+
 //#######################################################################################
 //#                                                                                     #
 //#                              CLOUDCOMPARE PLUGIN: qCSF                              #
@@ -25,9 +27,6 @@
 //#                      contact us: 2009zwm@gmail.com; wpqjbzwm@126.com                #
 //#                                                                                     #
 //#######################################################################################
-
-#ifndef _VEC3_H_
-#define _VEC3_H_
 
 //system
 #include <cmath>
@@ -116,5 +115,3 @@ public:
 		return x * v.x + y * v.y + z * v.z;
 	}
 };
-
-#endif //_VEC3_H_

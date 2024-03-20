@@ -55,8 +55,7 @@ public:
 	/** The points should be associated to an (active) scalar field.
 		The Fast Marching grid will have the same dimensions as
 		the input octree considered at a given level of subdivision.
-		\param cloud the point cloud
-		\param theOctree the associated octree
+		\param theOctree an octree, associated to a point cloud
 		\param gridLevel the level of subdivision
 		\param maxError maximum error allowed by 'propagated' facet
 		\param errorMeasure error measure
@@ -64,8 +63,7 @@ public:
 		\param progressCb progeress callback
 		\return a negative value if something went wrong
 	**/
-	int init(	ccGenericPointCloud* cloud,
-				CCCoreLib::DgmOctree* theOctree,
+	int init(	CCCoreLib::DgmOctree* theOctree,
 				unsigned char gridLevel,
 				ScalarType maxError,
 				CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,

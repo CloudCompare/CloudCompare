@@ -74,7 +74,7 @@ void ccThicknessTool::onNewSelection(const ccHObject::Container& selectedEntitie
 }
 
 //called when a point in a point cloud gets picked while this tool is active
-void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccHObject* pickedObject, const CCVector3& P)
+bool ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccHObject* pickedObject, const CCVector3& P)
 {
 	if (pickedObject->isA(CC_TYPES::PLANE)) //we want to be able to pick planes
 	{
@@ -83,7 +83,11 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccHO
 
 		//call to update selection
 		onNewSelection(m_app->getSelectedEntities());
+
+		return true;
 	}
+
+	return false;
 }
 
 //called when a point in a point cloud gets picked while this tool is active
@@ -92,7 +96,7 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 	//no plane, no deal
 	if (!m_referencePlane)
 	{
-		m_app->dispToConsole("[ccCompass] Please select a fit-plane to constrain true-thickness calculations.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		ccLog::Error("[Compass] Please select a fit-plane to constrain true-thickness calculations");
 		return;
 	}
 
@@ -109,7 +113,8 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 		//add to scene graph
 		insertPoint->addChild(g);
 		m_app->addToDB(g, false, true, false, true);
-	} else //two point mode... which points have been defined?
+	}
+	else //two point mode... which points have been defined?
 	{
 		if (!m_startPoint) //first point not yet defined - store it
 		{
@@ -126,7 +131,7 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 			m_app->addToDB(temp, false, false, false, true);
 
 			//display instructions
-			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point.", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
+			m_app->getActiveGLWindow()->displayNewMessage("Select second measurement point", ccGLWindowInterface::LOWER_LEFT_MESSAGE);
 
 		}
 		else
@@ -147,7 +152,7 @@ void ccThicknessTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 			delete m_startPoint;
 			m_startPoint = nullptr;
 		}
-	} 
+	}
 }
 
 ccHObject* ccThicknessTool::getInsertInterior(ccHObject* insertPoint)

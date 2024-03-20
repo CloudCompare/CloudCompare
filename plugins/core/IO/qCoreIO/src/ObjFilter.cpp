@@ -52,8 +52,8 @@ ObjFilter::ObjFilter()
 					8.0f,	// priority
 					QStringList{ "obj" },
 					"obj",
-					QStringList{ "OBJ mesh (*.obj)" },
-					QStringList{ "OBJ mesh (*.obj)" },
+					QStringList{ "OBJ cloud or mesh (*.obj)" },
+					QStringList{ "OBJ cloud or mesh (*.obj)" },
 					Import | Export
 					} )
 {
@@ -61,7 +61,7 @@ ObjFilter::ObjFilter()
 
 bool ObjFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
-	if (type == CC_TYPES::MESH)
+	if (type == CC_TYPES::MESH || type == CC_TYPES::POINT_CLOUD)
 	{
 		multiple = false;
 		exclusive = true;
@@ -73,42 +73,68 @@ bool ObjFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity)
-		return CC_FERR_BAD_ARGUMENT;
-
-	if (!entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccLog::Warning("[OBJ] This filter can only save one mesh (optionally with sub-meshes) at a time!");
+		return CC_FERR_BAD_ARGUMENT;
+	}
+
+	if (!entity->isKindOf(CC_TYPES::MESH) && !entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		ccLog::Warning("[OBJ] This filter can only save one mesh (optionally with sub-meshes) or one cloud at a time!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
 	//mesh
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-	if (!mesh || mesh->size() == 0)
+	if (mesh && mesh->size() == 0)
 	{
 		ccLog::Warning("[OBJ] Input mesh is empty!");
-		return CC_FERR_NO_SAVE;
 	}
 
 	//vertices
-	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-	if (!vertices || vertices->size() == 0)
+	ccGenericPointCloud* vertices = nullptr;
+
+	if (mesh)
 	{
-		ccLog::Warning("[OBJ] Input mesh has no vertices?!");
-		return CC_FERR_NO_SAVE;
+		vertices = mesh->getAssociatedCloud();
+		if (!vertices || vertices->size() == 0)
+		{
+			ccLog::Warning("[OBJ] Input mesh has no vertices");
+			return CC_FERR_NO_SAVE;
+		}
 	}
+	else
+	{
+		vertices = ccHObjectCaster::ToGenericPointCloud(entity);
+		if (!vertices || vertices->size() == 0)
+		{
+			ccLog::Warning("[OBJ] No impunt cloud, or input cloud is empty");
+			return CC_FERR_NO_SAVE;
+		}
+	}
+
 	unsigned nbPoints = vertices->size();
 
 	//try to open file for saving
 	QFile file(filename);
 	if (!file.open(QFile::Text | QFile::WriteOnly))
+	{
 		return CC_FERR_WRITING;
+	}
 
 	//progress (start with vertices)
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
-		pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		if (mesh)
+		{
+			pDlg->setMethodTitle(QObject::tr("Saving mesh [%1]").arg(mesh->getName()));
+		}
+		else
+		{
+			assert(vertices);
+			pDlg->setMethodTitle(QObject::tr("Saving cloud [%1]").arg(vertices->getName()));
+		}
 		pDlg->setInfo(QObject::tr("Writing %1 vertices").arg(nbPoints));
 		pDlg->setAutoClose(false); //don't close dialogue when progress bar is full
 		pDlg->start();
@@ -123,7 +149,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	stream << "# " << FileIO::createdDateTime() << endl;
 	
 	if (file.error() != QFile::NoError)
+	{
 		return CC_FERR_WRITING;
+	}
 
 	for (unsigned i = 0; i < nbPoints; ++i)
 	{
@@ -137,7 +165,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//normals
-	bool withTriNormals = mesh->hasTriNormals();
+	bool withTriNormals = (mesh ? mesh->hasTriNormals() : false);
 	bool withVertNormals = vertices->hasNormals();
 	bool withNormals = withTriNormals || withVertNormals;
 	if (withNormals)
@@ -145,6 +173,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		//per-triangle normals
 		if (withTriNormals)
 		{
+			assert(mesh);
+
 			NormsIndexesTableType* normsTable = mesh->getTriNormsTable();
 
 			//reset save dialog
@@ -161,11 +191,15 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 					const CCVector3& normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
 					stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << endl;
 					if (file.error() != QFile::NoError)
+					{
 						return CC_FERR_WRITING;
+					}
 
 					//increment progress bar
 					if (pDlg && !nprogress.oneStep()) //cancel requested
+					{
 						return CC_FERR_CANCELED_BY_USER;
+					}
 				}
 			}
 			else
@@ -174,12 +208,15 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				withTriNormals = false;
 			}
 		}
-		//per-vertices normals
-		else //if (withVertNormals)
+		else //per-vertices normals
 		{
+			assert(withVertNormals);
+
 			//reset save dialog
 			if (pDlg)
+			{
 				pDlg->setInfo(QObject::tr("Writing %1 vertex normals").arg(nbPoints));
+			}
 			nprogress.scale(nbPoints);
 			nprogress.reset();
 
@@ -188,7 +225,9 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				const CCVector3& normalVec = vertices->getPointNormal(i);
 				stream << "vn " << normalVec.x << " " << normalVec.y << " " << normalVec.z << endl;
 				if (file.error() != QFile::NoError)
+				{
 					return CC_FERR_WRITING;
+				}
 
 				//increment progress bar
 				if (pDlg && !nprogress.oneStep()) //cancel requested
@@ -200,223 +239,234 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//materials
-	const ccMaterialSet* materials = mesh->getMaterialSet();
-	bool withMaterials = (materials && mesh->hasMaterials());
-	if (withMaterials)
+	if (mesh)
 	{
-		//reset save dialog
-		if (pDlg)
-			pDlg->setInfo(QObject::tr("Writing %1 materials").arg(materials->size()));
-		nprogress.scale(1);
-		nprogress.reset();
-
-		//save mtl file
-		QStringList errors;
-		QString baseName = QFileInfo(filename).baseName();
-		if (materials->saveAsMTL(QFileInfo(filename).absolutePath(),baseName,errors))
-		{
-			stream << "mtllib " << baseName << ".mtl" << endl;
-			if (file.error() != QFile::NoError)
-				return CC_FERR_WRITING;
-		}
-		else
-		{
-			materials = nullptr;
-			withMaterials = false;
-		}
-
-		//display potential 'errors'
-		for (int i=0; i<errors.size(); ++i)
-		{
-			ccLog::Warning(QString("[OBJ][Material file writer] ")+errors[i]);
-		}
-
-		//increment progress bar
-		if (pDlg && !nprogress.oneStep()) //cancel requested
-			return CC_FERR_CANCELED_BY_USER;
-	}
-
-	//save texture coordinates
-	bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
-	if (withTexCoordinates)
-	{
-		TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
-		if (texCoords)
+		const ccMaterialSet* materials = mesh->getMaterialSet();
+		bool withMaterials = (materials && mesh->hasMaterials());
+		if (withMaterials)
 		{
 			//reset save dialog
-			unsigned numTexCoords = texCoords->currentSize();
 			if (pDlg)
 			{
-				pDlg->setInfo(QObject::tr("Writing %1 texture coordinates").arg(numTexCoords));
+				pDlg->setInfo(QObject::tr("Writing %1 materials").arg(materials->size()));
 			}
-			nprogress.scale(numTexCoords);
+			nprogress.scale(1);
 			nprogress.reset();
 
-			for (unsigned i=0; i<texCoords->currentSize(); ++i)
+			//save mtl file
+			QStringList errors;
+			QString baseName = QFileInfo(filename).baseName();
+			if (materials->saveAsMTL(QFileInfo(filename).absolutePath(), baseName, errors))
 			{
-				const TexCoords2D& tc = texCoords->getValue(i);
-				stream << "vt " << tc.tx << " " << tc.ty << endl;
+				stream << "mtllib " << baseName << ".mtl" << endl;
 				if (file.error() != QFile::NoError)
+				{
 					return CC_FERR_WRITING;
+				}
+			}
+			else
+			{
+				materials = nullptr;
+				withMaterials = false;
+			}
 
-				//increment progress bar
+			//display potential 'errors'
+			for (int i = 0; i < errors.size(); ++i)
+			{
+				ccLog::Warning(QString("[OBJ][Material file writer] ") + errors[i]);
+			}
+
+			//increment progress bar
+			if (pDlg && !nprogress.oneStep()) //cancel requested
+				return CC_FERR_CANCELED_BY_USER;
+		}
+
+		//save texture coordinates
+		bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
+		if (withTexCoordinates)
+		{
+			TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
+			if (texCoords)
+			{
+				//reset save dialog
+				unsigned numTexCoords = texCoords->currentSize();
+				if (pDlg)
+				{
+					pDlg->setInfo(QObject::tr("Writing %1 texture coordinates").arg(numTexCoords));
+				}
+				nprogress.scale(numTexCoords);
+				nprogress.reset();
+
+				for (unsigned i = 0; i < texCoords->currentSize(); ++i)
+				{
+					const TexCoords2D& tc = texCoords->getValue(i);
+					stream << "vt " << tc.tx << " " << tc.ty << endl;
+					if (file.error() != QFile::NoError)
+						return CC_FERR_WRITING;
+
+					//increment progress bar
+					if (pDlg && !nprogress.oneStep()) //cancel requested
+					{
+						return CC_FERR_CANCELED_BY_USER;
+					}
+				}
+			}
+			else
+			{
+				withTexCoordinates = false;
+			}
+		}
+
+		ccHObject::Container subMeshes;
+		//look for sub-meshes
+		mesh->filterChildren(subMeshes, false, CC_TYPES::SUB_MESH);
+		//check that the number of facets is the same as the full mesh!
+		{
+			unsigned faceCount = 0;
+			for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+			{
+				faceCount += static_cast<ccSubMesh*>(*it)->size();
+			}
+
+			//if there's no face (i.e. no sub-mesh) or less face than the total mesh, we save the full mesh!
+			if (faceCount < mesh->size())
+			{
+				subMeshes.clear();
+				subMeshes.push_back(mesh);
+			}
+		}
+
+		//reset save dialog for triangles
+		unsigned numTriangles = mesh->size();
+		if (pDlg)
+		{
+			pDlg->setInfo(QObject::tr("Writing %1 triangles").arg(numTriangles));
+			pDlg->setAutoClose(true); //(re-enable) close dialogue when progress bar is full
+		}
+		nprogress.scale(numTriangles);
+		nprogress.reset();
+
+		//mesh or sub-meshes
+		unsigned indexShift = 0;
+		for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
+		{
+			ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
+
+			stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
+			if (file.error() != QFile::NoError)
+			{
+				return CC_FERR_WRITING;
+			}
+
+			unsigned triNum = st->size();
+			st->placeIteratorAtBeginning();
+
+			int lastMtlIndex = -1;
+			int t1 = -1;
+			int t2 = -1;
+			int t3 = -1;
+
+			for (unsigned i = 0; i < triNum; ++i)
+			{
+				if (withMaterials)
+				{
+					int mtlIndex = mesh->getTriangleMtlIndex(indexShift + i);
+					if (mtlIndex != lastMtlIndex)
+					{
+						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
+						{
+							ccMaterial::CShared mat = materials->at(mtlIndex);
+							stream << "usemtl " << mat->getName() << endl;
+						}
+						else
+						{
+							stream << "usemtl " << endl;
+						}
+						if (file.error() != QFile::NoError)
+						{
+							return CC_FERR_WRITING;
+						}
+						lastMtlIndex = mtlIndex;
+					}
+
+					if (withTexCoordinates)
+					{
+						mesh->getTriangleTexCoordinatesIndexes(indexShift + i, t1, t2, t3);
+						if (t1 >= 0) ++t1;
+						if (t2 >= 0) ++t2;
+						if (t3 >= 0) ++t3;
+					}
+				}
+
+				const CCCoreLib::VerticesIndexes* tsi = st->getNextTriangleVertIndexes();
+				//for per-triangle normals
+				unsigned i1 = tsi->i1 + 1;
+				unsigned i2 = tsi->i2 + 1;
+				unsigned i3 = tsi->i3 + 1;
+
+				stream << "f";
+				if (withNormals)
+				{
+					int n1 = static_cast<int>(i1);
+					int n2 = static_cast<int>(i2);
+					int n3 = static_cast<int>(i3);
+					if (withTriNormals)
+					{
+						st->getTriangleNormalIndexes(i, n1, n2, n3);
+						if (n1 >= 0) ++n1;
+						if (n2 >= 0) ++n2;
+						if (n3 >= 0) ++n3;
+					}
+
+					if (withTexCoordinates)
+					{
+						stream << " " << i1 << "/" << t1 << "/" << n1;
+						stream << " " << i2 << "/" << t2 << "/" << n2;
+						stream << " " << i3 << "/" << t3 << "/" << n3;
+					}
+					else
+					{
+						stream << " " << i1 << "//" << n1;
+						stream << " " << i2 << "//" << n2;
+						stream << " " << i3 << "//" << n3;
+					}
+				}
+				else
+				{
+					if (withTexCoordinates)
+					{
+						stream << " " << i1 << "/" << t1;
+						stream << " " << i2 << "/" << t2;
+						stream << " " << i3 << "/" << t3;
+					}
+					else
+					{
+						stream << " " << i1;
+						stream << " " << i2;
+						stream << " " << i3;
+					}
+				}
+				stream << endl;
+
+				if (file.error() != QFile::NoError)
+				{
+					return CC_FERR_WRITING;
+				}
+
 				if (pDlg && !nprogress.oneStep()) //cancel requested
 				{
 					return CC_FERR_CANCELED_BY_USER;
 				}
 			}
-		}
-		else
-		{
-			withTexCoordinates = false;
-		}
-	}
 
-	ccHObject::Container subMeshes;
-	//look for sub-meshes
-	mesh->filterChildren(subMeshes,false,CC_TYPES::SUB_MESH);
-	//check that the number of facets is the same as the full mesh!
-	{
-		unsigned faceCount = 0;
-		for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
-		{
-			faceCount += static_cast<ccSubMesh*>(*it)->size();
-		}
-
-		//if there's no face (i.e. no sub-mesh) or less face than the total mesh, we save the full mesh!
-		if (faceCount < mesh->size())
-		{
-			subMeshes.clear();
-			subMeshes.push_back(mesh);
-		}
-	}
-
-	//reset save dialog for triangles
-	unsigned numTriangles = mesh->size();
-	if (pDlg)
-	{
-		pDlg->setInfo(QObject::tr("Writing %1 triangles").arg(numTriangles));
-		pDlg->setAutoClose(true); //(re-enable) close dialogue when progress bar is full
-	}
-	nprogress.scale(numTriangles);
-	nprogress.reset();
-
-	//mesh or sub-meshes
-	unsigned indexShift = 0;
-	for (ccHObject::Container::const_iterator it = subMeshes.begin(); it != subMeshes.end(); ++it)
-	{
-		ccGenericMesh* st = static_cast<ccGenericMesh*>(*it);
-
-		stream << "g " << (st->getName().isNull() ? "mesh" : st->getName()) << endl;
-		if (file.error() != QFile::NoError)
-			return CC_FERR_WRITING;
-
-		unsigned triNum = st->size();
-		st->placeIteratorAtBeginning();
-
-		int lastMtlIndex = -1;
-		int t1 = -1;
-		int t2 = -1;
-		int t3 = -1;
-
-		for (unsigned i=0; i<triNum; ++i)
-		{
-			if (withMaterials)
-			{
-				int mtlIndex = mesh->getTriangleMtlIndex(indexShift + i);
-				if (mtlIndex != lastMtlIndex)
-				{
-					if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
-					{
-						ccMaterial::CShared mat = materials->at(mtlIndex);
-						stream << "usemtl " << mat->getName() << endl;
-					}
-					else
-					{
-						stream << "usemtl " << endl;
-					}
-					if (file.error() != QFile::NoError)
-						return CC_FERR_WRITING;
-					lastMtlIndex = mtlIndex;
-				}
-
-				if (withTexCoordinates)
-				{
-					mesh->getTriangleTexCoordinatesIndexes(indexShift + i, t1, t2, t3);
-					if (t1 >= 0) ++t1;
-					if (t2 >= 0) ++t2;
-					if (t3 >= 0) ++t3;
-				}
-			}
-
-			const CCCoreLib::VerticesIndexes* tsi = st->getNextTriangleVertIndexes();
-			//for per-triangle normals
-			unsigned i1 = tsi->i1 + 1;
-			unsigned i2 = tsi->i2 + 1;
-			unsigned i3 = tsi->i3 + 1;
-
-			stream << "f";
-			if (withNormals)
-			{
-				int n1 = static_cast<int>(i1);
-				int n2 = static_cast<int>(i2);
-				int n3 = static_cast<int>(i3);
-				if (withTriNormals)
-				{
-					st->getTriangleNormalIndexes(i, n1, n2, n3);
-					if (n1 >= 0) ++n1;
-					if (n2 >= 0) ++n2;
-					if (n3 >= 0) ++n3;
-				}
-
-				if (withTexCoordinates)
-				{
-					stream << " " << i1 << "/" << t1 << "/" << n1;
-					stream << " " << i2 << "/" << t2 << "/" << n2;
-					stream << " " << i3 << "/" << t3 << "/" << n3;
-				}
-				else
-				{
-					stream << " " << i1 << "//" << n1;
-					stream << " " << i2 << "//" << n2;
-					stream << " " << i3 << "//" << n3;
-				}
-			}
-			else
-			{
-				if (withTexCoordinates)
-				{
-					stream << " " << i1 << "/" << t1;
-					stream << " " << i2 << "/" << t2;
-					stream << " " << i3 << "/" << t3;
-				}
-				else
-				{
-					stream << " " << i1;
-					stream << " " << i2;
-					stream << " " << i3;
-				}
-			}
-			stream << endl;
-
+			stream << "#" << triNum << " faces" << endl;
 			if (file.error() != QFile::NoError)
 			{
 				return CC_FERR_WRITING;
 			}
 
-			if (pDlg && !nprogress.oneStep()) //cancel requested
-			{
-				return CC_FERR_CANCELED_BY_USER;
-			}
+			indexShift += triNum;
 		}
-
-		stream << "#" << triNum << " faces" << endl;
-		if (file.error() != QFile::NoError)
-		{
-			return CC_FERR_WRITING;
-		}
-
-		indexShift += triNum;
 	}
 
 	return CC_FERR_NO_ERROR;
@@ -425,9 +475,12 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 //! Updates point index to a global index starting from 0!
 static bool UpdatePointIndex(int& vIndex, int maxIndex)
 {
-	if (vIndex == 0 || -vIndex>maxIndex)
+	if (vIndex == 0 || -vIndex > maxIndex)
+	{
 		return false;
-	vIndex = (vIndex>0 ? vIndex-1 : maxIndex+vIndex);
+	}
+	vIndex = (vIndex > 0 ? vIndex - 1 : maxIndex + vIndex);
+
 	return true;
 }
 
@@ -457,7 +510,7 @@ struct facetElement
 	//! Updates point index to a global index starting from 0!
 	inline bool updatePointIndex(int maxIndex)
 	{
-		return UpdatePointIndex(vIndex,maxIndex);
+		return UpdatePointIndex(vIndex, maxIndex);
 	}
 
 	//! Updates tex coord index to a global index starting from 0!
@@ -466,7 +519,7 @@ struct facetElement
 		if (-tcIndex > maxIndex)
 			return false;
 		//if tcIndex == 0 then we return '-1'
-		tcIndex = (tcIndex >= 0 ? tcIndex-1 : maxIndex+tcIndex);
+		tcIndex = (tcIndex >= 0 ? tcIndex - 1 : maxIndex + tcIndex);
 		return true;
 	}
 
@@ -476,7 +529,7 @@ struct facetElement
 		if (-nIndex > maxIndex)
 			return false;
 		//if nIndex == 0 then we return '-1'
-		nIndex = (nIndex >= 0 ? nIndex-1 : maxIndex+nIndex);
+		nIndex = (nIndex >= 0 ? nIndex - 1 : maxIndex + nIndex);
 		return true;
 	}
 };
@@ -488,7 +541,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	//open file
 	QFile file(filename);
 	if (!file.open(QFile::ReadOnly))
+	{
 		return CC_FERR_READING;
+	}
 	QTextStream stream(&file);
 
 	//current vertex shift
@@ -554,7 +609,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						INVALID_LINE		= 3,
 						CANCELLED_BY_USER	= 4,
 	};
-	bool objWarnings[5] = { false, false, false, false, false };
+	bool objWarnings[5] { false, false, false, false, false };
 	bool error = false;
 
 	try

@@ -72,7 +72,7 @@ protected:
 protected:
 
 	//! Updates all forms with a given matrix
-	void updateAll(const ccGLMatrix& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true, bool fromToForm = true);
+	void updateAll(const ccGLMatrixd& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true, bool fromToForm = true);
 };
 
 #endif //CC_APPLY_TRANSFORMATION_DLG_HEADER

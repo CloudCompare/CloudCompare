@@ -650,11 +650,11 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 								pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
 								m_options.m_bitmapEpsilon);
 							newSize = clone.Size();
-							shape->Release();
+							//shape->Release();
 							if (newScore > oldScore && newSize > m_options.m_minSupport)
 								clone.Clone(&candidates.back());
 						}
-						clone2.Shape()->Release();
+						//clone2.Shape()->Release();
 					}
 					//allowDifferentShapes = false;
 				}
@@ -1012,7 +1012,7 @@ PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
 							}
 						}
 					}
-					suggestions[si]->Release();
+					//suggestions[si]->Release();
 				}
 			}
 		}

@@ -140,7 +140,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	}
 
 	bool valid = false;
-	ccGLMatrix mat = ccGLMatrix::FromString(text, valid);
+	ccGLMatrixd mat = ccGLMatrixd::FromString(text, valid);
 	if (valid)
 	{
 		updateAll(mat, false, true, true, true); //no need to update the current form
@@ -149,21 +149,21 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 
 void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 {
-	PointCoordinateType alpha = 0;
-	CCVector3 axis;
-	CCVector3 t;
-	PointCoordinateType scale = 1.0;
+	double alpha = 0.0;
+	CCVector3d axis(0.0, 0.0, 1.0);
+	CCVector3d t(0.0, 0.0, 0.0);
+	double scale = 1.0;
 
-	axis.x	= static_cast<PointCoordinateType>(rxAxisDoubleSpinBox->value());
-	axis.y	= static_cast<PointCoordinateType>(ryAxisDoubleSpinBox->value());
-	axis.z	= static_cast<PointCoordinateType>(rzAxisDoubleSpinBox->value());
-	alpha	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( rAngleDoubleSpinBox->value() ) );
-	t.x		= static_cast<PointCoordinateType>(txAxisDoubleSpinBox->value());
-	t.y		= static_cast<PointCoordinateType>(tyAxisDoubleSpinBox->value());
-	t.z		= static_cast<PointCoordinateType>(tzAxisDoubleSpinBox->value());
-	scale	= static_cast<PointCoordinateType>(scaleDoubleSpinBox->value());
+	axis.x	= rxAxisDoubleSpinBox->value();
+	axis.y	= ryAxisDoubleSpinBox->value();
+	axis.z	= rzAxisDoubleSpinBox->value();
+	alpha	= CCCoreLib::DegreesToRadians(rAngleDoubleSpinBox->value());
+	t.x		= txAxisDoubleSpinBox->value();
+	t.y		= tyAxisDoubleSpinBox->value();
+	t.z		= tzAxisDoubleSpinBox->value();
+	scale	= scaleDoubleSpinBox->value();
 
-	ccGLMatrix mat;
+	ccGLMatrixd mat;
 	mat.initFromParameters(alpha, axis, t);
 	if (scale != 1)
 	{
@@ -175,21 +175,21 @@ void ccApplyTransformationDlg::onRotAngleValueChanged(double)
 
 void ccApplyTransformationDlg::onEulerValueChanged(double)
 {
-	PointCoordinateType phi = 0;
-	PointCoordinateType theta = 0;
-	PointCoordinateType psi = 0;
-	CCVector3 t;
-	PointCoordinateType scale = 1.0;
+	double phi = 0.0;
+	double theta = 0.0;
+	double psi = 0.0;
+	CCVector3d t(0.0, 0.0, 0.0);
+	double scale = 1.0;
 
-	phi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePhiDoubleSpinBox->value() ) );
-	theta	= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( eThetaDoubleSpinBox->value() ) );
-	psi		= static_cast<PointCoordinateType>( CCCoreLib::DegreesToRadians( ePsiDoubleSpinBox->value() ) );
-	t.x		= static_cast<PointCoordinateType>(etxAxisDoubleSpinBox->value());
-	t.y		= static_cast<PointCoordinateType>(etyAxisDoubleSpinBox->value());
-	t.z		= static_cast<PointCoordinateType>(etzAxisDoubleSpinBox->value());
-	scale	= static_cast<PointCoordinateType>(eScaleDoubleSpinBox->value());
+	phi		= CCCoreLib::DegreesToRadians(ePhiDoubleSpinBox->value());
+	theta	= CCCoreLib::DegreesToRadians(eThetaDoubleSpinBox->value());
+	psi		= CCCoreLib::DegreesToRadians(ePsiDoubleSpinBox->value());
+	t.x		= etxAxisDoubleSpinBox->value();
+	t.y		= etyAxisDoubleSpinBox->value();
+	t.z		= etzAxisDoubleSpinBox->value();
+	scale	= eScaleDoubleSpinBox->value();
 
-	ccGLMatrix mat;
+	ccGLMatrixd mat;
 	mat.initFromParameters(phi, theta, psi, t);
 	if (scale != 1)
 	{
@@ -201,26 +201,26 @@ void ccApplyTransformationDlg::onEulerValueChanged(double)
 
 void ccApplyTransformationDlg::onFromToValueChanged(double)
 {
-	CCVector3 fromAxis, toAxis;
-	CCVector3 t;
-	PointCoordinateType scale = 1.0;
+	CCVector3d fromAxis(0.0, 0.0, 1.0), toAxis(0.0, 0.0, 1.0);
+	CCVector3d t(0.0, 0.0, 0.0);
+	double scale = 1.0;
 
-	fromAxis.x	= static_cast<PointCoordinateType>(fromXAxisDoubleSpinBox->value());
-	fromAxis.y	= static_cast<PointCoordinateType>(fromYAxisDoubleSpinBox->value());
-	fromAxis.z	= static_cast<PointCoordinateType>(fromZAxisDoubleSpinBox->value());
-	toAxis.x	= static_cast<PointCoordinateType>(toXAxisDoubleSpinBox->value());
-	toAxis.y	= static_cast<PointCoordinateType>(toYAxisDoubleSpinBox->value());
-	toAxis.z	= static_cast<PointCoordinateType>(toZAxisDoubleSpinBox->value());
-	t.x			= static_cast<PointCoordinateType>(fromToTxAxisDoubleSpinBox->value());
-	t.y			= static_cast<PointCoordinateType>(fromToTyAxisDoubleSpinBox->value());
-	t.z			= static_cast<PointCoordinateType>(fromToTzAxisDoubleSpinBox->value());
-	scale		= static_cast<PointCoordinateType>(fromToScaleDoubleSpinBox->value());
+	fromAxis.x	= fromXAxisDoubleSpinBox->value();
+	fromAxis.y	= fromYAxisDoubleSpinBox->value();
+	fromAxis.z	= fromZAxisDoubleSpinBox->value();
+	toAxis.x	= toXAxisDoubleSpinBox->value();
+	toAxis.y	= toYAxisDoubleSpinBox->value();
+	toAxis.z	= toZAxisDoubleSpinBox->value();
+	t.x			= fromToTxAxisDoubleSpinBox->value();
+	t.y			= fromToTyAxisDoubleSpinBox->value();
+	t.z			= fromToTzAxisDoubleSpinBox->value();
+	scale		= fromToScaleDoubleSpinBox->value();
 
 	fromAxis.normalize();
 	toAxis.normalize();
-	ccGLMatrix mat = ccGLMatrix::FromToRotation(fromAxis, toAxis);
+	ccGLMatrixd mat = ccGLMatrixd::FromToRotation(fromAxis, toAxis);
 	mat.setTranslation(t);
-	if (scale != 1)
+	if (scale != 1.0)
 	{
 		mat.scaleRotation(scale);
 	}
@@ -229,7 +229,7 @@ void ccApplyTransformationDlg::onFromToValueChanged(double)
 
 }
 
-void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
+void ccApplyTransformationDlg::updateAll(	const ccGLMatrixd& mat,
 											bool textForm/*=true*/,
 											bool axisAngleForm/*=true*/,
 											bool eulerForm/*=true*/,
@@ -252,11 +252,12 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->blockSignals(true);
 		tyAxisDoubleSpinBox->blockSignals(true);
 		tzAxisDoubleSpinBox->blockSignals(true);
+		scaleDoubleSpinBox ->blockSignals(true);
 
-		PointCoordinateType alpha = 0;
-		CCVector3 axis;
-		CCVector3 t;
-		PointCoordinateType scale = 1;
+		double alpha = 0.0;
+		CCVector3d axis(0.0, 0.0, 1.0);
+		CCVector3d t(0.0, 0.0, 0.0);
+		double scale = 1.0;
 		mat.getParameters(alpha, axis, t, &scale);
 
 		rxAxisDoubleSpinBox->setValue(axis.x);
@@ -266,7 +267,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->setValue(t.x);
 		tyAxisDoubleSpinBox->setValue(t.y);
 		tzAxisDoubleSpinBox->setValue(t.z);
-		scaleDoubleSpinBox->setValue(scale);
+		scaleDoubleSpinBox ->setValue(scale);
 
 		rxAxisDoubleSpinBox->blockSignals(false);
 		ryAxisDoubleSpinBox->blockSignals(false);
@@ -275,6 +276,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		txAxisDoubleSpinBox->blockSignals(false);
 		tyAxisDoubleSpinBox->blockSignals(false);
 		tzAxisDoubleSpinBox->blockSignals(false);
+		scaleDoubleSpinBox ->blockSignals(false);
 	}
 
 	if (eulerForm)
@@ -285,12 +287,13 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		etxAxisDoubleSpinBox->blockSignals(true);
 		etyAxisDoubleSpinBox->blockSignals(true);
 		etzAxisDoubleSpinBox->blockSignals(true);
+		eScaleDoubleSpinBox ->blockSignals(true);
 
-		PointCoordinateType phi = 0;
-		PointCoordinateType theta = 0;
-		PointCoordinateType psi = 0;
-		CCVector3 t;
-		PointCoordinateType scale = 1;
+		double phi = 0.0;
+		double theta = 0.0;
+		double psi = 0.0;
+		CCVector3d t(0.0, 0.0, 0.0);
+		double scale = 1.0;
 		mat.getParameters(phi, theta, psi, t, &scale);
 
 		ePhiDoubleSpinBox   ->setValue(CCCoreLib::RadiansToDegrees(phi));
@@ -307,6 +310,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		etxAxisDoubleSpinBox->blockSignals(false);
 		etyAxisDoubleSpinBox->blockSignals(false);
 		etzAxisDoubleSpinBox->blockSignals(false);
+		eScaleDoubleSpinBox ->blockSignals(false);
 	}
 
 	if (fromToForm)
@@ -320,12 +324,13 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		fromToTxAxisDoubleSpinBox->blockSignals(true);
 		fromToTyAxisDoubleSpinBox->blockSignals(true);
 		fromToTzAxisDoubleSpinBox->blockSignals(true);
+		fromToScaleDoubleSpinBox ->blockSignals(true);
 
-		CCVector3 from(0, 0, 1);
-		CCVector3 to = from;
+		CCVector3d from(0.0, 0.0, 1.0);
+		CCVector3d to = from;
 		mat.applyRotation(to);
-		PointCoordinateType scale = mat.getColumnAsVec3D(0).norm();
-		CCVector3 t = mat.getTranslationAsVec3D();
+		double scale = mat.getColumnAsVec3D(0).norm();
+		CCVector3d t = mat.getTranslationAsVec3D();
 
 		fromXAxisDoubleSpinBox   ->setValue(from.x);
 		fromYAxisDoubleSpinBox   ->setValue(from.y);
@@ -347,6 +352,7 @@ void ccApplyTransformationDlg::updateAll(	const ccGLMatrix& mat,
 		fromToTxAxisDoubleSpinBox->blockSignals(false);
 		fromToTyAxisDoubleSpinBox->blockSignals(false);
 		fromToTzAxisDoubleSpinBox->blockSignals(false);
+		fromToScaleDoubleSpinBox ->blockSignals(false);
 	}
 }
 
@@ -424,9 +430,13 @@ void ccApplyTransformationDlg::loadFromClipboard()
 	{
 		QString clipText = clipboard->text();
 		if (!clipText.isEmpty())
+		{
 			matrixTextEdit->setPlainText(clipText);
+		}
 		else
+		{
 			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
+		}
 	}
 }
 
@@ -450,10 +460,10 @@ void ccApplyTransformationDlg::initFromDipAndDipDir()
 	s_rotateAboutCenter = dddDlg.rotateAboutCenterCheckBox->isChecked();
 
 	//resulting normal vector
-	CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(static_cast<PointCoordinateType>(s_dip_deg), static_cast<PointCoordinateType>(s_dipDir_deg));
+	CCVector3d Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(s_dip_deg, s_dipDir_deg);
 	//corresponding rotation (assuming we start from (0, 0, 1))
 
-	ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), Nd);
+	ccGLMatrixd trans = ccGLMatrixd::FromToRotation(CCVector3d(0.0, 0.0, 1.0), Nd);
 
 	if (s_rotateAboutCenter && MainWindow::TheInstance())
 	{
@@ -466,10 +476,10 @@ void ccApplyTransformationDlg::initFromDipAndDipDir()
 
 		if (box.isValid())
 		{
-			CCVector3 C = box.getCenter();
-			ccGLMatrix shiftToCenter;
+			CCVector3d C = box.getCenter().toDouble();
+			ccGLMatrixd shiftToCenter;
 			shiftToCenter.setTranslation(-C);
-			ccGLMatrix backToOrigin;
+			ccGLMatrixd backToOrigin;
 			backToOrigin.setTranslation(C);
 			trans = backToOrigin * trans * shiftToCenter;
 		}
@@ -482,7 +492,7 @@ void ccApplyTransformationDlg::buttonClicked(QAbstractButton* button)
 {
 	if (buttonBox->buttonRole(button) == QDialogButtonBox::ResetRole)
 	{
-		updateAll(ccGLMatrix(), true, true, true, true);
+		updateAll({}, true, true, true, true);
 		inverseCheckBox->setChecked(false);
 	}
 }

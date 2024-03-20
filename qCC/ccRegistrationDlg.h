@@ -89,7 +89,7 @@ public:
 	bool useModelSFAsWeights() const;
 
 	//! Whether to use signed distances when the reference is a mesh
-	bool useC2MSignedDistances() const;
+	bool useC2MSignedDistances(bool& robust) const;
 
 	//! Method to take normals into account
 	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatchingOption() const;

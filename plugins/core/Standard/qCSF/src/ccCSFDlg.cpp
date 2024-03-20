@@ -28,12 +28,13 @@
 
 #include "ccCSFDlg.h"
 
-#include <ccOctree.h>
-
 static int MaxIteration = 500;
 static double cloth_resolution = 1.5;
 static double class_threshold = 0.5;
-ccCSFDlg::ccCSFDlg(QWidget* parent) : QDialog(parent), Ui::CSFDialog()
+
+ccCSFDlg::ccCSFDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::CSFDialog()
 {
 	setupUi(this);
 
@@ -44,7 +45,6 @@ ccCSFDlg::ccCSFDlg(QWidget* parent) : QDialog(parent), Ui::CSFDialog()
 	MaxIterationSpinBox->setValue(MaxIteration);
 	cloth_resolutionSpinBox->setValue(cloth_resolution);
 	class_thresholdSpinBox->setValue(class_threshold);
-
 }
 
 void ccCSFDlg::saveSettings()

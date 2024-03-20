@@ -1,9 +1,58 @@
 CloudCompare Version History
 ============================
 
+v2.13.1 (Kharkiv) - (03/20/2024)
+----------------------
+Improvements:
+	- the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will
+		also be exported when exporting facets info to CSV or SHP files
+
+	- the Compass plugin will now warn the user if a wrong entity is picked
+
+	- the 'Edit > Tools > Apply transformation' dialog accuracy has been improved (so as to properly handle small rotation angles)
+
+	- It is now possible to save clouds (points and normals) as an OBJ file
+
+	- the 'Tools > Distances > Cloud/Mesh distances' tool will now use a smarter algorithm to avoid edge cases
+		when determining the sign of the distance.
+		- the dialog has a new 'robust' option (enabled by default) to control whether this new algorithm should be used,
+			or if the old algorithm should be used.
+		- the ICP tool dialog also has a 'robust' option (Research tab) to control this behavior when using C2M distances
+		- new command line option -NON_ROBUST to force the old behavior for both the C2M distances computation and the ICP
+			tools (see below)
+
+	- Command line options
+		- New suboption for the -C2M_DIST command line option:
+			- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
+		- New suboptions for the -ICP command line option:
+			- -USE_C2M_DIST to force the computation of Cloud/Mesh distances (only if the reference entity is a mesh)
+			- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
+			- -NORMAL_MATCH {OPTION} to specify the normals matching mode (no normal matching is used by default).
+				{OPTION} can be OPPOSITE, SAME_SIDE or DOUBLE_SIDED
+
+	- The 3DFin plugin version has been bumped to 0.3.3
+
+Bug fixes:
+	- CSF: the multi-threading strategy could cause artefacts in the cloth simulation, leading to suboptimal results
+	- CSF: the acceleration component was wrongly multiplied twice by the square time increment, requiring much more
+		iterations for the algorithm to converge
+	- 3DMASC: when using a test cloud, the process was automatically terminated as if the user had clicked on the
+		'cancel' button
+	- The DotPorduct (DP) file I/O filter was not able to load files with non latin characters. It was also wrongly
+		reporting its ability to export files while it is no longer the case.
+	- Upgrading the DotProduct SDK to version 5.2 to avoid crashes when loading some DP files
+	- The -EXTRACT_CC command line option could overwrite the automatically saved component clouds if multiple clouds were
+		originating from the same file. Now the component filenames will contain the cloud name and index in the file to
+		make sure they are unique.
+	- The Global Shift information was not always saved when exporting to the PCD format
+	- When refusing to change the Global Shift & Scale information after applying a transformation, the Global Shift & Scale
+		information could be reset
+	- When changing values in the Apply Transformation tool, a chain of events/updates could lead to a strange behavior
+		of the dialog
+
 v2.13.0 (Kharkiv) - (02/14/2024)
 ----------------------
-- - New features:
+- New features:
 
 	- New menu entry: Save project
 		- File > Save project (or CTRL+SHIFT+S)

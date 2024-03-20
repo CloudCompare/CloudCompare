@@ -104,6 +104,8 @@ constexpr char COMMAND_COLOR_LEVELS[]					= "CLEVELS";
 constexpr char COMMAND_C2M_DIST[]						= "C2M_DIST";
 constexpr char COMMAND_C2M_DIST_FLIP_NORMALS[]			= "FLIP_NORMS";
 constexpr char COMMAND_C2M_DIST_UNSIGNED[]				= "UNSIGNED";
+constexpr char COMMAND_C2M_DIST_NON_ROBUST[]			= "NON_ROBUST";
+constexpr char COMMAND_C2M_NORMAL_MATCHING[]			= "NORMAL_MATCH";
 constexpr char COMMAND_C2C_DIST[]						= "C2C_DIST";
 constexpr char COMMAND_CLOSEST_POINT_SET[]				= "CLOSEST_POINT_SET";
 constexpr char COMMAND_C2C_SPLIT_XYZ[]					= "SPLIT_XYZ";
@@ -145,6 +147,7 @@ constexpr char COMMAND_ICP_ROT[]						= "ROT";
 constexpr char COMMAND_ICP_SKIP_TX[]					= "SKIP_TX";
 constexpr char COMMAND_ICP_SKIP_TY[]					= "SKIP_TY";
 constexpr char COMMAND_ICP_SKIP_TZ[]					= "SKIP_TZ";
+constexpr char COMMAND_ICP_C2M_DIST[]					= "USE_C2M_DIST";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]				= "PLY_EXPORT_FMT";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]		= "COMPUTE_NORMALS";
 constexpr char COMMAND_INVERT_NORMALS[]					= "INVERT_NORMALS";
@@ -1819,8 +1822,14 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 						//'shift on load' information
 						compCloud->copyGlobalShiftAndScale(*desc.pc);
 						compCloud->setName(QString(desc.pc->getName() + "_CC#%1").arg(j + 1));
-						
-						CLCloudDesc newDesc(compCloud, desc.basename + QObject::tr("_COMPONENT_%1").arg(++realIndex), desc.path);
+
+						QString filenameSuffix = QObject::tr("_COMPONENT_%1").arg(++realIndex);
+						if (desc.indexInFile >= 0)
+						{
+							// add the cloud name and its index in the file to avoid overwriting files if mutlitple clouds came from the same file
+							filenameSuffix.prepend(QObject::tr("_CLOUD_%1(%2)").arg(desc.pc->getName()).arg(desc.indexInFile));
+						}
+						CLCloudDesc newDesc(compCloud, desc.basename + filenameSuffix, desc.path);
 						if (cmd.autoSaveMode())
 						{
 							QString errorStr = cmd.exportEntity(newDesc, QString(), nullptr, ccCommandLineInterface::ExportOption::ForceNoTimestamp);
@@ -5081,6 +5090,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 	//inner loop for Distance computation options
 	bool flipNormals = false;
 	bool unsignedDistances = false;
+	bool robust = true;
 	double maxDist = 0.0;
 	unsigned octreeLevel = 0;
 	int maxThreadCount = 0;
@@ -5116,6 +5126,18 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 			if (!m_cloud2meshDist)
 			{
 				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_UNSIGNED));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_NON_ROBUST))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			robust = false;
+
+			if (!m_cloud2meshDist)
+			{
+				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_NON_ROBUST));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2X_MAX_DISTANCE))
@@ -5291,15 +5313,16 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 		compDlg.maxThreadCountSpinBox->setValue(maxThreadCount);
 	}
 	
-	//C2M-only parameters
 	if (m_cloud2meshDist)
 	{
+		//C2M-only parameters
 		compDlg.flipNormalsCheckBox->setChecked(flipNormals);
 		compDlg.signedDistCheckBox->setChecked(!unsignedDistances);
+		compDlg.robustCheckBox->setChecked(robust);
 	}
-	//C2C-only parameters
 	else
 	{
+		//C2C-only parameters
 		if (splitXYZ)
 		{
 			//DGM: not true anymore
@@ -6397,6 +6420,9 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	QString dataWeightsSFIndexName;
 	int maxThreadCount = 0;
 	int transformationFilters = CCCoreLib::RegistrationTools::SKIP_NONE;
+	bool useC2MDistances = false;
+	bool robustC2MDistances = true;
+	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatching = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 
 	while (!cmd.arguments().empty())
 	{
@@ -6603,6 +6629,55 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
 		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_C2M_DIST))
+		{
+			useC2MDistances = true;
+			cmd.print(QObject::tr("[ICP] Use C2M distances"));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_NON_ROBUST))
+		{
+			robustC2MDistances = false;
+			cmd.warning(QObject::tr("[ICP] Use non-robust C2M distances"));
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_NORMAL_MATCHING))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: normals matching mode after '%1'").arg(COMMAND_C2M_NORMAL_MATCHING));
+			}
+
+			QString normalsMatchingOption = cmd.arguments().takeFirst().toUpper();
+
+			if (normalsMatchingOption == "OPPOSITE")
+			{
+				normalsMatching = CCCoreLib::ICPRegistrationTools::OPPOSITE_NORMALS;
+				cmd.print(QObject::tr("[ICP] Use opposite normals matching mode"));
+			}
+			else if (normalsMatchingOption == "SAME_SIDE")
+			{
+				normalsMatching = CCCoreLib::ICPRegistrationTools::SAME_SIDE_NORMALS;
+				cmd.print(QObject::tr("[ICP] Use same-side normals matching mode"));
+			}
+			else if (normalsMatchingOption == "DOUBLE_SIDED")
+			{
+				normalsMatching = CCCoreLib::ICPRegistrationTools::DOUBLE_SIDED_NORMALS;
+				cmd.print(QObject::tr("[ICP] Use double-sided normals matching mode"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Unknown normal matching mode: ") + normalsMatchingOption);
+			}
+
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+		}
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
@@ -6689,8 +6764,9 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		parameters.finalOverlapRatio		= overlap / 100.0;
 		parameters.transformationFilters	= transformationFilters;
 		parameters.maxThreadCount			= maxThreadCount;
-		parameters.useC2MSignedDistances	= false; //TODO
-		parameters.normalsMatching			= CCCoreLib::ICPRegistrationTools::NO_NORMAL; //TODO
+		parameters.useC2MSignedDistances	= useC2MDistances;
+		parameters.robustC2MSignedDistances = robustC2MDistances;
+		parameters.normalsMatching			= normalsMatching;
 	}
 
 	if (ccRegistrationTools::ICP(	dataAndModel[0]->getEntity(),

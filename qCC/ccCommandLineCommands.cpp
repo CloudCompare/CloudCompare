@@ -175,6 +175,7 @@ constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
 constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
 constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
+constexpr char COMMAND_FILTER[]							= "FILTER";
 
 //options / modifiers
 constexpr char COMMAND_MAX_THREAD_COUNT[]				= "MAX_TCOUNT";
@@ -195,6 +196,16 @@ constexpr char OPTION_PERCENT[]							= "PERCENT";
 constexpr char OPTION_NUMBER_OF_POINTS[]				= "NUMBER_OF_POINTS";
 constexpr char OPTION_FORCE[]							= "FORCE";
 constexpr char OPTION_USE_ACTIVE_SF[]					= "USE_ACTIVE_SF";
+constexpr char OPTION_SF[]								= "SF";
+constexpr char OPTION_RGB[]								= "RGB";
+constexpr char OPTION_GAUSSIAN[]						= "GAUSSIAN";
+constexpr char OPTION_BILATERAL[]						= "BILATERAL";
+constexpr char OPTION_MEAN[]							= "MEAN";
+constexpr char OPTION_MEDIAN[]							= "MEDIAN";
+constexpr char OPTION_SIGMA[]							= "SIGMA";
+constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
+constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
+constexpr char OPTION_BLEND_GRAYSCALE[]					= "BLEND_GRAYSCALE";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -6143,6 +6154,178 @@ bool CommandColorInterpolation::process(ccCommandLineInterface& cmd)
 	entities.push_back(cmd.clouds()[1].pc);
 
 	return 	ccEntityAction::interpolateColors(entities, cmd.widgetParent());
+}
+
+CommandFilter::CommandFilter()
+	: ccCommandLineInterface::Command(QObject::tr("FILTER"), COMMAND_FILTER)
+{}
+
+bool CommandFilter::process(ccCommandLineInterface& cmd)
+{
+	bool applyToRGB = false;
+	bool applyToSF = false;
+	bool gaussian = false;
+	ccPointCloud::RgbFilterOptions(filterParams);
+	filterParams.commandLine = true;
+	while (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_SF))
+		{
+			cmd.arguments().pop_front();
+			applyToSF = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_RGB))
+		{
+			cmd.arguments().pop_front();
+			applyToRGB = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BILATERAL))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::BILATERAL;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_GAUSSIAN))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEAN))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEAN;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MEDIAN))
+		{
+			cmd.arguments().pop_front();
+			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+			{
+				filterParams.filterType = ccPointCloud::RGB_FILTER_TYPES::MEDIAN;
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: spatial sigma after '-%1'").arg(OPTION_SIGMA));
+			}
+
+			bool ok = false;
+			filterParams.spatialSigma = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid value for spatial sigma after '%1'!").arg(OPTION_SIGMA));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_SIGMA_SF))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: spatial sigma after '-%1'").arg(OPTION_SIGMA_SF));
+			}
+
+			bool ok = false;
+			filterParams.sigmaSF = cmd.arguments().takeFirst().toDouble(&ok);
+			if (!ok)
+			{
+				return cmd.error(QObject::tr("Invalid value for spatial sigma after '%1'!").arg(OPTION_SIGMA_SF));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BURNT_COLOR_THRESHOLD))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: burnt color threshold after '-%1'").arg(OPTION_BURNT_COLOR_THRESHOLD));
+			}
+
+			bool ok = false;
+			uint burntOutColorThreshold = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || burntOutColorThreshold > 255)
+			{
+				return cmd.error(QObject::tr("Invalid value for burnt color threshold after '%1', must be an integer between 0 and 255!").arg(OPTION_BURNT_COLOR_THRESHOLD));
+			}
+			filterParams.burntOutColorThreshold = static_cast<unsigned char>(burntOutColorThreshold);
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_BLEND_GRAYSCALE))
+		{
+			cmd.arguments().pop_front();
+			if (cmd.arguments().size() < 2)
+			{
+				return cmd.error(QObject::tr("Missing parameter: blend grayscale threshold and grayscale percent after '-%1'").arg(OPTION_BLEND_GRAYSCALE));
+			}
+
+			bool ok = false;
+			uint blendGrayscale = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || blendGrayscale > 255)
+			{
+				return cmd.error(QObject::tr("Invalid value for blend grayscale threshold after '%1', must be an integer between 0 and 255!").arg(OPTION_BLEND_GRAYSCALE));
+			}
+			filterParams.blendGrayscale = true;
+			filterParams.blendGrayscaleThreshold = static_cast<unsigned char>(blendGrayscale);
+
+			uint grayscalePercent = cmd.arguments().takeFirst().toUInt(&ok);
+			if (!ok || grayscalePercent > 100)
+			{
+				return cmd.error(QObject::tr("Invalid value for grayscale percent after '%1 %2', must be an integer between 0 and 100!").arg(OPTION_BLEND_GRAYSCALE).arg(filterParams.blendGrayscaleThreshold));
+			}
+			filterParams.blendGrayscalePercent = static_cast<double>(grayscalePercent) / 100;
+
+		}
+
+		else
+		{
+			break;
+		}
+	}
+	if(!applyToRGB && !applyToSF)
+	{
+		return cmd.error(QObject::tr("Missing parameter -%1 and/or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
+	}
+
+	if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::NONE)
+	{
+		return cmd.error(QObject::tr("Missing parameter any of '-%1', '-%2', '-%3', '-%4' need to be set.")
+			.arg(OPTION_MEAN)
+			.arg(OPTION_GAUSSIAN)
+			.arg(OPTION_BILATERAL)
+			.arg(OPTION_MEDIAN));
+	}
+
+	//apply operation on clouds
+	ccHObject::Container selectedEntities;
+
+	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
+	{
+		selectedEntities.push_back(thisCloudDesc.pc);
+	}
+
+	if (applyToSF && applyToRGB)
+	{
+		applyToSF = false;
+		filterParams.applyToSFduringRGB = true;
+	}
+	if (applyToSF)
+	{
+		return ccEntityAction::sfGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
+	}
+	else if (applyToRGB)
+	{
+		return ccEntityAction::rgbGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
+	}
+	
+	return true;
 }
 
 CommandRenameEntities::CommandRenameEntities()

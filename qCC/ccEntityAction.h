@@ -19,6 +19,7 @@
 
 //qCC_db
 #include <ccMesh.h>
+#include <ccPointCloud.h>
 #include <ccPointCloudInterpolator.h>
 
 class QWidget;
@@ -27,6 +28,7 @@ class ccMainAppInterface;
 
 namespace ccEntityAction
 {
+
 	// Colours
 	bool	setColor(ccHObject::Container selectedEntities, bool colorize, QWidget* parent = nullptr);
 	bool	rgbToGreyScale(const ccHObject::Container &selectedEntities);
@@ -35,10 +37,10 @@ namespace ccEntityAction
 	bool	interpolateColors(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	convertTextureToColor(const ccHObject::Container& selectedEntities, QWidget* parent = nullptr);
 	bool	enhanceRGBWithIntensities(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	rgbGaussianFilter(const ccHObject::Container &selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
 	
 	// Scalar Fields
-	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
-	bool	sfBilateralFilter(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
+	bool	sfGaussianFilter(const ccHObject::Container &selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
 	bool	sfConvertToRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfConvertToRandomRGB(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);
 	bool	sfRename(const ccHObject::Container &selectedEntities, QWidget* parent = nullptr);

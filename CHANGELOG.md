@@ -1,6 +1,40 @@
 CloudCompare Version History
 ============================
 
+v2.14.alpha (???) - (??/??/202?)
+----------------------
+
+New Feature:
+	- Edit > Color > Gaussian filter
+	- Edit > Color > Bilateral filter
+	- Edit > Color > Median filter
+	- Edit > Color > Mean filter
+		- to improve coloring by applying a color filter
+
+	- New Command line options
+		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
+			- command arguments with a dash can be in any order
+			- -RGB runs the filter on color
+			- -SF runs the filter on the active scalar field
+			- -RGB and -SF can be used at the same time, otherwise at least one of the 2 options is required
+			- -MEAN|-MEDIAN|GAUSSIAN|BILATERAL
+				- specifies the filtering algorithm to use
+				- required
+				- only one should be set (However, if multiple are passed, only the first one will be used)
+			- -BURNT_COLOR_THRESHOLD {burnt_color_threshold}
+				- discards points for calculations if their R,G,B values are out of the [brunt_color_threshold;255-burnt_color_threshold] range.
+				- {burnt_color_threshold} is an integer between 0 and 255
+				- default value is 0, so all points are used
+				- optional
+				- only used when the filter is applied to RGB colors
+			- -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
+				- if the set of neighbors around each point contains more than {grayscale_percent}% of grayscale colors, only grayscale colors will be used.
+				- a color is considered as 'gray' when (R + G + B) / 3 - {grayscale_threshold} <= [R,G,B] <= (R + G + B) / 3 + {grayscale_threshold}
+				- {grayscale_threshold} is a strictly positive integer (HINT: use a small value between 1 and 10)
+				- {grayscale_percent} is an integer between 0 and 100 to decide when to consider colors as grayscale instead of RGB
+				- optional
+				- only used when the filter is applied to RGB colors
+
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------
 Improvements:
@@ -29,25 +63,6 @@ Improvements:
 			- -NON_ROBUST to disable the robust signed C2M distances computation algorithm (old behavior)
 			- -NORMAL_MATCH {OPTION} to specify the normals matching mode (no normal matching is used by default).
 				{OPTION} can be OPPOSITE, SAME_SIDE or DOUBLE_SIDED
-		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
-			- command arguments with dash can be in any order
-			- -RGB run the filter on color can be used alongside with -SF (-RGB and/or -SF required)
-			- -SF run the filter on the active scalar field
-			- {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} specify the filter algorithm, only one can be used, however if multiple passed the first one will be used. (required)
-			- -BURNT_COLOR_THRESHOLD {burnt_color_threshold} (optional)
-				- only used when filter applied to RGB colors
-				- an integer between 0 and 255
-				- discard points for calculations if the points R,G,B values are out of the [brunt_color_threshold;255-burnt_color_threshold] range.
-				- default value is 0, so all the points are used.
-			- -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent} (optional)
-				- only used when filter applied to RGB colors
-				- {grayscale_threshold} a positive integer. HINT: Use a non zero small value 1-10 (required when -BLEND_GRAYSCALE used)
-				- {grayscale_percent} an integer between 0 and 100 to decide when to use grayscale colors instead of true colors. (required when -BLEND_GRAYSCALE used)
-				- a point is considered as grayscale when (R + G + B) / 3 + {grayscale_threshold} <= [R,G,B] <=(R + G + B) / 3 + {grayscale_threshold}
-				- grayscale colors will be used instead of true color, when a pointset contains more than {grayscale_percent}% grayscale points.
-
-New Features:
-	- Edit -> Color -> Gaussian|Bilateral|Median|Mean filter to apply color filtering (blur) to create a more homogenous coloring.
 
 	- The 3DFin plugin version has been bumped to 0.3.3
 

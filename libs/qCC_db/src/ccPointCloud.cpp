@@ -1830,8 +1830,8 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	bool median = filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEDIAN;
 
 	//we only use the squared value of sigma
-	PointCoordinateType sigma2 = 2 * sigma*sigma;
-	PointCoordinateType radius = 3 * sigma; //3 * sigma > 99.7%
+	double sigma2 = (2.0 * sigma) * sigma;
+	double radius = 3.0 * sigma; //3 * sigma > 99.7%
 
 	//we only use the squared value of sigmaSF
 	PointCoordinateType sigmaSF2 = 2 * sigmaSF*sigmaSF;
@@ -1839,7 +1839,6 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 	//number of points inside the current cell
 	unsigned n = cell.points->size();
 
-	//structures pour la recherche de voisinages SPECIFIQUES
 	CCCoreLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level = cell.level;
 	cell.parentOctree->getCellPos(cell.truncatedCode, cell.level, nNSS.cellPos, true);
@@ -1870,6 +1869,12 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 
 	bool bilateralFilter = (sigmaSF > 0.0) && !mean && !median;
 
+	// For the median filter
+	std::vector<unsigned char> rValues;
+	std::vector<unsigned char> gValues;
+	std::vector<unsigned char> bValues;
+	std::vector<ScalarType> sfValues;
+
 	for (unsigned i = 0; i < n; ++i) //for each point in cell
 	{
 		ScalarType queryValue = 0; //scalar of the query point
@@ -1896,20 +1901,21 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 		it = nNSS.pointsInNeighbourhood.begin();
 		if (median)
 		{
-			std::vector<unsigned char> rValues;
-			std::vector<unsigned char> gValues;
-			std::vector<unsigned char> bValues;
-			std::vector<ScalarType> sfValues;
+			rValues.clear();
+			gValues.clear();
+			bValues.clear();
+			sfValues.clear();
 			for (unsigned j = 0; j < k; ++j, ++it)
 			{
 				const ccColor::Rgba& col = cloud->getPointColor(it->pointIndex);
 
 				if ((	col.r >= burntOutColorThresholdMax &&
 						col.g >= burntOutColorThresholdMax &&
-						col.b >= burntOutColorThresholdMax
-					) || (	col.r <= burntOutColorThresholdMin &&
-							col.g <= burntOutColorThresholdMin &&
-							col.b <= burntOutColorThresholdMin)
+						col.b >= burntOutColorThresholdMax )
+					||
+					(	col.r <= burntOutColorThresholdMin &&
+						col.g <= burntOutColorThresholdMin &&
+						col.b <= burntOutColorThresholdMin )
 					)
 				{
 					continue;
@@ -1929,7 +1935,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 				}
 			}
 
-			if (rValues.size() > 0)
+			if (rValues.size() != 0)
 			{
 				std::vector<unsigned char>::iterator medR = rValues.begin() + rValues.size() / 2;
 				std::nth_element(rValues.begin(), medR, rValues.end());
@@ -1939,26 +1945,26 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 				std::nth_element(bValues.begin(), medB, bValues.end());
 
 				ccColor::Rgb medCol(static_cast<ColorCompType>(*medR),
-					static_cast<ColorCompType>(*medG),
-					static_cast<ColorCompType>(*medB));
+									static_cast<ColorCompType>(*medG),
+									static_cast<ColorCompType>(*medB));
 
 				cloud->setPointColor(queryPointIndex, medCol);
 			}
 
-			if (sfValues.size() > 0)
+			if (sfValues.size() != 0)
 			{
-				std::vector<ScalarType>::iterator medSF= sfValues.begin() + sfValues.size() / 2;
+				std::vector<ScalarType>::iterator medSF = sfValues.begin() + sfValues.size() / 2;
 				std::nth_element(sfValues.begin(), medSF, sfValues.end());
 				cloud->setPointScalarValue(queryPointIndex, static_cast<ScalarType>(*medSF));
 			}
 		}
 		else
 		{
-			ccColor::RgbTpl<double> rgbSum(0, 0, 0);
+			ccColor::RgbTpl<double> rgbSum(0.0, 0.0, 0.0);
 			double wSum = 0.0;
 			double sfSum = 0.0;
 			double sfWSum = 0.0;
-			ccColor::RgbTpl<double> rgbGrayscaleSum(0, 0, 0);
+			ccColor::RgbTpl<double> rgbGrayscaleSum(0.0, 0.0, 0.0);
 			double wGrayscaleSum = 0.0;
 			size_t nrOfGrayscale = 0;
 			size_t nrOfUsedNeighbours = 0;
@@ -1976,10 +1982,10 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 					{
 						if (bilateralFilter)
 						{
-							ScalarType dSF = queryValue - val;
+							double dSF = queryValue - val;
 							weight *= exp(-(dSF*dSF) / sigmaSF2);
 						}
-						sfSum += weight * static_cast<double>(val);
+						sfSum += weight * val;
 						sfWSum += weight;
 					}
 					else
@@ -1990,10 +1996,11 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 
 				if ((	col.r >= burntOutColorThresholdMax &&
 						col.g >= burntOutColorThresholdMax &&
-						col.b >= burntOutColorThresholdMax
-					) || (	col.r <= burntOutColorThresholdMin &&
-							col.g <= burntOutColorThresholdMin &&
-							col.b <= burntOutColorThresholdMin)
+						col.b >= burntOutColorThresholdMax )
+					||
+					(	col.r <= burntOutColorThresholdMin &&
+						col.g <= burntOutColorThresholdMin &&
+						col.b <= burntOutColorThresholdMin )
 					)
 				{
 					continue;
@@ -2003,11 +2010,12 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 				rgbSum.g += weight * col.g;
 				rgbSum.b += weight * col.b;
 				wSum += weight;
-				nrOfUsedNeighbours++;
+				++nrOfUsedNeighbours;
+
 				if (filterParams.blendGrayscale)
 				{
-					double grayscaleMin = static_cast<double>(col.r)/3.0 + static_cast<double>(col.g) / 3.0 + static_cast<double>(col.b) / 3.0 - static_cast<double>(filterParams.blendGrayscaleThreshold);
-					double grayscaleMax = grayscaleMin + 2 * static_cast<double>(filterParams.blendGrayscaleThreshold);
+					double grayscaleMin = (col.r / 3.0) + (col.g / 3.0) + (col.b / 3.0) - filterParams.blendGrayscaleThreshold;
+					double grayscaleMax = grayscaleMin + 2.0 * filterParams.blendGrayscaleThreshold;
 					if (static_cast<double>(col.r) >= grayscaleMin && static_cast<double>(col.g) >= grayscaleMin && static_cast<double>(col.b) >= grayscaleMin &&
 						static_cast<double>(col.r) <= grayscaleMax && static_cast<double>(col.g) <= grayscaleMax && static_cast<double>(col.b) <= grayscaleMax)
 					{
@@ -2016,7 +2024,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 						rgbGrayscaleSum.g += weight * col.g;
 						rgbGrayscaleSum.b += weight * col.b;
 						wGrayscaleSum += weight;
-						nrOfGrayscale++;
+						++nrOfGrayscale;
 					}
 				}
 			}
@@ -2024,28 +2032,27 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 			if (wSum != 0.0)
 			{
 				ccColor::Rgb avgCol(static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.r / wSum), 0.0)),
-					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
-					static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
+									static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.g / wSum), 0.0)),
+									static_cast<ColorCompType>(std::max(std::min(255.0, rgbSum.b / wSum), 0.0)));
 
 				//blend grayscale modifications
 				if (filterParams.blendGrayscale)
 				{
-
-					//contains more grayscale point than given percent, so use only grayscale points
-					if ((static_cast<double>(nrOfGrayscale) / static_cast<double>(nrOfUsedNeighbours) > filterParams.blendGrayscalePercent) && wGrayscaleSum != 0)
+					//if the neighbor set contains more grayscale point than given percent, so use only use grayscale points
+					if ((static_cast<double>(nrOfGrayscale) > filterParams.blendGrayscalePercent * nrOfUsedNeighbours) && wGrayscaleSum != 0)
 					{
 						avgCol.r = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.r / wGrayscaleSum), 0.0));
 						avgCol.g = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.g / wGrayscaleSum), 0.0));
 						avgCol.b = static_cast<ColorCompType>(std::max(std::min(255.0, rgbGrayscaleSum.b / wGrayscaleSum), 0.0));
 					}
-					//more true color than grayscale use only true color values
-					else
+					else //else, we have more RGB colors than grayscale ones. We use only the RGB values.
 					{
-						if (wSum - wGrayscaleSum != 0)
+						double wRGBSum = wSum - wGrayscaleSum;
+						if (wRGBSum != 0.0)
 						{
-							avgCol.r = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.r - rgbGrayscaleSum.r) / (wSum - wGrayscaleSum)), 0.0));
-							avgCol.g = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.g - rgbGrayscaleSum.g) / (wSum - wGrayscaleSum)), 0.0));
-							avgCol.b = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.b - rgbGrayscaleSum.b) / (wSum - wGrayscaleSum)), 0.0));
+							avgCol.r = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.r - rgbGrayscaleSum.r) / wRGBSum), 0.0));
+							avgCol.g = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.g - rgbGrayscaleSum.g) / wRGBSum), 0.0));
+							avgCol.b = static_cast<ColorCompType>(std::max(std::min(255.0, (rgbSum.b - rgbGrayscaleSum.b) / wRGBSum), 0.0));
 						}
 					}
 				}
@@ -2072,9 +2079,9 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 }
 
 bool ccPointCloud::applyFilterToRGB(PointCoordinateType sigma,
-											PointCoordinateType sigmaSF,
-											RgbFilterOptions filterParams,
-											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
+									PointCoordinateType sigmaSF,
+									RgbFilterOptions filterParams,
+									CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
 	unsigned n = size();
 	if (n == 0)

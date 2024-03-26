@@ -202,6 +202,7 @@ struct CommandCSF : public ccCommandLineInterface::Command
 			//store ground subset
 			if (groundCloud)
 			{
+				groundCloud->setName(desc.basename + QString("_ground_points"));
 				//add cloud to the pool of new clouds
 				CLCloudDesc groundDesc(groundCloud, desc.basename + QString("_ground_points"), desc.path, -1);
 				newClouds.push_back(groundDesc);
@@ -219,6 +220,7 @@ struct CommandCSF : public ccCommandLineInterface::Command
 			//store off-ground subset
 			if (offGroundCloud)
 			{
+				offGroundCloud->setName(desc.basename + QString("_offground_points"));
 				CLCloudDesc offgroundDesc(offGroundCloud, desc.basename + QString("_offground_points"), desc.path, -1);
 				newClouds.push_back(offgroundDesc);
 				if (exportOffground)

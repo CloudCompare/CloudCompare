@@ -1,15 +1,5 @@
 CloudCompare Version History
 ============================
-v2.14.beta
-----------------------
-- New features:
-	-Command line:
-		* add new option to SF_OP -NOT_IN_PLACE {sf} {operation} {value}, to create new scalar field during the operation.
-
-- Improvements:
-	-Command line:
-		* -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as value
-
 v2.14.alpha (???) - (??/??/202?)
 ----------------------
 
@@ -21,7 +11,7 @@ New Feature:
 		- to improve coloring by applying a color filter
 
 	- New Command line options
-		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
+		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -SIGMA {sigma} -SIGMA_SF {sigma_sf} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
 			- command arguments with a dash can be in any order
 			- -RGB runs the filter on color
 			- -SF runs the filter on the active scalar field
@@ -43,8 +33,19 @@ New Feature:
 				- {grayscale_percent} is an integer between 0 and 100 to decide when to consider colors as grayscale instead of RGB
 				- optional
 				- only used when the filter is applied to RGB colors
+			- -SIGMA {sigma}
+					- optional
+					- nearest neighbours calculated with a radius of 3*sigma, if not set cloud compare will calculate a default value.
+			- -SIGMA_SF {sigma_sf}
+					- optional, only used when bilateral filter applied
+		- New option to SF_OP -NOT_IN_PLACE {sf} {operation} {value}, to create new scalar field during the operation.
 
-v2.13.1 (Kharkiv) - (03/20/2024)
+Improvements:
+	- Command line:
+		- -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as value
+		- Rename -CSF command's result clouds to be able to select them later.
+
+		v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------
 Improvements:
 	- the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will

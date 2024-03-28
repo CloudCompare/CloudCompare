@@ -1,6 +1,5 @@
 CloudCompare Version History
 ============================
-
 v2.14.alpha (???) - (??/??/202?)
 ----------------------
 
@@ -12,7 +11,7 @@ New Feature:
 		- to improve coloring by applying a color filter
 
 	- New Command line options
-		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
+		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -SIGMA {sigma} -SIGMA_SF {sigma_sf} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
 			- command arguments with a dash can be in any order
 			- -RGB runs the filter on color
 			- -SF runs the filter on the active scalar field
@@ -34,6 +33,20 @@ New Feature:
 				- {grayscale_percent} is an integer between 0 and 100 to decide when to consider colors as grayscale instead of RGB
 				- optional
 				- only used when the filter is applied to RGB colors
+			- -SIGMA {sigma}
+					- optional
+					- nearest neighbours extracted with a radius of 3*sigma. If not set, CloudCompare will calculate a default value.
+			- -SIGMA_SF {sigma_sf}
+					- optional, only used when bilateral filter applied
+		- New SF_OP suboption: -NOT_IN_PLACE
+			- to create new scalar field during the operation.
+
+Improvements:
+	- Command line:
+		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
+		- Rename -CSF command's resulting clouds to be able to select them later:
+			- {original cloud name} + '_ground_points'
+			- {original cloud name} + '_offground_points'
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

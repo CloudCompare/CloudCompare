@@ -5885,7 +5885,6 @@ CommandSFOperation::CommandSFOperation()
 
 bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 {
-
 	//in place modifier, to keep old commands intact we should keep it in place by default. However it makes the command line inconsistent, because the SF_ARITHMETIC works the other way.
 	bool inPlace = true;
 	if (!cmd.arguments().empty())

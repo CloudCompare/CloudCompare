@@ -35,17 +35,20 @@ New Feature:
 				- only used when the filter is applied to RGB colors
 			- -SIGMA {sigma}
 					- optional
-					- nearest neighbours calculated with a radius of 3*sigma, if not set cloud compare will calculate a default value.
+					- nearest neighbours extracted with a radius of 3*sigma. If not set, CloudCompare will calculate a default value.
 			- -SIGMA_SF {sigma_sf}
 					- optional, only used when bilateral filter applied
-		- New option to SF_OP -NOT_IN_PLACE {sf} {operation} {value}, to create new scalar field during the operation.
+		- New SF_OP suboption: -NOT_IN_PLACE
+			- to create new scalar field during the operation.
 
 Improvements:
 	- Command line:
-		- -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as value
-		- Rename -CSF command's result clouds to be able to select them later.
+		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
+		- Rename -CSF command's resulting clouds to be able to select them later:
+			- {original cloud name} + '_ground_points'
+			- {original cloud name} + '_offground_points'
 
-		v2.13.1 (Kharkiv) - (03/20/2024)
+v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------
 Improvements:
 	- the Facets plugin will now retain the Global Shift information when extracting facets, and the 'Global center' will

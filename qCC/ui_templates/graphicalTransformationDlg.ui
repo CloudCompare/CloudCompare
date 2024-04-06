@@ -81,7 +81,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>Pause segmentation</string>
+         <string>Pause transformation (allow rotation/panning of 3D view)</string>
         </property>
         <property name="statusTip">
          <string>Pause transformation (allow rotation/panning of 3D view)</string>

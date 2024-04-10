@@ -268,11 +268,8 @@ namespace LasDetails
 			if (hasWaveform || previousMinorVersion >= 3)
 			{
 				minorVersion = 3;
-				if (hasGpsTime)
-				{
-					pointFormat = 4;
-				}
-				else if (hasRGB)
+				pointFormat = 4;
+				if (hasRGB)
 				{
 					pointFormat = 5;
 				}

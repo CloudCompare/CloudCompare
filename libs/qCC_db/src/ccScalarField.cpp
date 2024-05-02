@@ -205,7 +205,7 @@ void ccScalarField::computeMinAndMax()
 
 						if (ValidValue(val))
 						{
-							unsigned bin = static_cast<unsigned>(floor(static_cast<double>(val - m_displayRange.min())*step));
+							unsigned bin = static_cast<unsigned>((val - m_displayRange.min())*step);
 							++m_histogram[std::min(bin, numberOfClasses - 1)];
 						}
 					}

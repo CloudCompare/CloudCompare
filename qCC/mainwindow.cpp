@@ -3609,7 +3609,7 @@ void MainWindow::doActionMerge()
 			{
 				unsigned countBefore = firstCloud->size();
 				unsigned countAdded = pc->size();
-				*firstCloud += pc;
+				firstCloud->append(pc, countBefore, false, false); //append without recalculating SF min/max
 
 				//success?
 				if (firstCloud->size() == countBefore + countAdded)
@@ -3644,9 +3644,17 @@ void MainWindow::doActionMerge()
 			}
 		}
 
+		//compute min and max once after all appends are done
+		if (firstCloud)
+		{
+			for (size_t i = 0; i<firstCloud->getNumberOfScalarFields(); i++)
+			{
+				firstCloud->getScalarField(i)->computeMinAndMax();
+			}
+		}
+
 		if (ocIndexSF)
 		{
-			ocIndexSF->computeMinAndMax();
 			firstCloud->showSF(true);
 		}
 

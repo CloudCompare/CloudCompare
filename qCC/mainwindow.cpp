@@ -3574,6 +3574,13 @@ void MainWindow::doActionMerge()
 		CCCoreLib::ScalarField* ocIndexSF = nullptr;
 		size_t cloudIndex = 0;
 
+		//compute total size of the final cloud
+		unsigned totalSize = 0;
+		for (size_t i = 0; i < clouds.size(); ++i)
+		{
+			totalSize += clouds[i]->size();
+		}
+
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc = clouds[i];
@@ -3584,6 +3591,13 @@ void MainWindow::doActionMerge()
 				//we still have to temporarily detach the first cloud, as it may undergo
 				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
 				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+
+				//reserve the final required number of points
+				if (!firstCloud->reserve(totalSize))
+				{
+					ccConsole::Error(tr("Not enough memory!"));
+					break;
+				}
 
 				if (QMessageBox::question(this, tr("Original cloud index"), tr("Do you want to generate a scalar field with the original cloud index?")) == QMessageBox::Yes)
 				{

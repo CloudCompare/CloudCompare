@@ -21,6 +21,8 @@ jobs:
             compile_qanimation_with_ffmpeg: "ON",
             compile_qpcl: "OFF",
             compile_qransac: "ON",
+            compile_riegl: "ON",
+            conda_dep_file: ".ci/conda-win.yml"
           }
           - {
             name: "macOS Clang",
@@ -30,6 +32,8 @@ jobs:
             compile_qanimation_with_ffmpeg: "OFF",
             compile_qpcl: "OFF",
             compile_qransac: "ON",
+            compile_riegl: "OFF",
+            conda_dep_file: ".ci/conda-macos.yml"
           }
 
     steps:
@@ -38,12 +42,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup (Windows)
-        if: matrix.config.os == 'windows-latest'
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-
       # DGM: without caching, using conda on Windows takes a long time...
       - name: Install Dependencies
         uses: conda-incubator/setup-miniconda@v3
@@ -51,7 +49,7 @@ jobs:
           architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
           activate-environment: CloudCompareDev
           auto-activate-base: false
-          environment-file: .ci/conda.yml
+          environment-file: ${{ matrix.config.conda_dep_file }}
           mamba-version: "*"
 
       - name: Configure MSVC console (Windows)
@@ -92,9 +90,9 @@ jobs:
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
             -DPLUGIN_IO_QLAS=ON \
-            -DPLUGIN_IO_QRDB=OFF \
-            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
-            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
+            -DPLUGIN_IO_QRDB=${{ matrix.config.compile_riegl }}  \
+            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
+            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} \
             -DPLUGIN_STANDARD_QBROOM=ON \

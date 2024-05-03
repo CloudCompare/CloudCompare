@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - eigen=3.4.*
-  - ffmpeg=6.1.*
+  - ffmpeg=4.2.*
   - ninja
   - pcl=1.14.*
   - qt=5.15.*

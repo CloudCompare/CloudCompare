@@ -52,7 +52,7 @@ jobs:
           activate-environment: CloudCompareDev
           auto-activate-base: false
           environment-file: .ci/conda.yml
-          miniconda-version: 'latest'
+          mamba-version: "*"
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'

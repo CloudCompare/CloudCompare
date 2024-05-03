@@ -4,7 +4,7 @@ channels:
 dependencies:
   - eigen=3.4.*
   - ninja
-  - pcl=1.14.*
+  #- pcl=1.14.*
   - qt=5.15.*
   - xerces-c=3.2.*
   - zlib=1.2.*

@@ -124,7 +124,7 @@ jobs:
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
@@ -144,7 +144,7 @@ jobs:
           sudo apt-get update -qq
 
           sudo apt-get install -qy cmake ninja-build
-          libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
+          libqt5svg5-dev libqt5opengl5-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev
           libtbb-dev
           libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
           libboost-program-options-dev libboost-thread-dev

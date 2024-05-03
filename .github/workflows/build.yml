@@ -48,15 +48,11 @@ jobs:
       - name: Install Dependencies
         uses: conda-incubator/setup-miniconda@v3
         with:
-          architecture: arm64
+          architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
           activate-environment: CloudCompareDev
           auto-activate-base: false
           environment-file: .ci/conda.yml
           miniconda-version: 'latest'
-
-      - name: Install Dependencies (macOS)
-        if: matrix.config.os == 'macos-latest'
-        run: brew install xerces-c
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'

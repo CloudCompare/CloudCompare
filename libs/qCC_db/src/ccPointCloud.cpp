@@ -602,7 +602,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 	return append(addedCloud, size());
 }
 
-const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore, bool ignoreChildren/*=false*/)
+const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore, bool ignoreChildren/*=false*/, bool recomputeMinAndMax/*=true*/)
 {
 	//Clears the LOD structure (and potentially stop its construction)
 	clearLOD();
@@ -907,12 +907,25 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					if (sameSF->currentSize() == pointCountBefore)
 					{
 						double shift = sf->getGlobalShift() - sameSF->getGlobalShift();
-						for (unsigned i = 0; i < addedPoints; i++)
+						if (shift != 0) //avoid re-casting unless necessary
 						{
-							sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
+							for (unsigned i = 0; i < addedPoints; i++)
+							{
+								sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
+							}
+						}
+						else
+						{
+							for (unsigned i = 0; i < addedPoints; i++)
+							{
+								sameSF->addElement(sf->getValue(i));
+							}
 						}
 					}
-					sameSF->computeMinAndMax();
+					if (recomputeMinAndMax)
+					{
+						sameSF->computeMinAndMax();
+					}
 
 					//flag this SF as 'updated'
 					assert(sfIdx < static_cast<int>(sfCount));
@@ -930,7 +943,10 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						{
 							newSF->setValue(pointCountBefore + i, sf->getValue(i));
 						}
-						newSF->computeMinAndMax();
+						if (recomputeMinAndMax)
+						{
+							newSF->computeMinAndMax();
+						}
 						//copy display parameters
 						newSF->importParametersFrom(sf);
 

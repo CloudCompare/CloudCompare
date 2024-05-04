@@ -792,9 +792,10 @@ public: //other methods
 		\param cloud cloud to be added
 		\param pointCountBefore the number of points previously contained in this cloud
 		\param ignoreChildren whether to copy input cloud's children or not
+		\param recomputeMinAndMax whether to compute min and max of scalar fields after append or not
 		\return the resulting point cloud
 	**/
-	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
+	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false, bool recomputeMinAndMax = true);
 
 	//! Enhances the RGB colors with the current scalar field (assuming it's intensities)
 	bool enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange = false, double minI = 0.0, double maxI = 1.0);

@@ -457,8 +457,6 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		}
 	}
 
-	computeMinAndMax();
-
 	//displayed values & saturation boundaries (dataVersion>=20)
 	double minDisplayed = 0;
 	if (in.read((char*)&minDisplayed, sizeof(double)) < 0)

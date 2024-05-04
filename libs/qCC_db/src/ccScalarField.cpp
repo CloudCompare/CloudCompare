@@ -151,7 +151,7 @@ void ccScalarField::setLogScale(bool state)
 	if (m_logScale != state)
 	{
 		m_logScale = state;
-		if (m_logScale && m_minVal < 0)
+		if (m_logScale && getMin() < 0)
 		{
 			ccLog::Warning("[ccScalarField] Scalar field contains negative values! Log scale will only consider absolute values...");
 		}
@@ -164,7 +164,7 @@ void ccScalarField::computeMinAndMax()
 {
 	ScalarField::computeMinAndMax();
 
-	m_displayRange.setBounds(m_minVal, m_maxVal);
+	m_displayRange.setBounds(getMin(), getMax());
 
 	//update histogram
 	{
@@ -205,7 +205,7 @@ void ccScalarField::computeMinAndMax()
 
 						if (ValidValue(val))
 						{
-							unsigned bin = static_cast<unsigned>(floor(static_cast<double>(val - m_displayRange.min())*step));
+							unsigned bin = static_cast<unsigned>((val - m_displayRange.min())*step);
 							++m_histogram[std::min(bin, numberOfClasses - 1)];
 						}
 					}
@@ -226,8 +226,8 @@ void ccScalarField::updateSaturationBounds()
 {
 	if (!m_colorScale || m_colorScale->isRelative()) //Relative scale (default)
 	{
-		ScalarType minAbsVal = (m_maxVal < 0 ? std::min(-m_maxVal, -m_minVal) : std::max<ScalarType>(m_minVal, 0));
-		ScalarType maxAbsVal = std::max(std::abs(m_minVal), std::abs(m_maxVal));
+		ScalarType minAbsVal = (getMax() < 0 ? std::min(-getMax(), -getMin()) : std::max<ScalarType>(getMin(), 0));
+		ScalarType maxAbsVal = std::max(std::abs(getMin()), std::abs(getMax()));
 
 		if (m_symmetricalScale)
 		{
@@ -235,7 +235,7 @@ void ccScalarField::updateSaturationBounds()
 		}
 		else
 		{
-			m_saturationRange.setBounds(m_minVal,m_maxVal);
+			m_saturationRange.setBounds(getMin(),getMax());
 		}
 
 		//log scale (we always update it even if m_logScale is not enabled!)

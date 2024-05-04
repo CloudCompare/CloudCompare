@@ -18,8 +18,6 @@ jobs:
             os: windows-latest,
             generator: "Ninja",
             conda_library_dir: "Library",
-            compile_qpcl: "OFF",
-            compile_qransac: "ON",
             compile_riegl: "ON",
             conda_dep_file: ".ci/conda-win.yml"
           }
@@ -28,8 +26,6 @@ jobs:
             os: macos-latest,
             generator: "Ninja",
             conda_library_dir: ".",
-            compile_qpcl: "OFF",
-            compile_qransac: "ON",
             compile_riegl: "OFF",
             conda_dep_file: ".ci/conda-macos.yml"
           }
@@ -104,8 +100,8 @@ jobs:
             -DPLUGIN_STANDARD_QPCV=ON \
             -DPLUGIN_STANDARD_QPOISSON_RECON=ON \
             -DPLUGIN_STANDARD_QSRA=ON \
-            -DPLUGIN_STANDARD_QRANSAC_SD=${{ matrix.config.compile_qransac }} \
-            -DPLUGIN_STANDARD_QPCL=${{ matrix.config.compile_qpcl }} \
+            -DPLUGIN_STANDARD_QRANSAC_SD=ON \
+            -DPLUGIN_STANDARD_QPCL=ON \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             .
 

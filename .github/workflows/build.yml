@@ -18,7 +18,6 @@ jobs:
             os: windows-latest,
             generator: "Ninja",
             conda_library_dir: "Library",
-            compile_qanimation_with_ffmpeg: "ON",
             compile_qpcl: "OFF",
             compile_qransac: "ON",
             compile_riegl: "ON",
@@ -29,7 +28,6 @@ jobs:
             os: macos-latest,
             generator: "Ninja",
             conda_library_dir: ".",
-            compile_qanimation_with_ffmpeg: "OFF",
             compile_qpcl: "OFF",
             compile_qransac: "ON",
             compile_riegl: "OFF",
@@ -38,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -94,7 +92,7 @@ jobs:
             -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
             -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
             -DPLUGIN_STANDARD_QANIMATION=ON \
-            -DQANIMATION_WITH_FFMPEG_SUPPORT=${{ matrix.config.compile_qanimation_with_ffmpeg }} \
+            -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
             -DPLUGIN_STANDARD_QBROOM=ON \
             -DPLUGIN_STANDARD_QCANUPO=OFF \
             -DPLUGIN_STANDARD_QCOMPASS=ON \
@@ -135,7 +133,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -192,7 +190,7 @@ jobs:
           -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON
           -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON
           -DPLUGIN_STANDARD_QANIMATION=ON
-          -DQANIMATION_WITH_FFMPEG_SUPPORT=ON
+          -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF
           -DPLUGIN_STANDARD_QBROOM=ON
           -DPLUGIN_STANDARD_QCANUPO=ON
           -DPLUGIN_STANDARD_QCOMPASS=ON

@@ -3325,9 +3325,9 @@ bool ccMesh::interpolateColors(const CCCoreLib::VerticesIndexes& vertIndexes, co
 	const ccColor::Rgba& C2 = m_associatedCloud->getPointColor(vertIndexes.i2);
 	const ccColor::Rgba& C3 = m_associatedCloud->getPointColor(vertIndexes.i3);
 
-	color.r = static_cast<ColorCompType>(floor(C1.r * w.u[0] + C2.r * w.u[1] + C3.r * w.u[2]));
-	color.g = static_cast<ColorCompType>(floor(C1.g * w.u[0] + C2.g * w.u[1] + C3.g * w.u[2]));
-	color.b = static_cast<ColorCompType>(floor(C1.b * w.u[0] + C2.b * w.u[1] + C3.b * w.u[2]));
+	color.r = static_cast<ColorCompType>(C1.r * w.u[0] + C2.r * w.u[1] + C3.r * w.u[2]); //static_cast is equivalent to floor if value >= 0
+	color.g = static_cast<ColorCompType>(C1.g * w.u[0] + C2.g * w.u[1] + C3.g * w.u[2]); //static_cast is equivalent to floor if value >= 0
+	color.b = static_cast<ColorCompType>(C1.b * w.u[0] + C2.b * w.u[1] + C3.b * w.u[2]); //static_cast is equivalent to floor if value >= 0
 
 	return true;
 }
@@ -3350,10 +3350,10 @@ bool ccMesh::interpolateColors(const CCCoreLib::VerticesIndexes& vertIndexes, co
 	const ccColor::Rgba& C2 = m_associatedCloud->getPointColor(vertIndexes.i2);
 	const ccColor::Rgba& C3 = m_associatedCloud->getPointColor(vertIndexes.i3);
 
-	color.r = static_cast<ColorCompType>(floor(C1.r * w.u[0] + C2.r * w.u[1] + C3.r * w.u[2]));
-	color.g = static_cast<ColorCompType>(floor(C1.g * w.u[0] + C2.g * w.u[1] + C3.g * w.u[2]));
-	color.b = static_cast<ColorCompType>(floor(C1.b * w.u[0] + C2.b * w.u[1] + C3.b * w.u[2]));
-	color.a = static_cast<ColorCompType>(floor(C1.a * w.u[0] + C2.a * w.u[1] + C3.a * w.u[2]));
+	color.r = static_cast<ColorCompType>(C1.r * w.u[0] + C2.r * w.u[1] + C3.r * w.u[2]); //static_cast is equivalent to floor if value >= 0
+	color.g = static_cast<ColorCompType>(C1.g * w.u[0] + C2.g * w.u[1] + C3.g * w.u[2]); //static_cast is equivalent to floor if value >= 0
+	color.b = static_cast<ColorCompType>(C1.b * w.u[0] + C2.b * w.u[1] + C3.b * w.u[2]); //static_cast is equivalent to floor if value >= 0
+	color.a = static_cast<ColorCompType>(C1.a * w.u[0] + C2.a * w.u[1] + C3.a * w.u[2]); //static_cast is equivalent to floor if value >= 0
 
 	return true;
 }
@@ -3403,8 +3403,8 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 				//get color from texture image
 				const QImage texture = material->getTexture();
-				int xPix = std::min(static_cast<int>(floor(tx * texture.width())), texture.width() - 1);
-				int yPix = std::min(static_cast<int>(floor(ty * texture.height())), texture.height() - 1);
+				int xPix = std::min(static_cast<int>(tx * texture.width()), texture.width() - 1); //static_cast is equivalent to floor if value >= 0
+				int yPix = std::min(static_cast<int>(ty * texture.height()), texture.height() - 1); //static_cast is equivalent to floor if value >= 0
 
 				QRgb pixel = texture.pixel(xPix, yPix);
 
@@ -3519,8 +3519,8 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor
 	//get color from texture image
 	{
 		const QImage texture = material->getTexture();
-		int xPix = std::min(static_cast<int>(floor(x*texture.width())), texture.width() - 1);
-		int yPix = std::min(static_cast<int>(floor(y*texture.height())), texture.height() - 1);
+		int xPix = std::min(static_cast<int>(x*texture.width()), texture.width() - 1); //static_cast is equivalent to floor if value >= 0
+		int yPix = std::min(static_cast<int>(y*texture.height()), texture.height() - 1); //static_cast is equivalent to floor if value >= 0
 
 		QRgb pixel = texture.pixel(xPix, yPix);
 

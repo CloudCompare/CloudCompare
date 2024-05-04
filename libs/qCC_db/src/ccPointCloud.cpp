@@ -3458,7 +3458,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 							if (toDisplay.decimStep > 1)
 							{
-								chunkSize = static_cast<unsigned>(floor(static_cast<float>(chunkSize) / toDisplay.decimStep));
+								chunkSize = static_cast<unsigned>(static_cast<double>(chunkSize) / toDisplay.decimStep); //static_cast is equivalent to floor if value >= 0
 							}
 							glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(chunkSize));
 						}
@@ -3655,7 +3655,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 						if (toDisplay.decimStep > 1)
 						{
-							chunkSize = static_cast<unsigned>(floor(static_cast<float>(chunkSize) / toDisplay.decimStep));
+							chunkSize = static_cast<unsigned>(static_cast<double>(chunkSize) / toDisplay.decimStep); //static_cast is equivalent to floor if value >= 0
 						}
 						glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(chunkSize));
 					}

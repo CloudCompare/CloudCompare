@@ -282,7 +282,5 @@ std::vector<LasScalarField> LasScalarField::ForPointFormat(unsigned pointFormatI
 		scalarFields.emplace_back(LasScalarField::Id::NearInfrared);
 	}
 
-	scalarFields.shrink_to_fit();
-
 	return scalarFields;
 }

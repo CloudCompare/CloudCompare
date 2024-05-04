@@ -304,7 +304,7 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 			//we ignore values outside of [m_minVal,m_maxVal] (works fro NaN values as well)
 			if (/*ccScalarField::ValidValue(val) &&*/val >= m_minVal && val <= m_maxVal)
 			{
-				size_t bin = static_cast<size_t>(floor((val - m_minVal) / step));
+				size_t bin = static_cast<size_t>((val - m_minVal) / step); //static_cast is equivalent to floor if value >= 0
 				++m_histoValues[std::min(bin, binCount - 1)];
 			}
 		}

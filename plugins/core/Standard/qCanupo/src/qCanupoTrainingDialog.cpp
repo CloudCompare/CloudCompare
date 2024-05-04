@@ -137,7 +137,7 @@ bool qCanupoTrainingDialog::getScales(std::vector<float>& scales) const
 			double minScale	= minScaleDoubleSpinBox->value();
 			if (maxScale < minScale || maxScale < 0 || step < 1.0e-6)
 				return false;
-			unsigned stepCount = static_cast<unsigned>( floor((maxScale-minScale)/step + 1.0e-6) ) + 1;
+			unsigned stepCount = static_cast<unsigned>((maxScale - minScale) / step + 1.0e-6) + 1; //static_cast is equivalent to floor if value >= 0
 			scales.resize(stepCount);
 			for (unsigned i=0; i<stepCount; ++i)
 				scales[i] = static_cast<float>(maxScale - i*step);

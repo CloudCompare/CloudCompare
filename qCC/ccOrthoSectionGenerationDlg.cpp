@@ -73,6 +73,6 @@ void ccOrthoSectionGenerationDlg::onStepChanged(double step)
 	if (step < 0)
 		return;
 
-	unsigned count = step < 1.0e-6 ? 1 : 1+static_cast<unsigned>(std::floor(m_pathLength / step));
+	unsigned count = step < 1.0e-6 ? 1 : 1 + static_cast<unsigned>(m_pathLength / step); //static_cast is equivalent to floor if value >= 0
 	sectionCountLineEdit->setText(QString::number(count));
 }

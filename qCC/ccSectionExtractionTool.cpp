@@ -1951,7 +1951,6 @@ void ccSectionExtractionTool::extractPoints()
 						assert(false);
 						continue;
 					}
-					polySegments2D.shrink_to_fit();
 				}
 
 				int cloudCount = m_clouds.size();
@@ -2011,13 +2010,17 @@ void ccSectionExtractionTool::extractPoints()
 								if (dotprod < 0)
 								{
 									if (j == 0 && !poly->isClosed())
+									{
 										continue;
+									}
 									squareDist = AP2D.norm2();
 								}
 								else if (dotprod > seg2D.lAB)
 								{
 									if (j + 1 == polySegments2D.size() && !poly->isClosed())
+									{
 										continue;
+									}
 									squareDist = (P2D - seg2D.B).norm2();
 								}
 								else

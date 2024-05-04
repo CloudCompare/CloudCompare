@@ -142,7 +142,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 		//level = 7 if < 1.000.000
 		//level = 8 if < 10.000.000
 		//level = 9 if > 10.000.000
-		int gridLevel = static_cast<int>(floor(log10(static_cast<double>(std::max(dataCloud->size(), modelCloud->size()))))) + 2;
+		int gridLevel = static_cast<int>(log10(static_cast<double>(std::max(dataCloud->size(), modelCloud->size())))) + 2; //static_cast is equivalent to floor if value >= 0
 		    gridLevel = std::min(std::max(gridLevel, 7), 9);
 		int result = -1;
 		if (modelMesh)

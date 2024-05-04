@@ -139,12 +139,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -165,7 +165,7 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
 
 	normalsCheckBox->setEnabled(cloud->hasNormals());
-	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked:Qt::Unchecked);
+	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked : Qt::Unchecked);
 }
 
 /// When the selected version changes, we need to update the combo box
@@ -591,8 +591,6 @@ std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const
 		}
 	}
 
-	fields.shrink_to_fit();
-
 	return fields;
 }
 
@@ -635,8 +633,6 @@ std::vector<LasExtraScalarField> LasSaveDialog::extraFieldsToSave() const
 		}
 		extraScalarFields.push_back(field);
 	}
-
-	extraScalarFields.shrink_to_fit();
 
 	return extraScalarFields;
 }

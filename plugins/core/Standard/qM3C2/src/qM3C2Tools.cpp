@@ -731,7 +731,7 @@ bool qM3C2Tools::GuessBestParams(	ccPointCloud* cloud1,
 				if (!hasBestProjLevel)
 				{
 					std::sort(populations.begin(), populations.begin() + probingCount);
-					unsigned pop97 = populations[static_cast<unsigned>(floor(probingCount * 0.03))];
+					unsigned pop97 = populations[static_cast<unsigned>(probingCount * 0.03)]; //static_cast is equivalent to floor if value >= 0
 					if (app)
 						app->dispToConsole(QString("[M3C2::auto] \t97% of cells above: %1 +/- %2").arg(pop97));
 					if (pop97 /*meanPopulation - 2 * stdDevPopulation*/ >= minPoints4Stats)

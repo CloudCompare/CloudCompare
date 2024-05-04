@@ -490,6 +490,7 @@ void ccPointCloudLOD::shrink_to_fit()
 			break;
 		}
 	}
+
 	m_levels.shrink_to_fit();
 }
 

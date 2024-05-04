@@ -276,8 +276,6 @@ void ccRasterizeTool::getExportedStats(std::vector<ccRasterGrid::ExportableField
 		stats.push_back(ccRasterGrid::PER_CELL_UNIQUE_COUNT_VALUE);
 	if (m_UI->generateStatisticsPercentileCheckBox->isChecked())
 		stats.push_back(ccRasterGrid::PER_CELL_PERCENTILE_VALUE);
-
-	stats.shrink_to_fit();
 }
 
 bool ccRasterizeTool::resampleOriginalCloud() const
@@ -2151,7 +2149,7 @@ void ccRasterizeTool::generateImage() const
 					{
 						double normalizedHeight = (emptyCellsValue - minValue) / valueRange;
 						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-						emptyCellColorIndex = static_cast<unsigned>(floor(normalizedHeight*maxColorComp));
+						emptyCellColorIndex = static_cast<unsigned>(normalizedHeight*maxColorComp); //static_cast is equivalent to floor if value >= 0
 					}
 					break;
 				case ccRasterGrid::FILL_AVERAGE_HEIGHT:
@@ -2187,7 +2185,7 @@ void ccRasterizeTool::generateImage() const
 						double value = sfRow ? sfRow[i] : row[i].h;
 						double normalizedHeight = (value - minValue) / valueRange;
 						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-						unsigned char val = static_cast<unsigned char>(floor(normalizedHeight*maxColorComp));
+						unsigned char val = static_cast<unsigned char>(normalizedHeight*maxColorComp); //static_cast is equivalent to floor if value >= 0
 						outputImage.setPixel(i, m_grid.height - 1 - j, val);
 					}
 				}

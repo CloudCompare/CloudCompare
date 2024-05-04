@@ -6,6 +6,7 @@ dependencies:
   - ffmpeg=6.1.*
   - ninja
   - boost=1.84.*
+  - opencv=4.9.0
   - pcl=1.14.*
   - qt=5.15.*
   - xerces-c=3.2.*

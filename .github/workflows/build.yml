@@ -77,6 +77,7 @@ jobs:
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
             -DPLUGIN_EXAMPLE_STANDARD=ON \
+            -DPLUGIN_STANDARD_3DMASC=ON \
             -DPLUGIN_GL_QEDL=ON \
             -DPLUGIN_GL_QSSAO=ON \
             -DPLUGIN_IO_QADDITIONAL=ON \
@@ -135,9 +136,9 @@ jobs:
 
       - name: Install Dependencies
         run: >
-          sudo apt-get update -qq
+          sudo apt update -qq
 
-          sudo apt-get install -qy cmake ninja-build
+          sudo apt install -qy cmake ninja-build
           libqt5svg5-dev libqt5opengl5-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev
           libtbb-dev
           libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
@@ -145,6 +146,7 @@ jobs:
           libeigen3-dev
           libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
           libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
+          libopencv-dev
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -174,6 +176,7 @@ jobs:
           -DPLUGIN_EXAMPLE_GL=ON
           -DPLUGIN_EXAMPLE_IO=ON
           -DPLUGIN_EXAMPLE_STANDARD=ON
+          -DPLUGIN_STANDARD_3DMASC=ON
           -DPLUGIN_GL_QEDL=ON
           -DPLUGIN_GL_QSSAO=ON
           -DPLUGIN_IO_QADDITIONAL=ON

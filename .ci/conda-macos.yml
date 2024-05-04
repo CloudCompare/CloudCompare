@@ -5,6 +5,7 @@ dependencies:
   - eigen=3.4.*
   - ninja
   - boost=1.84.*
+  - opencv=4.9.0
   - pcl=1.14.*
   - ffmpeg=6.1.*
   - qt=5.15.*

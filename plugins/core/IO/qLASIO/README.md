@@ -19,7 +19,7 @@ Ubuntu: `liblaszip-dev`
 
 Clone in `plugins/private` folder of CloudComapare's sources.
 
-Add `-DPLUGIN_LAS_IO=ON` to cmake.
+Add `-DPLUGIN_IO_QLAS=ON` to cmake.
 
 Adding `-DCMAKE_INCLUDE_PATH=` and `-DCMAKE_LIBRARY_PATH=` maybe be needed to help find laszip libraries.
 

@@ -36,7 +36,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         submodules: recursive
 
@@ -72,7 +72,7 @@ jobs:
           -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON \
           -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON \
           -DPLUGIN_STANDARD_QANIMATION=ON \
-          -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
+          -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF \
           -DPLUGIN_STANDARD_QBROOM=ON \
           -DPLUGIN_STANDARD_QCANUPO=ON \
           -DPLUGIN_STANDARD_QCOMPASS=ON \

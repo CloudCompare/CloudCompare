@@ -1262,9 +1262,13 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		//do some cleaning
 		vertices->shrinkToFit();
 		if (normals)
+		{
 			normals->shrink_to_fit();
+		}
 		if (texCoords)
+		{
 			texCoords->shrink_to_fit();
+		}
 		if (baseMesh->size() == 0)
 		{
 			delete baseMesh;

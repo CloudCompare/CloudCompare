@@ -31,6 +31,7 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
 
 	try
 	{
+		m_options.reserve(22);
 		m_options.push_back(Option(roughnessCheckBox, CCCoreLib::GeometricalAnalysisTools::Roughness, 0));
 		m_options.push_back(Option(firstOrderMomentCheckBox, CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0));
 		m_options.push_back(Option(curvMeanCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::MEAN_CURV));
@@ -54,10 +55,10 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
 		m_options.push_back(Option(eigenvalue2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue2));
 		m_options.push_back(Option(eigenvalue3CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue3));
 	}
-	catch (...)
+	catch (std::bad_alloc)
 	{
+		ccLog::Warning("[ccGeomFeaturesDlg] Not enough memory");
 	}
-	m_options.shrink_to_fit();
 }
 
 void ccGeomFeaturesDlg::setUpDirection(const CCVector3& upDir)
@@ -116,7 +117,6 @@ bool ccGeomFeaturesDlg::getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicS
 			if (opt.checkBox && opt.checkBox->isChecked())
 				features.push_back(opt);
 		}
-		features.shrink_to_fit();
 	}
 	catch (const std::bad_alloc&)
 	{

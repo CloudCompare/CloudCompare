@@ -276,8 +276,6 @@ void ccRasterizeTool::getExportedStats(std::vector<ccRasterGrid::ExportableField
 		stats.push_back(ccRasterGrid::PER_CELL_UNIQUE_COUNT_VALUE);
 	if (m_UI->generateStatisticsPercentileCheckBox->isChecked())
 		stats.push_back(ccRasterGrid::PER_CELL_PERCENTILE_VALUE);
-
-	stats.shrink_to_fit();
 }
 
 bool ccRasterizeTool::resampleOriginalCloud() const

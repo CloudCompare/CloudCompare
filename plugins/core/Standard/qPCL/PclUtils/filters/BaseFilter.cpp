@@ -248,5 +248,6 @@ void BaseFilter::getSelectedEntitiesThatAre(CC_CLASS_ENUM kind, ccHObject::Conta
 			entities.push_back(entity);
 		}
 	}
+
 	entities.shrink_to_fit();
 }

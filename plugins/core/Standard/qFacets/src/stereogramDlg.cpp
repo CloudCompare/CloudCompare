@@ -208,19 +208,23 @@ bool StereogramWidget::init(double angularStep_deg,
 			PointCoordinateType dip = 0;
 			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
-			//unsigned iDip = static_cast<unsigned>(floor(static_cast<double>(dip)/densityGrid->step_deg));
+			//unsigned iDip = static_cast<unsigned>(static_cast<double>(dip) / densityGrid->step_deg); //static_cast is equivalent to floor if value >= 0
 			//if (iDip == densityGrid->dSteps)
 			//	iDip--;
-			unsigned iDipDir = static_cast<unsigned>(floor(static_cast<double>(dipDir)/densityGrid->step_deg));
+			unsigned iDipDir = static_cast<unsigned>(dipDir / densityGrid->step_deg); //static_cast is equivalent to floor if value >= 0
 			if (iDipDir == densityGrid->ddSteps)
+			{
 				iDipDir--;
+			}
 
 			double dip_rad = CCCoreLib::DegreesToRadians( dip );
 			double R = sin(dip_rad) / (1.0 + cos(dip_rad));
 
-			unsigned iR = static_cast<unsigned>(floor(static_cast<double>(R)/densityGrid->step_R));
+			unsigned iR = static_cast<unsigned>(R / densityGrid->step_R); //static_cast is equivalent to floor if value >= 0
 			if (iR == densityGrid->rSteps)
+			{
 				iR--;
+			}
 
 			densityGrid->grid[iR + iDipDir * densityGrid->rSteps] += weight;
 
@@ -237,12 +241,12 @@ bool StereogramWidget::init(double angularStep_deg,
 		{
 			Nmean.normalize();
 			CCVector3 N(static_cast<PointCoordinateType>(Nmean.x),
-				static_cast<PointCoordinateType>(Nmean.y),
-				static_cast<PointCoordinateType>(Nmean.z));
+						static_cast<PointCoordinateType>(Nmean.y),
+						static_cast<PointCoordinateType>(Nmean.z));
 
 			PointCoordinateType dipDir = 0;
 			PointCoordinateType dip = 0;
-			ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+			ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
 			m_meanDipDir_deg = static_cast<double>(dipDir);
 			m_meanDip_deg = static_cast<double>(dip);
@@ -255,13 +259,13 @@ bool StereogramWidget::init(double angularStep_deg,
 		//compute min and max density
 		{
 			//DGM: only supported on C++x11!
-			//std::pair<double*,double*> minmax = std::minmax_element(densityGrid->grid,densityGrid->grid+cellCount);
+			//std::pair<double*, double*> minmax = std::minmax_element(densityGrid->grid, densityGrid->grid + cellCount);
 			//densityGrid->minMaxDensity[0] = *minmax.first;
 			//densityGrid->minMaxDensity[1] = *minmax.second;
 
 			densityGrid->minMaxDensity[0] = densityGrid->grid[0];
 			densityGrid->minMaxDensity[1] = densityGrid->grid[0];
-			for (unsigned j=1; j<cellCount; ++j)
+			for (unsigned j = 1; j < cellCount; ++j)
 			{
 				if (densityGrid->grid[j] < densityGrid->minMaxDensity[0])
 					densityGrid->minMaxDensity[0] = densityGrid->grid[j];

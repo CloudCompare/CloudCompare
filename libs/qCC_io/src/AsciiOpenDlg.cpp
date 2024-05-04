@@ -1475,7 +1475,7 @@ void AsciiOpenDlg::setSeparator(QChar sep)
 
 unsigned AsciiOpenDlg::getMaxCloudSize() const
 {
-	return static_cast<unsigned>(floor(m_ui->maxCloudSizeDoubleSpinBox->value() * 1.0e6));
+	return static_cast<unsigned>(m_ui->maxCloudSizeDoubleSpinBox->value() * 1.0e6); //static_cast is equivalent to floor if value >= 0
 }
 
 bool AsciiOpenDlg::showLabelsIn2D() const

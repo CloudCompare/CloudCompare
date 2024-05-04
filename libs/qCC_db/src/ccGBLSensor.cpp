@@ -205,19 +205,25 @@ bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordina
 	if (yaw < m_thetaMin || yaw > m_thetaMax + m_depthBuffer.deltaTheta)
 		return false;
 
-	i = static_cast<unsigned>(floor((yaw - m_thetaMin) / m_depthBuffer.deltaTheta));
+	i = static_cast<unsigned>((yaw - m_thetaMin) / m_depthBuffer.deltaTheta); //static_cast is equivalent to floor if value >= 0
 	if (i == m_depthBuffer.width)
+	{
 		--i;
+	}
 	//yaw angles are in the wrong way! (because they are expressed relatively to the sensor)
 	assert(i < m_depthBuffer.width);
 	i = (m_depthBuffer.width - 1) - i;
 
 	//pitch
 	if (pitch < m_phiMin || pitch > m_phiMax + m_depthBuffer.deltaPhi)
+	{
 		return false;
-	j = static_cast<unsigned>(floor((pitch - m_phiMin) / m_depthBuffer.deltaPhi));
+	}
+	j = static_cast<unsigned>((pitch - m_phiMin) / m_depthBuffer.deltaPhi); //static_cast is equivalent to floor if value >= 0
 	if (j == m_depthBuffer.height)
+	{
 		--j;
+	}
 	assert(j < m_depthBuffer.height);
 
 	return true;

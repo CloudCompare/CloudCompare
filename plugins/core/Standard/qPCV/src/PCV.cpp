@@ -109,7 +109,9 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 			{
 				double f = floor(mbar[i] + alpha + fuzz);
 				if ((mbar[i] - f) >= 0.5)
+				{
 					f = ceil(mbar[i] + alpha - fuzz);
+				}
 				m[i] = static_cast<int>(f);
 
 				alpha += mbar[i] - m[i];

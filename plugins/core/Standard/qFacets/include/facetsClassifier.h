@@ -90,10 +90,10 @@ public:
 		PointCoordinateType dipDir = 0, dip = 0;
 		ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 
-		iDip = static_cast<unsigned>(floor(dip / angularStep_deg));
+		iDip = static_cast<unsigned>(dip / angularStep_deg); //static_cast is equivalent to floor if value >= 0
 		if (iDip == dSteps)
 			iDip--;
-		iDipDir = static_cast<unsigned>(floor(dipDir / angularStep_deg));
+		iDipDir = static_cast<unsigned>(dipDir / angularStep_deg); //static_cast is equivalent to floor if value >= 0
 		if (iDipDir == ddSteps)
 			iDipDir--;
 	}

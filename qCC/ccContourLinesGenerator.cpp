@@ -184,7 +184,7 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 	unsigned levelCount = 1;
 	if (CCCoreLib::GreaterThanEpsilon(params.step))
 	{
-		levelCount += static_cast<unsigned>(floor((params.maxAltitude - params.startAltitude) / params.step));
+		levelCount += static_cast<unsigned>((params.maxAltitude - params.startAltitude) / params.step); //static_cast is equivalent to floor if value >= 0
 	}
 
 	try

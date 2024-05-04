@@ -86,8 +86,8 @@ bool CSF::Apply(const wl::PointCloud& csfPointCloud,
 							bbMax.y + params.clothYHeight,
 							bbMin.z - params.clothBuffer * params.cloth_resolution);
 	
-		int width_num = static_cast<int>(floor((bbMax.x - bbMin.x) / params.cloth_resolution)) + 2 * params.clothBuffer;
-		int height_num = static_cast<int>(floor((bbMax.z - bbMin.z) / params.cloth_resolution)) + 2 * params.clothBuffer;
+		int width_num = static_cast<int>((bbMax.x - bbMin.x) / params.cloth_resolution) + 2 * params.clothBuffer; //static_cast is equivalent to floor if value >= 0
+		int height_num = static_cast<int>((bbMax.z - bbMin.z) / params.cloth_resolution) + 2 * params.clothBuffer; //static_cast is equivalent to floor if value >= 0
 		
 		//Cloth object
 		Cloth cloth(origin_pos, 

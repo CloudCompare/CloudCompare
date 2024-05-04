@@ -160,10 +160,10 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 		return false;
 	}
 
-	const AVOutputFormat *outputFormat = NULL;
+	const AVOutputFormat *outputFormat = nullptr;
 	if (!formatShortName.isEmpty())
 	{
-		outputFormat = av_guess_format(qPrintable(formatShortName), NULL, NULL);
+		outputFormat = av_guess_format(qPrintable(formatShortName), nullptr, nullptr);
 		if (!outputFormat)
 		{
 			errors << "Could not find output format from short name: " + formatShortName;
@@ -171,14 +171,14 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 	}
 
 	// find the output format
-	avformat_alloc_output_context2(&m_ff->formatContext, outputFormat, NULL, outputFormat ? qPrintable(m_filename) : NULL);
+	avformat_alloc_output_context2(&m_ff->formatContext, outputFormat, nullptr, outputFormat ? qPrintable(m_filename) : nullptr);
 	if (!m_ff->formatContext)
 	{
 		if (!outputFormat)
 		{
 			errors << "Could not deduce output format from file extension: using MPEG";
 
-			avformat_alloc_output_context2(&m_ff->formatContext, NULL, "mpeg", qPrintable(m_filename));
+			avformat_alloc_output_context2(&m_ff->formatContext, nullptr, "mpeg", qPrintable(m_filename));
 			if (!m_ff->formatContext)
 			{
 				errors << "Codec not found";
@@ -272,7 +272,7 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 		return false;
 	}
 
-	int	err = avformat_write_header(m_ff->formatContext, NULL);
+	int	err = avformat_write_header(m_ff->formatContext, nullptr);
 
 	if ( err != 0 )
 	{
@@ -447,11 +447,11 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 											m_height,
 											AV_PIX_FMT_YUV420P,
 											SWS_BICUBIC,
-											NULL,
-											NULL,
-											NULL);
+											nullptr,
+											nullptr,
+											nullptr);
 
-	if (m_ff->swsContext == NULL)
+	if (m_ff->swsContext == nullptr)
 	{
 		if (errorString)
 			*errorString = "[SWS] Cannot initialize the conversion context";

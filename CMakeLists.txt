@@ -29,10 +29,9 @@ endif()
 # Default debug suffix for libraries.
 set( CMAKE_DEBUG_POSTFIX "d" )
 
-
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
-if(WIN32 OR APPLE) 
+if(WIN32 OR APPLE)
 	set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
 	set( CCVIEWER_DEST_FOLDER ccViewer )
 else()
@@ -42,7 +41,7 @@ endif()
 
 if( WIN32 )
     set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER} )
-    
+
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
 	endif()

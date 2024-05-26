@@ -4,10 +4,20 @@ CloudCompare Version History
 v2.13.2 (Kharkiv) - (05/26/2024)
 ----------------------
 Improvements:
+	- substantial improvement of the cloud merge operation (thanks to Thomas Watson)
+
 	- symbolic link files (or shortcut or alias) should now be properly handled
 
 	- command line: increase the timestamp resolution of the registration matrix filename and best fit plane
 		information filename so as to avoid overwriting them if generated too quickly
+
+	- Korean translation updated (thanks to Yun-Ho Chung)
+
+	- The Animation plugin now uses ffmppeg 6.1
+
+Bug fix:
+	- The LAS dialog could be be wrongly initialized with a point format of 0 in some cases (with FWF data).
+		In command line this could result in missing waveforms when saving. Thanks to Paul Leroy for the fix ;)
 
 
 v2.13.1 (Kharkiv) - (03/20/2024)

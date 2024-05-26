@@ -80,7 +80,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	//search for a sensor as child (we take the first if there are several of them)
-	ccSensor* sensor(nullptr);
+	ccSensor* sensor = nullptr;
 	{
 		for (unsigned i = 0; i < ccCloud->getChildrenNumber(); ++i)
 		{
@@ -89,7 +89,9 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			//try to cast to a ccSensor
 			sensor = ccHObjectCaster::ToSensor(child);
 			if (sensor)
+			{
 				break;
+			}
 		}
 	}
 
@@ -181,7 +183,15 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		stream << QString(p.generateHeaderBinary(*pclCloud, pos, ori).c_str()) << "DATA binary\n";
 		return CC_FERR_NO_ERROR;
 	}
-	if (pcl::io::savePCDFile( qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+
+	try
+	{
+		if (pcl::io::savePCDFile(qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+		{
+			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+		}
+	}
+	catch (...)
 	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}

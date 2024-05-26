@@ -48,6 +48,12 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
+v2.13.2 (Kharkiv) - (05/26/2024)
+----------------------
+Improvements:
+	- symbolic link files (or shortcut or alias) should now be properly handled
+
+
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------
 Improvements:

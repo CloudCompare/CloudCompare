@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_FILE_IO_FILTER_HEADER
-#define CC_FILE_IO_FILTER_HEADER
 
 //qCC_db
 #include <ccHObject.h>
@@ -314,7 +313,12 @@ public:
 		DynamicInfo = 0x0008,	//< FilterInfo cannot be set statically (this is used for internal consistency checking)
 	};
 	Q_DECLARE_FLAGS( FilterFeatures, FilterFeature )
-	
+
+public: //helpers
+
+	//! Returns the real file/path in case the input filename points to a symbolic link, shortcut or alias
+	static QString GetRealFilename(QString filename);
+
 protected:
 	static constexpr float DEFAULT_PRIORITY = 25.0f;
 
@@ -367,5 +371,3 @@ private:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS( FileIOFilter::FilterFeatures )
-
-#endif

@@ -63,6 +63,7 @@ qFacets plugin:
 [*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
+[*] Control the fitted plane output filename and format (https://www.cloudcompare.org/forum/viewtopic.php?p=29618)
 [*] Option to lock an entity (https://www.cloudcompare.org/forum/viewtopic.php?p=29251)
 [*] Batch export several entities to single-entity formats (LAS, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=29066)
 [*] Restore the option to not decompose the classification field with the new LAS I/O filter (https://www.cloudcompare.org/forum/viewtopic.php?p=28999)

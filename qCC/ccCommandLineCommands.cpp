@@ -3794,7 +3794,8 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 			QString txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(desc.path, desc.basename);
 			if (cmd.addTimestamp())
 			{
-				txtFilename += QObject::tr("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+				QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
+				txtFilename += QObject::tr("_%1").arg(timestamp);
 			}
 			txtFilename += QObject::tr(".txt");
 			QFile txtFile(txtFilename);
@@ -7014,7 +7015,10 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			QString txtFilename = QObject::tr("%1/%2_REGISTRATION_MATRIX").arg(dataAndModel[0]->path, dataAndModel[0]->basename);
 			if (cmd.addTimestamp())
-				txtFilename += QObject::tr("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			{
+				QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
+				txtFilename += QObject::tr("_%1").arg(timestamp);
+			}
 			txtFilename += QObject::tr(".txt");
 			QFile txtFile(txtFilename);
 			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
@@ -7184,7 +7188,7 @@ bool CommandSaveClouds::process(ccCommandLineInterface& cmd)
 	}
 	
 	QString ext = cmd.cloudExportExt();
-	bool timestamp = cmd.addTimestamp();
+	bool autoAddTimestamp = cmd.addTimestamp();
 	if (setFileNames)
 	{
 		cmd.toggleAddTimestamp(false);
@@ -7199,11 +7203,11 @@ bool CommandSaveClouds::process(ccCommandLineInterface& cmd)
 		}
 	}
 	
-	auto res = cmd.saveClouds(QString(), allAtOnce, setFileNames ? &fileNames[0] : nullptr);
+	bool res = cmd.saveClouds(QString(), allAtOnce, allAtOnce && setFileNames ? &fileNames[0] : nullptr);
 	
 	if (setFileNames)
 	{
-		cmd.toggleAddTimestamp(timestamp);
+		cmd.toggleAddTimestamp(autoAddTimestamp);
 		cmd.setCloudExportFormat(cmd.cloudExportFormat(), ext);
 	}
 	
@@ -7255,7 +7259,7 @@ bool CommandSaveMeshes::process(ccCommandLineInterface& cmd)
 	}
 	
 	QString ext = cmd.meshExportExt();
-	bool timestamp = cmd.addTimestamp();
+	bool autoAddTimestamp = cmd.addTimestamp();
 	if (setFileNames)
 	{
 		cmd.toggleAddTimestamp(false);
@@ -7270,11 +7274,11 @@ bool CommandSaveMeshes::process(ccCommandLineInterface& cmd)
 		}
 	}
 	
-	auto res = cmd.saveMeshes(QString(), allAtOnce, setFileNames ? &fileNames[0] : nullptr);
+	bool res = cmd.saveMeshes(QString(), allAtOnce, allAtOnce && setFileNames ? &fileNames[0] : nullptr);
 	
 	if (setFileNames)
 	{
-		cmd.toggleAddTimestamp(timestamp);
+		cmd.toggleAddTimestamp(autoAddTimestamp);
 		cmd.setMeshExportFormat(cmd.meshExportFormat(), ext);
 	}
 	

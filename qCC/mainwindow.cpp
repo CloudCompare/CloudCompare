@@ -10187,7 +10187,6 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 	ccHObject* newGroup = FileIOFilter::LoadFromFile(filename, parameters, result);
 
 	return newGroup;
-
 }
 
 void MainWindow::addToDBAuto(const QStringList& filenames)

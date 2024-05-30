@@ -24,25 +24,24 @@ Big ones:
 	- editable
 	- being able to work on portions of very big clouds while other portions are visible but in 'read-only' mode (http://www.cloudcompare.org/forum/viewtopic.php?t=1699)
 [*] Undo mechanism
-[*] Command line mode could be extended
-	- option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
-	- SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
-	- label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
-	- extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
-	- save the plane orientation as a text file after best plane fitting
-	- option to apply the inverse transformation
-	- change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
-	- clean filter
-	- let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
-		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
-	- export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
-	- choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
-	- set a custom prefix for saved filenames (see https://www.cloudcompare.org/forum/viewtopic.php?p=23987)
-	- Rasterize tool
-		- set the active layer for raster generation (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
-		- set the output raster filename (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
-		- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
-	- Colors level (https://www.cloudcompare.org/forum/viewtopic.php?t=5743)
+
+Command line mode:
+[*] Option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
+[*] SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
+[*] Label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
+[*] Extract a cross section from a point cloud using an existing polyline (loading in .bin or dxf format as in the interface) (http://www.danielgm.net/cc/forum/viewtopic.php?t=1515)
+[*] Change the default output directory (http://www.danielgm.net/cc/forum/viewtopic.php?t=1240)
+[*] Clean filter
+[*] Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
+	from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
+[*] Export the history transformation (or the barycenter translation - see http://www.danielgm.net/cc/forum/viewtopic.php?t=1242)
+[*] Choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
+[*] Set a custom prefix for saved filenames (see https://www.cloudcompare.org/forum/viewtopic.php?p=23987)
+[*] Rasterize tool
+	- set the active layer for raster generation (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
+	- set the output raster filename (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
+	- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
+[*] Colors level (https://www.cloudcompare.org/forum/viewtopic.php?t=5743)
 	- Fit > Sphere (https://www.cloudcompare.org/forum/viewtopic.php?p=25333)
 	- Edit > Colors > Enhance with intensities (https://www.cloudcompare.org/forum/viewtopic.php?t=5795)
 	- Set the random subsampling rate as a percentage (https://www.cloudcompare.org/forum/viewtopic.php?f=14&t=6357)
@@ -50,6 +49,9 @@ Big ones:
 [*] Volume calculation
 	- between clouds (from distances)
 	- between meshes (http://www.danielgm.net/cc/forum/viewtopic.php?t=1253)
+[*] Control the fitted plane output filename and format (https://www.cloudcompare.org/forum/viewtopic.php?p=29618)
+[*] Compute the distance/range from sensor center via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=3786 and https://www.cloudcompare.org/forum/viewtopic.php?p=27540)
+[*] Command line option to 'Export cloud info' (https://www.cloudcompare.org/forum/viewtopic.php?t=5243)
 
 qAnimation plugin:
 [*] It would be great to specify the resolution.
@@ -63,10 +65,10 @@ qFacets plugin:
 [*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
 Various:
-[*] Control the fitted plane output filename and format (https://www.cloudcompare.org/forum/viewtopic.php?p=29618)
 [*] Option to lock an entity (https://www.cloudcompare.org/forum/viewtopic.php?p=29251)
 [*] Batch export several entities to single-entity formats (LAS, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=29066)
 [*] Restore the option to not decompose the classification field with the new LAS I/O filter (https://www.cloudcompare.org/forum/viewtopic.php?p=28999)
+[*] Save or load preset format for the new LAS I/O plugin (https://www.cloudcompare.org/forum/viewtopic.php?t=6167)
 [*] Converting viewports to sensors, or creating sensors from current viewport (https://www.cloudcompare.org/forum/viewtopic.php?t=6722)
 [*] Coloring brush (https://www.cloudcompare.org/forum/viewtopic.php?t=6672)
 [*] Shortcut to translate the cloud (relative to the drawn polygon/rectangle) in graphical segmentation mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6658)
@@ -80,13 +82,11 @@ Various:
 	- export other fields than the height field (SFs, colors, etc.) when exporting the grid to an image or a matrix file (http://www.cloudcompare.org/forum/viewtopic.php?t=1800)
 [*] Dark mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6369)
 [*] Add 'drawing' tools (curve passing through 3 points, arc, circle, etc.) to be exported to DXF
-[*] Compute the distance/range from sensor center via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=27540)
-[*] Save or load preset format for the new LAS I/O plugin (https://www.cloudcompare.org/forum/viewtopic.php?t=6167)
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 [*] Being able to select only the visible or the enabled clouds with the  'Select children by type and/or name' feature (https://www.cloudcompare.org/forum/viewtopic.php?p=27159)
 [*] Save multiple clouds in a LAS file (or other file types that normally only store one cloud - https://www.cloudcompare.org/forum/viewtopic.php?p=27131)
 [*] Manage viewports as sensors to be able to move/edit them easily (https://www.cloudcompare.org/forum/posting.php?mode=reply&t=6112)
-[*] Option to automatically deleted the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
+[*] Option to automatically delete the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
 [*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
 [*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)
 [*] Create Height / Surface / Volume chart for bathymetry jobs (https://www.cloudcompare.org/forum/viewtopic.php?p=26787)
@@ -99,9 +99,7 @@ Various:
 [*] Shortcut to the 'Edit > Scalar fields > Export coordinate(s) to SF' (https://github.com/CloudCompare/CloudCompare/issues/1607)
 [*] Option to input the rotation point for the Translate/Rotate tool (https://www.cloudcompare.org/forum/viewtopic.php?p=24572)
 [*] Extract E57 images (as standard image files) via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=24493)
-[*] Compute the distance from sensor via the command line (https://www.cloudcompare.org/forum/viewtopic.php?t=3786)
 [*] Circular eraser in the Scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5319)
-[*] Command line option to 'Export cloud info' (https://www.cloudcompare.org/forum/viewtopic.php?t=5243)
 [*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
 [*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
 [*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)

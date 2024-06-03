@@ -2015,11 +2015,13 @@ namespace ccEntityAction
 			static ccNormalVectors::Orientation s_lastNormalOrientation = ccNormalVectors::UNDEFINED;
 			static int s_lastMSTNeighborCount = 6;
 			static double s_lastMinGridAngle_deg = 1.0;
+			static bool s_orientNormals = true;
 			
 			ccNormalComputationDlg ncDlg(withScanGrid, withSensor, parent);
 			ncDlg.setLocalModel(s_lastModelType);
 			ncDlg.setRadius(defaultRadius);
 			ncDlg.setPreferredOrientation(s_lastNormalOrientation);
+			ncDlg.setOrientNormals(s_orientNormals);
 			ncDlg.setMSTNeighborCount(s_lastMSTNeighborCount);
 			ncDlg.setMinGridAngle_deg(s_lastMinGridAngle_deg);
 			if (clouds.size() == 1)
@@ -2028,7 +2030,9 @@ namespace ccEntityAction
 			}
 			
 			if (!ncDlg.exec())
+			{
 				return false;
+			}
 			
 			//normals computation
 			CCCoreLib::LOCAL_MODEL_TYPES model = s_lastModelType = ncDlg.getLocalModel();
@@ -2037,7 +2041,7 @@ namespace ccEntityAction
 			double minGridAngle_deg = s_lastMinGridAngle_deg = ncDlg.getMinGridAngle_deg();
 			
 			//normals orientation
-			bool orientNormals = ncDlg.orientNormals();
+			s_orientNormals = ncDlg.orientNormals();
 			bool orientNormalsWithGrids = withScanGrid && ncDlg.useScanGridsForOrientation();
 			bool orientNormalsWithSensors = withSensor && ncDlg.useSensorsForOrientation();
 			ccNormalVectors::Orientation preferredOrientation = s_lastNormalOrientation = ncDlg.getPreferredOrientation();
@@ -2097,8 +2101,8 @@ namespace ccEntityAction
 				else
 				{
 					//compute normals with the octree
-					normalsAlreadyOriented = orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
-					result = cloud->computeNormalsWithOctree(model, orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
+					normalsAlreadyOriented = s_orientNormals && (preferredOrientation != ccNormalVectors::UNDEFINED);
+					result = cloud->computeNormalsWithOctree(model, s_orientNormals ? preferredOrientation : ccNormalVectors::UNDEFINED, defaultRadius, &pDlg);
 					if (result)
 					{
 						//save the normal computation radius as meta-data
@@ -2107,7 +2111,7 @@ namespace ccEntityAction
 				}
 				
 				//do we need to orient the normals? (this may have been already done if 'orientNormalsForThisCloud' is true)
-				if (result && orientNormals && !normalsAlreadyOriented)
+				if (result && s_orientNormals && !normalsAlreadyOriented)
 				{
 					if (cloud->gridCount() && orientNormalsWithGrids)
 					{

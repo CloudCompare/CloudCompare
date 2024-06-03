@@ -2288,7 +2288,7 @@ void ccRasterizeTool::showInterpolationParamsDialog()
 	case ccRasterGrid::EmptyCellFillOption::INTERPOLATE_DELAUNAY:
 	{
 		bool ok = false;
-		double value = QInputDialog::getDouble(this, tr("Delaunay triangulation"), tr("Triangles max edge length"), m_delaunayInterpParams.maxEdgeLength , 1.0e-6, 1.0e6, 6, &ok);
+		double value = QInputDialog::getDouble(this, tr("Delaunay triangulation"), tr("Triangles max edge length (0 = no limit)"), m_delaunayInterpParams.maxEdgeLength , 0, 1.0e6, 6, &ok);
 		if (ok)
 		{
 			m_delaunayInterpParams.maxEdgeLength = value;

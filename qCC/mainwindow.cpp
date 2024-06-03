@@ -3661,7 +3661,7 @@ void MainWindow::doActionMerge()
 		//compute min and max once after all appends are done
 		if (firstCloud)
 		{
-			for (size_t i = 0; i<firstCloud->getNumberOfScalarFields(); i++)
+			for (unsigned i = 0; i < firstCloud->getNumberOfScalarFields(); i++)
 			{
 				firstCloud->getScalarField(i)->computeMinAndMax();
 			}

@@ -62,6 +62,8 @@ Improvements:
 
 	- The Animation plugin now uses ffmppeg 6.1
 
+	- The 'Normals computation' dialog should remember whether normals 'orientation' should be resolved or not
+
 Bug fix:
 	- The LAS dialog could be be wrongly initialized with a point format of 0 in some cases (with FWF data).
 		In command line this could result in missing waveforms when saving. Thanks to Paul Leroy for the fix ;)

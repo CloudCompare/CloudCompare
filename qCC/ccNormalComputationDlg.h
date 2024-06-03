@@ -70,6 +70,9 @@ public:
 	//! Returns whether normals should be oriented or not
 	bool orientNormals() const;
 
+	//! Sets whether normals should be oriented or not
+	void setOrientNormals(bool state);
+
 	//! Returns whether scan grids should be used for normals orientation
 	bool useScanGridsForOrientation() const;
 

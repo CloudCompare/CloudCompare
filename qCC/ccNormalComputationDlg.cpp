@@ -163,6 +163,11 @@ bool ccNormalComputationDlg::orientNormals() const
 	return normalsOrientGroupBox->isChecked();
 }
 
+void ccNormalComputationDlg::setOrientNormals(bool state)
+{
+	normalsOrientGroupBox->setChecked(state);
+}
+
 bool ccNormalComputationDlg::useScanGridsForOrientation() const
 {
 	return scanGridsOrientCheckBox->isChecked();

@@ -56,6 +56,16 @@
 #include <vld.h>
 #endif
 
+/**
+ * @brief Checks if the application is being run from the command line.
+ *
+ * This function determines whether the application is being run from the command line by checking the command line arguments.
+ * On macOS, it also handles the case where the Finder adds a process serial number as a command-line parameter when double-clicking the application.
+ *
+ * @param argc The number of command line arguments.
+ * @param argv An array of C-style strings representing the command line arguments.
+ * @return `true` if the application is being run from the command line, `false` otherwise.
+ */
 static bool IsCommandLine(int argc, char **argv)
 {
 #ifdef Q_OS_MAC
@@ -79,6 +89,16 @@ static bool IsCommandLine(int argc, char **argv)
 #endif
 }
 
+/**
+ * @brief The main function of the application.
+ *
+ * This function is the entry point of the application. It initializes the necessary components,
+ * processes command line arguments, loads plugins, and starts the main window or command line mode.
+ *
+ * @param argc The number of command line arguments.
+ * @param argv An array of command line arguments.
+ * @return The exit code of the application.
+ */
 int main(int argc, char **argv)
 {
 #ifdef _WIN32 //This will allow printf to function on windows when opened from command line	

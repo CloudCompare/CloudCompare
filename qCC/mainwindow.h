@@ -890,225 +890,1156 @@ private:
 	 */
 	void echoPivotPointChanged(const CCVector3d &);
 
+	/**
+	 * @brief Renders the scene to a file.
+	 *
+	 * This function is called to render the current 3D view to a file.
+	 */
 	void doActionRenderToFile();
 
-	// menu action
+	/**
+	 * @brief Sets the unique color of selected entities.
+	 *
+	 * This function sets a unique color for the selected entities.
+	 */
 	void doActionSetUniqueColor();
+
+	/**
+	 * @brief Colorizes the selected entities.
+	 *
+	 * This function colorizes the selected entities.
+	 */
 	void doActionColorize();
+
+	/**
+	 * @brief Converts the RGB colors of the selected entities to grayscale.
+	 *
+	 * This function converts the RGB colors of the selected entities to grayscale.
+	 */
 	void doActionRGBToGreyScale();
+
+	/**
+	 * @brief Sets the color of the selected entities.
+	 *
+	 * This function sets the color of the selected entities. If the 'colorize' parameter is true, the color will be set randomly.
+	 *
+	 * @param colorize If true, the color will be set randomly. If false, the user will be prompted to select a color.
+	 */
 	void doActionSetColor(bool colorize);
+
+	/**
+	 * @brief Sets a color gradient on the selected entities.
+	 *
+	 * This function sets a color gradient on the selected entities.
+	 */
 	void doActionSetColorGradient();
+
+	/**
+	 * @brief Interpolates the colors of the selected entities.
+	 *
+	 * This function interpolates the colors of the selected entities.
+	 */
 	void doActionInterpolateColors();
+
+	/**
+	 * @brief Changes the color levels of the selected entities.
+	 *
+	 * This function changes the color levels of the selected entities.
+	 */
 	void doActionChangeColorLevels();
+
+	/**
+	 * @brief Enhances the RGB colors of the selected entities with their intensities.
+	 *
+	 * This function enhances the RGB colors of the selected entities with their intensities.
+	 */
 	void doActionEnhanceRGBWithIntensities();
+
+	/**
+	 * @brief Colors the selected entities based on their scalar fields.
+	 *
+	 * This function colors the selected entities based on their scalar fields.
+	 */
 	void doActionColorFromScalars();
+
+	/**
+	 * @brief Applies a Gaussian filter to the RGB colors of the selected entities.
+	 *
+	 * This function applies a Gaussian filter to the RGB colors of the selected entities.
+	 */
 	void doActionRGBGaussianFilter();
+
+	/**
+	 * @brief Applies a bilateral filter to the RGB colors of the selected entities.
+	 *
+	 * This function applies a bilateral filter to the RGB colors of the selected entities.
+	 */
 	void doActionRGBBilateralFilter();
+
+	/**
+	 * @brief Applies a mean filter to the RGB colors of the selected entities.
+	 *
+	 * This function applies a mean filter to the RGB colors of the selected entities.
+	 */
 	void doActionRGBMeanFilter();
+
+	/**
+	 * @brief Applies a median filter to the RGB colors of the selected entities.
+	 *
+	 * This function applies a median filter to the RGB colors of the selected entities.
+	 */
 	void doActionRGBMedianFilter();
 
+	/**
+	 * @brief Applies a Gaussian filter to the scalar fields of the selected entities.
+	 *
+	 * This function applies a Gaussian filter to the scalar fields of the selected entities.
+	 */
 	void doActionSFGaussianFilter();
+
+	/**
+	 * @brief Applies a bilateral filter to the scalar fields of the selected entities.
+	 *
+	 * This function applies a bilateral filter to the scalar fields of the selected entities.
+	 */
 	void doActionSFBilateralFilter();
+
+	/**
+	 * @brief Converts the scalar fields of the selected entities to RGB colors.
+	 *
+	 * This function converts the scalar fields of the selected entities to RGB colors.
+	 */
 	void doActionSFConvertToRGB();
+
+	/**
+	 * @brief Converts the scalar fields of the selected entities to random RGB colors.
+	 *
+	 * This function converts the scalar fields of the selected entities to random RGB colors.
+	 */
 	void doActionSFConvertToRandomRGB();
+
+	/**
+	 * @brief Renames the scalar fields of the selected entities.
+	 *
+	 * This function allows the user to rename the scalar fields of the selected entities.
+	 */
 	void doActionRenameSF();
+
+	/**
+	 * @brief Opens the color scales manager.
+	 *
+	 * This function opens the color scales manager dialog, allowing the user to manage the available color scales.
+	 */
 	void doActionOpenColorScalesManager();
+
+	/**
+	 * @brief Adds an ID field to the selected entities.
+	 *
+	 * This function adds an ID field to the selected entities.
+	 */
 	void doActionAddIdField();
+
+	/**
+	 * @brief Splits the cloud using the current scalar field.
+	 *
+	 * This function splits the selected cloud(s) using the current scalar field.
+	 */
 	void doActionSplitCloudUsingSF();
+
+	/**
+	 * @brief Sets the scalar field as the coordinates of the selected entities.
+	 *
+	 * This function sets the scalar field as the coordinates of the selected entities.
+	 */
 	void doActionSetSFAsCoord();
+
+	/**
+	 * @brief Interpolates the scalar fields of the selected entities.
+	 *
+	 * This function interpolates the scalar fields of the selected entities.
+	 */
 	void doActionInterpolateScalarFields();
 
+	/**
+	 * @brief Computes the geometric features of the selected entities.
+	 *
+	 * This function computes various geometric features of the selected entities, such as curvature, anisotropy, etc.
+	 * The user can select which features to compute and the radius of the neighborhood used for the computations.
+	 */
 	void doComputeGeometricFeature();
+
+	/**
+	 * @brief Computes the scalar field gradient of the selected entities.
+	 *
+	 * This function computes the gradient of the current scalar field on the selected entities.
+	 */
 	void doActionSFGradient();
+
+	/**
+	 * @brief Removes duplicate points from the selected entities.
+	 *
+	 * This function removes duplicate points from the selected entities, based on a user-defined minimum distance between points.
+	 */
 	void doRemoveDuplicatePoints();
 	void doSphericalNeighbourhoodExtractionTest();	 // DGM TODO: remove after test
 	void doCylindricalNeighbourhoodExtractionTest(); // DGM TODO: remove after test
+													 /**
+													  * @brief Fits a plane to the selected entities.
+													  *
+													  * This function fits a plane to the selected entities. The user can choose whether to fit an infinite plane or a bounded plane (facet).
+													  */
 	void doActionFitPlane();
+
+	/**
+	 * @brief Fits a sphere to the selected entities.
+	 *
+	 * This function fits a sphere to the selected entities.
+	 */
 	void doActionFitSphere();
+
+	/**
+	 * @brief Fits a circle to the selected entities.
+	 *
+	 * This function fits a circle to the selected entities.
+	 */
 	void doActionFitCircle();
+
+	/**
+	 * @brief Fits a facet to the selected entities.
+	 *
+	 * This function fits a facet (bounded plane) to the selected entities.
+	 */
 	void doActionFitFacet();
+
+	/**
+	 * @brief Fits a quadric to the selected entities.
+	 *
+	 * This function fits a quadric surface to the selected entities.
+	 */
 	void doActionFitQuadric();
+
+	/**
+	 * @brief Shows the primitive factory dialog.
+	 *
+	 * This function displays the primitive factory dialog, allowing the user to create various geometric primitives.
+	 */
 	void doShowPrimitiveFactory();
 
+	/**
+	 * @brief Computes the normals of the selected entities.
+	 *
+	 * This function computes the normals of the selected entities.
+	 */
 	void doActionComputeNormals();
+
+	/**
+	 * @brief Inverts the normals of the selected entities.
+	 *
+	 * This function inverts the normals of the selected entities.
+	 */
 	void doActionInvertNormals();
+
+	/**
+	 * @brief Converts the normals of the selected entities to HSV colors.
+	 *
+	 * This function converts the normals of the selected entities to HSV colors.
+	 */
 	void doActionConvertNormalsToHSV();
+
+	/**
+	 * @brief Converts the normals of the selected entities to dip and dip direction.
+	 *
+	 * This function converts the normals of the selected entities to dip and dip direction.
+	 */
 	void doActionConvertNormalsToDipDir();
+	/**
+	 * @brief Computes the octree of the selected entities.
+	 *
+	 * This function computes the octree data structure for the selected entities.
+	 */
 	void doActionComputeOctree();
+
+	/**
+	 * @brief Computes the KD-tree of the selected entities.
+	 *
+	 * This function computes the KD-tree data structure for the selected entities.
+	 */
 	void doActionComputeKdTree();
+
+	/**
+	 * @brief Applies a transformation to the selected entities.
+	 *
+	 * This function allows the user to apply a transformation (translation, rotation, scaling) to the selected entities.
+	 */
 	void doActionApplyTransformation();
+
+	/**
+	 * @brief Merges the selected entities.
+	 *
+	 * This function merges the selected entities into a single entity.
+	 */
 	void doActionMerge();
+
+	/**
+	 * @brief Registers the selected entities.
+	 *
+	 * This function performs a registration operation on the selected entities.
+	 */
 	void doActionRegister();
-	void doAction4pcsRegister(); // Aurelien BEY le 13/11/2008
-	void doActionSubsample();	 // Aurelien BEY le 4/12/2008
+
+	/**
+	 * @brief Performs a 4-points congruent sets (4PCS) registration.
+	 *
+	 * This function performs a 4-points congruent sets (4PCS) registration on the selected entities.
+	 */
+	void doAction4pcsRegister();
+
+	/**
+	 * @brief Subsamples the selected entities.
+	 *
+	 * This function subsamples the selected entities, reducing the number of points.
+	 */
+	void doActionSubsample();
+
+	/**
+	 * @brief Performs a statistical test on the selected entities.
+	 *
+	 * This function performs a statistical test on the selected entities.
+	 */
 	void doActionStatisticalTest();
+
+	/**
+	 * @brief Samples points on the selected mesh(es).
+	 *
+	 * This function samples points on the selected mesh(es).
+	 */
 	void doActionSamplePointsOnMesh();
+
+	/**
+	 * @brief Samples points on the selected polyline(s).
+	 *
+	 * This function samples points on the selected polyline(s).
+	 */
 	void doActionSamplePointsOnPolyline();
+
+	/**
+	 * @brief Smooths the selected polyline(s).
+	 *
+	 * This function smooths the selected polyline(s).
+	 */
 	void doActionSmoohPolyline();
+
+	/**
+	 * @brief Converts the texture of the selected mesh(es) to color.
+	 *
+	 * This function converts the texture of the selected mesh(es) to color.
+	 */
 	void doActionConvertTextureToColor();
+
+	/**
+	 * @brief Labels the connected components of the selected entities.
+	 *
+	 * This function labels the connected components of the selected entities.
+	 */
 	void doActionLabelConnectedComponents();
+
+	/**
+	 * @brief Computes the statistical parameters of the selected entities.
+	 *
+	 * This function computes the statistical parameters (mean, standard deviation, etc.) of the selected entities.
+	 */
 	void doActionComputeStatParams();
+
+	/**
+	 * @brief Filters the selected entities by value.
+	 *
+	 * This function allows the user to filter the selected entities by value (e.g., scalar field value).
+	 */
 	void doActionFilterByValue();
 
-	// Picking operations
+	/**
+	 * @brief Enables a picking operation.
+	 *
+	 * This function enables a picking operation in the specified 3D view and displays the given message.
+	 *
+	 * @param win The 3D view window in which the picking operation will take place.
+	 * @param message The message to display during the picking operation.
+	 */
 	void enablePickingOperation(ccGLWindowInterface *win, QString message);
+
+	/**
+	 * @brief Cancels the previous picking operation.
+	 *
+	 * This function cancels the previous picking operation, either because the operation was aborted by the user or completed successfully.
+	 *
+	 * @param aborted Indicates whether the picking operation was aborted (true) or completed successfully (false).
+	 */
 	void cancelPreviousPickingOperation(bool aborted);
 
-	// For rotation center picking
+	/**
+	 * @brief Picks the rotation center.
+	 *
+	 * This function allows the user to pick a point in the 3D view to be used as the rotation center.
+	 */
 	void doPickRotationCenter();
-	// For leveling
+
+	/**
+	 * @brief Levels the selected entities.
+	 *
+	 * This function levels the selected entities by aligning them with the horizontal plane.
+	 */
 	void doLevel();
 
+	/**
+	 * @brief Creates a new plane.
+	 *
+	 * This function creates a new plane and adds it to the scene.
+	 */
 	void doActionCreatePlane();
+
+	/**
+	 * @brief Edits an existing plane.
+	 *
+	 * This function allows the user to edit the properties of an existing plane.
+	 */
 	void doActionEditPlane();
+
+	/**
+	 * @brief Flips the normal of the selected plane(s).
+	 *
+	 * This function flips the normal of the selected plane(s).
+	 */
 	void doActionFlipPlane();
+
+	/**
+	 * @brief Compares two planes.
+	 *
+	 * This function compares the properties of two selected planes, such as the angle between them, the distance between their centers, etc.
+	 */
 	void doActionComparePlanes();
 
+	/**
+	 * @brief Deletes the scan grids of the selected entities.
+	 *
+	 * This function deletes the scan grids associated with the selected entities.
+	 */
 	void doActionDeleteScanGrids();
+
+	/**
+	 * @brief Smooths the scalar field of the selected mesh(es).
+	 *
+	 * This function applies a smoothing operation to the scalar field of the selected mesh(es).
+	 */
 	void doActionSmoothMeshSF();
+
+	/**
+	 * @brief Enhances the scalar field of the selected mesh(es).
+	 *
+	 * This function applies an enhancement operation to the scalar field of the selected mesh(es).
+	 */
 	void doActionEnhanceMeshSF();
+	/**
+	 * @brief Adds a constant scalar field to the selected entities.
+	 *
+	 * This function adds a constant scalar field to the selected entities.
+	 */
 	void doActionAddConstantSF();
+
+	/**
+	 * @brief Adds a classification scalar field to the selected entities.
+	 *
+	 * This function adds a classification scalar field to the selected entities.
+	 */
 	void doActionAddClassificationSF();
+
+	/**
+	 * @brief Performs scalar field arithmetic on the selected entities.
+	 *
+	 * This function allows the user to perform arithmetic operations on the scalar fields of the selected entities.
+	 */
 	void doActionScalarFieldArithmetic();
+
+	/**
+	 * @brief Converts the color of the selected entities to a scalar field.
+	 *
+	 * This function converts the color information of the selected entities to a scalar field.
+	 */
 	void doActionScalarFieldFromColor();
+
+	/**
+	 * @brief Orients the normals of the selected entities using the Fast Marching method.
+	 *
+	 * This function orients the normals of the selected entities using the Fast Marching method.
+	 */
 	void doActionOrientNormalsFM();
+
+	/**
+	 * @brief Orients the normals of the selected entities using the Minimum Spanning Tree method.
+	 *
+	 * This function orients the normals of the selected entities using the Minimum Spanning Tree method.
+	 */
 	void doActionOrientNormalsMST();
+
+	/**
+	 * @brief Shifts the points of the selected entities along their normals.
+	 *
+	 * This function shifts the points of the selected entities along their normals by a user-specified amount.
+	 */
 	void doActionShiftPointsAlongNormals();
+
+	/**
+	 * @brief Resamples the selected entities using their octree.
+	 *
+	 * This function resamples the selected entities using their octree data structure.
+	 */
 	void doActionResampleWithOctree();
+
+	/**
+	 * @brief Computes the mesh of the selected entities using an Axis-Aligned Bounding Box.
+	 *
+	 * This function computes the mesh of the selected entities using an Axis-Aligned Bounding Box.
+	 */
 	void doActionComputeMeshAA();
+
+	/**
+	 * @brief Computes the mesh of the selected entities using a Least-Squares plane.
+	 *
+	 * This function computes the mesh of the selected entities using a Least-Squares plane.
+	 */
 	void doActionComputeMeshLS();
+
+	/**
+	 * @brief Computes the mesh of the selected scan grids.
+	 *
+	 * This function computes the mesh of the selected scan grids.
+	 */
 	void doActionMeshScanGrids();
+
+	/**
+	 * @brief Computes the distance map of the selected entities.
+	 *
+	 * This function computes the distance map of the selected entities.
+	 */
 	void doActionComputeDistanceMap();
+
+	/**
+	 * @brief Computes the distance to the best-fit 3D quadric of the selected entities.
+	 *
+	 * This function computes the distance to the best-fit 3D quadric of the selected entities.
+	 */
 	void doActionComputeDistToBestFitQuadric3D();
+
+	/**
+	 * @brief Measures the surface area of the selected mesh(es).
+	 *
+	 * This function measures the surface area of the selected mesh(es).
+	 */
 	void doActionMeasureMeshSurface();
+
+	/**
+	 * @brief Measures the volume of the selected mesh(es).
+	 *
+	 * This function measures the volume of the selected mesh(es).
+	 */
 	void doActionMeasureMeshVolume();
+
+	/**
+	 * @brief Flags the vertices of the selected mesh(es).
+	 *
+	 * This function flags the vertices of the selected mesh(es) based on their connectivity (normal, border, non-manifold).
+	 */
 	void doActionFlagMeshVertices();
+
+	/**
+	 * @brief Applies Laplacian smoothing to the selected mesh(es).
+	 *
+	 * This function applies Laplacian smoothing to the selected mesh(es).
+	 */
 	void doActionSmoothMeshLaplacian();
+	/**
+	 * @brief Subdivides the selected mesh(es).
+	 *
+	 * This function subdivides the selected mesh(es) by adding new vertices and faces.
+	 */
 	void doActionSubdivideMesh();
+
+	/**
+	 * @brief Flips the triangles of the selected mesh(es).
+	 *
+	 * This function flips the triangles of the selected mesh(es).
+	 */
 	void doActionFlipMeshTriangles();
+
+	/**
+	 * @brief Computes the Closest Point Set (CPS) of the selected entities.
+	 *
+	 * This function computes the Closest Point Set (CPS) of the selected entities.
+	 */
 	void doActionComputeCPS();
+
+	/**
+	 * @brief Shows the waveform dialog.
+	 *
+	 * This function displays the waveform dialog for the selected point cloud(s).
+	 */
 	void doActionShowWaveDialog();
+
+	/**
+	 * @brief Compresses the full waveform data of the selected point cloud(s).
+	 *
+	 * This function compresses the full waveform data of the selected point cloud(s).
+	 */
 	void doActionCompressFWFData();
+
+	/**
+	 * @brief Performs a K-Means clustering on the selected entities.
+	 *
+	 * This function performs a K-Means clustering on the selected entities.
+	 */
 	void doActionKMeans();
+
+	/**
+	 * @brief Performs a front propagation on the selected entities.
+	 *
+	 * This function performs a front propagation on the selected entities.
+	 */
 	void doActionFrontPropagation();
+
+	/**
+	 * @brief Applies a scale to the selected entities.
+	 *
+	 * This function allows the user to apply a scale to the selected entities.
+	 */
 	void doActionApplyScale();
+
+	/**
+	 * @brief Edits the global shift and scale of the selected entities.
+	 *
+	 * This function allows the user to edit the global shift and scale of the selected entities.
+	 */
 	void doActionEditGlobalShiftAndScale();
+
+	/**
+	 * @brief Matches the bounding box centers of the selected entities.
+	 *
+	 * This function matches the bounding box centers of the selected entities.
+	 */
 	void doActionMatchBBCenters();
+
+	/**
+	 * @brief Matches the scales of the selected entities.
+	 *
+	 * This function matches the scales of the selected entities.
+	 */
 	void doActionMatchScales();
+
+	/**
+	 * @brief Applies a Statistical Outlier Removal (SOR) filter to the selected entities.
+	 *
+	 * This function applies a Statistical Outlier Removal (SOR) filter to the selected entities.
+	 */
 	void doActionSORFilter();
+
+	/**
+	 * @brief Applies a noise filter to the selected entities.
+	 *
+	 * This function applies a noise filter to the selected entities.
+	 */
 	void doActionFilterNoise();
+
+	/**
+	 * @brief Unrolls the selected entities.
+	 *
+	 * This function unrolls the selected entities, such as point clouds or meshes, onto a 2D plane.
+	 */
 	void doActionUnroll();
+
+	/**
+	 * @brief Creates a ground-based laser (GBL) sensor.
+	 *
+	 * This function creates a ground-based laser (GBL) sensor and associates it with the selected entities.
+	 */
 	void doActionCreateGBLSensor();
+	/**
+	 * @brief Creates a camera sensor.
+	 *
+	 * This function creates a new camera sensor and associates it with the selected entities.
+	 */
 	void doActionCreateCameraSensor();
+
+	/**
+	 * @brief Modifies an existing sensor.
+	 *
+	 * This function allows the user to modify the parameters of an existing sensor.
+	 */
 	void doActionModifySensor();
+
+	/**
+	 * @brief Projects the uncertainty of the selected camera sensor.
+	 *
+	 * This function projects the uncertainty of the selected camera sensor onto the associated point cloud.
+	 */
 	void doActionProjectUncertainty();
+
+	/**
+	 * @brief Checks the points inside the frustum of the selected camera sensor.
+	 *
+	 * This function checks which points of the associated point cloud are inside the frustum of the selected camera sensor.
+	 */
 	void doActionCheckPointsInsideFrustum();
+
+	/**
+	 * @brief Computes the distances from the selected sensor.
+	 *
+	 * This function computes the distances from the selected sensor (camera or ground-based laser) to the associated point cloud.
+	 */
 	void doActionComputeDistancesFromSensor();
+
+	/**
+	 * @brief Computes the scattering angles of the selected sensor.
+	 *
+	 * This function computes the scattering angles of the selected ground-based laser sensor and the associated point cloud.
+	 */
 	void doActionComputeScatteringAngles();
+
+	/**
+	 * @brief Sets the view from the selected sensor.
+	 *
+	 * This function sets the view of the active 3D window based on the selected sensor.
+	 */
 	void doActionSetViewFromSensor();
+
+	/**
+	 * @brief Shows the depth buffer of the selected ground-based laser sensor.
+	 *
+	 * This function displays the depth buffer of the selected ground-based laser sensor.
+	 */
 	void doActionShowDepthBuffer();
+
+	/**
+	 * @brief Exports the depth buffer of the selected ground-based laser sensor.
+	 *
+	 * This function exports the depth buffer of the selected ground-based laser sensor to a file.
+	 */
 	void doActionExportDepthBuffer();
+
+	/**
+	 * @brief Computes the visibility of the points with respect to the selected ground-based laser sensor.
+	 *
+	 * This function computes the visibility of the points in the associated point cloud with respect to the selected ground-based laser sensor.
+	 */
 	void doActionComputePointsVisibility();
+
+	/**
+	 * @brief Rasterizes the selected entities.
+	 *
+	 * This function rasterizes the selected entities (point clouds or meshes) into a grid.
+	 */
 	void doActionRasterize();
+
+	/**
+	 * @brief Computes the 2.5D volume of the selected entities.
+	 *
+	 * This function computes the 2.5D volume of the selected entities (one or two point clouds).
+	 */
 	void doCompute2HalfDimVolume();
+
+	/**
+	 * @brief Converts the selected polylines to a mesh.
+	 *
+	 * This function converts the selected polylines to a single mesh.
+	 */
 	void doConvertPolylinesToMesh();
+
+	/**
+	 * @brief Meshes two polylines.
+	 *
+	 * This function creates a mesh between two selected polylines.
+	 */
 	void doMeshTwoPolylines();
+
+	/**
+	 * @brief Exports the coordinates of the selected entities to a scalar field.
+	 *
+	 * This function exports the coordinates of the selected entities to a scalar field.
+	 */
 	void doActionExportCoordToSF();
+
+	/**
+	 * @brief Exports the normals of the selected entities to a scalar field.
+	 *
+	 * This function exports the normals of the selected entities to a scalar field.
+	 */
 	void doActionExportNormalToSF();
+
+	/**
+	 * @brief Sets the scalar fields of the selected entities as their normals.
+	 *
+	 * This function sets the scalar fields of the selected entities as their normals.
+	 */
 	void doActionSetSFsAsNormal();
+	/**
+	 * @brief Computes the best-fit bounding box of the selected entities.
+	 *
+	 * This function computes the best-fit bounding box of the selected entities, which may be rotated compared to the original bounding box.
+	 */
 	void doComputeBestFitBB();
+
+	/**
+	 * @brief Crops the selected entities.
+	 *
+	 * This function allows the user to crop the selected entities using a bounding box.
+	 */
 	void doActionCrop();
 
+	/**
+	 * @brief Edits the camera.
+	 *
+	 * This function opens the camera parameters editing dialog for the active 3D view.
+	 */
 	void doActionEditCamera();
+
+	/**
+	 * @brief Adjusts the zoom of the active 3D view.
+	 *
+	 * This function opens a dialog that allows the user to adjust the zoom of the active 3D view.
+	 */
 	void doActionAdjustZoom();
+
+	/**
+	 * @brief Saves the current viewport as a camera.
+	 *
+	 * This function creates a new camera object that captures the current viewport settings.
+	 */
 	void doActionSaveViewportAsCamera();
+
+	/**
+	 * @brief Resets the position of the GUI elements.
+	 *
+	 * This function resets the position of the GUI elements to their default positions.
+	 */
 	void doActionResetGUIElementsPos();
+
+	/**
+	 * @brief Toggles the automatic restoration of the window on startup.
+	 *
+	 * This function toggles the automatic restoration of the main window's position and size on startup.
+	 *
+	 * @param state The new state of the automatic restoration (true to enable, false to disable).
+	 */
 	void doActionToggleRestoreWindowOnStartup(bool);
+
+	/**
+	 * @brief Resets all VBOs (Vertex Buffer Objects) associated with the selected entities.
+	 *
+	 * This function resets all VBOs associated with the selected entities, freeing up GPU memory.
+	 */
 	void doActionResetAllVBOs();
 
-	// Shaders & plugins
+	/**
+	 * @brief Loads a new shader.
+	 *
+	 * This function allows the user to load a new shader program to be used in the 3D views.
+	 */
 	void doActionLoadShader();
+
+	/**
+	 * @brief Deletes the current shader.
+	 *
+	 * This function removes the current shader program from the active 3D view.
+	 */
 	void doActionDeleteShader();
 
+	/**
+	 * @brief Performs the action to find the biggest inner rectangle.
+	 *
+	 * This function is responsible for finding the biggest inner rectangle in the current context.
+	 * It performs the necessary calculations and updates the necessary variables to determine the result.
+	 *
+	 * @note This function assumes that the necessary data and context have been properly set up before calling it.
+	 *
+	 * @see setContext()
+	 * @see updateVariables()
+	 *
+	 * @return void
+	 */
 	void doActionFindBiggestInnerRectangle();
 
 	// Clipping box
+	/**
+	 * @brief Activates the clipping box mode.
+	 *
+	 * This function activates the clipping box mode in the main window.
+	 * In this mode, the user can define a box-shaped region to clip the point cloud data.
+	 * The clipped data will be displayed within the defined region.
+	 */
 	void activateClippingBoxMode();
+	/**
+	 * @brief Deactivates the clipping box mode.
+	 *
+	 * This function disables the clipping box mode in the application. When the clipping box mode is active, certain operations or rendering effects may be limited to the area defined by the clipping box.
+	 *
+	 * @param mode The mode to set. Pass `true` to activate the clipping box mode, or `false` to deactivate it.
+	 */
 	void deactivateClippingBoxMode(bool);
 
 	// Graphical transformation
+	/**
+	 * @brief Activates the translate and rotate mode.
+	 *
+	 * This function activates the translate and rotate mode in the main window.
+	 * In this mode, the user can perform translation and rotation operations on the selected objects.
+	 */
 	void activateTranslateRotateMode();
+	/**
+	 * @brief Deactivates the translate and rotate mode.
+	 *
+	 * This function is used to deactivate the translate and rotate mode in the application.
+	 *
+	 * @param[in] mode A boolean value indicating whether to deactivate the translate and rotate mode.
+	 */
 	void deactivateTranslateRotateMode(bool);
 
 	// Graphical segmentation
+	/**
+	 * @brief Activates the segmentation mode.
+	 *
+	 * This function is responsible for activating the segmentation mode in the application.
+	 * Segmentation mode allows the user to perform segmentation operations on the data.
+	 */
 	void activateSegmentationMode();
+	/**
+	 * @brief Deactivates the segmentation mode.
+	 *
+	 * This function is used to deactivate the segmentation mode in the main window.
+	 *
+	 * @param[in] mode The mode to be deactivated.
+	 */
 	void deactivateSegmentationMode(bool);
 
-	// Polyline tracing
+	/**
+	 * @brief Activates the polyline tracing mode.
+	 *
+	 * This function activates the polyline tracing mode, allowing the user to trace a polyline in the active 3D view.
+	 */
 	void activateTracePolylineMode();
+
+	/**
+	 * @brief Deactivates the polyline tracing mode.
+	 *
+	 * This function deactivates the polyline tracing mode.
+	 *
+	 * @param state Indicates whether the polyline tracing mode was successfully deactivated (true) or not (false).
+	 */
 	void deactivateTracePolylineMode(bool);
 
-	// Section extraction
+	/**
+	 * @brief Activates the section extraction mode.
+	 *
+	 * This function activates the section extraction mode, allowing the user to extract sections from the selected entities.
+	 */
 	void activateSectionExtractionMode();
+
+	/**
+	 * @brief Deactivates the section extraction mode.
+	 *
+	 * This function deactivates the section extraction mode.
+	 *
+	 * @param state Indicates whether the section extraction mode was successfully deactivated (true) or not (false).
+	 */
 	void deactivateSectionExtractionMode(bool);
 
-	// Entities comparison
+	/**
+	 * @brief Computes the cloud-to-cloud distance between the selected entities.
+	 *
+	 * This function computes the cloud-to-cloud distance between the selected entities.
+	 */
 	void doActionCloudCloudDist();
+
+	/**
+	 * @brief Computes the cloud-to-mesh distance between the selected entities.
+	 *
+	 * This function computes the cloud-to-mesh distance between the selected entities.
+	 */
 	void doActionCloudMeshDist();
+
+	/**
+	 * @brief Computes the cloud-to-primitive distance between the selected entities.
+	 *
+	 * This function computes the cloud-to-primitive distance between the selected entities.
+	 */
 	void doActionCloudPrimitiveDist();
+
+	/**
+	 * @brief Deactivates the comparison mode.
+	 *
+	 * This function deactivates the comparison mode, which was previously activated by one of the cloud/mesh/primitive distance functions.
+	 *
+	 * @param result The result of the comparison (0 for success, other values for failure).
+	 */
 	void deactivateComparisonMode(int);
 
-	// Point picking mechanism
+	/**
+	 * @brief Activates the point picking mode.
+	 *
+	 * This function activates the point picking mode, allowing the user to pick individual points in the active 3D view.
+	 */
 	void activatePointPickingMode();
+
+	/**
+	 * @brief Deactivates the point picking mode.
+	 *
+	 * This function deactivates the point picking mode.
+	 *
+	 * @param state Indicates whether the point picking mode was successfully deactivated (true) or not (false).
+	 */
 	void deactivatePointPickingMode(bool);
 
-	// Point list picking mechanism
+	/**
+	 * @brief Activates the point list picking mode.
+	 *
+	 * This function activates the point list picking mode, allowing the user to pick a list of points in the active 3D view.
+	 */
 	void activatePointListPickingMode();
+
+	/**
+	 * @brief Deactivates the point list picking mode.
+	 *
+	 * This function deactivates the point list picking mode.
+	 *
+	 * @param state Indicates whether the point list picking mode was successfully deactivated (true) or not (false).
+	 */
 	void deactivatePointListPickingMode(bool);
 
-	// Point-pair registration mechanism
+	/**
+	 * @brief Activates the point-pair registration tool.
+	 *
+	 * This function activates the point-pair registration tool, allowing the user to perform a manual registration between two entities.
+	 */
 	void activateRegisterPointPairTool();
+
+	/**
+	 * @brief Deactivates the point-pair registration tool.
+	 *
+	 * This function deactivates the point-pair registration tool.
+	 *
+	 * @param state Indicates whether the point-pair registration tool was successfully deactivated (true) or not (false).
+	 */
 	void deactivateRegisterPointPairTool(bool);
 
-	// Current active scalar field
+	/**
+	 * @brief Toggles the active scalar field color scale.
+	 *
+	 * This function toggles the display of the color scale for the active scalar field.
+	 */
 	void doActionToggleActiveSFColorScale();
+
+	/**
+	 * @brief Shows the previous active scalar field.
+	 *
+	 * This function switches to the previous active scalar field.
+	 */
 	void doActionShowActiveSFPrevious();
+
+	/**
+	 * @brief Shows the next active scalar field.
+	 *
+	 * This function switches to the next active scalar field.
+	 */
 	void doActionShowActiveSFNext();
 
-	//! Removes all entities currently loaded in the DB tree
+	/**
+	 * @brief Closes all entities currently loaded in the database tree.
+	 *
+	 * This function removes all entities currently loaded in the database tree.
+	 */
 	void closeAll();
 
-	//! Batch export some info from a set of selected clouds
+	/**
+	 * @brief Batch exports information from the selected clouds.
+	 *
+	 * This function exports various information (number of points, mean coordinates, scalar field statistics, etc.) from the selected clouds to a CSV file.
+	 */
 	void doActionExportCloudInfo();
-	//! Batch export some info from a set of selected planes
+
+	/**
+	 * @brief Batch exports information from the selected planes.
+	 *
+	 * This function exports various information (center, normal, dip, dip direction, etc.) from the selected planes to a CSV file.
+	 */
 	void doActionExportPlaneInfo();
 
-	//! Generates a matrix with the best (registration) RMS for all possible couple among the selected entities
+	/**
+	 * @brief Computes the best ICP RMS matrix for all possible pairs among the selected entities.
+	 *
+	 * This function computes the best ICP (Iterative Closest Point) RMS (Root Mean Square) for all possible pairs of selected entities and saves the results to a CSV file.
+	 */
 	void doActionComputeBestICPRmsMatrix();
 
-	//! Creates a cloud with the (bounding-box) centers of all selected entities
+	/**
+	 * @brief Creates a cloud with the bounding box centers of the selected entities.
+	 *
+	 * This function creates a new point cloud with the bounding box centers of all selected entities.
+	 */
 	void doActionCreateCloudFromEntCenters();
 
-	//! Creates a cloud with a single point
+	/**
+	 * @brief Creates a point cloud with a single point.
+	 *
+	 * This function allows the user to create a new point cloud with a single point, whose coordinates can be specified.
+	 */
 	void createSinglePointCloud();
-	//! Creates a cloud from the clipboard (ASCII) data
+
+	/**
+	 * @brief Creates a point cloud from the clipboard data.
+	 *
+	 * This function creates a new point cloud from ASCII data copied to the clipboard.
+	 */
 	void createPointCloudFromClipboard();
 
-	inline void doActionMoveBBCenterToOrigin() { doActionFastRegistration(MoveBBCenterToOrigin); }
-	inline void doActionMoveBBMinCornerToOrigin() { doActionFastRegistration(MoveBBMinCornerToOrigin); }
-	inline void doActionMoveBBMaxCornerToOrigin() { doActionFastRegistration(MoveBBMaxCornerToOrigin); }
+	/**
+	 * @brief Moves the bounding box center of the selected entities to the origin.
+	 *
+	 * This function applies a transformation that moves the bounding box center of the selected entities to the origin.
+	 */
+	void doActionMoveBBCenterToOrigin();
 
-	//! Restores position and state of all GUI elements
+	/**
+	 * @brief Moves the bounding box minimum corner of the selected entities to the origin.
+	 *
+	 * This function applies a transformation that moves the bounding box minimum corner of the selected entities to the origin.
+	 */
+	void doActionMoveBBMinCornerToOrigin();
+
+	/**
+	 * @brief Moves the bounding box maximum corner of the selected entities to the origin.
+	 *
+	 * This function applies a transformation that moves the bounding box maximum corner of the selected entities to the origin.
+	 */
+	void doActionMoveBBMaxCornerToOrigin();
+
+	/**
+	 * @brief Restores the position and state of all GUI elements.
+	 *
+	 * This function restores the position and state of all GUI elements, such as toolbars, dockable windows, and 3D views.
+	 */
 	void restoreGUIElementsPos();
 
 private:
-	//! Shortcut: asks the user to select one cloud
-	/** \param defaultCloudEntity a cloud to select by default (optional)
-		\param inviteMessage invite message (default is something like 'Please select an entity:') (optional)
-		\return the selected cloud (or null if the user cancelled the operation)
-	**/
+	/**
+	 * @brief Asks the user to select a cloud.
+	 *
+	 * This function displays a dialog that prompts the user to select a cloud from the currently loaded entities.
+	 *
+	 * @param defaultCloudEntity A cloud entity to be selected by default (optional).
+	 * @param inviteMessage The message to be displayed in the dialog (optional, default is 'Please select an entity:').
+	 * @return The selected cloud, or nullptr if the user canceled the operation.
+	 */
 	ccPointCloud *askUserToSelectACloud(ccHObject *defaultCloudEntity = nullptr, QString inviteMessage = QString());
 
+	/**
+	 * @brief Enumeration for the fast registration modes.
+	 */
 	enum FastRegistrationMode
 	{
 		MoveBBCenterToOrigin,
@@ -1116,17 +2047,64 @@ private:
 		MoveBBMaxCornerToOrigin
 	};
 
+	/**
+	 * @brief Applies a fast registration transformation to the selected entities.
+	 *
+	 * This function applies a fast registration transformation to the selected entities, based on the specified mode.
+	 *
+	 * @param mode The fast registration mode to be applied.
+	 */
 	void doActionFastRegistration(FastRegistrationMode mode);
 
+	/**
+	 * @brief Toggles a property of the selected entities.
+	 *
+	 * This function toggles a specific property (visibility, normals, scalar field, etc.) of the selected entities.
+	 *
+	 * @param property The property to be toggled.
+	 */
 	void toggleSelectedEntitiesProperty(ccEntityAction::TOGGLE_PROPERTY property);
+
+	/**
+	 * @brief Clears a property of the selected entities.
+	 *
+	 * This function clears a specific property (scalar field, normals, etc.) of the selected entities.
+	 *
+	 * @param property The property to be cleared.
+	 */
 	void clearSelectedEntitiesProperty(ccEntityAction::CLEAR_PROPERTY property);
 
-	void setView(CC_VIEW_ORIENTATION view) override;
+	/**
+	 * @brief Sets the view orientation.
+	 *
+	 * This function sets the view orientation of the active 3D window.
+	 *
+	 * @param view The new view orientation.
+	 */
+	void setView(CC_VIEW_ORIENTATION view);
 
-	//! Apply transformation to the selected entities
+	/**
+	 * @brief Applies a transformation to the selected entities.
+	 *
+	 * This function applies the specified transformation matrix to the selected entities.
+	 *
+	 * @param transMat The transformation matrix to be applied.
+	 * @param applyToGlobal Indicates whether the transformation should be applied to the global coordinate system.
+	 */
 	void applyTransformation(const ccGLMatrixd &transMat, bool applyToGlobal);
 
-	//! Creates point clouds from multiple 'components'
+	/**
+	 * @brief Creates point clouds from multiple components.
+	 *
+	 * This function creates new point cloud entities from the components of the specified cloud, based on various criteria.
+	 *
+	 * @param cloud The input cloud to be processed.
+	 * @param components The reference cloud container for the components.
+	 * @param minPointPerComponent The minimum number of points per component to create a new cloud.
+	 * @param randomColors Indicates whether to assign random colors to the new clouds.
+	 * @param selectComponents Indicates whether to select the new clouds after creation.
+	 * @param sortBysize Indicates whether to sort the new clouds by size.
+	 */
 	void createComponentsClouds(ccGenericPointCloud *cloud,
 								CCCoreLib::ReferenceCloudContainer &components,
 								unsigned minPointPerComponent,
@@ -1134,149 +2112,356 @@ private:
 								bool selectComponents,
 								bool sortBysize = true);
 
-	//! Saves position and state of all GUI elements
+	/**
+	 * @brief Saves the position and state of all GUI elements.
+	 *
+	 * This function saves the position and state of all GUI elements, such as toolbars, dockable windows, and 3D views.
+	 */
 	void saveGUIElementsPos();
 
+	/**
+	 * @brief Sets the active window to an orthographic view.
+	 *
+	 * This function sets the active 3D window to an orthographic view.
+	 *
+	 * @param win The 3D window to be set to an orthographic view.
+	 */
 	void setOrthoView(ccGLWindowInterface *win);
+
+	/**
+	 * @brief Sets the active window to a centered perspective view.
+	 *
+	 * This function sets the active 3D window to a centered perspective view.
+	 *
+	 * @param win The 3D window to be set to a centered perspective view.
+	 * @param autoRedraw Indicates whether to automatically redraw the window after the view change.
+	 */
 	void setCenteredPerspectiveView(ccGLWindowInterface *win, bool autoRedraw = true);
+
+	/**
+	 * @brief Sets the active window to a viewer-based perspective view.
+	 *
+	 * This function sets the active 3D window to a viewer-based perspective view.
+	 *
+	 * @param win The 3D window to be set to a viewer-based perspective view.
+	 */
 	void setViewerPerspectiveView(ccGLWindowInterface *win);
 
-	void showEvent(QShowEvent *event) override;
-	void closeEvent(QCloseEvent *event) override;
-	void moveEvent(QMoveEvent *event) override;
-	void resizeEvent(QResizeEvent *event) override;
-	bool eventFilter(QObject *obj, QEvent *event) override;
-	void keyPressEvent(QKeyEvent *event) override;
+	/**
+	 * @brief Handles the show event.
+	 *
+	 * This function is called when the main window is shown.
+	 *
+	 * @param event The show event.
+	 */
+	void showEvent(QShowEvent *event);
 
-	//! Makes the window including an entity zoom on it (helper)
+	/**
+	 * @brief Handles the close event.
+	 *
+	 * This function is called when the main window is closed.
+	 *
+	 * @param event The close event.
+	 */
+	void closeEvent(QCloseEvent *event);
+
+	/**
+	 * @brief Handles the move event.
+	 *
+	 * This function is called when the main window is moved.
+	 *
+	 * @param event The move event.
+	 */
+	void moveEvent(QMoveEvent *event);
+
+	/**
+	 * @brief Handles the resize event.
+	 *
+	 * This function is called when the main window is resized.
+	 *
+	 * @param event The resize event.
+	 */
+	void resizeEvent(QResizeEvent *event);
+
+	/**
+	 * @brief Handles the event filter.
+	 *
+	 * This function is called to filter events for the main window.
+	 *
+	 * @param obj The object that generated the event.
+	 * @param event The event.
+	 * @return True if the event was handled, false otherwise.
+	 */
+	bool eventFilter(QObject *obj, QEvent *event);
+
+	/**
+	 * @brief Handles the key press event.
+	 *
+	 * This function is called when a key is pressed in the main window.
+	 *
+	 * @param event The key press event.
+	 */
+	void keyPressEvent(QKeyEvent *event);
+
+	/**
+	 * @brief Zooms in on the specified entity.
+	 *
+	 * This function makes the active 3D window zoom in on the specified entity.
+	 *
+	 * @param object The entity to zoom in on.
+	 */
 	void zoomOn(ccHObject *object);
 
-	//! Active SF action fork
-	/** - action=0 : toggle SF color scale
-		- action=1 : activate previous SF
-		- action=2 : activate next SF
-		\param action action id
-	**/
+	/**
+	 * @brief Applies an action to the active scalar field.
+	 *
+	 * This function applies a specific action (toggle color scale, activate previous/next scalar field) to the active scalar field.
+	 *
+	 * @param action The action to be applied.
+	 */
 	void doApplyActiveSFAction(int action);
 
-	//! Mesh computation fork
-	/** \param type triangulation type
-	 **/
+	/**
+	 * @brief Computes a mesh using the specified triangulation type.
+	 *
+	 * This function computes a mesh for the selected entities using the specified triangulation type.
+	 *
+	 * @param type The triangulation type to be used.
+	 */
 	void doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type);
 
-	//! Computes the orientation of an entity
-	/** Either fit a plane or a 'facet' (2D polygon)
-	 **/
+	/**
+	 * @brief Computes the orientation of an entity.
+	 *
+	 * This function computes the orientation of the selected entity, either by fitting a plane or a facet (2D polygon).
+	 *
+	 * @param fitFacet Indicates whether to fit a facet (true) or a plane (false).
+	 */
 	void doComputePlaneOrientation(bool fitFacet);
 
-	//! Sets up any input devices (3D mouse, gamepad) and adds their menus
+	/**
+	 * @brief Sets up any input devices (3D mouse, gamepad) and adds their menus.
+	 */
 	void setupInputDevices();
-	//! Stops input and destroys any input device handling
+
+	/**
+	 * @brief Stops input and destroys any input device handling.
+	 */
 	void destroyInputDevices();
 
-	//! Connects all QT actions to slots
+	/**
+	 * @brief Connects all Qt actions to slots.
+	 */
 	void connectActions();
 
-	//! Enables menu entires based on the current selection
+	/**
+	 * @brief Enables menu items based on the current selection.
+	 *
+	 * @param selInfo Information about the current selection.
+	 */
 	void enableUIItems(dbTreeSelectionInfo &selInfo);
 
-	//! Updates the view mode pop-menu based for a given window (or an absence of!)
+	/**
+	 * @brief Updates the view mode pop-up menu based on the active 3D window.
+	 *
+	 * @param win The active 3D window (or nullptr if none).
+	 */
 	void updateViewModePopUpMenu(ccGLWindowInterface *win);
 
-	//! Updates the pivot visibility pop-menu based for a given window (or an absence of!)
+	/**
+	 * @brief Updates the pivot visibility pop-up menu based on the active 3D window.
+	 *
+	 * @param win The active 3D window (or nullptr if none).
+	 */
 	void updatePivotVisibilityPopUpMenu(ccGLWindowInterface *win);
 
-	//! Checks whether stereo mode can be stopped (if necessary) or not
+	/**
+	 * @brief Checks whether the stereo mode can be stopped (if necessary) or not.
+	 *
+	 * @param win The 3D window to check.
+	 * @return True if the stereo mode can be stopped, false otherwise.
+	 */
 	bool checkStereoMode(ccGLWindowInterface *win);
 
-	//! Adds a single value SF to the active point cloud
+	/**
+	 * @brief Adds a constant scalar field to the active point cloud.
+	 *
+	 * @param cloud The active point cloud to add the scalar field to.
+	 * @param sfName The name of the new scalar field.
+	 * @param integerValue Indicates whether the scalar field values should be integers.
+	 */
 	void addConstantSF(ccPointCloud *cloud, QString sfName, bool integerValue);
 
 private: // members
-	//! Main UI
+		 /**
+		  * @brief The main user interface object.
+		  */
 	Ui::MainWindow *m_UI;
 
-	//! DB tree
+	/**
+	 * @brief The database tree root.
+	 */
 	ccDBRoot *m_ccRoot;
 
-	//! Currently selected entities;
+	/**
+	 * @brief The currently selected entities.
+	 */
 	ccHObject::Container m_selectedEntities;
 
-	//! UI frozen state (see freezeUI)
+	/**
+	 * @brief Indicates whether the user interface is frozen.
+	 *
+	 * This flag is set when the user interface is frozen using the `freezeUI` function.
+	 */
 	bool m_uiFrozen;
 
-	//! Recent files menu
+	/**
+	 * @brief The manager for recent files.
+	 */
 	ccRecentFiles *m_recentFiles;
 
-	//! 3D mouse
+	/**
+	 * @brief The 3D mouse manager.
+	 */
 	cc3DMouseManager *m_3DMouseManager;
 
-	//! Gamepad handler
+	/**
+	 * @brief The gamepad manager.
+	 */
 	ccGamepadManager *m_gamepadManager;
 
-	//! View mode pop-up menu button
+	/**
+	 * @brief The view mode pop-up menu button.
+	 */
 	QToolButton *m_viewModePopupButton;
 
-	//! Pivot visibility pop-up menu button
+	/**
+	 * @brief The pivot visibility pop-up menu button.
+	 */
 	QToolButton *m_pivotVisibilityPopupButton;
 
-	//! Flag: first time the window is made visible
+	/**
+	 * @brief Indicates whether this is the first time the window is made visible.
+	 */
 	bool m_firstShow;
 
-	//! Point picking hub
+	/**
+	 * @brief The point picking hub.
+	 */
 	ccPickingHub *m_pickingHub;
 
 	/******************************/
 	/***        MDI AREA        ***/
 	/******************************/
 
+	/**
+	 * @brief The MDI (Multiple Document Interface) area.
+	 */
 	QMdiArea *m_mdiArea;
 
-	//! CloudCompare MDI area overlay dialogs
+	/**
+	 * @brief Represents an MDI area overlay dialog.
+	 *
+	 * This structure contains the overlay dialog and its position in the MDI area.
+	 */
 	struct ccMDIDialogs
 	{
+		/**
+		 * @brief The overlay dialog.
+		 */
 		ccOverlayDialog *dialog;
+
+		/**
+		 * @brief The position of the overlay dialog in the MDI area.
+		 */
 		Qt::Corner position;
 
-		//! Constructor with dialog and position
+		/**
+		 * @brief Constructor with dialog and position.
+		 *
+		 * @param dlg The overlay dialog.
+		 * @param pos The position of the overlay dialog.
+		 */
 		ccMDIDialogs(ccOverlayDialog *dlg, Qt::Corner pos)
 			: dialog(dlg), position(pos)
 		{
 		}
 	};
 
-	//! Repositions an MDI dialog at its right position
+	/**
+	 * @brief Repositions an MDI dialog to its correct position.
+	 *
+	 * This function repositions the specified MDI dialog to its correct position in the MDI area.
+	 *
+	 * @param mdiDlg The MDI dialog to be repositioned.
+	 */
 	void repositionOverlayDialog(ccMDIDialogs &mdiDlg);
 
-	//! Registered MDI area 'overlay' dialogs
+	/**
+	 * @brief The registered MDI area overlay dialogs.
+	 */
 	std::vector<ccMDIDialogs> m_mdiDialogs;
 
-	/*** dialogs ***/
-	//! Camera params dialog
+	/**
+	 * @brief The camera parameters edit dialog.
+	 */
 	ccCameraParamEditDlg *m_cpeDlg;
-	//! Graphical segmentation dialog
+
+	/**
+	 * @brief The graphical segmentation tool.
+	 */
 	ccGraphicalSegmentationTool *m_gsTool;
-	//! Polyline tracing tool
+
+	/**
+	 * @brief The polyline tracing tool.
+	 */
 	ccTracePolylineTool *m_tplTool;
-	//! Section extraction dialog
+
+	/**
+	 * @brief The section extraction tool.
+	 */
 	ccSectionExtractionTool *m_seTool;
-	//! Graphical transformation dialog
+
+	/**
+	 * @brief The graphical transformation tool.
+	 */
 	ccGraphicalTransformationTool *m_transTool;
-	//! Clipping box dialog
+
+	/**
+	 * @brief The clipping box tool.
+	 */
 	ccClippingBoxTool *m_clipTool;
-	//! Cloud comparison dialog
+
+	/**
+	 * @brief The cloud comparison dialog.
+	 */
 	ccComparisonDlg *m_compDlg;
-	//! Point properties mode dialog
+
+	/**
+	 * @brief The point properties mode dialog.
+	 */
 	ccPointPropertiesDlg *m_ppDlg;
-	//! Point list picking
+
+	/**
+	 * @brief The point list picking dialog.
+	 */
 	ccPointListPickingDlg *m_plpDlg;
-	//! Point-pair registration
+
+	/**
+	 * @brief The point-pair registration dialog.
+	 */
 	ccPointPairRegistrationDlg *m_pprDlg;
-	//! Primitive factory dialog
+
+	/**
+	 * @brief The primitive factory dialog.
+	 */
 	ccPrimitiveFactoryDlg *m_pfDlg;
 
-	/*** plugins ***/
-	//! Manages plugins - menus, toolbars, and the about dialog
+	/**
+	 * @brief The plugin UI manager.
+	 *
+	 * This manages the plugins' menus, toolbars, and the about dialog.
+	 */
 	ccPluginUIManager *m_pluginUIManager;
 };
 

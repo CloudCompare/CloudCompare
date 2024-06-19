@@ -1,6 +1,5 @@
 #################
 ## Eclipse
-
 *.pydevproject
 .project
 .metadata
@@ -139,3 +138,10 @@ CCCoreLibExport.h
 #VS2019 default cmake build & install paths
 /out/
 plugins/private
+# pixi environments
+.pixi
+.build
+# macos script subproduct
+dependencies.json
+*.egg-info
+

@@ -78,7 +78,7 @@ cmd = [
   "-DPLUGIN_IO_QFBX=OFF", # Possible, but it needs a proprietary SDK
   #"-DPLUGIN_IO_QLAS_FWF=ON" # Seems to be Windows only
   "-DPLUGIN_IO_QPHOTOSCAN=ON",
-  "-DPLUGIN_IO_QRDB=OFF", # Needs a proprietary lib. The lib is not available for macos-amr64
+  "-DPLUGIN_IO_QRDB=OFF", # Needs a proprietary lib. The lib is not available for osx-arm64
   "-DPLUGIN_IO_QSTEP=ON",
   "-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
   "-DOPENCASCADE_LIB_DIR=$CONDA_PREFIX/lib",
@@ -94,7 +94,7 @@ outputs = [".build/CMakeFiles/"]
 cmd = ["cmake", "--build", ".build"]
 depends-on = ["configure"]
 inputs = ["CMakeLists.txt", "qCC/"]
-outputs = [".build/qCC/CloudCompare"]
+#outputs = [".build/qCC/CloudCompare"]
 
 [feature.build.tasks.install]
 cmd = ["cmake", "--install", ".build"]
@@ -104,7 +104,15 @@ outputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCom
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
 [feature.build.tasks.post_install]
-cmd = ["python", "postInstall/libBundleCloudCompare.py", ".build/install", "--extra_pathlib", ".pixi/envs/build/lib/", "--embed_python"]
+cmd = [
+  "python",
+  "postInstall/libBundleCloudCompare.py",
+  ".build/install",
+  "--extra_pathlib",
+  ".pixi/envs/build/lib/",
+  "--embed_python",
+  "--output_dependencies"
+]
 depends-on = ["install"]
 
 [environments]

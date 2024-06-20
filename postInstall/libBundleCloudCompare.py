@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+
+from __future__ import annotations
+
 import argparse
 import json
 import logging
@@ -23,26 +27,55 @@ class CCAppBundleConfig:
     base_python_binary: str  # "prefix/bin/python"
     base_python_libs: str  # "prefix/lib/pythonMajor.Minor"
 
-    def __init__(self, install_path: str, extra_pathlib: str, output_dependencies: bool) -> None:
+    def __init__(
+        self,
+        install_path: str,
+        extra_pathlib: str,
+        output_dependencies: bool,
+    ) -> None:
+        """Construct a configuration.
+
+        Args:
+        ----
+            install_path (str): string representation of the path where CC is "installed".
+            extra_pathlib (str): string representation of a path where additional libs can be found.
+            output_dependencies (bool): boolean that control the level of debug. If true some extra
+            files will be created (macos_bundle_warnings.json macos_bundle_dependencies.json).
+
+        """
         self.output_dependencies = output_dependencies
         self.bundle_abs_path = install_path + "/CloudCompare/CloudCompare.app"
         self.cc_bin_path = self.bundle_abs_path + "/Contents/MacOS/CloudCompare"
         self.extra_pathlib = extra_pathlib
-        self.frameworks_path = os.path.abspath(self.bundle_abs_path + "/Contents/Frameworks")
+        self.frameworks_path = os.path.abspath(
+            self.bundle_abs_path + "/Contents/Frameworks",
+        )
         self.plugin_path = os.path.abspath(self.bundle_abs_path + "/Contents/PlugIns")
 
-        # TODO: python
+        # TODO: Python
         self._query_python()
         self.embedded_python_rootpath = self.bundle_abs_path + "/Contents/Resources/python"
-        self.embedded_python_path = os.path.abspath(os.path.join(self.embedded_python_rootpath, "bin"))
-        self.embedded_python_binary = os.path.abspath(os.path.join(self.embedded_python_path, "python"))
-        self.embedded_python_libpath = os.path.abspath(os.path.join(self.embedded_python_rootpath, "lib"))
-        self.embedded_python_lib = os.path.abspath(
-            os.path.join(self.embedded_python_libpath, "python" + self.python_version)  # TODO: param
+        self.embedded_python_path = os.path.abspath(
+            os.path.join(self.embedded_python_rootpath, "bin"),
         )
-        self.embedded_python_site_package = os.path.abspath(os.path.join(self.embedded_python_lib, "site-packages"))
+        self.embedded_python_binary = os.path.abspath(
+            os.path.join(self.embedded_python_path, "python"),
+        )
+        self.embedded_python_libpath = os.path.abspath(
+            os.path.join(self.embedded_python_rootpath, "lib"),
+        )
+        self.embedded_python_lib = os.path.abspath(
+            os.path.join(
+                self.embedded_python_libpath,
+                "python" + self.python_version,
+            ),  # TODO: param
+        )
+        self.embedded_python_site_package = os.path.abspath(
+            os.path.join(self.embedded_python_lib, "site-packages"),
+        )
 
     def __str__(self) -> str:
+        """Return a string representation of the class."""
         res = (
             f"--- Frameworks path: {self.frameworks_path} \n"
             f" --- plugin path: {self.plugin_path} \n"
@@ -55,34 +88,36 @@ class CCAppBundleConfig:
         return res
 
     def _query_python(self):
-        """Query for python paths and configuration"""
+        """Query for python paths and configuration."""
         self.python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
         self.base_python_binary = f"{sys.exec_prefix}/bin/python"
         self.base_python_libs = f"{sys.exec_prefix}/lib/python{self.python_version}"
 
 
-dependencies = {}  # dictionary of lib dependencies : key depends on (list of libs) (not recursive)
+dependencies = dict()  # dictionary of lib dependencies : key depends on (list of libs) (not recursive)
+warnings = dict()
 
-from collections import defaultdict
-warnings = defaultdict(list)
 
 def get_lib_dependencies(mainlib: str) -> tuple[list[str], list[str]]:
-    """
-    List dependencies of mainlib (using otool -L).
+    """List dependencies of mainlib (using otool -L).
 
     We only look for dependencies with @rpath and @executable_path.
     We consider @executable_path being relative to the CloudCompare executable.
     We keep record and debug /usr and /System for debug purposes.
 
     Args:
+    ----
         mainlib (str): string representation of the path to a binary (lib, executable)
 
     Returns:
+    -------
         libs (list[str]): lib @rpath ou @executable_path
         lib_ex (list[str]): lib @executable_path
+
     """
     libs = []
     lib_ex = []
+    warning_libs = []
     with subprocess.Popen(["otool", "-L", mainlib], stdout=subprocess.PIPE) as proc:
         lines = proc.stdout.readlines()
         logger.debug(mainlib)
@@ -104,29 +139,40 @@ def get_lib_dependencies(mainlib: str) -> tuple[list[str], list[str]]:
             if dirs[0] == "@rpath":
                 libs.append(dirs[1])
             elif dirs[0] == "@loader_path":
-                logger.warning(f"{mainlib} declares a dependencies with @loader_path, this won't be resolved")
+                logger.warning(
+                    f"{mainlib} declares a dependencies with @loader_path, this won't be resolved",
+                )
             elif dirs[0] == "@executable_path":
-                logger.warning(f"{mainlib} declares a dependencies with @executable_path")
+                logger.warning(
+                    f"{mainlib} declares a dependencies with @executable_path",
+                )
                 # TODO: check if mainlib is in the bundle, to be sure executable path is relaltive to the application
-                lib_ex.append((os.path.basename(mainlib), pathlib.removeprefix("@executable_path/")))
+                lib_ex.append(
+                    (
+                        os.path.basename(mainlib),
+                        pathlib.removeprefix("@executable_path/"),
+                    ),
+                )
             elif (dirs[1] != "usr") and (dirs[1] != "System"):
                 logger.warning(f"{mainlib} depends on  undeclared pathlib: {pathlib}")
-                warnings[mainlib].append(pathlib)
+        warnings[mainlib] = warning_libs
         dependencies[os.path.basename(mainlib)] = libs
     return libs, lib_ex
 
 
 def get_rpath(binary_path: str) -> list[str]:
-    """
-    Retrieve paths stored in LC_RPATH part of the binary.
+    """Retrieve paths stored in LC_RPATH part of the binary.
 
     Paths are expected to be in the form @loader_path/xxx, @executable_path/xxx, or even abs and relative Paths
 
     Args:
+    ----
         binary_path (str): string representation of the path to a binary (lib, executable)
 
     Returns:
+    -------
       list[str]: rpath list
+
     """
     rpaths = []
     with subprocess.Popen(["otool", "-l", binary_path], stdout=subprocess.PIPE) as proc:
@@ -140,19 +186,21 @@ def get_rpath(binary_path: str) -> list[str]:
 
 
 def convert_rpaths(binary_path: str, rpaths: list[str]):
-    """
-    Convert rpaths to absolute paths.
+    """Convert rpaths to absolute paths.
 
     Given a path to a binary (lib, executable) and a list of rpaths, resolve rpaths
     and append binary_path to them in order to create putative aboslute path to this binary
 
     Args:
+    ----
         binary_path (str): string representation of the path to a binary (lib, executable)
 
         rpaths (list[str]): string representation of rpath list
 
     Returns:
+    -------
         list[str]: string representation of putative full path to the binary
+
     """
     dirname_binary = os.path.dirname(binary_path)
     abs_paths = []
@@ -169,21 +217,25 @@ def convert_rpaths(binary_path: str, rpaths: list[str]):
     return abs_paths
 
 
-def embedded_python_env():
-    # TODO: it should be handled by CCPython-Runtime Cmake
-    # with an option "Embed_Python"
+def copy_python_env(config: CCAppBundleConfig):
+    """Copy python environment.
+
+    Ideally this should be handled by CCPython-Runtime CMake script like in Windows.
+    """
     logger.info("Python: copy distribution in package")
     try:
         os.makedirs(config.embedded_python_path)
         os.makedirs(config.embedded_python_libpath)
     except OSError:
-        logger.error("Python dir in already exists in bundle, please clean your bundle and rerun this script")
+        logger.error(
+            "Python dir already exists in bundle, please clean your bundle and rerun this script",
+        )
         sys.exit(1)
     shutil.copytree(config.base_python_libs, config.embedded_python_lib)
     shutil.copy2(config.base_python_binary, config.embedded_python_binary)
 
 
-def do_python(config: CCAppBundleConfig):
+def embed_python(config: CCAppBundleConfig):
     libs_to_check = [config.embedded_python_binary]
 
     # results
@@ -191,7 +243,7 @@ def do_python(config: CCAppBundleConfig):
     lib_ex_found = set()
     python_libs = set()  # Lib in python dir
 
-    embedded_python_env()
+    copy_python_env(config)
     # --- enumerate all libs inside the dir
     for root, _, files in os.walk(config.embedded_python_lib):
         for name in files:
@@ -201,7 +253,9 @@ def do_python(config: CCAppBundleConfig):
                 libs_to_check.append(library)
                 python_libs.add(library)
 
-    logger.info(f"number of libs (.so and .dylib) in embedded Python: {len(python_libs)}")
+    logger.info(
+        f"number of libs (.so and .dylib) in embedded Python: {len(python_libs)}",
+    )
 
     while len(libs_to_check):
         lib2check = libs_to_check.pop(0)
@@ -242,23 +296,31 @@ def do_python(config: CCAppBundleConfig):
             continue
         base = os.path.basename(lib)
         if base not in libs_in_framework and lib not in python_libs:
-            shutil.copy2(lib, config.frameworks_path)  # copy libs that are not in framework yet
+            shutil.copy2(
+                lib,
+                config.frameworks_path,
+            )  # copy libs that are not in framework yet
             added_to_framework_count = added_to_framework_count + 1
     logger.info(f"libs added to Frameworks: {added_to_framework_count}")
 
-    logger.info(f" --- Python libs: set rpath to Frameworks, nb libs: {len(python_libs)}")
+    logger.info(
+        f" --- Python libs: set rpath to Frameworks, nb libs: {len(python_libs)}",
+    )
     # TODO: remove old rpath
     dir_python_libs = config.embedded_python_lib.split("/")
-    deepSP = len(dir_python_libs)
+    deep_sp = len(dir_python_libs)
     # Set the rpath to the Frameworks path
     for filename in python_libs:
-        dirFSP = filename.split("/")
-        deepLibSP = len(dirFSP) - deepSP
+        dir_fsp = filename.split("/")
+        deep_lib_sp = len(dir_fsp) - deep_sp
         rpath = "@loader_path/../../../"
-        for _ in range(deepLibSP):
+        for _ in range(deep_lib_sp):
             rpath += "../"
         rpath += "Frameworks"
-        subprocess.run(["install_name_tool", "-add_rpath", rpath, filename], check=False)
+        subprocess.run(
+            ["install_name_tool", "-add_rpath", rpath, filename],
+            check=False,
+        )
 
 
 def collect_dependencies(config: CCAppBundleConfig):
@@ -277,7 +339,9 @@ def collect_dependencies(config: CCAppBundleConfig):
     for filename in libs_in_framework_dirs:
         f = os.path.join(config.frameworks_path, filename)
         libs_to_check.append(f)
-    logger.info(f"number of libs already in Frameworks directory: {len(libs_in_framework_dirs)}")
+    logger.info(
+        f"number of libs already in Frameworks directory: {len(libs_in_framework_dirs)}",
+    )
 
     logger.info("Adding plugins to the libsToCheck")
     for plugin_dir in os.listdir(config.plugin_path):
@@ -343,44 +407,45 @@ def collect_dependencies(config: CCAppBundleConfig):
 
 def embed_libraries(
     config: CCAppBundleConfig,
-    libsfound: set[str],
-    libexfound: set[str],
-    libsInPlugins: set[str],
+    libs_found: set[str],
+    lib_ex_found: set[str],
+    libs_in_plugins: set[str],
 ):
     logger.info("Copying libraries")
-    logger.info(f"libexfound to add to Frameworks: {len(libexfound)}")
-    logger.info(f"libsfound to add to Frameworks: {len(libsfound)}")
+    logger.info(f"libexfound to add to Frameworks: {len(lib_ex_found)}")
+    logger.info(f"libsfound to add to Frameworks: {len(libs_found)}")
 
-    libsInFrameworks = os.listdir(config.frameworks_path)
+    libs_in_frameworks = os.listdir(config.frameworks_path)
 
-    nbLibsAdded = 0
-    for lib in libsfound:
+    nb_libs_added = 0
+    for lib in libs_found:
         if lib == config.cc_bin_path:
             continue
         base = os.path.basename(lib)
-        if (base not in libsInFrameworks) and (lib not in libsInPlugins):
+        if (base not in libs_in_frameworks) and (lib not in libs_in_plugins):
             shutil.copy2(lib, config.frameworks_path)
-            nbLibsAdded += 1
-    logger.info(f"number of libs added to Frameworks: {nbLibsAdded}")
+            nb_libs_added += 1
+    logger.info(f"number of libs added to Frameworks: {nb_libs_added}")
 
     # --- ajout des rpath pour les librairies du framework : framework et ccPlugins
     logger.info(" --- Frameworks libs: add rpath to Frameworks")
-    nbFrameworksLibs = 0
+    nb_frameworks_libs = 0
 
     # TODO: purge old rpath
-
     for filename in os.listdir(config.frameworks_path):
         f = os.path.join(config.frameworks_path, filename)
         if os.path.isfile(f) and os.path.splitext(f)[1] in (".so", ".dylib"):
-            nbFrameworksLibs += 1
+            nb_frameworks_libs += 1
             subprocess.run(
                 ["install_name_tool", "-add_rpath", "@loader_path", f],
                 stdout=subprocess.PIPE,
                 check=False,
             )
-    logger.info(f"number of Frameworks libs with rpath modified: {nbFrameworksLibs}")
-    logger.info(f" --- PlugIns libs: add rpath to Frameworks, number of libs: {len(libsInPlugins)}")
-    for f in libsInPlugins:
+    logger.info(f"number of Frameworks libs with rpath modified: {nb_frameworks_libs}")
+    logger.info(
+        f" --- PlugIns libs: add rpath to Frameworks, number of libs: {len(libs_in_plugins)}",
+    )
+    for f in libs_in_plugins:
         if os.path.isfile(f):
             subprocess.run(
                 ["install_name_tool", "-add_rpath", "@loader_path/../../Frameworks", f],
@@ -390,7 +455,7 @@ def embed_libraries(
 
     # TODO: make a function for this
     # Embed libs with an @executable_path dependencies
-    for libex in libexfound:
+    for libex in lib_ex_found:
         base = libex[0]
         target = libex[1]
 
@@ -419,11 +484,22 @@ def embed_libraries(
             check=False,
         )
 
-    with open(os.path.join(os.getcwd(), "dependencies.json"), "w", encoding="utf-8") as f:
-        json.dump(dependencies, f, sort_keys=True, indent=4)
+    # output debug files if needed
+    if config.output_dependencies:
+        logger.info("write debug files (macos_bundle_dependencies.json and macos_bundle_warnings.json)")
+        with open(
+            os.path.join(os.getcwd(), "macos_bundle_dependencies.json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(dependencies, f, sort_keys=True, indent=4)
 
-    with open(os.path.join(os.getcwd(), "warnings.json"), "w", encoding="utf-8") as f:
-        json.dump(warnings, f, sort_keys=True, indent=4)
+        with open(
+            os.path.join(os.getcwd(), "macos_bundle_warnings.json"),
+            "w",
+            encoding="utf-8",
+        ) as f:
+            json.dump(warnings, f, sort_keys=True, indent=4)
 
 
 if __name__ == "__main__":
@@ -446,18 +522,26 @@ if __name__ == "__main__":
         help="Extra path to find libraries (typically current conda env lib path)",
         type=Path,
     )
-    parser.add_argument("--embed_python", help="Whether embedding python or not", action="store_true")
+    parser.add_argument(
+        "--embed_python",
+        help="Whether embedding python or not",
+        action="store_true",
+    )
     parser.add_argument(
         "--output_dependencies",
-        help="output a dependencies.json file to debug dependency graph",
+        help="Output a json files in order to debug dependency graph",
         action="store_true",
     )
     arguments = parser.parse_args()
     # convert extra_pathlib to aboslute path
     extra_pathlib = arguments.extra_pathlib.resolve()
 
-    config = CCAppBundleConfig(str(arguments.install_path), str(extra_pathlib), arguments.output_dependencies)
+    config = CCAppBundleConfig(
+        str(arguments.install_path),
+        str(extra_pathlib),
+        arguments.output_dependencies,
+    )
     if arguments.embed_python:
-        do_python(config)
+        embed_python(config)
     libs_found, libs_ex_found, libs_in_plugins = collect_dependencies(config)
     embed_libraries(config, libs_found, libs_ex_found, libs_in_plugins)

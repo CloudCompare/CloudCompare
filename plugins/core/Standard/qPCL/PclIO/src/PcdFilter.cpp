@@ -35,6 +35,7 @@
 
 //System
 #include <iostream>
+#include <fstream>
 
 //pcl
 #include <pcl/filters/passthrough.h>
@@ -69,7 +70,9 @@ bool PcdFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
+	{
 		return CC_FERR_BAD_ARGUMENT;
+	}
 
 	//the cloud to save
 	ccPointCloud* ccCloud = ccHObjectCaster::ToPointCloud(entity);
@@ -174,6 +177,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	if (ccCloud->size() == 0)
 	{
+		//Specific case: empty cloud (header only)
 		pcl::PCDWriter p;
 		QFile file(filename);
 		if (!file.open(QFile::WriteOnly | QFile::Truncate))
@@ -186,10 +190,18 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	try
 	{
-		if (pcl::io::savePCDFile(qPrintable(filename), *pclCloud, pos, ori, true) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+#ifdef _MSC_VER
+		std::ofstream ofs(filename.toStdWString(), std::wifstream::out | std::wifstream::binary);
+#else
+		std::ofstream ofs(filename.toStdString(), std::wifstream::out | std::wifstream::binary);
+#endif
+		pcl::PCDWriter p;
+		if (p.writeBinaryCompressed(ofs, *pclCloud, pos, ori) < 0)
 		{
+			ofs.close();
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
+		ofs.close();
 	}
 	catch (...)
 	{
@@ -246,24 +258,64 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 		unsigned int cloudDataIndex = 0;
 		PCLCloud::Ptr inputCloud(new PCLCloud);
 
+		//To avoid issues with local characters, we will open the file 'manually' and then provide the contents to PCL directly
+#ifdef _MSC_VER
+		std::ifstream ifs(filename.toStdWString(), std::wifstream::in | std::wifstream::binary);
+#else
+		std::ifstream ifs(filename.toStdString(), std::wifstream::in | std::wifstream::binary);
+#endif
+
 		//Load the input file
 		pcl::PCDReader pcdReader;
-		if (pcdReader.readHeader(qPrintable(filename), *inputCloud, origin, orientation, pcdVersion, dataType, cloudDataIndex) < 0)
+		if (pcdReader.readHeader(ifs, *inputCloud, origin, orientation, pcdVersion, dataType, cloudDataIndex) < 0)
 		{
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
 		ccLog::Print(QString("[PCL] PCD version: %1").arg(pcdVersion));
 
 		unsigned pointCount = static_cast<unsigned>(inputCloud->width * inputCloud->height);
-		ccLog::Print(QString("[PCL] %1: Point Count: %2").arg(qPrintable(filename)).arg(pointCount));
+		ccLog::Print(QString("[PCL] %1: %2 points").arg(filename).arg(pointCount));
 		if (pointCount == 0)
 		{
 			return CC_FERR_NO_LOAD;
 		}
 
-		if (pcdReader.read(qPrintable(filename), *inputCloud) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+		if (dataType == 0) // ASCII format
 		{
-			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+			ccLog::Print(QObject::tr("[PCL] Reading ASCII PCD file..."));
+			ifs.seekg(cloudDataIndex, std::ios::beg);
+			if (pcdReader.readBodyASCII(ifs, *inputCloud, pcdVersion) < 0) //DGM: warning, toStdString doesn't preserve "local" characters
+			{
+				return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+			}
+		}
+		else // Binary
+		{
+			ccLog::Print(QObject::tr("[PCL] Reading %1 binary PCD file...").arg(dataType == 2 ? QObject::tr("compressed") : QObject::tr("uncompressed")));
+
+			std::vector<char> buffer;
+			try
+			{
+				qint64 fileSize = QFileInfo(filename).size();
+				buffer.resize(fileSize);
+
+				ifs.seekg(0, std::ios::beg);
+				ifs.read(buffer.data(), fileSize);
+				ifs.close();
+
+				if (pcdReader.readBodyBinary(reinterpret_cast<unsigned char*>(buffer.data()), *inputCloud, pcdVersion, dataType == 2, cloudDataIndex) < 0)
+				{
+					return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+				}
+			}
+			catch (const std::bad_alloc&)
+			{
+				// try to read the file 'normally' in this case
+				if (pcdReader.read(qPrintable(filename), *inputCloud) < 0)
+				{
+					return CC_FERR_NOT_ENOUGH_MEMORY;
+				}
+			}
 		}
 
 		ccPointCloud::Grid::Shared grid;

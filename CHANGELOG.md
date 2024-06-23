@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.13.2 (Kharkiv) - (05/26/2024)
+v2.13.2 (Kharkiv) - (06/23/2024)
 ----------------------
 Improvements:
 	- substantial improvement of the cloud merge operation (thanks to Thomas Watson)
@@ -16,6 +16,8 @@ Improvements:
 	- The Animation plugin now uses ffmppeg 6.1
 
 	- The 'Normals computation' dialog should remember whether normals 'orientation' should be resolved or not
+
+	- PCD files can now be loaded or saved with local characters. PCD files will also be saved as compressed files by default.
 
 Bug fix:
 	- The LAS dialog could be be wrongly initialized with a point format of 0 in some cases (with FWF data).

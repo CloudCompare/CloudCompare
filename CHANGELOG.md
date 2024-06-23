@@ -23,6 +23,7 @@ Bug fix:
 	- The Rasterize tool was not letting the user use '0' as the max edge length parameter for the Delaunay-based
 		raster interpolation mode (forcing the user to set a high value to keep all triangles)
 	- The scale value in the bottom right corner of the 3D view (orthographic mode) was wrong if the screen height was larger than the width
+	- After the -FEATURE command line command was run, the automatically exported filename of clouds was containing some duplicated contents
 
 
 v2.13.1 (Kharkiv) - (03/20/2024)

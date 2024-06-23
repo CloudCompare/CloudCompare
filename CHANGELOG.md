@@ -22,6 +22,7 @@ Bug fix:
 		In command line this could result in missing waveforms when saving. Thanks to Paul Leroy for the fix ;)
 	- The Rasterize tool was not letting the user use '0' as the max edge length parameter for the Delaunay-based
 		raster interpolation mode (forcing the user to set a high value to keep all triangles)
+	- The scale value in the bottom right corner of the 3D view (orthographic mode) was wrong if the screen height was larger than the width
 
 
 v2.13.1 (Kharkiv) - (03/20/2024)

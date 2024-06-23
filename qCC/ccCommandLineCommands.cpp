@@ -1342,7 +1342,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//replace current cloud by this one
 				delete desc.pc;
 				desc.pc = result;
-				desc.basename += QObject::tr("_SUBSAMPLED");
+				desc.basename += "_RANDOM_SUBSAMPLED";
 			}
 			else
 			{
@@ -1492,9 +1492,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//replace current cloud by this one
 				delete desc.pc;
 				desc.pc = result;
-				desc.basename += QObject::tr("_SUBSAMPLED");
-				//delete result;
-				//result = 0;
+				desc.basename += "_SPATIAL_SUBSAMPLED";
 			}
 			else
 			{
@@ -1687,15 +1685,14 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				octreeLevel = -1;
 			}
 
-
-			
 			if (result)
 			{
 				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
+				QString suffix = QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel);
 				if (cmd.autoSaveMode())
 				{
 					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(newDesc, QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+					QString errorStr = cmd.exportEntity(newDesc, suffix);
 					if (!errorStr.isEmpty())
 					{
 						delete result;
@@ -1707,7 +1704,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					//replace current cloud by subsampled one if it was changed
 					delete desc.pc;
 					desc.pc = result;
-					desc.basename += QObject::tr("_SUBSAMPLED");
+					desc.basename += '_' + suffix;
 				}
 			}
 			else
@@ -7760,26 +7757,36 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No point cloud on which to compute feature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FEATURE));
 	}
 
-	//Call MainWindow generic method
+	//Call MainWindow generic method on all available clouds
 	ccHObject::Container entities;
-	entities.resize(cmd.clouds().size());
+	{
+		entities.resize(cmd.clouds().size());
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			entities[i] = cmd.clouds()[i].pc;
+		}
+	}
+
+	if (!ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, nullptr, cmd.widgetParent()))
+	{
+		return cmd.error(QObject::tr("The computation of some geometric features failed."));
+	}
+
+	// on success, update the cloud names
 	QString fileNameExt = QObject::tr("%1_FEATURE_KERNEL_%2").arg(featureTypeStr).arg(kernelSize);
 	for (size_t i = 0; i < cmd.clouds().size(); ++i)
 	{
 		CLCloudDesc& desc = cmd.clouds()[i];
-		entities[i] = desc.pc;
 		desc.basename += "_" + fileNameExt;
-		entities[i]->setName(entities[i]->getName() + "_" + fileNameExt);
+		desc.pc->setName(entities[i]->getName() + QObject::tr(".%1_feature(%2)").arg(featureTypeStr.toLower()).arg(kernelSize));
 	}
 
-	if (ccLibAlgorithms::ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::Feature, featureType, kernelSize, entities, nullptr, cmd.widgetParent()))
+	//save output
+	if (cmd.autoSaveMode() && !cmd.saveClouds())
 	{
-		//save output
-		if (cmd.autoSaveMode() && !cmd.saveClouds(fileNameExt))
-		{
-			return false;
-		}
+		return false;
 	}
+
 	return true;
 }
 

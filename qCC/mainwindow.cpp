@@ -11595,7 +11595,7 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 	m_ccRoot->addElement(obj,false);
 }
 
-void MainWindow::doActionGlobalShiftSeetings()
+void MainWindow::doActionGlobalShiftSettings()
 {
 	QDialog dialog(this);
 	Ui_GlobalShiftSettingsDialog ui;

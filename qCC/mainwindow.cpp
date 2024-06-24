@@ -11768,3 +11768,18 @@ void MainWindow::doActionComparePlanes()
 	QMessageBox::information(this, tr("Plane comparison"), info.join("\n"));
 	forceConsoleDisplay();
 }
+
+void MainWindow::doActionMoveBBCenterToOrigin()
+{
+    // todo: Implement the logic to move the bounding box center to the origin
+}
+
+void MainWindow::doActionMoveBBMinCornerToOrigin()
+{
+    // todo:  Implement the logic to move the bounding box minimum corner to the origin
+}
+
+void MainWindow::doActionMoveBBMaxCornerToOrigin()
+{
+    // todo: Implement the logic to move the bounding box maximum corner to the origin
+}

@@ -508,7 +508,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionOpen,						&QAction::triggered, this, &MainWindow::doActionLoadFile);
 	connect(m_UI->actionSave,						&QAction::triggered, this, &MainWindow::doActionSaveFile);
 	connect(m_UI->actionSaveProject,				&QAction::triggered, this, &MainWindow::doActionSaveProject);
-	connect(m_UI->actionGlobalShiftSettings,		&QAction::triggered, this, &MainWindow::doActionGlobalShiftSeetings);
+	connect(m_UI->actionGlobalShiftSettings,		&QAction::triggered, this, &MainWindow::doActionGlobalShiftSettings);
 	connect(m_UI->actionPrimitiveFactory,			&QAction::triggered, this, &MainWindow::doShowPrimitiveFactory);
 	connect(m_UI->actionCloseAll,					&QAction::triggered, this, &MainWindow::closeAll);
 	connect(m_UI->actionQuit,						&QAction::triggered, this, &QWidget::close);

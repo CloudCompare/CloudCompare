@@ -108,8 +108,6 @@ cmd = [
   "python",
   "postInstall/libBundleCloudCompare.py",
   ".build/install",
-  "--extra_pathlib",
-  ".pixi/envs/build/lib/",
   "--embed_python",
   "--output_dependencies"
 ]

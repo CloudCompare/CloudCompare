@@ -15,12 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 class CCAppBundleConfig:
-    CloudCompareApp: str
     output_dependencies: bool
     embed_python: bool
 
     cc_bin_path: str
-    extra_pathlib: str | None = None
+    extra_pathlib: str
     frameworks_path: str
     plugin_path: str
     embedded_python_rootpath: str
@@ -557,11 +556,9 @@ if __name__ == "__main__":
         help="Path where the CC application is installed (CMake install dir)",
         type=Path,
     )
-    # TODO: rename this extra_loader_path
-    # this could be infered from the $CONDA_PATH
     parser.add_argument(
         "--extra_pathlib",
-        help="Extra path to find libraries (typically current conda env lib path)",
+        help="Extra path to find libraries (default to $CONDA_PREFIX/lib)",
         type=Path,
     )
     parser.add_argument(
@@ -575,8 +572,18 @@ if __name__ == "__main__":
         action="store_true",
     )
     arguments = parser.parse_args()
-    # convert extra_pathlib to aboslute path
-    extra_pathlib = arguments.extra_pathlib.resolve()
+    # convert extra_pathlib to aboslute paths
+    if arguments.extra_pathlib is not None:
+        extra_pathlib = arguments.extra_pathlib.resolve()
+    else:
+        conda_prefix = os.environ.get("CONDA_PREFIX")
+        if conda_prefix is not None:
+            extra_pathlib = (Path(conda_prefix) / "lib").resolve()
+        else:
+            logger.error(
+                "Unable to find CONDA_PREFIX system variable, please run this script inside a conda environment or use the extra_pathlib option.",
+            )
+            sys.exit(1)
 
     config = CCAppBundleConfig(
         str(arguments.install_path),

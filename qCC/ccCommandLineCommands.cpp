@@ -51,9 +51,10 @@ constexpr char COMMAND_ASCII_EXPORT_ADD_COL_HEADER[]	= "ADD_HEADER";
 constexpr char COMMAND_ASCII_EXPORT_ADD_PTS_COUNT[]		= "ADD_PTS_COUNT";
 constexpr char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 constexpr char COMMAND_HIERARCHY_EXPORT_FORMAT[]		= "H_EXPORT_FMT";
-constexpr char COMMAND_OPEN[]							= "O";				//+file name
-constexpr char COMMAND_OPEN_SKIP_LINES[]				= "SKIP";			//+number of lines to skip
-constexpr char COMMAND_COMMAND_FILE[]					= "COMMAND_FILE";	//+file name
+constexpr char COMMAND_OPEN[]							= "O";				//+ file name
+constexpr char COMMAND_OPEN_SKIP_LINES[]				= "SKIP";			//+ number of lines to skip
+constexpr char COMMAND_OPEN_NO_LABEL[]					= "NO_LABEL";
+constexpr char COMMAND_COMMAND_FILE[]					= "COMMAND_FILE";	//+ file name
 constexpr char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 constexpr char COMMAND_EXTRACT_CC[]						= "EXTRACT_CC";
 constexpr char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS)
@@ -596,10 +597,20 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 	//optional parameters
 	int skipLines = 0;
 	ccCommandLineInterface::GlobalShiftOptions globalShiftOptions;
+	bool doNotCreateLabels = false;
 
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_OPEN_NO_LABEL))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			cmd.print(QObject::tr("Will not load labels"));
+
+			doNotCreateLabels = true;
+		}
 		if (ccCommandLineInterface::IsCommand(argument, COMMAND_OPEN_SKIP_LINES))
 		{
 			//local option confirmed, we can move on
@@ -640,6 +651,7 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 	{
 		AsciiFilter::SetDefaultSkippedLineCount(skipLines);
 	}
+	AsciiFilter::SetNoLabelCreated(doNotCreateLabels);
 	
 	//open specified file
 	QString filename(cmd.arguments().takeFirst());

@@ -48,15 +48,19 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
-v2.13.2 (Kharkiv) - (06/23/2024)
+v2.13.2 (Kharkiv) - (06/24/2024)
 ----------------------
 Improvements:
 	- substantial improvement of the cloud merge operation (thanks to Thomas Watson)
 
 	- symbolic link files (or shortcut or alias) should now be properly handled
 
-	- command line: increase the timestamp resolution of the registration matrix filename and best fit plane
-		information filename so as to avoid overwriting them if generated too quickly
+	- command line:
+		- increase the timestamp resolution of the registration matrix filename and best fit plane
+			information filename so as to avoid overwriting them if generated too quickly
+		- new sub-option -NO_LABEL after -O
+			- prevents any label from being loaded/created automatically (in case text columns are present in the input file)
+			- for ASCCI files only
 
 	- Korean translation updated (thanks to Yun-Ho Chung)
 

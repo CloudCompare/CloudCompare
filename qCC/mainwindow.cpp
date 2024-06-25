@@ -11771,15 +11771,15 @@ void MainWindow::doActionComparePlanes()
 
 void MainWindow::doActionMoveBBCenterToOrigin()
 {
-    // todo: Implement the logic to move the bounding box center to the origin
+	doActionFastRegistration(MoveBBCenterToOrigin);
 }
 
 void MainWindow::doActionMoveBBMinCornerToOrigin()
 {
-    // todo:  Implement the logic to move the bounding box minimum corner to the origin
+	doActionFastRegistration(MoveBBMinCornerToOrigin);
 }
 
 void MainWindow::doActionMoveBBMaxCornerToOrigin()
 {
-    // todo: Implement the logic to move the bounding box maximum corner to the origin
+	doActionFastRegistration(MoveBBMaxCornerToOrigin);
 }

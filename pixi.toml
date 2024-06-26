@@ -103,7 +103,7 @@ outputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCom
 
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
-[feature.build.tasks.post_install]
+[feature.build.tasks.bundle]
 cmd = [
   "python",
   "postInstall/libBundleCloudCompare.py",
@@ -112,6 +112,15 @@ cmd = [
   "--output_dependencies"
 ]
 depends-on = ["install"]
+
+[feature.build.tasks.sign_bundle]
+cmd = [
+  "python",
+  "postInstall/signatureCloudCompare.py",
+  ".build/install",
+  "--embed_python",
+]
+#TODO: depends-on = ["bundle"] #TODO: add input & output
 
 [environments]
 build = ["build"]

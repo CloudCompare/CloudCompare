@@ -43,7 +43,7 @@ class CCAppBundleConfig:
             extra_pathlib (str): string representation of a path where additional libs can be found.
             output_dependencies (bool): boolean that control the level of debug. If true some extra
             files will be created (macos_bundle_warnings.json macos_bundle_dependencies.json).
-
+            embed_python (bool): Whether or not python should be embedded into the bundle.
         """
         self.output_dependencies = output_dependencies
         self.bundle_abs_path = install_path + "/CloudCompare/CloudCompare.app"
@@ -528,7 +528,7 @@ class CCBundler:
                 # TODO: this should not be possible
                 raise Exception("no base path")
 
-            logger.info(f"modify : @executable_path -> @rpath: {base_path}")
+            logger.info("modify : @executable_path -> @rpath: %s", base_path)
 
             subprocess.run(
                 [

@@ -25,8 +25,8 @@ class CCAppBundleConfig:
     embedded_python_rootpath: Path
 
     python_version: str  # pythonMajor.Minor
-    base_python_binary: Path  # "prefix/bin/python"
-    base_python_libs: Path  # "prefix/lib/pythonMajor.Minor"
+    base_python_binary: Path  # prefix/bin/python
+    base_python_libs: Path  # prefix/lib/pythonMajor.Minor
 
     def __init__(
         self,
@@ -44,6 +44,7 @@ class CCAppBundleConfig:
             output_dependencies (bool): boolean that control the level of debug. If true some extra
             files will be created (macos_bundle_warnings.json macos_bundle_dependencies.json).
             embed_python (bool): Whether or not python should be embedded into the bundle.
+
         """
         self.output_dependencies = output_dependencies
         self.bundle_abs_path = (install_path / "CloudCompare" / "CloudCompare.app").absolute()
@@ -142,7 +143,7 @@ class CCBundler:
         warning_libs = []
         with subprocess.Popen(["otool", "-L", str(mainlib)], stdout=subprocess.PIPE) as proc:
             lines = proc.stdout.readlines()
-            logger.debug(str(mainlib))
+            logger.debug(mainlib)
             lines.pop(0)  # Drop the first line as it contains the name of the lib / binary
             # now first line is LC_ID_DYLIB (should be @rpath/libname)
             for line in lines:
@@ -150,9 +151,9 @@ class CCBundler:
                 if len(vals) < 2:
                     continue
                 pathlib = vals[0].decode()
-                logger.debug(f"->pathlib: {pathlib}")
+                logger.debug("->pathlib: %s", pathlib)
                 if pathlib == self.config.extra_pathlib:
-                    logger.info(f"{mainlib} lib from additional extra pathlib")
+                    logger.info("%s lib from additional extra pathlib", mainlib)
                     libs.append(Path(pathlib))
                     continue
                 dirs = pathlib.split("/")
@@ -161,23 +162,19 @@ class CCBundler:
                 if dirs[0] == "@rpath":
                     libs.append(Path(dirs[1]))
                 elif dirs[0] == "@loader_path":
-                    logger.warning(
-                        f"{mainlib} declares a dependencies with @loader_path, this won't be resolved",
-                    )
+                    logger.warning("%s declares a dependencies with @loader_path, this won't be resolved", mainlib)
                 elif dirs[0] == "@executable_path":
-                    logger.warning(
-                        f"{mainlib} declares a dependencies with @executable_path",
-                    )
+                    logger.warning("%s declares a dependencies with @executable_path", mainlib)
                     # TODO: check if mainlib is in the bundle in order to be sure that
                     # the executable path is relative to the application
                     lib_ex.append(
                         (
                             mainlib.name,
                             Path(pathlib.removeprefix("@executable_path/")),
-                        )
+                        ),
                     )
                 elif (dirs[1] != "usr") and (dirs[1] != "System"):
-                    logger.warning(f"{mainlib} depends on  undeclared pathlib: {pathlib}")
+                    logger.warning("%s depends on undeclared pathlib: %s", mainlib, pathlib)
             self.warnings[str(mainlib)] = str(warning_libs)
             self.dependencies[mainlib.name] = str(libs)
         return libs, lib_ex
@@ -281,9 +278,7 @@ class CCBundler:
                     libs_to_check.append(library)
                     python_libs.add(library)
 
-        logger.info(
-            f"number of libs (.so and .dylib) in embedded Python: {len(python_libs)}",
-        )
+        logger.info("number of libs (.so and .dylib) in embedded Python: %i", len(python_libs))
 
         while len(libs_to_check):
             lib2check = libs_to_check.pop(0)
@@ -314,8 +309,8 @@ class CCBundler:
                                 libs_to_check.append(abs_lib)
                             break
 
-        logger.info(f"lib_ex_found to add to Frameworks: {len(lib_ex_found)}")
-        logger.info(f"libs_found to add to Frameworks: {len(libs_found)}")
+        logger.info("lib_ex_found to add to Frameworks: %i", len(lib_ex_found))
+        logger.info("libs_found to add to Frameworks: %i", len(libs_found))
 
         libs_in_framework = set(self.config.frameworks_path.iterdir())
         added_to_framework_count = 0
@@ -329,11 +324,9 @@ class CCBundler:
                     self.config.frameworks_path,
                 )  # copy libs that are not in framework yet
                 added_to_framework_count = added_to_framework_count + 1
-        logger.info(f"libs added to Frameworks: {added_to_framework_count}")
+        logger.info("libs added to Frameworks: %i", {added_to_framework_count})
 
-        logger.info(
-            f" --- Python libs: set rpath to Frameworks, nb libs: {len(python_libs)}",
-        )
+        logger.info(" --- Python libs: set rpath to Frameworks, nb libs: %i", len(python_libs))
 
         # Set the rpath to the Frameworks path
         # TODO: remove old rpath
@@ -372,9 +365,7 @@ class CCBundler:
         logger.info("Adding lib already available in Frameworks to the libsToCheck")
         for file_path in self.config.frameworks_path.iterdir():
             libs_to_check.append(file_path)
-        logger.info(
-            f"number of libs already in Frameworks directory: {len(libs_to_check)}",
-        )
+        logger.info("number of libs already in Frameworks directory: %i", len(libs_to_check))
 
         logger.info("Adding plugins to the libs to check")
         for plugin_dir in self.config.plugin_path.iterdir():
@@ -384,7 +375,7 @@ class CCBundler:
                         libs_to_check.append(file)
                         libs_in_plugins.add(file)
 
-        logger.info(f"number of libs in PlugIns directory: {len(libs_in_plugins)}")
+        logger.info("number of libs in PlugIns directory: %i", len(libs_in_plugins))
 
         logger.info("searching for dependencies...")
         while len(libs_to_check):
@@ -452,8 +443,8 @@ class CCBundler:
 
         """
         logger.info("Copying libraries")
-        logger.info(f"lib_ex_found to add to Frameworks: {len(lib_ex_found)}")
-        logger.info(f"libs_found to add to Frameworks: {len(libs_found)}")
+        logger.info("lib_ex_found to add to Frameworks: %i", len(lib_ex_found))
+        logger.info("libs_found to add to Frameworks: %i", len(libs_found))
 
         libs_in_frameworks = set(self.config.frameworks_path.iterdir())
 
@@ -465,7 +456,7 @@ class CCBundler:
             if (base not in libs_in_frameworks) and (lib not in libs_in_plugins):
                 shutil.copy2(lib, self.config.frameworks_path)
                 nb_libs_added += 1
-        logger.info(f"number of libs added to Frameworks: {nb_libs_added}")
+        logger.info("number of libs added to Frameworks: %i", {nb_libs_added})
 
         # --- ajout des rpath pour les libraries du framework : framework et ccPlugins
         logger.info(" --- Frameworks libs: add rpath to Frameworks")
@@ -480,10 +471,8 @@ class CCBundler:
                     stdout=subprocess.PIPE,
                     check=False,
                 )
-        logger.info(f"number of Frameworks libs with rpath modified: {nb_frameworks_libs}")
-        logger.info(
-            f" --- PlugIns libs: add rpath to Frameworks, number of libs: {len(libs_in_plugins)}",
-        )
+        logger.info("number of Frameworks libs with rpath modified: %i", nb_frameworks_libs)
+        logger.info(" --- PlugIns libs: add rpath to Frameworks, number of libs: %i", len(libs_in_plugins))
         for file in libs_in_plugins:
             if file.is_file():
                 subprocess.run(
@@ -510,7 +499,7 @@ class CCBundler:
                 raise Exception("no base path")
                 sys.exit(1)
 
-            logger.info("modify : @executable_path -> @rpath: %s", str(base_path))
+            logger.info("modify : @executable_path -> @rpath: %s", base_path)
 
             subprocess.run(
                 [

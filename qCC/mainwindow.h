@@ -1,19 +1,19 @@
-// ##########################################################################
-// #                                                                        #
-// #                              CLOUDCOMPARE                              #
-// #                                                                        #
-// #  This program is free software; you can redistribute it and/or modify  #
-// #  it under the terms of the GNU General Public License as published by  #
-// #  the Free Software Foundation; version 2 or later of the License.      #
-// #                                                                        #
-// #  This program is distributed in the hope that it will be useful,       #
-// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-// #  GNU General Public License for more details.                          #
-// #                                                                        #
-// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-// #                                                                        #
-// ##########################################################################
+//##########################################################################
+//#                                                                        #
+//#                              CLOUDCOMPARE                              #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 or later of the License.      #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
 
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
@@ -430,7 +430,7 @@ public:
 	 * \param obj The object to be put back into the database tree.
 	 * \param context The context used to put the object back into the tree.
 	 */
-	void putObjectBackIntoDBTree(ccHObject *obj, const ccHObjectContext &context) override;
+	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext &context) override;
 
 	/**
 	 * \brief Handles the event when an item is picked.
@@ -469,7 +469,7 @@ public:
 	 *
 	 * \param menu The menu to which the action will be added.
 	 */
-	void addEditPlaneAction(QMenu &menu) const;
+	void addEditPlaneAction(QMenu& menu) const;
 
 	/**
 	 * \brief Initializes the plugins.

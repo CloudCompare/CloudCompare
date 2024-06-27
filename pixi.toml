@@ -106,7 +106,7 @@ outputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCom
 [feature.build.tasks.bundle]
 cmd = [
   "python",
-  "postInstall/libBundleCloudCompare.py",
+  "scripts/mac/bundle/libBundleCloudCompare.py",
   ".build/install",
   "--embed_python",
   "--output_dependencies"
@@ -116,7 +116,7 @@ depends-on = ["install"]
 [feature.build.tasks.sign_bundle]
 cmd = [
   "python",
-  "postInstall/signatureCloudCompare.py",
+  "scripts/mac/bundle/signatureCloudCompare.py",
   ".build/install",
   "--embed_python",
 ]

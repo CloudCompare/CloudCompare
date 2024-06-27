@@ -39,7 +39,7 @@ class CCSignBundleConfig:
             install_path (Path):  Path where CC is "installed".
             signature (str): Signature to use to sign binaries in the bundle (`codesign -s` option).
             identifier (str): Identifier to use to sign binaries in the bundle (`codesign -i` option).
-            embed_python (bool): Whether or not Python in embedded in the package.
+            embed_python (bool): Whether or not Python is embedded in the package.
 
         """
         self.install_path = install_path

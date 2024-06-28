@@ -222,7 +222,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/yarl-1.9.4-py311h05b510d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.2.13-h53f4e23_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: https://files.pythonhosted.org/packages/74/bf/4ece5fcc54d0ce4640d3d12c3127d1f0f5db5c3be649aaa9127e9c528a92/3dfin-0.4.0rc1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/f0/81/702e8c808a69244b9720342300bfa3918832cda94a7691c81f1669040ecb/3dfin-0.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/a3/1e4612a5ff6ef08f885e0d8e83ba972cbe767bbd07a6fb5f9d2f47725554/CSF_3DFin-1.3.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/9f/d7/1e096e9f69489b37d9756ee82ed5678355fff8e9d736bdada630f38c2cbe/dendromatics-0.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0d/7c/6a96a86f194a68b671fd2c1c881bed1ddaef467321a1b19e1111bc145a31/laspy-2.5.3-py3-none-any.whl
@@ -434,7 +434,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/yarl-1.9.4-py311h05b510d_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zlib-1.2.13-h53f4e23_5.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/zstd-1.5.6-hb46c0d2_0.conda
-      - pypi: https://files.pythonhosted.org/packages/74/bf/4ece5fcc54d0ce4640d3d12c3127d1f0f5db5c3be649aaa9127e9c528a92/3dfin-0.4.0rc1-py3-none-any.whl
+      - pypi: https://files.pythonhosted.org/packages/f0/81/702e8c808a69244b9720342300bfa3918832cda94a7691c81f1669040ecb/3dfin-0.4.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c7/a3/1e4612a5ff6ef08f885e0d8e83ba972cbe767bbd07a6fb5f9d2f47725554/CSF_3DFin-1.3.0.tar.gz
       - pypi: https://files.pythonhosted.org/packages/9f/d7/1e096e9f69489b37d9756ee82ed5678355fff8e9d736bdada630f38c2cbe/dendromatics-0.5.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/0d/7c/6a96a86f194a68b671fd2c1c881bed1ddaef467321a1b19e1111bc145a31/laspy-2.5.3-py3-none-any.whl
@@ -451,9 +451,9 @@ environments:
 packages:
 - kind: pypi
   name: 3dfin
-  version: 0.4.0rc1
-  url: https://files.pythonhosted.org/packages/74/bf/4ece5fcc54d0ce4640d3d12c3127d1f0f5db5c3be649aaa9127e9c528a92/3dfin-0.4.0rc1-py3-none-any.whl
-  sha256: 16fd5c93a5d4ef49d8fb74347684cc5f9e9f474033d0458f7743d2b1bfc1a172
+  version: 0.4.1
+  url: https://files.pythonhosted.org/packages/f0/81/702e8c808a69244b9720342300bfa3918832cda94a7691c81f1669040ecb/3dfin-0.4.1-py3-none-any.whl
+  sha256: e48f1b9b46cec7f5ef5af35c35db0a138a8a932bf042f417110b29e32e50329c
   requires_dist:
   - dendromatics~=0.5.0
   - lazrs~=0.6.0

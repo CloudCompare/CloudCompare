@@ -9,6 +9,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import multiprocessing
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,8 +28,8 @@ class CCSignBundleConfig:
     bundle_abs_path: Path
     cc_bin_path: Path
 
-    signature: Path
-    identifier: Path
+    signature: str
+    identifier: str
 
     embed_python: bool
 
@@ -155,9 +157,11 @@ class CCSignBundle:
             logger.info("--- Total # lib in the CC sub system (framework and plugins) %i", len(cc_app_libs))
 
         logger.info("Remove old signatures")
+        
+        # create the process pool
+        process_pool = multiprocessing.Pool()
         # Remove signature in all embedded libs
-        for lib in all_libs:
-            CCSignBundle._remove_signature(lib)
+        process_pool.map(CCSignBundle._remove_signature, all_libs)
 
         # Remove CC signature as well
         CCSignBundle._remove_signature(self.config.cc_bin_path)
@@ -166,15 +170,13 @@ class CCSignBundle:
             CCSignBundle._remove_signature(self.config.embedded_python_binary)
 
             logger.info("Sign Python dynamic libraries")
-            for lib in python_libs:
-                self._add_signature(lib)
+            process_pool.map(self._add_signature, python_libs)
 
             logger.info("Add entitlements to Python binary")
             self._add_entitlements(self.config.embedded_python_binary, PYAPP_ENTITLEMENTS)
 
             logger.info("Sign CC dynamic libraries")
-            for lib in cc_app_libs:
-                self._add_signature(lib)
+            process_pool.map(self._add_signature, cc_app_libs)
 
             logger.info("Add entitlements to CC binary")
             self._add_entitlements(self.config.cc_bin_path, CCAPP_ENTITLEMENTS)
@@ -184,8 +186,7 @@ class CCSignBundle:
 
         else:
             logger.info("Sign CC dynamic libraries")
-            for lib in cc_app_libs:
-                self._add_signature(lib)
+            process_pool.map(self._add_signature, cc_app_libs)
 
             logger.info("Add entitlements to CC binary")
             # TODO: the original shell script sign the binary AND add entitlements...
@@ -194,6 +195,7 @@ class CCSignBundle:
 
             logger.warning("Add entitlements to CC bundle (CloudCompare.app)")
             self._add_entitlements(self.config.bundle_abs_path, HARDENED_CCAPP_ENTITLEMENTS)
+        process_pool.close()
         return 0
 
 

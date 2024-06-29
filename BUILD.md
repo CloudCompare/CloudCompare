@@ -27,7 +27,7 @@ or plugins.
 ## 3. CMake Configuration
 
 When doing a basic build of CloudCompare, the only CMake arguments that is required
-is the `CMAKE_PREFIX_PATH` to tell CMake where to find your Qt installation. 
+is the `CMAKE_PREFIX_PATH` to tell CMake where to find your Qt installation.
 
 This is only required on **Windows** and **macOs** as on Linux Qt is installed in a standard location
 that CMake will find.
@@ -60,7 +60,7 @@ You can always take a look at how CloudCompare is being build on [GitHub's CI](.
 cmake --build .
 ```
 
-## 5. Install 
+## 5. Install
 
 ```console
 # Still in the build folder
@@ -75,7 +75,7 @@ Example, to build the `qEDL` plugin, add `-DPLUGIN_GL_QEDL=ON` argument to CMake
 
 The optional features are:
 
-|     CMake Option      | Default Value | Description 
+|     CMake Option      | Default Value | Description
 |-----------------------|---------------|-------------
 | OPTION_BUILD_CCVIEWER |      ON       | Whether or not to build the ccViewer side project.
 | OPTION_USE_SHAPE_LIB  |      ON       | Use the vendored shapelib to add support for SHP files.
@@ -114,7 +114,7 @@ The available plugins are
 | qLASFWIO                | PLUGIN_IO_QLAS_FWF                       | OFF           | Windows only. Support for LAS/LAZ with and without waveform using LIBlas (***deprecated, consider using qLASIO instead***).
 | qLASIO                  | PLUGIN_IO_QLAS                           | OFF           | Support for LAS/LAZ with and without waveform (all platforms) using **LASZIP**.
 | qPDALIO                 | PLUGIN_IO_QPDAL                          | OFF           | Add support for LAS/LAZ files using PDAL (***deprecated, consider using qLASIO instead***).
-| qPhotoscanIO            | PLUGIN_IO_QPHOTOSCAN                     | OFF           | 
+| qPhotoscanIO            | PLUGIN_IO_QPHOTOSCAN                     | OFF           |
 | qRDBIO                  | PLUGIN_IO_QRDB                           | OFF           | Add support for RDB.
 | qStepCADImport          | PLUGIN_IO_QSTEP                          | OFF           | Add support for STEP files.
 
@@ -254,7 +254,7 @@ Then, the CloudCompare CMake project will request that you set the following var
   - On Windows 7/8/10 CMake doesn't have the rights to 'install' files in the `Program Files` folder (even though it's CMake's default installation destination!)
 
 
-# Other things 
+# Other things
 
 ## linux
 
@@ -265,6 +265,9 @@ With versions of CMake prior to 3.13, the compiled application might not work fo
 If you are compiling and running locally, add `-DCC_MAC_DEV_PATHS` to the `CMAKE_CXX_FLAGS` in the `CMAKE` group. This
 will look for the plugins in your build directory rather than the application bundle. If you need the shaders as well,
 you will have to create a `shaders` folder in the build directory and copy the shaders you need into it.
+
+For convenience, we provide a 100% self contained build system based on `pixi`. Simply install `pixi` from the [official website](www.pixi.sh) and in the root directory of CC code repository simply launch `pixi run build` and then `pixi run CloudCompare`.
+You can also create a portable (relocatable) `.app` by using `pixi run bundle`. You could find the bundle in `.build/install/CloudCompare` directory.
 
 ## Working with Visual Studio on Windows
 

@@ -49,9 +49,9 @@ ccTrace::ccTrace(ccPolyline* obj)
 		}
 
 		//store waypoints metadata
-		QVariantMap* map = new QVariantMap();
-		map->insert("waypoints", waypoints);
-		setMetaData(*map, true);
+		QVariantMap map;
+		map.insert("waypoints", waypoints);
+		setMetaData(map, true);
 	}
 
 	//load cost function from metadata
@@ -99,14 +99,14 @@ void ccTrace::init(ccPointCloud* associatedCloud)
 
 void ccTrace::updateMetadata()
 {
-	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "Trace");
-	map->insert("search_r", m_search_r);
-	map->insert("cost_function", ccTrace::COST_MODE);
+	QVariantMap map;
+	map.insert("ccCompassType", "Trace");
+	map.insert("search_r", m_search_r);
+	map.insert("cost_function", ccTrace::COST_MODE);
 
 	//TODO - write metadata for structure normal estimates
 
-	setMetaData(*map, true);
+	setMetaData(map, true);
 }
 
 int ccTrace::insertWaypoint(int pointId)
@@ -231,16 +231,20 @@ bool ccTrace::optimizePath(int maxIterations)
 	#endif
 
 	//write control points to property (for reloading)
-	QVariantMap* map = new QVariantMap();
-	QString waypoints = "";
+	QVariantMap map;
+	QString waypoints;
 
 	for (unsigned i = 0; i < m_waypoints.size(); i++)
 	{
-		waypoints += QString::number(m_waypoints[i]) + ",";
+		if (i != 0)
+		{
+			waypoints += ',';
+		}
+		waypoints += QString::number(m_waypoints[i]);
 	}
 
-	map->insert("waypoints", waypoints);
-	setMetaData(*map, true);
+	map.insert("waypoints", waypoints);
+	setMetaData(map, true);
 
 	//push points onto underlying polyline object (for picking & save/load)
 	finalizePath();
@@ -254,7 +258,7 @@ void ccTrace::finalizePath()
 	clear();
 
 	//push trace buffer to said polyline (for save/export etc.)
-	for (std::deque<int> seg : m_trace)
+	for (const std::deque<int>& seg : m_trace)
 	{
 		for (int p : seg)
 		{

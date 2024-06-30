@@ -1223,7 +1223,7 @@ void DistanceMapGenerationDlg::exportMapAsCloud()
 	ccPointCloud* cloud = DistanceMapGenerationTool::ConvertMapToCloud(m_map, m_profile, baseRadius);
 	if (cloud)
 	{
-		if (m_colorScaleSelector)
+		if (m_colorScaleSelector && cloud->getCurrentDisplayedScalarField())
 		{
 			cloud->getCurrentDisplayedScalarField()->setColorScale(m_colorScaleSelector->getSelectedScale());
 		}

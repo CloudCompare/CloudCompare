@@ -18,6 +18,8 @@
 #include "../include/ccMouseCircle.h"
 
 //Qt
+#include <QCursor>
+#include <QWidget>
 #include <QWheelEvent>
 
 //System
@@ -42,13 +44,12 @@ struct Circle
 };
 static Circle s_unitCircle;
 
-ccMouseCircle::ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindowInterface* owner, QString name)
+ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name)
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
-	, m_app(appInterface)
 	, m_owner(owner)
 	, m_pixelSize(0.0f)
 	, m_radius(50)
-	, m_radiusStep(4)	
+	, m_radiusStep(4)
 	, m_allowScroll(true)
 {
 	setVisible(true);
@@ -74,14 +75,6 @@ ccMouseCircle::~ccMouseCircle()
 		m_owner->asQObject()->removeEventFilter(this);
 		m_owner->removeFromOwnDB(this);
 	}
-}
-
-//get the circle radius in world coordinates
-float ccMouseCircle::getRadiusWorld()
-{
-	float r = getRadiusPx() * m_pixelSize;
-	ccLog::Print(QString("Radius_w = %1 (= %2 x %3)").arg(r).arg(getRadiusPx()).arg(m_pixelSize));
-	return r;
 }
 
 //override draw function

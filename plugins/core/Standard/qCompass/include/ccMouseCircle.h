@@ -36,7 +36,7 @@ public:
 	explicit ccMouseCircle(ccGLWindowInterface* owner, QString name = QString("MouseCircle"));
 
 	//deconstructor
-	~ccMouseCircle();
+	~ccMouseCircle() override;
 
 	//get the circle radius in px
 	inline int getRadiusPx() const { return m_radius; }
@@ -52,12 +52,14 @@ protected:
 	void draw(CC_DRAW_CONTEXT& context) override;
 
 private:
-	//ccGLWindowInterface this overlay is attached to -> used to get mouse position & events
-	ccGLWindowInterface* m_owner;
-	float m_pixelSize;
-
 	//event to get mouse-move updates & trigger repaint
 	bool eventFilter(QObject* obj, QEvent* event) override;
+
+private:
+	//ccGLWindowInterface this overlay is attached to -> used to get mouse position & events
+	ccGLWindowInterface* m_owner;
+
+	float m_pixelSize;
 
 	int m_radius;
 	int m_radiusStep;

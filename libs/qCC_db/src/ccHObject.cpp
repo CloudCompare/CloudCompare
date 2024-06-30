@@ -988,9 +988,21 @@ void ccHObject::removeAllChildren()
 		if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
 			if (child->isShareable())
-				dynamic_cast<CCShareable*>(child)->release();
+			{
+				CCShareable* shareable = dynamic_cast<CCShareable*>(child);
+				if (shareable)
+				{
+					shareable->release();
+				}
+				else
+				{
+					assert(false);
+				}
+			}
 			else
+			{
 				delete child;
+			}
 		}
 	}
 }

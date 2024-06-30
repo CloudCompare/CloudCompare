@@ -1248,7 +1248,7 @@ void DesignElement::remove(GenericItem *i)
 	for (std::list<DesignElement*>::iterator it = nelements.begin(); it != nelements.end();)
 	{
 		if (*it == i)
-			nelements.erase(it);
+			it = nelements.erase(it);
 		else
 			++it;
 	}
@@ -1866,7 +1866,7 @@ void Loop::remove(GenericItem *i)
 	for (std::list<Vertex*>::iterator it = loop.begin(); it != loop.end(); )
 	{
 		if ((*it) == i)
-			loop.erase(it);
+			it = loop.erase(it);
 		else
 			++it;
 	}

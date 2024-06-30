@@ -48,7 +48,7 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
-v2.13.2 (Kharkiv) - (06/24/2024)
+v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
 Improvements:
 	- substantial improvement of the cloud merge operation (thanks to Thomas Watson)

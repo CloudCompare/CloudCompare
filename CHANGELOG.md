@@ -37,6 +37,7 @@ Bug fix:
 	- The torus primitive mesh topology was broken
 	- LAS files: the synthetic flag could be mistakenly set at save time if some non-zero classification values were present
 	- The envelope/contour extraction routine of the Cross Section tool could fail or crash in some cases
+	- Canupo: some scalar fields were not properly removed/cleaned in some cases
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

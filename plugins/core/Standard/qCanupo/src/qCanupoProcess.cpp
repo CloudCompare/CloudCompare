@@ -413,7 +413,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 
 					if (computer->needSF()
 						&& ((realCorePoints		&& realCorePoints->getCurrentDisplayedScalarField() == nullptr)
-						||  (!realCorePoints	&&          cloud->getCurrentDisplayedScalarField() == nullptr) //if realCorePoints == 0, it means that the subsampled cloud couldn't be converted to a real cloud!
+						||  (!realCorePoints	&&          cloud->getCurrentDisplayedScalarField() == nullptr) //if realCorePoints == nullptr, it means that the subsampled cloud couldn't be converted to a real cloud!
 						)
 						)
 					{
@@ -808,7 +808,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							}
 
 							for (int j = 0; j < toDelete.size(); ++j)
-								cloud->deleteScalarField(realCorePoints->getScalarFieldIndexByName(qPrintable(toDelete[j])));
+								cloud->deleteScalarField(cloud->getScalarFieldIndexByName(qPrintable(toDelete[j])));
 						}
 
 						size_t scaleCount = scales.size();
@@ -845,7 +845,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						//remove any previously generated scalar field starting by CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME
 						{
 							QStringList toDelete;
-							for (unsigned i = 0; i < realCorePoints->getNumberOfScalarFields(); ++i)
+							for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 							{
 								QString sfName(cloud->getScalarField(i)->getName());
 								if (sfName.startsWith(CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME))

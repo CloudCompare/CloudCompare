@@ -31,6 +31,7 @@ Bug fix:
 	- The scale value in the bottom right corner of the 3D view (orthographic mode) was wrong if the screen height was larger than the width
 	- After the -FEATURE command line command was run, the automatically exported filename of clouds was containing some duplicated contents
 	- The Poisson Reconstruction progress dialog 'cancel' button was ineffective (the process cannot be canceled). It is now hidden.
+	- Per-vertex colors were never saved in a Maya (MA) file
 
 
 v2.13.1 (Kharkiv) - (03/20/2024)

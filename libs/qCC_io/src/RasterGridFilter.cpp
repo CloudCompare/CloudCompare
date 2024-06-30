@@ -552,6 +552,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 													/*y_offset=*/0) != CE_None)
 								{
 									CPLFree(colValues);
+									sf->release();
 									delete pc;
 									return CC_FERR_READING;
 								}

@@ -2745,8 +2745,7 @@ void MainWindow::doActionSamplePointsOnMesh()
 	bool withRGB = dlg.interpolateRGB();
 	bool withTexture = dlg.interpolateTexture();
 	s_useDensity = dlg.useDensity();
-	assert(dlg.getPointsNumber() >= 0);
-	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
+	s_ptsSamplingCount = dlg.getPointsNumber();
 	s_ptsSamplingDensity = dlg.getDensityValue();
 	s_ptsSampleNormals = withNormals;
 
@@ -2798,8 +2797,7 @@ void MainWindow::doActionSamplePointsOnPolyline()
 	if (!dlg.exec())
 		return;
 
-	assert(dlg.getPointsNumber() >= 0);
-	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
+	s_ptsSamplingCount = dlg.getPointsNumber();
 	s_ptsSamplingDensity = dlg.getDensityValue();
 	s_useDensity = dlg.useDensity();
 
@@ -3614,8 +3612,11 @@ void MainWindow::doActionMerge()
 					else
 					{
 						ocIndexSF = pc->getScalarField(sfIdx);
-						ocIndexSF->fill(0);
-						firstCloud->setCurrentDisplayedScalarField(sfIdx);
+						if (ocIndexSF)
+						{
+							ocIndexSF->fill(0);
+							firstCloud->setCurrentDisplayedScalarField(sfIdx);
+						}
 					}
 				}
 			}
@@ -3665,11 +3666,11 @@ void MainWindow::doActionMerge()
 			{
 				firstCloud->getScalarField(i)->computeMinAndMax();
 			}
-		}
 
-		if (ocIndexSF)
-		{
-			firstCloud->showSF(true);
+			if (ocIndexSF)
+			{
+				firstCloud->showSF(true);
+			}
 		}
 
 		//something to remove?
@@ -4010,19 +4011,29 @@ void MainWindow::doAction4pcsRegister()
 		return;
 	}
 
-	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front());
 	ccGenericPointCloud* data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.back());
+	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front());
 
-	ccAlignDlg aDlg(model, data);
+	ccAlignDlg aDlg(data, model);
 	if (!aDlg.exec())
+	{
 		return;
+	}
 
 	// model = aDlg.getModelObject();
 	data = aDlg.getDataObject();
 
 	//Take the correct number of points among the clouds
-	CCCoreLib::ReferenceCloud *subModel = aDlg.getSampledModel();
-	CCCoreLib::ReferenceCloud *subData = aDlg.getSampledData();
+	CCCoreLib::ReferenceCloud* subModel = aDlg.getSampledModel();
+	CCCoreLib::ReferenceCloud* subData = aDlg.getSampledData();
+
+	if (!subModel || !subData)
+	{
+		delete subModel;
+		delete subData;
+		assert(false);
+		return;
+	}
 
 	unsigned nbMaxCandidates = aDlg.isNumberOfCandidatesLimited() ? aDlg.getMaxNumberOfCandidates() : 0;
 
@@ -4030,15 +4041,15 @@ void MainWindow::doAction4pcsRegister()
 
 	CCCoreLib::PointProjectionTools::Transformation transform;
 	if (CCCoreLib::FPCSRegistrationTools::RegisterClouds(	subModel,
-														subData,
-														transform,
-														static_cast<ScalarType>(aDlg.getDelta()),
-														static_cast<ScalarType>(aDlg.getDelta()/2),
-														static_cast<PointCoordinateType>(aDlg.getOverlap()),
-														aDlg.getNbTries(),
-														5000,
-														&pDlg,
-														nbMaxCandidates))
+															subData,
+															transform,
+															static_cast<ScalarType>(aDlg.getDelta()),
+															static_cast<ScalarType>(aDlg.getDelta()/2),
+															static_cast<PointCoordinateType>(aDlg.getOverlap()),
+															aDlg.getNbTries(),
+															5000,
+															&pDlg,
+															nbMaxCandidates))
 	{
 		//output resulting transformation matrix
 		{
@@ -4071,10 +4082,10 @@ void MainWindow::doAction4pcsRegister()
 		ccConsole::Warning(tr("[Align] Registration failed!"));
 	}
 
-	if (subModel)
-		delete subModel;
-	if (subData)
-		delete subData;
+	delete subModel;
+	subModel = nullptr;
+	delete subData;
+	subData = nullptr;
 
 	refreshAll();
 	updateUI();
@@ -5714,7 +5725,9 @@ void MainWindow::doActionSORFilter()
 	sorDlg.setKNN(s_sorFilterKnn);
 	sorDlg.setNSigma(s_sorFilterNSigma);
 	if (!sorDlg.exec())
+	{
 		return;
+	}
 
 	//update semi-persistent/dynamic parameters
 	s_sorFilterKnn = sorDlg.KNN();
@@ -5727,12 +5740,16 @@ void MainWindow::doActionSORFilter()
 
 	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: 'selectEntity' will change the set of currently selected entities!
 
-	for ( ccHObject *entity : selectedEntities )
+	for (ccHObject* entity : selectedEntities)
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
-		if (cloud && lockedVertices)
+		if (!cloud)
+		{
+			continue;
+		}
+		if (lockedVertices)
 		{
 			ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
 			continue;
@@ -5745,7 +5762,7 @@ void MainWindow::doActionSORFilter()
 																						cloud->getOctree().data(),
 																						&pDlg);
 
-		if (selection && cloud)
+		if (selection)
 		{
 			if (selection->size() == cloud->size())
 			{
@@ -5782,14 +5799,7 @@ void MainWindow::doActionSORFilter()
 		else
 		{
 			//no points fall inside selection!
-			if ( cloud != nullptr )
-			{
-				ccConsole::Warning(tr("[DoActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
-			}
-			else
-			{
-				ccConsole::Warning(tr("[DoActionSORFilter] Trying to apply the noise filter to null cloud"));
-			}
+			ccConsole::Warning(tr("[DoActionSORFilter] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 		}
 	}
 
@@ -5847,8 +5857,12 @@ void MainWindow::doActionFilterNoise()
 	{
 		//specific test for locked vertices
 		bool lockedVertices;
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
-		if (cloud && lockedVertices)
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
+		if (!cloud)
+		{
+			continue;
+		}
+		if (lockedVertices)
 		{
 			ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
 			continue;
@@ -5866,7 +5880,7 @@ void MainWindow::doActionFilterNoise()
 																							cloud->getOctree().data(),
 																							&pDlg);
 
-		if (selection && cloud)
+		if (selection)
 		{
 			if (selection->size() == cloud->size())
 			{
@@ -5903,14 +5917,7 @@ void MainWindow::doActionFilterNoise()
 		else
 		{
 			//no points fall inside selection!
-			if ( cloud != nullptr )
-			{
-				ccConsole::Warning(tr("[DoActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
-			}
-			else
-			{
-				ccConsole::Warning(tr("[DoActionFilterNoise] Trying to apply the noise filter to null cloud"));
-			}
+			ccConsole::Warning(tr("[DoActionFilterNoise] Failed to apply the noise filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
 		}
 	}
 
@@ -8085,8 +8092,9 @@ void MainWindow::doActionAddConstantSF()
 
 	//for "real" point clouds only
 	if (!cloud)
+	{
 		return;
-
+	}
 	if (lockedVertices && !ent->isAncestorOf(cloud))
 	{
 		ccUtils::DisplayLockedVerticesWarning(ent->getName(),true);
@@ -8129,7 +8137,9 @@ void MainWindow::doActionAddClassificationSF()
 
 	//for "real" point clouds only
 	if (!cloud)
+	{
 		return;
+	}
 
 	if (lockedVertices && !ent->isAncestorOf(cloud))
 	{
@@ -9229,9 +9239,17 @@ void MainWindow::doActionExportCloudInfo()
 					}
 				}
 				csvStream << validCount << ';' /*"SF valid values;"*/;
-				double mean = sfSum/validCount;
-				csvStream << mean << ';' /*"SF mean;"*/;
-				csvStream << sqrt(std::abs(sfSum2/validCount - mean*mean)) << ';' /*"SF std.dev.;"*/;
+				if (validCount)
+				{
+					double mean = sfSum / validCount;
+					csvStream << mean << ';' /*"SF mean;"*/;
+					csvStream << sqrt(std::abs(sfSum2 / validCount - mean * mean)) << ';' /*"SF std.dev.;"*/;
+				}
+				else
+				{
+					csvStream << "N/A;" /*"SF mean;"*/;
+					csvStream << "N/A;" /*"SF std.dev.;"*/;
+				}
 				csvStream << sfSum << ';' /*"SF sum;"*/;
 			}
 			csvStream << endl;
@@ -10233,11 +10251,11 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	//we simply update the fullscreen action method icon (whatever the window)
 	ccGLWindowInterface* win = getActiveGLWindow();
 	
-	if ( win == nullptr )
+	if (win == nullptr)
 		return;
 
 	m_UI->actionExclusiveFullScreen->blockSignals(true);
-	m_UI->actionExclusiveFullScreen->setChecked(win ? win->exclusiveFullScreen() : false);
+	m_UI->actionExclusiveFullScreen->setChecked(win->exclusiveFullScreen());
 	m_UI->actionExclusiveFullScreen->blockSignals(false);
 
 	if (	!state

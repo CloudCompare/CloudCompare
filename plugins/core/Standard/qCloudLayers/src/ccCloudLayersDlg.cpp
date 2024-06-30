@@ -13,6 +13,7 @@
 
 //CC
 #include <ccGLWindowInterface.h>
+#include <ccMainAppInterface.h>
 #include <ccPointCloud.h>
 
 ccCloudLayersDlg::ccCloudLayersDlg(ccMainAppInterface* app, QWidget* parent)
@@ -55,7 +56,7 @@ ccCloudLayersDlg::ccCloudLayersDlg(ccMainAppInterface* app, QWidget* parent)
 	m_presets.append(QString("All Points"));
 	m_presets.append(QString("Visible Points"));
 
-	m_mouseCircle = new ccMouseCircle(m_app, m_app->getActiveGLWindow());
+	m_mouseCircle = new ccMouseCircle(m_app->getActiveGLWindow());
 	m_mouseCircle->setVisible(false);
 }
 

@@ -845,6 +845,19 @@ void ccCompassExport::SaveSVG(ccMainAppInterface *app, const QString &filename, 
 	
 void ccCompassExport::SaveXML(ccMainAppInterface *app, const QString &filename)
 {
+	//find root node
+	ccHObject* rootObject = app->dbRootObject();
+	if (rootObject && rootObject->getChildrenNumber() == 1) //HACK - often the root only has one child (a .bin file); if so, move down a level
+	{
+		rootObject = rootObject->getChild(0);
+	}
+	if (!rootObject)
+	{
+		assert(false);
+		app->dispToConsole("[ccCompass] Internal error: failed to find the root object", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		return;
+	}
+
 	//open output stream
 	QFile file(filename);
 
@@ -854,13 +867,6 @@ void ccCompassExport::SaveXML(ccMainAppInterface *app, const QString &filename)
 
 		xmlWriter.setAutoFormatting(true);
 		xmlWriter.writeStartDocument();
-
-		//find root node
-		ccHObject* rootObject = app->dbRootObject();
-		if (rootObject && rootObject->getChildrenNumber() == 1)
-		{
-			rootObject = rootObject->getChild(0); //HACK - often the root only has one child (a .bin file); if so, move down a level
-		}
 
 		/*ccHObject::Container pointClouds;
 		rootObject->filterChildren(&pointClouds, true, CC_TYPES::POINT_CLOUD, true);*/

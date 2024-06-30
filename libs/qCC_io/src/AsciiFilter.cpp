@@ -50,10 +50,16 @@ static int s_outputSeparatorIndex = 0;
 static bool s_saveSFBeforeColor = false;
 static bool s_saveColumnsNamesHeader = false;
 static bool s_savePointCountHeader = false;
+static bool s_doNotCreateLabels = false;
 
 void AsciiFilter::SetDefaultSkippedLineCount(int count)
 {
 	s_defaultSkippedLineCount = count;
+}
+
+void AsciiFilter::SetNoLabelCreated(bool state)
+{
+	s_doNotCreateLabels = state;
 }
 
 void AsciiFilter::SetOutputCoordsPrecision(int prec)
@@ -572,7 +578,7 @@ void clearStructure(cloudAttributesDescriptor &cloudDesc)
 	cloudDesc.reset();
 }
 
-cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequence,
+cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence& openSequence,
 										unsigned numberOfPoints,
 										int& maxIndex,
 										unsigned step = 1)
@@ -1124,7 +1130,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			}
 
 			//Label
-			if (cloudDesc.labelIndex >= 0)
+			if (cloudDesc.labelIndex >= 0 && !s_doNotCreateLabels)
 			{
 				cc2DLabel* label = new cc2DLabel();
 				label->addPickedPoint(cloudDesc.cloud, cloudDesc.cloud->size() - 1);
@@ -1153,22 +1159,30 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 	if (cloudDesc.cloud)
 	{
 		if (cloudDesc.cloud->size() < cloudDesc.cloud->capacity())
+		{
 			cloudDesc.cloud->resize(cloudDesc.cloud->size());
+		}
 
 		//add cloud to output
 		if (!cloudDesc.scalarFields.empty())
 		{
 			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE);
-				cloudDesc.scalarFields[j]->computeMinAndMax();
+				if (cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE))
+				{
+					cloudDesc.scalarFields[j]->computeMinAndMax();
+				}
+				else
+				{
+					// nothing will happen, we just use too much memory...
+				}
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 			cloudDesc.cloud->showSF(true);
 		}
 
 		//position the labels
-		if (cloudDesc.labelIndex >= 0)
+		if (cloudDesc.labelIndex >= 0 && !s_doNotCreateLabels)
 		{
 			ccHObject::Container labels;
 			cloudDesc.cloud->filterChildren(labels, false, CC_TYPES::LABEL_2D, true);

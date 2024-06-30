@@ -593,7 +593,11 @@ void qCanupo2DViewDialog::addOrSelectPoint(int x, int y)
 		return;
 	}
 	unsigned newIndexInCloud = vertices->size();
-	vertices->reserve(newIndexInCloud+1);
+	if (!vertices->reserve(newIndexInCloud + 1))
+	{
+		delete vertices;
+		return;
+	}
 	vertices->addPoint(P);
 
 	//add the corresponding point index at the end of the polyline
@@ -634,10 +638,10 @@ void qCanupo2DViewDialog::removePoint(int x, int y)
 		return;
 
 	//picking radius
-	double maxPickingDist = static_cast<double>(m_pickingRadius) * m_glWindow->computeActualPixelSize();
+	double maxPickingDist = m_pickingRadius * m_glWindow->computeActualPixelSize();
 
 	//B = closest vertex
-	const CCVector3* B = (closeIndex >=0 ? m_poly->getPoint(closeIndex) : nullptr);
+	const CCVector3* B = m_poly->getPoint(closeIndex);
 	if ((P-*B).norm() > maxPickingDist)
 	{
 		//too far
@@ -645,9 +649,11 @@ void qCanupo2DViewDialog::removePoint(int x, int y)
 	}
 
 	//shift all indexes on the polyline only (we don't bother with the vertices cloud!)
-	for (unsigned i=static_cast<unsigned>(closeIndex); i<polySize-1; ++i)
-		m_poly->setPointIndex(i,m_poly->getPointGlobalIndex(i+1));
-	m_poly->resize(polySize-1);
+	for (unsigned i = static_cast<unsigned>(closeIndex); i < polySize - 1; ++i)
+	{
+		m_poly->setPointIndex(i, m_poly->getPointGlobalIndex(i + 1));
+	}
+	m_poly->resize(polySize - 1);
 
 	m_glWindow->redraw();
 }

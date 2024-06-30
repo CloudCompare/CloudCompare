@@ -83,19 +83,23 @@ namespace ccEntityAction
 		if (cloud == nullptr)
 		{
 			Q_ASSERT(false);
-			return QString();
+			return {};
 		}
 		
 		QString name = baseName;
-		int tries = 0;
-		
-		while (cloud->getScalarFieldIndexByName(qPrintable(name)) >= 0 || tries > 99)
-			name = QString("%1 #%2").arg(baseName).arg(++tries);
-		
-		if (tries > 99)
-			return QString();
-		
-		return name;
+		for (int trials = 0; trials < 99; ++trials)
+		{
+			if (cloud->getScalarFieldIndexByName(qPrintable(name)) < 0)
+			{
+				// Scalar field name is available
+				return name;
+			}
+			// else, generate a new name
+			name = QString("%1 #%2").arg(baseName).arg(trials + 1);
+		}
+
+		// we couldn't find an available name!
+		return {};
 	}
 	
 	//////////

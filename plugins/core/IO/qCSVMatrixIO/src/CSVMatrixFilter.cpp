@@ -155,7 +155,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 
 	file.close();
 
-	if (result == CC_FERR_NO_ERROR)
+	if (result == CC_FERR_NO_ERROR && rowCount != 0 && colCount != 0)
 	{
 		//load as mesh
 		ccMesh* mesh = nullptr;
@@ -164,7 +164,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			cloud->setName("vertices");
 			mesh = new ccMesh(cloud);
 			
-			unsigned triCount = (colCount-1) * (rowCount-1) * 2;
+			unsigned triCount = (colCount - 1) * (rowCount - 1) * 2;
 			if (!mesh->reserve(triCount))
 			{
 				delete mesh;

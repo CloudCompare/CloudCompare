@@ -212,7 +212,12 @@ public:
 		{
 			if (m_polyVertices->size() == m_polyVertices->capacity())
 			{
-				m_polyVertices->reserve(m_polyVertices->size() + 1);
+				if (!m_polyVertices->reserve(m_polyVertices->size() + 1))
+				{
+
+					// Not enough memory
+					return;
+				}
 			}
 
 			m_poly->addPointIndex(m_polyVertices->size());

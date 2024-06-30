@@ -48,6 +48,8 @@ public: // Default / persistent settings
 
 	//! Sets the default number of skipped lines (at loading time)
 	static void SetDefaultSkippedLineCount(int count);
+	//! Prevents the filter to create labels (at loading time)
+	static void SetNoLabelCreated(bool state);
 
 	//! Sets the default output coords precision (as saving time)
 	static void SetOutputCoordsPrecision(int prec);

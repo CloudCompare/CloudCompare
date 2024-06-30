@@ -385,7 +385,7 @@ void qSRA::computeCloud2ProfileRadialDist() const
 	else
 	{
 		if (m_app)
-			m_app->dispToConsole(QString("Select exactly one cloud and one Surface of Revolution (polyline/profile, cone or cylinder)"),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString("Select exactly one cloud and one Surface of Revolution (polyline/profile, cone or cylinder)"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 	}
 
 	if (polyline && tempPolyline)

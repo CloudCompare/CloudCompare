@@ -375,9 +375,15 @@ void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, i
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
 {
 	if (!m_associatedWin)
+	{
 		return;
+	}
 
 	PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
+	if (it == pushedMatrices.end())
+	{
+		return;
+	}
 
 	ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
 	initWithMatrix(mat);

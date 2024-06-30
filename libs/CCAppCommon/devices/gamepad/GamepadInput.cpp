@@ -12,6 +12,7 @@
 GamepadInput::GamepadInput(QObject* parent/*=nullptr*/)
 	: QGamepad(0, parent)
 	, m_hasPanning(false)
+	, m_hasTranslation(false)
 	, m_hasRotation(false)
 	, m_zoom(0)
 {

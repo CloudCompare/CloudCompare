@@ -42,19 +42,19 @@ public:
 								OCTREE
 	};
 
-	ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent = nullptr);
+	ccAlignDlg(ccGenericPointCloud* data, ccGenericPointCloud* model, QWidget* parent = nullptr);
 	virtual ~ccAlignDlg();
 
 	unsigned getNbTries();
 	double getOverlap();
 	double getDelta();
-	ccGenericPointCloud *getModelObject();
-	ccGenericPointCloud *getDataObject();
+	ccGenericPointCloud* getModelObject();
+	ccGenericPointCloud* getDataObject();
 	CC_SAMPLING_METHOD getSamplingMethod();
 	bool isNumberOfCandidatesLimited();
 	unsigned getMaxNumberOfCandidates();
-	CCCoreLib::ReferenceCloud *getSampledModel();
-	CCCoreLib::ReferenceCloud *getSampledData();
+	CCCoreLib::ReferenceCloud* getSampledModel();
+	CCCoreLib::ReferenceCloud* getSampledData();
 
 protected:
 	void swapModelAndData();

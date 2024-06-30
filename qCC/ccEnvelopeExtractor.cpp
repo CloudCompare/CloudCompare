@@ -295,14 +295,24 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			{
 				VertexIterator itBefore = itLeft;
 				if (itBefore == hullPoints.begin())
-					itBefore = hullPoints.end(); --itBefore;
-				VertexIterator itAfter = itLeft; ++itAfter;
+				{
+					itBefore = hullPoints.end();
+					--itBefore;
+				}
+
+				VertexIterator itAfter = itLeft;
+				++itAfter;
+
 				if (itAfter == hullPoints.end())
+				{
 					itAfter = hullPoints.begin();
+				}
 
 				bool forward = ((**itBefore - **itLeft).cross(**itAfter - **itLeft) < 0 && envelopeType == LOWER);
 				if (!forward)
-					std::swap(itLeft,itRight);
+				{
+					std::swap(itLeft, itRight);
+				}
 			}
 
 			//copy the right part
@@ -333,7 +343,6 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			return false;
 		}
 	}
-
 
 	//DEBUG MECHANISM
 	ccEnvelopeExtractorDlg debugDialog;
@@ -367,19 +376,28 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 			debugEnvelope = new ccPolyline(debugEnvelopeVertices);
 			debugEnvelope->addChild(debugEnvelopeVertices);
 			unsigned hullSize = static_cast<unsigned>(hullPoints.size());
-			debugEnvelope->reserve(hullSize);
-			debugEnvelopeVertices->reserve(hullSize);
-			unsigned index = 0;
-			for (VertexIterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA, ++index)
+			if (debugEnvelope->reserve(hullSize))
 			{
-				const Vertex2D* P = *itA;
-				debugEnvelopeVertices->addPoint(CCVector3(P->x, P->y, 0));
-				debugEnvelope->addPointIndex(index/*(*itA)->index*/);
+				debugEnvelopeVertices->reserve(hullSize);
+				unsigned index = 0;
+				for (VertexIterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA, ++index)
+				{
+					const Vertex2D* P = *itA;
+					debugEnvelopeVertices->addPoint(CCVector3(P->x, P->y, 0));
+					debugEnvelope->addPointIndex(index/*(*itA)->index*/);
+				}
+				debugEnvelope->setColor(ccColor::red);
+				debugEnvelopeVertices->setEnabled(false);
+				debugEnvelope->setClosed(envelopeType == FULL);
+				debugDialog.addToDisplay(debugEnvelope, false); //the window will take care of deleting this entity!
 			}
-			debugEnvelope->setColor(ccColor::red);
-			debugEnvelopeVertices->setEnabled(false);
-			debugEnvelope->setClosed(envelopeType == FULL);
-			debugDialog.addToDisplay(debugEnvelope, false); //the window will take care of deleting this entity!
+			else
+			{
+				ccLog::Warning("Not enough memory to create the debug envelope polyline");
+				delete debugEnvelope;
+				debugEnvelope = nullptr;
+				debugEnvelopeVertices = nullptr;
+			}
 		}
 
 		//set zoom
@@ -550,7 +568,7 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(	std::vector<Vertex2D>& points,
 
 					if (enableVisualDebugMode && !debugDialog.isSkipped())
 					{
-						if (debugEnvelope)
+						if (debugEnvelope && debugEnvelopeVertices)
 						{
 							debugEnvelopeVertices->clear();
 							unsigned hullSize = static_cast<unsigned>(hullPoints.size());

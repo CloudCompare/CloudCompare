@@ -2941,7 +2941,17 @@ void ccGLWindowInterface::togglePerspective(bool objectCentered)
 
 double ccGLWindowInterface::computeActualPixelSize() const
 {
-	return m_viewportParams.computePixelSize(glWidth()); // we now use the width as the driving dimension for scaling
+	double pixelSize = m_viewportParams.computePixelSize(glWidth()); // we now use the width as the driving dimension for scaling
+
+	// but we have to compensate for the aspect ratio is h > w
+	double ar = static_cast<double>(glHeight()) / glWidth();
+	if (ar > 1.0)
+	{
+		pixelSize *= ar;
+	}
+
+	return pixelSize;
+
 }
 
 void ccGLWindowInterface::setBubbleViewMode(bool state)

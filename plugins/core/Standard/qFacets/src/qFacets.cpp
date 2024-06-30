@@ -334,7 +334,12 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 		{
 			//we remove the temporary scalar field (otherwise it will be copied to the sub-clouds!)
 			ccScalarField* indexSF = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
-			indexSF->link(); //to prevent deletion below
+			if (!indexSF)
+			{
+				assert(false);
+				return;
+			}
+			indexSF->link(); //to prevent deletion when calling deleteScalarField below
 			pc->deleteScalarField(sfIdx);
 			sfIdx = -1;
 
@@ -364,9 +369,8 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 				}
 				else
 				{
-					//we but back the scalar field
-					if (indexSF)
-						sfIdx = pc->addScalarField(indexSF);
+					//we put the scalar field back
+					sfIdx = pc->addScalarField(indexSF);
 				}
 
 				//pc->setEnabled(false);

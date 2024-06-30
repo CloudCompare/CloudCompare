@@ -37,7 +37,7 @@ ccTorus::ccTorus(	PointCoordinateType insideRadius,
 	, m_rectSectionHeight(std::abs(rectSectionHeight))
 	, m_angle_rad(std::abs(angle_rad))
 {
-	setDrawingPrecision(std::max<unsigned>(precision,MIN_DRAWING_PRECISION)); //automatically calls updateRepresentation
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); //automatically calls updateRepresentation
 }
 
 ccTorus::ccTorus(QString name/*=QString("Torus")*/)
@@ -52,7 +52,7 @@ ccTorus::ccTorus(QString name/*=QString("Torus")*/)
 
 ccGenericPrimitive* ccTorus::clone() const
 {
-	return finishCloneJob(new ccTorus(m_insideRadius,m_outsideRadius,m_angle_rad,m_rectSection,m_rectSectionHeight,&m_transformation,getName(),m_drawPrecision));
+	return finishCloneJob(new ccTorus(m_insideRadius, m_outsideRadius, m_angle_rad, m_rectSection, m_rectSectionHeight, &m_transformation, getName(), m_drawPrecision));
 }
 
 bool ccTorus::buildUp()
@@ -67,23 +67,23 @@ bool ccTorus::buildUp()
 	{
 		return false;
 	}
-	
+
 	//topology
 	bool closed = (m_angle_rad >= 2.0*M_PI);
 
 	const unsigned steps = m_drawPrecision;
 
-	unsigned sweepSteps = 4 * (closed ? steps : static_cast<unsigned>(ceil((m_angle_rad * steps)/(2.0*M_PI))));
+	unsigned sweepSteps = 4 * (closed ? steps : static_cast<unsigned>(ceil((m_angle_rad * steps) / (2.0*M_PI))));
 	unsigned sectSteps = (m_rectSection ? 4 : steps);
 
 	//vertices
 	unsigned vertCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
 	//faces
-	unsigned facesCount = sweepSteps * sectSteps *2;
+	unsigned facesCount = sweepSteps * sectSteps * 2;
 	//faces normals
 	unsigned faceNormCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
 	if (!closed)
-		facesCount += (m_rectSection ? 2 : sectSteps)*2;
+		facesCount += (m_rectSection ? 2 : sectSteps) * 2;
 
 	if (!init(vertCount + (closed || m_rectSection ? 0 : 2), false, facesCount, faceNormCount + (closed ? 0 : 2)))
 	{
@@ -99,7 +99,7 @@ bool ccTorus::buildUp()
 	}
 	catch (const std::bad_alloc&)
 	{
-		init(0,false,0,0);
+		init(0, false, 0, 0);
 		ccLog::Error("[ccTorus::buildUp] Not enough memory");
 		return false;
 	}
@@ -107,12 +107,12 @@ bool ccTorus::buildUp()
 	double sweepStep_rad = m_angle_rad / sweepSteps;
 	double sectStep_rad = (2.0*M_PI) / sectSteps;
 
-	PointCoordinateType sectionRadius = (m_outsideRadius-m_insideRadius)/2;
+	PointCoordinateType sectionRadius = (m_outsideRadius - m_insideRadius) / 2;
 	if (m_rectSection)
 	{
 		//rectangular section
-		sectPoints[0].x = (m_outsideRadius-m_insideRadius)/2;
-		sectPoints[0].z = m_rectSectionHeight/2;
+		sectPoints[0].x = (m_outsideRadius - m_insideRadius) / 2;
+		sectPoints[0].z = m_rectSectionHeight / 2;
 		sectPoints[1].x = -sectPoints[0].x;
 		sectPoints[1].z = sectPoints[0].z;
 		sectPoints[2].x = sectPoints[1].x;
@@ -123,7 +123,7 @@ bool ccTorus::buildUp()
 	else
 	{
 		//circular section
-		for (unsigned i=0; i<sectSteps; ++i)
+		for (unsigned i = 0; i < sectSteps; ++i)
 		{
 			double sect_angle_rad = i * sectStep_rad;
 			sectPoints[i].x = static_cast<PointCoordinateType>(cos(sect_angle_rad) * sectionRadius);
@@ -137,7 +137,7 @@ bool ccTorus::buildUp()
 
 	//main sweep
 	PointCoordinateType sweepRadius = (m_insideRadius + m_outsideRadius)/2;
-	for (unsigned t=0; t<(closed ? sweepSteps : sweepSteps+1); ++t)
+	for (unsigned t = 0; t < (closed ? sweepSteps : sweepSteps + 1); ++t)
 	{
 		//unit director vector
 		CCVector3 sweepU(static_cast<PointCoordinateType>(cos(t*sweepStep_rad)),
@@ -145,7 +145,7 @@ bool ccTorus::buildUp()
 						 0);
 
 		//section points
-		for (unsigned i=0; i<sectSteps; ++i)
+		for (unsigned i = 0; i < sectSteps; ++i)
 		{
 			CCVector3 P(sweepU.x * (sweepRadius + sectPoints[i].x),
 						sweepU.y * (sweepRadius + sectPoints[i].x),
@@ -156,14 +156,14 @@ bool ccTorus::buildUp()
 		//normals
 		if (m_rectSection)
 		{
-			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,1.0).u));
+			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, 1.0).u));
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex((-sweepU).u));
-			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,-1.0).u));
+			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(sweepU.u));
 		}
 		else //circular section
 		{
-			for (unsigned i=0; i<sectSteps; ++i)
+			for (unsigned i = 0; i < sectSteps; ++i)
 			{
 				double sectAngle_rad = i * sectStep_rad;
 				CCVector3 sectU(cos(sectAngle_rad), 0.0, sin(sectAngle_rad));
@@ -177,7 +177,7 @@ bool ccTorus::buildUp()
 
 	if (!closed && !m_rectSection)
 	{
-		CCVector3 P(sweepRadius,0,0);
+		CCVector3 P(sweepRadius, 0, 0);
 		verts->addPoint(P);
 		CCVector3 P2(	static_cast<PointCoordinateType>(cos(m_angle_rad))*sweepRadius,
 						static_cast<PointCoordinateType>(sin(m_angle_rad))*sweepRadius,
@@ -188,7 +188,7 @@ bool ccTorus::buildUp()
 	if (!closed)
 	{
 		//first section (left side)
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0,-1,0).u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, -1, 0).u));
 		//last section (right side)
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(	static_cast<PointCoordinateType>(-sin(m_angle_rad)),
 																			static_cast<PointCoordinateType>(cos(m_angle_rad)),
@@ -201,57 +201,57 @@ bool ccTorus::buildUp()
 	{
 		assert(m_triVertIndexes);
 
-		for (unsigned t=0;t<sweepSteps;++t)
+		for (unsigned t = 0; t < sweepSteps; ++t)
 		{
-			unsigned sweepStart = t*sectSteps;
-			for (unsigned i=0;i<sectSteps;++i)
+			unsigned sweepStart = t * sectSteps;
+			for (unsigned i = 0; i < sectSteps; ++i)
 			{
-				unsigned iNext = (i+1)%sectSteps;
-				addTriangle(sweepStart+i,(sweepStart+i+sectSteps)%vertCount,(sweepStart+iNext+sectSteps)%vertCount);
+				unsigned iNext = (i + 1) % sectSteps;
+				addTriangle(sweepStart + i, (sweepStart + i + sectSteps) % vertCount, (sweepStart + iNext + sectSteps) % vertCount);
 				if (m_rectSection)
-					addTriangleNormalIndexes(sweepStart+i,(sweepStart+i+sectSteps)%faceNormCount,(sweepStart+i+sectSteps)%faceNormCount);
+					addTriangleNormalIndexes(sweepStart + i, (sweepStart + i + sectSteps) % faceNormCount, (sweepStart + i + sectSteps) % faceNormCount);
 				else
-					addTriangleNormalIndexes(sweepStart+i,(sweepStart+i+sectSteps)%faceNormCount,(sweepStart+iNext+sectSteps)%faceNormCount);
-				addTriangle(sweepStart+i,(sweepStart+iNext+sectSteps)%vertCount,sweepStart+iNext);
+					addTriangleNormalIndexes(sweepStart + i, (sweepStart + i + sectSteps) % faceNormCount, (sweepStart + iNext + sectSteps) % faceNormCount);
+				addTriangle(sweepStart + i, (sweepStart + iNext + sectSteps) % vertCount, sweepStart + iNext);
 				if (m_rectSection)
-					addTriangleNormalIndexes(sweepStart+i,(sweepStart+i+sectSteps)%faceNormCount,sweepStart+i);
+					addTriangleNormalIndexes(sweepStart + i, (sweepStart + i + sectSteps) % faceNormCount, sweepStart + iNext);
 				else
-					addTriangleNormalIndexes(sweepStart+i,(sweepStart+iNext+sectSteps)%faceNormCount,sweepStart+iNext);
+					addTriangleNormalIndexes(sweepStart + i, (sweepStart + iNext + sectSteps) % faceNormCount, sweepStart + iNext);
 			}
 		}
 
 		if (!closed)
 		{
-			unsigned lastSectionShift = sweepSteps*sectSteps;
+			unsigned lastSectionShift = sweepSteps * sectSteps;
 			if (m_rectSection)
 			{
 				//rectangular left section
-				addTriangle(0,1,2);
-				addTriangleNormalIndexes(faceNormCount,faceNormCount,faceNormCount);
-				addTriangle(0,2,3);
-				addTriangleNormalIndexes(faceNormCount,faceNormCount,faceNormCount);
+				addTriangle(0, 1, 2);
+				addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
+				addTriangle(0, 2, 3);
+				addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
 				//rectangular right section
-				addTriangle(lastSectionShift,lastSectionShift+2,lastSectionShift+1);
-				addTriangleNormalIndexes(faceNormCount+1,faceNormCount+1,faceNormCount+1);
-				addTriangle(lastSectionShift,lastSectionShift+3,lastSectionShift+2);
-				addTriangleNormalIndexes(faceNormCount+1,faceNormCount+1,faceNormCount+1);
+				addTriangle(lastSectionShift, lastSectionShift + 2, lastSectionShift + 1);
+				addTriangleNormalIndexes(faceNormCount + 1, faceNormCount + 1, faceNormCount + 1);
+				addTriangle(lastSectionShift, lastSectionShift + 3, lastSectionShift + 2);
+				addTriangleNormalIndexes(faceNormCount + 1, faceNormCount + 1, faceNormCount + 1);
 			}
 			else
 			{
 				unsigned lastSectionCenterShift = vertCount;
 				//circular 'left' section
-				for (unsigned i=0;i<sectSteps;++i)
+				for (unsigned i = 0; i < sectSteps; ++i)
 				{
-					unsigned iNext = (i+1)%sectSteps;
-					addTriangle(lastSectionCenterShift,i,iNext);
-					addTriangleNormalIndexes(faceNormCount,faceNormCount,faceNormCount);
+					unsigned iNext = (i + 1) % sectSteps;
+					addTriangle(lastSectionCenterShift, i, iNext);
+					addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
 				}
 				//circular 'right' section
-				for (unsigned i=0;i<sectSteps;++i)
+				for (unsigned i = 0; i < sectSteps; ++i)
 				{
-					unsigned iNext = (i+1)%sectSteps;
-					addTriangle(lastSectionCenterShift+1,lastSectionShift+iNext,lastSectionShift+i);
-					addTriangleNormalIndexes(faceNormCount+1,faceNormCount+1,faceNormCount+1);
+					unsigned iNext = (i + 1) % sectSteps;
+					addTriangle(lastSectionCenterShift + 1, lastSectionShift + iNext, lastSectionShift + i);
+					addTriangleNormalIndexes(faceNormCount + 1, faceNormCount + 1, faceNormCount + 1);
 				}
 			}
 		}

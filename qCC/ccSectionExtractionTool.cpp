@@ -103,7 +103,9 @@ ccSectionExtractionTool::~ccSectionExtractionTool()
 	if (m_editedPoly)
 	{
 		if (m_associatedWin)
+		{
 			m_associatedWin->removeFromOwnDB(m_editedPoly);
+		}
 		delete m_editedPoly;
 		m_editedPoly = nullptr;
 	}
@@ -297,7 +299,9 @@ void ccSectionExtractionTool::releasePolyline(Section* section)
 		{
 			//remove from display
 			if (m_associatedWin)
+			{
 				m_associatedWin->removeFromOwnDB(section->entity);
+			}
 			//delete entity
 			delete section->entity;
 			section->entity = nullptr;
@@ -428,7 +432,9 @@ void ccSectionExtractionTool::undo()
 	m_UI->undoToolButton->setEnabled(!m_undoCount.empty());
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 }
 
 bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
@@ -475,7 +481,9 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 		if (cloud.entity && !cloud.isInDB)
 		{
 			if (m_associatedWin)
+			{
 				m_associatedWin->removeFromOwnDB(cloud.entity);
+			}
 			delete cloud.entity;
 			cloud.entity = nullptr;
 
@@ -490,7 +498,9 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation/*=true*/)
 	updateCloudsBox();
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	return true;
 }
@@ -500,7 +510,9 @@ void ccSectionExtractionTool::stop(bool accepted)
 	if (m_editedPoly)
 	{
 		if (m_associatedWin)
+		{
 			m_associatedWin->removeFromOwnDB(m_editedPoly);
+		}
 		delete m_editedPoly;
 		m_editedPoly = nullptr;
 	}
@@ -535,6 +547,11 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	if (!inputPoly)
 	{
 		assert(false);
+		return false;
+	}
+	if (!m_associatedWin)
+	{
+		ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
 		return false;
 	}
 
@@ -620,13 +637,10 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	inputPoly->setWidth(s_defaultPolylineWidth);
 
 	//add to display
-	if (m_associatedWin)
+	inputPoly->setDisplay_recursive(m_associatedWin);
+	if (!alreadyInDB)
 	{
-		inputPoly->setDisplay_recursive(m_associatedWin);
-		if (!alreadyInDB)
-		{
-			m_associatedWin->addToOwnDB(inputPoly);
-		}
+		m_associatedWin->addToOwnDB(inputPoly);
 	}
 
 	return true;
@@ -667,7 +681,9 @@ bool ccSectionExtractionTool::addCloud(ccGenericPointCloud* inputCloud, bool alr
 	{
 		inputCloud->setDisplay(m_associatedWin);
 		if (!alreadyInDB)
+		{
 			m_associatedWin->addToOwnDB(inputCloud);
+		}
 	}
 
 	return true;
@@ -742,8 +758,8 @@ void ccSectionExtractionTool::addPointToPolyline(int x, int y)
 	//clicked point (2D)
 	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
-		static_cast<PointCoordinateType>(pos2D.y()),
-		0);
+				static_cast<PointCoordinateType>(pos2D.y()),
+				0);
 
 	//start new polyline?
 	if (((m_state & RUNNING) == 0) || vertCount == 0)
@@ -815,13 +831,17 @@ void ccSectionExtractionTool::closePolyLine(int, int)
 
 		//remove polyline from the 'temporary' world
 		if (m_associatedWin)
+		{
 			m_associatedWin->removeFromOwnDB(m_editedPoly);
+		}
 		//set default display style
 		m_editedPoly->showColors(true);
 		m_editedPoly->setColor(s_defaultPolylineColor);
 		m_editedPoly->setWidth(s_defaultPolylineWidth);
 		if (!m_clouds.isEmpty())
+		{
 			m_editedPoly->setDisplay_recursive(m_clouds.front().originalDisplay); //set the same 'default' display as the cloud
+		}
 		m_editedPoly->setName(QString("Polyline #%1").arg(m_sections.size() + 1));
 		//save polyline
 		if (!addPolyline(m_editedPoly, false))
@@ -858,7 +878,9 @@ void ccSectionExtractionTool::cancelCurrentPolyline()
 	m_state &= (~RUNNING);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 }
 
 void ccSectionExtractionTool::enableSectionEditingMode(bool state)
@@ -954,9 +976,13 @@ void ccSectionExtractionTool::doImportPolylinesFromDB()
 		
 		//auto-select the last one
 		if (!m_sections.empty())
+		{
 			selectPolyline(&(m_sections.back()));
+		}
 		if (m_associatedWin)
+		{
 			m_associatedWin->redraw();
+		}
 	}
 	else
 	{
@@ -987,6 +1013,11 @@ void ccSectionExtractionTool::generateOrthoSections()
 	if (!m_selectedPoly)
 	{
 		ccLog::Warning("[ccSectionExtractionTool] No polyline selected");
+		return;
+	}
+	if (!m_associatedWin)
+	{
+		ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
 		return;
 	}
 
@@ -1149,10 +1180,8 @@ void ccSectionExtractionTool::generateOrthoSections()
 	}
 
 	poly->showArrow(false, 0, 0);
-	if (m_associatedWin)
-	{
-		m_associatedWin->redraw();
-	}
+
+	m_associatedWin->redraw();
 }
 
 ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, const QString& defaultName)
@@ -1194,7 +1223,14 @@ ccHObject* ccSectionExtractionTool::getExportGroup(unsigned& defaultGroupID, con
 void ccSectionExtractionTool::exportSections()
 {
 	if (m_sections.empty())
+	{
 		return;
+	}
+	if (!m_associatedWin)
+	{
+		ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
+		return;
+	}
 
 	//we only export 'temporary' objects
 	unsigned exportCount = 0;
@@ -1237,10 +1273,7 @@ void ccSectionExtractionTool::exportSections()
 
 	ccLog::Print(QString("[ccSectionExtractionTool] %1 sections exported").arg(exportCount));
 
-	//if (m_associatedWin)
-	//{
-	//	m_associatedWin->redraw();
-	//}
+	//m_associatedWin->redraw();
 }
 
 bool ccSectionExtractionTool::extractSectionEnvelope(const ccPolyline* originalSection,
@@ -1429,6 +1462,8 @@ bool ccSectionExtractionTool::extractSectionCloud(const std::vector<CCCoreLib::R
 			}
 			else
 			{
+				assert(sectionCloud);
+
 				//fuse it with the global cloud
 				unsigned cloudSizeBefore = sectionCloud->size();
 				unsigned partSize = part->size();
@@ -1805,7 +1840,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 struct Segment2D
 {
-	Segment2D() : s(0) {}
+	Segment2D() : lAB(0), s(0) {}
 
 	CCVector2 A, B, uAB;
 	PointCoordinateType lAB;

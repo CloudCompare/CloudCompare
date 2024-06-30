@@ -941,7 +941,7 @@ PointCoordinateType ccOctree::GuessBestRadius(	ccGenericPointCloud* cloud,
 		}
 	}
 
-	if (octree && !inputOctree)
+	if (nullptr == inputOctree)
 	{
 		delete octree;
 		octree = nullptr;

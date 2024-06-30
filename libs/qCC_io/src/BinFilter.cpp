@@ -690,11 +690,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->showMaterials(false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (materials)
-								orphans->addChild(materials);
-							materials = nullptr;
 						}
 					}
 					//per-triangle normals
@@ -714,11 +709,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->showTriNorms(false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (triNormsTable)
-								orphans->addChild(triNormsTable);
-							triNormsTable = nullptr;
 						}
 					}
 					//per-triangle texture coordinates
@@ -737,11 +727,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->setTexCoordinatesTable(nullptr, false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (texCoordsTable)
-								orphans->addChild(texCoordsTable);
-							texCoordsTable = nullptr;
 						}
 					}
 
@@ -1242,13 +1227,29 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 				if (header.colors)
 				{
-					loadedCloud->reserveTheRGBTable();
-					loadedCloud->showColors(true);
+					if (loadedCloud->reserveTheRGBTable())
+					{
+						loadedCloud->showColors(true);
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to allocate RGB colors on cloud '%1'").arg(loadedCloud->getName()));
+						delete loadedCloud;
+						return CC_FERR_NOT_ENOUGH_MEMORY;
+					}
 				}
 				if (header.normals)
 				{
-					loadedCloud->reserveTheNormsTable();
-					loadedCloud->showNormals(true);
+					if (loadedCloud->reserveTheNormsTable())
+					{
+						loadedCloud->showNormals(true);
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to allocate normals on cloud '%1'").arg(loadedCloud->getName()));
+						delete loadedCloud;
+						return CC_FERR_NOT_ENOUGH_MEMORY;
+					}
 				}
 				if (header.scalarField)
 				{

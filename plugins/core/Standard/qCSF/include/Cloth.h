@@ -61,7 +61,7 @@ private:
 	// total number of particles is num_particles_width*num_particles_height
 	int constraint_iterations;
 
-	double time_step;
+	//double time_step;
 
 	std::vector<Particle> particles; // all particles that are part of this cloth
 //	std::vector<Constraint> constraints; // alle constraints between particles as part of this cloth

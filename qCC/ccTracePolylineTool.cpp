@@ -138,9 +138,12 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 	}
 
 	ccHObject::Container clouds;
-	m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin);
 	ccHObject::Container meshes;
-	m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin);
+	if (m_associatedWin)
+	{
+		m_associatedWin->getSceneDB()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, false, m_associatedWin);
+		m_associatedWin->getSceneDB()->filterChildren(meshes, true, CC_TYPES::MESH, false, m_associatedWin);
+	}
 
 	if (clouds.empty() && meshes.empty())
 	{
@@ -553,11 +556,10 @@ void ccTracePolylineTool::closePolyLine(int, int)
 		{
 			m_pickingHub->removeListener(this);
 		}
-		m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING); //no more picking
-		m_done = true;
-
 		if (m_associatedWin)
 		{
+			m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING); //no more picking
+			m_done = true;
 			m_associatedWin->redraw(true, false);
 		}
 	}
@@ -640,7 +642,10 @@ void ccTracePolylineTool::exportLine()
 		else
 		{
 			ccLog::Error("Oversampling failed");
-			m_associatedWin->addToOwnDB(m_poly3D);
+			if (m_associatedWin)
+			{
+				m_associatedWin->addToOwnDB(m_poly3D);
+			}
 			return;
 		}
 	}

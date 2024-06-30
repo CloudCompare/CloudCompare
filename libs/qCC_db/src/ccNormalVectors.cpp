@@ -283,8 +283,10 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	{
 		if (!theNormsCodes.resizeSafe(pointCount))
 		{
-			if (theOctree && !inputOctree)
+			if (nullptr == inputOctree)
+			{
 				delete theOctree;
+			}
 			return false;
 		}
 	}
@@ -295,8 +297,10 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	if (!theNorms->resizeSafe(pointCount, true, &blankN))
 	{
 		theNormsCodes.resize(0);
-		if (theOctree && !inputOctree)
+		if (nullptr == inputOctree)
+		{
 			delete theOctree;
+		}
 		return false;
 	}
 	//theNorms->fill(0);
@@ -371,7 +375,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		UpdateNormalOrientations(theCloud, theNormsCodes, preferredOrientation);
 	}
 
-	if (theOctree && !inputOctree)
+	if (nullptr == inputOctree)
 	{
 		delete theOctree;
 		theOctree = nullptr;

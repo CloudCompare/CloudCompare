@@ -377,6 +377,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	{
 		if (zStdDevSfIndex >= 0)
 		{
+			assert(pc);
 			zStdDevSF = pc->getScalarField(zStdDevSfIndex);
 		}
 
@@ -1164,6 +1165,7 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char Z,
 				if (!nProgress.oneStep())
 				{
 					//process cancelled by user
+					kriging.releaseOrdinaryKrigeContext(context);
 					return false;
 				}
 			}

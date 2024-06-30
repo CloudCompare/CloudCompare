@@ -365,15 +365,15 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 	}
 }
 
-int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
-													unsigned char octreeLevel,
-													ccProgressDialog* progressCb)
+int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud* cloud,
+	unsigned char octreeLevel,
+	ccProgressDialog* progressCb)
 {
 	if (!cloud || !cloud->normals())
 	{
-		const QString	name( (cloud == nullptr) ? QStringLiteral("[unnamed]") : cloud->getName() );
-		
-		ccLog::Warning(QString("[orientNormalsWithFM] Cloud '%1' is invalid (or cloud has no normals)").arg( name ));
+		const QString	name((cloud == nullptr) ? QStringLiteral("[unnamed]") : cloud->getName());
+
+		ccLog::Warning(QString("[orientNormalsWithFM] Cloud '%1' is invalid (or cloud has no normals)").arg(name));
 		assert(false);
 		return 0;
 	}
@@ -459,7 +459,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 		progressCb->start();
 	}
 
-	const int octreeWidth = (1<<octreeLevel)-1;
+	const int octreeWidth = (1 << octreeLevel) - 1;
 
 	//enable 26-connectivity
 	//fm.setExtendedConnectivity(true);
@@ -474,8 +474,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 		do
 		{
 			++lastProcessedPoint;
-		}
-		while (lastProcessedPoint < static_cast<int>(numberOfPoints) && resolved[lastProcessedPoint] != 0);
+		} while (lastProcessedPoint < static_cast<int>(numberOfPoints) && resolved[lastProcessedPoint] != 0);
 
 		//all points have been processed? Then we can stop.
 		if (lastProcessedPoint == static_cast<int>(numberOfPoints))
@@ -526,7 +525,10 @@ int ccFastMarchingForNormsDirection::OrientNormals(	ccPointCloud* cloud,
 	cloud->showNormals(true);
 #ifdef QT_DEBUG
 	cloud->setCurrentDisplayedScalarField(sfIdx);
-	cloud->getCurrentDisplayedScalarField()->computeMinAndMax();
+	if (cloud->getCurrentDisplayedScalarField())
+	{
+		cloud->getCurrentDisplayedScalarField()->computeMinAndMax();
+	}
 	cloud->showSF(true);
 #else
 	cloud->deleteScalarField(sfIdx);

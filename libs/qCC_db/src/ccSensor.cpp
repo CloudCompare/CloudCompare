@@ -36,7 +36,17 @@ ccSensor::ccSensor(const ccSensor& sensor)
 	, m_scale(sensor.m_scale)
 {
 	if (sensor.m_posBuffer)
+	{
 		m_posBuffer = new ccIndexedTransformationBuffer(*sensor.m_posBuffer);
+		addChild(m_posBuffer);
+		m_posBuffer->setDisplay(sensor.getDisplay());
+		m_posBuffer->setVisible(true);
+		m_posBuffer->setEnabled(false);
+	}
+}
+
+ccSensor::~ccSensor()
+{
 }
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
@@ -62,7 +72,9 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	}
 
 	if (sort)
+	{
 		m_posBuffer->sort();
+	}
 
 	return true;
 }
@@ -92,12 +104,12 @@ void ccSensor::getIndexBounds(double& minIndex, double& maxIndex) const
 bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double index) const
 {
 	trans.toIdentity();
-	if (m_posBuffer)
-		if (!m_posBuffer->getInterpolatedTransformation(index,trans))
-			return false;
+	if (m_posBuffer && !m_posBuffer->getInterpolatedTransformation(index, trans))
+	{
+		return false;
+	}
 
 	trans *= m_rigidTransformation;
-
 	return true;
 }
 
@@ -164,14 +176,18 @@ bool ccSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 
 	//color (dataVersion>=35)
 	if (out.write((const char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
+	{
 		return WriteError();
+	}
 
 	//we can't save the associated position buffer (as it may be shared by multiple sensors)
 	//so instead we save it's unique ID (dataVersion>=34)
 	//WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t bufferUniqueID = (m_posBuffer ? static_cast<uint32_t>(m_posBuffer->getUniqueID()) : 0);
 	if (out.write((const char*)&bufferUniqueID, 4) < 0)
+	{
 		return WriteError();
+	}
 
 	return true;
 }
@@ -203,7 +219,9 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t bufferUniqueID = 0;
 	if (in.read((char*)&bufferUniqueID, 4) < 0)
+	{
 		return ReadError();
+	}
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_posBuffer' pointer!!!
 	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;
 

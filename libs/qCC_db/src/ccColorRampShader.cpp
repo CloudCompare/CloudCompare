@@ -68,9 +68,16 @@ bool ccColorRampShader::setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, flo
 	for (unsigned i = 0; i < colorSteps; ++i)
 	{
 		const ccColor::Rgb* col = colorScale->getColorByRelativePos(static_cast<double>(i) / (colorSteps - 1), colorSteps);
-		//set ramp colors as float-packed values
-		int rgb = (col->r << 16) | (col->g << 8) | col->b;
-		s_packedColormapf[i] = static_cast<float>(rgb / resolution);
+		if (col)
+		{
+			//set ramp colors as float-packed values
+			int rgb = (col->r << 16) | (col->g << 8) | col->b;
+			s_packedColormapf[i] = static_cast<float>(rgb / resolution);
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 	setUniformValueArray("uf_colormapTable", s_packedColormapf, colorSteps, 1);
 

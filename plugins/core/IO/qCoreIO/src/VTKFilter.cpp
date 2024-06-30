@@ -286,6 +286,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 	}
+	assert(nullptr != vertices);
 
 	//loop on keywords/data
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
@@ -820,7 +821,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 	file.close();
 
-	if (vertices && vertices->size() == 0)
+	if (vertices->size() == 0)
 	{
 		delete vertices;
 		vertices = nullptr;

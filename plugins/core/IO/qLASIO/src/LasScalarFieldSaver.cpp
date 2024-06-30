@@ -58,13 +58,13 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::ScanDirectionFlag:
 			if (field.sf)
 			{
-				point.scan_direction_flag = (static_cast<laszip_U8>(value) > 0);
+				point.scan_direction_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::EdgeOfFlightLine:
 			if (field.sf)
 			{
-				point.edge_of_flight_line = (static_cast<laszip_U8>(value) > 0);
+				point.edge_of_flight_line = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::Classification:
@@ -72,22 +72,23 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 			{
 				point.classification = static_cast<laszip_U8>(value);
 			}
+			break;
 		case LasScalarField::SyntheticFlag:
 			if (field.sf)
 			{
-				point.synthetic_flag = (static_cast<laszip_U8>(value) > 0);
+				point.synthetic_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::KeypointFlag:
 			if (field.sf)
 			{
-				point.keypoint_flag = (static_cast<laszip_U8>(value) > 0);
+				point.keypoint_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::WithheldFlag:
 			if (field.sf)
 			{
-				point.withheld_flag = (static_cast<laszip_U8>(value) > 0);
+				point.withheld_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::ScanAngleRank:
@@ -128,7 +129,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::OverlapFlag:
 			if (field.sf)
 			{
-				point.extended_classification_flags |= (static_cast<laszip_U8>(value) > 0) ? LasDetails::OVERLAP_FLAG_BIT_MASK : 0;
+				point.extended_classification_flags |= (static_cast<laszip_U8>(value) != 0) ? LasDetails::OVERLAP_FLAG_BIT_MASK : 0;
 			}
 			break;
 		case LasScalarField::ExtendedClassification:

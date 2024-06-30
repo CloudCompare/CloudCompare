@@ -66,7 +66,7 @@ void ccBilateralFilter::reset()
 	m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
+bool ccBilateralFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error)
 {
 	if (width == 0 || height == 0)
 	{

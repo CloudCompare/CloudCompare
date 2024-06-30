@@ -742,9 +742,15 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			outputName += QString(" scale=%1").arg(normalScale);
 			ccPointCloud* sourceCloud = (corePointsHaveBeenSubsampled ? s_M3C2Params.corePoints : cloud1);
 			s_M3C2Params.coreNormals = sourceCloud->normals();
-			normalsAreOk = (s_M3C2Params.coreNormals && s_M3C2Params.coreNormals->currentSize() == sourceCloud->size());
-			s_M3C2Params.coreNormals->link(); //will be released anyway at the end of the process
-
+			if (s_M3C2Params.coreNormals)
+			{
+				normalsAreOk = (s_M3C2Params.coreNormals->currentSize() == sourceCloud->size());
+				s_M3C2Params.coreNormals->link(); //will be released anyway at the end of the process
+			}
+			else
+			{
+				normalsAreOk = false;
+			}
 			//DGM TODO: should we export the normals to the output cloud?
 		}
 		break;

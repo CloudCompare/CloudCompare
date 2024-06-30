@@ -269,6 +269,11 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 
 	//get PCL field
 	int fieldIndex = pcl::getFieldIndex(pclCloud, sfName);
+	if (fieldIndex < 0)
+	{
+		newSF->release();
+		return false;
+	}
 	const PCLScalarField& pclField = pclCloud.fields[fieldIndex];
 	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
 	const_cast<PCLScalarField&>(pclField).name = "S5c4laR";

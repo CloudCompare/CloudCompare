@@ -60,7 +60,7 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
+	virtual bool init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
 	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	virtual GLuint getTexture() override;
 
@@ -72,7 +72,7 @@ public:
 				unsigned height,
 				GLenum internalFormat,
 				GLenum minMagFilter,
-				QString shadersPath,
+				const QString& shadersPath,
 				QString& error);
 
 	//! Sets light direction

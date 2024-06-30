@@ -79,8 +79,14 @@ public:
 				mu2 += samplesvec[i];
 			}
 		}
-		mu1 /= ndata_class1;
-		mu2 /= ndata_class2;
+		if (ndata_class1 != 0)
+		{
+			mu1 /= ndata_class1;
+		}
+		if (ndata_class2 != 0)
+		{
+			mu2 /= ndata_class2;
+		}
 
 		// if you get a compilation error coming from here (with templates
 		// and a 'visual_studio_sucks_cov_helper' structure involved) then
@@ -298,9 +304,9 @@ static void ComputeReferencePoints(	Classifier::Point2D& refpt_pos,
 		}
 	}
 	if (npos)
-		refpt_pos /= static_cast<float>(npos);
+		refpt_pos /= static_cast<PointCoordinateType>(npos);
 	if (nneg)
-		refpt_neg /= static_cast<float>(nneg);
+		refpt_neg /= static_cast<PointCoordinateType>(nneg);
 
 	if (_npos)
 		*_npos = npos;
@@ -348,6 +354,13 @@ static bool DilateClassifier(	Classifier& classifier,
 			++nsamples2;
 		}
 	}
+
+	if (nsamples1 < 2 || nsamples2 < 2)
+	{
+		assert(false);
+		return false;
+	}
+
 	m11 /= nsamples1;
 	v11 = (v11 - m11 * m11*nsamples1) / (nsamples1 - 1);
 	m21 /= nsamples2;
@@ -361,10 +374,10 @@ static bool DilateClassifier(	Classifier& classifier,
 	float d2 = sqrt(v21 / v22);
 	classifier.axisScaleRatio = sqrt(d1*d2);
 
-	float bdValues[4] = { e1.x, e1.y, e2.x / classifier.axisScaleRatio, e2.y / classifier.axisScaleRatio };
+	float bdValues[4] { e1.x, e1.y, e2.x / classifier.axisScaleRatio, e2.y / classifier.axisScaleRatio };
 	dlib::matrix<float, 2, 2> bd(bdValues);
 
-	float biValues[4] = { e1.x, e2.x, e1.y, e2.y };
+	float biValues[4] { e1.x, e2.x, e1.y, e2.y };
 	dlib::matrix<float, 2, 2> bi(biValues);
 	dlib::matrix<float, 2, 2> c = inv(trans(bd)) /* bi * bd */;
 

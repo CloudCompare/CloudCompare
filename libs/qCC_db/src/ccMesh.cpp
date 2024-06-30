@@ -795,12 +795,9 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 			}
 
 			//if we have both the main array and per-triangle normals indexes, we can finish the job
-			if (cloneMesh)
-			{
-				cloneMesh->setTriNormsTable(clonedNormsTable);
-				assert(cloneMesh->m_triNormalIndexes);
-				m_triNormalIndexes->copy(*cloneMesh->m_triNormalIndexes); //should be ok as array is already reserved!
-			}
+			cloneMesh->setTriNormsTable(clonedNormsTable);
+			assert(cloneMesh->m_triNormalIndexes);
+			m_triNormalIndexes->copy(*cloneMesh->m_triNormalIndexes); //should be ok as array is already reserved!
 		}
 		else
 		{
@@ -1695,11 +1692,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		//no normals shading without light!
-		if (!MACRO_LightIsEnabled(context))
-		{
-			glParams.showNorms = false;
-		}
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
@@ -1712,6 +1704,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		//fix 'showNorms'
         glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
+		//no normals shading without light!
+		if (!MACRO_LightIsEnabled(context))
+		{
+			glParams.showNorms = false;
+		}
 
 		//materials & textures
 		bool applyMaterials = (hasMaterials() && materialsShown());
@@ -2636,7 +2633,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 					int oldVertexIndex = tsi.i[j];
 					assert(oldVertexIndex < newIndexes.size());
 					tsi.i[j] = newIndexes[oldVertexIndex];
-					assert(tsi.i[j] >= 0 && tsi.i[j] < m_associatedCloud->size());
+					assert(tsi.i[j] < m_associatedCloud->size());
 				}
 			}
 		}

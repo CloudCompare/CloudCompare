@@ -365,7 +365,14 @@ void ccPluginManager::loadFromPathsAndAddToList()
 
 				// maintain the order of the plugin list
 				const int index = m_pluginList.indexOf(pluginInterface);
-				m_pluginList.replace(index, ccPlugin);
+				if (index >= 0)
+				{
+					m_pluginList.replace(index, ccPlugin);
+				}
+				else
+				{
+					assert(false);
+				}
 
 				previousLoader->unload();
 

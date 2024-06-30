@@ -3611,11 +3611,11 @@ void MainWindow::doActionMerge()
 			{
 				firstCloud->getScalarField(i)->computeMinAndMax();
 			}
-		}
 
-		if (ocIndexSF)
-		{
-			firstCloud->showSF(true);
+			if (ocIndexSF)
+			{
+				firstCloud->showSF(true);
+			}
 		}
 
 		//something to remove?
@@ -3956,10 +3956,10 @@ void MainWindow::doAction4pcsRegister()
 		return;
 	}
 
-	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front());
 	ccGenericPointCloud* data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.back());
+	ccGenericPointCloud* model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front());
 
-	ccAlignDlg aDlg(model, data);
+	ccAlignDlg aDlg(data, model);
 	if (!aDlg.exec())
 		return;
 

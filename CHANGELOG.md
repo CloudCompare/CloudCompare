@@ -81,6 +81,7 @@ Bug fix:
 	- Per-vertex colors were never saved in a Maya (MA) file
 	- Loading a corrupted STL filter could result in a corrupted mesh or a crash
 	- The Compass plugin had some minor but numerous memory leaks
+	- The torus primitive mesh topology was broken
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

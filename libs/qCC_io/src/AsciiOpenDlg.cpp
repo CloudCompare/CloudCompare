@@ -110,6 +110,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	, m_ui(new Ui_AsciiOpenDialog)
 	, m_separator(' ')
 	, m_averageLineSize(-1.0)
+	, m_stream(nullptr)
 	, m_columnsCount(0)
 {
 	m_ui->setupUi(this);

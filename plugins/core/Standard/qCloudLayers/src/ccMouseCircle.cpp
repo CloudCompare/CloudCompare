@@ -45,6 +45,8 @@ static Circle s_unitCircle;
 ccMouseCircle::ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindowInterface* owner, QString name)
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
 	, m_app(appInterface)
+	, m_owner(owner)
+	, m_pixelSize(0.0f)
 	, m_radius(50)
 	, m_radiusStep(4)	
 	, m_allowScroll(true)
@@ -53,10 +55,15 @@ ccMouseCircle::ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindowInterfa
 	setEnabled(false);
 
 	//attach to owner
-	assert(owner); //check valid pointer
-	ccMouseCircle::m_owner = owner;
-	m_owner->asQObject()->installEventFilter(this);
-	m_owner->addToOwnDB(this, true);	
+	if (nullptr != m_owner)
+	{
+		m_owner->asQObject()->installEventFilter(this);
+		m_owner->addToOwnDB(this, true);
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 ccMouseCircle::~ccMouseCircle()

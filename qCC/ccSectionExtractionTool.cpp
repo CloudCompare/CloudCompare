@@ -1805,7 +1805,7 @@ void ccSectionExtractionTool::unfoldPoints()
 
 struct Segment2D
 {
-	Segment2D() : s(0) {}
+	Segment2D() : lAB(0), s(0) {}
 
 	CCVector2 A, B, uAB;
 	PointCoordinateType lAB;

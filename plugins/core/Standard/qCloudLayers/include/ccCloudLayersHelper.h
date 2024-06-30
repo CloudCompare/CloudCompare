@@ -105,17 +105,14 @@ private: // variables
 
 	struct CloudState
 	{
-	public:
-		CloudState() {}
-
 		void update(ScalarType code, ccColor::Rgb color)
 		{
 			this->code = code;
 			this->color = color;
 		}
 
-		ScalarType code;
-		ccColor::Rgb color;
+		ScalarType code = 0;
+		ccColor::Rgb color = ccColor::blackRGB;
 	};
 
 	std::vector<CloudState> m_cloudState;

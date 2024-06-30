@@ -1646,14 +1646,14 @@ void ccCompass::estimateStructureNormals()
 			//build octree over points in combined trace
 			ccOctree::Shared oct = points[r]->computeOctree();
 			unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2); //init vars needed for nearest neighbour search
-			CCCoreLib::ReferenceCloud* nCloud = new  CCCoreLib::ReferenceCloud(points[r]);
+			CCCoreLib::ReferenceCloud nCloud(points[r]);
 			d = -1.0; //re-use the d variable rather than re-declaring another
 			for (unsigned p = 0; p < pinchNodes->size(); p++)
 			{
 				//get closest point in combined trace to this pinch node
-				nCloud->clear(false);
-				oct->findPointNeighbourhood(pinchNodes->getPoint(p), nCloud, 1, level, d);
-				breaks[nCloud->getPointGlobalIndex(0)] = true; //assign
+				nCloud.clear(false);
+				oct->findPointNeighbourhood(pinchNodes->getPoint(p), &nCloud, 1, level, d);
+				breaks[nCloud.getPointGlobalIndex(0)] = true; //assign
 			}
 
 			//***********************************************************************************************

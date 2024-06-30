@@ -355,7 +355,7 @@ static bool DilateClassifier(	Classifier& classifier,
 		}
 	}
 
-	if (nsamples1 < 2 && nsamples2 < 2)
+	if (nsamples1 < 2 || nsamples2 < 2)
 	{
 		assert(false);
 		return false;

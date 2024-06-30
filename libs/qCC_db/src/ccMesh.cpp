@@ -1692,11 +1692,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		//no normals shading without light!
-		if (!MACRO_LightIsEnabled(context))
-		{
-			glParams.showNorms = false;
-		}
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
@@ -1709,6 +1704,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		//fix 'showNorms'
         glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
+		//no normals shading without light!
+		if (!MACRO_LightIsEnabled(context))
+		{
+			glParams.showNorms = false;
+		}
 
 		//materials & textures
 		bool applyMaterials = (hasMaterials() && materialsShown());

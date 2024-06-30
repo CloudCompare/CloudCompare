@@ -83,6 +83,7 @@ Bug fix:
 	- The Compass plugin had some minor but numerous memory leaks
 	- The torus primitive mesh topology was broken
 	- LAS files: the synthetic flag could be mistakenly set at save time if some non-zero classification values were present
+	- The envelope/contour extraction routine of the Cross Section tool could fail or crash in some cases
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

@@ -187,9 +187,6 @@ protected: //members
 	//! Reference points set
 	ccPointCloud m_refPoints;
 
-	//! Dedicated window
-	ccGLWindowInterface* m_win;
-
 	//! Whether the dialog is paused or not
 	bool m_paused;
 

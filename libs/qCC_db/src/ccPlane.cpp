@@ -37,7 +37,7 @@ ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const c
 	updateRepresentation();
 }
 
-ccPlane::ccPlane(QString name /*=QString("Plane")*/)
+ccPlane::ccPlane(QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name)
 	, m_xWidth(0)
 	, m_yWidth(0)

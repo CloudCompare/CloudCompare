@@ -251,7 +251,7 @@ struct SFDescriptor
 
 struct GlobalDescriptor
 {
-	size_t pointCount;
+	size_t pointCount = 0;
 	CCVector3d globalShift;
 	double globalScale = 1.0;
 	std::vector<SFDescriptor> SFs;

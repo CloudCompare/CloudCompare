@@ -168,6 +168,7 @@ public:
 
 	ccGLStereoWidget(ccGLWindowStereo* window, QWidget* parent = nullptr)
 		: QWidget(parent)
+		, m_associatedWindow(nullptr)
 	{
 		setLayout(new QHBoxLayout);
 		layout()->setContentsMargins(0, 0, 0, 0);

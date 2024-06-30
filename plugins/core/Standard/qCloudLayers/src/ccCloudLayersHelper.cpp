@@ -18,9 +18,9 @@ ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* 
 	, m_formerCloudColors( nullptr )
 	, m_formerCloudColorsWereShown( false )
 	, m_formerCloudSFWasShown( false )
+	, m_parameters{}
 	, m_scalarFieldIndex( 0 )
 	, m_modified( false )
-	, m_parameters{}
 {
 	m_projectedPoints.resize(m_cloud->size());
 	m_pointInFrustum.resize(m_cloud->size());

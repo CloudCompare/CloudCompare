@@ -1848,7 +1848,9 @@ void ccCompass::estimateStructureNormals()
 				}
 			}
 
-			if (!hasValidSNE) { //if segments between pinch nodes are too small, then we will not get any valid fit-planes
+			if (!hasValidSNE)
+			{
+				//if segments between pinch nodes are too small, then we will not get any valid fit-planes
 				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Region %d contains no valid points (PinchNodes break the trace into small segments?). Region ignored.", regions[r]->getUniqueID()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				delete points[r];
 				points[r] = nullptr;
@@ -2102,10 +2104,7 @@ void ccCompass::estimateStructureNormals()
 					}
 
 					//figure out id of the compared surface (opposite to the current one)
-					int compID = 0;
-					if (r == 0) {
-						compID = 1;
-					}
+					int compID = (r == 0 ? 1 : 0);
 
 					//get octree for the picking and build picking data structures
 					ccOctree::Shared oct = points[compID]->getOctree();
@@ -2162,11 +2161,10 @@ void ccCompass::estimateStructureNormals()
 
 						//calculate thickness for this point pair in sne cloud
 						//build equation of the plane
-						PointCoordinateType pEq[4];
-						pEq[0] = points[r]->getPointNormal(p).x;
-						pEq[1] = points[r]->getPointNormal(p).y;
-						pEq[2] = points[r]->getPointNormal(p).z;
-						pEq[3] = points[r]->getPoint(p)->dot(points[r]->getPointNormal(p));
+						PointCoordinateType pEq[4] {	points[r]->getPointNormal(p).x,
+														points[r]->getPointNormal(p).y,
+														points[r]->getPointNormal(p).z,
+														points[r]->getPoint(p)->dot(points[r]->getPointNormal(p)) };
 
 						//calculate point to plane distance
 						d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
@@ -2185,11 +2183,10 @@ void ccCompass::estimateStructureNormals()
 								if (idSF_sample->getValue(s) == p) //find samples matching this point
 								{
 									//calculate and store thickness
-									PointCoordinateType pEq[4];
-									pEq[0] = samples[r]->getPointNormal(s).x;
-									pEq[1] = samples[r]->getPointNormal(s).y;
-									pEq[2] = samples[r]->getPointNormal(s).z;
-									pEq[3] = samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s));
+									PointCoordinateType pEq[4]{	samples[r]->getPointNormal(s).x,
+																samples[r]->getPointNormal(s).y,
+																samples[r]->getPointNormal(s).z,
+																samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s)) };
 									d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 									thickSF_sample->setValue(s, std::abs(d));
 									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / std::abs(d)));
@@ -2197,6 +2194,9 @@ void ccCompass::estimateStructureNormals()
 							}
 						}
 					}
+
+					delete nCloud;
+					nCloud = nullptr;
 
 					//compute min and max of thickness scalar fields
 					thickSF->computeMinAndMax();

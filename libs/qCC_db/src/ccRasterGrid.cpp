@@ -377,6 +377,7 @@ bool ccRasterGrid::fillWith(	ccGenericPointCloud* cloud,
 	{
 		if (zStdDevSfIndex >= 0)
 		{
+			assert(pc);
 			zStdDevSF = pc->getScalarField(zStdDevSfIndex);
 		}
 

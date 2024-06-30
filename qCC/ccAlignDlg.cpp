@@ -359,7 +359,11 @@ void ccAlignDlg::estimateDelta()
 	//we have to work on a copy of the cloud in order to prevent the algorithms from modifying the original cloud.
 	CCCoreLib::PointCloud cloud;
 	{
-		cloud.reserve(sampledData->size());
+		if (!cloud.reserve(sampledData->size()))
+		{
+			ccLog::Error("Not enough memory");
+			return;
+		}
 		for (unsigned i = 0; i < sampledData->size(); i++)
 		{
 			cloud.addPoint(*sampledData->getPoint(i));

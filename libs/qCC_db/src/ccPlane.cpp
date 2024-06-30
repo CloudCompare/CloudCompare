@@ -245,7 +245,9 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 		||	quadMesh->getAssociatedCloud()->size() > 4) //they may not be reserved yet?
 	{
 		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid input quad");
+		return nullptr;
 	}
+
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid texture image!");

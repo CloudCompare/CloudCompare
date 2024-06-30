@@ -1159,15 +1159,23 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 	if (cloudDesc.cloud)
 	{
 		if (cloudDesc.cloud->size() < cloudDesc.cloud->capacity())
+		{
 			cloudDesc.cloud->resize(cloudDesc.cloud->size());
+		}
 
 		//add cloud to output
 		if (!cloudDesc.scalarFields.empty())
 		{
 			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE);
-				cloudDesc.scalarFields[j]->computeMinAndMax();
+				if (cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE))
+				{
+					cloudDesc.scalarFields[j]->computeMinAndMax();
+				}
+				else
+				{
+					// nothing will happen, we just use too much memory...
+				}
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 			cloudDesc.cloud->showSF(true);

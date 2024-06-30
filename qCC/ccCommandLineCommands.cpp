@@ -3799,49 +3799,57 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 				cmd.warning(errorStr);
 			}
 			
-			//open text file to save plane related information
-			QString txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(desc.path, desc.basename);
-			if (cmd.addTimestamp())
-			{
-				QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
-				txtFilename += QObject::tr("_%1").arg(timestamp);
-			}
-			txtFilename += QObject::tr(".txt");
-			QFile txtFile(txtFilename);
-			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
-			QTextStream txtStream(&txtFile);
-			
-			txtStream << QObject::tr("Filename: %1").arg(outputFilename) << endl;
-			txtStream << QObject::tr("Fitting RMS: %1").arg(rms) << endl;
-			
-			//We always consider the normal with a positive 'Z' by default!
-			if (N.z < 0.0)
-			{
-				N *= -1.0;
-			}
-			
-			int precision = cmd.numericalPrecision();
-			txtStream << QObject::tr("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << endl;
-			
-			//we compute strike & dip by the way
-			{
-				PointCoordinateType dip = 0;
-				PointCoordinateType dipDir = 0;
-				ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
-				txtStream << ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir) << endl;
-			}
-			
 			//compute the transformation matrix that would make this normal points towards +Z
 			ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N, CCVector3(0, 0, CCCoreLib::PC_ONE));
 			CCVector3 Gt = C;
 			makeZPosMatrix.applyRotation(Gt);
 			makeZPosMatrix.setTranslation(C - Gt);
-			
-			txtStream << "Orientation matrix:" << endl;
-			txtStream << makeZPosMatrix.toString(precision, ' ') << endl;
-			
-			//close the text file
-			txtFile.close();
+
+			//open text file to save plane related information
+			{
+				QString txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(desc.path, desc.basename);
+				if (cmd.addTimestamp())
+				{
+					QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
+					txtFilename += QObject::tr("_%1").arg(timestamp);
+				}
+				txtFilename += QObject::tr(".txt");
+				QFile txtFile(txtFilename);
+				if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text))
+				{
+					QTextStream txtStream(&txtFile);
+
+					txtStream << QObject::tr("Filename: %1").arg(outputFilename) << endl;
+					txtStream << QObject::tr("Fitting RMS: %1").arg(rms) << endl;
+
+					//We always consider the normal with a positive 'Z' by default!
+					if (N.z < 0.0)
+					{
+						N *= -1.0;
+					}
+
+					int precision = cmd.numericalPrecision();
+					txtStream << QObject::tr("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << endl;
+
+					//we compute strike & dip by the way
+					{
+						PointCoordinateType dip = 0;
+						PointCoordinateType dipDir = 0;
+						ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
+						txtStream << ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir) << endl;
+					}
+
+					txtStream << "Orientation matrix:" << endl;
+					txtStream << makeZPosMatrix.toString(precision, ' ') << endl;
+
+					//close the text file
+					txtFile.close();
+				}
+				else
+				{
+					cmd.warning("Failed to open file " + txtFilename + " for writing");
+				}
+			}
 			
 			if (keepLoaded)
 			{
@@ -4232,6 +4240,11 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 		if (!filteredCloud)
 		{
 			return cmd.error(QObject::tr("Process failed (see log)"));
+		}
+		if (filteredCloud == desc.pc)
+		{
+			// nothing to do
+			continue;
 		}
 
 		//replace current cloud by filtered one
@@ -4639,10 +4652,10 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 					}
 				}
 			}
-		}
-		else
-		{
-			return cmd.error(QObject::tr("Failed to set SF %1 as coord %2 on cloud '%3'!").arg(sfName).arg(dimStr).arg(desc.pc->getName()));
+			else
+			{
+				return cmd.error(QObject::tr("Failed to set SF %1 as coord %2 on cloud '%3'!").arg(sfName).arg(dimStr).arg(desc.pc->getName()));
+			}
 		}
 	}
 
@@ -5719,8 +5732,7 @@ bool CommandDelaunayTri::process(ccCommandLineInterface& cmd)
 			maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok)
 			{
-				return cmd.error(QObject::tr("Invalid value for max edge length! (after %1)").arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
-				cmd.print(QObject::tr("Max edge length: %1").arg(maxEdgeLength));
+				return cmd.error(QObject::tr("Invalid value for max edge length (%1)! (after %2)").arg(maxEdgeLength).arg(COMMAND_DELAUNAY_MAX_EDGE_LENGTH));
 			}
 		}
 		else
@@ -6340,7 +6352,7 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 			break;
 		}
 	}
-	if(!applyToRGB && !applyToSF)
+	if (!applyToRGB && !applyToSF)
 	{
 		return cmd.error(QObject::tr("Missing parameter -%1 and/or -%2 need to be set.").arg(OPTION_RGB).arg(OPTION_SF));
 	}
@@ -7026,14 +7038,20 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			if (cmd.addTimestamp())
 			{
 				QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
-				txtFilename += QObject::tr("_%1").arg(timestamp);
+				txtFilename += QString("_%1").arg(timestamp);
 			}
-			txtFilename += QObject::tr(".txt");
+			txtFilename += ".txt";
 			QFile txtFile(txtFilename);
-			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
-			QTextStream txtStream(&txtFile);
-			txtStream << transMat.toString(cmd.numericalPrecision(), ' ') << endl;
-			txtFile.close();
+			if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text))
+			{
+				QTextStream txtStream(&txtFile);
+				txtStream << transMat.toString(cmd.numericalPrecision(), ' ') << endl;
+				txtFile.close();
+			}
+			else
+			{
+				cmd.warning("Failed to save the registration matrix to file " + txtFilename);
+			}
 		}
 		
 		dataAndModel[0]->basename += QObject::tr("_REGISTERED");

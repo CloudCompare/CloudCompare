@@ -201,12 +201,15 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 	if (!m_systemInvalid)
 	{
 		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
-		sf->setColorScale(m_storedOrigColorScale);
-		sf->setSaturationStart(m_storedOrigSatRange.min());
-		sf->setSaturationStop(m_storedOrigSatRange.max());
-		sf->setMinDisplayed(m_storedOrigDisplayRange.min());
-		sf->setMaxDisplayed(m_storedOrigDisplayRange.max());
-		m_cloud->redrawDisplay();
+		if (sf)
+		{
+			sf->setColorScale(m_storedOrigColorScale);
+			sf->setSaturationStart(m_storedOrigSatRange.min());
+			sf->setSaturationStop(m_storedOrigSatRange.max());
+			sf->setMinDisplayed(m_storedOrigDisplayRange.min());
+			sf->setMaxDisplayed(m_storedOrigDisplayRange.max());
+			m_cloud->redrawDisplay();
+		}
 	}
 	delete m_ui;
 }
@@ -551,14 +554,18 @@ void ccColorFromScalarDlg::onApply()
 	{
 		if (!m_cloud->hasColors())
 		{
-			m_cloud->resizeTheRGBTable(false);
+			if (!m_cloud->resizeTheRGBTable(false))
+			{
+				ccLog::Error(tr("Not enough memory"));
+				return;
+			}
 		}
 
 		//which maps to flip?
-		bool reversed[c_channelCount] = { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
+		bool reversed[c_channelCount] { m_ui->reverseR->isChecked(), m_ui->reverseG->isChecked(), m_ui->reverseB->isChecked(), m_ui->reverseA->isChecked() };
 
 		//and which are fixed?
-		bool fixed[c_channelCount] = { m_ui->fixR->isChecked(), m_ui->fixG->isChecked(), m_ui->fixB->isChecked(), m_ui->fixA->isChecked() };
+		bool fixed[c_channelCount] { m_ui->fixR->isChecked(), m_ui->fixG->isChecked(), m_ui->fixB->isChecked(), m_ui->fixA->isChecked() };
 
 		//map scalar values to RGB
 		if (m_ui->toggleRGB->isChecked())

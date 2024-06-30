@@ -643,15 +643,24 @@ int ccTrace::getSegmentCostScalar(int p1, int p2)
 {
 	//m_cloud->getCurrentDisplayedScalarFieldIndex();
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	if (!sf)
+	{
+		assert(false);
+		return 0;
+	}
 	return (sf->getValue(p2)-sf->getMin()) * (765 / (sf->getMax()-sf->getMin())); //return scalar field value mapped to range 0 - 765
 }
 
 int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	if (!sf)
+	{
+		assert(false);
+		return 0;
+	}
 	return (sf->getMax() - sf->getValue(p2)) * (765 / (sf->getMax() - sf->getMin())); //return inverted scalar field value mapped to range 0 - 765
 }
-
 
 //functions for calculating cost SFs
 void ccTrace::buildGradientCost(QWidget* parent)

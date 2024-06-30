@@ -110,7 +110,7 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 		xAxis->setVisible(true);
 	}
 
-	if (xLabel.isNull())
+	if (yLabel.isNull())
 	{
 		yAxis->setVisible(false);
 	}

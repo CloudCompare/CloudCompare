@@ -334,15 +334,14 @@ void ccCompass::tryLoading()
 		prg.setValue(50 + static_cast<int>((50 * i) / originals.size()));
 
 		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
+		if (!original) //can't find for some reason?
+			continue;
 		ccHObject* replacement = replacements[i];
+		if (!replacement) //can't find for some reason?
+			continue;
 
 		replacement->setVisible(original->isVisible());
 		replacement->setEnabled(original->isEnabled());
-
-		if (!original) //can't find for some reason?
-			continue;
-		if (!replacement) //can't find for some reason?
-			continue;
 
 		//steal all the children
 		for (unsigned c = 0; c < original->getChildrenNumber(); c++)
@@ -354,7 +353,10 @@ void ccCompass::tryLoading()
 		original->detachAllChildren();
 
 		//add new parent to scene graph
-		original->getParent()->addChild(replacement);
+		if (original->getParent())
+		{
+			original->getParent()->addChild(replacement);
+		}
 
 		//delete originals
 		m_app->removeFromDB(original);
@@ -610,7 +612,6 @@ void  ccCompass::stopPicking()
 //Get the place/object that new measurements or interpretation should be stored
 ccHObject* ccCompass::getInsertPoint()
 {
-
 	//check if there is an active GeoObject or we are in mapMode
 	if (ccCompass::mapMode || m_geoObject)
 	{
@@ -618,6 +619,7 @@ ccHObject* ccCompass::getInsertPoint()
 		if (!m_geoObject)
 		{
 			m_app->dispToConsole("[ccCompass] Error: Please select a GeoObject to digitize to.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return nullptr;
 		}
 
 		//check it actually exists/hasn't been deleted
@@ -729,12 +731,6 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		{
 			//get point cloud
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity); //cast to point cloud
-
-			if (!cloud)
-			{
-				ccLog::Warning("[Item picking] Shit's fubar (Picked point is not in pickable entities DB?)!");
-				return;
-			}
 
 			//pass picked point, cloud & insert point to relevant tool
 			m_activeTool->pointPicked(parentNode, itemIdx, cloud, P);

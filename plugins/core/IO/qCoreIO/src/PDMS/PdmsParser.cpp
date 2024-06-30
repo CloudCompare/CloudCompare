@@ -636,7 +636,8 @@ bool PdmsParser::parseSessionContent()
 	else if (currentItem->getRoot() != root)
 		session->printWarning("there could be several hierarchy root specified in this file");
 	if (root)
-		root->convertCoordinateSystem();
+		if (!root->convertCoordinateSystem())
+			return false;
 	session->setLoadedObject(root);
 	session->closeSession(false);
 	return true;

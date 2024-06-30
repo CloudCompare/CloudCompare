@@ -795,12 +795,9 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=nullptr*/,
 			}
 
 			//if we have both the main array and per-triangle normals indexes, we can finish the job
-			if (cloneMesh)
-			{
-				cloneMesh->setTriNormsTable(clonedNormsTable);
-				assert(cloneMesh->m_triNormalIndexes);
-				m_triNormalIndexes->copy(*cloneMesh->m_triNormalIndexes); //should be ok as array is already reserved!
-			}
+			cloneMesh->setTriNormsTable(clonedNormsTable);
+			assert(cloneMesh->m_triNormalIndexes);
+			m_triNormalIndexes->copy(*cloneMesh->m_triNormalIndexes); //should be ok as array is already reserved!
 		}
 		else
 		{
@@ -2636,7 +2633,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(	bool removeSelectedTriangles,
 					int oldVertexIndex = tsi.i[j];
 					assert(oldVertexIndex < newIndexes.size());
 					tsi.i[j] = newIndexes[oldVertexIndex];
-					assert(tsi.i[j] >= 0 && tsi.i[j] < m_associatedCloud->size());
+					assert(tsi.i[j] < m_associatedCloud->size());
 				}
 			}
 		}

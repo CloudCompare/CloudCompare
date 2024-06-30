@@ -238,8 +238,10 @@ bool Reference::execute(PdmsObjects::GenericItem* &item) const
 	if (isNameReference())
 	{
 		//Use the hierarchy scanning function given the requested object name
-		if (item)
+		if (!item || !item->getRoot())
+		{
 			return false;
+		}
 		result = item->getRoot()->scan(refname);
 	}
 	//Request for an element (hierarchical or design element only)
@@ -1294,8 +1296,8 @@ bool GroupElement::push(GenericItem *i)
 	if (PdmsToken::isGroupElement(i->getType()))
 	{
 		//If this group can contain the request item, then insert it in the group list
-		GroupElement *group = dynamic_cast<GroupElement*>(i);
-		if (group->level == PDMS_GROUP || group->level > level)
+		GroupElement* group = dynamic_cast<GroupElement*>(i);
+		if (group && (group->level == PDMS_GROUP || group->level > level))
 		{
 			if (group->owner)
 				group->owner->remove(group);
@@ -1313,9 +1315,13 @@ bool GroupElement::push(GenericItem *i)
 		}
 		//else the requested item should be inserted in this group owner
 		else if (owner)
+		{
 			owner->push(group);
+		}
 		else
+		{
 			return false;
+		}
 	}
 	//For design elements, insert it in the group' design element list
 	else if (PdmsToken::isDesignElement(i->getType()))

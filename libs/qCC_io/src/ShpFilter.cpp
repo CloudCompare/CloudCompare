@@ -1267,7 +1267,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline* poly,
                                   ESRI_SHAPE_TYPE outputShapeType,
                                   unsigned char vertDim = 2)
 {
-	assert(vertDim >= 0 && vertDim < 3);
+	assert(vertDim < 3);
 
 	if (!poly)
 	{

@@ -79,7 +79,7 @@ Bug fix:
 	- After the -FEATURE command line command was run, the automatically exported filename of clouds was containing some duplicated contents
 	- The Poisson Reconstruction progress dialog 'cancel' button was ineffective (the process cannot be canceled). It is now hidden.
 	- Per-vertex colors were never saved in a Maya (MA) file
-
+	- Loading a corrupted STL filter could result in a corrupted mesh or a crash
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

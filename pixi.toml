@@ -1,0 +1,130 @@
+[project]
+name = "cloudcompare"
+version = "2.14.0"
+description = "CloudCompare is a 3D point cloud processing software."
+authors = ["Daniel Girardeau-Montaut <admin@cloudcompare.org>"]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tasks.CloudCompare]
+# Start the built executable
+cmd = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
+#input = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
+depends-on = ["install"]
+
+[feature.build.dependencies]
+cmake = ">=3.27,<3.30"
+cxx-compiler = ">=1.7.0,<1.8"
+ninja = "1.12.*"
+
+[dependencies]
+qt = ">=5.15.8,<5.16"
+python = ">=3.11,<3.12"
+laszip = ">=3.4.3,<3.5"
+opencv = ">=4.9.0,<4.10"
+pcl = ">=1.14.1,<1.15"
+boost = ">=1.84.0,<1.85"
+pybind11 = ">=2.12.0,<2.13"
+pyqt = ">=5.15.7,<=5.15.9"
+scipy = ">=1.13.0,<1.14" # Needed by 3DFin
+scikit-learn = ">=1.5,<1.6"
+eigen = ">=3.4.0,<3.5"
+draco = ">=1.5.7,<1.6"
+xerces-c = ">=3.2.5,<3.3"
+occt = ">=7.7.1,<7.8" # Opencascade, >=7.8 needs cmake adjustements
+
+[feature.build.tasks.configure]
+# Configures CMake
+cmd = [
+  "cmake",
+  "-GNinja",
+  "-S.",
+  # We want build in the .build directory
+  "-B.build",
+  "-DCMAKE_BUILD_TYPE=Release",
+  "-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
+  "-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
+  "-DCMAKE_INSTALL_PREFIX=.build/install",
+  "-DPLUGIN_IO_QLAS=ON",
+  "-DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=ON",
+  "-DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=ON",
+  "-DPLUGIN_STANDARD_3DMASC=ON",
+  "-DPLUGIN_PYTHON=ON",
+  "-DPLUGIN_STANDARD_QANIMATION=ON",
+  "-DQANIMATION_WITH_FFMPEG_SUPPORT=ON",
+  "-DPLUGIN_STANDARD_QBROOM=ON",
+  "-DPLUGIN_STANDARD_QCSF=ON",
+  "-DPLUGIN_STANDARD_QCANUPO=ON",
+  "-DPLUGIN_STANDARD_QCLOUDLAYERS=ON",
+  "-DPLUGIN_STANDARD_QCOMPASS=ON",
+  "-DPLUGIN_STANDARD_QCOLORIMETRIC_SEGMENTER=ON",
+  "-DPLUGIN_STANDARD_QFACETS=ON",
+  "-DPLUGIN_STANDARD_QHPR=ON",
+  "-DPLUGIN_STANDARD_QHOUGH_NORMALS=ON",
+  "-DPLUGIN_STANDARD_QM3C2=ON",
+  "-DPLUGIN_STANDARD_QMPLANE=ON",
+  "-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF", #TODO: need libigl for osx-arm64
+  "-DPLUGIN_STANDARD_QPCL=ON",
+  "-DPLUGIN_STANDARD_QPCV=ON",
+  "-DPLUGIN_STANDARD_QPOISSON_RECON=ON",
+  "-DPLUGIN_STANDARD_QRANSAC_SD=ON",
+  "-DPLUGIN_STANDARD_QSRA=ON",
+  "-DPLUGIN_STANDARD_QTREEISO=OFF", #TODO: improve compatibility.
+  #--IO PLUGINS--
+  "-DPLUGIN_IO_QADDITIONAL=ON",
+  "-DPLUGIN_IO_QCORE=ON",
+  "-DPLUGIN_IO_QDRACO=OFF", #TODO
+  "-DPLUGIN_IO_QE57=ON",
+  "-DE57_RELEASE_LTO=OFF", #TODO: Needed else it won't find the AR/Ranlib binary
+  "-DPLUGIN_IO_QFBX=OFF", # Possible, but it needs a proprietary SDK
+  #"-DPLUGIN_IO_QLAS_FWF=ON" # Seems to be Windows only
+  "-DPLUGIN_IO_QPHOTOSCAN=ON",
+  "-DPLUGIN_IO_QRDB=OFF", # Needs a proprietary lib. The lib is not available for osx-arm64
+  "-DPLUGIN_IO_QSTEP=ON",
+  "-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
+  "-DOPENCASCADE_LIB_DIR=$CONDA_PREFIX/lib",
+  #--GL PLUGINS--
+  "-DPLUGIN_GL_QEDL=ON",
+  "-DPLUGIN_GL_QSSAO=ON"
+]
+
+inputs = ["CMakeLists.txt"]
+outputs = [".build/CMakeFiles/"]
+
+[feature.build.tasks.build]
+cmd = ["cmake", "--build", ".build"]
+depends-on = ["configure"]
+inputs = ["CMakeLists.txt", "qCC/"]
+outputs = [".build/qCC/CloudCompare"]
+
+[feature.build.tasks.install]
+cmd = ["cmake", "--install", ".build"]
+depends-on = ["configure"]
+outputs = [".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"]
+
+#TODO: macos only
+# This will embed dependencies and fix rpath accordingly
+[feature.build.tasks.bundle]
+cmd = [
+  "python",
+  "scripts/mac/bundle/libBundleCloudCompare.py",
+  ".build/install",
+  "--embed_python",
+]
+depends-on = ["install"]
+
+# Bundel signature
+[feature.build.tasks.sign_bundle]
+cmd = [
+  "python",
+  "scripts/mac/bundle/signatureCloudCompare.py",
+  ".build/install",
+  "--embed_python",
+]
+depends-on = ["install"]
+
+[environments]
+build = ["build"]
+
+[pypi-dependencies]
+3dfin = { version = "==0.4.1" }

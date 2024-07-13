@@ -85,7 +85,7 @@ public:
 	void keepCurrentSFVisible();
 
 private: // methods
-	void project(ccGLCameraParameters camera, unsigned start, unsigned end);
+	void project(const ccGLCameraParameters& camera, unsigned start, unsigned end);
 	static PointCoordinateType ComputeSquaredEuclideanDistance(const CCVector2& a, const CCVector2& b);
 
 private: // variables
@@ -105,17 +105,14 @@ private: // variables
 
 	struct CloudState
 	{
-	public:
-		CloudState() {}
-
 		void update(ScalarType code, ccColor::Rgb color)
 		{
 			this->code = code;
 			this->color = color;
 		}
 
-		ScalarType code;
-		ccColor::Rgb color;
+		ScalarType code = 0;
+		ccColor::Rgb color = ccColor::blackRGB;
 	};
 
 	std::vector<CloudState> m_cloudState;

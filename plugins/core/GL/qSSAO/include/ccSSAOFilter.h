@@ -59,7 +59,7 @@ public:
 
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(unsigned width, unsigned height, QString shadersPath, QString& error) override;
+	virtual bool init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
 	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	virtual GLuint getTexture() override;
 
@@ -67,7 +67,7 @@ public:
 				unsigned height,
 				bool enableBilateralFilter,
 				bool useReflectTexture,
-				QString shadersPath,
+				const QString& shadersPath,
 				QString& error);
 
 	void setParameters(int N, float Kz, float R, float F);

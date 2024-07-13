@@ -534,7 +534,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		}
 
 		//3rd to 5th lines: 'vertex vix viy viz'
-		unsigned vertIndexes[3];
+		unsigned vertIndexes[3]{ 0, 0, 0 };
 		//unsigned pointCountBefore = pointCount;
 		for (unsigned i = 0; i < 3; ++i)
 		{
@@ -594,11 +594,18 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 			//cloud is already full?
 			if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + s_defaultMemAllocCount))
+			{
 				return CC_FERR_NOT_ENOUGH_MEMORY;
+			}
 
 			//insert new point
 			vertIndexes[i] = pointCount++;
 			vertices->addPoint(P);
+		}
+
+		if (CC_FERR_NO_ERROR != result)
+		{
+			break;
 		}
 
 		//we have successfully read the 3 vertices

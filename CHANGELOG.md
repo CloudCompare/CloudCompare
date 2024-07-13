@@ -48,15 +48,19 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
-v2.13.2 (Kharkiv) - (05/26/2024)
+v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
 Improvements:
 	- substantial improvement of the cloud merge operation (thanks to Thomas Watson)
 
 	- symbolic link files (or shortcut or alias) should now be properly handled
 
-	- command line: increase the timestamp resolution of the registration matrix filename and best fit plane
-		information filename so as to avoid overwriting them if generated too quickly
+	- command line:
+		- increase the timestamp resolution of the registration matrix filename and best fit plane
+			information filename so as to avoid overwriting them if generated too quickly
+		- new sub-option -NO_LABEL after -O
+			- prevents any label from being loaded/created automatically (in case text columns are present in the input file)
+			- for ASCCI files only
 
 	- Korean translation updated (thanks to Yun-Ho Chung)
 
@@ -64,12 +68,23 @@ Improvements:
 
 	- The 'Normals computation' dialog should remember whether normals 'orientation' should be resolved or not
 
+	- PCD files can now be loaded or saved with local characters. PCD files will also be saved as compressed files by default.
+
 Bug fix:
 	- The LAS dialog could be be wrongly initialized with a point format of 0 in some cases (with FWF data).
 		In command line this could result in missing waveforms when saving. Thanks to Paul Leroy for the fix ;)
 	- The Rasterize tool was not letting the user use '0' as the max edge length parameter for the Delaunay-based
 		raster interpolation mode (forcing the user to set a high value to keep all triangles)
-
+	- The scale value in the bottom right corner of the 3D view (orthographic mode) was wrong if the screen height was larger than the width
+	- After the -FEATURE command line command was run, the automatically exported filename of clouds was containing some duplicated contents
+	- The Poisson Reconstruction progress dialog 'cancel' button was ineffective (the process cannot be canceled). It is now hidden.
+	- Per-vertex colors were never saved in a Maya (MA) file
+	- Loading a corrupted STL filter could result in a corrupted mesh or a crash
+	- The Compass plugin had some minor but numerous memory leaks
+	- The torus primitive mesh topology was broken
+	- LAS files: the synthetic flag could be mistakenly set at save time if some non-zero classification values were present
+	- The envelope/contour extraction routine of the Cross Section tool could fail or crash in some cases
+	- Canupo: some scalar fields were not properly removed/cleaned in some cases
 
 v2.13.1 (Kharkiv) - (03/20/2024)
 ----------------------

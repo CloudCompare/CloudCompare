@@ -55,7 +55,7 @@ public:
 		**/
 	virtual bool init(	unsigned width,
 						unsigned height,
-						QString shadersPath,
+						const QString& shadersPath,
 						QString& error) = 0;
 
 	//! Minimal set of 3D viewport parameters that can be used by shaders

@@ -44,6 +44,8 @@ static Circle s_unitCircle;
 
 ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name) 
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
+	, m_owner(nullptr)
+	, m_pixelSize(0.0f)
 	, m_radius(50)
 	, m_radiusStep(4)
 {

@@ -563,9 +563,6 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 
 void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 {
-	if (!m_associatedWin)
-		return;
-	
 	//no point picking when paused!
 	if (m_paused)
 		return;
@@ -595,7 +592,11 @@ void ccPointPairRegistrationDlg::onItemPicked(const PickedItem& pi)
 		}
 		return;
 	}
-	m_associatedWin->redraw();
+
+	if (m_associatedWin)
+	{
+		m_associatedWin->redraw();
+	}
 }
 
 void ccPointPairRegistrationDlg::onPointCountChanged()
@@ -805,7 +806,9 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccHObject* ent
 	addPointToTable(alignedPointsTableWidget, newPointIndex, Pin, pointName);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 
@@ -865,7 +868,9 @@ void ccPointPairRegistrationDlg::unstackAligned()
 	m_alignedPoints.resize(pointCount);
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 }
@@ -1097,7 +1102,9 @@ void ccPointPairRegistrationDlg::unstackRef()
 	}
 
 	if (m_associatedWin)
+	{
 		m_associatedWin->redraw();
+	}
 
 	onPointCountChanged();
 }
@@ -1174,16 +1181,22 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPo
 void ccPointPairRegistrationDlg::showAlignedEntities(bool state)
 {
 	if (m_alignedEntities.empty())
+	{
 		return;
+	}
 
 	for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
+	{
 		it.key()->setVisible(state);
+	}
 	m_alignedPoints.setEnabled(state);
 
 	if (m_associatedWin)
 	{
 		if (autoZoomCheckBox->isChecked())
+		{
 			m_associatedWin->zoomGlobal();
+		}
 		m_associatedWin->redraw();
 	}
 }
@@ -1191,16 +1204,22 @@ void ccPointPairRegistrationDlg::showAlignedEntities(bool state)
 void ccPointPairRegistrationDlg::showReferenceEntities(bool state)
 {
 	if (m_referenceEntities.empty())
+	{
 		return;
+	}
 
 	for (auto it = m_referenceEntities.begin(); it != m_referenceEntities.end(); ++it)
+	{
 		it.key()->setVisible(state);
+	}
 	m_refPoints.setEnabled(state);
 
 	if (m_associatedWin)
 	{
 		if (autoZoomCheckBox->isChecked())
+		{
 			m_associatedWin->zoomGlobal();
+		}
 		m_associatedWin->redraw();
 	}
 }
@@ -1394,7 +1413,7 @@ void ccPointPairRegistrationDlg::clearRMSColumns()
 
 void ccPointPairRegistrationDlg::resetTitle()
 {
-	if ( m_associatedWin != nullptr )
+	if (m_associatedWin)
 	{
 		m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false);
 		m_associatedWin->displayNewMessage("[Point-pair registration]", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600);
@@ -1414,7 +1433,10 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 		&&	callHornRegistration(trans, rms, true))
 	{
 		QString rmsString = QString("Achievable RMS: %1").arg(rms);
-		m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
+		if (m_associatedWin)
+		{
+			m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
+		}
 		resetToolButton->setEnabled(true);
 		validToolButton->setEnabled(true);
 	}
@@ -1424,14 +1446,22 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 		validToolButton->setEnabled(false);
 	}
 
-	m_associatedWin->redraw();
+	if (m_associatedWin)
+	{
+		m_associatedWin->redraw();
+	}
 }
 
 void ccPointPairRegistrationDlg::align()
 {
+	if (!m_associatedWin)
+	{
+		assert(false);
+		return;
+	}
+
 	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms = std::numeric_limits<double>::quiet_NaN();
-
 
 	//reset title
 	resetTitle();
@@ -1526,10 +1556,9 @@ void ccPointPairRegistrationDlg::reset()
 		}
 	}
 
-	if (m_associatedWin)
+	if (m_associatedWin && autoZoomCheckBox->isChecked())
 	{
-		if (autoZoomCheckBox->isChecked())
-			m_associatedWin->zoomGlobal();
+		m_associatedWin->zoomGlobal();
 	}
 
 	updateAlignInfo();

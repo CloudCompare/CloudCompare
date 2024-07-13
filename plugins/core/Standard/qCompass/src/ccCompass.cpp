@@ -334,15 +334,14 @@ void ccCompass::tryLoading()
 		prg.setValue(50 + static_cast<int>((50 * i) / originals.size()));
 
 		ccHObject* original = m_app->dbRootObject()->find(originals[i]);
+		if (!original) //can't find for some reason?
+			continue;
 		ccHObject* replacement = replacements[i];
+		if (!replacement) //can't find for some reason?
+			continue;
 
 		replacement->setVisible(original->isVisible());
 		replacement->setEnabled(original->isEnabled());
-
-		if (!original) //can't find for some reason?
-			continue;
-		if (!replacement) //can't find for some reason?
-			continue;
 
 		//steal all the children
 		for (unsigned c = 0; c < original->getChildrenNumber(); c++)
@@ -354,7 +353,10 @@ void ccCompass::tryLoading()
 		original->detachAllChildren();
 
 		//add new parent to scene graph
-		original->getParent()->addChild(replacement);
+		if (original->getParent())
+		{
+			original->getParent()->addChild(replacement);
+		}
 
 		//delete originals
 		m_app->removeFromDB(original);
@@ -610,7 +612,6 @@ void  ccCompass::stopPicking()
 //Get the place/object that new measurements or interpretation should be stored
 ccHObject* ccCompass::getInsertPoint()
 {
-
 	//check if there is an active GeoObject or we are in mapMode
 	if (ccCompass::mapMode || m_geoObject)
 	{
@@ -618,6 +619,7 @@ ccHObject* ccCompass::getInsertPoint()
 		if (!m_geoObject)
 		{
 			m_app->dispToConsole("[ccCompass] Error: Please select a GeoObject to digitize to.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return nullptr;
 		}
 
 		//check it actually exists/hasn't been deleted
@@ -729,12 +731,6 @@ void ccCompass::pointPicked(ccHObject* entity, unsigned itemIdx, int x, int y, c
 		{
 			//get point cloud
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity); //cast to point cloud
-
-			if (!cloud)
-			{
-				ccLog::Warning("[Item picking] Shit's fubar (Picked point is not in pickable entities DB?)!");
-				return;
-			}
 
 			//pass picked point, cloud & insert point to relevant tool
 			m_activeTool->pointPicked(parentNode, itemIdx, cloud, P);
@@ -1646,14 +1642,14 @@ void ccCompass::estimateStructureNormals()
 			//build octree over points in combined trace
 			ccOctree::Shared oct = points[r]->computeOctree();
 			unsigned char level = oct->findBestLevelForAGivenPopulationPerCell(2); //init vars needed for nearest neighbour search
-			CCCoreLib::ReferenceCloud* nCloud = new  CCCoreLib::ReferenceCloud(points[r]);
+			CCCoreLib::ReferenceCloud nCloud(points[r]);
 			d = -1.0; //re-use the d variable rather than re-declaring another
 			for (unsigned p = 0; p < pinchNodes->size(); p++)
 			{
 				//get closest point in combined trace to this pinch node
-				nCloud->clear(false);
-				oct->findPointNeighbourhood(pinchNodes->getPoint(p), nCloud, 1, level, d);
-				breaks[nCloud->getPointGlobalIndex(0)] = true; //assign
+				nCloud.clear(false);
+				oct->findPointNeighbourhood(pinchNodes->getPoint(p), &nCloud, 1, level, d);
+				breaks[nCloud.getPointGlobalIndex(0)] = true; //assign
 			}
 
 			//***********************************************************************************************
@@ -1848,7 +1844,9 @@ void ccCompass::estimateStructureNormals()
 				}
 			}
 
-			if (!hasValidSNE) { //if segments between pinch nodes are too small, then we will not get any valid fit-planes
+			if (!hasValidSNE)
+			{
+				//if segments between pinch nodes are too small, then we will not get any valid fit-planes
 				m_app->dispToConsole(QString::asprintf("[ccCompass] Warning: Region %d contains no valid points (PinchNodes break the trace into small segments?). Region ignored.", regions[r]->getUniqueID()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				delete points[r];
 				points[r] = nullptr;
@@ -2102,10 +2100,7 @@ void ccCompass::estimateStructureNormals()
 					}
 
 					//figure out id of the compared surface (opposite to the current one)
-					int compID = 0;
-					if (r == 0) {
-						compID = 1;
-					}
+					int compID = (r == 0 ? 1 : 0);
 
 					//get octree for the picking and build picking data structures
 					ccOctree::Shared oct = points[compID]->getOctree();
@@ -2162,11 +2157,10 @@ void ccCompass::estimateStructureNormals()
 
 						//calculate thickness for this point pair in sne cloud
 						//build equation of the plane
-						PointCoordinateType pEq[4];
-						pEq[0] = points[r]->getPointNormal(p).x;
-						pEq[1] = points[r]->getPointNormal(p).y;
-						pEq[2] = points[r]->getPointNormal(p).z;
-						pEq[3] = points[r]->getPoint(p)->dot(points[r]->getPointNormal(p));
+						PointCoordinateType pEq[4] {	points[r]->getPointNormal(p).x,
+														points[r]->getPointNormal(p).y,
+														points[r]->getPointNormal(p).z,
+														points[r]->getPoint(p)->dot(points[r]->getPointNormal(p)) };
 
 						//calculate point to plane distance
 						d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
@@ -2185,11 +2179,10 @@ void ccCompass::estimateStructureNormals()
 								if (idSF_sample->getValue(s) == p) //find samples matching this point
 								{
 									//calculate and store thickness
-									PointCoordinateType pEq[4];
-									pEq[0] = samples[r]->getPointNormal(s).x;
-									pEq[1] = samples[r]->getPointNormal(s).y;
-									pEq[2] = samples[r]->getPointNormal(s).z;
-									pEq[3] = samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s));
+									PointCoordinateType pEq[4]{	samples[r]->getPointNormal(s).x,
+																samples[r]->getPointNormal(s).y,
+																samples[r]->getPointNormal(s).z,
+																samples[r]->getPoint(s)->dot(samples[r]->getPointNormal(s)) };
 									d = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(nCloud->getPoint(0), pEq);
 									thickSF_sample->setValue(s, std::abs(d));
 									samples[r]->setPointNormal(s, samples[r]->getPointNormal(s) * (d / std::abs(d)));
@@ -2197,6 +2190,9 @@ void ccCompass::estimateStructureNormals()
 							}
 						}
 					}
+
+					delete nCloud;
+					nCloud = nullptr;
 
 					//compute min and max of thickness scalar fields
 					thickSF->computeMinAndMax();

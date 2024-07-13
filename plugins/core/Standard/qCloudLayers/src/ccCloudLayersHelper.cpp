@@ -18,15 +18,15 @@ ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* 
 	, m_formerCloudColors( nullptr )
 	, m_formerCloudColorsWereShown( false )
 	, m_formerCloudSFWasShown( false )
+	, m_parameters{}
 	, m_scalarFieldIndex( 0 )
 	, m_modified( false )
-	, m_parameters{}
 {
-	m_projectedPoints.resize(m_cloud->size());
-	m_pointInFrustum.resize(m_cloud->size());
-
 	if (m_cloud)
 	{
+		m_projectedPoints.resize(m_cloud->size());
+		m_pointInFrustum.resize(m_cloud->size());
+
 		m_formerCloudColorsWereShown = m_cloud->colorsShown();
 		m_formerCloudSFWasShown = m_cloud->sfShown();
 
@@ -48,8 +48,8 @@ ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* 
 			}
 		}
 
-		cloud->showColors(true);
-		cloud->showSF(false);
+		m_cloud->showColors(true);
+		m_cloud->showSF(false);
 	}
 }
 
@@ -242,7 +242,7 @@ void ccCloudLayersHelper::restoreState()
 	}
 }
 
-void ccCloudLayersHelper::project(ccGLCameraParameters camera, unsigned start, unsigned end)
+void ccCloudLayersHelper::project(const ccGLCameraParameters& camera, unsigned start, unsigned end)
 {
 	const double half_w = camera.viewport[2] / 2.0;
 	const double half_h = camera.viewport[3] / 2.0;

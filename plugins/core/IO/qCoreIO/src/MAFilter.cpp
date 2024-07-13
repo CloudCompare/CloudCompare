@@ -126,7 +126,9 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 
 	bool hasColors = false;
 	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
-		static_cast<ccPointCloud*>(theCloud)->hasColors();
+	{
+		hasColors = static_cast<ccPointCloud*>(theCloud)->hasColors();
+	}
 
 	//and its scalar field
 	//ccScalarField* sf = 0;

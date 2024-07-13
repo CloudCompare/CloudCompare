@@ -246,7 +246,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			assert(false);
 			return false;
 		}
-		else if (sf2Desc->isConstantValue)
+
+		if (sf2Desc->isConstantValue)
 		{
 			if (op == DIVIDE && sf2Desc->constantValue == 0)
 			{
@@ -270,6 +271,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			QString sfName = GetOperationName(op,sf1Name,sf2Name);
 			if (sfName.length() > 24)
 			{
+				assert(sf2Desc);
 				//if the resulting SF name is too long, we use shortcuts instead
 				sf1Name = QString("(SF#%1)").arg(sf1Idx);
 				sf2Name = QString("(SF#%1)").arg(sf2Desc->sfIndex);
@@ -285,7 +287,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
 		if (sfIdx >= 0)
 		{
-			if (sfIdx == sf1Idx || sfIdx == sf2Desc->sfIndex)
+			if (sfIdx == sf1Idx || (sf2Desc && sfIdx == sf2Desc->sfIndex))
 			{
 				ccLog::Warning(QString("[ccScalarFieldArithmeticsDlg::apply] Resulting scalar field would have the same name as one of the operand (%1)! Rename it first...").arg(sfName));
 				return false;
@@ -341,12 +343,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			{
 			case PLUS:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
 						val = val1 + static_cast<ScalarType>(sf2Desc->constantValue);
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
 							val = val1 + val2;
@@ -355,12 +359,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case MINUS:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
 						val = val1 - static_cast<ScalarType>(sf2Desc->constantValue);
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
 							val = val1 - val2;
@@ -369,12 +375,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case MULTIPLY:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
 						val = val1 * static_cast<ScalarType>(sf2Desc->constantValue);
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
 							val = val1 * val2;
@@ -383,12 +391,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case DIVIDE:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
 						val = val1 / static_cast<ScalarType>(sf2Desc->constantValue);
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2) && CCCoreLib::GreaterThanEpsilon(std::abs(val2) ) )
 						{
@@ -445,6 +455,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = CCCoreLib::LessThanEpsilon(std::abs(val1)) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(1.0 / val1);
 				break;
 			case SET:
+				assert(sf2Desc);
 				val = sf2Desc->constantValue;
 				break;
 			case ABS:
@@ -454,12 +465,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			case MAX:
 			{
 				ScalarType val2 = 0;
+				assert(sf2Desc);
 				if (sf2Desc->isConstantValue)
 				{
 					val2 = sf2Desc->constantValue;
 				}
 				else
 				{
+					assert(sf2);
 					val2 = sf2->getValue(i);
 				}
 				if (ccScalarField::ValidValue(val2))

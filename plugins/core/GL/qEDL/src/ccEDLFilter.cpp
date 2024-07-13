@@ -129,12 +129,12 @@ void ccEDLFilter::reset()
 	m_screenWidth = m_screenHeight = 0;
 }
 
-bool ccEDLFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
+bool ccEDLFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error)
 {
 	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath, error);
 }
 
-bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
+bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, GLenum minMagFilter, const QString& shadersPath, QString& error)
 {
 	if (width == 0 || height == 0)
 	{

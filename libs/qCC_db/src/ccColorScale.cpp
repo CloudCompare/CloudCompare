@@ -540,7 +540,10 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 		int missingItems = 3;
 		while (!stream.atEnd() && missingItems > 0)
 		{
-			stream.readNextStartElement();
+			if (!stream.readNextStartElement())
+			{
+				break;
+			}
 			QStringRef itemName = stream.name();
 			QString itemValue = stream.readElementText();
 			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString(), itemValue));

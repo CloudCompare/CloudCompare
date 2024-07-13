@@ -104,8 +104,8 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	split3DCheckBox->setEnabled(false);
 	okButton->setEnabled(false);
 
-	compName->setText(m_compEnt->getName());
-	refName->setText(m_refEnt->getName());
+	compName->setText(m_compEnt ? m_compEnt->getName() : QString());
+	refName->setText(m_refEnt ? m_refEnt->getName() : QString());
 	preciseResultsTabWidget->setCurrentIndex(0);
 
 	m_refVisibility = (m_refEnt ? m_refEnt->isVisible() : false);
@@ -664,7 +664,10 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			theBestOctreeLevel = level;
 		}
 
-		nProgress.oneStep();
+		if (!nProgress.oneStep())
+		{
+			break;
+		}
 	}
 
 	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)", theBestOctreeLevel, maxSearchDist);

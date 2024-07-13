@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
@@ -15,39 +17,30 @@
 //#                                                                        #
 //##########################################################################
 
-#pragma once
-
 /**
 This is a custom 2DViewportLabel which takes up the entire viewport but is entirely transparent,
 except for a circle with radius r around the mouse. 
 */
 
-#include <ccStdPluginInterface.h>
 #include <ccGLWindowInterface.h>
 #include <cc2DViewportObject.h>
 
+class QEvent;
+
 //Qt
-#include <QEvent>
-#include <QPoint>
 #include <QObject>
 
 class ccMouseCircle : public cc2DViewportObject, public QObject
 {
 public:
 	//constructor
-	explicit ccMouseCircle(ccMainAppInterface* appInterface, ccGLWindowInterface* owner, QString name = QString("MouseCircle"));
+	explicit ccMouseCircle(ccGLWindowInterface* owner, QString name = QString("MouseCircle"));
 
 	//deconstructor
-	~ccMouseCircle();
+	~ccMouseCircle() override;
 
 	//get the circle radius in px
 	inline int getRadiusPx() const { return m_radius; }
-
-	//get the circle radius in world coordinates
-	float getRadiusWorld();
-
-	//removes the link with the owner (no cleanup)
-	inline void ownerIsDead() { m_owner = nullptr; }
 
 	//sets whether scroll is allowed or not
 	inline void setAllowScroll(bool state) { m_allowScroll = state; }
@@ -57,15 +50,15 @@ protected:
 	void draw(CC_DRAW_CONTEXT& context) override;
 
 private:
-	ccMainAppInterface* m_app;
-
-	//ccGLWindowInterface this overlay is attached to -> used to get mouse position & events
-	ccGLWindowInterface* m_owner;
-	float m_pixelSize;
-
 	//event to get mouse-move updates & trigger repaint
 	bool eventFilter(QObject* obj, QEvent* event) override;
-	
+
+private:
+	//ccGLWindowInterface this overlay is attached to -> used to get mouse position & events
+	ccGLWindowInterface* m_owner;
+
+	float m_pixelSize;
+
 	int m_radius;
 	int m_radiusStep;
 	bool m_allowScroll;

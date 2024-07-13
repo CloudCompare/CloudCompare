@@ -1543,8 +1543,16 @@ void MainWindow::doActionEditGlobalShiftAndScale()
 			if (lockedVertices)
 			{
 				//get the vertices
-				assert(entity->isKindOf(CC_TYPES::MESH));
-				ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(entity)->getAssociatedCloud();
+				ccGenericPointCloud* vertices = nullptr;
+				//if it's a mesh
+				if (entity->isKindOf(CC_TYPES::MESH))
+				{
+					vertices = static_cast<ccGenericMesh*>(entity)->getAssociatedCloud();
+				}
+				else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+				{
+					vertices = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(entity)->getAssociatedCloud());
+				}
 				if (!vertices || !entity->isAncestorOf(vertices))
 				{
 					ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());

@@ -48,6 +48,9 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
+Bug fixes:
+	- Editing the Global Shift & Scale information of a polyline would make CC crash
+
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
 Improvements:

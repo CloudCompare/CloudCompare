@@ -40,6 +40,7 @@ LasExtraScalarFieldCard::LasExtraScalarFieldCard(QWidget* parent)
 			        nameEdit->setText(text);
 		        }
 	        });
+	connect(unlockModificationsButton, &QPushButton::clicked, this, &LasExtraScalarFieldCard::onUnlockModifications);
 
 	advancedOptionFrame->hide();
 	scaledCheckBox->setChecked(false);
@@ -73,6 +74,8 @@ void LasExtraScalarFieldCard::reset()
 	firstScalarFieldComboBox->setCurrentIndex(0);
 	secondScalarFieldComboBox->setCurrentIndex(0);
 	thirdScalarFieldComboBox->setCurrentIndex(0);
+	unlockModificationsButton->setVisible(true);
+	advancedOptionsButton->setVisible(false);
 }
 
 void LasExtraScalarFieldCard::fillFrom(const LasExtraScalarField& field)
@@ -173,6 +176,35 @@ void LasExtraScalarFieldCard::fillFrom(const LasExtraScalarField& field)
 		typeComboBox->setCurrentText("float32");
 		break;
 	}
+
+	unlockModificationsButton->setVisible(false);
+}
+
+void LasExtraScalarFieldCard::fillAsDefault(const char* sfName)
+{
+	if (strlen(sfName) > LasExtraScalarField::MAX_NAME_SIZE)
+	{
+		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
+		               sfName);
+	}
+
+	QString name(sfName);
+	name.truncate(LasExtraScalarField::MAX_NAME_SIZE);
+	nameEdit->setText(name);
+
+	typeComboBox->setCurrentText("float32");
+
+	radioButton1->setChecked(true);
+	firstScalarFieldComboBox->setCurrentText(name);
+
+	// Disallow modifications
+	unlockModificationsButton->setVisible(true);
+	advancedOptionsButton->setVisible(false);
+	nameEdit->setEnabled(false);
+	typeComboBox->setEnabled(false);
+	firstScalarFieldComboBox->setEnabled(false);
+
+	emit radioButton1->clicked(true);
 }
 
 bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPointCloud& pointCloud) const
@@ -203,19 +235,8 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPoin
 		               stdDescription.c_str());
 	}
 
-	field.type = dataType();
-	if (radioButton1->isChecked())
-	{
-		field.dimensions = LasExtraScalarField::DimensionSize::One;
-	}
-	else if (radioButton2->isChecked())
-	{
-		field.dimensions = LasExtraScalarField::DimensionSize::Two;
-	}
-	else if (radioButton3->isChecked())
-	{
-		field.dimensions = LasExtraScalarField::DimensionSize::Three;
-	}
+	field.type       = dataType();
+	field.dimensions = dimensionSize();
 
 	if (scaledCheckBox->isChecked())
 	{
@@ -249,6 +270,24 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPoin
 	}
 
 	return true;
+}
+
+LasExtraScalarField::DimensionSize LasExtraScalarFieldCard::dimensionSize() const
+{
+	if (radioButton1->isChecked())
+	{
+		return LasExtraScalarField::DimensionSize::One;
+	}
+	else if (radioButton2->isChecked())
+	{
+		return LasExtraScalarField::DimensionSize::Two;
+	}
+	else if (radioButton3->isChecked())
+	{
+		return LasExtraScalarField::DimensionSize::Three;
+	}
+
+	throw std::logic_error("None of the radio button of extra field num dimension are picked");
 }
 
 LasExtraScalarField::DataType LasExtraScalarFieldCard::dataType() const
@@ -354,4 +393,28 @@ void LasExtraScalarFieldCard::onToggleAdvancedOptionsClicked()
 	{
 		advancedOptionFrame->hide();
 	}
+}
+
+bool LasExtraScalarFieldCard::mapsFieldWithName(const char* sfName)
+{
+	const auto numDimensions = static_cast<size_t>(dimensionSize());
+
+	for (size_t i = 0; i < numDimensions; ++i)
+	{
+		const QString dimName = m_scalarFieldsUserInputs[i].scalarFieldComboBox->currentText();
+		if (dimName == sfName)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void LasExtraScalarFieldCard::onUnlockModifications()
+{
+	advancedOptionsButton->setVisible(true);
+	unlockModificationsButton->setVisible(false);
+	nameEdit->setEnabled(true);
+	typeComboBox->setEnabled(true);
+	firstScalarFieldComboBox->setEnabled(true);
 }

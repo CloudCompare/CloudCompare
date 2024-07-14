@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: Thomas Montaigu                           #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 of the License.               #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: Thomas Montaigu                           #
+// #                                                                        #
+// ##########################################################################
 
 #include "LasSaveDialog.h"
 
@@ -139,14 +139,34 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
+
+	connect(pointFormatComboBox,
+	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        this,
+	        &LasSaveDialog::handleSelectedPointFormatChange);
+
+	connect(leftOverFieldsAsExtraCheckBox,
+	        &QCheckBox::stateChanged,
+	        this,
+	        [this](bool state)
+	        {
+		        if (state)
+		        {
+			        assignLeftOverFieldsAsExtra();
+		        }
+		        else
+		        {
+			        unassignDefaultFields();
+		        }
+	        });
 
 	handleSelectedVersionChange(versionComboBox->currentText()); // will call handleSelectedPointFormatChange
 
@@ -256,6 +276,11 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	else
 	{
 		tabWidget->setTabIcon(1, {});
+	}
+
+	if (shouldAutomaticallyAssignLeftOverFieldsAsExtra())
+	{
+		assignLeftOverFieldsAsExtra();
 	}
 }
 
@@ -371,6 +396,11 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 			waveformCheckBox->hide();
 		}
 	}
+
+	if (shouldAutomaticallyAssignLeftOverFieldsAsExtra())
+	{
+		assignLeftOverFieldsAsExtra();
+	}
 }
 
 void LasSaveDialog::handleCustomScaleButtontoggled(bool checked)
@@ -392,28 +422,18 @@ LasExtraScalarFieldCard* LasSaveDialog::createCard() const
 	return card;
 }
 
-void LasSaveDialog::addExtraScalarFieldCard()
+LasExtraScalarFieldCard* LasSaveDialog::addExtraScalarFieldCard()
 {
-#ifdef CC_CORE_LIB_USES_DOUBLE
-	const char* defaultType = "float64";
-#else
-	const char* defaultType = "float32";
-#endif
-	int defaultTypeIndex = m_extraFieldsDataTypesModel->stringList().indexOf(defaultType);
-	defaultTypeIndex     = std::max(defaultTypeIndex, 0);
-
 	int esfCount = extraScalarFieldsLayout->count();
 
-	// firt, look if a card has already been created, but is currently hidden
+	// first, look if a card has already been created, but is currently hidden
 	for (int i = 0; i < esfCount; ++i)
 	{
+
 		QLayoutItem* item   = extraScalarFieldsLayout->itemAt(i);
 		QWidget*     widget = item->widget();
 		if (widget && widget->isHidden())
 		{
-			// remove and insert it again at the end
-			extraScalarFieldsLayout->removeItem(item);
-			extraScalarFieldsLayout->insertItem(extraScalarFieldsLayout->count(), item);
 			auto* card = qobject_cast<LasExtraScalarFieldCard*>(widget);
 			if (!card)
 			{
@@ -423,13 +443,14 @@ void LasSaveDialog::addExtraScalarFieldCard()
 
 			card->reset();
 			widget->show();
-			return;
+			return card;
 		}
 	}
 
 	// else we'll create a new card
 	auto* card = createCard();
 	extraScalarFieldsLayout->insertWidget(esfCount, card);
+	return card;
 }
 
 void LasSaveDialog::setVersionAndPointFormat(const LasDetails::LasVersion versionAndFmt)
@@ -584,7 +605,7 @@ std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const
 				continue;
 			}
 
-			ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(sfIdx));
+			auto* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(sfIdx));
 
 			const std::string name = item.first->name().toStdString();
 			fields.emplace_back(LasScalarField::IdFromName(name.c_str(), pointFormat), sf);
@@ -635,4 +656,101 @@ std::vector<LasExtraScalarField> LasSaveDialog::extraFieldsToSave() const
 	}
 
 	return extraScalarFields;
+}
+
+void LasSaveDialog::assignLeftOverFieldsAsExtra()
+{
+	unassignDefaultFields();
+
+	// We use lambda for clarity
+	auto isAssignedToStandardField = [this](const char* sfName) -> bool
+	{
+		for (const auto& item : m_scalarFieldMapping)
+		{
+			if (item.second->currentIndex() > 0)
+			{
+				const QString correspondingScalarFieldName = item.second->currentText();
+				if (correspondingScalarFieldName == sfName)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	};
+
+	auto isAssignedAsExtraField = [this](const char* sfName)
+	{
+		int esfCount = extraScalarFieldsLayout->count();
+		for (int i = 0; i < esfCount; ++i)
+		{
+			QLayoutItem* item   = extraScalarFieldsLayout->itemAt(i);
+			QWidget*     widget = item->widget();
+			if (!widget || widget->isHidden())
+			{
+				continue;
+			}
+			auto* card = qobject_cast<LasExtraScalarFieldCard*>(widget);
+			if (!card)
+			{
+				continue;
+			}
+
+			if (card->isDefault())
+			{
+				continue;
+			}
+
+			if (card->mapsFieldWithName(sfName))
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	uint sfCount = m_cloud->getNumberOfScalarFields();
+
+	for (uint index = 0; index < sfCount; index++)
+	{
+		auto*       sf              = static_cast<ccScalarField*>(m_cloud->getScalarField(index));
+		const char* sfName          = sf->getName();
+		const bool  alreadyAssigned = isAssignedToStandardField(sfName) || isAssignedAsExtraField(sfName);
+		if (!alreadyAssigned)
+		{
+			LasExtraScalarFieldCard* card = addExtraScalarFieldCard();
+			card->fillAsDefault(sfName);
+		}
+	}
+}
+
+void LasSaveDialog::unassignDefaultFields()
+{
+	unsigned int esfCount = extraScalarFieldsLayout->count();
+	for (unsigned int numIter = 0, i = 0; numIter < esfCount; ++numIter)
+	{
+		QLayoutItem* item   = extraScalarFieldsLayout->itemAt(static_cast<int>(i));
+		QWidget*     widget = item->widget();
+		if (!widget || widget->isHidden())
+		{
+			++i;
+			continue;
+		}
+		auto* card = qobject_cast<LasExtraScalarFieldCard*>(widget);
+		if (!card)
+		{
+			++i;
+			continue;
+		}
+
+		if (card->isDefault())
+		{
+			card->reset();
+			widget->setVisible(false);
+		}
+
+		// Move the item to the back
+		extraScalarFieldsLayout->removeItem(item);
+		extraScalarFieldsLayout->addItem(item);
+	}
 }

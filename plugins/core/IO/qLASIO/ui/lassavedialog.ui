@@ -33,10 +33,10 @@
           </sizepolicy>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QFormLayout" name="formLayout">
           <item row="0" column="0">
@@ -73,7 +73,7 @@
             <item>
              <widget class="QRadioButton" name="bestScaleRadioButton">
               <property name="text">
-               <string>Optimal scale</string>
+               <string>Op&amp;timal scale</string>
               </property>
              </widget>
             </item>
@@ -87,7 +87,7 @@
             <item>
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -120,7 +120,7 @@ font: italic;</string>
             <item>
              <widget class="QRadioButton" name="originalScaleRadioButton">
               <property name="text">
-               <string>Original scale</string>
+               <string>O&amp;riginal scale</string>
               </property>
               <property name="checkable">
                <bool>true</bool>
@@ -140,7 +140,7 @@ font: italic;</string>
             <item>
              <spacer name="horizontalSpacer_8">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -168,7 +168,7 @@ font: italic;</string>
             <item>
              <widget class="QRadioButton" name="customScaleRadioButton">
               <property name="text">
-               <string>Custom scale</string>
+               <string>Custo&amp;m scale</string>
               </property>
              </widget>
             </item>
@@ -207,7 +207,7 @@ font: italic;</string>
             <item>
              <spacer name="horizontalSpacer_9">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -247,7 +247,7 @@ font: italic;</string>
        <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -279,10 +279,10 @@ font: italic;</string>
           </sizepolicy>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
@@ -309,13 +309,26 @@ font: italic;</string>
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="leftOverFieldsAsExtraCheckBox">
+            <property name="toolTip">
+             <string>If checked, all scalar fields of the point cloud that are not assigned to a standard LAS field, will then be assigned as an extra LAS field</string>
+            </property>
+            <property name="text">
+             <string>Assign other fields as extra scalarFields</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
        <item>
         <spacer name="verticalSpacer_2">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -342,8 +355,8 @@ font: italic;</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>98</width>
-            <height>28</height>
+            <width>720</width>
+            <height>283</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -353,7 +366,7 @@ font: italic;</string>
            <item>
             <spacer name="verticalSpacer_3">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -381,10 +394,10 @@ font: italic;</string>
    <item>
     <widget class="QFrame" name="buttonFrame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -402,7 +415,7 @@ font: italic;</string>
       <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -415,10 +428,10 @@ font: italic;</string>
       <item>
        <widget class="QDialogButtonBox" name="buttonBox">
         <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+         <enum>Qt::Orientation::Horizontal</enum>
         </property>
         <property name="standardButtons">
-         <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+         <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
         </property>
        </widget>
       </item>

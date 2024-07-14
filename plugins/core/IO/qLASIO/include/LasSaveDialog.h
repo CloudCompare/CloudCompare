@@ -1,21 +1,21 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: Thomas Montaigu                           #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 of the License.               #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: Thomas Montaigu                           #
+// #                                                                        #
+// ##########################################################################
 
 #include "LasDetails.h"
 #include "LasExtraScalarField.h"
@@ -74,14 +74,23 @@ class LasSaveDialog : public QDialog
 	std::vector<LasExtraScalarField> extraFieldsToSave() const;
 
   public Q_SLOTS:
-	void handleSelectedVersionChange(const QString&);
-	void handleSelectedPointFormatChange(int index);
-	void handleComboBoxChange(int index);
-	void handleCustomScaleButtontoggled(bool checked);
-	void addExtraScalarFieldCard();
+	void                     handleSelectedVersionChange(const QString&);
+	void                     handleSelectedPointFormatChange(int index);
+	void                     handleComboBoxChange(int index);
+	void                     handleCustomScaleButtontoggled(bool checked);
+	LasExtraScalarFieldCard* addExtraScalarFieldCard();
 
   private:
 	LasExtraScalarFieldCard* createCard() const;
+	/// This will scan the scalar fields from the point cloud
+	/// and create a default scalar field extra card if the field is
+	/// neither selected as a standard field nor as a extra field.
+	void assignLeftOverFieldsAsExtra();
+	void unassignDefaultFields();
+	bool shouldAutomaticallyAssignLeftOverFieldsAsExtra() const
+	{
+		return leftOverFieldsAsExtraCheckBox->isChecked();
+	}
 
   private:
 	ccPointCloud* m_cloud{nullptr};

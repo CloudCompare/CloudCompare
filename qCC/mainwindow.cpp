@@ -6309,8 +6309,9 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+	const ccOptions &opts =  ccOptions::Instance();
 	// If we don't have anything displayed, then just close...
-	if (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0))
+	if (!opts.confirmQuit || (m_ccRoot && (m_ccRoot->getRootEntity()->getChildrenNumber() == 0)))
 	{
 		event->accept();
 	}
@@ -6319,16 +6320,28 @@ void MainWindow::closeEvent(QCloseEvent* event)
 		QMessageBox message_box( QMessageBox::Question,
 								 tr("Quit"),
 								 tr("Are you sure you want to quit?"),
-								 QMessageBox::Ok | QMessageBox::Cancel,
+								 QMessageBox::NoButton,
 								 this);
-		
-		if ( message_box.exec() == QMessageBox::Ok )
-		{
-			event->accept();
-		}
-		else
-		{
-			event->ignore();
+		message_box.addButton(QMessageBox::Button::Yes);
+		message_box.addButton(tr("Yes, don't ask again"), QMessageBox::ButtonRole::YesRole);
+		message_box.addButton(QMessageBox::Button::No);
+
+		message_box.exec();
+
+		switch (message_box.buttons().indexOf(message_box.clickedButton())) {
+			case 1: // Yes, don't ask again
+			{
+				ccOptions optsCopied = opts;
+				optsCopied.confirmQuit = false;
+				optsCopied.toPersistentSettings();
+				Q_FALLTHROUGH(); // Fallthrough to the yes case, to accept the event
+			}
+			case 0: // Yes
+				event->accept();
+				break;
+			case 2: // No
+			default:
+				event->ignore();
 		}
 	}
 

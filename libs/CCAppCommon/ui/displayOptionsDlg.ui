@@ -837,7 +837,7 @@
          </property>
         </widget>
        </item>
-       <item row="14" column="0">
+       <item row="15" column="0">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -892,6 +892,13 @@
            <string>Pointing hand</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="14" column="0">
+        <widget class="QCheckBox" name="confirmQuitCheckBox">
+         <property name="text">
+          <string>Ask for a confirmation before quitting</string>
+         </property>
         </widget>
        </item>
       </layout>

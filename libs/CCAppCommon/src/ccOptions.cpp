@@ -59,6 +59,7 @@ void ccOptions::reset()
 {
 	normalsDisplayedByDefault = false;
 	useNativeDialogs = true;
+	confirmQuit = true;
 }
 
 void ccOptions::fromPersistentSettings()
@@ -68,6 +69,7 @@ void ccOptions::fromPersistentSettings()
 	{
 		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
 		useNativeDialogs = settings.value("useNativeDialogs", true).toBool();
+		confirmQuit = settings.value("confirmQuit", true).toBool();
 	}
 	settings.endGroup();
 }
@@ -79,6 +81,7 @@ void ccOptions::toPersistentSettings() const
 	{
 		settings.setValue("normalsDisplayedByDefault", normalsDisplayedByDefault);
 		settings.setValue("useNativeDialogs", useNativeDialogs);
+		settings.setValue("confirmQuit", confirmQuit);
 	}
 	settings.endGroup();
 }

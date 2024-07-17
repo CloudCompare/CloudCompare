@@ -32,6 +32,9 @@ public: //parameters
 	//! Use native load/save dialogs
 	bool useNativeDialogs;
 
+	//! Should we ask for confirmation when user clicked to quit the app ?
+	bool confirmQuit;
+
 public: //methods
 
 	//! Default constructor

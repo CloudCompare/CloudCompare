@@ -65,6 +65,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->singleClickPickingCheckBox,	   &QCheckBox::toggled, this, [&](bool state) { m_parameters.singleClickPicking = state; });
 	connect(m_ui->autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { m_options.normalsDisplayedByDefault = state; });
 	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { m_options.useNativeDialogs = state; });
+	connect(m_ui->confirmQuitCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_options.confirmQuit = state; });
 
 	connect(m_ui->useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeVBOUsage);
 
@@ -205,6 +206,7 @@ void ccDisplayOptionsDlg::refresh()
 
 	m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
 	m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
+	m_ui->confirmQuitCheckBox->setChecked(m_options.confirmQuit);
 
 	switch (m_parameters.pickingCursorShape)
 	{

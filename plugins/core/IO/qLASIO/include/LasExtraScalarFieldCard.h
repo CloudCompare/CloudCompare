@@ -45,17 +45,17 @@ class LasExtraScalarFieldCard : public QWidget
 	/// Returns `true` on success, `false` on failure.
 	bool fillField(LasExtraScalarField& field, const ccPointCloud& pointCloud) const;
 
-	bool isDefault() const
+	inline bool isDefault() const
 	{
 		return !unlockModificationsButton->isHidden();
 	};
 
 	/// Returns true if this card maps the field with the name
-	bool mapsFieldWithName(const char* sfName);
+	bool mapsFieldWithName(const char* sfName) const;
 
   private:
-	//! Struct to aggregate together the user input related
-	//! to one dimension of an extra scalar field definition.
+	/// Struct to aggregate together the user input related
+	/// to one dimension of an extra scalar field definition.
 	struct ScalarFieldUserInputs
 	{
 		QComboBox*      scalarFieldComboBox{nullptr};

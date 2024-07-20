@@ -82,15 +82,12 @@ class LasSaveDialog : public QDialog
 
   private:
 	LasExtraScalarFieldCard* createCard() const;
-	/// This will scan the scalar fields from the point cloud
+	/// This will scan the the point cloud scalar fields
 	/// and create a default scalar field extra card if the field is
-	/// neither selected as a standard field nor as a extra field.
-	void assignLeftOverFieldsAsExtra();
+	/// neither selected as a standard field nor as an extra field.
+	void assignLeftoverScalarFieldsAsExtra();
 	void unassignDefaultFields();
-	bool shouldAutomaticallyAssignLeftOverFieldsAsExtra() const
-	{
-		return leftOverFieldsAsExtraCheckBox->isChecked();
-	}
+	bool shouldAutomaticallyAssignLeftoverSFsAsExtra() const;
 
   private:
 	ccPointCloud* m_cloud{nullptr};

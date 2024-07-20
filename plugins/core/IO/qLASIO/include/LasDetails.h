@@ -162,7 +162,7 @@ namespace LasDetails
 	/// If the version does not exists or is not supported a nullptr is returned.
 	///
 	/// \param version version string, must be "major.minor" e.g. "1.2"
-	const std::vector<unsigned>* PointFormatsAvailableForVersion(QString version);
+	const std::vector<unsigned>& PointFormatsAvailableForVersion(const QString& version);
 
 	const std::array<const char*, 3>& AvailableVersions();
 

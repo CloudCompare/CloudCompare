@@ -31,10 +31,10 @@
 #include <cstring>
 #include <stdexcept>
 
-static const std::vector<unsigned>      PointFormatForV1_2 = {0, 1, 2, 3};
-static const std::vector<unsigned>      PointFormatForV1_3 = {0, 1, 2, 3, 4, 5};
-static const std::vector<unsigned>      PointFormatForV1_4 = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-static const std::array<const char*, 3> VersionsArray      = {"1.2", "1.3", "1.4"};
+static const std::vector<unsigned>      PointFormatForV1_2{0, 1, 2, 3};
+static const std::vector<unsigned>      PointFormatForV1_3{0, 1, 2, 3, 4, 5};
+static const std::vector<unsigned>      PointFormatForV1_4{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+static const std::array<const char*, 3> VersionsArray{"1.2", "1.3", "1.4"};
 
 namespace LasDetails
 {
@@ -158,26 +158,27 @@ namespace LasDetails
 		                       { return vlr.record_length_after_header + header_size + size; });
 	}
 
-	const std::vector<unsigned>* PointFormatsAvailableForVersion(QString version)
+	const std::vector<unsigned>& PointFormatsAvailableForVersion(const QString& version)
 	{
 		if (version.size() == 3 && version.startsWith("1."))
 		{
 			if (version[2] == '2')
 			{
-				return &PointFormatForV1_2;
+				return PointFormatForV1_2;
 			}
 			if (version[2] == '3')
 			{
-				return &PointFormatForV1_3;
+				return PointFormatForV1_3;
 			}
 			if (version[2] == '4')
 			{
-				return &PointFormatForV1_4;
+				return PointFormatForV1_4;
 			}
 		}
 
 		ccLog::Warning("Unknown LAS version: " + version);
-		return nullptr;
+		static std::vector<unsigned> InvalidPointFormat;
+		return InvalidPointFormat;
 	}
 
 	const std::array<const char*, 3>& AvailableVersions()
@@ -268,7 +269,7 @@ namespace LasDetails
 			if (hasWaveform)
 			{
 				minorVersion = 3;
-				pointFormat = 4;
+				pointFormat  = 4;
 				if (hasRGB)
 				{
 					pointFormat = 5;

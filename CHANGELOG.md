@@ -46,11 +46,18 @@ New Feature:
 		- it can then be restored via the 'Display > Display options' menu entry
 
 Improvements:
+
 	- Command line:
 		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
+
+	- LAS file saving dialog
+		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)
+		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),
+			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
+			if the point format is changed.
 
 Bug fixes:
 	- Editing the Global Shift & Scale information of a polyline would make CC crash

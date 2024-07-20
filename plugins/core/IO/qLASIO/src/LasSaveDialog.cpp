@@ -31,7 +31,7 @@
 //! Default LAS scale
 static const double DefaultLASScale = 1.0e-3;
 
-//! Widget to map a predefined scalar field 'role' with a particular scalar field (combo box)
+//! Widget to map a predefined scalar field 'role' to a specific scalar field (combo-box)
 class MappingLabel : public QWidget
 {
   public:
@@ -117,7 +117,7 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 
 	customScaleRadioButton->setEnabled(true);
 	customScaleRadioButton->setChecked(false);
-	QDoubleSpinBox* scaleButtons[3] = {customScaleXDoubleSpinBox, customScaleYDoubleSpinBox, customScaleZDoubleSpinBox};
+	QDoubleSpinBox* scaleButtons[3]{customScaleXDoubleSpinBox, customScaleYDoubleSpinBox, customScaleZDoubleSpinBox};
 	for (size_t i = 0; i < 3; i++)
 	{
 		QDoubleSpinBox* spinBox = scaleButtons[i];
@@ -139,28 +139,28 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	versionComboBox->setCurrentIndex(0);
 
 	connect(versionComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
 	connect(pointFormatComboBox,
-	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
-	connect(leftOverFieldsAsExtraCheckBox,
+	connect(saveLeftoverSFsAsExtraVLRCheckBox,
 	        &QCheckBox::stateChanged,
 	        this,
 	        [this](bool state)
 	        {
 		        if (state)
 		        {
-			        assignLeftOverFieldsAsExtra();
+			        assignLeftoverScalarFieldsAsExtra();
 		        }
 		        else
 		        {
@@ -188,6 +188,11 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked : Qt::Unchecked);
 }
 
+bool LasSaveDialog::shouldAutomaticallyAssignLeftoverSFsAsExtra() const
+{
+	return saveLeftoverSFsAsExtraVLRCheckBox->isChecked();
+}
+
 /// When the selected version changes, we need to update the combo box
 /// of point format to match the ones supported by the version
 void LasSaveDialog::handleSelectedVersionChange(const QString& version)
@@ -195,10 +200,10 @@ void LasSaveDialog::handleSelectedVersionChange(const QString& version)
 	pointFormatComboBox->blockSignals(true);
 	pointFormatComboBox->clear();
 
-	const std::vector<unsigned>* pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
-	if (pointFormats)
+	const std::vector<unsigned>& pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
+	if (!pointFormats.empty())
 	{
-		for (unsigned fmt : *pointFormats)
+		for (unsigned fmt : pointFormats)
 		{
 			pointFormatComboBox->addItem(QString::number(fmt));
 		}
@@ -225,11 +230,16 @@ void LasSaveDialog::handleComboBoxChange(int index)
 		return;
 	}
 	QObject* senderObject = sender();
-	size_t   senderIndex  = std::distance(m_scalarFieldMapping.begin(),
-                                       std::find_if(m_scalarFieldMapping.begin(),
-                                                    m_scalarFieldMapping.end(),
-                                                    [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
-                                                    { return pair.second == senderObject; }));
+	if (nullptr == senderObject)
+	{
+		assert(false);
+		return;
+	}
+	size_t senderIndex = std::distance(m_scalarFieldMapping.begin(),
+	                                   std::find_if(m_scalarFieldMapping.begin(),
+	                                                m_scalarFieldMapping.end(),
+	                                                [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
+	                                                { return pair.second == senderObject; }));
 
 	if (qobject_cast<QComboBox*>(senderObject)->itemText(index).isEmpty())
 	{
@@ -238,7 +248,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	}
 	const QString scalarFieldName   = m_scalarFieldMapping[senderIndex].first->name();
 	const QString ccScalarFieldName = m_scalarFieldMapping[senderIndex].second->currentText();
-	int           sfIdx             = m_cloud->getScalarFieldIndexByName(ccScalarFieldName.toStdString().c_str());
+	int           sfIdx             = m_cloud->getScalarFieldIndexByName(qPrintable(ccScalarFieldName));
 	if (sfIdx == -1)
 	{
 		assert(false);
@@ -269,7 +279,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair)
 	                                   { return pair.first->hasWarning(); });
 
-	if (numWarnings > 0)
+	if (numWarnings != 0)
 	{
 		tabWidget->setTabIcon(1, QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
 	}
@@ -278,9 +288,9 @@ void LasSaveDialog::handleComboBoxChange(int index)
 		tabWidget->setTabIcon(1, {});
 	}
 
-	if (shouldAutomaticallyAssignLeftOverFieldsAsExtra())
+	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
 	{
-		assignLeftOverFieldsAsExtra();
+		assignLeftoverScalarFieldsAsExtra();
 	}
 }
 
@@ -297,10 +307,16 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 		return;
 	}
 
-	const std::vector<unsigned>* pointFormats = LasDetails::PointFormatsAvailableForVersion(versionComboBox->currentText());
-	if (!pointFormats)
+	const std::vector<unsigned>& pointFormats = LasDetails::PointFormatsAvailableForVersion(versionComboBox->currentText());
+	if (pointFormats.empty())
 	{
 		Q_ASSERT_X(false, __func__, "No point format available for the selected version");
+		return;
+	}
+
+	if (static_cast<size_t>(index) >= pointFormats.size())
+	{
+		Q_ASSERT_X(false, __func__, "Invalid point format index");
 		return;
 	}
 
@@ -320,7 +336,7 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 		}
 	}
 
-	unsigned                    selectedPointFormat = pointFormats->at(index);
+	unsigned                    selectedPointFormat = pointFormats[index];
 	std::vector<LasScalarField> lasScalarFields     = LasScalarField::ForPointFormat(selectedPointFormat);
 
 	int numDeltaFields = scalarFieldFormLayout->rowCount() - static_cast<int>(lasScalarFields.size());
@@ -397,9 +413,9 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 		}
 	}
 
-	if (shouldAutomaticallyAssignLeftOverFieldsAsExtra())
+	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
 	{
-		assignLeftOverFieldsAsExtra();
+		assignLeftoverScalarFieldsAsExtra();
 	}
 }
 
@@ -658,7 +674,7 @@ std::vector<LasExtraScalarField> LasSaveDialog::extraFieldsToSave() const
 	return extraScalarFields;
 }
 
-void LasSaveDialog::assignLeftOverFieldsAsExtra()
+void LasSaveDialog::assignLeftoverScalarFieldsAsExtra()
 {
 	unassignDefaultFields();
 

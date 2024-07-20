@@ -257,13 +257,12 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPoin
 
 	for (size_t i = 0; i < field.numElements(); i++)
 	{
-		const std::string sfName =
-		    m_scalarFieldsUserInputs[i].scalarFieldComboBox->currentText().toStdString();
-		int sfIndex = pointCloud.getScalarFieldIndexByName(sfName.c_str());
+		const std::string sfName  = m_scalarFieldsUserInputs[i].scalarFieldComboBox->currentText().toStdString();
+		int               sfIndex = pointCloud.getScalarFieldIndexByName(sfName.c_str());
 
 		if (sfIndex < 0)
 		{
-			ccLog::Warning("Failed to get scalar field named '%s'", sfName.c_str());
+			ccLog::Warning("Failed to retrieve scalar field named '%s'", sfName.c_str());
 			return false;
 		}
 		field.scalarFields[i] = static_cast<ccScalarField*>(pointCloud.getScalarField(sfIndex));
@@ -286,8 +285,10 @@ LasExtraScalarField::DimensionSize LasExtraScalarFieldCard::dimensionSize() cons
 	{
 		return LasExtraScalarField::DimensionSize::Three;
 	}
-
-	throw std::logic_error("None of the radio button of extra field num dimension are picked");
+	else
+	{
+		throw std::logic_error("None of the radio button of extra field num dimension are picked");
+	}
 }
 
 LasExtraScalarField::DataType LasExtraScalarFieldCard::dataType() const
@@ -298,54 +299,47 @@ LasExtraScalarField::DataType LasExtraScalarFieldCard::dataType() const
 	{
 		return LasExtraScalarField::DataType::u8;
 	}
-
-	if (selectedElementType == "uint16")
+	else if (selectedElementType == "uint16")
 	{
 		return LasExtraScalarField::DataType::u16;
 	}
-
-	if (selectedElementType == "uint32")
+	else if (selectedElementType == "uint32")
 	{
 		return LasExtraScalarField::DataType::u32;
 	}
-
-	if (selectedElementType == "uint64")
+	else if (selectedElementType == "uint64")
 	{
 		return LasExtraScalarField::DataType::u64;
 	}
-
-	if (selectedElementType == "int8")
+	else if (selectedElementType == "int8")
 	{
 		return LasExtraScalarField::DataType::i8;
 	}
-
-	if (selectedElementType == "int16")
+	else if (selectedElementType == "int16")
 	{
 		return LasExtraScalarField::DataType::i16;
 	}
-
-	if (selectedElementType == "int32")
+	else if (selectedElementType == "int32")
 	{
 		return LasExtraScalarField::DataType::i32;
 	}
-
-	if (selectedElementType == "int64")
+	else if (selectedElementType == "int64")
 	{
 		return LasExtraScalarField::DataType::i64;
 	}
-
-	if (selectedElementType == "float32")
+	else if (selectedElementType == "float32")
 	{
 		return LasExtraScalarField::DataType::f32;
 	}
-
-	if (selectedElementType == "float64")
+	else if (selectedElementType == "float64")
 	{
 		return LasExtraScalarField::DataType::f64;
 	}
-
-	assert(false);
-	return LasExtraScalarField::DataType::Invalid;
+	else
+	{
+		assert(false);
+		return LasExtraScalarField::DataType::Invalid;
+	}
 }
 
 void LasExtraScalarFieldCard::onNumberOfElementsSelected(unsigned numberOfElements)
@@ -360,7 +354,7 @@ void LasExtraScalarFieldCard::onNumberOfElementsSelected(unsigned numberOfElemen
 	{
 		ScalarFieldUserInputs& userInput = m_scalarFieldsUserInputs[i];
 
-		const bool isPartOfSelected = i <= (numberOfElements - 1);
+		bool isPartOfSelected = (i <= (numberOfElements - 1));
 
 		userInput.scalarFieldComboBox->setVisible(isPartOfSelected);
 		userInput.scaleSpinBox->setEnabled(isPartOfSelected);
@@ -395,7 +389,7 @@ void LasExtraScalarFieldCard::onToggleAdvancedOptionsClicked()
 	}
 }
 
-bool LasExtraScalarFieldCard::mapsFieldWithName(const char* sfName)
+bool LasExtraScalarFieldCard::mapsFieldWithName(const char* sfName) const
 {
 	const auto numDimensions = static_cast<size_t>(dimensionSize());
 

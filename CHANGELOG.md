@@ -1,8 +1,8 @@
 CloudCompare Version History
 ============================
+
 v2.14.alpha (???) - (??/??/202?)
 ----------------------
-
 New Feature:
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
@@ -40,6 +40,10 @@ New Feature:
 					- optional, only used when bilateral filter applied
 		- New SF_OP suboption: -NOT_IN_PLACE
 			- to create new scalar field during the operation.
+
+	- New option to discard the confirmation popup dialog when exiting CloudCompare
+		- one can choose to discard it the first time it appears
+		- it can then be restored via the 'Display > Display options' menu entry
 
 Improvements:
 	- Command line:

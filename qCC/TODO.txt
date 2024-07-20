@@ -26,6 +26,7 @@ Big ones:
 [*] Undo mechanism
 
 Command line mode:
+[*] Option to generate a scalar field with the cloud indexes when merging clouds (https://www.cloudcompare.org/forum/viewtopic.php?p=29907)
 [*] Option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
 [*] Label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
@@ -73,6 +74,7 @@ Scissors/segmentation tool
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 
 Various:
+[*] ASCII load file dialog: display the extracted colum title directly under the role of each column (https://www.cloudcompare.org/forum/viewtopic.php?t=7085)
 [*] Option to lock an entity (https://www.cloudcompare.org/forum/viewtopic.php?p=29251)
 [*] Batch export several entities to single-entity formats (LAS, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=29066)
 [*] Restore the option to not decompose the classification field with the new LAS I/O filter (https://www.cloudcompare.org/forum/viewtopic.php?p=28999)

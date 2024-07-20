@@ -63,6 +63,14 @@ class LasScalarFieldLoader
 		m_force8bitRgbMode = state;
 	}
 
+	/// Sets whether the classification field should be decomposed into
+	/// the classification, synthetic flag, key_point flag, withheld flag.
+	///
+	/// Only applies to point format <= 5 (ie field Classification, not ExtendedClassification)
+	inline void setDecomposeClassification(bool state) {
+		m_decomposeClassification = state;
+	}
+
 	/// If nan, this value will be ignored and the time shift
 	/// will be taken using the first value encountered.
 	inline void setManualTimeShift(double timeShift)
@@ -116,6 +124,7 @@ class LasScalarFieldLoader
 
   private:
 	bool                              m_force8bitRgbMode{false};
+	bool                              m_decomposeClassification{true};
 	bool                              m_ignoreFieldsWithDefaultValues{true};
 	double                            m_manualTimeShiftValue{std::numeric_limits<double>::quiet_NaN()};
 	unsigned char                     m_colorCompShift{0};

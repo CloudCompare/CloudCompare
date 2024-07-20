@@ -257,6 +257,19 @@
                   </widget>
                  </item>
                  <item>
+                  <widget class="QCheckBox" name="decomposeClassificationCheckBox">
+                   <property name="toolTip">
+                    <string>If checked, the classification field will be decomposed into Classification, Synthetic, Key Point and Withheld</string>
+                   </property>
+                   <property name="text">
+                    <string>Decompose Classification</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QCheckBox" name="force8bitColorsCheckBox">
                    <property name="text">
                     <string>Force 8-bit colors</string>

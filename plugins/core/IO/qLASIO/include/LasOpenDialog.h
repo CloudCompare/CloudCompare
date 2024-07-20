@@ -77,6 +77,10 @@ class LasOpenDialog : public QDialog
 	/// rgb from the file as 8-bit components.
 	bool shouldForce8bitColors() const;
 
+	/// Returns whether the user wants to decompose the classification field
+	/// according to what the LAS standard says.
+	bool shouldDecomposeClassification() const;
+
 	/// Returns quiet_NaN if the time shift value should be
 	/// automatically found.
 	///
@@ -120,6 +124,9 @@ class LasOpenDialog : public QDialog
 	void onBrowseTilingOutputDir();
 
 	void onCurrentTabChanged(int index);
+
+	/// Hides or un-hides the checkboxes that corresponds to the flag fields
+	void onDecomposeClassificationToggled(bool state);
 
   private:
 	bool m_shouldSkipDialog{false};

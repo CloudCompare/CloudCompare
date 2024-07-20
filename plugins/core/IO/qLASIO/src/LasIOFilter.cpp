@@ -253,6 +253,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	loader.setIgnoreFieldsWithDefaultValues(m_openDialog.shouldIgnoreFieldsWithDefaultValues());
 	loader.setForce8bitRgbMode(m_openDialog.shouldForce8bitColors());
 	loader.setManualTimeShift(m_openDialog.timeShiftValue());
+	loader.setDecomposeClassification(m_openDialog.shouldDecomposeClassification());
 	std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
 	if (LasDetails::HasWaveform(laszipHeader->point_data_format))
 	{

@@ -273,15 +273,51 @@ void ccApplicationBase::setupPaths()
 
 bool ccApplicationBase::setAppStyle(QString styleKey)
 {
-	QStyle* style = QStyleFactory::create(styleKey);
-	if (!style)
+	const auto loadStyleSheet = [this](const QString& resourcePath)
 	{
-		ccLog::Warning("Invalid style key or style couldn't be created: " + styleKey);
-		return false;
-	}
+		QFile f(resourcePath);
+		if (!f.exists())
+		{
+			f.close();
+			return false;
+		}
+		else
+		{
+			f.open(QFile::ReadOnly | QFile::Text);
+			QTextStream ts(&f);
+			setStyleSheet(ts.readAll());
+			f.close();
+			return true;
+		}
+	};
 
-	ccLog::Print("Applying application style: " + styleKey);
-	setStyle(style);
+	if (styleKey == "QDarkStyleSheet::Dark")
+	{
+		if (!loadStyleSheet(":qdarkstyle/dark/darkstyle.qss"))
+		{
+			return false;
+		}
+	}
+	else if (styleKey == "QDarkStyleSheet::Light")
+	{
+		if (!loadStyleSheet(":qdarkstyle/light/lightstyle.qss"))
+		{
+			return false;
+		}
+	}
+	else
+	{
+		QStyle* style = QStyleFactory::create(styleKey);
+		if (!style)
+		{
+			ccLog::Warning("Invalid style key or style couldn't be created: " + styleKey);
+			return false;
+		}
+
+		setStyleSheet({});
+		ccLog::Print("Applying application style: " + styleKey);
+		setStyle(style);
+	}
 
 	// remember the style in persistent settings
 	QSettings settings;

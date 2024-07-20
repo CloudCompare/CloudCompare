@@ -22,6 +22,7 @@
 
 //local
 #include "ccQtHelpers.h"
+#include "ccPersistentSettings.h"
 
 #include <ccLog.h>
 
@@ -30,6 +31,7 @@
 #include <QStyleFactory>
 
 #include <cassert>
+#include <QSettings>
 
 //Default 'min cloud size' for LoD  when VBOs are activated
 constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
@@ -91,26 +93,34 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 
 	// fill the application style combo-box
 	{
-		// store the default style (= the active one when the dialog is first shown)
-		QStyle* defaultStyle = ccApp->style();
-		QString defaultAppStyle;
-		if (defaultStyle)
+		// Store the default style (= the active one when the dialog is first shown)
+		// Which is necessarily the key currently stored in persistent settings
+		// since this is saved each time the current setting is selected,
+		// and since it's the first time the user opens the settings for this session,
+		// then, the style was not changed.
+		QSettings settings;
+		settings.beginGroup(ccPS::AppStyle());
+		const QString defaultStyleName = settings.value("style").toString();
+		settings.endGroup();
+
+				// fill the combo-box
+		QStringList appStyles = QStyleFactory::keys();
+		for (const auto & style : appStyles)
 		{
-			defaultAppStyle = defaultStyle->objectName();
+				m_ui->appStyleComboBox->addItem(style);
 		}
 
-		// fill the combo-box
-		QStringList appStyles = QStyleFactory::keys();
-		for (int i = 0; i < appStyles.size(); ++i)
-		{
-			const QString& style = appStyles[i];
-			m_ui->appStyleComboBox->addItem(style);
+		m_ui->appStyleComboBox->addItem(QStringLiteral("QDarkStyleSheet::Light"));
+		m_ui->appStyleComboBox->addItem(QStringLiteral("QDarkStyleSheet::Dark"));
 
-			if (style.compare(defaultAppStyle, Qt::CaseInsensitive) == 0)
+		for (int i = 0; i < m_ui->appStyleComboBox->count(); ++i)
+		{
+			if (m_ui->appStyleComboBox->itemText(i).compare(defaultStyleName, Qt::CaseInsensitive) == 0)
 			{
 				m_defaultAppStyleIndex = i;
 			}
 		}
+
 		m_ui->appStyleComboBox->setCurrentIndex(m_defaultAppStyleIndex);
 	}
 

@@ -95,6 +95,7 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
+	connect(decomposeClassificationCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onDecomposeClassificationToggled);
 
 	// reload the last tiling output path
 	{
@@ -149,6 +150,8 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numP
 
 	force8bitColorsCheckBox->setEnabled(LasDetails::HasRGB(pointFormatId));
 	timeShiftLayout->setEnabled(LasDetails::HasGpsTime(pointFormatId));
+
+	decomposeClassificationCheckBox->setHidden(pointFormatId >= 6);
 }
 
 void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>&      scalarFields,
@@ -164,6 +167,7 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 		{
 			availableScalarFields->addItem(CreateItem(lasScalarField.name()));
 		}
+		onDecomposeClassificationToggled(decomposeClassificationCheckBox->isChecked());
 	}
 	else
 	{
@@ -266,6 +270,10 @@ bool LasOpenDialog::shouldIgnoreFieldsWithDefaultValues() const
 bool LasOpenDialog::shouldForce8bitColors() const
 {
 	return force8bitColorsCheckBox->isChecked();
+}
+
+bool LasOpenDialog::shouldDecomposeClassification() const {
+	return decomposeClassificationCheckBox->isChecked();
 }
 
 double LasOpenDialog::timeShiftValue() const
@@ -399,5 +407,23 @@ void LasOpenDialog::onCurrentTabChanged(int index)
 	{
 		applyButton->setText(APPLY_TEXT);
 		applyAllButton->setText(APPLY_ALL_TEXT);
+	}
+}
+
+void LasOpenDialog::onDecomposeClassificationToggled(bool checked) {
+	static constexpr std::array<const char *, 3>flagNames = {
+			LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
+
+	for (const char *flagName: flagNames) {
+		for (int i = 0; i < availableScalarFields->count(); ++i)
+		{
+			QListWidgetItem *item = availableScalarFields->item(i);
+			if (item->text() == flagName)
+			{
+				item->setHidden(!checked);
+				item->setCheckState(checked ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+				break;
+			}
+		}
 	}
 }

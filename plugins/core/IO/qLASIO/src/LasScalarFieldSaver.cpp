@@ -72,12 +72,13 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 			{
 				// Before entering the switch, the value is 'clamped',
 				// for the following to work we need the non-clamped value
-				value = field.sf->getValue(pointIndex);
-				point.classification = static_cast<laszip_U8>(value) & 31;
-				if (!m_classificationWasDecomposed) {
-					point.synthetic_flag = (static_cast<laszip_U8>(value) >> 5) & 1;
-					point.keypoint_flag = (static_cast<laszip_U8>(value) >> 6) & 1;
-					point.withheld_flag = (static_cast<laszip_U8>(value) >> 7) & 1;
+				laszip_U8 valueU8    = static_cast<laszip_U8>(field.sf->getValue(pointIndex));
+				point.classification = valueU8 & 31;
+				if (!m_classificationWasDecomposed)
+				{
+					point.synthetic_flag = (valueU8 >> 5) & 1;
+					point.keypoint_flag  = (valueU8 >> 6) & 1;
+					point.withheld_flag  = (valueU8 >> 7) & 1;
 				}
 			}
 			break;

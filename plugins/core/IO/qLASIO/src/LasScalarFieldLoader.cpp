@@ -58,7 +58,8 @@ CC_FILE_ERROR LasScalarFieldLoader::handleScalarFields(ccPointCloud&       point
 		case LasScalarField::Classification:
 		{
 			laszip_U8 classification = currentPoint.classification;
-			if (!m_decomposeClassification) {
+			if (!m_decomposeClassification)
+			{
 				classification |= (currentPoint.synthetic_flag << 5);
 				classification |= (currentPoint.keypoint_flag << 6);
 				classification |= (currentPoint.withheld_flag << 7);

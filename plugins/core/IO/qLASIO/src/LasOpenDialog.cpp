@@ -272,7 +272,8 @@ bool LasOpenDialog::shouldForce8bitColors() const
 	return force8bitColorsCheckBox->isChecked();
 }
 
-bool LasOpenDialog::shouldDecomposeClassification() const {
+bool LasOpenDialog::shouldDecomposeClassification() const
+{
 	return decomposeClassificationCheckBox->isChecked();
 }
 
@@ -410,14 +411,15 @@ void LasOpenDialog::onCurrentTabChanged(int index)
 	}
 }
 
-void LasOpenDialog::onDecomposeClassificationToggled(bool checked) {
-	static constexpr std::array<const char *, 3>flagNames = {
-			LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
+void LasOpenDialog::onDecomposeClassificationToggled(bool checked)
+{
+	static constexpr std::array<const char*, 3> flagNames{LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
 
-	for (const char *flagName: flagNames) {
+	for (const char* flagName : flagNames)
+	{
 		for (int i = 0; i < availableScalarFields->count(); ++i)
 		{
-			QListWidgetItem *item = availableScalarFields->item(i);
+			QListWidgetItem* item = availableScalarFields->item(i);
 			if (item->text() == flagName)
 			{
 				item->setHidden(!checked);

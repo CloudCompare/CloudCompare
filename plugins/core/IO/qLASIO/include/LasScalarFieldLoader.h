@@ -67,7 +67,8 @@ class LasScalarFieldLoader
 	/// the classification, synthetic flag, key_point flag, withheld flag.
 	///
 	/// Only applies to point format <= 5 (ie field Classification, not ExtendedClassification)
-	inline void setDecomposeClassification(bool state) {
+	inline void setDecomposeClassification(bool state)
+	{
 		m_decomposeClassification = state;
 	}
 

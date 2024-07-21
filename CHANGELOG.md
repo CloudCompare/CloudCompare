@@ -53,6 +53,8 @@ Improvements:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
 
+	- LAS file loading dialog
+		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
 	- LAS file saving dialog
 		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)
 		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),

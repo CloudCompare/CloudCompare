@@ -1,49 +1,46 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "IcmFilter.h"
 
-//qCC_db
+// qCC_db
 #include <ccCameraSensor.h>
 #include <ccImage.h>
 #include <ccLog.h>
 
-//Qt
+// Qt
 #include <QFileInfo>
 
-//system
+// system
 #include <cassert>
 #include <cstdio>
 
-//Max number of characters per line in an ASCII file
-//TODO: use QFile instead!
+// Max number of characters per line in an ASCII file
+// TODO: use QFile instead!
 const int MAX_ASCII_FILE_LINE_LENGTH = 4096;
 
-
 IcmFilter::IcmFilter()
-	: FileIOFilter({
-					"_ICM Filter",
-					DEFAULT_PRIORITY,	// priority
-					QStringList{ "icm" },
-					"icm",
-					QStringList{ "Clouds + calibrated images [meta][ascii] (*.icm)" },
-					QStringList(),
-					Import
-		})
+    : FileIOFilter({"_ICM Filter",
+                    DEFAULT_PRIORITY, // priority
+                    QStringList{"icm"},
+                    "icm",
+                    QStringList{"Clouds + calibrated images [meta][ascii] (*.icm)"},
+                    QStringList(),
+                    Import})
 {
 }
 
@@ -54,7 +51,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Warning(QString("[ICM] Input filename contains special characters. It might be rejected by the I/O filter..."));
 	}
 
-	//ouverture du fichier
+	// ouverture du fichier
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
 #else
@@ -65,10 +62,10 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_READING;
 	}
 
-	//buffer
+	// buffer
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
 
-	//lecture du header
+	// lecture du header
 	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		fclose(fp);
@@ -81,7 +78,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
 
-	//on extrait le chemin relatif
+	// on extrait le chemin relatif
 	QString path = QFileInfo(filename).absolutePath();
 
 	char cloudFileName[MAX_ASCII_FILE_LINE_LENGTH];
@@ -118,9 +115,9 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_UNKNOWN_FILE;
 	}
 
-	//load the corresponding file (potentially containing several clouds)
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path, cloudFileName), parameters, filter, result);
+	// load the corresponding file (potentially containing several clouds)
+	CC_FILE_ERROR result   = CC_FERR_NO_ERROR;
+	ccHObject*    entities = FileIOFilter::LoadFromFile(QString("%1/%2").arg(path, cloudFileName), parameters, filter, result);
 	if (!entities)
 	{
 		fclose(fp);
@@ -129,7 +126,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 
 	container.addChild(entities);
 
-	//chargement des images
+	// chargement des images
 	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 	{
 		ccLog::Error("[ICM] Read error (IMAGES_DESCRIPTOR)! No image loaded");
@@ -158,7 +155,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 {
 	assert(entities);
 
-	//ouverture du fichier
+	// ouverture du fichier
 	QString completeImageDescFilename = QString("%1/%2").arg(path, imageDescFilename);
 
 	if (CheckForSpecialChars(completeImageDescFilename))
@@ -177,14 +174,14 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 		return -1;
 	}
 
-	//buffers
+	// buffers
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
 #ifdef INCLUDE_PHOTOS
 	char totalFileName[256];
 #endif
 	int loadedImages = 0;
 
-	//IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
+	// IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
 	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp) != nullptr)
 	{
 		if (line[0] == 'D' && line[1] == 'E' && line[2] == 'F')
@@ -192,9 +189,9 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			char imageFileName[256];
 			sscanf(line, "DEF %s Viewpoint {", imageFileName);
 
-			//add absolute path
+			// add absolute path
 			ccImage* CI = new ccImage();
-			QString errorStr;
+			QString  errorStr;
 			if (!CI->load(QString("%1/%2").arg(path, imageFileName), errorStr))
 			{
 				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName, errorStr));
@@ -210,7 +207,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			CI->setCompleteFileName(totalFileName);
 #endif
 
-			//FOV
+			// FOV
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
 				ccLog::Print("[IcmFilter] Read error (fieldOfView)!");
@@ -225,7 +222,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			float fov_deg = CCCoreLib::RadiansToDegrees(fov_rad);
 			ccLog::Print("\t FOV=%f (degrees)", fov_deg);
 
-			//Position
+			// Position
 			float t[3];
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
@@ -238,7 +235,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 
 			ccLog::Print("\t Camera pos=(%f,%f,%f)", t[0], t[1], t[2]);
 
-			//Description
+			// Description
 			char desc[MAX_ASCII_FILE_LINE_LENGTH];
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
@@ -249,11 +246,11 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			}
 			sscanf(line, "\t description \"%s\"\n", desc);
 
-			//CI->setDescription(desc);
+			// CI->setDescription(desc);
 			ccLog::Print("\t Description: '%s'", desc);
 
-			//Orientation
-			float axis[3]{ 0.0f, 0.0f, 0.0f };
+			// Orientation
+			float axis[3]{0.0f, 0.0f, 0.0f};
 			float angle_rad = 0.0f;
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
 			{
@@ -266,14 +263,14 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]", axis[0], axis[1], axis[2], angle_rad);
 
 			ccCameraSensor::IntrinsicParameters params;
-			params.vFOV_rad = fov_rad;
-			params.arrayWidth = CI->getW();
-			params.arrayHeight = CI->getH();
+			params.vFOV_rad           = fov_rad;
+			params.arrayWidth         = CI->getW();
+			params.arrayHeight        = CI->getH();
 			params.principal_point[0] = params.arrayWidth / 2.0f;
 			params.principal_point[1] = params.arrayHeight / 2.0f;
-			params.vertFocal_pix = params.arrayHeight / (2 * tan(params.vFOV_rad / 2));
+			params.vertFocal_pix      = params.arrayHeight / (2 * tan(params.vFOV_rad / 2));
 			params.pixelSize_mm[0] = params.pixelSize_mm[1] = 1.0f;
-			ccCameraSensor* sensor = new ccCameraSensor(params);
+			ccCameraSensor* sensor                          = new ccCameraSensor(params);
 
 			ccGLMatrix mat;
 			mat.initFromParameters(angle_rad, CCVector3::fromArray(axis), CCVector3::fromArray(t));

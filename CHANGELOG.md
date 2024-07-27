@@ -63,6 +63,8 @@ Improvements:
 
 Bug fixes:
 	- Editing the Global Shift & Scale information of a polyline would make CC crash
+	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
+		preventing from detecting some or all instances of these shapes if not explicitly defined by the user
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

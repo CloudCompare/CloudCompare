@@ -1,33 +1,33 @@
 #pragma once
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "CCAppCommon.h"
 
-//Local
+// Local
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
 
-//qCC_db
+// qCC_db
 #include <ccGLMatrix.h>
-//qCC_gl
+// qCC_gl
 #include <ccGLUtils.h>
 
-//system
+// system
 #include <map>
 
 class QMdiSubWindow;
@@ -41,12 +41,12 @@ namespace Ui
 }
 
 //! Dialog to interactively edit the camera pose parameters
-class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog, public ccPickingListener
+class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog
+    , public ccPickingListener
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub);
 
@@ -59,15 +59,14 @@ public:
 	//! Returns matrix corresponding to dialog values
 	ccGLMatrixd getMatrix();
 
-	//inherited from ccOverlayDialog
+	// inherited from ccOverlayDialog
 	bool start() override;
 	bool linkWith(ccGLWindowInterface* win) override;
 
-	//inherited from ccPickingListener
+	// inherited from ccPickingListener
 	void onItemPicked(const PickedItem& pi) override;
 
-public:
-
+  public:
 	//! Links this dialog with a given sub-window
 	void linkWith(QMdiSubWindow* qWin);
 
@@ -115,8 +114,7 @@ public:
 	void pickPointAsPivot(bool);
 	void processPickedItem(ccHObject*, unsigned, int, int, const CCVector3&, const CCVector3d&);
 
-protected:
-
+  protected:
 	//! Reflects any dialog parameter change
 	void reflectParamChange();
 
@@ -129,8 +127,7 @@ protected:
 	//! Reverts to pushed matrix
 	void revertToPushedMatrix();
 
-protected:
-
+  protected:
 	//! Inits dialog values with specified window
 	void initWith(ccGLWindowInterface* win);
 
@@ -144,7 +141,7 @@ protected:
 
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
-	
-private:
+
+  private:
 	Ui::CameraParamDlg* m_ui;
 };

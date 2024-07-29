@@ -1,51 +1,48 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "SalomeHydroFilter.h"
 
-//qCC_db
+// qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
 
-//Qt
+// Qt
 #include <QFile>
 #include <QStringList>
 #include <QTextStream>
 
-
 SalomeHydroFilter::SalomeHydroFilter()
-	: FileIOFilter( {
-					"_SalomeHydro Filter",
-					DEFAULT_PRIORITY,	// priority
-					QStringList{ "poly" },
-					"poly",
-					QStringList{ "Salome Hydro polylines (*.poly)" },
-					QStringList{ "Salome Hydro polylines (*.poly)" },
-					Import | Export
-					} )
-{	
+    : FileIOFilter({"_SalomeHydro Filter",
+                    DEFAULT_PRIORITY, // priority
+                    QStringList{"poly"},
+                    "poly",
+                    QStringList{"Salome Hydro polylines (*.poly)"},
+                    QStringList{"Salome Hydro polylines (*.poly)"},
+                    Import | Export})
+{
 }
 
 bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::POLY_LINE)
 	{
-		multiple = true;
+		multiple  = true;
 		exclusive = true;
 		return true;
 	}
@@ -54,12 +51,12 @@ bool SalomeHydroFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclus
 
 CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
-	Q_UNUSED( parameters );
-	
+	Q_UNUSED(parameters);
+
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	//get all polylines
+	// get all polylines
 	std::vector<ccPolyline*> candidates;
 	try
 	{
@@ -69,7 +66,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 		}
 		else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+			for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 				if (entity->getChild(i) && entity->getChild(i)->isA(CC_TYPES::POLY_LINE))
 					candidates.push_back(static_cast<ccPolyline*>(entity->getChild(i)));
 		}
@@ -82,42 +79,42 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 	if (candidates.empty())
 		return CC_FERR_NO_SAVE;
 
-	//open ASCII file for writing
+	// open ASCII file for writing
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return CC_FERR_WRITING;
 
 	QTextStream outFile(&file);
-	const int c_precision = 12;
+	const int   c_precision = 12;
 
 	CC_FILE_ERROR result = CC_FERR_NO_SAVE;
 
-	//for each polyline
-	for (size_t i=0; i<candidates.size(); ++i)
+	// for each polyline
+	for (size_t i = 0; i < candidates.size(); ++i)
 	{
-		ccPolyline* poly = candidates[i];
-		unsigned vertCount = poly ? poly->size() : 0;
+		ccPolyline* poly      = candidates[i];
+		unsigned    vertCount = poly ? poly->size() : 0;
 		if (vertCount < 2)
 		{
-			//invalid size
+			// invalid size
 			ccLog::Warning(QString("[Salome Hydro] Polyline '%1' does not have enough vertices")
-						   .arg(poly ? poly->getName() : QStringLiteral("unnamed")));
+			                   .arg(poly ? poly->getName() : QStringLiteral("unnamed")));
 			continue;
 		}
-		
-		//a simple empty line is used as separator between each polyline!
+
+		// a simple empty line is used as separator between each polyline!
 		if (i != 0)
 			outFile << endl;
 
-		for (unsigned j=0; j<vertCount; ++j)
+		for (unsigned j = 0; j < vertCount; ++j)
 		{
 			const CCVector3* P = poly->getPoint(j);
 
-			//convert to 'local' coordinate system
+			// convert to 'local' coordinate system
 			CCVector3d Pg = poly->toGlobal3d(*P);
-			outFile << QString::number(Pg.x,'E',c_precision) << " ";
-			outFile << QString::number(Pg.y,'E',c_precision) << " ";
-			outFile << QString::number(Pg.z,'E',c_precision) << endl;
+			outFile << QString::number(Pg.x, 'E', c_precision) << " ";
+			outFile << QString::number(Pg.y, 'E', c_precision) << " ";
+			outFile << QString::number(Pg.z, 'E', c_precision) << endl;
 		}
 
 		result = CC_FERR_NO_ERROR;
@@ -130,7 +127,7 @@ CC_FILE_ERROR SalomeHydroFilter::saveToFile(ccHObject* entity, const QString& fi
 
 CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
-	//we open the file (ASCII mode)
+	// we open the file (ASCII mode)
 	QFile file(filename);
 	if (!file.open(QFile::ReadOnly))
 	{
@@ -139,18 +136,18 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 	QTextStream stream(&file);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	CCVector3d Pshift(0, 0, 0);
-	bool preserveCoordinateShift = true;
-	bool firstPoint = true;
+	CCVector3d    Pshift(0, 0, 0);
+	bool          preserveCoordinateShift = true;
+	bool          firstPoint              = true;
 
 	ccPointCloud* currentVertices = nullptr;
-	unsigned index = 0;
+	unsigned      index           = 0;
 	while (true)
 	{
 		QString currentLine = stream.readLine().trimmed();
 		if (currentLine.isNull() || currentLine.isEmpty())
 		{
-			//close any ongoing polyline
+			// close any ongoing polyline
 			if (currentVertices)
 			{
 				if (currentVertices->size() < 2)
@@ -165,7 +162,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					if (currentVertices->size() > 2)
 					{
 						const CCVector3* firstVertex = currentVertices->getPoint(0);
-						const CCVector3* lastVertex = currentVertices->getPoint(currentVertices->size() - 1);
+						const CCVector3* lastVertex  = currentVertices->getPoint(currentVertices->size() - 1);
 
 						// close the polyline
 						if (CCCoreLib::LessThanEpsilon((*lastVertex - *firstVertex).norm2()))
@@ -176,8 +173,8 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					}
 
 					currentVertices->shrinkToFit();
-					
-					//create the corresponding polyline
+
+					// create the corresponding polyline
 					ccPolyline* newPoly = new ccPolyline(currentVertices);
 					newPoly->setName(QString(QString("Polyline #%1").arg(++index)));
 					newPoly->addChild(currentVertices);
@@ -190,7 +187,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 						result = CC_FERR_NOT_ENOUGH_MEMORY;
 						break;
 					}
-					newPoly->addPointIndex(0,currentVertices->size());
+					newPoly->addPointIndex(0, currentVertices->size());
 					currentVertices->setEnabled(false);
 					container.addChild(newPoly);
 					currentVertices = nullptr;
@@ -199,7 +196,7 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 
 			if (currentLine.isNull())
 			{
-				//end of file
+				// end of file
 				break;
 			}
 		}
@@ -218,11 +215,11 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 			if (parts.size() == 3)
 			{
 				//(X,Y,Z)
-				CCVector3d P(	parts[0].toDouble(),
-								parts[1].toDouble(),
-								parts[2].toDouble() );
+				CCVector3d P(parts[0].toDouble(),
+				             parts[1].toDouble(),
+				             parts[2].toDouble());
 
-				//first point: check for 'big' coordinates
+				// first point: check for 'big' coordinates
 				if (firstPoint)
 				{
 					if (HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters))
@@ -236,14 +233,14 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 					firstPoint = false;
 				}
 
-				//add point
+				// add point
 				if (currentVertices->size() == currentVertices->capacity())
 				{
 					if (!currentVertices->reserve(currentVertices->size() + 64))
 					{
 						delete currentVertices;
 						currentVertices = nullptr;
-						result = CC_FERR_NOT_ENOUGH_MEMORY;
+						result          = CC_FERR_NOT_ENOUGH_MEMORY;
 						break;
 					}
 				}
@@ -257,9 +254,9 @@ CC_FILE_ERROR SalomeHydroFilter::loadFile(const QString& filename, ccHObject& co
 			}
 		}
 	}
-	
+
 	delete currentVertices;
 	currentVertices = nullptr;
-	
+
 	return result;
 }

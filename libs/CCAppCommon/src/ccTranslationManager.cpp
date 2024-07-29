@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 // Qt
 #include <QDebug>
@@ -31,7 +31,9 @@
 #include "ccApplicationBase.h"
 #include "ccTranslationManager.h"
 
-class _ccTranslationManager : public ccTranslationManager {};	// trick for Q_GLOBAL_STATIC to access constructor
+class _ccTranslationManager : public ccTranslationManager
+{
+}; // trick for Q_GLOBAL_STATIC to access constructor
 Q_GLOBAL_STATIC(_ccTranslationManager, s_translationmanager)
 
 ccTranslationManager& ccTranslationManager::Get()
@@ -39,9 +41,9 @@ ccTranslationManager& ccTranslationManager::Get()
 	return *s_translationmanager;
 }
 
-void ccTranslationManager::registerTranslatorFile(const QString &prefix, const QString &path)
+void ccTranslationManager::registerTranslatorFile(const QString& prefix, const QString& path)
 {
-	mTranslatorFileInfo.append({ prefix, path });
+	mTranslatorFileInfo.append({prefix, path});
 }
 
 void ccTranslationManager::loadTranslation(QString language)
@@ -78,9 +80,7 @@ void ccTranslationManager::populateMenu(QMenu* menu, const QString& pathToTransl
 	action->setChecked(true);
 
 	connect(action, &QAction::triggered, this, [this]()
-		{
-			setLanguagePref(QStringLiteral("en"));
-		});
+	        { setLanguagePref(QStringLiteral("en")); });
 
 	QAction* separator = new QAction(group);
 	separator->setSeparator(true);
@@ -99,9 +99,7 @@ void ccTranslationManager::populateMenu(QMenu* menu, const QString& pathToTransl
 		}
 
 		connect(action, &QAction::triggered, this, [=]()
-			{
-				setLanguagePref(langInfo.first);
-			});
+		        { setLanguagePref(langInfo.first); });
 	}
 
 	menu->addActions(group->actions());
@@ -125,8 +123,8 @@ ccTranslationManager::LanguageList ccTranslationManager::availableLanguages(cons
 {
 	QDir dir(pathToTranslationFiles);
 
-	const QString     filter = QStringLiteral("%1_*.qm").arg(appName);
-	const QStringList fileNames = dir.entryList({ filter });
+	const QString     filter    = QStringLiteral("%1_*.qm").arg(appName);
+	const QStringList fileNames = dir.entryList({filter});
 
 	// e.g. File name is "CloudCompare_es_AR.qm"
 	//	Regexp grabs "es_AR" in the var "localeStr" (used to set our locale using QLocale)
@@ -167,13 +165,13 @@ ccTranslationManager::LanguageList ccTranslationManager::availableLanguages(cons
 			menuItem += QStringLiteral(" (%1)").arg(locale.nativeCountryName());
 		}
 
-		languageList += { localeStr, menuItem };
+		languageList += {localeStr, menuItem};
 	}
 
 	return languageList;
 }
 
-void ccTranslationManager::setLanguagePref(const QString &languageCode)
+void ccTranslationManager::setLanguagePref(const QString& languageCode)
 {
 	if (languageCode == languagePref())
 	{
@@ -187,7 +185,7 @@ void ccTranslationManager::setLanguagePref(const QString &languageCode)
 	}
 	settings.endGroup();
 
-	QMessageBox::information(	nullptr,
-								tr("Language Change"),
-								tr("Language change will take effect when CloudCompare is restarted") );
+	QMessageBox::information(nullptr,
+	                         tr("Language Change"),
+	                         tr("Language change will take effect when CloudCompare is restarted"));
 }

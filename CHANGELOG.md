@@ -44,6 +44,8 @@ New Feature:
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry
+		
+	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
 Improvements:
 

@@ -5882,7 +5882,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 				const int& v2 = scanGrid->indexes[(j + 1) * scanGrid->w + i];
 				const int& v3 = scanGrid->indexes[(j + 1) * scanGrid->w + (i + 1)];
 
-				bool topo[4] = { v0 >= 0, v1 >= 0, v2 >= 0, v3 >= 0 };
+				bool topo[4] { v0 >= 0, v1 >= 0, v2 >= 0, v3 >= 0 };
 
 				int mask = 0;
 				int pixels = 0;
@@ -5901,7 +5901,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 					continue;
 				}
 
-				Tuple3i tris[4] =
+				Tuple3i tris[4]
 				{
 					{ v0, v2, v1 },
 					{ v0, v3, v1 },
@@ -5909,7 +5909,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 					{ v1, v2, v3 }
 				};
 
-				int tri[2] = { -1, -1 };
+				int tri[2] { -1, -1 };
 
 				switch (mask)
 				{

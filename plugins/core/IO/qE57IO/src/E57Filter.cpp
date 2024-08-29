@@ -1921,6 +1921,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	unsigned size = 0;
 	int64_t realCount = 0;
 	int64_t invalidCount = 0;
+	int64_t zeroCount = 0;
 	int col = 0, row = 0;
 	while ((size = dataReader.read()))
 	{
@@ -1975,6 +1976,11 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 					Pd.y = arrays.yData[i];
 				if (!arrays.zData.empty())
 					Pd.z = arrays.zData[i];
+			}
+
+			if (Pd.x == 0 && Pd.y == 0 && Pd.z == 0)
+			{
+				++zeroCount;
 			}
 
 			//first point: check for 'big' coordinates
@@ -2073,6 +2079,11 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 
 	dataReader.close();
+
+	if (zeroCount > 1)
+	{
+		ccLog::Warning(QString("[E57] Number of points clustured at the origin: %1 (consider removing duplicate points)").arg(zeroCount));
+	}
 
 	if (realCount == 0)
 	{

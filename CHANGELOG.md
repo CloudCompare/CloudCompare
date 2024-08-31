@@ -81,6 +81,8 @@ Bug fixes:
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
 		preventing from detecting some or all instances of these shapes if not explicitly defined by the user
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
+	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
+		1000 the second time a file was loaded.
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

@@ -148,7 +148,7 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 											double linearDeflection,
 											LoadParameters& parameters )
 {
-	Interface_Static::SetCVal("xstep.cascade.unit", "M");
+	//Interface_Static::SetCVal("xstep.cascade.unit", "M"); // DGM: seems to mess things completely, having various impacts during the next run (smaller scale, etc.)
 
 	STEPControl_Reader aReader;
 	IFSelect_ReturnStatus aStatus = aReader.ReadFile(qUtf8Printable(fullFileName));
@@ -240,10 +240,10 @@ CC_FILE_ERROR STEPFilter::importStepFile(	ccHObject& container,
 
 		for (int j = 1; j <= facing->NbTriangles(); j++)
 		{
-			Standard_Integer index[3] = { 0 };
+			Standard_Integer index[3] { 0 };
 			triangles.Value(j).Get(index[0], index[1], index[2]);
 			
-			unsigned vertIndexes[3] = { 0 };
+			unsigned vertIndexes[3] { 0 };
 			for (unsigned k = 0; k < 3; ++k)
 			{
 				gp_Pnt pk = facing->Node(index[k]).Transformed(nodeTransformation);

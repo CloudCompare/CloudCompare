@@ -54,6 +54,9 @@ Improvements:
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
+		- set the default PCD output file format: -PCD_OUTPUT_FORMAT {format}
+			- format can be one of 'COMPRESSED_BINARY', 'BINARY' or 'ASCII'
+			- default format is 'COMPRESSED_BINARY'
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
@@ -67,6 +70,11 @@ Improvements:
 
 	- PLY loading dialog:
 		- new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+
+	- PCD format:
+		- a new dialog will appear when saving PCD file, to choose the output format (between compressed binary, binary and ASCII/text)
+		- this dialog can be hidden once and for all by clicking on the 'Yes to all' button
+		- the default output format can also be set via the command line (see above)
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

@@ -267,11 +267,41 @@
        <widget class="QListWidget" name="scalarFields"/>
       </item>
       <item>
-       <widget class="QToolButton" name="addSFToolButton">
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QToolButton" name="addSFToolButton">
+          <property name="toolTip">
+           <string>Add a single standard property to be loaded as a Scalar Field</string>
+          </property>
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="addAllSFToolButton">
+          <property name="toolTip">
+           <string>Add all unused standard properties to be loaded as Scalar Fields</string>
+          </property>
+          <property name="text">
+           <string>Add all</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

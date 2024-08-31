@@ -65,6 +65,9 @@ Improvements:
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 
+	- PLY loading dialog:
+		- new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,

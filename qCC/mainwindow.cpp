@@ -4169,7 +4169,7 @@ void MainWindow::doActionSubsample()
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = clouds[i];
-			CCCoreLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
+			CCCoreLib::ReferenceCloud* sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
 			if (!sampledCloud)
 			{
 				ccConsole::Warning(tr("[Subsampling] Failed to subsample cloud '%1'!").arg(cloud->getName()));
@@ -4178,7 +4178,7 @@ void MainWindow::doActionSubsample()
 			}
 
 			int warnings = 0;
-			ccPointCloud *newPointCloud = cloud->partialClone(sampledCloud,&warnings);
+			ccPointCloud* newPointCloud = cloud->partialClone(sampledCloud,&warnings);
 
 			delete sampledCloud;
 			sampledCloud = nullptr;

@@ -63,10 +63,13 @@ Improvements:
 			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
 			if the point format is changed.
 
+	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
+
 Bug fixes:
-	- Editing the Global Shift & Scale information of a polyline would make CC crash
+	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
 		preventing from detecting some or all instances of these shapes if not explicitly defined by the user
+	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

@@ -34,6 +34,9 @@ public:
 
 	//inherited from ccIOPluginInterface
 	FilterList getFilters() override;
+
+	//inherited from ccDefaultPluginInterface
+	void registerCommands(ccCommandLineInterface* cmd) override;
 };
 
 #endif //Q_PCL_IO_PLUGIN_HEADER

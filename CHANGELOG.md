@@ -54,6 +54,9 @@ Improvements:
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'
 			- {original cloud name} + '_offground_points'
+		- set the default PCD output file format: -PCD_OUTPUT_FORMAT {format}
+			- format can be one of 'COMPRESSED_BINARY', 'BINARY' or 'ASCII'
+			- default format is 'COMPRESSED_BINARY'
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
@@ -63,10 +66,23 @@ Improvements:
 			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
 			if the point format is changed.
 
+	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
+
+	- PLY loading dialog:
+		- new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+
+	- PCD format:
+		- a new dialog will appear when saving PCD file, to choose the output format (between compressed binary, binary and ASCII/text)
+		- this dialog can be hidden once and for all by clicking on the 'Yes to all' button
+		- the default output format can also be set via the command line (see above)
+
 Bug fixes:
-	- Editing the Global Shift & Scale information of a polyline would make CC crash
+	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
 		preventing from detecting some or all instances of these shapes if not explicitly defined by the user
+	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
+	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
+		1000 the second time a file was loaded.
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

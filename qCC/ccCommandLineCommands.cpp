@@ -7190,7 +7190,7 @@ bool CommandSaveClouds::process(ccCommandLineInterface& cmd)
 			cmd.arguments().pop_front();
 			allAtOnce = true;
 		}
-		else if (argument.left(sizeof(OPTION_FILE_NAMES) - 1).toUpper() == OPTION_FILE_NAMES)
+		else if (argument.startsWith(OPTION_FILE_NAMES))
 		{
 			cmd.arguments().pop_front();
 			setFileNames = true;

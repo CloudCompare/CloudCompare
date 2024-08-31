@@ -4,6 +4,7 @@ AddPlugin( NAME ${PROJECT_NAME} TYPE io )
 
 add_subdirectory( include )
 add_subdirectory( src )
+add_subdirectory( ui )
 
 target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
 

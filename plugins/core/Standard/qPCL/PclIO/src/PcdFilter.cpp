@@ -28,6 +28,11 @@
 
 //Qt
 #include <QFileInfo>
+#include <QDialog>
+#include <QPushButton>
+
+//Dialog
+#include <ui_PCDOutputFormatDlg.h>
 
 //Boost
 #include <boost/bind.hpp>
@@ -67,11 +72,96 @@ bool PcdFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 	return false;
 }
 
+static PcdFilter::PCDOutputFileFormat s_outputFileFormat = PcdFilter::AUTO;
+void PcdFilter::SetOutputFileFormat(PCDOutputFileFormat format)
+{
+	s_outputFileFormat = format;
+}
+
+//! Dialog for the PCV plugin
+class ccPCDFileOutputForamtDialog : public QDialog, public Ui::PCDOutputFormatDialog
+{
+public:
+	explicit ccPCDFileOutputForamtDialog(QWidget* parent = nullptr)
+		: QDialog(parent, Qt::Tool)
+		, Ui::PCDOutputFormatDialog()
+	{
+		setupUi(this);
+	}
+};
+
 CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	if (!entity || filename.isEmpty())
 	{
 		return CC_FERR_BAD_ARGUMENT;
+	}
+
+	PcdFilter::PCDOutputFileFormat outputFileFormat = s_outputFileFormat;
+	if (outputFileFormat == AUTO)
+	{
+		if (nullptr == parameters.parentWidget)
+		{
+			// defaulting to compressed binary
+			outputFileFormat = COMPRESSED_BINARY;
+		}
+		else
+		{
+			// GUI version: show a dialog to let the user choose the output format
+			ccPCDFileOutputForamtDialog dialog;
+			static PcdFilter::PCDOutputFileFormat s_previousOutputFileFormat = COMPRESSED_BINARY;
+			switch (s_previousOutputFileFormat)
+			{
+			case COMPRESSED_BINARY:
+				dialog.compressedBinaryRadioButton->setChecked(true);
+				break;
+			case BINARY:
+				dialog.binaryRadioButton->setChecked(true);
+				break;
+			case ASCII:
+				dialog.asciiRadioButton->setChecked(true);
+				break;
+			}
+
+			QAbstractButton* clickedButton = nullptr;
+
+			QObject::connect(dialog.buttonBox, &QDialogButtonBox::clicked, [&](QAbstractButton* button)
+				{
+					clickedButton = button;
+				});
+
+			if (dialog.exec())
+			{
+				if (dialog.compressedBinaryRadioButton->isChecked())
+				{
+					outputFileFormat = COMPRESSED_BINARY;
+				}
+				else if (dialog.binaryRadioButton->isChecked())
+				{
+					outputFileFormat = BINARY;
+				}
+				else if (dialog.asciiRadioButton->isChecked())
+				{
+					outputFileFormat = ASCII;
+				}
+				else
+				{
+					assert(false);
+				}
+
+				s_previousOutputFileFormat = outputFileFormat;
+
+				if (clickedButton == dialog.buttonBox->button(QDialogButtonBox::StandardButton::YesToAll))
+				{
+					// remember once and for all the output file format
+					s_outputFileFormat = outputFileFormat;
+				}
+			}
+			else
+			{
+				return CC_FERR_CANCELED_BY_USER;
+			}
+		}
 	}
 
 	//the cloud to save
@@ -190,18 +280,44 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	try
 	{
-#ifdef _MSC_VER
-		std::ofstream ofs(filename.toStdWString(), std::wifstream::out | std::wifstream::binary);
-#else
-		std::ofstream ofs(filename.toStdString(), std::wifstream::out | std::wifstream::binary);
-#endif
 		pcl::PCDWriter p;
-		if (p.writeBinaryCompressed(ofs, *pclCloud, pos, ori) < 0)
+
+		switch (outputFileFormat)
 		{
+		case COMPRESSED_BINARY:
+		{
+#ifdef _MSC_VER
+			std::ofstream ofs(filename.toStdWString(), std::wifstream::out | std::wifstream::binary);
+#else
+			std::ofstream ofs(filename.toStdString(), std::wifstream::out | std::wifstream::binary);
+#endif
+			if (p.writeBinaryCompressed(ofs, *pclCloud, pos, ori) < 0)
+			{
+				ofs.close();
+				return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+			}
 			ofs.close();
-			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
-		ofs.close();
+		break;
+
+		case BINARY:
+		{
+			if (p.writeBinary(filename.toStdString(), *pclCloud, pos, ori) < 0)
+			{
+				return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+			}
+		}
+		break;
+
+		case ASCII:
+		{
+			if (p.writeASCII(filename.toStdString(), *pclCloud, pos, ori) < 0)
+			{
+				return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+			}
+		}
+		break;
+		}
 	}
 	catch (...)
 	{

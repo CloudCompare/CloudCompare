@@ -317,6 +317,13 @@ void ccSubsamplingDlg::enableSFModulation(ScalarType sfMin, ScalarType sfMax)
 		return;
 	}
 
+	if (sfMin == sfMax)
+	{
+		m_sfModEnabled = false;
+		ccLog::Warning("[ccSubsamplingDlg::enableSFModulation] Can't modulate sampling if all scalar values are the same");
+		return;
+	}
+
 	m_sfMin = sfMin;
 	m_sfMax = sfMax;
 

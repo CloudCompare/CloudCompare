@@ -2197,6 +2197,14 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 
 	//get pose information
 	output.validPoseMat = GetPoseInformation(imageNode, output.poseMat);
+	ccGLMatrixd rotZ;
+	rotZ.toIdentity();
+	//rotZ.initFromParameters(M_PI / 2, CCVector3d(0, 0, 1), CCVector3d(0, 0, 0));
+	ccGLMatrixd rotX;
+	rotX.toIdentity();
+	rotX.initFromParameters(M_PI, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
+	//output.poseMat = output.poseMat * rotX * rotZ;
+	//output.poseMat.setColumn(2, -output.poseMat.getColumnAsVec3D(2));
 
 	//camera information
 	e57::ustring cameraRepresentationStr("none");

@@ -75,6 +75,7 @@ public:
 protected:
 	void apply();
 	void applyAll();
+	void addAllStdPropsAsSF();
 
 Q_SIGNALS:
 	void fullyAccepted();

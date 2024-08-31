@@ -80,6 +80,7 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent)
 	}
 
 	connect(addSFToolButton,	&QAbstractButton::clicked,	this,	&PlyOpenDlg::addSFComboBox);
+	connect(addAllSFToolButton,	&QAbstractButton::clicked,	this,	&PlyOpenDlg::addAllStdPropsAsSF);
 	connect(applyButton,		&QAbstractButton::clicked,	this,	&PlyOpenDlg::apply);
 	connect(applyAllButton,		&QAbstractButton::clicked,	this,	&PlyOpenDlg::applyAll);
 	connect(cancelButton,		&QAbstractButton::clicked,	this,	&QDialog::reject);
@@ -464,4 +465,63 @@ void PlyOpenDlg::addSFComboBox(int selectedIndex/*=0*/)
 	scalarFields->setItemWidget(sfItem, sfCombo);
 
 	m_sfCombos.push_back(sfCombo);
+}
+
+void PlyOpenDlg::addAllStdPropsAsSF()
+{
+	std::vector<bool> notUsed;
+	notUsed.resize(m_stdPropsText.size(), true);
+
+	// check standard comboboxes
+	for (QComboBox* combo : m_standardCombos)
+	{
+		assert(combo);
+		int index = combo->currentIndex();
+		if (index >= 0)
+		{
+			if (static_cast<size_t>(index) < notUsed.size())
+			{
+				notUsed[index] = false;
+			}
+		}
+		else
+		{
+			assert(false);
+			ccLog::Warning("Invalid combobox index!");
+		}
+	}
+
+	// check already existing SF combos
+	for (QComboBox* combo : m_sfCombos)
+	{
+		assert(combo);
+		int index = combo->currentIndex();
+		if (index >= 0)
+		{
+			if (static_cast<size_t>(index) < notUsed.size())
+			{
+				notUsed[index] = false;
+			}
+		}
+		else
+		{
+			assert(false);
+			ccLog::Warning("Invalid combobox index!");
+		}
+	}
+
+	size_t createdSFCount = 0;
+	for (size_t i = 0; i < notUsed.size(); ++i)
+	{
+		if (notUsed[i])
+		{
+			addSFComboBox(static_cast<int>(i));
+			++createdSFCount;
+		}
+	}
+
+	if (createdSFCount == 0)
+	{
+		QMessageBox::warning(this, "Add all SFs", "No unused property");
+	}
 }

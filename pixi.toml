@@ -14,7 +14,7 @@ depends-on = ["install"]
 
 [feature.build.dependencies]
 cmake = ">=3.27,<3.30"
-cxx-compiler = ">=1.7.0,<1.8"
+cxx-compiler = ">=1.8.0,<1.9"
 ninja = "1.12.*"
 
 [dependencies]
@@ -22,10 +22,10 @@ qt = ">=5.15.8,<5.16"
 python = ">=3.11,<3.12"
 laszip = ">=3.4.3,<3.5"
 opencv = ">=4.9.0,<4.10"
-pcl = ">=1.14.1,<1.15"
+pcl = ">=1.14.1,<1.15" #osx-64 only accept 1.14.0 (due to pyqt 6 dependency)
 boost = ">=1.84.0,<1.85"
-pybind11 = ">=2.12.0,<2.13"
-pyqt = ">=5.15.7,<=5.15.9"
+pybind11 = ">=2.13.0,<2.14"
+pyqt = ">=5.15.7,<=5.15.11"
 scipy = ">=1.13.0,<1.14" # Needed by 3DFin
 scikit-learn = ">=1.5,<1.6"
 eigen = ">=3.4.0,<3.5"

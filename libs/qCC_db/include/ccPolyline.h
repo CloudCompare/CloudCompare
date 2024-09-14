@@ -162,7 +162,7 @@ public:
 
 	//! Creates a polyline mesh with the selected vertices only
 	/** This method is called after a graphical segmentation.
-		It creates one or several new polylines with the segments having their two
+		It creates one or several new polylines with the segments having both
 		vertices tagged as "visible" (see ccGenericPointCloud::visibilityArray).
 	**/
 	bool createNewPolylinesFromSelection(std::vector<ccPolyline*>& output);

@@ -83,6 +83,8 @@ Bug fixes:
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
 		1000 the second time a file was loaded.
+	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
+		of polyline vertices
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

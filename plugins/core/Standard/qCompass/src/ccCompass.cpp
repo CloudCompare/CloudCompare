@@ -386,7 +386,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>& originals, std::vec
 	//is object already represented by a ccCompass class?
 	if (dynamic_cast<ccFitPlane*>(obj)
 		|| dynamic_cast<ccTrace*>(obj)
-		|| dynamic_cast<ccPointPair*>(obj) //n.b. several classes inherit from PointPair, so this cast will still succede for them
+		|| dynamic_cast<ccPointPair*>(obj) //n.b. several classes inherit from PointPair, so this cast will still succeed for them
 		|| dynamic_cast<ccGeoObject*>(obj)
 		|| dynamic_cast<ccSNECloud*>(obj))
 	{
@@ -431,7 +431,7 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>& originals, std::vec
 		return;
 	}
 
-	//is the HObject a polyline? (this will be the case for lineations & traces)
+	//is the HObject a polyline?
 	ccPolyline* p = dynamic_cast<ccPolyline*>(obj);
 	if (p)
 	{
@@ -1096,7 +1096,7 @@ void ccCompass::fitPlaneToGeoObject()
 	{
 		if (ccTrace::isTrace(upper->getChild(i)))
 		{
-			ccTrace* t = dynamic_cast<ccTrace*> (upper->getChild(i));
+			ccTrace* t = dynamic_cast<ccTrace*>(upper->getChild(i));
 
 			if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 			{
@@ -1138,7 +1138,7 @@ void ccCompass::fitPlaneToGeoObject()
 		{
 			if (ccTrace::isTrace(lower->getChild(i)))
 			{
-				ccTrace* t = dynamic_cast<ccTrace*> (lower->getChild(i));
+				ccTrace* t = dynamic_cast<ccTrace*>(lower->getChild(i));
 
 				if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 				{
@@ -1195,18 +1195,22 @@ void ccCompass::recalculateFitPlanes()
 		if (ccTrace::isTrace(parent)) //add to recalculate list
 		{
 			//recalculate the fit plane
-			ccTrace* t = static_cast<ccTrace*>(parent);
-			ccFitPlane* p = t->fitPlane();
-			if (p)
+			ccTrace* t = dynamic_cast<ccTrace*>(parent);
+
+			if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 			{
-				t->addChild(p); //add the new fit-plane
-				m_app->addToDB(p, false, false, false, false);
+				ccFitPlane* p = t->fitPlane();
+				if (p)
+				{
+					t->addChild(p); //add the new fit-plane
+					m_app->addToDB(p, false, false, false, false);
+				}
+
+				//add the old plane to the garbage list (to be deleted later)
+				garbage.push_back(plane);
+
+				continue; //next
 			}
-
-			//add the old plane to the garbage list (to be deleted later)
-			garbage.push_back(plane);
-
-			continue; //next
 		}
 
 		//otherwise - does the plane have a child that is a trace object (i.e. it was created in Compass mode)
@@ -1216,25 +1220,29 @@ void ccCompass::recalculateFitPlanes()
 			if (ccTrace::isTrace(child)) //add to recalculate list
 			{
 				//recalculate the fit plane
-				ccTrace* t = static_cast<ccTrace*>(child);
-				ccFitPlane* p = t->fitPlane();
-				
-				if (p)
+				ccTrace* t = dynamic_cast<ccTrace*>(child);
+
+				if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 				{
-					//... do some jiggery pokery
-					parent->addChild(p); //add fit-plane to the original fit-plane's parent (as we are replacing it)
-					m_app->addToDB(p, false, false, false, false);
+					ccFitPlane* p = t->fitPlane();
 
-					//remove the trace from the original fit-plane
-					plane->detachChild(t);
+					if (p)
+					{
+						//... do some jiggery pokery
+						parent->addChild(p); //add fit-plane to the original fit-plane's parent (as we are replacing it)
+						m_app->addToDB(p, false, false, false, false);
 
-					//add it to the new one
-					p->addChild(t);
+						//remove the trace from the original fit-plane
+						plane->detachChild(t);
 
-					//add the old plane to the garbage list (to be deleted later)
-					garbage.push_back(plane);
+						//add it to the new one
+						p->addChild(t);
 
-					break;
+						//add the old plane to the garbage list (to be deleted later)
+						garbage.push_back(plane);
+
+						break;
+					}
 				}
 			}
 		}
@@ -1486,18 +1494,26 @@ void ccCompass::estimateStructureNormals()
 
 		//option 2 - selected object is a trace or has children that are traces
 		objs.clear();
-		if (ccTrace::isTrace(o)) { //selected object is a trace
+		if (ccTrace::isTrace(o))
+		{
+			//selected object is a trace
 			objs.push_back(o);
 		}
-		else {//otherwise search for all GeoObjects
+		else
+		{
+			//otherwise search for all GeoObjects
 			o->filterChildren(objs, true, CC_TYPES::POLY_LINE); //n.b. geoObjects are simpy considered to be hierarchy objects by CC
 		}
-		for (ccHObject* o2 : objs) {
-			if (ccTrace::isTrace(o2) && o2->isEnabled()) {//is it a trace?
+		for (ccHObject* o2 : objs)
+		{
+			if (ccTrace::isTrace(o2) && o2->isEnabled())
+			{
+				//is it a trace?
 				ccTrace* t = dynamic_cast<ccTrace*> (o2);
-				if (t != nullptr) {//can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
-					std::array<ccHObject*, 2> data = { t, nullptr };
-					datasets.push_back(data); //store data for processing
+				if (t != nullptr)
+				{
+					//can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
+					datasets.push_back({ t, nullptr }); //store data for processing
 					pinchClouds.push_back(new ccPointCloud()); //push empty cloud (no pinch nodes).
 				}
 			}
@@ -1539,16 +1555,21 @@ void ccCompass::estimateStructureNormals()
 
 			//search for traces in this region
 			ccHObject::Container objs;
-			if (ccTrace::isTrace(regions[r])) { //given object is a trace
+			if (ccTrace::isTrace(regions[r]))
+			{
+				//given object is a trace
 				objs.push_back(regions[r]);
-			} else { //otherwise search for child traces (this is a GeoObject region so traces need to be joined together)
+			}
+			else
+			{
+				//otherwise search for child traces (this is a GeoObject region so traces need to be joined together)
 				regions[r]->filterChildren(objs, true, CC_TYPES::POLY_LINE);
 			}
 			for (ccHObject* c : objs)
 			{
 				if (ccTrace::isTrace(c) && c->isEnabled()) //is it a trace?
 				{
-					ccTrace* t = dynamic_cast<ccTrace*> (c);
+					ccTrace* t = dynamic_cast<ccTrace*>(c);
 					if (t != nullptr) //can in rare cases be a null ptr (dynamic cast will fail for traces that haven't been converted to ccTrace objects)
 					{
 						//copy points from this trace across into the relevant point cloud for future access
@@ -2233,7 +2254,8 @@ void ccCompass::estimateStrain()
 	for (ccHObject* o : m_app->getSelectedEntities())
 	{
 		//Is selected object a trace?
-		if (ccTrace::isTrace(o) && o->isEnabled()) {
+		if (ccTrace::isTrace(o) && o->isEnabled())
+		{
 			lines.push_back(static_cast<ccPolyline*>(o));
 			continue;
 		}

@@ -65,6 +65,15 @@ Improvements:
 		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),
 			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
 			if the point format is changed.
+		- CC will now explicitly display and let the user choose the 'LAS offset' among up to 4 options
+			- Current global shift (if any), original LAS offset (if any), the cloud minimum bounding-box corner, or a custom offset
+			- by default, the following priority order is now used for selecting the default option:
+				1) a previously 'custom LAS offset' already input by the user
+				2) the current Global Shift, if any and if different from the original LAS offset (XY only)
+				3) (0, 0, 0) if no Global Shift is set, and a non-null LAS offset was present (XY only) [GUI version only]
+				4) the original LAS offset, if any
+				5) the cloud minimum bounding-box corner (if applicable)
+			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 

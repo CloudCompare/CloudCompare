@@ -1,0 +1,28 @@
+{
+	"type" : "Standard",
+	"core" : true,
+	"name" : "VOXFALL",
+	"icon" : ":/CC/plugin/qVoxFall/images/icon.png",
+	"description": "Voxelized rockFall (VoxFall).",
+	"authors" : [
+		{
+			"name" : "Ioannis Farmakis",
+			"email" : "i.farmakis@icloud.com"
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "Ioannis Farmakis",
+			"email" : "i.farmakis@icloud.com"
+		}
+	],
+	"references" : [
+		{
+			"text" : "VoxFall: Non-parametric volumetric change detection for rockfalls",
+			"url" : "to be published by Engineering Geology"
+		},
+		{
+			"text" : "The idea behind the development of this plug in was generated during my post-doc spell at the University of Newcastle, Australia."
+		}
+	]
+}

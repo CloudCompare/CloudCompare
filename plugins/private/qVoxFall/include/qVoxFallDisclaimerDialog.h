@@ -15,8 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-#pragma once
-
 #ifndef VOXFALL_DISCLAIMER_DIALOG_HEADER
 #define VOXFALL_DISCLAIMER_DIALOG_HEADER
 

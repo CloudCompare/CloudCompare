@@ -119,21 +119,3 @@ void qVoxFall::doAction()
 	//'Compute' may change some parameters of the dialog
 	dlg.saveParamsToPersistentSettings();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

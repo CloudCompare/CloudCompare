@@ -94,6 +94,7 @@ Bug fixes:
 		1000 the second time a file was loaded.
 	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
 		of polyline vertices
+	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

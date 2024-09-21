@@ -6969,7 +6969,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	if (dataWeightsSFIndex >= 0 || !dataWeightsSFIndexName.isEmpty())
 	{
 		ccPointCloud* dataAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
-		if (!dataAsCloud)
+		if (dataAsCloud)
 		{
 			dataWeightsSFIndex = GetScalarFieldIndex(dataAsCloud, dataWeightsSFIndex, dataWeightsSFIndexName, true);
 			if (dataWeightsSFIndex >= 0)
@@ -6983,7 +6983,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	if (modelWeightsSFIndex >= 0 || !modelWeightsSFIndexName.isEmpty())
 	{
 		ccPointCloud* modelAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
-		if (!modelAsCloud)
+		if (modelAsCloud)
 		{
 			modelWeightsSFIndex = GetScalarFieldIndex(modelAsCloud, modelWeightsSFIndex, modelWeightsSFIndexName, true);
 			if (modelWeightsSFIndex >= 0)

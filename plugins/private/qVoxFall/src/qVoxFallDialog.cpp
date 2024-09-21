@@ -213,11 +213,3 @@ void qVoxFallDialog::saveParamsTo(QSettings& settings)
 	settings.setValue("ExportMeshesEnabled", exportCheckBox->isChecked());
 	settings.setValue("LossGainEnabled", lossCheckBox->isChecked());
 }
-
-
-
-
-
-
-
-

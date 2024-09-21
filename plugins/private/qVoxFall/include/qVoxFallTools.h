@@ -15,8 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-#pragma once
-
 #ifndef Q_VOXFALL_TOOLS_HEADER
 #define Q_VOXFALL_TOOLS_HEADER
 

@@ -3,7 +3,7 @@ CloudCompare Version History
 
 v2.14.alpha (???) - (??/??/202?)
 ----------------------
-New Feature:
+New features:
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter
@@ -46,6 +46,11 @@ New Feature:
 		- it can then be restored via the 'Display > Display options' menu entry
 		
 	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
+
+New plugin
+
+	- VoxFall: non-parametric volumetric change detection for rockfalls
+		- computes volume differences between 2 meshes, with some visual representation
 
 Improvements:
 

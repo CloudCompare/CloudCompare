@@ -272,14 +272,10 @@ LasScalarFieldLoader::handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointC
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
-		double timeShift;
+		double timeShift = m_manualTimeShiftValue;
 		if (std::isnan(m_manualTimeShiftValue))
 		{
 			timeShift = static_cast<int64_t>(currentValue / 10000.0) * 10000.0;
-		}
-		else
-		{
-			timeShift = m_manualTimeShiftValue;
 		}
 
 		double shiftedValue = currentValue - timeShift;
@@ -300,7 +296,7 @@ LasScalarFieldLoader::handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointC
 		newSf->setGlobalShift(timeShift);
 		for (unsigned j = 0; j < pointCloud.size() - 1; ++j)
 		{
-			newSf->addElement(static_cast<ScalarType>(timeShift));
+			newSf->addElement(-static_cast<ScalarType>(timeShift));
 		}
 	}
 

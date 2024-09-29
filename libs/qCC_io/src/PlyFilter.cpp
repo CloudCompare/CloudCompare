@@ -40,6 +40,7 @@
 //System
 #include <cassert>
 #include <cstring>
+#include <array>
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
@@ -110,7 +111,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const QString& filename, 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_storage_mode storageType)
 {
 	if (!entity || filename.isEmpty())
+	{
 		return CC_FERR_BAD_ARGUMENT;
+	}
 
 	ccGenericPointCloud* vertices = nullptr;
 	ccGenericMesh* mesh = nullptr;
@@ -125,7 +128,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 
 	if (!vertices)
+	{
 		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 
 #ifdef _WIN32
 	p_ply ply = ply_create(filename.toStdWString().c_str(), storageType, errorCallback, 0, nullptr);
@@ -133,7 +138,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	p_ply ply = ply_create(qPrintable(filename), storageType, errorCallback, 0, nullptr);
 #endif
 	if (!ply)
+	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
 
 	//Has the cloud been recentered?
 	e_ply_type coordType = vertices->isShifted() || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
@@ -168,7 +175,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 					{
 						//save first encountered texture
 						if (!material)
+						{
 							material = materials->at(i);
+						}
 						++textureCount;
 					}
 				}
@@ -269,7 +278,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 
 	bool hasUniqueColor = false;
-	ColorCompType uniqueColor[3] = {0,0,0};
+	ColorCompType uniqueColor[3]{ 0,0,0 };
 	if (material)
 	{
 		//Material without texture?
@@ -316,6 +325,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	std::vector<ccScalarField*> scalarFields;
 	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 	{
+		QStringList originalStdPropsNames;
+		if (vertices->hasMetaData("ply.stdPropNames"))
+		{
+			originalStdPropsNames = vertices->getMetaData("ply.stdPropNames").toStringList();
+		}
+
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(vertices);
 		unsigned sfCount = ccCloud->getNumberOfScalarFields();
 		if (sfCount)
@@ -323,23 +338,37 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			e_ply_type scalarType = (sizeof(ScalarType) > 4 ? PLY_DOUBLE : PLY_FLOAT);
 
 			scalarFields.resize(sfCount);
-			unsigned unnamedSF = 0;
-			for (unsigned i=0; i<sfCount; ++i)
+			unsigned unnamedSFCount = 0;
+			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				scalarFields[i] = static_cast<ccScalarField*>(ccCloud->getScalarField(i));
 				const char* sfName = scalarFields[i]->getName();
 				QString propName;
 				if (!sfName)
 				{
-					if (unnamedSF++ == 0)
+					if (unnamedSFCount == 0)
+					{
 						propName = "scalar";
+					}
 					else
-						propName = QString("scalar_%1").arg(unnamedSF);
+					{
+						propName = QString("scalar_%1").arg(unnamedSFCount);
+					}
+					++unnamedSFCount;
 				}
 				else
 				{
-					propName = QString("scalar_%1").arg(sfName);
-					propName.replace(' ','_');
+					if (originalStdPropsNames.contains(sfName))
+					{
+						// don't change the name of a field that was already in the original file
+						propName = sfName;
+					}
+					else
+					{
+						// append the SF name with 'scalar' for easier detection at loading time
+						propName = QString("scalar_%1").arg(sfName);
+						propName.replace(' ', '_');
+					}
 				}
 
 				result = ply_add_scalar_property(ply, qPrintable(propName), scalarType);
@@ -411,7 +440,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	}
 
 	//save the point cloud (=vertices)
-	for (unsigned i=0; i<vertCount; ++i)
+	for (unsigned i = 0; i < vertCount; ++i)
 	{
 		const CCVector3* P = vertices->getPoint(i);
 		CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
@@ -515,8 +544,8 @@ static int vertex_cb(p_ply_argument argument)
 		//skip the next pieces of data
 		return 1;
 	}
-	long flags;
-	ccPointCloud* cloud;
+	long flags = 0;
+	ccPointCloud* cloud = nullptr;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
 	double val = ply_get_argument_value(argument);
@@ -558,7 +587,9 @@ static int vertex_cb(p_ply_argument argument)
 
 		s_PointDataCorrupted = false;
 		if ((s_PointCount % PROCESS_EVENTS_FREQ) == 0)
+		{
 			QCoreApplication::processEvents();
+		}
 	}
 
 	return 1;
@@ -571,8 +602,8 @@ static int normal_cb(p_ply_argument argument)
 		//skip the next pieces of data
 		return 1;
 	}
-	long flags;
-	ccPointCloud* cloud;
+	long flags = 0;
+	ccPointCloud* cloud = nullptr;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
 	static CCVector3 s_Normal(0, 0, 0);
@@ -584,7 +615,9 @@ static int normal_cb(p_ply_argument argument)
 		++s_NormalCount;
 
 		if ((s_NormalCount % PROCESS_EVENTS_FREQ) == 0)
+		{
 			QCoreApplication::processEvents();
+		}
 	}
 
 	return 1;
@@ -597,8 +630,8 @@ static int rgb_cb(p_ply_argument argument)
 		//skip the next pieces of data
 		return 1;
 	}
-	long flags;
-	ccPointCloud* cloud;
+	long flags = 0;
+	ccPointCloud* cloud = nullptr;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
 	p_ply_property prop;
@@ -633,7 +666,9 @@ static int rgb_cb(p_ply_argument argument)
 		++s_ColorCount;
 
 		if ((s_ColorCount % PROCESS_EVENTS_FREQ) == 0)
+		{
 			QCoreApplication::processEvents();
+		}
 	}
 
 	return 1;
@@ -646,7 +681,7 @@ static int grey_cb(p_ply_argument argument)
 		//skip the next pieces of data
 		return 1;
 	}
-	ccPointCloud* cloud;
+	ccPointCloud* cloud = nullptr;
 	ply_get_argument_user_data(argument, (void**)(&cloud), nullptr);
 
 	p_ply_property prop;
@@ -679,7 +714,9 @@ static int grey_cb(p_ply_argument argument)
 	++s_IntensityCount;
 
 	if ((s_IntensityCount % PROCESS_EVENTS_FREQ) == 0)
+	{
 		QCoreApplication::processEvents();
+	}
 
 	return 1;
 }
@@ -702,7 +739,9 @@ static int scalar_cb(p_ply_argument argument)
 	sf->setValue(instance_index,scal);
 
 	if ((++s_totalScalarCount % PROCESS_EVENTS_FREQ) == 0)
+	{
 		QCoreApplication::processEvents();
+	}
 
 	return 1;
 }
@@ -843,7 +882,9 @@ static int texCoords_cb(p_ply_argument argument)
 		++s_texCoordCount;
 
 		if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
+		{
 			QCoreApplication::processEvents();
+		}
 	}
 
 	return 1;
@@ -872,7 +913,9 @@ static int texIndexes_cb(p_ply_argument argument)
 	texIndexes->addElement(index);
 
 	if ((texIndexes->currentSize() % PROCESS_EVENTS_FREQ) == 0)
+	{
 		QCoreApplication::processEvents();
+	}
 
 	return 1;
 }
@@ -913,7 +956,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	p_ply ply = ply_open(qPrintable(filename), errorCallback, 0, nullptr);
 #endif
 	if (!ply)
+	{
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
 	ccLog::PrintDebug(QString("[PLY] Opening file '%1' ...").arg(filename));
 
 	if (!ply_read_header(ply))
@@ -1088,7 +1133,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	//properties indexes (0 = unassigned)
 	static const unsigned nStdProp = 10;
-	int stdPropIndexes[nStdProp] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	int stdPropIndexes[nStdProp] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int& xIndex = stdPropIndexes[0];
 	int& yIndex = stdPropIndexes[1];
 	int& zIndex = stdPropIndexes[2];
@@ -1101,19 +1146,19 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	int& iIndex = stdPropIndexes[9];
 
 	std::vector<int> sfPropIndexes;
-	//int& sfIndex = stdPropIndexes[10];
 
 	static const unsigned nListProp = 2;
-	int listPropIndexes[nListProp] = { 0, 0 };
+	std::array<int, nListProp> listPropIndexes{ 0, 0 };
 	int& facesIndex = listPropIndexes[0];
 	int& texCoordsIndex = listPropIndexes[1];
 
 	static const unsigned nSingleProp = 1;
-	int singlePropIndexes[nSingleProp] = { 0 };
+	std::array<int, nSingleProp> singlePropIndexes{ 0 };
 	int& texNumberIndex = singlePropIndexes[0];
 
 	//Combo box items for standard properties (coordinates, color components, etc.)
 	QStringList stdPropsText;
+	QStringList stdPropsNames;
 	stdPropsText << QString("None");
 	{
 		for (int i = 1; i <= static_cast<int>(stdProperties.size()); ++i)
@@ -1122,6 +1167,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			//assert(pp.type != PLY_LIST || pp.value_type == PLY_FLOAT); //we don't want any PLY_LIST here
 			stdPropsText << itemText;
+			stdPropsNames << pp.propName;
 
 			QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
 			QString propName = QString(pp.propName).toUpper();
@@ -1162,14 +1208,16 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	//Combo box items for 'list' properties (vertex indexes, etc.)
 	QStringList listPropsText;
+	QStringList listPropsNames;
 	{
 		listPropsText << QString("None");
 		for (int i = 0; i < static_cast<int>(listProperties.size()); ++i)
 		{
 			plyProperty& pp = listProperties[i];
-			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
+			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName, pp.propName, e_ply_type_names[pp.type]);
 			assert(pp.type == PLY_LIST); //we only want PLY_LIST here
 			listPropsText << itemText;
+			listPropsNames << pp.propName;
 
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
 			QString propName = QString(pp.propName).toUpper();
@@ -1186,6 +1234,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	//Combo box items for 'single' properties (texture index, etc.)
 	QStringList singlePropsText;
+	QStringList singlePropsNames;
 	{
 		singlePropsText << QString("None");
 		for (int i = 0; i < static_cast<int>(singleProperties.size()); ++i)
@@ -1193,6 +1242,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			plyProperty& pp = singleProperties[i];
 			QString itemText = QString("%1 - %2 [%3]").arg(meshElements[pp.elemIndex].elementName,pp.propName,e_ply_type_names[pp.type]);
 			singlePropsText << itemText;
+			singlePropsNames << pp.propName;
 
 			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
 			QString propName = QString(pp.propName).toUpper();
@@ -1352,7 +1402,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	//Main point cloud
 	ccPointCloud* cloud = new ccPointCloud("unnamed - Cloud");
 
-	// Save comments
+	//Save comments
 	if (!comments.isEmpty())
 	{
 		cloud->setMetaData("ply.comments", comments);
@@ -1542,7 +1592,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	/* Intensity (I) */
 
-	//INTENSITE (G)
+	//INTENSITY (I or G)
 	if (iIndex > 0)
 	{
 		if (numberOfColors > 0)
@@ -1827,7 +1877,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		if (s_triCount < numberOfFacets)
 		{
 			mesh->resize(s_triCount);
-			ccLog::Warning("[PLY] Some facets couldn't be loaded!");
+			ccLog::Warning("[PLY] Some triangles couldn't be loaded!");
 		}
 		mesh->shrinkToFit();
 
@@ -1855,7 +1905,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		{
 			if (maxVertIndex == numberOfPoints && minVertIndex > 0)
 			{
-				ccLog::Warning("[PLY] Vertex indexes seem to be shifted (+1)! We will try to 'unshift' indices (otherwise file is corrupted...)");
+				ccLog::Warning("[PLY] Vertex indexes seem to be shifted (+1)! We will try to 'unshift' the indexes (otherwise the file might be corrupted...)");
 				for (unsigned i = 0; i < s_triCount; ++i)
 				{
 					CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
@@ -1866,7 +1916,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			}
 			else //file is definitely corrupted!
 			{
-				ccLog::Warning("[PLY] Invalid vertex indices!");
+				ccLog::Warning("[PLY] Invalid vertex indexes!");
 				delete mesh;
 				delete cloud;
 				return CC_FERR_MALFORMED_FILE;
@@ -1998,11 +2048,17 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		}
 
 		if (cloud->hasColors())
+		{
 			mesh->showColors(true);
+		}
 		if (cloud->hasDisplayedScalarField())
+		{
 			mesh->showSF(true);
+		}
 		if (cloud->hasNormals())
+		{
 			mesh->showNormals(true);
+		}
 		else
 		{
 			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
@@ -2012,13 +2068,31 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		}
 
 		if (mesh->hasMaterials())
+		{
 			mesh->showNormals(false);
+		}
 
 		container.addChild(mesh);
 	}
 	else
 	{
 		container.addChild(cloud);
+	}
+
+	//Save the list of standard property names as meta-data
+	{
+		if (!stdPropsNames.empty())
+		{
+			cloud->setMetaData("ply.stdPropNames", stdPropsNames);
+		}
+		if (!listPropsNames.empty())
+		{
+			cloud->setMetaData("ply.listPropNames", listPropsNames);
+		}
+		if (!singlePropsNames.empty())
+		{
+			cloud->setMetaData("ply.singlePropNames", singlePropsNames);
+		}
 	}
 
 	if (texCoords)

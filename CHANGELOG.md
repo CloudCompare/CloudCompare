@@ -82,8 +82,9 @@ Improvements:
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 
-	- PLY loading dialog:
-		- new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+	- PLY files:
+		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+		- at saving time, CC will not change the internal name of scalar fields that were already present in the input PLY file
 
 	- PCD format:
 		- a new dialog will appear when saving PCD file, to choose the output format (between compressed binary, binary and ASCII/text)

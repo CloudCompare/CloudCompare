@@ -62,6 +62,8 @@ Improvements:
 		- set the default PCD output file format: -PCD_OUTPUT_FORMAT {format}
 			- format can be one of 'COMPRESSED_BINARY', 'BINARY' or 'ASCII'
 			- default format is 'COMPRESSED_BINARY'
+		- the C_EXPORT_FMT or M_EXPORT_FMT can now be used with secondary extensions (e.g. LAZ instead of LAS)
+			- The secondary extension will also be used when automatically generating output filenames (i.e. when the 'FILE' sub-option is not used)
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields

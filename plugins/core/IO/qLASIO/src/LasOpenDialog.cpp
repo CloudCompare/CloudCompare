@@ -25,11 +25,11 @@
 
 constexpr int TILLING_TAB_INDEX = 1;
 
-static QListWidgetItem* CreateItem(const char* name)
+static QListWidgetItem* CreateItem(const char* name, bool checked = true)
 {
 	auto item = new QListWidgetItem(name);
 	item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-	item->setCheckState(Qt::Checked);
+	item->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
 	return item;
 }
 
@@ -157,6 +157,16 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numP
 void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>&      scalarFields,
                                              const std::vector<LasExtraScalarField>& extraScalarFields)
 {
+	// remember previous state
+	QMap<QString, bool> previousScalarFields;
+	{
+		for (int i = 0; i < availableScalarFields->count(); ++i)
+		{
+			auto item                          = availableScalarFields->item(i);
+			previousScalarFields[item->text()] = (item->checkState() == Qt::Checked);
+		}
+	}
+
 	availableScalarFields->clear();
 	availableExtraScalarFields->clear();
 
@@ -165,9 +175,14 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 		scalarFieldFrame->show();
 		for (const LasScalarField& lasScalarField : scalarFields)
 		{
-			availableScalarFields->addItem(CreateItem(lasScalarField.name()));
+			bool checked = true;
+			if (previousScalarFields.contains(lasScalarField.name()))
+			{
+				checked = previousScalarFields[lasScalarField.name()];
+			}
+			availableScalarFields->addItem(CreateItem(lasScalarField.name(), checked));
 		}
-		onDecomposeClassificationToggled(decomposeClassificationCheckBox->isChecked());
+		decomposeClassificationFields(decomposeClassificationCheckBox->isChecked(), false);
 	}
 	else
 	{
@@ -411,21 +426,29 @@ void LasOpenDialog::onCurrentTabChanged(int index)
 	}
 }
 
-void LasOpenDialog::onDecomposeClassificationToggled(bool checked)
+void LasOpenDialog::decomposeClassificationFields(bool decompose, bool autoUpdateCheckSate)
 {
-	static constexpr std::array<const char*, 3> flagNames{LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
+	static constexpr std::array<const char*, 3> FlagNames{LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
 
-	for (const char* flagName : flagNames)
+	for (const char* flagName : FlagNames)
 	{
 		for (int i = 0; i < availableScalarFields->count(); ++i)
 		{
 			QListWidgetItem* item = availableScalarFields->item(i);
 			if (item->text() == flagName)
 			{
-				item->setHidden(!checked);
-				item->setCheckState(checked ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+				item->setHidden(!decompose);
+				if (autoUpdateCheckSate)
+				{
+					item->setCheckState(decompose ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+				}
 				break;
 			}
 		}
 	}
+}
+
+void LasOpenDialog::onDecomposeClassificationToggled(bool checked)
+{
+	decomposeClassificationFields(checked, true);
 }

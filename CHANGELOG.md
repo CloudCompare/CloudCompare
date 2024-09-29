@@ -67,6 +67,7 @@ Improvements:
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
+		- Smarter restoration of the previous scalar fields loading pattern
 		- Maximum GPS time shift increased to 10^10
 	- LAS file saving dialog
 		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)

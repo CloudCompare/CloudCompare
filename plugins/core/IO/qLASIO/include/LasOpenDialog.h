@@ -125,6 +125,8 @@ class LasOpenDialog : public QDialog
 
 	void onCurrentTabChanged(int index);
 
+	void decomposeClassificationFields(bool decompose, bool autoUpdateCheckSate);
+
 	/// Hides or un-hides the checkboxes that corresponds to the flag fields
 	void onDecomposeClassificationToggled(bool state);
 

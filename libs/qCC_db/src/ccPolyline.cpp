@@ -191,7 +191,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -234,7 +234,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			_verticesVisibility = &(verticesCloud->getTheVisibilityArray());
 		}
 	}
-	bool visFiltering = (_verticesVisibility && _verticesVisibility->size() >= vertCount);
+	bool visFiltering = (_verticesVisibility && _verticesVisibility->size() >= getAssociatedCloud()->size());
 
 	if (visFiltering)
 	{
@@ -242,15 +242,17 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned maxIndex = (m_isClosed ? vertCount : vertCount - 1);
 		for (unsigned i = 0; i < maxIndex; ++i)
 		{
-			if (_verticesVisibility->at(i) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+			unsigned pointIndex = getPointGlobalIndex(i);
+			if (_verticesVisibility->at(pointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
 			
 			unsigned nextIndex = ((i + 1) % vertCount);
-			if (_verticesVisibility->at(nextIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
+			if (_verticesVisibility->at(nextPointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
 
-			ccGL::Vertex3v(glFunc, getPoint(i)->u);
-			ccGL::Vertex3v(glFunc, getPoint(nextIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(pointIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(nextPointIndex)->u);
 		}
 		glFunc->glEnd();
 	}
@@ -936,7 +938,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		assert(false);
 		return false;
 	}
-	unsigned vertCount = m_theAssociatedCloud->size();
+	unsigned vertCount = size();
 	
 	//vertices visibility
 	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
@@ -947,7 +949,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		return false;
 	}
 	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = verticesCloud->getTheVisibilityArray();
-	if (verticesVisibility.size() < vertCount)
+	if (verticesVisibility.size() < verticesCloud->size())
 	{
 		// no visibility table instantiated
 		ccLog::Warning("[ccPolyline::createNewPolylinesFromSelection] No visibility table instantiated");
@@ -963,13 +965,18 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		for (unsigned i = 0; i < maxIndex; ++i)
 		{
 			unsigned nextIndex = ((i + 1) % vertCount);
+
+			unsigned pointIndex = getPointGlobalIndex(i);
+			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
+
 			bool kept = false;
-			if (verticesVisibility.at(i) == CCCoreLib::POINT_VISIBLE && verticesVisibility.at(nextIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
+			if (	verticesVisibility.at(pointIndex) == CCCoreLib::POINT_VISIBLE
+				&&	verticesVisibility.at(nextPointIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
 			{
 				kept = true;
 
-				const CCVector3* P0 = getPoint(i);
-				const CCVector3* P1 = getPoint(nextIndex);
+				const CCVector3* P0 = verticesCloud->getPoint(pointIndex);
+				const CCVector3* P1 = verticesCloud->getPoint(nextPointIndex);
 
 				// recreate a chunk if none is ready yet
 				static const unsigned DefaultPolySizeIncrement = 64;

@@ -770,3 +770,110 @@ void LasSaveDialog::unassignDefaultFields()
 		extraScalarFieldsLayout->addItem(item);
 	}
 }
+
+QString ToString(const CCVector3d& offset)
+{
+	return QString("(%1 ; %2 ; %3)").arg(offset.x).arg(offset.y).arg(offset.z);
+}
+
+void LasSaveDialog::setOffsets(const QMap<Offset, CCVector3d>& availableOffsets, Offset selectedOffsetType)
+{
+	outputOffsets = availableOffsets;
+
+	// Global shift
+	if (outputOffsets.contains(GLOBAL_SHIFT))
+	{
+		currentGlobalShiftLineEdit->setText(ToString(outputOffsets[GLOBAL_SHIFT]));
+		useGlobalShiftRadioButton->setEnabled(true);
+		if (selectedOffsetType == GLOBAL_SHIFT)
+		{
+			useGlobalShiftRadioButton->setChecked(true);
+		}
+	}
+	else
+	{
+		currentGlobalShiftLineEdit->setText("N/A");
+		useGlobalShiftRadioButton->setEnabled(false);
+	}
+
+	// Original LAS offset
+	if (outputOffsets.contains(ORIGN_LAS_OFFSET))
+	{
+		originalLASOffsetLineEdit->setText(ToString(outputOffsets[ORIGN_LAS_OFFSET]));
+		useOriginLASOffsetRadioButton->setEnabled(true);
+		if (selectedOffsetType == ORIGN_LAS_OFFSET)
+		{
+			useOriginLASOffsetRadioButton->setChecked(true);
+		}
+	}
+	else
+	{
+		originalLASOffsetLineEdit->setText("N/A");
+		useOriginLASOffsetRadioButton->setEnabled(false);
+	}
+
+	// Minimum BB corner
+	if (outputOffsets.contains(MIN_BB_CORNER))
+	{
+		minBBCornerLineEdit->setText(ToString(outputOffsets[MIN_BB_CORNER]));
+		useMinBBCornerOffsetRadioButton->setEnabled(true);
+		if (selectedOffsetType == MIN_BB_CORNER)
+		{
+			useMinBBCornerOffsetRadioButton->setChecked(true);
+		}
+	}
+	else
+	{
+		minBBCornerLineEdit->setText("N/A");
+		useMinBBCornerOffsetRadioButton->setEnabled(false);
+	}
+
+	// Custom LAS offset
+	{
+		if (!outputOffsets.contains(CUSTOM_LAS_OFFSET))
+		{
+			outputOffsets[CUSTOM_LAS_OFFSET] = CCVector3d(0, 0, 0);
+		}
+		xOffsetDoubleSpinBox->setValue(outputOffsets[CUSTOM_LAS_OFFSET].x);
+		yOffsetDoubleSpinBox->setValue(outputOffsets[CUSTOM_LAS_OFFSET].y);
+		zOffsetDoubleSpinBox->setValue(outputOffsets[CUSTOM_LAS_OFFSET].z);
+		useCustomLASOffsetRadioButton->setEnabled(true);
+
+		if (selectedOffsetType == CUSTOM_LAS_OFFSET)
+		{
+			useCustomLASOffsetRadioButton->setChecked(true);
+		}
+		else if (!outputOffsets.contains(selectedOffsetType))
+		{
+			ccLog::Warning("Internal error: selected output offset is not in the input map");
+			//we choose the custom one
+			useCustomLASOffsetRadioButton->setChecked(true);
+		}
+	}
+}
+
+CCVector3d LasSaveDialog::chosenOffset(Offset& offsetType) const
+{
+	if (useGlobalShiftRadioButton->isChecked())
+	{
+		offsetType = GLOBAL_SHIFT;
+		return outputOffsets[GLOBAL_SHIFT];
+	}
+	else if (useOriginLASOffsetRadioButton->isChecked())
+	{
+		offsetType = ORIGN_LAS_OFFSET;
+		return outputOffsets[ORIGN_LAS_OFFSET];
+	}
+	else if (useMinBBCornerOffsetRadioButton->isChecked())
+	{
+		offsetType = MIN_BB_CORNER;
+		return outputOffsets[MIN_BB_CORNER];
+	}
+	else
+	{
+		offsetType = CUSTOM_LAS_OFFSET;
+		return {xOffsetDoubleSpinBox->value(),
+		        yOffsetDoubleSpinBox->value(),
+		        zOffsetDoubleSpinBox->value()};
+	}
+}

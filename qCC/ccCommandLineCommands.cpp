@@ -325,14 +325,15 @@ QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface& c
 	if (!cmd.arguments().isEmpty())
 	{
 		//test if the specified format corresponds to a known file type
-		QString extension = cmd.arguments().front().toUpper();
+		QString extension = cmd.arguments().front();
+		QString upperExtension = extension.toUpper();
 		cmd.arguments().pop_front();
 
 		const FileIOFilter::FilterContainer& filters = FileIOFilter::GetFilters();
 		
-		for (const auto & filter : filters)
+		for (const auto& filter : filters)
 		{
-			if (extension == filter->getDefaultExtension().toUpper())
+			if (upperExtension == filter->getDefaultExtension().toUpper())
 			{
 				//found a matching filter
 				fileFilter = filter->getFileFilters(false).first();
@@ -342,6 +343,33 @@ QString CommandChangeOutputFormat::getFileFormatFilter(ccCommandLineInterface& c
 		}
 
 		//haven't found anything?
+		if (fileFilter.isEmpty())
+		{
+			ccLog::Warning(QString("Extension '%1' was not identified as a primary extension. Let's look for secondary ones...").arg(extension));
+			// let's look for secondary formats
+			for (const auto& filter : filters)
+			{
+				QStringList outputFilters = filter->getFileFilters(false);
+				for (const QString& outputFilter : outputFilters)
+				{
+					int index = outputFilter.toUpper().indexOf(upperExtension);
+					if (index >= 2 && outputFilter.mid(index - 2, 2) == "*.")
+					{
+						ccLog::Print(QString("Extension '%1' found in the output formats supported by the '%2' filter").arg(extension).arg(filter->getDefaultExtension().toUpper()));
+						fileFilter = outputFilter;
+						defaultExt = extension;
+						break;
+					}
+				}
+
+				if (!fileFilter.isEmpty())
+				{
+					break;
+				}
+			}
+		}
+
+		//still haven't found anything?
 		if (fileFilter.isEmpty())
 		{
 			cmd.error(QObject::tr("Unhandled format specifier (%1)").arg(extension));
@@ -6969,7 +6997,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	if (dataWeightsSFIndex >= 0 || !dataWeightsSFIndexName.isEmpty())
 	{
 		ccPointCloud* dataAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[0]->getEntity());
-		if (!dataAsCloud)
+		if (dataAsCloud)
 		{
 			dataWeightsSFIndex = GetScalarFieldIndex(dataAsCloud, dataWeightsSFIndex, dataWeightsSFIndexName, true);
 			if (dataWeightsSFIndex >= 0)
@@ -6983,7 +7011,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	if (modelWeightsSFIndex >= 0 || !modelWeightsSFIndexName.isEmpty())
 	{
 		ccPointCloud* modelAsCloud = ccHObjectCaster::ToPointCloud(dataAndModel[1]->getEntity());
-		if (!modelAsCloud)
+		if (modelAsCloud)
 		{
 			modelWeightsSFIndex = GetScalarFieldIndex(modelAsCloud, modelWeightsSFIndex, modelWeightsSFIndexName, true);
 			if (modelWeightsSFIndex >= 0)

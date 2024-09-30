@@ -29,60 +29,74 @@ ccTrace::ccTrace(ccPointCloud* associatedCloud) : ccPolyline(associatedCloud)
 }
 
 ccTrace::ccTrace(ccPolyline* obj)
-	: ccPolyline(obj->getAssociatedCloud())
+	: ccPolyline(obj ? obj->getAssociatedCloud() : nullptr)
 {
-	ccPointCloud* cld = dynamic_cast<ccPointCloud*>(obj->getAssociatedCloud());
-	assert(cld != nullptr); //should never be null
-	init(cld);
-
-	//load waypoints from metadata
-	if (obj->hasMetaData("waypoints"))
+	if (obj)
 	{
-		QString waypoints = obj->getMetaData("waypoints").toString();
-		for (QString str : waypoints.split(","))
+		ccPointCloud* cld = dynamic_cast<ccPointCloud*>(obj->getAssociatedCloud());
+		if (cld != nullptr)
 		{
-			if (str != "")
-			{
-				int pID = str.toInt();
-				m_waypoints.push_back(pID); //add waypoint
-			}
+			init(cld);
+		}
+		else
+		{
+			assert(false);
 		}
 
-		//store waypoints metadata
-		QVariantMap map;
-		map.insert("waypoints", waypoints);
-		setMetaData(map, true);
-	}
+		//load waypoints from metadata
+		if (obj->hasMetaData("waypoints"))
+		{
+			QString waypoints = obj->getMetaData("waypoints").toString();
+			for (QString str : waypoints.split(","))
+			{
+				if (!str.isEmpty())
+				{
+					int pID = str.toInt();
+					m_waypoints.push_back(pID); //add waypoint
+				}
+			}
 
-	//load cost function from metadata
-	if (obj->hasMetaData("cost_function"))
+			//store waypoints metadata
+			QVariantMap map;
+			map.insert("waypoints", waypoints);
+			setMetaData(map, true);
+		}
+
+		//load cost function from metadata
+		if (obj->hasMetaData("cost_function"))
+		{
+			ccTrace::COST_MODE = obj->getMetaData("cost_function").toInt();
+		}
+
+		setName(obj->getName());
+
+		//recalculate trace if polyline data somehow lost [redundancy thing..]
+		if (obj->size() == 0)
+		{
+			optimizePath(); //[slooooow...!]
+		}
+		else
+		{
+			//copy polyline into trace points
+			std::deque<int> seg;
+			for (unsigned i = 0; i < obj->size(); i++)
+			{
+				//copy into "trace" object
+				int pId = obj->getPointGlobalIndex(i); //get global point ID
+				seg.push_back(pId);
+
+				//also copy into polyline object
+				addPointIndex(pId);
+			}
+			m_trace.push_back(seg);
+		}
+
+		//load SNE data from metadata (TODO)
+	}
+	else
 	{
-		ccTrace::COST_MODE = obj->getMetaData("cost_function").toInt();
+		assert(false);
 	}
-
-	setName(obj->getName());
-
-	//copy polyline into trace points
-	std::deque<int> seg;
-	for (unsigned i = 0; i < obj->size(); i++)
-	{
-		//copy into "trace" object
-		int pId = obj->getPointGlobalIndex(i); //get global point ID
-		seg.push_back(pId);
-
-		//also copy into polyline object
-		addPointIndex(pId);
-	}
-	m_trace.push_back(seg);
-
-	//recalculate trace if polyline data somehow lost [redundancy thing..]
-	if (obj->size() == 0)
-	{
-		m_trace.clear();
-		optimizePath(); //[slooooow...!]
-	}
-
-	//load SNE data from metadata (TODO)
 
 	invalidateBoundingBox(); //update bounding box (for picking)
 }

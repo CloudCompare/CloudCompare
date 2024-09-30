@@ -3,7 +3,7 @@ CloudCompare Version History
 
 v2.14.alpha (???) - (??/??/202?)
 ----------------------
-New Feature:
+New features:
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter
@@ -47,6 +47,11 @@ New Feature:
 		
 	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
+New plugin
+
+	- VoxFall: non-parametric volumetric change detection for rockfalls
+		- computes volume differences between 2 meshes, with some visual representation
+
 Improvements:
 
 	- Command line:
@@ -57,19 +62,33 @@ Improvements:
 		- set the default PCD output file format: -PCD_OUTPUT_FORMAT {format}
 			- format can be one of 'COMPRESSED_BINARY', 'BINARY' or 'ASCII'
 			- default format is 'COMPRESSED_BINARY'
+		- the C_EXPORT_FMT or M_EXPORT_FMT can now be used with secondary extensions (e.g. LAZ instead of LAS)
+			- The secondary extension will also be used when automatically generating output filenames (i.e. when the 'FILE' sub-option is not used)
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
+		- Smarter restoration of the previous scalar fields loading pattern
+		- Maximum GPS time shift increased to 10^10
 	- LAS file saving dialog
 		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)
 		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),
 			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
 			if the point format is changed.
+		- CC will now explicitly display and let the user choose the 'LAS offset' among up to 4 options
+			- Current global shift (if any), original LAS offset (if any), the cloud minimum bounding-box corner, or a custom offset
+			- by default, the following priority order is now used for selecting the default option:
+				1) a previously 'custom LAS offset' already input by the user
+				2) the current Global Shift, if any and if different from the original LAS offset (XY only)
+				3) (0, 0, 0) if no Global Shift is set, and a non-null LAS offset was present (XY only) [GUI version only]
+				4) the original LAS offset, if any
+				5) the cloud minimum bounding-box corner (if applicable)
+			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 
-	- PLY loading dialog:
-		- new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+	- PLY files:
+		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
+		- at saving time, CC will not change the internal name of scalar fields that were already present in the input PLY file
 
 	- PCD format:
 		- a new dialog will appear when saving PCD file, to choose the output format (between compressed binary, binary and ASCII/text)
@@ -83,6 +102,9 @@ Bug fixes:
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
 		1000 the second time a file was loaded.
+	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
+		of polyline vertices
+	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

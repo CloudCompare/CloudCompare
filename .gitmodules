@@ -33,3 +33,6 @@
 [submodule "libs/CCAppCommon/QDarkStyleSheet"]
 	path = libs/CCAppCommon/QDarkStyleSheet
 	url = https://github.com/ColinDuquesnoy/QDarkStyleSheet
+[submodule "plugins/core/Standard/qVoxFall"]
+	path = plugins/core/Standard/qVoxFall
+	url = ../../farmakis/qVoxFall.git

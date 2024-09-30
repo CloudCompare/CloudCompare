@@ -44,7 +44,6 @@ jobs:
           activate-environment: CloudCompareDev
           auto-activate-base: false
           environment-file: ${{ matrix.config.conda_dep_file }}
-          mamba-version: "*"
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'

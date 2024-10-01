@@ -102,6 +102,7 @@ jobs:
             -DPLUGIN_STANDARD_QRANSAC_SD=ON \
             -DPLUGIN_STANDARD_QPCL=ON \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
+            -DPLUGIN_STANDARD_QVOXFALL=ON \
             .
 
       - name: Build
@@ -200,6 +201,7 @@ jobs:
           -DPLUGIN_STANDARD_QRANSAC_SD=ON
           -DPLUGIN_STANDARD_QPCL=ON
           -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
+          -DPLUGIN_STANDARD_QVOXFALL=ON
           -DBUILD_TESTING=ON
 
       - name: Build

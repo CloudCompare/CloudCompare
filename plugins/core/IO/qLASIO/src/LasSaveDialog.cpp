@@ -199,21 +199,24 @@ bool LasSaveDialog::shouldAutomaticallyAssignLeftoverSFsAsExtra() const
 void LasSaveDialog::handleSelectedVersionChange(const QString& version)
 {
 	pointFormatComboBox->blockSignals(true);
+	int previousIndex = pointFormatComboBox->currentIndex();
 	pointFormatComboBox->clear();
 
 	const std::vector<unsigned>& pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
+	int                          newIndex     = -1;
 	if (!pointFormats.empty())
 	{
 		for (unsigned fmt : pointFormats)
 		{
 			pointFormatComboBox->addItem(QString::number(fmt));
 		}
-		pointFormatComboBox->setCurrentIndex(0);
 
-		// We have to force the call here so that the point format combo-box is always updated
-		handleSelectedPointFormatChange(0);
+		newIndex = (previousIndex < pointFormatComboBox->count() ? previousIndex : 0);
+		pointFormatComboBox->setCurrentIndex(newIndex);
 	}
 
+	// We have to force the call here so that the point format combo-box is always updated
+	handleSelectedPointFormatChange(newIndex);
 	pointFormatComboBox->blockSignals(false);
 
 	// EVLRs are not officially supported before version 1.4

@@ -168,6 +168,10 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 		        }
 	        });
 
+	if (m_cloud)
+	{
+		normalsCheckBox->setCheckState(m_cloud->hasNormals() ? Qt::CheckState::Checked : Qt::Unchecked);
+	}
 	handleSelectedVersionChange(versionComboBox->currentText()); // will call handleSelectedPointFormatChange
 
 	QStringList extraFieldsDataTypeNames{"uint8",
@@ -183,14 +187,11 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
 
 	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
-
-	normalsCheckBox->setEnabled(cloud->hasNormals());
-	normalsCheckBox->setCheckState(cloud->hasNormals() ? Qt::CheckState::Checked : Qt::Unchecked);
 }
 
 bool LasSaveDialog::shouldAutomaticallyAssignLeftoverSFsAsExtra() const
 {
-	return saveLeftoverSFsAsExtraVLRCheckBox->isChecked();
+	return saveLeftoverSFsAsExtraVLRCheckBox->isEnabled() && saveLeftoverSFsAsExtraVLRCheckBox->isChecked();
 }
 
 /// When the selected version changes, we need to update the combo box
@@ -214,6 +215,28 @@ void LasSaveDialog::handleSelectedVersionChange(const QString& version)
 	}
 
 	pointFormatComboBox->blockSignals(false);
+
+	// EVLRs are not officially supported before version 1.4
+	{
+		uint8_t versionMajor = 1;
+		uint8_t versionMinor = 0;
+		selectedVersion(versionMajor, versionMinor);
+
+		if (versionMajor < 1 || (versionMajor == 1 && versionMinor < 4))
+		{
+			normalsCheckBox->setEnabled(false);
+			normalsCheckBox->setChecked(false);
+			saveLeftoverSFsAsExtraVLRCheckBox->setEnabled(false);
+			saveLeftoverSFsAsExtraVLRCheckBox->setChecked(false);
+		}
+		else
+		{
+			normalsCheckBox->setEnabled(m_cloud ? m_cloud->hasNormals() : false);
+			normalsCheckBox->setChecked(normalsCheckBox->isEnabled());
+			saveLeftoverSFsAsExtraVLRCheckBox->setEnabled(m_cloud ? m_cloud->hasScalarFields() : false);
+			saveLeftoverSFsAsExtraVLRCheckBox->setChecked(saveLeftoverSFsAsExtraVLRCheckBox->isEnabled());
+		}
+	}
 }
 
 /// When the user changes the ccScalarField it wants to save in the particular LAS field,
@@ -381,37 +404,11 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 		}
 	}
 
-	if (!LasDetails::HasRGB(selectedPointFormat) && !LasDetails::HasWaveform(selectedPointFormat))
-	{
-		specialScalarFieldFrame->hide();
-		waveformCheckBox->setCheckState(Qt::Unchecked);
-		rgbCheckBox->setCheckState(Qt::Unchecked);
-	}
-	else
-	{
-		specialScalarFieldFrame->show();
-		if (LasDetails::HasRGB(selectedPointFormat))
-		{
-			rgbCheckBox->show();
-			rgbCheckBox->setEnabled(m_cloud->hasColors());
-			rgbCheckBox->setChecked(m_cloud->hasColors());
-		}
-		else
-		{
-			rgbCheckBox->hide();
-		}
+	rgbCheckBox->setEnabled(m_cloud->hasColors() && LasDetails::HasRGB(selectedPointFormat));
+	rgbCheckBox->setChecked(rgbCheckBox->isEnabled());
 
-		if (LasDetails::HasWaveform(selectedPointFormat))
-		{
-			waveformCheckBox->show();
-			waveformCheckBox->setEnabled(m_cloud->hasFWF());
-			waveformCheckBox->setChecked(m_cloud->hasFWF());
-		}
-		else
-		{
-			waveformCheckBox->hide();
-		}
-	}
+	waveformCheckBox->setEnabled(m_cloud->hasFWF() && LasDetails::HasWaveform(selectedPointFormat));
+	waveformCheckBox->setChecked(waveformCheckBox->isEnabled());
 
 	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
 	{
@@ -568,7 +565,7 @@ bool LasSaveDialog::shouldSaveWaveform() const
 
 bool LasSaveDialog::shouldSaveNormalsAsExtraScalarField() const
 {
-	return normalsCheckBox->isChecked();
+	return normalsCheckBox->isEnabled() && normalsCheckBox->isChecked();
 }
 
 CCVector3d LasSaveDialog::chosenScale() const

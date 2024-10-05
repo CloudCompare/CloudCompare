@@ -471,6 +471,9 @@ font: italic;</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>Save RGB information (a point format that supports RGB must be selected)</string>
+               </property>
                <property name="text">
                 <string>RGB</string>
                </property>
@@ -483,6 +486,9 @@ font: italic;</string>
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>Save Waveforms (a point format that supports WF must be selected)</string>
                </property>
                <property name="text">
                 <string>Waveform</string>
@@ -498,20 +504,22 @@ font: italic;</string>
                 </sizepolicy>
                </property>
                <property name="toolTip">
-                <string>Saves normals as Extra fields (VLRs) using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.</string>
+                <string>Saves normals as Extra bytes (EVLRs) using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.
+Requires LAS 1.4 file version.</string>
                </property>
                <property name="text">
-                <string>Normals (as Extra fields / VLRs)</string>
+                <string>Normals (as Extra bytes / EVLRs)</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="saveLeftoverSFsAsExtraVLRCheckBox">
                <property name="toolTip">
-                <string>If checked, all scalar fields that are not assigned to a standard LAS field will be saved as extra fields (VLRs)</string>
+                <string>If checked, all scalar fields that are not assigned to a standard LAS field will be saved as extra bytes (EVLRs)
+Requires LAS 1.4 file version.</string>
                </property>
                <property name="text">
-                <string>Save remaining scalar fields as Extra fields / VLRs</string>
+                <string>Save remaining scalar fields as Extra bytes / EVLRs</string>
                </property>
                <property name="checked">
                 <bool>true</bool>

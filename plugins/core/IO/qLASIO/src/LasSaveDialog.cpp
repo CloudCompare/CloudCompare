@@ -153,15 +153,22 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 		extraScalarFieldsTab->setEnabled(cloudHasScalarFields);
 	}
 
+	QStringList extraFieldsDataTypeNames{"uint8",
+	                                     "uint16",
+	                                     "uint32",
+	                                     "uint64",
+	                                     "int8",
+	                                     "int16",
+	                                     "int32",
+	                                     "int64",
+	                                     "float32",
+	                                     "float64"};
+	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
+
 	connect(versionComboBox,
 	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
-
-	connect(pointFormatComboBox,
-	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
-	        this,
-	        &LasSaveDialog::handleSelectedPointFormatChange);
 
 	connect(pointFormatComboBox,
 	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
@@ -183,38 +190,25 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 		        }
 	        });
 
+	connect(addExtraScalarFieldButton,
+	        &QPushButton::clicked,
+	        this,
+	        &LasSaveDialog::addExtraScalarFieldCard);
+
 	handleSelectedVersionChange(versionComboBox->currentText()); // will call handleSelectedPointFormatChange
-
-	QStringList extraFieldsDataTypeNames{"uint8",
-	                                     "uint16",
-	                                     "uint32",
-	                                     "uint64",
-	                                     "int8",
-	                                     "int16",
-	                                     "int32",
-	                                     "int64",
-	                                     "float32",
-	                                     "float64"};
-	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
-
-	connect(addExtraScalarFieldButton, &QPushButton::clicked, this, &LasSaveDialog::addExtraScalarFieldCard);
-}
-
-bool LasSaveDialog::shouldAutomaticallyAssignLeftoverSFsAsExtra() const
-{
-	return saveLeftoverSFsAsExtraVLRCheckBox->isEnabled() && saveLeftoverSFsAsExtraVLRCheckBox->isChecked();
 }
 
 /// When the selected version changes, we need to update the combo box
 /// of point format to match the ones supported by the version
 void LasSaveDialog::handleSelectedVersionChange(const QString& version)
 {
-	pointFormatComboBox->blockSignals(true);
 	int previousIndex = pointFormatComboBox->currentIndex();
+	int newIndex      = -1;
+
+	pointFormatComboBox->blockSignals(true);
 	pointFormatComboBox->clear();
 
-	const std::vector<unsigned>& pointFormats = LasDetails::PointFormatsAvailableForVersion(qPrintable(version));
-	int                          newIndex     = -1;
+	const std::vector<unsigned>& pointFormats = LasDetails::PointFormatsAvailableForVersion(version);
 	if (!pointFormats.empty())
 	{
 		for (unsigned fmt : pointFormats)
@@ -229,84 +223,6 @@ void LasSaveDialog::handleSelectedVersionChange(const QString& version)
 	// We have to force the call here so that the point format combo-box is always updated
 	handleSelectedPointFormatChange(newIndex);
 	pointFormatComboBox->blockSignals(false);
-}
-
-/// When the user changes the ccScalarField it wants to save in the particular LAS field,
-/// we check that the values are in range. If they are not we display a small warning
-void LasSaveDialog::handleComboBoxChange(int index)
-{
-	if (!m_cloud)
-	{
-		assert(false);
-		return;
-	}
-	if (index < 0)
-	{
-		return;
-	}
-	QObject* senderObject = sender();
-	if (nullptr == senderObject)
-	{
-		assert(false);
-		return;
-	}
-	size_t senderIndex = std::distance(m_scalarFieldMapping.begin(),
-	                                   std::find_if(m_scalarFieldMapping.begin(),
-	                                                m_scalarFieldMapping.end(),
-	                                                [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
-	                                                { return pair.second == senderObject; }));
-
-	if (qobject_cast<QComboBox*>(senderObject)->itemText(index).isEmpty())
-	{
-		m_scalarFieldMapping[senderIndex].first->clearWarning();
-		return;
-	}
-	const QString scalarFieldName   = m_scalarFieldMapping[senderIndex].first->name();
-	const QString ccScalarFieldName = m_scalarFieldMapping[senderIndex].second->currentText();
-	int           sfIdx             = m_cloud->getScalarFieldIndexByName(qPrintable(ccScalarFieldName));
-	if (sfIdx == -1)
-	{
-		assert(false);
-		return;
-	}
-	const CCCoreLib::ScalarField* scalarField = m_cloud->getScalarField(sfIdx);
-	if (!scalarField)
-	{
-		assert(false);
-		return;
-	}
-
-	// TODO support QString equality
-	LasScalarField::Id    scalarFieldId = LasScalarField::IdFromName(scalarFieldName.toStdString().c_str(), selectedPointFormat());
-	LasScalarField::Range range         = LasScalarField::ValueRange(scalarFieldId);
-
-	if (scalarField->getMin() < range.min || scalarField->getMax() > range.max)
-	{
-		m_scalarFieldMapping[senderIndex].first->setWarning("Some values are out of range and will be truncated");
-	}
-	else
-	{
-		m_scalarFieldMapping[senderIndex].first->clearWarning();
-	}
-
-	size_t numWarnings = std::count_if(m_scalarFieldMapping.begin(),
-	                                   m_scalarFieldMapping.end(),
-	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair)
-	                                   { return pair.first->hasWarning(); });
-
-	if (numWarnings != 0)
-	{
-		tabWidget->setTabIcon(1, QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
-	}
-	else
-	{
-		tabWidget->setTabIcon(1, {});
-	}
-
-	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
-	{
-		assignLeftoverScalarFieldsAsExtra();
-	}
 }
 
 /// When the user changes the point format, we need to update the scalar field form.
@@ -401,6 +317,84 @@ void LasSaveDialog::handleSelectedPointFormatChange(int index)
 
 	waveformCheckBox->setEnabled(m_cloud->hasFWF() && LasDetails::HasWaveform(selectedPointFormat));
 	waveformCheckBox->setChecked(waveformCheckBox->isEnabled());
+
+	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
+	{
+		assignLeftoverScalarFieldsAsExtra();
+	}
+}
+
+/// When the user changes the ccScalarField it wants to save in the particular LAS field,
+/// we check that the values are in range. If they are not we display a small warning
+void LasSaveDialog::handleComboBoxChange(int index)
+{
+	if (!m_cloud)
+	{
+		assert(false);
+		return;
+	}
+	if (index < 0)
+	{
+		return;
+	}
+	QObject* senderObject = sender();
+	if (nullptr == senderObject)
+	{
+		assert(false);
+		return;
+	}
+	size_t senderIndex = std::distance(m_scalarFieldMapping.begin(),
+	                                   std::find_if(m_scalarFieldMapping.begin(),
+	                                                m_scalarFieldMapping.end(),
+	                                                [senderObject](const std::pair<MappingLabel*, QComboBox*>& pair)
+	                                                { return pair.second == senderObject; }));
+
+	if (qobject_cast<QComboBox*>(senderObject)->itemText(index).isEmpty())
+	{
+		m_scalarFieldMapping[senderIndex].first->clearWarning();
+		return;
+	}
+	const QString scalarFieldName   = m_scalarFieldMapping[senderIndex].first->name();
+	const QString ccScalarFieldName = m_scalarFieldMapping[senderIndex].second->currentText();
+	int           sfIdx             = m_cloud->getScalarFieldIndexByName(qPrintable(ccScalarFieldName));
+	if (sfIdx == -1)
+	{
+		assert(false);
+		return;
+	}
+	const CCCoreLib::ScalarField* scalarField = m_cloud->getScalarField(sfIdx);
+	if (!scalarField)
+	{
+		assert(false);
+		return;
+	}
+
+	// TODO support QString equality
+	LasScalarField::Id    scalarFieldId = LasScalarField::IdFromName(scalarFieldName.toStdString().c_str(), selectedPointFormat());
+	LasScalarField::Range range         = LasScalarField::ValueRange(scalarFieldId);
+
+	if (scalarField->getMin() < range.min || scalarField->getMax() > range.max)
+	{
+		m_scalarFieldMapping[senderIndex].first->setWarning("Some values are out of range and will be truncated");
+	}
+	else
+	{
+		m_scalarFieldMapping[senderIndex].first->clearWarning();
+	}
+
+	size_t numWarnings = std::count_if(m_scalarFieldMapping.begin(),
+	                                   m_scalarFieldMapping.end(),
+	                                   [](const std::pair<MappingLabel*, QComboBox*>& pair)
+	                                   { return pair.first->hasWarning(); });
+
+	if (numWarnings != 0)
+	{
+		tabWidget->setTabIcon(1, QApplication::style()->standardPixmap(QStyle::SP_MessageBoxWarning));
+	}
+	else
+	{
+		tabWidget->setTabIcon(1, {});
+	}
 
 	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
 	{
@@ -524,6 +518,12 @@ void LasSaveDialog::setExtraScalarFields(const std::vector<LasExtraScalarField>&
 
 uint8_t LasSaveDialog::selectedPointFormat() const
 {
+	if (pointFormatComboBox->count() == 0)
+	{
+		assert(false);
+		return 0;
+	}
+
 	return static_cast<uint8_t>(std::min(pointFormatComboBox->currentText().toUInt(), 255u));
 }
 
@@ -558,6 +558,11 @@ bool LasSaveDialog::shouldSaveWaveform() const
 bool LasSaveDialog::shouldSaveNormalsAsExtraScalarField() const
 {
 	return normalsCheckBox->isEnabled() && normalsCheckBox->isChecked();
+}
+
+bool LasSaveDialog::shouldAutomaticallyAssignLeftoverSFsAsExtra() const
+{
+	return saveLeftoverSFsAsExtraVLRCheckBox->isEnabled() && saveLeftoverSFsAsExtraVLRCheckBox->isChecked();
 }
 
 CCVector3d LasSaveDialog::chosenScale() const

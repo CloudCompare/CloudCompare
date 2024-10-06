@@ -70,10 +70,11 @@ Improvements:
 		- Smarter restoration of the previous scalar fields loading pattern
 		- Maximum GPS time shift increased to 10^10
 	- LAS file saving dialog
-		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)
-		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),
-			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
+		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (EVLRs)
+		- if the 'Save remaining scalar fields as Extra fields / EVLRs' checkbox is checked (default state),
+			some entries are automatically created in the 3rd tab (Extra fields / EVLRs). This is updated automatically
 			if the point format is changed.
+		- Saving normals or non-standard scalar fields is now explicitly allowed for version 1.2 and 1.3
 		- CC will now explicitly display and let the user choose the 'LAS offset' among up to 4 options
 			- Current global shift (if any), original LAS offset (if any), the cloud minimum bounding-box corner, or a custom offset
 			- by default, the following priority order is now used for selecting the default option:

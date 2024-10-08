@@ -138,7 +138,7 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	}
 	versionComboBox->setCurrentIndex(0);
 
-	// EVLRs are not officially supported before version 1.4
+	// Extra-bytes VLRs are not officially supported before version 1.4
 	// But we can still allow the user to save them in version 1.2 and 1.3
 	{
 		bool cloudHasNormals = (m_cloud && m_cloud->hasNormals());

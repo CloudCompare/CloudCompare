@@ -70,9 +70,9 @@ Improvements:
 		- Smarter restoration of the previous scalar fields loading pattern
 		- Maximum GPS time shift increased to 10^10
 	- LAS file saving dialog
-		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (EVLRs)
-		- if the 'Save remaining scalar fields as Extra fields / EVLRs' checkbox is checked (default state),
-			some entries are automatically created in the 3rd tab (Extra fields / EVLRs). This is updated automatically
+		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (Extra-bytes VLRs)
+		- if the 'Save all remaining scalar fields as Extra fields / EB-VLRs' checkbox is checked (default state),
+			some entries are automatically created in the 3rd tab 'Extra fields (Extra Bytes VLRs)'. This is updated automatically
 			if the point format is changed.
 		- Saving normals or non-standard scalar fields is now explicitly allowed for version 1.2 and 1.3
 		- CC will now explicitly display and let the user choose the 'LAS offset' among up to 4 options
@@ -245,7 +245,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- based on LASzip
 		- should work on all platforms (Windows, Linux, macOS)
 		- manages all versions of LAS files (1.0 to 1.4)
-		- gives much more control over extended fields (EVLR) as well as custom mapping between
+		- gives much more control over extended fields (Extra-bytes VLR) as well as custom mapping between
 			the existing fields of a cloud and their destination in the LAS file
 
 	- New plugin: q3DMASC

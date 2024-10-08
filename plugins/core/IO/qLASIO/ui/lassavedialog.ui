@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>700</width>
     <height>580</height>
    </rect>
   </property>
@@ -504,22 +504,22 @@ font: italic;</string>
                 </sizepolicy>
                </property>
                <property name="toolTip">
-                <string>Saves normals as Extra bytes (EVLRs) using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.
+                <string>Saves normals as Extra bytes (EB-VLRs) using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.
 Version 1.4 is recommended for compatibility with all software packages.</string>
                </property>
                <property name="text">
-                <string>Normals (as Extra fields / EVLRs)</string>
+                <string>Normals (as Extra fields / EB-VLRs)</string>
                </property>
               </widget>
              </item>
              <item>
               <widget class="QCheckBox" name="saveLeftoverSFsAsExtraVLRCheckBox">
                <property name="toolTip">
-                <string>If checked, all scalar fields that are not assigned to a standard LAS field will be saved as extra bytes (EVLRs)
+                <string>If checked, all scalar fields that are not assigned to a standard LAS field will be saved as extra bytes (EB-VLRs)
 Version 1.4 is recommended for compatibility with all software packages.</string>
                </property>
                <property name="text">
-                <string>Save all remaining scalar fields as Extra fields / EVLRs</string>
+                <string>Save all remaining scalar fields as Extra fields / EB-VLRs</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -559,7 +559,7 @@ Version 1.4 is recommended for compatibility with all software packages.</string
         </widget>
         <widget class="QWidget" name="extraScalarFieldsTab">
          <attribute name="title">
-          <string>Extra fields (EVLRs)</string>
+          <string>Extra fields (Extra Bytes VLRs)</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
@@ -572,7 +572,7 @@ Version 1.4 is recommended for compatibility with all software packages.</string
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>634</width>
+               <width>654</width>
                <height>456</height>
               </rect>
              </property>

@@ -106,6 +106,8 @@ Bug fixes:
 	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
 		of polyline vertices
 	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
+	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
+		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

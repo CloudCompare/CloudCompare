@@ -127,12 +127,20 @@ bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 }
 
 //Helper: save pose information
-static void SavePoseInformation(e57::StructureNode& parentNode, const e57::ImageFile& imf, const ccGLMatrixd& poseMat)
+static void SavePoseInformation(e57::StructureNode& parentNode,
+								const e57::ImageFile& imf,
+								ccGLMatrixd& poseMat,
+								const CCVector3d& globalShift)
 {
 	e57::StructureNode pose = e57::StructureNode(imf);
 	parentNode.set("pose", pose);
 
 	CCCoreLib::SquareMatrixd transMat(poseMat.data(), true);
+	if (transMat.computeDet() < 0)
+	{
+		ccLog::Warning("[E57] Pose matrix seems to be a reflection. Can't save it as a quaternion (required by the E57 format). We will use the non-reflective form.");
+	}
+
 	double q[4];
 	if (transMat.toQuaternion(q))
 	{
@@ -145,13 +153,20 @@ static void SavePoseInformation(e57::StructureNode& parentNode, const e57::Image
 	}
 
 	//translation
+	CCVector3d tr = poseMat.getTranslationAsVec3D();
 	{
 		e57::StructureNode translation = e57::StructureNode(imf);
-		translation.set("x", e57::FloatNode(imf, poseMat.getTranslation()[0]));
-		translation.set("y", e57::FloatNode(imf, poseMat.getTranslation()[1]));
-		translation.set("z", e57::FloatNode(imf, poseMat.getTranslation()[2]));
+		translation.set("x", e57::FloatNode(imf, tr.x - globalShift.x));
+		translation.set("y", e57::FloatNode(imf, tr.y - globalShift.y));
+		translation.set("z", e57::FloatNode(imf, tr.z - globalShift.z));
 		pose.set("translation", translation);
 	}
+
+	//it happens that the saved pose matrix doesn't capture everything (such as reflections)
+	//because of the quaternion form. Therefore we update the input 'poseMat' with what we
+	//have actually saved
+	poseMat = ccGLMatrixd::FromQuaternion(q);
+	poseMat.setTranslation(tr);
 }
 
 static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile& imf, e57::VectorNode& data3D, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
@@ -185,11 +200,24 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 			{
 				//apply transformation history (i.e. transformations applied after the entity has been loaded)
 				//--> we assume they have been implicitly applied to the sensor as well
-				toSensorCS = ccGLMatrixd(cloud->getGLTransformationHistory().data()) * toSensorCS;
+				ccGLMatrixd historyTransform(cloud->getGLTransformationHistory().data());
+				toSensorCS = historyTransform * toSensorCS;
 			}
 			else
 			{
-				ccLog::Warning("[E57Filter::saveFile] Sernsor pose meta-data is invalid");
+				ccLog::Warning("[E57Filter::saveFile] Sensor pose meta-data is invalid");
+				toSensorCS.toIdentity();
+			}
+		}
+		else
+		{
+			// look for a sensor
+			ccHObject::Container sensors;
+			cloud->filterChildren(sensors, false, CC_TYPES::GBL_SENSOR, false);
+			if (sensors.size() != 0)
+			{
+				hasSensorPoseMat = true;
+				toSensorCS = ccGLMatrixd(sensors.front()->getGLTransformationHistory().data());
 			}
 		}
 
@@ -198,14 +226,12 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		if (globalShift.norm2d() != 0)
 		{
 			//add the Global Shift to the 'pose' matrix
-			ccGLMatrixd toGlobalCS = toSensorCS;
-			toGlobalCS.setTranslation((toSensorCS.getTranslationAsVec3D() - globalShift).u);
-			SavePoseInformation(scanNode, imf, toGlobalCS);
+			SavePoseInformation(scanNode, imf, toSensorCS, globalShift);
 		}
 		else if (hasSensorPoseMat)
 		{
 			//simply save the sensor pose matrix
-			SavePoseInformation(scanNode, imf, toSensorCS);
+			SavePoseInformation(scanNode, imf, toSensorCS, {});
 		}
 	}
 
@@ -228,15 +254,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 			//DGM: according to E57 specifications, the bounding-box is local
 			//(i.e. in the sensor 'input' coordinate system)
-			CCVector3d Plocal;
-			if (hasSensorPoseMat)
-			{
-				Plocal = fromSensorToLocalCS * Psensor;
-			}
-			else
-			{
-				Plocal = Psensor;
-			}
+			CCVector3d Plocal = fromSensorToLocalCS * Psensor;
 
 			if (i != 0)
 			{
@@ -564,15 +582,18 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 			//DGM: according to E57 specifications, the points are saved in the local CS
 			//(i.e. in the sensor 'input' coordinate system)
-			CCVector3d Plocal;
+			CCVector3d Plocal = (hasSensorPoseMat ? fromSensorToLocalCS * Psensor : Psensor);
+#ifdef _DEBUG
 			if (hasSensorPoseMat)
 			{
-				Plocal = fromSensorToLocalCS * Psensor;
+				CCVector3d Psensor2 = fromSensorToLocalCS.inverse() * Plocal;
+				double error = (Psensor2 - Psensor).norm();
+				if (error > 0.00001)
+				{
+					ccLog::Warning("Back-projection error: %f", error);
+				}
 			}
-			else
-			{
-				Plocal = Psensor;
-			}
+#endif
 
 			arrays.xData[i] = Plocal.x;
 			arrays.yData[i] = Plocal.y;

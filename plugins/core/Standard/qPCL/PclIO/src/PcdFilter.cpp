@@ -199,11 +199,10 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	Eigen::Quaternionf ori = Eigen::Quaternionf::Identity();
 	PCLCloud::Ptr pclCloud;
 
-	bool customShift = false;
 	if (sensor)
 	{
 		//get sensor data
-		const ccGLMatrix& sensorMatrix = sensor->getRigidTransformation();
+		ccGLMatrix sensorMatrix = sensor->getRigidTransformation();
 
 		//translation
 		CCVector3 trans = sensorMatrix.getTranslationAsVec3D();
@@ -225,7 +224,27 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 					eigrot(i, j) = sensorMatrix.getColumn(j)[i];
 
 			//now translate to a quaternion
-			ori = Eigen::Quaternionf(eigrot);
+			ori = Eigen::Quaternionf(eigrot).normalized(); // need to normalize the output in case the input matrix is not purely 'orthogonal'
+
+			//it happens that the saved pose matrix doesn't capture everything (such as reflections)
+			//because of the quaternion form. Therefore we update the input 'poseMat' with what we
+			//have actually saved
+			{
+				CCCoreLib::SquareMatrix transMat(sensorMatrix.data(), true);
+				if (transMat.computeDet() < 0)
+				{
+					ccLog::Warning("[PCD] Sensor pose matrix seems to be a reflection. Can't save it as a quaternion (required by the PCD format). We will use the non-reflective form.");
+				}
+
+				eigrot = ori.toRotationMatrix();
+				for (int i = 0; i < 3; ++i)
+				{
+					for (int j = 0; j < 3; ++j)
+					{
+						sensorMatrix.getColumn(j)[i] = eigrot(i, j);
+					}
+				}
+			}
 
 			// we have to project the cloud to the sensor CS
 			ccPointCloud* tempCloud = ccCloud->cloneThis(nullptr, true);
@@ -240,7 +259,6 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			pos(0) = static_cast<float>(pos(0) - globalShift.x);
 			pos(1) = static_cast<float>(pos(1) - globalShift.y);
 			pos(2) = static_cast<float>(pos(2) - globalShift.z);
-			customShift = true;
 
 			delete tempCloud;
 			tempCloud = nullptr;
@@ -251,7 +269,7 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	if (!customShift)
+	if (!pclCloud)
 	{
 		pclCloud = cc2smReader(ccCloud).getAsSM();
 

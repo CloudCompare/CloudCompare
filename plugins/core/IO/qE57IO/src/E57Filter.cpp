@@ -583,17 +583,6 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 			//DGM: according to E57 specifications, the points are saved in the local CS
 			//(i.e. in the sensor 'input' coordinate system)
 			CCVector3d Plocal = (hasSensorPoseMat ? fromSensorToLocalCS * Psensor : Psensor);
-#ifdef _DEBUG
-			if (hasSensorPoseMat)
-			{
-				CCVector3d Psensor2 = fromSensorToLocalCS.inverse() * Plocal;
-				double error = (Psensor2 - Psensor).norm();
-				if (error > 0.00001)
-				{
-					ccLog::Warning("Back-projection error: %f", error);
-				}
-			}
-#endif
 
 			arrays.xData[i] = Plocal.x;
 			arrays.yData[i] = Plocal.y;

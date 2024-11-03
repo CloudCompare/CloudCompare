@@ -65,9 +65,9 @@ ccHObject::ccHObject(const ccHObject& object)
 	, ccDrawableObject(object)
 	, m_parent(nullptr)
 	, m_selectionBehavior(object.m_selectionBehavior)
+	, m_glTransHistory(object.m_glTransHistory)
 	, m_isDeleting(false)
 {
-	m_glTransHistory.toIdentity();
 }
 
 ccHObject::~ccHObject()

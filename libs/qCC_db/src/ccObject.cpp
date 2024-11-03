@@ -116,6 +116,7 @@ ccObject::ccObject(const ccObject& object)
 	: m_name(object.m_name)
 	, m_flags(object.m_flags)
 	, m_uniqueID(GetNextUniqueID())
+	, m_metaData(object.m_metaData)
 {}
 
 void ccObject::setUniqueID(unsigned ID)

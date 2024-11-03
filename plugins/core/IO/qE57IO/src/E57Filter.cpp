@@ -773,7 +773,8 @@ void SaveImage(	const ccImage* image,
 	//Restore scan (node) information if any
 	if (image->hasMetaData(s_e57NodeInfoKey))
 	{
-		QStringList stringList = image->getMetaData(s_e57NodeInfoKey).toString().split("\n");
+		QString metaData = image->getMetaData(s_e57NodeInfoKey).toString();
+		QStringList stringList = metaData.split("\n", Qt::SkipEmptyParts);
 
 		E57NodeMap nodeMap;
 		E57NodeMap::FromStringList(nodeMap, stringList);

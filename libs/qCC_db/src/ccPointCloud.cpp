@@ -278,7 +278,9 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 	static constexpr const char* DefaultSuffix = ".extract";
 	QString cloneName = getName();
 	if (!cloneName.endsWith(DefaultSuffix)) // avoid adding a multitude of suffixes
+	{
 		cloneName += DefaultSuffix;
+	}
 
 	ccPointCloud* result = new ccPointCloud(cloneName);
 

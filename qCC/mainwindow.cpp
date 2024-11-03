@@ -10324,6 +10324,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
+	bool loadCoordinatesTransForced = false;
 
 	FileIOFilter::LoadParameters parameters;
 	{
@@ -10331,6 +10332,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
 		parameters._coordinatesShift = &loadCoordinatesShift;
 		parameters._coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters._coordinatesShiftForced = &loadCoordinatesTransForced;
 		parameters.parentWidget = this;
 	}
 

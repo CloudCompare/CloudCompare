@@ -596,8 +596,14 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 	{
 		Pshift = *loadParameters._coordinatesShift;
 		preserveCoordinateShift = loadParameters.preserveShiftOnSave;
-	}
 	
+		if (nullptr != loadParameters._coordinatesShiftForced  && *loadParameters._coordinatesShiftForced)
+		{
+			// the user asked for this coordinate shift to be applied to all entities!
+			return true;
+		}
+	}
+
 	bool applyAll = false;
 	if (	sizeof(PointCoordinateType) < 8
 		&&	ccGlobalShiftManager::Handle(	P,
@@ -615,6 +621,17 @@ bool FileIOFilter::HandleGlobalShift(	const CCVector3d& P,
 			if (nullptr != loadParameters._coordinatesShiftEnabled)
 			{
 				*loadParameters._coordinatesShiftEnabled = true;
+			}
+			if (applyAll && nullptr != loadParameters._coordinatesShiftForced)
+			{
+				bool needShift = ccGlobalShiftManager::NeedShift(P + Pshift);
+				if (needShift)
+				{
+					// if the user has clicked on 'apply all' while the inupt shift is not sufficient,
+					// this means that this shift needs to be forced to all the entities!
+					// (otherwise, if the shift is sufficient, then it will probably be ok for the next entities)
+					*loadParameters._coordinatesShiftForced = true;
+				}
 			}
 			if (nullptr != loadParameters._coordinatesShift)
 			{

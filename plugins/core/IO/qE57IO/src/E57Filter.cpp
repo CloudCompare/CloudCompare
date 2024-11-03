@@ -911,7 +911,7 @@ void SaveImage(	const ccImage* image,
 			pinholeRepresentation->imageMaskSize = 0;
 			pinholeRepresentation->imageWidth = image->data().width();
 			pinholeRepresentation->imageHeight = image->data().height();
-			pinholeRepresentation->imageSize = pinholeRepresentation->imageWidth * pinholeRepresentation->imageHeight;
+			pinholeRepresentation->imageSize = static_cast<int64_t>(pinholeRepresentation->imageWidth) * pinholeRepresentation->imageHeight;
 		}
 		cameraRepresentation = pinholeRepresentation;
 	}

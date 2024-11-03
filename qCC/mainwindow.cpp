@@ -4178,7 +4178,7 @@ void MainWindow::doActionSubsample()
 			}
 
 			int warnings = 0;
-			ccPointCloud* newPointCloud = cloud->partialClone(sampledCloud,&warnings);
+			ccPointCloud* newPointCloud = cloud->partialClone(sampledCloud, &warnings);
 
 			delete sampledCloud;
 			sampledCloud = nullptr;

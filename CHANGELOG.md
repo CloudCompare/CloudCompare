@@ -85,6 +85,12 @@ Improvements:
 				5) the cloud minimum bounding-box corner (if applicable)
 			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
 
+	- E57 files
+		- when loading E57 files, CC will now store more information about sensors
+		- it will then restore these pieces of information when saving the clouds and images back as an E57 file, effectively
+			preserving the image sensor definition
+		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
+
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 
 	- PLY files:

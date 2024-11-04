@@ -108,6 +108,8 @@ Bug fixes:
 	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
+	- M3C2: 
+		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

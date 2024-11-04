@@ -377,8 +377,8 @@ qM3C2Normals::ComputationMode qM3C2Dialog::getNormalsComputationMode() const
 	{
 		if (getRequestedComputationMode() == qM3C2Normals::VERT_MODE)
 		{
-			return qM3C2Normals::VERT_MODE;
 			ccLog::Print("[M3C2] force vertical mode as requested in the parameter file");
+			return qM3C2Normals::VERT_MODE;
 		}
 	}
 

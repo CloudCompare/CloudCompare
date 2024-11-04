@@ -106,6 +106,9 @@ Improvements:
 		- this dialog can be hidden once and for all by clicking on the 'Yes to all' button
 		- the default output format can also be set via the command line (see above)
 
+	- Animation plugin:
+		- Improved/fixed video file generation process to reduce the occurrence of invalid videos
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,

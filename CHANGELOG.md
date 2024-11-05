@@ -107,7 +107,8 @@ Improvements:
 		- the default output format can also be set via the command line (see above)
 
 	- Animation plugin:
-		- Improved/fixed video file generation process to reduce the occurrence of invalid videos
+		- improved/fixed video file generation process to reduce the occurrence of invalid videos
+		- the output file extension will now be automatically updated when changing the codec
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

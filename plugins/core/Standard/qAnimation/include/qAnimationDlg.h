@@ -66,6 +66,7 @@ protected:
 	void onAutoStepsDurationToggled(bool);
 	void onSmoothTrajectoryToggled(bool);
 	void onSmoothRatioChanged(double);
+	void onCodecChanged(int);
 
 	void preview();
 	void renderAnimation() { render(false); }
@@ -127,4 +128,7 @@ protected: //members
 
 	//! Associated 3D view
 	ccGLWindowInterface* m_view3d;
+
+	//! Map of the codecs short names Vs extensions
+	QMap<QString, QString> m_codecNamesAndExtensions;
 };

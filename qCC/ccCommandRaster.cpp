@@ -366,7 +366,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		if (projectionType == ccRasterGrid::PROJ_INVERSE_VAR_VALUE)
 		{
 			// let's check if the SF description is its name
-			invVarProjSFIndex = cloudDesc.pc->getScalarFieldIndexByName(qPrintable(stdDevSFDesc));
+			invVarProjSFIndex = cloudDesc.pc->getScalarFieldIndexByName(stdDevSFDesc.toStdString());
 			if (invVarProjSFIndex < 0)
 			{
 				// let's check if it's a (valid) index then

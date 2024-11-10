@@ -86,7 +86,7 @@ CC_FILE_ERROR LasScalarFieldLoader::handleScalarFields(ccPointCloud&       point
 			error = handleScalarField(lasScalarField, pointCloud, currentPoint.point_source_ID);
 			break;
 		case LasScalarField::GpsTime:
-			error = handleGpsTime(lasScalarField, pointCloud, currentPoint.gps_time);
+			error = handleScalarField(lasScalarField, pointCloud, currentPoint.gps_time);
 			break;
 		case LasScalarField::ExtendedScanAngle:
 			error = handleScalarField(
@@ -256,57 +256,6 @@ LasScalarFieldLoader::handleScalarField(LasScalarField& sfInfo, ccPointCloud& po
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR
-LasScalarFieldLoader::handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointCloud, const double currentValue)
-{
-	if (!sfInfo.sf)
-	{
-		if (m_ignoreFieldsWithDefaultValues && currentValue == 0.0)
-		{
-			return CC_FERR_NO_ERROR;
-		}
-		auto newSf = new ccScalarField(sfInfo.name());
-		sfInfo.sf  = newSf;
-		if (!newSf->reserveSafe(pointCloud.capacity()))
-		{
-			return CC_FERR_NOT_ENOUGH_MEMORY;
-		}
-
-		double timeShift = m_manualTimeShiftValue;
-		if (std::isnan(m_manualTimeShiftValue))
-		{
-			timeShift = static_cast<int64_t>(currentValue / 10000.0) * 10000.0;
-		}
-
-		double shiftedValue = currentValue - timeShift;
-		if (shiftedValue < 1.0e5)
-		{
-			ccLog::Warning("[LAS] Time SF has been shifted to prevent a loss of accuracy (%.2f)", timeShift);
-		}
-		else if (timeShift > 0.0)
-		{
-			ccLog::Warning("[LAS] Time SF has been shifted but accuracy may not be preserved (%.2f)",
-			               timeShift);
-		}
-		else
-		{
-			ccLog::Warning("[LAS] Time SF has not been shifted. Accuracy may not be preserved.");
-		}
-
-		newSf->setGlobalShift(timeShift);
-		for (unsigned j = 0; j < pointCloud.size() - 1; ++j)
-		{
-			newSf->addElement(-static_cast<ScalarType>(timeShift));
-		}
-	}
-
-	if (sfInfo.sf)
-	{
-		sfInfo.sf->addElement(static_cast<ScalarType>(currentValue - sfInfo.sf->getGlobalShift()));
-	}
-	return CC_FERR_NO_ERROR;
-}
-
 bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCloud)
 {
 	for (LasExtraScalarField& extraField : m_extraScalarFields)
@@ -349,7 +298,7 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 		{
 			for (unsigned i = 0; i < extraField.numElements(); ++i)
 			{
-				extraField.scalarFields[i]->setGlobalShift(extraField.offsets[i]);
+				extraField.scalarFields[i]->setOffset(extraField.offsets[i]);
 			}
 		}
 	}

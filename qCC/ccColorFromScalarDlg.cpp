@@ -123,7 +123,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 				m_combos[i]->clear();
 				for (unsigned int s = 0; s < m_cloud->getNumberOfScalarFields(); s++)
 				{
-					m_combos[i]->addItem(m_cloud->getScalarFieldName(s));
+					m_combos[i]->addItem(QString::fromStdString(m_cloud->getScalarFieldName(s)));
 				}
 				m_combos[i]->setCurrentIndex(m_cloud->getCurrentDisplayedScalarFieldIndex());
 			}

@@ -100,9 +100,9 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	{
 		for (unsigned i = 0; i < m_cloud->getNumberOfScalarFields(); ++i)
 		{
-			if (strcmp(m_cloud->getScalarFieldName(i), "Default") != 0)
+			if (m_cloud->getScalarFieldName(i).compare("Default") != 0)
 			{
-				cloudScalarFieldsNames << m_cloud->getScalarFieldName(i);
+				cloudScalarFieldsNames << QString::fromStdString(m_cloud->getScalarFieldName(i));
 			}
 		}
 	}
@@ -356,7 +356,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 	}
 	const QString scalarFieldName   = m_scalarFieldMapping[senderIndex].first->name();
 	const QString ccScalarFieldName = m_scalarFieldMapping[senderIndex].second->currentText();
-	int           sfIdx             = m_cloud->getScalarFieldIndexByName(qPrintable(ccScalarFieldName));
+	int           sfIdx             = m_cloud->getScalarFieldIndexByName(ccScalarFieldName.toStdString());
 	if (sfIdx == -1)
 	{
 		assert(false);
@@ -608,7 +608,7 @@ std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const
 	{
 		if (item.second->currentIndex() > 0)
 		{
-			int sfIdx = m_cloud->getScalarFieldIndexByName(qPrintable(item.second->currentText()));
+			int sfIdx = m_cloud->getScalarFieldIndexByName(item.second->currentText().toStdString());
 			if (sfIdx < 0)
 			{
 				assert(false);
@@ -673,14 +673,14 @@ void LasSaveDialog::assignLeftoverScalarFieldsAsExtra()
 	unassignDefaultFields();
 
 	// We use lambda for clarity
-	auto isAssignedToStandardField = [this](const char* sfName) -> bool
+	auto isAssignedToStandardField = [this](const std::string& sfName) -> bool
 	{
 		for (const auto& item : m_scalarFieldMapping)
 		{
 			if (item.second->currentIndex() > 0)
 			{
 				const QString correspondingScalarFieldName = item.second->currentText();
-				if (correspondingScalarFieldName == sfName)
+				if (correspondingScalarFieldName == QString::fromStdString(sfName))
 				{
 					return true;
 				}
@@ -689,7 +689,7 @@ void LasSaveDialog::assignLeftoverScalarFieldsAsExtra()
 		return false;
 	};
 
-	auto isAssignedAsExtraField = [this](const char* sfName)
+	auto isAssignedAsExtraField = [this](const std::string& sfName)
 	{
 		int esfCount = extraScalarFieldsLayout->count();
 		for (int i = 0; i < esfCount; ++i)
@@ -723,9 +723,9 @@ void LasSaveDialog::assignLeftoverScalarFieldsAsExtra()
 
 	for (uint index = 0; index < sfCount; index++)
 	{
-		auto*       sf              = static_cast<ccScalarField*>(m_cloud->getScalarField(index));
-		const char* sfName          = sf->getName();
-		const bool  alreadyAssigned = isAssignedToStandardField(sfName) || isAssignedAsExtraField(sfName);
+		auto*              sf              = static_cast<ccScalarField*>(m_cloud->getScalarField(index));
+		const std::string& sfName          = sf->getName();
+		const bool         alreadyAssigned = isAssignedToStandardField(sfName) || isAssignedAsExtraField(sfName);
 		if (!alreadyAssigned)
 		{
 			LasExtraScalarFieldCard* card = addExtraScalarFieldCard();

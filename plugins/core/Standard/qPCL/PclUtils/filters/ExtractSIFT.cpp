@@ -124,7 +124,7 @@ int ExtractSIFT::getParametersFromDialog()
 	fieldNames.reserve(fieldCount);
 	for (unsigned i = 0; i < fieldCount; i++)
 	{
-		fieldNames << cloud->getScalarFieldName(i);
+		fieldNames << QString::fromStdString(cloud->getScalarFieldName(i));
 	}
 
 	//do we have rgb fields?
@@ -171,7 +171,7 @@ int ExtractSIFT::getParametersFromDialog()
 
 	QString fieldname(m_field_to_use);
 	fieldname.replace(' ', '_');
-	m_field_to_use_no_space = qPrintable(fieldname); //DGM: warning, toStdString doesn't preserve "local" characters
+	m_field_to_use_no_space = fieldname.toStdString(); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	return checkParameters();
 }

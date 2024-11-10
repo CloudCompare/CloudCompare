@@ -153,7 +153,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 
 			//il faut ecrire le nom du fichier relatif et non absolu !
-			int result = fprintf(mainFile,"\n#POV %u\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
+			int result = fprintf(mainFile, "\n#POV %u\nF %s\nT ASC\n", i, qPrintable(QFileInfo(thisFilename).fileName()));
 
 			if (result > 0)
 			{

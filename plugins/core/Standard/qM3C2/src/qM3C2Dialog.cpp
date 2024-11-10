@@ -154,7 +154,7 @@ bool PopulateSFCombo(QComboBox* combo, const ccPointCloud& cloud, int defaultFie
 	bool defaultFieldFound = false;
 	for (unsigned i = 0; i < sfCount; ++i)
 	{
-		QString sfName = cloud.getScalarFieldName(i);
+		QString sfName = QString::fromStdString(cloud.getScalarFieldName(i));
 		combo->addItem(sfName);
 		if (selectedFieldIndex < 0 && !defaultField.isEmpty())
 		{

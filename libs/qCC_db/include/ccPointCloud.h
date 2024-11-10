@@ -253,7 +253,7 @@ public: //scalar-fields management
 	//inherited from base class
 	void deleteScalarField(int index) override;
 	void deleteAllScalarFields() override;
-	int addScalarField(const char* uniqueName) override;
+	int addScalarField(const std::string& uniqueName) override;
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;

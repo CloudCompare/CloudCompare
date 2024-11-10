@@ -64,12 +64,7 @@ void LasExtraScalarFieldCard::reset()
 		emit advancedOptionsButton->clicked();
 	}
 
-#ifdef CC_CORE_LIB_USES_DOUBLE
-	const char* defaultType = "float64";
-#else
-	const char* defaultType = "float32";
-#endif
-	typeComboBox->setCurrentText(defaultType);
+	typeComboBox->setCurrentText("float64");
 
 	firstScalarFieldComboBox->setCurrentIndex(0);
 	secondScalarFieldComboBox->setCurrentIndex(0);
@@ -89,26 +84,26 @@ void LasExtraScalarFieldCard::fillFrom(const LasExtraScalarField& field)
 		radioButton1->setChecked(true);
 		emit radioButton1->clicked(true);
 		assert(field.scalarFields[0] != nullptr);
-		firstScalarFieldComboBox->setCurrentText(field.scalarFields[0]->getName());
+		firstScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[0]->getName()));
 		break;
 	case 2:
 		radioButton2->setChecked(true);
 		emit radioButton2->clicked(true);
 		assert(field.scalarFields[0] != nullptr);
-		firstScalarFieldComboBox->setCurrentText(field.scalarFields[0]->getName());
+		firstScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[0]->getName()));
 		assert(field.scalarFields[1] != nullptr);
-		secondScalarFieldComboBox->setCurrentText(field.scalarFields[1]->getName());
+		secondScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[1]->getName()));
 		break;
 	case 3:
 		radioButton3->setChecked(true);
 		emit radioButton3->clicked(true);
-		firstScalarFieldComboBox->setCurrentText(field.scalarFields[0]->getName());
+		firstScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[0]->getName()));
 		assert(field.scalarFields[1] != nullptr);
-		secondScalarFieldComboBox->setCurrentText(field.scalarFields[1]->getName());
+		secondScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[1]->getName()));
 		assert(field.scalarFields[1] != nullptr);
-		secondScalarFieldComboBox->setCurrentText(field.scalarFields[1]->getName());
+		secondScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[1]->getName()));
 		assert(field.scalarFields[2] != nullptr);
-		thirdScalarFieldComboBox->setCurrentText(field.scalarFields[2]->getName());
+		thirdScalarFieldComboBox->setCurrentText(QString::fromStdString(field.scalarFields[2]->getName()));
 		break;
 	default:
 		assert(false);
@@ -180,15 +175,15 @@ void LasExtraScalarFieldCard::fillFrom(const LasExtraScalarField& field)
 	unlockModificationsButton->setVisible(false);
 }
 
-void LasExtraScalarFieldCard::fillAsDefault(const char* sfName)
+void LasExtraScalarFieldCard::fillAsDefault(const std::string& sfName)
 {
-	if (strlen(sfName) > LasExtraScalarField::MAX_NAME_SIZE)
+	if (sfName.length() > LasExtraScalarField::MAX_NAME_SIZE)
 	{
 		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
 		               sfName);
 	}
 
-	QString name(sfName);
+	QString name = QString::fromStdString(sfName);
 	name.truncate(LasExtraScalarField::MAX_NAME_SIZE);
 	nameEdit->setText(name);
 
@@ -389,14 +384,14 @@ void LasExtraScalarFieldCard::onToggleAdvancedOptionsClicked()
 	}
 }
 
-bool LasExtraScalarFieldCard::mapsFieldWithName(const char* sfName) const
+bool LasExtraScalarFieldCard::mapsFieldWithName(const std::string& sfName) const
 {
 	const auto numDimensions = static_cast<size_t>(dimensionSize());
 
 	for (size_t i = 0; i < numDimensions; ++i)
 	{
 		const QString dimName = m_scalarFieldsUserInputs[i].scalarFieldComboBox->currentText();
-		if (dimName == sfName)
+		if (dimName == QString::fromStdString(sfName))
 		{
 			return true;
 		}

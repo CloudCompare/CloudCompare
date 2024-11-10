@@ -187,7 +187,7 @@ PCLCloud::Ptr cc2smReader::getFloatScalarField(const QString& fieldName) const
 		return {};
 	}
 
-	int sfIdx = m_ccCloud->getScalarFieldIndexByName(qPrintable(fieldName));
+	int sfIdx = m_ccCloud->getScalarFieldIndexByName(fieldName.toStdString());
 	if (sfIdx < 0)
 	{
 		return {};
@@ -241,7 +241,7 @@ PCLCloud::Ptr cc2smReader::getAsSM() const
 	QStringList scalarFields;
 	for (unsigned i = 0; i < m_ccCloud->getNumberOfScalarFields(); ++i)
 	{
-		scalarFields << m_ccCloud->getScalarField(static_cast<int>(i))->getName();
+		scalarFields << QString::fromStdString(m_ccCloud->getScalarField(static_cast<int>(i))->getName());
 	}
 
 	return getAsSM(true, m_ccCloud->hasNormals(), m_ccCloud->hasColors(), scalarFields);

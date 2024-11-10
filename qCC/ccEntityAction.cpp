@@ -89,7 +89,7 @@ namespace ccEntityAction
 		QString name = baseName;
 		for (int trials = 0; trials < 99; ++trials)
 		{
-			if (cloud->getScalarFieldIndexByName(qPrintable(name)) < 0)
+			if (cloud->getScalarFieldIndexByName(name.toStdString()) < 0)
 			{
 				// Scalar field name is available
 				return name;
@@ -453,7 +453,7 @@ namespace ccEntityAction
 				{
 					for (unsigned i = 0; i < sfCount; ++i)
 					{
-						scalarFields << source->getScalarFieldName(i);
+						scalarFields << QString::fromStdString(source->getScalarFieldName(i));
 					}
 				}
 				isDlg.setItems(scalarFields, 0);
@@ -650,7 +650,7 @@ namespace ccEntityAction
 				if (!defaultSFName.isEmpty())
 				{
 					//if it's valid, we'll keep this SF!
-					sfIdx = pc->getScalarFieldIndexByName(qPrintable(defaultSFName));
+					sfIdx = pc->getScalarFieldIndexByName(defaultSFName.toStdString());
 				}
 				if (sfIdx < 0)
 				{
@@ -660,7 +660,7 @@ namespace ccEntityAction
 					{
 						CCCoreLib::ScalarField* sf = pc->getScalarField(i);
 						assert(sf);
-						QString sfName(sf->getName());
+						QString sfName = QString::fromStdString(sf->getName());
 						poeDlg.addElement(sfName);
 						if (sfIdx < 0 && sfName.contains("intensity", Qt::CaseInsensitive))
 						{
@@ -675,7 +675,7 @@ namespace ccEntityAction
 						return false;
 					}
 					sfIdx = poeDlg.getSelectedIndex();
-					defaultSFName = pc->getScalarField(sfIdx)->getName();
+					defaultSFName = QString::fromStdString(pc->getScalarField(sfIdx)->getName());
 				}
 			}
 			else
@@ -855,24 +855,24 @@ namespace ccEntityAction
 					QString sfName;
 					if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 					{
-						sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(spatialSigma).arg(sigmaSF);
+						sfName = QString("%1.bilsmooth(%2,%3)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma).arg(sigmaSF);
 					}
 					else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN)
 					{
-						sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+						sfName = QString("%1.smooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 					}
 					else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEAN)
 					{
-						sfName = QString("%1.meansmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+						sfName = QString("%1.meansmooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 					}
 					else
 					{
-						sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+						sfName = QString("%1.medsmooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 					}
 
-					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+					sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
 					if (sfIdx < 0)
-						sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
+						sfIdx = pc->addScalarField(sfName.toStdString()); //output SF has same type as input SF
 					if (sfIdx >= 0)
 						pc->setCurrentInScalarField(sfIdx);
 					else
@@ -1035,24 +1035,24 @@ namespace ccEntityAction
 				QString sfName;
 				if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 				{
-					sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(spatialSigma).arg(scalarFieldSigma);
+					sfName = QString("%1.bilsmooth(%2,%3)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma).arg(scalarFieldSigma);
 				}
 				else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::GAUSSIAN)
 				{
-					sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					sfName = QString("%1.smooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 				}
 				else if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::MEAN)
 				{
-					sfName = QString("%1.meansmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					sfName = QString("%1.meansmooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 				}
 				else
 				{
-					sfName = QString("%1.medsmooth(%2)").arg(outSF->getName()).arg(spatialSigma);
+					sfName = QString("%1.medsmooth(%2)").arg(QString::fromStdString(outSF->getName())).arg(spatialSigma);
 				}
 
-				int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+				int sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
 				if (sfIdx < 0)
-					sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
+					sfIdx = pc->addScalarField(sfName.toStdString()); //output SF has same type as input SF
 				if (sfIdx >= 0)
 					pc->setCurrentInScalarField(sfIdx);
 				else
@@ -1250,16 +1250,16 @@ namespace ccEntityAction
 				}
 				else
 				{
-					const char* sfName = sf->getName();
+					const std::string& sfName = sf->getName();
 					bool ok = false;
 					QString newName = QInputDialog::getText(parent,
 															QObject::tr("SF name"),
 															QObject::tr("name:"),
 															QLineEdit::Normal,
-															QString(sfName ? sfName : QObject::tr("unknown")),
+															QString(!sfName.empty() ? QString::fromStdString(sfName) : QObject::tr("unknown")),
 															&ok);
 					if (ok)
-						sf->setName(qPrintable(newName));
+						sf->setName(newName.toStdString());
 				}
 			}
 		}
@@ -1267,12 +1267,12 @@ namespace ccEntityAction
 		return true;
 	}
 	
-	bool	sfAddIdField(const ccHObject::Container &selectedEntities, bool storeAsInt)
+	bool	sfAddIdField(const ccHObject::Container& selectedEntities, bool storeAsInt)
 	{
 		for (ccHObject* ent : selectedEntities)
 		{
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
-			if (cloud != nullptr) //TODO
+			if (nullptr != cloud) //TODO
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 				
@@ -1288,40 +1288,17 @@ namespace ccEntityAction
 				CCCoreLib::ScalarField* sf = pc->getScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
 
-				for (size_t j=0 ; j<cloud->size(); j++)
+				for (unsigned j = 0; j < cloud->size(); j++)
 				{
-					ScalarType idValue;
+					ScalarType idValue = 0;
 					if (!storeAsInt)
 					{
 						idValue = static_cast<ScalarType>(j);
 					}
 					else
 					{
-#if defined CC_CORE_LIB_USES_DOUBLE
+						uint8_t* valuePtr = reinterpret_cast<uint8_t*>(&idValue);
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-						unsigned char *valuePtr = (unsigned char *)(&idValue);
-						valuePtr[7] = static_cast<unsigned char>(j & 0xff);
-						valuePtr[6] = static_cast<unsigned char>(j >> 8 & 0xff);
-						valuePtr[5] = static_cast<unsigned char>(j >> 16 & 0xff);
-						valuePtr[4] = static_cast<unsigned char>(j >> 24 & 0xff);
-						valuePtr[3] = static_cast<unsigned char>(j >> 32 & 0xff);
-						valuePtr[2] = static_cast<unsigned char>(j >> 40 & 0xff);
-						valuePtr[1] = static_cast<unsigned char>(j >> 48 & 0xff);
-						valuePtr[0] = static_cast<unsigned char>(j >> 56 & 0xff);
-#else
-						unsigned char *valuePtr = (unsigned char *)(&idValue);
-						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
-						valuePtr[1] = static_cast<unsigned char>(j >> 8 & 0xff);
-						valuePtr[2] = static_cast<unsigned char>(j >> 16 & 0xff);
-						valuePtr[3] = static_cast<unsigned char>(j >> 24 & 0xff);
-						valuePtr[4] = static_cast<unsigned char>(j >> 32 & 0xff);
-						valuePtr[5] = static_cast<unsigned char>(j >> 40 & 0xff);
-						valuePtr[6] = static_cast<unsigned char>(j >> 48 & 0xff);
-						valuePtr[7] = static_cast<unsigned char>(j >> 56 & 0xff);
-#endif
-#elif defined CC_CORE_LIB_USES_FLOAT
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-						unsigned char *valuePtr = (unsigned char *)(&idValue);
 						valuePtr[0] = static_cast<unsigned char>(j & 0xff);
 						valuePtr[1] = static_cast<unsigned char>((j >> 8) & 0xff);
 						valuePtr[2] = static_cast<unsigned char>((j >> 16) & 0xff);
@@ -1332,9 +1309,6 @@ namespace ccEntityAction
 						valuePtr[2] = static_cast<unsigned char>((j >> 8) & 0xff);
 						valuePtr[1] = static_cast<unsigned char>((j >> 16) & 0xff);
 						valuePtr[0] = static_cast<unsigned char>((j >> 24) & 0xff);
-#endif
-#else
-						static_assert(false, "type for ScalarType has not been declared");
 #endif
 					}
 					sf->setValue(j, idValue);
@@ -1364,7 +1338,7 @@ namespace ccEntityAction
 			return false;
 		}
 
-		if (cloud->getScalarFieldIndexByName(qPrintable(sfName)) >= 0)
+		if (cloud->getScalarFieldIndexByName(sfName.toStdString()) >= 0)
 		{
 			ccLog::Error(QT_TR_NOOP("A SF with a similar name already exists!"));
 			return false;
@@ -1399,9 +1373,9 @@ namespace ccEntityAction
 			return false;
 		}
 
-		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = cloud->addScalarField(qPrintable(sfName));
+			sfIdx = cloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Error(QT_TR_NOOP("An error occurred! (see console)"));
@@ -1448,9 +1422,9 @@ namespace ccEntityAction
             // count integer values
             size_t N = sf->size();
             std::set<int> classes;
-            for (ScalarType sfValue : *sf)
+            for (size_t i = 0; i < sf->size(); ++i)
             {
-				classes.insert(static_cast<int>(sfValue));
+				classes.insert(static_cast<int>(sf->getValue(i)));
             }
             ccLog::Print("[sfSplitCloud] " + QString::number(classes.size()) + " classe(s) found in the current scalar field");
 
@@ -1490,7 +1464,7 @@ namespace ccEntityAction
 					// populate the cloud with the points which have the selected class
 					for (unsigned index = 0; index < static_cast<unsigned>(cloud->size()); index++)
 					{
-						if (static_cast<int>(sf->at(index)) == pointClass)
+						if (static_cast<int>(sf->getValue(index)) == pointClass)
 						{
 							referenceCloud.addPointIndex(index);
 						}
@@ -1977,11 +1951,11 @@ namespace ccEntityAction
 		for (const auto cloud : clouds)
 		{
 			std::vector<ccScalarField*> fields(5, nullptr);
-			fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "R"))) : nullptr);
-			fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "G"))) : nullptr);
-			fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "B"))) : nullptr);
-			fields[3] = (exportAlpha ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "Alpha"))) : nullptr);
-			fields[4] = (exportComposite ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud, "Composite"))) : nullptr);
+			fields[0] = (exportR ? new ccScalarField(GetFirstAvailableSFName(cloud, "R").toStdString()) : nullptr);
+			fields[1] = (exportG ? new ccScalarField(GetFirstAvailableSFName(cloud, "G").toStdString()) : nullptr);
+			fields[2] = (exportB ? new ccScalarField(GetFirstAvailableSFName(cloud, "B").toStdString()) : nullptr);
+			fields[3] = (exportAlpha ? new ccScalarField(GetFirstAvailableSFName(cloud, "Alpha").toStdString()) : nullptr);
+			fields[4] = (exportComposite ? new ccScalarField(GetFirstAvailableSFName(cloud, "Composite").toStdString()) : nullptr);
 			
 			//try to instantiate memory for each field
 			unsigned count = cloud->size();
@@ -1989,7 +1963,7 @@ namespace ccEntityAction
 			{
 				if (sf && !sf->reserveSafe(count))
 				{
-					ccLog::Warning(QObject::tr("[SfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(sf->getName(), cloud->getName()));
+					ccLog::Warning(QObject::tr("[SfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(QString::fromStdString(sf->getName()), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
@@ -2041,12 +2015,14 @@ namespace ccEntityAction
 					}
 					
 					if (!fieldsStr.isEmpty())
+					{
 						fieldsStr.append(", ");
-					fieldsStr.append(sf->getName());
+					}
+					fieldsStr.append(QString::fromStdString(sf->getName()));
 				}
 				else
 				{
-					ccConsole::Warning(QObject::tr("[SfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(sf->getName(), cloud->getName()));
+					ccConsole::Warning(QObject::tr("[SfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(QString::fromStdString(sf->getName()), cloud->getName()));
 					sf->release();
 					sf = nullptr;
 				}
@@ -3137,13 +3113,13 @@ namespace ccEntityAction
 			size_t sfValidCount = sf->countValidValues();
 			if (sfValidCount == 0)
 			{
-				ccLog::Warning(QObject::tr("Scalar field '%1' of cloud %2 has no valid values").arg(sf->getName()).arg(pc->getName()));
+				ccLog::Warning(QObject::tr("Scalar field '%1' of cloud %2 has no valid values").arg(QString::fromStdString(sf->getName())).arg(pc->getName()));
 				continue;
 			}
 			
 			Q_ASSERT(!sf->empty());
 			
-			if (sf && distrib->computeParameters(*sf))
+			if (sf && distrib->computeParameters(CCCoreLib::GenericDistribution::SFAsScalarContainer(*sf)))
 			{
 				QString description;
 				const unsigned precision = ccGui::Parameters().displayedNumPrecision;
@@ -3240,14 +3216,14 @@ namespace ccEntityAction
 				histogram->setCurveValues(npis);
 				npis.clear();
 				histogram->setTitle(description);
-				histogram->setAxisLabels(sf->getName(), QObject::tr("Count"));
+				histogram->setAxisLabels(QString::fromStdString(sf->getName()), QObject::tr("Count"));
 				histogram->refresh();
 				
 				hDlg->show();
 			}
 			else
 			{
-				ccConsole::Warning(QObject::tr("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName(), sf->getName()));
+				ccConsole::Warning(QObject::tr("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName(), QString::fromStdString(sf->getName())));
 			}
 		}
 		

@@ -2361,9 +2361,9 @@ void MainWindow::doActionProjectUncertainty()
 	{
 		// add scalar field
 		QString sfName = tr("[%1] Uncertainty (%2)").arg(sensor->getName()).arg(dimChar[d]);
-		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
+			sfIdx = pointCloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Error(tr("An error occurred! (see console)"));
@@ -2390,9 +2390,9 @@ void MainWindow::doActionProjectUncertainty()
 	// add scalar field
 	{
 		QString sfName = tr("[%1] Uncertainty (3D)").arg(sensor->getName());
-		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
+			sfIdx = pointCloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Error(tr("An error occurred! (see console)"));
@@ -3245,8 +3245,10 @@ void MainWindow::doActionOpenColorScalesManager()
 
 void MainWindow::doActionAddIdField()
 {
-	if ( !ccEntityAction::sfAddIdField(m_selectedEntities) )
+	if (!ccEntityAction::sfAddIdField(m_selectedEntities))
+	{
 		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -7836,10 +7838,10 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::max<unsigned>(4, numberOfClasses);
 					numberOfClasses = std::min<unsigned>(256, numberOfClasses);
 
-					histogram->setTitle(tr("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
+					histogram->setTitle(tr("%1 (%2 values) ").arg(QString::fromStdString(sf->getName())).arg(numberOfPoints));
 					bool showNaNValuesInGrey = sf->areNaNValuesShownInGrey();
 					histogram->fromSF(sf, numberOfClasses, true, showNaNValuesInGrey);
-					histogram->setAxisLabels(sf->getName(), tr("Count"));
+					histogram->setAxisLabels(QString::fromStdString(sf->getName()), tr("Count"));
 					histogram->refresh();
 				}
 				hDlg->show();
@@ -8124,7 +8126,7 @@ void MainWindow::doActionAddConstantSF()
 
 	QString defaultName = "Constant";
 	unsigned trys = 1;
-	while (cloud->getScalarFieldIndexByName(qPrintable(defaultName)) >= 0 || trys > 99)
+	while (cloud->getScalarFieldIndexByName(defaultName.toStdString()) >= 0 || trys > 99)
 	{
 		defaultName = tr("Constant #%1").arg(++trys);
 	}
@@ -8562,9 +8564,9 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		}
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
 
-		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = cloud->addScalarField(qPrintable(sfName));
+			sfIdx = cloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccConsole::Error(tr("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
@@ -9244,7 +9246,7 @@ void MainWindow::doActionExportCloudInfo()
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);
-				csvStream << sf->getName() << ';' /*"SF name;"*/;
+				csvStream << QString::fromStdString(sf->getName()) << ';' /*"SF name;"*/;
 
 				unsigned validCount = 0;
 				double sfSum = 0.0;
@@ -9625,14 +9627,14 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 		}
 
-		int _sfIdx = compEnt->getScalarFieldIndexByName(qPrintable(sfName));
+		int _sfIdx = compEnt->getScalarFieldIndexByName(sfName.toStdString());
 		if (_sfIdx >= 0)
 		{
 			compEnt->deleteScalarField(_sfIdx);
 			//we update sfIdx because indexes are all messed up after deletion
 			sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		}
-		compEnt->renameScalarField(sfIdx, qPrintable(sfName));
+		compEnt->renameScalarField(sfIdx, sfName.toStdString());
 
 		ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
 		if (sf)

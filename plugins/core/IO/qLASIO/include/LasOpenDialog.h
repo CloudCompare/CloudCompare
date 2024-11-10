@@ -81,12 +81,6 @@ class LasOpenDialog : public QDialog
 	/// according to what the LAS standard says.
 	bool shouldDecomposeClassification() const;
 
-	/// Returns quiet_NaN if the time shift value should be
-	/// automatically found.
-	///
-	/// Otherwise, returns the value manually specified by the user.
-	double timeShiftValue() const;
-
 	/// Returns the action the user wants to do.
 	///
 	/// The action is based on the active tab when the
@@ -109,13 +103,6 @@ class LasOpenDialog : public QDialog
 
 	void doSelectAll(bool doSelect);
 	void doSelectAllESF(bool doSelect);
-
-	/// Connected to the "automatic time shift" check box.
-	///
-	/// Depending on if the user checks or un-checks the automatic time shift,
-	/// we need to enable / disable the double spin box that
-	/// is used to get the manually entered time shift.
-	void onAutomaticTimeShiftToggle(bool checked);
 
 	void onApplyAll();
 

@@ -40,8 +40,7 @@ public:
 	virtual PrimitiveShape *Clone() const = 0;
 	virtual float Distance(const Vec3f &p) const = 0;
 	virtual float SignedDistance(const Vec3f &p) const = 0;
-	virtual float NormalDeviation(const Vec3f &p,
-		const Vec3f &n) const = 0;
+	virtual float NormalDeviation(const Vec3f &p, const Vec3f &n) const = 0;
 	// computes the distance to the shape and the deviation of the normal
 	// to the normal at the nearest point on the shape
 	virtual void DistanceAndNormalDeviation(

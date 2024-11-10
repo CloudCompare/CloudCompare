@@ -179,8 +179,7 @@ void LasExtraScalarFieldCard::fillAsDefault(const std::string& sfName)
 {
 	if (sfName.length() > LasExtraScalarField::MAX_NAME_SIZE)
 	{
-		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
-		               sfName);
+		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated", sfName.c_str());
 	}
 
 	QString name = QString::fromStdString(sfName);
@@ -221,13 +220,11 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPoin
 	// used  too many non ascii symbols
 	if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
 	{
-		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
-		               stdName.c_str());
+		ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated", stdName.c_str());
 	}
 	if (stdDescription.size() > LasExtraScalarField::MAX_DESCRIPTION_SIZE)
 	{
-		ccLog::Warning("[LAS] Extra scalar field description '%s' is too long and will be truncated",
-		               stdDescription.c_str());
+		ccLog::Warning("[LAS] Extra scalar field description '%s' is too long and will be truncated", stdDescription.c_str());
 	}
 
 	field.type       = dataType();

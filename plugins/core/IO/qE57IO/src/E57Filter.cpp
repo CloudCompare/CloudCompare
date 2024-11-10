@@ -478,7 +478,7 @@ static bool SaveScan(	ccPointCloud* cloud,
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			if (intensitySFIndex >= 0)
-				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex));
+				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex).c_str());
 		}
 		if (intensitySFIndex >= 0)
 		{

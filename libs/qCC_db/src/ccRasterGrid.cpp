@@ -1939,7 +1939,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 
 				if (sfIdx < 0)
 				{
-					ccLog::Warning("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName());
+					ccLog::Warning("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName().c_str());
 				}
 				else
 				{

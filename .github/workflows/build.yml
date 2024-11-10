@@ -4,14 +4,13 @@ on: [ push, pull_request ]
 
 jobs:
   build:
-    name: ${{ matrix.config.name }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
       fail-fast: false
       matrix:
-        scalar_double: [ "OFF", "ON" ]
         config:
           - {
             name: "Windows MSVC",
@@ -70,7 +69,6 @@ jobs:
             -G "${{ matrix.config.generator }}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
-            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} \
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
             -DOPTION_SUPPORT_GAMEPADS=ON \
             -DPLUGIN_EXAMPLE_GL=ON \
@@ -117,14 +115,13 @@ jobs:
         run: cmake --install build
 
   ubuntu-build:
-    name: Ubuntu ${{ matrix.compiler }} SCALAR_DOUBLE=${{ matrix.scalar_double }}
+    name: Ubuntu ${{ matrix.compiler }}
     runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
       fail-fast: false
       matrix:
-        scalar_double: [ "OFF", "ON" ]
         compiler: ["GCC", "Clang"]
 
     steps:
@@ -169,7 +166,6 @@ jobs:
           -DEIGEN_ROOT_DIR=/usr/include/eigen3
           -DJSON_ROOT_DIR=/usr/include/jsoncpp
           -DDLIB_ROOT=/usr/include
-          -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }}
           -DCCCORELIB_USE_TBB=ON
           -DPLUGIN_EXAMPLE_GL=ON
           -DPLUGIN_EXAMPLE_IO=ON

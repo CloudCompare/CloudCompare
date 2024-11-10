@@ -339,7 +339,7 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 		}
 		char nameBuffer[256];
 		strncpy(nameBuffer, m_name.c_str(), 256);
-		nameBuffer[std::min(m_name.length(), 255ull)] = 0;
+		nameBuffer[std::min(m_name.length(), static_cast<size_t>(255))] = 0;
 		if (out.write(nameBuffer, 256) < 0)
 		{
 			return WriteError();

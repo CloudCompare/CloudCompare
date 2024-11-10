@@ -342,9 +342,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				scalarFields[i] = static_cast<ccScalarField*>(ccCloud->getScalarField(i));
-				const char* sfName = scalarFields[i]->getName();
+				QString sfName = QString::fromStdString(scalarFields[i]->getName());
 				QString propName;
-				if (!sfName)
+				if (sfName.isEmpty())
 				{
 					if (unnamedSFCount == 0)
 					{
@@ -472,7 +472,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 
 		for (std::vector<ccScalarField*>::const_iterator sf = scalarFields.begin(); sf != scalarFields.end(); ++sf)
 		{
-			ply_write(ply, (*sf)->getGlobalShift() + (*sf)->getValue(i));
+			ply_write(ply, (*sf)->getValue(i));
 		}
 	}
 
@@ -1652,7 +1652,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 					qPropName = qPropName.mid(7).replace('_', ' ');
 				}
 
-				int sfIdx = cloud->addScalarField(qPrintable(qPropName));
+				int sfIdx = cloud->addScalarField(qPropName.toStdString());
 				if (sfIdx >= 0)
 				{
 					CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);

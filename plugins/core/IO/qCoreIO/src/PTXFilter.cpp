@@ -441,13 +441,15 @@ CC_FILE_ERROR PTXFilter::loadFile(	const QString& filename,
 		else
 		{
 			if (result == CC_FERR_NO_LOAD)
+			{
 				result = CC_FERR_NO_ERROR; //to make clear that we have loaded at least something!
+			}
 			
 			cloud->resize(cloud->size());
 			if (intensitySF)
 			{
 				assert(intensitySF->currentSize() == cloud->size());
-				intensitySF->resize(cloud->size());
+				intensitySF->resizeSafe(cloud->size());
 				intensitySF->computeMinAndMax();
 				int intensitySFIndex = cloud->addScalarField(intensitySF);
 

@@ -35,7 +35,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 	for (unsigned i = 0; i < sfCount; ++i)
 	{
 		const CCCoreLib::ScalarField* field = inCloud->getScalarField(i);
-		const char* name = field->getName();
+		const std::string& name = field->getName();
 
 		ccScalarField* newSF = nullptr;
 

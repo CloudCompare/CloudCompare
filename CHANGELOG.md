@@ -54,6 +54,11 @@ New plugin
 
 Improvements:
 
+	- Scalar fields now natively handle large values
+		- for instance: no need to define a GPS time shift anymore when loading LAS files
+
+	- Scalar fields name can now be longer than 256 characters
+		
 	- Global Shift:
 		- CC will now understand that when clicking on 'Apply all' while the shift is not sufficient to make the point coordinates small enough,
 			this means the user really wants to apply the input Global shift to all the entities (instead of showing the dialog again and again)

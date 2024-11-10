@@ -713,7 +713,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 		//above 3, ptnparams contains additional scalars
 		for (int i=3; i<ptnparams; ++i)
 		{
-			int sfIdx = corePoints->addScalarField(qPrintable(QString("scalar #%1").arg(i-2)));
+			int sfIdx = corePoints->addScalarField(QString("scalar #%1").arg(i-2).toStdString());
 			paramsSf.push_back(sfIdx >= 0 ? corePoints->getScalarField(sfIdx) : nullptr);
 
 			if (sfIdx < 0)

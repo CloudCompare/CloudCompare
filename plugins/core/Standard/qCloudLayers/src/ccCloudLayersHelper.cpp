@@ -88,7 +88,7 @@ QStringList ccCloudLayersHelper::getScalarFields()
 	{
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			scalarFields.append(QString(m_cloud->getScalarFieldName(i)));
+			scalarFields.append(QString::fromStdString(m_cloud->getScalarFieldName(i)));
 		}
 	}
 	return scalarFields;
@@ -144,9 +144,9 @@ int ccCloudLayersHelper::apply(ccAsprsModel::AsprsItem& item, bool redrawDisplay
 	ScalarType code = static_cast<ScalarType>(item.code);
 	int affected = 0;
 	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i, ++counter)
 	{
-		if ((*it) == code)
+		if (sf->getValue(i) == code)
 		{
 			m_cloud->setPointColor(counter, ccColor);
 			++affected;
@@ -167,9 +167,9 @@ void ccCloudLayersHelper::changeCode(const ccAsprsModel::AsprsItem& item, Scalar
 
 	ScalarType code = static_cast<ScalarType>(item.code);
 	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i, ++counter)
 	{
-		if ((*it) == oldCode)
+		if (sf->getValue(i) == oldCode)
 		{
 			sf->setValue(counter, code);
 		}
@@ -188,9 +188,9 @@ int ccCloudLayersHelper::moveItem(const ccAsprsModel::AsprsItem& from, const ccA
 
 	int affected = 0;
 	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i, ++counter)
 	{
-		if ((*it) == code)
+		if (sf->getValue(i) == code)
 		{
 			sf->setValue(counter, emptyCode);
 			m_cloud->setPointColor(counter, color);

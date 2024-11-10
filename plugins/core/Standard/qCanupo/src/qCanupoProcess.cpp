@@ -434,7 +434,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					{
 						QString sfName = QString(CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME) + QString(" @ scale %1").arg(scales[s]);
 
-						coreRoughnessSFs[s] = new ccScalarField(qPrintable(sfName));
+						coreRoughnessSFs[s] = new ccScalarField(sfName.toStdString());
 						if (!coreRoughnessSFs[s]->resizeSafe(corePoints->size(), CCCoreLib::NAN_VALUE))
 						{
 							if (app)
@@ -791,7 +791,9 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					if (generateAdditionalSF && corePointsDescriptors.dimPerScale() != 2)
 					{
 						if (app)
+						{
 							app->dispToConsole("[qCanupo] Per-level 'x-y' values can only be extracted from descriptor with 2 dimensions per scale!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+						}
 						generateAdditionalSF = false;
 					}
 
@@ -802,13 +804,17 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							QStringList toDelete;
 							for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 							{
-								QString sfName(cloud->getScalarField(i)->getName());
+								QString sfName = QString::fromStdString(cloud->getScalarField(i)->getName());
 								if (sfName.startsWith(CANUPO_PER_LEVEL_ADDITIONAL_SF_NAME))
+								{
 									toDelete << sfName;
+								}
 							}
 
 							for (int j = 0; j < toDelete.size(); ++j)
-								cloud->deleteScalarField(cloud->getScalarFieldIndexByName(qPrintable(toDelete[j])));
+							{
+								cloud->deleteScalarField(cloud->getScalarFieldIndexByName(toDelete[j].toStdString()));
+							}
 						}
 
 						size_t scaleCount = scales.size();
@@ -819,9 +825,9 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							QString sfName = QString(CANUPO_PER_LEVEL_ADDITIONAL_SF_NAME) + QString(" @ scale %1").arg(scales[s]);
 
 							//SF with same name (if any) should have already been removed!
-							assert(cloud->getScalarFieldIndexByName(qPrintable(sfName)) < 0);
+							assert(cloud->getScalarFieldIndexByName(sfName.toStdString()) < 0);
 
-							scaleSFs[s] = new ccScalarField(qPrintable(sfName));
+							scaleSFs[s] = new ccScalarField(sfName.toStdString());
 							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, CCCoreLib::NAN_VALUE))
 							{
 								if (app)
@@ -847,13 +853,17 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							QStringList toDelete;
 							for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 							{
-								QString sfName(cloud->getScalarField(i)->getName());
+								QString sfName = QString::fromStdString(cloud->getScalarField(i)->getName());
 								if (sfName.startsWith(CANUPO_PER_LEVEL_ROUGHNESS_SF_NAME))
+								{
 									toDelete << sfName;
+								}
 							}
 
 							for (int j = 0; j < toDelete.size(); ++j)
-								cloud->deleteScalarField(cloud->getScalarFieldIndexByName(qPrintable(toDelete[j])));
+							{
+								cloud->deleteScalarField(cloud->getScalarFieldIndexByName(toDelete[j].toStdString()));
+							}
 						}
 
 						//if the output cloud has the same number of points as the core points cloud, no need to duplicate the scalar fields!

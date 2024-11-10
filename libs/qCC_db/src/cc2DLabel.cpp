@@ -188,12 +188,7 @@ QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 		}
 		else
 		{
-			QString sfVal = QString::number(info.sfValue, 'f', precision);
-			if (info.sfValueIsShifted)
-			{
-				sfVal = QString::number(info.sfShiftedValue, 'f', precision) + QString(" (shifted: %1)").arg(sfVal);
-			}
-			return sfVal;
+			return QString::number(info.sfValue, 'f', precision);
 		}
 	}
 	else
@@ -722,12 +717,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				if (sf)
 				{
 					info.sfValue = sf->getValue(pp.index);
-					info.sfName = sf->getName();
-					if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
-					{
-						info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
-						info.sfValueIsShifted = true;
-					}
+					info.sfName = QString::fromStdString(sf->getName());
 				}
 				else
 				{
@@ -795,12 +785,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 
 				if (sf)
 				{
-					info.sfName = sf->getName();
-					if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
-					{
-						info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
-						info.sfValueIsShifted = true;
-					}
+					info.sfName = QString::fromStdString(sf->getName());
 				}
 				else
 				{

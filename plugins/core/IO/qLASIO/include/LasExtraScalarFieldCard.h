@@ -33,7 +33,7 @@ class LasExtraScalarFieldCard : public QWidget
 	/// A card filled using this method is considered as being non-default
 	void fillFrom(const LasExtraScalarField& field);
 
-	void fillAsDefault(const char* sfName);
+	void fillAsDefault(const std::string& sfName);
 
 	void reset();
 
@@ -51,7 +51,7 @@ class LasExtraScalarFieldCard : public QWidget
 	};
 
 	/// Returns true if this card maps the field with the name
-	bool mapsFieldWithName(const char* sfName) const;
+	bool mapsFieldWithName(const std::string& sfName) const;
 
   private:
 	/// Struct to aggregate together the user input related

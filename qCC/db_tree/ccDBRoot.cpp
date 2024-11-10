@@ -2150,7 +2150,7 @@ void ccDBRoot::editLabelScalarValue()
 	ScalarType s = sf->getValue(P.index);
 
 	bool ok = false;
-	double newValue = QInputDialog::getDouble(MainWindow::TheInstance(), "Edit scalar value", QString("%1 (%2) =").arg(sf->getName()).arg(P.index), s, -2147483647, 2147483647, 6, &ok);
+	double newValue = QInputDialog::getDouble(MainWindow::TheInstance(), "Edit scalar value", QString("%1 (%2) =").arg(QString::fromStdString(sf->getName())).arg(P.index), s, -2147483647, 2147483647, 6, &ok);
 	if (!ok)
 	{
 		//process cancelled by the user

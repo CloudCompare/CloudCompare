@@ -61,7 +61,7 @@ ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
 			CCCoreLib::ScalarField* sf = cloud->getScalarField(i);
 			if (sf)
 			{
-				QString sfName = sf->getName();
+				QString sfName = QString::fromStdString(sf->getName());
 				fields << sfName;
 
 				sfName = sfName.toUpper();

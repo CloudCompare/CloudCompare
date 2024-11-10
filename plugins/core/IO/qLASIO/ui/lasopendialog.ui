@@ -276,30 +276,6 @@
                    </property>
                   </widget>
                  </item>
-                 <item>
-                  <layout class="QHBoxLayout" name="timeShiftLayout">
-                   <item>
-                    <widget class="QCheckBox" name="automaticTimeShiftCheckBox">
-                     <property name="text">
-                      <string>Automatic GPS Time shift</string>
-                     </property>
-                     <property name="checked">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QDoubleSpinBox" name="manualTimeShiftSpinBox">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="maximum">
-                      <double>10000000000.000000000000000</double>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
                 </layout>
                </widget>
                <widget class="QGroupBox" name="extraScalarFieldsFrame">

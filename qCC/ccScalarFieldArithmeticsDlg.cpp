@@ -64,7 +64,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 	{
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			sfLabels << QString(cloud->getScalarFieldName(i));
+			sfLabels << QString::fromStdString(cloud->getScalarFieldName(i));
 		}
 
 		m_ui->sf1ComboBox->addItems(sfLabels);
@@ -263,11 +263,11 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	if (!inplace)
 	{
 		//generate new sf name based on the operation
-		QString sf1Name(sf1->getName());
+		QString sf1Name = QString::fromStdString(sf1->getName());
 		QString sf2Name;
 		if (sf2)
 		{
-			sf2Name = sf2->getName();
+			sf2Name = QString::fromStdString(sf2->getName());
 			QString sfName = GetOperationName(op,sf1Name,sf2Name);
 			if (sfName.length() > 24)
 			{
@@ -284,7 +284,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 		QString sfName = GetOperationName(op, sf1Name, sf2Name);
 
-		sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx >= 0)
 		{
 			if (sfIdx == sf1Idx || (sf2Desc && sfIdx == sf2Desc->sfIndex))
@@ -304,7 +304,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			cloud->deleteScalarField(sfIdx);
 		}
 
-		sfIdx = cloud->addScalarField(qPrintable(sfName));
+		sfIdx = cloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Warning("[ccScalarFieldArithmeticsDlg::apply] Failed to create destination SF! (not enough memory?)");

@@ -451,7 +451,10 @@ void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 	m_label->setDisplayedIn2D(true);
 	m_label->displayPointLegend(false);
 	m_label->setDisplay(m_display);
-	cloud->addChild(m_label.get());
+	if (!cloud->find(m_label->getUniqueID()))
+	{
+		cloud->addChild(m_label.get());
+	}
 
 	m_display->redraw();
 

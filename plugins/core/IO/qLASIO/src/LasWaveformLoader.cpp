@@ -208,7 +208,10 @@ void LasWaveformLoader::loadWaveform(ccPointCloud& pointCloud, const laszip_poin
 	}
 	else if (!descriptors.contains(descriptorIndex))
 	{
-		ccLog::Warning("[LAS] No valid descriptor vlr for index %d", descriptorIndex);
+		if (byteCount != 0) // otherwise it's just a blank/missing waveform
+		{
+			ccLog::Warning("[LAS] No valid descriptor vlr for index %d", descriptorIndex);
+		}
 		return;
 	}
 

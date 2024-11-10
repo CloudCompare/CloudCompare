@@ -129,6 +129,9 @@ Bug fixes:
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
 	- M3C2: 
 		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
+	- Waveform
+		- each LAS point with missing waveform data was triggering a warning message
+		- the Waveform picking dialog could display an annoying error message each time a new point was picked
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

@@ -121,6 +121,9 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			case ASCII:
 				dialog.asciiRadioButton->setChecked(true);
 				break;
+			default:
+				assert(false);
+				break;
 			}
 
 			QAbstractButton* clickedButton = nullptr;
@@ -335,6 +338,10 @@ CC_FILE_ERROR PcdFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 		}
 		break;
+
+		default:
+			assert(false);
+			break;
 		}
 	}
 	catch (...)

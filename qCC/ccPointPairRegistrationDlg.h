@@ -110,11 +110,12 @@ protected:
 	//! Enables (or not) buttons depending on the number of points in both lists
 	void onPointCountChanged();
 
-	//! Calls Horn registration (CCCoreLib::HornRegistrationTools)
-	bool callHornRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
-								double& rms,
-								bool autoUpdateTab,
-								QStringList* report = nullptr);
+	//! Calls the registration routine
+	bool callRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
+							double& rms,
+							bool autoUpdateTab,
+							bool& withUmeyama,
+							QStringList* report = nullptr );
 
 	//! Clears the RMS rows
 	void clearRMSColumns();

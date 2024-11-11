@@ -58,6 +58,10 @@ Improvements:
 		- for instance: no need to define a GPS time shift anymore when loading LAS files
 
 	- Scalar fields name can now be longer than 256 characters
+
+	- Point pair-based alignment tool:
+		- CC will now use the Umeyama algorithm instead of Horn's method (supposed to be more robust to mirroring)
+		- required CC to be compiled with the CC_USE_EIGEN CMake option on
 		
 	- Global Shift:
 		- CC will now understand that when clicking on 'Apply all' while the shift is not sufficient to make the point coordinates small enough,

@@ -133,7 +133,7 @@ template <typename Tin, typename Tout> ccGLMatrixTpl<Tout> FromCCLibMatrix(const
 	{
 		//we copy each column
 		Tout* mat = outputMat.data();
-		for (unsigned j=0; j<3; ++j)
+		for (unsigned j = 0; j < 3; ++j)
 		{
 			*mat++ = static_cast<Tout>(R.m_values[0][j] * S);
 			*mat++ = static_cast<Tout>(R.m_values[1][j] * S);

@@ -50,6 +50,12 @@
 #include <QToolButton>
 #include <QSettings>
 
+#ifdef CC_USES_EIGEN
+//Eigen
+#include <Eigen/Core>
+#include <Eigen/Geometry> //Umeyama
+#endif
+
 //default position of each columns in the to-be-aligned and ref. table widgets
 static const int XYZ_COL_INDEX			= 0;
 static const int RMS_COL_INDEX			= 6;
@@ -1224,11 +1230,98 @@ void ccPointPairRegistrationDlg::showReferenceEntities(bool state)
 	}
 }
 
-bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
-														double& rms,
-														bool autoUpdateTab,
-														QStringList* report/*=nullptr*/ )
+static bool UmeyamaRegistration(CCCoreLib::GenericCloud* toBeAlignedPoints,
+								CCCoreLib::GenericCloud* referencePoints,
+								CCCoreLib::PointProjectionTools::Transformation& trans,
+								bool fixedScale)
 {
+#ifdef CC_USES_EIGEN
+	//output transformation (R is invalid on initialization, T is (0,0,0) and s==1)
+	trans.R.invalidate();
+	trans.T = CCVector3d(0, 0, 0);
+	trans.s = 1.0;
+
+	if (toBeAlignedPoints == nullptr
+		|| referencePoints == nullptr
+		|| toBeAlignedPoints->size() != referencePoints->size()
+		|| toBeAlignedPoints->size() < 3)
+	{
+		return false;
+	}
+
+	unsigned pointCount = toBeAlignedPoints->size();
+
+	// Use Eigen Umeyama with 3D vectors
+	Eigen::MatrixXd srcMatrix(3, pointCount), destMatrix(3, pointCount);
+
+	toBeAlignedPoints->placeIteratorAtBeginning();
+	referencePoints->placeIteratorAtBeginning();
+	for (size_t i = 0; i < pointCount; ++i)
+	{
+		const CCVector3* P = toBeAlignedPoints->getNextPoint();
+		srcMatrix(0, i) = P->x;
+		srcMatrix(1, i) = P->y;
+		srcMatrix(2, i) = P->z;
+
+		const CCVector3* Q = referencePoints->getNextPoint();
+		destMatrix(0, i) = Q->x;
+		destMatrix(1, i) = Q->y;
+		destMatrix(2, i) = Q->z;
+	}
+
+	Eigen::MatrixXd resultUmeyama = Eigen::umeyama(srcMatrix, destMatrix, !fixedScale);
+
+	//scale
+	if (!fixedScale)
+	{
+		//calculate the scale
+		trans.s = CCVector3d(resultUmeyama(0, 0), resultUmeyama(1, 0), resultUmeyama(2, 0)).normd();
+		if (trans.s == 0)
+		{
+			assert(false);
+			return false;
+		}
+	}
+
+	//rotation
+	{
+		trans.R = CCCoreLib::SquareMatrixd(3);
+		//1st column
+		trans.R.m_values[0][0] = resultUmeyama(0, 0) / trans.s;
+		trans.R.m_values[0][1] = resultUmeyama(0, 1) / trans.s;
+		trans.R.m_values[0][2] = resultUmeyama(0, 2) / trans.s;
+		//2nd column
+		trans.R.m_values[1][0] = resultUmeyama(1, 0) / trans.s;
+		trans.R.m_values[1][1] = resultUmeyama(1, 1) / trans.s;
+		trans.R.m_values[1][2] = resultUmeyama(1, 2) / trans.s;
+		//3rd column
+		trans.R.m_values[2][0] = resultUmeyama(2, 0) / trans.s;
+		trans.R.m_values[2][1] = resultUmeyama(2, 1) / trans.s;
+		trans.R.m_values[2][2] = resultUmeyama(2, 2) / trans.s;
+	}
+
+	//translation
+	{
+		trans.T.x = resultUmeyama(0, 3);
+		trans.T.y = resultUmeyama(1, 3);
+		trans.T.z = resultUmeyama(2, 3);
+	}
+
+	return true;
+#else
+	// Eigen is not supported
+	return false;
+#endif
+}
+
+bool ccPointPairRegistrationDlg::callRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
+													double& rms,
+													bool autoUpdateTab,
+													bool& withUmeyama,
+													QStringList* report/*=nullptr*/ )
+{
+	withUmeyama = false;
+
 	if (report)
 	{
 		report->clear();
@@ -1250,8 +1343,18 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 	//fixed scale?
 	bool adjustScale = adjustScaleCheckBox->isChecked();
 
-	//call Horn registration method
-	if (!CCCoreLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale))
+	//! Calls Horn or Umeyama registration procedure (depending on which one is available)
+	bool success = false;
+#ifdef CC_USES_EIGEN
+	// we prefer using Umeyama's method if available
+	withUmeyama = true;
+
+	success = UmeyamaRegistration(&m_alignedPoints, &m_refPoints, trans, !adjustScale);
+#else
+	success = CCCoreLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale);
+#endif
+
+	if (!success)
 	{
 		ccLog::Error("Registration failed! (points are all aligned?)");
 		return false;
@@ -1369,6 +1472,12 @@ bool ccPointPairRegistrationDlg::callHornRegistration(	CCCoreLib::PointProjectio
 					report->append(reportLine);
 				}
 
+				if (report)
+				{
+					QString registrationMethod = tr("Registration method: ") + (withUmeyama ? "Umeyama" : "Horn");
+					report->append(registrationMethod);
+				}
+
 				if (autoUpdateTab)
 				{
 					QTableWidgetItem* itemA = new QTableWidgetItem();
@@ -1426,17 +1535,20 @@ void ccPointPairRegistrationDlg::updateAlignInfo()
 	resetTitle();
 
 	CCCoreLib::PointProjectionTools::Transformation trans;
-	double rms;
+	double rms = 0.0;
+	bool withUmeyama = false;
 
 	if (	m_alignedPoints.size() == m_refPoints.size()
 		&&	m_refPoints.size() >= MIN_PAIRS_COUNT
-		&&	callHornRegistration(trans, rms, true))
+		&&	callRegistration(trans, rms, true, withUmeyama))
 	{
-		QString rmsString = QString("Achievable RMS: %1").arg(rms);
+		QString rmsString = tr("Achievable RMS: %1").arg(rms);
 		if (m_associatedWin)
 		{
 			m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		}
+		rmsString.prepend(withUmeyama ? "[Umeyama] " : "[Horn] ");
+		ccLog::Print(rmsString);
 		resetToolButton->setEnabled(true);
 		validToolButton->setEnabled(true);
 	}
@@ -1467,12 +1579,13 @@ void ccPointPairRegistrationDlg::align()
 	resetTitle();
 	m_associatedWin->refresh(true);
 
-	if (callHornRegistration(trans, rms, true))
+	bool withUmeyama = false;
+	if (callRegistration(trans, rms, true, withUmeyama))
 	{
 		if (rms >= 0)
 		{
-			QString rmsString = QString("Current RMS: %1").arg(rms);
-			ccLog::Print(QString("[PointPairRegistration] ") + rmsString);
+			QString rmsString = tr("Current RMS: %1").arg(rms);
+			ccLog::Print(QString("[PointPairRegistration][%1] ").arg(withUmeyama ? "Umeyama" : "Horn") + rmsString);
 			m_associatedWin->displayNewMessage(rmsString, ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 60 * 60);
 		}
 		else
@@ -1529,7 +1642,9 @@ void ccPointPairRegistrationDlg::align()
 		if (m_associatedWin)
 		{
 			if (autoZoomCheckBox->isChecked())
+			{
 				m_associatedWin->zoomGlobal();
+			}
 			m_associatedWin->redraw();
 		}
 
@@ -1541,11 +1656,16 @@ void ccPointPairRegistrationDlg::align()
 void ccPointPairRegistrationDlg::reset()
 {
 	if (m_alignedEntities.empty())
+	{
 		return;
+	}
 
 	for (auto it = m_alignedEntities.begin(); it != m_alignedEntities.end(); ++it)
+	{
 		it.key()->enableGLTransformation(false);
+	}
 	m_alignedPoints.enableGLTransformation(false);
+
 	//DGM: we have to reset the markers scale
 	for (unsigned i = 0; i < m_alignedPoints.getChildrenNumber(); ++i)
 	{
@@ -1569,8 +1689,9 @@ void ccPointPairRegistrationDlg::apply()
 	CCCoreLib::PointProjectionTools::Transformation trans;
 	double rms = -1.0;
 	QStringList report;
+	bool withUmeyama = false;
 
-	if (callHornRegistration(trans, rms, false, &report))
+	if (callRegistration(trans, rms, false, withUmeyama, &report))
 	{
 		QStringList summary;
 		if (rms >= 0)

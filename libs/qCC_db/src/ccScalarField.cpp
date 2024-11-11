@@ -352,7 +352,7 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 		{
 			ccLog::Warning(QString("Scalar field '%1...' name is too long, it will be truncated to the first %2 characters").arg(QString::fromStdString(m_name).left(128)).arg(MaxSFNameLength));
 		}
-		uint16_t nameLength = static_cast<uint16_t>(std::max(m_name.length(), MaxSFNameLength));
+		uint16_t nameLength = static_cast<uint16_t>(std::min(m_name.length(), MaxSFNameLength));
 		if (out.write((const char*)&nameLength, sizeof(uint16_t)) < 0)
 		{
 			return WriteError();
@@ -364,7 +364,7 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 	}
 
 	//data (dataVersion>=20)
-	if (!ccSerializationHelper::GenericArrayToFile<float, 1, ScalarType>(*this, out))
+	if (!ccSerializationHelper::GenericArrayToFile<float, 1, float>(*this, out))
 	{
 		return WriteError();
 	}
@@ -465,7 +465,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			//read the name the new way, with a dynamic size
 			uint16_t nameLength = 0;
-			if ((char*)&nameLength, sizeof(uint16_t))
+			if (in.read((char*)&nameLength, sizeof(uint16_t)) < 0)
 			{
 				return ReadError();
 			}
@@ -668,7 +668,9 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 		//A scalar field must have a color scale!
 		if (!m_colorScale)
+		{
 			m_colorScale = ccColorScalesManager::GetDefaultScale();
+		}
 
 		//color ramp steps (dataVersion>=20)
 		uint32_t colorRampSteps = 0;

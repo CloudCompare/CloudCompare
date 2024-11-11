@@ -328,9 +328,10 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	{
 		char flags = 0;
 		if (sizeof(PointCoordinateType) == 8)
+		{
 			flags |= static_cast<char>(ccSerializableObject::DF_POINT_COORDS_64_BITS);
-		if (sizeof(ScalarType) == 4)
-			flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		}
+		flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS); // internal representation of scalar fields is now always floats
 		assert(flags <= 8);
 		firstBytes[3] = 48 + flags; //48 = ASCII("0")
 	}

@@ -4758,8 +4758,15 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 	
 	//orthogonal dimension
 	unsigned char orthoDim = 2;
+	bool orderFlipped = false;
 	{
 		QString orthoDimStr = cmd.arguments().takeFirst().toUpper();
+		if (orthoDimStr.endsWith("FLIP"))
+		{
+			orderFlipped = true;
+			orthoDimStr = orthoDimStr.left(orthoDimStr.size() - 4);
+		}
+
 		if (orthoDimStr == "X")
 		{
 			orthoDim = 0;
@@ -4775,6 +4782,26 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 		else
 		{
 			return cmd.error(QObject::tr("Invalid parameter: orthogonal dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_CROP_2D));
+		}
+	}
+
+	ccCommandLineInterface::GlobalShiftOptions globalShiftOptions;
+	globalShiftOptions.mode = ccCommandLineInterface::GlobalShiftOptions::NO_GLOBAL_SHIFT;
+
+	if (cmd.arguments().size() >= 4)
+	{
+		if (cmd.nextCommandIsGlobalShift())
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (!cmd.processGlobalShiftCommand(globalShiftOptions))
+			{
+				//error message already issued
+				return false;
+			}
+
+			cmd.setGlobalShiftOptions(globalShiftOptions);
 		}
 	}
 	
@@ -4796,7 +4823,19 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Not enough memory!"));
 		}
-		
+
+		assert(orthoDim < 3);
+		unsigned char X = ((orthoDim + 1) % 3);
+		unsigned char Y = ((X + 1) % 3);
+
+		unsigned char Xread = X;
+		unsigned char Yread = Y;
+		if (orderFlipped)
+		{
+			std::swap(Xread, Yread);
+		}
+
+		CCVector3d PShift(0, 0, 0);
 		for (unsigned i = 0; i < N; ++i)
 		{
 			if (cmd.arguments().size() < 2)
@@ -4804,26 +4843,46 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
 			}
 			
-			CCVector3 P(0, 0, 0);
+			CCVector3d Pd(0, 0, 0);
 			
 			QString coordStr = cmd.arguments().takeFirst();
-			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			Pd.u[Xread] = coordStr.toDouble(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			}
 			/*QString */coordStr = cmd.arguments().takeFirst();
-			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			Pd.u[Yread] = coordStr.toDouble(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 			}
-			
-			vertices.addPoint(P); //the polyline must be defined in the XY plane!
+
+			if (i == 0)
+			{
+				bool preserveCoordinateShift = false; //ignored
+				if (FileIOFilter::HandleGlobalShift(Pd, PShift, preserveCoordinateShift, cmd.fileLoadingParams()))
+				{
+					ccLog::Warning(QString("[%1] 2D polyline has been recentered! Translation: (%2 ; %3 ; %4)").arg(COMMAND_CROP_2D).arg(PShift.x, 0, 'f', 2).arg(PShift.y, 0, 'f', 2).arg(PShift.z, 0, 'f', 2));
+				}
+			}
+
+			CCVector3 P3D = (Pd + PShift).toPC();
+
+			// warning: the polyline must be defined in the XY plane!
+			CCVector3 P2D;
+			{
+				P2D.x = P3D.u[X];
+				P2D.y = P3D.u[Y];
+				P2D.z = 0;
+			}
+			vertices.addPoint(P2D);
 		}
 		
 		poly.setClosed(true);
 	}
+
+	cmd.updateInteralGlobalShift(globalShiftOptions);
 	
 	//optional parameters
 	bool inside = true;

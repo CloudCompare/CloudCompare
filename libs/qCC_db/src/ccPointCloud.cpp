@@ -5377,14 +5377,14 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 		return nullptr;
 	}
 
-	unsigned char X = ((orthoDim+1) % 3);
-	unsigned char Y = ((X+1) % 3);
+	unsigned char X = ((orthoDim + 1) % 3);
+	unsigned char Y = ((X + 1) % 3);
 
-	for (unsigned i=0; i<count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = point(i);
 
-		CCVector2 P2D( P->u[X], P->u[Y] );
+		CCVector2 P2D(P->u[X], P->u[Y]);
 		bool pointIsInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, poly);
 		if (inside == pointIsInside)
 		{

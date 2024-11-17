@@ -265,10 +265,18 @@ public: //file I/O
 		CCVector3d customGlobalShift;
 	};
 
+	//! Sets the global shift options
+	/** \warning Should be called before calling fileLoadingParams() if importFile has not been called already.
+	**/
+	virtual void setGlobalShiftOptions(const GlobalShiftOptions& globalShiftOptions) = 0;
+
 	//! Loads a file with a specific filter
 	/** Automatically dispatches the entities between the clouds and meshes sets.
 	**/
 	virtual bool importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter = FileIOFilter::Shared(nullptr)) = 0;
+
+	//! Updates the internal state of the stored global shift information
+	virtual void updateInteralGlobalShift(const GlobalShiftOptions& globalShiftOptions) = 0;
 
 	//! Returns the current cloud(s) export format
 	virtual QString cloudExportFormat() const = 0;

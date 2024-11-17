@@ -564,15 +564,15 @@ void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
 	}
 }
 
-bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter)
+//! Whether Global (coordinate) shift has already been defined
+static bool s_firstCoordinatesShiftEnabled = false;
+//! Global shift (if defined)
+static CCVector3d s_firstGlobalShift;
+//! First time the global shift is set/defined
+static bool s_globalShiftFirstTime = true;
+
+void ccCommandLineParser::setGlobalShiftOptions(const GlobalShiftOptions& globalShiftOptions)
 {
-	printHigh(QString("Opening file: '%1'").arg(filename));
-
-	//whether Global (coordinate) shift has already been defined
-	static bool s_firstCoordinatesShiftEnabled = false;
-	//global shift (if defined)
-	static CCVector3d s_firstGlobalShift;
-
 	//default Global Shift handling parameters
 	m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
 	m_loadingParameters.coordinatesShiftEnabled = false;
@@ -587,9 +587,16 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 
 	case GlobalShiftOptions::FIRST_GLOBAL_SHIFT:
 		//use the first encountered global shift value (if any)
-		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-		m_loadingParameters.coordinatesShiftEnabled = s_firstCoordinatesShiftEnabled;
-		m_loadingParameters.coordinatesShift = s_firstGlobalShift;
+		if (s_globalShiftFirstTime)
+		{
+			ccLog::Warning("Can't reuse the first Global Shift (no global shift set yet)");
+			m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+		}
+		else
+		{
+			m_loadingParameters.coordinatesShiftEnabled = s_firstCoordinatesShiftEnabled;
+			m_loadingParameters.coordinatesShift = s_firstGlobalShift;
+		}
 		break;
 
 	case GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT:
@@ -602,6 +609,27 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 		//nothing to do
 		break;
 	}
+}
+
+void ccCommandLineParser::updateInteralGlobalShift(const GlobalShiftOptions& globalShiftOptions)
+{
+	if (globalShiftOptions.mode != GlobalShiftOptions::NO_GLOBAL_SHIFT)
+	{
+		if (s_globalShiftFirstTime)
+		{
+			// remember the first Global Shift parameters used
+			s_firstCoordinatesShiftEnabled = m_loadingParameters.coordinatesShiftEnabled;
+			s_firstGlobalShift = m_loadingParameters.coordinatesShift;
+			s_globalShiftFirstTime = false;
+		}
+	}
+}
+
+bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions& globalShiftOptions, FileIOFilter::Shared filter)
+{
+	printHigh(QString("Opening file: '%1'").arg(filename));
+
+	setGlobalShiftOptions(globalShiftOptions);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	ccHObject* db = nullptr;
@@ -619,17 +647,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 		return false/*cmd.error(QString("Failed to open file '%1'").arg(filename))*/; //Error message already issued
 	}
 
-	if (globalShiftOptions.mode != GlobalShiftOptions::NO_GLOBAL_SHIFT)
-	{
-		static bool s_firstTime = true;
-		if (s_firstTime)
-		{
-			// remember the first Global Shift parameters used
-			s_firstCoordinatesShiftEnabled = m_loadingParameters.coordinatesShiftEnabled;
-			s_firstGlobalShift = m_loadingParameters.coordinatesShift;
-			s_firstTime = false;
-		}
-	}
+	updateInteralGlobalShift(globalShiftOptions);
 
 	std::unordered_set<unsigned> verticesIDs;
 	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)

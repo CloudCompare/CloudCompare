@@ -77,6 +77,10 @@ Improvements:
 			- default format is 'COMPRESSED_BINARY'
 		- the C_EXPORT_FMT or M_EXPORT_FMT can now be used with secondary extensions (e.g. LAZ instead of LAS)
 			- The secondary extension will also be used when automatically generating output filenames (i.e. when the 'FILE' sub-option is not used)
+		- the CROP2D command has new options
+			- Option -GLOBAL_SHIFT (must be placed just after the orthogonal dimension setting)
+				- this allows to apply a Global Shift to the polyline vertices. Similar syntax to the -GLOBAL_SHIFT option of the -O command.
+			- The orthogonal dimension can now be Xflip, Yflip or Zflip to reverse the order in whcih CC expects the coordinates
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields

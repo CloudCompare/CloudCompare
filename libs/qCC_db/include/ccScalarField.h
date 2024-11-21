@@ -62,7 +62,7 @@ public:
 		//setters
 		void setBounds(ScalarType minVal, ScalarType maxVal, bool resetStartStop = true)
 		{
-			assert(minVal <=maxVal);
+			assert(std::isnan(minVal) || std::isnan(maxVal) || minVal <= maxVal);
 			m_min = minVal; m_max = maxVal;
 			if (resetStartStop)
 			{

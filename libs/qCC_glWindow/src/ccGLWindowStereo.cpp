@@ -40,7 +40,6 @@ ccGLWindowStereo::ccGLWindowStereo(	QSurfaceFormat* format/*=nullptr*/,
 	: QWindow(parent)
 	, ccGLWindowInterface(this, silentInitialization)
 	, m_context(nullptr)
-	, m_device(new QOpenGLPaintDevice)
 	, m_parentWidget(nullptr)
 {
 	setSurfaceType(QWindow::OpenGLSurface);
@@ -75,9 +74,6 @@ ccGLWindowStereo::~ccGLWindowStereo()
 	{
 		m_context->doneCurrent();
 	}
-
-	delete m_device;
-	m_device = nullptr;
 }
 
 void ccGLWindowStereo::grabMouse()

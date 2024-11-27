@@ -354,6 +354,8 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent/*=nullptr*/, bool silen
 
 ccGLWindowInterface::~ccGLWindowInterface()
 {
+	doMakeCurrent();
+
 	//we must unlink entities currently linked to this window
 	if (m_globalDBRoot)
 	{
@@ -4052,7 +4054,10 @@ GLfloat ccGLWindowInterface::getGLDepth(int x, int y, bool extendToNeighbors/*=f
 				extendToNeighbors = false;
 			}
 		}
-		m_pickingPBO.glBuffer->release();
+		if (m_pickingPBO.glBuffer) // may be null if an error occurred when calling glBuffer->map
+		{
+			m_pickingPBO.glBuffer->release();
+		}
 	}
 	if (m_activeFbo != formerFBO)
 	{

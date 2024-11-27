@@ -149,9 +149,6 @@ protected: //members
 	//! Associated OpenGL context
 	QOpenGLContext* m_context;
 
-	//! OpenGL device
-	QOpenGLPaintDevice* m_device;
-
 	//! Format
 	QSurfaceFormat m_format;
 

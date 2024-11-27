@@ -145,7 +145,7 @@ public:
 	virtual QFont getFont() const = 0;
 	virtual QOpenGLContext* getOpenGLContext() const = 0;
 	virtual void setWindowCursor(const QCursor&) = 0;
-	virtual void doMakeCurrent() = 0;
+	virtual void doMakeCurrent() {};
 	virtual QObject* asQObject() = 0;
 	virtual const QObject* asQObject() const = 0;
 	virtual QString getWindowTitle() const = 0;

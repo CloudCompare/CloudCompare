@@ -71,7 +71,7 @@
 #include <ccPickingHub.h>
 //common dialogs
 #include <ccCameraParamEditDlg.h>
-#include <ccDisplayOptionsDlg.h>
+#include <ccDisplaySettingsDlg.h>
 #include <ccPickOneElementDlg.h>
 #include <ccStereoModeDlg.h>
 
@@ -723,7 +723,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
-	connect(m_UI->actionDisplayOptions,				&QAction::triggered, this, &MainWindow::showDisplayOptions);
+	connect(m_UI->actionDisplaySettings,			&QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
 	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
@@ -7187,10 +7187,10 @@ void MainWindow::testFrameRate()
 		win->startFrameRateTest();
 }
 
-void MainWindow::showDisplayOptions()
+void MainWindow::showDisplaySettings()
 {
-	ccDisplayOptionsDlg displayOptionsDlg(this);
-	connect(&displayOptionsDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, [=] () { redrawAll();	});
+	ccDisplaySettingsDlg displayOptionsDlg(this);
+	connect(&displayOptionsDlg, &ccDisplaySettingsDlg::aspectHasChanged, this, [=] () { redrawAll(); });
 			
 	displayOptionsDlg.exec();
 

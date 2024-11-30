@@ -28,7 +28,7 @@
 
 //common dialogs
 #include <ccCameraParamEditDlg.h>
-#include <ccDisplayOptionsDlg.h>
+#include <ccDisplaySettingsDlg.h>
 #include <ccStereoModeDlg.h>
 
 //qCC_db
@@ -606,9 +606,9 @@ void ccViewer::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 
 void ccViewer::showDisplayParameters()
 {
-	ccDisplayOptionsDlg clmDlg(this);
+	ccDisplaySettingsDlg clmDlg(this);
 
-	connect(&clmDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, &ccViewer::updateDisplay);
+	connect(&clmDlg, &ccDisplaySettingsDlg::aspectHasChanged, this, &ccViewer::updateDisplay);
 
 	clmDlg.exec();
 

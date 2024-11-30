@@ -15,10 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccDisplayOptionsDlg.h"
+#include "ccDisplaySettingsDlg.h"
 #include "ccApplicationBase.h"
 
-#include "ui_displayOptionsDlg.h"
+#include "ui_displaySettingsDlg.h"
 
 //local
 #include "ccQtHelpers.h"
@@ -36,25 +36,25 @@
 //Default 'min cloud size' for LoD  when VBOs are activated
 constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
 
-ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
+ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	: QDialog(parent, Qt::Tool)
-	, m_ui( new Ui::DisplayOptionsDlg )
+	, m_ui( new Ui::DisplaySettingsDlg )
 	, m_defaultAppStyleIndex(-1)
 {
 	m_ui->setupUi(this);
 
-	connect(m_ui->ambientColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightAmbientColor);
-	connect(m_ui->diffuseColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightDiffuseColor);
-	connect(m_ui->specularColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLightSpecularColor);
-	connect(m_ui->meshBackColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshBackDiffuseColor);
-	connect(m_ui->meshSpecularColorButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshSpecularColor);
-	connect(m_ui->meshFrontColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeMeshFrontDiffuseColor);
-	connect(m_ui->bbColorButton,			&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeBBColor);
-	connect(m_ui->bkgColorButton,			&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeBackgroundColor);
-	connect(m_ui->labelBkgColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLabelBackgroundColor);
-	connect(m_ui->labelMarkerColorButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeLabelMarkerColor);
-	connect(m_ui->pointsColorButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changePointsColor);
-	connect(m_ui->textColorButton,			&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeTextColor);
+	connect(m_ui->ambientColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightAmbientColor);
+	connect(m_ui->diffuseColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightDiffuseColor);
+	connect(m_ui->specularColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightSpecularColor);
+	connect(m_ui->meshBackColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshBackDiffuseColor);
+	connect(m_ui->meshSpecularColorButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshSpecularColor);
+	connect(m_ui->meshFrontColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshFrontDiffuseColor);
+	connect(m_ui->bbColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeBBColor);
+	connect(m_ui->bkgColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeBackgroundColor);
+	connect(m_ui->labelBkgColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLabelBackgroundColor);
+	connect(m_ui->labelMarkerColorButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLabelMarkerColor);
+	connect(m_ui->pointsColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changePointsColor);
+	connect(m_ui->textColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeTextColor);
 
 	connect(m_ui->doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_parameters.lightDoubleSided = state; });
 	connect(m_ui->enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { m_parameters.drawBackgroundGradient = state; });
@@ -69,27 +69,27 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { m_options.useNativeDialogs = state; });
 	connect(m_ui->confirmQuitCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_options.confirmQuit = state; });
 
-	connect(m_ui->useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::changeVBOUsage);
+	connect(m_ui->useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeVBOUsage);
 
-	connect(m_ui->colorRampWidthSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeColorScaleRampWidth);
+	connect(m_ui->colorRampWidthSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeColorScaleRampWidth);
 
-	connect(m_ui->defaultFontSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeDefaultFontSize);
-	connect(m_ui->labelFontSizeSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelFontSize);
-	connect(m_ui->numberPrecisionSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeNumberPrecision);
-	connect(m_ui->labelOpacitySpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelOpacity);
-	connect(m_ui->labelMarkerSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeLabelMarkerSize);
+	connect(m_ui->defaultFontSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeDefaultFontSize);
+	connect(m_ui->labelFontSizeSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelFontSize);
+	connect(m_ui->numberPrecisionSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeNumberPrecision);
+	connect(m_ui->labelOpacitySpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelOpacity);
+	connect(m_ui->labelMarkerSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelMarkerSize);
 
-	connect(m_ui->zoomSpeedDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeZoomSpeed);
-	connect(m_ui->maxCloudSizeDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxCloudSize);
-	connect(m_ui->maxMeshSizeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplayOptionsDlg::changeMaxMeshSize);
+	connect(m_ui->zoomSpeedDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeZoomSpeed);
+	connect(m_ui->maxCloudSizeDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxCloudSize);
+	connect(m_ui->maxMeshSizeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxMeshSize);
 
-	connect(m_ui->autoComputeOctreeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changeAutoComputeOctreeOption);
-	connect(m_ui->pickingCursorComboBox,        qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplayOptionsDlg::changePickingCursor);
+	connect(m_ui->autoComputeOctreeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeAutoComputeOctreeOption);
+	connect(m_ui->pickingCursorComboBox,        qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changePickingCursor);
 
-	connect(m_ui->okButton,		&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doAccept);
-	connect(m_ui->applyButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::apply);
-	connect(m_ui->resetButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::reset);
-	connect(m_ui->cancelButton,	&QAbstractButton::clicked,	this, &ccDisplayOptionsDlg::doReject);
+	connect(m_ui->okButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::doAccept);
+	connect(m_ui->applyButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::apply);
+	connect(m_ui->resetButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::reset);
+	connect(m_ui->cancelButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::doReject);
 
 	// fill the application style combo-box
 	{
@@ -132,13 +132,13 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent)
 	setUpdatesEnabled(true);
 }
 
-ccDisplayOptionsDlg::~ccDisplayOptionsDlg()
+ccDisplaySettingsDlg::~ccDisplaySettingsDlg()
 {
 	delete m_ui;
 	m_ui = nullptr;
 }
 
-void ccDisplayOptionsDlg::refresh()
+void ccDisplaySettingsDlg::refresh()
 {
 	const ccColor::Rgbaf& ac = m_parameters.lightAmbientColor;
 	m_lightAmbientColor.setRgbF(ac.r, ac.g, ac.b, ac.a);
@@ -233,7 +233,7 @@ void ccDisplayOptionsDlg::refresh()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeLightDiffuseColor()
+void ccDisplaySettingsDlg::changeLightDiffuseColor()
 {
 	QColor newCol = QColorDialog::getColor(m_lightDiffuseColor, this);
 	if (!newCol.isValid())
@@ -244,7 +244,7 @@ void ccDisplayOptionsDlg::changeLightDiffuseColor()
 	m_parameters.lightDiffuseColor = ccColor::FromQColoraf(m_lightDiffuseColor);
 }
 
-void ccDisplayOptionsDlg::changeLightAmbientColor()
+void ccDisplaySettingsDlg::changeLightAmbientColor()
 {
 	QColor newCol = QColorDialog::getColor(m_lightAmbientColor, this);
 	if (!newCol.isValid())
@@ -257,7 +257,7 @@ void ccDisplayOptionsDlg::changeLightAmbientColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeLightSpecularColor()
+void ccDisplaySettingsDlg::changeLightSpecularColor()
 {
 	QColor newCol = QColorDialog::getColor(m_lightSpecularColor, this);
 	if (!newCol.isValid())
@@ -270,7 +270,7 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
+void ccDisplaySettingsDlg::changeMeshFrontDiffuseColor()
 {
 	QColor newCol = QColorDialog::getColor(m_meshFrontDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -284,7 +284,7 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
+void ccDisplaySettingsDlg::changeMeshBackDiffuseColor()
 {
 	QColor newCol = QColorDialog::getColor(m_meshBackDiff, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -297,7 +297,7 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeMeshSpecularColor()
+void ccDisplaySettingsDlg::changeMeshSpecularColor()
 {
 	QColor newCol = QColorDialog::getColor(m_meshSpecularColor, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -310,7 +310,7 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changePointsColor()
+void ccDisplaySettingsDlg::changePointsColor()
 {
 	QColor newCol = QColorDialog::getColor(m_pointsDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -323,7 +323,7 @@ void ccDisplayOptionsDlg::changePointsColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeBBColor()
+void ccDisplaySettingsDlg::changeBBColor()
 {
 	QColor newCol = QColorDialog::getColor(m_bbDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -336,7 +336,7 @@ void ccDisplayOptionsDlg::changeBBColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeTextColor()
+void ccDisplaySettingsDlg::changeTextColor()
 {
 	QColor newCol = QColorDialog::getColor(m_textDefaultCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -349,7 +349,7 @@ void ccDisplayOptionsDlg::changeTextColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeBackgroundColor()
+void ccDisplaySettingsDlg::changeBackgroundColor()
 {
 	QColor newCol = QColorDialog::getColor(m_backgroundCol, this);
 	if (!newCol.isValid())
@@ -362,7 +362,7 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeLabelBackgroundColor()
+void ccDisplaySettingsDlg::changeLabelBackgroundColor()
 {
 	QColor newCol = QColorDialog::getColor(m_labelBackgroundCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -375,7 +375,7 @@ void ccDisplayOptionsDlg::changeLabelBackgroundColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeLabelMarkerColor()
+void ccDisplaySettingsDlg::changeLabelMarkerColor()
 {
 	QColor newCol = QColorDialog::getColor(m_labelMarkerCol, this, QString(), QColorDialog::ShowAlphaChannel);
 	if (!newCol.isValid())
@@ -388,17 +388,17 @@ void ccDisplayOptionsDlg::changeLabelMarkerColor()
 	update();
 }
 
-void ccDisplayOptionsDlg::changeMaxMeshSize(double val)
+void ccDisplaySettingsDlg::changeMaxMeshSize(double val)
 {
 	m_parameters.minLoDMeshSize = static_cast<unsigned>(val * 1000000);
 }
 
-void ccDisplayOptionsDlg::changeMaxCloudSize(double val)
+void ccDisplaySettingsDlg::changeMaxCloudSize(double val)
 {
 	m_parameters.minLoDCloudSize = static_cast<unsigned>(val * 1000000);
 }
 
-void ccDisplayOptionsDlg::changeVBOUsage()
+void ccDisplaySettingsDlg::changeVBOUsage()
 {
 	m_parameters.useVBOs = m_ui->useVBOCheckBox->isChecked();
 	if (m_parameters.useVBOs && m_ui->maxCloudSizeDoubleSpinBox->value() < s_defaultMaxVBOCloudSizeM)
@@ -407,7 +407,7 @@ void ccDisplayOptionsDlg::changeVBOUsage()
 	}
 }
 
-void ccDisplayOptionsDlg::changePickingCursor(int index)
+void ccDisplaySettingsDlg::changePickingCursor(int index)
 {
 	switch (index)
 	{
@@ -423,53 +423,53 @@ void ccDisplayOptionsDlg::changePickingCursor(int index)
 	}
 }
 
-void ccDisplayOptionsDlg::changeColorScaleRampWidth(int val)
+void ccDisplaySettingsDlg::changeColorScaleRampWidth(int val)
 {
 	if (val < 2)
 		return;
 	m_parameters.colorScaleRampWidth = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeDefaultFontSize(int val)
+void ccDisplaySettingsDlg::changeDefaultFontSize(int val)
 {
 	if (val < 0)
 		return;
 	m_parameters.defaultFontSize = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeLabelFontSize(int val)
+void ccDisplaySettingsDlg::changeLabelFontSize(int val)
 {
 	if (val < 0)
 		return;
 	m_parameters.labelFontSize = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeNumberPrecision(int val)
+void ccDisplaySettingsDlg::changeNumberPrecision(int val)
 {
 	if (val < 0)
 		return;
 	m_parameters.displayedNumPrecision = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeZoomSpeed(double val)
+void ccDisplaySettingsDlg::changeZoomSpeed(double val)
 {
 	m_parameters.zoomSpeed = val;
 }
 
-void ccDisplayOptionsDlg::changeAutoComputeOctreeOption(int index)
+void ccDisplaySettingsDlg::changeAutoComputeOctreeOption(int index)
 {
 	assert(index >= 0 && index < 3);
 	m_parameters.autoComputeOctree = static_cast<ccGui::ParamStruct::ComputeOctreeForPicking>(index);
 }
 
-void ccDisplayOptionsDlg::changeLabelOpacity(int val)
+void ccDisplaySettingsDlg::changeLabelOpacity(int val)
 {
 	if (val < 0 || val > 100)
 		return;
 	m_parameters.labelOpacity = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
+void ccDisplaySettingsDlg::changeLabelMarkerSize(int val)
 {
 	if (val <= 0)
 		return;
@@ -477,7 +477,7 @@ void ccDisplayOptionsDlg::changeLabelMarkerSize(int val)
 	m_parameters.labelMarkerSize = static_cast<unsigned>(val);
 }
 
-void ccDisplayOptionsDlg::doReject()
+void ccDisplaySettingsDlg::doReject()
 {
 	ccGui::Set(m_oldParameters);
 	ccOptions::Set(m_oldOptions);
@@ -487,7 +487,7 @@ void ccDisplayOptionsDlg::doReject()
 	reject();
 }
 
-void ccDisplayOptionsDlg::reset()
+void ccDisplaySettingsDlg::reset()
 {
 	m_parameters.reset();
 	m_options.reset();
@@ -496,7 +496,7 @@ void ccDisplayOptionsDlg::reset()
 	refresh();
 }
 
-void ccDisplayOptionsDlg::apply()
+void ccDisplaySettingsDlg::apply()
 {
 	ccGui::Set(m_parameters);
 	ccOptions::Set(m_options);
@@ -510,7 +510,7 @@ void ccDisplayOptionsDlg::apply()
 	Q_EMIT aspectHasChanged();
 }
 
-void ccDisplayOptionsDlg::doAccept()
+void ccDisplaySettingsDlg::doAccept()
 {
 	apply();
 

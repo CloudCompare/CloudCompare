@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DisplayOptionsDlg</class>
- <widget class="QDialog" name="DisplayOptionsDlg">
+ <class>DisplaySettingsDlg</class>
+ <widget class="QDialog" name="DisplaySettingsDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Display settings</string>
+   <string>Display Settings</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -34,8 +34,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>496</width>
-        <height>409</height>
+        <width>374</width>
+        <height>189</height>
        </rect>
       </property>
       <attribute name="label">
@@ -374,8 +374,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>496</width>
-        <height>409</height>
+        <width>362</width>
+        <height>92</height>
        </rect>
       </property>
       <attribute name="label">
@@ -459,8 +459,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>496</width>
-        <height>409</height>
+        <width>286</width>
+        <height>98</height>
        </rect>
       </property>
       <attribute name="label">

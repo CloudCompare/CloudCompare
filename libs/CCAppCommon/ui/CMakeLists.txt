@@ -2,7 +2,7 @@
 target_sources( ${PROJECT_NAME}
 	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/cameraParamDlg.ui
-		${CMAKE_CURRENT_LIST_DIR}/displayOptionsDlg.ui
+		${CMAKE_CURRENT_LIST_DIR}/displaySettingsDlg.ui
 		${CMAKE_CURRENT_LIST_DIR}/pickOneElementDlg.ui
 		${CMAKE_CURRENT_LIST_DIR}/stereoModeDlg.ui
 )

@@ -208,7 +208,11 @@ public:
 		\param dataVersion version current data version
 		\return success
 	**/
-	template <class Type, int N, class ComponentType> static bool GenericArrayFromFile(std::vector<Type>& data, QFile& in, short dataVersion)
+	template <class Type, int N, class ComponentType>
+	static bool GenericArrayFromFile(	std::vector<Type>& data,
+										QFile& in,
+										short dataVersion,
+										const QString& verboseDescription )
 	{
 		::uint8_t componentCount = 0;
 		::uint32_t elementCount = 0;
@@ -220,6 +224,8 @@ public:
 		{
 			return ccSerializableObject::CorruptError();
 		}
+
+		ccLog::PrintVerbose(QString("Loading %0: %1 elements and %2 dimension(s)").arg(verboseDescription).arg(elementCount).arg(componentCount));
 
 		if (elementCount)
 		{
@@ -264,7 +270,11 @@ public:
 		\return success
 	**/
 	template <class Type, int N, class ComponentType, class FileComponentType>
-	static bool GenericArrayFromTypedFile(std::vector<Type>& data, QFile& in, short dataVersion, FileComponentType* _autoOffset = nullptr)
+	static bool GenericArrayFromTypedFile(	std::vector<Type>& data,
+											QFile& in,
+											short dataVersion,
+											const QString& verboseDescription,
+											FileComponentType* _autoOffset = nullptr)
 	{
 		::uint8_t componentCount = 0;
 		::uint32_t elementCount = 0;
@@ -276,6 +286,8 @@ public:
 		{
 			return ccSerializableObject::CorruptError();
 		}
+
+		ccLog::PrintVerbose(QString("Loading %0: %1 elements and %2 dimension(s)").arg(verboseDescription).arg(elementCount).arg(componentCount));
 
 		if (elementCount)
 		{

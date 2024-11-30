@@ -618,7 +618,7 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
 
 	//references (dataVersion>=29)
-	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, dataVersion))
+	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, dataVersion, "triangle indexes"))
 		return ReadError();
 
 	return true;

@@ -87,6 +87,7 @@ void ccGui::ParamStruct::reset()
 	useVBOs						= true;
 	displayCross				= true;
 	pickingCursorShape			= Qt::CrossCursor;
+	logVerbosityLevel			= ccLog::LOG_STANDARD;
 
 	labelMarkerSize				= 5;
 
@@ -155,7 +156,8 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	zoomSpeed					=                                      settings.value("zoomSpeed",                1.0 ).toDouble();
 	autoComputeOctree			= static_cast<ComputeOctreeForPicking>(settings.value("autoComputeOctree",   ASK_USER ).toInt());
 	singleClickPicking			=									   settings.value("singleClickPicking",		 true ).toBool();
-	pickingCursorShape			= static_cast<Qt::CursorShape>(        settings.value("cursorShape", static_cast<int>(Qt::CrossCursor)).toInt());
+	pickingCursorShape			= static_cast<Qt::CursorShape>(		   settings.value("cursorShape", static_cast<int>(Qt::CrossCursor)).toInt());
+	logVerbosityLevel			= static_cast<ccLog::MessageLevelFlags>(settings.value("logVerbosityLevel", static_cast<int>(ccLog::LOG_STANDARD)).toInt());
 
 	settings.endGroup();
 }
@@ -196,8 +198,9 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("labelOpacity",             labelOpacity);
 	settings.setValue("zoomSpeed",                zoomSpeed);
 	settings.setValue("autoComputeOctree",        static_cast<int>(autoComputeOctree));
-	settings.setValue("singleClickPicking",		  singleClickPicking);
+	settings.setValue("singleClickPicking",       singleClickPicking);
 	settings.setValue("cursorShape",              static_cast<int>(pickingCursorShape));
+	settings.setValue("logVerbosityLevel",        static_cast<int>(logVerbosityLevel));
 
 	settings.endGroup();
 }

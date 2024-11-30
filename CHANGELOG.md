@@ -123,6 +123,9 @@ Improvements:
 		- improved/fixed video file generation process to reduce the occurrence of invalid videos
 		- the output file extension will now be automatically updated when changing the codec
 
+	- Display > Display settings
+		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,

@@ -62,6 +62,7 @@ protected:
 	void changeVBOUsage();
 	void changeColorScaleRampWidth(int);
 	void changePickingCursor(int);
+	void changeLogVerbosity(int);
 
 	void changeDefaultFontSize(int);
 	void changeLabelFontSize(int);

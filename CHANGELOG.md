@@ -54,6 +54,11 @@ New plugin
 
 Improvements:
 
+	- BIN file loading
+		- when loading a corrupted/truncated BIN file, or if not enough memory, CloudCompare will give the user
+			the option to proceed and load the entities completely or partly loaded (at risk)
+		- some verbose logs have been added (if the 'Verbose' log level is set in the Display Settings - see below)
+
 	- Scalar fields now natively handle large values
 		- for instance: no need to define a GPS time shift anymore when loading LAS files
 

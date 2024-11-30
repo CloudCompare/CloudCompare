@@ -84,7 +84,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	connect(m_ui->maxMeshSizeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxMeshSize);
 
 	connect(m_ui->autoComputeOctreeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeAutoComputeOctreeOption);
-	connect(m_ui->pickingCursorComboBox,        qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changePickingCursor);
+	connect(m_ui->pickingCursorComboBox,		qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changePickingCursor);
+	connect(m_ui->logVerbosityComboBox,			qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeLogVerbosity);
 
 	connect(m_ui->okButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::doAccept);
 	connect(m_ui->applyButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::apply);
@@ -103,11 +104,11 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 		const QString defaultStyleName = settings.value("style").toString();
 		settings.endGroup();
 
-				// fill the combo-box
+		// fill the combo-box
 		QStringList appStyles = QStyleFactory::keys();
 		for (const auto & style : appStyles)
 		{
-				m_ui->appStyleComboBox->addItem(style);
+			m_ui->appStyleComboBox->addItem(style);
 		}
 
 		m_ui->appStyleComboBox->addItem(QStringLiteral("QDarkStyleSheet::Light"));
@@ -140,94 +141,102 @@ ccDisplaySettingsDlg::~ccDisplaySettingsDlg()
 
 void ccDisplaySettingsDlg::refresh()
 {
-	const ccColor::Rgbaf& ac = m_parameters.lightAmbientColor;
-	m_lightAmbientColor.setRgbF(ac.r, ac.g, ac.b, ac.a);
-	ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, m_lightAmbientColor);
-
-	const ccColor::Rgbaf& dc = m_parameters.lightDiffuseColor;
-	m_lightDiffuseColor.setRgbF(dc.r, dc.g, dc.b, dc.a);
-	ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, m_lightDiffuseColor);
-
-	const ccColor::Rgbaf& sc = m_parameters.lightSpecularColor;
-	m_lightSpecularColor.setRgbF(sc.r, sc.g, sc.b, sc.a);
-	ccQtHelpers::SetButtonColor(m_ui->specularColorButton, m_lightSpecularColor);
-
-	const ccColor::Rgbaf& mbc = m_parameters.meshBackDiff;
-	m_meshBackDiff.setRgbF(mbc.r, mbc.g, mbc.b, mbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, m_meshBackDiff);
-
-	const ccColor::Rgbaf& mspec = m_parameters.meshSpecular;
-	m_meshSpecularColor.setRgbF(mspec.r, mspec.g, mspec.b, mspec.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, m_meshSpecularColor);
-
-	const ccColor::Rgbaf& mfc = m_parameters.meshFrontDiff;
-	m_meshFrontDiff.setRgbF(mfc.r, mfc.g, mfc.b, mfc.a);
-	ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, m_meshFrontDiff);
-
-	const ccColor::Rgba& bbc = m_parameters.bbDefaultCol;
-	m_bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b, bbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->bbColorButton, m_bbDefaultCol);
-
-	const ccColor::Rgbub& bgc = m_parameters.backgroundCol;
-	m_backgroundCol.setRgb(bgc.r, bgc.g, bgc.b);
-	ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, m_backgroundCol);
-
-	const ccColor::Rgba& lblbc = m_parameters.labelBackgroundCol;
-	m_labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b, lblbc.a);
-	ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, m_labelBackgroundCol);
-
-	const ccColor::Rgba& lblmc = m_parameters.labelMarkerCol;
-	m_labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b, lblmc.a);
-	ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, m_labelMarkerCol);
-
-	const ccColor::Rgba& pdc = m_parameters.pointsDefaultCol;
-	m_pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b, pdc.a);
-	ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, m_pointsDefaultCol);
-
-	const ccColor::Rgba& tdc = m_parameters.textDefaultCol;
-	m_textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b, tdc.a);
-	ccQtHelpers::SetButtonColor(m_ui->textColorButton, m_textDefaultCol);
-
-	m_ui->doubleSidedCheckBox->setChecked(m_parameters.lightDoubleSided);
-	m_ui->enableGradientCheckBox->setChecked(m_parameters.drawBackgroundGradient);
-	m_ui->decimateMeshBox->setChecked(m_parameters.decimateMeshOnMove);
-	m_ui->maxMeshSizeDoubleSpinBox->setValue(m_parameters.minLoDMeshSize / 1000000.0);
-	m_ui->decimateCloudBox->setChecked(m_parameters.decimateCloudOnMove);
-	m_ui->drawRoundedPointsCheckBox->setChecked(m_parameters.drawRoundedPoints);
-	m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
-	m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
-	m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
-	m_ui->singleClickPickingCheckBox->setChecked(m_parameters.singleClickPicking);
-
-	m_ui->colorScaleShowHistogramCheckBox->setChecked(m_parameters.colorScaleShowHistogram);
-	m_ui->useColorScaleShaderCheckBox->setChecked(m_parameters.colorScaleUseShader);
-	m_ui->useColorScaleShaderCheckBox->setEnabled(m_parameters.colorScaleShaderSupported);
-	m_ui->colorRampWidthSpinBox->setValue(m_parameters.colorScaleRampWidth);
-
-	m_ui->defaultFontSizeSpinBox->setValue(m_parameters.defaultFontSize);
-	m_ui->labelFontSizeSpinBox->setValue(m_parameters.labelFontSize);
-	m_ui->numberPrecisionSpinBox->setValue(m_parameters.displayedNumPrecision);
-	m_ui->labelOpacitySpinBox->setValue(m_parameters.labelOpacity);
-	m_ui->labelMarkerSizeSpinBox->setValue(m_parameters.labelMarkerSize);
-
-	m_ui->zoomSpeedDoubleSpinBox->setValue(m_parameters.zoomSpeed);
-	
-	m_ui->autoComputeOctreeComboBox->setCurrentIndex(m_parameters.autoComputeOctree);
-
-	m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
-	m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
-	m_ui->confirmQuitCheckBox->setChecked(m_options.confirmQuit);
-
-	switch (m_parameters.pickingCursorShape)
+	// Parameters
 	{
-	default:
-		assert(false);
-	case Qt::CrossCursor:
-		m_ui->pickingCursorComboBox->setCurrentIndex(0);
-		break;
-	case Qt::PointingHandCursor:
-		m_ui->pickingCursorComboBox->setCurrentIndex(1);
-		break;
+		const ccColor::Rgbaf& ac = m_parameters.lightAmbientColor;
+		m_lightAmbientColor.setRgbF(ac.r, ac.g, ac.b, ac.a);
+		ccQtHelpers::SetButtonColor(m_ui->ambientColorButton, m_lightAmbientColor);
+
+		const ccColor::Rgbaf& dc = m_parameters.lightDiffuseColor;
+		m_lightDiffuseColor.setRgbF(dc.r, dc.g, dc.b, dc.a);
+		ccQtHelpers::SetButtonColor(m_ui->diffuseColorButton, m_lightDiffuseColor);
+
+		const ccColor::Rgbaf& sc = m_parameters.lightSpecularColor;
+		m_lightSpecularColor.setRgbF(sc.r, sc.g, sc.b, sc.a);
+		ccQtHelpers::SetButtonColor(m_ui->specularColorButton, m_lightSpecularColor);
+
+		const ccColor::Rgbaf& mbc = m_parameters.meshBackDiff;
+		m_meshBackDiff.setRgbF(mbc.r, mbc.g, mbc.b, mbc.a);
+		ccQtHelpers::SetButtonColor(m_ui->meshBackColorButton, m_meshBackDiff);
+
+		const ccColor::Rgbaf& mspec = m_parameters.meshSpecular;
+		m_meshSpecularColor.setRgbF(mspec.r, mspec.g, mspec.b, mspec.a);
+		ccQtHelpers::SetButtonColor(m_ui->meshSpecularColorButton, m_meshSpecularColor);
+
+		const ccColor::Rgbaf& mfc = m_parameters.meshFrontDiff;
+		m_meshFrontDiff.setRgbF(mfc.r, mfc.g, mfc.b, mfc.a);
+		ccQtHelpers::SetButtonColor(m_ui->meshFrontColorButton, m_meshFrontDiff);
+
+		const ccColor::Rgba& bbc = m_parameters.bbDefaultCol;
+		m_bbDefaultCol.setRgb(bbc.r, bbc.g, bbc.b, bbc.a);
+		ccQtHelpers::SetButtonColor(m_ui->bbColorButton, m_bbDefaultCol);
+
+		const ccColor::Rgbub& bgc = m_parameters.backgroundCol;
+		m_backgroundCol.setRgb(bgc.r, bgc.g, bgc.b);
+		ccQtHelpers::SetButtonColor(m_ui->bkgColorButton, m_backgroundCol);
+
+		const ccColor::Rgba& lblbc = m_parameters.labelBackgroundCol;
+		m_labelBackgroundCol.setRgb(lblbc.r, lblbc.g, lblbc.b, lblbc.a);
+		ccQtHelpers::SetButtonColor(m_ui->labelBkgColorButton, m_labelBackgroundCol);
+
+		const ccColor::Rgba& lblmc = m_parameters.labelMarkerCol;
+		m_labelMarkerCol.setRgb(lblmc.r, lblmc.g, lblmc.b, lblmc.a);
+		ccQtHelpers::SetButtonColor(m_ui->labelMarkerColorButton, m_labelMarkerCol);
+
+		const ccColor::Rgba& pdc = m_parameters.pointsDefaultCol;
+		m_pointsDefaultCol.setRgb(pdc.r, pdc.g, pdc.b, pdc.a);
+		ccQtHelpers::SetButtonColor(m_ui->pointsColorButton, m_pointsDefaultCol);
+
+		const ccColor::Rgba& tdc = m_parameters.textDefaultCol;
+		m_textDefaultCol.setRgb(tdc.r, tdc.g, tdc.b, tdc.a);
+		ccQtHelpers::SetButtonColor(m_ui->textColorButton, m_textDefaultCol);
+
+		m_ui->doubleSidedCheckBox->setChecked(m_parameters.lightDoubleSided);
+		m_ui->enableGradientCheckBox->setChecked(m_parameters.drawBackgroundGradient);
+		m_ui->decimateMeshBox->setChecked(m_parameters.decimateMeshOnMove);
+		m_ui->maxMeshSizeDoubleSpinBox->setValue(m_parameters.minLoDMeshSize / 1000000.0);
+		m_ui->decimateCloudBox->setChecked(m_parameters.decimateCloudOnMove);
+		m_ui->drawRoundedPointsCheckBox->setChecked(m_parameters.drawRoundedPoints);
+		m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
+		m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
+		m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
+		m_ui->singleClickPickingCheckBox->setChecked(m_parameters.singleClickPicking);
+
+		m_ui->colorScaleShowHistogramCheckBox->setChecked(m_parameters.colorScaleShowHistogram);
+		m_ui->useColorScaleShaderCheckBox->setChecked(m_parameters.colorScaleUseShader);
+		m_ui->useColorScaleShaderCheckBox->setEnabled(m_parameters.colorScaleShaderSupported);
+		m_ui->colorRampWidthSpinBox->setValue(m_parameters.colorScaleRampWidth);
+
+		m_ui->defaultFontSizeSpinBox->setValue(m_parameters.defaultFontSize);
+		m_ui->labelFontSizeSpinBox->setValue(m_parameters.labelFontSize);
+		m_ui->numberPrecisionSpinBox->setValue(m_parameters.displayedNumPrecision);
+		m_ui->labelOpacitySpinBox->setValue(m_parameters.labelOpacity);
+		m_ui->labelMarkerSizeSpinBox->setValue(m_parameters.labelMarkerSize);
+
+		m_ui->zoomSpeedDoubleSpinBox->setValue(m_parameters.zoomSpeed);
+
+		m_ui->autoComputeOctreeComboBox->setCurrentIndex(m_parameters.autoComputeOctree);
+
+		switch (m_parameters.pickingCursorShape)
+		{
+		default:
+			assert(false);
+		case Qt::CrossCursor:
+			m_ui->pickingCursorComboBox->setCurrentIndex(0);
+			break;
+		case Qt::PointingHandCursor:
+			m_ui->pickingCursorComboBox->setCurrentIndex(1);
+			break;
+		}
+
+		m_ui->logVerbosityComboBox->setCurrentIndex(std::min(static_cast<int>(m_parameters.logVerbosityLevel), static_cast<int>(ccLog::LOG_WARNING)));
+	}
+
+	// Options
+	{
+		m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
+		m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
+		m_ui->confirmQuitCheckBox->setChecked(m_options.confirmQuit);
 	}
 
 	update();
@@ -423,6 +432,20 @@ void ccDisplaySettingsDlg::changePickingCursor(int index)
 	}
 }
 
+void ccDisplaySettingsDlg::changeLogVerbosity(int index)
+{
+	if (index >= 0 && index < ccLog::LOG_ERROR)
+	{
+		m_parameters.logVerbosityLevel = static_cast<ccLog::MessageLevelFlags>(index);
+	}
+	else
+	{
+		// unexepected value
+		assert(false);
+	}
+}
+
+
 void ccDisplaySettingsDlg::changeColorScaleRampWidth(int val)
 {
 	if (val < 2)
@@ -505,6 +528,13 @@ void ccDisplaySettingsDlg::apply()
 	{
 		QString style = m_ui->appStyleComboBox->currentText();
 		ccApp->setAppStyle(style);
+	}
+
+	// log verbosity
+	if (ccLog::VerbosityLevel() != m_parameters.logVerbosityLevel)
+	{
+		ccLog::SetVerbosityLevel(m_parameters.logVerbosityLevel);
+		ccLog::Print(QString("New log verbosity level: %1").arg(m_parameters.logVerbosityLevel));
 	}
 
 	Q_EMIT aspectHasChanged();

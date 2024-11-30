@@ -496,15 +496,16 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	bool result = false;
 	double baseOffset = 0.0;
 	{
+		QString sfDescription = "SF " + QString::fromStdString(m_name);
 		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
 		if (fileScalarIsFloat) //file is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromFile<float, 1, float>(*this, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile<float, 1, float>(*this, in, dataVersion, sfDescription);
 		}
 		else //file is 'double'
 		{
 			// we load it as float, but apply an automatic offset (based on the first element) to not lose information/accuracy
-			result = ccSerializationHelper::GenericArrayFromTypedFile<float, 1, float, double>(*this, in, dataVersion, &baseOffset);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<float, 1, float, double>(*this, in, dataVersion, sfDescription, &baseOffset);
 		}
 	}
 	if (!result)

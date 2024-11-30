@@ -4854,8 +4854,12 @@ bool ccPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading cloud %1...").arg(m_name));
+
 	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	//points array (dataVersion>=20)
 	{
@@ -4863,18 +4867,19 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		bool fileCoordIsDouble = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS);
 		if (!fileCoordIsDouble && sizeof(PointCoordinateType) == 8) //file is 'float' and current type is 'double'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, float>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, float>(m_points, in, dataVersion, "3D points");
 		}
 		else if (fileCoordIsDouble && sizeof(PointCoordinateType) == 4) //file is 'double' and current type is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, double>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, double>(m_points, in, dataVersion, "3D points");
 		}
 		else
 		{
-			result = ccSerializationHelper::GenericArrayFromFile<CCVector3, 3, PointCoordinateType>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile<CCVector3, 3, PointCoordinateType>(m_points, in, dataVersion, "3D points");
 		}
 		if (!result)
 		{
+			ccLog::PrintVerbose("Failed to load the points");
 			return false;
 		}
 
@@ -4919,6 +4924,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				QSharedPointer<ColorsTableType> oldRGBColors(new ColorsTableType);
 				if (!oldRGBColors->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					unallocateColors();
 					return false;
 				}
 
@@ -4944,6 +4950,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			else
 			{
+				unallocateColors();
 				return CorruptError();
 			}
 		}
@@ -4953,7 +4960,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 	{
 		bool hasNormalsArray = false;
 		if (in.read((char*)&hasNormalsArray, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		if (hasNormalsArray)
 		{
 			if (!m_normals)
@@ -4963,7 +4972,10 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
 			if (classID != CC_TYPES::NORMAL_INDEXES_ARRAY)
+			{
+				unallocateNorms();
 				return CorruptError();
+			}
 			if (!m_normals->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				unallocateNorms();
@@ -4977,7 +4989,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = 0;
 		if (in.read((char*)&sfCount, 4) < 0)
+		{
 			return ReadError();
+		}
 
 		//scalar fields (dataVersion>=20)
 		for (uint32_t i = 0; i < sfCount; ++i)
@@ -4996,7 +5010,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			//'show NaN values in grey' state (27>dataVersion>=20)
 			bool greyForNanScalarValues = true;
 			if (in.read((char*)&greyForNanScalarValues, sizeof(bool)) < 0)
+			{
 				return ReadError();
+			}
 
 			//update all scalar fields accordingly (old way)
 			for (unsigned i = 0; i < getNumberOfScalarFields(); ++i)
@@ -5007,14 +5023,20 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 
 		//'show current sf color scale' state (dataVersion>=20)
 		if (in.read((char*)&m_sfColorScaleDisplayed, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = 0;
 		if (in.read((char*)&displayedScalarFieldIndex, 4) < 0)
+		{
 			return ReadError();
-		if (displayedScalarFieldIndex < (int32_t)sfCount)
+		}
+		if (displayedScalarFieldIndex < static_cast<int32_t>(sfCount))
+		{
 			setCurrentDisplayedScalarField(displayedScalarFieldIndex);
+		}
 	}
 
 	//grid structures (dataVersion>=41)
@@ -5023,7 +5045,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		//number of grids
 		uint32_t count = 0;
 		if (in.read((char*)&count, 4) < 0)
+		{
 			return ReadError();
+		}
 
 		//load each grid
 		for (uint32_t i = 0; i < count; ++i)
@@ -5061,12 +5085,14 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				uint8_t id = 0;
 				if (in.read((char*)&id, 1) < 0)
 				{
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 				//read the descriptor
 				WaveformDescriptor d;
 				if (!d.fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 				//add the descriptor to the set
@@ -5077,6 +5103,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			uint32_t waveformCount = 0;
 			if (in.read((char*)&waveformCount, 4) < 0)
 			{
+				m_fwfDescriptors.clear();
 				return ReadError();
 			}
 			assert(waveformCount >= size());
@@ -5086,17 +5113,20 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			catch (const std::bad_alloc&)
 			{
+				m_fwfDescriptors.clear();
 				return MemoryError();
 			}
 			for (uint32_t i = 0; i < waveformCount; ++i)
 			{
 				if (!m_fwfWaveforms[i].fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 			}
 
-			//eventually save the data
+			//eventually load the FWF data
 			uint64_t dataSize = 0;
 			if (in.read((char*)&dataSize, 8) < 0)
 			{
@@ -5111,12 +5141,18 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				}
 				catch (const std::bad_alloc&)
 				{
+					delete container;
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return MemoryError();
 				}
 				m_fwfData = SharedFWFDataContainer(container);
 
 				if (in.read((char*)m_fwfData->data(), dataSize) < 0)
 				{
+					m_fwfData.clear();
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 			}
@@ -5127,6 +5163,8 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 
 	//We should update the VBOs (just in case)
 	releaseVBOs();
+
+	ccLog::PrintVerbose("Point cloud loaded");
 
 	return true;
 }

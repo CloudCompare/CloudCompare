@@ -30,7 +30,7 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 		static const unsigned OLD_QUANTIZE_LEVEL = 6;
 
 		ccArray<unsigned short, 1, unsigned short>* oldNormals = new ccArray<unsigned short, 1, unsigned short>();
-		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, dataVersion))
+		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, dataVersion, "old compressed normals"))
 		{
 			oldNormals->release();
 			return false;
@@ -66,6 +66,6 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 	}
 	else
 	{
-		return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion);
+		return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion, "compressed normals");
 	}
 }

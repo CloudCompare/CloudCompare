@@ -435,47 +435,64 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
+
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	if (dataVersion < 28)
+	{
 		return false;
+	}
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
 	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
-	uint32_t vertUniqueID = 0;
-	if (in.read((char*)&vertUniqueID, 4) < 0)
-		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-	*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+	{
+		uint32_t vertUniqueID = 0;
+		if (in.read((char*)&vertUniqueID, 4) < 0)
+		{
+			return ReadError();
+		}
+		//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
+		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+	}
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = 0;
 	if (in.read((char*)&pointCount, 4) < 0)
+	{
 		return ReadError();
+	}
 	if (!reserve(pointCount))
+	{
 		return false;
+	}
+
+	ccLog::PrintVerbose(QString("Polyline has %1 vertices").arg(pointCount));
 
 	//points (references to) (dataVersion>=28)
 	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = 0;
 		if (in.read((char*)&pointIndex, 4) < 0)
+		{
 			return ReadError();
+		}
 		addPointIndex(pointIndex);
 	}
 
 	//'global shift & scale' (dataVersion>=39)
+	m_globalScale = 1.0;
+	m_globalShift = CCVector3d(0, 0, 0);
 	if (dataVersion >= 39)
 	{
 		if (!loadShiftInfoFromFile(in))
+		{
 			return ReadError();
-	}
-	else
-	{
-		m_globalScale = 1.0;
-		m_globalShift = CCVector3d(0, 0, 0);
+		}
 	}
 
 	QDataStream inStream(&in);
@@ -494,11 +511,17 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 	//Foreground mode (dataVersion>=28)
 	inStream >> m_foreground;
 
+	if (inStream.status() != QDataStream::Status::Ok)
+	{
+		return ReadError();
+	}
+
 	//Width of the line (dataVersion>=31)
+	m_width = 0;
 	if (dataVersion >= 31)
+	{
 		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
-	else
-		m_width = 0;
+	}
 
 	return true;
 }

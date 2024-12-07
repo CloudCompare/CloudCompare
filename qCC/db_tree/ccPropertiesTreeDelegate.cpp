@@ -686,6 +686,11 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
+			if (ccLog::VerbosityLevel() == ccLog::LOG_VERBOSE)
+			{
+				appendRow(ITEM( tr( "Offset" ) ), ITEM(QString::number(sf->getOffset())));
+			}
+
 			addSeparator("Color Scale");
 
 			//color scale selection combo box

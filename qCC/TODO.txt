@@ -26,6 +26,7 @@ Big ones:
 [*] Undo mechanism
 
 Command line mode:
+[*] Support import of lat/lon data (Latitude, Longitude, Northing, Easting) (https://www.cloudcompare.org/forum/viewtopic.php?p=30502)
 [*] Option to generate a scalar field with the cloud indexes when merging clouds (https://www.cloudcompare.org/forum/viewtopic.php?p=29907)
 [*] Option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)

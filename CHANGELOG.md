@@ -54,6 +54,11 @@ New plugin
 
 Improvements:
 
+	- Rasterize tool > Contour plot generation
+		- the individual polylines should now be properly named (with the real iso-value)
+		- they should be properly ordered
+		- they should be 'closed' when possible
+
 	- BIN file loading
 		- when loading a corrupted/truncated BIN file, or if not enough memory, CloudCompare will give the user
 			the option to proceed and load the entities completely or partly loaded (at risk)

@@ -193,7 +193,7 @@ private: //standard methods
 	bool canClose();
 
 	//! Adds a new contour line
-	void addNewContour(ccPolyline* poly, double height, unsigned subIndex);
+	void addNewContour(ccPolyline* poly, double height);
 
 protected: //raster grid related stuff
 

@@ -1802,7 +1802,7 @@ void ccRasterizeTool::generateHillshade()
 	}
 }
 
-void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
+void ccRasterizeTool::addNewContour(ccPolyline* poly, double height)
 {
 	if (!m_cloud || !poly)
 	{
@@ -1812,7 +1812,6 @@ void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned su
 
 	if (poly->size() > 1)
 	{
-		poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(subIndex));
 		poly->setGlobalScale(m_cloud->getGlobalScale());
 		poly->setGlobalShift(m_cloud->getGlobalShift());
 		poly->setWidth(m_UI->contourWidthSpinBox->value() < 2 ? 0 : m_UI->contourWidthSpinBox->value()); //size 1 is equivalent to the default size
@@ -1919,9 +1918,7 @@ void ccRasterizeTool::generateContours()
 
 	for (ccPolyline* poly : contourLines)
 	{
-		addNewContour(	poly,
-						poly->getMetaData(ccPolyline::MetaKeyConstAltitude()).toUInt(),
-						poly->getMetaData(ccContourLinesGenerator::MetaKeySubIndex()).toUInt() );
+		addNewContour(poly, poly->getMetaData(ccPolyline::MetaKeyConstAltitude()).toUInt());
 	}
 
 	if (!m_contourLines.empty())

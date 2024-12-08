@@ -57,9 +57,4 @@ public:
 										const CCVector2d& gridMinCornerXY, //grid min corner (2D)
 										const Parameters& params,
 										std::vector<ccPolyline*>& contourLines);
-
-public:
-
-	//! Additional meta-data key for generated polylines (see ccPolyline)
-	static const char* MetaKeySubIndex() { return "SubIndex"; }
 };

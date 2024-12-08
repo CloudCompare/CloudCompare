@@ -48,7 +48,7 @@ public:
 	virtual ~ccPolyline() override = default;
 
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override {return CC_TYPES::POLY_LINE;}
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
 
 	//inherited methods (ccHObject)
 	bool isSerializable() const override { return true; }
@@ -60,6 +60,9 @@ public:
 	void setGlobalScale(double scale) override;
 	const CCVector3d& getGlobalShift() const override;
 	double getGlobalScale() const override;
+
+	//! Removes unused capacity
+	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
 
 	//! Clones this polyline
 	ccPolyline* clone() const;
@@ -103,7 +106,9 @@ public:
 	{
 		//DGM: only for 3D polylines!
 		if (!is2DMode())
+		{
 			ccShiftedObject::drawBB(context, col);
+		}
 	}
 
 
@@ -113,8 +118,7 @@ public:
 		\param[out]	parts			output polyline parts
 		\return success
 	**/
-	bool split(	PointCoordinateType maxEdgeLength,
-				std::vector<ccPolyline*>& parts );
+	bool split(	PointCoordinateType maxEdgeLength, std::vector<ccPolyline*>& parts );
 
 	//! Computes the polyline length
 	PointCoordinateType computeLength() const;

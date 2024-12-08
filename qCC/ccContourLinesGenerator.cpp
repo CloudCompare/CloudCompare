@@ -27,6 +27,21 @@
 //System
 #include <cassert>
 
+static QString GetPolylineName(double value, unsigned mainIndex, unsigned partNumber)
+{
+	QString contourLineName = QObject::tr("Contour line [value = %1]").arg(value);
+	if (partNumber != 0)
+	{
+		contourLineName += QObject::tr(" (poly %1-%2)").arg(mainIndex).arg(partNumber);
+	}
+	else
+	{
+		contourLineName += QObject::tr(" (poly %1)").arg(mainIndex);
+	}
+
+	return contourLineName;
+}
+
 #ifndef CC_GDAL_SUPPORT
 
 #include "ccIsolines.h" //old alternative code to generate contour lines (doesn't work very well :( )
@@ -48,22 +63,6 @@ struct ContourGenerationParameters
 	const ccRasterGrid* grid = nullptr;
 	bool projectContourOnAltitudes = false;
 };
-
-static QString GetPolylineName(double value, unsigned mainIndex, unsigned partNumber)
-{
-	QString contourLineName = QObject::tr("Contour line [value = %1]").arg(value);
-	if (partNumber != 0)
-	{
-		contourLineName += QObject::tr(" (poly %1-%2)").arg(mainIndex).arg(partNumber);
-	}
-	else
-	{
-		contourLineName += QObject::tr(" (poly %1)").arg(mainIndex);
-	}
-
-	return contourLineName;
-}
-
 
 static CPLErr ContourWriter(	double dfLevel,
 								int nPoints,

@@ -3506,10 +3506,12 @@ void MainWindow::doActionMerge()
 
 	try
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		for (ccHObject* entity : getSelectedEntities())
 		{
 			if (!entity)
+			{
 				continue;
+			}
 
 			if (entity->isA(CC_TYPES::POINT_CLOUD))
 			{

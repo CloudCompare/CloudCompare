@@ -149,6 +149,8 @@ class CCSignBundle:
         if self.config.embed_python:
             python_libs = set(filter(lambda p: p.is_relative_to(self.config.embedded_python_rootpath), all_libs))
             cc_app_libs = all_libs - python_libs
+        else:
+            cc_app_libs = all_libs
 
         logger.info("--- Total # lib in the bundle %i", len(all_libs))
 
@@ -181,7 +183,7 @@ class CCSignBundle:
             logger.info("Add entitlements to CC binary")
             self._add_entitlements(self.config.cc_bin_path, CCAPP_ENTITLEMENTS)
 
-            logger.warning("Add entitlements to CC bundle (CloudCompare.app)")
+            logger.info("Add entitlements to CC bundle (CloudCompare.app)")
             self._add_entitlements(self.config.bundle_abs_path, CCAPP_ENTITLEMENTS)
 
         else:
@@ -193,7 +195,7 @@ class CCSignBundle:
             # is it necessary?
             self._add_entitlements(self.config.cc_bin_path, HARDENED_CCAPP_ENTITLEMENTS)
 
-            logger.warning("Add entitlements to CC bundle (CloudCompare.app)")
+            logger.info("Add entitlements to CC bundle (CloudCompare.app)")
             self._add_entitlements(self.config.bundle_abs_path, HARDENED_CCAPP_ENTITLEMENTS)
         process_pool.close()
         return 0

@@ -910,20 +910,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					//we fill it with new values (it should have been already 'reserved' (if necessary)
 					if (sameSF->currentSize() == pointCountBefore)
 					{
-						double shift = sf->getOffset() - sameSF->getOffset();
-						if (shift != 0.0) //avoid re-casting unless necessary
+						for (unsigned i = 0; i < addedPoints; i++)
 						{
-							for (unsigned i = 0; i < addedPoints; i++)
-							{
-								sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
-							}
-						}
-						else
-						{
-							for (unsigned i = 0; i < addedPoints; i++)
-							{
-								sameSF->addElement(sf->getValue(i));
-							}
+							sameSF->addElement(sf->getValue(i));
 						}
 					}
 					if (recomputeMinAndMax)

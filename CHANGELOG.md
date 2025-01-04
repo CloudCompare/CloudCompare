@@ -136,6 +136,11 @@ Improvements:
 	- Display > Display settings
 		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
 
+	- Quadric model/fitting
+		- improved fitting of quadric functions on points:
+			- for the local model optionally used when computing C2C distances
+			- for the MEAN and GAUSSIAN curvature computation (Tools > Other > Compute geometric features)
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,

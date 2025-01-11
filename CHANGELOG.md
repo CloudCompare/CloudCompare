@@ -161,6 +161,7 @@ Bug fixes:
 	- Waveform
 		- each LAS point with missing waveform data was triggering a warning message
 		- the Waveform picking dialog could display an annoying error message each time a new point was picked
+	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

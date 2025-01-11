@@ -335,8 +335,6 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		unsigned sfCount = ccCloud->getNumberOfScalarFields();
 		if (sfCount)
 		{
-			e_ply_type scalarType = (sizeof(ScalarType) > 4 ? PLY_DOUBLE : PLY_FLOAT);
-
 			scalarFields.resize(sfCount);
 			unsigned unnamedSFCount = 0;
 			for (unsigned i = 0; i < sfCount; ++i)
@@ -369,6 +367,15 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 						propName = QString("scalar_%1").arg(sfName);
 						propName.replace(' ', '_');
 					}
+				}
+
+				scalarFields[i]->computeMinAndMax();
+				ScalarType maxValue = std::max(std::abs(scalarFields[i]->getMin()), std::abs(scalarFields[i]->getMax()));
+
+				e_ply_type scalarType = (maxValue < ccGlobalShiftManager::MaxBoundgBoxDiagonal() ? PLY_FLOAT : PLY_DOUBLE);
+				if (scalarType == PLY_DOUBLE)
+				{
+					ccLog::Warning(QString("[PLY] Scalar field '%1' has large values and will be saved as double values instead of float values").arg(QString::fromStdString(scalarFields[i]->getName())));
 				}
 
 				result = ply_add_scalar_property(ply, qPrintable(propName), scalarType);

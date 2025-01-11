@@ -149,6 +149,11 @@ Improvements:
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
 
+	- Others:
+		- The shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
+			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the
+			GUI is frozen, but not the View toolbar.
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,

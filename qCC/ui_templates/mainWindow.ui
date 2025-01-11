@@ -615,7 +615,6 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionGlobalZoom"/>
    <addaction name="actionPickRotationCenter"/>
    <addaction name="actionAutoPickRotationCenter"/>
-   <addaction name="actionLevel"/>
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
    <addaction name="actionSetViewFront"/>

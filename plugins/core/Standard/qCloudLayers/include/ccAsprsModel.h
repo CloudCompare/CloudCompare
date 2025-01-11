@@ -56,11 +56,11 @@ public:
 
 	struct AsprsItem
 	{
-		bool visible;
+		bool visible = false;
 		QString name;
-		int code;
+		int code = 0;
 		QColor color;
-		int count;
+		int count = 0;
 	};
 
 	void refreshData();
@@ -77,15 +77,16 @@ public Q_SLOTS:
 	bool removeRows(int position, int rows, const QModelIndex& parent);
 
 Q_SIGNALS:
-	void codeChanged(AsprsItem& item, int oldCode);
-	void colorChanged(AsprsItem& item);
+	void codeChanged(AsprsItem item, int oldCode);
+	void colorChanged(AsprsItem item);
+	void classNamedChanged(int row, QString newName);
 
 private:
 	QList<AsprsItem> m_data;
 
 private:
-	bool isNameExist(const QString& name) const;
-	bool isCodeExist(int code) const;
+	bool nameExists(const QString& name) const;
+	bool codeExists(int code) const;
 
 	// default asprs items
 	void createDefaultItems();

@@ -43,7 +43,7 @@ public:
 	bool start() override;
 	void stop(bool accepted) override;
 	
-	void setPointCloud(ccPointCloud* cloud);
+	bool setPointCloud(ccPointCloud* cloud);
 	
 private:
 	void resetUI();
@@ -73,15 +73,16 @@ private Q_SLOTS:
 	void applyClicked();
 
 	//! restore changes and close dialog
-	void closeClicked();
+	void closeClicked() { reject(); }
 	
 	void scalarFieldIndexChanged(int index);
 	void inputClassIndexChanged(int index);
 	void outputClassIndexChanged(int index);
 
 	//! asprs model signals
-	void codeChanged(ccAsprsModel::AsprsItem &item, int oldCode);
-	void colorChanged(ccAsprsModel::AsprsItem &item);
+	void codeChanged(ccAsprsModel::AsprsItem item, int oldCode);
+	void colorChanged(ccAsprsModel::AsprsItem item);
+	void classNameChanged(int row, QString newName);
 
 	//! show color picker dialog
 	void tableViewDoubleClicked(const QModelIndex &index);
@@ -97,6 +98,5 @@ private:
 	ccAsprsModel m_asprsModel;
 	ccCloudLayersHelper* m_helper;
 	ccMouseCircle* m_mouseCircle;
-	QList<QString> m_presets;
 };
 

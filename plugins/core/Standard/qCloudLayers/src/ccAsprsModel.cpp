@@ -17,6 +17,9 @@
 
 #include "../include/ccAsprsModel.h"
 
+// CloudCompare
+#include <ccLog.h>
+
 //QT
 #include <QSettings>
 
@@ -48,10 +51,14 @@ int ccAsprsModel::columnCount(const QModelIndex& parent) const
 QVariant ccAsprsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
+	{
 		return {};
+	}
 
 	if (orientation == Qt::Vertical)
+	{
 		return section;
+	}
 
 	switch (section)
 	{
@@ -76,7 +83,9 @@ QVariant ccAsprsModel::headerData(int section, Qt::Orientation orientation, int 
 QVariant ccAsprsModel::data(const QModelIndex& index, int role) const
 {
 	if (!index.isValid())
+	{
 		return {};
+	}
 
 	const AsprsItem& item = m_data[index.row()];
 
@@ -148,30 +157,33 @@ bool ccAsprsModel::setData(const QModelIndex& index, const QVariant& value, int 
 	case NAME:
 	{
 		QString name = value.toString();
-		if (!isNameExist(name))
+		if (nameExists(name))
 		{
-			item.name = name;
-			break;
+			ccLog::Error(QObject::tr("Name %1 already used").arg(name));
+			return false;
 		}
 		else
 		{
-			return false;
+			item.name = name;
+			emit classNamedChanged(index.row(), name);
+			break;
 		}
 	}
 
 	case CODE:
 	{
 		int code = value.toInt();
-		if (!isCodeExist(code))
+		if (codeExists(code))
+		{
+			ccLog::Error(QObject::tr("Class #%1 already used").arg(code));
+			return false;
+		}
+		else
 		{
 			int oldCode = item.code;
 			item.code = code;
 			Q_EMIT codeChanged(item, oldCode);
 			break;
-		}
-		else
-		{
-			return false;
 		}
 	}
 
@@ -224,13 +236,13 @@ QModelIndex ccAsprsModel::createNewItem()
 	return createIndex(rowNumber, NAME);
 }
 
-bool ccAsprsModel::isNameExist(const QString& name) const
+bool ccAsprsModel::nameExists(const QString& name) const
 {
 	auto item = std::find_if(m_data.begin(), m_data.end(), [name](const AsprsItem& item) { return item.name == name; });
 	return item != m_data.end();
 }
 
-bool ccAsprsModel::isCodeExist(int code) const
+bool ccAsprsModel::codeExists(int code) const
 {
 	auto item = std::find_if(m_data.begin(), m_data.end(), [code](const AsprsItem& item) { return item.code == code; });
 	return item != m_data.end();

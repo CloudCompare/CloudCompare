@@ -52,6 +52,12 @@ void ccTraceTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointC
 	if (!t)
 	{
 		t = new ccTrace(cloud);
+		//since the cloud can't be a child of the trace instance, we want to be notified
+		//whenever it's deleted (in which case we'll have to clear the trace to avoid a crash)
+		if (cloud)
+		{
+			cloud->addDependency(t, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
+		}
 		t->setDisplay(m_window);
 		t->setVisible(true);
 		t->setName("Trace");

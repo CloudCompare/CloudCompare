@@ -171,6 +171,11 @@ static QSharedPointer<ccCone> c_unitArrow(nullptr);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	if (!getAssociatedCloud())
+	{
+		return;
+	}
+
 	unsigned vertCount = size();
 	if (vertCount < 2)
 		return;
@@ -383,17 +388,13 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 	//so instead we save it's unique ID (dataVersion>=28)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
-	if (!vertices)
-	{
-		ccLog::Warning("[ccPolyline::toFile_MeOnly] Polyline vertices is not a ccPointCloud structure?!");
-		return false;
-	}
-	uint32_t vertUniqueID = (m_theAssociatedCloud ? (uint32_t)vertices->getUniqueID() : 0);
+
+	uint32_t vertUniqueID = (vertices ? static_cast<uint32_t>(vertices->getUniqueID()) : 0);
 	if (out.write((const char*)&vertUniqueID, 4) < 0)
 		return WriteError();
 
 	//number of points (references to) (dataVersion>=28)
-	uint32_t pointCount = size();
+	uint32_t pointCount = vertices ? size() : 0;
 	if (out.write((const char*)&pointCount, 4) < 0)
 		return WriteError();
 
@@ -535,6 +536,11 @@ short ccPolyline::minimumFileVersion_MeOnly() const
 bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 						std::vector<ccPolyline*>& parts)
 {
+	if (!m_theAssociatedCloud)
+	{
+		return false;
+	}
+
 	parts.clear();
 
 	//not enough vertices?
@@ -550,13 +556,13 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 	while (startIndex <= lastIndex)
 	{
 		unsigned stopIndex = startIndex;
-		while (stopIndex < lastIndex && (*getPoint(stopIndex+1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
+		while (stopIndex < lastIndex && (*getPoint(stopIndex + 1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
 		{
 			++stopIndex;
 		}
 
 		//number of vertices for the current part
-		unsigned partSize = stopIndex-startIndex+1;
+		unsigned partSize = stopIndex - startIndex + 1;
 
 		//if the polyline is closed we have to look backward for the first segment!
 		if (startIndex == 0)
@@ -564,7 +570,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 			if (isClosed())
 			{
 				unsigned realStartIndex = vertCount;
-				while (realStartIndex > stopIndex && (*getPoint(realStartIndex-1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
+				while (realStartIndex > stopIndex && (*getPoint(realStartIndex - 1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
 				{
 					--realStartIndex;
 				}
@@ -964,7 +970,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 	unsigned vertCount = size();
 	
 	//vertices visibility
-	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
+	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(m_theAssociatedCloud);
 	if (!verticesCloud)
 	{
 		// no visibility table instantiated
@@ -1101,4 +1107,20 @@ ccPolyline* ccPolyline::Circle(const CCVector3& center, PointCoordinateType radi
 	circle->setName("Circle");
 
 	return circle;
+}
+
+void ccPolyline::onDeletionOf(const ccHObject* obj)
+{
+	ccShiftedObject::onDeletionOf(obj); //remove dependencies, etc.
+
+	// can't cast to a point cloud or anything else than ccHObject, as this is called by the ccHObject destructor
+	const ccHObject* associatedObj = dynamic_cast<const ccHObject*>(getAssociatedCloud());
+
+	if (associatedObj == obj)
+	{
+		//we have to "detach" the cloud from the polyine... (ideally this object should be deleted)
+		clear();
+		setAssociatedCloud(nullptr);
+		setName(getName() + " (emptied)");
+	}
 }

@@ -150,7 +150,10 @@ void ccMesh::onUpdateOf(ccHObject* obj)
 void ccMesh::onDeletionOf(const ccHObject* obj)
 {
 	if (obj == m_associatedCloud)
+	{
+		//we have to "detach" the cloud from the mesh... (ideally this object should be deleted)
 		setAssociatedCloud(nullptr);
+	}
 
 	ccGenericMesh::onDeletionOf(obj);
 }
@@ -4221,13 +4224,21 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel/*=10*/, QWidget* 
 		}
 		else
 		{
-			delete m_associatedCloud;
-			m_associatedCloud = nullptr;
+			// not sure if we can delete this cloud, as it may be shared with other entities!
+			//delete m_associatedCloud;
+			//m_associatedCloud = nullptr;
 		}
 		setAssociatedCloud(newVertices);
 		if (childPos >= 0)
 		{
 			addChild(m_associatedCloud);
+		}
+		else
+		{
+			// warning: the mesh is not the parent of its vertices!
+			// We want to make sure we will be notified whenever the vertices
+			// are deleted (in which case the mesh will be emptied to avoid any crash)
+			newVertices->addDependency(this, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
 		}
 		vertCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
 		ccLog::Print("[MergeDuplicatedVertices] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);

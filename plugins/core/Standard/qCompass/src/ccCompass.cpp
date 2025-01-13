@@ -440,6 +440,13 @@ void ccCompass::tryLoading(ccHObject* obj, std::vector<int>& originals, std::vec
 		{
 
 			ccTrace* trace = new ccTrace(p);
+			//since the cloud can't be a child of the trace instance, we want to be notified
+			//whenever it's deleted (in which case we'll have to clear the trace to avoid a crash)
+			ccHObject* cloud = dynamic_cast<ccHObject*>(p->getAssociatedCloud());
+			if (cloud)
+			{
+				cloud->addDependency(trace, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
+			}
 			trace->setWidth(2);
 			//add to originals/duplicates list [these are used later to overwrite the originals]
 			originals.push_back(obj->getUniqueID());

@@ -61,22 +61,23 @@ class ccTrace :
 public:
 	ccTrace(ccPointCloud* associatedCloud);
 	ccTrace(ccPolyline* obj); //used for constructing from polylines with the correct metadata
-	virtual ~ccTrace() {}
+	~ccTrace() override {}
 
 	//inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_H_OBJECT | CC_TYPES::POLY_LINE; }
+	void onDeletionOf(const ccHObject* obj) override;
 
 	/*
 	Adds waypoint to the end of this trace.
 	@Args
-	 *pointIndex* = the index of the point (in the cloud associated with this object) that is the new waypoint
+	 *pointId* = the index of the point (in the cloud associated with this object) that is the new waypoint
 	*/
 	void pushWaypoint(int pointId) { m_waypoints.push_back(pointId); }
 
 	/*
 	Deletes the specified waypoint.
 	@Args
-	*pointIndex* = the index of the point (in the cloud associated with this object) that represents the waypoint to be deleted. If this point is not
+	*pointId* = the index of the point (in the cloud associated with this object) that represents the waypoint to be deleted. If this point is not
 	               a waypoint then the function does nothing.
 	*/
 	inline void deleteWaypoint(int pointId)
@@ -248,6 +249,7 @@ private:
 	class Compare
 	{
 	public:
+
 		bool operator() (Node* t1, Node* t2)
 		{
 			//n.b. the priority queue puts "higher" priorities at the front of the queue.
@@ -270,7 +272,7 @@ private:
 	Test if a point falls within a circle who's diameter equals the line from segStart to segEnd. This is used to test if a newly added point should be
 	(1) appended to the end of the trace [falls outside of all segment-circles], or (2) inserted to split a segment [falls into a segment-circle]
 	*/
-	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
+	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query) const;
 
 	//used by various constructors to do initialization
 	void init(ccPointCloud* associatedCloud);
@@ -278,9 +280,10 @@ private:
 	//used to update metadata flags
 	void updateMetadata();
 
-//static functions
-public:
-	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]
+public: //static functions
+
+	//! Returns true if object is a valid trace [regardless of its class type]
+	static bool isTrace(ccHObject* object);
 };
 
 #endif

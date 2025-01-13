@@ -87,7 +87,7 @@ ccHObject::~ccHObject()
 		//delete other object?
 		if ((it->second & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
-			it->first->removeDependencyFlag(this,DP_NOTIFY_OTHER_ON_DELETE); //in order to avoid any loop!
+			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); //in order to avoid any loop!
 			//delete object
 			if (it->first->isShareable())
 			{
@@ -274,7 +274,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 		if (it != m_dependencies.end())
 		{
 			//nothing changes? we stop here (especially to avoid infinite
-			//loop when setting  the DP_NOTIFY_OTHER_ON_DELETE flag below!)
+			//loop when setting the DP_NOTIFY_OTHER_ON_DELETE flag below!)
 			if ((it->second & flags) == flags)
 				return;
 			flags |= it->second;

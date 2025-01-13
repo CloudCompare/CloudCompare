@@ -313,7 +313,9 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 	}
 
 	if (pointsToRemove == 0)
+	{
 		return;
+	}
 
 	if (pointsToRemove == m_pickedPoints.size())
 	{
@@ -328,7 +330,9 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 			if (m_pickedPoints[i].entity() != obj)
 			{
 				if (i != j)
+				{
 					std::swap(m_pickedPoints[i], m_pickedPoints[j]);
+				}
 				j++;
 			}
 		}

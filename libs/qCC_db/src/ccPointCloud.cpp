@@ -6611,7 +6611,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				continue;
 			}
 
-			Tuple3i tris[4] =
+			Tuple3i tris[4]
 			{
 				{ v0, v2, v1 },
 				{ v0, v3, v1 },
@@ -6619,7 +6619,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				{ v1, v2, v3 }
 			};
 
-			int tri[2] = { -1, -1 };
+			int tri[2] { -1, -1 };
 
 			switch (mask)
 			{

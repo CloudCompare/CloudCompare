@@ -828,7 +828,11 @@ static ccMesh* CreateMesh(
 		}
 	}
 
-	return new ccMesh(vertices);
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->addChild(vertices);
+	vertices->setEnabled(false);
+
+	return mesh;
 }
 
 //! Builds the patches that where read from a MultiPatch record of a Shapefile

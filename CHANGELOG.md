@@ -174,6 +174,8 @@ Bug fixes:
 	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
 	- the Cloud Layers plugin had several issues (it was not properly restoring the cloud colors or scalar in some cases,
 		and renaming a class would prevent from using it...)
+	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
+		to a crash (warning: now, the polylines will be emptied to prevent a crash)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

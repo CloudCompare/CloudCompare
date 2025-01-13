@@ -125,6 +125,11 @@ void ccTrace::updateMetadata()
 
 int ccTrace::insertWaypoint(int pointId)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	if (m_waypoints.size() >= 2)
 	{
 		//get location of point to add
@@ -168,7 +173,7 @@ int ccTrace::insertWaypoint(int pointId)
 }
 
 //test if the query point is within a circle bound by segStart & segEnd
-bool ccTrace::inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query)
+bool ccTrace::inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query) const
 {
 	//calculate vector Query->Start and Query->End
 	CCVector3 QS(segStart->x - query->x, segStart->y - query->y, segStart->z - query->z);
@@ -470,7 +475,12 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 
 int ccTrace::getSegmentCost(int p1, int p2)
 {
-	int cost=1; //n.b. default value is 1 so that if no cost functions are used, the function doesn't crash (and returns the unweighted shortest path)
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
+	int cost = 1; //n.b. default value is 1 so that if no cost functions are used, the function doesn't crash (and returns the unweighted shortest path)
 	if (m_cloud->hasColors()) //check cloud has colour data
 	{
 		if (COST_MODE & MODE::RGB)
@@ -501,6 +511,11 @@ int ccTrace::getSegmentCost(int p1, int p2)
 
 int ccTrace::getSegmentCostRGB(int p1, int p2)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	//get colors
 	const ccColor::Rgb& p1_rgb = m_cloud->getPointColor(p1);
 	const ccColor::Rgb& p2_rgb = m_cloud->getPointColor(p2);
@@ -532,6 +547,11 @@ int ccTrace::getSegmentCostRGB(int p1, int p2)
 
 int ccTrace::getSegmentCostDark(int p1, int p2)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	//return magnitude of the point p2
 	//const ColorCompType* p1_rgb = m_cloud->getPointColor(p1);
 	const ccColor::Rgb& p2_rgb = m_cloud->getPointColor(p2);
@@ -548,6 +568,11 @@ int ccTrace::getSegmentCostLight(int p1, int p2)
 
 int ccTrace::getSegmentCostCurve(int p1, int p2)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
 	if (isCurvaturePrecomputed()) //scalar field found - return from precomputed cost]
 	{
@@ -589,6 +614,11 @@ int ccTrace::getSegmentCostCurve(int p1, int p2)
 
 int ccTrace::getSegmentCostGrad(int p1, int p2, float search_r)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
 	if (idx != -1) //found precomputed gradient
 	{
@@ -655,6 +685,11 @@ int ccTrace::getSegmentCostDist(int p1, int p2)
 
 int ccTrace::getSegmentCostScalar(int p1, int p2)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	//m_cloud->getCurrentDisplayedScalarFieldIndex();
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
 	if (!sf)
@@ -667,6 +702,11 @@ int ccTrace::getSegmentCostScalar(int p1, int p2)
 
 int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 {
+	if (!m_cloud)
+	{
+		return 0;
+	}
+
 	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
 	if (!sf)
 	{
@@ -679,9 +719,16 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 //functions for calculating cost SFs
 void ccTrace::buildGradientCost(QWidget* parent)
 {
+	if (!m_cloud)
+	{
+		return;
+	}
+
 	//is there already a gradient SF?
 	if (isGradientPrecomputed()) //already done :)
+	{
 		return;
+	}
 
 	//create new SF for greyscale
 	int idx = m_cloud->addScalarField("Greyscale");
@@ -756,8 +803,15 @@ void ccTrace::buildGradientCost(QWidget* parent)
 
 void ccTrace::buildCurvatureCost(QWidget* parent)
 {
-	if (isCurvaturePrecomputed()) //already done
+	if (!m_cloud)
+	{
 		return;
+	}
+
+	if (isCurvaturePrecomputed()) //already done
+	{
+		return;
+	}
 
 	//create curvature SF
 	//make gradient sf
@@ -813,22 +867,39 @@ void ccTrace::buildCurvatureCost(QWidget* parent)
 
 bool ccTrace::isGradientPrecomputed()
 {
+	if (!m_cloud)
+	{
+		return false;
+	}
+
 	int idx = m_cloud->getScalarFieldIndexByName("Gradient"); //look for pre-existing gradient SF
 	return idx != -1; //was something found?
 }
 bool ccTrace::isCurvaturePrecomputed()
 {
+	if (!m_cloud)
+	{
+		return false;
+	}
+
 	int idx = m_cloud->getScalarFieldIndexByName("Curvature"); //look for pre-existing gradient SF
 	return idx != -1; //was something found?
 }
 
 ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 {
+	if (!m_cloud)
+	{
+		return nullptr;
+	}
+
 	//put all "trace" points into the cloud
 	finalizePath();
 	
 	if (size() < 3)
+	{
 		return nullptr; //need three points to fit a plane
+	}
 
 	//check we are not trying to fit a plane to a line
 	CCCoreLib::Neighbourhood Z(this);
@@ -892,6 +963,11 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 
 void ccTrace::bakePathToScalarField()
 {
+	if (!m_cloud)
+	{
+		return;
+	}
+
 	//bake points
 	int vertexCount = static_cast<int>(m_cloud->size());
 	for (const std::deque<int>& seg : m_trace)
@@ -908,6 +984,11 @@ void ccTrace::bakePathToScalarField()
 
 float ccTrace::calculateOptimumSearchRadius()
 {
+	if (!m_cloud)
+	{
+		return 0.0;
+	}
+
 	CCCoreLib::DgmOctree::NeighboursSet neighbours;
 
 	//setup octree & values for nearest neighbour searches
@@ -951,17 +1032,27 @@ float ccTrace::calculateOptimumSearchRadius()
 static QSharedPointer<ccSphere> c_unitPointMarker(nullptr);
 void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	if (!m_cloud)
+	{
+		return;
+	}
+
 	if (!MACRO_Foreground(context)) //2D foreground only
+	{
 		return; //do nothing
+	}
 
 	if (MACRO_Draw3D(context))
 	{
 		if (m_waypoints.empty()) //no points -> bail!
+		{
 			return;
+		}
 
 		//get the set of OpenGL functions (version 2.1)
 		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-		if (glFunc == nullptr) {
+		if (glFunc == nullptr)
+		{
 			assert(false);
 			return;
 		}
@@ -1104,4 +1195,14 @@ bool ccTrace::isTrace(ccHObject* object) //return true if object is a valid trac
 		return object->getMetaData("ccCompassType").toString().contains("Trace");
 	}
 	return false;
+}
+
+void ccTrace::onDeletionOf(const ccHObject* obj)
+{
+	if (m_cloud == obj)
+	{
+		m_cloud = nullptr;
+	}
+
+	ccPolyline::onDeletionOf(obj); //remove dependencies, etc.
 }

@@ -912,7 +912,7 @@ void ccDBRoot::unselectAllEntities()
 
 void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)
 {
-	bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers() & Qt::ControlModifier);
 
 	QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
 	assert(selectionModel);
@@ -965,7 +965,7 @@ void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*
 
 void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 {
-	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool ctrlPushed = (QApplication::keyboardModifiers() & Qt::ControlModifier);
 
 	//convert input list of IDs to proper entities
 	ccHObject::Container entities;
@@ -2016,7 +2016,7 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
 		return;
 	}
 
-	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool ctrlPushed = (QApplication::keyboardModifiers() & Qt::ControlModifier);
 	selectEntities(toSelect, ctrlPushed);
 }
 

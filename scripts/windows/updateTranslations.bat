@@ -15,4 +15,5 @@ cd ..\..
 %QT_DIR%\lupdate.exe %SRC_DIRS% %OPTIONS% -ts qCC\translations\CloudCompare_ko.ts
 %QT_DIR%\lupdate.exe %SRC_DIRS% %OPTIONS% -ts qCC\translations\CloudCompare_pt.ts
 %QT_DIR%\lupdate.exe %SRC_DIRS% %OPTIONS% -ts qCC\translations\CloudCompare_ru.ts
+%QT_DIR%\lupdate.exe %SRC_DIRS% %OPTIONS% -ts qCC\translations\CloudCompare_zh.ts
 cd scripts\windows

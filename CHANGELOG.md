@@ -149,6 +149,10 @@ Improvements:
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
 
+	- 'Tools > Batch export'
+		- the 'Export cloud info' and 'Export plane info' tools will now also export the center global coordinates
+			(in case the clouds or planes have been shifted to a local coordinate system)
+
 	- Others:
 		- The shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

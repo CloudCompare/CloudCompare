@@ -9111,6 +9111,9 @@ void MainWindow::doActionExportPlaneInfo()
 	csvStream << "Cx;";
 	csvStream << "Cy;";
 	csvStream << "Cz;";
+	csvStream << "Cx_global;";
+	csvStream << "Cy_global;";
+	csvStream << "Cz_global;";
 	csvStream << "Nx;";
 	csvStream << "Ny;";
 	csvStream << "Nz;";
@@ -9126,6 +9129,7 @@ void MainWindow::doActionExportPlaneInfo()
 		ccPlane* plane = static_cast<ccPlane*>(ent);
 			
 		CCVector3 C = plane->getOwnBB().getCenter();
+		CCVector3d Cg = plane->toGlobal3d(C);
 		CCVector3 N = plane->getNormal();
 		PointCoordinateType dip_deg = 0;
 		PointCoordinateType dipDir_deg = 0;
@@ -9137,6 +9141,9 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << C.x << separator;					//Cx
 		csvStream << C.y << separator;					//Cy
 		csvStream << C.z << separator;					//Cz
+		csvStream << Cg.x << separator;					//Cx
+		csvStream << Cg.y << separator;					//Cy
+		csvStream << Cg.z << separator;					//Cz
 		csvStream << N.x << separator;					//Nx
 		csvStream << N.y << separator;					//Ny
 		csvStream << N.z << separator;					//Nz
@@ -9220,6 +9227,9 @@ void MainWindow::doActionExportCloudInfo()
 	csvStream << "meanX;";
 	csvStream << "meanY;";
 	csvStream << "meanZ;";
+	csvStream << "meanX_global;";
+	csvStream << "meanY_global;";
+	csvStream << "meanZ_global;";
 	{
 		for (unsigned i = 0; i < maxSFCount; ++i)
 		{
@@ -9240,11 +9250,15 @@ void MainWindow::doActionExportCloudInfo()
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 
 			CCVector3 G = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
+			CCVector3d Gg = cloud->toGlobal3d(G);
 			csvStream << cloud->getName() << ';' /*"Name;"*/;
 			csvStream << cloud->size() << ';' /*"Points;"*/;
 			csvStream << G.x << ';' /*"meanX;"*/;
 			csvStream << G.y << ';' /*"meanY;"*/;
 			csvStream << G.z << ';' /*"meanZ;"*/;
+			csvStream << Gg.x << ';' /*"meanX_global;"*/;
+			csvStream << Gg.y << ';' /*"meanY_global;"*/;
+			csvStream << Gg.z << ';' /*"meanZ_global;"*/;
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);

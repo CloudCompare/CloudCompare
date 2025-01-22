@@ -1108,14 +1108,14 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			//Quaternion
 			if (cloudDesc.hasQuaternion)
 			{
-				double quat[4] = { locale.toDouble(parts[cloudDesc.qwIndex]),
-									locale.toDouble(parts[cloudDesc.qxIndex]),
-									locale.toDouble(parts[cloudDesc.qyIndex]),
-									locale.toDouble(parts[cloudDesc.qzIndex])
+				double quat[4] { locale.toDouble(parts[cloudDesc.qwIndex]),
+								 locale.toDouble(parts[cloudDesc.qxIndex]),
+								 locale.toDouble(parts[cloudDesc.qyIndex]),
+								 locale.toDouble(parts[cloudDesc.qzIndex])
 				};
 
 				ccGLMatrix mat = ccGLMatrix::FromQuaternion(quat);
-				mat.setTranslation(P.u);
+				mat.setTranslation((P + Pshift).u);
 
 				ccCoordinateSystem* cs = new ccCoordinateSystem(ccCoordinateSystem::DEFAULT_DISPLAY_SCALE,
 																CCCoreLib::PC_ONE,

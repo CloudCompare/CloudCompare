@@ -59,8 +59,6 @@ namespace
 	unsigned s_absoluteScanIndex = 0;
 	bool s_cancelRequestedByUser = false;
 	
-	unsigned s_absoluteImageIndex = 0;
-	
 	ScalarType s_maxIntensity = 0;
 	ScalarType s_minIntensity = 0;
 	
@@ -609,6 +607,7 @@ static bool SaveScan(	ccPointCloud* cloud,
 		arrays.scanIndexData.resize(chunkSize);
 		dbufs.emplace_back( imf, "returnIndex",  arrays.scanIndexData.data(),  chunkSize, true, true );
 	}
+
 	//Intensity field
 	if (intensitySF)
 	{
@@ -749,6 +748,7 @@ void SaveImage(	const ccImage* image,
 				const QString& scanGUID,
 				e57::ImageFile& imf,
 				e57::VectorNode& images2D,
+				unsigned imageIndex,
 				const CCVector3d& globalShift)
 {
 	assert(image);
@@ -765,7 +765,7 @@ void SaveImage(	const ccImage* image,
 	}
 	else
 	{
-		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(s_absoluteImageIndex).toStdString()));
+		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(imageIndex).toStdString()));
 	}
 
 	imageNode.set("associatedData3DGuid", e57::StringNode(imf, scanGUID.toStdString()));
@@ -1099,7 +1099,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (result == CC_FERR_NO_ERROR)
 		{
 			//Save images
-			s_absoluteImageIndex = 0;
+			unsigned imageIndex = 0;
 			size_t scanCount = scans.size();
 			for (size_t i = 0; i < scanCount; ++i)
 			{
@@ -1124,8 +1124,8 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 						assert(images[j]->isKindOf(CC_TYPES::IMAGE));
 						assert(scansGUID.contains(cloud));
 						QString scanGUID = scansGUID.value(cloud);
-						SaveImage(static_cast<ccImage*>(images[j]), scanGUID, imf, images2D, cloud->getGlobalShift());
-						++s_absoluteImageIndex;
+						SaveImage(static_cast<ccImage*>(images[j]), scanGUID, imf, images2D, imageIndex, cloud->getGlobalShift());
+						++imageIndex;
 						if (!nprogress.oneStep())
 						{
 							s_cancelRequestedByUser = true;
@@ -2473,26 +2473,26 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	output.validPoseMat = GetPoseInformation(imageNode, output.poseMat);
 
 	//camera information
-	VisualReferenceRepresentation* cameraRepresentation = nullptr;
+	QSharedPointer<VisualReferenceRepresentation> cameraRepresentation(nullptr);
 	if (imageNode.isDefined(VisualReferenceRepresentation::GetName()))
 	{
-		cameraRepresentation = new VisualReferenceRepresentation;
+		cameraRepresentation.reset(new VisualReferenceRepresentation);
 	}
 	else if (imageNode.isDefined(PinholeRepresentation::GetName()))
 	{
-		cameraRepresentation = new PinholeRepresentation;
+		cameraRepresentation.reset(new PinholeRepresentation);
 	}
 	else if (imageNode.isDefined(SphericalRepresentation::GetName()))
 	{
-		cameraRepresentation = new SphericalRepresentation;
+		cameraRepresentation.reset(new SphericalRepresentation);
 	}
 	else if (imageNode.isDefined(CylindricalRepresentation::GetName()))
 	{
-		cameraRepresentation = new CylindricalRepresentation;
+		cameraRepresentation.reset(new CylindricalRepresentation);
 	}
 	else
 	{
-		ccLog::Warning(QString("[E57] Image %1 has no or a unknown associated camera representation!").arg(imageName));
+		ccLog::Warning(QString("[E57] Image %1 has no or an unknown associated camera representation!").arg(imageName));
 		return {};
 	}
 	assert(cameraRepresentation);
@@ -2519,14 +2519,12 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	else
 	{
 		ccLog::Warning("[E57] Unhandled image format (only JPG and PNG are currently supported)");
-		delete cameraRepresentation;
 		return {};
 	}
 
 	if (cameraRepresentation->imageSize == 0)
 	{
 		ccLog::Warning("[E57] Invalid image size!");
-		delete cameraRepresentation;
 		return {};
 	}
 
@@ -2534,7 +2532,6 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	if (!imageBits)
 	{
 		ccLog::Warning("[E57] Not enough memory to load image!");
-		delete cameraRepresentation;
 		return {};
 	}
 	
@@ -2553,7 +2550,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	case E57_CYLINDRICAL:
 	case E57_SPHERICAL:
 		{
-			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
+			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation.data());
 			spherical->pixelHeight = e57::FloatNode(cameraRepresentationNode.get("pixelHeight")).value();
 			spherical->pixelWidth = e57::FloatNode(cameraRepresentationNode.get("pixelWidth")).value();
 		}
@@ -2566,7 +2563,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 
 	if (cameraType == E57_PINHOLE)
 	{
-		PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+		PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation.data());
 
 		pinhole->focalLength = e57::FloatNode(cameraRepresentationNode.get("focalLength")).value();
 		pinhole->principalPointX = e57::FloatNode(cameraRepresentationNode.get("principalPointX")).value();
@@ -2574,7 +2571,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 	else if (cameraType == E57_CYLINDRICAL)
 	{
-		CylindricalRepresentation* cylindrical = static_cast<CylindricalRepresentation*>(cameraRepresentation);
+		CylindricalRepresentation* cylindrical = static_cast<CylindricalRepresentation*>(cameraRepresentation.data());
 
 		cylindrical->principalPointY = e57::FloatNode(cameraRepresentationNode.get("principalPointY")).value();
 		cylindrical->radius = e57::FloatNode(cameraRepresentationNode.get("radius")).value();
@@ -2647,7 +2644,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		break;
 	case E57_PINHOLE:
 		{
-			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation.data());
 			float focal_mm        = static_cast<float>(pinhole->focalLength * 1000.0);
 			float pixelWidth_mm   = static_cast<float>(pinhole->pixelWidth * 1000.0);
 			float pixelHeight_mm  = static_cast<float>(pinhole->pixelHeight * 1000.0);
@@ -2678,6 +2675,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 			output.entity->setAssociatedSensor(output.sensor);
 		}
 		break;
+
 	case E57_NO_PROJECTION:
 		assert(false);
 		break;
@@ -2701,13 +2699,10 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 			cameraType == E57_PINHOLE ||
 			cameraType == E57_SPHERICAL)
 		{
-			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
+			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation.data());
 			output.entity->setAspectRatio(static_cast<float>(spherical->pixelWidth / spherical->pixelHeight) * output.entity->getAspectRatio());
 		}
 	}
-
-	delete cameraRepresentation;
-	cameraRepresentation = nullptr;
 
 	return output;
 }

@@ -157,6 +157,7 @@ Improvements:
 		- The shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the
 			GUI is frozen, but not the View toolbar.
+		- the Box primitive is now a real box mesh, with only 8 vertices, instead of 6 independent planes.
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

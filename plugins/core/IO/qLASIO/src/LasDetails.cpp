@@ -29,7 +29,6 @@
 #include <QDataStream>
 // System
 #include <cstring>
-#include <stdexcept>
 
 static const std::vector<unsigned>      PointFormatForV1_2{0, 1, 2, 3};
 static const std::vector<unsigned>      PointFormatForV1_3{0, 1, 2, 3, 4, 5};
@@ -41,6 +40,11 @@ namespace LasDetails
 	bool EvlrHeader::isWaveFormDataPackets() const
 	{
 		return recordID == 65'535 && strncmp(userID, "LASF_Spec", EvlrHeader::USER_ID_SIZE) == 0;
+	}
+
+	bool EvlrHeader::isCOPCEntry() const
+	{
+		return recordID == 1'000 && strncmp(userID, "copc", EvlrHeader::USER_ID_SIZE) == 0;
 	}
 
 	EvlrHeader EvlrHeader::Waveform()

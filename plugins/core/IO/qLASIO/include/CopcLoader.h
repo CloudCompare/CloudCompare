@@ -222,8 +222,8 @@ namespace copc
 		CCVector3d     m_globalShift;
 		UnscaledExtent m_extent;
 
-		bool m_hasClippingConstraint;
-		bool m_hasMaxLevelConstraint;
+		bool m_hasClippingConstraint{false};
+		bool m_hasMaxLevelConstraint{false};
 
 		int32_t        m_maxLevelConstraint{0};
 		UnscaledExtent m_ClippingConstraint;

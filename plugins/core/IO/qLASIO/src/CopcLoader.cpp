@@ -62,12 +62,12 @@ namespace copc
 				return;
 			}
 
-			// Note: the root page is not the first entry of COPC EVRL data reccord,
+			// Note: the root page is generally not the first entry of COPC EVRL data reccord,
 			// This means we cannot obtain the EVLR header by seeking straight to `root_hier_offset` minus the EVLR header size (60).
-			// To check é&the existence of the COPC EVLR hierarchy, we'll have to iterate thought all
-			// EVLRs starting from laszip_header::start_of_first_extended_variable_length_record.
-			// We do not check the existence of the EVLR header. we seek direclty to the root_hier_offset
-			// and validate each seeking operation by checking for EOF.
+			// To check the existence of the COPC EVLR hierarchy, we'll have to iterate thought all
+			// EVLRs starting from laszip_header::start_of_first_extended_variable_length_record...
+			// Here we do not check the existence of the EVLR header. we seek directly to the root_hier_offset
+			// and validate each seeking operation by checking for EOF which should be robust enough.
 			QDataStream        copcDataSource(&copcFile);
 			std::queue<Page>   pageQueue;
 			std::vector<Entry> entries;
@@ -119,7 +119,7 @@ namespace copc
 				pageQueue.pop();
 			}
 
-			ccLog::Print("[LAS] COPC file with %u pages / %lu entries / %llu points", numPages, entries.size(), m_numPoints);
+			ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
 
 			// init our octree structure
 			generateChunktableIntervalsHierarchy(entries);
@@ -150,7 +150,7 @@ namespace copc
 			}
 
 			// Consistency check: is the octree traversable
-			// if not, only issue a warning we will simply not handle the non-traversable part.
+			// Otherwise, we only issue a warning. We will simply not handle the non-traversable part.
 			if (!isTraversable())
 			{
 				ccLog::Warning("[LAS] COPC file contains unreachable nodes");
@@ -236,7 +236,7 @@ namespace copc
 		size_t                                     maxNumLayers = (m_hasMaxLevelConstraint ? m_maxLevelConstraint : m_maxLevel) + 1;
 		std::vector<ccGenericPointCloudLOD::Level> lodLevels(maxNumLayers);
 
-		// keep track of the VoxelKey by insterting them in the same order than CC LOD Nodes.
+		// keep track of the VoxelKey by inserting them in the same order than CC LOD Nodes.
 		std::vector<std::vector<VoxelKey>> lodKeys(maxNumLayers);
 		lodLevels[0].data.emplace_back(0);
 		lodKeys[0].push_back(VoxelKey::Root());

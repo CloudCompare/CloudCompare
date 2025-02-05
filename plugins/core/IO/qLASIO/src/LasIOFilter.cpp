@@ -46,7 +46,6 @@
 
 // System
 #include <memory>
-#include <numeric>
 #include <utility>
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
                                  bool&                         preserveCoordinateShift,
@@ -137,7 +136,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 	if (pointCount >= std::numeric_limits<unsigned>::max())
 	{
-		ccLog::Error("[LAS] Files with more that %lu points are not supported", std::numeric_limits<unsigned>::max());
+		ccLog::Error("[LAS] Files with more that %u points are not supported", std::numeric_limits<unsigned>::max());
 		return CC_FERR_NOT_IMPLEMENTED;
 	}
 
@@ -163,7 +162,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		}
 		else
 		{
-			ccLog::Warning("[LAS] Something went wrong with the initial parsing of the COPC structure, fall back to LAZ reading");
+			ccLog::Warning("[LAS] Something went wrong with the initial parsing of the COPC structure, fall back to regular LAZ reading");
 			copcLoader.reset(nullptr);
 		}
 	}
@@ -223,7 +222,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return TileLasReader(laszipReader, fileName, m_openDialog.tilingOptions());
 	}
 
-	// Update intervalsToReads according to the COPCLoader if needed
+	// Update chunksToReads according to the COPCLoader if needed
 	if (copcLoader)
 	{
 		const uint32_t copcUserDefinedMaxLevel = m_openDialog.copcDepthComboBox->currentData().toUInt();
@@ -347,16 +346,16 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		bool testInExtent = intervalRef.status == LasDetails::ChunkInterval::eFilterStatus::INTERSECT_BB && copcLoader;
 
 		// Minimize seeking for COPC.
-		// It's not clear if it gives some performance improvements but it complexify a lot the code.
+		// It's not clear if it gives some performance improvements but it complexify the code.
 		// since it enforces to keep track of multiples indices in order to generate the proper LOD
 		// data structure.
-		// The main bottleneck in lAZ reading is point decompression but high number of seeking
+		// The main bottleneck in LAZ reading is point decompression but high number of seeking
 		// operation could have an impact on big files.
 		// In a standard LAS/LAZ scenario this is noop since nextPointIndex = 0;
 		if (nextPointIndex != intervalRef.pointOffsetInFile)
 		{
-			// Here int64_t is internally converted to uint32_t in lASzio, so it overflows if we have cloud with more
-			// than approx. 4.2B. points lasperf does not suffer from this limitation.
+			// Here int64_t is internally converted to uint32_t in LASzip, so it overflows if we have cloud with more
+			// than approx. 4.2B. points laz-perf does not suffer from this limitation.
 			// CC is also limited to unsigned in sizes.
 			// https://github.com/LASzip/LASzip/issues/76
 			// https://github.com/LASzip/LASzip/blob/103c4464611a39853d40aea9c3594b523a6c168b/src/laszip_dll.cpp#L4648
@@ -416,8 +415,8 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 				isglobalShiftDefined = true;
 			}
 
-			// test if the point is within the allowed extent:
-			// If the clippingBox intersects the current chunk interval, each of its points must be tested individually.
+			// Test if the point is within the allowed extent:
+			// If the clippingBox intersects the current chunk interval, each point of the chunk must be tested individually.
 			if (testInExtent)
 			{
 				if (!copcLoader->clippingExtent().contains(CCVector3d(laszipCoordinates[0], laszipCoordinates[1], laszipCoordinates[2])))
@@ -581,7 +580,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	}
 
 	// With the copcLoader, we shrink the point cloud to take into account the point that could be filtered in the loading process
-	// We have to do that before the LOD construction because shrinkTofit clears the LOD
+	// We have to do that before the LOD construction because shrinkTofit clears the LOD.
 	if (copcLoader)
 	{
 		pointCloud->shrinkToFit();

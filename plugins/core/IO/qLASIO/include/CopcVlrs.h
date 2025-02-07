@@ -37,7 +37,6 @@
 /// this is based on COPC v1 specs. See https://copc.io for documentation
 namespace copc
 {
-
 	struct Info
 	{
 		/// Extract extent
@@ -263,8 +262,8 @@ namespace std
 		{
 			std::hash<uint64_t> h;
 
-			uint64_t k1 = ((uint64_t)key.level << 32) | key.x;
-			uint64_t k2 = ((uint64_t)key.y << 32) | key.z;
+			uint64_t k1 = (static_cast<uint64_t>(key.level) << 32) | key.x;
+			uint64_t k2 = (static_cast<uint64_t>(key.y) << 32) | key.z;
 			return h(k1) ^ (h(k2) << 1);
 		}
 	};

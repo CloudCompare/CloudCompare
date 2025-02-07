@@ -98,6 +98,12 @@ class LasOpenDialog : public QDialog
 	/// Only valid when the action is Tiling
 	LasTilingOptions tilingOptions() const;
 
+	/// Return the status of the extent defined in the COPC tab
+	bool hasUsableExtent() const;
+
+	/// Returns COPC max level :)
+	uint32_t copcMaxLevel() const;
+
 	/// Returns the current extent defined in the COPC tab
 	LasDetails::UnscaledExtent copcExtent() const;
 
@@ -105,7 +111,6 @@ class LasOpenDialog : public QDialog
 
 	bool shouldSkipDialog() const;
 
-	bool hasUsableExtent() const;
 
   private:
 	bool isChecked(const LasScalarField& lasScalarField) const;

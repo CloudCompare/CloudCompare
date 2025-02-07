@@ -47,6 +47,7 @@
 // System
 #include <memory>
 #include <utility>
+
 static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
                                  bool&                         preserveCoordinateShift,
                                  const CCVector3d&             lasOffset,
@@ -88,7 +89,7 @@ static CCVector3d GetGlobalShift(FileIOFilter::LoadParameters& parameters,
 
 LasIOFilter::LasIOFilter()
     : FileIOFilter({"LAS IO Filter",
-                    3.0f, /// priority (same as the old PDAL-based plugin)
+                    3.0f, // priority (same as the old PDAL-based plugin)
                     QStringList{"las", "laz"},
                     "las",
                     QStringList{"LAS file (*.las *.laz *.copc.laz)"},
@@ -225,7 +226,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	// Update chunksToReads according to the COPCLoader if needed
 	if (copcLoader)
 	{
-		const uint32_t copcUserDefinedMaxLevel = m_openDialog.copcDepthComboBox->currentData().toUInt();
+		const uint32_t copcUserDefinedMaxLevel = m_openDialog.copcMaxLevel();
 		if (copcUserDefinedMaxLevel < copcLoader->maxLevel())
 		{
 			copcLoader->setMaxLevelConstraint(copcUserDefinedMaxLevel);
@@ -233,8 +234,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 		if (m_openDialog.hasUsableExtent())
 		{
-			// BoundingBox do not have copy/move constructors;
-			// we create a temp
 			const auto clippingExtent = m_openDialog.copcExtent();
 			if (clippingExtent.isValid())
 			{

@@ -22,9 +22,6 @@
 #include "LasDetails.h"
 
 // CC
-// TODO LOD
-//#include "ccPointCloudLOD.h"
-
 // Qt
 #include <QFile>
 
@@ -120,14 +117,14 @@ namespace copc
 		/// Returns the validity of the viewer.
 		///
 		/// this is set by the constructor.
-		/// User of this class have the responsibility to check this getter
-		/// before any usage of the instance of the CopcLoader.
+		/// User of this loader instance has the responsibility to check its validity
+		/// before any usage of its methods.
 		bool isValid() const
 		{
 			return m_isValid;
 		}
 
-		/// Set global shift. This is used by
+		/// Set global shift. This is used during the LOD creation.
 		void setGlobalShift(const CCVector3d& globalShift)
 		{
 			m_globalShift = globalShift;
@@ -142,33 +139,14 @@ namespace copc
 		/// can only be filtered during file reading. if no clipping constraint is set, the estimatedPointCount variable represent the true number of points.
 		void getChunkIntervalsSet(std::vector<std::reference_wrapper<ChunkInterval>>& sortedChunkIntervalSet, uint64_t& estimatedPointCount);
 
-		/// Recurse COPC octree and create a CC LOD matching this Hierachy
-		// TODO LOD
-		//std::vector<ccGenericPointCloudLOD::Level> createLOD();
-
 	  public: // static methods
-		/// Determive if the file has the potential to contains COPC structure
-		static bool IsPutativeCOPCFile(const laszip_header* laszipHeader)
-		{
-
-			return laszipHeader->version_minor >= COPC_LAS_VERSION_MINOR
-			       && laszipHeader->point_data_format > COPC_LAS_DATA_FORMAT_GT
-			       && laszipHeader->point_data_format < COPC_LAS_DATA_FORMAT_LT
-			       && laszipHeader->number_of_variable_length_records > 0
-			       && IsCOPCVlr(laszipHeader->vlrs[0]);
-		}
+		/// Check if the file has the potential to contain a COPC structure
+		static bool IsPutativeCOPCFile(const laszip_header* laszipHeader);
 
 		/// Check if a given VLR is a COPC one
 		///
 		/// Notes: COPC VLR has to be at id 0 of the vlr array.
-		static bool IsCOPCVlr(const laszip_vlr_struct& vlr)
-		{
-			if (strcmp(COPC_USER_ID, vlr.user_id) == 0 && vlr.record_id == COPC_RECORD_ID)
-			{
-				return true;
-			}
-			return false;
-		}
+		static bool IsCOPCVlr(const laszip_vlr_struct& vlr);
 
 	  private: // methods
 		/// Generate the chunk table hierarchy from COPC entries
@@ -183,37 +161,31 @@ namespace copc
 		/// as key.
 		void generateChunktableIntervalsHierarchy(std::vector<Entry>& entries);
 
-		/// Check if a given VoxelKey pass constraints/filter tests and return its status
+		/// Check if a given VoxelKey passes constraints/filter tests and return its status
 		ChunkInterval::eFilterStatus checkConstraints(const VoxelKey& voxelkey);
 
 		/// Reset the satus of the chunkIntervals
 		void resetIntervalsStatus();
 
-		/// Recursively propage failure fag to COPC nodes
+		/// Recursively propagate failure fag to COPC nodes
 		void propagateFailureFlag(const VoxelKey& voxelkey);
 
 		/// Recursively Flag ChunkIntervals (i.e check constraints of each VoxelKey)
 		uint64_t flagIntervalNodes(const VoxelKey& voxelkey);
 
-		/// Recurse the COPC tree and emplace visited VoxelKeys into
-		void recurse(const VoxelKey& voxelkey, std::unordered_set<VoxelKey>& visitedNodes);
+		/// Recurse the COPC octree and emplace visited VoxelKeys into a set
+		void recurse(const VoxelKey& voxelkey, std::unordered_set<VoxelKey>& visitedNodes) const;
 
-		/// Traverse the COPC octree and if all nodes are reachables.
-		bool isTraversable();
+		/// Traverse the COPC octree and check if all nodes are reachables
+		bool isTraversable() const;
 
-		/// Consistancy check: check if the root node exists
-		bool hasRoot()
+		/// Consistency check: check if the root node exists
+		bool hasRoot() const
 		{
 			return m_chunkIntervalsHierarchy.count(VoxelKey::Root());
 		}
 
 	  private: // static members
-		/// static members used to check if a file is a COPC
-		static const uint8_t         COPC_LAS_VERSION_MINOR{4};
-		static const uint8_t         COPC_LAS_DATA_FORMAT_GT{5};
-		static const uint8_t         COPC_LAS_DATA_FORMAT_LT{9};
-		static const uint8_t         COPC_RECORD_ID{1};
-		static constexpr const char* COPC_USER_ID = "copc";
 
 	  private: // members
 		bool           m_isValid{false};

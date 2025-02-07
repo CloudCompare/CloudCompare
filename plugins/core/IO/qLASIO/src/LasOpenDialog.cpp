@@ -276,6 +276,11 @@ LasDetails::UnscaledExtent LasOpenDialog::copcExtent() const
 	return extent;
 }
 
+uint32_t LasOpenDialog::copcMaxLevel() const
+{
+	return copcDepthComboBox->currentData().toUInt();
+}
+
 bool LasOpenDialog::hasUsableExtent() const
 {
 	return copcExtentGroupBox->isChecked() && m_validExtent;

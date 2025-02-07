@@ -23,6 +23,7 @@
 
 // CCCoreLib
 #include <CCGeom.h>
+#include <ParallelSort.h>
 #include <ccLog.h>
 
 // System
@@ -31,138 +32,160 @@
 
 namespace copc
 {
+	/// static const used to check if a file is a COPC
+	static const uint8_t         COPC_LAS_VERSION_MINOR{4};
+	static const uint8_t         COPC_LAS_DATA_FORMAT_GT{5};
+	static const uint8_t         COPC_LAS_DATA_FORMAT_LT{9};
+	static const uint8_t         COPC_RECORD_ID{1};
+	static constexpr const char* COPC_USER_ID = "copc";
+
+	bool CopcLoader::IsPutativeCOPCFile(const laszip_header* laszipHeader)
+	{
+		return laszipHeader->version_minor >= COPC_LAS_VERSION_MINOR
+		       && laszipHeader->point_data_format > COPC_LAS_DATA_FORMAT_GT
+		       && laszipHeader->point_data_format < COPC_LAS_DATA_FORMAT_LT
+		       && laszipHeader->number_of_variable_length_records > 0
+		       && IsCOPCVlr(laszipHeader->vlrs[0]);
+	}
+
+	/// Check if a given VLR is a COPC one
+	///
+	/// Notes: COPC VLR has to be at id 0 of the vlr array.
+	bool CopcLoader::IsCOPCVlr(const laszip_vlr_struct& vlr)
+	{
+		return (strcmp(COPC_USER_ID, vlr.user_id) == 0 && vlr.record_id == COPC_RECORD_ID);
+	}
+
 	CopcLoader::CopcLoader(const laszip_header* laszipHeader, const QString& fileName)
 	{
+		// Parse the info vlr
+		const laszip_vlr copcInfoVlr = laszipHeader->vlrs[0];
+		if (copcInfoVlr.record_length_after_header != Info::SIZE)
 		{
-			// parse the info vlr
-			const laszip_vlr copcInfoVlr = laszipHeader->vlrs[0];
-			if (copcInfoVlr.record_length_after_header != Info::SIZE)
+			ccLog::Warning("[LAS] laszip error: invalid Copc Info");
+			return;
+		}
+
+		// extract the COPC infos
+		QDataStream copcInfoData(QByteArray::fromRawData(reinterpret_cast<const char*>(copcInfoVlr.data), Info::SIZE));
+		copcInfoData >> m_copcInfo;
+
+		if (!m_copcInfo.extractExtent(m_extent))
+		{
+			ccLog::Warning("[LAS] laszip error: invalid Copc extent");
+			return;
+		}
+		m_ClippingConstraint = m_extent;
+
+		QFile copcFile;
+		copcFile.setFileName(fileName);
+
+		if (!copcFile.open(QFile::ReadOnly))
+		{
+			ccLog::Warning("[LAS] laszip error: Unable to open the LAS file to parse COPC pages");
+			return;
+		}
+
+		// Note: the root page is generally not the first entry of COPC EVRL data reccord,
+		// This means we cannot obtain the EVLR header by seeking straight to `root_hier_offset` minus the EVLR header size (60).
+		// To check the existence of the COPC EVLR hierarchy, we'll have to iterate thought all
+		// EVLRs starting from laszip_header::start_of_first_extended_variable_length_record...
+		// Here we do not check the existence of the EVLR header. we seek directly to the root_hier_offset
+		// and validate each seeking operation by checking for EOF which should be robust enough.
+		QDataStream        copcDataSource(&copcFile);
+		std::queue<Page>   pageQueue;
+		std::vector<Entry> entries;
+		// Enque the root page
+		pageQueue.emplace(m_copcInfo.root_hier_offset, m_copcInfo.root_hier_size / Entry::SIZE);
+
+		size_t numPages = 0;
+		while (!pageQueue.empty())
+		{
+			const Page& page = pageQueue.front();
+			++numPages;
+
+			copcFile.seek(page.offset);
+			if (copcDataSource.status() == QDataStream::Status::ReadPastEnd)
 			{
-				ccLog::Warning("[LAS] laszip error: invalid Copc Info");
+				ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF");
 				return;
 			}
-
-			// extract the COPC infos
-			QDataStream copcInfoData(QByteArray::fromRawData(reinterpret_cast<const char*>(copcInfoVlr.data), Info::SIZE));
-			copcInfoData >> m_copcInfo;
-
-			if (!m_copcInfo.extractExtent(m_extent))
+			entries.reserve(entries.size() + page.num_entries);
+			QDataStream entryDataStream(&copcFile);
+			for (size_t entry_id = 0; entry_id < page.num_entries; ++entry_id)
 			{
-				ccLog::Warning("[LAS] laszip error: invalid Copc extent");
-				return;
-			}
-			m_ClippingConstraint = m_extent;
+				Entry entry;
+				copcDataSource >> entry;
 
-			QFile copcFile;
-			copcFile.setFileName(fileName);
+				// Check the key validity and early return if it fails
+				if (!entry.key.isValid())
+				{
+					ccLog::Warning("[LAS] Failed to read the the COPC pages (invalid entry)");
+					return;
+				}
 
-			if (!copcFile.open(QFile::ReadOnly))
-			{
-				ccLog::Warning("[LAS] laszip error: Unable to open the LAS file to parse COPC pages");
-				return;
-			}
-
-			// Note: the root page is generally not the first entry of COPC EVRL data reccord,
-			// This means we cannot obtain the EVLR header by seeking straight to `root_hier_offset` minus the EVLR header size (60).
-			// To check the existence of the COPC EVLR hierarchy, we'll have to iterate thought all
-			// EVLRs starting from laszip_header::start_of_first_extended_variable_length_record...
-			// Here we do not check the existence of the EVLR header. we seek directly to the root_hier_offset
-			// and validate each seeking operation by checking for EOF which should be robust enough.
-			QDataStream        copcDataSource(&copcFile);
-			std::queue<Page>   pageQueue;
-			std::vector<Entry> entries;
-			// Enque the root page
-			pageQueue.emplace(m_copcInfo.root_hier_offset, m_copcInfo.root_hier_size / Entry::SIZE);
-
-			size_t numPages = 0;
-			while (!pageQueue.empty())
-			{
-				const Page& page = pageQueue.front();
-				++numPages;
-
-				copcFile.seek(page.offset);
+				m_maxLevel = std::max(m_maxLevel, entry.key.level);
 				if (copcDataSource.status() == QDataStream::Status::ReadPastEnd)
 				{
 					ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF");
 					return;
 				}
-				entries.reserve(entries.size() + page.num_entries);
-				QDataStream entryDataStream(&copcFile);
-				for (size_t entry_id = 0; entry_id < page.num_entries; ++entry_id)
+				if (entry.isHierarchyPage())
 				{
-					Entry entry;
-					copcDataSource >> entry;
-
-					// Check the key validity and early return if it fails
-					if (!entry.key.isValid())
-					{
-						ccLog::Warning("[LAS] Failed to read the the COPC pages (invalid entry)");
-						return;
-					}
-
-					m_maxLevel = std::max(m_maxLevel, entry.key.level);
-					if (copcDataSource.status() == QDataStream::Status::ReadPastEnd)
-					{
-						ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF");
-						return;
-					}
-					if (entry.isHierarchyPage())
-					{
-						pageQueue.emplace(entry.offset, entry.byte_size / Entry::SIZE);
-					}
-					else
-					{
-						m_numPoints += entry.point_count;
-						entries.push_back(std::move(entry));
-					}
+					pageQueue.emplace(entry.offset, entry.byte_size / Entry::SIZE);
 				}
-				pageQueue.pop();
+				else
+				{
+					m_numPoints += entry.point_count;
+					entries.push_back(std::move(entry));
+				}
 			}
+			pageQueue.pop();
+		}
 
-			ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
+		ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
 
-			// init our octree structure
-			generateChunktableIntervalsHierarchy(entries);
+		// init our octree structure
+		generateChunktableIntervalsHierarchy(entries);
 
-			// Consistency check: Check the number of points in the COPC data structure
-			// is equal to the number of points in the laszip header
-			if (LasDetails::TrueNumberOfPoints(laszipHeader) != m_numPoints)
-			{
-				ccLog::Warning("[LAS] Failed to read the the COPC file (number of points in COPC structure does not match the one in LAZ header)");
-				return;
-			}
+		// Consistency check: Check the number of points in the COPC data structure
+		// is equal to the number of points in the laszip header
+		if (LasDetails::TrueNumberOfPoints(laszipHeader) != m_numPoints)
+		{
+			ccLog::Warning("[LAS] Failed to read the the COPC file (number of points in COPC structure does not match the one in LAZ header)");
+			return;
+		}
 
-			// Consistency check: Does the octree have a root node?
-			if (!hasRoot())
-			{
-				ccLog::Warning("[LAS] COPC file Missing root node");
-				return;
-			}
+		// Consistency check: Does the octree have a root node?
+		if (!hasRoot())
+		{
+			ccLog::Warning("[LAS] COPC file Missing root node");
+			return;
+		}
 
-			// No this is considered as a valid file
-			m_isValid = true;
+		// No this is considered as a valid file
+		m_isValid = true;
 
-			// Fill m_levelPointCounts vector (used by UI to provide feedback)
-			m_levelPointCounts.resize(m_maxLevel + 1);
-			for (const auto& entry : entries)
-			{
-				m_levelPointCounts[entry.key.level] += entry.point_count;
-			}
+		// Fill m_levelPointCounts vector (used by UI to provide feedback)
+		m_levelPointCounts.resize(m_maxLevel + 1);
+		for (const auto& entry : entries)
+		{
+			m_levelPointCounts[entry.key.level] += entry.point_count;
+		}
 
-			// Consistency check: is the octree traversable
-			// Otherwise, we only issue a warning. We will simply not handle the non-traversable part.
-			if (!isTraversable())
-			{
-				ccLog::Warning("[LAS] COPC file contains unreachable nodes");
-			}
+		// Consistency check: is the octree traversable
+		// Otherwise, we only issue a warning. We will simply not handle the non-traversable part.
+		if (!isTraversable())
+		{
+			ccLog::Warning("[LAS] COPC file contains unreachable nodes");
 		}
 	}
 
 	void CopcLoader::generateChunktableIntervalsHierarchy(std::vector<Entry>& entries)
 	{
 		// Sort entries by offset to be able to get the first point of each chunk.
-		std::sort(std::begin(entries), std::end(entries), [](const Entry& a, const Entry& b)
-		          { return a.offset < b.offset; });
+		ParallelSort(std::begin(entries), std::end(entries), [](const Entry& a, const Entry& b)
+		             { return a.offset < b.offset; });
 		uint64_t starting_point = 0;
 		m_chunkIntervalsHierarchy.reserve(entries.size());
 		std::for_each(std::cbegin(entries), std::cend(entries), [&starting_point, this](const Entry& entry)
@@ -188,10 +211,10 @@ namespace copc
 			assert(valid);
 
 			// references for convenience
-			const auto aMin = m_ClippingConstraint.minCorner();
-			const auto aMax = m_ClippingConstraint.maxCorner();
-			const auto bMin = voxelExtent.minCorner();
-			const auto bMax = voxelExtent.maxCorner();
+			const auto& aMin = m_ClippingConstraint.minCorner();
+			const auto& aMax = m_ClippingConstraint.maxCorner();
+			const auto& bMin = voxelExtent.minCorner();
+			const auto& bMax = voxelExtent.maxCorner();
 
 			// works because all extents are supposed to be axis aligned
 			// test for inclusion
@@ -230,82 +253,6 @@ namespace copc
 				kv.second.filteredPointCount = 0; });
 	}
 
-/* TODO: create LOD
-	std::vector<ccGenericPointCloudLOD::Level> CopcLoader::createLOD()
-	{
-		size_t                                     maxNumLayers = (m_hasMaxLevelConstraint ? m_maxLevelConstraint : m_maxLevel) + 1;
-		std::vector<ccGenericPointCloudLOD::Level> lodLevels(maxNumLayers);
-
-		// keep track of the VoxelKey by inserting them in the same order than CC LOD Nodes.
-		std::vector<std::vector<VoxelKey>> lodKeys(maxNumLayers);
-		lodLevels[0].data.emplace_back(0);
-		lodKeys[0].push_back(VoxelKey::Root());
-
-		// First we populate the root level with the root node.
-		// root existence in copc hierarchy is tested in the constructor
-		// so the indexing operator should not fail.
-		const auto& rootInterval = m_chunkIntervalsHierarchy[VoxelKey::Root()];
-
-		// Create the rootNode
-		auto& rootNode          = lodLevels[0].data.back();
-		rootNode.pointCount     = rootInterval.pointCount - rootInterval.filteredPointCount;
-		rootNode.firstCodeIndex = rootInterval.pointOffsetInCCCloud;
-
-		// Compute the enclosing sphere for the root node,
-		// sphere could be computed "exactly" by retrieving each point of the root copc entry.
-		// we simply use the enclosing sphere of the node/voxel but we should try to left the possibility to compute it
-		// elsewhere
-		// the sphere center is a float in the LOD struct, so we do not use PointCoordinateType
-		// but we shift the center and force it to floating.
-		// We do no take into account Clipping.
-		CCVector3f rootSphereCenter(static_cast<float>(m_copcInfo.center_x + m_globalShift.x),
-		                            static_cast<float>(m_copcInfo.center_y + m_globalShift.y),
-		                            static_cast<float>(m_copcInfo.center_z + m_globalShift.z));
-
-		// init the sphere for the rootNode
-		rootNode.radius = static_cast<float>(m_extent.getDiagNorm()) / 2.f; // same as halfsize * sqrt(3.0)
-		rootNode.center = rootSphereCenter;
-
-		for (size_t levelIndex = 0; levelIndex < maxNumLayers - 1; ++levelIndex)
-		{
-			auto&  currLevel      = lodLevels[levelIndex];
-			size_t nextLevelIndex = levelIndex + 1;
-
-			// test the 8 children for each node of current layer and insert them in the next layer
-			for (size_t nodeIndex = 0; nodeIndex < currLevel.data.size(); ++nodeIndex)
-			{
-				auto&       parentNode = currLevel.data[nodeIndex];
-				const auto& parentKey  = lodKeys[levelIndex][nodeIndex];
-				for (const auto& childKey : parentKey.childrenKeys())
-				{
-					const auto& maybeChild = m_chunkIntervalsHierarchy.find(childKey);
-					if (maybeChild != std::end(m_chunkIntervalsHierarchy))
-					{
-						const auto& childInterval = maybeChild->second;
-						if (maybeChild->second.status != ChunkInterval::eFilterStatus::FAIL)
-						{
-							lodKeys[nextLevelIndex].push_back(childKey);
-							lodLevels[nextLevelIndex].data.emplace_back(nextLevelIndex);
-							auto& newNode          = lodLevels[nextLevelIndex].data.back();
-							newNode.firstCodeIndex = childInterval.pointOffsetInCCCloud;
-							newNode.pointCount     = childInterval.pointCount - childInterval.filteredPointCount;
-
-							LasDetails::UnscaledExtent voxelExtent;
-							childKey.extractExtent(m_extent, voxelExtent);
-							newNode.radius                                   = static_cast<float>(voxelExtent.getDiagNorm()) / 2.f;
-							const CCVector3d centerd                         = voxelExtent.getCenter();
-							newNode.center                                   = CCVector3f(static_cast<float>(centerd.x + m_globalShift.x),
-                                                        static_cast<float>(centerd.y + m_globalShift.y),
-                                                        static_cast<float>(centerd.z + m_globalShift.z));
-							parentNode.childIndexes[parentNode.childCount++] = lodKeys[nextLevelIndex].size() - 1;
-						}
-					}
-				}
-			}
-		}
-		return lodLevels;
-	}*/
-
 	void CopcLoader::propagateFailureFlag(const VoxelKey& voxelkey)
 	{
 		if (voxelkey.level > m_maxLevel)
@@ -323,7 +270,7 @@ namespace copc
 		}
 	}
 
-	void CopcLoader::recurse(const VoxelKey& voxelkey, std::unordered_set<VoxelKey, std::hash<VoxelKey>>& visitedNodes)
+	void CopcLoader::recurse(const VoxelKey& voxelkey, std::unordered_set<VoxelKey, std::hash<VoxelKey>>& visitedNodes) const
 	{
 		if (voxelkey.level <= m_maxLevel && m_chunkIntervalsHierarchy.count(voxelkey))
 		{
@@ -335,7 +282,7 @@ namespace copc
 		}
 	}
 
-	bool CopcLoader::isTraversable()
+	bool CopcLoader::isTraversable() const
 	{
 		std::unordered_set<VoxelKey> visitedNodes;
 		recurse(VoxelKey::Root(), visitedNodes);
@@ -392,8 +339,8 @@ namespace copc
 		               { return std::ref(kv.second); });
 
 		// sort them by starting point to optimize seeking;
-		std::sort(std::begin(sortedChunkIntervalSet), std::end(sortedChunkIntervalSet), [](const ChunkInterval& a, const ChunkInterval& b)
-		          { return a.pointOffsetInFile < b.pointOffsetInFile; });
+		ParallelSort(std::begin(sortedChunkIntervalSet), std::end(sortedChunkIntervalSet), [](const ChunkInterval& a, const ChunkInterval& b)
+		             { return a.pointOffsetInFile < b.pointOffsetInFile; });
 	}
 
 } // namespace copc

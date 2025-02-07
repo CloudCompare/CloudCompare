@@ -21,7 +21,6 @@
 #include "CopcVlrs.h"
 #include "LasDetails.h"
 
-// CC
 // Qt
 #include <QFile>
 
@@ -43,8 +42,6 @@ using namespace LasDetails;
 
 namespace copc
 {
-	using MyBox = CCCoreLib::BoundingBoxTpl<double>;
-
 	class CopcLoader
 	{
 	  public: // methods

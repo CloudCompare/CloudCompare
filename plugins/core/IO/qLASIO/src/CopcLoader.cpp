@@ -16,14 +16,8 @@
 // #                                                                        #
 // ##########################################################################
 
-// QLASIO
 #include "CopcLoader.h"
-
 #include "CopcVlrs.h"
-
-// CCCoreLib
-#include <CCGeom.h>
-#include <ccLog.h>
 
 // System
 #include <algorithm>

@@ -23,7 +23,6 @@
 
 // CCCoreLib
 #include <CCGeom.h>
-#include <ParallelSort.h>
 #include <ccLog.h>
 
 // System
@@ -184,7 +183,7 @@ namespace copc
 	void CopcLoader::generateChunktableIntervalsHierarchy(std::vector<Entry>& entries)
 	{
 		// Sort entries by offset to be able to get the first point of each chunk.
-		ParallelSort(std::begin(entries), std::end(entries), [](const Entry& a, const Entry& b)
+		std::sort(std::begin(entries), std::end(entries), [](const Entry& a, const Entry& b)
 		             { return a.offset < b.offset; });
 		uint64_t starting_point = 0;
 		m_chunkIntervalsHierarchy.reserve(entries.size());
@@ -339,7 +338,7 @@ namespace copc
 		               { return std::ref(kv.second); });
 
 		// sort them by starting point to optimize seeking;
-		ParallelSort(std::begin(sortedChunkIntervalSet), std::end(sortedChunkIntervalSet), [](const ChunkInterval& a, const ChunkInterval& b)
+		std::sort(std::begin(sortedChunkIntervalSet), std::end(sortedChunkIntervalSet), [](const ChunkInterval& a, const ChunkInterval& b)
 		             { return a.pointOffsetInFile < b.pointOffsetInFile; });
 	}
 

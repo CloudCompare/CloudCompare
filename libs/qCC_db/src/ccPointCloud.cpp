@@ -3033,8 +3033,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				&&	MACRO_LODActivated(context)
 				)
 			{
-				bool skipLoD = false;
-
 				//is there a LoD structure associated yet?
 				if (!m_lod || !m_lod->isBroken())
 				{
@@ -3099,7 +3097,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
-				if (!toDisplay.indexMap && !skipLoD)
+				if (!toDisplay.indexMap)
 				{
 					//if we don't have a LoD map, we can only display points at level 0!
 					if (context.currentLODLevel != 0)

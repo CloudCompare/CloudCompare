@@ -654,14 +654,15 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 					radii.push_back(static_cast<PointCoordinateType>(scale / 2));
 				}
 
-				outputName += QString(" scale=[%1:%2:%3]").arg(startScale).arg(step).arg(stopScale);
+				outputName += QString(" [Multi-scale norms:{%1:%2:%3}]").arg(startScale).arg(step).arg(stopScale);
 
 				normalScaleSF = new ccScalarField(NORMAL_SCALE_SF_NAME);
 				normalScaleSF->link(); //will be released anyway at the end of the process
 			}
 			else
 			{
-				outputName += QString(" scale=%1").arg(normalScale);
+				assert(dlg.normalScaleDoubleSpinBox->isEnabled());
+				outputName += QString(" [Norm. scale=%1]").arg(normalScale);
 				//otherwise, we use a unique scale by default
 				radii.push_back(static_cast<PointCoordinateType>(normalScale / 2)); //we want the radius in fact ;)
 			}
@@ -739,7 +740,6 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 		case qM3C2Normals::USE_CLOUD1_NORMALS:
 		{
-			outputName += QString(" scale=%1").arg(normalScale);
 			ccPointCloud* sourceCloud = (corePointsHaveBeenSubsampled ? s_M3C2Params.corePoints : cloud1);
 			s_M3C2Params.coreNormals = sourceCloud->normals();
 			if (s_M3C2Params.coreNormals)
@@ -768,7 +768,6 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 
 		case qM3C2Normals::VERT_MODE:
 		{
-			outputName += QString(" scale=%1").arg(normalScale);
 			outputName += QString(" [VERTICAL]");
 
 			//nothing to do
@@ -783,6 +782,8 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 			error = true;
 		}
 	}
+
+	outputName += QString(" Proj. scale=%1").arg(projectionScale);
 
 	if (!error && s_M3C2Params.coreNormals && corePointsHaveBeenSubsampled)
 	{

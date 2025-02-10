@@ -214,7 +214,6 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent/*=nullptr*/, bool silen
 	, m_validModelviewMatrix(false)
 	, m_validProjectionMatrix(false)
 	, m_LODEnabled(true)
-	, m_LODAutoDisable(false)
 	, m_shouldBeRefreshed(false)
 	, m_mouseMoved(false)
 	, m_mouseButtonPressed(false)
@@ -813,7 +812,7 @@ void ccGLWindowInterface::onResizeGL(int w, int h)
 		logGLError("ccGLWindowInterface::onResizeGL");
 	}
 
-	setLODEnabled(true, true);
+	setLODEnabled(true);
 	m_currentLODState.level = 0;
 	if (m_hotZone)
 	{
@@ -922,7 +921,7 @@ void ccGLWindowInterface::setDisplayParameters(const ccGui::ParamStruct &params,
 	}
 }
 
-bool ccGLWindowInterface::setLODEnabled(bool state, bool autoDisable/*=false*/)
+bool ccGLWindowInterface::setLODEnabled(bool state)
 {
 	if (state && (!m_fbo || (m_stereoModeEnabled && !m_stereoParams.isAnaglyph() && !m_fbo2)))
 	{
@@ -931,7 +930,6 @@ bool ccGLWindowInterface::setLODEnabled(bool state, bool autoDisable/*=false*/)
 	}
 
 	m_LODEnabled = state;
-	m_LODAutoDisable = autoDisable;
 	return true;
 }
 
@@ -1356,7 +1354,7 @@ void ccGLWindowInterface::setPivotPoint(const CCVector3d& P,
 			//in orthographic mode, make sure the level of 'zoom' is maintained by repositioning the camera
 			newCameraPos.z = m_viewportParams.getFocalDistance() + P.z;
 		}
-		
+
 		setCameraPos(newCameraPos); //will also update the pixel size
 	}
 
@@ -1415,7 +1413,7 @@ void ccGLWindowInterface::computeColorRampAreaLimits(int& yStart, int& yStop) co
 	{
 		yStart += 2 * defaultMargin; //we still add a margin
 	}
-	
+
 	//bottom: only the trihedron
 	yStop = glHeight() - defaultMargin;
 	if (trihedronIsDisplayed())
@@ -1586,7 +1584,7 @@ ccGLMatrixd ccGLWindowInterface::computeProjectionMatrix(bool withGLfeatures, Pr
 
 			//on input 'eyeOffset' should be -1 (left) or +1 (right)
 			*eyeOffset *= eyeSeperation;
-			
+
 			frustumAsymmetry = (*eyeOffset) * zNear / convergence;
 
 			//if (*eyeOffset < 0.0)
@@ -1850,7 +1848,7 @@ void ccGLWindowInterface::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/, 
 		m_defaultCursorShape = displayParams.pickingCursorShape;
 	}
 	break;
-	
+
 	default:
 		break;
 	}
@@ -1993,48 +1991,48 @@ bool ccGLWindowInterface::processClickableItems(int x, int y)
 		//nothing to do
 	}
 	break;
-	
+
 	case ClickableItem::INCREASE_POINT_SIZE:
 	{
 		setPointSize(m_viewportParams.defaultPointSize + 1.0f);
 		redraw();
 	}
 	return true;
-	
+
 	case ClickableItem::DECREASE_POINT_SIZE:
 	{
 		setPointSize(m_viewportParams.defaultPointSize - 1.0f);
 		redraw();
 	}
 	return true;
-	
+
 	case ClickableItem::INCREASE_LINE_WIDTH:
 	{
 		setLineWidth(m_viewportParams.defaultLineWidth + 1.0f);
 		redraw();
 	}
 	return true;
-	
+
 	case ClickableItem::DECREASE_LINE_WIDTH:
 	{
 		setLineWidth(m_viewportParams.defaultLineWidth - 1.0f);
 		redraw();
 	}
 	return true;
-	
+
 	case ClickableItem::LEAVE_BUBBLE_VIEW_MODE:
 	{
 		setBubbleViewMode(false);
 		redraw();
 	}
 	return true;
-	
+
 	case ClickableItem::LEAVE_FULLSCREEN_MODE:
 	{
 		toggleExclusiveFullScreen(false);
 	}
 	return true;
-	
+
 	default:
 	{
 		//unhandled item?!
@@ -2078,7 +2076,7 @@ void ccGLWindowInterface::onWheelEvent(float wheelDelta_deg)
 		moveCamera(v);
 	}
 
-	setLODEnabled(true, true);
+	setLODEnabled(true);
 	m_currentLODState.level = 0;
 
 	redraw();
@@ -2706,12 +2704,12 @@ void ccGLWindowInterface::displayNewMessage(const QString& message,
 void ccGLWindowInterface::setPointSize(float size, bool silent/*=false*/)
 {
 	float newSize = std::max(std::min(size, MAX_POINT_SIZE_F), MIN_POINT_SIZE_F);
-	
+
 	if (m_viewportParams.defaultPointSize != newSize)
 	{
 		m_viewportParams.defaultPointSize = newSize;
 		deprecate3DLayer();
-	
+
 		if (!silent)
 		{
 			displayNewMessage(	QString("New default point size: %1").arg(newSize),
@@ -2743,7 +2741,7 @@ void ccGLWindowInterface::setLineWidth(float width, bool silent/*=false*/)
 			ccLog::Warning(QString("Line width is too big: %1/%2").arg(width).arg(MAX_LINE_WIDTH_F));
 	}
 	float newWidth = std::max(std::min(width, MAX_LINE_WIDTH_F), MIN_LINE_WIDTH_F);
-	
+
 	if (m_viewportParams.defaultLineWidth != newWidth)
 	{
 		m_viewportParams.defaultLineWidth = newWidth;
@@ -3097,7 +3095,7 @@ void ccGLWindowInterface::setBubbleViewFov(float fov_deg)
 	{
 		return;
 	}
-	
+
 	if (fov_deg != m_bubbleViewFov_deg)
 	{
 		m_bubbleViewFov_deg = fov_deg;
@@ -3494,7 +3492,7 @@ void ccGLWindowInterface::displayText(	QString text,
 			x2 -= rect.width() / 2;
 		else if (align & ALIGN_HRIGHT)
 			x2 -= rect.width();
-		
+
 		if (align & ALIGN_VMIDDLE)
 			y2 -= textHeight / 2;
 		else if (align & ALIGN_VBOTTOM)
@@ -3534,7 +3532,7 @@ void ccGLWindowInterface::displayText(	QString text,
 			glFunc->glPopMatrix();
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPopMatrix();
-			
+
 			glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 		}
 	}
@@ -3620,12 +3618,12 @@ ccGLWindowInterface::StereoParams::StereoParams()
 {}
 
 void ccGLWindowInterface::renderText(int x, int y, const QString & str, uint16_t uniqueID/*=0*/, const QFont & font/*=QFont()*/)
-{   
+{
 	if (m_activeFbo)
 	{
 		m_activeFbo->start();
 	}
-   
+
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
@@ -3711,12 +3709,12 @@ void ccGLWindowInterface::renderText(int x, int y, const QString & str, uint16_t
 		glFunc->glGetFloatv(GL_CURRENT_COLOR, glColor);
 		QColor color;
 		color.setRgbF( glColor[0], glColor[1], glColor[2], glColor[3] );
-		
+
 		painter.setPen( color );
 		painter.setFont( font );
 		painter.drawText(imageRect, Qt::AlignLeft, str );
 	}
-	
+
 	//and then we convert this QImage to a texture!
 	{
 		glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
@@ -3776,7 +3774,7 @@ void ccGLWindowInterface::renderText(int x, int y, const QString & str, uint16_t
 		glFunc->glPopMatrix();
 		glFunc->glMatrixMode(GL_MODELVIEW);
 		glFunc->glPopMatrix();
-		
+
 		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT
 	}
 }
@@ -3787,7 +3785,7 @@ void ccGLWindowInterface::renderText(double x, double y, double z, const QString
 
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
-	
+
 	//get the actual viewport / matrices
 	ccGLCameraParameters camera;
 	glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
@@ -3848,7 +3846,7 @@ void ccGLWindowInterface::toggleAutoRefresh(bool state, int period_ms/*=0*/)
 		//nothing to do
 		return;
 	}
-	
+
 	m_autoRefresh = state;
 	if (m_autoRefresh)
 	{
@@ -4090,7 +4088,7 @@ bool ccGLWindowInterface::getClick3DPos(int x, int y, CCVector3d& P3D, bool useP
 	{
 		return false;
 	}
-	
+
 	CCVector3d P2D(x, y, glDepth);
 
 	ccGLCameraParameters camera;
@@ -4700,11 +4698,6 @@ void ccGLWindowInterface::doPaintGL()
 	{
 		//we have reached the final level
 		stopLODCycle();
-
-		if (m_LODAutoDisable)
-		{
-			setLODEnabled(false);
-		}
 	}
 
 	if (isFrameRateTestInProgress())
@@ -6097,7 +6090,7 @@ bool ccGLWindowInterface::initFBO(int w, int h)
 		ccLog::Warning("[FBO] Initialization failed!");
 		m_alwaysUseFBO = false;
 		removeFBOSafe(m_fbo2);
-		setLODEnabled(false, false);
+		setLODEnabled(false);
 		return false;
 	}
 
@@ -6116,7 +6109,7 @@ bool ccGLWindowInterface::initFBO(int w, int h)
 			ccLog::Warning("[FBO] Failed to initialize secondary FBO!");
 			m_alwaysUseFBO = false;
 			removeFBOSafe(m_fbo);
-			setLODEnabled(false, false);
+			setLODEnabled(false);
 			return false;
 		}
 	}
@@ -6270,7 +6263,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 
 	int dx = x - m_lastMousePos.x();
 	int dy = y - m_lastMousePos.y();
-	setLODEnabled(true, false);
+	setLODEnabled(true);
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -6808,14 +6801,14 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 
 	if (doRedraw)
 	{
-		setLODEnabled(true, true);
+		setLODEnabled(true);
 		m_currentLODState.level = 0;
 
 		redraw();
 	}
 }
 
-//draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 
+//draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY)
 static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
 	assert(context);

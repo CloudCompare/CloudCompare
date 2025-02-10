@@ -587,17 +587,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 	LasMetadata::SaveMetadataInto(*laszipHeader, *pointCloud, availableExtraScalarFields);
 
-	// TODO LOD
-	/*
-	if (copcLoader && m_openDialog.copcLoDCheckbox->isChecked())
-	{
-		const auto            lodLevels = copcLoader->createLOD();
-		std::vector<unsigned> indices(pointCloud->size(), 0);
-		// TODO RJ remove indices in this init call as this is no longer used
-		// TODO shrink lod to prune void cells
-		pointCloud->initLOD(lodLevels, indices);
-	}*/
-
 	container.addChild(pointCloud.release());
 
 	if (error == CC_FERR_THIRD_PARTY_LIB_FAILURE)

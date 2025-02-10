@@ -92,7 +92,6 @@ namespace copc
 		uint64_t root_hier_offset{0};
 		uint64_t root_hier_size{0};
 
-		/// TODO
 		double gpstime_minimum{0.0};
 		double gpstime_maximum{0.0};
 

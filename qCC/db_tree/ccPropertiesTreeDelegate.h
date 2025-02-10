@@ -111,6 +111,7 @@ public:
 							OBJECT_CLOUD_NORMAL_COLOR				,
 							OBJECT_CLOUD_NORMAL_LENGTH				,
 							OBJECT_CLOUD_DRAW_NORMALS				,
+							OBJECT_CLOUD_USE_LOD					,
 	};
 
 	//! Default constructor
@@ -124,7 +125,7 @@ public:
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-	
+
 	void unbind();
 
 	//! Fill property view with QItems corresponding to object's type
@@ -144,7 +145,7 @@ private:
 	static const char* s_sfColor;
 	static const char* s_defaultPointSizeString;
 	static const char* s_defaultPolyWidthSizeString;
-	
+
 	void updateItem(QStandardItem*);
 	void scalarFieldChanged(int);
 	void colorScaleChanged(int);
@@ -183,6 +184,7 @@ private:
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
 	void fillWithDrawNormals(ccGenericPointCloud*);
+	void fillWithPointCloudLOD(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);
 	void fillWithMesh(const ccGenericMesh*);
 	void fillWithFacet(const ccFacet*);
@@ -203,7 +205,7 @@ private:
 	void fillWithMetaData(const ccObject*);
 	void fillWithShifted(const ccShiftedObject*);
 	void fillWithCoordinateSystem(const ccCoordinateSystem*);
-	
+
 	template<class Type, int N, class ComponentType>
 	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);
 

@@ -28,13 +28,11 @@
 //local
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
-#include "ccColorScalesManager.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccFrustum.h"
 #include "ccGBLSensor.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericMesh.h"
-#include "ccImage.h"
 #include "ccKdTree.h"
 #include "ccMaterial.h"
 #include "ccMesh.h"
@@ -150,6 +148,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
 	, m_fwfData(nullptr)
+	, m_useLODRendering(true)
 	, m_normalsDrawnAsLines(false)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
@@ -3029,6 +3028,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
+				&&	m_useLODRendering
 				&&	toDisplay.count > context.minLODPointCount
 				&&	MACRO_LODActivated(context)
 				)
@@ -6453,6 +6453,25 @@ void ccPointCloud::clearLOD()
 	{
 		m_lod->clear();
 	}
+}
+
+bool ccPointCloud::hasUsableLOD() const
+{
+	if(m_lod && m_lod->isInitialized())
+	{
+		return true;
+	}
+	return false;
+}
+
+bool ccPointCloud::useLODRendering() const
+{
+	return m_useLODRendering;
+}
+
+void ccPointCloud::setLODRendering(bool value)
+{
+	m_useLODRendering = value;
 }
 
 void ccPointCloud::clearFWFData()

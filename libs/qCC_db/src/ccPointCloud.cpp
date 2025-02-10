@@ -6457,7 +6457,7 @@ void ccPointCloud::clearLOD()
 
 bool ccPointCloud::hasUsableLOD() const
 {
-	if(m_lod && m_lod->isInitialized())
+	if (m_lod && m_lod->isInitialized())
 	{
 		return true;
 	}

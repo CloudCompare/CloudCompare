@@ -628,7 +628,7 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 			fillWithDrawNormals(_obj);
 		}
 
-		if(cloud->hasUsableLOD())
+		if (cloud->hasUsableLOD())
 		{
 			fillWithPointCloudLOD(_obj);
 		}
@@ -663,14 +663,15 @@ void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
 
 void ccPropertiesTreeDelegate::fillWithPointCloudLOD(ccGenericPointCloud* _obj)
 {
-	assert(_obj && m_model);
 	if (!_obj || !m_model)
 	{
+		assert(false);
 		return;
 	}
-	assert(_obj->isA(CC_TYPES::POINT_CLOUD));
+
 	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
 	{
+		assert(false);
 		return;
 	}
 
@@ -2290,9 +2291,9 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_CLOUD_DRAW_NORMALS:
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
-		bool isChecked = (item->checkState() == Qt::Checked);
 		if (cloud)
 		{
+			bool isChecked = (item->checkState() == Qt::Checked);
 			static_cast<ccPointCloud*>(cloud)->showNormalsAsLines(isChecked);
 		}
 	}
@@ -2301,9 +2302,9 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_CLOUD_USE_LOD:
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
-		bool isChecked = (item->checkState() == Qt::Checked);
 		if (cloud)
 		{
+			bool isChecked = (item->checkState() == Qt::Checked);
 			static_cast<ccPointCloud*>(cloud)->setLODRendering(isChecked);
 		}
 	}

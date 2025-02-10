@@ -100,10 +100,19 @@ namespace copc
 			copcFile.seek(page.offset);
 			if (copcDataSource.status() == QDataStream::Status::ReadPastEnd)
 			{
-				ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF");
+				ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF)");
 				return;
 			}
-			entries.reserve(entries.size() + page.num_entries);
+			try
+			{
+				entries.reserve(entries.size() + page.num_entries);
+			}
+			catch (const std::bad_alloc&)
+			{
+				entries.clear();
+				ccLog::Warning("[LAS] Failed to allocate meemory for the COPC datastructure");
+				return;
+			}
 			QDataStream entryDataStream(&copcFile);
 			for (size_t entry_id = 0; entry_id < page.num_entries; ++entry_id)
 			{
@@ -120,7 +129,7 @@ namespace copc
 				m_maxLevel = std::max(m_maxLevel, entry.key.level);
 				if (copcDataSource.status() == QDataStream::Status::ReadPastEnd)
 				{
-					ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF");
+					ccLog::Warning("[LAS] Failed to read the the COPC pages (unexpected EOF)");
 					return;
 				}
 				if (entry.isHierarchyPage())
@@ -138,8 +147,18 @@ namespace copc
 
 		ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
 
-		// init our octree structure
-		generateChunktableIntervalsHierarchy(entries);
+		try
+		{
+			// init our "octree" structure
+			generateChunktableIntervalsHierarchy(entries);
+		}
+		catch (const std::bad_alloc&)
+		{
+			entries.clear();
+			m_chunkIntervalsHierarchy.clear();
+			ccLog::Warning("[LAS] Failed to allocate meemory for the COPC datastructure");
+			return;
+		}
 
 		// Consistency check: Check the number of points in the COPC data structure
 		// is equal to the number of points in the laszip header
@@ -152,7 +171,7 @@ namespace copc
 		// Consistency check: Does the octree have a root node?
 		if (!hasRoot())
 		{
-			ccLog::Warning("[LAS] COPC file Missing root node");
+			ccLog::Warning("[LAS] missing root node in the COPC file");
 			return;
 		}
 

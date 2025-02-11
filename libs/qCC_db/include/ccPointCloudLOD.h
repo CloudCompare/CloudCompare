@@ -25,12 +25,14 @@
 #include <QMutex>
 
 //system
+#include <memory>
+#include <qwindow.h>
 #include <stdint.h>
 #include <array>
-#include <functional>
 
 class ccPointCloud;
 class ccPointCloudLODThread;
+class ccGenericPointCloudLODVisibilityFlagger;
 
 //! Level descriptor
 struct LODLevelDesc
@@ -45,23 +47,21 @@ struct LODLevelDesc
 	unsigned count;
 };
 
+
 //! L.O.D. indexes set
 typedef std::vector<unsigned> LODIndexSet;
 
 //! L.O.D. (Level of Detail) structure
-class ccPointCloudLOD
+class ccGenericPointCloudLOD
 {
 public:
 	//! Structure initialization state
 	enum State { NOT_INITIALIZED, UNDER_CONSTRUCTION, INITIALIZED, BROKEN };
 
 	//! Default constructor
-	ccPointCloudLOD();
+	ccGenericPointCloudLOD();
 	//! Destructor
-	~ccPointCloudLOD();
-
-	//! Initializes the construction process (asynchronous)
-	bool init(ccPointCloud* cloud);
+	virtual ~ccGenericPointCloudLOD() = default;
 
 	//! Locks the structure
 	inline void lock() const
@@ -83,14 +83,11 @@ public:
 		return state;
 	}
 
-	//! Clears the structure
-	void clear();
+	//! Initializes the construction process if needed (could be asynchronous)
+	virtual bool init(ccPointCloud* cloud) = 0;
 
-	//! Returns the associated octree
-	const ccOctree::Shared& octree() const
-	{
-		return m_octree;
-	}
+	//! Clears the structure
+	virtual void clear() = 0;
 
 	//! Returns whether the structure is null (i.e. not under construction or initialized) or not
 	inline bool isNull() const { return getState() == NOT_INITIALIZED; }
@@ -113,7 +110,7 @@ public:
 
 	//! Undefined visibility flag
 	static const unsigned char UNDEFINED = 255;
-	
+
 	//! Octree 'tree' node
 	struct Node
 	{
@@ -161,13 +158,19 @@ public:
 
 	inline const Node& root() const { return node(0, 0); }
 
+	//! Level data
+	struct Level
+	{
+		std::vector<Node> data;
+	};
+
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
 	**/
-	uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = nullptr);
+	virtual uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = nullptr);
 
 	//! Builds an index map with the remaining visible points
-	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel);
+	virtual LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) = 0;
 
 	//! Returns the last index map
 	inline const LODIndexSet& getLasIndexMap() const { return m_lastIndexMap; }
@@ -176,20 +179,18 @@ public:
 	inline bool allDisplayed() const { return m_currentState.displayedPoints >= m_currentState.visiblePoints; }
 
 	//! Returns the memory used by the structure (in bytes)
-	size_t memory() const;
+	virtual size_t memory() const;
 
 protected: //methods
 
-	friend ccPointCloudLODThread;
-
-	//! Reserves memory
-	bool initInternal(ccOctree::Shared octree);
+	//! Factory to create the  visibilityFlagger (avoid templating)
+	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) = 0;
 
 	//! Sets the current state
 	inline void setState(State state) { lock(); m_state = state; unlock(); }
 
 	//! Clears the internal (nodes) data
-	void clearData();
+	virtual void clearData();
 
 	//! Reserves a new cell at a given level
 	/** \return the new cell index in the array corresponding to this level (see m_levels)
@@ -204,16 +205,7 @@ protected: //methods
 	**/
 	void resetVisibility();
 
-	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
-	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
-
 protected: //members
-
-	//! Level data
-	struct Level
-	{
-		std::vector<Node> data;
-	};
 
 	//! Per-level cells data
 	std::vector<Level> m_levels;
@@ -244,14 +236,8 @@ protected: //members
 	//! Index map
 	LODIndexSet m_indexMap;
 
-	//! Last index map (pointer on)
+	//! Last index map
 	LODIndexSet m_lastIndexMap;
-
-	//! Associated octree
-	ccOctree::Shared m_octree;
-
-	//! Computing thread
-	ccPointCloudLODThread* m_thread;
 
 	//! For concurrent access
 	mutable QMutex m_mutex;
@@ -259,3 +245,208 @@ protected: //members
 	//! State
 	State m_state;
 };
+
+
+class ccGenericPointCloudLODVisibilityFlagger
+{
+public:
+
+	 ccGenericPointCloudLODVisibilityFlagger(	ccGenericPointCloudLOD& lod,
+									const Frustum& frustum,
+									unsigned char maxLevel)
+		: m_lod(lod)
+		, m_frustum(frustum)
+		, m_maxLevel(maxLevel)
+		, m_hasClipPlanes(false)
+	{}
+
+	void setClipPlanes(const ccClipPlaneSet& clipPlanes)
+	{
+		try
+		{
+			m_clipPlanes = clipPlanes;
+		}
+		catch (const std::bad_alloc&)
+		{
+			//not enough memory
+			m_hasClipPlanes = false;
+		}
+		m_hasClipPlanes = !m_clipPlanes.empty();
+	}
+
+	void propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag)
+	{
+		node.intersection = flag;
+
+		if (node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					propagateFlag(m_lod.node(node.childIndexes[i], node.level + 1), flag);
+				}
+			}
+		}
+	}
+
+	virtual uint32_t flag(ccGenericPointCloudLOD::Node& node)
+	{
+		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
+		if (m_hasClipPlanes && node.intersection != Frustum::OUTSIDE)
+		{
+			for (const ccClipPlane& clipPlane : m_clipPlanes)
+			{
+				//distance from center to clip plane
+				//we assume the plane normal (= 3 first coefficients) is normalized!
+				double dist = clipPlane.equation.x * node.center.x
+							+ clipPlane.equation.y * node.center.y
+							+ clipPlane.equation.z * node.center.z
+							+ clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
+
+				if (dist < node.radius)
+				{
+					if (dist <= -node.radius)
+					{
+						node.intersection = Frustum::OUTSIDE;
+						break;
+					}
+					else
+					{
+						node.intersection = Frustum::INTERSECT;
+					}
+				}
+			}
+		}
+
+		uint32_t visibleCount = 0;
+		switch (node.intersection)
+		{
+		case Frustum::INSIDE:
+			visibleCount = node.pointCount;
+			//no need to propagate the visibility to the children as the default value should already be 'INSIDE'
+			break;
+
+		case Frustum::INTERSECT:
+			//we have to test the children
+			{
+				if (node.level < m_maxLevel && node.childCount)
+				{
+					for (int i = 0; i < 8; ++i)
+					{
+						if (node.childIndexes[i] >= 0)
+						{
+							ccGenericPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
+							visibleCount += flag(childNode);
+						}
+					}
+
+					if (visibleCount == 0)
+					{
+						//as no point is visible we can flag this node as being outside/invisible
+						node.intersection = Frustum::OUTSIDE;
+					}
+				}
+				else
+				{
+					//we have to consider that all points are visible
+					visibleCount = node.pointCount;
+				}
+			}
+			break;
+
+		case Frustum::OUTSIDE:
+			//be sure that all children nodes are flagged as outside!
+			propagateFlag(node, Frustum::OUTSIDE);
+			break;
+		}
+
+		return visibleCount;
+	}
+
+	ccGenericPointCloudLOD& m_lod;
+	const Frustum& m_frustum;
+	unsigned char m_maxLevel;
+	ccClipPlaneSet m_clipPlanes;
+	bool m_hasClipPlanes;
+};
+
+
+//! The "original" CloudCompare LOD
+class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
+{
+public: // methods
+	ccInternalPointCloudLOD();
+
+	~ccInternalPointCloudLOD();
+
+	//! Initializes the construction process (asynchronous)
+	bool init(ccPointCloud* cloud) override;
+
+	void clear() override;
+
+	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
+
+protected: //methods
+	//! Reserves memory, used internally by the LOD construction thread
+	bool initInternal(ccOctree::Shared octree);
+
+	//! cleanData override
+	void clearData() override;
+
+	//! return the flagger used by this LOD
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD &lod, const Frustum &frustum, unsigned char maxLevel) override
+	{
+		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
+	}
+
+	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
+	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
+
+protected: //members
+	//! friend class
+	friend ccPointCloudLODThread;
+
+	//! Associated octree
+	ccOctree::Shared m_octree;
+
+	//! Computing thread
+	ccPointCloudLODThread* m_thread;
+};
+
+//! The most common LOD datastructure (in the litterature and implementations)
+//!
+//! This kind of structure is used by Potree and entwine (thus COPC, untwine..).
+//! Each leayers contains a subsambled version of the point cloud.
+//! Cloud resolution increases as we go deeper into the octree levels.
+//! It's additive, union of all points of all the cells (at all levels) = the point cloud
+//!
+//! The creation of this kind of structure is not implemented in CC
+//! but it should be easy in core in CC using CC octree and using a subsampling
+//! strategy (either gridding or poisson sampling) bottom up.
+//! Out of core creation would requiere more work in order to have efficiency
+//! in computation and file I/O.
+
+// the declaration should look like this.
+/*class NestedOctreePointCloudLOD : ccGenericPointCloudLOD
+{
+		NestedOctreePointCloudLOD();
+
+		~NestedOctreePointCloudLOD();
+
+		//! Initializes the construction process (asynchronous)
+		bool init(ccPointCloud* cloud) override;
+
+		void clear() override;
+
+		LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
+
+protected: //methods
+
+		void clearData() override;
+
+		std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD &lod, const Frustum &frustum, unsigned char maxLevel) override
+		{
+			return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
+		}
+};*/

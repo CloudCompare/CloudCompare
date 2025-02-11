@@ -38,7 +38,7 @@ class ccPolyline;
 class ccMesh;
 class QGLBuffer;
 class ccProgressDialog;
-class ccPointCloudLOD;
+class ccGenericPointCloudLOD;
 
 /***************************************************
 				ccPointCloud
@@ -961,7 +961,7 @@ public: //Level of Detail (LOD)
 protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
-	ccPointCloudLOD* m_lod;
+	ccGenericPointCloudLOD* m_lod;
 
 	//! Boolean flag indicating whether this specific cloud should
 	//! be rendered using the LOD mechanism. (see its usage in DrawMeOnly)

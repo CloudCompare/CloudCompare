@@ -6440,7 +6440,7 @@ bool ccPointCloud::initLOD()
 {
 	if (!m_lod)
 	{
-		m_lod = new ccPointCloudLOD;
+		m_lod = new ccInternalPointCloudLOD;
 	}
 	return m_lod->init(this);
 }

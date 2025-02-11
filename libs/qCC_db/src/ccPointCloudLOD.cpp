@@ -29,11 +29,11 @@
 class ccPointCloudLODThread : public QThread
 {
 	Q_OBJECT
-	
+
 public:
-	
+
 	//! Default constructor
-	ccPointCloudLODThread(ccPointCloud& cloud, ccPointCloudLOD& lod, uint32_t maxCountPerCell)
+	ccPointCloudLODThread(ccPointCloud& cloud, ccInternalPointCloudLOD& lod, uint32_t maxCountPerCell)
 		: QThread()
 		, m_cloud(cloud)
 		, m_lod(lod)
@@ -43,7 +43,7 @@ public:
 		, m_earlyStop(0)
 	{
 	}
-	
+
 	//! Destructor
 	~ccPointCloudLODThread() override
 	{
@@ -72,11 +72,11 @@ public:
 		m_octree.clear();
 		m_earlyStop = 0;
 	}
-	
+
 protected:
 
 	//! Fills a node (and returns its relative position) - no recurrence
-	uint8_t fillNode_flat(ccPointCloudLOD::Node& node) const
+	uint8_t fillNode_flat(ccGenericPointCloudLOD::Node& node) const
 	{
 		assert(m_octree);
 
@@ -133,7 +133,7 @@ protected:
 	//! Called by run() before quiting (in case the process has to be aborted)
 	void abortConstruction()
 	{
-		m_lod.setState(ccPointCloudLOD::BROKEN);
+		m_lod.setState(ccGenericPointCloudLOD::BROKEN);
 		m_octree.clear();
 		m_lod.clearData();
 		m_earlyStop = 0;
@@ -142,7 +142,7 @@ protected:
 	//reimplemented from QThread
 	void run() override
 	{
-		m_lod.setState(ccPointCloudLOD::NOT_INITIALIZED);
+		m_lod.setState(ccGenericPointCloudLOD::NOT_INITIALIZED);
 
 		if (m_earlyStop != 0)
 		{
@@ -158,7 +158,7 @@ protected:
 		}
 
 		//reset structure
-		m_lod.setState(ccPointCloudLOD::UNDER_CONSTRUCTION);
+		m_lod.setState(ccGenericPointCloudLOD::UNDER_CONSTRUCTION);
 		m_lod.clearData();
 
 		ccLog::Print(QString("[LoD] Preparing LoD acceleration structure for cloud '%1' [%2 points]...").arg(m_cloud.getName()).arg(pointCount));
@@ -178,7 +178,7 @@ protected:
 				{
 					//not enough memory
 					ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
-					m_lod.setState(ccPointCloudLOD::BROKEN);
+					m_lod.setState(ccGenericPointCloudLOD::BROKEN);
 				}
 				else
 				{
@@ -234,7 +234,7 @@ protected:
 		//first we allow the division of nodes as deep as possible but with a minimum number of points per cell
 		for (uint8_t currentLevel = 0; currentLevel < m_maxLevel; ++currentLevel)
 		{
-			ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+			ccGenericPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 			if (level.data.empty())
 			{
 				break;
@@ -246,7 +246,7 @@ protected:
 			//now we can prepare the next level
 			if (currentLevel + 1 < m_maxLevel)
 			{
-				for (ccPointCloudLOD::Node& node : level.data)
+				for (ccGenericPointCloudLOD::Node& node : level.data)
 				{
 					//do we need to subdivide this cell?
 					if (node.pointCount > m_maxCountPerCell)
@@ -254,7 +254,7 @@ protected:
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
-							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
+							ccGenericPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
@@ -301,11 +301,11 @@ protected:
 			biggestLevel = std::min<uint8_t>(biggestLevel, 10);
 			for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
 			{
-				ccPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+				ccGenericPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 				assert(!level.data.empty());
 
 				size_t cellCountBefore = m_lod.m_levels[currentLevel + 1].data.size();
-				for (ccPointCloudLOD::Node& node : level.data)
+				for (ccGenericPointCloudLOD::Node& node : level.data)
 				{
 					//do we need to subdivide this cell?
 					if (node.childCount == 0 && node.pointCount > 16)
@@ -313,7 +313,7 @@ protected:
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
 							int32_t childNodeIndex = m_lod.newCell(node.level + 1);
-							ccPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
+							ccGenericPointCloudLOD::Node& childNode = m_lod.node(childNodeIndex, node.level + 1);
 							childNode.firstCodeIndex = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
@@ -346,7 +346,7 @@ protected:
 			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 		}
 
-		m_lod.setState(ccPointCloudLOD::INITIALIZED);
+		m_lod.setState(ccGenericPointCloudLOD::INITIALIZED);
 
 		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / mem. = %3 Mb / duration: %4 s.)")
 			.arg(m_cloud.getName())
@@ -358,32 +358,25 @@ protected:
 	}
 
 	ccPointCloud& m_cloud;
-	ccPointCloudLOD& m_lod;
+	ccInternalPointCloudLOD& m_lod;
 	ccOctree::Shared m_octree;
 	uint32_t m_maxCountPerCell;
 	uint8_t m_maxLevel;
 	QAtomicInt m_earlyStop;
 };
 
-ccPointCloudLOD::ccPointCloudLOD()
+ccGenericPointCloudLOD::ccGenericPointCloudLOD()
 	: m_indexMap(0)
 	, m_lastIndexMap(0)
-	, m_octree(nullptr)
-	, m_thread(nullptr)
 	, m_state(NOT_INITIALIZED)
 {
 	clearData(); //initializes the root node
 }
 
-ccPointCloudLOD::~ccPointCloudLOD()
+size_t ccGenericPointCloudLOD::memory() const
 {
-	clear();
-}
+	size_t thisSize = sizeof(ccGenericPointCloudLOD);
 
-size_t ccPointCloudLOD::memory() const
-{
-	size_t thisSize = sizeof(ccPointCloudLOD);
-	
 	size_t totalNodeCount = 0;
 	for (size_t i = 0; i < m_levels.size(); ++i)
 	{
@@ -395,73 +388,14 @@ size_t ccPointCloudLOD::memory() const
 	return nodesSize + thisSize;
 }
 
-bool ccPointCloudLOD::init(ccPointCloud* cloud)
+void ccGenericPointCloudLOD::clearData()
 {
-	if (!cloud)
-	{
-		assert(false);
-		return false;
-	}
-	
-	if (isBroken())
-	{
-		return false;
-	}
-
-	if (!m_thread)
-	{
-		m_thread = new ccPointCloudLODThread(*cloud, *this, 256);
-	}
-	else if (m_thread->isRunning())
-	{
-		//already running?
-		assert(false);
-		return true;
-	}
-
-	m_thread->start();
-	return true;
-}
-
-void ccPointCloudLOD::clearData()
-{
-	//1 empty (root) node
 	m_levels.resize(1);
 	m_levels.front().data.resize(1);
 	m_levels.front().data.front() = Node();
-
-	m_octree.clear();
 }
 
-bool ccPointCloudLOD::initInternal(ccOctree::Shared octree)
-{
-	if (!octree)
-	{
-		return false;
-	}
-	
-	//clear the structure (just in case)
-	clearData();
-
-	QMutexLocker locker(&m_mutex);
-
-	try
-	{
-		assert(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
-		m_levels.resize(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL + 1);
-	}
-	catch (const std::bad_alloc&)
-	{
-		//not enough memory
-		return false;
-	}
-	
-	m_octree = octree;
-
-	return true;
-}
-
-int32_t ccPointCloudLOD::newCell(unsigned char level)
+int32_t ccGenericPointCloudLOD::newCell(unsigned char level)
 {
 	assert(level != 0);
 	assert(level < m_levels.size());
@@ -473,7 +407,7 @@ int32_t ccPointCloudLOD::newCell(unsigned char level)
 	return static_cast<int32_t>(l.data.size()) - 1;
 }
 
-void ccPointCloudLOD::shrink_to_fit()
+void ccGenericPointCloudLOD::shrink_to_fit()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -494,29 +428,8 @@ void ccPointCloudLOD::shrink_to_fit()
 	m_levels.shrink_to_fit();
 }
 
-void ccPointCloudLOD::clear()
-{
-	if (m_thread && m_thread->isRunning())
-	{
-		m_thread->stop();
-	}
-	
-	m_mutex.lock();
 
-	if (m_thread)
-	{
-		delete m_thread;
-		m_thread = nullptr;
-	}
-
-	m_levels.clear();
-	m_octree.clear();
-	m_state = NOT_INITIALIZED;
-
-	m_mutex.unlock();
-}
-
-void ccPointCloudLOD::resetVisibility()
+void ccGenericPointCloudLOD::resetVisibility()
 {
 	if (m_state != INITIALIZED)
 	{
@@ -535,131 +448,8 @@ void ccPointCloudLOD::resetVisibility()
 	}
 }
 
-class PointCloudLODVisibilityFlagger
-{
-public:
-	
-	PointCloudLODVisibilityFlagger(	ccPointCloudLOD& lod,
-									const Frustum& frustum,
-									unsigned char maxLevel)
-		: m_lod(lod)
-		, m_frustum(frustum)
-		, m_maxLevel(maxLevel)
-		, m_hasClipPlanes(false)
-	{}
 
-	void setClipPlanes(const ccClipPlaneSet& clipPlanes)
-	{
-		try
-		{
-			m_clipPlanes = clipPlanes;
-		}
-		catch (const std::bad_alloc&)
-		{
-			//not enough memory
-			m_hasClipPlanes = false;
-		}
-		m_hasClipPlanes = !m_clipPlanes.empty();
-	}
-
-	void propagateFlag(ccPointCloudLOD::Node& node, uint8_t flag)
-	{
-		node.intersection = flag;
-
-		if (node.childCount)
-		{
-			for (int i = 0; i < 8; ++i)
-			{
-				if (node.childIndexes[i] >= 0)
-				{
-					propagateFlag(m_lod.node(node.childIndexes[i], node.level + 1), flag);
-				}
-			}
-		}
-	}
-
-	uint32_t flag(ccPointCloudLOD::Node& node)
-	{
-		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
-		if (m_hasClipPlanes && node.intersection != Frustum::OUTSIDE)
-		{
-			for (const ccClipPlane& clipPlane : m_clipPlanes)
-			{
-				//distance from center to clip plane
-				//we assume the plane normal (= 3 first coefficients) is normalized!
-				double dist = clipPlane.equation.x * node.center.x
-							+ clipPlane.equation.y * node.center.y
-							+ clipPlane.equation.z * node.center.z
-							+ clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
-
-				if (dist < node.radius)
-				{
-					if (dist <= -node.radius)
-					{
-						node.intersection = Frustum::OUTSIDE;
-						break;
-					}
-					else
-					{
-						node.intersection = Frustum::INTERSECT;
-					}
-				}
-			}
-		}
-
-		uint32_t visibleCount = 0;
-		switch (node.intersection)
-		{
-		case Frustum::INSIDE:
-			visibleCount = node.pointCount;
-			//no need to propagate the visibility to the children as the default value should already be 'INSIDE'
-			break;
-
-		case Frustum::INTERSECT:
-			//we have to test the children
-			{
-				if (node.level < m_maxLevel && node.childCount)
-				{
-					for (int i = 0; i < 8; ++i)
-					{
-						if (node.childIndexes[i] >= 0)
-						{
-							ccPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
-							visibleCount += flag(childNode);
-						}
-					}
-
-					if (visibleCount == 0)
-					{
-						//as no point is visible we can flag this node as being outside/invisible
-						node.intersection = Frustum::OUTSIDE;
-					}
-				}
-				else
-				{
-					//we have to consider that all points are visible
-					visibleCount = node.pointCount;
-				}
-			}
-			break;
-
-		case Frustum::OUTSIDE:
-			//be sure that all children nodes are flagged as outside!
-			propagateFlag(node, Frustum::OUTSIDE);
-			break;
-		}
-
-		return visibleCount;
-	}
-
-	ccPointCloudLOD& m_lod;
-	const Frustum& m_frustum;
-	unsigned char m_maxLevel;
-	ccClipPlaneSet m_clipPlanes;
-	bool m_hasClipPlanes;
-};
-
-uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes/*=nullptr*/)
+uint32_t ccGenericPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes/*=nullptr*/)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -670,25 +460,122 @@ uint32_t ccPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet*
 
 	resetVisibility();
 
-	PointCloudLODVisibilityFlagger lodVisibility(*this, frustum, static_cast<unsigned char>(m_levels.size()));
+	auto lodVisibility = getVisibilityFlagger(*this, frustum, static_cast<unsigned char>(m_levels.size()));
 	if (clipPlanes)
 	{
-		lodVisibility.setClipPlanes(*clipPlanes);
+		lodVisibility->setClipPlanes(*clipPlanes);
 	}
 
-	m_currentState.visiblePoints = lodVisibility.flag(root());
+	m_currentState.visiblePoints = lodVisibility->flag(root());
 
 	return m_currentState.visiblePoints;
 }
 
-uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
+//! ccInternalPointCloudLOD implementation
+ccInternalPointCloudLOD::ccInternalPointCloudLOD()
+	: m_octree(nullptr)
+	, m_thread(nullptr)
+{}
+
+ccInternalPointCloudLOD::~ccInternalPointCloudLOD()
+{
+	clear();
+}
+
+bool ccInternalPointCloudLOD::init(ccPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (isBroken())
+	{
+		return false;
+	}
+
+	if (!m_thread)
+	{
+		m_thread = new ccPointCloudLODThread(*cloud, *this, 256);
+	}
+	else if (m_thread->isRunning())
+	{
+		//already running?
+		assert(false);
+		return true;
+	}
+
+	m_thread->start();
+	return true;
+}
+
+void ccInternalPointCloudLOD::clear()
+{
+	if (m_thread && m_thread->isRunning())
+	{
+		m_thread->stop();
+	}
+
+	m_mutex.lock();
+
+	if (m_thread)
+	{
+		delete m_thread;
+		m_thread = nullptr;
+	}
+
+	m_levels.clear();
+	m_octree.clear();
+	m_state = NOT_INITIALIZED;
+
+	m_mutex.unlock();
+}
+
+void ccInternalPointCloudLOD::clearData()
+{
+	//1 empty (root) node
+	ccGenericPointCloudLOD::clearData();
+	//+ delete the octree
+	m_octree.clear();
+}
+
+bool ccInternalPointCloudLOD::initInternal(ccOctree::Shared octree)
+{
+	if (!octree)
+	{
+		return false;
+	}
+
+	//clear the structure (just in case)
+	clearData();
+
+	QMutexLocker locker(&m_mutex);
+
+	try
+	{
+		assert(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL <= 255);
+		m_levels.resize(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL + 1);
+	}
+	catch (const std::bad_alloc&)
+	{
+		//not enough memory
+		return false;
+	}
+
+	m_octree = octree;
+
+	return true;
+}
+
+uint32_t ccInternalPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 {
 	if (m_indexMap.capacity() == 0 || m_octree.isNull())
 	{
 		assert(false);
 		return 0;
 	}
-	
+
 	uint32_t displayedCount = 0;
 
 	if (node.childCount)
@@ -696,12 +583,12 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 		uint32_t thisNodeRemainingCount = (node.pointCount - node.displayedPointCount);
 		assert(count <= thisNodeRemainingCount);
 		bool displayAll = (count >= thisNodeRemainingCount);
-		
+
 		for (int i = 0; i < 8; ++i)
 		{
 			if (node.childIndexes[i] >= 0)
 			{
-				ccPointCloudLOD::Node& childNode = this->node(node.childIndexes[i], node.level + 1);
+				ccGenericPointCloudLOD::Node& childNode = this->node(node.childIndexes[i], node.level + 1);
 				if (childNode.intersection == Frustum::OUTSIDE)
 					continue;
 				if (childNode.pointCount == childNode.displayedPointCount)
@@ -724,7 +611,7 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 						i = 8; //we can stop right now
 					}
 				}
-				
+
 				uint32_t childDisplayedCount = addNPointsToIndexMap(childNode, childMaxCount);
 				//assert(childDisplayedCount == childMaxCount || !displayAll || childNode.intersection != Frustum::INSIDE);
 				assert(childDisplayedCount <= childMaxCount);
@@ -756,7 +643,7 @@ uint32_t ccPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t count)
 	return displayedCount;
 }
 
-LODIndexSet& ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel)
+LODIndexSet& ccInternalPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel)
 {
 	remainingPointsAtThisLevel = 0;
 	m_lastIndexMap.clear();
@@ -841,18 +728,18 @@ LODIndexSet& ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 
 			uint32_t nodeDisplayCount = addNPointsToIndexMap(node, nodeMaxCount);
 			assert(nodeDisplayCount <= nodeMaxCount);
-			
+
 			thisPassDisplayCount += nodeDisplayCount;
 			assert(thisPassDisplayCount == m_indexMap.size());
 			remainingPointsAtThisLevel += (node.pointCount - node.displayedPointCount);
 		}
 	}
-	
+
 	uint32_t totalRemainingCount = m_currentState.visiblePoints - m_currentState.displayedPoints;
 	//remove the already displayed points (= unfinished from previous run)
 	assert(totalRemainingCount >= thisPassDisplayCount);
 	totalRemainingCount -= thisPassDisplayCount;
-	
+
 	//do we still have data to display AND can we display it?
 	if (totalRemainingCount != 0 && thisPassDisplayCount < maxCount)
 	{
@@ -942,7 +829,7 @@ LODIndexSet& ccPointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCoun
 		m_currentState.unfinishedLevel = -1;
 		m_currentState.unfinishedPoints = 0;
 	}
-	
+
 	m_lastIndexMap = m_indexMap;
 	return m_indexMap;
 }

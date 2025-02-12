@@ -29,7 +29,6 @@
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
 #include "ccFastMarchingForNormsDirection.h"
-#include "ccFrustum.h"
 #include "ccGBLSensor.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericMesh.h"
@@ -3072,11 +3071,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								glFunc->glGetIntegerv(GL_VIEWPORT, camera.viewport);
 								glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 								glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
-								//camera frustum
-								Frustum frustum(camera.modelViewMat, camera.projectionMat);
 
 								//first time: we flag the cells visibility and count the number of visible points
-								m_lod->flagVisibility(frustum, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
+								m_lod->flagVisibility(camera, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;

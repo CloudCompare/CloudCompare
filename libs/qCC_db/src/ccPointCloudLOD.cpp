@@ -18,13 +18,17 @@
 #include "ccPointCloudLOD.h"
 
 // Local
+#include "ccGenericGLDisplay.h"
 #include "ccPointCloud.h"
 
 // Qt
 #include <QAtomicInt>
 #include <QElapsedTimer>
 #include <QThread>
+#include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <vector>
 
 //! Thread for background computation
 class ccPointCloudLODThread : public QThread
@@ -453,7 +457,7 @@ void ccGenericPointCloudLOD::resetVisibility()
 	}
 }
 
-uint32_t ccGenericPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes /*=nullptr*/)
+uint32_t ccGenericPointCloudLOD::flagVisibility(const ccGLCameraParameters& camera, ccClipPlaneSet* clipPlanes /*=nullptr*/)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -464,7 +468,7 @@ uint32_t ccGenericPointCloudLOD::flagVisibility(const Frustum& frustum, ccClipPl
 
 	resetVisibility();
 
-	auto lodVisibility = getVisibilityFlagger(*this, frustum, static_cast<unsigned char>(m_levels.size()));
+	auto lodVisibility = getVisibilityFlagger(*this, camera, static_cast<unsigned char>(m_levels.size()));
 	if (clipPlanes)
 	{
 		lodVisibility->setClipPlanes(*clipPlanes);
@@ -891,6 +895,10 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 	size_t   earlyStopIndex                     = 0;
 	uint32_t computedRemainingPointsAtThisLevel = 0;
 
+	std::vector<Node*> nodePriorityList;
+
+	// TODO reseve max size
+	nodePriorityList.reserve(l.data.size());
 	for (size_t i = 0; i < l.data.size(); ++i)
 	{
 		auto& node = l.data[i];
@@ -903,20 +911,24 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 		if (node.pointCount == node.displayedPointCount)
 			continue;
 		computedRemainingPointsAtThisLevel += node.pointCount - node.displayedPointCount;
+		nodePriorityList.push_back(&node);
 	}
+
+	std::sort(std::begin(nodePriorityList), std::end(nodePriorityList), [](const Node* a, const Node* b)
+	          { return a->score > b->score; });
 
 	bool displayAll = computedRemainingPointsAtThisLevel <= maxCount;
 
-	for (size_t i = 0; i < l.data.size(); ++i)
+	for (size_t i = 0; i < nodePriorityList.size(); ++i)
 	{
-		auto& node = l.data[i];
-		if (node.intersection == Frustum::OUTSIDE)
+		auto node = nodePriorityList[i];
+		if (node->intersection == Frustum::OUTSIDE)
 			continue;
-		if (node.pointCount == node.displayedPointCount)
+		if (node->pointCount == node->displayedPointCount)
 			continue;
 		// if display all;
 		uint32_t       nodeMaxCount       = 0;
-		const uint32_t nodeRemainingCount = node.pointCount - node.displayedPointCount;
+		const uint32_t nodeRemainingCount = node->pointCount - node->displayedPointCount;
 		if (displayAll)
 		{
 			nodeMaxCount = nodeRemainingCount;
@@ -937,17 +949,15 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 		}
 
 		// simplified addNpointTo...
-		uint32_t iStop = std::min(node.displayedPointCount + nodeMaxCount, node.pointCount);
+		uint32_t iStop = std::min(node->displayedPointCount + nodeMaxCount, node->pointCount);
 		// simplified collect point indices
-		for (uint32_t i = node.displayedPointCount; i < iStop; ++i)
+		for (uint32_t i = node->displayedPointCount; i < iStop; ++i)
 		{
-			m_indexMap.push_back(node.firstCodeIndex + i);
+			m_indexMap.push_back(node->firstCodeIndex + i);
 		}
 
-		node.displayedPointCount += nodeMaxCount;
+		node->displayedPointCount += nodeMaxCount;
 		thisPassDisplayCount += nodeMaxCount;
-
-		assert(nodeDisplayCount <= nodeMaxCount);
 		assert(thisPassDisplayCount == m_indexMap.size());
 
 		if (earlyStop)
@@ -963,11 +973,11 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 	// compute the remaining point in case of early stop.
 	if (earlyStop)
 	{
-		for (size_t i = earlyStopIndex; i < l.data.size(); ++i)
+		for (size_t i = earlyStopIndex; i < nodePriorityList.size(); ++i)
 		{
 			auto& node = l.data[i];
 			// be sure to properly finish to count the number of 'unfinished' points!
-			assert(node->intersection != UNDEFINED);
+			assert(node.intersection != UNDEFINED);
 			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
 			remainingPointsAtThisLevel += nodeRemainingCount;
 		}

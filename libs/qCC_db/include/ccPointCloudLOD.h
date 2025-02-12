@@ -18,15 +18,16 @@
 // ##########################################################################
 
 // qCC_db
-#include <cassert>
-#include <ccFrustum.h>
-#include <ccOctree.h>
+#include "ccOctree.h"
+#include "ccFrustum.h"
+#include "ccGenericGLDisplay.h"
 
 // Qt
 #include <QMutex>
 
 // system
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <memory>
 #include <qwindow.h>
@@ -86,13 +87,14 @@ class ccGenericPointCloudLOD
 		float                  radius;              //  4 bytes
 		CCVector3f             center;              // 12 bytes
 		std::array<int32_t, 8> childIndexes;        // 32 bytes
+		float                  score;               //  4 bytes
 		uint32_t               firstCodeIndex;      //  4 bytes
 		uint32_t               displayedPointCount; //  4 bytes
 		uint8_t                level;               //  1 byte
 		uint8_t                childCount;          //  1 byte
 		uint8_t                intersection;        //  1 byte
 
-		// Total												// 63 bytes (64 with alignment)
+		// Total									// 67 bytes (68 with alignment)
 
 		//! Default constructor
 		Node(uint8_t _level = 0)
@@ -101,6 +103,7 @@ class ccGenericPointCloudLOD
 		    , center(0, 0, 0)
 		    , childIndexes{-1, -1, -1, -1, -1, -1, -1, -1}
 		    , firstCodeIndex(0)
+		    , score(0)
 		    , displayedPointCount(0)
 		    , level(_level)
 		    , childCount(0)
@@ -200,7 +203,7 @@ class ccGenericPointCloudLOD
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
 	 **/
-	uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = nullptr);
+	uint32_t flagVisibility(const ccGLCameraParameters& frustum, ccClipPlaneSet* clipPlanes = nullptr);
 
 	//! Builds an index map with the remaining visible points
 	virtual LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) = 0;
@@ -225,7 +228,7 @@ class ccGenericPointCloudLOD
 	ccGenericPointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers);
 
 	//! Factory to create the  visibilityFlagger (avoid templating)
-	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) = 0;
+	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) = 0;
 
 	//! Sets the current state
 	inline void setState(State state)
@@ -295,11 +298,12 @@ class ccGenericPointCloudLOD
 class ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
-	                                        const Frustum&          frustum,
-	                                        unsigned char           maxLevel)
+	ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+	                                        const ccGLCameraParameters& camera,
+	                                        unsigned char               maxLevel)
 	    : m_lod(lod)
-	    , m_frustum(frustum)
+	    , m_camera(camera)
+	    , m_frustum(camera.modelViewMat, camera.projectionMat)
 	    , m_maxLevel(maxLevel)
 	    , m_hasClipPlanes(false)
 	{
@@ -419,24 +423,48 @@ class ccGenericPointCloudLODVisibilityFlagger
 		return visibleCount;
 	}
 
-	ccGenericPointCloudLOD& m_lod;
-	const Frustum&          m_frustum;
-	unsigned char           m_maxLevel;
-	ccClipPlaneSet          m_clipPlanes;
-	bool                    m_hasClipPlanes;
+	ccGenericPointCloudLOD&     m_lod;
+	const ccGLCameraParameters& m_camera;
+	Frustum                     m_frustum;
+	unsigned char               m_maxLevel;
+	ccClipPlaneSet              m_clipPlanes;
+	bool                        m_hasClipPlanes;
 };
 
 class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
-	                                             const Frustum&          frustum,
-	                                             unsigned char           maxLevel)
-	    : ccGenericPointCloudLODVisibilityFlagger(lod, frustum, maxLevel)
+	ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+	                                             const ccGLCameraParameters& camera,
+	                                             unsigned char               maxLevel)
+	    : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
 	{
 	}
 
 	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
+
+	inline void computeNodeFootprint(ccGenericPointCloudLOD::Node & node)
+	{
+		// see https://github.com/potree/potree/blob/c53cf7f7e692ee27bc4c2c623fe17bd678d25558/src/Potree_update_visibility.js#L353
+		// see Markus Schütz thesis for explanations.
+		if (m_camera.perspective)
+		{
+			float distance = (m_camera.modelViewMat * node.center).norm();
+			if (distance - node.radius < 0)
+			{
+				node.score = std::numeric_limits<float>::max();
+				return;
+			}
+			const float slope            = std::tan(CCCoreLib::DegreesToRadians(m_camera.fov_deg) * 0.5f);
+			const float projectionFactor = (0.5f * (m_camera.viewport[3] - m_camera.viewport[1])) / (slope * distance);
+			node.score               = node.radius * projectionFactor;
+		}
+		else
+		{
+			// TODO add a weighting function for other type of cam
+			node.score = std::numeric_limits<float>::max();
+		}
+	}
 
 	uint32_t flag(ccGenericPointCloudLOD::Node& node) override
 	{
@@ -453,7 +481,7 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 		case Frustum::INTERSECT:
 			// we have to test the children
 			{
-				//node.computeFootprint(m_camera);
+				computeNodeFootprint(node);
 				visibleCount += node.pointCount;
 				if (node.level < m_maxLevel && node.childCount)
 				{
@@ -505,9 +533,9 @@ class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
 	void clearData() override;
 
 	//! Return sthe flagger used by this LOD
-	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) override
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{
-		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
+		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, camera, maxLevel);
 	}
 
 	//! Reserves memory, used internally by the LOD construction thread
@@ -554,8 +582,8 @@ class ccNestedOctreePointCloudLOD : public ccGenericPointCloudLOD
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
   protected: // methods
-	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) override
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{
-		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
+		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel);
 	}
 };

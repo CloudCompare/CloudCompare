@@ -24,9 +24,6 @@
 //CCCoreLib
 #include <Delaunay2dMesh.h>
 
-//system
-#include <string.h>
-
 ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 				 PointCoordinateType height,
 				 const ccGLMatrix* transMat /*= 0*/,

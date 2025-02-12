@@ -26,7 +26,6 @@
 #include <ui_lasopendialog.h>
 
 // system
-#include <string>
 #include <vector>
 
 // CCCoreLib
@@ -98,11 +97,14 @@ class LasOpenDialog : public QDialog
 	/// Only valid when the action is Tiling
 	LasTilingOptions tilingOptions() const;
 
-	/// Return the status of the extent defined in the COPC tab
+	/// Returns the status of the extent defined in the COPC tab
 	bool hasUsableExtent() const;
 
 	/// Returns COPC max level :)
 	uint32_t copcMaxLevel() const;
+
+	/// Determines if the COPC octree have to be mapped into the LOD data structure
+	bool mapCOPCintoLODDataStructure() const;
 
 	/// Returns the current extent defined in the COPC tab
 	LasDetails::UnscaledExtent copcExtent() const;
@@ -110,7 +112,6 @@ class LasOpenDialog : public QDialog
 	void resetShouldSkipDialog();
 
 	bool shouldSkipDialog() const;
-
 
   private:
 	bool isChecked(const LasScalarField& lasScalarField) const;

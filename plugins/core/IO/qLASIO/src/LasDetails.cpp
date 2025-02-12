@@ -20,6 +20,7 @@
 #include "LasScalarField.h"
 
 // LASzip
+#include <cstdint>
 #include <laszip/laszip_api.h>
 // CC
 #include <ccLog.h>

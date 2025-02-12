@@ -6445,6 +6445,14 @@ bool ccPointCloud::initLOD()
 	return m_lod->init(this);
 }
 
+bool ccPointCloud::initLOD(std::vector<ccGenericPointCloudLOD::Level> lodLayers)
+{
+	clearLOD();
+	m_lod = new ccNestedOctreePointCloudLOD(lodLayers);
+	return m_lod->init(this);
+}
+
+
 void ccPointCloud::clearLOD()
 {
 	if (m_lod)

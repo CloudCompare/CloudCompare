@@ -1,34 +1,34 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
-//qCC_db
+// qCC_db
 #include <ccOctree.h>
 #include <ccFrustum.h>
 
-//Qt
+// Qt
 #include <QMutex>
 
-//system
+// system
+#include <array>
+#include <cstdint>
 #include <memory>
 #include <qwindow.h>
-#include <stdint.h>
-#include <array>
 
 class ccPointCloud;
 class ccPointCloudLODThread;
@@ -38,15 +38,22 @@ class ccGenericPointCloudLODVisibilityFlagger;
 struct LODLevelDesc
 {
 	//! Default constructor
-	LODLevelDesc() : startIndex(0), count(0) {}
+	LODLevelDesc()
+	    : startIndex(0)
+	    , count(0)
+	{
+	}
 	//! Constructor from a start index and a count value
-	LODLevelDesc(unsigned _startIndex, unsigned _count) : startIndex(_startIndex), count(_count) {}
+	LODLevelDesc(unsigned _startIndex, unsigned _count)
+	    : startIndex(_startIndex)
+	    , count(_count)
+	{
+	}
 	//! Start index (refers to the 'indexes' table)
 	unsigned startIndex;
 	//! Index count for this level
 	unsigned count;
 };
-
 
 //! L.O.D. indexes set
 typedef std::vector<unsigned> LODIndexSet;
@@ -54,14 +61,58 @@ typedef std::vector<unsigned> LODIndexSet;
 //! L.O.D. (Level of Detail) structure
 class ccGenericPointCloudLOD
 {
-public:
+  public:
 	//! Structure initialization state
-	enum State { NOT_INITIALIZED, UNDER_CONSTRUCTION, INITIALIZED, BROKEN };
+	enum State
+	{
+		NOT_INITIALIZED,
+		UNDER_CONSTRUCTION,
+		INITIALIZED,
+		BROKEN
+	};
 
 	//! Default constructor
 	ccGenericPointCloudLOD();
+
 	//! Destructor
 	virtual ~ccGenericPointCloudLOD() = default;
+
+	//! Octree 'tree' node
+	struct Node
+	{
+		// Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
+		uint32_t               pointCount;          //  4 bytes
+		float                  radius;              //  4 bytes
+		CCVector3f             center;              // 12 bytes
+		std::array<int32_t, 8> childIndexes;        // 32 bytes
+		uint32_t               firstCodeIndex;      //  4 bytes
+		uint32_t               displayedPointCount; //  4 bytes
+		uint8_t                level;               //  1 byte
+		uint8_t                childCount;          //  1 byte
+		uint8_t                intersection;        //  1 byte
+
+		// Total												// 63 bytes (64 with alignment)
+
+		//! Default constructor
+		Node(uint8_t _level = 0)
+		    : pointCount(0)
+		    , radius(0)
+		    , center(0, 0, 0)
+		    , childIndexes{-1, -1, -1, -1, -1, -1, -1, -1}
+		    , firstCodeIndex(0)
+		    , displayedPointCount(0)
+		    , level(_level)
+		    , childCount(0)
+		    , intersection(UNDEFINED)
+		{
+		}
+	};
+
+	//! Level data
+	struct Level
+	{
+		std::vector<Node> data;
+	};
 
 	//! Locks the structure
 	inline void lock() const
@@ -90,16 +141,28 @@ public:
 	virtual void clear() = 0;
 
 	//! Returns whether the structure is null (i.e. not under construction or initialized) or not
-	inline bool isNull() const { return getState() == NOT_INITIALIZED; }
+	inline bool isNull() const
+	{
+		return getState() == NOT_INITIALIZED;
+	}
 
 	//! Returns whether the structure is initialized or not
-	inline bool isInitialized() const { return getState() == INITIALIZED; }
+	inline bool isInitialized() const
+	{
+		return getState() == INITIALIZED;
+	}
 
 	//! Returns whether the structure is initialized or not
-	inline bool isUnderConstruction() const { return getState() == UNDER_CONSTRUCTION; }
+	inline bool isUnderConstruction() const
+	{
+		return getState() == UNDER_CONSTRUCTION;
+	}
 
 	//! Returns whether the structure is broken or not
-	inline bool isBroken() const { return getState() == BROKEN; }
+	inline bool isBroken() const
+	{
+		return getState() == BROKEN;
+	}
 
 	//! Returns the maximum accessible level
 	inline unsigned char maxLevel() const
@@ -110,37 +173,6 @@ public:
 
 	//! Undefined visibility flag
 	static const unsigned char UNDEFINED = 255;
-
-	//! Octree 'tree' node
-	struct Node
-	{
-		//Warning: put the non aligned members (< 4 bytes) at the end to avoid too much alignment padding!
-		uint32_t				pointCount;					//  4 bytes
-		float					radius;						//  4 bytes
-		CCVector3f				center;						// 12 bytes
-		std::array<int32_t, 8>	childIndexes;				// 32 bytes
-		uint32_t				firstCodeIndex;				//  4 bytes
-		uint32_t				displayedPointCount;		//  4 bytes
-		uint8_t					level;						//  1 byte
-		uint8_t					childCount;					//  1 byte
-		uint8_t					intersection;				//  1 byte
-
-		//Total												// 63 bytes (64 with alignment)
-
-		//! Default constructor
-		Node(uint8_t _level = 0)
-			: pointCount(0)
-			, radius(0)
-			, center(0, 0, 0)
-			, childIndexes{-1, -1, -1, -1, -1, -1, -1, -1}
-			, firstCodeIndex(0)
-			, displayedPointCount(0)
-			, level(_level)
-			, childCount(0)
-			, intersection(UNDEFINED)
-		{
-		}
-	};
 
 	inline Node& node(int32_t index, unsigned char level)
 	{
@@ -154,47 +186,60 @@ public:
 		return m_levels[level].data[index];
 	}
 
-	inline Node& root() { return node(0, 0); }
-
-	inline const Node& root() const { return node(0, 0); }
-
-	//! Level data
-	struct Level
+	inline Node& root()
 	{
-		std::vector<Node> data;
-	};
+		return node(0, 0);
+	}
+
+	inline const Node& root() const
+	{
+		return node(0, 0);
+	}
 
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
-	**/
-	virtual uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = nullptr);
+	 **/
+	uint32_t flagVisibility(const Frustum& frustum, ccClipPlaneSet* clipPlanes = nullptr);
 
 	//! Builds an index map with the remaining visible points
 	virtual LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) = 0;
 
 	//! Returns the last index map
-	inline const LODIndexSet& getLasIndexMap() const { return m_lastIndexMap; }
+	inline const LODIndexSet& getLasIndexMap() const
+	{
+		return m_lastIndexMap;
+	}
 
 	//! Returns whether all points have been displayed or not
-	inline bool allDisplayed() const { return m_currentState.displayedPoints >= m_currentState.visiblePoints; }
+	inline bool allDisplayed() const
+	{
+		return m_currentState.displayedPoints >= m_currentState.visiblePoints;
+	}
 
 	//! Returns the memory used by the structure (in bytes)
-	virtual size_t memory() const;
+	size_t memory() const;
 
-protected: //methods
+  protected: // methods
+	//! Constructor with provided Lod levels
+	ccGenericPointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers);
 
 	//! Factory to create the  visibilityFlagger (avoid templating)
 	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) = 0;
 
 	//! Sets the current state
-	inline void setState(State state) { lock(); m_state = state; unlock(); }
+	inline void setState(State state)
+	{
+		lock();
+		m_state = state;
+		unlock();
+	}
 
 	//! Clears the internal (nodes) data
 	virtual void clearData();
 
 	//! Reserves a new cell at a given level
 	/** \return the new cell index in the array corresponding to this level (see m_levels)
-	**/
+	 **/
 	int32_t newCell(unsigned char level);
 
 	//! Shrinks the internal data to its minimum size
@@ -202,11 +247,10 @@ protected: //methods
 
 	//! Resets the internal visibility flags
 	/** All nodes are flagged as 'INSIDE' (= visible) and their 'visibleCount' attribute is set to 0.
-	**/
+	 **/
 	void resetVisibility();
 
-protected: //members
-
+  protected: // members
 	//! Per-level cells data
 	std::vector<Level> m_levels;
 
@@ -214,11 +258,12 @@ protected: //members
 	struct RenderParams
 	{
 		RenderParams()
-			: visiblePoints(0)
-			, displayedPoints(0)
-			, unfinishedLevel(-1)
-			, unfinishedPoints(0)
-		{}
+		    : visiblePoints(0)
+		    , displayedPoints(0)
+		    , unfinishedLevel(-1)
+		    , unfinishedPoints(0)
+		{
+		}
 
 		//! Number of visible points (for the last visibility test)
 		uint32_t visiblePoints;
@@ -246,19 +291,18 @@ protected: //members
 	State m_state;
 };
 
-
 class ccGenericPointCloudLODVisibilityFlagger
 {
-public:
-
-	 ccGenericPointCloudLODVisibilityFlagger(	ccGenericPointCloudLOD& lod,
-									const Frustum& frustum,
-									unsigned char maxLevel)
-		: m_lod(lod)
-		, m_frustum(frustum)
-		, m_maxLevel(maxLevel)
-		, m_hasClipPlanes(false)
-	{}
+  public:
+	ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
+	                                        const Frustum&          frustum,
+	                                        unsigned char           maxLevel)
+	    : m_lod(lod)
+	    , m_frustum(frustum)
+	    , m_maxLevel(maxLevel)
+	    , m_hasClipPlanes(false)
+	{
+	}
 
 	void setClipPlanes(const ccClipPlaneSet& clipPlanes)
 	{
@@ -268,7 +312,7 @@ public:
 		}
 		catch (const std::bad_alloc&)
 		{
-			//not enough memory
+			// not enough memory
 			m_hasClipPlanes = false;
 		}
 		m_hasClipPlanes = !m_clipPlanes.empty();
@@ -297,12 +341,12 @@ public:
 		{
 			for (const ccClipPlane& clipPlane : m_clipPlanes)
 			{
-				//distance from center to clip plane
-				//we assume the plane normal (= 3 first coefficients) is normalized!
+				// distance from center to clip plane
+				// we assume the plane normal (= 3 first coefficients) is normalized!
 				double dist = clipPlane.equation.x * node.center.x
-							+ clipPlane.equation.y * node.center.y
-							+ clipPlane.equation.z * node.center.z
-							+ clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
+				              + clipPlane.equation.y * node.center.y
+				              + clipPlane.equation.z * node.center.z
+				              + clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
 
 				if (dist < node.radius)
 				{
@@ -324,11 +368,11 @@ public:
 		{
 		case Frustum::INSIDE:
 			visibleCount = node.pointCount;
-			//no need to propagate the visibility to the children as the default value should already be 'INSIDE'
+			// no need to propagate the visibility to the children as the default value should already be 'INSIDE'
 			break;
 
 		case Frustum::INTERSECT:
-			//we have to test the children
+			// we have to test the children
 			{
 				if (node.level < m_maxLevel && node.childCount)
 				{
@@ -343,20 +387,20 @@ public:
 
 					if (visibleCount == 0)
 					{
-						//as no point is visible we can flag this node as being outside/invisible
+						// as no point is visible we can flag this node as being outside/invisible
 						node.intersection = Frustum::OUTSIDE;
 					}
 				}
 				else
 				{
-					//we have to consider that all points are visible
+					// we have to consider that all points are visible
 					visibleCount = node.pointCount;
 				}
 			}
 			break;
 
 		case Frustum::OUTSIDE:
-			//be sure that all children nodes are flagged as outside!
+			// be sure that all children nodes are flagged as outside!
 			propagateFlag(node, Frustum::OUTSIDE);
 			break;
 		}
@@ -365,17 +409,34 @@ public:
 	}
 
 	ccGenericPointCloudLOD& m_lod;
-	const Frustum& m_frustum;
-	unsigned char m_maxLevel;
-	ccClipPlaneSet m_clipPlanes;
-	bool m_hasClipPlanes;
+	const Frustum&          m_frustum;
+	unsigned char           m_maxLevel;
+	ccClipPlaneSet          m_clipPlanes;
+	bool                    m_hasClipPlanes;
 };
 
+class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudLODVisibilityFlagger
+{
+  public:
+	ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
+	                                             const Frustum&          frustum,
+	                                             unsigned char           maxLevel)
+	    : ccGenericPointCloudLODVisibilityFlagger(lod, frustum, maxLevel)
+	{
+	}
+
+	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
+
+	uint32_t flag(ccGenericPointCloudLOD::Node& node) override
+	{
+		return 0;
+	}
+};
 
 //! The "original" CloudCompare LOD
 class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
 {
-public: // methods
+  public: // methods
 	ccInternalPointCloudLOD();
 
 	~ccInternalPointCloudLOD();
@@ -387,23 +448,23 @@ public: // methods
 
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
-protected: //methods
-	//! Reserves memory, used internally by the LOD construction thread
-	bool initInternal(ccOctree::Shared octree);
-
+  protected: // methods
 	//! cleanData override
 	void clearData() override;
 
-	//! return the flagger used by this LOD
-	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD &lod, const Frustum &frustum, unsigned char maxLevel) override
+	//! Return sthe flagger used by this LOD
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) override
 	{
 		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
 	}
 
+	//! Reserves memory, used internally by the LOD construction thread
+	bool initInternal(ccOctree::Shared octree);
+
 	//! Adds a given number of points to the active index map (should be dispatched among the children cells)
 	uint32_t addNPointsToIndexMap(Node& node, uint32_t count);
 
-protected: //members
+  protected: // members
 	//! friend class
 	friend ccPointCloudLODThread;
 
@@ -415,9 +476,8 @@ protected: //members
 };
 
 //! The most common LOD datastructure (in the litterature and implementations)
-//!
 //! This kind of structure is used by Potree and entwine (thus COPC, untwine..).
-//! Each leayers contains a subsambled version of the point cloud.
+//! Each layer contains a subsambled version of the point cloud.
 //! Cloud resolution increases as we go deeper into the octree levels.
 //! It's additive, union of all points of all the cells (at all levels) = the point cloud
 //!
@@ -426,27 +486,24 @@ protected: //members
 //! strategy (either gridding or poisson sampling) bottom up.
 //! Out of core creation would requiere more work in order to have efficiency
 //! in computation and file I/O.
-
-// the declaration should look like this.
-/*class NestedOctreePointCloudLOD : ccGenericPointCloudLOD
+class ccNestedOctreePointCloudLOD : public ccGenericPointCloudLOD
 {
-		NestedOctreePointCloudLOD();
+  public: // methods
+	ccNestedOctreePointCloudLOD() = default;
 
-		~NestedOctreePointCloudLOD();
+	ccNestedOctreePointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers);
 
-		//! Initializes the construction process (asynchronous)
-		bool init(ccPointCloud* cloud) override;
+	~ccNestedOctreePointCloudLOD() = default;
 
-		void clear() override;
+	bool init(ccPointCloud* cloud) override;
 
-		LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
+	void clear() override;
 
-protected: //methods
+	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
-		void clearData() override;
-
-		std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD &lod, const Frustum &frustum, unsigned char maxLevel) override
-		{
-			return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
-		}
-};*/
+  protected: // methods
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const Frustum& frustum, unsigned char maxLevel) override
+	{
+		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, frustum, maxLevel);
+	}
+};

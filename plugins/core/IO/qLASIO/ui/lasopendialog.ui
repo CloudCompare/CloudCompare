@@ -728,7 +728,7 @@ It will be saved as multiple tiles on the disk.</string>
           <item>
            <widget class="QCheckBox" name="copcLoDCheckbox">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Map COPC hierarchy into LoD data structure</string>

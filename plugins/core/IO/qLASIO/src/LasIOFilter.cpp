@@ -583,6 +583,13 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	if (copcLoader)
 	{
 		pointCloud->shrinkToFit();
+
+		// If the LOD checkbox is active, create and init the LOD
+		if (m_openDialog.mapCOPCintoLODDataStructure())
+		{
+			const auto lodLevels = copcLoader->createLODLevels();
+			pointCloud->initLOD(lodLevels);
+		}
 	}
 
 	LasMetadata::SaveMetadataInto(*laszipHeader, *pointCloud, availableExtraScalarFields);

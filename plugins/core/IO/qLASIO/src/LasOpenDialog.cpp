@@ -286,6 +286,11 @@ bool LasOpenDialog::hasUsableExtent() const
 	return copcExtentGroupBox->isChecked() && m_validExtent;
 }
 
+bool LasOpenDialog::mapCOPCintoLODDataStructure() const
+{
+	return copcLoDCheckbox->isChecked();
+}
+
 void LasOpenDialog::checkExtentConsistency(double value)
 {
 	m_validExtent = copcExtentSpinMaxX->value() - copcExtentSpinMinX->value() > 0 &&

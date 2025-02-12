@@ -17,6 +17,7 @@
 // ##########################################################################
 
 #include "CopcLoader.h"
+
 #include "CopcVlrs.h"
 
 // System
@@ -197,7 +198,7 @@ namespace copc
 	{
 		// Sort entries by offset to be able to get the first point of each chunk.
 		std::sort(std::begin(entries), std::end(entries), [](const Entry& a, const Entry& b)
-		             { return a.offset < b.offset; });
+		          { return a.offset < b.offset; });
 		uint64_t starting_point = 0;
 		m_chunkIntervalsHierarchy.reserve(entries.size());
 		std::for_each(std::cbegin(entries), std::cend(entries), [&starting_point, this](const Entry& entry)
@@ -352,7 +353,80 @@ namespace copc
 
 		// sort them by starting point to optimize seeking;
 		std::sort(std::begin(sortedChunkIntervalSet), std::end(sortedChunkIntervalSet), [](const ChunkInterval& a, const ChunkInterval& b)
-		             { return a.pointOffsetInFile < b.pointOffsetInFile; });
+		          { return a.pointOffsetInFile < b.pointOffsetInFile; });
+	}
+
+	std::vector<ccGenericPointCloudLOD::Level> CopcLoader::createLODLevels() const
+	{
+		size_t                                     maxNumLayers = (m_hasMaxLevelConstraint ? m_maxLevelConstraint : m_maxLevel) + 1;
+		std::vector<ccGenericPointCloudLOD::Level> lodLevels(maxNumLayers);
+
+		// Keep track of the VoxelKey by insterting them in the same order than CC LOD Nodes.
+		std::vector<std::vector<VoxelKey>> lodKeys(maxNumLayers);
+		lodLevels[0].data.emplace_back(0);
+		lodKeys[0].push_back(VoxelKey::Root());
+
+		// First we populate the root level with the root node.
+		// root existence in copc hierarchy is tested in the constructor
+		// so the indexing operator should not fail.
+		const auto& rootInterval = m_chunkIntervalsHierarchy.at(VoxelKey::Root());
+
+		// Create the rootNode
+		auto& rootNode          = lodLevels[0].data.back();
+		rootNode.pointCount     = rootInterval.pointCount - rootInterval.filteredPointCount;
+		rootNode.firstCodeIndex = rootInterval.pointOffsetInCCCloud;
+
+		// Compute the enclosing sphere for the root node,
+		// We do no take into account potential clipping in the loading process. here we simply use the enclosing sphere of the node/voxel.
+		// But the enclosing sphere could be computed "exactly" by retrieving each point assigned to each cell.
+		// Beware the sphere center is a float in the LOD struct, so we do not use PointCoordinateType
+		// but we shift the center and cast it to float.
+		CCVector3f rootSphereCenter(static_cast<float>(m_copcInfo.center_x + m_globalShift.x),
+		                            static_cast<float>(m_copcInfo.center_y + m_globalShift.y),
+		                            static_cast<float>(m_copcInfo.center_z + m_globalShift.z));
+
+		// init the sphere for the rootNode
+		rootNode.radius = static_cast<float>(m_extent.getDiagNorm()) / 2.f; // same as halfsize * sqrt(3.0)
+		rootNode.center = rootSphereCenter;
+
+		for (size_t levelIndex = 0; levelIndex < maxNumLayers - 1; ++levelIndex)
+		{
+			auto&  currLevel      = lodLevels[levelIndex];
+			size_t nextLevelIndex = levelIndex + 1;
+
+			// test the 8 children for each node of current layer and insert them in the next layer
+			for (size_t nodeIndex = 0; nodeIndex < currLevel.data.size(); ++nodeIndex)
+			{
+				auto&       parentNode = currLevel.data[nodeIndex];
+				const auto& parentKey  = lodKeys[levelIndex][nodeIndex];
+				for (const auto& childKey : parentKey.childrenKeys())
+				{
+					const auto& maybeChild = m_chunkIntervalsHierarchy.find(childKey);
+					if (maybeChild != std::end(m_chunkIntervalsHierarchy))
+					{
+						const auto& childInterval = maybeChild->second;
+						if (maybeChild->second.status != ChunkInterval::eFilterStatus::FAIL)
+						{
+							lodKeys[nextLevelIndex].push_back(childKey);
+							lodLevels[nextLevelIndex].data.emplace_back(nextLevelIndex);
+							auto& newNode          = lodLevels[nextLevelIndex].data.back();
+							newNode.firstCodeIndex = childInterval.pointOffsetInCCCloud;
+							newNode.pointCount     = childInterval.pointCount - childInterval.filteredPointCount;
+
+							LasDetails::UnscaledExtent voxelExtent;
+							childKey.extractExtent(m_extent, voxelExtent);
+							newNode.radius                                   = static_cast<float>(voxelExtent.getDiagNorm()) / 2.f;
+							const CCVector3d centerd                         = voxelExtent.getCenter();
+							newNode.center                                   = CCVector3f(static_cast<float>(centerd.x + m_globalShift.x),
+                                                        static_cast<float>(centerd.y + m_globalShift.y),
+                                                        static_cast<float>(centerd.z + m_globalShift.z));
+							parentNode.childIndexes[parentNode.childCount++] = lodKeys[nextLevelIndex].size() - 1;
+						}
+					}
+				}
+			}
+		}
+		return lodLevels;
 	}
 
 } // namespace copc

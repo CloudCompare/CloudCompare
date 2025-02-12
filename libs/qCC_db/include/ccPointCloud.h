@@ -17,6 +17,8 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccPointCloudLOD.h"
+#include <vector>
 #ifdef _MSC_VER
 //To get rid of the warnings about dominant inheritance
 #pragma warning( disable: 4250 )
@@ -945,6 +947,9 @@ public: //Level of Detail (LOD)
 	/** \return success
 	**/
 	bool initLOD();
+
+	//! Initializes a LOD from an externally created data structure
+	bool initLOD(std::vector<ccGenericPointCloudLOD::Level>);
 
 	//! Clears the LOD structure
 	void clearLOD();

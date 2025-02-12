@@ -21,11 +21,14 @@
 #include "CopcVlrs.h"
 #include "LasDetails.h"
 
+// Laszip
+#include <laszip/laszip_api.h>
+
 // Qt
 #include <QFile>
 
-// Laszip
-#include <laszip/laszip_api.h>
+// qCC_db
+#include <ccPointCloudLOD.h>
 
 // System
 #include <cstdint>
@@ -136,6 +139,9 @@ namespace copc
 		/// can only be filtered during file reading. if no clipping constraint is set, the estimatedPointCount variable represent the true number of points.
 		void getChunkIntervalsSet(std::vector<std::reference_wrapper<ChunkInterval>>& sortedChunkIntervalSet, uint64_t& estimatedPointCount);
 
+		/// Recurse COPC octree and create some LOD levels matching the hierachy
+		std::vector<ccGenericPointCloudLOD::Level> createLODLevels() const;
+
 	  public: // static methods
 		/// Check if the file has the potential to contain a COPC structure
 		static bool IsPutativeCOPCFile(const laszip_header* laszipHeader);
@@ -183,7 +189,6 @@ namespace copc
 		}
 
 	  private: // static members
-
 	  private: // members
 		bool           m_isValid{false};
 		int32_t        m_maxLevel{0};

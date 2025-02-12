@@ -57,6 +57,20 @@ namespace LasDetails
 		return self;
 	}
 
+	uint64_t TrueNumberOfPoints(const laszip_header* laszipHeader)
+	{
+		laszip_U64 pointCount;
+		if (laszipHeader->version_minor == 4)
+		{
+			pointCount = laszipHeader->extended_number_of_point_records;
+		}
+		else
+		{
+			pointCount = laszipHeader->number_of_point_records;
+		}
+		return pointCount;
+	}
+
 	QDataStream& operator>>(QDataStream& stream, EvlrHeader& hdr)
 	{
 		stream.setByteOrder(QDataStream::ByteOrder::LittleEndian);

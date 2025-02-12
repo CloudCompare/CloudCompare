@@ -26,19 +26,18 @@
 
 // System
 #include <array>
-#include <cmath>
+#include <cstdint>
 #include <limits>
-#include <string>
+
 #include <vector>
 
-// LASzip
-#include <laszip/laszip_api.h>
 
 class ccPointCloud;
 class ccScalarField;
 
 class QDataStream;
 
+struct laszip_header;
 struct laszip_vlr;
 typedef laszip_vlr laszip_vlr_struct;
 
@@ -125,19 +124,7 @@ namespace LasDetails
 	/// the "true" number of points in a las file.
 	/// the field to query in the laszip_header in order to have the number of point
 	/// is format dependant.
-	static laszip_U64 TrueNumberOfPoints(const laszip_header* laszipHeader)
-	{
-		laszip_U64 pointCount;
-		if (laszipHeader->version_minor == 4)
-		{
-			pointCount = laszipHeader->extended_number_of_point_records;
-		}
-		else
-		{
-			pointCount = laszipHeader->number_of_point_records;
-		}
-		return pointCount;
-	}
+	uint64_t TrueNumberOfPoints(const laszip_header* laszipHeader);
 
 	// The position of the overlap flag in the classification flags
 	// (valid for fmt >= 6)

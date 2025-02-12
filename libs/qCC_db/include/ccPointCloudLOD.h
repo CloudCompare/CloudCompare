@@ -18,8 +18,9 @@
 // ##########################################################################
 
 // qCC_db
-#include <ccOctree.h>
+#include <cassert>
 #include <ccFrustum.h>
+#include <ccOctree.h>
 
 // Qt
 #include <QMutex>
@@ -334,33 +335,43 @@ class ccGenericPointCloudLODVisibilityFlagger
 		}
 	}
 
+	inline void clippingIntersection(ccGenericPointCloudLOD::Node& node)
+	{
+		if (!m_hasClipPlanes)
+		{
+			return;
+		}
+
+		for (const ccClipPlane& clipPlane : m_clipPlanes)
+		{
+			// distance from center to clip plane
+			// we assume the plane normal (= 3 first coefficients) is normalized!
+			double dist = clipPlane.equation.x * node.center.x
+			              + clipPlane.equation.y * node.center.y
+			              + clipPlane.equation.z * node.center.z
+			              + clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
+
+			if (dist < node.radius)
+			{
+				if (dist <= -node.radius)
+				{
+					node.intersection = Frustum::OUTSIDE;
+					return;
+				}
+				else
+				{
+					node.intersection = Frustum::INTERSECT;
+				}
+			}
+		}
+	}
+
 	virtual uint32_t flag(ccGenericPointCloudLOD::Node& node)
 	{
 		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
-		if (m_hasClipPlanes && node.intersection != Frustum::OUTSIDE)
+		if (node.intersection != Frustum::OUTSIDE)
 		{
-			for (const ccClipPlane& clipPlane : m_clipPlanes)
-			{
-				// distance from center to clip plane
-				// we assume the plane normal (= 3 first coefficients) is normalized!
-				double dist = clipPlane.equation.x * node.center.x
-				              + clipPlane.equation.y * node.center.y
-				              + clipPlane.equation.z * node.center.z
-				              + clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
-
-				if (dist < node.radius)
-				{
-					if (dist <= -node.radius)
-					{
-						node.intersection = Frustum::OUTSIDE;
-						break;
-					}
-					else
-					{
-						node.intersection = Frustum::INTERSECT;
-					}
-				}
-			}
+			clippingIntersection(node);
 		}
 
 		uint32_t visibleCount = 0;
@@ -429,7 +440,48 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 
 	uint32_t flag(ccGenericPointCloudLOD::Node& node) override
 	{
-		return 0;
+		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
+		if (node.intersection != Frustum::OUTSIDE)
+		{
+			clippingIntersection(node);
+		}
+
+		uint32_t visibleCount = 0;
+		switch (node.intersection)
+		{
+		case Frustum::INSIDE:
+		case Frustum::INTERSECT:
+			// we have to test the children
+			{
+				//node.computeFootprint(m_camera);
+				visibleCount += node.pointCount;
+				if (node.level < m_maxLevel && node.childCount)
+				{
+					for (int i = 0; i < 8; ++i)
+					{
+						if (node.childIndexes[i] >= 0)
+						{
+							ccGenericPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
+							visibleCount += flag(childNode);
+						}
+					}
+
+					if (visibleCount == 0)
+					{
+						// as no point is visible we can flag this node as being outside/invisible
+						node.intersection = Frustum::OUTSIDE;
+					}
+				}
+			}
+			break;
+
+		case Frustum::OUTSIDE:
+			// be sure that all children nodes are flagged as outside!
+			propagateFlag(node, Frustum::OUTSIDE);
+			break;
+		}
+
+		return visibleCount;
 	}
 };
 

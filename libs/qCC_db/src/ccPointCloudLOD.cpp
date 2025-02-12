@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccPointCloudLOD.h"
 
@@ -24,6 +24,7 @@
 #include <QAtomicInt>
 #include <QElapsedTimer>
 #include <QThread>
+#include <cstddef>
 
 //! Thread for background computation
 class ccPointCloudLODThread : public QThread
@@ -857,9 +858,134 @@ void ccNestedOctreePointCloudLOD::clear()
 LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel)
 {
 	m_lastIndexMap.clear();
-	maxCount                   = 0;
 	remainingPointsAtThisLevel = 0;
-	return m_lastIndexMap;
+
+	if (m_state != INITIALIZED)
+	{
+		maxCount = 0;
+		return m_lastIndexMap; // empty
+	}
+
+	if (m_currentState.displayedPoints >= m_currentState.visiblePoints) // TODO
+	{
+		// assert(false);
+		maxCount = 0;
+		return m_lastIndexMap; // empty
+	}
+
+	m_indexMap.clear();
+	try
+	{
+		m_indexMap.reserve(maxCount);
+	}
+	catch (const std::bad_alloc&)
+	{
+		// not enough memory
+		return m_lastIndexMap; // empty
+	}
+
+	Level&   l                    = m_levels[level];
+	uint32_t thisPassDisplayCount = 0;
+
+	bool     earlyStop                          = false;
+	size_t   earlyStopIndex                     = 0;
+	uint32_t computedRemainingPointsAtThisLevel = 0;
+
+	for (size_t i = 0; i < l.data.size(); ++i)
+	{
+		auto& node = l.data[i];
+		assert(node.intersection != UNDEFINED);
+
+		// check if the node is intersected or inside the frustum
+		// and if it has data to render
+		if (node.intersection == Frustum::OUTSIDE)
+			continue;
+		if (node.pointCount == node.displayedPointCount)
+			continue;
+		computedRemainingPointsAtThisLevel += node.pointCount - node.displayedPointCount;
+	}
+
+	bool displayAll = computedRemainingPointsAtThisLevel <= maxCount;
+
+	for (size_t i = 0; i < l.data.size(); ++i)
+	{
+		auto& node = l.data[i];
+		if (node.intersection == Frustum::OUTSIDE)
+			continue;
+		if (node.pointCount == node.displayedPointCount)
+			continue;
+		// if display all;
+		uint32_t       nodeMaxCount       = 0;
+		const uint32_t nodeRemainingCount = node.pointCount - node.displayedPointCount;
+		if (displayAll)
+		{
+			nodeMaxCount = nodeRemainingCount;
+		}
+		else
+		{
+			// if there is an overflow, early stop
+			if (m_indexMap.size() + nodeRemainingCount >= maxCount)
+			{
+				assert(maxCount >= m_indexMap.size());
+				nodeMaxCount = maxCount - static_cast<uint32_t>(m_indexMap.size());
+				earlyStop    = true;
+			}
+			else
+			{
+				nodeMaxCount = nodeRemainingCount;
+			}
+		}
+
+		// simplified addNpointTo...
+		uint32_t iStop = std::min(node.displayedPointCount + nodeMaxCount, node.pointCount);
+		// simplified collect point indices
+		for (uint32_t i = node.displayedPointCount; i < iStop; ++i)
+		{
+			m_indexMap.push_back(node.firstCodeIndex + i);
+		}
+
+		node.displayedPointCount += nodeMaxCount;
+		thisPassDisplayCount += nodeMaxCount;
+
+		assert(nodeDisplayCount <= nodeMaxCount);
+		assert(thisPassDisplayCount == m_indexMap.size());
+
+		if (earlyStop)
+		{
+			earlyStopIndex = i;
+			break;
+		}
+	}
+
+	maxCount = static_cast<uint32_t>(m_indexMap.size());
+	m_currentState.displayedPoints += maxCount;
+
+	// compute the remaining point in case of early stop.
+	if (earlyStop)
+	{
+		for (size_t i = earlyStopIndex; i < l.data.size(); ++i)
+		{
+			auto& node = l.data[i];
+			// be sure to properly finish to count the number of 'unfinished' points!
+			assert(node->intersection != UNDEFINED);
+			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
+			remainingPointsAtThisLevel += nodeRemainingCount;
+		}
+	}
+
+	if (remainingPointsAtThisLevel)
+	{
+		m_currentState.unfinishedLevel  = static_cast<int>(level);
+		m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
+	}
+	else
+	{
+		m_currentState.unfinishedLevel  = -1;
+		m_currentState.unfinishedPoints = 0;
+	}
+
+	m_lastIndexMap = m_indexMap;
+	return m_indexMap;
 }
 
 #include "ccPointCloudLOD.moc"

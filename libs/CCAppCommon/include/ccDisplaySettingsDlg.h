@@ -29,17 +29,17 @@
 
 namespace Ui
 {
-	class DisplayOptionsDlg;
+	class DisplaySettingsDlg;
 }
 
 //! Dialog to setup display settings
-class CCAPPCOMMON_LIB_API ccDisplayOptionsDlg : public QDialog
+class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
-	explicit ccDisplayOptionsDlg(QWidget* parent);
-	~ccDisplayOptionsDlg() override;
+	explicit ccDisplaySettingsDlg(QWidget* parent);
+	~ccDisplaySettingsDlg() override;
 
 Q_SIGNALS:
 	void aspectHasChanged();
@@ -62,6 +62,7 @@ protected:
 	void changeVBOUsage();
 	void changeColorScaleRampWidth(int);
 	void changePickingCursor(int);
+	void changeLogVerbosity(int);
 
 	void changeDefaultFontSize(int);
 	void changeLabelFontSize(int);
@@ -111,5 +112,5 @@ protected:
 	int m_defaultAppStyleIndex;
 	
 private:
-	Ui::DisplayOptionsDlg* m_ui;
+	Ui::DisplaySettingsDlg* m_ui;
 };

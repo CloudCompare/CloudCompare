@@ -282,7 +282,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			//add each associated SF name
 			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
-				QString sfName((*it)->getName());
+				QString sfName(QString::fromStdString((*it)->getName()));
 				sfName.replace(separator, '_');
 				header.append(separator);
 				header.append(sfName);
@@ -383,7 +383,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
 				line.append(separator);
-				double sfVal = (*it)->getGlobalShift() + (*it)->getValue(i);
+				ScalarType sfVal = (*it)->getValue(i);
 				line.append(QString::number(sfVal, 'f', s_outputSFPrecision));
 			}
 		}
@@ -668,7 +668,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence& openSequen
 					sfName.replace('_', ' ');
 				}
 
-				ccScalarField* sf = new ccScalarField(qPrintable(sfName));
+				ccScalarField* sf = new ccScalarField(sfName.toStdString());
 				int sfIdx = cloud->addScalarField(sf);
 				if (sfIdx >= 0)
 				{
@@ -860,7 +860,6 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
 
 	//buffers
-	ScalarType D = 0;
 	CCVector3d P(0, 0, 0);
 	CCVector3d Pshift(0, 0, 0);
 	CCVector3 N(0, 0, 0);
@@ -1101,22 +1100,22 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			{
 				for (size_t j = 0; j < cloudDesc.scalarIndexes.size(); ++j)
 				{
-					D = static_cast<ScalarType>(locale.toDouble(parts[cloudDesc.scalarIndexes[j]]));
-					cloudDesc.scalarFields[j]->emplace_back(D);
+					ScalarType sfValue = static_cast<ScalarType>(locale.toDouble(parts[cloudDesc.scalarIndexes[j]]));
+					cloudDesc.scalarFields[j]->addElement(sfValue);
 				}
 			}
 
 			//Quaternion
 			if (cloudDesc.hasQuaternion)
 			{
-				double quat[4] = { locale.toDouble(parts[cloudDesc.qwIndex]),
-									locale.toDouble(parts[cloudDesc.qxIndex]),
-									locale.toDouble(parts[cloudDesc.qyIndex]),
-									locale.toDouble(parts[cloudDesc.qzIndex])
+				double quat[4] { locale.toDouble(parts[cloudDesc.qwIndex]),
+								 locale.toDouble(parts[cloudDesc.qxIndex]),
+								 locale.toDouble(parts[cloudDesc.qyIndex]),
+								 locale.toDouble(parts[cloudDesc.qzIndex])
 				};
 
 				ccGLMatrix mat = ccGLMatrix::FromQuaternion(quat);
-				mat.setTranslation(P.u);
+				mat.setTranslation((P + Pshift).u);
 
 				ccCoordinateSystem* cs = new ccCoordinateSystem(ccCoordinateSystem::DEFAULT_DISPLAY_SCALE,
 																CCCoreLib::PC_ONE,

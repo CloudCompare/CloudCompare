@@ -71,7 +71,6 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(applyButton, &QPushButton::clicked, this, &QDialog::accept);
 	connect(applyAllButton, &QPushButton::clicked, this, &QDialog::accept);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
-	connect(automaticTimeShiftCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onAutomaticTimeShiftToggle);
 	connect(applyAllButton, &QPushButton::clicked, this, &LasOpenDialog::onApplyAll);
 	connect(selectAllToolButton, &QPushButton::clicked, [&]
 	        { doSelectAll(true); });
@@ -149,7 +148,6 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numP
 	numPointsLabelValue->setText(QLocale(QLocale::English).toString(numPoints));
 
 	force8bitColorsCheckBox->setEnabled(LasDetails::HasRGB(pointFormatId));
-	timeShiftLayout->setEnabled(LasDetails::HasGpsTime(pointFormatId));
 
 	decomposeClassificationCheckBox->setHidden(pointFormatId >= 6);
 }
@@ -292,16 +290,6 @@ bool LasOpenDialog::shouldDecomposeClassification() const
 	return decomposeClassificationCheckBox->isChecked();
 }
 
-double LasOpenDialog::timeShiftValue() const
-{
-	if (automaticTimeShiftCheckBox->isChecked())
-	{
-		return std::numeric_limits<double>::quiet_NaN();
-	}
-
-	return manualTimeShiftSpinBox->value();
-}
-
 bool LasOpenDialog::isChecked(const LasExtraScalarField& lasExtraScalarField) const
 {
 	return IsCheckedIn(lasExtraScalarField.name, availableExtraScalarFields);
@@ -310,11 +298,6 @@ bool LasOpenDialog::isChecked(const LasExtraScalarField& lasExtraScalarField) co
 bool LasOpenDialog::isChecked(const LasScalarField& lasScalarField) const
 {
 	return IsCheckedIn(lasScalarField.name(), availableScalarFields);
-}
-
-void LasOpenDialog::onAutomaticTimeShiftToggle(bool checked)
-{
-	manualTimeShiftSpinBox->setEnabled(!checked);
 }
 
 bool LasOpenDialog::shouldSkipDialog() const

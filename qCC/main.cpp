@@ -164,6 +164,12 @@ int main(int argc, char **argv)
 
 	ccApplication app(argc, argv, commandLine);
 
+	if (!commandLine)
+	{
+		// if not in CLI mode, we set the default log verbosity level
+		ccLog::SetVerbosityLevel(ccGui::Parameters().logVerbosityLevel);
+	}
+
 #ifdef CC_GAMEPAD_SUPPORT
 #if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)

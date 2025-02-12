@@ -302,9 +302,9 @@ namespace ccLibAlgorithms
 				{
 					pc = static_cast<ccPointCloud*>(cloud);
 
-					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+					sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
 					if (sfIdx < 0)
-						sfIdx = pc->addScalarField(qPrintable(sfName));
+						sfIdx = pc->addScalarField(sfName.toStdString());
 					if (sfIdx >= 0)
 						pc->setCurrentScalarField(sfIdx);
 					else
@@ -490,7 +490,7 @@ namespace ccLibAlgorithms
 							{
 								//we set as 'output' SF the currently displayed scalar field
 								pc->setCurrentOutScalarField(outSfIdx);
-								sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME, pc->getScalarFieldName(outSfIdx));
+								sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME, QString::fromStdString(pc->getScalarFieldName(outSfIdx)));
 							}
 						}
 						else //if (!cloud->hasDisplayedScalarField()) //TODO: displayed but not necessarily set as OUTPUT!
@@ -515,9 +515,9 @@ namespace ccLibAlgorithms
 				{
 					pc = static_cast<ccPointCloud*>(cloud);
 					
-					sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
+					sfIdx = pc->getScalarFieldIndexByName(sfName.toStdString());
 					if (sfIdx < 0)
-						sfIdx = pc->addScalarField(qPrintable(sfName));
+						sfIdx = pc->addScalarField(sfName.toStdString());
 					if (sfIdx >= 0)
 						pc->setCurrentInScalarField(sfIdx);
 					else

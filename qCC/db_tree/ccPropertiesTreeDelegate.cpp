@@ -686,11 +686,9 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
-			//field shift
-			ccScalarField* ccSF = dynamic_cast<ccScalarField*>(sf);
-			if (ccSF)
+			if (ccLog::VerbosityLevel() == ccLog::LOG_VERBOSE)
 			{
-				appendRow(ITEM( tr( "Shift" ) ), ITEM(QString::number(ccSF->getGlobalShift(), 'f', 2)));
+				appendRow(ITEM( tr( "Offset" ) ), ITEM(QString::number(sf->getOffset())));
 			}
 
 			addSeparator("Color Scale");
@@ -1303,7 +1301,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		int nsf = cloud ? cloud->getNumberOfScalarFields() : 0;
 		for (int i = 0; i < nsf; ++i)
 		{
-			comboBox->addItem(QString(cloud->getScalarFieldName(i)));
+			comboBox->addItem(QString::fromStdString(cloud->getScalarFieldName(i)));
 		}
 
 		connect(comboBox, qOverload<int>(&QComboBox::activated),

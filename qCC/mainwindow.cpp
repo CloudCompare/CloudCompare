@@ -71,7 +71,7 @@
 #include <ccPickingHub.h>
 //common dialogs
 #include <ccCameraParamEditDlg.h>
-#include <ccDisplayOptionsDlg.h>
+#include <ccDisplaySettingsDlg.h>
 #include <ccPickOneElementDlg.h>
 #include <ccStereoModeDlg.h>
 
@@ -723,7 +723,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
-	connect(m_UI->actionDisplayOptions,				&QAction::triggered, this, &MainWindow::showDisplayOptions);
+	connect(m_UI->actionDisplaySettings,			&QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
 	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
@@ -2361,9 +2361,9 @@ void MainWindow::doActionProjectUncertainty()
 	{
 		// add scalar field
 		QString sfName = tr("[%1] Uncertainty (%2)").arg(sensor->getName()).arg(dimChar[d]);
-		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
+			sfIdx = pointCloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Error(tr("An error occurred! (see console)"));
@@ -2390,9 +2390,9 @@ void MainWindow::doActionProjectUncertainty()
 	// add scalar field
 	{
 		QString sfName = tr("[%1] Uncertainty (3D)").arg(sensor->getName());
-		int sfIdx = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = pointCloud->addScalarField(qPrintable(sfName));
+			sfIdx = pointCloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Error(tr("An error occurred! (see console)"));
@@ -3245,8 +3245,10 @@ void MainWindow::doActionOpenColorScalesManager()
 
 void MainWindow::doActionAddIdField()
 {
-	if ( !ccEntityAction::sfAddIdField(m_selectedEntities) )
+	if (!ccEntityAction::sfAddIdField(m_selectedEntities))
+	{
 		return;
+	}
 
 	refreshAll();
 	updateUI();
@@ -3504,10 +3506,12 @@ void MainWindow::doActionMerge()
 
 	try
 	{
-		for ( ccHObject *entity : getSelectedEntities() )
+		for (ccHObject* entity : getSelectedEntities())
 		{
 			if (!entity)
+			{
 				continue;
+			}
 
 			if (entity->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -4178,7 +4182,7 @@ void MainWindow::doActionSubsample()
 			}
 
 			int warnings = 0;
-			ccPointCloud* newPointCloud = cloud->partialClone(sampledCloud,&warnings);
+			ccPointCloud* newPointCloud = cloud->partialClone(sampledCloud, &warnings);
 
 			delete sampledCloud;
 			sampledCloud = nullptr;
@@ -7185,10 +7189,10 @@ void MainWindow::testFrameRate()
 		win->startFrameRateTest();
 }
 
-void MainWindow::showDisplayOptions()
+void MainWindow::showDisplaySettings()
 {
-	ccDisplayOptionsDlg displayOptionsDlg(this);
-	connect(&displayOptionsDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, [=] () { redrawAll();	});
+	ccDisplaySettingsDlg displayOptionsDlg(this);
+	connect(&displayOptionsDlg, &ccDisplaySettingsDlg::aspectHasChanged, this, [=] () { redrawAll(); });
 			
 	displayOptionsDlg.exec();
 
@@ -7836,10 +7840,10 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::max<unsigned>(4, numberOfClasses);
 					numberOfClasses = std::min<unsigned>(256, numberOfClasses);
 
-					histogram->setTitle(tr("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
+					histogram->setTitle(tr("%1 (%2 values) ").arg(QString::fromStdString(sf->getName())).arg(numberOfPoints));
 					bool showNaNValuesInGrey = sf->areNaNValuesShownInGrey();
 					histogram->fromSF(sf, numberOfClasses, true, showNaNValuesInGrey);
-					histogram->setAxisLabels(sf->getName(), tr("Count"));
+					histogram->setAxisLabels(QString::fromStdString(sf->getName()), tr("Count"));
 					histogram->refresh();
 				}
 				hDlg->show();
@@ -8124,7 +8128,7 @@ void MainWindow::doActionAddConstantSF()
 
 	QString defaultName = "Constant";
 	unsigned trys = 1;
-	while (cloud->getScalarFieldIndexByName(qPrintable(defaultName)) >= 0 || trys > 99)
+	while (cloud->getScalarFieldIndexByName(defaultName.toStdString()) >= 0 || trys > 99)
 	{
 		defaultName = tr("Constant #%1").arg(++trys);
 	}
@@ -8562,9 +8566,9 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 		}
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
 
-		int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
-			sfIdx = cloud->addScalarField(qPrintable(sfName));
+			sfIdx = cloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccConsole::Error(tr("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
@@ -9107,6 +9111,9 @@ void MainWindow::doActionExportPlaneInfo()
 	csvStream << "Cx;";
 	csvStream << "Cy;";
 	csvStream << "Cz;";
+	csvStream << "Cx_global;";
+	csvStream << "Cy_global;";
+	csvStream << "Cz_global;";
 	csvStream << "Nx;";
 	csvStream << "Ny;";
 	csvStream << "Nz;";
@@ -9122,6 +9129,7 @@ void MainWindow::doActionExportPlaneInfo()
 		ccPlane* plane = static_cast<ccPlane*>(ent);
 			
 		CCVector3 C = plane->getOwnBB().getCenter();
+		CCVector3d Cg = plane->toGlobal3d(C);
 		CCVector3 N = plane->getNormal();
 		PointCoordinateType dip_deg = 0;
 		PointCoordinateType dipDir_deg = 0;
@@ -9133,6 +9141,9 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << C.x << separator;					//Cx
 		csvStream << C.y << separator;					//Cy
 		csvStream << C.z << separator;					//Cz
+		csvStream << Cg.x << separator;					//Cx
+		csvStream << Cg.y << separator;					//Cy
+		csvStream << Cg.z << separator;					//Cz
 		csvStream << N.x << separator;					//Nx
 		csvStream << N.y << separator;					//Ny
 		csvStream << N.z << separator;					//Nz
@@ -9216,6 +9227,9 @@ void MainWindow::doActionExportCloudInfo()
 	csvStream << "meanX;";
 	csvStream << "meanY;";
 	csvStream << "meanZ;";
+	csvStream << "meanX_global;";
+	csvStream << "meanY_global;";
+	csvStream << "meanZ_global;";
 	{
 		for (unsigned i = 0; i < maxSFCount; ++i)
 		{
@@ -9236,15 +9250,19 @@ void MainWindow::doActionExportCloudInfo()
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 
 			CCVector3 G = *CCCoreLib::Neighbourhood(cloud).getGravityCenter();
+			CCVector3d Gg = cloud->toGlobal3d(G);
 			csvStream << cloud->getName() << ';' /*"Name;"*/;
 			csvStream << cloud->size() << ';' /*"Points;"*/;
 			csvStream << G.x << ';' /*"meanX;"*/;
 			csvStream << G.y << ';' /*"meanY;"*/;
 			csvStream << G.z << ';' /*"meanZ;"*/;
+			csvStream << Gg.x << ';' /*"meanX_global;"*/;
+			csvStream << Gg.y << ';' /*"meanY_global;"*/;
+			csvStream << Gg.z << ';' /*"meanZ_global;"*/;
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);
-				csvStream << sf->getName() << ';' /*"SF name;"*/;
+				csvStream << QString::fromStdString(sf->getName()) << ';' /*"SF name;"*/;
 
 				unsigned validCount = 0;
 				double sfSum = 0.0;
@@ -9625,14 +9643,14 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 		}
 
-		int _sfIdx = compEnt->getScalarFieldIndexByName(qPrintable(sfName));
+		int _sfIdx = compEnt->getScalarFieldIndexByName(sfName.toStdString());
 		if (_sfIdx >= 0)
 		{
 			compEnt->deleteScalarField(_sfIdx);
 			//we update sfIdx because indexes are all messed up after deletion
 			sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		}
-		compEnt->renameScalarField(sfIdx, qPrintable(sfName));
+		compEnt->renameScalarField(sfIdx, sfName.toStdString());
 
 		ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
 		if (sf)
@@ -10324,6 +10342,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 	//to use the same 'global shift' for multiple files
 	CCVector3d loadCoordinatesShift(0, 0, 0);
 	bool loadCoordinatesTransEnabled = false;
+	bool loadCoordinatesTransForced = false;
 
 	FileIOFilter::LoadParameters parameters;
 	{
@@ -10331,6 +10350,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 		parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
 		parameters._coordinatesShift = &loadCoordinatesShift;
 		parameters._coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
+		parameters._coordinatesShiftForced = &loadCoordinatesTransForced;
 		parameters.parentWidget = this;
 	}
 

@@ -335,16 +335,14 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		unsigned sfCount = ccCloud->getNumberOfScalarFields();
 		if (sfCount)
 		{
-			e_ply_type scalarType = (sizeof(ScalarType) > 4 ? PLY_DOUBLE : PLY_FLOAT);
-
 			scalarFields.resize(sfCount);
 			unsigned unnamedSFCount = 0;
 			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				scalarFields[i] = static_cast<ccScalarField*>(ccCloud->getScalarField(i));
-				const char* sfName = scalarFields[i]->getName();
+				QString sfName = QString::fromStdString(scalarFields[i]->getName());
 				QString propName;
-				if (!sfName)
+				if (sfName.isEmpty())
 				{
 					if (unnamedSFCount == 0)
 					{
@@ -369,6 +367,15 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 						propName = QString("scalar_%1").arg(sfName);
 						propName.replace(' ', '_');
 					}
+				}
+
+				scalarFields[i]->computeMinAndMax();
+				ScalarType maxValue = std::max(std::abs(scalarFields[i]->getMin()), std::abs(scalarFields[i]->getMax()));
+
+				e_ply_type scalarType = (maxValue < ccGlobalShiftManager::MaxBoundgBoxDiagonal() ? PLY_FLOAT : PLY_DOUBLE);
+				if (scalarType == PLY_DOUBLE)
+				{
+					ccLog::Warning(QString("[PLY] Scalar field '%1' has large values and will be saved as double values instead of float values").arg(QString::fromStdString(scalarFields[i]->getName())));
 				}
 
 				result = ply_add_scalar_property(ply, qPrintable(propName), scalarType);
@@ -472,7 +479,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 
 		for (std::vector<ccScalarField*>::const_iterator sf = scalarFields.begin(); sf != scalarFields.end(); ++sf)
 		{
-			ply_write(ply, (*sf)->getGlobalShift() + (*sf)->getValue(i));
+			ply_write(ply, (*sf)->getValue(i));
 		}
 	}
 
@@ -1652,7 +1659,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 					qPropName = qPropName.mid(7).replace('_', ' ');
 				}
 
-				int sfIdx = cloud->addScalarField(qPrintable(qPropName));
+				int sfIdx = cloud->addScalarField(qPropName.toStdString());
 				if (sfIdx >= 0)
 				{
 					CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);

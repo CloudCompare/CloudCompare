@@ -388,23 +388,20 @@ bool ccNormalVectors::ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPer
 {
 	CCCoreLib::Neighbourhood Z(points);
 
-	Tuple3ub dims;
-	const PointCoordinateType* h = Z.getQuadric(&dims);
+	CCCoreLib::SquareMatrix toLocalOrientation;
+	const PointCoordinateType* h = Z.getQuadric(&toLocalOrientation);
 	if (h)
 	{
 		const CCVector3* gv = Z.getGravityCenter();
 		assert(gv);
+		
+		CCVector3 Q = toLocalOrientation * (P - *gv);
 
-		const unsigned char& iX = dims.x;
-		const unsigned char& iY = dims.y;
-		const unsigned char& iZ = dims.z;
+		N.x = h[1] + (2 * h[3] * Q.x) + (h[4] * Q.y);
+		N.y = h[2] + (2 * h[5] * Q.y) + (h[4] * Q.x);
+		N.z = -1;
 
-		PointCoordinateType lX = P.u[iX] - gv->u[iX];
-		PointCoordinateType lY = P.u[iY] - gv->u[iY];
-
-		N.u[iX] = h[1] + (2 * h[3] * lX) + (h[4] * lY);
-		N.u[iY] = h[2] + (2 * h[5] * lY) + (h[4] * lX);
-		N.u[iZ] = -1;
+		N = toLocalOrientation.inv() * N;
 
 		//normalize the result
 		N.normalize();

@@ -638,7 +638,7 @@ void ccGraphicalTransformationTool::advRefAxisRadioToggled(bool state)
 
 void ccGraphicalTransformationTool::incrementalTranslationToggle()
 {
-	const bool isIncrementalActive = TxCheckBox->isChecked() || TxCheckBox->isChecked() || TzCheckBox->isChecked();
+	const bool isIncrementalActive = TxCheckBox->isChecked() || TyCheckBox->isChecked() || TzCheckBox->isChecked();
 	incrementalTransLabel->setEnabled(isIncrementalActive);
 	incrementalTransSpin->setEnabled(isIncrementalActive);
 }
@@ -955,7 +955,7 @@ void ccGraphicalTransformationTool::incrementalTransform() {
 	// The translation part:
 	// we pass a vector with equal magnitude in the three components; gltranslate will handle the correct transform for us.
 	const double transMagnitude = isForwardTransform ? incrementalTransSpin->value() : -incrementalTransSpin->value() ;
-	glTranslate(CCVector3d(transMagnitude,transMagnitude,transMagnitude));
+	glTranslate(CCVector3d(transMagnitude, transMagnitude, transMagnitude));
 }
 
 void ccGraphicalTransformationTool::reset()

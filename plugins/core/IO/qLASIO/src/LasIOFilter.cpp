@@ -252,7 +252,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 	loader.setIgnoreFieldsWithDefaultValues(m_openDialog.shouldIgnoreFieldsWithDefaultValues());
 	loader.setForce8bitRgbMode(m_openDialog.shouldForce8bitColors());
-	loader.setManualTimeShift(m_openDialog.timeShiftValue());
 	loader.setDecomposeClassification(m_openDialog.shouldDecomposeClassification());
 	std::unique_ptr<LasWaveformLoader> waveformLoader{nullptr};
 	if (LasDetails::HasWaveform(laszipHeader->point_data_format))
@@ -741,12 +740,12 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		uint sfCount = pointCloud->getNumberOfScalarFields();
 		for (uint index = 0; index < sfCount; index++)
 		{
-			ccScalarField* sf     = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
-			const char*    sfName = sf->getName();
-			bool           found  = false;
+			ccScalarField*     sf     = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
+			const std::string& sfName = sf->getName();
+			bool               found  = false;
 			for (auto& el : params.standardFields)
 			{
-				if (strcmp(sfName, el.name()) == 0)
+				if (sfName.compare(el.name()) == 0)
 				{
 					found = true;
 					break;
@@ -756,7 +755,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			{
 				for (auto& el : params.extraFields)
 				{
-					if (strcmp(sfName, el.scalarFields[0]->getName()) == 0)
+					if (sfName.compare(el.scalarFields[0]->getName()) == 0)
 					{
 						found = true;
 						break;
@@ -765,7 +764,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 			}
 			if (!found)
 			{
-				ccLog::Print("[LAS] scalar field " + QString(sfName) + " will be saved automatically in the extra fields of the output file");
+				ccLog::Print("[LAS] scalar field " + QString::fromStdString(sfName) + " will be saved automatically in the extra fields of the output file");
 				LasExtraScalarField field;
 				const std::string   stdName = sfName;
 				strncpy(field.name, stdName.c_str(), LasExtraScalarField::MAX_NAME_SIZE);

@@ -760,7 +760,7 @@ void DistanceMapGenerationDlg::updateHeightUnits()
 
 	if (m_window && m_window->getAssociatedScalarField())
 	{
-		m_window->getAssociatedScalarField()->setName(qPrintable(QString("Distance (%1)").arg(getHeightUnitString())));
+		m_window->getAssociatedScalarField()->setName(QString("Distance (%1)").arg(getHeightUnitString()).toStdString());
 	}
 
 	updateOverlayGrid();

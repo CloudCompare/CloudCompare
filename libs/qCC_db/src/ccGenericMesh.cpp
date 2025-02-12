@@ -727,25 +727,35 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	//'show wired' state (dataVersion>=20)
 	if (in.read(reinterpret_cast<char*>(&m_showWired), sizeof(bool)) < 0)
+	{
 		return ReadError();
+	}
 
 	//'per-triangle normals shown' state (dataVersion>=29))
 	if (dataVersion >= 29)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_triNormsShown), sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 
 		//'materials shown' state (dataVersion>=29))
 		if (in.read(reinterpret_cast<char*>(&m_materialsShown), sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 
 		//'polygon stippling' state (dataVersion>=29))
 		if (in.read(reinterpret_cast<char*>(&m_stippling), sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 	}
 
 	return true;

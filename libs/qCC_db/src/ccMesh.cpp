@@ -150,7 +150,10 @@ void ccMesh::onUpdateOf(ccHObject* obj)
 void ccMesh::onDeletionOf(const ccHObject* obj)
 {
 	if (obj == m_associatedCloud)
+	{
+		//we have to "detach" the cloud from the mesh... (ideally this object should be deleted)
 		setAssociatedCloud(nullptr);
+	}
 
 	ccGenericMesh::onDeletionOf(obj);
 }
@@ -3045,15 +3048,21 @@ bool ccMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading mesh %1...").arg(m_name));
+
 	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)
 	//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t vertUniqueID = 0;
 	if (in.read((char*)&vertUniqueID, 4) < 0)
+	{
 		return ReadError();
+	}
 	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
 	*(uint32_t*)(&m_associatedCloud) = vertUniqueID;
 
@@ -3064,7 +3073,9 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		//is the responsibility of the caller to make sure that all dependencies are saved together)
 		uint32_t normArrayID = 0;
 		if (in.read((char*)&normArrayID, 4) < 0)
+		{
 			return ReadError();
+		}
 		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_triNormals' pointer!!!
 		*(uint32_t*)(&m_triNormals) = normArrayID;
 	}
@@ -3076,7 +3087,9 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		//is the responsibility of the caller to make sure that all dependencies are saved together)
 		uint32_t texCoordArrayID = 0;
 		if (in.read((char*)&texCoordArrayID, 4) < 0)
+		{
 			return ReadError();
+		}
 		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_texCoords' pointer!!!
 		*(uint32_t*)(&m_texCoords) = texCoordArrayID;
 	}
@@ -3088,21 +3101,29 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		//is the responsibility of the caller to make sure that all dependencies are saved together)
 		uint32_t matSetID = 0;
 		if (in.read((char*)&matSetID, 4) < 0)
+		{
 			return ReadError();
+		}
 		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_materials' pointer!!!
 		*(uint32_t*)(&m_materials) = matSetID;
 	}
 
 	//triangles indexes (dataVersion>=20)
 	if (!m_triVertIndexes)
+	{
 		return false;
-	if (!ccSerializationHelper::GenericArrayFromFile<CCCoreLib::VerticesIndexes, 3, unsigned>(*m_triVertIndexes, in, dataVersion))
+	}
+	if (!ccSerializationHelper::GenericArrayFromFile<CCCoreLib::VerticesIndexes, 3, unsigned>(*m_triVertIndexes, in, dataVersion, "vertex indexes"))
+	{
 		return false;
+	}
 
 	//per-triangle materials (dataVersion>=20))
 	bool hasTriMtlIndexes = false;
 	if (in.read((char*)&hasTriMtlIndexes, sizeof(bool)) < 0)
+	{
 		return ReadError();
+	}
 	if (hasTriMtlIndexes)
 	{
 		if (!m_triMtlIndexes)
@@ -3110,7 +3131,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 			m_triMtlIndexes = new triangleMaterialIndexesSet();
 			m_triMtlIndexes->link();
 		}
-		if (!ccSerializationHelper::GenericArrayFromFile<int, 1, int>(*m_triMtlIndexes, in, dataVersion))
+		if (!ccSerializationHelper::GenericArrayFromFile<int, 1, int>(*m_triMtlIndexes, in, dataVersion, "material indexes"))
 		{
 			m_triMtlIndexes->release();
 			m_triMtlIndexes = nullptr;
@@ -3121,7 +3142,9 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	//per-triangle texture coordinates indexes (dataVersion>=20))
 	bool hasTexCoordIndexes = false;
 	if (in.read((char*)&hasTexCoordIndexes, sizeof(bool)) < 0)
+	{
 		return ReadError();
+	}
 	if (hasTexCoordIndexes)
 	{
 		if (!m_texCoordIndexes)
@@ -3129,7 +3152,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 			m_texCoordIndexes = new triangleTexCoordIndexesSet();
 			m_texCoordIndexes->link();
 		}
-		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, dataVersion))
+		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, dataVersion, "texture coordinates"))
 		{
 			m_texCoordIndexes->release();
 			m_texCoordIndexes = nullptr;
@@ -3142,14 +3165,18 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	{
 		bool materialsShown = false;
 		if (in.read((char*)&materialsShown, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		showMaterials(materialsShown);
 	}
 
 	//per-triangle normals  indexes (dataVersion>=20))
 	bool hasTriNormalIndexes = false;
 	if (in.read((char*)&hasTriNormalIndexes, sizeof(bool)) < 0)
+	{
 		return ReadError();
+	}
 	if (hasTriNormalIndexes)
 	{
 		if (!m_triNormalIndexes)
@@ -3158,7 +3185,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 			m_triNormalIndexes->link();
 		}
 		assert(m_triNormalIndexes);
-		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_triNormalIndexes, in, dataVersion))
+		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_triNormalIndexes, in, dataVersion, "normal indexes"))
 		{
 			removePerTriangleNormalIndexes();
 			return false;
@@ -3170,13 +3197,17 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		//'per-triangle normals shown' state (dataVersion>=20 && dataVersion<29))
 		bool triNormsShown = false;
 		if (in.read((char*)&triNormsShown, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		showTriNorms(triNormsShown);
 
 		//'polygon stippling' state (dataVersion>=20 && dataVersion<29))
 		bool stippling = false;
 		if (in.read((char*)&stippling, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		enableStippling(stippling);
 	}
 
@@ -4193,13 +4224,21 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel/*=10*/, QWidget* 
 		}
 		else
 		{
-			delete m_associatedCloud;
-			m_associatedCloud = nullptr;
+			// not sure if we can delete this cloud, as it may be shared with other entities!
+			//delete m_associatedCloud;
+			//m_associatedCloud = nullptr;
 		}
 		setAssociatedCloud(newVertices);
 		if (childPos >= 0)
 		{
 			addChild(m_associatedCloud);
+		}
+		else
+		{
+			// warning: the mesh is not the parent of its vertices!
+			// We want to make sure we will be notified whenever the vertices
+			// are deleted (in which case the mesh will be emptied to avoid any crash)
+			newVertices->addDependency(this, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
 		}
 		vertCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
 		ccLog::Print("[MergeDuplicatedVertices] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);

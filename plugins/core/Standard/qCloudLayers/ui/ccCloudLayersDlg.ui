@@ -56,6 +56,16 @@
       </spacer>
      </item>
      <item>
+      <widget class="QCheckBox" name="keepRGBColorsCheckBox">
+       <property name="toolTip">
+        <string>Overwrite the cloud RGB colors with the displayed class colors on exit (if validated)</string>
+       </property>
+       <property name="text">
+        <string>overwrite RGB colors on exit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pbApply">
        <property name="toolTip">
         <string>apply and close dialog</string>
@@ -109,10 +119,7 @@
        <item>
         <widget class="QPushButton" name="pbDelete">
          <property name="toolTip">
-          <string>delete selected rows</string>
-         </property>
-         <property name="locale">
-          <locale language="English" country="UnitedStates"/>
+          <string>delete selected class</string>
          </property>
          <property name="text">
           <string/>
@@ -126,7 +133,7 @@
        <item>
         <widget class="QPushButton" name="pbStart">
          <property name="toolTip">
-          <string>start drawing circle</string>
+          <string>start converting Input to Output (painting)</string>
          </property>
          <property name="text">
           <string/>
@@ -140,7 +147,7 @@
        <item>
         <widget class="QPushButton" name="pbPause">
          <property name="toolTip">
-          <string>return to transform camera mode</string>
+          <string>return to camera transform mode</string>
          </property>
          <property name="text">
           <string/>
@@ -188,6 +195,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Use ALT to swap the input and output class while painting</string>
+       </property>
        <property name="text">
         <string>Input Class</string>
        </property>
@@ -206,6 +216,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Use ALT to swap the input and output class while painting</string>
        </property>
        <property name="text">
         <string>Output Class</string>

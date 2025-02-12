@@ -154,7 +154,7 @@ bool PopulateSFCombo(QComboBox* combo, const ccPointCloud& cloud, int defaultFie
 	bool defaultFieldFound = false;
 	for (unsigned i = 0; i < sfCount; ++i)
 	{
-		QString sfName = cloud.getScalarFieldName(i);
+		QString sfName = QString::fromStdString(cloud.getScalarFieldName(i));
 		combo->addItem(sfName);
 		if (selectedFieldIndex < 0 && !defaultField.isEmpty())
 		{
@@ -279,7 +279,7 @@ void qM3C2Dialog::updateNormalComboBox()
 	{
 		normalSourceComboBox->setCurrentIndex(lastIndex); //default mode
 	}
-	
+
 	if (m_cloud1 && m_cloud1->hasNormals())
 	{
 		normalSourceComboBox->addItem("Use cloud #1 normals", QVariant(qM3C2Normals::USE_CLOUD1_NORMALS));
@@ -290,7 +290,7 @@ void qM3C2Dialog::updateNormalComboBox()
 			previouslySelectedItem = qM3C2Normals::USE_CLOUD1_NORMALS;
 		}
 	}
-	
+
 	if (cpUseOtherCloudRadioButton->isChecked())
 	{
 		//return the cloud currently selected in the combox box
@@ -372,6 +372,16 @@ void qM3C2Dialog::setCloud2Visibility(bool state)
 
 qM3C2Normals::ComputationMode qM3C2Dialog::getNormalsComputationMode() const
 {
+	// force vertical mode if needed in command line mode
+	if (!m_app)
+	{
+		if (getRequestedComputationMode() == qM3C2Normals::VERT_MODE)
+		{
+			ccLog::Print("[M3C2] force vertical mode as requested in the parameter file");
+			return qM3C2Normals::VERT_MODE;
+		}
+	}
+
 	//special case
 	if (normalSourceComboBox->currentIndex() >= 0)
 	{
@@ -649,6 +659,10 @@ bool qM3C2Dialog::loadParamsFromFile(QString filename)
 	}
 
 	loadParamsFrom(fileSettings);
+
+	// load the requested normal mode from the parameter file (used in command line calls)
+	int normalMode = fileSettings.value("NormalMode", static_cast<int>(qM3C2Normals::DEFAULT_MODE)).toInt();
+	m_requestedComputationMode = static_cast<qM3C2Normals::ComputationMode>(normalMode);
 
 	return true;
 }

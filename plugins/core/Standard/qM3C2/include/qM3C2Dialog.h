@@ -72,6 +72,9 @@ public:
 	//! Returns selected export option
 	ExportOptions getExportOption() const;
 
+	//! Returns the computation mode read in the parameter file (usefull in command line calls)
+	qM3C2Normals::ComputationMode getRequestedComputationMode() const {return m_requestedComputationMode;}
+
 	//! Returns whether the original cloud should be kept instead of creating a new output one
 	/** Only valid if the export option is PROJECT_ON_CORE_POINTS.
 	**/
@@ -126,6 +129,9 @@ protected: //members
 	ccPointCloud* m_cloud1;
 	ccPointCloud* m_cloud2;
 	ccPointCloud* m_corePointsCloud;
+
+	//! Computation mode requested in a parameter file during a command line call
+	qM3C2Normals::ComputationMode m_requestedComputationMode = qM3C2Normals::DEFAULT_MODE;
 };
 
 #endif //Q_M3C2_DIALOG_HEADER

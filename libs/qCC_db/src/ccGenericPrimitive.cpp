@@ -188,9 +188,11 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 
 	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
 	//(this is in fact the default one - automatically created on construction)
-	//while the true vertices come as a child (at least it should;)
+	//while the true vertices come as a child (at least it should ;)
 	if (getChildrenNumber() && getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && getChild(0) != m_associatedCloud)
+	{
 		removeChild(0);
+	}
 
 	//Transformation matrix backup (dataVersion>=21)
 	if (!m_transformation.fromFile(in, dataVersion, flags, oldToNewIDMap))

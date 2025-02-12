@@ -54,6 +54,29 @@ New plugin
 
 Improvements:
 
+	- Rasterize tool > Contour plot generation
+		- the individual polylines should now be properly named (with the real iso-value)
+		- they should be properly ordered
+		- they should be 'closed' when possible
+
+	- BIN file loading
+		- when loading a corrupted/truncated BIN file, or if not enough memory, CloudCompare will give the user
+			the option to proceed and load the entities completely or partly loaded (at risk)
+		- some verbose logs have been added (if the 'Verbose' log level is set in the Display Settings - see below)
+
+	- Scalar fields now natively handle large values
+		- for instance: no need to define a GPS time shift anymore when loading LAS files
+
+	- Scalar fields name can now be longer than 256 characters
+
+	- Point pair-based alignment tool:
+		- CC will now use the Umeyama algorithm instead of Horn's method (supposed to be more robust to mirroring)
+		- required CC to be compiled with the CC_USE_EIGEN CMake option on
+		
+	- Global Shift:
+		- CC will now understand that when clicking on 'Apply all' while the shift is not sufficient to make the point coordinates small enough,
+			this means the user really wants to apply the input Global shift to all the entities (instead of showing the dialog again and again)
+
 	- Command line:
 		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
 		- Rename -CSF command's resulting clouds to be able to select them later:
@@ -64,16 +87,21 @@ Improvements:
 			- default format is 'COMPRESSED_BINARY'
 		- the C_EXPORT_FMT or M_EXPORT_FMT can now be used with secondary extensions (e.g. LAZ instead of LAS)
 			- The secondary extension will also be used when automatically generating output filenames (i.e. when the 'FILE' sub-option is not used)
+		- the CROP2D command has new options
+			- Option -GLOBAL_SHIFT (must be placed just after the orthogonal dimension setting)
+				- this allows to apply a Global Shift to the polyline vertices. Similar syntax to the -GLOBAL_SHIFT option of the -O command.
+			- The orthogonal dimension can now be Xflip, Yflip or Zflip to reverse the order in whcih CC expects the coordinates
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields
 		- Smarter restoration of the previous scalar fields loading pattern
 		- Maximum GPS time shift increased to 10^10
 	- LAS file saving dialog
-		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (VLRs)
-		- if the 'Save remaining scalar fields as Extra fields / VLRs' checkbox is checked (default state),
-			some entries are automatically created in the 3rd tab (Extra fields / VLRs). This is updated automatically
+		- CC will now automatically assign scalar fields with non 'LAS-standard' names to Extra fields (Extra-bytes VLRs)
+		- if the 'Save all remaining scalar fields as Extra fields / EB-VLRs' checkbox is checked (default state),
+			some entries are automatically created in the 3rd tab 'Extra fields (Extra Bytes VLRs)'. This is updated automatically
 			if the point format is changed.
+		- Saving normals or non-standard scalar fields is now explicitly allowed for version 1.2 and 1.3
 		- CC will now explicitly display and let the user choose the 'LAS offset' among up to 4 options
 			- Current global shift (if any), original LAS offset (if any), the cloud minimum bounding-box corner, or a custom offset
 			- by default, the following priority order is now used for selecting the default option:
@@ -83,6 +111,12 @@ Improvements:
 				4) the original LAS offset, if any
 				5) the cloud minimum bounding-box corner (if applicable)
 			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
+
+	- E57 files
+		- when loading E57 files, CC will now store more information about sensors
+		- it will then restore these pieces of information when saving the clouds and images back as an E57 file, effectively
+			preserving the image sensor definition
+		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 
@@ -95,6 +129,37 @@ Improvements:
 		- this dialog can be hidden once and for all by clicking on the 'Yes to all' button
 		- the default output format can also be set via the command line (see above)
 
+	- Animation plugin:
+		- improved/fixed video file generation process to reduce the occurrence of invalid videos
+		- the output file extension will now be automatically updated when changing the codec
+
+	- Display > Display settings
+		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
+
+	- Quadric model/fitting
+		- improved fitting of quadric functions on points:
+			- for the local model optionally used when computing C2C distances
+			- for the MEAN and GAUSSIAN curvature computation (Tools > Other > Compute geometric features)
+
+	- CSF plugin
+		- the clouds and mesh generated by the CSF plugin should now retain the Global Shift and Scale information of the input cloud
+
+	- Cloud Layers plugin
+		- general improvement, with a better behavior when changing the active scalar field, the name of a class,
+			or the camera FOV and other parameters
+		- option to export the colors as RGB
+
+	- 'Tools > Batch export'
+		- the 'Export cloud info' and 'Export plane info' tools will now also export the center global coordinates
+			(in case the clouds or planes have been shifted to a local coordinate system)
+
+	- Others:
+		- The shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
+			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the
+			GUI is frozen, but not the View toolbar.
+		- the Box primitive is now a real box mesh, with only 8 vertices, instead of 6 independent planes.
+		- Better naming of M3C2 output clouds
+
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
@@ -105,6 +170,18 @@ Bug fixes:
 	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
 		of polyline vertices
 	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
+	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
+		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
+	- M3C2: 
+		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
+	- Waveform
+		- each LAS point with missing waveform data was triggering a warning message
+		- the Waveform picking dialog could display an annoying error message each time a new point was picked
+	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
+	- the Cloud Layers plugin had several issues (it was not properly restoring the cloud colors or scalar in some cases,
+		and renaming a class would prevent from using it...)
+	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
+		to a crash (warning: now, the polylines will be emptied to prevent a crash)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
@@ -244,7 +321,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- based on LASzip
 		- should work on all platforms (Windows, Linux, macOS)
 		- manages all versions of LAS files (1.0 to 1.4)
-		- gives much more control over extended fields (EVLR) as well as custom mapping between
+		- gives much more control over extended fields (Extra-bytes VLR) as well as custom mapping between
 			the existing fields of a cloud and their destination in the LAS file
 
 	- New plugin: q3DMASC

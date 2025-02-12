@@ -64,6 +64,7 @@ public:
 			: shiftHandlingMode(ccGlobalShiftManager::DIALOG_IF_NECESSARY)
 			, alwaysDisplayLoadDialog(true)
 			, _coordinatesShiftEnabled(nullptr)
+			, _coordinatesShiftForced(nullptr)
 			, _coordinatesShift(nullptr)
 			, preserveShiftOnSave(true)
 			, autoComputeNormals(false)
@@ -77,6 +78,8 @@ public:
 		bool alwaysDisplayLoadDialog;
 		//! Whether shift on load has been applied after loading (optional)
 		bool* _coordinatesShiftEnabled;
+		//! Whether shift on load should be forced to all entities (optional)
+		bool* _coordinatesShiftForced;
 		//! If applicable, applied shift on load (optional)
 		CCVector3d* _coordinatesShift;
 		//! If applicable, whether shift should be preserved or not (optional)

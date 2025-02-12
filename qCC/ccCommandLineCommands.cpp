@@ -274,7 +274,7 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName,
 		if (!sfName.isEmpty()) // the user has provided a SF name instead of an index
 		{
 			//check if this cloud has a scalar field with the input name
-			sfIndex = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+			sfIndex = cloud->getScalarFieldIndexByName(sfName.toStdString());
 			if (sfIndex < 0)
 			{
 				ccLog::Warning(QObject::tr("Cloud %1 has no SF named '%2'").arg(cloud->getName()).arg(sfName));
@@ -1463,7 +1463,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 						if (!ccScalarField::ValidValue(sfMin) || !ccScalarField::ValidValue(sfMax))
 						{
 							//warn the user, don't use 'Use Active SF' and keep going
-							cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%1' has invalid min/max values.").arg(sf->getName()));
+							cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%1' has invalid min/max values.").arg(QString::fromStdString(sf->getName())));
 						}
 						else
 						{
@@ -1493,7 +1493,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					else
 					{
 						//warn the user, not use Use Active SF and keep going
-						cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%2' does not have any valid value.").arg(COMMAND_SET_ACTIVE_SF).arg(sf->getName()));
+						cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%2' does not have any valid value.").arg(COMMAND_SET_ACTIVE_SF).arg(QString::fromStdString(sf->getName())));
 
 					}
 				}
@@ -3494,7 +3494,7 @@ bool CommandRemoveSF::removeSF(int sfIndex, ccPointCloud& pc)
 {
 	if (sfIndex < static_cast<int>(pc.getNumberOfScalarFields()))
 	{
-		ccLog::Print("[REMOVE_SF] " + QString(pc.getScalarFieldName(sfIndex)));
+		ccLog::Print("[REMOVE_SF] " + QString::fromStdString(pc.getScalarFieldName(sfIndex)));
 		pc.deleteScalarField(sfIndex);
 		if (pc.getNumberOfScalarFields() == 0)
 		{
@@ -4758,8 +4758,15 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 	
 	//orthogonal dimension
 	unsigned char orthoDim = 2;
+	bool orderFlipped = false;
 	{
 		QString orthoDimStr = cmd.arguments().takeFirst().toUpper();
+		if (orthoDimStr.endsWith("FLIP"))
+		{
+			orderFlipped = true;
+			orthoDimStr = orthoDimStr.left(orthoDimStr.size() - 4);
+		}
+
 		if (orthoDimStr == "X")
 		{
 			orthoDim = 0;
@@ -4775,6 +4782,26 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 		else
 		{
 			return cmd.error(QObject::tr("Invalid parameter: orthogonal dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_CROP_2D));
+		}
+	}
+
+	ccCommandLineInterface::GlobalShiftOptions globalShiftOptions;
+	globalShiftOptions.mode = ccCommandLineInterface::GlobalShiftOptions::NO_GLOBAL_SHIFT;
+
+	if (cmd.arguments().size() >= 4)
+	{
+		if (cmd.nextCommandIsGlobalShift())
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (!cmd.processGlobalShiftCommand(globalShiftOptions))
+			{
+				//error message already issued
+				return false;
+			}
+
+			cmd.setGlobalShiftOptions(globalShiftOptions);
 		}
 	}
 	
@@ -4796,7 +4823,19 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Not enough memory!"));
 		}
-		
+
+		assert(orthoDim < 3);
+		unsigned char X = ((orthoDim + 1) % 3);
+		unsigned char Y = ((X + 1) % 3);
+
+		unsigned char Xread = X;
+		unsigned char Yread = Y;
+		if (orderFlipped)
+		{
+			std::swap(Xread, Yread);
+		}
+
+		CCVector3d PShift(0, 0, 0);
 		for (unsigned i = 0; i < N; ++i)
 		{
 			if (cmd.arguments().size() < 2)
@@ -4804,26 +4843,46 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 				return cmd.error(QObject::tr("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
 			}
 			
-			CCVector3 P(0, 0, 0);
+			CCVector3d Pd(0, 0, 0);
 			
 			QString coordStr = cmd.arguments().takeFirst();
-			P.x = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			Pd.u[Xread] = coordStr.toDouble(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: X-coordinate of vertex #%1").arg(i + 1));
 			}
 			/*QString */coordStr = cmd.arguments().takeFirst();
-			P.y = static_cast<PointCoordinateType>(coordStr.toDouble(&ok));
+			Pd.u[Yread] = coordStr.toDouble(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: Y-coordinate of vertex #%1").arg(i + 1));
 			}
-			
-			vertices.addPoint(P); //the polyline must be defined in the XY plane!
+
+			if (i == 0)
+			{
+				bool preserveCoordinateShift = false; //ignored
+				if (FileIOFilter::HandleGlobalShift(Pd, PShift, preserveCoordinateShift, cmd.fileLoadingParams()))
+				{
+					ccLog::Warning(QString("[%1] 2D polyline has been recentered! Translation: (%2 ; %3 ; %4)").arg(COMMAND_CROP_2D).arg(PShift.x, 0, 'f', 2).arg(PShift.y, 0, 'f', 2).arg(PShift.z, 0, 'f', 2));
+				}
+			}
+
+			CCVector3 P3D = (Pd + PShift).toPC();
+
+			// warning: the polyline must be defined in the XY plane!
+			CCVector3 P2D;
+			{
+				P2D.x = P3D.u[X];
+				P2D.y = P3D.u[Y];
+				P2D.z = 0;
+			}
+			vertices.addPoint(P2D);
 		}
 		
 		poly.setClosed(true);
 	}
+
+	cmd.updateInteralGlobalShift(globalShiftOptions);
 	
 	//optional parameters
 	bool inside = true;
@@ -6216,7 +6275,7 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 		return false;
 	}
 
-	cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + source->getScalarField(sfIndex)->getName());
+	cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + QString::fromStdString(source->getScalarField(sfIndex)->getName()));
 
 	//semi-persistent parameters
 	ccPointCloudInterpolator::Parameters params;
@@ -6514,7 +6573,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(desc.pc, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(qPrintable(newSFName));
+				int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(newSFName.toStdString());
 				if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
 				{
 					return cmd.error("A SF with the same name is already defined on cloud " + desc.pc->getName());
@@ -6525,7 +6584,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 					assert(false);
 					return cmd.error("Internal error: invalid SF index");
 				}
-				sf->setName(qPrintable(newSFName));
+				sf->setName(newSFName.toStdString());
 
 				if (cmd.autoSaveMode())
 				{
@@ -6549,7 +6608,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
 			if (thisSFIndex >= 0)
 			{
-				int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(qPrintable(newSFName));
+				int indexOfSFWithSameName = cloud->getScalarFieldIndexByName(newSFName.toStdString());
 				if (indexOfSFWithSameName >= 0 && thisSFIndex != indexOfSFWithSameName)
 				{
 					return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
@@ -6560,7 +6619,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 					assert(false);
 					return cmd.error("Internal error: invalid SF index");
 				}
-				sf->setName(qPrintable(newSFName));
+				sf->setName(newSFName.toStdString());
 
 				if (cmd.autoSaveMode())
 				{
@@ -6607,12 +6666,12 @@ bool CommandSFAddConst::process(ccCommandLineInterface& cmd)
         if (desc.pc)
         {
             // check that there is no existing scalar field with the same name
-            int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(qPrintable(sfName));
+            int indexOfSFWithSameName = desc.pc->getScalarFieldIndexByName(sfName.toStdString());
             if (indexOfSFWithSameName >= 0)
                 return cmd.error("A SF with the same name is already defined on cloud " + desc.pc->getName());
 
             // add the new scalar field
-            int sfIndex = desc.pc->addScalarField(qPrintable(sfName));
+            int sfIndex = desc.pc->addScalarField(sfName.toStdString());
             if (sfIndex == -1)
             {
                 return cmd.error("Internal error: addScalarField failed");
@@ -6668,10 +6727,7 @@ bool CommandSFAddId::process(ccCommandLineInterface& cmd)
 		selectedEntities.push_back(desc.getEntity());
 	}
 
-	if ( !ccEntityAction::sfAddIdField(selectedEntities, addIdAsInt) )
-		return false;
-
-	return true;
+	return ccEntityAction::sfAddIdField(selectedEntities, addIdAsInt);
 }
 
 CommandICP::CommandICP()

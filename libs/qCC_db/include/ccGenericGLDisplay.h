@@ -82,6 +82,22 @@ struct ccGLCameraParameters
 		return ccGL::Unproject<PointCoordinateType, double>(input2D, modelViewMat.data(), projectionMat.data(), viewport, output3D);
 	}
 
+	//! Equality operator
+	bool operator==(const ccGLCameraParameters& otherParams)
+	{
+		return (perspective == otherParams.perspective)
+			&& (fov_deg == otherParams.fov_deg)
+			&& (pixelSize == otherParams.pixelSize)
+			&& (viewport[0] == otherParams.viewport[0])
+			&& (viewport[1] == otherParams.viewport[1])
+			&& (viewport[2] == otherParams.viewport[2])
+			&& (viewport[3] == otherParams.viewport[3])
+			&& (nearClippingDepth == otherParams.nearClippingDepth)
+			&& (farClippingDepth == otherParams.farClippingDepth)
+			&& (modelViewMat == otherParams.modelViewMat)
+			&& (projectionMat == otherParams.projectionMat);
+	}
+
 	//! Model view matrix (GL_MODELVIEW)
 	ccGLMatrixd modelViewMat;
 	//! Projection matrix (GL_PROJECTION)

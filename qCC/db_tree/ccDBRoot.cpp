@@ -912,7 +912,7 @@ void ccDBRoot::unselectAllEntities()
 
 void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)
 {
-	bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers() & Qt::ControlModifier);
 
 	QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
 	assert(selectionModel);
@@ -965,7 +965,7 @@ void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*
 
 void ccDBRoot::selectEntities(std::unordered_set<int> entIDs)
 {
-	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool ctrlPushed = (QApplication::keyboardModifiers() & Qt::ControlModifier);
 
 	//convert input list of IDs to proper entities
 	ccHObject::Container entities;
@@ -1766,32 +1766,32 @@ void ccDBRoot::gatherRecursiveInformation()
 
 		const QString separator("--------------------------");
 
-		infoStr << QString("Point(s):\t\t%L1").arg(info.pointCount);
-		infoStr << QString("Triangle(s):\t\t%L1").arg(info.triangleCount);
+		infoStr << QString("Point(s):        %L1").arg(info.pointCount);
+		infoStr << QString("Triangle(s):     %L1").arg(info.triangleCount);
 
 		infoStr << separator;
 		if (info.colorCount)
-			infoStr << QString("Color(s):\t\t%L1").arg(info.colorCount);
+			infoStr << QString("Color(s):        %L1").arg(info.colorCount);
 		if (info.normalCount)
-			infoStr << QString("Normal(s):\t\t%L1").arg(info.normalCount);
+			infoStr << QString("Normal(s):       %L1").arg(info.normalCount);
 		if (info.scalarFieldCount)
-			infoStr << QString("Scalar field(s):\t\t%L1").arg(info.scalarFieldCount);
+			infoStr << QString("Scalar field(s): %L1").arg(info.scalarFieldCount);
 		if (info.materialCount)
-			infoStr << QString("Material(s):\t\t%L1").arg(info.materialCount);
+			infoStr << QString("Material(s):     %L1").arg(info.materialCount);
 
 		infoStr << separator;
-		infoStr << QString("Cloud(s):\t\t%L1").arg(info.cloudCount);
-		infoStr << QString("Mesh(es):\t\t%L1").arg(info.meshCount);
-		infoStr << QString(" - Pritmitive(s):\t%L1").arg(info.primitiveCount);
+		infoStr << QString("Cloud(s):        %L1").arg(info.cloudCount);
+		infoStr << QString("Mesh(es):        %L1").arg(info.meshCount);
+		infoStr << QString(" - Pritmitive(s):   %L1").arg(info.primitiveCount);
 
 		if (info.octreeCount)
-			infoStr << QString("Octree(s):\t\t%L1").arg(info.octreeCount);
+			infoStr << QString("Octree(s):       %L1").arg(info.octreeCount);
 		if (info.imageCount)
-			infoStr << QString("Image(s):\t\t%L1").arg(info.imageCount);
+			infoStr << QString("Image(s):        %L1").arg(info.imageCount);
 		if (info.labelCount)
-			infoStr << QString("Label(s):\t\t%L1").arg(info.labelCount);
+			infoStr << QString("Label(s):        %L1").arg(info.labelCount);
 		if (info.sensorCount)
-			infoStr << QString("Sensor(s):\t\t%L1").arg(info.sensorCount);
+			infoStr << QString("Sensor(s):       %L1").arg(info.sensorCount);
 
 		//display info box
 		QMessageBox::information(MainWindow::TheInstance(),
@@ -2016,7 +2016,7 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
 		return;
 	}
 
-	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+	bool ctrlPushed = (QApplication::keyboardModifiers() & Qt::ControlModifier);
 	selectEntities(toSelect, ctrlPushed);
 }
 
@@ -2150,7 +2150,7 @@ void ccDBRoot::editLabelScalarValue()
 	ScalarType s = sf->getValue(P.index);
 
 	bool ok = false;
-	double newValue = QInputDialog::getDouble(MainWindow::TheInstance(), "Edit scalar value", QString("%1 (%2) =").arg(sf->getName()).arg(P.index), s, -2147483647, 2147483647, 6, &ok);
+	double newValue = QInputDialog::getDouble(MainWindow::TheInstance(), "Edit scalar value", QString("%1 (%2) =").arg(QString::fromStdString(sf->getName())).arg(P.index), s, -2147483647, 2147483647, 6, &ok);
 	if (!ok)
 	{
 		//process cancelled by the user

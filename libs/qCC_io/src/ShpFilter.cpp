@@ -828,7 +828,11 @@ static ccMesh* CreateMesh(
 		}
 	}
 
-	return new ccMesh(vertices);
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->addChild(vertices);
+	vertices->setEnabled(false);
+
+	return mesh;
 }
 
 //! Builds the patches that where read from a MultiPatch record of a Shapefile
@@ -1520,7 +1524,15 @@ static CC_FILE_ERROR LoadCloud(QDataStream& shpStream,
 					ScalarType s = IsESRINoData(m) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(m);
 					sf->addElement(s);
 				}
-				bool allNans = std::all_of(sf->begin(), sf->end(), [](ScalarType s) { return std::isnan(s); });
+				bool allNans = true;
+				for (int32_t i = 0; i < numPoints; ++i)
+				{
+					if (CCCoreLib::ScalarField::ValidValue(sf->getValue(i)))
+					{
+						allNans = false;
+						break;
+					}
+				}
 				if (!allNans)
 				{
 					sf->computeMinAndMax();

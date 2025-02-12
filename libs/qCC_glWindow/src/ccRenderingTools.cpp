@@ -387,15 +387,11 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	bool showHistogram = (displayParams.colorScaleShowHistogram && !logScale && histogram.maxValue != 0 && histogram.size() > 1);
 
 	//Scalar field title (= name)
-	QString sfTitle;
-	const char* sfName = sf->getName();
-	if (sfName)
+	const std::string& sfName = sf->getName();
+	QString sfTitle = (sfName.empty() ? "Unnamed" : QString::fromStdString(sfName));
+	if (logScale)
 	{
-		sfTitle = QString(sfName);
-		if (sf->getGlobalShift() != 0)
-			sfTitle += QString("[Shifted]");
-		if (logScale)
-			sfTitle += QString("[Log scale]");
+		sfTitle += QString("[Log scale]");
 	}
 
 	//display font

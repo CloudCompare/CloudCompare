@@ -210,7 +210,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(	ccPointCloud* destCl
 			return false;
 		}
 
-		const char* sfName = srcCloud->getScalarFieldName(inSFIndex);
+		std::string sfName = srcCloud->getScalarFieldName(inSFIndex);
 		int outSFIndex = destCloud->getScalarFieldIndexByName(sfName);
 		if (outSFIndex < 0)
 		{

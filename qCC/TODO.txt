@@ -26,6 +26,7 @@ Big ones:
 [*] Undo mechanism
 
 Command line mode:
+[*] Support import of lat/lon data (Latitude, Longitude, Northing, Easting) (https://www.cloudcompare.org/forum/viewtopic.php?p=30502)
 [*] Option to generate a scalar field with the cloud indexes when merging clouds (https://www.cloudcompare.org/forum/viewtopic.php?p=29907)
 [*] Option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
@@ -39,6 +40,7 @@ Command line mode:
 [*] Choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
 [*] Set a custom prefix for saved filenames (see https://www.cloudcompare.org/forum/viewtopic.php?p=23987)
 [*] Rasterize tool
+	- set the raster grid origin/position (https://www.cloudcompare.org/forum/viewtopic.php?p=30724)
 	- set the active layer for raster generation (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
 	- set the output raster filename (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
 	- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
@@ -74,6 +76,7 @@ Scissors/segmentation tool
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 
 Various:
+[*] Create a compressed version of the BIN format (https://www.cloudcompare.org/forum/viewtopic.php?p=30722)
 [*] ASCII load file dialog: display the extracted colum title directly under the role of each column (https://www.cloudcompare.org/forum/viewtopic.php?t=7085)
 [*] Option to lock an entity (https://www.cloudcompare.org/forum/viewtopic.php?p=29251)
 [*] Batch export several entities to single-entity formats (LAS, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=29066)

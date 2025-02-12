@@ -120,7 +120,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::GpsTime:
 			if (field.sf)
 			{
-				point.gps_time = static_cast<laszip_F64>(value) + field.sf->getGlobalShift();
+				point.gps_time = static_cast<laszip_F64>(value);
 			}
 			break;
 		case LasScalarField::ExtendedScanAngle:
@@ -187,7 +187,7 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& poi
 
 		for (size_t elemIndex{0}; elemIndex < extraField.numElements(); ++elemIndex)
 		{
-			values[elemIndex] = (*extraField.scalarFields[elemIndex])[pointIndex];
+			values[elemIndex] = extraField.scalarFields[elemIndex]->getValue(pointIndex);
 		}
 
 		if (extraField.scaleIsRelevant() || extraField.offsetIsRelevant())

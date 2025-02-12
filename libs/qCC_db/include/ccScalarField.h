@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DB_SCALAR_FIELD_HEADER
-#define CC_DB_SCALAR_FIELD_HEADER
-
 //CCCoreLib
 #include <ScalarField.h>
 
@@ -34,7 +33,7 @@ public:
 	//! Default constructor
 	/** \param name scalar field name
 	**/
-	explicit ccScalarField(const char* name = nullptr);
+	explicit ccScalarField(const std::string& name = std::string());
 
 	//! Copy constructor
 	/** \param sf scalar field to copy
@@ -63,7 +62,7 @@ public:
 		//setters
 		void setBounds(ScalarType minVal, ScalarType maxVal, bool resetStartStop = true)
 		{
-			assert(minVal <=maxVal);
+			assert(std::isnan(minVal) || std::isnan(maxVal) || minVal <= maxVal);
 			m_min = minVal; m_max = maxVal;
 			if (resetStartStop)
 			{
@@ -212,11 +211,6 @@ public:
 	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion() const override;
 
-	//! Returns the global shift (if any)
-	inline double getGlobalShift() const { return m_globalShift; }
-	//! Sets the global shift
-	inline void setGlobalShift(double shift) { m_globalShift = shift; }
-
 protected: //methods
 
 	//! Default destructor
@@ -276,9 +270,4 @@ protected: //members
 		will turn this flag on.
 	**/
 	bool m_modified;
-
-	//! Global shift
-	double m_globalShift;
 };
-
-#endif //CC_DB_SCALAR_FIELD_HEADER

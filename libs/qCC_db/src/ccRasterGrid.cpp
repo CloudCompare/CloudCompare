@@ -1549,7 +1549,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 				continue;
 			}
 
-			sfName = inputCloudAsPC->getScalarFieldName(static_cast<int>(sfIndex)) + QString(" ") + GetDefaultFieldName(exportedStatistics[statIndex]);
+			sfName = QString::fromStdString(inputCloudAsPC->getScalarFieldName(static_cast<int>(sfIndex))) + " " + GetDefaultFieldName(exportedStatistics[statIndex]);
 		}
 
 		assert(statIndex < exportedStatistics.size());
@@ -1564,10 +1564,10 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 		}
 
 		// get or create the corresponding scalar field
-		int sfIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(sfName));
+		int sfIndex = cloudGrid->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIndex < 0)
 		{
-			sfIndex = cloudGrid->addScalarField(qPrintable(sfName));
+			sfIndex = cloudGrid->addScalarField(sfName.toStdString());
 			if (sfIndex < 0)
 			{
 				ccLog::Warning("[Rasterize] Couldn't allocate scalar field(s)! Try to free some memory ...");
@@ -1934,12 +1934,12 @@ ccPointCloud* ccRasterGrid::convertToCloud(	bool exportHeightStats,
 				int sfIdx = cloudGrid->addScalarField(formerSf->getName());
 				if (sfIdx < 0) //if we aren't lucky, the input cloud already had a SF with the same name
 				{
-					sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
+					sfIdx = cloudGrid->addScalarField(formerSf->getName() + ".old");
 				}
 
 				if (sfIdx < 0)
 				{
-					ccLog::Warning("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName());
+					ccLog::Warning("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName().c_str());
 				}
 				else
 				{

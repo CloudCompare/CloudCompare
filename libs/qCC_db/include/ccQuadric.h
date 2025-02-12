@@ -38,7 +38,7 @@ public:
 		\param minCorner min corner of the 'representation' base area
 		\param maxCorner max corner of the 'representation' base area
 		\param eq equation coefficients ( Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2)
-		\param dims optional dimension indexes
+		\param toLocalOrientation optional local orientation matrix
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision
@@ -46,7 +46,7 @@ public:
 	ccQuadric(	CCVector2 minCorner,
 				CCVector2 maxCorner,
 				const PointCoordinateType eq[6],
-				const Tuple3ub* dims = nullptr,
+				const CCCoreLib::SquareMatrix* toLocalOrientation = nullptr,
 				const ccGLMatrix* transMat = nullptr,
 				QString name = QString("Quadric"),
 				unsigned precision = DEFAULT_DRAWING_PRECISION);
@@ -75,8 +75,8 @@ public:
 	//! Returns the equation coefficients
 	inline const PointCoordinateType* getEquationCoefs() const { return m_eq; }
 
-	//! Returns the equation 'coordinate system' (X,Y,Z dimensions indexes)
-	inline const Tuple3ub& getEquationDims() const { return m_dims; }
+	//! Returns the equation local coordinate/orientation system
+	inline const CCCoreLib::SquareMatrix& getLocalOrientation() const { return m_toLocalOrientation; }
 
 	//! Projects a 3D point in the quadric coordinate system
 	/** \param P input 3D point
@@ -112,8 +112,8 @@ protected:
 	//! Equation coefficients
 	PointCoordinateType m_eq[6];
 
-	//! Dimension indexes
-	Tuple3ub m_dims;
+	//! Local quadric orientation matrix
+	CCCoreLib::SquareMatrix m_toLocalOrientation;
 
 	//! Min height
 	PointCoordinateType m_minZ;

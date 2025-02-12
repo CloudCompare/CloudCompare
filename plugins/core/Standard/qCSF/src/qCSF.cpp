@@ -213,6 +213,7 @@ void qCSF::doAction()
 
 		if (groundCloud)
 		{
+			groundCloud->copyGlobalShiftAndScale(*pc);
 			groundCloud->setVisible(true);
 			groundCloud->setName("Ground points");
 			cloudContainer->addChild(groundCloud);
@@ -220,6 +221,7 @@ void qCSF::doAction()
 
 		if (offGroundCloud)
 		{
+			offGroundCloud->copyGlobalShiftAndScale(*pc);
 			offGroundCloud->setVisible(true);
 			offGroundCloud->setName("Off-ground points");
 			cloudContainer->addChild(offGroundCloud);
@@ -227,6 +229,8 @@ void qCSF::doAction()
 
 		if (clothMesh)
 		{
+			clothMesh->copyGlobalShiftAndScale(*pc);
+			clothMesh->getAssociatedCloud()->copyGlobalShiftAndScale(*pc);
 			clothMesh->computePerVertexNormals();
 			clothMesh->showNormals(true);
 			cloudContainer->addChild(clothMesh);

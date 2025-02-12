@@ -24,48 +24,6 @@
 //Local
 #include "ccGLMatrix.h"
 
-class Plane
-{
-public:
-
-	Plane()
-		: normal(0, 0, 1)
-		, constCoef(0)
-	{}
-
-	virtual ~Plane() = default;
-
-	void setCoefficients(float a, float b, float c, float d)
-	{
-		// set the normal vector
-		normal = CCVector3f(a, b, c);
-		//compute the length of the vector
-		float l = normal.norm();
-		if (l != 0)
-		{
-			// normalize the vector
-			normal /= l;
-			// and divide constCoef as well
-			constCoef = d / l;
-		}
-		else
-		{
-			constCoef = d;
-		}
-
-	}
-
-	float distance(const CCVector3f& p) const
-	{
-		return normal.dot(p) + constCoef;
-	}
-
-public: //members
-
-	CCVector3f normal;
-	float constCoef;
-};
-
 class AABox : public CCCoreLib::AABB<float>
 {
 public:
@@ -117,7 +75,7 @@ public:
 			normal.z > 0 ? O.z + d : O.z
 		};
 	}
-	
+
 	CCVector3f getVertexN(const CCVector3f& normal) const
 	{
 		return {
@@ -189,7 +147,7 @@ public: //Intersection tests
 	Intersection boxInFrustum(const AABox& box) const
 	{
 		Intersection result = INSIDE;
-		
+
 		for (const auto &plane : pl)
 		{
 			if (plane.distance(box.getVertexP(plane.normal)) < 0)
@@ -204,7 +162,7 @@ public: //Intersection tests
 	Intersection boxInFrustum(const AACube& cube) const
 	{
 		Intersection result = INSIDE;
-		
+
 		for (const auto &plane : pl)
 		{
 			if (plane.distance(cube.getVertexP(plane.normal)) < 0)
@@ -218,6 +176,47 @@ public: //Intersection tests
 
 protected: //protected methods
 
+	class Plane
+	{
+	public:
+
+		Plane()
+			: normal(0, 0, 1)
+			, constCoef(0)
+		{}
+
+		virtual ~Plane() = default;
+
+		void setCoefficients(float a, float b, float c, float d)
+		{
+			// set the normal vector
+			normal = CCVector3f(a, b, c);
+			//compute the length of the vector
+			float l = normal.norm();
+			if (l != 0)
+			{
+				// normalize the vector
+				normal /= l;
+				// and divide constCoef as well
+				constCoef = d / l;
+			}
+			else
+			{
+				constCoef = d;
+			}
+
+		}
+
+		float distance(const CCVector3f& p) const
+		{
+			return normal.dot(p) + constCoef;
+		}
+
+	public: //members
+
+		CCVector3f normal;
+		float constCoef;
+	};
 	enum PLANE
 	{
 		TOP = 0,

@@ -1,21 +1,21 @@
 #pragma once
 
-// ##########################################################################
-// #                                                                        #
-// #                              CLOUDCOMPARE                              #
-// #                                                                        #
-// #  This program is free software; you can redistribute it and/or modify  #
-// #  it under the terms of the GNU General Public License as published by  #
-// #  the Free Software Foundation; version 2 or later of the License.      #
-// #                                                                        #
-// #  This program is distributed in the hope that it will be useful,       #
-// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-// #  GNU General Public License for more details.                          #
-// #                                                                        #
-// #                    COPYRIGHT: CloudCompare project                     #
-// #                                                                        #
-// ##########################################################################
+//##########################################################################
+//#                                                                        #
+//#                              CLOUDCOMPARE                              #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 or later of the License.      #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                    COPYRIGHT: CloudCompare project                     #
+//#                                                                        #
+//##########################################################################
 
 // qCC_db
 #include "ccOctree.h"
@@ -295,222 +295,55 @@ class ccGenericPointCloudLOD
 	State m_state;
 };
 
+//! Base class for visibility flagging of Level of Detail (LOD) point cloud nodes.
+/*!
+ * This class determines which nodes are visible based on frustum culling and optional clipping planes.
+ */
 class ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
-	                                        const ccGLCameraParameters& camera,
-	                                        unsigned char               maxLevel)
-	    : m_lod(lod)
-	    , m_camera(camera)
-	    , m_frustum(camera.modelViewMat, camera.projectionMat)
-	    , m_maxLevel(maxLevel)
-	    , m_hasClipPlanes(false)
-	{
-	}
+    ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
+                                            const ccGLCameraParameters& camera,
+                                            unsigned char maxLevel);
 
-	void setClipPlanes(const ccClipPlaneSet& clipPlanes)
-	{
-		try
-		{
-			m_clipPlanes = clipPlanes;
-		}
-		catch (const std::bad_alloc&)
-		{
-			// not enough memory
-			m_hasClipPlanes = false;
-		}
-		m_hasClipPlanes = !m_clipPlanes.empty();
-	}
+    //! Sets custom clip planes for additional visibility constraints.
+    void setClipPlanes(const ccClipPlaneSet& clipPlanes);
+    //! brief Determines whether a node is intersected by the clipping planes.
+    void clippingIntersection(ccGenericPointCloudLOD::Node& node);
+    //! Propagates a visibility flag to a node and its children.
+    void propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag);
+    //! Flags the visibility status of a node based on frustum culling and clipping planes.
+    virtual uint32_t flag(ccGenericPointCloudLOD::Node& node);
 
-	void propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag)
-	{
-		node.intersection = flag;
-
-		if (node.childCount)
-		{
-			for (int i = 0; i < 8; ++i)
-			{
-				if (node.childIndexes[i] >= 0)
-				{
-					propagateFlag(m_lod.node(node.childIndexes[i], node.level + 1), flag);
-				}
-			}
-		}
-	}
-
-	inline void clippingIntersection(ccGenericPointCloudLOD::Node& node)
-	{
-		if (!m_hasClipPlanes)
-		{
-			return;
-		}
-
-		for (const ccClipPlane& clipPlane : m_clipPlanes)
-		{
-			// distance from center to clip plane
-			// we assume the plane normal (= 3 first coefficients) is normalized!
-			double dist = clipPlane.equation.x * node.center.x
-			              + clipPlane.equation.y * node.center.y
-			              + clipPlane.equation.z * node.center.z
-			              + clipPlane.equation.w /* / CCVector3d::vnorm(clipPlane.equation.u) */;
-
-			if (dist < node.radius)
-			{
-				if (dist <= -node.radius)
-				{
-					node.intersection = Frustum::OUTSIDE;
-					return;
-				}
-				else
-				{
-					node.intersection = Frustum::INTERSECT;
-				}
-			}
-		}
-	}
-
-	virtual uint32_t flag(ccGenericPointCloudLOD::Node& node)
-	{
-		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
-		if (node.intersection != Frustum::OUTSIDE)
-		{
-			clippingIntersection(node);
-		}
-
-		uint32_t visibleCount = 0;
-		switch (node.intersection)
-		{
-		case Frustum::INSIDE:
-			visibleCount = node.pointCount;
-			// no need to propagate the visibility to the children as the default value should already be 'INSIDE'
-			break;
-
-		case Frustum::INTERSECT:
-			// we have to test the children
-			{
-				if (node.level < m_maxLevel && node.childCount)
-				{
-					for (int i = 0; i < 8; ++i)
-					{
-						if (node.childIndexes[i] >= 0)
-						{
-							ccGenericPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
-							visibleCount += flag(childNode);
-						}
-					}
-
-					if (visibleCount == 0)
-					{
-						// as no point is visible we can flag this node as being outside/invisible
-						node.intersection = Frustum::OUTSIDE;
-					}
-				}
-				else
-				{
-					// we have to consider that all points are visible
-					visibleCount = node.pointCount;
-				}
-			}
-			break;
-
-		case Frustum::OUTSIDE:
-			// be sure that all children nodes are flagged as outside!
-			propagateFlag(node, Frustum::OUTSIDE);
-			break;
-		}
-
-		return visibleCount;
-	}
-
-	ccGenericPointCloudLOD&     m_lod;
-	const ccGLCameraParameters& m_camera;
-	Frustum                     m_frustum;
-	unsigned char               m_maxLevel;
-	ccClipPlaneSet              m_clipPlanes;
-	bool                        m_hasClipPlanes;
+  protected:
+    ccGenericPointCloudLOD&     m_lod;
+    const ccGLCameraParameters& m_camera;
+    Frustum                     m_frustum;
+    unsigned char               m_maxLevel;
+    ccClipPlaneSet              m_clipPlanes;
+    bool                        m_hasClipPlanes;
 };
 
+//! A specialized visibility flagger that prioritizes nodes based on their projected screen footprint.
+/*!
+ * Extends the base LOD visibility flagger by introducing a score for nodes,
+ * which prioritizes nodes based on their screen-space footprint (A la Potree)
+ * Flagging differs as well, due to datastructure differences between CC LOD and NestedOctree LODs.
+ */
 class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
-	                                             const ccGLCameraParameters& camera,
-	                                             unsigned char               maxLevel)
-	    : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
-	{
-	}
+    ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
+                                                 const ccGLCameraParameters& camera,
+                                                 unsigned char maxLevel);
+    ~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
 
-	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
-
-	inline void computeNodeFootprint(ccGenericPointCloudLOD::Node & node)
-	{
-		// see https://github.com/potree/potree/blob/c53cf7f7e692ee27bc4c2c623fe17bd678d25558/src/Potree_update_visibility.js#L353
-		// see Markus Schütz thesis for explanations.
-		if (m_camera.perspective)
-		{
-			float distance = (m_camera.modelViewMat * node.center).norm();
-			if (distance - node.radius < 0)
-			{
-				node.score = std::numeric_limits<float>::max();
-				return;
-			}
-			const float slope            = std::tan(CCCoreLib::DegreesToRadians(m_camera.fov_deg) * 0.5f);
-			const float projectionFactor = (0.5f * (m_camera.viewport[3] - m_camera.viewport[1])) / (slope * distance);
-			node.score               = node.radius * projectionFactor;
-		}
-		else
-		{
-			// TODO add a weighting function for other type of cam
-			node.score = std::numeric_limits<float>::max();
-		}
-	}
-
-	uint32_t flag(ccGenericPointCloudLOD::Node& node) override
-	{
-		node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
-		if (node.intersection != Frustum::OUTSIDE)
-		{
-			clippingIntersection(node);
-		}
-
-		uint32_t visibleCount = 0;
-		switch (node.intersection)
-		{
-		case Frustum::INSIDE:
-		case Frustum::INTERSECT:
-			// we have to test the children
-			{
-				computeNodeFootprint(node);
-				visibleCount += node.pointCount;
-				if (node.level < m_maxLevel && node.childCount)
-				{
-					for (int i = 0; i < 8; ++i)
-					{
-						if (node.childIndexes[i] >= 0)
-						{
-							ccGenericPointCloudLOD::Node& childNode = m_lod.node(node.childIndexes[i], node.level + 1);
-							visibleCount += flag(childNode);
-						}
-					}
-
-					if (visibleCount == 0)
-					{
-						// as no point is visible we can flag this node as being outside/invisible
-						node.intersection = Frustum::OUTSIDE;
-					}
-				}
-			}
-			break;
-
-		case Frustum::OUTSIDE:
-			// be sure that all children nodes are flagged as outside!
-			propagateFlag(node, Frustum::OUTSIDE);
-			break;
-		}
-
-		return visibleCount;
-	}
+    //! Computes the projected screen-space footprint of a node.
+    void computeNodeFootprint(ccGenericPointCloudLOD::Node& node);
+    //! dedicated function for INSIDE flag propagation
+    uint32_t propagateInsideFlag(ccGenericPointCloudLOD::Node& node);
+    //! override
+    uint32_t flag(ccGenericPointCloudLOD::Node& node) override;
 };
 
 //! The "original" CloudCompare LOD
@@ -556,16 +389,20 @@ class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
 };
 
 //! The most common LOD datastructure (in the litterature and implementations)
-//! This kind of structure is used by Potree and entwine (thus COPC, untwine..).
-//! Each layer contains a subsambled version of the point cloud.
-//! Cloud resolution increases as we go deeper into the octree levels.
-//! It's additive, union of all points of all the cells (at all levels) = the point cloud
-//!
-//! The creation of this kind of structure is not implemented in CC
-//! but it should be easy in core in CC using CC octree and using a subsampling
-//! strategy (either gridding or poisson sampling) bottom up.
-//! Out of core creation would requiere more work in order to have efficiency
-//! in computation and file I/O.
+/*!
+This kind of structure is used by Potree and entwine (thus COPC, untwine...).
+Each layer contains a subsambled version of the point cloud.
+Cloud resolution increases as we go deeper into the octree levels.
+It's additive, union of all points of all the cells (at all levels) = the point cloud
+
+The creation of this kind of structure is not implemented in CC
+but it should be easy in core in CC using CC octree and using a subsampling
+strategy (either gridding or poisson sampling) bottom up.
+Out of core creation would requiere more work in order to have efficiency
+in computation and file I/O.
+
+It assumes the point cloud is organized by chunks.
+*/
 class ccNestedOctreePointCloudLOD : public ccGenericPointCloudLOD
 {
   public: // methods

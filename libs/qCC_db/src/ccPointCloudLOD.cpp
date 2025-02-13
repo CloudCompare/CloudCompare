@@ -1,19 +1,19 @@
-// ##########################################################################
-// #                                                                        #
-// #                              CLOUDCOMPARE                              #
-// #                                                                        #
-// #  This program is free software; you can redistribute it and/or modify  #
-// #  it under the terms of the GNU General Public License as published by  #
-// #  the Free Software Foundation; version 2 or later of the License.      #
-// #                                                                        #
-// #  This program is distributed in the hope that it will be useful,       #
-// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-// #  GNU General Public License for more details.                          #
-// #                                                                        #
-// #                    COPYRIGHT: CloudCompare project                     #
-// #                                                                        #
-// ##########################################################################
+//##########################################################################
+//#                                                                        #
+//#                              CLOUDCOMPARE                              #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 or later of the License.      #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#                    COPYRIGHT: CloudCompare project                     #
+//#                                                                        #
+//##########################################################################
 
 #include "ccPointCloudLOD.h"
 
@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <new>
 #include <vector>
 
 //! Thread for background computation
@@ -289,7 +290,6 @@ class ccPointCloudLODThread : public QThread
 		m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 
 		// refinement step
-		if (true)
 		{
 			// we look at the 'main' depth level (with the most points)
 			uint8_t biggestLevel = 0;
@@ -828,25 +828,17 @@ LODIndexSet& ccInternalPointCloudLOD::getIndexMap(unsigned char level, unsigned&
 		}
 	}
 
-	if (remainingPointsAtThisLevel)
-	{
-		m_currentState.unfinishedLevel  = static_cast<int>(level);
-		m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
-	}
-	else
-	{
-		m_currentState.unfinishedLevel  = -1;
-		m_currentState.unfinishedPoints = 0;
-	}
+	m_currentState.unfinishedLevel  = remainingPointsAtThisLevel ? static_cast<int>(level) : -1;
+	m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
 
 	m_lastIndexMap = m_indexMap;
 	return m_indexMap;
 }
 
+//! ccNestedOctreePointCloudLOD implementation
 ccNestedOctreePointCloudLOD::ccNestedOctreePointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers)
     : ccGenericPointCloudLOD(lodLayers){};
 
-//! Initializes the construction process
 bool ccNestedOctreePointCloudLOD::init(ccPointCloud* cloud)
 {
 	m_state = INITIALIZED;
@@ -870,9 +862,9 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 		return m_lastIndexMap; // empty
 	}
 
-	if (m_currentState.displayedPoints >= m_currentState.visiblePoints) // TODO
+	if (m_currentState.displayedPoints >= m_currentState.visiblePoints)
 	{
-		// assert(false);
+		assert(false);
 		maxCount = 0;
 		return m_lastIndexMap; // empty
 	}
@@ -888,8 +880,7 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 		return m_lastIndexMap; // empty
 	}
 
-	Level&   l                    = m_levels[level];
-	uint32_t thisPassDisplayCount = 0;
+	Level& l = m_levels[level];
 
 	bool     earlyStop                          = false;
 	size_t   earlyStopIndex                     = 0;
@@ -897,68 +888,70 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 
 	std::vector<Node*> nodePriorityList;
 
-	// TODO reseve max size
-	nodePriorityList.reserve(l.data.size());
-	for (size_t i = 0; i < l.data.size(); ++i)
+	// Reserve/allocate maximum size for the priority list.
+	// Alternatively, we can test without pre-allocating
+	// or consider a buffer for each layer, sized according to the node cardinality (at each layer)
+	// and use partial sorting to sort the n visible nodes... this should be even faster.
+	try
 	{
-		auto& node = l.data[i];
+		nodePriorityList.reserve(l.data.size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		maxCount = 0;
+		return m_lastIndexMap;
+	}
+	for (auto& node : l.data)
+	{
 		assert(node.intersection != UNDEFINED);
+		if (node.intersection == Frustum::OUTSIDE || node.pointCount == node.displayedPointCount)
+			continue;
 
-		// check if the node is intersected or inside the frustum
-		// and if it has data to render
-		if (node.intersection == Frustum::OUTSIDE)
-			continue;
-		if (node.pointCount == node.displayedPointCount)
-			continue;
 		computedRemainingPointsAtThisLevel += node.pointCount - node.displayedPointCount;
 		nodePriorityList.push_back(&node);
 	}
 
-	std::sort(std::begin(nodePriorityList), std::end(nodePriorityList), [](const Node* a, const Node* b)
-	          { return a->score > b->score; });
-
 	bool displayAll = computedRemainingPointsAtThisLevel <= maxCount;
+
+	if (!displayAll)
+	{
+		// Number of cells is small in general and it does not spanning thread to sort this
+		std::sort(std::begin(nodePriorityList), std::end(nodePriorityList), [](const Node* a, const Node* b)
+		          { return a->score > b->score; });
+	}
 
 	for (size_t i = 0; i < nodePriorityList.size(); ++i)
 	{
 		auto node = nodePriorityList[i];
-		if (node->intersection == Frustum::OUTSIDE)
+		if (node->intersection == Frustum::OUTSIDE || node->pointCount == node->displayedPointCount)
 			continue;
-		if (node->pointCount == node->displayedPointCount)
-			continue;
+
 		// if display all;
 		uint32_t       nodeMaxCount       = 0;
 		const uint32_t nodeRemainingCount = node->pointCount - node->displayedPointCount;
-		if (displayAll)
+		if (displayAll || (m_indexMap.size() + nodeRemainingCount <= maxCount))
 		{
 			nodeMaxCount = nodeRemainingCount;
 		}
 		else
 		{
-			// if there is an overflow, early stop
-			if (m_indexMap.size() + nodeRemainingCount >= maxCount)
-			{
-				assert(maxCount >= m_indexMap.size());
-				nodeMaxCount = maxCount - static_cast<uint32_t>(m_indexMap.size());
-				earlyStop    = true;
-			}
-			else
-			{
-				nodeMaxCount = nodeRemainingCount;
-			}
+			// In this case there is an "overflow" of the IndexMap if we fill it with
+			// all the content of the node. We take only the number of points
+			// that allow to saturate the indexMap.
+			// early stop
+			assert(maxCount >= m_indexMap.size());
+			nodeMaxCount = maxCount - static_cast<uint32_t>(m_indexMap.size());
+			earlyStop    = true;
 		}
 
-		// simplified addNpointTo...
+		// we can use a simplified addNPointsToIndexMap
 		uint32_t iStop = std::min(node->displayedPointCount + nodeMaxCount, node->pointCount);
-		// simplified collect point indices
 		for (uint32_t i = node->displayedPointCount; i < iStop; ++i)
 		{
 			m_indexMap.push_back(node->firstCodeIndex + i);
 		}
 
 		node->displayedPointCount += nodeMaxCount;
-		thisPassDisplayCount += nodeMaxCount;
-		assert(thisPassDisplayCount == m_indexMap.size());
 
 		if (earlyStop)
 		{
@@ -970,32 +963,229 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 	maxCount = static_cast<uint32_t>(m_indexMap.size());
 	m_currentState.displayedPoints += maxCount;
 
-	// compute the remaining point in case of early stop.
+	// Compute the remaining point in case of early stop.
 	if (earlyStop)
 	{
 		for (size_t i = earlyStopIndex; i < nodePriorityList.size(); ++i)
 		{
-			auto& node = l.data[i];
+			auto& node = nodePriorityList[i];
 			// be sure to properly finish to count the number of 'unfinished' points!
-			assert(node.intersection != UNDEFINED);
-			uint32_t nodeRemainingCount = (node.pointCount - node.displayedPointCount);
+			uint32_t nodeRemainingCount = (node->pointCount - node->displayedPointCount);
 			remainingPointsAtThisLevel += nodeRemainingCount;
 		}
 	}
 
-	if (remainingPointsAtThisLevel)
+	m_currentState.unfinishedLevel  = remainingPointsAtThisLevel ? static_cast<int>(level) : -1;
+	m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
+	m_lastIndexMap                  = m_indexMap;
+	return m_indexMap;
+}
+
+//! ccGenericPointCloudLODVisibilityFlagger implementation
+ccGenericPointCloudLODVisibilityFlagger::ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+                                                                                 const ccGLCameraParameters& camera,
+                                                                                 unsigned char               maxLevel)
+    : m_lod(lod)
+    , m_camera(camera)
+    , m_frustum(camera.modelViewMat, camera.projectionMat)
+    , m_maxLevel(maxLevel)
+    , m_hasClipPlanes(false)
+{
+}
+
+void ccGenericPointCloudLODVisibilityFlagger::setClipPlanes(const ccClipPlaneSet& clipPlanes)
+{
+	try
 	{
-		m_currentState.unfinishedLevel  = static_cast<int>(level);
-		m_currentState.unfinishedPoints = remainingPointsAtThisLevel;
+		m_clipPlanes = clipPlanes;
+	}
+	catch (const std::bad_alloc&)
+	{
+		m_hasClipPlanes = false;
+		return;
+	}
+	m_hasClipPlanes = !m_clipPlanes.empty();
+}
+
+void ccGenericPointCloudLODVisibilityFlagger::propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag)
+{
+	node.intersection = flag;
+	if (node.childCount)
+	{
+		for (int i = 0; i < 8; ++i)
+		{
+			if (node.childIndexes[i] >= 0)
+			{
+				propagateFlag(m_lod.node(node.childIndexes[i], node.level + 1), flag);
+			}
+		}
+	}
+}
+
+void ccGenericPointCloudLODVisibilityFlagger::clippingIntersection(ccGenericPointCloudLOD::Node& node)
+{
+	if (!m_hasClipPlanes)
+	{
+		return;
+	}
+
+	for (const ccClipPlane& clipPlane : m_clipPlanes)
+	{
+		double dist = clipPlane.equation.x * node.center.x
+		              + clipPlane.equation.y * node.center.y
+		              + clipPlane.equation.z * node.center.z
+		              + clipPlane.equation.w;
+
+		if (dist < node.radius)
+		{
+			node.intersection = (dist <= -node.radius) ? Frustum::OUTSIDE : Frustum::INTERSECT;
+			if (node.intersection == Frustum::OUTSIDE)
+				return;
+		}
+	}
+}
+
+uint32_t ccGenericPointCloudLODVisibilityFlagger::flag(ccGenericPointCloudLOD::Node& node)
+{
+	node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
+	if (node.intersection != Frustum::OUTSIDE)
+	{
+		clippingIntersection(node);
+	}
+
+	uint32_t visibleCount = 0;
+	switch (node.intersection)
+	{
+	case Frustum::INSIDE:
+		visibleCount = node.pointCount;
+		break;
+
+	case Frustum::INTERSECT:
+		if (node.level < m_maxLevel && node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					visibleCount += flag(m_lod.node(node.childIndexes[i], node.level + 1));
+				}
+			}
+
+			if (visibleCount == 0)
+			{
+				node.intersection = Frustum::OUTSIDE;
+			}
+		}
+		else
+		{
+			visibleCount = node.pointCount;
+		}
+		break;
+
+	case Frustum::OUTSIDE:
+		propagateFlag(node, Frustum::OUTSIDE);
+		break;
+	}
+
+	return visibleCount;
+}
+
+//! ccNestedOctreePointCloudLODVisibilityFlagger implementation
+ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+                                                                                           const ccGLCameraParameters& camera,
+                                                                                           unsigned char               maxLevel)
+    : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
+{
+}
+
+void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccGenericPointCloudLOD::Node& node)
+{
+	if (m_camera.perspective)
+	{
+		const float distance = (m_camera.modelViewMat * node.center).norm();
+		if (distance < node.radius)
+		{
+			node.score = std::numeric_limits<float>::max();
+			return;
+		}
+
+		const float slope            = std::tan(CCCoreLib::DegreesToRadians(m_camera.fov_deg) * 0.5f);
+		const float projectionFactor = (0.5f * (m_camera.viewport[3] - m_camera.viewport[1])) / (slope * distance);
+		node.score                   = node.radius * projectionFactor;
 	}
 	else
 	{
-		m_currentState.unfinishedLevel  = -1;
-		m_currentState.unfinishedPoints = 0;
+		node.score = std::numeric_limits<float>::max();
+	}
+}
+
+uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::propagateInsideFlag(ccGenericPointCloudLOD::Node& node)
+{
+	node.intersection = Frustum::INSIDE;
+	computeNodeFootprint(node);
+
+	uint32_t visibleCount = node.pointCount;
+	if (node.childCount)
+	{
+		for (int i = 0; i < 8; ++i)
+		{
+			if (node.childIndexes[i] >= 0)
+			{
+				visibleCount += propagateInsideFlag(m_lod.node(node.childIndexes[i], node.level + 1));
+			}
+		}
 	}
 
-	m_lastIndexMap = m_indexMap;
-	return m_indexMap;
+	if (visibleCount == 0)
+	{
+		node.intersection = Frustum::OUTSIDE;
+	}
+
+	return visibleCount;
+}
+
+uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccGenericPointCloudLOD::Node& node)
+{
+	node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
+	if (node.intersection != Frustum::OUTSIDE)
+	{
+		clippingIntersection(node);
+	}
+
+	uint32_t visibleCount = 0;
+	switch (node.intersection)
+	{
+	case Frustum::INSIDE:
+		visibleCount += propagateInsideFlag(node);
+		break;
+
+	case Frustum::INTERSECT:
+		computeNodeFootprint(node);
+		visibleCount += node.pointCount;
+
+		if (node.level < m_maxLevel && node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					visibleCount += flag(m_lod.node(node.childIndexes[i], node.level + 1));
+				}
+			}
+
+			if (visibleCount == 0)
+			{
+				node.intersection = Frustum::OUTSIDE;
+			}
+		}
+		break;
+
+	case Frustum::OUTSIDE:
+		propagateFlag(node, Frustum::OUTSIDE);
+		break;
+	}
+
+	return visibleCount;
 }
 
 #include "ccPointCloudLOD.moc"

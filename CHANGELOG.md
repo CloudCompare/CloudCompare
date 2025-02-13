@@ -183,6 +183,7 @@ Bug fixes:
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
 		to a crash (warning: now, the polylines will be emptied to prevent a crash)
 	- VBOs are now properly released when using the LoD rendering
+	- Normals shown has lines were not automatically update after applying a transformation to a cloud
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

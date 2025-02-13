@@ -2336,6 +2336,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
 			}
 		}
+
+		//we must update the VBOs
+		normalsHaveChanged();
 	}
 
 	//and the scan grids!
@@ -6269,16 +6272,19 @@ bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
 void ccPointCloud::showNormalsAsLines(bool state)
 {
 	if (!hasNormals())
+	{
 		return;
+	}
 
 	m_normalsDrawnAsLines = state;
 
 	if (state == false)
+	{
 		m_decompressedNormals.clear();
+	}
 	else
 	{
 		decompressNormals();
-		redrawDisplay();
 	}
 }
 
@@ -6368,7 +6374,17 @@ void ccPointCloud::decompressNormals()
 	if (m_normalsDrawnAsLines)
 	{
 		// we need to decompress the normals
-		m_decompressedNormals.resize(size());
+		try
+		{
+			m_decompressedNormals.resize(size());
+		}
+		catch (const std::bad_alloc)
+		{
+			ccLog::Warning("Not enough memory to decompress normals");
+			m_normalsDrawnAsLines = false;
+			m_decompressedNormals.clear();
+			return;
+		}
 		for (unsigned idx = 0; idx < size(); idx++)
 		{
 			m_decompressedNormals[idx] = getPointNormal(idx);

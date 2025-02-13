@@ -3088,7 +3088,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							else
 							{
 								assert(toDisplay.count == toDisplay.indexMap->size());
-								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count;
+								toDisplay.endIndex = toDisplay.startIndex + toDisplay.count; // 0 + indexMap->size()
 							}
 
 							//could we draw more points at the next level?
@@ -3373,46 +3373,37 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (toDisplay.indexMap) //LoD display
 					{
-						unsigned s = toDisplay.startIndex;
-						while (s < toDisplay.endIndex)
+						assert(toDisplay.count <= MAX_POINT_COUNT_PER_LOD_RENDER_PASS);
+						//points
+						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
+						//normals
+						if (glParams.showNorms)
 						{
-							unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
-							unsigned e = s + count;
-
-							//points
-							glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
-							//normals
-							if (glParams.showNorms)
-							{
-								glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e);
-							}
-							//SF colors
-							if (colorRampShader)
-							{
-								float* _sfColors = s_rgbBuffer3f;
-								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
-								for (unsigned j = s; j < e; j++, _sfColors += 3)
-								{
-									unsigned pointIndex = toDisplay.indexMap->at(j);
-									ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
-									//normalized sf value
-									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfVal, sfSaturationRange) : GetNormalizedValue(sfVal, sfDisplayRange);
-									//flag: whether point is grayed out or not (NaN values are also rejected!)
-									_sfColors[1] = sfDisplayRange.isInRange(sfVal) ? 1.0f : 0.0f;
-									//reference value (to get the true lighting value)
-									_sfColors[2] = 1.0f;
-								}
-								glFunc->glColorPointer(3, GL_FLOAT, 0, s_rgbBuffer3f);
-							}
-							else
-							{
-								glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e);
-							}
-
-							glFunc->glDrawArrays(GL_POINTS, 0, count);
-
-							s = e;
+							glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
 						}
+						//SF colors
+						if (colorRampShader)
+						{
+							float* _sfColors = s_rgbBuffer3f;
+							bool symScale = m_currentDisplayedScalarField->symmetricalScale();
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j++, _sfColors += 3)
+							{
+								unsigned pointIndex = toDisplay.indexMap->at(j);
+								ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
+								//normalized sf value
+								_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfVal, sfSaturationRange) : GetNormalizedValue(sfVal, sfDisplayRange);
+								//flag: whether point is grayed out or not (NaN values are also rejected!)
+								_sfColors[1] = sfDisplayRange.isInRange(sfVal) ? 1.0f : 0.0f;
+								//reference value (to get the true lighting value)
+								_sfColors[2] = 1.0f;
+							}
+							glFunc->glColorPointer(3, GL_FLOAT, 0, s_rgbBuffer3f);
+						}
+						else
+						{
+							glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
+						}
+						glFunc->glDrawArrays(GL_POINTS, 0, toDisplay.count);
 					}
 					else
 					{
@@ -3615,24 +3606,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (toDisplay.indexMap) //LoD display
 				{
-					unsigned s = toDisplay.startIndex;
-					while (s < toDisplay.endIndex)
-					{
-						unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
-						unsigned e = s + count;
+					assert(toDisplay.count <= MAX_POINT_COUNT_PER_LOD_RENDER_PASS);
+					//points
+					glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
+					//normals
+					if (glParams.showNorms)
+						glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
+					//colors
+					if (glParams.showColors)
+						glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
 
-						//points
-						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
-						//normals
-						if (glParams.showNorms)
-							glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e);
-						//colors
-						if (glParams.showColors)
-							glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e);
-
-						glFunc->glDrawArrays(GL_POINTS, 0, count);
-						s = e;
-					}
+					glFunc->glDrawArrays(GL_POINTS, 0, toDisplay.count);
 				}
 				else
 				{

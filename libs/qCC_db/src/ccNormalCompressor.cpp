@@ -81,7 +81,7 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 			else if (x > halfBox[0]) sector = 0;
 		}
 		res |= sector;
-		
+
 		if (level != 0) //skip this at the last level
 		{
 			if (flip)
@@ -163,11 +163,11 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 		else
 		{
 			const PointCoordinateType tmp = (sector != 3 ? box[3 + sector] : 0);
-			
+
 			box[3] = (box[0] + box[3]) / 2;
 			box[4] = (box[1] + box[4]) / 2;
 			box[5] = (box[2] + box[5]) / 2;
-			
+
 			if (sector != 3)
 			{
 				box[sector] = box[3 + sector];

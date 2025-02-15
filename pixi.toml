@@ -32,6 +32,7 @@ eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
 xerces-c = ">=3.2.5,<3.3"
 occt = ">=7.7.1,<7.8"       # Opencascade, >=7.8 needs cmake adjustements
+tbb = ">=2022.0.0,<2023"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -44,6 +45,8 @@ cmd = [
 	"-DCMAKE_BUILD_TYPE=Release",
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
+	"-DCCCORELIB_USE_TBB=ON",
+	"-DCC_USE_EIGEN=ON",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DPLUGIN_IO_QLAS=ON",
 	"-DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=ON",
@@ -63,22 +66,22 @@ cmd = [
 	"-DPLUGIN_STANDARD_QHOUGH_NORMALS=ON",
 	"-DPLUGIN_STANDARD_QM3C2=ON",
 	"-DPLUGIN_STANDARD_QMPLANE=ON",
-	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF",           #TODO: need libigl for osx-arm64
+	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF",           # TODO: need libigl for osx-arm64
 	"-DPLUGIN_STANDARD_QPCL=ON",
 	"-DPLUGIN_STANDARD_QPCV=ON",
 	"-DPLUGIN_STANDARD_QPOISSON_RECON=ON",
 	"-DPLUGIN_STANDARD_QRANSAC_SD=ON",
 	"-DPLUGIN_STANDARD_QSRA=ON",
-	"-DPLUGIN_STANDARD_QTREEISO=OFF",                #TODO: improve compatibility.
+	"-DPLUGIN_STANDARD_QTREEISO=OFF",                # TODO: improve compatibility.
 	"-DPLUGIN_STANDARD_QVOXFALL=ON",
 	#--IO PLUGINS--
 	"-DPLUGIN_IO_QADDITIONAL=ON",
 	"-DPLUGIN_IO_QCORE=ON",
-	"-DPLUGIN_IO_QDRACO=OFF",     #TODO
+	"-DPLUGIN_IO_QDRACO=OFF",     # TODO
 	"-DPLUGIN_IO_QE57=ON",
-	"-DE57_RELEASE_LTO=OFF",      #TODO: Needed else it won't find the AR/Ranlib binary
+	"-DE57_RELEASE_LTO=OFF",      # TODO: Needed else it won't find the AR/Ranlib binary
 	"-DPLUGIN_IO_QFBX=OFF",       # Possible, but it needs a proprietary SDK
-	#"-DPLUGIN_IO_QLAS_FWF=ON" # Seems to be Windows only
+	#"-DPLUGIN_IO_QLAS_FWF=ON" # Seems to be Windows only, deprecated in favor of qLASIO
 	"-DPLUGIN_IO_QPHOTOSCAN=ON",
 	"-DPLUGIN_IO_QRDB=OFF",                                    # Needs a proprietary lib. The lib is not available for osx-arm64
 	"-DPLUGIN_IO_QSTEP=ON",

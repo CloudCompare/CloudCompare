@@ -29,7 +29,6 @@
 
 //system
 #include <cassert>
-#include <cmath>
 
 //! Default number of steps for spin-boxes
 const int SPIN_BOX_STEPS = 1000;

@@ -31,7 +31,15 @@
 #include <PointProjectionTools.h>
 
 #ifdef CC_CORE_LIB_USES_TBB
-#include <tbb/parallel_for.h>
+#ifndef Q_MOC_RUN
+#if defined(emit)
+	#undef emit
+	#include <tbb/parallel_for.h>
+	#define emit // restore the macro definition of "emit", as it was defined in gtmetamacros.h
+#else
+	#include <tbb/parallel_for.h>
+#endif // defined(emit)
+#endif // Q_MOC_RUN
 #endif
 
 //System

@@ -376,7 +376,7 @@ void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersi
 	if (m_model && item)
 	{
 		m_model->appendRow(item);
-		
+
 		if (openPersistentEditor && (m_view != nullptr))
 		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
@@ -395,7 +395,7 @@ void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 		leftItem->setData(TREE_VIEW_HEADER);
 		leftItem->setAccessibleDescription(title);
 		m_model->appendRow(leftItem);
-		
+
 		if ( m_view != nullptr )
 		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
@@ -422,7 +422,7 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 	{
 		QVariant var = it.value();
 		QString value;
-		
+
 		if (var.canConvert(QVariant::String))
 		{
 			var.convert(QVariant::String);
@@ -627,6 +627,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 		{
 			fillWithDrawNormals(_obj);
 		}
+
+		if (cloud->hasUsableLOD())
+		{
+			fillWithPointCloudLOD(_obj);
+		}
 	}
 }
 
@@ -654,6 +659,27 @@ void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
 
 	//normals color
 	appendRow(ITEM(tr("Color")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_COLOR), true);
+}
+
+void ccPropertiesTreeDelegate::fillWithPointCloudLOD(ccGenericPointCloud* _obj)
+{
+	if (!_obj || !m_model)
+	{
+		assert(false);
+		return;
+	}
+
+	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		assert(false);
+		return;
+	}
+
+	addSeparator( tr( "LOD rendering" ) );
+
+	//visibility
+	const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+	appendRow(ITEM(tr("Use LOD Rendering")), CHECKABLE_ITEM(cloud->useLODRendering(), OBJECT_CLOUD_USE_LOD));
 }
 
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
@@ -1017,7 +1043,7 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* 
 
 	//"Update Viewport" button
 	appendRow(ITEM( tr( "Update viewport" ) ), PERSISTENT_EDITOR(OBJECT_UPDATE_LABEL_VIEWPORT), true);
-	
+
 }
 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
@@ -1103,7 +1129,7 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 				  ITEM( QStringLiteral("[%1 ; %2]")
 						.arg( CCCoreLib::RadiansToDegrees( yawMin ), 0, 'f', 2)
 						.arg( CCCoreLib::RadiansToDegrees( yawMax ), 0, 'f', 2)));
-		
+
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
 		appendRow(ITEM( tr( "Yaw step" ) ),
@@ -1293,7 +1319,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CURRENT_SCALAR_FIELD:
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-		assert(cloud);		
+		assert(cloud);
 
 		QComboBox *comboBox = new QComboBox(parent);
 
@@ -1474,7 +1500,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
-		
+
 		double minIndex = 0.0;
 		double maxIndex = 0.0;
 		if (sensor)
@@ -1570,7 +1596,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_defaultPointSizeString ) ); //size = 0
-		
+
 		for (int i = static_cast<int>(ccGLWindowInterface::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindowInterface::MAX_POINT_SIZE_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
@@ -1587,7 +1613,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_defaultPolyWidthSizeString ) ); //size = 0
-				
+
 		for (int i = static_cast<int>(ccGLWindowInterface::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindowInterface::MAX_LINE_WIDTH_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
@@ -1604,7 +1630,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_noneString ) );
-		
+
 		if (m_currentObject)
 		{
 			if (m_currentObject->hasColors())
@@ -1656,7 +1682,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		{
 			spinBox->setValue(cs->getDisplayScale());
 		}
-		
+
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
 
@@ -2148,7 +2174,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		cloud->showSFColorsScale(item->checkState() == Qt::Checked);
 	}
 	redraw = true;
-	break;	
+	break;
 	case OBJECT_COORDINATE_SYSTEM_DISP_AXES:
 	{
 		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
@@ -2265,10 +2291,21 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_CLOUD_DRAW_NORMALS:
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
-		bool isChecked = (item->checkState() == Qt::Checked);
 		if (cloud)
 		{
+			bool isChecked = (item->checkState() == Qt::Checked);
 			static_cast<ccPointCloud*>(cloud)->showNormalsAsLines(isChecked);
+		}
+	}
+	redraw = true;
+	break;
+	case OBJECT_CLOUD_USE_LOD:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		if (cloud)
+		{
+			bool isChecked = (item->checkState() == Qt::Checked);
+			static_cast<ccPointCloud*>(cloud)->setLODRendering(isChecked);
 		}
 	}
 	redraw = true;

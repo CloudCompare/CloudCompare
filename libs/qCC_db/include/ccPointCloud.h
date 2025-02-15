@@ -949,10 +949,23 @@ public: //Level of Detail (LOD)
 	//! Clears the LOD structure
 	void clearLOD();
 
+	//! Returns if the cloud has a valuable LOD
+	bool hasUsableLOD() const;
+
+	//! Getter for the m_useLODRendering member
+	bool useLODRendering() const;
+
+	//! Mutates the m_useLODRendering member (setter)
+	void setLODRendering(bool);
+
 protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
 	ccPointCloudLOD* m_lod;
+
+	//! Boolean flag indicating whether this specific cloud should
+	//! be rendered using the LOD mechanism. (see its usage in DrawMeOnly)
+	bool m_useLODRendering;
 
 protected: //waveform (e.g. from airborne scanners)
 
@@ -965,6 +978,7 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
+protected: //Normals drawing
 	bool m_normalsDrawnAsLines;
 
 	struct NormalLineParameters

@@ -28,7 +28,7 @@
 #include "ccColorTypes.h"
 
 //Qt
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_0>
 
 //! Shortcuts to OpenGL commands independent on the input type
 class ccGL
@@ -36,42 +36,42 @@ class ccGL
 public:
 
 	//type-less glVertex3Xv call (X=f,d)
-	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glVertex3fv(v); }
-	static inline void Vertex3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glVertex3dv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_3_0* glFunc, const float* v) { glFunc->glVertex3fv(v); }
+	static inline void Vertex3v(QOpenGLFunctions_3_0* glFunc, const double* v) { glFunc->glVertex3dv(v); }
 
 	//type-less glVertex3X call (X=f,d)
-	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
-	static inline void Vertex3(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glVertex3d(x, y, z); }
+	static inline void Vertex3(QOpenGLFunctions_3_0* glFunc, float x, float y, float z) { glFunc->glVertex3f(x, y, z); }
+	static inline void Vertex3(QOpenGLFunctions_3_0* glFunc, double x, double y, double z) { glFunc->glVertex3d(x, y, z); }
 
 	//type-less glScaleX call (X=f,d)
-	static inline void Scale(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glScalef(x, y, z); }
-	static inline void Scale(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glScaled(x, y, z); }
+	static inline void Scale(QOpenGLFunctions_3_0* glFunc, float x, float y, float z) { glFunc->glScalef(x, y, z); }
+	static inline void Scale(QOpenGLFunctions_3_0* glFunc, double x, double y, double z) { glFunc->glScaled(x, y, z); }
 
 	//type-less glNormal3Xv call (X=f,d)
-	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glNormal3fv(v); }
-	static inline void Normal3v(QOpenGLFunctions_2_1* glFunc, const double* v) { glFunc->glNormal3dv(v); }
+	static inline void Normal3v(QOpenGLFunctions_3_0* glFunc, const float* v) { glFunc->glNormal3fv(v); }
+	static inline void Normal3v(QOpenGLFunctions_3_0* glFunc, const double* v) { glFunc->glNormal3dv(v); }
 
 	//type-less glRotateX call (X=f,d)
-	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
-	static inline void Rotate(QOpenGLFunctions_2_1* glFunc, double a, double x, double y, double z) { glFunc->glRotated(a, x, y, z); }
+	static inline void Rotate(QOpenGLFunctions_3_0* glFunc, float a, float x, float y, float z) { glFunc->glRotatef(a, x, y, z); }
+	static inline void Rotate(QOpenGLFunctions_3_0* glFunc, double a, double x, double y, double z) { glFunc->glRotated(a, x, y, z); }
 
 	//type-less glTranslateX call (X=f,d)
-	static inline void Translate(QOpenGLFunctions_2_1* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
-	static inline void Translate(QOpenGLFunctions_2_1* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_3_0* glFunc, float x, float y, float z) { glFunc->glTranslatef(x, y, z); }
+	static inline void Translate(QOpenGLFunctions_3_0* glFunc, double x, double y, double z) { glFunc->glTranslated(x, y, z); }
 
 	//type-less glColor3Xv call (X=f,ub)
-	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
-	static inline void Color3v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor3fv(v); }
+	static inline void Color3v(QOpenGLFunctions_3_0* glFunc, const unsigned char* v) { glFunc->glColor3ubv(v); }
+	static inline void Color3v(QOpenGLFunctions_3_0* glFunc, const float* v) { glFunc->glColor3fv(v); }
 
 	//type-less glColor4Xv call (X=f,ub)
-	static inline void Color4v(QOpenGLFunctions_2_1* glFunc, const unsigned char* v) { glFunc->glColor4ubv(v); }
-	static inline void Color4v(QOpenGLFunctions_2_1* glFunc, const float* v) { glFunc->glColor4fv(v); }
+	static inline void Color4v(QOpenGLFunctions_3_0* glFunc, const unsigned char* v) { glFunc->glColor4ubv(v); }
+	static inline void Color4v(QOpenGLFunctions_3_0* glFunc, const float* v) { glFunc->glColor4fv(v); }
 
 	//ccColor dedicated calls
-	static inline void Color(QOpenGLFunctions_2_1* glFunc, const ccColor::RgbaTpl<unsigned char>& col)	{ glFunc->glColor4ubv(col.rgba); }
-	static inline void Color(QOpenGLFunctions_2_1* glFunc, const ccColor::RgbaTpl<float>& col)			{ glFunc->glColor4fv(col.rgba);  }
-	static inline void Color(QOpenGLFunctions_2_1* glFunc, const ccColor::RgbTpl<unsigned char>& col)	{ glFunc->glColor3ubv(col.rgb);  }
-	static inline void Color(QOpenGLFunctions_2_1* glFunc, const ccColor::RgbTpl<float>& col)			{ glFunc->glColor3fv(col.rgb);   }
+	static inline void Color(QOpenGLFunctions_3_0* glFunc, const ccColor::RgbaTpl<unsigned char>& col)	{ glFunc->glColor4ubv(col.rgba); }
+	static inline void Color(QOpenGLFunctions_3_0* glFunc, const ccColor::RgbaTpl<float>& col)			{ glFunc->glColor4fv(col.rgba);  }
+	static inline void Color(QOpenGLFunctions_3_0* glFunc, const ccColor::RgbTpl<unsigned char>& col)	{ glFunc->glColor3ubv(col.rgb);  }
+	static inline void Color(QOpenGLFunctions_3_0* glFunc, const ccColor::RgbTpl<float>& col)			{ glFunc->glColor3fv(col.rgb);   }
 
 public: //GLU equivalent methods
 
@@ -218,7 +218,7 @@ public: //GLU equivalent methods
 			Pp.z = static_cast<oType>(projection[2]*Pm.x + projection[6]*Pm.y + projection[10]*Pm.z + projection[14]*Pm.w);
 			Pp.w = static_cast<oType>(projection[3]*Pm.x + projection[7]*Pm.y + projection[11]*Pm.z + projection[15]*Pm.w);
 		};
-		
+
 		//The result normalizes between -1 and 1
 		if (Pp.w == 0.0)
 		{
@@ -250,7 +250,7 @@ public: //GLU equivalent methods
 
 		return true;
 	}
-	
+
 	inline static double MAT(const double* m, int r, int c) { return m[c * 4 + r]; }
 	inline static float MAT(const float* m, int r, int c) { return m[c * 4 + r]; }
 

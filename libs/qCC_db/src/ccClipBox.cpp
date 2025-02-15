@@ -44,7 +44,7 @@ static QSharedPointer<ccTorus>    c_torus        (nullptr);
 void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -97,7 +97,7 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -144,7 +144,7 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 static void DrawUnitCross(bool entityPickingMode, const CCVector3& center, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -437,7 +437,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 			assert(false);
 			return false;
 		}
-		
+
 		//send 'modified' signal
 		Q_EMIT boxModified(&m_box);
 	}
@@ -475,7 +475,7 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 			assert(false);
 			return false;
 		}
-		
+
 		CCVector3d R = Rb;
 		if (m_glTransEnabled)
 		{
@@ -537,7 +537,7 @@ void ccClipBox::shift(const CCVector3& v)
 {
 	m_box.minCorner() += v;
 	m_box.maxCorner() += v;
-		
+
 	update();
 
 	//send 'modified' signal
@@ -634,11 +634,11 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!m_box.isValid())
 		return;
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
-	
+
 	if ( glFunc == nullptr )
 		return;
 
@@ -648,7 +648,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//m_box.draw(m_selected ? context.bbDefaultCol : ccColor::magenta);
 		m_box.draw(context, ccColor::yellow);
 	}
-	
+
 	if (!m_selected)
 	{
 		//nothing to show
@@ -663,7 +663,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		const CCVector3& minC = m_box.minCorner();
 		const CCVector3& maxC = m_box.maxCorner();
 		const CCVector3 center = m_box.getCenter();
-	
+
 		PointCoordinateType scale = computeArrowsScale();
 
 		//custom arrow 'context'

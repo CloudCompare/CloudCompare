@@ -89,14 +89,14 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//2D foreground only
 	if (!MACRO_Foreground(context) || !MACRO_Draw2D(context))
 		return;
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
-	
+
 	if ( glFunc == nullptr )
 		return;
-	
+
 	//test viewport parameters
 	const ccViewportParameters& params = context.display->getViewportParameters();
 
@@ -128,7 +128,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//focal distance change compensation
 	double relativeZoom = m_params.getFocalDistance() / params.getFocalDistance();
-	
+
 	//camera center shift compensation
 	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist();
 

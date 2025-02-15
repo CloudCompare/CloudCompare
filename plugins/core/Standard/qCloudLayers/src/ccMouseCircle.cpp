@@ -38,7 +38,7 @@ struct Circle
 			vertices[n][1] = std::sin(heading_rad);
 		}
 	}
-	
+
 	static const unsigned Resolution = 64;
 	double vertices[Resolution][2];
 };
@@ -99,7 +99,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 	if (glFunc == nullptr)
 	{
@@ -115,7 +115,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
 	int mx = p.x(); //mouse x-coord
 	int my = context.glH - 1 - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
-	
+
 	//calculate circle location
 	int cx = mx - context.glW / 2;
 	int cy = my - context.glH / 2;
@@ -136,7 +136,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glVertex2d(s_unitCircle.vertices[n][0] * m_radius + cx, s_unitCircle.vertices[n][1] * m_radius + cy);
 		}
-		
+
 		glFunc->glEnd();
 		glFunc->glPopAttrib();
 	}
@@ -162,7 +162,7 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 	if (event->type() == QEvent::Wheel && m_allowScroll)
 	{
 		QWheelEvent* wheelEvent = static_cast<QWheelEvent *>(event);
-	
+
 		//adjust radius (+ avoid really small radius)
 		m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->delta() / 100.0)));
 

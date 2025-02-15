@@ -36,13 +36,13 @@ struct Circle
 			vertices[n][1] = std::sin(heading);
 		}
 	}
-	
+
 	static const int Resolution = 100;
 	double vertices[Resolution][2];
 };
 static Circle s_unitCircle;
 
-ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name) 
+ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name)
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
 	, m_owner(nullptr)
 	, m_pixelSize(0.0f)
@@ -99,7 +99,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 	if (glFunc == nullptr)
 	{
@@ -116,7 +116,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
 	int mx = p.x(); //mouse x-coord
 	int my = context.glH - 1 - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
-	
+
 	//calculate circle location
 	int cx = mx - context.glW / 2;
 	int cy = my - context.glH / 2;

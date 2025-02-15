@@ -43,7 +43,7 @@ ccBBox ccKdTree::getOwnBB(bool withGLFeatures/*=false*/)
 class MultiplyBoundingBoxVisitor
 {
 public:
-	
+
 	MultiplyBoundingBoxVisitor(PointCoordinateType multFactor) : m_multFactor(multFactor) {}
 
 	void visit(ccKdTree::BaseNode* node)
@@ -71,7 +71,7 @@ void ccKdTree::multiplyBoundingBox(const PointCoordinateType multFactor)
 class TranslateBoundingBoxVisitor
 {
 public:
-	
+
 	TranslateBoundingBoxVisitor(const CCVector3& T) : m_translation(T) {}
 
 	void visit(ccKdTree::BaseNode* node)
@@ -100,7 +100,7 @@ void ccKdTree::translateBoundingBox(const CCVector3& T)
 class DrawMeOnlyVisitor
 {
 public:
-	
+
 	DrawMeOnlyVisitor(const ccBBox& box, const ccColor::Rgb& color)
 		: m_drawCellBBox(box)
 		, m_color(color)
@@ -145,14 +145,14 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!MACRO_Draw3D(context))
 		return;
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
-	
+
 	if ( glFunc == nullptr )
 		return;
-	
+
 	ccColor::Rgb color = ccColor::green;
 
 	bool entityPickingMode = MACRO_EntityPicking(context);
@@ -246,7 +246,7 @@ bool ccKdTree::convertCellIndexToRandomColor()
 class GetCellBBoxVisitor
 {
 public:
-	
+
 	ccBBox m_UpdatedBox;
 
 	GetCellBBoxVisitor()
@@ -255,7 +255,7 @@ public:
 		m_UpdatedBox.maxCorner() = CCVector3(CCCoreLib::PC_NAN,CCCoreLib::PC_NAN,CCCoreLib::PC_NAN);
 		m_UpdatedBox.minCorner() = CCVector3(CCCoreLib::PC_NAN,CCCoreLib::PC_NAN,CCCoreLib::PC_NAN);
 	}
-	
+
 	void visit(ccKdTree::BaseNode* node)
 	{
 		assert(node);

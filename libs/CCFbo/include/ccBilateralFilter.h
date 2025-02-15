@@ -102,7 +102,7 @@ protected: //members
 	bool m_useCurrentViewport;
 
 	//! Associated OpenGL functions set
-	QOpenGLFunctions_2_1 m_glFunc;
+	QOpenGLFunctions_3_0 m_glFunc;
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };

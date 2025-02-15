@@ -43,7 +43,7 @@
 #include <ccBilateralFilter.h>
 
 //Qt
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_0>
 
 class ccShader;
 class ccFrameBufferObject;
@@ -132,7 +132,7 @@ private:
 	float m_lightDir[3];
 
 	//! Associated OpenGL functions set
-	QOpenGLFunctions_2_1 m_glFunc;
+	QOpenGLFunctions_3_0 m_glFunc;
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };

@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 #endif
 
 	ccViewerApplication::InitOpenGL();
-	
+
 	// Convert the input arguments to QString before the application is initialized
 	// (as it will force utf8, which might prevent from properly reading filenmaes from the command line)
 	QStringList argumentsLocal8Bit;
@@ -73,10 +73,10 @@ int main(int argc, char *argv[])
 #ifdef USE_VLD
 	VLDEnable();
 #endif
-	
+
 	QDir workingDir = QCoreApplication::applicationDirPath();
-	
-#ifdef Q_OS_MAC	
+
+#ifdef Q_OS_MAC
 	// This makes sure that our "working directory" is not within the application bundle
 	if ( workingDir.dirName() == "MacOS" )
 	{
@@ -85,15 +85,15 @@ int main(int argc, char *argv[])
 		workingDir.cdUp();
 	}
 #endif
-	
+
 	QDir::setCurrent(workingDir.absolutePath());
-	
+
 	if (!QGLFormat::hasOpenGL())
 	{
 		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL to run!");
 		return EXIT_FAILURE;
 	}
-	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+	if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_0) == 0)
 	{
 		QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
 		return EXIT_FAILURE;

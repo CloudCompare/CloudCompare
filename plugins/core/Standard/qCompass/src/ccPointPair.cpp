@@ -23,7 +23,7 @@ static QSharedPointer<ccCylinder> c_bodyMarker(nullptr);
 static QSharedPointer<ccCone> c_headMarker(nullptr);
 
 //ctor
-ccPointPair::ccPointPair(ccPointCloud* associatedCloud) 
+ccPointPair::ccPointPair(ccPointCloud* associatedCloud)
 	: ccPolyline(associatedCloud)
 {
 	//do nothing
@@ -69,7 +69,7 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 		if (glFunc == nullptr) {
 			assert(false);
 			return;

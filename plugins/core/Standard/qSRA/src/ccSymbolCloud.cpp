@@ -17,10 +17,10 @@ bool ccSymbolCloud::reserve(unsigned numberOfPoints)
 {
 	if (!ccPointCloud::reserve(numberOfPoints))
 		return false;
-	
+
 	if (m_labels.size())
 		return reserveLabelArray(numberOfPoints);
-	
+
 	return true;
 }
 
@@ -28,10 +28,10 @@ bool ccSymbolCloud::resize(unsigned numberOfPoints)
 {
 	if (!ccPointCloud::resize(numberOfPoints))
 		return false;
-	
+
 	if (m_labels.size())
 		return resizeLabelArray(numberOfPoints);
-	
+
 	return true;
 }
 
@@ -90,7 +90,7 @@ QString ccSymbolCloud::getLabel(unsigned index) const
 	{
 		return m_labels[index];
 	}
-	
+
 	return QString();
 }
 
@@ -138,7 +138,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -188,7 +188,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			color = &m_tempColor;
 			glParams.showColors = false;
 		}
-		
+
 		unsigned numberOfPoints = size();
 
 		//viewport parameters (will be used to project 3D positions to 2D)
@@ -238,7 +238,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//draw associated symbol
 				if (m_showSymbols && m_symbolSize > 0.0)
 				{
-					drawSymbolAt<QOpenGLFunctions_2_1>(glFunc, Q2D.x - context.glW / 2, Q2D.y - context.glH / 2, m_symbolSize / 2);
+					drawSymbolAt<QOpenGLFunctions_3_0>(glFunc, Q2D.x - context.glW / 2, Q2D.y - context.glH / 2, m_symbolSize / 2);
 				}
 
 				//draw associated label?

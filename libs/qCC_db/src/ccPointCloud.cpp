@@ -2644,7 +2644,7 @@ static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_D
 
 void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
 {
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (useVBOs
@@ -2692,7 +2692,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 {
 	assert(m_normals);
 
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (	useVBOs
@@ -2749,7 +2749,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	assert(m_rgbaColors);
 	assert(sizeof(ColorCompType) == 1);
 
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (useVBOs
@@ -2792,7 +2792,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	assert(m_currentDisplayedScalarField);
 	assert(sizeof(ColorCompType) == 1);
 
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (useVBOs
@@ -2986,7 +2986,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -3388,11 +3388,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							unsigned e = s + count;
 
 							//points
-							glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
+							glLODChunkVertexPointer<QOpenGLFunctions_3_0>(this, glFunc, *toDisplay.indexMap, s, e);
 							//normals
 							if (glParams.showNorms)
 							{
-								glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e);
+								glLODChunkNormalPointer<QOpenGLFunctions_3_0>(m_normals, glFunc, *toDisplay.indexMap, s, e);
 							}
 							//SF colors
 							if (colorRampShader)
@@ -3414,7 +3414,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e);
+								glLODChunkSFPointer<QOpenGLFunctions_3_0>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e);
 							}
 
 							glFunc->glDrawArrays(GL_POINTS, 0, count);
@@ -3630,13 +3630,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						unsigned e = s + count;
 
 						//points
-						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e);
+						glLODChunkVertexPointer<QOpenGLFunctions_3_0>(this, glFunc, *toDisplay.indexMap, s, e);
 						//normals
 						if (glParams.showNorms)
-							glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e);
+							glLODChunkNormalPointer<QOpenGLFunctions_3_0>(m_normals, glFunc, *toDisplay.indexMap, s, e);
 						//colors
 						if (glParams.showColors)
-							glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e);
+							glLODChunkColorPointer<QOpenGLFunctions_3_0>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e);
 
 						glFunc->glDrawArrays(GL_POINTS, 0, count);
 						s = e;
@@ -5597,7 +5597,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			//allocate memory for current VBO
 			int vboSizeBytes = m_vboManager.vbos[chunkIndex]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
 
-			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+			QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 			if (glFunc)
 			{
 				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
@@ -5688,7 +5688,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				m_vboManager.vbos[chunkIndex]->release();
 
 				//if an error is detected
-				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+				QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 				assert(glFunc != nullptr);
 				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
 				{
@@ -6353,7 +6353,7 @@ void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 		return;
 	}
 
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	QMatrix4x4 projection;
@@ -6397,7 +6397,7 @@ void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
 	//Direct use of openGL function to use GL_FALSE (in normalized flag)
 	// enable the normals array
-	s_programDrawNormals->setAttributeBuffer(s_drawNormalsShaderParameters.normalLocation, GL_UNSIGNED_INT, 0, 1);
+	glFunc->glVertexAttribIPointer(s_drawNormalsShaderParameters.normalLocation, 1, GL_UNSIGNED_INT, 0, (void *)0);
 
 	glFunc->glDrawArrays(GL_POINTS, 0, size());
 

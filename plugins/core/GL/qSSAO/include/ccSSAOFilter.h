@@ -39,7 +39,7 @@
 #include <ccGlFilter.h>
 
 //Qt
-#include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_0>
 
 //system
 #include <vector>
@@ -102,7 +102,7 @@ protected:
 	float              m_bilateralGSigmaZ;
 
 	//! Associated OpenGL functions set
-	QOpenGLFunctions_2_1 m_glFunc;
+	QOpenGLFunctions_3_0 m_glFunc;
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };

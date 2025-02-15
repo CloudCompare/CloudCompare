@@ -24,11 +24,11 @@ void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 {
 	if (!m_valid)
 		return;
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
-	
+
 	if ( glFunc == nullptr )
 		return;
 

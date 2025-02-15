@@ -228,7 +228,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 	}
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	if (glFunc == nullptr)
 	{
 		assert(false);
@@ -454,7 +454,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		const ccColor::Rgbub& borderColor = textColor;
 		ccGL::Color(glFunc, borderColor);
 		//GL_LINE_LOOP cuts the corners, and GL_LINES tries to round the borders!
-		DrawRectangleAsQuad<QOpenGLFunctions_2_1>(*glFunc, x - borderWidth, y - borderWidth, x + scaleWidth + borderWidth, y + scaleMaxHeight + 1 + borderWidth);
+		DrawRectangleAsQuad<QOpenGLFunctions_3_0>(*glFunc, x - borderWidth, y - borderWidth, x + scaleWidth + borderWidth, y + scaleMaxHeight + 1 + borderWidth);
 
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(renderZoom);
@@ -522,7 +522,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 			double value = sortedKeyValues.front().value;
 			if (logScale)
 				value = exp(value*c_log10);
-			
+
 			const ccColor::Rgb* col = sf->getColor(static_cast<ScalarType>(value));
 			ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB);
 			DrawRectangleAsQuad(*glFunc, x, y, x + scaleWidth, y + scaleMaxHeight + 1);
@@ -635,7 +635,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 		{
 			VLabelSet::iterator itNext = it;
 			++itNext;
-			
+
 			//position
 			unsigned char align = ccGLWindowInterface::ALIGN_HRIGHT;
 			if (it == drawnLabels.begin())

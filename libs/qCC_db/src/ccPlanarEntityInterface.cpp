@@ -19,7 +19,7 @@ static QSharedPointer<ccCone> c_unitNormalHeadSymbol(nullptr);
 void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=nullptr*/)
 {
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)

@@ -55,7 +55,7 @@ void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters&
 	// Kourosh Khoshelham and Sander Oude Elberink
 	constexpr float focal_mm		= static_cast<float>(5.45e-3);	// focal length (real distance in meter)
 	constexpr float pixelSize_mm	= static_cast<float>(9.3e-6);		// pixel size (real distance in meter)
-	
+
 	params.vertFocal_pix      = ConvertFocalMMToPix(focal_mm, pixelSize_mm);
 	params.pixelSize_mm[0]    = pixelSize_mm;
 	params.pixelSize_mm[1]    = pixelSize_mm;
@@ -1407,7 +1407,7 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
 
 	if ( glFunc == nullptr )
@@ -2463,7 +2463,7 @@ bool ccOctreeFrustumIntersector::build(CCCoreLib::DgmOctree* octree)
 	{
 		cell.clear();
 	}
-	
+
 	const CCCoreLib::DgmOctree::cellsContainer& thePointsAndTheirCellCodes = octree->pointsAndTheirCellCodes();
 	CCCoreLib::DgmOctree::cellsContainer::const_iterator it = thePointsAndTheirCellCodes.begin();
 

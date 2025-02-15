@@ -33,7 +33,7 @@ ccBBox ccOctreeProxy::getOwnBB(bool withGLFeatures/*=false*/)
 		assert(false);
 		return ccBBox();
 	}
-	
+
 	return withGLFeatures ? m_octree->getSquareBB() : m_octree->getPointsBB();
 }
 
@@ -49,7 +49,7 @@ void ccOctreeProxy::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)

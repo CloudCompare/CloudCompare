@@ -41,7 +41,7 @@ ccColorRampShader::ccColorRampShader()
 {
 }
 
-bool ccColorRampShader::setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale)
+bool ccColorRampShader::setup(QOpenGLFunctions_3_0* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale)
 {
 	assert(glFunc);
 

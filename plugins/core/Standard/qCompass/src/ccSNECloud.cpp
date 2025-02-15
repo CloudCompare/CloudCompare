@@ -21,13 +21,13 @@
 //pass ctors straight to ccPointCloud
 ccSNECloud::ccSNECloud()
 	: ccPointCloud()
-{ 
+{
 	updateMetadata();
 }
 
 ccSNECloud::ccSNECloud(ccPointCloud* obj)
 	: ccPointCloud()
-{ 
+{
 	//copy points, normals and scalar fields from obj.
 	*this += obj;
 
@@ -71,7 +71,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			return;
 
 		//get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 		if (glFunc == nullptr) {
 			assert(false);
 			return;
@@ -84,7 +84,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
 		const ccViewportParameters& viewportParams = context.display->getViewportParameters();
-		
+
 		//get point size for drawing
 		float pSize = 0.0f;
 		glFunc->glGetFloatv(GL_POINT_SIZE, &pSize);
@@ -163,7 +163,7 @@ void ccSNECloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			ccGL::Vertex3v(glFunc, end.u);
 		}
 		glFunc->glEnd();
-			
+
 		glFunc->glPopAttrib(); //GL_COLOR_BUFFER_BIT
 
 		//cleanup

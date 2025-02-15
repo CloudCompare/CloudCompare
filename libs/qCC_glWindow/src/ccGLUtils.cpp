@@ -36,7 +36,7 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int 
 		assert(false);
 		return;
 	}
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context->versionFunctions<QOpenGLFunctions_3_0>();
 	if (glFunc)
 	{
 		glFunc->glBindTexture(GL_TEXTURE_2D, texID);

@@ -21,14 +21,14 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
-									   PointCoordinateType axisWidth, 
+ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
+									   PointCoordinateType axisWidth,
 									   const ccGLMatrix* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), 
-	  m_DisplayScale(displayScale), 
-	  m_width(axisWidth), 
-	  m_showAxisPlanes(true), 
+	: ccGenericPrimitive(name, transMat),
+	  m_DisplayScale(displayScale),
+	  m_width(axisWidth),
+	  m_showAxisPlanes(true),
 	  m_showAxisLines(true)
 {
 	updateRepresentation();
@@ -37,10 +37,10 @@ ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
 
 ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
 									   QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), 
-	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
-	  m_width(AXIS_DEFAULT_WIDTH), 
-	  m_showAxisPlanes(true), 
+	: ccGenericPrimitive(name, transMat),
+	  m_DisplayScale(DEFAULT_DISPLAY_SCALE),
+	  m_width(AXIS_DEFAULT_WIDTH),
+	  m_showAxisPlanes(true),
 	  m_showAxisLines(true)
 {
 	updateRepresentation();
@@ -48,10 +48,10 @@ ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
 }
 
 ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name), 
-	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
-	  m_width(AXIS_DEFAULT_WIDTH), 
-	  m_showAxisPlanes(true), 
+	: ccGenericPrimitive(name),
+	  m_DisplayScale(DEFAULT_DISPLAY_SCALE),
+	  m_width(AXIS_DEFAULT_WIDTH),
+	  m_showAxisPlanes(true),
 	  m_showAxisLines(true)
 {
 	updateRepresentation();
@@ -222,7 +222,7 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//show axis
 	if (m_showAxisLines && MACRO_Draw3D(context))
 	{
-		QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 		assert(glFunc != nullptr);
 
 		if (glFunc == nullptr)

@@ -196,7 +196,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -250,7 +250,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			unsigned pointIndex = getPointGlobalIndex(i);
 			if (_verticesVisibility->at(pointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
-			
+
 			unsigned nextIndex = ((i + 1) % vertCount);
 			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
 			if (_verticesVisibility->at(nextPointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
@@ -587,7 +587,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 					assert(realStartIndex != 0);
 					lastIndex = realStartIndex-1;
 					//warning: we shift the indexes!
-					startIndex = realStartIndex; 
+					startIndex = realStartIndex;
 					stopIndex += vertCount;
 				}
 			}
@@ -968,7 +968,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		return false;
 	}
 	unsigned vertCount = size();
-	
+
 	//vertices visibility
 	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(m_theAssociatedCloud);
 	if (!verticesCloud)

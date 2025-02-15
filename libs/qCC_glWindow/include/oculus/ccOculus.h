@@ -125,7 +125,7 @@ struct OculusHMD
 				return false;
 			}
 
-			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+			QOpenGLFunctions_3_0* glFunc = context->versionFunctions<QOpenGLFunctions_3_0>();
 			//we create a depth texture for each color texture
 			assert(depthTextures.empty());
 
@@ -246,7 +246,7 @@ struct OculusHMD
 			glExt.glDeleteFramebuffers(1, &mirror.fbo);
 			mirror.fbo = 0;
 		}
-		
+
 		if (mirror.texture)
 		{
 			ovr_DestroyMirrorTexture(session, mirror.texture);
@@ -257,7 +257,7 @@ struct OculusHMD
 	void stop(bool autoShutdown = true)
 	{
 		if (session)
-		{ 
+		{
 			//destroy the textures (if any)
 			destroyTextureSet();
 
@@ -273,7 +273,7 @@ struct OculusHMD
 	}
 
 	//! Destroy the textures (if any)
-	void destroyTextureSet(QOpenGLFunctions_2_1* glFunc = 0)
+	void destroyTextureSet(QOpenGLFunctions_3_0* glFunc = 0)
 	{
 		if (fbo)
 		{
@@ -292,7 +292,7 @@ struct OculusHMD
 			QOpenGLContext* context = QOpenGLContext::currentContext();
 			if (context)
 			{
-				QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+				QOpenGLFunctions_3_0* glFunc = context->versionFunctions<QOpenGLFunctions_3_0>();
 				for (size_t i = 0; i < depthTextures.size(); ++i)
 				{
 					glFunc->glDeleteTextures(1, &(depthTextures[i]));
@@ -323,7 +323,7 @@ struct OculusHMD
 		GLuint fbo = 0;
 
 	};
-	
+
 	//! Mirror
 	Mirror mirror;
 

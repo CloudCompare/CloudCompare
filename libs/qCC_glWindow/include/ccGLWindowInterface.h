@@ -664,7 +664,7 @@ public: // other methods
 protected: //rendering
 
 	//Default OpenGL functions set
-	using ccQOpenGLFunctions = QOpenGLFunctions_2_1;
+	using ccQOpenGLFunctions = QOpenGLFunctions_3_0;
 
 	//! Returns the set of OpenGL functions
 	virtual ccQOpenGLFunctions* functions() const = 0;

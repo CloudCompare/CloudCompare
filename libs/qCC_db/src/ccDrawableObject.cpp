@@ -187,9 +187,9 @@ void ccDrawableObject::toggleClipPlanes(CC_DRAW_CONTEXT& context, bool enable)
 	{
 		return;
 	}
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -278,5 +278,3 @@ void ccDrawableObject::applyDisplayState(const DisplayState& state)
 	if (state.display != m_currentDisplay)
 		setDisplay(state.display);
 }
-
-

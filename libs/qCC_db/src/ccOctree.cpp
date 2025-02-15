@@ -87,7 +87,7 @@ void ccOctree::clear()
 	if (context)
 	{
 		//get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+		QOpenGLFunctions_3_0* glFunc = context->versionFunctions<QOpenGLFunctions_3_0>();
 		assert(glFunc != nullptr);
 
 		if (glFunc && glFunc->glIsList(m_glListID))
@@ -140,11 +140,11 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor/*=nullp
 	{
 		return;
 	}
-	
+
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert( glFunc != nullptr );
-	
+
 	if ( glFunc == nullptr )
 		return;
 
@@ -154,7 +154,7 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor/*=nullp
 	{
 		//this display mode is too heavy to be stored as a GL list
 		//(therefore we always render it dynamically)
-		
+
 		glFunc->glDisable(GL_LIGHTING);
 		if (pickingColor)
 			ccGL::Color(glFunc, *pickingColor);
@@ -297,7 +297,7 @@ bool ccOctree::DrawCellAsABox(	const CCCoreLib::DgmOctree::octreeCell& cell,
 								CCCoreLib::NormalizedProgress* nProgress/*=nullptr*/)
 {
 	ccOctreeFrustumIntersector* ofi = static_cast<ccOctreeFrustumIntersector*>(additionalParameters[0]);
-	QOpenGLFunctions_2_1* glFunc     = static_cast<QOpenGLFunctions_2_1*>(additionalParameters[1]);
+	QOpenGLFunctions_3_0* glFunc     = static_cast<QOpenGLFunctions_3_0*>(additionalParameters[1]);
 	assert(glFunc != nullptr);
 
 	CCVector3 bbMin;
@@ -366,7 +366,7 @@ bool ccOctree::DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 	//variables additionnelles
 	glDrawParams* glParams			= reinterpret_cast<glDrawParams*>(additionalParameters[0]);
 	ccGenericPointCloud* cloud		= reinterpret_cast<ccGenericPointCloud*>(additionalParameters[1]);
-	QOpenGLFunctions_2_1* glFunc	= static_cast<QOpenGLFunctions_2_1*>(additionalParameters[2]);
+	QOpenGLFunctions_3_0* glFunc	= static_cast<QOpenGLFunctions_3_0*>(additionalParameters[2]);
 	assert(glFunc != nullptr);
 
 	if (glParams->showSF)
@@ -404,7 +404,7 @@ bool ccOctree::DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell
 	CC_DRAW_CONTEXT* context		= reinterpret_cast<CC_DRAW_CONTEXT*>(additionalParameters[3]);
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context->glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context->glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -498,7 +498,7 @@ bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned
 	float globalPlaneCoefficients[6][4];
 	CCVector3 globalCorners[8];
 	CCVector3 globalEdges[6];
-	CCVector3 globalCenter; 
+	CCVector3 globalCenter;
 	sensor->computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
 	if (!m_frustumIntersector)
@@ -514,7 +514,7 @@ bool ccOctree::intersectWithFrustum(ccCameraSensor* sensor, std::vector<unsigned
 	// get points of cells in frustum
 	std::vector< std::pair<unsigned, CCVector3> > pointsToTest;
 	m_frustumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
-	
+
 	// project points
 	for (size_t i = 0; i < pointsToTest.size(); i++)
 	{
@@ -544,7 +544,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 		//nothing to do
 		return false;
 	}
-	
+
 	CCVector3d clickPosd(clickPos.x, clickPos.y, 0.0);
 	CCVector3d X(0, 0, 0);
 	if (!camera.unproject(clickPosd, X))
@@ -642,7 +642,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 	for (cellsContainer::const_iterator it = m_thePointsAndTheirCellCodes.begin(); it != m_thePointsAndTheirCellCodes.end(); ++it)
 	{
 		CellCode truncatedCode = (it->theCode >> currentBitDec);
-		
+
 		//new cell?
 		if (truncatedCode != currentCellTruncatedCode)
 		{
@@ -697,7 +697,7 @@ bool ccOctree::pointPicking(const CCVector2d& clickPos,
 				else
 					++level;
 			}
-			
+
 			currentBitDec = GET_BIT_SHIFT(level);
 			currentCellTruncatedCode = (currentCellCode >> currentBitDec);
 		}

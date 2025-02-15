@@ -979,7 +979,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 			{
 				const CCVector3* P = poly->getPoint(v);
 				int vertIndex = static_cast<int>(points2D.size());
-				
+
 				CCVector3 OP = *P - O;
 				CCVector2 P2D(OP.dot(X), OP.dot(Y));
 				points2D.emplace_back(P2D);
@@ -1024,7 +1024,7 @@ ccMesh* ccMesh::TriangulateTwoPolylines(ccPolyline* p1, ccPolyline* p2, CCVector
 				indexedPoints2D[i] = points2D[i];
 				indexedPoints2D[i].index = static_cast<unsigned>(i);
 			}
-			
+
 			std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
 			if (CCCoreLib::PointProjectionTools::extractConvexHull2D(indexedPoints2D, hullPoints))
 			{
@@ -1124,7 +1124,7 @@ ccMesh* ccMesh::Triangulate(ccGenericPointCloud* cloud,
 		ccLog::Warning("[ccMesh::Triangulate] Cloud has not enough points!");
 		return nullptr;
 	}
-	
+
 	//compute raw mesh
 	std::string errorStr;
 	CCCoreLib::GenericIndexedMesh* dummyMesh = CCCoreLib::PointProjectionTools::computeTriangulation(	cloud,
@@ -1670,7 +1670,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	handleColorRamp(context);
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -1751,7 +1751,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 			sfMayHaveHiddenValues = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
-			
+
 			if (	!currentDisplayedScalarField
 				||	(entityPickingMode && !sfMayHaveHiddenValues)) //in picking mode, no need to take SF into account if we don't hide any points!
 			{
@@ -2031,7 +2031,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					rgb3 = currentDisplayedScalarField->getValueColor(tsi.i3);
 					if (!rgb3)
 						continue;
-					
+
 					if (entityPickingMode)
 					{
 						//in picking mode, we don't want to apply the colors, just filter the invisible triangles
@@ -2101,7 +2101,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							(*m_materials)[newMatlIndex]->applyGL(context.qGLContext, glParams.showNorms, false);
 						else
 							context.defaultMat->applyGL(context.qGLContext, glParams.showNorms, false);
-						
+
 						glFunc->glBegin(triangleDisplayType);
 						lasMtlIndex = newMatlIndex;
 					}
@@ -4051,7 +4051,7 @@ static bool TagDuplicatedVertices(	const CCCoreLib::DgmOctree::octreeCell& cell,
 	for (unsigned i = 0; i < n; ++i)
 	{
 		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
-		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet 
+		if (equivalentIndexes->at(thisIndex) < 0) //has no equivalent yet
 		{
 			cell.points->getPoint(i, nNSS.queryPoint);
 

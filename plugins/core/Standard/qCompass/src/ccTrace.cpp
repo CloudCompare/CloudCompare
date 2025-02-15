@@ -178,7 +178,7 @@ bool ccTrace::inCircle(const CCVector3* segStart, const CCVector3* segEnd, const
 	//calculate vector Query->Start and Query->End
 	CCVector3 QS(segStart->x - query->x, segStart->y - query->y, segStart->z - query->z);
 	CCVector3 QE(segEnd->x - query->x, segEnd->y - query->y, segEnd->z - query->z);
-	
+
 	//is angle between these vectors obtuce (i.e. QS dot QE) < 0)? If so we are inside a circle between start&end, otherwise we are not
 	QS.normalize();QE.normalize();
 
@@ -220,7 +220,7 @@ bool ccTrace::optimizePath(int maxIterations)
 		tID = i - 1; //id of the trace segment id (in m_trace vector)
 
 		//are we adding to the end of the trace?
-		if (tID >= m_trace.size()) 
+		if (tID >= m_trace.size())
 		{
 			std::deque<int> segment = optimizeSegment(start, end, m_search_r); //calculate segment
 			m_trace.push_back(segment); //store segment
@@ -340,7 +340,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 
 	//setup buffer for storing nodes
 	int bufferSize = 500000; //500k node buffer (~1.5-2Mb). This should be enough for most small-medium size traces. More buffers will be created for bigger ones.
-	Node* node_buffer = new Node[bufferSize]; 
+	Node* node_buffer = new Node[bufferSize];
 	nodes.push_back(node_buffer); //store buffer in nodes list (for cleanup)
 	int nodeCount = 1; //start node will be added shortly
 
@@ -415,14 +415,14 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 
 		//fill "neighbours" with nodes - essentially get results of a "sphere" search around active current point
 		m_neighbours.clear();
-    
+
 		oct->getPointsInSphericalNeighbourhood(*cur, PointCoordinateType(m_search_r), m_neighbours, level);
 
 		//loop through neighbours
 		for (size_t i = 0; i < m_neighbours.size(); i++)
 		{
 			m_p = m_neighbours[i];
-			
+
 			if (visited[m_p.pointIndex]) //Has this node been visited before? If so then bail.
 				continue;
 
@@ -469,7 +469,7 @@ std::deque<int> ccTrace::optimizeSegment(int start, int end, int offset)
 
 	// If we're here, then it exhausted all the reachable points without finding the destination point.
 	// This can happen if, for example, the user is asking for a path between two "islands".
-	
+
 	return {};
 }
 
@@ -521,7 +521,7 @@ int ccTrace::getSegmentCostRGB(int p1, int p2)
 	const ccColor::Rgb& p2_rgb = m_cloud->getPointColor(p2);
 
 	//cost function: cost = |c1-c2| + 0.25 ( |c1-start| + |c1-end| + |c2-start| + |c2-end| )
-	//IDEA: can we somehow optimize all the square roots here (for speed)? 
+	//IDEA: can we somehow optimize all the square roots here (for speed)?
 	return sqrt(
 		//|c1-c2|
 		(p1_rgb.r - p2_rgb.r) * (p1_rgb.r - p2_rgb.r) +
@@ -785,7 +785,7 @@ void ccTrace::buildGradientCost(QWidget* parent)
 
 	//calculate bounds
 	m_cloud->getScalarField(gIdx)->computeMinAndMax();
-	
+
 	//normalize and log-transform
 	m_cloud->setCurrentScalarField(gIdx);
 	float logMax = log(m_cloud->getScalarField(gIdx)->getMax() + 10);
@@ -895,7 +895,7 @@ ccFitPlane* ccTrace::fitPlane(int surface_effect_tolerance, float min_planarity)
 
 	//put all "trace" points into the cloud
 	finalizePath();
-	
+
 	if (size() < 3)
 	{
 		return nullptr; //need three points to fit a plane
@@ -1021,10 +1021,10 @@ float ccTrace::calculateOptimumSearchRadius()
 			dsum += sqrt(d);
 		}
 	}
-	
+
 	//average nearest-neighbour distances
 	double d = dsum / 30;
-	
+
 	//return a number slightly larger than the average distance
 	return d * 1.5;
 }
@@ -1050,7 +1050,7 @@ void ccTrace::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		QOpenGLFunctions_3_0 *glFunc = context.glFunctions<QOpenGLFunctions_3_0>();
 		if (glFunc == nullptr)
 		{
 			assert(false);

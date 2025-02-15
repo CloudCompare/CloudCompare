@@ -30,7 +30,7 @@
 class QCC_DB_LIB_API ccColorRampShader : public ccShader
 {
 	Q_OBJECT
-	
+
 public:
 
 	//! Default constructor
@@ -42,7 +42,7 @@ public:
 	//! Setups shader
 	/** Shader must have already been stared!
 	**/
-	bool setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale);
+	bool setup(QOpenGLFunctions_3_0* glFunc, float minSatRel, float maxSatRel, unsigned colorSteps, const ccColorScale::Shared& colorScale);
 
 	//! Returns the maximum color ramp size
 	static unsigned MaxColorRampSize();

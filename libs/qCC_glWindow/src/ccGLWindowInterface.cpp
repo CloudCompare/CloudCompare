@@ -6812,7 +6812,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
 	assert(context);
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_3_0* glFunc = context->versionFunctions<QOpenGLFunctions_3_0>();
 	if (!glFunc)
 	{
 		return;

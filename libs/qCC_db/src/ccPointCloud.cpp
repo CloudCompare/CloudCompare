@@ -28,13 +28,11 @@
 //local
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
-#include "ccColorScalesManager.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccFrustum.h"
 #include "ccGBLSensor.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericMesh.h"
-#include "ccImage.h"
 #include "ccKdTree.h"
 #include "ccMaterial.h"
 #include "ccMesh.h"
@@ -150,6 +148,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
 	, m_fwfData(nullptr)
+	, m_useLODRendering(true)
 	, m_normalsDrawnAsLines(false)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
@@ -807,11 +806,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					size_t newKeyCount = addedCloud->m_fwfDescriptors.size();
 					assert(newKeyCount < 256); //IDs should range from 1 to 255
-					
+
 					if (!m_fwfDescriptors.empty())
 					{
 						assert(m_fwfDescriptors.size() < 256); //IDs should range from 1 to 255
-						
+
 						//we'll have to find free descriptor IDs (not used in the destination cloud) before merging
 						std::queue<uint8_t> freeDescriptorIDs;
 						for (uint8_t k = 0; k < 255; ++k)
@@ -2083,7 +2082,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -2338,6 +2337,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
 			}
 		}
+
+		//we must update the VBOs
+		normalsHaveChanged();
 	}
 
 	//and the scan grids!
@@ -2887,7 +2889,7 @@ template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTabl
 }
 
 template <class QOpenGLFunctions> void glLODChunkColorPointer(	RGBAColorsTableType* colors,
-																QOpenGLFunctions* glFunc, 
+																QOpenGLFunctions* glFunc,
 																const LODIndexSet& indexMap,
 																unsigned startIndex,
 																unsigned stopIndex)
@@ -2965,10 +2967,10 @@ struct DisplayDesc : LODLevelDesc
 		endIndex = startIndex + count;
 		return *this;
 	}
-	
+
 	//! Last index (excluded)
 	unsigned endIndex;
-	
+
 	//! Decimation step (for non-octree based LoD)
 	unsigned decimStep;
 
@@ -3029,6 +3031,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
+				&&	m_useLODRendering
 				&&	toDisplay.count > context.minLODPointCount
 				&&	MACRO_LODActivated(context)
 				)
@@ -3046,6 +3049,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						assert(m_lod);
+						//Reset the VBO manager if needed:
+						// We do not want to use the LoD and
+						// to have the cloud loaded in the VBOs simultaneously.
+						releaseVBOs();
 
 						unsigned char maxLevel = m_lod->maxLevel();
 						bool underConstruction = m_lod->isUnderConstruction();
@@ -3211,7 +3218,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								//we force display of points hidden because of their scalar field value
 								//to be sure that the user doesn't miss them (during manual segmentation for instance)
-								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose 
+								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose
 							}
 							else if (glParams.showColors)
 							{
@@ -3672,7 +3679,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
-		
+
 		if (m_normalsDrawnAsLines)
 		{
 			drawNormalsAsLines(context);
@@ -5497,7 +5504,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
-		
+
 		if (	glParams.showSF
 		&& (		!m_vboManager.hasColors
 				||	!m_vboManager.colorIsSF
@@ -5588,7 +5595,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			//allocate memory for current VBO
 			int vboSizeBytes = m_vboManager.vbos[chunkIndex]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
 
-			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>(); 
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 			if (glFunc)
 			{
 				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
@@ -5760,7 +5767,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 			//no message as it will probably happen on a lot on (old) graphic cards
 			return -1;
 		}
-		
+
 		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
 													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
 	}
@@ -5792,7 +5799,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 	}
 
 	release();
-	
+
 	return totalSizeBytes;
 }
 
@@ -6021,7 +6028,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 						{
 							continue;
 						}
-						
+
 						PointCoordinateType cosC = -uBC.dot(uCA);
 						if (cosC > minAngleCos)
 						{
@@ -6235,7 +6242,7 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 		ccLog::Warning(QString("[computeNormals] Failed to compute normals on cloud '%1'").arg(getName()));
 		return false;
 	}
-	
+
 	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 	if (!hasNormals())
@@ -6284,16 +6291,19 @@ bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
 void ccPointCloud::showNormalsAsLines(bool state)
 {
 	if (!hasNormals())
+	{
 		return;
-	
+	}
+
 	m_normalsDrawnAsLines = state;
 
 	if (state == false)
+	{
 		m_decompressedNormals.clear();
+	}
 	else
 	{
 		decompressNormals();
-		redrawDisplay();
 	}
 }
 
@@ -6383,7 +6393,17 @@ void ccPointCloud::decompressNormals()
 	if (m_normalsDrawnAsLines)
 	{
 		// we need to decompress the normals
-		m_decompressedNormals.resize(size());
+		try
+		{
+			m_decompressedNormals.resize(size());
+		}
+		catch (const std::bad_alloc)
+		{
+			ccLog::Warning("Not enough memory to decompress normals");
+			m_normalsDrawnAsLines = false;
+			m_decompressedNormals.clear();
+			return;
+		}
 		for (unsigned idx = 0; idx < size(); idx++)
 		{
 			m_decompressedNormals[idx] = getPointNormal(idx);
@@ -6409,7 +6429,7 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 {
 	if (m_visibilityCheckEnabled)
 	{
-		//if we have associated sensors, we can use them to check the visibility of other points 
+		//if we have associated sensors, we can use them to check the visibility of other points
 		unsigned char bestVisibility = 255;
 		for (size_t i = 0; i < m_children.size(); ++i)
 		{
@@ -6449,6 +6469,21 @@ void ccPointCloud::clearLOD()
 	}
 }
 
+bool ccPointCloud::hasUsableLOD() const
+{
+	return m_lod && m_lod->isInitialized();
+}
+
+bool ccPointCloud::useLODRendering() const
+{
+	return m_useLODRendering;
+}
+
+void ccPointCloud::setLODRendering(bool value)
+{
+	m_useLODRendering = value;
+}
+
 void ccPointCloud::clearFWFData()
 {
 	m_fwfWaveforms.resize(0);
@@ -6458,7 +6493,7 @@ void ccPointCloud::clearFWFData()
 bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg/*=nullptr*/) const
 {
 	minVal = maxVal = 0;
-	
+
 	if (size() != m_fwfWaveforms.size())
 	{
 		return false;
@@ -6580,7 +6615,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos( CCCoreLib::DegreesToRadians( minTriangleAngle_deg ) ));
 	//double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
-	
+
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{
 		for (int i = 0; i < static_cast<int>(grid.w) - 1; ++i)
@@ -6644,7 +6679,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				}
 				break;
 			}
-			
+
 			default:
 				continue;
 			}
@@ -6738,7 +6773,7 @@ bool ccPointCloud::setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf
 	}
 
 	invalidateBoundingBox();
-	
+
 	return true;
 }
 

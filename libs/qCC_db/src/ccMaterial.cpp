@@ -19,8 +19,8 @@
 #include "ccIncludeGL.h"
 
 //Local
-#include "../include/ccMaterial.h"
-#include "../include/ccMaterialDB.h"
+#include "ccMaterial.h"
+#include "ccMaterialDB.h"
 
 //Qt
 #include <QUuid>

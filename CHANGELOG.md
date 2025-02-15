@@ -21,7 +21,7 @@ New features:
 				- required
 				- only one should be set (However, if multiple are passed, only the first one will be used)
 			- -BURNT_COLOR_THRESHOLD {burnt_color_threshold}
-				- discards points for calculations if their R,G,B values are out of the [brunt_color_threshold;255-burnt_color_threshold] range.
+				- discards points for calculations if their R,G,B values are out of the [burnt_color_threshold;255-burnt_color_threshold] range.
 				- {burnt_color_threshold} is an integer between 0 and 255
 				- default value is 0, so all points are used
 				- optional
@@ -182,6 +182,8 @@ Bug fixes:
 		and renaming a class would prevent from using it...)
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
 		to a crash (warning: now, the polylines will be emptied to prevent a crash)
+	- VBOs are now properly released when using the LoD rendering
+	- Normals shown has lines were not automatically update after applying a transformation to a cloud
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

@@ -21,7 +21,6 @@
 #include "ccPointCloud.h"
 
 //CCCoreLib
-#include <GL/gl.h>
 #include <GeometricalAnalysisTools.h>
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
@@ -54,6 +53,7 @@
 //system
 #include <cassert>
 #include <qglbuffer.h>
+#include <qopenglbuffer.h>
 #include <queue>
 
 static const char s_deviationSFName[] = "Deviation";
@@ -6362,6 +6362,20 @@ void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 	glFunc->glGetFloatv(GL_MODELVIEW_MATRIX, modelView.data());
 	QMatrix4x4 projectionModelView = projection * modelView; // QMatrix4x4 expects row major data
 
+	QOpenGLBuffer normalIndicesVBO(QOpenGLBuffer::VertexBuffer);
+	normalIndicesVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	normalIndicesVBO.create();
+	normalIndicesVBO.bind();
+	normalIndicesVBO.allocate(m_normals->data(), static_cast<int>(m_normals->currentSize() * sizeof(GLuint)));
+	normalIndicesVBO.release();
+
+	QOpenGLBuffer vertexVBO(QOpenGLBuffer::VertexBuffer);
+	vertexVBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	vertexVBO.create();
+	vertexVBO.bind();
+	vertexVBO.allocate(m_points.data(), size() * 3 * sizeof(GLuint));
+	vertexVBO.release();
+
 	s_programDrawNormals->bind();
 	// set uniforms
 	s_programDrawNormals->setUniformValue(s_drawNormalsShaderParameters.matrixLocation, projectionModelView);
@@ -6371,27 +6385,25 @@ void ccPointCloud::drawNormalsAsLines(CC_DRAW_CONTEXT& context)
 										  m_normalLineParameters.color.g,
 										  m_normalLineParameters.color.b,
 										  m_normalLineParameters.color.a);
+
+	vertexVBO.bind();
 	// enable the vertex locations array
 	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
 	// set the vertex locations array
-	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.vertexLocation, static_cast<GLfloat*>(m_points.front().u), 3);
+	s_programDrawNormals->setAttributeArray(s_drawNormalsShaderParameters.vertexLocation, GL_FLOAT, 0, 3);
+
+	normalIndicesVBO.bind();
 	// set the normals array
-	// enable the normals array
 	s_programDrawNormals->enableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
-	QGLBuffer normalIndicesVBO(QGLBuffer::VertexBuffer);
-	normalIndicesVBO.create();
-	normalIndicesVBO.bind();
-	normalIndicesVBO.setUsagePattern(QGLBuffer::StaticDraw);
-	normalIndicesVBO.allocate(m_normals->data(), static_cast<int>(m_normals->currentSize() * sizeof(GLuint)));
 	//Direct use of openGL function to use GL_FALSE (in normalized flag)
-	glFunc->glVertexAttribPointer(s_drawNormalsShaderParameters.normalLocation, 1, GL_UNSIGNED_INT, GL_FALSE, 0, (void*)0);
-	normalIndicesVBO.bind();
+	// enable the normals array
+	s_programDrawNormals->setAttributeBuffer(s_drawNormalsShaderParameters.normalLocation, GL_UNSIGNED_INT, 0, 1);
 
 	glFunc->glDrawArrays(GL_POINTS, 0, size());
 
 	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.vertexLocation);
 	s_programDrawNormals->disableAttributeArray(s_drawNormalsShaderParameters.normalLocation);
-
+	vertexVBO.release();
 	normalIndicesVBO.release();
 	s_programDrawNormals->release();
 }

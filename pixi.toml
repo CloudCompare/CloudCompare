@@ -26,8 +26,8 @@ pcl = ">=1.14.0,<1.15"      #osx-64 only accept 1.14.0 (due to pyqt 6 dependency
 boost = ">=1.84.0,<1.85"
 pybind11 = ">=2.13.0,<2.14"
 pyqt = ">=5.15.7,<=5.15.11"
-scipy = ">=1.13.0,<1.14"    # Needed by 3DFin
-scikit-learn = ">=1.5,<1.6"
+scipy = ">=1.15,<1.16"      # Needed by 3DFin
+scikit-learn = ">=1.6,<1.7"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
 xerces-c = ">=3.2.5,<3.3"
@@ -104,9 +104,6 @@ outputs = [".build/qCC/CloudCompare"]
 [feature.build.tasks.install]
 cmd = ["cmake", "--install", ".build"]
 depends-on = ["configure"]
-outputs = [
-	".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare",
-]
 
 #TODO: macos only
 # This will embed dependencies and fix rpath accordingly
@@ -133,6 +130,6 @@ depends-on = ["install"]
 build = ["build"]
 
 [pypi-dependencies]
-# Disable 3DFIn for now, need update for the new SF API
-#3dfin = { version = "==0.5.0a0" }
-#dendromatics = {version = "==0.6.0a2"} # Explicit because it's a pre-release
+3dfin = { version = "==0.5.0a1" }
+dendromatics = { version = "==0.6.0a5" } # Explicit because it's a pre-release
+csf-3dfin = { version = "==2.0.0a3" }    # Explicit because it's a pre-release

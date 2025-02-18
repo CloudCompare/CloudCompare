@@ -36,7 +36,7 @@
 class ccScalarField;
 class ccPolyline;
 class ccMesh;
-class QGLBuffer;
+class QOpenGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 

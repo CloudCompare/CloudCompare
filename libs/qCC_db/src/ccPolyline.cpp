@@ -27,7 +27,6 @@
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
 	: Polyline(associatedCloud)
 	, ccShiftedObject("Polyline", uniqueID)
-	, m_serializeData(true)
 {
 	set2DMode(false);
 	setForeground(true);
@@ -380,12 +379,6 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	if (!m_serializeData && dataVersion < 56)
-	{
-		assert(false);
-		return false;
-	}
-
 	if (!ccHObject::toFile_MeOnly(out, dataVersion))
 	{
 		return false;
@@ -394,7 +387,7 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 	//we can't save the associated cloud here (as it may be shared by multiple polylines)
 	//so instead we save it's unique ID (dataVersion>=28)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
-	ccPointCloud* vertices = m_serializeData ? dynamic_cast<ccPointCloud*>(m_theAssociatedCloud) : nullptr;
+	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
 
 	uint32_t vertUniqueID = (vertices ? static_cast<uint32_t>(vertices->getUniqueID()) : 0);
 	if (out.write((const char*)&vertUniqueID, 4) < 0)

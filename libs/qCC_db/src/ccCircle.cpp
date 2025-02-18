@@ -27,9 +27,6 @@ ccCircle::ccCircle(	double radius/*=0.0*/,
 	, m_radius(std::max(0.0, radius))
 	, m_resolution(std::max(resolution, 4u))
 {
-	// no need to serialize the circle data (automatically generated)
-	m_serializeData = false;
-
 	if (radius > 0.0)
 	{
 		updateInternalRepresentation();
@@ -102,9 +99,6 @@ bool ccCircle::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	// no need to save the vertices
-	assert(false == m_serializeData);
-
 	if (!ccPolyline::toFile_MeOnly(out, dataVersion))
 	{
 		return false;
@@ -124,8 +118,12 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 {
 	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
 
-	// save the pointer to the associated cloud before it's overwritten
-	auto theAssociatedCloud = m_theAssociatedCloud;
+	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
+	if (vertices)
+	{
+		removeChild(vertices);
+		m_theAssociatedCloud = nullptr;
+	}
 
 	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 	{
@@ -137,18 +135,12 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 		return false;
 	}
 
-	// restore the original pointer
-	m_theAssociatedCloud = theAssociatedCloud;
-
 	QDataStream inStream(&in);
 
 	//Radius (dataVersion>=56)
 	inStream >> m_radius;
 	//Resolution (dataVersion>=56)
 	inStream >> m_resolution;
-
-	//DGM: will have to be called later, as the gl transformation history matrix is loaded afterwards!
-	//updateInternalRepresentation();
 
 	return true;
 }

@@ -5585,7 +5585,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, m_points));
 
-			VBO * currentVBO = m_vboManager.vbos[chunkIndex];
+			VBO* currentVBO = m_vboManager.vbos[chunkIndex];
 
 			int chunkUpdateFlags = m_vboManager.updateFlags;
 			bool reallocated = false;

@@ -31,7 +31,7 @@
 #include "ccWaveform.h"
 
 //Qt
-#include <qopenglbuffer.h>
+#include <QOpenGLBuffer>
 
 class ccScalarField;
 class ccPolyline;

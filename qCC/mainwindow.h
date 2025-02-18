@@ -330,6 +330,8 @@ private:
 	void doActionFlipPlane();
 	void doActionComparePlanes();
 
+	void doActionPromoteCircleToCylinder();
+
 	void doActionDeleteScanGrids();
 	void doActionSmoothMeshSF();
 	void doActionEnhanceMeshSF();

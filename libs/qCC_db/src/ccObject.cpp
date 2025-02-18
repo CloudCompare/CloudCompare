@@ -65,9 +65,10 @@
 	v5.2 - 11/30/2020 - New ccCoordinateSystem added
 	v5.3 - 10/02/2022 - ccViewportParameters new members (near and far clipping planes)
 	v5.4 - 01/29/2023 - ccColorScale custom labels can be overridden by a string
-	v5.5 - 11/10/2024 - Scalar fields with 'double' offset and names as std::string 
+	v5.5 - 11/10/2024 - Scalar fields with 'double' offset and names as std::string
+	v5.6 - 02/18/2025 - Circle entity
 **/
-const unsigned c_currentDBVersion = 55; //5.5
+const unsigned c_currentDBVersion = 56; //5.6
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

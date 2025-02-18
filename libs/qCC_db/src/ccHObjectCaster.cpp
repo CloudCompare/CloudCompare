@@ -22,6 +22,7 @@
 #include "cc2DViewportLabel.h"
 #include "cc2DViewportObject.h"
 #include "ccCameraSensor.h"
+#include "ccCircle.h"
 #include "ccCone.h"
 #include "ccCylinder.h"
 #include "ccDish.h"
@@ -153,7 +154,7 @@ ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)
 
 ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 {
-	return (obj && obj->isA(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : nullptr);
+	return (obj && obj->isKindOf(CC_TYPES::POLY_LINE) ? static_cast<ccPolyline*>(obj) : nullptr);
 }
 
 ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)
@@ -276,6 +277,11 @@ ccIndexedTransformationBuffer* ccHObjectCaster::ToTransBuffer(ccHObject* obj)
 ccCoordinateSystem* ccHObjectCaster::ToCoordinateSystem(ccHObject* obj)
 {
 	return (obj && obj->isKindOf(CC_TYPES::COORDINATESYSTEM) ? static_cast<ccCoordinateSystem*>(obj) : nullptr);
+}
+
+ccCircle* ccHObjectCaster::ToCircle(ccHObject* obj)
+{
+	return (obj && obj->isKindOf(CC_TYPES::CIRCLE) ? static_cast<ccCircle*>(obj) : nullptr);
 }
 
 bool ccHObjectCaster::CloneChildren(const ccHObject* sourceEntity,

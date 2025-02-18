@@ -38,6 +38,7 @@
 #include <cc2DViewportObject.h>
 #include <cc2DViewportLabel.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
 #include <ccFacet.h>
@@ -588,6 +589,10 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
 	connect(m_UI->actionFlipPlane,					&QAction::triggered, this, &MainWindow::doActionFlipPlane);
 	connect(m_UI->actionComparePlanes,				&QAction::triggered, this, &MainWindow::doActionComparePlanes);
+
+	//"Edit > Circle" menu
+	connect(m_UI->actionPromoteCircleToCylinder,	&QAction::triggered, this, &MainWindow::doActionPromoteCircleToCylinder);
+
 	//"Edit > Sensor > Ground-Based lidar" menu
 	connect(m_UI->actionShowDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionShowDepthBuffer);
 	connect(m_UI->actionExportDepthBuffer,			&QAction::triggered, this, &MainWindow::doActionExportDepthBuffer);
@@ -7972,6 +7977,14 @@ void MainWindow::doActionClone()
 				ccConsole::Error(tr("An error occurred while cloning polyline %1").arg(entity->getName()));
 			}
 		}
+		else if (entity->isA(CC_TYPES::CIRCLE))
+		{
+			clone = ccHObjectCaster::ToCircle(entity)->clone();
+			if (!clone)
+			{
+				ccConsole::Error(tr("An error occurred while cloning polyline %1").arg(entity->getName()));
+			}
+		}
 		else if (entity->isA(CC_TYPES::FACET))
 		{
 			clone = ccHObjectCaster::ToFacet(entity);
@@ -8288,7 +8301,7 @@ void MainWindow::doActionFitCircle()
 			.arg(normal.z));
 
 		// create the circle representation as a polyline
-		ccPolyline* circle = ccPolyline::Circle(CCVector3(0, 0, 0), radius, 128);
+		ccCircle* circle = new ccCircle(radius, 128);
 		if (circle)
 		{
 			circle->setName(QObject::tr("Circle r=%1").arg(radius));
@@ -8299,8 +8312,7 @@ void MainWindow::doActionFitCircle()
 
 			ccGLMatrix trans = ccGLMatrix::FromToRotation(CCVector3(0, 0, 1), normal);
 			trans.setTranslation(center);
-			circle->applyGLTransformation_recursive(&trans);
-
+			circle->applyGLTransformation(trans);
 
 			addToDB(circle, false, false, false);
 		}
@@ -11348,6 +11360,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionFlipPlane->setEnabled(selInfo.planeCount != 0);
 	m_UI->actionComparePlanes->setEnabled(selInfo.planeCount == 2);
 
+	m_UI->actionPromoteCircleToCylinder->setEnabled((selInfo.selCount == 1) && (selInfo.circleCount == 1));
+
 	m_UI->actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 
 	m_UI->menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount > 0);
@@ -11811,8 +11825,8 @@ void MainWindow::doActionComparePlanes()
 	info << tr("Angle P1/P2: %1 deg.").arg( CCCoreLib::RadiansToDegrees( angle_rad ) );
 	ccLog::Print(tr("[Compare] ") + info.last());
 
-	PointCoordinateType planeEq1[4] = { N1.x, N1.y, N1.z, d1 };
-	PointCoordinateType planeEq2[4] = { N2.x, N2.y, N2.z, d2 };
+	PointCoordinateType planeEq1[4] { N1.x, N1.y, N1.z, d1 };
+	PointCoordinateType planeEq2[4] { N2.x, N2.y, N2.z, d2 };
 	CCVector3 C1 = p1->getCenter();
 	ScalarType distCenter1ToPlane2 = CCCoreLib::DistanceComputationTools::computePoint2PlaneDistance(&C1, planeEq2);
 	info << tr("Distance Center(P1)/P2: %1").arg(distCenter1ToPlane2);
@@ -11826,4 +11840,49 @@ void MainWindow::doActionComparePlanes()
 	//pop-up summary
 	QMessageBox::information(this, tr("Plane comparison"), info.join("\n"));
 	forceConsoleDisplay();
+}
+
+void MainWindow::doActionPromoteCircleToCylinder()
+{
+	if (!haveOneSelection())
+	{
+		assert(false);
+		return;
+	}
+
+	ccCircle* circle = ccHObjectCaster::ToCircle(m_selectedEntities.front());
+	if (!circle)
+	{
+		assert(false);
+		return;
+	}
+
+	static double CylinderHeight = 0.0;
+	if (CylinderHeight == 0.0)
+	{
+		CylinderHeight = 2 * circle->getRadius();
+	}
+	bool ok = false;
+	double value = QInputDialog::getDouble(this, tr("Cylinder height"), tr("Height"), CylinderHeight, 0.0, std::numeric_limits<double>::max(), 6, &ok);
+	if (!ok)
+	{
+		return;
+	}
+
+	CylinderHeight = value;
+
+	ccCylinder* cylinder = new ccCylinder(	static_cast<PointCoordinateType>(circle->getRadius()),
+											static_cast<PointCoordinateType>(CylinderHeight),
+											&circle->getGLTransformationHistory(),
+											tr("Cylinder from ") + circle->getName());
+
+	circle->setEnabled(false);
+	if (circle->getParent())
+	{
+		circle->getParent()->addChild(cylinder);
+	}
+
+	addToDB(cylinder, true, true);
+	setSelectedInDB(circle, false);
+	setSelectedInDB(cylinder, true);
 }

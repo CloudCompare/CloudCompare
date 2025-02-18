@@ -34,6 +34,7 @@
 #include <cc2DViewportObject.h>
 #include <ccAdvancedTypes.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccColorScalesManager.h>
 #include <ccCone.h>
 #include <ccFacet.h>
@@ -255,7 +256,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	{
 		fillWithFacet(ccHObjectCaster::ToFacet(m_currentObject));
 	}
-	else if (m_currentObject->isA(CC_TYPES::POLY_LINE))
+	else if (m_currentObject->isKindOf(CC_TYPES::POLY_LINE))
 	{
 		fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
 	}
@@ -887,6 +888,15 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 		return;
 	}
 
+	if (_obj->isA(CC_TYPES::CIRCLE))
+	{
+		addSeparator(tr("Circle"));
+
+		appendRow(ITEM(tr("Drawing precision")), PERSISTENT_EDITOR(OBJECT_CIRCLE_RESOLUTION), true);
+
+		appendRow(ITEM(tr("Radius")), PERSISTENT_EDITOR(OBJECT_CIRCLE_RADIUS), true);
+	}
+
 	addSeparator( tr( "Polyline" ) );
 
 	//number of vertices
@@ -1432,11 +1442,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CIRCLE_RESOLUTION:
+	{
+		QSpinBox* spinBox = new QSpinBox(parent);
+		spinBox->setRange(4, 1024);
+		spinBox->setSingleStep(4);
+
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::circleResolutionChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_SPHERE_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1445,10 +1467,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CIRCLE_RADIUS:
+	{
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
+		spinBox->setSingleStep(1.0);
+
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::circleRadiusChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_CONE_HEIGHT:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
+		spinBox->setDecimals(7);
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
@@ -1461,8 +1496,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CONE_BOTTOM_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1474,8 +1509,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CONE_TOP_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1976,11 +2011,25 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetSpinBoxValue(editor, primitive ? primitive->getDrawingPrecision() : 0);
 		break;
 	}
+	case OBJECT_CIRCLE_RESOLUTION:
+	{
+		ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+		assert(circle);
+		SetSpinBoxValue(editor, circle ? circle->getResolution() : 0);
+		break;
+	}
 	case OBJECT_SPHERE_RADIUS:
 	{
 		ccSphere* sphere = ccHObjectCaster::ToSphere(m_currentObject);
 		assert(sphere);
 		SetDoubleSpinBoxValue(editor, sphere ? sphere->getRadius() : 0.0);
+		break;
+	}
+	case OBJECT_CIRCLE_RADIUS:
+	{
+		ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+		assert(circle);
+		SetDoubleSpinBoxValue(editor, circle ? circle->getRadius() : 0.0);
 		break;
 	}
 	case OBJECT_CONE_HEIGHT:
@@ -2549,6 +2598,34 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	}
 }
 
+void ccPropertiesTreeDelegate::circleResolutionChanged(int val)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+	assert(circle);
+	if (!circle)
+		return;
+
+	if (circle->getResolution() != static_cast<unsigned int>(val))
+	{
+		bool wasVisible = circle->isVisible();
+		circle->setResolution(val);
+		circle->setVisible(wasVisible);
+
+		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CIRCLE_RESOLUTION;
+
+		//we must also reset the properties display!
+		updateModel();
+	}
+}
+
 void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 {
 	if (!m_currentObject)
@@ -2570,6 +2647,32 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 
 		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_SPHERE_RADIUS;
+
+		//we must also reset the properties display!
+		updateModel();
+	}
+}
+
+void ccPropertiesTreeDelegate::circleRadiusChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+	assert(circle);
+	if (!circle)
+		return;
+
+	if (circle->getRadius() != val)
+	{
+		bool wasVisible = circle->isVisible();
+		circle->setRadius(val);
+		circle->setVisible(wasVisible);
+
+		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CIRCLE_RADIUS;
 
 		//we must also reset the properties display!
 		updateModel();

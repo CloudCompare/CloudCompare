@@ -231,7 +231,4 @@ protected:
 	PointCoordinateType m_arrowLength;
 	//! Arrow index
 	unsigned m_arrowIndex;
-
-	//! Whether to serialize the polyline data or not (vertices and indexes)
-	bool m_serializeData;
 };

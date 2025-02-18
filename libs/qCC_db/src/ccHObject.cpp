@@ -157,7 +157,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(nullptr);
 	case CC_TYPES::CIRCLE:
-		return new ccCircle();
+		return new ccCircle;
 	case CC_TYPES::FACET:
 		return new ccFacet();
 	case CC_TYPES::MATERIAL_SET:

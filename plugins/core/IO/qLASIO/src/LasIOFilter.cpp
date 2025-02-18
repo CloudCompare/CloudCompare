@@ -29,12 +29,12 @@
 #include "LasWaveformSaver.h"
 
 // CC
+#include <CCGeom.h>
 #include <GenericProgressCallback.h>
 #include <ccColorScalesManager.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
-#include <CCGeom.h>
 
 // Qt
 #include <QDate>
@@ -227,7 +227,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	if (copcLoader)
 	{
 		const uint32_t copcUserDefinedMaxLevel = m_openDialog.copcMaxLevel();
-		if (copcUserDefinedMaxLevel < copcLoader->maxLevel())
+		if (copcUserDefinedMaxLevel < static_cast<uint32_t>(copcLoader->maxLevel()))
 		{
 			copcLoader->setMaxLevelConstraint(copcUserDefinedMaxLevel);
 		}

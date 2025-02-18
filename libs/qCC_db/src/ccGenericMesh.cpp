@@ -41,6 +41,9 @@
 //system
 #include <cassert>
 
+//QT
+#include <QPainter>
+
 #if defined(_OPENMP)
 //OpenMP
 #include <omp.h>
@@ -925,7 +928,7 @@ void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
 	enableStippling(mesh->stipplingEnabled());
 	//wired style
 	showWired(mesh->isShownAsWire());
-	
+
 	//keep the transformation history!
 	setGLTransformationHistory(mesh->getGLTransformationHistory());
 	//and meta-data
@@ -1098,7 +1101,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d& clickPos,
 	{
 		CCVector3d P;
 		CCVector3d BC;
-		if (!trianglePicking(	i,	
+		if (!trianglePicking(	i,
 								clickPos,
 								trans,
 								noGLTrans,
@@ -1163,7 +1166,7 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 		ccLog::Warning("Index out of range");
 		return true;
 	}
-	
+
 	CCVector3 A;
 	CCVector3 B;
 	CCVector3 C;
@@ -1174,7 +1177,7 @@ bool ccGenericMesh::computePointPosition(unsigned triIndex, const CCVector2d& uv
 	{
 		ccLog::Warning("Point falls outside of the triangle");
 	}
-	
+
 	P = CCVector3(	static_cast<PointCoordinateType>(uv.x * A.x + uv.y * B.x + z * C.x),
 					static_cast<PointCoordinateType>(uv.x * A.y + uv.y * B.y + z * C.y),
 					static_cast<PointCoordinateType>(uv.x * A.z + uv.y * B.z + z * C.z));
@@ -1231,7 +1234,7 @@ bool ccGenericMesh::IsCloudVerticesOfMesh(ccGenericPointCloud* cloud, ccGenericM
 		assert(false);
 		return false;
 	}
-	
+
 	// check whether the input point cloud acts as the vertices of a mesh
 	{
 		ccHObject* parent = cloud->getParent();

@@ -42,6 +42,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLDebugLogger>
 #include <QOffscreenSurface>
+#include <QPainter>
 #include <QPushButton>
 #include <QSettings>
 #include <QTouchEvent>

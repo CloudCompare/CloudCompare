@@ -31,12 +31,12 @@
 #include "ccWaveform.h"
 
 //Qt
-#include <QGLBuffer>
+#include <QOpenGLBuffer>
 
 class ccScalarField;
 class ccPolyline;
 class ccMesh;
-class QGLBuffer;
+class QOpenGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 
@@ -876,7 +876,7 @@ protected: // VBO
 	//! Init/updates VBOs
 	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
-	class VBO : public QGLBuffer
+	class VBO : public QOpenGLBuffer
 	{
 	public:
 		int rgbShift;
@@ -888,7 +888,7 @@ protected: // VBO
 		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
 
 		VBO()
-			: QGLBuffer(QGLBuffer::VertexBuffer)
+			: QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
 			, rgbShift(0)
 			, normalShift(0)
 		{}

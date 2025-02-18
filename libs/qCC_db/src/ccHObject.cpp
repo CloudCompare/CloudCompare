@@ -25,6 +25,7 @@
 #include "cc2DViewportLabel.h"
 #include "ccBox.h"
 #include "ccCameraSensor.h"
+#include "ccCircle.h"
 #include "ccCustomObject.h"
 #include "ccCylinder.h"
 #include "ccCoordinateSystem.h"
@@ -155,6 +156,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/
 	case CC_TYPES::POLY_LINE:
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(nullptr);
+	case CC_TYPES::CIRCLE:
+		return new ccCircle();
 	case CC_TYPES::FACET:
 		return new ccFacet();
 	case CC_TYPES::MATERIAL_SET:

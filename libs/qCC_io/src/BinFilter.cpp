@@ -26,6 +26,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccFacet.h>
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
@@ -235,7 +236,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		{
 			dependencies.insert(currentObject->getParent());
 		}
-		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
+		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE) && !currentObject->isA(CC_TYPES::CIRCLE))
 		{
 			CCCoreLib::GenericIndexedCloudPersist* cloud = static_cast<ccPolyline*>(currentObject)->getAssociatedCloud();
 			ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
@@ -808,6 +809,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					}
 				}
 			}
+		}
+		else if (currentObject->isA(CC_TYPES::CIRCLE))
+		{
+			ccCircle* circle = ccHObjectCaster::ToCircle(currentObject);
+			ccGLMatrix Id;
+			Id.toIdentity();
+			circle->applyGLTransformation_recursive(&Id); // to force the internal repesentation update
 		}
 		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
 		{

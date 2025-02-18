@@ -188,6 +188,10 @@ private:
 		const int	viewportLabelIndex = mIconList.count();
 		mIconList.append( { QIcon(QStringLiteral(":/CC/images/dbAreaLabelSymbol.png")),
 							{} } );
+
+		const int	circleIndex = mIconList.count();
+		mIconList.append({ QIcon(QStringLiteral(":/CC/images/dbCircle.png")),
+							{} });
 		
 		mIconMap = {
 			{ CC_TYPES::HIERARCHY_OBJECT, hObjectIndex },
@@ -195,6 +199,7 @@ private:
 			{ CC_TYPES::PLANE, geomIndex },
 			{ CC_TYPES::SPHERE, geomIndex },
 			{ CC_TYPES::TORUS, geomIndex },
+			{ CC_TYPES::CIRCLE, circleIndex },
 			{ CC_TYPES::CYLINDER, geomIndex },
 			{ CC_TYPES::CONE, geomIndex },
 			{ CC_TYPES::BOX, geomIndex },
@@ -223,6 +228,7 @@ private:
 			{ CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex },
 			{ CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex },
 			{ CC_TYPES::COORDINATESYSTEM, geomIndex }
+			
 		};
 	}
 	
@@ -1195,9 +1201,11 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			{
 				ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(obj);
 				info->cloudCount++;
-				info->octreeCount += genericCloud->getOctree() != nullptr ? 1 : 0;
+				if (nullptr != genericCloud->getOctree())
+					info->octreeCount++;
 				ccPointCloud* qccCloud = ccHObjectCaster::ToPointCloud(obj);
-				info->gridCound += qccCloud->gridCount();
+				if (nullptr != qccCloud)
+					info->gridCound += qccCloud->gridCount();
 			}
 			else if (obj->isKindOf(CC_TYPES::MESH))
 			{
@@ -1214,6 +1222,11 @@ size_t ccDBRoot::getSelectedEntities(	ccHObject::Container& selectedEntities,
 			else if (obj->isKindOf(CC_TYPES::POLY_LINE))
 			{
 				info->polylineCount++;
+
+				if (obj->isKindOf(CC_TYPES::CIRCLE))
+				{
+					info->circleCount++;
+				}
 			}
 			else if(obj->isKindOf(CC_TYPES::SENSOR))
 			{

@@ -48,6 +48,7 @@ struct dbTreeSelectionInfo
 	size_t groupCount = 0;
 	size_t polylineCount = 0;
 	size_t planeCount = 0;
+	size_t circleCount = 0;
 	size_t meshCount = 0;
 	size_t primitiveCount = 0;
 	size_t imageCount = 0;

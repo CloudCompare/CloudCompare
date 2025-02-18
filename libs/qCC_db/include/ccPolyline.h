@@ -45,7 +45,7 @@ public:
 	ccPolyline(const ccPolyline& poly);
 
 	//! Destructor
-	virtual ~ccPolyline() override = default;
+	~ccPolyline() override = default;
 
 	//! Returns class ID
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
@@ -102,8 +102,8 @@ public:
 	inline const ccColor::Rgb& getColor() const { return m_rgbColor; }
 
 	//inherited methods (ccHObject)
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-	inline virtual void drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) override
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	inline void drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) override
 	{
 		//DGM: only for 3D polylines!
 		if (!is2DMode())
@@ -111,7 +111,6 @@ public:
 			ccShiftedObject::drawBB(context, col);
 		}
 	}
-
 
 	//! Splits the polyline into several parts based on a maximum edge length
 	/** \warning output polylines set (parts) may be empty if all the vertices are too far from each other!
@@ -175,9 +174,6 @@ public:
 	//! Helper to determine if the input cloud acts as vertices of a polyline
 	static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline = nullptr);
 
-	//! Creates a circle as a polyline
-	static ccPolyline* Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution = 48);
-
 public: //meta-data keys
 	
 	//! Meta data key: vertical direction (for 2D polylines, contour plots, etc.)
@@ -235,4 +231,7 @@ protected:
 	PointCoordinateType m_arrowLength;
 	//! Arrow index
 	unsigned m_arrowIndex;
+
+	//! Whether to serialize the polyline data or not (vertices and indexes)
+	bool m_serializeData;
 };

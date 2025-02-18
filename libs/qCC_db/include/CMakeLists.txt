@@ -11,6 +11,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccBBox.h
 		${CMAKE_CURRENT_LIST_DIR}/ccBox.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCameraSensor.h
+		${CMAKE_CURRENT_LIST_DIR}/ccCircle.h
 		${CMAKE_CURRENT_LIST_DIR}/ccChunk.h
 		${CMAKE_CURRENT_LIST_DIR}/ccClipBox.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorBasedEntityPicking.h

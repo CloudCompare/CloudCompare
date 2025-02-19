@@ -29,11 +29,9 @@
 
 //Local
 #include "ccColorScale.h"
+#include "ccVBOManager.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
-
-//Qt
-#include <QOpenGLBuffer>
 
 class ccScalarField;
 class ccPolyline;
@@ -163,11 +161,11 @@ public: //features deletion/clearing
 	void unallocateNorms();
 
 	//! Notify a modification of color / scalar field display parameters or contents
-	inline void colorsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_COLORS; }
+	inline void colorsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_NORMALS; decompressNormals();}
+	inline void normalsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_NORMALS; decompressNormals();}
 	//! Notify a modification of points display parameters or contents
-	inline void pointsHaveChanged() { m_vboManager.updateFlags |= vboSet::UPDATE_POINTS; }
+	inline void pointsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_POINTS; }
 
 public: //features allocation/resize
 
@@ -878,62 +876,8 @@ protected: // VBO
 	//! Init/updates VBOs
 	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
-	class VBO : public QOpenGLBuffer
-	{
-	public:
-		int rgbShift;
-		int normalShift;
-
-		//! Inits the VBO
-		/** \return the number of allocated bytes (or -1 if an error occurred)
-		**/
-		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
-
-		VBO()
-			: QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
-			, rgbShift(0)
-			, normalShift(0)
-		{}
-	};
-
-	//! VBO set
-	struct vboSet
-	{
-		//! States of the VBO(s)
-		enum STATES { NEW, INITIALIZED, FAILED };
-
-		//! Update flags
-		enum UPDATE_FLAGS {
-			UPDATE_POINTS = 1,
-			UPDATE_COLORS = 2,
-			UPDATE_NORMALS = 4,
-			UPDATE_ALL = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
-		};
-
-		vboSet()
-			: hasColors(false)
-			, colorIsSF(false)
-			, sourceSF(nullptr)
-			, hasNormals(false)
-			, totalMemSizeBytes(0)
-			, updateFlags(0)
-			, state(NEW)
-		{}
-
-		std::vector<VBO*> vbos;
-		bool hasColors;
-		bool colorIsSF;
-		ccScalarField* sourceSF;
-		bool hasNormals;
-		size_t totalMemSizeBytes;
-		int updateFlags;
-
-		//! Current state
-		STATES state;
-	};
-
 	//! Set of VBOs attached to this cloud
-	vboSet m_vboManager;
+	ccVBOManager m_vboManager;
 
 	//per-block data transfer to the GPU (VBO or standard mode)
 	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);

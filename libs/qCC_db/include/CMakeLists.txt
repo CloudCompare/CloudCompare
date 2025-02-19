@@ -80,6 +80,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccSphere.h
 		${CMAKE_CURRENT_LIST_DIR}/ccSubMesh.h
 		${CMAKE_CURRENT_LIST_DIR}/ccTorus.h
+		${CMAKE_CURRENT_LIST_DIR}/ccVBOManager.h
 		${CMAKE_CURRENT_LIST_DIR}/ccViewportParameters.h
 		${CMAKE_CURRENT_LIST_DIR}/qCC_db.h
 )

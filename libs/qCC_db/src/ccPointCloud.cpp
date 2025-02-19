@@ -2645,7 +2645,7 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 	assert(glFunc != nullptr);
 
 	if (useVBOs
-		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.managerState == ccVBOManager::INITIALIZED
 		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
 		&& m_vboManager.vbos[chunkIndex]
 		&& m_vboManager.vbos[chunkIndex]->isCreated())
@@ -2659,7 +2659,7 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 		else
 		{
 			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager.state = vboSet::FAILED;
+			m_vboManager.managerState = ccVBOManager::FAILED;
 			//recall the method
 			glChunkVertexPointer(context, chunkIndex, decimStep, false);
 		}
@@ -2693,7 +2693,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 	assert(glFunc != nullptr);
 
 	if (	useVBOs
-		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.managerState == ccVBOManager::INITIALIZED
 		&&	m_vboManager.hasNormals
 		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
 		&&	m_vboManager.vbos[chunkIndex]
@@ -2710,7 +2710,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 		else
 		{
 			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager.state = vboSet::FAILED;
+			m_vboManager.managerState = ccVBOManager::FAILED;
 			//recall the method
 			glChunkNormalPointer(context, chunkIndex, decimStep, false);
 		}
@@ -2750,7 +2750,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	assert(glFunc != nullptr);
 
 	if (useVBOs
-		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.managerState == ccVBOManager::INITIALIZED
 		&&	m_vboManager.hasColors
 		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
 		&& m_vboManager.vbos[chunkIndex]
@@ -2767,7 +2767,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		else
 		{
 			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager.state = vboSet::FAILED;
+			m_vboManager.managerState = ccVBOManager::FAILED;
 			//recall the method
 			glChunkColorPointer(context, chunkIndex, decimStep, false);
 		}
@@ -2793,7 +2793,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	assert(glFunc != nullptr);
 
 	if (useVBOs
-		&&	m_vboManager.state == vboSet::INITIALIZED
+		&&	m_vboManager.managerState == ccVBOManager::INITIALIZED
 		&&	m_vboManager.hasColors
 		&&	m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
 		&&	m_vboManager.vbos[chunkIndex]
@@ -2811,7 +2811,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		else
 		{
 			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager.state = vboSet::FAILED;
+			m_vboManager.managerState = ccVBOManager::FAILED;
 			//call the method again
 			glChunkSFPointer(context, chunkIndex, decimStep, false);
 		}
@@ -5459,18 +5459,6 @@ static bool CatchGLErrors(GLenum err, const char* context)
 
 bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
-	if (isColorOverridden())
-	{
-		//nothing to do (we don't display true colors, SF or normals!)
-		return false;
-	}
-
-	if (m_vboManager.state == vboSet::FAILED)
-	{
-		//ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
-		return false;
-	}
-
 	if (!m_currentDisplay)
 	{
 		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(getName()));
@@ -5478,12 +5466,24 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		return false;
 	}
 
-	if (m_vboManager.state == vboSet::INITIALIZED)
+	if (isColorOverridden())
+	{
+		//nothing to do (we don't display true colors, SF or normals!)
+		return false;
+	}
+
+	if (m_vboManager.managerState == ccVBOManager::FAILED)
+	{
+		//ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
+		return false;
+	}
+
+	if (m_vboManager.managerState == ccVBOManager::INITIALIZED)
 	{
 		//let's check if something has changed
 		if ( glParams.showColors && ( !m_vboManager.hasColors || m_vboManager.colorIsSF ) )
 		{
-			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
+			m_vboManager.updateFlags |= ccVBOManager::UPDATE_COLORS;
 		}
 
 		if (	glParams.showSF
@@ -5492,7 +5492,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				||	 m_vboManager.sourceSF != m_currentDisplayedScalarField
 				||	 m_currentDisplayedScalarField->getModificationFlag() == true ) )
 		{
-			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
+			m_vboManager.updateFlags |= ccVBOManager::UPDATE_COLORS;
 		}
 
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
@@ -5509,7 +5509,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 	}
 	else
 	{
-		m_vboManager.updateFlags = vboSet::UPDATE_ALL;
+		m_vboManager.updateFlags = ccVBOManager::UPDATE_ALL;
 	}
 
 	size_t chunksCount = ccChunk::Count(m_points);
@@ -5535,7 +5535,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(getName()));
-			m_vboManager.state = vboSet::FAILED;
+			m_vboManager.managerState = ccVBOManager::FAILED;
 			return false;
 		}
 	}
@@ -5566,13 +5566,13 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, m_points));
 
-			VBO* currentVBO = m_vboManager.vbos[chunkIndex];
+			ccVBO* currentVBO = m_vboManager.vbos[chunkIndex];
 
 			int chunkUpdateFlags = m_vboManager.updateFlags;
 			bool reallocated = false;
 			if (!currentVBO)
 			{
-				currentVBO = new VBO;
+				currentVBO = new ccVBO;
 			}
 
 			//allocate memory for current VBO
@@ -5591,18 +5591,18 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				if (reallocated)
 				{
 					//if the vbo is reallocated, then all its content has been cleared!
-					chunkUpdateFlags = vboSet::UPDATE_ALL;
+					chunkUpdateFlags = ccVBOManager::UPDATE_ALL;
 				}
 
 				currentVBO->bind();
 
 				//load points
-				if (chunkUpdateFlags & vboSet::UPDATE_POINTS)
+				if (chunkUpdateFlags & ccVBOManager::UPDATE_POINTS)
 				{
 					currentVBO->write(0, ccChunk::Start(m_points, chunkIndex), sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 				//load colors
-				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
+				if (chunkUpdateFlags & ccVBOManager::UPDATE_COLORS)
 				{
 					if (glParams.showSF)
 					{
@@ -5692,7 +5692,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				if (chunkIndex == 0)
 				{
 					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
-					m_vboManager.state = vboSet::FAILED;
+					m_vboManager.managerState = ccVBOManager::FAILED;
 					m_vboManager.vbos.resize(0);
 					return false;
 				}
@@ -5722,68 +5722,10 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			.arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
 #endif
 
-	m_vboManager.state = vboSet::INITIALIZED;
+	m_vboManager.managerState = ccVBOManager::INITIALIZED;
 	m_vboManager.updateFlags = 0;
 
 	return true;
-}
-
-int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=nullptr*/)
-{
-	//required memory
-	int totalSizeBytes = sizeof(PointCoordinateType) * count * 3;
-	if (withColors)
-	{
-		rgbShift = totalSizeBytes;
-		totalSizeBytes += sizeof(ColorCompType) * count * 4;
-	}
-	if (withNormals)
-	{
-		normalShift = totalSizeBytes;
-		totalSizeBytes += sizeof(PointCoordinateType) * count * 3;
-	}
-
-	if (!isCreated())
-	{
-		if (!create())
-		{
-			//no message as it will probably happen on a lot on (old) graphic cards
-			return -1;
-		}
-
-		setUsagePattern(QOpenGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
-													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
-	}
-
-	if (!bind())
-	{
-		ccLog::Warning("[ccPointCloud::VBO::init] Failed to bind VBO to active context!");
-		destroy();
-		return -1;
-	}
-
-	if (totalSizeBytes != size())
-	{
-		allocate(totalSizeBytes);
-		if (reallocated)
-			*reallocated = true;
-
-		if (size() != totalSizeBytes)
-		{
-			ccLog::Warning("[ccPointCloud::VBO::init] Not enough (GPU) memory!");
-			release();
-			destroy();
-			return -1;
-		}
-	}
-	else
-	{
-		//nothing to do
-	}
-
-	release();
-
-	return totalSizeBytes;
 }
 
 size_t ccPointCloud::vboSize() const
@@ -5793,7 +5735,7 @@ size_t ccPointCloud::vboSize() const
 
 void ccPointCloud::releaseVBOs()
 {
-	if (m_vboManager.state == vboSet::NEW)
+	if (m_vboManager.managerState == ccVBOManager::NEW)
 		return;
 
 	if (m_currentDisplay)
@@ -5820,7 +5762,7 @@ void ccPointCloud::releaseVBOs()
 	m_vboManager.colorIsSF = false;
 	m_vboManager.sourceSF = nullptr;
 	m_vboManager.totalMemSizeBytes = 0;
-	m_vboManager.state = vboSet::NEW;
+	m_vboManager.managerState = ccVBOManager::NEW;
 }
 
 void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
@@ -6164,7 +6106,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg/*=nullptr*/)
 	return true;
 }
 
-bool ccPointCloud::orientNormalsTowardViewPoint( CCVector3 & VP, ccProgressDialog* pDlg)
+bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3 & VP, ccProgressDialog* pDlg)
 {
 	int progressIndex = 0;
 	for (unsigned pointIndex = 0; pointIndex < m_points.size(); ++pointIndex)
@@ -6450,7 +6392,6 @@ bool ccPointCloud::initLOD(std::vector<ccGenericPointCloudLOD::Level> lodLayers)
 	m_lod = new ccNestedOctreePointCloudLOD(lodLayers);
 	return m_lod->init(this);
 }
-
 
 void ccPointCloud::clearLOD()
 {

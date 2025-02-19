@@ -27,6 +27,7 @@
 #include "LasVlr.h"
 #include "LasWaveformLoader.h"
 #include "LasWaveformSaver.h"
+#include "ccLog.h"
 
 // CC
 #include <CCGeom.h>
@@ -588,6 +589,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		// If the LOD checkbox is active, create and init the LOD
 		if (m_openDialog.mapCOPCintoLODDataStructure())
 		{
+			ccLog::Print("Creating COPC LOD...");
 			const auto lodLevels = copcLoader->createLODLevels();
 			pointCloud->initLOD(lodLevels);
 		}

@@ -16,38 +16,49 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccGLDrawContext.h"
+#include "ccGenericGLDisplay.h"
+#include "ccScalarField.h"
+
 // Qt
 #include <QOpenGLBuffer>
 
 // System
+#include <cstdint>
 #include <vector>
 
 class ccPointCloud;
-class ccScalarField;
+
+// DGM: normals are so slow to display that it's a waste of memory and time to load them in VBOs!
+#define DONT_LOAD_NORMALS_IN_VBOS
 
 class ccVBO : public QOpenGLBuffer
 {
-  public:
-	int rgbShift;
-	int normalShift;
+  public: // methods
+	ccVBO()
+	    : QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
+	    , rgbShift(0)
+	    , normalShift(0)
+	    , pointCount(0)
+	{
+	}
 
 	//! Inits the VBO
 	/** \return the number of allocated bytes (or -1 if an error occurred)
 	 **/
 	int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
 
-	ccVBO()
-	    : QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
-	    , rgbShift(0)
-	    , normalShift(0)
-	{
-	}
+  public: // members
+	int      rgbShift;
+	int      normalShift;
+	uint32_t pointCount;
 };
 
-//! VBO set
-class ccVBOManager
+//! VBO Manager
+class ccAbstractVBOManager
 {
-  public:
+  public: // enums
 	//! States of the VBO(s)
 	enum STATES
 	{
@@ -65,7 +76,44 @@ class ccVBOManager
 		UPDATE_ALL     = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
 	};
 
-	ccVBOManager()
+	static bool CatchGLErrors(GLenum err, const char* context)
+	{
+		// catch GL errors
+		{
+			// see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
+			switch (err)
+			{
+			case GL_NO_ERROR:
+				return false;
+			case GL_INVALID_ENUM:
+				ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+				break;
+			case GL_INVALID_VALUE:
+				ccLog::Warning("[%s] OpenGL error: invalid value", context);
+				break;
+			case GL_INVALID_OPERATION:
+				ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+				break;
+			case GL_STACK_OVERFLOW:
+				ccLog::Warning("[%s] OpenGL error: stack overflow", context);
+				break;
+			case GL_STACK_UNDERFLOW:
+				ccLog::Warning("[%s] OpenGL error: stack underflow", context);
+				break;
+			case GL_OUT_OF_MEMORY:
+				ccLog::Warning("[%s] OpenGL error: out of memory", context);
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+				break;
+			}
+		}
+
+		return true;
+	}
+
+  public: // methods
+	ccAbstractVBOManager()
 	    : hasColors(false)
 	    , colorIsSF(false)
 	    , sourceSF(nullptr)
@@ -76,14 +124,31 @@ class ccVBOManager
 	{
 	}
 
-	std::vector<ccVBO*> vbos;
-	bool                hasColors;
-	bool                colorIsSF;
-	ccScalarField*      sourceSF;
-	bool                hasNormals;
-	size_t              totalMemSizeBytes;
-	int                 updateFlags;
+	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay)                                                                                      = 0;
+	virtual bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
+	virtual bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)                                                                   = 0;
+
+  public: // members
+	bool           hasColors;
+	bool           colorIsSF;
+	ccScalarField* sourceSF;
+	bool           hasNormals;
+	size_t         totalMemSizeBytes;
+	int            updateFlags;
 
 	//! Current state
 	STATES managerState;
 };
+
+class ccPointCloudVBOManager : public ccAbstractVBOManager
+{
+  public: // methods
+	bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
+	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return false;}; // TODO
+
+  public: // members
+	std::vector<ccVBO*> vbos;
+};
+
+using ccGLDrawContext = CC_DRAW_CONTEXT;

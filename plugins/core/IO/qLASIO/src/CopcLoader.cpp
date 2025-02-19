@@ -360,10 +360,10 @@ namespace copc
 		             { return a.pointOffsetInFile < b.pointOffsetInFile; });
 	}
 
-	std::vector<ccGenericPointCloudLOD::Level> CopcLoader::createLODLevels() const
+	std::vector<ccAbstractPointCloudLOD::Level> CopcLoader::createLODLevels() const
 	{
 		size_t                                     maxNumLayers = (m_hasMaxLevelConstraint ? m_maxLevelConstraint : m_maxLevel) + 1;
-		std::vector<ccGenericPointCloudLOD::Level> lodLevels(maxNumLayers);
+		std::vector<ccAbstractPointCloudLOD::Level> lodLevels(maxNumLayers);
 
 		// Keep track of the VoxelKey by insterting them in the same order than CC LOD Nodes.
 		std::vector<std::vector<VoxelKey>> lodKeys(maxNumLayers);

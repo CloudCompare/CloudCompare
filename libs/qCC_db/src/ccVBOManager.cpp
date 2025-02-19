@@ -16,7 +16,14 @@
 // ##########################################################################
 
 #include "ccVBOManager.h"
+
+#include "ccChunk.h"
+#include "ccColorTypes.h"
+#include "ccLog.h"
 #include "ccPointCloud.h"
+
+// CCCore lib
+#include <CCTypes.h>
 
 int ccVBO::init(int count, bool withColors, bool withNormals, bool* reallocated /*=nullptr*/)
 {
@@ -74,4 +81,297 @@ int ccVBO::init(int count, bool withColors, bool withNormals, bool* reallocated 
 	release();
 
 	return totalSizeBytes;
+}
+
+void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDisplay)
+{
+	if (managerState == ccAbstractVBOManager::NEW)
+		return;
+
+	if (currentDisplay)
+	{
+		//'destroy' all vbos
+		for (size_t i = 0; i < vbos.size(); ++i)
+		{
+			if (vbos[i])
+			{
+				vbos[i]->destroy();
+				delete vbos[i];
+				vbos[i] = nullptr;
+			}
+		}
+	}
+	else
+	{
+		assert(vbos.empty());
+	}
+
+	vbos.resize(0);
+	hasColors         = false;
+	hasNormals        = false;
+	colorIsSF         = false;
+	sourceSF          = nullptr;
+	totalMemSizeBytes = 0;
+	managerState      = ccAbstractVBOManager::NEW;
+}
+
+bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+{
+	if (!currentDisplay)
+	{
+		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(pc->getName()));
+		assert(false);
+		return false;
+	}
+
+	if (pc->isColorOverridden())
+	{
+		// nothing to do (we don't display true colors, SF or normals!)
+		return false;
+	}
+
+	if (managerState == ccAbstractVBOManager::FAILED)
+	{
+		// ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
+		return false;
+	}
+
+	if (managerState == ccAbstractVBOManager::INITIALIZED)
+	{
+		// let's check if something has changed
+		if (glParams.showColors && (!hasColors || colorIsSF))
+		{
+			updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
+		}
+
+		if (glParams.showSF
+		    && (!hasColors
+		        || !colorIsSF
+		        || sourceSF != pc->m_currentDisplayedScalarField
+		        || pc->m_currentDisplayedScalarField->getModificationFlag() == true))
+		{
+			updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
+		}
+
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		if (glParams.showNorms && !hasNormals)
+		{
+			updateFlags |= UPDATE_NORMALS;
+		}
+#endif
+		// nothing to do?
+		if (updateFlags == 0)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		updateFlags = ccAbstractVBOManager::UPDATE_ALL;
+	}
+
+	size_t chunksCount = ccChunk::Count(pc->m_points);
+	// allocate per-chunk descriptors if necessary
+	if (vbos.size() != chunksCount)
+	{
+		// properly remove the elements that are not needed anymore!
+		for (size_t i = chunksCount; i < vbos.size(); ++i)
+		{
+			if (vbos[i])
+			{
+				vbos[i]->destroy();
+				delete vbos[i];
+				vbos[i] = nullptr;
+			}
+		}
+
+		// resize the container
+		try
+		{
+			vbos.resize(chunksCount, nullptr);
+		}
+		catch (const std::bad_alloc&)
+		{
+			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(pc->getName()));
+			managerState = ccAbstractVBOManager::FAILED;
+			return false;
+		}
+	}
+
+	// init VBOs
+	unsigned pointsInVBOs         = 0;
+	size_t   totalSizeBytesBefore = totalMemSizeBytes;
+	totalMemSizeBytes             = 0;
+	{
+		// DGM: the context should be already active as this method should only be called from 'drawMeOnly'
+		assert(!glParams.showSF || pc->m_currentDisplayedScalarField);
+		assert(!glParams.showColors || pc->m_rgbaColors);
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		assert(!glParams.showNorms || (m_normals && m_normals->chunksCount() >= chunksCount));
+#endif
+
+		hasColors = glParams.showSF || glParams.showColors;
+		colorIsSF = glParams.showSF;
+		sourceSF  = glParams.showSF ? pc->m_currentDisplayedScalarField : nullptr;
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		hasNormals = glParams.showNorms;
+#else
+		hasNormals = false;
+#endif
+
+		// process each chunk
+		for (size_t chunkIndex = 0; chunkIndex < chunksCount; ++chunkIndex)
+		{
+			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, pc->m_points));
+
+			ccVBO* currentVBO = vbos[chunkIndex];
+
+			int  chunkUpdateFlags = updateFlags;
+			bool reallocated      = false;
+			if (!currentVBO)
+			{
+				currentVBO = new ccVBO;
+			}
+
+			// allocate memory for current VBO
+			int vboSizeBytes = currentVBO->init(chunkSize, hasColors, hasNormals, &reallocated);
+
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+			if (glFunc)
+			{
+				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
+			}
+
+			if (vboSizeBytes > 0)
+			{
+				// ccLog::Print(QString("[VBO] VBO #%1 initialized (ID=%2)").arg(chunkIndex).arg(vbos[chunkIndex]->bufferId()));
+
+				if (reallocated)
+				{
+					// if the vbo is reallocated, then all its content has been cleared!
+					chunkUpdateFlags = ccAbstractVBOManager::UPDATE_ALL;
+				}
+
+				currentVBO->bind();
+
+				// load points
+				if (chunkUpdateFlags & ccAbstractVBOManager::UPDATE_POINTS)
+				{
+					currentVBO->write(0, ccChunk::Start(pc->m_points, chunkIndex), sizeof(PointCoordinateType) * chunkSize * 3);
+				}
+				// load colors
+				if (chunkUpdateFlags & ccAbstractVBOManager::UPDATE_COLORS)
+				{
+					if (glParams.showSF)
+					{
+						// copy SF colors in static array
+						ColorCompType* _sfColors = ccPointCloud::s_rgbBuffer4ub;
+						if (sourceSF)
+						{
+							size_t chunkStart = ccChunk::StartPos(chunkIndex);
+							for (int j = 0; j < chunkSize; j++)
+							{
+								// SF value
+								ScalarType sfValue = sourceSF->getValue(chunkStart + j);
+								// we need to convert scalar value to color into a temporary structure
+								const ccColor::Rgb* col = sourceSF->getColor(sfValue);
+								if (!col)
+								{
+									col = &ccColor::lightGreyRGB;
+								}
+								*_sfColors++ = col->r;
+								*_sfColors++ = col->g;
+								*_sfColors++ = col->b;
+								*_sfColors++ = ccColor::MAX;
+							}
+						}
+						else
+						{
+							assert(false);
+							for (int j = 0; j < chunkSize; j++)
+							{
+								// we need to convert scalar value to color into a temporary structure
+								*_sfColors++ = ccColor::lightGreyRGB.r;
+								*_sfColors++ = ccColor::lightGreyRGB.g;
+								*_sfColors++ = ccColor::lightGreyRGB.b;
+								*_sfColors++ = ccColor::MAX;
+							}
+						}
+						// then send them in VRAM
+						currentVBO->write(currentVBO->rgbShift, ccPointCloud::s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
+						// upadte 'modification' flag for current displayed SF
+						sourceSF->setModificationFlag(false);
+					}
+					else if (glParams.showColors)
+					{
+						currentVBO->write(currentVBO->rgbShift, ccChunk::Start(*pc->m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
+					}
+				}
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+				// load normals
+				if (glParams.showNorms && (chunkUpdateFlags & UPDATE_NORMALS))
+				{
+					// we must decode the normals first!
+					CompressedNormType*  inNorms  = pc->m_normals->chunkStartPtr(chunkIndex);
+					PointCoordinateType* outNorms = s_normalBuffer;
+					for (int j = 0; j < chunkSize; ++j)
+					{
+						const CCVector3& N = ccNormalVectors::GetNormal(*inNorms++);
+						*(outNorms)++      = N.x;
+						*(outNorms)++      = N.y;
+						*(outNorms)++      = N.z;
+					}
+					currentVBO->write(currentVBO->normalShift, s_normalBuffer, sizeof(PointCoordinateType) * chunkSize * 3);
+				}
+#endif
+				currentVBO->release();
+
+				// if an error is detected
+				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+				assert(glFunc != nullptr);
+				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
+				{
+					vboSizeBytes = -1;
+				}
+				else
+				{
+					totalMemSizeBytes += static_cast<size_t>(vboSizeBytes);
+					pointsInVBOs += chunkSize;
+				}
+			}
+
+			if (vboSizeBytes < 0) // VBO initialization failed
+			{
+				currentVBO->destroy();
+				delete currentVBO;
+				currentVBO = nullptr;
+
+				// we can stop here
+				if (chunkIndex == 0)
+				{
+					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(pc->getName()));
+					managerState = ccAbstractVBOManager::FAILED;
+					vbos.resize(0);
+					return false;
+				}
+				else
+				{
+					// shouldn't be better for the next VBOs!
+					break;
+				}
+			}
+		}
+	}
+#ifdef _DEBUG
+	if (totalMemSizeBytes != totalSizeBytesBefore)
+		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)")
+		                 .arg(getName())
+		                 .arg(static_cast<double>(totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
+		                 .arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
+#endif
+
+	managerState = ccAbstractVBOManager::INITIALIZED;
+	updateFlags  = 0;
+
+	return true;
 }

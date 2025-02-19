@@ -211,11 +211,11 @@ MainWindow::MainWindow()
 	m_UI->setupUi( this );
 
 	setWindowTitle(QStringLiteral("CloudCompare v") + ccApp->versionLongStr(false));
-	
+
 	m_pluginUIManager = new ccPluginUIManager( this, this );
-	
+
 	ccTranslationManager::Get().populateMenu( m_UI->menuLanguage, ccApp->translationPath() );
-	
+
 #ifdef Q_OS_MAC
 	m_UI->actionAbout->setMenuRole( QAction::AboutRole );
 	m_UI->actionAboutPlugins->setMenuRole( QAction::ApplicationSpecificRole );
@@ -226,7 +226,7 @@ MainWindow::MainWindow()
 
 	// Set up dynamic menus
 	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
-	
+
 	//Console
 	ccConsole::Init(m_UI->consoleWidget, this, this);
 	m_UI->actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());
@@ -310,12 +310,12 @@ MainWindow::MainWindow()
 	updateUI();
 
 	QMainWindow::statusBar()->showMessage(tr("Ready"));
-	
+
 #ifdef CC_CORE_LIB_USES_TBB
 	ccConsole::Print( QStringLiteral( "[TBB] Using Intel's Threading Building Blocks %1" )
 					  .arg( QString( TBB_VERSION ) ) );
 #endif
-	
+
 	ccConsole::Print(tr("CloudCompare started!"));
 }
 
@@ -373,23 +373,23 @@ MainWindow::~MainWindow()
 
 	delete m_UI;
 	m_UI = nullptr;
-	
+
 	ccConsole::ReleaseInstance(false); //if we flush the console, it will try to display the console window while we are destroying everything!
 }
 
 void MainWindow::initPlugins( )
 {
 	m_pluginUIManager->init();
-	
+
 	// Set up dynamic tool bars
 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->glFiltersToolbar() );
 	addToolBar( Qt::RightToolBarArea, m_pluginUIManager->mainPluginToolbar() );
-	
+
 	for ( QToolBar *toolbar : m_pluginUIManager->additionalPluginToolbars() )
 	{
 		addToolBar( Qt::TopToolBarArea, toolbar );
 	}
-	
+
 	// Set up dynamic menus
 	m_UI->menubar->insertMenu( m_UI->menu3DViews->menuAction(), m_pluginUIManager->pluginMenu() );
 	m_UI->menuDisplay->insertMenu( m_UI->menuActiveScalarField->menuAction(), m_pluginUIManager->shaderAndFilterMenu() );
@@ -459,9 +459,9 @@ void MainWindow::connectActions()
 {
 	assert(m_ccRoot);
 	assert(m_mdiArea);
-	
+
 	//Keyboard shortcuts
-	
+
 	//'A': toggles selected items activation
 	connect(m_UI->actionToggleActivation, &QAction::triggered, this, [=]() {
 		toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY::ACTIVE );
@@ -583,7 +583,7 @@ void MainWindow::connectActions()
 	//"Edit > Polyline" menu
 	connect(m_UI->actionSamplePointsOnPolyline,		&QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
 	connect(m_UI->actionSmoothPolyline,				&QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
-	
+
 	//"Edit > Plane" menu
 	connect(m_UI->actionCreatePlane,				&QAction::triggered, this, &MainWindow::doActionCreatePlane);
 	connect(m_UI->actionEditPlane,					&QAction::triggered, this, &MainWindow::doActionEditPlane);
@@ -631,7 +631,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionDeleteAllSF,				&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::ALL_SCALAR_FIELDS );
 	});
-	
+
 	//"Edit > Waveform" menu
 	connect(m_UI->actionShowWaveDialog,				&QAction::triggered, this, &MainWindow::doActionShowWaveDialog);
 	connect(m_UI->actionCompressFWFData,			&QAction::triggered, this, &MainWindow::doActionCompressFWFData);
@@ -659,7 +659,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionConvertPolylinesToMesh,		&QAction::triggered, this, &MainWindow::doConvertPolylinesToMesh);
 	//connect(m_UI->actionCreateSurfaceBetweenTwoPolylines, &QAction::triggered, this, &MainWindow::doMeshTwoPolylines); //DGM: already connected to actionMeshTwoPolylines
 	connect(m_UI->actionExportCoordToSF,			&QAction::triggered, this, &MainWindow::doActionExportCoordToSF);
-	
+
 	//"Tools > Registration" menu
 	connect(m_UI->actionMatchBBCenters,				&QAction::triggered, this, &MainWindow::doActionMatchBBCenters);
 	connect(m_UI->actionMatchScales,				&QAction::triggered, this, &MainWindow::doActionMatchScales);
@@ -777,7 +777,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSetPivotAlwaysOn,			&QAction::triggered, this, &MainWindow::setPivotAlwaysOn);
 	connect(m_UI->actionSetPivotRotationOnly,		&QAction::triggered, this, &MainWindow::setPivotRotationOnly);
 	connect(m_UI->actionSetPivotOff,				&QAction::triggered, this, &MainWindow::setPivotOff);
-	
+
 	connect(m_UI->actionSetOrthoView,               &QAction::triggered, this, [this] () {
 		setOrthoView( getActiveGLWindow() );
 	});
@@ -787,10 +787,10 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSetViewerPerspectiveView,   &QAction::triggered, this, [this] () {
 		setViewerPerspectiveView( getActiveGLWindow() );
 	});
-	
+
 	connect(m_UI->actionEnableStereo,				&QAction::toggled, this, &MainWindow::toggleActiveWindowStereoVision);
 	connect(m_UI->actionAutoPickRotationCenter,		&QAction::toggled, this, &MainWindow::toggleActiveWindowAutoPickRotCenter);
-	
+
 	connect(m_UI->actionSetViewTop,                 &QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
 	connect(m_UI->actionSetViewBottom,              &QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
 	connect(m_UI->actionSetViewFront,               &QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
@@ -799,7 +799,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionSetViewRight,               &QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
 	connect(m_UI->actionSetViewIso1,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
 	connect(m_UI->actionSetViewIso2,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
-	
+
 	//hidden
 	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);
 }
@@ -2040,7 +2040,7 @@ void MainWindow::doActionComputeScatteringAngles()
 		{
 			theta = CCCoreLib::RadiansToDegrees( theta );
 		}
-		
+
 		angles->setValue(i,theta);
 	}
 
@@ -2768,17 +2768,17 @@ void MainWindow::doActionSamplePointsOnMesh()
 	{
 		if (!entity->isKindOf(CC_TYPES::MESH))
 			continue;
-		
+
 		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 		assert(mesh);
-		
+
 		ccPointCloud* cloud = mesh->samplePoints(	s_useDensity,
 													s_useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,
 													withNormals,
 													withRGB,
 													withTexture,
 													&pDlg );
-		
+
 		if (cloud)
 		{
 			addToDB(cloud);
@@ -2964,7 +2964,7 @@ void MainWindow::doActionFilterByValue()
 {
 	typedef std::pair<ccHObject*, ccPointCloud*> EntityAndVerticesType;
 	std::vector<EntityAndVerticesType> toFilter;
-	
+
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
@@ -2986,7 +2986,7 @@ void MainWindow::doActionFilterByValue()
 
 	if (toFilter.empty())
 		return;
-	
+
 	double minVald = 0.0;
 	double maxVald = 1.0;
 
@@ -3078,7 +3078,7 @@ void MainWindow::doActionFilterByValue()
 			{
 				//shortcut, as we know here that the point cloud is a "ccPointCloud"
 				resultInside = pc->filterPointsByScalarValue(minVal, maxVal, false);
-				
+
 				if (resultInside == ent)
 				{
 					//specific case: all points were selected, nothing to do
@@ -4294,7 +4294,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 			}
 
 			ParallelSort(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
-			
+
 			_sortedIndexes = &sortedIndexes;
 		}
 	}
@@ -4727,7 +4727,7 @@ void MainWindow::doConvertPolylinesToMesh()
 		{
 			if (poly == nullptr)
 				continue;
-			
+
 			unsigned vertCount = poly->size();
 			int vertIndex0 = static_cast<int>(points2D.size());
 			bool closed = poly->isClosed();
@@ -5074,7 +5074,7 @@ void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
 void MainWindow::doActionFitQuadric()
 {
 	bool errors = false;
-	
+
 	//for all selected entities
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
@@ -5867,9 +5867,9 @@ void MainWindow::doActionFilterNoise()
 	pDlg.setAutoClose(false);
 
 	bool firstCloud = true;
-	
+
 	ccHObject::Container selectedEntities = getSelectedEntities(); //we have to use a local copy: and 'selectEntity' will change the set of currently selected entities!
-	
+
 	for ( ccHObject *entity : selectedEntities )
 	{
 		//specific test for locked vertices
@@ -6023,7 +6023,7 @@ void MainWindow::doActionUnroll()
 		output = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
 	}
 	break;
-	
+
 	default:
 		assert(false);
 		break;
@@ -6095,7 +6095,7 @@ QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
 
 ccGLWindowInterface* MainWindow::getGLWindow(int index) const
 {
-	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();	
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 	if (index >= 0 && index < subWindowList.size())
 	{
 		ccGLWindowInterface* win = ccGLWindowInterface::FromWidget(subWindowList[index]->widget());
@@ -6140,7 +6140,7 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 
 	QWidget* viewWidget = nullptr;
 	ccGLWindowInterface* view3D = nullptr;
-	
+
 	createGLWindow(view3D, viewWidget);
 	if (!viewWidget || !view3D)
 	{
@@ -6165,7 +6165,7 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitySelectionChanged, this, [=] (ccHObject *entity) {
 			m_ccRoot->selectEntity( entity );
 		});
-		
+
 		connect(view3D->signalEmitter(), &ccGLWindowSignalEmitter::entitiesSelectionChanged, this, [=] (std::unordered_set<int> entities){
 			m_ccRoot->selectEntities( entities );
 		});
@@ -6230,7 +6230,7 @@ void MainWindow::doActionResetGUIElementsPos()
 	QMessageBox::information( this,
 							  tr("Restart"),
 							  tr("To finish the process, you'll have to close and restart CloudCompare") );
-	
+
 	//to avoid saving them right away!
 	s_autoSaveGuiElementPos = false;
 }
@@ -6253,7 +6253,7 @@ void MainWindow::doActionResetAllVBOs()
 		if (cloud)
 		{
 			releasedSize += cloud->vboSize();
-			cloud->releaseVBOs();
+			cloud->releaseAllVBOs();
 		}
 	}
 
@@ -6289,7 +6289,7 @@ void MainWindow::restoreGUIElementsPos()
 
 	if (previousGeometry.isValid())
 	{
-		restoreGeometry(previousGeometry.toByteArray()); 
+		restoreGeometry(previousGeometry.toByteArray());
 	}
 	else
 	{
@@ -6410,7 +6410,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 				repositionOverlayDialog(mdi);
 				break;
 			}
-		}		
+		}
 	});
 
 	repositionOverlayDialog(m_mdiDialogs.back());
@@ -6457,10 +6457,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 			}
 			break;
 		}
-			
+
 		default:
 			QMainWindow::keyPressEvent(event);
-	}	
+	}
 }
 
 void MainWindow::updateOverlayDialogsPlacement()
@@ -6557,7 +6557,7 @@ void MainWindow::freezeUI(bool state)
 	//freeze standard plugins
 	m_UI->toolBarMainTools->setDisabled(state);
 	m_UI->toolBarSFTools->setDisabled(state);
-	
+
 	m_pluginUIManager->mainPluginToolbar()->setDisabled(state);
 
 	//freeze plugin toolbars
@@ -6737,7 +6737,7 @@ void MainWindow::activateSectionExtractionMode()
 					{
 						firstDisplay = static_cast<ccGLWindowInterface*>(entity->getDisplay());
 					}
-					
+
 					++validCount;
 				}
 			}
@@ -7198,7 +7198,7 @@ void MainWindow::showDisplaySettings()
 {
 	ccDisplaySettingsDlg displayOptionsDlg(this);
 	connect(&displayOptionsDlg, &ccDisplaySettingsDlg::aspectHasChanged, this, [=] () { redrawAll(); });
-			
+
 	displayOptionsDlg.exec();
 
 	disconnect(&displayOptionsDlg);
@@ -7302,7 +7302,7 @@ void MainWindow::zoomOnSelectedEntities()
 	for (size_t i = 0; i < selNum; ++i)
 	{
 		ccHObject *entity = m_selectedEntities[i];
-		
+
 		if (i == 0 || !win)
 		{
 			//take the first valid window as reference
@@ -7778,7 +7778,7 @@ void MainWindow::toggleSelectedEntitiesProperty( ccEntityAction::TOGGLE_PROPERTY
 	{
 		return;
 	}
-	
+
 	refreshAll();
 	updateUI();
 }
@@ -7940,11 +7940,11 @@ void MainWindow::doActionCrop()
 void MainWindow::doActionClone()
 {
 	ccHObject* lastClone = nullptr;
-	
+
 	for ( ccHObject *entity : getSelectedEntities() )
 	{
 		ccHObject* clone = nullptr;
-		
+
 		if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			clone = ccHObjectCaster::ToGenericPointCloud(entity)->clone();
@@ -8349,8 +8349,8 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 
 	ccHObject::Container selectedEntities = getSelectedEntities(); //warning, getSelectedEntites may change during this loop!
 	bool firstEntity = true;
-	
-	for (ccHObject *entity : selectedEntities) 
+
+	for (ccHObject *entity : selectedEntities)
 	{
 		ccShiftedObject* shifted = nullptr;
 		CCCoreLib::GenericIndexedCloudPersist* cloud = nullptr;
@@ -8586,7 +8586,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			ccConsole::Error(tr("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(cloud->getName()));
 			return;
 		}
-			
+
 		ccOctree::Shared octree = cloud->getOctree();
 		if (!octree)
 		{
@@ -8774,14 +8774,14 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 		for ( ccHObject *entity : getSelectedEntities() )
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-			
+
 			if (cloud == nullptr)
 			{
 				continue;
 			}
-			
+
 			centers->addPoint(cloud->getOwnBB().getCenter());
-			
+
 			//we display the cloud in the same window as the first (selected) cloud we encounter
 			if (!centers->getDisplay())
 			{
@@ -9139,7 +9139,7 @@ void MainWindow::doActionExportPlaneInfo()
 	for (ccHObject* ent : planes)
 	{
 		ccPlane* plane = static_cast<ccPlane*>(ent);
-			
+
 		CCVector3 C = plane->getOwnBB().getCenter();
 		CCVector3d Cg = plane->toGlobal3d(C);
 		CCVector3 N = plane->getNormal();
@@ -9497,7 +9497,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 		ccConsole::Error(tr("Select at least one cloud"));
 		return;
 	}
-		
+
 	ccPrimitiveDistanceDlg pDD{ this };
 
 	static bool s_treatPlanesAsBounded = false;
@@ -10301,7 +10301,7 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 {
 	//we simply update the fullscreen action method icon (whatever the window)
 	ccGLWindowInterface* win = getActiveGLWindow();
-	
+
 	if (win == nullptr)
 		return;
 
@@ -10389,7 +10389,7 @@ void MainWindow::addToDB(	const QStringList& filenames,
 					}
 				}
 			}
-			
+
 			if (destWin)
 			{
 				newGroup->setDisplay_recursive(destWin);
@@ -10442,18 +10442,18 @@ void MainWindow::closeAll()
 	{
 		return;
 	}
-	
+
 	QMessageBox message_box( QMessageBox::Question,
 							 tr("Close all"),
 							 tr("Are you sure you want to remove all loaded entities?"),
 							 QMessageBox::Yes | QMessageBox::No,
 							 this );
-	
+
 	if (message_box.exec() == QMessageBox::No)
 	{
 		return;
 	}
-	
+
 	m_ccRoot->unloadAll();
 
 	redrawAll(false);
@@ -10470,12 +10470,12 @@ void MainWindow::doActionLoadFile()
 	// Add all available file I/O filters (with import capabilities)
 	const QStringList filterStrings = FileIOFilter::ImportFilterList();
 	const QString &allFilter = filterStrings.at( 0 );
-	
+
 	if ( !filterStrings.contains( currentOpenDlgFilter ) )
 	{
 		currentOpenDlgFilter = allFilter;
 	}
-	
+
 	//file choosing dialog
 	QStringList selectedFiles = QFileDialog::getOpenFileNames(	this,
 																tr("Open file(s)"),
@@ -10496,7 +10496,7 @@ void MainWindow::doActionLoadFile()
 	{
 		currentOpenDlgFilter.clear(); //this way FileIOFilter will try to guess the file type automatically!
 	}
-	
+
 	//load files
 	addToDB(selectedFiles, currentOpenDlgFilter);
 }
@@ -10698,7 +10698,7 @@ void MainWindow::doActionSaveFile()
 	//default output path (+ filename)
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 	QString fullPathName = currentPath;
-	
+
 	if (haveOneSelection())
 	{
 		//hierarchy objects have generally as name: 'filename.ext (fullpath)'
@@ -11101,17 +11101,17 @@ void MainWindow::update3DViewsMenu()
 		m_UI->menu3DViews->addAction(separator);
 
 		int i = 0;
-		
+
 		for ( QMdiSubWindow* window : windows )
 		{
 			ccGLWindowInterface *child = ccGLWindowInterface::FromWidget(window->widget());
 
 			QString text = QString("&%1 %2").arg(++i).arg(child->getWindowTitle());
 			QAction *action = m_UI->menu3DViews->addAction(text);
-			
+
 			action->setCheckable(true);
 			action->setChecked(child == getActiveGLWindow());
-			
+
 			connect(action, &QAction::triggered, this, [=] () {
 				setActiveSubWindow( window );
 			} );

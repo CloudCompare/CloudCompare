@@ -140,7 +140,7 @@ namespace copc
 		void getChunkIntervalsSet(std::vector<std::reference_wrapper<ChunkInterval>>& sortedChunkIntervalSet, uint64_t& estimatedPointCount);
 
 		/// Recurse COPC octree and create some LOD levels matching the hierachy
-		std::vector<ccGenericPointCloudLOD::Level> createLODLevels() const;
+		std::vector<ccAbstractPointCloudLOD::Level> createLODLevels() const;
 
 	  public: // static methods
 		/// Check if the file has the potential to contain a COPC structure

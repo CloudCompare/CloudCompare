@@ -1,34 +1,37 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccPointCloudLOD.h"
 
 // Local
+#include "ccFrustum.h"
 #include "ccGenericGLDisplay.h"
+#include "ccGenericMesh.h"
+#include "ccLog.h"
 #include "ccPointCloud.h"
+#include "ccVBOManager.h"
 
 // Qt
-#include <QAtomicInt>
 #include <QElapsedTimer>
 #include <QThread>
+
+// System
 #include <algorithm>
-#include <cstddef>
-#include <iterator>
-#include <new>
+#include <cstdint>
 #include <vector>
 
 //! Thread for background computation
@@ -80,7 +83,7 @@ class ccPointCloudLODThread : public QThread
 
   protected:
 	//! Fills a node (and returns its relative position) - no recurrence
-	uint8_t fillNode_flat(ccGenericPointCloudLOD::Node& node) const
+	uint8_t fillNode_flat(ccAbstractPointCloudLOD::Node& node) const
 	{
 		assert(m_octree);
 
@@ -137,7 +140,7 @@ class ccPointCloudLODThread : public QThread
 	//! Called by run() before quiting (in case the process has to be aborted)
 	void abortConstruction()
 	{
-		m_lod.setState(ccGenericPointCloudLOD::BROKEN);
+		m_lod.setState(ccAbstractPointCloudLOD::BROKEN);
 		m_octree.clear();
 		m_lod.clearData();
 		m_earlyStop = 0;
@@ -146,7 +149,7 @@ class ccPointCloudLODThread : public QThread
 	// reimplemented from QThread
 	void run() override
 	{
-		m_lod.setState(ccGenericPointCloudLOD::NOT_INITIALIZED);
+		m_lod.setState(ccAbstractPointCloudLOD::NOT_INITIALIZED);
 
 		if (m_earlyStop != 0)
 		{
@@ -162,7 +165,7 @@ class ccPointCloudLODThread : public QThread
 		}
 
 		// reset structure
-		m_lod.setState(ccGenericPointCloudLOD::UNDER_CONSTRUCTION);
+		m_lod.setState(ccAbstractPointCloudLOD::UNDER_CONSTRUCTION);
 		m_lod.clearData();
 
 		ccLog::Print(QString("[LoD] Preparing LoD acceleration structure for cloud '%1' [%2 points]...").arg(m_cloud.getName()).arg(pointCount));
@@ -182,7 +185,7 @@ class ccPointCloudLODThread : public QThread
 				{
 					// not enough memory
 					ccLog::Warning(QString("[LoD] Failed to compute octree on cloud '%1' (not enough memory)").arg(m_cloud.getName()));
-					m_lod.setState(ccGenericPointCloudLOD::BROKEN);
+					m_lod.setState(ccAbstractPointCloudLOD::BROKEN);
 				}
 				else
 				{
@@ -239,7 +242,7 @@ class ccPointCloudLODThread : public QThread
 		// first we allow the division of nodes as deep as possible but with a minimum number of points per cell
 		for (uint8_t currentLevel = 0; currentLevel < m_maxLevel; ++currentLevel)
 		{
-			ccGenericPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+			ccAbstractPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 			if (level.data.empty())
 			{
 				break;
@@ -251,16 +254,16 @@ class ccPointCloudLODThread : public QThread
 			// now we can prepare the next level
 			if (currentLevel + 1 < m_maxLevel)
 			{
-				for (ccGenericPointCloudLOD::Node& node : level.data)
+				for (ccAbstractPointCloudLOD::Node& node : level.data)
 				{
 					// do we need to subdivide this cell?
 					if (node.pointCount > m_maxCountPerCell)
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
-							int32_t                       childNodeIndex = m_lod.newCell(node.level + 1);
-							ccGenericPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
-							childNode.firstCodeIndex                     = node.firstCodeIndex + i;
+							int32_t                        childNodeIndex = m_lod.newCell(node.level + 1);
+							ccAbstractPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
+							childNode.firstCodeIndex                      = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
 							if (m_earlyStop)
@@ -305,20 +308,20 @@ class ccPointCloudLODThread : public QThread
 			biggestLevel = std::min<uint8_t>(biggestLevel, 10);
 			for (uint8_t currentLevel = 0; currentLevel < biggestLevel; ++currentLevel)
 			{
-				ccGenericPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
+				ccAbstractPointCloudLOD::Level& level = m_lod.m_levels[currentLevel];
 				assert(!level.data.empty());
 
 				size_t cellCountBefore = m_lod.m_levels[currentLevel + 1].data.size();
-				for (ccGenericPointCloudLOD::Node& node : level.data)
+				for (ccAbstractPointCloudLOD::Node& node : level.data)
 				{
 					// do we need to subdivide this cell?
 					if (node.childCount == 0 && node.pointCount > 16)
 					{
 						for (uint32_t i = 0; i < node.pointCount;)
 						{
-							int32_t                       childNodeIndex = m_lod.newCell(node.level + 1);
-							ccGenericPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
-							childNode.firstCodeIndex                     = node.firstCodeIndex + i;
+							int32_t                        childNodeIndex = m_lod.newCell(node.level + 1);
+							ccAbstractPointCloudLOD::Node& childNode      = m_lod.node(childNodeIndex, node.level + 1);
+							childNode.firstCodeIndex                      = node.firstCodeIndex + i;
 
 							uint8_t childIndex = fillNode_flat(childNode);
 							if (m_earlyStop)
@@ -350,7 +353,7 @@ class ccPointCloudLODThread : public QThread
 			m_maxLevel = static_cast<uint8_t>(std::max<size_t>(1, m_lod.m_levels.size())) - 1;
 		}
 
-		m_lod.setState(ccGenericPointCloudLOD::INITIALIZED);
+		m_lod.setState(ccAbstractPointCloudLOD::INITIALIZED);
 
 		ccLog::Print(QString("[LoD] Acceleration structure ready for cloud '%1' (max level: %2 / mem. = %3 Mb / duration: %4 s.)")
 		                 .arg(m_cloud.getName())
@@ -369,7 +372,7 @@ class ccPointCloudLODThread : public QThread
 	QAtomicInt               m_earlyStop;
 };
 
-ccGenericPointCloudLOD::ccGenericPointCloudLOD()
+ccAbstractPointCloudLOD::ccAbstractPointCloudLOD()
     : m_indexMap(0)
     , m_lastIndexMap(0)
     , m_state(NOT_INITIALIZED)
@@ -377,15 +380,15 @@ ccGenericPointCloudLOD::ccGenericPointCloudLOD()
 	clearData(); // initializes the root node
 }
 
-ccGenericPointCloudLOD::ccGenericPointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers)
-    : ccGenericPointCloudLOD()
+ccAbstractPointCloudLOD::ccAbstractPointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers)
+    : ccAbstractPointCloudLOD()
 {
 	m_levels = lodLayers;
 }
 
-size_t ccGenericPointCloudLOD::memory() const
+size_t ccAbstractPointCloudLOD::memory() const
 {
-	size_t thisSize = sizeof(ccGenericPointCloudLOD);
+	size_t thisSize = sizeof(ccAbstractPointCloudLOD);
 
 	size_t totalNodeCount = 0;
 	for (size_t i = 0; i < m_levels.size(); ++i)
@@ -398,14 +401,14 @@ size_t ccGenericPointCloudLOD::memory() const
 	return nodesSize + thisSize;
 }
 
-void ccGenericPointCloudLOD::clearData()
+void ccAbstractPointCloudLOD::clearData()
 {
 	m_levels.resize(1);
 	m_levels.front().data.resize(1);
 	m_levels.front().data.front() = Node();
 }
 
-int32_t ccGenericPointCloudLOD::newCell(unsigned char level)
+int32_t ccAbstractPointCloudLOD::newCell(unsigned char level)
 {
 	assert(level != 0);
 	assert(level < m_levels.size());
@@ -417,7 +420,7 @@ int32_t ccGenericPointCloudLOD::newCell(unsigned char level)
 	return static_cast<int32_t>(l.data.size()) - 1;
 }
 
-void ccGenericPointCloudLOD::shrink_to_fit()
+void ccAbstractPointCloudLOD::shrink_to_fit()
 {
 	QMutexLocker locker(&m_mutex);
 
@@ -438,7 +441,7 @@ void ccGenericPointCloudLOD::shrink_to_fit()
 	m_levels.shrink_to_fit();
 }
 
-void ccGenericPointCloudLOD::resetVisibility()
+void ccAbstractPointCloudLOD::resetVisibility()
 {
 	if (m_state != INITIALIZED)
 	{
@@ -457,7 +460,7 @@ void ccGenericPointCloudLOD::resetVisibility()
 	}
 }
 
-uint32_t ccGenericPointCloudLOD::flagVisibility(const ccGLCameraParameters& camera, ccClipPlaneSet* clipPlanes /*=nullptr*/)
+uint32_t ccAbstractPointCloudLOD::flagVisibility(const ccGLCameraParameters& camera, ccClipPlaneSet* clipPlanes /*=nullptr*/)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -544,7 +547,7 @@ void ccInternalPointCloudLOD::clear()
 void ccInternalPointCloudLOD::clearData()
 {
 	// 1 empty (root) node
-	ccGenericPointCloudLOD::clearData();
+	ccAbstractPointCloudLOD::clearData();
 	//+ delete the octree
 	m_octree.clear();
 }
@@ -597,7 +600,7 @@ uint32_t ccInternalPointCloudLOD::addNPointsToIndexMap(Node& node, uint32_t coun
 		{
 			if (node.childIndexes[i] >= 0)
 			{
-				ccGenericPointCloudLOD::Node& childNode = this->node(node.childIndexes[i], node.level + 1);
+				ccAbstractPointCloudLOD::Node& childNode = this->node(node.childIndexes[i], node.level + 1);
 				if (childNode.intersection == Frustum::OUTSIDE)
 					continue;
 				if (childNode.pointCount == childNode.displayedPointCount)
@@ -836,8 +839,8 @@ LODIndexSet& ccInternalPointCloudLOD::getIndexMap(unsigned char level, unsigned&
 }
 
 //! ccNestedOctreePointCloudLOD implementation
-ccNestedOctreePointCloudLOD::ccNestedOctreePointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers)
-    : ccGenericPointCloudLOD(lodLayers){};
+ccNestedOctreePointCloudLOD::ccNestedOctreePointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers)
+    : ccAbstractPointCloudLOD(lodLayers){};
 
 bool ccNestedOctreePointCloudLOD::init(ccPointCloud* cloud)
 {
@@ -982,7 +985,7 @@ LODIndexSet& ccNestedOctreePointCloudLOD::getIndexMap(unsigned char level, unsig
 }
 
 //! ccGenericPointCloudLODVisibilityFlagger implementation
-ccGenericPointCloudLODVisibilityFlagger::ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+ccGenericPointCloudLODVisibilityFlagger::ccGenericPointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
                                                                                  const ccGLCameraParameters& camera,
                                                                                  unsigned char               maxLevel)
     : m_lod(lod)
@@ -1007,7 +1010,7 @@ void ccGenericPointCloudLODVisibilityFlagger::setClipPlanes(const ccClipPlaneSet
 	m_hasClipPlanes = !m_clipPlanes.empty();
 }
 
-void ccGenericPointCloudLODVisibilityFlagger::propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag)
+void ccGenericPointCloudLODVisibilityFlagger::propagateFlag(ccAbstractPointCloudLOD::Node& node, uint8_t flag)
 {
 	node.intersection = flag;
 	if (node.childCount)
@@ -1022,7 +1025,7 @@ void ccGenericPointCloudLODVisibilityFlagger::propagateFlag(ccGenericPointCloudL
 	}
 }
 
-void ccGenericPointCloudLODVisibilityFlagger::clippingIntersection(ccGenericPointCloudLOD::Node& node)
+void ccGenericPointCloudLODVisibilityFlagger::clippingIntersection(ccAbstractPointCloudLOD::Node& node)
 {
 	if (!m_hasClipPlanes)
 	{
@@ -1045,7 +1048,7 @@ void ccGenericPointCloudLODVisibilityFlagger::clippingIntersection(ccGenericPoin
 	}
 }
 
-uint32_t ccGenericPointCloudLODVisibilityFlagger::flag(ccGenericPointCloudLOD::Node& node)
+uint32_t ccGenericPointCloudLODVisibilityFlagger::flag(ccAbstractPointCloudLOD::Node& node)
 {
 	node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
 	if (node.intersection != Frustum::OUTSIDE)
@@ -1091,14 +1094,17 @@ uint32_t ccGenericPointCloudLODVisibilityFlagger::flag(ccGenericPointCloudLOD::N
 }
 
 //! ccNestedOctreePointCloudLODVisibilityFlagger implementation
-ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD&     lod,
+ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
                                                                                            const ccGLCameraParameters& camera,
-                                                                                           unsigned char               maxLevel)
+                                                                                           unsigned char               maxLevel,
+                                                                                           float                       minPxFootprint)
     : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
+    , m_minPxFootprint(minPxFootprint)
+    , m_numVisibleNodes(0)
 {
 }
 
-void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccGenericPointCloudLOD::Node& node)
+void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccAbstractPointCloudLOD::Node& node)
 {
 	if (m_camera.perspective)
 	{
@@ -1119,32 +1125,7 @@ void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccGeneri
 	}
 }
 
-uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::propagateInsideFlag(ccGenericPointCloudLOD::Node& node)
-{
-	node.intersection = Frustum::INSIDE;
-	computeNodeFootprint(node);
-
-	uint32_t visibleCount = node.pointCount;
-	if (node.childCount)
-	{
-		for (int i = 0; i < 8; ++i)
-		{
-			if (node.childIndexes[i] >= 0)
-			{
-				visibleCount += propagateInsideFlag(m_lod.node(node.childIndexes[i], node.level + 1));
-			}
-		}
-	}
-
-	if (visibleCount == 0)
-	{
-		node.intersection = Frustum::OUTSIDE;
-	}
-
-	return visibleCount;
-}
-
-uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccGenericPointCloudLOD::Node& node)
+uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccAbstractPointCloudLOD::Node& node)
 {
 	node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
 	if (node.intersection != Frustum::OUTSIDE)
@@ -1152,17 +1133,23 @@ uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccGenericPointCloudL
 		clippingIntersection(node);
 	}
 
+	if (node.intersection != Frustum::OUTSIDE)
+	{
+		computeNodeFootprint(node);
+		if (node.score < m_minPxFootprint)
+		{
+			// A dedicated flag could be used for that to improve semantic meaning.
+			// and it's needed in the PoC of hybrid LOD (VBO+IndexMap)
+			node.intersection = Frustum::OUTSIDE;
+		}
+	}
+
 	uint32_t visibleCount = 0;
 	switch (node.intersection)
 	{
 	case Frustum::INSIDE:
-		visibleCount += propagateInsideFlag(node);
-		break;
-
 	case Frustum::INTERSECT:
-		computeNodeFootprint(node);
 		visibleCount += node.pointCount;
-
 		if (node.level < m_maxLevel && node.childCount)
 		{
 			for (int i = 0; i < 8; ++i)
@@ -1172,20 +1159,297 @@ uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccGenericPointCloudL
 					visibleCount += flag(m_lod.node(node.childIndexes[i], node.level + 1));
 				}
 			}
-
-			if (visibleCount == 0)
-			{
-				node.intersection = Frustum::OUTSIDE;
-			}
 		}
 		break;
-
 	case Frustum::OUTSIDE:
 		propagateFlag(node, Frustum::OUTSIDE);
 		break;
 	}
 
 	return visibleCount;
+}
+
+void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentDisplay)
+{
+	if (managerState == ccAbstractVBOManager::NEW)
+		return;
+
+	if (currentDisplay)
+	{
+		for (auto& level : m_levels)
+		{
+			for (auto& node : level.data)
+			{
+				if (node.vbo)
+				{
+					node.vbo->destroy();
+					delete node.vbo;
+					node.vbo = nullptr;
+				}
+			}
+		} //'destroy' all vbos
+	}
+	else
+	{
+		assert(false);
+	}
+
+	hasColors         = false;
+	hasNormals        = false;
+	colorIsSF         = false;
+	sourceSF          = nullptr;
+	totalMemSizeBytes = 0;
+	managerState      = ccAbstractVBOManager::NEW;
+};
+
+bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+{
+	// TODO: the necessary checks for LOD datastructure
+	if (m_state != INITIALIZED)
+	{
+		// this is unlikely to happen
+		assert(false);
+		managerState = ccAbstractVBOManager::FAILED;
+		return false;
+	}
+
+	if (managerState == ccAbstractVBOManager::INITIALIZED)
+	{
+		// let's check if something has changed
+		if (glParams.showColors && (!hasColors || colorIsSF))
+		{
+			updateFlags |= UPDATE_COLORS;
+		}
+
+		if (glParams.showSF
+		    && (!hasColors
+		        || !colorIsSF
+		        || sourceSF != pc->m_currentDisplayedScalarField
+		        || pc->m_currentDisplayedScalarField->getModificationFlag() == true))
+		{
+			updateFlags |= UPDATE_COLORS;
+		}
+
+		if (glParams.showNorms && !hasNormals)
+		{
+			updateFlags |= UPDATE_NORMALS;
+		}
+		// nothing to do?
+		if (updateFlags == 0) // DO NOTHING
+		{
+			// return true;
+		}
+	}
+	else
+	{
+		updateFlags = ccAbstractVBOManager::UPDATE_ALL;
+	}
+
+	// DGM: the context should be already active as this method should only be called from 'PointCloud::drawMeOnly'
+	assert(!glParams.showSF || pc->m_currentDisplayedScalarField);
+
+	hasColors  = glParams.showSF || glParams.showColors;
+	colorIsSF  = glParams.showSF;
+	sourceSF   = glParams.showSF ? pc->m_currentDisplayedScalarField : nullptr;
+	hasNormals = glParams.showNorms;
+
+	size_t totalSizeBytesBefore = totalMemSizeBytes;
+	totalMemSizeBytes           = 0;
+
+	for (size_t levelID = 0; levelID < m_levels.size(); levelID++)
+	{
+		auto& l = m_levels[levelID];
+		for (size_t i = 0; i < l.data.size(); ++i)
+		{
+			Node& node = l.data[i];
+			// check if the node is intersected or inside the frustum
+			// and if it has data to render
+			if (node.intersection == Frustum::OUTSIDE || !node.pointCount)
+			{
+				if (node.vbo)
+				{
+					node.vbo->destroy();
+					delete node.vbo;
+					node.vbo = nullptr;
+				}
+				continue;
+			}
+
+			int  nodeUpdateFlags = updateFlags;
+			bool reallocated     = false;
+
+			if (!node.vbo)
+			{
+				node.vbo = new ccVBO;
+			}
+
+			ccVBO* currentVBO   = node.vbo;
+			int    vboSizeBytes = currentVBO->init(node.pointCount, hasColors, hasNormals, &reallocated);
+
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+			if (glFunc)
+			{
+				CatchGLErrors(glFunc->glGetError(), "ccPointCloudLOD::vbo.init");
+			}
+
+			if (vboSizeBytes > 0)
+			{
+				if (reallocated)
+				{
+					// if the vbo is reallocated, then all its content has been cleared!
+					nodeUpdateFlags = UPDATE_ALL;
+				}
+
+				currentVBO->bind();
+
+				// load points
+				if (nodeUpdateFlags & UPDATE_POINTS)
+				{
+					currentVBO->write(0, pc->m_points[node.firstCodeIndex].u, sizeof(PointCoordinateType) * node.pointCount * 3);
+				}
+				// load colors
+				if (nodeUpdateFlags & UPDATE_COLORS)
+				{
+					if (glParams.showSF)
+					{
+						// copy SF colors in static array
+						{
+							assert(sourceSF);
+							ColorCompType* _sfColors  = ccPointCloud::s_rgbBuffer4ub;
+							size_t         chunkStart = static_cast<size_t>(node.firstCodeIndex);
+							for (uint32_t j = 0; j < node.pointCount; j++)
+							{
+								ScalarType sfValue = sourceSF->getValue(chunkStart++);
+								// we need to convert scalar value to color into a temporary structure
+								const ccColor::Rgb* col = sourceSF->getColor(sfValue);
+								if (!col)
+									col = &ccColor::lightGreyRGB;
+								*_sfColors++ = col->r;
+								*_sfColors++ = col->g;
+								*_sfColors++ = col->b;
+								*_sfColors++ = ccColor::MAX;
+							}
+						}
+						// then send them in VRAM
+						currentVBO->write(currentVBO->rgbShift, ccPointCloud::s_rgbBuffer4ub, sizeof(ColorCompType) * node.pointCount * 4);
+						// upadte 'modification' flag for current displayed SF
+						sourceSF->setModificationFlag(false);
+					}
+					else if (glParams.showColors)
+					{
+						currentVBO->write(currentVBO->rgbShift, pc->m_rgbaColors->data() + node.firstCodeIndex, sizeof(ColorCompType) * node.pointCount * 4);
+					}
+				}
+				// load normals
+				if (glParams.showNorms && (nodeUpdateFlags & UPDATE_NORMALS))
+				{
+					assert(pc->m_normals && glFunc);
+
+					// compressed normals set
+					const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+
+					// compressed normals set
+					const CompressedNormType* _normalsIndexes = pc->m_normals->data() + node.firstCodeIndex;
+					PointCoordinateType*      outNorms        = ccPointCloud::s_normalBuffer;
+					for (uint32_t j = 0; j < node.pointCount; ++j)
+					{
+						const CCVector3& N = ccNormalVectors::GetNormal(*_normalsIndexes++);
+						*(outNorms)++      = N.x;
+						*(outNorms)++      = N.y;
+						*(outNorms)++      = N.z;
+					}
+					currentVBO->write(currentVBO->normalShift, ccPointCloud::s_normalBuffer, sizeof(PointCoordinateType) * node.pointCount * 3);
+				}
+				currentVBO->release();
+
+				// if an error is detected
+				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+				assert(glFunc != nullptr);
+				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
+				{
+					vboSizeBytes = -1;
+				}
+				else
+				{
+					totalMemSizeBytes += static_cast<size_t>(vboSizeBytes);
+				}
+			}
+
+			if (vboSizeBytes < 0) // VBO initialization failed
+			{
+				currentVBO->destroy();
+				delete currentVBO;
+				currentVBO = nullptr;
+
+				// we can stop here
+				managerState = ccAbstractVBOManager::FAILED;
+				return false;
+			}
+			currentVBO->pointCount = node.pointCount;
+		}
+	}
+	managerState = ccAbstractVBOManager::INITIALIZED;
+	updateFlags  = 0;
+
+	return true;
+}
+
+bool ccNestedOctreePointCloudLOD::renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+{
+	if (m_state != INITIALIZED)
+	{
+		// this is unlikely to happen
+		assert(false);
+		managerState = ccAbstractVBOManager::FAILED;
+	}
+
+	if (managerState == ccAbstractVBOManager::FAILED)
+	{
+		return false;
+	}
+
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+	for (size_t levelID = 0; levelID < m_levels.size(); levelID++)
+	{
+		auto& l = m_levels[levelID];
+		for (size_t i = 0; i < l.data.size(); ++i)
+		{
+			Node& node = l.data[i];
+			// check if the node is intersected or inside the frustum
+			// and if it has data to render
+			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo)
+				continue;
+
+			if (node.vbo->bind())
+			{
+				const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
+				glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
+
+				if (glParams.showNorms)
+				{
+					int normalDataShift = node.vbo->normalShift;
+					glFunc->glNormalPointer(GL_FLOAT, 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
+				}
+
+				if (glParams.showColors || glParams.showSF)
+				{
+					int colorDataShift = node.vbo->rgbShift;
+					glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
+				}
+				node.vbo->release();
+				// we can use VBOs directly
+				glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount));
+			}
+			else
+			{
+				ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+				managerState = ccAbstractVBOManager::FAILED;
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 #include "ccPointCloudLOD.moc"

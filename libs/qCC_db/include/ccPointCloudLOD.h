@@ -1,26 +1,27 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 // qCC_db
 #include "ccOctree.h"
 #include "ccFrustum.h"
 #include "ccGenericGLDisplay.h"
+#include "ccVBOManager.h"
 
 // Qt
 #include <QMutex>
@@ -30,7 +31,6 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
-#include <qwindow.h>
 
 class ccPointCloud;
 class ccPointCloudLODThread;
@@ -61,7 +61,7 @@ struct LODLevelDesc
 typedef std::vector<unsigned> LODIndexSet;
 
 //! L.O.D. (Level of Detail) structure
-class ccGenericPointCloudLOD
+class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 {
   public:
 	//! Structure initialization state
@@ -74,10 +74,10 @@ class ccGenericPointCloudLOD
 	};
 
 	//! Default constructor
-	ccGenericPointCloudLOD();
+	ccAbstractPointCloudLOD();
 
 	//! Destructor
-	virtual ~ccGenericPointCloudLOD() = default;
+	virtual ~ccAbstractPointCloudLOD() = default;
 
 	//! Octree 'tree' node
 	struct Node
@@ -90,6 +90,7 @@ class ccGenericPointCloudLOD
 		float                  score;               //  4 bytes
 		uint32_t               firstCodeIndex;      //  4 bytes
 		uint32_t               displayedPointCount; //  4 bytes
+		ccVBO*                 vbo;                 // 4 bytes
 		uint8_t                level;               //  1 byte
 		uint8_t                childCount;          //  1 byte
 		uint8_t                intersection;        //  1 byte
@@ -105,6 +106,7 @@ class ccGenericPointCloudLOD
 		    , firstCodeIndex(0)
 		    , score(0)
 		    , displayedPointCount(0)
+		    , vbo(nullptr)
 		    , level(_level)
 		    , childCount(0)
 		    , intersection(UNDEFINED)
@@ -118,23 +120,11 @@ class ccGenericPointCloudLOD
 		std::vector<Node> data;
 	};
 
-	//! Locks the structure
-	inline void lock() const
-	{
-		m_mutex.lock();
-	}
-	//! Unlocks the structure
-	inline void unlock() const
-	{
-		m_mutex.unlock();
-	}
-
 	//! Returns the current state
 	inline State getState() const
 	{
-		lock();
-		State state = m_state;
-		unlock();
+		QMutexLocker locker(&m_mutex);
+		State        state = m_state;
 		return state;
 	}
 
@@ -200,10 +190,18 @@ class ccGenericPointCloudLOD
 		return node(0, 0);
 	}
 
+	virtual bool useVBO() = 0;
+
+	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override = 0;
+
+	virtual bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
+
+	virtual bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
+
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
 	 **/
-	uint32_t flagVisibility(const ccGLCameraParameters& frustum, ccClipPlaneSet* clipPlanes = nullptr);
+	virtual uint32_t flagVisibility(const ccGLCameraParameters& frustum, ccClipPlaneSet* clipPlanes = nullptr);
 
 	//! Builds an index map with the remaining visible points
 	virtual LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) = 0;
@@ -225,17 +223,16 @@ class ccGenericPointCloudLOD
 
   protected: // methods
 	//! Constructor with provided Lod levels
-	ccGenericPointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers);
+	ccAbstractPointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
 
 	//! Factory to create the  visibilityFlagger (avoid templating)
-	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) = 0;
+	virtual std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) = 0;
 
 	//! Sets the current state
 	inline void setState(State state)
 	{
-		lock();
+		QMutexLocker locker(&m_mutex);
 		m_state = state;
-		unlock();
 	}
 
 	//! Clears the internal (nodes) data
@@ -302,26 +299,26 @@ class ccGenericPointCloudLOD
 class ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-    ccGenericPointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
-                                            const ccGLCameraParameters& camera,
-                                            unsigned char maxLevel);
+	ccGenericPointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&     lod,
+	                                        const ccGLCameraParameters& camera,
+	                                        unsigned char               maxLevel);
 
-    //! Sets custom clip planes for additional visibility constraints.
-    void setClipPlanes(const ccClipPlaneSet& clipPlanes);
-    //! brief Determines whether a node is intersected by the clipping planes.
-    void clippingIntersection(ccGenericPointCloudLOD::Node& node);
-    //! Propagates a visibility flag to a node and its children.
-    void propagateFlag(ccGenericPointCloudLOD::Node& node, uint8_t flag);
-    //! Flags the visibility status of a node based on frustum culling and clipping planes.
-    virtual uint32_t flag(ccGenericPointCloudLOD::Node& node);
+	//! Sets custom clip planes for additional visibility constraints.
+	void setClipPlanes(const ccClipPlaneSet& clipPlanes);
+	//! brief Determines whether a node is intersected by the clipping planes.
+	void clippingIntersection(ccAbstractPointCloudLOD::Node& node);
+	//! Propagates a visibility flag to a node and its children.
+	void propagateFlag(ccAbstractPointCloudLOD::Node& node, uint8_t flag);
+	//! Flags the visibility status of a node based on frustum culling and clipping planes.
+	virtual uint32_t flag(ccAbstractPointCloudLOD::Node& node);
 
   protected:
-    ccGenericPointCloudLOD&     m_lod;
-    const ccGLCameraParameters& m_camera;
-    Frustum                     m_frustum;
-    unsigned char               m_maxLevel;
-    ccClipPlaneSet              m_clipPlanes;
-    bool                        m_hasClipPlanes;
+	ccAbstractPointCloudLOD&     m_lod;
+	const ccGLCameraParameters& m_camera;
+	Frustum                     m_frustum;
+	unsigned char               m_maxLevel;
+	ccClipPlaneSet              m_clipPlanes;
+	bool                        m_hasClipPlanes;
 };
 
 //! A specialized visibility flagger that prioritizes nodes based on their projected screen footprint.
@@ -333,21 +330,26 @@ class ccGenericPointCloudLODVisibilityFlagger
 class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-    ccNestedOctreePointCloudLODVisibilityFlagger(ccGenericPointCloudLOD& lod,
-                                                 const ccGLCameraParameters& camera,
-                                                 unsigned char maxLevel);
-    ~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
+	ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&     lod,
+	                                             const ccGLCameraParameters& camera,
+	                                             unsigned char               maxLevel,
+	                                             float                       minPxFootprint);
+	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
 
-    //! Computes the projected screen-space footprint of a node.
-    void computeNodeFootprint(ccGenericPointCloudLOD::Node& node);
-    //! dedicated function for INSIDE flag propagation
-    uint32_t propagateInsideFlag(ccGenericPointCloudLOD::Node& node);
-    //! override
-    uint32_t flag(ccGenericPointCloudLOD::Node& node) override;
+	//! Computes the projected screen-space footprint of a node.
+	void computeNodeFootprint(ccAbstractPointCloudLOD::Node& node);
+	//! dedicated function for INSIDE flag propagation
+	uint32_t propagateInsideFlag(ccAbstractPointCloudLOD::Node& node);
+	//! override
+	uint32_t flag(ccAbstractPointCloudLOD::Node& node) override;
+
+  private:
+	float    m_minPxFootprint;
+	uint32_t m_numVisibleNodes;
 };
 
 //! The "original" CloudCompare LOD
-class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
+class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 {
   public: // methods
 	ccInternalPointCloudLOD();
@@ -361,12 +363,25 @@ class ccInternalPointCloudLOD : public ccGenericPointCloudLOD
 
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
+	bool useVBO() override
+	{
+		return false;
+	}
+
+	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override{};
+
+	bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override
+	{
+		return false;
+	};
+	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return  true;};
+
   protected: // methods
 	//! cleanData override
 	void clearData() override;
 
 	//! Return sthe flagger used by this LOD
-	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{
 		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, camera, maxLevel);
 	}
@@ -403,12 +418,12 @@ in computation and file I/O.
 
 It assumes the point cloud is organized by chunks.
 */
-class ccNestedOctreePointCloudLOD : public ccGenericPointCloudLOD
+class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 {
   public: // methods
 	ccNestedOctreePointCloudLOD() = default;
 
-	ccNestedOctreePointCloudLOD(const std::vector<ccGenericPointCloudLOD::Level>& lodLayers);
+	ccNestedOctreePointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
 
 	~ccNestedOctreePointCloudLOD() = default;
 
@@ -418,9 +433,19 @@ class ccNestedOctreePointCloudLOD : public ccGenericPointCloudLOD
 
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
-  protected: // methods
-	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccGenericPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
+	bool useVBO() override
 	{
-		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel);
+		return true;
+	}
+
+	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
+
+	bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+
+	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+  protected: // methods
+	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
+	{
+		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel, 75.0);
 	}
 };

@@ -17,7 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccPointCloudLOD.h"
 #include <vector>
 #ifdef _MSC_VER
 //To get rid of the warnings about dominant inheritance
@@ -28,8 +27,8 @@
 #include <PointCloudTpl.h>
 
 //Local
+#include "ccPointCloudLOD.h"
 #include "ccColorScale.h"
-#include "ccVBOManager.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
 
@@ -38,7 +37,8 @@ class ccPolyline;
 class ccMesh;
 class QOpenGLBuffer;
 class ccProgressDialog;
-class ccGenericPointCloudLOD;
+class ccPointCloudVBOManager;
+class ccAbstractPointCloudLOD;
 
 /***************************************************
 				ccPointCloud
@@ -161,11 +161,11 @@ public: //features deletion/clearing
 	void unallocateNorms();
 
 	//! Notify a modification of color / scalar field display parameters or contents
-	inline void colorsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_COLORS; }
+	inline void colorsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS; }
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_NORMALS; decompressNormals();}
+	inline void normalsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS; decompressNormals();}
 	//! Notify a modification of points display parameters or contents
-	inline void pointsHaveChanged() { m_vboManager.updateFlags |= ccVBOManager::UPDATE_POINTS; }
+	inline void pointsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS; }
 
 public: //features allocation/resize
 
@@ -810,7 +810,7 @@ public: //other methods
 	bool exportNormalToSF(bool exportDims[3]);
 
 	//! Release VBOs
-	void releaseVBOs();
+	void releaseAllVBOs();
 
 	//! Returns the VBOs size (if any)
 	size_t vboSize() const;
@@ -871,13 +871,10 @@ protected: // variable members
 	**/
 	bool m_visibilityCheckEnabled;
 
-protected: // VBO
-
-	//! Init/updates VBOs
-	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
+protected: // VBO, rendering
 
 	//! Set of VBOs attached to this cloud
-	ccVBOManager m_vboManager;
+	ccPointCloudVBOManager * m_vboManager;
 
 	//per-block data transfer to the GPU (VBO or standard mode)
 	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
@@ -887,13 +884,29 @@ protected: // VBO
 
 public: //Level of Detail (LOD)
 
+	//! Maximum number of points (per cloud) displayed in a single LOD iteration
+	//! warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+	#ifdef _DEBUG
+	static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 16); //~ 64K
+	#else
+	static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 19); //~ 512K
+	#endif
+
+	//! Vertex indexes for OpenGL "arrays" drawing
+	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+	static ColorCompType       s_rgbBuffer4ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4];
+	static float               s_rgbBuffer3f[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+
+	friend ccPointCloudVBOManager;
+	friend ccNestedOctreePointCloudLOD;
 	//! Initializes the LOD structure
 	/** \return success
 	**/
 	bool initLOD();
 
 	//! Initializes a LOD from an externally created data structure
-	bool initLOD(std::vector<ccGenericPointCloudLOD::Level>);
+	bool initLOD(std::vector<ccAbstractPointCloudLOD::Level>);
 
 	//! Clears the LOD structure
 	void clearLOD();
@@ -910,7 +923,7 @@ public: //Level of Detail (LOD)
 protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
-	ccGenericPointCloudLOD* m_lod;
+	ccAbstractPointCloudLOD* m_lod;
 
 	//! Boolean flag indicating whether this specific cloud should
 	//! be rendered using the LOD mechanism. (see its usage in DrawMeOnly)

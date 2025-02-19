@@ -113,6 +113,7 @@ class LasOpenDialog : public QDialog
 
 	bool shouldSkipDialog() const;
 
+
   private:
 	bool isChecked(const LasScalarField& lasScalarField) const;
 

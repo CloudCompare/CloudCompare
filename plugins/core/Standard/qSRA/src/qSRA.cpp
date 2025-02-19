@@ -42,9 +42,7 @@
 #include <ccScalarField.h>
 
 //System
-#include <string.h>
-#include <algorithm>
-#include <vector>
+#include <cstring>
 
 qSRA::qSRA(QObject* parent/*=nullptr*/)
 	: QObject(parent)
@@ -508,7 +506,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 			{
 				QString message = QString("Cloud has no '%1' field and no active scalar field!").arg(RADIAL_DIST_SF_NAME);
 				ccLog::Error(message);
-				
+
 				//additional indications
 				if (m_doCompareCloudToProfile)
 				{

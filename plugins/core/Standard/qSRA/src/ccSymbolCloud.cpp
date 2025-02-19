@@ -3,6 +3,9 @@
 //qCC_db
 #include <ccGenericGLDisplay.h>
 
+//QT
+#include <QFontMetrics>
+
 ccSymbolCloud::ccSymbolCloud(QString name/*=QString()*/)
 	: ccPointCloud(name)
 	, m_symbolSize(10.0)
@@ -17,10 +20,10 @@ bool ccSymbolCloud::reserve(unsigned numberOfPoints)
 {
 	if (!ccPointCloud::reserve(numberOfPoints))
 		return false;
-	
+
 	if (m_labels.size())
 		return reserveLabelArray(numberOfPoints);
-	
+
 	return true;
 }
 
@@ -28,10 +31,10 @@ bool ccSymbolCloud::resize(unsigned numberOfPoints)
 {
 	if (!ccPointCloud::resize(numberOfPoints))
 		return false;
-	
+
 	if (m_labels.size())
 		return resizeLabelArray(numberOfPoints);
-	
+
 	return true;
 }
 
@@ -90,7 +93,7 @@ QString ccSymbolCloud::getLabel(unsigned index) const
 	{
 		return m_labels[index];
 	}
-	
+
 	return QString();
 }
 
@@ -188,7 +191,7 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			color = &m_tempColor;
 			glParams.showColors = false;
 		}
-		
+
 		unsigned numberOfPoints = size();
 
 		//viewport parameters (will be used to project 3D positions to 2D)

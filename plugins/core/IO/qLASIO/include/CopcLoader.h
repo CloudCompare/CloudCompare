@@ -188,7 +188,6 @@ namespace copc
 			return m_chunkIntervalsHierarchy.count(VoxelKey::Root());
 		}
 
-	  private: // static members
 	  private: // members
 		bool           m_isValid{false};
 		int32_t        m_maxLevel{0};

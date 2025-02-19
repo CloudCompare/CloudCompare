@@ -10,6 +10,12 @@ New features:
 	- Edit > Color > Mean filter
 		- to improve coloring by applying a color filter
 
+	- New entity: Circle
+		- specific polyline that is currently the result of the 'Tools > Fit > Circle' method
+		- the user can control the radius and the display resolution
+		- New method: 'Edit > Circle > Promote to Cylinder'
+			-can be used on a Circle entity to derive a cylinder from it (CC will simply ask for the cylinder height)
+
 	- New Command line options
 		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -SIGMA {sigma} -SIGMA_SF {sigma_sf} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
 			- command arguments with a dash can be in any order
@@ -148,6 +154,10 @@ Improvements:
 		- general improvement, with a better behavior when changing the active scalar field, the name of a class,
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
+
+	- TreeIso plugin
+		- updated version, faster and more robust
+		- detection of ill-formed clouds (i.e. with ground points for instance)
 
 	- 'Tools > Batch export'
 		- the 'Export cloud info' and 'Export plane info' tools will now also export the center global coordinates

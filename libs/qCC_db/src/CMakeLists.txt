@@ -8,6 +8,7 @@ target_sources( ${PROJECT_NAME}
 	    ${CMAKE_CURRENT_LIST_DIR}/ccBBox.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccBox.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccCameraSensor.cpp
+		${CMAKE_CURRENT_LIST_DIR}/ccCircle.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccClipBox.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccColorRampShader.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccColorScale.cpp

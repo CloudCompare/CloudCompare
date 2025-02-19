@@ -5566,15 +5566,17 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, m_points));
 
+			VBO* currentVBO = m_vboManager.vbos[chunkIndex];
+
 			int chunkUpdateFlags = m_vboManager.updateFlags;
 			bool reallocated = false;
-			if (!m_vboManager.vbos[chunkIndex])
+			if (!currentVBO)
 			{
-				m_vboManager.vbos[chunkIndex] = new VBO;
+				currentVBO = new VBO;
 			}
 
 			//allocate memory for current VBO
-			int vboSizeBytes = m_vboManager.vbos[chunkIndex]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
+			int vboSizeBytes = currentVBO->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
 
 			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 			if (glFunc)
@@ -5592,12 +5594,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 					chunkUpdateFlags = vboSet::UPDATE_ALL;
 				}
 
-				m_vboManager.vbos[chunkIndex]->bind();
+				currentVBO->bind();
 
 				//load points
 				if (chunkUpdateFlags & vboSet::UPDATE_POINTS)
 				{
-					m_vboManager.vbos[chunkIndex]->write(0, ccChunk::Start(m_points, chunkIndex), sizeof(PointCoordinateType)*chunkSize * 3);
+					currentVBO->write(0, ccChunk::Start(m_points, chunkIndex), sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 				//load colors
 				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
@@ -5638,13 +5640,13 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 							}
 						}
 						//then send them in VRAM
-						m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->rgbShift, s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
 						//upadte 'modification' flag for current displayed SF
 						m_vboManager.sourceSF->setModificationFlag(false);
 					}
 					else if (glParams.showColors)
 					{
-						m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->rgbShift, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
 					}
 				}
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
@@ -5661,10 +5663,10 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 						*(outNorms)++ = N.y;
 						*(outNorms)++ = N.z;
 					}
-					m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->normalShift, s_normalBuffer, sizeof(PointCoordinateType)*chunkSize * 3);
+					currentVBO->write(currentVBO->normalShift, s_normalBuffer, sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 #endif
-				m_vboManager.vbos[chunkIndex]->release();
+				currentVBO->release();
 
 				//if an error is detected
 				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -5682,9 +5684,9 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 
 			if (vboSizeBytes < 0) //VBO initialization failed
 			{
-				m_vboManager.vbos[chunkIndex]->destroy();
-				delete m_vboManager.vbos[chunkIndex];
-				m_vboManager.vbos[chunkIndex] = nullptr;
+				currentVBO->destroy();
+				delete currentVBO;
+				currentVBO = nullptr;
 
 				//we can stop here
 				if (chunkIndex == 0)
@@ -5749,7 +5751,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 			return -1;
 		}
 
-		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
+		setUsagePattern(QOpenGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
 													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
 	}
 

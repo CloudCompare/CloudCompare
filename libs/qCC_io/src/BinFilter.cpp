@@ -26,6 +26,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccFacet.h>
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>

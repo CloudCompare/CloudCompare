@@ -345,6 +345,12 @@
      <addaction name="actionCreateSinglePointCloud"/>
      <addaction name="actionPasteCloudFromClipboard"/>
     </widget>
+    <widget class="QMenu" name="menuCircle">
+     <property name="title">
+      <string>Circle</string>
+     </property>
+     <addaction name="actionPromoteCircleToCylinder"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
@@ -353,6 +359,7 @@
     <addaction name="menuMesh"/>
     <addaction name="menuPolyline"/>
     <addaction name="menuPlane"/>
+    <addaction name="menuCircle"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
     <addaction name="menuWaveform"/>
@@ -3263,6 +3270,15 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionPromoteCircleToCylinder">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/primCylinder.gif</normaloff>:/CC/images/primCylinder.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Promote to cylinder</string>
    </property>
   </action>
  </widget>

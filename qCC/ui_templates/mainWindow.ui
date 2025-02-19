@@ -823,10 +823,10 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>&amp;Open</string>
    </property>
    <property name="toolTip">
-    <string>Open one or severa files</string>
+    <string>Open one or several files</string>
    </property>
    <property name="statusTip">
-    <string>Open one or severa files</string>
+    <string>Open one or several files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>

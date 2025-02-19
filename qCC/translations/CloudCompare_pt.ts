@@ -8464,7 +8464,7 @@ The active scalar field should have integer values.</source>
     <message>
         <location filename="../ui_templates/mainWindow.ui" line="819"/>
         <location filename="../ui_templates/mainWindow.ui" line="822"/>
-        <source>Open one or severa files</source>
+        <source>Open one or several files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

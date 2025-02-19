@@ -155,6 +155,10 @@ Improvements:
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
 
+	- TreeIso plugin
+		- updated version, faster and more robust
+		- detection of ill-formed clouds (i.e. with ground points for instance)
+
 	- 'Tools > Batch export'
 		- the 'Export cloud info' and 'Export plane info' tools will now also export the center global coordinates
 			(in case the clouds or planes have been shifted to a local coordinate system)

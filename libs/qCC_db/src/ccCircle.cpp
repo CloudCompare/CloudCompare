@@ -62,13 +62,15 @@ ccCircle* ccCircle::clone() const
 
 void ccCircle::applyGLTransformation(const ccGLMatrix& trans)
 {
-	//transparent call
+	//we call the ccHObject method instead of the ccPolyline one,
+	//to only update the transformation history matrix, and not
+	//trigger any coordinate modification
 	ccHObject::applyGLTransformation(trans);
 
+	//now we can update the vertices
 	updateInternalRepresentation();
 
 	//invalidate the bounding-box
-	//(and we hope the vertices will be updated as well!)
 	invalidateBoundingBox();
 }
 

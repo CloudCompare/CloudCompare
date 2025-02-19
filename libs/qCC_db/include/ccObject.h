@@ -70,7 +70,7 @@ enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATH
 #define CC_RGBA_COLOR_BIT				0x00000400000000	//Color (R,G,B,A)
 #define CC_COORDINATESYSTEM_BIT			0x00000800000000	//CoordinateSystem (primitive)
 #define CC_CLIP_BOX_PART_BIT			0x00001000000000	//Cliping-box component
-#define CC_CIRCLE_BIT					0x00002000000000	//'3D' circle (primitive)
+#define CC_CIRCLE_BIT					0x00002000000000	//'3D' circle (polyline)
 //#define CC_FREE_BIT					0x00004000000000
 //#define CC_FREE_BIT					0x00008000000000
 //#define CC_FREE_BIT					0x00010000000000

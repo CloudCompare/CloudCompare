@@ -872,20 +872,12 @@ protected: // variable members
 	**/
 	bool m_visibilityCheckEnabled;
 
-protected: // VBO, rendering
+public: // VBO, rendering
 
-	//! Set of VBOs attached to this cloud
-	ccPointCloudVBOManager * m_vboManager;
+	//! "Regular" VBO manager
+	friend ccPointCloudVBOManager;
 
-	//per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-
-public: //Level of Detail (LOD)
-
-	//! Maximum number of points (per cloud) displayed in a single LOD iteration
+    //! Maximum number of points (per cloud) displayed in a single transfert iteration
 	//! warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
 	#ifdef _DEBUG
 	static constexpr unsigned SIZE_POWER = 16; //1 << SIZE_POWER ~ 64K
@@ -903,8 +895,22 @@ public: //Level of Detail (LOD)
 
 	using ccChunk = ccChunkN<19>;
 
-	friend ccPointCloudVBOManager;
+protected: // VBO, rendering
+
+	//! Set of VBOs attached to this cloud
+	ccPointCloudVBOManager * m_vboManager;
+
+	//per-block data transfer to the GPU (standard mode)
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);
+	void glChunkColorPointer (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);
+	void glChunkSFPointer    (const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);
+
+public: //Level of Detail (LOD)
+
+	//! NestedOctree VBO manager (and LOD)
 	friend ccNestedOctreePointCloudLOD;
+
 	//! Initializes the LOD structure
 	/** \return success
 	**/

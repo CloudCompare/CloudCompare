@@ -2652,69 +2652,20 @@ PointCoordinateType ccPointCloud::s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_
 ColorCompType       ccPointCloud::s_rgbBuffer4ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4];
 float               ccPointCloud::s_rgbBuffer3f[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
 
-void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-
-	if (useVBOs
-		&&	m_vboManager->managerState == ccAbstractVBOManager::INITIALIZED
-		&&	m_vboManager->vbos.size() > static_cast<size_t>(chunkIndex)
-		&& m_vboManager->vbos[chunkIndex]
-		&& m_vboManager->vbos[chunkIndex]->isCreated())
-	{
-		//we can use VBOs directly
-		if (m_vboManager->vbos[chunkIndex]->bind())
-		{
-			glFunc->glVertexPointer(3, GL_FLOAT, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
-			m_vboManager->vbos[chunkIndex]->release();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager->managerState = ccAbstractVBOManager::FAILED;
-			//recall the method
-			glChunkVertexPointer(context, chunkIndex, decimStep, false);
-		}
-	}
-	else
-	{
-		//standard OpenGL copy
-		glFunc->glVertexPointer(3, GL_FLOAT, decimStep * 3 * sizeof(PointCoordinateType), ccChunk::Start(m_points, chunkIndex));
-	}
+	//standard OpenGL copy
+	glFunc->glVertexPointer(3, GL_FLOAT, decimStep * 3 * sizeof(PointCoordinateType), ccChunk::Start(m_points, chunkIndex));
 }
 
-void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
 	assert(m_normals);
-
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-
-	if (	useVBOs
-		&&	m_vboManager->managerState == ccAbstractVBOManager::INITIALIZED
-		&&	m_vboManager->hasNormals
-		&&	m_vboManager->vbos.size() > static_cast<size_t>(chunkIndex)
-		&&	m_vboManager->vbos[chunkIndex]
-		&&	m_vboManager->vbos[chunkIndex]->isCreated())
-	{
-		//we can use VBOs directly
-		if (m_vboManager->vbos[chunkIndex]->bind())
-		{
-			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
-			int normalDataShift = m_vboManager->vbos[chunkIndex]->normalShift;
-			glFunc->glNormalPointer(GL_FLOAT, decimStep * 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
-			m_vboManager->vbos[chunkIndex]->release();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager->managerState = ccAbstractVBOManager::FAILED;
-			//recall the method
-			glChunkNormalPointer(context, chunkIndex, decimStep, false);
-		}
-	}
-	else if (m_normals)
+	if (m_normals)
 	{
 		//we must decode normals in a dedicated static array
 		PointCoordinateType* _normals = s_normalBuffer;
@@ -2740,38 +2691,14 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 	}
 }
 
-void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
 	assert(m_rgbaColors);
 	assert(sizeof(ColorCompType) == 1);
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-
-	if (useVBOs
-		&&	m_vboManager->managerState == ccAbstractVBOManager::INITIALIZED
-		&&	m_vboManager->hasColors
-		&&	m_vboManager->vbos.size() > static_cast<size_t>(chunkIndex)
-		&& m_vboManager->vbos[chunkIndex]
-		&& m_vboManager->vbos[chunkIndex]->isCreated())
-	{
-		//we can use VBOs directly
-		if (m_vboManager->vbos[chunkIndex]->bind())
-		{
-			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
-			int colorDataShift = m_vboManager->vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, decimStep * 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
-			m_vboManager->vbos[chunkIndex]->release();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager->managerState = ccAbstractVBOManager::FAILED;
-			//recall the method
-			glChunkColorPointer(context, chunkIndex, decimStep, false);
-		}
-	}
-	else if (m_rgbaColors)
+	if (m_rgbaColors)
 	{
 		assert(m_rgbaColors);
 		//standard OpenGL copy
@@ -2783,7 +2710,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	}
 }
 
-void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
 	assert(m_currentDisplayedScalarField);
 	assert(sizeof(ColorCompType) == 1);
@@ -2791,31 +2718,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
-	if (useVBOs
-		&&	m_vboManager->managerState == ccAbstractVBOManager::INITIALIZED
-		&&	m_vboManager->hasColors
-		&&	m_vboManager->vbos.size() > static_cast<size_t>(chunkIndex)
-		&&	m_vboManager->vbos[chunkIndex]
-		&&	m_vboManager->vbos[chunkIndex]->isCreated())
-	{
-		assert(m_vboManager->colorIsSF && m_vboManager->sourceSF == m_currentDisplayedScalarField);
-		//we can use VBOs directly
-		if (m_vboManager->vbos[chunkIndex]->bind())
-		{
-			const GLbyte* start = nullptr; //fake pointer used to prevent warnings on Linux
-			int colorDataShift = m_vboManager->vbos[chunkIndex]->rgbShift;
-			glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, decimStep * 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
-			m_vboManager->vbos[chunkIndex]->release();
-		}
-		else
-		{
-			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-			m_vboManager->managerState = ccAbstractVBOManager::FAILED;
-			//call the method again
-			glChunkSFPointer(context, chunkIndex, decimStep, false);
-		}
-	}
-	else if (m_currentDisplayedScalarField)
+	if (m_currentDisplayedScalarField)
 	{
 		//we must convert the scalar values to RGB colors in a dedicated static array
 		size_t chunkStart = ccChunk::StartPos(chunkIndex);
@@ -2835,6 +2738,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		}
 		glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, s_rgbBuffer4ub);
 	}
+
 }
 
 template <class QOpenGLFunctions> void glLODChunkVertexPointer(	ccPointCloud* cloud,
@@ -3155,7 +3059,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		// whether VBOs are available (for faster display) or not
-		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMAP based LOD)
+		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
 		bool useRegularVBOs = useVBOPreconditions && !toDisplay.isLODDisplay() ? m_vboManager->updateVBOs(this, m_currentDisplay, context, glParams) : false;
 
 		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT);
@@ -3434,7 +3338,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else if(toDisplay.LODUseVBOs) // LOD VBO Display
 					{
 						assert(m_lod);
-						m_lod->renderVBOs(context, glParams);
+						m_lod->renderVBOs(this, context, glParams);
+					}
+					else if(useRegularVBOs)
+					{
+						m_vboManager->renderVBOs(this, context, glParams);
 					}
 					else // Regular VBOs or chucked
 					{
@@ -3444,11 +3352,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							size_t chunkSize = ccChunk::Size(k, m_points);
 
 							//points
-							glChunkVertexPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+							glChunkVertexPointer(context, k, toDisplay.decimStep);
 							//normals
 							if (glParams.showNorms)
 							{
-								glChunkNormalPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+								glChunkNormalPointer(context, k, toDisplay.decimStep);
 							}
 							//SF colors
 							if (colorRampShader)
@@ -3471,7 +3379,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								glChunkSFPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+								glChunkSFPointer(context, k, toDisplay.decimStep);
 							}
 
 							if (toDisplay.decimStep > 1)
@@ -3648,24 +3556,26 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				else if (toDisplay.LODUseVBOs)
 				{
 					assert(m_lod);
-					m_lod->renderVBOs(context, glParams);
+					m_lod->renderVBOs(this, context, glParams);
+				}
+				else if(useRegularVBOs)
+				{
+					m_vboManager->renderVBOs(this, context, glParams);
 				}
 				else
 				{
 					size_t chunkCount = ccChunk::Count(m_points);
-
 					for (size_t k = 0; k < chunkCount; ++k)
 					{
 						size_t chunkSize = ccChunk::Size(k, m_points);
-
 						//points
-						glChunkVertexPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+						glChunkVertexPointer(context, k, toDisplay.decimStep);
 						//normals
 						if (glParams.showNorms)
-							glChunkNormalPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+							glChunkNormalPointer(context, k, toDisplay.decimStep);
 						//colors
 						if (glParams.showColors)
-							glChunkColorPointer(context, k, toDisplay.decimStep, useRegularVBOs);
+							glChunkColorPointer(context, k, toDisplay.decimStep);
 
 						if (toDisplay.decimStep > 1)
 						{

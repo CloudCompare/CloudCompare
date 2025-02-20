@@ -126,7 +126,8 @@ class ccAbstractVBOManager
 
 	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay)                                                                                      = 0;
 	virtual bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
-	virtual bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)                                                                   = 0;
+	//! Dependency on point cloud is needed by the "Regular" VBO Manager (ccPointCloudVBOManager) to handle normals
+	virtual bool renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)                                                 = 0;
 
   public: // members
 	bool           hasColors;
@@ -145,10 +146,10 @@ class ccPointCloudVBOManager : public ccAbstractVBOManager
   public: // methods
 	bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
-	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return false;}; // TODO
+	bool renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
-  public: // members
-	std::vector<ccVBO*> vbos;
+  protected: // members
+	std::vector<ccVBO*> m_vbos;
 };
 
 using ccGLDrawContext = CC_DRAW_CONTEXT;

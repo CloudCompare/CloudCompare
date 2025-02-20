@@ -196,7 +196,7 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 
 	virtual bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
-	virtual bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
+	virtual bool renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
@@ -374,7 +374,8 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 	{
 		return false;
 	};
-	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return  true;};
+
+	bool renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return false;};
 
   protected: // methods
 	//! cleanData override
@@ -442,7 +443,8 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 
 	bool updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
-	bool renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+	bool renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+
   protected: // methods
 	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{

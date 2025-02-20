@@ -1390,7 +1390,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 	return true;
 }
 
-bool ccNestedOctreePointCloudLOD::renderVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -1414,10 +1414,10 @@ bool ccNestedOctreePointCloudLOD::renderVBOs(const CC_DRAW_CONTEXT& context, con
 			Node& node = l.data[i];
 			// check if the node is intersected or inside the frustum
 			// and if it has data to render
-			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo)
+			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo )
 				continue;
 
-			if (node.vbo->bind())
+			if (node.vbo->isCreated() && node.vbo->bind())
 			{
 				const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
 				glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);

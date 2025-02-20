@@ -14,7 +14,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
 #include "ccVBOManager.h"
 
 #include "ccChunk.h"
@@ -91,22 +90,22 @@ void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDispla
 	if (currentDisplay)
 	{
 		//'destroy' all vbos
-		for (size_t i = 0; i < vbos.size(); ++i)
+		for (size_t i = 0; i < m_vbos.size(); ++i)
 		{
-			if (vbos[i])
+			if (m_vbos[i])
 			{
-				vbos[i]->destroy();
-				delete vbos[i];
-				vbos[i] = nullptr;
+				m_vbos[i]->destroy();
+				delete m_vbos[i];
+				m_vbos[i] = nullptr;
 			}
 		}
 	}
 	else
 	{
-		assert(vbos.empty());
+		assert(m_vbos.empty());
 	}
 
-	vbos.resize(0);
+	m_vbos.resize(0);
 	hasColors         = false;
 	hasNormals        = false;
 	colorIsSF         = false;
@@ -174,23 +173,23 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 
 	size_t chunksCount = ccChunk::Count(pc->m_points);
 	// allocate per-chunk descriptors if necessary
-	if (vbos.size() != chunksCount)
+	if (m_vbos.size() != chunksCount)
 	{
 		// properly remove the elements that are not needed anymore!
-		for (size_t i = chunksCount; i < vbos.size(); ++i)
+		for (size_t i = chunksCount; i < m_vbos.size(); ++i)
 		{
-			if (vbos[i])
+			if (m_vbos[i])
 			{
-				vbos[i]->destroy();
-				delete vbos[i];
-				vbos[i] = nullptr;
+				m_vbos[i]->destroy();
+				delete m_vbos[i];
+				m_vbos[i] = nullptr;
 			}
 		}
 
 		// resize the container
 		try
 		{
-			vbos.resize(chunksCount, nullptr);
+			m_vbos.resize(chunksCount, nullptr);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -227,16 +226,15 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, pc->m_points));
 
-
 			int  chunkUpdateFlags = updateFlags;
 			bool reallocated      = false;
 
-			if (!vbos[chunkIndex])
+			if (!m_vbos[chunkIndex])
 			{
-				vbos[chunkIndex] = new ccVBO;
+				m_vbos[chunkIndex] = new ccVBO;
 			}
 
-			ccVBO* currentVBO = vbos[chunkIndex];
+			ccVBO* currentVBO = m_vbos[chunkIndex];
 
 			// allocate memory for current VBO
 			int vboSizeBytes = currentVBO->init(chunkSize, hasColors, hasNormals, &reallocated);
@@ -323,6 +321,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 					currentVBO->write(currentVBO->normalShift, s_normalBuffer, sizeof(PointCoordinateType) * chunkSize * 3);
 				}
 #endif
+				currentVBO->pointCount = chunkSize;
 				currentVBO->release();
 
 				// if an error is detected
@@ -348,7 +347,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 				{
 					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(pc->getName()));
 					managerState = ccAbstractVBOManager::FAILED;
-					vbos.resize(0);
+					m_vbos.resize(0);
 					return false;
 				}
 				else
@@ -362,13 +361,80 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 #ifdef _DEBUG
 	if (totalMemSizeBytes != totalSizeBytesBefore)
 		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)")
-		                 .arg(getName())
+		                 .arg(pc->getName())
 		                 .arg(static_cast<double>(totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
-		                 .arg(static_cast<double>(pointsInVBOs) / size() * 100.0, 0, 'f', 2));
+		                 .arg(static_cast<double>(pointsInVBOs) / pc->size() * 100.0, 0, 'f', 2));
 #endif
 
 	managerState = ccAbstractVBOManager::INITIALIZED;
 	updateFlags  = 0;
 
+	return true;
+}
+
+bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+{
+	using ccChunk = ccPointCloud::ccChunk;
+
+	if (managerState == ccAbstractVBOManager::FAILED)
+	{
+		return false;
+	}
+
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+	for (size_t i = 0; i < m_vbos.size(); ++i)
+	{
+		const auto vbo = m_vbos[i];
+		if (vbo && vbo->isCreated() && vbo->bind())
+		{
+			const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
+			glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
+
+			if (glParams.showNorms)
+			{
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+				int normalDataShift = vbo->normalShift;
+				glFunc->glNormalPointer(GL_FLOAT, 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
+#else
+				if (pc->m_normals)
+				{
+					vbo->release(); // Releae VBO for normals
+					// we must decode normals in a dedicated static array
+					PointCoordinateType*      _normals        = ccPointCloud::s_normalBuffer;
+					const CompressedNormType* _normalsIndexes = ccChunk::Start(*(pc->m_normals), i);
+					size_t                    chunkSize       = ccChunk::Size(i, pc->m_normals->size());
+
+					// compressed normals set
+					const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+					assert(compressedNormals);
+					for (size_t j = 0; j < chunkSize; j++, _normalsIndexes++)
+					{
+						const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
+						*(_normals)++      = N.x;
+						*(_normals)++      = N.y;
+						*(_normals)++      = N.z;
+					}
+					glFunc->glNormalPointer(GL_FLOAT, 0, ccPointCloud::s_normalBuffer);
+					vbo->bind(); // Re-bind VBO
+				}
+#endif
+			}
+			if (glParams.showColors || glParams.showSF)
+			{
+				int colorDataShift = vbo->rgbShift;
+				glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
+			}
+			vbo->release();
+			// we can use VBOs directly
+			glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(vbo->pointCount)); // Could be glMultiDrawArrays with shaders...
+		}
+		else
+		{
+			ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+			managerState = ccAbstractVBOManager::FAILED;
+			return false;
+		}
+	}
 	return true;
 }

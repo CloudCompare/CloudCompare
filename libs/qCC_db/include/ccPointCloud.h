@@ -27,6 +27,7 @@
 #include <PointCloudTpl.h>
 
 //Local
+#include "ccChunk.h"
 #include "ccPointCloudLOD.h"
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
@@ -887,16 +888,20 @@ public: //Level of Detail (LOD)
 	//! Maximum number of points (per cloud) displayed in a single LOD iteration
 	//! warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
 	#ifdef _DEBUG
-	static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 16); //~ 64K
+	static constexpr unsigned SIZE_POWER = 16; //1 << SIZE_POWER ~ 64K
 	#else
-	static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 19); //~ 512K
+	static constexpr unsigned SIZE_POWER = 19; //1 << SIZE_POWER ~ 512K
 	#endif
+
+	static constexpr unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << SIZE_POWER);
 
 	//! Vertex indexes for OpenGL "arrays" drawing
 	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
 	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
 	static ColorCompType       s_rgbBuffer4ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4];
 	static float               s_rgbBuffer3f[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+
+	using ccChunk = ccChunkN<19>;
 
 	friend ccPointCloudVBOManager;
 	friend ccNestedOctreePointCloudLOD;

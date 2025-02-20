@@ -21,7 +21,6 @@
 #include "ccGenericMesh.h"
 
 //local
-#include "ccChunk.h"
 #include "ccColorScalesManager.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
@@ -145,7 +144,7 @@ ColorCompType* ccGenericMesh::GetColorsBuffer()
 }
 
 //Vertex indexes buffer (for wired display)
-static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
+static unsigned s_vertWireIndexes[ccGenericMesh::ccChunk::SIZE * 6];
 static bool s_vertIndexesInitialized = false;
 unsigned* ccGenericMesh::GetWireVertexIndexes()
 {

@@ -23,6 +23,7 @@
 
 //Local
 #include "ccAdvancedTypes.h"
+#include "ccChunk.h"
 #include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
 
@@ -50,6 +51,8 @@ public:
 
 	//! Destructor
 	~ccGenericMesh() override = default;
+
+	using ccChunk = ccChunkN<16>;
 
 	//inherited methods (ccDrawableObject)
 	void showNormals(bool state) override;
@@ -181,7 +184,7 @@ public:
 	//! Sets whether mesh should be displayed as a wire or with plain facets
 	virtual void showWired(bool state) { m_showWired = state; }
 
-	//! Returns whether per-triangle normals are shown or not 
+	//! Returns whether per-triangle normals are shown or not
 	virtual bool triNormsShown() const { return m_triNormsShown; }
 
 	//! Sets whether to show or not per-triangle normals

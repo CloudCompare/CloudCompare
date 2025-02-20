@@ -117,6 +117,8 @@ void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDispla
 
 bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
+	using ccChunk = ccPointCloud::ccChunk;
+
 	if (!currentDisplay)
 	{
 		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(pc->getName()));

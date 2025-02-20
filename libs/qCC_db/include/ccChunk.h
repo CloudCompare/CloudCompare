@@ -19,14 +19,15 @@
 #define CC_CHUNK_HEADER
 
 //System
+#include <cstddef>
 #include <vector>
 
 //! Fake chunked array management
-class ccChunk
+template<size_t SIZE_POWER>
+class ccChunkN
 {
 public:
-	static const size_t SIZE_POWER = 16;
-	static const size_t SIZE = (1 << SIZE_POWER); //~ 64K
+	static constexpr size_t SIZE = (1 << SIZE_POWER); //N=16~ 64K
 
 	inline static size_t Count(size_t elementCount) { return (elementCount >> SIZE_POWER) + ((elementCount & (SIZE - 1)) ? 1 : 0); }
 	inline static size_t Size(size_t chunkIndex, size_t elementCount) { return (chunkIndex + 1 < Count(elementCount) ? SIZE : elementCount - chunkIndex * SIZE); }

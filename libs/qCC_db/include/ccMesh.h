@@ -47,7 +47,7 @@ public:
 
 	//! Default destructor
 	~ccMesh() override;
-	
+
 	//! Returns class ID
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::MESH; }
 
@@ -271,6 +271,7 @@ public:
 	//! Container of per-triangle material descriptors
 	using triangleMaterialIndexesSet = ccArray<int, 1, int>;
 
+	using ccChunk = ccGenericMesh::ccChunk;
 	//! Sets per-triangle material indexes array
 	void setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable = true);
 
@@ -432,7 +433,7 @@ protected: //methods
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
 
 	/*** EXTENDED CALL SCRIPTS (FOR CC_SUB_MESHES) ***/
-	
+
 	//0 parameter
 	#define ccMesh_extended_call0(baseName,recursiveName) \
 	inline virtual void recursiveName() \

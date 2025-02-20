@@ -147,7 +147,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	stream << "# " << FileIO::createdBy() << endl;
 	stream << "# " << FileIO::createdDateTime() << endl;
-	
+
 	if (file.error() != QFile::NoError)
 	{
 		return CC_FERR_WRITING;
@@ -612,12 +612,13 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	bool objWarnings[5] { false, false, false, false, false };
 	bool error = false;
 
+	using ccChunk =  ccChunkN<16>;
 	try
 	{
 		unsigned lineCount = 0;
 		unsigned polyCount = 0;
 		QString currentLine = stream.readLine();
-		
+
 		while (!currentLine.isNull())
 		{
 			++lineCount;
@@ -1315,7 +1316,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 		}
-		
+
 		if (!error && baseMesh)
 		{
 			if (normals && normalsPerFacet)
@@ -1465,7 +1466,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		else if (objWarnings[CANCELLED_BY_USER])
 			return CC_FERR_CANCELED_BY_USER;
-		else 
+		else
 			return CC_FERR_MALFORMED_FILE;
 	}
 	else

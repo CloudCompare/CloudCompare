@@ -1253,9 +1253,11 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 	sourceSF   = glParams.showSF ? pc->m_currentDisplayedScalarField : nullptr;
 	hasNormals = glParams.showNorms;
 
-	size_t totalSizeBytesBefore = totalMemSizeBytes;
-	totalMemSizeBytes           = 0;
+	size_t totalSizeBytesBefore  = totalMemSizeBytes;
+	totalMemSizeBytes            = 0;
 
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
 	for (size_t levelID = 0; levelID < m_levels.size(); levelID++)
 	{
 		auto& l = m_levels[levelID];
@@ -1286,11 +1288,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 			ccVBO* currentVBO   = node.vbo;
 			int    vboSizeBytes = currentVBO->init(node.pointCount, hasColors, hasNormals, &reallocated);
 
-			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-			if (glFunc)
-			{
-				CatchGLErrors(glFunc->glGetError(), "ccPointCloudLOD::vbo.init");
-			}
+			CatchGLErrors(glFunc->glGetError(), "ccPointCloudLOD::vbo.init");
 
 			if (vboSizeBytes > 0)
 			{
@@ -1363,8 +1361,6 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 				currentVBO->release();
 
 				// if an error is detected
-				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-				assert(glFunc != nullptr);
 				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
 				{
 					vboSizeBytes = -1;
@@ -1439,7 +1435,7 @@ bool ccNestedOctreePointCloudLOD::renderVBOs(const CC_DRAW_CONTEXT& context, con
 				}
 				node.vbo->release();
 				// we can use VBOs directly
-				glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount));
+				glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount)); // Could be glMultiDrawArrays with shaders...
 			}
 			else
 			{

@@ -220,34 +220,31 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 #else
 		hasNormals = false;
 #endif
-
+		QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+		assert(glFunc != nullptr);
 		// process each chunk
 		for (size_t chunkIndex = 0; chunkIndex < chunksCount; ++chunkIndex)
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, pc->m_points));
 
-			ccVBO* currentVBO = vbos[chunkIndex];
 
 			int  chunkUpdateFlags = updateFlags;
 			bool reallocated      = false;
-			if (!currentVBO)
+
+			if (!vbos[chunkIndex])
 			{
-				currentVBO = new ccVBO;
+				vbos[chunkIndex] = new ccVBO;
 			}
+
+			ccVBO* currentVBO = vbos[chunkIndex];
 
 			// allocate memory for current VBO
 			int vboSizeBytes = currentVBO->init(chunkSize, hasColors, hasNormals, &reallocated);
 
-			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-			if (glFunc)
-			{
-				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
-			}
+			CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
 
 			if (vboSizeBytes > 0)
 			{
-				// ccLog::Print(QString("[VBO] VBO #%1 initialized (ID=%2)").arg(chunkIndex).arg(vbos[chunkIndex]->bufferId()));
-
 				if (reallocated)
 				{
 					// if the vbo is reallocated, then all its content has been cleared!
@@ -329,8 +326,6 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 				currentVBO->release();
 
 				// if an error is detected
-				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-				assert(glFunc != nullptr);
 				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
 				{
 					vboSizeBytes = -1;

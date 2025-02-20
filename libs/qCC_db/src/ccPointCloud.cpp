@@ -2947,6 +2947,7 @@ struct DisplayDesc : LODLevelDesc
 		, endIndex(0)
 		, decimStep(1)
 		, indexMap(nullptr)
+		, LODUseVBOs(false)
 	{}
 
 	//! Constructor from a start index and a count value
@@ -2974,6 +2975,15 @@ struct DisplayDesc : LODLevelDesc
 
 	//! Map of indexes (to invert the natural order)
 	LODIndexSet* indexMap;
+
+	//! Whether the LOD use VBOs.
+	bool LODUseVBOs;
+
+	//! Wheter we will use LOD in this pass.
+	bool isLODDisplay()
+	{
+		return LODUseVBOs || indexMap;
+	};
 };
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -3026,9 +3036,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// L.O.D. display
 		DisplayDesc toDisplay(0, size());
-		bool LODUseVBOs = false;
-		bool useVBOPreconditions = context.useVBOs && !isVisibilityTableInstantiated()  && (!glParams.showSF || glParams.showSF && !m_currentDisplayedScalarField->mayHaveHiddenValues());
-
+		// check all conditions
+		bool useVBOPreconditions = context.useVBOs && !isVisibilityTableInstantiated()  && (!glParams.showSF || !m_currentDisplayedScalarField->mayHaveHiddenValues());
+		//ccLog::Print(QString("useVBOPrecond %1").arg(useVBOPreconditions));
 		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
@@ -3079,16 +3089,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 								//first time: we flag the cells visibility and count the number of visible points
 								m_lod->flagVisibility(camera, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
+
 								if(useVBOPreconditions && m_lod->useVBO()) //TODO more preconditions
 								{
-									LODUseVBOs = m_lod->updateVBOs(this, m_currentDisplay, context, glParams);
+									toDisplay.LODUseVBOs = m_lod->updateVBOs(this, m_currentDisplay, context, glParams);
 								}
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;
 							toDisplay.startIndex = 0;
 							toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
-							if(!LODUseVBOs)
+
+							if(!toDisplay.LODUseVBOs)
 							{
 								toDisplay.indexMap = &m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
 								if (toDisplay.count == 0)
@@ -3118,7 +3130,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
-				if (!toDisplay.indexMap && !LODUseVBOs)
+				if (!toDisplay.isLODDisplay())
 				{
 					//if we don't have a LoD map, we can only display points at level 0!
 					if (context.currentLODLevel != 0)
@@ -3142,7 +3154,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
-		//ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
+		// whether VBOs are available (for faster display) or not
+		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMAP based LOD)
+		bool useRegularVBOs = useVBOPreconditions && !toDisplay.isLODDisplay() ? m_vboManager->updateVBOs(this, m_currentDisplay, context, glParams) : false;
 
 		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT);
 
@@ -3269,19 +3283,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//if some points may not be displayed, we'll have to be smarter!
 				bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
 
-				//whether VBOs are available (for faster display) or not
-				bool useVBOs = false;
-				if (useVBOPreconditions && !toDisplay.indexMap && !LODUseVBOs) //VBOs are not compatible with LoD
-				{
-					//can't use VBOs if some points are hidden
-					useVBOs = m_vboManager->updateVBOs(this, m_currentDisplay, context, glParams);
-				}
-
 				//color ramp shader initialization
 				ccColorRampShader* colorRampShader = context.colorRampShader;
 				{
 					//color ramp shader is not compatible with VBOs (and VBOs are faster)
-					if (useVBOs && LODUseVBOs)
+					if (useRegularVBOs || toDisplay.LODUseVBOs)
 					{
 						colorRampShader = nullptr;
 					}
@@ -3425,12 +3431,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						glFunc->glDrawArrays(GL_POINTS, 0, toDisplay.count);
 					}
-					else if(LODUseVBOs) // LOD VBO Display
+					else if(toDisplay.LODUseVBOs) // LOD VBO Display
 					{
 						assert(m_lod);
 						m_lod->renderVBOs(context, glParams);
 					}
-					else // Full VBO or chucked
+					else // Regular VBOs or chucked
 					{
 						size_t chunkCount = ccChunk::Count(m_points);
 						for (size_t k = 0; k < chunkCount; ++k)
@@ -3438,11 +3444,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							size_t chunkSize = ccChunk::Size(k, m_points);
 
 							//points
-							glChunkVertexPointer(context, k, toDisplay.decimStep, useVBOs);
+							glChunkVertexPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 							//normals
 							if (glParams.showNorms)
 							{
-								glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs);
+								glChunkNormalPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 							}
 							//SF colors
 							if (colorRampShader)
@@ -3465,7 +3471,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								glChunkSFPointer(context, k, toDisplay.decimStep, useVBOs);
+								glChunkSFPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 							}
 
 							if (toDisplay.decimStep > 1)
@@ -3619,8 +3625,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else //no visibility table enabled, no scalar field
 			{
-				bool useVBOs = useVBOPreconditions && !toDisplay.indexMap && !LODUseVBOs ? m_vboManager->updateVBOs(this, m_currentDisplay, context, glParams) : false; //VBOs are not compatible with LoD
-
 				glFunc->glEnableClientState(GL_VERTEX_ARRAY);
 				if (glParams.showNorms)
 					glFunc->glEnableClientState(GL_NORMAL_ARRAY);
@@ -3641,7 +3645,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					glFunc->glDrawArrays(GL_POINTS, 0, toDisplay.count);
 				}
-				else if (LODUseVBOs)
+				else if (toDisplay.LODUseVBOs)
 				{
 					assert(m_lod);
 					m_lod->renderVBOs(context, glParams);
@@ -3655,13 +3659,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						size_t chunkSize = ccChunk::Size(k, m_points);
 
 						//points
-						glChunkVertexPointer(context, k, toDisplay.decimStep, useVBOs);
+						glChunkVertexPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 						//normals
 						if (glParams.showNorms)
-							glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs);
+							glChunkNormalPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 						//colors
 						if (glParams.showColors)
-							glChunkColorPointer(context, k, toDisplay.decimStep, useVBOs);
+							glChunkColorPointer(context, k, toDisplay.decimStep, useRegularVBOs);
 
 						if (toDisplay.decimStep > 1)
 						{

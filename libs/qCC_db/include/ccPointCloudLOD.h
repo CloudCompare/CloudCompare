@@ -90,7 +90,7 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 		float                  score;               //  4 bytes
 		uint32_t               firstCodeIndex;      //  4 bytes
 		uint32_t               displayedPointCount; //  4 bytes
-		ccVBO*                 vbo;                 // 4 bytes
+		ccVBO*                 vbo;                 //  4 bytes
 		uint8_t                level;               //  1 byte
 		uint8_t                childCount;          //  1 byte
 		uint8_t                intersection;        //  1 byte
@@ -345,7 +345,6 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 
   private:
 	float    m_minPxFootprint;
-	uint32_t m_numVisibleNodes;
 };
 
 //! The "original" CloudCompare LOD
@@ -450,4 +449,6 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 	{
 		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel, 75.0);
 	}
+
+	template <class QOpenGLFunctions> bool renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc);
 };

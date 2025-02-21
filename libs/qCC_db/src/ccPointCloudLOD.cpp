@@ -14,7 +14,6 @@
 // #                    COPYRIGHT: CloudCompare project                     #
 // #                                                                        #
 // ##########################################################################
-
 #include "ccPointCloudLOD.h"
 
 // Local
@@ -1100,7 +1099,6 @@ ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibil
                                                                                            float                       minPxFootprint)
     : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
     , m_minPxFootprint(minPxFootprint)
-    , m_numVisibleNodes(0)
 {
 }
 
@@ -1125,6 +1123,32 @@ void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccAbstra
 	}
 }
 
+uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::propagateInsideFlag(ccAbstractPointCloudLOD::Node& node)
+{
+	computeNodeFootprint(node);
+	if (node.score < m_minPxFootprint)
+	{
+		propagateFlag(node, Frustum::OUTSIDE);
+		return 0;
+	}
+	else
+	{
+		node.intersection     = Frustum::INSIDE;
+		uint32_t visibleCount = node.childCount;
+		if (node.level < m_maxLevel && node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					visibleCount += propagateInsideFlag(m_lod.node(node.childIndexes[i], node.level + 1));
+				}
+			}
+		}
+		return visibleCount;
+	}
+}
+
 uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccAbstractPointCloudLOD::Node& node)
 {
 	node.intersection = m_frustum.sphereInFrustum(node.center, node.radius);
@@ -1133,23 +1157,19 @@ uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccAbstractPointCloud
 		clippingIntersection(node);
 	}
 
-	if (node.intersection != Frustum::OUTSIDE)
+	switch (node.intersection)
+	{
+	case Frustum::INSIDE:
+		return propagateInsideFlag(node);
+	case Frustum::INTERSECT:
 	{
 		computeNodeFootprint(node);
 		if (node.score < m_minPxFootprint)
 		{
-			// A dedicated flag could be used for that to improve semantic meaning.
-			// and it's needed in the PoC of hybrid LOD (VBO+IndexMap)
-			node.intersection = Frustum::OUTSIDE;
+			propagateFlag(node, Frustum::OUTSIDE);
+			return 0;
 		}
-	}
-
-	uint32_t visibleCount = 0;
-	switch (node.intersection)
-	{
-	case Frustum::INSIDE:
-	case Frustum::INTERSECT:
-		visibleCount += node.pointCount;
+		uint32_t visibleCount = node.pointCount;
 		if (node.level < m_maxLevel && node.childCount)
 		{
 			for (int i = 0; i < 8; ++i)
@@ -1160,13 +1180,13 @@ uint32_t ccNestedOctreePointCloudLODVisibilityFlagger::flag(ccAbstractPointCloud
 				}
 			}
 		}
-		break;
+		return visibleCount;
+	}
 	case Frustum::OUTSIDE:
 		propagateFlag(node, Frustum::OUTSIDE);
-		break;
+		return 0;
 	}
-
-	return visibleCount;
+	return 0;
 }
 
 void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentDisplay)
@@ -1193,13 +1213,7 @@ void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentD
 	{
 		assert(false);
 	}
-
-	hasColors         = false;
-	hasNormals        = false;
-	colorIsSF         = false;
-	sourceSF          = nullptr;
-	totalMemSizeBytes = 0;
-	managerState      = ccAbstractVBOManager::NEW;
+	resetFlags();
 };
 
 bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
@@ -1258,6 +1272,9 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
+
+	// This can't really be recursive because we need to be sure we visit all the node
+	// in order to destroy unused VBOs.
 	for (size_t levelID = 0; levelID < m_levels.size(); levelID++)
 	{
 		auto& l = m_levels[levelID];
@@ -1266,6 +1283,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 			Node& node = l.data[i];
 			// check if the node is intersected or inside the frustum
 			// and if it has data to render
+			assert(node.intersection != UNDEFINED);
 			if (node.intersection == Frustum::OUTSIDE || !node.pointCount)
 			{
 				if (node.vbo)
@@ -1285,9 +1303,9 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 				node.vbo = new ccVBO;
 			}
 
+			// alias
 			ccVBO* currentVBO   = node.vbo;
 			int    vboSizeBytes = currentVBO->init(node.pointCount, hasColors, hasNormals, &reallocated);
-
 			CatchGLErrors(glFunc->glGetError(), "ccPointCloudLOD::vbo.init");
 
 			if (vboSizeBytes > 0)
@@ -1390,6 +1408,80 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 	return true;
 }
 
+template <class QOpenGLFunctions>
+bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc)
+{
+	// check if the node is intersected or inside the frustum
+	// and if it has data to render
+	assert(node.intersection != UNDEFINED);
+	assert(glFunc != nullptr);
+
+	if (node.intersection == Frustum::OUTSIDE)
+		return true;
+
+	if (!node.pointCount) // could have children with points
+	{
+		if (node.level < m_levels.size() && node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					if (!renderVBOsRecursive(this->node(node.childIndexes[i], node.level + 1), context, glParams, glFunc))
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	assert(node.vbo);
+	if (node.vbo && node.vbo->isCreated() && node.vbo->bind())
+	{
+		const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
+		glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
+
+		if (glParams.showNorms)
+		{
+			int normalDataShift = node.vbo->normalShift;
+			glFunc->glNormalPointer(GL_FLOAT, 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
+		}
+
+		if (glParams.showColors || glParams.showSF)
+		{
+			int colorDataShift = node.vbo->rgbShift;
+			glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
+		}
+
+		node.vbo->release();
+		// we can use VBOs directly
+		glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount)); // Could be glMultiDrawArrays with shaders...
+
+		uint8_t maxLevel = static_cast<uint8_t>((m_levels.size() - 1));
+		if (node.level < maxLevel && node.childCount)
+		{
+			for (int i = 0; i < 8; ++i)
+			{
+				if (node.childIndexes[i] >= 0)
+				{
+					if (!renderVBOsRecursive(this->node(node.childIndexes[i], node.level + 1), context, glParams, glFunc))
+					{
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+	else
+	{
+		ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
+		managerState = ccAbstractVBOManager::FAILED;
+		return false;
+	}
+}
+
 bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	if (m_state != INITIALIZED)
@@ -1406,46 +1498,7 @@ bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud& pc, const CC_DR
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-	for (size_t levelID = 0; levelID < m_levels.size(); levelID++)
-	{
-		auto& l = m_levels[levelID];
-		for (size_t i = 0; i < l.data.size(); ++i)
-		{
-			Node& node = l.data[i];
-			// check if the node is intersected or inside the frustum
-			// and if it has data to render
-			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo)
-				continue;
-
-			if (node.vbo->isCreated() && node.vbo->bind())
-			{
-				const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
-				glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
-
-				if (glParams.showNorms)
-				{
-					int normalDataShift = node.vbo->normalShift;
-					glFunc->glNormalPointer(GL_FLOAT, 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
-				}
-
-				if (glParams.showColors || glParams.showSF)
-				{
-					int colorDataShift = node.vbo->rgbShift;
-					glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 4 * sizeof(ColorCompType), static_cast<const GLvoid*>(start + colorDataShift));
-				}
-				node.vbo->release();
-				// we can use VBOs directly
-				glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount)); // Could be glMultiDrawArrays with shaders...
-			}
-			else
-			{
-				ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-				managerState = ccAbstractVBOManager::FAILED;
-				return false;
-			}
-		}
-	}
-	return true;
+	return renderVBOsRecursive<QOpenGLFunctions_2_1>(node(0, 0), context, glParams, glFunc);
 }
 
 #include "ccPointCloudLOD.moc"

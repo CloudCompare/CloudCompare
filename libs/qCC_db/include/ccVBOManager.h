@@ -126,6 +126,16 @@ class ccAbstractVBOManager
 
 	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) = 0;
 
+	void resetFlags()
+	{
+		hasColors         = false;
+		hasNormals        = false;
+		colorIsSF         = false;
+		sourceSF          = nullptr;
+		totalMemSizeBytes = 0;
+		managerState      = ccAbstractVBOManager::NEW;
+	}
+
 	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
 
 	//! Dependency on point cloud is needed by the "Regular" VBO Manager (ccPointCloudVBOManager) to handle normals

@@ -105,14 +105,7 @@ void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDispla
 	{
 		assert(m_vbos.empty());
 	}
-
-	m_vbos.resize(0);
-	hasColors         = false;
-	hasNormals        = false;
-	colorIsSF         = false;
-	sourceSF          = nullptr;
-	totalMemSizeBytes = 0;
-	managerState      = ccAbstractVBOManager::NEW;
+	resetFlags();
 }
 
 bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)

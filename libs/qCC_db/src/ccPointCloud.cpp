@@ -149,7 +149,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
-	, m_vboManager(new ccPointCloudVBOManager)
+	, m_standardVBOManager(new ccPointCloudVBOManager)
 	, m_fwfData(nullptr)
 	, m_useLODRendering(true)
 	, m_normalsDrawnAsLines(false)
@@ -523,10 +523,10 @@ ccPointCloud::~ccPointCloud()
 		m_lod = nullptr;
 	}
 
-	if(m_vboManager)
+	if(m_standardVBOManager)
 	{
-		delete m_vboManager;
-		m_vboManager = nullptr;
+		delete m_standardVBOManager;
+		m_standardVBOManager = nullptr;
 	}
 }
 
@@ -2883,7 +2883,7 @@ struct DisplayDesc : LODLevelDesc
 	//! Whether the LOD use VBOs.
 	bool LODUseVBOs;
 
-	//! Wheter we will use LOD in this pass.
+	//! Wheter we will use LOD during this rendering pass.
 	bool isLODDisplay()
 	{
 		return LODUseVBOs || indexMap;
@@ -2967,7 +2967,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						//Reset the VBO manager if needed:
 						// We do not want to use the LoD and
 						// to have the cloud loaded in the VBOs simultaneously.
-						m_vboManager->releaseVBOs(m_currentDisplay);
+						m_standardVBOManager->releaseVBOs(m_currentDisplay);
 
 						unsigned char maxLevel = m_lod->maxLevel();
 						bool underConstruction = m_lod->isUnderConstruction();
@@ -2994,7 +2994,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								//first time: we flag the cells visibility and count the number of visible points
 								m_lod->flagVisibility(camera, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 
-								if(useVBOPreconditions && m_lod->useVBO()) //TODO more preconditions
+								if(useVBOPreconditions)
 								{
 									toDisplay.LODUseVBOs = m_lod->updateVBOs(*this, m_currentDisplay, context, glParams);
 								}
@@ -3060,15 +3060,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// whether VBOs are available (for faster display) or not
 		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
-		bool useRegularVBOs = false;
+		bool useStandardVBOs = false;
 		if(useVBOPreconditions && !toDisplay.isLODDisplay())
 		{
 			//! be sure to release LOD VBOs if needed
-			if(m_lod && m_lod->useVBO())
+			if(m_lod)
 			{
 				m_lod->releaseVBOs(m_currentDisplay);
 			}
-	 		useRegularVBOs = m_vboManager->updateVBOs(*this, m_currentDisplay, context, glParams);
+	 		useStandardVBOs = m_standardVBOManager->updateVBOs(*this, m_currentDisplay, context, glParams);
 		}
 
 
@@ -3201,7 +3201,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccColorRampShader* colorRampShader = context.colorRampShader;
 				{
 					//color ramp shader is not compatible with VBOs (and VBOs are faster)
-					if (useRegularVBOs || toDisplay.LODUseVBOs)
+					if (useStandardVBOs || toDisplay.LODUseVBOs)
 					{
 						colorRampShader = nullptr;
 					}
@@ -3350,9 +3350,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(m_lod);
 						m_lod->renderVBOs(*this, context, glParams);
 					}
-					else if(useRegularVBOs)
+					else if(useStandardVBOs)
 					{
-						m_vboManager->renderVBOs(*this, context, glParams);
+						m_standardVBOManager->renderVBOs(*this, context, glParams);
 					}
 					else // Regular VBOs or chucked
 					{
@@ -3568,9 +3568,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					assert(m_lod);
 					m_lod->renderVBOs(*this, context, glParams);
 				}
-				else if(useRegularVBOs)
+				else if(useStandardVBOs)
 				{
-					m_vboManager->renderVBOs(*this, context, glParams);
+					m_standardVBOManager->renderVBOs(*this, context, glParams);
 				}
 				else
 				{
@@ -5371,14 +5371,14 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 
 size_t ccPointCloud::vboSize() const
 {
-	return m_vboManager->totalMemSizeBytes;
+	return m_standardVBOManager->totalMemSizeBytes;
 }
 
 
 void ccPointCloud::releaseAllVBOs()
 {
-	m_vboManager->releaseVBOs(m_currentDisplay);
-	if(m_lod && m_lod->useVBO())
+	m_standardVBOManager->releaseVBOs(m_currentDisplay);
+	if(m_lod)
 	{
 		m_lod->releaseVBOs(m_currentDisplay);
 	}
@@ -6007,7 +6007,6 @@ bool ccPointCloud::initLOD()
 
 bool ccPointCloud::initLOD(std::vector<ccAbstractPointCloudLOD::Level> lodLayers)
 {
-	clearLOD();
 	m_lod = new ccNestedOctreePointCloudLOD(lodLayers);
 	return m_lod->init(this);
 }
@@ -6016,7 +6015,19 @@ void ccPointCloud::clearLOD()
 {
 	if (m_lod)
 	{
+		// Release the VBOs if needed;
+		m_lod->releaseVBOs(m_currentDisplay);
 		m_lod->clear();
+
+		// As long we have two types of LOD and that we can't generate
+		// NestedOctree-based LOD, there is no way to reuse a cleared
+		// NestedOctree-based LOD, so we delete the LOD and DrawMeOnly
+		// will take care of creating a new InternalLOD if needed.
+		if(dynamic_cast<ccNestedOctreePointCloudLOD *>(m_lod))
+		{
+			delete m_lod;
+			m_lod = nullptr;
+		}
 	}
 }
 

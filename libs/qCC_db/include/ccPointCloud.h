@@ -162,11 +162,36 @@ public: //features deletion/clearing
 	void unallocateNorms();
 
 	//! Notify a modification of color / scalar field display parameters or contents
-	inline void colorsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS; }
+	inline void colorsHaveChanged()
+	{
+		assert(m_standardVBOManager);
+		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
+		if(m_lod)
+		{
+			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
+		};
+	}
 	//! Notify a modification of normals display parameters or contents
-	inline void normalsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS; decompressNormals();}
+	inline void normalsHaveChanged()
+	{
+		assert(m_standardVBOManager);
+		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS;
+		if(m_lod)
+		{
+			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS;
+		};
+		decompressNormals(); // decompress normals for the shader
+	}
 	//! Notify a modification of points display parameters or contents
-	inline void pointsHaveChanged() { m_vboManager->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS; }
+	inline void pointsHaveChanged()
+	{
+		assert(m_standardVBOManager);
+		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS;
+		if(m_lod)
+		{
+			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS;
+		};
+	}
 
 public: //features allocation/resize
 
@@ -898,7 +923,7 @@ public: // VBO, rendering
 protected: // VBO, rendering
 
 	//! Set of VBOs attached to this cloud
-	ccPointCloudVBOManager * m_vboManager;
+	ccPointCloudVBOManager * m_standardVBOManager;
 
 	//per-block data transfer to the GPU (standard mode)
 	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);
@@ -917,6 +942,7 @@ public: //Level of Detail (LOD)
 	bool initLOD();
 
 	//! Initializes a LOD from an externally created data structure
+	/*! \note this will be a NestedOctree LOD */
 	bool initLOD(std::vector<ccAbstractPointCloudLOD::Level>);
 
 	//! Clears the LOD structure

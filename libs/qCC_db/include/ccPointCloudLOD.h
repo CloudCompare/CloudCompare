@@ -214,9 +214,6 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 	//! Returns the memory used by the structure (in bytes)
 	size_t memory() const;
 
-	//! Whether this LOD can use VBO capabilities for Rendering
-	virtual bool useVBO() = 0;
-
   public: // inherited from ccAbrasctVBOManager
 	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override = 0;
 
@@ -372,11 +369,6 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
 
-	bool useVBO() override
-	{
-		return false;
-	}
-
   public: // methods ccAbstractVBOManager
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override
 	{
@@ -453,11 +445,6 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 	void clear() override;
 
 	LODIndexSet& getIndexMap(unsigned char level, unsigned& maxCount, unsigned& remainingPointsAtThisLevel) override;
-
-	bool useVBO() override
-	{
-		return true;
-	}
 
   public: // methods ccAbstractVBOManager
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;

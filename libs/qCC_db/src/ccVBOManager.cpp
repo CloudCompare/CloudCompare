@@ -14,6 +14,7 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
+
 #include "ccVBOManager.h"
 
 #include "ccChunk.h"
@@ -114,18 +115,18 @@ void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDispla
 	managerState      = ccAbstractVBOManager::NEW;
 }
 
-bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	using ccChunk = ccPointCloud::ccChunk;
 
 	if (!currentDisplay)
 	{
-		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(pc->getName()));
+		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(pc.getName()));
 		assert(false);
 		return false;
 	}
 
-	if (pc->isColorOverridden())
+	if (pc.isColorOverridden())
 	{
 		// nothing to do (we don't display true colors, SF or normals!)
 		return false;
@@ -148,8 +149,8 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 		if (glParams.showSF
 		    && (!hasColors
 		        || !colorIsSF
-		        || sourceSF != pc->m_currentDisplayedScalarField
-		        || pc->m_currentDisplayedScalarField->getModificationFlag() == true))
+		        || sourceSF != pc.m_currentDisplayedScalarField
+		        || pc.m_currentDisplayedScalarField->getModificationFlag() == true))
 		{
 			updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
 		}
@@ -171,7 +172,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 		updateFlags = ccAbstractVBOManager::UPDATE_ALL;
 	}
 
-	size_t chunksCount = ccChunk::Count(pc->m_points);
+	size_t chunksCount = ccChunk::Count(pc.m_points);
 	// allocate per-chunk descriptors if necessary
 	if (m_vbos.size() != chunksCount)
 	{
@@ -193,7 +194,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 		}
 		catch (const std::bad_alloc&)
 		{
-			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(pc->getName()));
+			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(pc.getName()));
 			managerState = ccAbstractVBOManager::FAILED;
 			return false;
 		}
@@ -205,15 +206,15 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 	totalMemSizeBytes             = 0;
 	{
 		// DGM: the context should be already active as this method should only be called from 'drawMeOnly'
-		assert(!glParams.showSF || pc->m_currentDisplayedScalarField);
-		assert(!glParams.showColors || pc->m_rgbaColors);
+		assert(!glParams.showSF || pc.m_currentDisplayedScalarField);
+		assert(!glParams.showColors || pc.m_rgbaColors);
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
 		assert(!glParams.showNorms || (m_normals && m_normals->chunksCount() >= chunksCount));
 #endif
 
 		hasColors = glParams.showSF || glParams.showColors;
 		colorIsSF = glParams.showSF;
-		sourceSF  = glParams.showSF ? pc->m_currentDisplayedScalarField : nullptr;
+		sourceSF  = glParams.showSF ? pc.m_currentDisplayedScalarField : nullptr;
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
 		hasNormals = glParams.showNorms;
 #else
@@ -224,7 +225,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 		// process each chunk
 		for (size_t chunkIndex = 0; chunkIndex < chunksCount; ++chunkIndex)
 		{
-			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, pc->m_points));
+			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, pc.m_points));
 
 			int  chunkUpdateFlags = updateFlags;
 			bool reallocated      = false;
@@ -254,7 +255,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 				// load points
 				if (chunkUpdateFlags & ccAbstractVBOManager::UPDATE_POINTS)
 				{
-					currentVBO->write(0, ccChunk::Start(pc->m_points, chunkIndex), sizeof(PointCoordinateType) * chunkSize * 3);
+					currentVBO->write(0, ccChunk::Start(pc.m_points, chunkIndex), sizeof(PointCoordinateType) * chunkSize * 3);
 				}
 				// load colors
 				if (chunkUpdateFlags & ccAbstractVBOManager::UPDATE_COLORS)
@@ -301,7 +302,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 					}
 					else if (glParams.showColors)
 					{
-						currentVBO->write(currentVBO->rgbShift, ccChunk::Start(*pc->m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, ccChunk::Start(*pc.m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
 					}
 				}
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
@@ -345,7 +346,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 				// we can stop here
 				if (chunkIndex == 0)
 				{
-					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(pc->getName()));
+					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(pc.getName()));
 					managerState = ccAbstractVBOManager::FAILED;
 					m_vbos.resize(0);
 					return false;
@@ -361,9 +362,9 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 #ifdef _DEBUG
 	if (totalMemSizeBytes != totalSizeBytesBefore)
 		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)")
-		                 .arg(pc->getName())
+		                 .arg(pc.getName())
 		                 .arg(static_cast<double>(totalMemSizeBytes) / (1 << 20), 0, 'f', 2)
-		                 .arg(static_cast<double>(pointsInVBOs) / pc->size() * 100.0, 0, 'f', 2));
+		                 .arg(static_cast<double>(pointsInVBOs) / pc.size() * 100.0, 0, 'f', 2));
 #endif
 
 	managerState = ccAbstractVBOManager::INITIALIZED;
@@ -372,7 +373,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud* pc, const ccGenericG
 	return true;
 }
 
-bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	using ccChunk = ccPointCloud::ccChunk;
 
@@ -397,13 +398,13 @@ bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud* pc, const CC_DRAW_CO
 				int normalDataShift = vbo->normalShift;
 				glFunc->glNormalPointer(GL_FLOAT, 3 * sizeof(PointCoordinateType), static_cast<const GLvoid*>(start + normalDataShift));
 #else
-				if (pc->m_normals)
+				if (pc.m_normals)
 				{
 					vbo->release(); // Releae VBO for normals
 					// we must decode normals in a dedicated static array
 					PointCoordinateType*      _normals        = ccPointCloud::s_normalBuffer;
-					const CompressedNormType* _normalsIndexes = ccChunk::Start(*(pc->m_normals), i);
-					size_t                    chunkSize       = ccChunk::Size(i, pc->m_normals->size());
+					const CompressedNormType* _normalsIndexes = ccChunk::Start(*(pc.m_normals), i);
+					size_t                    chunkSize       = ccChunk::Size(i, pc.m_normals->size());
 
 					// compressed normals set
 					const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();

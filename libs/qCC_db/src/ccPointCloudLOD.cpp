@@ -1202,7 +1202,7 @@ void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentD
 	managerState      = ccAbstractVBOManager::NEW;
 };
 
-bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	// TODO: the necessary checks for LOD datastructure
 	if (m_state != INITIALIZED)
@@ -1224,8 +1224,8 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 		if (glParams.showSF
 		    && (!hasColors
 		        || !colorIsSF
-		        || sourceSF != pc->m_currentDisplayedScalarField
-		        || pc->m_currentDisplayedScalarField->getModificationFlag() == true))
+		        || sourceSF != pc.m_currentDisplayedScalarField
+		        || pc.m_currentDisplayedScalarField->getModificationFlag() == true))
 		{
 			updateFlags |= UPDATE_COLORS;
 		}
@@ -1246,15 +1246,15 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 	}
 
 	// DGM: the context should be already active as this method should only be called from 'PointCloud::drawMeOnly'
-	assert(!glParams.showSF || pc->m_currentDisplayedScalarField);
+	assert(!glParams.showSF || pc.m_currentDisplayedScalarField);
 
 	hasColors  = glParams.showSF || glParams.showColors;
 	colorIsSF  = glParams.showSF;
-	sourceSF   = glParams.showSF ? pc->m_currentDisplayedScalarField : nullptr;
+	sourceSF   = glParams.showSF ? pc.m_currentDisplayedScalarField : nullptr;
 	hasNormals = glParams.showNorms;
 
-	size_t totalSizeBytesBefore  = totalMemSizeBytes;
-	totalMemSizeBytes            = 0;
+	size_t totalSizeBytesBefore = totalMemSizeBytes;
+	totalMemSizeBytes           = 0;
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
@@ -1303,7 +1303,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 				// load points
 				if (nodeUpdateFlags & UPDATE_POINTS)
 				{
-					currentVBO->write(0, pc->m_points[node.firstCodeIndex].u, sizeof(PointCoordinateType) * node.pointCount * 3);
+					currentVBO->write(0, pc.m_points[node.firstCodeIndex].u, sizeof(PointCoordinateType) * node.pointCount * 3);
 				}
 				// load colors
 				if (nodeUpdateFlags & UPDATE_COLORS)
@@ -1335,19 +1335,19 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 					}
 					else if (glParams.showColors)
 					{
-						currentVBO->write(currentVBO->rgbShift, pc->m_rgbaColors->data() + node.firstCodeIndex, sizeof(ColorCompType) * node.pointCount * 4);
+						currentVBO->write(currentVBO->rgbShift, pc.m_rgbaColors->data() + node.firstCodeIndex, sizeof(ColorCompType) * node.pointCount * 4);
 					}
 				}
 				// load normals
 				if (glParams.showNorms && (nodeUpdateFlags & UPDATE_NORMALS))
 				{
-					assert(pc->m_normals && glFunc);
+					assert(pc.m_normals && glFunc);
 
 					// compressed normals set
 					const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
 
 					// compressed normals set
-					const CompressedNormType* _normalsIndexes = pc->m_normals->data() + node.firstCodeIndex;
+					const CompressedNormType* _normalsIndexes = pc.m_normals->data() + node.firstCodeIndex;
 					PointCoordinateType*      outNorms        = ccPointCloud::s_normalBuffer;
 					for (uint32_t j = 0; j < node.pointCount; ++j)
 					{
@@ -1390,7 +1390,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud* pc, const ccGen
 	return true;
 }
 
-bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud* pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	if (m_state != INITIALIZED)
 	{
@@ -1414,7 +1414,7 @@ bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud* pc, const CC_DR
 			Node& node = l.data[i];
 			// check if the node is intersected or inside the frustum
 			// and if it has data to render
-			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo )
+			if (node.intersection == Frustum::OUTSIDE || node.intersection == UNDEFINED || !node.pointCount || !node.vbo)
 				continue;
 
 			if (node.vbo->isCreated() && node.vbo->bind())

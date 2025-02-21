@@ -2860,6 +2860,7 @@ struct DisplayDesc : LODLevelDesc
 		, endIndex(startIndex+count)
 		, decimStep(1)
 		, indexMap(nullptr)
+		, LODUseVBOs(false)
 	{}
 
 	//! Set operator

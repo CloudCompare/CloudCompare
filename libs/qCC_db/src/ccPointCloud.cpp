@@ -2647,10 +2647,32 @@ inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField
 }
 
 //! Vertex indexes for OpenGL "arrays" drawing
-PointCoordinateType ccPointCloud::s_pointBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
-PointCoordinateType ccPointCloud::s_normalBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
-ColorCompType       ccPointCloud::s_rgbBuffer4ub[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 4];
-float               ccPointCloud::s_rgbBuffer3f[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+PointCoordinateType* ccPointCloud::GetVertexBuffer()
+{
+	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	return s_pointBuffer;
+}
+
+//! Normals buffer
+PointCoordinateType* ccPointCloud::GetNormalsBuffer()
+{
+	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	return s_normalBuffer;
+}
+
+//! Colors buffer (4u)
+ColorCompType* ccPointCloud::GetColorsBuffer4u()
+{
+	static ColorCompType s_rgbBuffer4ub[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 4];
+	return s_rgbBuffer4ub;
+}
+
+//! Colors buffer (3f)
+float* ccPointCloud::GetColorsBuffer3f()
+{
+	static float s_rgbBuffer3f[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	return s_rgbBuffer3f;
+}
 
 void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
@@ -2668,7 +2690,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 	if (m_normals)
 	{
 		//we must decode normals in a dedicated static array
-		PointCoordinateType* _normals = s_normalBuffer;
+		PointCoordinateType* _normals = GetNormalsBuffer();
 		const CompressedNormType* _normalsIndexes = ccChunk::Start(*m_normals, chunkIndex);
 		size_t chunkSize = ccChunk::Size(chunkIndex, m_normals->size());
 
@@ -2683,7 +2705,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 			*(_normals)++ = N.y;
 			*(_normals)++ = N.z;
 		}
-		glFunc->glNormalPointer(GL_FLOAT, 0, s_normalBuffer);
+		glFunc->glNormalPointer(GL_FLOAT, 0, GetNormalsBuffer());
 	}
 	else
 	{
@@ -2722,7 +2744,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	{
 		//we must convert the scalar values to RGB colors in a dedicated static array
 		size_t chunkStart = ccChunk::StartPos(chunkIndex);
-		ColorCompType* _sfColors = s_rgbBuffer4ub;
+		ColorCompType* _sfColors = GetColorsBuffer4u();
 		size_t chunkSize = ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size());
 		for (size_t j = 0; j < chunkSize; j += decimStep)
 		{
@@ -2736,7 +2758,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 			*_sfColors++ = col->b;
 			*_sfColors++ = ccColor::MAX;
 		}
-		glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, s_rgbBuffer4ub);
+		glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, GetColorsBuffer4u());
 	}
 
 }
@@ -2750,7 +2772,7 @@ template <class QOpenGLFunctions> void glLODChunkVertexPointer(	ccPointCloud* cl
 	assert(startIndex < indexMap.size() && stopIndex <= indexMap.size());
 	assert(cloud && glFunc);
 
-	PointCoordinateType* _points = ccPointCloud::s_pointBuffer;
+	PointCoordinateType* _points = ccPointCloud::GetVertexBuffer();
 	for (unsigned j = startIndex; j < stopIndex; j++)
 	{
 		unsigned pointIndex = indexMap[j];
@@ -2760,7 +2782,7 @@ template <class QOpenGLFunctions> void glLODChunkVertexPointer(	ccPointCloud* cl
 		*(_points)++ = P->z;
 	}
 	//standard OpenGL copy
-	glFunc->glVertexPointer(3, GL_FLOAT, 0, ccPointCloud::s_pointBuffer);
+	glFunc->glVertexPointer(3, GL_FLOAT, 0, ccPointCloud::GetVertexBuffer());
 }
 
 template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTableType* normals,
@@ -2777,7 +2799,7 @@ template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTabl
 	assert(compressedNormals);
 
 	//we must decode normals in a dedicated static array
-	PointCoordinateType* _normals = ccPointCloud::s_normalBuffer;
+	PointCoordinateType* _normals = ccPointCloud::GetNormalsBuffer();
 	for (unsigned j = startIndex; j < stopIndex; j++)
 	{
 		unsigned pointIndex = indexMap[j];
@@ -2787,7 +2809,7 @@ template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTabl
 		*(_normals)++ = N.z;
 	}
 	//standard OpenGL copy
-	glFunc->glNormalPointer(GL_FLOAT, 0, ccPointCloud::s_normalBuffer);
+	glFunc->glNormalPointer(GL_FLOAT, 0, ccPointCloud::GetNormalsBuffer());
 }
 
 template <class QOpenGLFunctions> void glLODChunkColorPointer(	RGBAColorsTableType* colors,
@@ -2801,7 +2823,7 @@ template <class QOpenGLFunctions> void glLODChunkColorPointer(	RGBAColorsTableTy
 	assert(sizeof(ColorCompType) == 1);
 
 	//we must re-order colors in a dedicated static array
-	ColorCompType* _rgba = ccPointCloud::s_rgbBuffer4ub;
+	ColorCompType* _rgba = ccPointCloud::GetColorsBuffer4u();
 	for (unsigned j = startIndex; j < stopIndex; j++)
 	{
 		unsigned pointIndex = indexMap[j];
@@ -2812,7 +2834,7 @@ template <class QOpenGLFunctions> void glLODChunkColorPointer(	RGBAColorsTableTy
 		*(_rgba)++ = col.a;
 	}
 	//standard OpenGL copy
-	glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, ccPointCloud::s_rgbBuffer4ub);
+	glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, ccPointCloud::GetColorsBuffer4u());
 }
 
 template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
@@ -2826,7 +2848,7 @@ template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
 	assert(sizeof(ColorCompType) == 1);
 
 	//we must re-order and convert SF values to RGB colors in a dedicated static array
-	ColorCompType* _sfColors = ccPointCloud::s_rgbBuffer4ub;
+	ColorCompType* _sfColors = ccPointCloud::GetColorsBuffer4u();
 	for (unsigned j = startIndex; j < stopIndex; j++)
 	{
 		unsigned pointIndex = indexMap[j];
@@ -2839,7 +2861,7 @@ template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
 		*_sfColors++ = ccColor::MAX;
 	}
 	//standard OpenGL copy
-	glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, ccPointCloud::s_rgbBuffer4ub);
+	glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, ccPointCloud::GetColorsBuffer4u());
 }
 
 //description of the (sub)set of points to display
@@ -3007,7 +3029,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							toDisplay.startIndex = 0;
 							toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;
 
-							if(!toDisplay.LODUseVBOs)
+							if (!toDisplay.LODUseVBOs)
 							{
 								toDisplay.indexMap = &m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
 								if (toDisplay.count == 0)
@@ -3064,7 +3086,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// whether VBOs are available (for faster display) or not
 		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
 		bool useStandardVBOs = false;
-		if(useVBOPreconditions && !toDisplay.isLODDisplay())
+		if (useVBOPreconditions && !toDisplay.isLODDisplay())
 		{
 			//! be sure to release LOD VBOs if needed
 			if(m_lod)
@@ -3316,7 +3338,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (toDisplay.indexMap) //LoD display
 					{
-						assert(toDisplay.count <= MAX_POINT_COUNT_PER_LOD_RENDER_PASS);
+						assert(toDisplay.count <= MAX_POINT_COUNT_IN_STATIC_BUFFERS);
 						//points
 						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
 						//normals
@@ -3327,7 +3349,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						//SF colors
 						if (colorRampShader)
 						{
-							float* _sfColors = s_rgbBuffer3f;
+							float* _sfColors = GetColorsBuffer3f();
 							bool symScale = m_currentDisplayedScalarField->symmetricalScale();
 							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j++, _sfColors += 3)
 							{
@@ -3340,7 +3362,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								//reference value (to get the true lighting value)
 								_sfColors[2] = 1.0f;
 							}
-							glFunc->glColorPointer(3, GL_FLOAT, 0, s_rgbBuffer3f);
+							glFunc->glColorPointer(3, GL_FLOAT, 0, GetColorsBuffer3f());
 						}
 						else
 						{
@@ -3348,13 +3370,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						glFunc->glDrawArrays(GL_POINTS, 0, toDisplay.count);
 					}
-					else if(toDisplay.LODUseVBOs) // LOD VBO Display
+					else if (toDisplay.LODUseVBOs) // LOD VBO Display
 					{
 						assert(m_lod);
 						m_lod->renderVBOs(*this, context, glParams);
 					}
-					else if(useStandardVBOs)
+					else if (useStandardVBOs)
 					{
+						assert(m_standardVBOManager);
 						m_standardVBOManager->renderVBOs(*this, context, glParams);
 					}
 					else // Regular VBOs or chucked
@@ -3374,7 +3397,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//SF colors
 							if (colorRampShader)
 							{
-								float* _sfColors = s_rgbBuffer3f;
+								float* _sfColors = GetColorsBuffer3f();
 								size_t chunkStart = ccChunk::StartPos(k);
 								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
 								for (size_t j = 0; j < chunkSize; j += toDisplay.decimStep, _sfColors += 3)
@@ -3388,7 +3411,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									//reference value (to get the true lighting value)
 									_sfColors[2] = 1.0f;
 								}
-								glFunc->glColorPointer(3, GL_FLOAT, 0, s_rgbBuffer3f);
+								glFunc->glColorPointer(3, GL_FLOAT, 0, GetColorsBuffer3f());
 							}
 							else
 							{
@@ -3554,7 +3577,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (toDisplay.indexMap) //LoD display
 				{
-					assert(toDisplay.count <= MAX_POINT_COUNT_PER_LOD_RENDER_PASS);
+					assert(toDisplay.count <= MAX_POINT_COUNT_IN_STATIC_BUFFERS);
 					//points
 					glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, toDisplay.startIndex, toDisplay.endIndex);
 					//normals
@@ -3571,8 +3594,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					assert(m_lod);
 					m_lod->renderVBOs(*this, context, glParams);
 				}
-				else if(useStandardVBOs)
+				else if (useStandardVBOs)
 				{
+					assert(m_standardVBOManager);
 					m_standardVBOManager->renderVBOs(*this, context, glParams);
 				}
 				else

@@ -899,10 +899,10 @@ protected: // variable members
 
 public: // VBO, rendering
 
-	//! "Regular" VBO manager
+	//! Standard VBO manager
 	friend ccPointCloudVBOManager;
 
-    //! Maximum number of points (per cloud) displayed in a single transfert iteration
+   //! Maximum number of points (per cloud) displayed in a single transfert iteration
 	//! warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
 	#ifdef _DEBUG
 	static constexpr unsigned SIZE_POWER = 16; //1 << SIZE_POWER ~ 64K
@@ -912,18 +912,22 @@ public: // VBO, rendering
 
 	static constexpr unsigned MAX_POINT_COUNT_IN_STATIC_BUFFERS = (1 << SIZE_POWER);
 
-	//! Vertex indexes for OpenGL "arrays" drawing
-	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
-	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
-	static ColorCompType       s_rgbBuffer4ub[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 4];
-	static float               s_rgbBuffer3f[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	using ccChunk = ccChunkN<SIZE_POWER>;
 
-	using ccChunk = ccChunkN<19>;
+	//! Vertex buffer
+	static PointCoordinateType* GetVertexBuffer();
 
-protected: // VBO, rendering
+	//! Normals buffer
+	static PointCoordinateType* GetNormalsBuffer();
+
+	//! Colors buffer (4u)
+	static ColorCompType* GetColorsBuffer4u();
+
+	//! Colors buffer (3f)
+	static float* GetColorsBuffer3f();
 
 	//! Set of VBOs attached to this cloud
-	ccPointCloudVBOManager * m_standardVBOManager;
+	ccPointCloudVBOManager* m_standardVBOManager;
 
 	//per-block data transfer to the GPU (standard mode)
 	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);

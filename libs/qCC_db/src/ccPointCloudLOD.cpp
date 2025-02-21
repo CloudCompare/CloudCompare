@@ -14,6 +14,7 @@
 // #                    COPYRIGHT: CloudCompare project                     #
 // #                                                                        #
 // ##########################################################################
+
 #include "ccPointCloudLOD.h"
 
 // Local
@@ -1338,7 +1339,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 						// copy SF colors in static array
 						{
 							assert(sourceSF);
-							ColorCompType* _sfColors  = ccPointCloud::s_rgbBuffer4ub;
+							ColorCompType* _sfColors  = ccPointCloud::GetColorsBuffer4u();
 							size_t         chunkStart = static_cast<size_t>(node.firstCodeIndex);
 							for (uint32_t j = 0; j < node.pointCount; j++)
 							{
@@ -1354,7 +1355,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 							}
 						}
 						// then send them in VRAM
-						currentVBO->write(currentVBO->rgbShift, ccPointCloud::s_rgbBuffer4ub, sizeof(ColorCompType) * node.pointCount * 4);
+						currentVBO->write(currentVBO->rgbShift, ccPointCloud::GetColorsBuffer4u(), sizeof(ColorCompType) * node.pointCount * 4);
 						// upadte 'modification' flag for current displayed SF
 						sourceSF->setModificationFlag(false);
 					}
@@ -1373,7 +1374,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 
 					// compressed normals set
 					const CompressedNormType* _normalsIndexes = pc.m_normals->data() + node.firstCodeIndex;
-					PointCoordinateType*      outNorms        = ccPointCloud::s_normalBuffer;
+					PointCoordinateType*      outNorms        = ccPointCloud::GetNormalsBuffer();
 					for (uint32_t j = 0; j < node.pointCount; ++j)
 					{
 						const CCVector3& N = ccNormalVectors::GetNormal(*_normalsIndexes++);
@@ -1381,7 +1382,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 						*(outNorms)++      = N.y;
 						*(outNorms)++      = N.z;
 					}
-					currentVBO->write(currentVBO->normalShift, ccPointCloud::s_normalBuffer, sizeof(PointCoordinateType) * node.pointCount * 3);
+					currentVBO->write(currentVBO->normalShift, ccPointCloud::GetNormalsBuffer(), sizeof(PointCoordinateType) * node.pointCount * 3);
 				}
 				currentVBO->release();
 

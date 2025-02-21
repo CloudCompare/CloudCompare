@@ -256,7 +256,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const ccGenericG
 					if (glParams.showSF)
 					{
 						// copy SF colors in static array
-						ColorCompType* _sfColors = ccPointCloud::s_rgbBuffer4ub;
+						ColorCompType* _sfColors = ccPointCloud::GetColorsBuffer4u();
 						if (sourceSF)
 						{
 							size_t chunkStart = ccChunk::StartPos(chunkIndex);
@@ -289,7 +289,7 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const ccGenericG
 							}
 						}
 						// then send them in VRAM
-						currentVBO->write(currentVBO->rgbShift, ccPointCloud::s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, ccPointCloud::GetColorsBuffer4u(), sizeof(ColorCompType) * chunkSize * 4);
 						// upadte 'modification' flag for current displayed SF
 						sourceSF->setModificationFlag(false);
 					}
@@ -395,7 +395,7 @@ bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud& pc, const CC_DRAW_CO
 				{
 					vbo->release(); // Releae VBO for normals
 					// we must decode normals in a dedicated static array
-					PointCoordinateType*      _normals        = ccPointCloud::s_normalBuffer;
+					PointCoordinateType*      _normals        = ccPointCloud::GetNormalsBuffer();
 					const CompressedNormType* _normalsIndexes = ccChunk::Start(*(pc.m_normals), i);
 					size_t                    chunkSize       = ccChunk::Size(i, pc.m_normals->size());
 
@@ -409,7 +409,7 @@ bool ccPointCloudVBOManager::renderVBOs(const ccPointCloud& pc, const CC_DRAW_CO
 						*(_normals)++      = N.y;
 						*(_normals)++      = N.z;
 					}
-					glFunc->glNormalPointer(GL_FLOAT, 0, ccPointCloud::s_normalBuffer);
+					glFunc->glNormalPointer(GL_FLOAT, 0, ccPointCloud::GetNormalsBuffer());
 					vbo->bind(); // Re-bind VBO
 				}
 #endif

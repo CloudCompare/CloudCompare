@@ -3060,7 +3060,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		// whether VBOs are available (for faster display) or not
 		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
-		bool useRegularVBOs = useVBOPreconditions && !toDisplay.isLODDisplay() ? m_vboManager->updateVBOs(*this, m_currentDisplay, context, glParams) : false;
+		bool useRegularVBOs = false;
+		if(useVBOPreconditions && !toDisplay.isLODDisplay())
+		{
+			//! be sure to release LOD VBOs if needed
+			if(m_lod && m_lod->useVBO())
+			{
+				m_lod->releaseVBOs(m_currentDisplay);
+			}
+	 		useRegularVBOs = m_vboManager->updateVBOs(*this, m_currentDisplay, context, glParams);
+		}
+
 
 		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT);
 

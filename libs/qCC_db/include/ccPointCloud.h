@@ -910,13 +910,13 @@ public: // VBO, rendering
 	static constexpr unsigned SIZE_POWER = 19; //1 << SIZE_POWER ~ 512K
 	#endif
 
-	static constexpr unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << SIZE_POWER);
+	static constexpr unsigned MAX_POINT_COUNT_IN_STATIC_BUFFERS = (1 << SIZE_POWER);
 
 	//! Vertex indexes for OpenGL "arrays" drawing
-	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
-	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
-	static ColorCompType       s_rgbBuffer4ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4];
-	static float               s_rgbBuffer3f[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+	static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	static PointCoordinateType s_normalBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+	static ColorCompType       s_rgbBuffer4ub[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 4];
+	static float               s_rgbBuffer3f[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
 
 	using ccChunk = ccChunkN<19>;
 

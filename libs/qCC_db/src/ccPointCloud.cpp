@@ -2647,10 +2647,10 @@ inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField
 }
 
 //! Vertex indexes for OpenGL "arrays" drawing
-PointCoordinateType ccPointCloud::s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
-PointCoordinateType ccPointCloud::s_normalBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
-ColorCompType       ccPointCloud::s_rgbBuffer4ub[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4];
-float               ccPointCloud::s_rgbBuffer3f[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
+PointCoordinateType ccPointCloud::s_pointBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+PointCoordinateType ccPointCloud::s_normalBuffer[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
+ColorCompType       ccPointCloud::s_rgbBuffer4ub[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 4];
+float               ccPointCloud::s_rgbBuffer3f[MAX_POINT_COUNT_IN_STATIC_BUFFERS * 3];
 
 void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep)
 {
@@ -2944,6 +2944,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// check all conditions
 		bool useVBOPreconditions = context.useVBOs && !isVisibilityTableInstantiated()  && (!glParams.showSF || !m_currentDisplayedScalarField->mayHaveHiddenValues());
 		//ccLog::Print(QString("useVBOPrecond %1").arg(useVBOPreconditions));
+
 		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
@@ -3001,9 +3002,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								}
 							}
 
+
 							unsigned remainingPointsAtThisLevel = 0;
 							toDisplay.startIndex = 0;
-							toDisplay.count = MAX_POINT_COUNT_PER_LOD_RENDER_PASS;
+							toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;
 
 							if(!toDisplay.LODUseVBOs)
 							{

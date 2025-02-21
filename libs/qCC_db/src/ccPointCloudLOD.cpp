@@ -1099,11 +1099,18 @@ ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibil
                                                                                            float                       minPxFootprint)
     : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
     , m_minPxFootprint(minPxFootprint)
+    , m_minLevel(1)
 {
 }
 
 void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccAbstractPointCloudLOD::Node& node)
 {
+	if (node.level <= m_minLevel)
+	{
+		node.score = std::numeric_limits<float>::max();
+		return;
+	}
+
 	if (m_camera.perspective)
 	{
 		const float distance = (m_camera.modelViewMat * node.center).norm();
@@ -1419,26 +1426,28 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 	if (node.intersection == Frustum::OUTSIDE)
 		return true;
 
+	const uint8_t maxLevel = static_cast<uint8_t>((m_levels.size() - 1));
 	if (!node.pointCount) // could have children with points
 	{
-		if (node.level < m_levels.size() && node.childCount)
+		if (node.level < maxLevel && node.childCount)
 		{
 			for (int i = 0; i < 8; ++i)
 			{
 				if (node.childIndexes[i] >= 0)
 				{
 					if (!renderVBOsRecursive(this->node(node.childIndexes[i], node.level + 1), context, glParams, glFunc))
-					{
 						return false;
-					}
 				}
 			}
 		}
 		return true;
 	}
+
 	assert(node.vbo);
+
 	if (node.vbo && node.vbo->isCreated() && node.vbo->bind())
 	{
+
 		const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
 		glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
 
@@ -1458,7 +1467,6 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 		// we can use VBOs directly
 		glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(node.vbo->pointCount)); // Could be glMultiDrawArrays with shaders...
 
-		uint8_t maxLevel = static_cast<uint8_t>((m_levels.size() - 1));
 		if (node.level < maxLevel && node.childCount)
 		{
 			for (int i = 0; i < 8; ++i)
@@ -1466,9 +1474,7 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 				if (node.childIndexes[i] >= 0)
 				{
 					if (!renderVBOsRecursive(this->node(node.childIndexes[i], node.level + 1), context, glParams, glFunc))
-					{
 						return false;
-					}
 				}
 			}
 		}

@@ -124,8 +124,7 @@ class ccAbstractVBOManager
 	{
 	}
 
-	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) = 0;
-
+	//! Reset all flat of this Manager
 	void resetFlags()
 	{
 		hasColors         = false;
@@ -136,9 +135,34 @@ class ccAbstractVBOManager
 		managerState      = ccAbstractVBOManager::NEW;
 	}
 
+	//! Release all VBOs of this manager and reset the flags and switches
+	/*!
+	    \param currentDisplay A pointer to the current display context.
+	        This parameter is used to ensure that the VBOs are released in the correct OpenGL context.
+	*/
+	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) = 0;
+
+	//! Try to update the VBOs with the data from the given point cloud.
+	/*!
+	    \param pc The point cloud containing the data to be uploaded to the VBOs.
+	    \param currentDisplay A pointer to the current display. This parameter is used to ensure that the VBOs are updatedééé.
+	    \param context The drawing context, mainly used to retrieve the GL function.
+	    \param glParams the drawing parametes that specify how the VBOs should be updated (color, SF, normals...).
+
+	    \return True if the VBOs are successfully updated, false otherwise.
+	*/
 	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
 
-	//! Dependency on point cloud is needed by the "Regular" VBO Manager (ccPointCloudVBOManager) to handle normals
+	//! Try to render the VBOs associated with the given point cloud.
+	/*!
+	    \param pc The point cloud containing (see the note)
+	    \param context The drawing context, mainly used to retrieve the GL function.
+	    \param glParams the drawing parameter that specify how the VBOs should be rendered (color, SF, normals...).
+
+	    \return True if the VBOs were successfully rendered, false otherwise.
+
+	    \note the dependency on point cloud is needed by the "Regular" VBO Manager (ccPointCloudVBOManager) to handle normals
+	*/
 	virtual bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
 
   public: // members
@@ -156,6 +180,7 @@ class ccAbstractVBOManager
 class ccPointCloudVBOManager : public ccAbstractVBOManager
 {
   public: // methods
+	//! Destroy all ccVBOs in the vector and reset the flags and switches
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
 
 	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
@@ -163,6 +188,7 @@ class ccPointCloudVBOManager : public ccAbstractVBOManager
 	bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
   protected: // members
+	//! this manager store pointers to ccVBOs in a vector
 	std::vector<ccVBO*> m_vbos;
 };
 

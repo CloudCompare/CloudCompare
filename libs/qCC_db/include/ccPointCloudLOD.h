@@ -180,6 +180,7 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 		return m_levels[level].data[index];
 	}
 
+	//! get the root node
 	inline Node& root()
 	{
 		return node(0, 0);
@@ -189,14 +190,6 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 	{
 		return node(0, 0);
 	}
-
-	virtual bool useVBO() = 0;
-
-	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override = 0;
-
-	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
-
-	virtual bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
 	//! Test all cells visibility with a given frustum
 	/** Automatically calls resetVisibility
@@ -220,6 +213,16 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 
 	//! Returns the memory used by the structure (in bytes)
 	size_t memory() const;
+
+	//! Whether this LOD can use VBO capabilities for Rendering
+	virtual bool useVBO() = 0;
+
+  public: // inherited from ccAbrasctVBOManager
+	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override = 0;
+
+	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
+
+	virtual bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
   protected: // methods
 	//! Constructor with provided Lod levels
@@ -299,13 +302,13 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
 class ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccGenericPointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&     lod,
+	ccGenericPointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
 	                                        const ccGLCameraParameters& camera,
 	                                        unsigned char               maxLevel);
 
 	//! Sets custom clip planes for additional visibility constraints.
 	void setClipPlanes(const ccClipPlaneSet& clipPlanes);
-	//! brief Determines whether a node is intersected by the clipping planes.
+	//! Determines whether a node is intersected by the clipping planes.
 	void clippingIntersection(ccAbstractPointCloudLOD::Node& node);
 	//! Propagates a visibility flag to a node and its children.
 	void propagateFlag(ccAbstractPointCloudLOD::Node& node, uint8_t flag);
@@ -313,7 +316,7 @@ class ccGenericPointCloudLODVisibilityFlagger
 	virtual uint32_t flag(ccAbstractPointCloudLOD::Node& node);
 
   protected:
-	ccAbstractPointCloudLOD&     m_lod;
+	ccAbstractPointCloudLOD&    m_lod;
 	const ccGLCameraParameters& m_camera;
 	Frustum                     m_frustum;
 	unsigned char               m_maxLevel;
@@ -330,7 +333,7 @@ class ccGenericPointCloudLODVisibilityFlagger
 class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudLODVisibilityFlagger
 {
   public:
-	ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&     lod,
+	ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
 	                                             const ccGLCameraParameters& camera,
 	                                             unsigned char               maxLevel,
 	                                             float                       minPxFootprint);
@@ -338,13 +341,19 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 
 	//! Computes the projected screen-space footprint of a node.
 	void computeNodeFootprint(ccAbstractPointCloudLOD::Node& node);
-	//! dedicated function for INSIDE flag propagation
+	//! Dedicated function for INSIDE flag propagation
 	uint32_t propagateInsideFlag(ccAbstractPointCloudLOD::Node& node);
 	//! override
 	uint32_t flag(ccAbstractPointCloudLOD::Node& node) override;
 
   private:
-	float    m_minPxFootprint;
+	//! Rhreshold, below this value, the node is rendered considered "invisible".
+	/* could be exposed to the properties tree */
+	float m_minPxFootprint;
+	//! Min level to render, even if the threshold requirement  is not met (see computeNodeFootprint)
+	/* first two layers are very coarse, 1 is the default. Potree use a value of 2.
+	It could be exposed to the propertiesTree too*/
+	uint8_t m_minLevel;
 };
 
 //! The "original" CloudCompare LOD
@@ -355,6 +364,7 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 
 	~ccInternalPointCloudLOD();
 
+  public: // methods ccAbstractPointCloudLOD
 	//! Initializes the construction process (asynchronous)
 	bool init(ccPointCloud* cloud) override;
 
@@ -367,17 +377,24 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 		return false;
 	}
 
-	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override{};
+  public: // methods ccAbstractVBOManager
+	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override
+	{
+		return;
+	};
 
 	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override
 	{
 		return false;
 	};
 
-	bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override {return false;};
+	bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override
+	{
+		return false;
+	};
 
   protected: // methods
-	//! cleanData override
+	         //! cleanData override
 	void clearData() override;
 
 	//! Return sthe flagger used by this LOD
@@ -421,12 +438,16 @@ It assumes the point cloud is organized by chunks.
 class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 {
   public: // methods
+	      //! Default constucot
 	ccNestedOctreePointCloudLOD() = default;
 
+	//! Construct a LOD from externally defined lodLayers
 	ccNestedOctreePointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
 
+	//! Default Destructor
 	~ccNestedOctreePointCloudLOD() = default;
 
+  public: // methods ccAbstractPointCloudLOD
 	bool init(ccPointCloud* cloud) override;
 
 	void clear() override;
@@ -438,6 +459,7 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 		return true;
 	}
 
+  public: // methods ccAbstractVBOManager
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
 
 	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
@@ -450,5 +472,7 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel, 75.0);
 	}
 
-	template <class QOpenGLFunctions> bool renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc);
+  protected:
+	template <class QOpenGLFunctions>
+	bool renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc);
 };

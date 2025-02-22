@@ -3018,19 +3018,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								//first time: we flag the cells visibility and count the number of visible points
 								m_lod->flagVisibility(camera, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 
-								if(useVBOPreconditions)
-								{
-									toDisplay.LODUseVBOs = m_lod->updateVBOs(*this, m_currentDisplay, context, glParams);
-								}
+								// We update the VBOs of the LOD to update the toDisplay state
+								toDisplay.LODUseVBOs = useVBOPreconditions ? m_lod->updateVBOs(*this, m_currentDisplay, context, glParams) : false;
 							}
 
-
 							unsigned remainingPointsAtThisLevel = 0;
-							toDisplay.startIndex = 0;
-							toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;
 
+							// if the LOD do not use VBO or VBO fail, we fallback to IndexMap based LOD
 							if (!toDisplay.LODUseVBOs)
 							{
+								toDisplay.startIndex = 0;
+								toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;	
 								toDisplay.indexMap = &m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
 								if (toDisplay.count == 0)
 								{
@@ -3047,11 +3045,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								context.moreLODPointsAvailable = (remainingPointsAtThisLevel != 0);
 								context.higherLODLevelsAvailable = (!m_lod->allDisplayed() && context.currentLODLevel + 1 <= maxLevel);
 							}
-							else
+							// Else we inhibit the IndexMap basde rendering and notify the ccGLWindows that LOD is finished for this cloud.
+							// We can change this behavior to have an hybrid based LOD (VBO when moving and IndexMap when the camera is stationary)
+							else 
 							{
 								toDisplay.count = 0;
 								toDisplay.indexMap = nullptr;
-								//could we draw more points at the next level?
+								// Tells ccGLWindows we can't draw more point (see comment above)
 								context.moreLODPointsAvailable = false;
 								context.higherLODLevelsAvailable = false;
 							}
@@ -3083,12 +3083,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
-		// whether VBOs are available (for faster display) or not
-		// Regular VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
+		// Whether VBOs are available (for faster display) or not
+		// standard VBOs are not compatible with LoD (VBO LOD as well as IndexMap based LOD)
 		bool useStandardVBOs = false;
 		if (useVBOPreconditions && !toDisplay.isLODDisplay())
 		{
-			//! be sure to release LOD VBOs if needed
+			// Be sure we release LOD VBOs if needed
 			if(m_lod)
 			{
 				m_lod->releaseVBOs(m_currentDisplay);
@@ -3373,6 +3373,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else if (toDisplay.LODUseVBOs) // LOD VBO Display
 					{
 						assert(m_lod);
+						
 						m_lod->renderVBOs(*this, context, glParams);
 					}
 					else if (useStandardVBOs)

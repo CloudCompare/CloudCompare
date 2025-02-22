@@ -1226,7 +1226,7 @@ void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentD
 
 bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
-	// TODO: the necessary checks for LOD datastructure
+	// The necessary checks for LOD datastructure
 	if (m_state != INITIALIZED)
 	{
 		// this is unlikely to happen
@@ -1256,11 +1256,9 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 		{
 			updateFlags |= UPDATE_NORMALS;
 		}
-		// nothing to do?
-		if (updateFlags == 0) // DO NOTHING
-		{
-			// return true;
-		}
+		// if (updateFlags == 0) 
+		// in this case there is no VBO update.
+		// But we could remove or create some VBOs (depending on the visibility)
 	}
 	else
 	{
@@ -1419,7 +1417,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 template <class QOpenGLFunctions>
 bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc)
 {
-	// check if the node is intersected or inside the frustum
+	// Check if the node is intersected or inside the frustum
 	// and if it has data to render
 	assert(node.intersection != UNDEFINED);
 	assert(glFunc != nullptr);
@@ -1428,7 +1426,7 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 		return true;
 
 	const uint8_t maxLevel = static_cast<uint8_t>((m_levels.size() - 1));
-	if (!node.pointCount) // could have children with points
+	if (!node.pointCount) // An empty node could have children with points
 	{
 		if (node.level < maxLevel && node.childCount)
 		{
@@ -1483,8 +1481,6 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 	}
 	else
 	{
-		ccLog::Warning("[VBO] Failed to bind VBO?! We'll deactivate them then...");
-		managerState = ccAbstractVBOManager::FAILED;
 		return false;
 	}
 }
@@ -1505,7 +1501,13 @@ bool ccNestedOctreePointCloudLOD::renderVBOs(const ccPointCloud& pc, const CC_DR
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
-	return renderVBOsRecursive<QOpenGLFunctions_2_1>(node(0, 0), context, glParams, glFunc);
+	if (!renderVBOsRecursive<QOpenGLFunctions_2_1>(node(0, 0), context, glParams, glFunc))
+	{
+		ccLog::Warning("[VBO] Failed to bind or render VBOs We'll deactivate them then...");
+		managerState = ccAbstractVBOManager::FAILED;
+		return false;
+	}
+	return true;
 }
 
 #include "ccPointCloudLOD.moc"

@@ -112,10 +112,10 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	m_pixelSize = (context.glW != 0 ? params.computeWidthAtFocalDist() / context.glW : 0);
 
 	//get mouse position
-	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
+	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos()) * context.devicePixelRatio;
 	int mx = p.x(); //mouse x-coord
 	int my = context.glH - 1 - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
-	
+
 	//calculate circle location
 	int cx = mx - context.glW / 2;
 	int cy = my - context.glH / 2;

@@ -18,9 +18,9 @@
 // ##########################################################################
 
 // qCC_db
-#include "ccOctree.h"
 #include "ccFrustum.h"
 #include "ccGenericGLDisplay.h"
+#include "ccOctree.h"
 #include "ccVBOManager.h"
 
 // Qt
@@ -217,11 +217,11 @@ class ccAbstractPointCloudLOD : public ccAbstractVBOManager
   public: // inherited from ccAbrasctVBOManager
 	virtual void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override = 0;
 
-	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
+	virtual bool updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
 	virtual bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override = 0;
 
-  protected: // methods
+  protected: // methods ccAbstractPointCloudLOD
 	//! Constructor with provided Lod levels
 	ccAbstractPointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
 
@@ -334,6 +334,7 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 	                                             const ccGLCameraParameters& camera,
 	                                             unsigned char               maxLevel,
 	                                             float                       minPxFootprint);
+
 	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
 
 	//! Computes the projected screen-space footprint of a node.
@@ -344,7 +345,7 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 	uint32_t flag(ccAbstractPointCloudLOD::Node& node) override;
 
   private:
-	//! Rhreshold, below this value, the node is rendered considered "invisible".
+	//! threshold, below this value, the node is rendered considered "invisible".
 	/* could be exposed to the properties tree */
 	float m_minPxFootprint;
 	//! Min level to render, even if the threshold requirement  is not met (see computeNodeFootprint)
@@ -375,7 +376,7 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 		return;
 	};
 
-	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override
+	bool updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override
 	{
 		return false;
 	};
@@ -385,11 +386,11 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 		return false;
 	};
 
-  protected: // methods
-	         //! cleanData override
+  protected: // methods ccAbstractPointCloudLOD
+	//! cleanData override
 	void clearData() override;
 
-	//! Return sthe flagger used by this LOD
+	//! Returns the flagger used by this LOD
 	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{
 		return std::make_unique<ccGenericPointCloudLODVisibilityFlagger>(lod, camera, maxLevel);
@@ -414,7 +415,7 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 
 //! The most common LOD datastructure (in the litterature and implementations)
 /*!
-This kind of structure is used by Potree and entwine (thus COPC, untwine...).
+    This kind of structure is used by Potree and entwine (thus COPC, untwine...).
 Each layer contains a subsambled version of the point cloud.
 Cloud resolution increases as we go deeper into the octree levels.
 It's additive, union of all points of all the cells (at all levels) = the point cloud
@@ -430,16 +431,13 @@ It assumes the point cloud is organized by chunks.
 class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 {
   public: // methods
-	      //! Default constucot
-	ccNestedOctreePointCloudLOD() = default;
-
 	//! Construct a LOD from externally defined lodLayers
-	ccNestedOctreePointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
+	explicit ccNestedOctreePointCloudLOD(const std::vector<ccAbstractPointCloudLOD::Level>& lodLayers);
 
 	//! Default Destructor
 	~ccNestedOctreePointCloudLOD() = default;
 
-  public: // methods ccAbstractPointCloudLOD
+  public: // methods ccAbstractVBOManager
 	bool init(ccPointCloud* cloud) override;
 
 	void clear() override;
@@ -449,7 +447,7 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
   public: // methods ccAbstractVBOManager
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
 
-	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+	bool updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
 	bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
@@ -460,6 +458,18 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
 	}
 
   protected:
+	//! Recursivly render VBOs from a tree node
+	/*!
+	    This function traverses a the LOD starting from the given node and renders
+	    the VBOs associated with each node.
+
+	    \param pc The point cloud containing (see the note)
+	    \param context The drawing context, mainly used to retrieve the GL function.
+	    \param glParams the drawing parameter that specify how the VBOs should be rendered (color, SF, normals...).
+	    \param glFunc the OpenGLFunctions provider used to for rendering.
+
+	    \return True if the VBOs were successfully rendered, false otherwise.
+	 */
 	template <class QOpenGLFunctions>
 	bool renderVBOsRecursive(ccAbstractPointCloudLOD::Node& node, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, QOpenGLFunctions* glFunc);
 };

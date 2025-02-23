@@ -3012,7 +3012,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								m_lod->flagVisibility(camera, m_clipPlanes.empty() ? nullptr : &m_clipPlanes);
 
 								// We update the VBOs of the LOD to update the toDisplay state
-								toDisplay.LODUseVBOs = useVBOPreconditions ? m_lod->updateVBOs(*this, m_currentDisplay, context, glParams) : false;
+								toDisplay.LODUseVBOs = useVBOPreconditions ? m_lod->updateVBOs(*this, context, glParams) : false;
 							}
 
 							unsigned remainingPointsAtThisLevel = 0;
@@ -3086,7 +3086,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				m_lod->releaseVBOs(m_currentDisplay);
 			}
-	 		useStandardVBOs = m_standardVBOManager.updateVBOs(*this, m_currentDisplay, context, glParams);
+	 		useStandardVBOs = m_standardVBOManager.updateVBOs(*this, context, glParams);
 		}
 
 

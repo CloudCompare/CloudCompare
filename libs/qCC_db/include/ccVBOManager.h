@@ -76,6 +76,7 @@ class ccAbstractVBOManager
 		UPDATE_ALL     = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS
 	};
 
+	//! Catch GL errors from VBO creation and foward them to
 	static bool CatchGLErrors(GLenum err, const char* context)
 	{
 		// catch GL errors
@@ -145,17 +146,16 @@ class ccAbstractVBOManager
 	//! Try to update the VBOs with the data from the given point cloud.
 	/*!
 	    \param pc The point cloud containing the data to be uploaded to the VBOs.
-	    \param currentDisplay A pointer to the current display. This parameter is used to ensure that the VBOs are updatedééé.
 	    \param context The drawing context, mainly used to retrieve the GL function.
 	    \param glParams the drawing parametes that specify how the VBOs should be updated (color, SF, normals...).
 
 	    \return True if the VBOs are successfully updated, false otherwise.
 	*/
-	virtual bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
+	virtual bool updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) = 0;
 
 	//! Try to render the VBOs associated with the given point cloud.
 	/*!
-	    \param pc The point cloud containing (see the note)
+	    \param pc The point cloud containing the data used for rendering (see the note)
 	    \param context The drawing context, mainly used to retrieve the GL function.
 	    \param glParams the drawing parameter that specify how the VBOs should be rendered (color, SF, normals...).
 
@@ -180,14 +180,16 @@ class ccAbstractVBOManager
 class ccPointCloudVBOManager : public ccAbstractVBOManager
 {
   public: // methods
+	//! default constructor
 	ccPointCloudVBOManager() = default;
 
+	//! default destructor
 	~ccPointCloudVBOManager() = default;
 
 	//! Destroy all ccVBOs in the vector and reset the flags and switches
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
 
-	bool updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
+	bool updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 
 	bool renderVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams) override;
 

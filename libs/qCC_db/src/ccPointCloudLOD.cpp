@@ -1224,7 +1224,7 @@ void ccNestedOctreePointCloudLOD::releaseVBOs(const ccGenericGLDisplay* currentD
 	resetFlags();
 };
 
-bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGenericGLDisplay* currentDisplay, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
+bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
 	// The necessary checks for LOD datastructure
 	if (m_state != INITIALIZED)
@@ -1256,7 +1256,7 @@ bool ccNestedOctreePointCloudLOD::updateVBOs(const ccPointCloud& pc, const ccGen
 		{
 			updateFlags |= UPDATE_NORMALS;
 		}
-		// if (updateFlags == 0) 
+		// if (updateFlags == 0)
 		// in this case there is no VBO update.
 		// But we could remove or create some VBOs (depending on the visibility)
 	}
@@ -1446,7 +1446,6 @@ bool ccNestedOctreePointCloudLOD::renderVBOsRecursive(ccAbstractPointCloudLOD::N
 
 	if (node.vbo && node.vbo->isCreated() && node.vbo->bind())
 	{
-
 		const GLbyte* start = nullptr; // fake pointer used to prevent warnings on Linux
 		glFunc->glVertexPointer(3, GL_FLOAT, 3 * sizeof(PointCoordinateType), start);
 

@@ -1149,6 +1149,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 				}
+				scale = static_cast<float>(scale * context.devicePixelRatio);
 				glFunc->glScalef(scale, scale, scale);
 				m_pickedPoints[i].markerScale = scale;
 				c_unitPointMarker->draw(markerContext);

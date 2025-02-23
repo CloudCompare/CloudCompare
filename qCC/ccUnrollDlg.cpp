@@ -298,7 +298,7 @@ void ccUnrollDlg::fromPersistentSettings()
 		double radius          = settings.value("radius",            m_ui->radiusDoubleSpinBox->value()).toDouble();
 		bool autoCenter        = settings.value("autoCenter",        m_ui->checkBoxAuto->isChecked()).toBool();
 		bool exportDeviationSF = settings.value("exportDeviationSF", m_ui->exportDeviationSFCheckBox->isChecked()).toBool();
-		bool spanRatio         = settings.value("spanRatio",         m_ui->conicalProjSpanRatioDoubleSpinBox->value()).toDouble();
+		double spanRatio         = settings.value("spanRatio",         (2 * M_PI) / 100).toDouble(); // see https://github.com/CloudCompare/CloudCompare/issues/1767
 
 		// compatibility with older versions
 		if (projectionType < 0 || shapeType > 1)

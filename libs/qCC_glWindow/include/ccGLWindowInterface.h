@@ -1293,55 +1293,6 @@ protected: //members
 	//! Auto-refresh timer
 	QTimer m_autoRefreshTimer;
 
-	//! Precomputed stuff for the 'hot zone'
-	struct HotZone
-	{
-		//display font
-		QFont font;
-		//text height
-		int textHeight;
-		//text shift
-		int yTextBottomLineShift;
-		//default color
-		ccColor::Rgb color;
-
-		//bubble-view label rect.
-		QString bbv_label;
-		//bubble-view label rect.
-		QRect bbv_labelRect;
-		//bubble-view row width
-		int bbv_totalWidth;
-
-		//fullscreen label rect.
-		QString fs_label;
-		//fullscreen label rect.
-		QRect fs_labelRect;
-		//fullscreen row width
-		int fs_totalWidth;
-
-		//point size label
-		QString psi_label;
-		//point size label rect.
-		QRect psi_labelRect;
-		//point size row width
-		int psi_totalWidth;
-
-		//line size label
-		QString lsi_label;
-		//line size label rect.
-		QRect lsi_labelRect;
-		//line size row width
-		int lsi_totalWidth;
-
-		int margin;
-		int iconSize;
-		QPoint topCorner;
-
-		explicit HotZone(ccGLWindowInterface* win);
-
-		QRect rect(bool clickableItemsVisible, bool bubbleViewModeEnabled, bool fullScreenEnabled) const;
-	};
-
 	//! Hot zone
 	HotZone* m_hotZone;
 

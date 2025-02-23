@@ -149,7 +149,6 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_currentDisplayedScalarFieldIndex(-1)
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
-	, m_standardVBOManager(new ccPointCloudVBOManager)
 	, m_fwfData(nullptr)
 	, m_useLODRendering(true)
 	, m_normalsDrawnAsLines(false)
@@ -521,12 +520,6 @@ ccPointCloud::~ccPointCloud()
 	{
 		delete m_lod;
 		m_lod = nullptr;
-	}
-
-	if(m_standardVBOManager)
-	{
-		delete m_standardVBOManager;
-		m_standardVBOManager = nullptr;
 	}
 }
 
@@ -2991,7 +2984,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						//Reset the VBO manager if needed:
 						// We do not want to use the LoD and
 						// to have the cloud loaded in the VBOs simultaneously.
-						m_standardVBOManager->releaseVBOs(m_currentDisplay);
+						m_standardVBOManager.releaseVBOs(m_currentDisplay);
 
 						unsigned char maxLevel = m_lod->maxLevel();
 						bool underConstruction = m_lod->isUnderConstruction();
@@ -3028,7 +3021,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							if (!toDisplay.LODUseVBOs)
 							{
 								toDisplay.startIndex = 0;
-								toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;	
+								toDisplay.count = MAX_POINT_COUNT_IN_STATIC_BUFFERS;
 								toDisplay.indexMap = &m_lod->getIndexMap(context.currentLODLevel, toDisplay.count, remainingPointsAtThisLevel);
 								if (toDisplay.count == 0)
 								{
@@ -3047,7 +3040,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							// Else we inhibit the IndexMap basde rendering and notify the ccGLWindows that LOD is finished for this cloud.
 							// We can change this behavior to have an hybrid based LOD (VBO when moving and IndexMap when the camera is stationary)
-							else 
+							else
 							{
 								toDisplay.count = 0;
 								toDisplay.indexMap = nullptr;
@@ -3093,7 +3086,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				m_lod->releaseVBOs(m_currentDisplay);
 			}
-	 		useStandardVBOs = m_standardVBOManager->updateVBOs(*this, m_currentDisplay, context, glParams);
+	 		useStandardVBOs = m_standardVBOManager.updateVBOs(*this, m_currentDisplay, context, glParams);
 		}
 
 
@@ -3373,13 +3366,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else if (toDisplay.LODUseVBOs) // LOD VBO Display
 					{
 						assert(m_lod);
-						
+
 						m_lod->renderVBOs(*this, context, glParams);
 					}
 					else if (useStandardVBOs)
 					{
-						assert(m_standardVBOManager);
-						m_standardVBOManager->renderVBOs(*this, context, glParams);
+						m_standardVBOManager.renderVBOs(*this, context, glParams);
 					}
 					else // Regular VBOs or chucked
 					{
@@ -3597,8 +3589,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 				else if (useStandardVBOs)
 				{
-					assert(m_standardVBOManager);
-					m_standardVBOManager->renderVBOs(*this, context, glParams);
+					m_standardVBOManager.renderVBOs(*this, context, glParams);
 				}
 				else
 				{
@@ -5399,14 +5390,22 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 
 size_t ccPointCloud::vboSize() const
 {
-	return m_standardVBOManager->totalMemSizeBytes;
+	if (!m_lod)
+	{
+		return m_standardVBOManager.totalMemSizeBytes;
+	}
+	else
+	{
+		// we add the two but only one should be != 0
+		return m_lod->totalMemSizeBytes + m_standardVBOManager.totalMemSizeBytes;
+	}
 }
 
 
 void ccPointCloud::releaseAllVBOs()
 {
-	m_standardVBOManager->releaseVBOs(m_currentDisplay);
-	if(m_lod)
+	m_standardVBOManager.releaseVBOs(m_currentDisplay);
+	if (m_lod)
 	{
 		m_lod->releaseVBOs(m_currentDisplay);
 	}

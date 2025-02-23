@@ -164,9 +164,8 @@ public: //features deletion/clearing
 	//! Notify a modification of color / scalar field display parameters or contents
 	inline void colorsHaveChanged()
 	{
-		assert(m_standardVBOManager);
-		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
-		if(m_lod)
+		m_standardVBOManager.updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
+		if (m_lod)
 		{
 			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_COLORS;
 		};
@@ -174,9 +173,8 @@ public: //features deletion/clearing
 	//! Notify a modification of normals display parameters or contents
 	inline void normalsHaveChanged()
 	{
-		assert(m_standardVBOManager);
-		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS;
-		if(m_lod)
+		m_standardVBOManager.updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS;
+		if (m_lod)
 		{
 			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_NORMALS;
 		};
@@ -185,9 +183,8 @@ public: //features deletion/clearing
 	//! Notify a modification of points display parameters or contents
 	inline void pointsHaveChanged()
 	{
-		assert(m_standardVBOManager);
-		m_standardVBOManager->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS;
-		if(m_lod)
+		m_standardVBOManager.updateFlags |= ccAbstractVBOManager::UPDATE_POINTS;
+		if (m_lod)
 		{
 			m_lod->updateFlags |= ccAbstractVBOManager::UPDATE_POINTS;
 		};
@@ -927,7 +924,7 @@ public: // VBO, rendering
 	static float* GetColorsBuffer3f();
 
 	//! Set of VBOs attached to this cloud
-	ccPointCloudVBOManager* m_standardVBOManager;
+	ccPointCloudVBOManager m_standardVBOManager;
 
 	//per-block data transfer to the GPU (standard mode)
 	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep);

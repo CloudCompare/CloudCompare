@@ -180,6 +180,10 @@ class ccAbstractVBOManager
 class ccPointCloudVBOManager : public ccAbstractVBOManager
 {
   public: // methods
+	ccPointCloudVBOManager() = default;
+
+	~ccPointCloudVBOManager() = default;
+
 	//! Destroy all ccVBOs in the vector and reset the flags and switches
 	void releaseVBOs(const ccGenericGLDisplay* currentDisplay) override;
 

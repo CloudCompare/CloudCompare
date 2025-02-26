@@ -18,9 +18,6 @@
 #include "ccPointCloudLOD.h"
 
 // Local
-#include "ccFrustum.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericMesh.h"
 #include "ccLog.h"
 #include "ccPointCloud.h"
 #include "ccVBOManager.h"
@@ -1097,10 +1094,11 @@ uint32_t ccGenericPointCloudLODVisibilityFlagger::flag(ccAbstractPointCloudLOD::
 ccNestedOctreePointCloudLODVisibilityFlagger::ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
                                                                                            const ccGLCameraParameters& camera,
                                                                                            unsigned char               maxLevel,
-                                                                                           float                       minPxFootprint)
+                                                                                           float                       minPxFootprint,
+                                                                                           unsigned char               minLevel)
     : ccGenericPointCloudLODVisibilityFlagger(lod, camera, maxLevel)
     , m_minPxFootprint(minPxFootprint)
-    , m_minLevel(1)
+    , m_minLevel(minLevel)
 {
 }
 
@@ -1114,7 +1112,7 @@ void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccAbstra
 
 	if (m_camera.perspective)
 	{
-		const float distance = (m_camera.modelViewMat * node.center).norm();
+		const float distance = (m_camera.modelViewMat * (node.center, 0)).norm();
 		if (distance < node.radius)
 		{
 			node.score = std::numeric_limits<float>::max();

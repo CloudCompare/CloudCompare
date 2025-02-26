@@ -110,8 +110,6 @@ void ccPointCloudVBOManager::releaseVBOs(const ccGenericGLDisplay* currentDispla
 
 bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const CC_DRAW_CONTEXT& context, const glDrawParams& glParams)
 {
-	using ccChunk = ccPointCloud::ccChunk;
-
 	if (!pc.m_currentDisplay)
 	{
 		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(pc.getName()));
@@ -165,7 +163,9 @@ bool ccPointCloudVBOManager::updateVBOs(const ccPointCloud& pc, const CC_DRAW_CO
 		updateFlags = ccAbstractVBOManager::UPDATE_ALL;
 	}
 
+	using ccChunk = ccPointCloud::ccChunk;
 	size_t chunksCount = ccChunk::Count(pc.m_points);
+
 	// allocate per-chunk descriptors if necessary
 	if (m_vbos.size() != chunksCount)
 	{

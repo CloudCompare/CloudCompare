@@ -333,7 +333,8 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 	ccNestedOctreePointCloudLODVisibilityFlagger(ccAbstractPointCloudLOD&    lod,
 	                                             const ccGLCameraParameters& camera,
 	                                             unsigned char               maxLevel,
-	                                             float                       minPxFootprint);
+	                                             float                       minPxFootprint,
+	                                             unsigned char               minLevel);
 
 	~ccNestedOctreePointCloudLODVisibilityFlagger() = default;
 
@@ -349,9 +350,9 @@ class ccNestedOctreePointCloudLODVisibilityFlagger : public ccGenericPointCloudL
 	/* could be exposed to the properties tree */
 	float m_minPxFootprint;
 	//! Min level to render, even if the threshold requirement  is not met (see computeNodeFootprint)
-	/* first two layers are very coarse, 1 is the default. Potree use a value of 2.
+	/* First two layers are very coarse, 1 is the default. Potree use a value of 2.
 	It could be exposed to the propertiesTree too*/
-	uint8_t m_minLevel;
+	unsigned char m_minLevel;
 };
 
 //! The "original" CloudCompare LOD
@@ -415,7 +416,7 @@ class ccInternalPointCloudLOD : public ccAbstractPointCloudLOD
 
 //! The most common LOD datastructure (in the litterature and implementations)
 /*!
-    This kind of structure is used by Potree and entwine (thus COPC, untwine...).
+This kind of structure is used by Potree and entwine (thus COPC, untwine...).
 Each layer contains a subsambled version of the point cloud.
 Cloud resolution increases as we go deeper into the octree levels.
 It's additive, union of all points of all the cells (at all levels) = the point cloud
@@ -454,7 +455,7 @@ class ccNestedOctreePointCloudLOD : public ccAbstractPointCloudLOD
   protected: // methods
 	std::unique_ptr<ccGenericPointCloudLODVisibilityFlagger> getVisibilityFlagger(ccAbstractPointCloudLOD& lod, const ccGLCameraParameters& camera, unsigned char maxLevel) override
 	{
-		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel, 75.0);
+		return std::make_unique<ccNestedOctreePointCloudLODVisibilityFlagger>(lod, camera, maxLevel, 75.0, 1);
 	}
 
   protected:

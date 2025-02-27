@@ -476,7 +476,7 @@ namespace PdmsTools
 			PointCoordinateType value;
 			int valueChanges;
 
-			explicit NumericalValue(Token t) : Command(t), valueChanges(0) {}
+			explicit NumericalValue(Token t) : Command(t), value(0), valueChanges(0) {}
 			bool handle(PointCoordinateType numvalue) override;
 			bool isValid() const override;
 			virtual PointCoordinateType getValue() const;

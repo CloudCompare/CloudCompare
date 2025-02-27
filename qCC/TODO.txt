@@ -26,6 +26,8 @@ Big ones:
 [*] Undo mechanism
 
 Command line mode:
+[*] Support import of lat/lon data (Latitude, Longitude, Northing, Easting) (https://www.cloudcompare.org/forum/viewtopic.php?p=30502)
+[*] Option to generate a scalar field with the cloud indexes when merging clouds (https://www.cloudcompare.org/forum/viewtopic.php?p=29907)
 [*] Option to set or add the Global Shift manually (https://www.cloudcompare.org/forum/viewtopic.php?p=24959 or https://www.cloudcompare.org/forum/viewtopic.php?t=4307)
 [*] SF_TO_COORD option (see https://www.cloudcompare.org/forum/viewtopic.php?p=24955)
 [*] Label Connected Components tool (http://www.cloudcompare.org/forum/viewtopic.php?t=933)
@@ -38,6 +40,7 @@ Command line mode:
 [*] Choose the format of STL output (acsii / binary - see http://www.danielgm.net/cc/forum/viewtopic.php?f=13)
 [*] Set a custom prefix for saved filenames (see https://www.cloudcompare.org/forum/viewtopic.php?p=23987)
 [*] Rasterize tool
+	- set the raster grid origin/position (https://www.cloudcompare.org/forum/viewtopic.php?p=30724)
 	- set the active layer for raster generation (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
 	- set the output raster filename (see https://www.cloudcompare.org/forum/viewtopic.php?t=5576)
 	- compute and export the population per cell (https://www.cloudcompare.org/forum/viewtopic.php?p=25085)
@@ -64,7 +67,18 @@ qFacets plugin:
 [*] Add the facet perimeter to the set of exported values
 [*] Export more metrics in CSV/SHP DB files (perimeter, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=28216#p28216)
 
+Scissors/segmentation tool
+[*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
+[*] Add a 'circle' option in the Graphical Segmentation tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5319 and https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
+[*] Add a confirmation popup when exiting from the Segmentation tool with 'ESC' (https://www.cloudcompare.org/forum/viewtopic.php?t=5793)
+[*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
+[*] Add a filter to the current scissors selection based on the point colors (https://www.cloudcompare.org/forum/viewtopic.php?p=29711)
+[*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
+
 Various:
+[*] Display a dialog when loading E57 files to choose which scan and image to load (https://www.cloudcompare.org/forum/viewtopic.php?p=30783)
+[*] Create a compressed version of the BIN format (https://www.cloudcompare.org/forum/viewtopic.php?p=30722)
+[*] ASCII load file dialog: display the extracted colum title directly under the role of each column (https://www.cloudcompare.org/forum/viewtopic.php?t=7085)
 [*] Option to lock an entity (https://www.cloudcompare.org/forum/viewtopic.php?p=29251)
 [*] Batch export several entities to single-entity formats (LAS, etc.) (see https://www.cloudcompare.org/forum/viewtopic.php?p=29066)
 [*] Restore the option to not decompose the classification field with the new LAS I/O filter (https://www.cloudcompare.org/forum/viewtopic.php?p=28999)
@@ -82,26 +96,20 @@ Various:
 	- export other fields than the height field (SFs, colors, etc.) when exporting the grid to an image or a matrix file (http://www.cloudcompare.org/forum/viewtopic.php?t=1800)
 [*] Dark mode (https://www.cloudcompare.org/forum/viewtopic.php?t=6369)
 [*] Add 'drawing' tools (curve passing through 3 points, arc, circle, etc.) to be exported to DXF
-[*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 [*] Being able to select only the visible or the enabled clouds with the  'Select children by type and/or name' feature (https://www.cloudcompare.org/forum/viewtopic.php?p=27159)
 [*] Save multiple clouds in a LAS file (or other file types that normally only store one cloud - https://www.cloudcompare.org/forum/viewtopic.php?p=27131)
 [*] Manage viewports as sensors to be able to move/edit them easily (https://www.cloudcompare.org/forum/posting.php?mode=reply&t=6112)
 [*] Option to automatically delete the source cloud in the 'SF > Filter by value' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=6113)
-[*] Scissors tool: option to inverse the segmentation or to remove visible points (https://www.cloudcompare.org/forum/viewtopic.php?p=26981)
 [*] Voxel display mode (https://towardsdatascience.com/how-to-automate-voxel-modelling-of-3d-point-cloud-with-python-459f4d43a227)
 [*] Create Height / Surface / Volume chart for bathymetry jobs (https://www.cloudcompare.org/forum/viewtopic.php?p=26787)
 [*] Add options to compute the local average and std.dev. (and maybe medoid) of a SF (https://www.cloudcompare.org/forum/viewtopic.php?t=5700)
 [*] Add a 'Set value' operation to the SF arithmetics tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5933)
 [*] Improve the CSF plugin with the method proposed in https://www.mdpi.com/2072-4292/13/15/2938 (https://www.cloudcompare.org/forum/viewtopic.php?t=5887)
-[*] Add a 'circle' option in the Graphical Segmentation tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
-[*] Add a confirmation popup when exiting from the Segmentation tool with 'ESC' (https://www.cloudcompare.org/forum/viewtopic.php?t=5793)
 [*] Add a confirmation popup when deleting an entity in the DB tree (https://www.cloudcompare.org/forum/viewtopic.php?t=5756)
 [*] Shortcut to the 'Edit > Scalar fields > Export coordinate(s) to SF' (https://github.com/CloudCompare/CloudCompare/issues/1607)
 [*] Option to input the rotation point for the Translate/Rotate tool (https://www.cloudcompare.org/forum/viewtopic.php?p=24572)
 [*] Extract E57 images (as standard image files) via the command line (https://www.cloudcompare.org/forum/viewtopic.php?p=24493)
-[*] Circular eraser in the Scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=5319)
 [*] Being able to select the entities to load from a BIN file (https://www.cloudcompare.org/forum/viewtopic.php?t=5102)
-[*] Segment polylines with the scissors tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4692)
 [*] Manual editing of each point of a polyline (https://www.cloudcompare.org/forum/viewtopic.php?t=4690)
 [*] Let the user choose the color scale in the '2.5D Volume computation' tool (https://www.cloudcompare.org/forum/viewtopic.php?t=4196)
 [*] Update the two-point-distance label 'in real time' when the mouse hovers points (https://www.cloudcompare.org/forum/viewtopic.php?t=3765)

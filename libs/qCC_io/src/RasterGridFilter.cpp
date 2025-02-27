@@ -524,10 +524,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					else if (isScalar && !loadAsTexturedQuad)
 					{
 						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); //SF names really need to be unique!
-						ccScalarField* sf = new ccScalarField(qPrintable(sfName));
+						ccScalarField* sf = new ccScalarField(sfName.toStdString());
 						if (!sf->resizeSafe(pc->size(), true, CCCoreLib::NAN_VALUE))
 						{
-							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(sf->getName()));
+							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(QString::fromStdString(sf->getName())));
 							sf->release();
 							sf = nullptr;
 						}
@@ -552,6 +552,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 													/*y_offset=*/0) != CE_None)
 								{
 									CPLFree(colValues);
+									sf->release();
 									delete pc;
 									return CC_FERR_READING;
 								}

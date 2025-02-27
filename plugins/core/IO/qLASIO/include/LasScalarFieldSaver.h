@@ -38,6 +38,19 @@ class LasScalarFieldSaver
 	inline void setStandarFields(std::vector<LasScalarField>&& standardFields)
 	{
 		m_standardFields = standardFields;
+		// Another way to check this could have been to check for the existence of
+		// a field with name that is one of the decomposed flags.
+		// However check by looking at the max value may be better to handle
+		// clouds not coming from LAS at all.
+		for (const LasScalarField& field : m_standardFields)
+		{
+			if (strcmp(field.name(), LasNames::Classification) == 0
+			    && field.sf
+			    && field.sf->getMax() >= 32)
+			{
+				m_classificationWasDecomposed = false;
+			}
+		}
 	}
 
 	inline void setExtraFields(std::vector<LasExtraScalarField>&& extraFields)
@@ -77,4 +90,8 @@ class LasScalarFieldSaver
   private:
 	std::vector<LasScalarField>      m_standardFields;
 	std::vector<LasExtraScalarField> m_extraFields;
+	/// Whether the classification flags from point format <= 5 were
+	/// decomposed into individual scalar fields (synthetic, keypoint, withheld)
+	/// or if their values were kept packed into the classification field.
+	bool m_classificationWasDecomposed{false};
 };

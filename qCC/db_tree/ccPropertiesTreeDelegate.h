@@ -88,7 +88,9 @@ public:
 							OBJECT_LABEL_DISP_2D					,
 							OBJECT_LABEL_POINT_LEGEND				,
 							OBJECT_PRIMITIVE_PRECISION				,
+							OBJECT_CIRCLE_RESOLUTION				,
 							OBJECT_SPHERE_RADIUS					,
+							OBJECT_CIRCLE_RADIUS					,
 							OBJECT_CONE_HEIGHT						,
 							OBJECT_CONE_BOTTOM_RADIUS				,
 							OBJECT_CONE_TOP_RADIUS					,
@@ -111,6 +113,7 @@ public:
 							OBJECT_CLOUD_NORMAL_COLOR				,
 							OBJECT_CLOUD_NORMAL_LENGTH				,
 							OBJECT_CLOUD_DRAW_NORMALS				,
+							OBJECT_CLOUD_USE_LOD					,
 	};
 
 	//! Default constructor
@@ -124,7 +127,7 @@ public:
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-	
+
 	void unbind();
 
 	//! Fill property view with QItems corresponding to object's type
@@ -144,7 +147,7 @@ private:
 	static const char* s_sfColor;
 	static const char* s_defaultPointSizeString;
 	static const char* s_defaultPolyWidthSizeString;
-	
+
 	void updateItem(QStandardItem*);
 	void scalarFieldChanged(int);
 	void colorScaleChanged(int);
@@ -153,7 +156,9 @@ private:
 	void octreeDisplayModeChanged(int);
 	void octreeDisplayedLevelChanged(int);
 	void primitivePrecisionChanged(int);
+	void circleResolutionChanged(int);
 	void sphereRadiusChanged(double);
+	void circleRadiusChanged(double);
 	void coneHeightChanged(double);
 	void coneBottomRadiusChanged(double);
 	void coneTopRadiusChanged(double);
@@ -183,6 +188,7 @@ private:
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
 	void fillWithDrawNormals(ccGenericPointCloud*);
+	void fillWithPointCloudLOD(ccGenericPointCloud*);
 	void fillSFWithPointCloud(ccGenericPointCloud*);
 	void fillWithMesh(const ccGenericMesh*);
 	void fillWithFacet(const ccFacet*);
@@ -203,7 +209,7 @@ private:
 	void fillWithMetaData(const ccObject*);
 	void fillWithShifted(const ccShiftedObject*);
 	void fillWithCoordinateSystem(const ccCoordinateSystem*);
-	
+
 	template<class Type, int N, class ComponentType>
 	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);
 

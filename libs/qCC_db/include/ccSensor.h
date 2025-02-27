@@ -43,6 +43,9 @@ public:
 	//! Copy constructor
 	ccSensor(const ccSensor& sensor);
 
+	//! Destructor
+	~ccSensor() override;
+
 	//inherited from ccHObject
 	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::SENSOR; }
 	bool isSerializable() const override { return true; }

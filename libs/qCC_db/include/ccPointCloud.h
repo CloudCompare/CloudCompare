@@ -31,12 +31,12 @@
 #include "ccWaveform.h"
 
 //Qt
-#include <QGLBuffer>
+#include <QOpenGLBuffer>
 
 class ccScalarField;
 class ccPolyline;
 class ccMesh;
-class QGLBuffer;
+class QOpenGLBuffer;
 class ccProgressDialog;
 class ccPointCloudLOD;
 
@@ -253,7 +253,7 @@ public: //scalar-fields management
 	//inherited from base class
 	void deleteScalarField(int index) override;
 	void deleteAllScalarFields() override;
-	int addScalarField(const char* uniqueName) override;
+	int addScalarField(const std::string& uniqueName) override;
 
 	//! Returns whether color scale should be displayed or not
 	bool sfColorScaleShown() const;
@@ -876,7 +876,7 @@ protected: // VBO
 	//! Init/updates VBOs
 	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
-	class VBO : public QGLBuffer
+	class VBO : public QOpenGLBuffer
 	{
 	public:
 		int rgbShift;
@@ -888,7 +888,7 @@ protected: // VBO
 		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
 
 		VBO()
-			: QGLBuffer(QGLBuffer::VertexBuffer)
+			: QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
 			, rgbShift(0)
 			, normalShift(0)
 		{}
@@ -949,10 +949,23 @@ public: //Level of Detail (LOD)
 	//! Clears the LOD structure
 	void clearLOD();
 
+	//! Returns if the cloud has a valuable LOD
+	bool hasUsableLOD() const;
+
+	//! Getter for the m_useLODRendering member
+	bool useLODRendering() const;
+
+	//! Mutates the m_useLODRendering member (setter)
+	void setLODRendering(bool);
+
 protected: //Level of Detail (LOD)
 
 	//! L.O.D. structure
 	ccPointCloudLOD* m_lod;
+
+	//! Boolean flag indicating whether this specific cloud should
+	//! be rendered using the LOD mechanism. (see its usage in DrawMeOnly)
+	bool m_useLODRendering;
 
 protected: //waveform (e.g. from airborne scanners)
 
@@ -965,6 +978,7 @@ protected: //waveform (e.g. from airborne scanners)
 	//! Waveforms raw data storage
 	SharedFWFDataContainer m_fwfData;
 
+protected: //Normals drawing
 	bool m_normalsDrawnAsLines;
 
 	struct NormalLineParameters

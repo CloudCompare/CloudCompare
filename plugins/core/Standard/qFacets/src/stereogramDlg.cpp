@@ -460,9 +460,6 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 	//draw density map
 	if (m_densityGrid && m_densityColorScale && m_densityGrid->grid && m_densityGrid->minMaxDensity[1] != 0)
 	{
-		assert(m_densityColorScale);
-		assert(m_densityGrid->grid);
-
 		QBrush brush;
 		brush.setStyle(Qt::SolidPattern);
 		painter.setPen(Qt::NoPen);
@@ -484,12 +481,19 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			{
 				if (*d != 0)
 				{
-					double relPos = (*d)/ m_densityGrid->minMaxDensity[1];
+					double relPos = (*d) / m_densityGrid->minMaxDensity[1];
 					const ccColor::Rgb* col = m_densityColorScale->getColorByRelativePos(relPos, m_densityColorScaleSteps);
-					brush.setColor(QColor(	static_cast<int>(col->r),
-											static_cast<int>(col->g),
-											static_cast<int>(col->b),
-											255));
+					if (col)
+					{
+						brush.setColor(QColor(	static_cast<int>(col->r),
+												static_cast<int>(col->g),
+												static_cast<int>(col->b),
+												255));
+					}
+					else
+					{
+						assert(false);
+					}
 					painter.setBrush(brush);
 
 					//stereographic projection

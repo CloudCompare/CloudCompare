@@ -24,6 +24,7 @@ set( submod_plugins
 		${CMAKE_CURRENT_SOURCE_DIR}/qJSonRPCPlugin
 		${CMAKE_CURRENT_SOURCE_DIR}/qTreeIso
 		${CMAKE_CURRENT_SOURCE_DIR}/q3DMASC
+		${CMAKE_CURRENT_SOURCE_DIR}/qVoxFall
 )
 
 foreach( dir ${submod_plugins} )

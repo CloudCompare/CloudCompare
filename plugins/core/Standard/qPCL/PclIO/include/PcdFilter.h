@@ -29,9 +29,22 @@ public:
 
 	//inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
-
 	bool canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
+
+	//! Output file format
+	enum PCDOutputFileFormat
+	{
+		COMPRESSED_BINARY	= 0,
+		BINARY				= 1,
+		ASCII				= 2,
+		AUTO				= 255
+	};
+
+	//! Set the output file format
+	/** \param format output file format
+	**/
+	static void SetOutputFileFormat(PCDOutputFileFormat format);
 };
 
 #endif //CC_PCD_FILTER_HEADER

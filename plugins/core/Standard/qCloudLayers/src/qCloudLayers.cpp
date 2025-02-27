@@ -82,7 +82,12 @@ void qCloudLayers::doAction()
 	m_app->disableAllBut(m_app->getActiveGLWindow());
 
 	m_cloudLayersDlg->linkWith(m_app->getActiveGLWindow());
-	m_cloudLayersDlg->setPointCloud(cloud);
+	if (!m_cloudLayersDlg->setPointCloud(cloud))
+	{
+		// error message already issued
+		m_cloudLayersDlg->stop(false);
+		return;
+	}
 	
 	if (m_cloudLayersDlg->start())
 	{

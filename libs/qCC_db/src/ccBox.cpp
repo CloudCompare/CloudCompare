@@ -38,50 +38,71 @@ ccBox::ccBox(QString name/*=QString("Box")*/)
 
 bool ccBox::buildUp()
 {
-	//clear triangles indexes
-	if (m_triVertIndexes)
+	if (!init(8, false, 12, 6))
 	{
-		m_triVertIndexes->clear();
+		ccLog::Error("[ccPlane::buildUp] Not enough memory");
+		return false;
 	}
-	//clear per triangle normals
-	removePerTriangleNormalIndexes();
-	if (m_triNormals)
-	{
-		m_triNormals->clear();
-	}
-	//clear vertices
 	ccPointCloud* verts = vertices();
-	if (verts)
-	{
-		verts->clear();
-	}
+	assert(verts);
+	assert(m_triNormals);
+
+	//   5 -- 6
+	// 1/-- 2/|
+	// | 4 -|-7
+	// 0/-- 3/
+	verts->addPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2,  m_dims.z / 2));
+	verts->addPoint(CCVector3(-m_dims.x / 2,  m_dims.y / 2,  m_dims.z / 2));
+	verts->addPoint(CCVector3( m_dims.x / 2,  m_dims.y / 2,  m_dims.z / 2));
+	verts->addPoint(CCVector3( m_dims.x / 2, -m_dims.y / 2,  m_dims.z / 2));
+	verts->addPoint(CCVector3(-m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
+	verts->addPoint(CCVector3(-m_dims.x / 2,  m_dims.y / 2, -m_dims.z / 2));
+	verts->addPoint(CCVector3( m_dims.x / 2,  m_dims.y / 2, -m_dims.z / 2));
+	verts->addPoint(CCVector3( m_dims.x / 2, -m_dims.y / 2, -m_dims.z / 2));
+
+	//front plane
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1)));
+	addTriangle(0, 2, 1);
+	addTriangleNormalIndexes(0, 0, 0);
+	addTriangle(0, 3, 2);
+	addTriangleNormalIndexes(0, 0, 0);
+
+	//left plane
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(-1, 0, 0)));
+	addTriangle(4, 1, 5);
+	addTriangleNormalIndexes(1, 1, 1);
+	addTriangle(4, 0, 1);
+	addTriangleNormalIndexes(1, 1, 1);
+
+	//back plane
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 0, -1)));
+	addTriangle(7, 5, 6);
+	addTriangleNormalIndexes(2, 2, 2);
+	addTriangle(7, 4, 5);
+	addTriangleNormalIndexes(2, 2, 2);
+
+	//right plane
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(1, 0, 0)));
+	addTriangle(3, 6, 2);
+	addTriangleNormalIndexes(3, 3, 3);
+	addTriangle(3, 7, 6);
+	addTriangleNormalIndexes(3, 3, 3);
+
+	//lower plane
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, -1, 0)));
+	addTriangle(4, 3, 0);
+	addTriangleNormalIndexes(4, 4, 4);
+	addTriangle(4, 7, 3);
+	addTriangleNormalIndexes(4, 4, 4);
 
 	//upper plane
-	ccGLMatrix upperMat;
-	upperMat.getTranslation()[2] = m_dims.z / 2;
-	*this += ccPlane(m_dims.x, m_dims.y, &upperMat);
-	//lower plane
-	ccGLMatrix lowerMat;
-	lowerMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI), CCVector3(1, 0, 0), CCVector3(0, 0, -m_dims.z / 2));
-	*this += ccPlane(m_dims.x, m_dims.y, &lowerMat);
-	//left plane
-	ccGLMatrix leftMat;
-	leftMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI / 2), CCVector3(0, 1, 0), CCVector3(-m_dims.x / 2, 0, 0));
-	*this += ccPlane(m_dims.z, m_dims.y, &leftMat);
-	//right plane
-	ccGLMatrix rightMat;
-	rightMat.initFromParameters(static_cast<PointCoordinateType>(M_PI / 2), CCVector3(0, 1, 0), CCVector3(m_dims.x / 2, 0, 0));
-	*this += ccPlane(m_dims.z, m_dims.y, &rightMat);
-	//front plane
-	ccGLMatrix frontMat;
-	frontMat.initFromParameters(static_cast<PointCoordinateType>(M_PI / 2), CCVector3(1, 0, 0), CCVector3(0, -m_dims.y / 2, 0));
-	*this += ccPlane(m_dims.x, m_dims.z, &frontMat);
-	//back plane
-	ccGLMatrix backMat;
-	backMat.initFromParameters(-static_cast<PointCoordinateType>(M_PI / 2), CCVector3(1, 0, 0), CCVector3(0, m_dims.y / 2, 0));
-	*this += ccPlane(m_dims.x, m_dims.z, &backMat);
+	m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, 1, 0)));
+	addTriangle(1, 6, 5);
+	addTriangleNormalIndexes(5, 5, 5);
+	addTriangle(1, 2, 6);
+	addTriangleNormalIndexes(5, 5, 5);
 
-	return (vertices() && vertices()->size() == 24 && this->size() == 12);
+	return true;
 }
 
 ccGenericPrimitive* ccBox::clone() const

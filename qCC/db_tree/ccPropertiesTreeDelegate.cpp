@@ -34,6 +34,7 @@
 #include <cc2DViewportObject.h>
 #include <ccAdvancedTypes.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccColorScalesManager.h>
 #include <ccCone.h>
 #include <ccFacet.h>
@@ -255,7 +256,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	{
 		fillWithFacet(ccHObjectCaster::ToFacet(m_currentObject));
 	}
-	else if (m_currentObject->isA(CC_TYPES::POLY_LINE))
+	else if (m_currentObject->isKindOf(CC_TYPES::POLY_LINE))
 	{
 		fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
 	}
@@ -376,7 +377,7 @@ void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersi
 	if (m_model && item)
 	{
 		m_model->appendRow(item);
-		
+
 		if (openPersistentEditor && (m_view != nullptr))
 		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
@@ -395,7 +396,7 @@ void ccPropertiesTreeDelegate::addSeparator(const QString& title)
 		leftItem->setData(TREE_VIEW_HEADER);
 		leftItem->setAccessibleDescription(title);
 		m_model->appendRow(leftItem);
-		
+
 		if ( m_view != nullptr )
 		{
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount() - 1, 0));
@@ -422,7 +423,7 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 	{
 		QVariant var = it.value();
 		QString value;
-		
+
 		if (var.canConvert(QVariant::String))
 		{
 			var.convert(QVariant::String);
@@ -627,6 +628,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 		{
 			fillWithDrawNormals(_obj);
 		}
+
+		if (cloud->hasUsableLOD())
+		{
+			fillWithPointCloudLOD(_obj);
+		}
 	}
 }
 
@@ -654,6 +660,27 @@ void ccPropertiesTreeDelegate::fillWithDrawNormals(ccGenericPointCloud* _obj)
 
 	//normals color
 	appendRow(ITEM(tr("Color")), PERSISTENT_EDITOR(OBJECT_CLOUD_NORMAL_COLOR), true);
+}
+
+void ccPropertiesTreeDelegate::fillWithPointCloudLOD(ccGenericPointCloud* _obj)
+{
+	if (!_obj || !m_model)
+	{
+		assert(false);
+		return;
+	}
+
+	if (!_obj->isA(CC_TYPES::POINT_CLOUD))
+	{
+		assert(false);
+		return;
+	}
+
+	addSeparator( tr( "LOD rendering" ) );
+
+	//visibility
+	const ccPointCloud* cloud = static_cast<const ccPointCloud*>(_obj);
+	appendRow(ITEM(tr("Use LOD Rendering")), CHECKABLE_ITEM(cloud->useLODRendering(), OBJECT_CLOUD_USE_LOD));
 }
 
 void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
@@ -686,11 +713,9 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
-			//field shift
-			ccScalarField* ccSF = dynamic_cast<ccScalarField*>(sf);
-			if (ccSF)
+			if (ccLog::VerbosityLevel() == ccLog::LOG_VERBOSE)
 			{
-				appendRow(ITEM( tr( "Shift" ) ), ITEM(QString::number(ccSF->getGlobalShift(), 'f', 2)));
+				appendRow(ITEM( tr( "Offset" ) ), ITEM(QString::number(sf->getOffset())));
 			}
 
 			addSeparator("Color Scale");
@@ -863,6 +888,15 @@ void ccPropertiesTreeDelegate::fillWithPolyline(const ccPolyline* _obj)
 		return;
 	}
 
+	if (_obj->isA(CC_TYPES::CIRCLE))
+	{
+		addSeparator(tr("Circle"));
+
+		appendRow(ITEM(tr("Drawing precision")), PERSISTENT_EDITOR(OBJECT_CIRCLE_RESOLUTION), true);
+
+		appendRow(ITEM(tr("Radius")), PERSISTENT_EDITOR(OBJECT_CIRCLE_RADIUS), true);
+	}
+
 	addSeparator( tr( "Polyline" ) );
 
 	//number of vertices
@@ -1019,7 +1053,7 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(const cc2DViewportObject* 
 
 	//"Update Viewport" button
 	appendRow(ITEM( tr( "Update viewport" ) ), PERSISTENT_EDITOR(OBJECT_UPDATE_LABEL_VIEWPORT), true);
-	
+
 }
 
 void ccPropertiesTreeDelegate::fillWithTransBuffer(const ccIndexedTransformationBuffer* _obj)
@@ -1105,7 +1139,7 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(const ccGBLSensor* _obj)
 				  ITEM( QStringLiteral("[%1 ; %2]")
 						.arg( CCCoreLib::RadiansToDegrees( yawMin ), 0, 'f', 2)
 						.arg( CCCoreLib::RadiansToDegrees( yawMax ), 0, 'f', 2)));
-		
+
 		//Angular steps (yaw)
 		PointCoordinateType yawStep = _obj->getYawStep();
 		appendRow(ITEM( tr( "Yaw step" ) ),
@@ -1295,7 +1329,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CURRENT_SCALAR_FIELD:
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-		assert(cloud);		
+		assert(cloud);
 
 		QComboBox *comboBox = new QComboBox(parent);
 
@@ -1303,7 +1337,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		int nsf = cloud ? cloud->getNumberOfScalarFields() : 0;
 		for (int i = 0; i < nsf; ++i)
 		{
-			comboBox->addItem(QString(cloud->getScalarFieldName(i)));
+			comboBox->addItem(QString::fromStdString(cloud->getScalarFieldName(i)));
 		}
 
 		connect(comboBox, qOverload<int>(&QComboBox::activated),
@@ -1408,11 +1442,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CIRCLE_RESOLUTION:
+	{
+		QSpinBox* spinBox = new QSpinBox(parent);
+		spinBox->setRange(4, 1024);
+		spinBox->setSingleStep(4);
+
+		connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::circleResolutionChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_SPHERE_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1421,10 +1467,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		outputWidget = spinBox;
 	}
 	break;
+	case OBJECT_CIRCLE_RADIUS:
+	{
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
+		spinBox->setSingleStep(1.0);
+
+		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+			this, &ccPropertiesTreeDelegate::circleRadiusChanged);
+
+		outputWidget = spinBox;
+	}
+	break;
 	case OBJECT_CONE_HEIGHT:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
+		spinBox->setDecimals(7);
 		spinBox->setRange(0, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
@@ -1437,8 +1496,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CONE_BOTTOM_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1450,8 +1509,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_CONE_TOP_RADIUS:
 	{
 		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-		spinBox->setDecimals(6);
-		spinBox->setRange(0, 1.0e6);
+		spinBox->setDecimals(7);
+		spinBox->setRange(1.0e-6, 1.0e6);
 		spinBox->setSingleStep(1.0);
 
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
@@ -1476,7 +1535,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	{
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 		assert(sensor);
-		
+
 		double minIndex = 0.0;
 		double maxIndex = 0.0;
 		if (sensor)
@@ -1572,7 +1631,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_defaultPointSizeString ) ); //size = 0
-		
+
 		for (int i = static_cast<int>(ccGLWindowInterface::MIN_POINT_SIZE_F); i <= static_cast<int>(ccGLWindowInterface::MAX_POINT_SIZE_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
@@ -1589,7 +1648,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_defaultPolyWidthSizeString ) ); //size = 0
-				
+
 		for (int i = static_cast<int>(ccGLWindowInterface::MIN_LINE_WIDTH_F); i <= static_cast<int>(ccGLWindowInterface::MAX_LINE_WIDTH_F); ++i)
 		{
 			comboBox->addItem(QString::number(i));
@@ -1606,7 +1665,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QComboBox *comboBox = new QComboBox(parent);
 
 		comboBox->addItem( tr( s_noneString ) );
-		
+
 		if (m_currentObject)
 		{
 			if (m_currentObject->hasColors())
@@ -1658,7 +1717,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		{
 			spinBox->setValue(cs->getDisplayScale());
 		}
-		
+
 		connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
 			this, &ccPropertiesTreeDelegate::coordinateSystemDisplayScaleChanged);
 
@@ -1952,11 +2011,25 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 		SetSpinBoxValue(editor, primitive ? primitive->getDrawingPrecision() : 0);
 		break;
 	}
+	case OBJECT_CIRCLE_RESOLUTION:
+	{
+		ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+		assert(circle);
+		SetSpinBoxValue(editor, circle ? circle->getResolution() : 0);
+		break;
+	}
 	case OBJECT_SPHERE_RADIUS:
 	{
 		ccSphere* sphere = ccHObjectCaster::ToSphere(m_currentObject);
 		assert(sphere);
 		SetDoubleSpinBoxValue(editor, sphere ? sphere->getRadius() : 0.0);
+		break;
+	}
+	case OBJECT_CIRCLE_RADIUS:
+	{
+		ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+		assert(circle);
+		SetDoubleSpinBoxValue(editor, circle ? circle->getRadius() : 0.0);
 		break;
 	}
 	case OBJECT_CONE_HEIGHT:
@@ -2150,7 +2223,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		cloud->showSFColorsScale(item->checkState() == Qt::Checked);
 	}
 	redraw = true;
-	break;	
+	break;
 	case OBJECT_COORDINATE_SYSTEM_DISP_AXES:
 	{
 		ccCoordinateSystem* cs = ccHObjectCaster::ToCoordinateSystem(m_currentObject);
@@ -2267,10 +2340,21 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_CLOUD_DRAW_NORMALS:
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
-		bool isChecked = (item->checkState() == Qt::Checked);
 		if (cloud)
 		{
+			bool isChecked = (item->checkState() == Qt::Checked);
 			static_cast<ccPointCloud*>(cloud)->showNormalsAsLines(isChecked);
+		}
+	}
+	redraw = true;
+	break;
+	case OBJECT_CLOUD_USE_LOD:
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+		if (cloud)
+		{
+			bool isChecked = (item->checkState() == Qt::Checked);
+			static_cast<ccPointCloud*>(cloud)->setLODRendering(isChecked);
 		}
 	}
 	redraw = true;
@@ -2514,6 +2598,34 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	}
 }
 
+void ccPropertiesTreeDelegate::circleResolutionChanged(int val)
+{
+	if (!m_currentObject)
+	{
+		return;
+	}
+
+	ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+	assert(circle);
+	if (!circle)
+		return;
+
+	if (circle->getResolution() != static_cast<unsigned int>(val))
+	{
+		bool wasVisible = circle->isVisible();
+		circle->setResolution(val);
+		circle->setVisible(wasVisible);
+
+		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CIRCLE_RESOLUTION;
+
+		//we must also reset the properties display!
+		updateModel();
+	}
+}
+
 void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 {
 	if (!m_currentObject)
@@ -2535,6 +2647,32 @@ void ccPropertiesTreeDelegate::sphereRadiusChanged(double val)
 
 		//record item role to force the scroll focus (see 'createEditor').
 		m_lastFocusItemRole = OBJECT_SPHERE_RADIUS;
+
+		//we must also reset the properties display!
+		updateModel();
+	}
+}
+
+void ccPropertiesTreeDelegate::circleRadiusChanged(double val)
+{
+	if (!m_currentObject)
+		return;
+
+	ccCircle* circle = ccHObjectCaster::ToCircle(m_currentObject);
+	assert(circle);
+	if (!circle)
+		return;
+
+	if (circle->getRadius() != val)
+	{
+		bool wasVisible = circle->isVisible();
+		circle->setRadius(val);
+		circle->setVisible(wasVisible);
+
+		updateDisplay();
+
+		//record item role to force the scroll focus (see 'createEditor').
+		m_lastFocusItemRole = OBJECT_CIRCLE_RADIUS;
 
 		//we must also reset the properties display!
 		updateModel();

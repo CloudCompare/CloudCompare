@@ -187,12 +187,12 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
 			outFile << "POINT_DATA " << ptsCount << endl;
-			outFile << "SCALARS " << QString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
+			outFile << "SCALARS " << QString::fromStdString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
 			for (unsigned j = 0; j < ptsCount; ++j)
 			{
-				outFile << sf->getGlobalShift() + sf->getValue(j) << endl;
+				outFile << sf->getValue(j) << endl;
 			}
 		}
 	}
@@ -205,7 +205,9 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			outFile << "LOOKUP_TABLE default" << endl;
 
 			for (unsigned j = 0; j < ptsCount; ++j)
+			{
 				outFile << vertices->getPointDisplayedDistance(j) << endl;
+			}
 		}
 	}
 
@@ -286,6 +288,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 	}
+	assert(nullptr != vertices);
 
 	//loop on keywords/data
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
@@ -625,7 +628,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				lastSfName = parts[1].replace("_", " ");
 
 			//SF already exists?
-			if (vertices->getScalarFieldIndexByName(qPrintable(lastSfName)) >= 0)
+			if (vertices->getScalarFieldIndexByName(lastSfName.toStdString()) >= 0)
 				lastSfName += QString(" (%1)").arg(vertices->getNumberOfScalarFields());
 			//end of SCALARS
 		}
@@ -670,7 +673,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			ccScalarField* sf = nullptr;
 			if (createSF)
 			{
-				sf = new ccScalarField(qPrintable(lastSfName));
+				sf = new ccScalarField(lastSfName.toStdString());
 				if (!sf->reserveSafe(lastDataSize))
 				{
 					ccLog::Warning(QString("[VTK] Not enough memory to load scalar field' %1' (will be ignored)").arg(lastSfName));
@@ -820,7 +823,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 	file.close();
 
-	if (vertices && vertices->size() == 0)
+	if (vertices->size() == 0)
 	{
 		delete vertices;
 		vertices = nullptr;

@@ -36,7 +36,7 @@
 //number of valid operations
 constexpr unsigned s_opCount = 22;
 //operation names
-constexpr char s_opNames[s_opCount][8] = {"add", "sub", "mult", "div", "min", "max", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
+constexpr char s_opNames[s_opCount][8] {"add", "sub", "mult", "div", "min", "max", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
 
 //semi persitent
 static int s_previouslySelectedOperationIndex = 1;
@@ -64,7 +64,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 	{
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			sfLabels << QString(cloud->getScalarFieldName(i));
+			sfLabels << QString::fromStdString(cloud->getScalarFieldName(i));
 		}
 
 		m_ui->sf1ComboBox->addItems(sfLabels);
@@ -236,6 +236,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		sf1 = cloud->getScalarField(sf1Idx);
 		assert(sf1);
 	}
+	double sf1PreviousOffset = sf1->getOffset(); // remember the offset, as we may have to change it BEFORE reading the values
 
 	CCCoreLib::ScalarField* sf2 = nullptr;
 	if (op <= MAX)
@@ -246,7 +247,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			assert(false);
 			return false;
 		}
-		else if (sf2Desc->isConstantValue)
+
+		if (sf2Desc->isConstantValue)
 		{
 			if (op == DIVIDE && sf2Desc->constantValue == 0)
 			{
@@ -262,14 +264,15 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	if (!inplace)
 	{
 		//generate new sf name based on the operation
-		QString sf1Name(sf1->getName());
+		QString sf1Name = QString::fromStdString(sf1->getName());
 		QString sf2Name;
 		if (sf2)
 		{
-			sf2Name = sf2->getName();
+			sf2Name = QString::fromStdString(sf2->getName());
 			QString sfName = GetOperationName(op,sf1Name,sf2Name);
 			if (sfName.length() > 24)
 			{
+				assert(sf2Desc);
 				//if the resulting SF name is too long, we use shortcuts instead
 				sf1Name = QString("(SF#%1)").arg(sf1Idx);
 				sf2Name = QString("(SF#%1)").arg(sf2Desc->sfIndex);
@@ -282,10 +285,10 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 		QString sfName = GetOperationName(op, sf1Name, sf2Name);
 
-		sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+		sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx >= 0)
 		{
-			if (sfIdx == sf1Idx || sfIdx == sf2Desc->sfIndex)
+			if (sfIdx == sf1Idx || (sf2Desc && sfIdx == sf2Desc->sfIndex))
 			{
 				ccLog::Warning(QString("[ccScalarFieldArithmeticsDlg::apply] Resulting scalar field would have the same name as one of the operand (%1)! Rename it first...").arg(sfName));
 				return false;
@@ -302,15 +305,185 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			cloud->deleteScalarField(sfIdx);
 		}
 
-		sfIdx = cloud->addScalarField(qPrintable(sfName));
+		sfIdx = cloud->addScalarField(sfName.toStdString());
 		if (sfIdx < 0)
 		{
 			ccLog::Warning("[ccScalarFieldArithmeticsDlg::apply] Failed to create destination SF! (not enough memory?)");
 			return false;
 		}
 	}
-	else
+	else // we keep the original scalar field
 	{
+		// we might want to update the offset as best as we can
+		switch (op)
+		{
+		case PLUS:
+		{
+			if (sf2Desc && sf2Desc->isConstantValue)
+			{
+				// shortcut
+				sf1->setOffset(sf1->getOffset() + sf2Desc->constantValue);
+				sf1->computeMinAndMax();
+				cloud->setCurrentDisplayedScalarField(sf1Idx);
+
+				ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
+					.arg(QString::fromStdString(sf1->getName()))
+					.arg(sf1PreviousOffset)
+					.arg(sf1->getOffset()));
+				return true;
+			}
+			else
+			{
+				sf1->setOffset(sf1->getOffset() + sf2->getOffset());
+			}
+			break;
+		}
+		case MINUS:
+		{
+			if (sf2Desc && sf2Desc->isConstantValue)
+			{
+				// shortcut
+				sf1->setOffset(sf1->getOffset() - sf2Desc->constantValue);
+				sf1->computeMinAndMax();
+				cloud->setCurrentDisplayedScalarField(sf1Idx);
+
+				ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
+					.arg(QString::fromStdString(sf1->getName()))
+					.arg(sf1PreviousOffset)
+					.arg(sf1->getOffset()));
+				return true;
+			}
+			else
+			{
+				sf1->setOffset(sf1->getOffset() - sf2->getOffset());
+			}
+			break;
+		}
+		case MULTIPLY:
+		{
+			if (sf2Desc && sf2Desc->isConstantValue)
+			{
+				sf1->setOffset(sf1->getOffset() * sf2Desc->constantValue); // it's safe was long as we use sf1PreviousOffset to read the values later
+			}
+			else
+			{
+				sf1->setOffset(sf1->getOffset() * sf2->getOffset()); // it's safe was long as we use sf1PreviousOffset to read the values later
+			}
+			break;
+		}
+		case DIVIDE:
+		{
+			if (sf2Desc && sf2Desc->isConstantValue)
+			{
+				if (sf2Desc->constantValue != 0)
+				{
+					sf1->setOffset(sf1->getOffset() / sf2Desc->constantValue); // it's safe was long as we use sf1PreviousOffset to read the values later
+				}
+			}
+			else
+			{
+				// not obvious...
+			}
+			break;
+		}
+		case SQRT:
+		{
+			sf1->setOffset(sqrt(std::max(0.0, sf1->getOffset()))); // it's safe was long as we use sf1PreviousOffset to read the values later
+			break;
+		}
+		case POW2:
+		{
+			sf1->setOffset(sf1->getOffset() * sf1->getOffset()); // it's safe was long as we use sf1PreviousOffset to read the values later
+			break;
+		}
+		case POW3:
+		{
+			sf1->setOffset(sf1->getOffset() * sf1->getOffset() * sf1->getOffset()); // it's safe was long as we use sf1PreviousOffset to read the values later
+			break;
+		}
+		case EXP:
+		{
+			// hard to predict anything...
+			break;
+		}
+		case LOG:
+		{
+			if (sf1->getOffset() > 1.0)
+			{
+				sf1->setOffset(log(sf1->getOffset()));
+			}
+			else
+			{
+				sf1->setOffset(0.0);
+			}
+			break;
+		}
+		case LOG10:
+		case COS:
+		case SIN:
+		case TAN:
+		case ACOS:
+		case ASIN:
+		case ATAN:
+		{
+			sf1->setOffset(0.0); // it's safe was long as we use sf1PreviousOffset to read the values later
+			break;
+		}
+		case INT:
+		{
+			// no need to change the offset
+			break;
+		}
+		case INVERSE:
+		{
+			// if all values were close to 0, the result could be a very large number,
+			// but we'll assume that in most of the cases they will be >> 0
+			if (sf1->getMin() > 0.0 && sf1->getMax() < 1.0)
+			{
+				sf1->setOffset(1.0 / sf1->getMax());
+			}
+			else if (sf1->getMin() > -1.0 && sf1->getMax() < 0.0)
+			{
+				sf1->setOffset(1.0 / sf1->getMin());
+			}
+			else
+			{
+				sf1->setOffset(0.0);
+			}
+			break;
+		}
+		case SET:
+		{
+			if (sf2Desc && sf2Desc->isConstantValue)
+			{
+				sf1->setOffset(sf2Desc->constantValue); // it's safe was long as we use sf1PreviousOffset to read the values later
+			}
+			else
+			{
+				assert(false);
+			}
+			break;
+		}
+		case ABS:
+		{
+			sf1->setOffset(std::abs(sf1->getOffset())); // it's safe was long as we use sf1PreviousOffset to read the values later
+			break;
+		}
+		default:
+		{
+			// don't modify the offset, hopefully this should be enough...
+			break;
+		}
+		}
+
+		if (sf1->getOffset() != sf1PreviousOffset)
+		{
+			ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
+				.arg(QString::fromStdString(sf1->getName()))
+				.arg(sf1PreviousOffset)
+				.arg(sf1->getOffset()));
+		}
+
 		sfIdx = sf1Idx;
 	}
 	CCCoreLib::ScalarField* sfDest = cloud->getScalarField(sfIdx);
@@ -331,50 +504,60 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 	for (unsigned i = 0; i < valCount; ++i)
 	{
-		ScalarType val = CCCoreLib::NAN_VALUE;
+		double val = std::numeric_limits<double>::quiet_NaN();
 
 		//we must handle 'invalid' values
-		const ScalarType& val1 = sf1->getValue(i);
+		double val1 = sf1PreviousOffset + sf1->getLocalValue(i);
 		if (ccScalarField::ValidValue(val1))
 		{
 			switch (op)
 			{
 			case PLUS:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
-						val = val1 + static_cast<ScalarType>(sf2Desc->constantValue);
+						val = val1 + sf2Desc->constantValue;
 					}
 					else
 					{
-						const ScalarType& val2 = sf2->getValue(i);
+						assert(sf2);
+						ScalarType val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
+						{
 							val = val1 + val2;
+						}
 					}
 				}
 				break;
 			case MINUS:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
-						val = val1 - static_cast<ScalarType>(sf2Desc->constantValue);
+						val = val1 - sf2Desc->constantValue;
 					}
 					else
 					{
-						const ScalarType& val2 = sf2->getValue(i);
+						assert(sf2);
+						ScalarType val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
+						{
 							val = val1 - val2;
+						}
 					}
 				}
 				break;
 			case MULTIPLY:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
-						val = val1 * static_cast<ScalarType>(sf2Desc->constantValue);
+						val = val1 * sf2Desc->constantValue;
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2))
 							val = val1 * val2;
@@ -383,12 +566,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case DIVIDE:
 				{
+					assert(sf2Desc);
 					if (sf2Desc->isConstantValue)
 					{
 						val = val1 / static_cast<ScalarType>(sf2Desc->constantValue);
 					}
 					else
 					{
+						assert(sf2);
 						const ScalarType& val2 = sf2->getValue(i);
 						if (ccScalarField::ValidValue(val2) && CCCoreLib::GreaterThanEpsilon(std::abs(val2) ) )
 						{
@@ -399,7 +584,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case SQRT:
 				if (val1 >= 0)
+				{
 					val = std::sqrt(val1);
+				}
 				break;
 			case POW2:
 				val = val1 * val1;
@@ -412,11 +599,15 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				break;
 			case LOG:
 				if (val1 >= 0)
+				{
 					val = std::log(val1);
+				}
 				break;
 			case LOG10:
 				if (val1 >= 0)
+				{
 					val = std::log10(val1);
+				}
 				break;
 			case COS:
 				val = std::cos(val1);
@@ -428,23 +619,28 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = std::tan(val1);
 				break;
 			case ACOS:
-				if (val1 >= -1 && val1 <= 1)
+				if (val1 >= -1.0 && val1 <= 1.0)
+				{
 					val = std::acos(val1);
+				}
 				break;
 			case ASIN:
-				if (val1 >= -1 && val1 <= 1)
+				if (val1 >= -1.0 && val1 <= 1.0)
+				{
 					val = std::asin(val1);
+				}
 				break;
 			case ATAN:
 				val = std::atan(val1);
 				break;
 			case INT:
-				val = static_cast<ScalarType>(static_cast<int>(val1)); //integer part ('round' doesn't seem to be available on MSVC?!)
+				val = std::round(val1); //integer part
 				break;
 			case INVERSE:
-				val = CCCoreLib::LessThanEpsilon(std::abs(val1)) ? CCCoreLib::NAN_VALUE : static_cast<ScalarType>(1.0 / val1);
+				val = CCCoreLib::LessThanEpsilon(std::abs(val1)) ? std::numeric_limits<double>::quiet_NaN() : (1.0 / val1);
 				break;
 			case SET:
+				assert(sf2Desc);
 				val = sf2Desc->constantValue;
 				break;
 			case ABS:
@@ -454,12 +650,14 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			case MAX:
 			{
 				ScalarType val2 = 0;
+				assert(sf2Desc);
 				if (sf2Desc->isConstantValue)
 				{
 					val2 = sf2Desc->constantValue;
 				}
 				else
 				{
+					assert(sf2);
 					val2 = sf2->getValue(i);
 				}
 				if (ccScalarField::ValidValue(val2))

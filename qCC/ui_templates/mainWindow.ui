@@ -104,7 +104,7 @@
     <addaction name="actionEnableCameraLink"/>
     <addaction name="separator"/>
     <addaction name="actionRenderToFile"/>
-    <addaction name="actionDisplayOptions"/>
+    <addaction name="actionDisplaySettings"/>
     <addaction name="actionEditCamera"/>
     <addaction name="actionSaveViewportAsObject"/>
     <addaction name="actionAdjustZoom"/>
@@ -181,8 +181,8 @@
      <addaction name="actionEnhanceRGBWithIntensities"/>
      <addaction name="actionRGBBilateralFilter"/>
      <addaction name="actionRGBGaussianFilter"/>
-	 <addaction name="actionRGBMeanFilter"/>
-	 <addaction name="actionRGBMedianFilter"/>
+     <addaction name="actionRGBMeanFilter"/>
+     <addaction name="actionRGBMedianFilter"/>
      <addaction name="separator"/>
      <addaction name="actionClearColor"/>
     </widget>
@@ -345,6 +345,12 @@
      <addaction name="actionCreateSinglePointCloud"/>
      <addaction name="actionPasteCloudFromClipboard"/>
     </widget>
+    <widget class="QMenu" name="menuCircle">
+     <property name="title">
+      <string>Circle</string>
+     </property>
+     <addaction name="actionPromoteCircleToCylinder"/>
+    </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
     <addaction name="menuOctree"/>
@@ -353,6 +359,7 @@
     <addaction name="menuMesh"/>
     <addaction name="menuPolyline"/>
     <addaction name="menuPlane"/>
+    <addaction name="menuCircle"/>
     <addaction name="menuSensors"/>
     <addaction name="menuScalarFields"/>
     <addaction name="menuWaveform"/>
@@ -610,12 +617,11 @@ QTreeView::branch:open:has-children:has-siblings  {
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionDisplayOptions"/>
+   <addaction name="actionDisplaySettings"/>
    <addaction name="actionEditCamera"/>
    <addaction name="actionGlobalZoom"/>
    <addaction name="actionPickRotationCenter"/>
    <addaction name="actionAutoPickRotationCenter"/>
-   <addaction name="actionLevel"/>
    <addaction name="actionZoomAndCenter"/>
    <addaction name="actionSetViewTop"/>
    <addaction name="actionSetViewFront"/>
@@ -817,10 +823,10 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>&amp;Open</string>
    </property>
    <property name="toolTip">
-    <string>Open one or severa files</string>
+    <string>Open one or several files</string>
    </property>
    <property name="statusTip">
-    <string>Open one or severa files</string>
+    <string>Open one or several files</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -879,7 +885,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
-  <action name="actionDisplayOptions">
+  <action name="actionDisplaySettings">
    <property name="icon">
     <iconset resource="../icons.qrc">
      <normaloff>:/CC/images/monitor.svg</normaloff>:/CC/images/monitor.svg</iconset>
@@ -1360,32 +1366,28 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Compute bilateral filter</string>
    </property>
   </action>
-   <action name="actionRGBMeanFilter">
-	 <property name="icon">
-	 </property>
-	 <property name="text">
-	   <string>Mean filter</string>
-	 </property>
-	 <property name="toolTip">
-	   <string>Compute mean filter</string>
-	 </property>
-	 <property name="statusTip">
-	   <string>Compute mean filter</string>
-	 </property>
-   </action>
-   <action name="actionRGBMedianFilter">
-	 <property name="icon">
-	 </property>
-	 <property name="text">
-	   <string>Median filter</string>
-	 </property>
-	 <property name="toolTip">
-	   <string>Compute median filter</string>
-	 </property>
-	 <property name="statusTip">
-	   <string>Compute median filter</string>
-	 </property>
-   </action>
+  <action name="actionRGBMeanFilter">
+   <property name="text">
+    <string>Mean filter</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute mean filter</string>
+   </property>
+   <property name="statusTip">
+    <string>Compute mean filter</string>
+   </property>
+  </action>
+  <action name="actionRGBMedianFilter">
+   <property name="text">
+    <string>Median filter</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute median filter</string>
+   </property>
+   <property name="statusTip">
+    <string>Compute median filter</string>
+   </property>
+  </action>
   <action name="actionClearNormals">
    <property name="icon">
     <iconset resource="../icons.qrc">
@@ -3268,6 +3270,15 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionPromoteCircleToCylinder">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/primCylinder.gif</normaloff>:/CC/images/primCylinder.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Promote to cylinder</string>
    </property>
   </action>
  </widget>

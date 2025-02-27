@@ -760,7 +760,7 @@ void DistanceMapGenerationDlg::updateHeightUnits()
 
 	if (m_window && m_window->getAssociatedScalarField())
 	{
-		m_window->getAssociatedScalarField()->setName(qPrintable(QString("Distance (%1)").arg(getHeightUnitString())));
+		m_window->getAssociatedScalarField()->setName(QString("Distance (%1)").arg(getHeightUnitString()).toStdString());
 	}
 
 	updateOverlayGrid();
@@ -1055,7 +1055,11 @@ void DistanceMapGenerationDlg::updateProfileOrigin()
 	}
 
 	DistanceMapGenerationTool::ProfileMetaData profileDesc;
-	DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc);
+	if (!DistanceMapGenerationTool::GetPoylineMetaData(m_profile, profileDesc))
+	{
+		assert(false);
+		return;
+	}
 
 	//update origin
 	CCVector3 origin(	static_cast<PointCoordinateType>(xOriginDoubleSpinBox->value()),
@@ -1217,12 +1221,19 @@ void DistanceMapGenerationDlg::exportMapAsCloud()
 	double baseRadius = getBaseRadius();
 
 	ccPointCloud* cloud = DistanceMapGenerationTool::ConvertMapToCloud(m_map, m_profile, baseRadius);
-	if (m_colorScaleSelector)
-		cloud->getCurrentDisplayedScalarField()->setColorScale(m_colorScaleSelector->getSelectedScale());
-	cloud->setName(m_cloud->getName() + QString(".map(%1,%2)").arg(m_map->xSteps).arg(m_map->ySteps));
+	if (cloud)
+	{
+		if (m_colorScaleSelector && cloud->getCurrentDisplayedScalarField())
+		{
+			cloud->getCurrentDisplayedScalarField()->setColorScale(m_colorScaleSelector->getSelectedScale());
+		}
+		cloud->setName(m_cloud->getName() + QString(".map(%1,%2)").arg(m_map->xSteps).arg(m_map->ySteps));
 
-	if (cloud && m_app)
-		m_app->addToDB(cloud);
+		if (m_app)
+		{
+			m_app->addToDB(cloud);
+		}
+	}
 }
 
 void DistanceMapGenerationDlg::exportMapAsMesh()

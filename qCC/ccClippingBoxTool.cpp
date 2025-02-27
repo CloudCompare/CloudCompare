@@ -751,7 +751,10 @@ bool ccClippingBoxTool::ExtractSlicesAndContours
 						}
 					}
 
-					nProgress.oneStep();
+					if (!nProgress.oneStep())
+					{
+						// sadly, we can't cancel in the middle of this process!
+					}
 				} //project points into grid
 
 				if (progressDialog)

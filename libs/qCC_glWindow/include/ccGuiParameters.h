@@ -23,6 +23,7 @@
 
 //qCC_db
 #include <ccColorTypes.h>
+#include <ccLog.h>
 
 /***************************************************
 				GUI parameters
@@ -122,6 +123,9 @@ public:
 
 		//! Picking cursor
 		Qt::CursorShape pickingCursorShape;
+
+		//! Log verbosity level
+		ccLog::MessageLevelFlags logVerbosityLevel;
 
 		//! Default constructor
 		ParamStruct();

@@ -27,6 +27,7 @@ class cc2DLabel;
 class cc2DViewportLabel;
 class cc2DViewportObject;
 class ccCameraSensor;
+class ccCircle;
 class ccCone;
 class ccCylinder;
 class ccDish;
@@ -146,6 +147,9 @@ public:
 
 	//! Converts current object to ccCoordinateSystem (if possible)
 	static ccCoordinateSystem* ToCoordinateSystem(ccHObject* obj);
+
+	//! Converts current object to ccCircle (if possible)
+	static ccCircle* ToCircle(ccHObject* obj);
 
 	//! Helper: clones the children of sourceEntity and set the resulting entities as children of destEntity
 	/** \warning: Not all children can be cloned this way. Only simple ones for now (labels, sensors, images, etc.).

@@ -45,9 +45,9 @@ Cloth::Cloth(	const Vec3& _origin_pos,
 				double _smoothThreshold,
 				double _heightThreshold,
 				int rigidness/*,
-				double time_step*/)
+				double _time_step*/)
 	: constraint_iterations(rigidness)
-	, time_step(time_step)
+	//, time_step(_time_step)
 	, smoothThreshold(_smoothThreshold)
 	, heightThreshold(_heightThreshold)
 	, num_particles_width(_num_particles_width)

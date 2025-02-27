@@ -158,7 +158,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	texture.release();
 
 	glFunc->glPopAttrib();
-	glFunc->glPopAttrib();	
+	glFunc->glPopAttrib();
 }
 
 void ccImage::setAlpha(float value)

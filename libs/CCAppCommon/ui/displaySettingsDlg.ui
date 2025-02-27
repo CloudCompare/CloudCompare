@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DisplayOptionsDlg</class>
- <widget class="QDialog" name="DisplayOptionsDlg">
+ <class>DisplaySettingsDlg</class>
+ <widget class="QDialog" name="DisplaySettingsDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>514</width>
-    <height>566</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Display settings</string>
+   <string>Display Settings</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>409</height>
+        <height>423</height>
        </rect>
       </property>
       <attribute name="label">
@@ -375,7 +375,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>409</height>
+        <height>423</height>
        </rect>
       </property>
       <attribute name="label">
@@ -460,7 +460,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>409</height>
+        <height>423</height>
        </rect>
       </property>
       <attribute name="label">
@@ -603,7 +603,7 @@
         <x>0</x>
         <y>0</y>
         <width>496</width>
-        <height>409</height>
+        <height>423</height>
        </rect>
       </property>
       <attribute name="label">
@@ -787,21 +787,21 @@
          </item>
         </widget>
        </item>
-       <item row="8" column="0">
+       <item row="9" column="0">
         <widget class="QCheckBox" name="autoDisplayNormalsCheckBox">
          <property name="text">
           <string>Automatically display normals at loading time (if any)</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="0">
+       <item row="10" column="0">
         <widget class="QCheckBox" name="drawRoundedPointsCheckBox">
          <property name="text">
           <string>Draw rounded points (slower)</string>
          </property>
         </widget>
        </item>
-       <item row="10" column="0">
+       <item row="11" column="0">
         <widget class="QCheckBox" name="showCrossCheckBox">
          <property name="toolTip">
           <string>A cross is displayed in the middle of the screen</string>
@@ -817,7 +817,7 @@
          </property>
         </widget>
        </item>
-       <item row="12" column="0">
+       <item row="13" column="0">
         <widget class="QCheckBox" name="useVBOCheckBox">
          <property name="text">
           <string>Try to load clouds on GPU for faster display</string>
@@ -827,7 +827,7 @@
          </property>
         </widget>
        </item>
-       <item row="13" column="0">
+       <item row="14" column="0">
         <widget class="QCheckBox" name="useNativeDialogsCheckBox">
          <property name="text">
           <string>Use native load / save dialogs</string>
@@ -837,7 +837,7 @@
          </property>
         </widget>
        </item>
-       <item row="14" column="0">
+       <item row="16" column="0">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -850,7 +850,7 @@
          </property>
         </spacer>
        </item>
-       <item row="11" column="0">
+       <item row="12" column="0">
         <widget class="QCheckBox" name="singleClickPickingCheckBox">
          <property name="toolTip">
           <string>Can be slow on large point clouds</string>
@@ -890,6 +890,47 @@
          <item>
           <property name="text">
            <string>Pointing hand</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="15" column="0">
+        <widget class="QCheckBox" name="confirmQuitCheckBox">
+         <property name="text">
+          <string>Ask for a confirmation before quitting</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_23">
+         <property name="text">
+          <string>Log/console verbosity level</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QComboBox" name="logVerbosityComboBox">
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Verbose</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Standard</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Important</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Warning &amp; errors</string>
           </property>
          </item>
         </widget>

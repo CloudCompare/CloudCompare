@@ -44,16 +44,16 @@ public:
 	bool start() override { return true; }
 	void stop() override {}
 	
-	ccExternalFactory *getCustomObjectsFactory() const override { return nullptr; }
+	ccExternalFactory* getCustomObjectsFactory() const override { return nullptr; }
 	
-	void registerCommands(ccCommandLineInterface *cmd) override { Q_UNUSED( cmd ); }
+	void registerCommands(ccCommandLineInterface* cmd) override { Q_UNUSED( cmd ); }
 	
 protected:
-	ccDefaultPluginInterface( const QString &resourcePath = QString() );
+	ccDefaultPluginInterface( const QString& resourcePath = QString() );
 	
 private:
 	void setIID( const QString& iid ) override;
 	const QString& IID() const override;
 		
-	ccDefaultPluginData	*m_data;
+	ccDefaultPluginData* m_data;
 };

@@ -103,7 +103,7 @@ void ccSSAOFilter::reset()
 	}
 }
 
-bool ccSSAOFilter::init(unsigned width, unsigned height, QString shadersPath, QString& error)
+bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersPath, QString& error)
 {
 	return init(width, height, true, true, shadersPath, error);
 }
@@ -112,7 +112,7 @@ bool ccSSAOFilter::init(unsigned width,
 						unsigned height,
 						bool enableBilateralFilter,
 						bool useReflectTexture,
-						QString shadersPath,
+						const QString& shadersPath,
 						QString& error )
 {
 	if (width == 0 || height == 0)

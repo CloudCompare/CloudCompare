@@ -124,12 +124,17 @@ qAnimationDlg::qAnimationDlg(ccGLWindowInterface* view3d, QWidget* parent)
 			for (const QVideoEncoder::OutputFormat& f : formats)
 			{
 				QString title = f.longName;
+
+				m_codecNamesAndExtensions[f.shortName] = f.extensions;
+
 				if (!f.extensions.isEmpty())
 				{
 					title += "[" + f.extensions + "]";
 					static const int s_maxTitleLength = 48;
 					if (title.size() > s_maxTitleLength)
+					{
 						title = title.left(s_maxTitleLength - 3) + "...";
+					}
 				}
 				outputFormatComboBox->addItem(title, QVariant(f.shortName));
 				if (defaultIndex == 0 && !defaultOutputFormat.isEmpty() && defaultOutputFormat == f.shortName)
@@ -157,6 +162,8 @@ qAnimationDlg::qAnimationDlg(ccGLWindowInterface* view3d, QWidget* parent)
 	connect( exportFramesPushButton,&QAbstractButton::clicked,		this, &qAnimationDlg::renderFrames );
 	connect( buttonBox,				&QDialogButtonBox::accepted,	this, &qAnimationDlg::onAccept );
 	connect( buttonBox,				&QDialogButtonBox::rejected,	this, &qAnimationDlg::onReject );
+
+	connect(outputFormatComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &qAnimationDlg::onCodecChanged );
 }
 
 qAnimationDlg::~qAnimationDlg()
@@ -882,6 +889,38 @@ void qAnimationDlg::onStepTimeChanged(double time_sec)
 	updateCurrentStepDuration();
 	//we have to update the whole smooth trajectory duration as well
 	updateSmoothTrajectoryDurations();
+}
+
+void qAnimationDlg::onCodecChanged(int index)
+{
+	QString filename = outputFileLineEdit->text();
+	if (filename.size() < 3 || !filename.contains('.'))
+	{
+		// nothing to do
+		return;
+	}
+
+	QString codecFormat = outputFormatComboBox->itemData(index).toString();
+	QString extensions = m_codecNamesAndExtensions[codecFormat];
+	if (extensions.isEmpty())
+	{
+		// nothing to do
+		return;
+	}
+
+	QFileInfo fi(filename);
+	QString completeSuffix = fi.completeSuffix();
+
+	if (!extensions.contains(completeSuffix))
+	{
+		// the current extension is not a valid codec extension?
+		// use the first one by default
+		QString newSuffix = extensions.split(',').first();
+
+		filename.replace('.' + completeSuffix, '.' + newSuffix);
+
+		outputFileLineEdit->setText(filename);
+	}
 }
 
 void qAnimationDlg::onBrowseButtonClicked()

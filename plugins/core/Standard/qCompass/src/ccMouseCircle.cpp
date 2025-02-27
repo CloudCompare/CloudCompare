@@ -44,6 +44,8 @@ static Circle s_unitCircle;
 
 ccMouseCircle::ccMouseCircle(ccGLWindowInterface* owner, QString name) 
 	: cc2DViewportObject(name.isEmpty() ? "label" : name)
+	, m_owner(nullptr)
+	, m_pixelSize(0.0f)
 	, m_radius(50)
 	, m_radiusStep(4)
 {
@@ -111,7 +113,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	m_pixelSize = (context.glW != 0 ? params.computeWidthAtFocalDist() / context.glW : 0);
 
 	//get mouse position
-	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos());
+	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos()) * context.devicePixelRatio;
 	int mx = p.x(); //mouse x-coord
 	int my = context.glH - 1 - p.y(); //mouse y-coord in OpenGL coordinates (origin at bottom left, not top left)
 	

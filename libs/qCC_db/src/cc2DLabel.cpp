@@ -19,7 +19,6 @@
 
 //Local
 #include "cc2DLabel.h"
-#include "ccBasicTypes.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
@@ -28,6 +27,7 @@
 #include "ccSphere.h"
 
 //Qt
+#include <QFontMetrics>
 #include <QSharedPointer>
 
 //System
@@ -131,7 +131,7 @@ ccGenericPointCloud* cc2DLabel::PickedPoint::cloudOrVertices() const
 		return _cloud;
 	if (_mesh)
 		return _mesh->getAssociatedCloud();
-	
+
 	assert(false);
 	return nullptr;
 }
@@ -188,12 +188,7 @@ QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 		}
 		else
 		{
-			QString sfVal = QString::number(info.sfValue, 'f', precision);
-			if (info.sfValueIsShifted)
-			{
-				sfVal = QString::number(info.sfShiftedValue, 'f', precision) + QString(" (shifted: %1)").arg(sfVal);
-			}
-			return sfVal;
+			return QString::number(info.sfValue, 'f', precision);
 		}
 	}
 	else
@@ -318,7 +313,9 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 	}
 
 	if (pointsToRemove == 0)
+	{
 		return;
+	}
 
 	if (pointsToRemove == m_pickedPoints.size())
 	{
@@ -333,7 +330,9 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 			if (m_pickedPoints[i].entity() != obj)
 			{
 				if (i != j)
+				{
 					std::swap(m_pickedPoints[i], m_pickedPoints[j]);
+				}
 				j++;
 			}
 		}
@@ -359,7 +358,7 @@ void cc2DLabel::updateName()
 		setName(m_pickedPoints[0].prefix(POINT_INDEX_0));
 	}
 	break;
-	
+
 	case 2:
 	{
 		if (m_pickedPoints[0].entity() == m_pickedPoints[1].entity())
@@ -374,7 +373,7 @@ void cc2DLabel::updateName()
 		}
 	}
 	break;
-	
+
 	case 3:
 	{
 		if (	m_pickedPoints[0].entity() == m_pickedPoints[2].entity() && m_pickedPoints[1].entity() == m_pickedPoints[2].entity() )
@@ -391,7 +390,7 @@ void cc2DLabel::updateName()
 		}
 	}
 	break;
-	
+
 	}
 }
 
@@ -488,7 +487,7 @@ bool cc2DLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 		uint32_t meshID = static_cast<uint32_t>(it->_mesh ? it->_mesh->getUniqueID() : 0);
 		if (out.write((const char*)&meshID, 4) < 0)
 			return WriteError();
-		
+
 		//uv coordinates in the triangle (dataVersion >= 49)
 		if (out.write((const char*)it->uv.u, sizeof(double) * 2) < 0)
 			return WriteError();
@@ -650,7 +649,7 @@ void AddPointCoordinates(QStringList& body, const cc2DLabel::PickedPoint& pp, in
 {
 	QString pointShortName;
 	ccShiftedObject* shiftedObject = nullptr;
-	
+
 	if (pp._cloud)
 	{
 		shiftedObject = pp._cloud;
@@ -722,12 +721,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				if (sf)
 				{
 					info.sfValue = sf->getValue(pp.index);
-					info.sfName = sf->getName();
-					if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
-					{
-						info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
-						info.sfValueIsShifted = true;
-					}
+					info.sfName = QString::fromStdString(sf->getName());
 				}
 				else
 				{
@@ -786,7 +780,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 					s2 = vertices->getPointScalarValue(vi->i2);
 					s3 = vertices->getPointScalarValue(vi->i3);
 				}
-			
+
 				//interpolate the SF value
 				if (ccScalarField::ValidValue(s1) && ccScalarField::ValidValue(s2) && ccScalarField::ValidValue(s3))
 				{
@@ -795,12 +789,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 
 				if (sf)
 				{
-					info.sfName = sf->getName();
-					if (ccScalarField::ValidValue(info.sfValue) && sf->getGlobalShift() != 0)
-					{
-						info.sfShiftedValue = sf->getGlobalShift() + info.sfValue;
-						info.sfValueIsShifted = true;
-					}
+					info.sfName = QString::fromStdString(sf->getName());
 				}
 				else
 				{
@@ -1160,6 +1149,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					double unitD = viewportParams.zFar / 2; //we consider that the 'standard' scale is at half the depth
 					scale = static_cast<float>(scale * sqrt(d / unitD)); //sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 				}
+				scale = static_cast<float>(scale * context.devicePixelRatio);
 				glFunc->glScalef(scale, scale, scale);
 				m_pickedPoints[i].markerScale = scale;
 				c_unitPointMarker->draw(markerContext);

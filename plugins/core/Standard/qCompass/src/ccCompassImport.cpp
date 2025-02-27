@@ -25,13 +25,14 @@ namespace {
 			, m_sizeLabel( new QLabel )
 			, m_dipDirCombo( new QComboBox )
 			, m_dipCombo( new QComboBox )
+			, m_planeSize( nullptr )
 		{
 			QVBoxLayout* vbox = new QVBoxLayout;
 			
 			for (unsigned int i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 			{
-				m_dipDirCombo->addItem( cloud->getScalarFieldName(i), i );
-				m_dipCombo->addItem( cloud->getScalarFieldName(i), i );
+				m_dipDirCombo->addItem( QString::fromStdString(cloud->getScalarFieldName(i)), i );
+				m_dipCombo->addItem(QString::fromStdString(cloud->getScalarFieldName(i)), i );
 			}
 			
 			m_planeSize = new QLineEdit( "2.0" );
@@ -110,7 +111,7 @@ namespace ccCompassImport {
 		//get point cloud object
 		ccPointCloud* cld = static_cast<ccPointCloud*>(sel[0]);
 	
-		ImportDialog	foliationDialog( cld, app->getMainWindow() );
+		ImportDialog foliationDialog( cld, app->getMainWindow() );
 	
 		foliationDialog.setLabels( {
 									   QObject::tr( "Dip Field:", "ccCompassImport" ),
@@ -139,8 +140,8 @@ namespace ccCompassImport {
 		//loop through points
 		for (unsigned p = 0; p < cld->size(); p++)
 		{
-			float dip = cld->getScalarField(dipSF)->at(p);
-			float dipdir = cld->getScalarField(dipDirSF)->at(p);
+			ScalarType dip = cld->getScalarField(dipSF)->getValue(p);
+			ScalarType dipdir = cld->getScalarField(dipDirSF)->getValue(p);
 			CCVector3 Cd = *cld->getPoint(p);
 	
 			//build plane and get its orientation 
@@ -152,7 +153,7 @@ namespace ccCompassImport {
 			CCVector3 C = plane->getCenter();
 	
 			//figure out transform (blatantly stolen from ccPlaneEditDlg::updatePlane())
-			CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir, true);
+			CCVector3 Nd = ccNormalVectors::ConvertDipAndDipDirToNormal(dip, dipdir, true).toPC();
 			ccGLMatrix trans;
 			bool needToApplyTrans = false;
 			bool needToApplyRot = false;
@@ -247,8 +248,8 @@ namespace ccCompassImport {
 		//loop through points
 		for (unsigned p = 0; p < cld->size(); p++)
 		{
-			float trend = cld->getScalarField(dipSF)->at(p);
-			float plunge = cld->getScalarField(dipDirSF)->at(p);
+			ScalarType trend = cld->getScalarField(dipSF)->getValue(p);
+			ScalarType plunge = cld->getScalarField(dipDirSF)->getValue(p);
 			CCVector3 Cd = *cld->getPoint(p);
 
 			//build lineation vector

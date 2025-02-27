@@ -26,6 +26,7 @@
 //qCC_db
 #include <cc2DLabel.h>
 #include <ccCameraSensor.h>
+#include <ccCircle.h>
 #include <ccFacet.h>
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
@@ -152,20 +153,6 @@ static int ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags& he
 	return 0;
 }
 
-static QFile* s_file = nullptr;
-static int s_flags = 0;
-static ccHObject* s_container = nullptr;
-
-CC_FILE_ERROR _LoadFileV2()
-{
-	return (s_file && s_container ? BinFilter::LoadFileV2(*s_file, *s_container, s_flags) : CC_FERR_BAD_ARGUMENT);
-}
-
-CC_FILE_ERROR _SaveFileV2()
-{
-	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file, s_container) : CC_FERR_BAD_ARGUMENT);
-}
-
 CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
 {
 	s_lastSavedFileBinVersion = 0;
@@ -189,10 +176,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 	}
 
 	//concurrent call
-	s_file = &out;
-	s_container = root;
-
-	QFuture<CC_FILE_ERROR> future = QtConcurrent::run(_SaveFileV2);
+	QFuture<CC_FILE_ERROR> future = QtConcurrent::run([&]() { return BinFilter::SaveFileV2(out, root); });
 
 	while (!future.isFinished())
 	{
@@ -208,9 +192,6 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 		QApplication::processEvents();
 	}
 	
-	s_file = nullptr;
-	s_container = nullptr;
-
 	CC_FILE_ERROR result = future.result();
 
 	return result;
@@ -328,9 +309,10 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	{
 		char flags = 0;
 		if (sizeof(PointCoordinateType) == 8)
+		{
 			flags |= static_cast<char>(ccSerializableObject::DF_POINT_COORDS_64_BITS);
-		if (sizeof(ScalarType) == 4)
-			flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		}
+		flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS); // internal representation of scalar fields is now always floats
 		assert(flags <= 8);
 		firstBytes[3] = 48 + flags; //48 = ASCII("0")
 	}
@@ -392,60 +374,11 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 		}
 
-		//if (sizeof(PointCoordinateType) == 8 && strncmp((char*)&firstBytes,"CCB3",4) != 0)
-		//{
-		//	QMessageBox::information(nullptr, QString("Wrong version"), QString("This file has been generated with the standard 'float' version!\nAt this time it cannot be read with the 'double' version."),QMessageBox::Ok);
-		//	return CC_FERR_WRONG_FILE_TYPE;
-		//}
-		//else if (sizeof(PointCoordinateType) == 4 && strncmp((char*)&firstBytes,"CCB2",4) != 0)
-		//{
-		//	QMessageBox::information(nullptr, QString("Wrong version"), QString("This file has been generated with the new 'double' version!\nAt this time it cannot be read with the standard 'float' version."),QMessageBox::Ok);
-		//	return CC_FERR_WRONG_FILE_TYPE;
-		//}
-
-		if (parameters.alwaysDisplayLoadDialog)
-		{
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
-			if (parameters.parentWidget)
-			{
-				pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
-				pDlg->setMethodTitle(QObject::tr("BIN file"));
-				pDlg->setInfo(QObject::tr("Loading: %1").arg(QFileInfo(filename).fileName()));
-				pDlg->setRange(0, 0);
-				pDlg->show();
-			}
-
-			//concurrent call in a separate thread
-			s_file = &in;
-			s_container = &container;
-			s_flags = flags;
-
-			QFuture<CC_FILE_ERROR> future = QtConcurrent::run(_LoadFileV2);
-
-			while (!future.isFinished())
-			{
-#if defined(CC_WINDOWS)
-				::Sleep(500);
-#else
-				usleep(500 * 1000);
-#endif
-				if (pDlg)
-				{
-					pDlg->setValue(pDlg->value() + 1);
-				}
-				//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
-				QApplication::processEvents();
-			}
-	
-			s_file = nullptr;
-			s_container = nullptr;
-
-			return future.result();
-		}
-		else
-		{
-			return BinFilter::LoadFileV2(in, container, flags);
-		}
+		return BinFilter::LoadFileV2(	in,
+										container,
+										flags,
+										parameters.alwaysDisplayLoadDialog,
+										parameters.parentWidget);
 	}
 }
 
@@ -491,16 +424,40 @@ ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::Loaded
 	return nullptr;
 }
 
-CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
+static bool ContinueAfterError(bool& forceLoadAfterError, bool couldBeAMemoryIssue = false)
+{
+	if (!forceLoadAfterError)
+	{
+		// If forceLoadAfterError, it means we haven't asked the question yet, so let's do it
+		if (QMessageBox::Yes == QMessageBox::critical(	nullptr,
+														QObject::tr("Reading error"),
+														couldBeAMemoryIssue ?
+															"The file couldn't be completely loaded, but some entities were loaded.\nDo you want to take the risk to load them? (CC could crash)" :
+															"The file seems corrupted, but some entities were loaded.\nDo you want to take the risk to load them? (CC could crash)",
+														QMessageBox::Yes,
+														QMessageBox::No))
+		{
+			forceLoadAfterError = true;
+		}
+	}
+
+	return forceLoadAfterError;
+}
+
+CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, bool parallel, QWidget* parentWidget/*=nullptr*/)
 {
 	assert(in.isOpen());
 
 	uint32_t binVersion = 20;
 	if (in.read((char*)&binVersion, 4) < 0)
+	{
 		return CC_FERR_READING;
+	}
 
 	if (binVersion < 20) //should be superior to 2.0!
+	{
 		return CC_FERR_MALFORMED_FILE;
+	}
 
 	QString coordsFormat = ((flags & ccSerializableObject::DF_POINT_COORDS_64_BITS) ? "double" : "float");
 	QString scalarFormat = ((flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS) ? "float" : "double");
@@ -512,10 +469,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		return CC_FERR_CONSOLE_ERROR;
 	}
 
-	//we keep track of the last unique ID before load
-	unsigned lastUniqueIDBeforeLoad = ccObject::GetLastUniqueID();
-
-	//we read first entity type
+	//we read the first entity type
 	CC_CLASS_ENUM classID = ccObject::ReadClassIDFromFile(in, static_cast<short>(binVersion));
 	if (classID == CC_TYPES::OBJECT)
 	{
@@ -529,32 +483,90 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	ccObject::LoadedIDMap oldToNewIDMap;
+	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	if (parallel && parentWidget)
+	{
+		pDlg.reset(new ccProgressDialog(false, parentWidget));
+		pDlg->setMethodTitle(QObject::tr("BIN file"));
+		pDlg->setInfo(QObject::tr("Loading: %1").arg(in.fileName()));
+		pDlg->setRange(0, 0);
+		pDlg->show();
+	}
 
 	if (classID == CC_TYPES::CUSTOM_H_OBJECT)
 	{
 		// store seeking position
 		size_t original_pos = in.pos();
 		// we need to load it as plain ccCustomHobject
-		root->fromFileNoChildren(in, static_cast<short>(binVersion), flags, oldToNewIDMap); // this will load it
-		in.seek(original_pos); // reseek back the file
+		ccHObject::LoadedIDMap oldToNewIDMap;
+		root->fromFileNoChildren(in, static_cast<short>(binVersion), flags, oldToNewIDMap); // this will load it, should be pretty quick
+		in.seek(original_pos); // back to the beginning of the file
 
 		QString classId = root->getMetaData("class_name").toString();
 		QString pluginId = root->getMetaData("plugin_name").toString();
 
+		// get rid of the previous ccCustomHobject instance
+		delete root;
+		root = nullptr;
+
 		// try to get a new object from external factories
 		ccHObject* new_child = ccHObject::New(pluginId, classId);
-		if (new_child) // found a plugin that can deserialize it
+		if (new_child)
+		{
+			// found a plugin that can deserialize it
 			root = new_child;
+		}
 		else
+		{
 			return CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN;
+		}
 	}
 
-	if (!root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap))
+	bool success = false;
+	ccHObject::LoadedIDMap oldToNewIDMap;
+
+	if (parallel)
+	{
+		//concurrent call in a separate thread
+		QFuture<bool> future = QtConcurrent::run([&]() { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
+
+		while (!future.isFinished())
+		{
+#if defined(CC_WINDOWS)
+			::Sleep(500);
+#else
+			usleep(500 * 1000);
+#endif
+			if (pDlg)
+			{
+				pDlg->setValue(pDlg->value() + 1);
+			}
+			//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
+			QApplication::processEvents();
+		}
+
+		success = future.result();
+	}
+	else
+	{
+		success = root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap);
+	}
+
+	bool forceLoadAfterError = false;
+	if (!success)
 	{
 		//delete root; //DGM: can't delete it, too dangerous (bad pointers ;)
 		ccLog::Error(QString("Failed to read file (file position: %1 / %2").arg(in.pos()).arg(in.size()));
-		return CC_FERR_CONSOLE_ERROR;
+
+		if (!root->isA(CC_TYPES::HIERARCHY_OBJECT) || root->getChildrenNumber() != 0)
+		{
+			ContinueAfterError(forceLoadAfterError, true);
+		}
+
+		if (!forceLoadAfterError)
+		{
+			return CC_FERR_CONSOLE_ERROR;
+		}
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -608,7 +620,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							//DGM: can't delete it, too dangerous (bad pointers ;)
 							//delete subMesh;
 							ccLog::Warning(QString("[BIN] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(meshID).arg(subMesh->getName()));
-							return CC_FERR_MALFORMED_FILE;
+							if (!ContinueAfterError(forceLoadAfterError))
+							{
+								return CC_FERR_MALFORMED_FILE;
+							}
 						}
 					}
 				}
@@ -625,14 +640,26 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
-						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+						ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
+						assert(genericCloud);
+						mesh->setAssociatedCloud(genericCloud);
+
+						if (!mesh->isAncestorOf(cloud))
+						{
+							// warning: the mesh is not the parent of its vertices!
+							// We want to make sure we will be notified whenever the vertices
+							// are deleted (in which case the mesh will be emptied to avoid any crash)
+							cloud->addDependency(mesh, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
+						}
 					}
 					else
 					{
 						//we have a problem here ;)
 						mesh->setAssociatedCloud(nullptr);
 						if (mesh->getMaterialSet())
+						{
 							mesh->setMaterialSet(nullptr, false);
+						}
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete mesh;
 						if (mesh->getParent())
@@ -641,7 +668,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->getParent()->removeChild(mesh);
 						}
 						ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(cloudID).arg(mesh->getName()));
-						if (root == mesh)
+						if (root == mesh && !ContinueAfterError(forceLoadAfterError))
 						{
 							return CC_FERR_MALFORMED_FILE;
 						}
@@ -660,7 +687,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						if (root == mesh)
 						{
 							delete mesh;
-							return CC_FERR_MALFORMED_FILE;
+							if (!ContinueAfterError(forceLoadAfterError))
+							{
+								return CC_FERR_MALFORMED_FILE;
+							}
 						}
 						else
 						{
@@ -690,11 +720,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->showMaterials(false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (materials)
-								orphans->addChild(materials);
-							materials = nullptr;
 						}
 					}
 					//per-triangle normals
@@ -714,11 +739,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->showTriNorms(false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (triNormsTable)
-								orphans->addChild(triNormsTable);
-							triNormsTable = nullptr;
 						}
 					}
 					//per-triangle texture coordinates
@@ -737,11 +757,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->setTexCoordinatesTable(nullptr, false);
 							ccLog::Warning(QString("[BIN] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
 							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-							//add it to the 'orphans' set
-							if (texCoordsTable)
-								orphans->addChild(texCoordsTable);
-							texCoordsTable = nullptr;
 						}
 					}
 
@@ -783,7 +798,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 								mesh->setTriNormsTable(nullptr, false);
 								mesh->setTexCoordinatesTable(nullptr, false);
 								if (mesh->getParent())
+								{
 									mesh->getParent()->removeChild(mesh);
+								}
 								currentObject = mesh = nullptr;
 
 								break;
@@ -802,6 +819,14 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
 				poly->setAssociatedCloud(cloud);
+
+				if (!poly->isAncestorOf(cloud))
+				{
+					// warning: the polyline is not the parent of its vertices!
+					// We want to make sure we will be notified whenever the vertices
+					// are deleted (in which case the polyline will be emptied to avoid any crash)
+					cloud->addDependency(poly, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
+				}
 
 				// now check the indexes
 				unsigned pointCount = cloud->size();
@@ -824,7 +849,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				//delete root;
 				currentObject = nullptr;
 				ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(cloudID).arg(poly->getName()));
-				return CC_FERR_MALFORMED_FILE;
+				if (!ContinueAfterError(forceLoadAfterError))
+				{
+					return CC_FERR_MALFORMED_FILE;
+				}
 			}
 		}
 		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
@@ -878,7 +906,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						//we have a problem here ;)
 						ccLog::Warning(QString("[BIN] Couldn't find cloud (ID=%1) associated to label ID=%2 in the file!").arg(cloudID).arg(label->getUniqueID())); //we can't call getName as it relies on the cloud/mesh pointers!
 						if (label->getParent())
+						{
 							label->getParent()->removeChild(label);
+						}
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete label;
 						currentObject = label = nullptr;
@@ -901,7 +931,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						//we have a problem here ;)
 						ccLog::Warning(QString("[BIN] Couldn't find mesh (ID=%1) associated to label ID=%2 in the file!").arg(meshID).arg(label->getUniqueID())); //we can't call getName as it relies on the cloud/mesh pointers!
 						if (label->getParent())
+						{
 							label->getParent()->removeChild(label);
+						}
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete label;
 						currentObject = label = nullptr;
@@ -920,9 +952,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				for (const cc2DLabel::PickedPoint& cpp : correctedPickedPoints)
 				{
 					if (cpp._cloud)
+					{
 						label->addPickedPoint(cpp._cloud, cpp.index, cpp.entityCenterPoint);
+					}
 					else if (cpp._mesh)
+					{
 						label->addPickedPoint(cpp._mesh, cpp.index, cpp.uv, cpp.entityCenterPoint);
+					}
 				}
 				label->setVisible(visible);
 				label->setName(originalName);
@@ -1242,13 +1278,29 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 				if (header.colors)
 				{
-					loadedCloud->reserveTheRGBTable();
-					loadedCloud->showColors(true);
+					if (loadedCloud->reserveTheRGBTable())
+					{
+						loadedCloud->showColors(true);
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to allocate RGB colors on cloud '%1'").arg(loadedCloud->getName()));
+						delete loadedCloud;
+						return CC_FERR_NOT_ENOUGH_MEMORY;
+					}
 				}
 				if (header.normals)
 				{
-					loadedCloud->reserveTheNormsTable();
-					loadedCloud->showNormals(true);
+					if (loadedCloud->reserveTheNormsTable())
+					{
+						loadedCloud->showNormals(true);
+					}
+					else
+					{
+						ccLog::Warning(QString("Failed to allocate normals on cloud '%1'").arg(loadedCloud->getName()));
+						delete loadedCloud;
+						return CC_FERR_NOT_ENOUGH_MEMORY;
+					}
 				}
 				if (header.scalarField)
 				{

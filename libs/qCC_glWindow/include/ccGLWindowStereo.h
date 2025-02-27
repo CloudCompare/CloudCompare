@@ -149,9 +149,6 @@ protected: //members
 	//! Associated OpenGL context
 	QOpenGLContext* m_context;
 
-	//! OpenGL device
-	QOpenGLPaintDevice* m_device;
-
 	//! Format
 	QSurfaceFormat m_format;
 
@@ -168,6 +165,7 @@ public:
 
 	ccGLStereoWidget(ccGLWindowStereo* window, QWidget* parent = nullptr)
 		: QWidget(parent)
+		, m_associatedWindow(nullptr)
 	{
 		setLayout(new QHBoxLayout);
 		layout()->setContentsMargins(0, 0, 0, 0);

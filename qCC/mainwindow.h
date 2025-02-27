@@ -783,20 +783,7 @@ class MainWindow : public QMainWindow
      * \param window The window to set as the active sub-window.
      */
 	void setActiveSubWindow(QWidget* window);
-
-	/**
-     * \brief Shows the display options dialog.
-     *
-     * This function displays the display options dialog, allowing the user to configure various
-     * display-related settings.
-     */
-	void showDisplayOptions();
-
-	/**
-     * \brief Shows the histogram of the selected entities.
-     *
-     * This function displays the histogram of the scalar fields associated with the selected entities.
-     */
+	void showDisplaySettings();
 	void showSelectedEntitiesHistogram();
 
 	/**
@@ -1345,11 +1332,8 @@ class MainWindow : public QMainWindow
      */
 	void doActionComparePlanes();
 
-	/**
-     * \brief Deletes the scan grids of the selected entities.
-     *
-     * This function deletes the scan grids associated with the selected entities.
-     */
+	void doActionPromoteCircleToCylinder();
+
 	void doActionDeleteScanGrids();
 
 	/**

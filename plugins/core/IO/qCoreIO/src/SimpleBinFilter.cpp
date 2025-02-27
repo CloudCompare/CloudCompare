@@ -109,7 +109,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 			for (int i = 0; i < static_cast<int>(sfCount); ++i)
 			{
 				QString key = QString("SF%1").arg(i + 1);
-				QString sfName = cloud->getScalarFieldName(i);
+				QString sfName = QString::fromStdString(cloud->getScalarFieldName(i));
 
 				QStringList tokens;
 				tokens << sfName;
@@ -117,9 +117,9 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(i));
 
 				//global shift
-				if (sf && sf->getGlobalShift() != 0.0)
+				if (sf && sf->getOffset() != 0.0)
 				{
-					tokens << "s=" + QString::number(sf->getGlobalShift(), 'f', 12);
+					tokens << "s=" + QString::number(sf->getOffset(), 'f', 12);
 				}
 
 				//precision
@@ -226,8 +226,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 		//and now for the scalar values
 		for (unsigned j = 0; j < sfCount; ++j)
 		{
-			ScalarType val = cloud->getScalarField(j)->getValue(i);
-			float fVal = static_cast<float>(val);
+			float fVal = cloud->getScalarField(j)->getLocalValue(i);
 			dataStream << fVal;
 		}
 
@@ -245,13 +244,13 @@ struct SFDescriptor
 {
 	QString name;
 	double precision = std::numeric_limits<double>::quiet_NaN();
-	double shift = 0.0;
+	double offset = 0.0;
 	ccScalarField* sf = nullptr;
 };
 
 struct GlobalDescriptor
 {
-	size_t pointCount;
+	size_t pointCount = 0;
 	CCVector3d globalShift;
 	double globalScale = 1.0;
 	std::vector<SFDescriptor> SFs;
@@ -381,18 +380,20 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 						if (token.startsWith("s="))
 						{
 							token = token.mid(2);
-							double shift = token.toDouble(&ok);
+							double offset = token.toDouble(&ok);
 							if (!ok)
 							{
-								ccLog::Error(QString("[SBF] Invalid %1 description (shift)").arg(key));
+								ccLog::Error(QString("[SBF] Invalid %1 description (shift/offset)").arg(key));
 								return CC_FERR_MALFORMED_FILE;
 							}
-							descriptor.SFs[i].shift = shift;
+							descriptor.SFs[i].offset = offset;
 						}
 						else
 						{
 							if (token.startsWith("p="))
+							{
 								token = token.mid(2);
+							}
 							descriptor.SFs[i].precision = token.toDouble(&ok);
 							if (!ok)
 							{
@@ -528,7 +529,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		{
 			sfDesc.name = QString("Scalar field #%1").arg(i + 1);
 		}
-		sfDesc.sf = new ccScalarField(qPrintable(sfDesc.name));
+		sfDesc.sf = new ccScalarField(sfDesc.name.toStdString());
 		if (!sfDesc.sf->reserveSafe(static_cast<unsigned>(descriptor.pointCount)))
 		{
 			sfDesc.sf->release();
@@ -536,9 +537,9 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
-		if (sfDesc.shift != 0)
+		if (sfDesc.offset != 0)
 		{
-			sfDesc.sf->setGlobalShift(sfDesc.shift);
+			sfDesc.sf->setOffset(sfDesc.offset);
 		}
 
 		cloud->addScalarField(sfDesc.sf);
@@ -603,8 +604,9 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		//and now for the scalar values
 		for (SFDescriptor& sfDesc : descriptor.SFs)
 		{
-			float val;
-			dataStream >> val;
+			float fVal;
+			dataStream >> fVal;
+			ScalarType val = sfDesc.offset + fVal;
 			sfDesc.sf->addElement(val);
 		}
 
@@ -628,7 +630,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	//update scalar fields
 	if (!descriptor.SFs.empty())
 	{
-		for (auto & SF : descriptor.SFs)
+		for (auto& SF : descriptor.SFs)
 		{
 			SF.sf->computeMinAndMax();
 		}

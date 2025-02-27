@@ -30,3 +30,9 @@
 	path = plugins/core/Standard/q3DMASC
 	url = https://github.com/dgirardeau/q3DMASC.git
 	branch = master
+[submodule "libs/CCAppCommon/QDarkStyleSheet"]
+	path = libs/CCAppCommon/QDarkStyleSheet
+	url = https://github.com/ColinDuquesnoy/QDarkStyleSheet
+[submodule "plugins/core/Standard/qVoxFall"]
+	path = plugins/core/Standard/qVoxFall
+	url = ../../farmakis/qVoxFall.git

@@ -29,9 +29,11 @@
 using namespace CCCoreLib;
 
 //! Default number of classes for associated histogram
-const unsigned MAX_HISTOGRAM_SIZE = 512;
+static const unsigned MAX_HISTOGRAM_SIZE = 512;
+//! Max SF name size (when saved to a file)
+static const size_t MaxSFNameLength = 1023;
 
-ccScalarField::ccScalarField(const char* name/*=nullptr*/)
+ccScalarField::ccScalarField(const std::string& name/*=std::string()*/)
 	: ScalarField(name)
 	, m_showNaNValuesInGrey(true)
 	, m_symmetricalScale(false)
@@ -40,7 +42,6 @@ ccScalarField::ccScalarField(const char* name/*=nullptr*/)
 	, m_colorScale(nullptr)
 	, m_colorRampSteps(0)
 	, m_modified(true)
-	, m_globalShift(0)
 {
 	setColorRampSteps(ccColorScale::DEFAULT_STEPS);
 	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));
@@ -59,7 +60,6 @@ ccScalarField::ccScalarField(const ccScalarField& sf)
 	, m_colorRampSteps(sf.m_colorRampSteps)
 	, m_histogram(sf.m_histogram)
 	, m_modified(sf.m_modified)
-	, m_globalShift(sf.m_globalShift)
 {
 	computeMinAndMax();
 }
@@ -329,31 +329,63 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//name (dataVersion>=20)
-	if (out.write(m_name, 256) < 0)
-		return WriteError();
+	//name
+	if (dataVersion < 55)
+	{
+		// old style with a fixed size
+		if (m_name.length() > 255)
+		{
+			ccLog::Warning(QString("Scalar field '%1...' name is too long, it will be truncated to the first 255 characters").arg(QString::fromStdString(m_name).left(128)));
+		}
+		char nameBuffer[256];
+		strncpy(nameBuffer, m_name.c_str(), 256);
+		nameBuffer[std::min(m_name.length(), static_cast<size_t>(255))] = 0;
+		if (out.write(nameBuffer, 256) < 0)
+		{
+			return WriteError();
+		}
+	}
+	else
+	{
+		// new style with a dynamic length
+		if (m_name.length() > MaxSFNameLength)
+		{
+			ccLog::Warning(QString("Scalar field '%1...' name is too long, it will be truncated to the first %2 characters").arg(QString::fromStdString(m_name).left(128)).arg(MaxSFNameLength));
+		}
+		uint16_t nameLength = static_cast<uint16_t>(std::min(m_name.length(), MaxSFNameLength));
+		if (out.write((const char*)&nameLength, sizeof(uint16_t)) < 0)
+		{
+			return WriteError();
+		}
+		if (out.write(m_name.c_str(), static_cast<qint64>(nameLength)) < 0)
+		{
+			return WriteError();
+		}
+	}
 
 	//data (dataVersion>=20)
-	if (!ccSerializationHelper::GenericArrayToFile<ScalarType, 1, ScalarType>(*this, out))
+	if (!ccSerializationHelper::GenericArrayToFile<float, 1, float>(*this, out))
+	{
 		return WriteError();
+	}
 
 	//displayed values & saturation boundaries (dataVersion>=20)
-	double dValue = (double)m_displayRange.start();
+	double dValue = static_cast<double>(m_displayRange.start());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
-	dValue = (double)m_displayRange.stop();
+	dValue = static_cast<double>(m_displayRange.stop());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
-	dValue = (double)m_saturationRange.start();
+	dValue = static_cast<double>(m_saturationRange.start());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
-	dValue = (double)m_saturationRange.stop();
+	dValue = static_cast<double>(m_saturationRange.stop());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
-	dValue = (double)m_logSaturationRange.start();
+	dValue = static_cast<double>(m_logSaturationRange.start());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
-	dValue = (double)m_logSaturationRange.stop();
+	dValue = static_cast<double>(m_logSaturationRange.stop());
 	if (out.write((const char*)&dValue, sizeof(double)) < 0)
 		return WriteError();
 
@@ -385,15 +417,25 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 	}
 
 	//color ramp steps (dataVersion>=20)
-	uint32_t colorRampSteps = (uint32_t)m_colorRampSteps;
+	uint32_t colorRampSteps = static_cast<uint32_t>(m_colorRampSteps);
 	if (out.write((const char*)&colorRampSteps, 4) < 0)
+	{
 		return WriteError();
+	}
 
+	double offset = getOffset();
 	if (dataVersion >= 42)
 	{
-		//global shift (dataVersion>=42)
-		if (out.write((const char*)&m_globalShift, sizeof(double)) < 0)
+		//offset (formerly named 'global shift') (dataVersion>=42)
+		if (out.write((const char*)&offset, sizeof(double)) < 0)
+		{
 			return WriteError();
+		}
+	}
+	else if (offset != 0.0)
+	{
+		ccLog::Warning("Saving a scalar field with a non-zero offset with a version prior to 4.2 will lead to information loss!");
+		assert(false);
 	}
 
 	return true;
@@ -408,32 +450,62 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	}
 
 	//name (dataVersion >= 20)
-	if (in.read(m_name, 256) < 0)
-		return ReadError();
+	{
+		char nameBuffer[MaxSFNameLength + 1];
+		if (dataVersion < 55)
+		{
+			//read the name the old way (with a fixed size)
+			if (in.read(nameBuffer, 256) < 0)
+			{
+				return ReadError();
+			}
+			nameBuffer[255] = 0;
+		}
+		else
+		{
+			//read the name the new way, with a dynamic size
+			uint16_t nameLength = 0;
+			if (in.read((char*)&nameLength, sizeof(uint16_t)) < 0)
+			{
+				return ReadError();
+			}
+			if (nameLength > MaxSFNameLength)
+			{
+				return CorruptError();
+			}
+			if (in.read(nameBuffer, nameLength) < 0)
+			{
+				return ReadError();
+			}
+			nameBuffer[nameLength] = 0;
+		}
+		m_name = std::string(nameBuffer);
+	}
 
 	//'strictly positive' state (20 <= dataVersion < 26)
 	bool onlyPositiveValues = false;
 	if (dataVersion < 26)
 	{
 		if (in.read((char*)&onlyPositiveValues, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 	}
 
 	//data (dataVersion >= 20)
 	bool result = false;
+	double baseOffset = 0.0;
 	{
+		QString sfDescription = "SF " + QString::fromStdString(m_name);
 		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
-		if (fileScalarIsFloat && sizeof(ScalarType) == 8) //file is 'float' and current type is 'double'
+		if (fileScalarIsFloat) //file is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<ScalarType, 1, ScalarType, float>(*this, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile<float, 1, float>(*this, in, dataVersion, sfDescription);
 		}
-		else if (!fileScalarIsFloat && sizeof(ScalarType) == 4) //file is 'double' and current type is 'float'
+		else //file is 'double'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<ScalarType, 1, ScalarType, double>(*this, in, dataVersion);
-		}
-		else
-		{
-			result = ccSerializationHelper::GenericArrayFromFile<ScalarType, 1, ScalarType>(*this, in, dataVersion);
+			// we load it as float, but apply an automatic offset (based on the first element) to not lose information/accuracy
+			result = ccSerializationHelper::GenericArrayFromTypedFile<float, 1, float, double>(*this, in, dataVersion, sfDescription, &baseOffset);
 		}
 	}
 	if (!result)
@@ -448,7 +520,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 		for (unsigned i = 0; i < currentSize(); ++i)
 		{
-			ScalarType &val = getValue(i);
+			ScalarType val = getValue(i);
 			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
 			if ((onlyPositiveValues && val < 0) || (!onlyPositiveValues && val >= FORMER_BIG_VALUE))
 			{
@@ -597,7 +669,9 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 		//A scalar field must have a color scale!
 		if (!m_colorScale)
+		{
 			m_colorScale = ccColorScalesManager::GetDefaultScale();
+		}
 
 		//color ramp steps (dataVersion>=20)
 		uint32_t colorRampSteps = 0;
@@ -608,19 +682,23 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 	if (dataVersion >= 42)
 	{
-		//global shift (dataVersion>=42)
-		if (in.read((char*)&m_globalShift, sizeof(double)) < 0)
+		//offset (formerly named 'global shift') (dataVersion>=42)
+		double offset = 0.0;
+		if (in.read((char*)&offset, sizeof(double)) < 0)
+		{
 			return ReadError();
+		}
+		setOffset(baseOffset + offset);
 	}
 
 	//update values
 	computeMinAndMax();
-	m_displayRange.setStart((ScalarType)minDisplayed);
-	m_displayRange.setStop((ScalarType)maxDisplayed);
-	m_saturationRange.setStart((ScalarType)minSaturation);
-	m_saturationRange.setStop((ScalarType)maxSaturation);
-	m_logSaturationRange.setStart((ScalarType)minLogSaturation);
-	m_logSaturationRange.setStop((ScalarType)maxLogSaturation);
+	m_displayRange.setStart(static_cast<ScalarType>(minDisplayed));
+	m_displayRange.setStop(static_cast<ScalarType>(maxDisplayed));
+	m_saturationRange.setStart(static_cast<ScalarType>(minSaturation));
+	m_saturationRange.setStop(static_cast<ScalarType>(maxSaturation));
+	m_logSaturationRange.setStart(static_cast<ScalarType>(minLogSaturation));
+	m_logSaturationRange.setStop(static_cast<ScalarType>(maxLogSaturation));
 
 	m_modified = true;
 
@@ -629,12 +707,21 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 short ccScalarField::minimumFileVersion() const
 {
-	// we need verison 42 to save a non-zero global shift
-	short minVersion = (m_globalShift != 0 ? 42 : 27);
+	// we need version 42 to save a non-zero global shift
+	short minVersion = (getOffset() != 0.0 ? 42 : 27);
 
+	if (m_name.length() > 255)
+	{
+		// we need version 55 to save a scalar field name with more than 255 characters
+		minVersion = std::max(minVersion, static_cast<short>(55));
+	}
+
+	// we need version 20 to save the scalar field data in a standard way
 	minVersion = std::max(minVersion, ccSerializationHelper::GenericArrayToFileMinVersion());
+
 	if (m_colorScale)
 	{
+		// we need a certain version to save the color scale depending on its contents
 		minVersion = std::max(minVersion, m_colorScale->minimumFileVersion());
 	}
 	return minVersion;

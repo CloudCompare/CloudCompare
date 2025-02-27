@@ -171,6 +171,11 @@ static QSharedPointer<ccCone> c_unitArrow(nullptr);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	if (!getAssociatedCloud())
+	{
+		return;
+	}
+
 	unsigned vertCount = size();
 	if (vertCount < 2)
 		return;
@@ -191,7 +196,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -234,7 +239,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			_verticesVisibility = &(verticesCloud->getTheVisibilityArray());
 		}
 	}
-	bool visFiltering = (_verticesVisibility && _verticesVisibility->size() >= vertCount);
+	bool visFiltering = (_verticesVisibility && _verticesVisibility->size() >= getAssociatedCloud()->size());
 
 	if (visFiltering)
 	{
@@ -242,15 +247,17 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned maxIndex = (m_isClosed ? vertCount : vertCount - 1);
 		for (unsigned i = 0; i < maxIndex; ++i)
 		{
-			if (_verticesVisibility->at(i) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+			unsigned pointIndex = getPointGlobalIndex(i);
+			if (_verticesVisibility->at(pointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
 			
 			unsigned nextIndex = ((i + 1) % vertCount);
-			if (_verticesVisibility->at(nextIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
+			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
+			if (_verticesVisibility->at(nextPointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
 
-			ccGL::Vertex3v(glFunc, getPoint(i)->u);
-			ccGL::Vertex3v(glFunc, getPoint(nextIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(pointIndex)->u);
+			ccGL::Vertex3v(glFunc, getAssociatedCloud()->getPoint(nextPointIndex)->u);
 		}
 		glFunc->glEnd();
 	}
@@ -381,17 +388,13 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 	//so instead we save it's unique ID (dataVersion>=28)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
-	if (!vertices)
-	{
-		ccLog::Warning("[ccPolyline::toFile_MeOnly] Polyline vertices is not a ccPointCloud structure?!");
-		return false;
-	}
-	uint32_t vertUniqueID = (m_theAssociatedCloud ? (uint32_t)vertices->getUniqueID() : 0);
+
+	uint32_t vertUniqueID = (vertices ? static_cast<uint32_t>(vertices->getUniqueID()) : 0);
 	if (out.write((const char*)&vertUniqueID, 4) < 0)
 		return WriteError();
 
 	//number of points (references to) (dataVersion>=28)
-	uint32_t pointCount = size();
+	uint32_t pointCount = vertices ? size() : 0;
 	if (out.write((const char*)&pointCount, 4) < 0)
 		return WriteError();
 
@@ -433,47 +436,64 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
+
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	if (dataVersion < 28)
+	{
 		return false;
+	}
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
 	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
-	uint32_t vertUniqueID = 0;
-	if (in.read((char*)&vertUniqueID, 4) < 0)
-		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-	*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+	{
+		uint32_t vertUniqueID = 0;
+		if (in.read((char*)&vertUniqueID, 4) < 0)
+		{
+			return ReadError();
+		}
+		//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
+		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+	}
 
 	//number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = 0;
 	if (in.read((char*)&pointCount, 4) < 0)
+	{
 		return ReadError();
+	}
 	if (!reserve(pointCount))
+	{
 		return false;
+	}
+
+	ccLog::PrintVerbose(QString("Polyline has %1 vertices").arg(pointCount));
 
 	//points (references to) (dataVersion>=28)
 	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = 0;
 		if (in.read((char*)&pointIndex, 4) < 0)
+		{
 			return ReadError();
+		}
 		addPointIndex(pointIndex);
 	}
 
 	//'global shift & scale' (dataVersion>=39)
+	m_globalScale = 1.0;
+	m_globalShift = CCVector3d(0, 0, 0);
 	if (dataVersion >= 39)
 	{
 		if (!loadShiftInfoFromFile(in))
+		{
 			return ReadError();
-	}
-	else
-	{
-		m_globalScale = 1.0;
-		m_globalShift = CCVector3d(0, 0, 0);
+		}
 	}
 
 	QDataStream inStream(&in);
@@ -492,11 +512,17 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 	//Foreground mode (dataVersion>=28)
 	inStream >> m_foreground;
 
+	if (inStream.status() != QDataStream::Status::Ok)
+	{
+		return ReadError();
+	}
+
 	//Width of the line (dataVersion>=31)
+	m_width = 0;
 	if (dataVersion >= 31)
+	{
 		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
-	else
-		m_width = 0;
+	}
 
 	return true;
 }
@@ -510,6 +536,11 @@ short ccPolyline::minimumFileVersion_MeOnly() const
 bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 						std::vector<ccPolyline*>& parts)
 {
+	if (!m_theAssociatedCloud)
+	{
+		return false;
+	}
+
 	parts.clear();
 
 	//not enough vertices?
@@ -525,13 +556,13 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 	while (startIndex <= lastIndex)
 	{
 		unsigned stopIndex = startIndex;
-		while (stopIndex < lastIndex && (*getPoint(stopIndex+1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
+		while (stopIndex < lastIndex && (*getPoint(stopIndex + 1) - *getPoint(stopIndex)).norm() <= maxEdgeLength)
 		{
 			++stopIndex;
 		}
 
 		//number of vertices for the current part
-		unsigned partSize = stopIndex-startIndex+1;
+		unsigned partSize = stopIndex - startIndex + 1;
 
 		//if the polyline is closed we have to look backward for the first segment!
 		if (startIndex == 0)
@@ -539,7 +570,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 			if (isClosed())
 			{
 				unsigned realStartIndex = vertCount;
-				while (realStartIndex > stopIndex && (*getPoint(realStartIndex-1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
+				while (realStartIndex > stopIndex && (*getPoint(realStartIndex - 1) - *getPoint(realStartIndex % vertCount)).norm() <= maxEdgeLength)
 				{
 					--realStartIndex;
 				}
@@ -936,10 +967,10 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		assert(false);
 		return false;
 	}
-	unsigned vertCount = m_theAssociatedCloud->size();
+	unsigned vertCount = size();
 	
 	//vertices visibility
-	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
+	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(m_theAssociatedCloud);
 	if (!verticesCloud)
 	{
 		// no visibility table instantiated
@@ -947,7 +978,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		return false;
 	}
 	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = verticesCloud->getTheVisibilityArray();
-	if (verticesVisibility.size() < vertCount)
+	if (verticesVisibility.size() < verticesCloud->size())
 	{
 		// no visibility table instantiated
 		ccLog::Warning("[ccPolyline::createNewPolylinesFromSelection] No visibility table instantiated");
@@ -963,13 +994,18 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		for (unsigned i = 0; i < maxIndex; ++i)
 		{
 			unsigned nextIndex = ((i + 1) % vertCount);
+
+			unsigned pointIndex = getPointGlobalIndex(i);
+			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
+
 			bool kept = false;
-			if (verticesVisibility.at(i) == CCCoreLib::POINT_VISIBLE && verticesVisibility.at(nextIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
+			if (	verticesVisibility.at(pointIndex) == CCCoreLib::POINT_VISIBLE
+				&&	verticesVisibility.at(nextPointIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
 			{
 				kept = true;
 
-				const CCVector3* P0 = getPoint(i);
-				const CCVector3* P1 = getPoint(nextIndex);
+				const CCVector3* P0 = verticesCloud->getPoint(pointIndex);
+				const CCVector3* P1 = verticesCloud->getPoint(nextPointIndex);
 
 				// recreate a chunk if none is ready yet
 				static const unsigned DefaultPolySizeIncrement = 64;
@@ -1040,35 +1076,18 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 	return success;
 }
 
-ccPolyline* ccPolyline::Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution/*=48*/)
+void ccPolyline::onDeletionOf(const ccHObject* obj)
 {
-	if (resolution < 4)
+	ccShiftedObject::onDeletionOf(obj); //remove dependencies, etc.
+
+	// can't cast to a point cloud or anything else than ccHObject, as this is called by the ccHObject destructor
+	const ccHObject* associatedObj = dynamic_cast<const ccHObject*>(getAssociatedCloud());
+
+	if (associatedObj == obj)
 	{
-		ccLog::Warning("[ccPolyline::Circle] Resolution is too small");
-		return nullptr;
+		//we have to "detach" the cloud from the polyine... (ideally this object should be deleted)
+		clear();
+		setAssociatedCloud(nullptr);
+		setName(getName() + " (emptied)");
 	}
-
-	ccPointCloud* vertices = new ccPointCloud("vertices");
-	ccPolyline* circle = new ccPolyline(vertices);
-	if (!vertices->reserve(resolution) || !circle->reserve(resolution))
-	{
-		ccLog::Error(QObject::tr("Not enough memory"));
-		delete circle;
-		return nullptr;
-	}
-
-	double angleStep_rad = 2 * M_PI / resolution;
-	for (unsigned i = 0; i < resolution; ++i)
-	{
-		CCVector3 P = center + CCVector3(cos(i * angleStep_rad) * radius, sin(i * angleStep_rad) * radius, 0);
-		vertices->addPoint(P);
-	}
-
-	vertices->setEnabled(false);
-	circle->addChild(vertices);
-	circle->addPointIndex(0, resolution);
-	circle->setClosed(true);
-	circle->setName("Circle");
-
-	return circle;
 }

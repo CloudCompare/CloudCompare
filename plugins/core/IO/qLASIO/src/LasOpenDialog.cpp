@@ -23,13 +23,17 @@
 #include <QSettings>
 #include <QStringListModel>
 
-constexpr int TILLING_TAB_INDEX = 1;
+// System
+#include <algorithm>
 
-static QListWidgetItem* CreateItem(const char* name)
+constexpr int TILING_TAB_INDEX = 1;
+constexpr int COPC_TAB_INDEX = 2;
+
+static QListWidgetItem* CreateItem(const char* name, bool checked = true)
 {
 	auto item = new QListWidgetItem(name);
 	item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-	item->setCheckState(Qt::Checked);
+	item->setCheckState(checked ? Qt::Checked : Qt::Unchecked);
 	return item;
 }
 
@@ -71,7 +75,6 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(applyButton, &QPushButton::clicked, this, &QDialog::accept);
 	connect(applyAllButton, &QPushButton::clicked, this, &QDialog::accept);
 	connect(cancelButton, &QPushButton::clicked, this, &QDialog::reject);
-	connect(automaticTimeShiftCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onAutomaticTimeShiftToggle);
 	connect(applyAllButton, &QPushButton::clicked, this, &LasOpenDialog::onApplyAll);
 	connect(selectAllToolButton, &QPushButton::clicked, [&]
 	        { doSelectAll(true); });
@@ -84,18 +87,25 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
 	        { doSelectAllESF(false); });
 	connect(xNormalComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(yNormalComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(zNormalComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
+	connect(decomposeClassificationCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onDecomposeClassificationToggled);
 
+	{}
+	const auto extentSpinBoxes = copcExtentGroupBox->findChildren<QDoubleSpinBox *>();
+	for(auto extentSpinBox : extentSpinBoxes)
+	{
+		connect(extentSpinBox, (void(QDoubleSpinBox::*)(double))(&QDoubleSpinBox::valueChanged),  this, &LasOpenDialog::checkExtentConsistency);
+	}
 	// reload the last tiling output path
 	{
 		QSettings settings;
@@ -148,12 +158,23 @@ void LasOpenDialog::setInfo(int versionMinor, int pointFormatId, qulonglong numP
 	numPointsLabelValue->setText(QLocale(QLocale::English).toString(numPoints));
 
 	force8bitColorsCheckBox->setEnabled(LasDetails::HasRGB(pointFormatId));
-	timeShiftLayout->setEnabled(LasDetails::HasGpsTime(pointFormatId));
+
+	decomposeClassificationCheckBox->setHidden(pointFormatId >= 6);
 }
 
 void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>&      scalarFields,
                                              const std::vector<LasExtraScalarField>& extraScalarFields)
 {
+	// remember previous state
+	QMap<QString, bool> previousScalarFields;
+	{
+		for (int i = 0; i < availableScalarFields->count(); ++i)
+		{
+			auto item                          = availableScalarFields->item(i);
+			previousScalarFields[item->text()] = (item->checkState() == Qt::Checked);
+		}
+	}
+
 	availableScalarFields->clear();
 	availableExtraScalarFields->clear();
 
@@ -162,8 +183,14 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 		scalarFieldFrame->show();
 		for (const LasScalarField& lasScalarField : scalarFields)
 		{
-			availableScalarFields->addItem(CreateItem(lasScalarField.name()));
+			bool checked = true;
+			if (previousScalarFields.contains(lasScalarField.name()))
+			{
+				checked = previousScalarFields[lasScalarField.name()];
+			}
+			availableScalarFields->addItem(CreateItem(lasScalarField.name(), checked));
 		}
+		decomposeClassificationFields(decomposeClassificationCheckBox->isChecked(), false);
 	}
 	else
 	{
@@ -210,6 +237,61 @@ void LasOpenDialog::setAvailableScalarFields(const std::vector<LasScalarField>& 
 	{
 		extraScalarFieldsFrame->hide();
 	}
+}
+
+void LasOpenDialog::displayCopcTab(bool visibilityState)
+{
+	actionTab->setTabVisible(COPC_TAB_INDEX, visibilityState);
+}
+
+void LasOpenDialog::setCopcInformations(const std::vector<uint64_t>& pointCountPerLevel, const LasDetails::UnscaledExtent& copcBB)
+{
+	// reset previous combo box
+	copcDepthComboBox->clear();
+	uint64_t cumulative_point_count = 0;
+	for (size_t level_id = 0; level_id < pointCountPerLevel.size(); ++level_id)
+	{
+		cumulative_point_count += pointCountPerLevel[level_id];
+		auto label = QString("level %1 (%2 points)").arg(QString::number(level_id), QString::number(cumulative_point_count));
+		copcDepthComboBox->insertItem(0, label, QVariant(static_cast<uint32_t>(level_id)));
+	}
+	copcDepthComboBox->setCurrentIndex(0);
+
+	// set extent
+	copcExtentSpinMinX->setValue(copcBB.minCorner().x);
+	copcExtentSpinMinY->setValue(copcBB.minCorner().y);
+	copcExtentSpinMinZ->setValue(copcBB.minCorner().z);
+	copcExtentSpinMaxX->setValue(copcBB.maxCorner().x);
+	copcExtentSpinMaxY->setValue(copcBB.maxCorner().y);
+	copcExtentSpinMaxZ->setValue(copcBB.maxCorner().z);
+}
+
+LasDetails::UnscaledExtent LasOpenDialog::copcExtent() const
+{
+	LasDetails::UnscaledExtent extent;
+	CCVector3d minCorner(copcExtentSpinMinX->value(), copcExtentSpinMinY->value(), copcExtentSpinMinZ->value());
+	CCVector3d maxCorner(copcExtentSpinMaxX->value(), copcExtentSpinMaxY->value(), copcExtentSpinMaxZ->value());
+	extent.add(minCorner);
+	extent.add(maxCorner);
+	return extent;
+}
+
+uint32_t LasOpenDialog::copcMaxLevel() const
+{
+	return copcDepthComboBox->currentData().toUInt();
+}
+
+bool LasOpenDialog::hasUsableExtent() const
+{
+	return copcExtentGroupBox->isChecked() && m_validExtent;
+}
+
+void LasOpenDialog::checkExtentConsistency(double value)
+{
+	m_validExtent = copcExtentSpinMaxX->value() - copcExtentSpinMinX->value() > 0 &&
+	copcExtentSpinMaxY->value() - copcExtentSpinMinY->value() > 0 &&
+	copcExtentSpinMaxZ->value() - copcExtentSpinMinZ->value() > 0;
+	copcLabelWarningExtent->setVisible(!m_validExtent);
 }
 
 void LasOpenDialog::filterOutNotChecked(std::vector<LasScalarField>&      scalarFields,
@@ -268,14 +350,9 @@ bool LasOpenDialog::shouldForce8bitColors() const
 	return force8bitColorsCheckBox->isChecked();
 }
 
-double LasOpenDialog::timeShiftValue() const
+bool LasOpenDialog::shouldDecomposeClassification() const
 {
-	if (automaticTimeShiftCheckBox->isChecked())
-	{
-		return std::numeric_limits<double>::quiet_NaN();
-	}
-
-	return manualTimeShiftSpinBox->value();
+	return decomposeClassificationCheckBox->isChecked();
 }
 
 bool LasOpenDialog::isChecked(const LasExtraScalarField& lasExtraScalarField) const
@@ -286,11 +363,6 @@ bool LasOpenDialog::isChecked(const LasExtraScalarField& lasExtraScalarField) co
 bool LasOpenDialog::isChecked(const LasScalarField& lasScalarField) const
 {
 	return IsCheckedIn(lasScalarField.name(), availableScalarFields);
-}
-
-void LasOpenDialog::onAutomaticTimeShiftToggle(bool checked)
-{
-	manualTimeShiftSpinBox->setEnabled(!checked);
 }
 
 bool LasOpenDialog::shouldSkipDialog() const
@@ -324,7 +396,7 @@ void LasOpenDialog::onNormalComboBoxChanged(const QString& name)
 
 LasOpenDialog::Action LasOpenDialog::action() const
 {
-	if (actionTab->currentIndex() == TILLING_TAB_INDEX)
+	if (actionTab->currentIndex() == TILING_TAB_INDEX)
 	{
 		return Action::Tile;
 	}
@@ -390,7 +462,7 @@ void LasOpenDialog::onCurrentTabChanged(int index)
 	const static QString APPLY_TEXT     = QStringLiteral("Apply");
 	const static QString APPLY_ALL_TEXT = QStringLiteral("Apply All");
 
-	if (index == TILLING_TAB_INDEX)
+	if (index == TILING_TAB_INDEX)
 	{
 		applyButton->setText(TILE_TEXT);
 		applyAllButton->setText(TILE_ALL_TEXT);
@@ -400,4 +472,31 @@ void LasOpenDialog::onCurrentTabChanged(int index)
 		applyButton->setText(APPLY_TEXT);
 		applyAllButton->setText(APPLY_ALL_TEXT);
 	}
+}
+
+void LasOpenDialog::decomposeClassificationFields(bool decompose, bool autoUpdateCheckSate)
+{
+	static constexpr std::array<const char*, 3> FlagNames{LasNames::SyntheticFlag, LasNames::KeypointFlag, LasNames::WithheldFlag};
+
+	for (const char* flagName : FlagNames)
+	{
+		for (int i = 0; i < availableScalarFields->count(); ++i)
+		{
+			QListWidgetItem* item = availableScalarFields->item(i);
+			if (item->text() == flagName)
+			{
+				item->setHidden(!decompose);
+				if (autoUpdateCheckSate)
+				{
+					item->setCheckState(decompose ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+				}
+				break;
+			}
+		}
+	}
+}
+
+void LasOpenDialog::onDecomposeClassificationToggled(bool checked)
+{
+	decomposeClassificationFields(checked, true);
 }

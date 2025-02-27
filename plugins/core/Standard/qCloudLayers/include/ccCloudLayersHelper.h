@@ -39,20 +39,24 @@ class RGBAColorsTableType;
 class ccCloudLayersHelper
 {
 public:
-	ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* cloud);
+	ccCloudLayersHelper(ccMainAppInterface* app);
 	~ccCloudLayersHelper();
 
+	bool setCloud(ccPointCloud* cloud);
+	void restoreCloud(bool restoreSFValues);
+
 	QStringList getScalarFields();
-	void setScalarFieldIndex(int index);
+	bool setScalarFieldIndexAndStoreValues(int index);
+	int getCurrentScalarFieldIndex() const { return m_scalarFieldIndex; }
 
 	// set colors alpha to MAX
 	void setVisible(bool value);
 
 	// apply visibility and colors
-	void apply(QList<ccAsprsModel::AsprsItem>& items);
+	void applyClassColors(QList<ccAsprsModel::AsprsItem>& items);
 
 	// apply visibility and color return affected count
-	int apply(ccAsprsModel::AsprsItem& item, bool redrawDisplay = false);
+	int applyClassColor(ccAsprsModel::AsprsItem& item, bool redrawDisplay = false);
 
 	// asprs item code changed
 	void changeCode(const ccAsprsModel::AsprsItem& item, ScalarType oldCode);
@@ -60,15 +64,14 @@ public:
 	// set scalar code to zero return affected count
 	int moveItem(const ccAsprsModel::AsprsItem& from, const ccAsprsModel::AsprsItem* to, bool redrawDisplay = false);
 
-	// save color and codes
-	void saveState();
+	//! Restore original scalar values
+	void restoreCurrentSFValues();
 
-	// restore initial colors and codes
-	void restoreState();
+	void mouseMove(const CCVector2& center, PointCoordinateType squareDist, std::map<ScalarType, int>& affected);
+	bool projectCloud(const ccGLCameraParameters& camera);
 
-	void mouseMove(const CCVector2& center, float squareDist, std::map<ScalarType, int>& affected);
-	void projectCloud(const ccGLCameraParameters& camera);
-	bool hasChanges() const { return m_modified; }
+	//! Whether the scalar field values (and currently displayed colors) have been modified
+	bool modified() const { return m_modified; }
 
 	struct Parameters
 	{
@@ -85,40 +88,36 @@ public:
 	void keepCurrentSFVisible();
 
 private: // methods
-	void project(ccGLCameraParameters camera, unsigned start, unsigned end);
-	static PointCoordinateType ComputeSquaredEuclideanDistance(const CCVector2& a, const CCVector2& b);
+	void project(const ccGLCameraParameters& camera, unsigned start, unsigned end);
+
+	//! Save current scalar field values
+	bool saveCurrentSFValues(int sfIndex);
 
 private: // variables
 	ccMainAppInterface* m_app;
 	ccPointCloud* m_cloud;
-	RGBAColorsTableType* m_formerCloudColors;
-	bool m_formerCloudColorsWereShown;
-	bool m_formerCloudSFWasShown;
-	Parameters m_parameters;
-
-	unsigned m_scalarFieldIndex;
+	int m_scalarFieldIndex;
 	bool m_modified;
 
+	Parameters m_parameters;
 	ccGLCameraParameters m_cameraParameters;
-	std::vector<CCVector2> m_projectedPoints;
-	std::vector<bool> m_pointInFrustum;
 
-	struct CloudState
+	struct BackupData
 	{
-	public:
-		CloudState() {}
-
-		void update(ScalarType code, ccColor::Rgb color)
-		{
-			this->code = code;
-			this->color = color;
-		}
-
-		ScalarType code;
-		ccColor::Rgb color;
+		bool sfWasShown = false;
+		int displayedSFIndex = -1;
+		bool colorsWereShown = false;
+		bool hadColors = false;
+		QSharedPointer<RGBAColorsTableType> colors;
+		std::vector<double> scalarValues;
 	};
+	BackupData m_originalCloudState;
 
-	std::vector<CloudState> m_cloudState;
-
+	struct ProjectedPoint
+	{
+		CCVector2 pos2D;
+		bool inFrustum = false;
+	};
+	std::vector<ProjectedPoint> m_projectedPoints;
 };
 

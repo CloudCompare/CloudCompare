@@ -28,13 +28,11 @@
 //local
 #include "ccChunk.h"
 #include "ccColorRampShader.h"
-#include "ccColorScalesManager.h"
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccFrustum.h"
 #include "ccGBLSensor.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericMesh.h"
-#include "ccImage.h"
 #include "ccKdTree.h"
 #include "ccMaterial.h"
 #include "ccMesh.h"
@@ -150,6 +148,7 @@ ccPointCloud::ccPointCloud(QString name/*=QString()*/, unsigned uniqueID/*=ccUni
 	, m_visibilityCheckEnabled(false)
 	, m_lod(nullptr)
 	, m_fwfData(nullptr)
+	, m_useLODRendering(true)
 	, m_normalsDrawnAsLines(false)
 {
 	setName(name); //sadly we cannot use the ccGenericPointCloud constructor argument
@@ -278,7 +277,9 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 	static constexpr const char* DefaultSuffix = ".extract";
 	QString cloneName = getName();
 	if (!cloneName.endsWith(DefaultSuffix)) // avoid adding a multitude of suffixes
+	{
 		cloneName += DefaultSuffix;
+	}
 
 	ccPointCloud* result = new ccPointCloud(cloneName);
 
@@ -401,13 +402,15 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 						assert(currentScalarField);
 						if (currentScalarField->resizeSafe(selectionSize))
 						{
-							currentScalarField->setGlobalShift(sf->getGlobalShift());
+							currentScalarField->setOffset(sf->getOffset());
 
 							//we copy data to new SF
 							for (unsigned i = 0; i < selectionSize; i++)
+							{
 								currentScalarField->setValue(i, sf->getValue(selection->getPointGlobalIndex(i)));
-
+							}
 							currentScalarField->computeMinAndMax();
+
 							//copy display parameters
 							currentScalarField->importParametersFrom(sf);
 						}
@@ -415,7 +418,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 						{
 							//if we don't have enough memory, we cancel SF creation
 							result->deleteScalarField(sfIdx);
-							ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
+							ccLog::Warning(QString("[ccPointCloud::partialClone] Not enough memory to copy scalar field '%1'!").arg(QString::fromStdString(sf->getName())));
 							if (warnings)
 								*warnings |= WRN_OUT_OF_MEM_FOR_SFS;
 						}
@@ -803,11 +806,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					size_t newKeyCount = addedCloud->m_fwfDescriptors.size();
 					assert(newKeyCount < 256); //IDs should range from 1 to 255
-					
+
 					if (!m_fwfDescriptors.empty())
 					{
 						assert(m_fwfDescriptors.size() < 256); //IDs should range from 1 to 255
-						
+
 						//we'll have to find free descriptor IDs (not used in the destination cloud) before merging
 						std::queue<uint8_t> freeDescriptorIDs;
 						for (uint8_t k = 0; k < 255; ++k)
@@ -906,20 +909,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					//we fill it with new values (it should have been already 'reserved' (if necessary)
 					if (sameSF->currentSize() == pointCountBefore)
 					{
-						double shift = sf->getGlobalShift() - sameSF->getGlobalShift();
-						if (shift != 0) //avoid re-casting unless necessary
+						for (unsigned i = 0; i < addedPoints; i++)
 						{
-							for (unsigned i = 0; i < addedPoints; i++)
-							{
-								sameSF->addElement(static_cast<ScalarType>(shift + sf->getValue(i))); //FIXME: we could have accuracy issues here
-							}
-						}
-						else
-						{
-							for (unsigned i = 0; i < addedPoints; i++)
-							{
-								sameSF->addElement(sf->getValue(i));
-							}
+							sameSF->addElement(sf->getValue(i));
 						}
 					}
 					if (recomputeMinAndMax)
@@ -934,7 +926,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				else //otherwise we create a new SF
 				{
 					ccScalarField* newSF = new ccScalarField(sf->getName());
-					newSF->setGlobalShift(sf->getGlobalShift());
+					newSF->setOffset(sf->getOffset());
 					//we fill the beginning with NaN (as there is no equivalent in the current cloud)
 					if (newSF->resizeSafe(pointCountBefore + addedPoints, true, CCCoreLib::NAN_VALUE))
 					{
@@ -958,7 +950,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					{
 						newSF->release();
 						newSF = nullptr;
-						ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate a copy of scalar field '%s'",sf->getName());
+						ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
 					}
 				}
 			}
@@ -2090,7 +2082,7 @@ static bool ComputeCellGaussianFilter(	const CCCoreLib::DgmOctree::octreeCell& c
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -2345,6 +2337,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
 			}
 		}
+
+		//we must update the VBOs
+		normalsHaveChanged();
 	}
 
 	//and the scan grids!
@@ -2623,23 +2618,23 @@ void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 
 //helpers (for ColorRamp shader)
 
-inline float GetNormalizedValue(const ScalarType& sfVal, const ccScalarField::Range& displayRange)
+inline float GetNormalizedValue(ScalarType sfVal, const ccScalarField::Range& displayRange)
 {
 	return static_cast<float>((sfVal - displayRange.start()) / displayRange.range());
 }
 
-inline float GetSymmetricalNormalizedValue(const ScalarType& sfVal, const ccScalarField::Range& saturationRange)
+inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField::Range& saturationRange)
 {
 	//normalized sf value
 	ScalarType relativeValue = 0;
-	if (std::abs(sfVal) > saturationRange.start()) //we avoid the 'flat' SF case by the way
+	if (std::abs(sfVal) > saturationRange.start()) //we avoid the 'flat' SF case
 	{
 		if (sfVal < 0)
-			relativeValue = (sfVal+saturationRange.start())/saturationRange.max();
+			relativeValue = (sfVal + saturationRange.start()) / saturationRange.max();
 		else
-			relativeValue = (sfVal-saturationRange.start())/saturationRange.max();
+			relativeValue = (sfVal - saturationRange.start()) / saturationRange.max();
 	}
-	return (1.0f + relativeValue) / 2;	//normalized sf value
+	return static_cast<float>(1.0 + relativeValue) / 2;	//normalized sf value
 }
 
 //the GL type depends on the PointCoordinateType 'size' (float or double)
@@ -2825,13 +2820,15 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	else if (m_currentDisplayedScalarField)
 	{
 		//we must convert the scalar values to RGB colors in a dedicated static array
-		ScalarType* _sf = ccChunk::Start(*m_currentDisplayedScalarField, chunkIndex);
+		size_t chunkStart = ccChunk::StartPos(chunkIndex);
 		ColorCompType* _sfColors = s_rgbBuffer4ub;
 		size_t chunkSize = ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size());
-		for (size_t j = 0; j < chunkSize; j += decimStep, _sf += decimStep)
+		for (size_t j = 0; j < chunkSize; j += decimStep)
 		{
+			//SF value
+			ScalarType sfValue = m_currentDisplayedScalarField->getValue(chunkStart + j);
 			//convert the scalar value to a RGB color
-			const ccColor::Rgb* col = m_currentDisplayedScalarField->getColor(*_sf);
+			const ccColor::Rgb* col = m_currentDisplayedScalarField->getColor(sfValue);
 			assert(col);
 			*_sfColors++ = col->r;
 			*_sfColors++ = col->g;
@@ -2892,7 +2889,7 @@ template <class QOpenGLFunctions> void glLODChunkNormalPointer(	NormsIndexesTabl
 }
 
 template <class QOpenGLFunctions> void glLODChunkColorPointer(	RGBAColorsTableType* colors,
-																QOpenGLFunctions* glFunc, 
+																QOpenGLFunctions* glFunc,
 																const LODIndexSet& indexMap,
 																unsigned startIndex,
 																unsigned stopIndex)
@@ -2932,7 +2929,7 @@ template <class QOpenGLFunctions> void glLODChunkSFPointer(	ccScalarField* sf,
 	{
 		unsigned pointIndex = indexMap[j];
 		//convert the scalar value to a RGB color
-		const ccColor::Rgb* col = sf->getColor(sf->at(pointIndex));
+		const ccColor::Rgb* col = sf->getColor(sf->getValue(pointIndex));
 		assert(col);
 		*_sfColors++ = col->r;
 		*_sfColors++ = col->g;
@@ -2970,10 +2967,10 @@ struct DisplayDesc : LODLevelDesc
 		endIndex = startIndex + count;
 		return *this;
 	}
-	
+
 	//! Last index (excluded)
 	unsigned endIndex;
-	
+
 	//! Decimation step (for non-octree based LoD)
 	unsigned decimStep;
 
@@ -3034,12 +3031,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!entityPickingMode)
 		{
 			if (	context.decimateCloudOnMove
+				&&	m_useLODRendering
 				&&	toDisplay.count > context.minLODPointCount
 				&&	MACRO_LODActivated(context)
 				)
 			{
-				bool skipLoD = false;
-
 				//is there a LoD structure associated yet?
 				if (!m_lod || !m_lod->isBroken())
 				{
@@ -3053,6 +3049,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						assert(m_lod);
+						//Reset the VBO manager if needed:
+						// We do not want to use the LoD and
+						// to have the cloud loaded in the VBOs simultaneously.
+						releaseVBOs();
 
 						unsigned char maxLevel = m_lod->maxLevel();
 						bool underConstruction = m_lod->isUnderConstruction();
@@ -3104,7 +3104,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
-				if (!toDisplay.indexMap && !skipLoD)
+				if (!toDisplay.indexMap)
 				{
 					//if we don't have a LoD map, we can only display points at level 0!
 					if (context.currentLODLevel != 0)
@@ -3218,7 +3218,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
 								//we force display of points hidden because of their scalar field value
 								//to be sure that the user doesn't miss them (during manual segmentation for instance)
-								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose 
+								ccGL::Color(glFunc, col ? *col : ccColor::lightGreyRGB); //Make sure all points are visible. No alpha used on purpose
 							}
 							else if (glParams.showColors)
 							{
@@ -3437,15 +3437,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//SF colors
 							if (colorRampShader)
 							{
-								ScalarType* _sf = ccChunk::Start(*m_currentDisplayedScalarField, k);
 								float* _sfColors = s_rgbBuffer3f;
+								size_t chunkStart = ccChunk::StartPos(k);
 								bool symScale = m_currentDisplayedScalarField->symmetricalScale();
-								for (unsigned j = 0; j < chunkSize; j += toDisplay.decimStep, _sf += toDisplay.decimStep, _sfColors += 3)
+								for (size_t j = 0; j < chunkSize; j += toDisplay.decimStep, _sfColors += 3)
 								{
+									//SF value
+									ScalarType sfValue = m_currentDisplayedScalarField->getValue(chunkStart + j);
 									//normalized sf value
-									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(*_sf, sfSaturationRange) : GetNormalizedValue(*_sf, sfDisplayRange);
+									_sfColors[0] = symScale ? GetSymmetricalNormalizedValue(sfValue, sfSaturationRange) : GetNormalizedValue(sfValue, sfDisplayRange);
 									//flag: whether point is grayed out or not (NaN values are also rejected!)
-									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;
+									_sfColors[1] = sfDisplayRange.isInRange(sfValue) ? 1.0f : 0.0f;
 									//reference value (to get the true lighting value)
 									_sfColors[2] = 1.0f;
 								}
@@ -3677,7 +3679,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPopAttrib(); //GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
-		
+
 		if (m_normalsDrawnAsLines)
 		{
 			drawNormalsAsLines(context);
@@ -4627,7 +4629,7 @@ ccPointCloud* ccPointCloud::unroll(	UnrollMode mode,
 	return clone;
 }
 
-int ccPointCloud::addScalarField(const char* uniqueName)
+int ccPointCloud::addScalarField(const std::string& uniqueName)
 {
 	//create new scalar field
 	ccScalarField* sf = new ccScalarField(uniqueName);
@@ -4651,7 +4653,7 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 	//we don't accept two SFs with the same name!
 	if (getScalarFieldIndexByName(sf->getName()) >= 0)
 	{
-		ccLog::Warning(QString("[ccPointCloud::addScalarField] Name '%1' already exists!").arg(sf->getName()));
+		ccLog::Warning(QString("[ccPointCloud::addScalarField] Name '%1' already exists!").arg(QString::fromStdString(sf->getName())));
 		return -1;
 	}
 
@@ -4846,8 +4848,12 @@ bool ccPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading cloud %1...").arg(m_name));
+
 	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	{
 		return false;
+	}
 
 	//points array (dataVersion>=20)
 	{
@@ -4855,18 +4861,19 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		bool fileCoordIsDouble = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS);
 		if (!fileCoordIsDouble && sizeof(PointCoordinateType) == 8) //file is 'float' and current type is 'double'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, float>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, float>(m_points, in, dataVersion, "3D points");
 		}
 		else if (fileCoordIsDouble && sizeof(PointCoordinateType) == 4) //file is 'double' and current type is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, double>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<CCVector3, 3, PointCoordinateType, double>(m_points, in, dataVersion, "3D points");
 		}
 		else
 		{
-			result = ccSerializationHelper::GenericArrayFromFile<CCVector3, 3, PointCoordinateType>(m_points, in, dataVersion);
+			result = ccSerializationHelper::GenericArrayFromFile<CCVector3, 3, PointCoordinateType>(m_points, in, dataVersion, "3D points");
 		}
 		if (!result)
 		{
+			ccLog::PrintVerbose("Failed to load the points");
 			return false;
 		}
 
@@ -4911,6 +4918,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				QSharedPointer<ColorsTableType> oldRGBColors(new ColorsTableType);
 				if (!oldRGBColors->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					unallocateColors();
 					return false;
 				}
 
@@ -4936,6 +4944,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			else
 			{
+				unallocateColors();
 				return CorruptError();
 			}
 		}
@@ -4945,7 +4954,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 	{
 		bool hasNormalsArray = false;
 		if (in.read((char*)&hasNormalsArray, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 		if (hasNormalsArray)
 		{
 			if (!m_normals)
@@ -4955,7 +4966,10 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
 			if (classID != CC_TYPES::NORMAL_INDEXES_ARRAY)
+			{
+				unallocateNorms();
 				return CorruptError();
+			}
 			if (!m_normals->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				unallocateNorms();
@@ -4969,7 +4983,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = 0;
 		if (in.read((char*)&sfCount, 4) < 0)
+		{
 			return ReadError();
+		}
 
 		//scalar fields (dataVersion>=20)
 		for (uint32_t i = 0; i < sfCount; ++i)
@@ -4988,7 +5004,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			//'show NaN values in grey' state (27>dataVersion>=20)
 			bool greyForNanScalarValues = true;
 			if (in.read((char*)&greyForNanScalarValues, sizeof(bool)) < 0)
+			{
 				return ReadError();
+			}
 
 			//update all scalar fields accordingly (old way)
 			for (unsigned i = 0; i < getNumberOfScalarFields(); ++i)
@@ -4999,14 +5017,20 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 
 		//'show current sf color scale' state (dataVersion>=20)
 		if (in.read((char*)&m_sfColorScaleDisplayed, sizeof(bool)) < 0)
+		{
 			return ReadError();
+		}
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = 0;
 		if (in.read((char*)&displayedScalarFieldIndex, 4) < 0)
+		{
 			return ReadError();
-		if (displayedScalarFieldIndex < (int32_t)sfCount)
+		}
+		if (displayedScalarFieldIndex < static_cast<int32_t>(sfCount))
+		{
 			setCurrentDisplayedScalarField(displayedScalarFieldIndex);
+		}
 	}
 
 	//grid structures (dataVersion>=41)
@@ -5015,7 +5039,9 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		//number of grids
 		uint32_t count = 0;
 		if (in.read((char*)&count, 4) < 0)
+		{
 			return ReadError();
+		}
 
 		//load each grid
 		for (uint32_t i = 0; i < count; ++i)
@@ -5053,12 +5079,14 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				uint8_t id = 0;
 				if (in.read((char*)&id, 1) < 0)
 				{
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 				//read the descriptor
 				WaveformDescriptor d;
 				if (!d.fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 				//add the descriptor to the set
@@ -5069,6 +5097,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			uint32_t waveformCount = 0;
 			if (in.read((char*)&waveformCount, 4) < 0)
 			{
+				m_fwfDescriptors.clear();
 				return ReadError();
 			}
 			assert(waveformCount >= size());
@@ -5078,17 +5107,20 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 			}
 			catch (const std::bad_alloc&)
 			{
+				m_fwfDescriptors.clear();
 				return MemoryError();
 			}
 			for (uint32_t i = 0; i < waveformCount; ++i)
 			{
 				if (!m_fwfWaveforms[i].fromFile(in, dataVersion, flags, oldToNewIDMap))
 				{
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 			}
 
-			//eventually save the data
+			//eventually load the FWF data
 			uint64_t dataSize = 0;
 			if (in.read((char*)&dataSize, 8) < 0)
 			{
@@ -5103,12 +5135,18 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 				}
 				catch (const std::bad_alloc&)
 				{
+					delete container;
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return MemoryError();
 				}
 				m_fwfData = SharedFWFDataContainer(container);
 
 				if (in.read((char*)m_fwfData->data(), dataSize) < 0)
 				{
+					m_fwfData.clear();
+					m_fwfWaveforms.clear();
+					m_fwfDescriptors.clear();
 					return ReadError();
 				}
 			}
@@ -5119,6 +5157,8 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 
 	//We should update the VBOs (just in case)
 	releaseVBOs();
+
+	ccLog::PrintVerbose("Point cloud loaded");
 
 	return true;
 }
@@ -5369,14 +5409,14 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 		return nullptr;
 	}
 
-	unsigned char X = ((orthoDim+1) % 3);
-	unsigned char Y = ((X+1) % 3);
+	unsigned char X = ((orthoDim + 1) % 3);
+	unsigned char Y = ((X + 1) % 3);
 
-	for (unsigned i=0; i<count; ++i)
+	for (unsigned i = 0; i < count; ++i)
 	{
 		const CCVector3* P = point(i);
 
-		CCVector2 P2D( P->u[X], P->u[Y] );
+		CCVector2 P2D(P->u[X], P->u[Y]);
 		bool pointIsInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, poly);
 		if (inside == pointIsInside)
 		{
@@ -5464,7 +5504,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 		}
-		
+
 		if (	glParams.showSF
 		&& (		!m_vboManager.hasColors
 				||	!m_vboManager.colorIsSF
@@ -5545,17 +5585,21 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 		{
 			int chunkSize = static_cast<int>(ccChunk::Size(chunkIndex, m_points));
 
+
 			int chunkUpdateFlags = m_vboManager.updateFlags;
 			bool reallocated = false;
+			
 			if (!m_vboManager.vbos[chunkIndex])
 			{
 				m_vboManager.vbos[chunkIndex] = new VBO;
 			}
 
-			//allocate memory for current VBO
-			int vboSizeBytes = m_vboManager.vbos[chunkIndex]->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
+			VBO* currentVBO = m_vboManager.vbos[chunkIndex];
 
-			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>(); 
+			//allocate memory for current VBO
+			int vboSizeBytes = currentVBO->init(chunkSize, m_vboManager.hasColors, m_vboManager.hasNormals, &reallocated);
+
+			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 			if (glFunc)
 			{
 				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
@@ -5571,12 +5615,12 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 					chunkUpdateFlags = vboSet::UPDATE_ALL;
 				}
 
-				m_vboManager.vbos[chunkIndex]->bind();
+				currentVBO->bind();
 
 				//load points
 				if (chunkUpdateFlags & vboSet::UPDATE_POINTS)
 				{
-					m_vboManager.vbos[chunkIndex]->write(0, ccChunk::Start(m_points, chunkIndex), sizeof(PointCoordinateType)*chunkSize * 3);
+					currentVBO->write(0, ccChunk::Start(m_points, chunkIndex), sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 				//load colors
 				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
@@ -5584,30 +5628,46 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 					if (glParams.showSF)
 					{
 						//copy SF colors in static array
+						ColorCompType* _sfColors = s_rgbBuffer4ub;
+						if (m_vboManager.sourceSF)
 						{
-							assert(m_vboManager.sourceSF);
-							ColorCompType* _sfColors = s_rgbBuffer4ub;
-							ScalarType* _sf = ccChunk::Start(*m_vboManager.sourceSF, chunkIndex);
-							for (int j = 0; j < chunkSize; j++, _sf++)
+							size_t chunkStart = ccChunk::StartPos(chunkIndex);
+							for (int j = 0; j < chunkSize; j++)
 							{
+								//SF value
+								ScalarType sfValue = m_vboManager.sourceSF->getValue(chunkStart + j);
 								//we need to convert scalar value to color into a temporary structure
-								const ccColor::Rgb* col = _sf ? m_vboManager.sourceSF->getColor(*_sf) : nullptr;
+								const ccColor::Rgb* col = m_vboManager.sourceSF->getColor(sfValue);
 								if (!col)
+								{
 									col = &ccColor::lightGreyRGB;
+								}
 								*_sfColors++ = col->r;
 								*_sfColors++ = col->g;
 								*_sfColors++ = col->b;
 								*_sfColors++ = ccColor::MAX;
 							}
 						}
+						else
+						{
+							assert(false);
+							for (int j = 0; j < chunkSize; j++)
+							{
+								//we need to convert scalar value to color into a temporary structure
+								*_sfColors++ = ccColor::lightGreyRGB.r;
+								*_sfColors++ = ccColor::lightGreyRGB.g;
+								*_sfColors++ = ccColor::lightGreyRGB.b;
+								*_sfColors++ = ccColor::MAX;
+							}
+						}
 						//then send them in VRAM
-						m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->rgbShift, s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
 						//upadte 'modification' flag for current displayed SF
 						m_vboManager.sourceSF->setModificationFlag(false);
 					}
 					else if (glParams.showColors)
 					{
-						m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->rgbShift, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->write(currentVBO->rgbShift, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
 					}
 				}
 #ifndef DONT_LOAD_NORMALS_IN_VBOS
@@ -5624,10 +5684,10 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 						*(outNorms)++ = N.y;
 						*(outNorms)++ = N.z;
 					}
-					m_vboManager.vbos[chunkIndex]->write(m_vboManager.vbos[chunkIndex]->normalShift, s_normalBuffer, sizeof(PointCoordinateType)*chunkSize * 3);
+					currentVBO->write(currentVBO->normalShift, s_normalBuffer, sizeof(PointCoordinateType)*chunkSize * 3);
 				}
 #endif
-				m_vboManager.vbos[chunkIndex]->release();
+				currentVBO->release();
 
 				//if an error is detected
 				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -5645,9 +5705,9 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 
 			if (vboSizeBytes < 0) //VBO initialization failed
 			{
-				m_vboManager.vbos[chunkIndex]->destroy();
-				delete m_vboManager.vbos[chunkIndex];
-				m_vboManager.vbos[chunkIndex] = nullptr;
+				currentVBO->destroy();
+				delete currentVBO;
+				currentVBO = nullptr;
 
 				//we can stop here
 				if (chunkIndex == 0)
@@ -5711,8 +5771,8 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 			//no message as it will probably happen on a lot on (old) graphic cards
 			return -1;
 		}
-		
-		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
+
+		setUsagePattern(QOpenGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
 													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
 	}
 
@@ -5743,7 +5803,7 @@ int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* 
 	}
 
 	release();
-	
+
 	return totalSizeBytes;
 }
 
@@ -5882,7 +5942,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 				const int& v2 = scanGrid->indexes[(j + 1) * scanGrid->w + i];
 				const int& v3 = scanGrid->indexes[(j + 1) * scanGrid->w + (i + 1)];
 
-				bool topo[4] = { v0 >= 0, v1 >= 0, v2 >= 0, v3 >= 0 };
+				bool topo[4] { v0 >= 0, v1 >= 0, v2 >= 0, v3 >= 0 };
 
 				int mask = 0;
 				int pixels = 0;
@@ -5901,7 +5961,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 					continue;
 				}
 
-				Tuple3i tris[4] =
+				Tuple3i tris[4]
 				{
 					{ v0, v2, v1 },
 					{ v0, v3, v1 },
@@ -5909,7 +5969,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 					{ v1, v2, v3 }
 				};
 
-				int tri[2] = { -1, -1 };
+				int tri[2] { -1, -1 };
 
 				switch (mask)
 				{
@@ -5972,7 +6032,7 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 						{
 							continue;
 						}
-						
+
 						PointCoordinateType cosC = -uBC.dot(uCA);
 						if (cosC > minAngleCos)
 						{
@@ -6186,7 +6246,7 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 		ccLog::Warning(QString("[computeNormals] Failed to compute normals on cloud '%1'").arg(getName()));
 		return false;
 	}
-	
+
 	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 	if (!hasNormals())
@@ -6235,16 +6295,19 @@ bool ccPointCloud::orientNormalsWithFM(	unsigned char level,
 void ccPointCloud::showNormalsAsLines(bool state)
 {
 	if (!hasNormals())
+	{
 		return;
-	
+	}
+
 	m_normalsDrawnAsLines = state;
 
 	if (state == false)
+	{
 		m_decompressedNormals.clear();
+	}
 	else
 	{
 		decompressNormals();
-		redrawDisplay();
 	}
 }
 
@@ -6334,7 +6397,17 @@ void ccPointCloud::decompressNormals()
 	if (m_normalsDrawnAsLines)
 	{
 		// we need to decompress the normals
-		m_decompressedNormals.resize(size());
+		try
+		{
+			m_decompressedNormals.resize(size());
+		}
+		catch (const std::bad_alloc)
+		{
+			ccLog::Warning("Not enough memory to decompress normals");
+			m_normalsDrawnAsLines = false;
+			m_decompressedNormals.clear();
+			return;
+		}
 		for (unsigned idx = 0; idx < size(); idx++)
 		{
 			m_decompressedNormals[idx] = getPointNormal(idx);
@@ -6360,7 +6433,7 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 {
 	if (m_visibilityCheckEnabled)
 	{
-		//if we have associated sensors, we can use them to check the visibility of other points 
+		//if we have associated sensors, we can use them to check the visibility of other points
 		unsigned char bestVisibility = 255;
 		for (size_t i = 0; i < m_children.size(); ++i)
 		{
@@ -6400,6 +6473,21 @@ void ccPointCloud::clearLOD()
 	}
 }
 
+bool ccPointCloud::hasUsableLOD() const
+{
+	return m_lod && m_lod->isInitialized();
+}
+
+bool ccPointCloud::useLODRendering() const
+{
+	return m_useLODRendering;
+}
+
+void ccPointCloud::setLODRendering(bool value)
+{
+	m_useLODRendering = value;
+}
+
 void ccPointCloud::clearFWFData()
 {
 	m_fwfWaveforms.resize(0);
@@ -6409,7 +6497,7 @@ void ccPointCloud::clearFWFData()
 bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgressDialog* pDlg/*=nullptr*/) const
 {
 	minVal = maxVal = 0;
-	
+
 	if (size() != m_fwfWaveforms.size())
 	{
 		return false;
@@ -6531,7 +6619,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos( CCCoreLib::DegreesToRadians( minTriangleAngle_deg ) ));
 	//double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
-	
+
 	for (int j = 0; j < static_cast<int>(grid.h) - 1; ++j)
 	{
 		for (int i = 0; i < static_cast<int>(grid.w) - 1; ++i)
@@ -6560,7 +6648,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				continue;
 			}
 
-			Tuple3i tris[4] =
+			Tuple3i tris[4]
 			{
 				{ v0, v2, v1 },
 				{ v0, v3, v1 },
@@ -6568,7 +6656,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				{ v1, v2, v3 }
 			};
 
-			int tri[2] = { -1, -1 };
+			int tri[2] { -1, -1 };
 
 			switch (mask)
 			{
@@ -6595,7 +6683,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				}
 				break;
 			}
-			
+
 			default:
 				continue;
 			}
@@ -6689,7 +6777,7 @@ bool ccPointCloud::setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf
 	}
 
 	invalidateBoundingBox();
-	
+
 	return true;
 }
 
@@ -6714,10 +6802,10 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 			continue;
 		}
 
-		int sfIndex = getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+		int sfIndex = getScalarFieldIndexByName(defaultSFName[d].toStdString());
 		if (sfIndex < 0)
 		{
-			sfIndex = addScalarField(qPrintable(defaultSFName[d]));
+			sfIndex = addScalarField(defaultSFName[d].toStdString());
 		}
 		if (sfIndex < 0)
 		{
@@ -6773,10 +6861,10 @@ bool ccPointCloud::exportNormalToSF(bool exportDims[3])
 			continue;
 		}
 
-		int sfIndex = getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+		int sfIndex = getScalarFieldIndexByName(defaultSFName[d].toStdString());
 		if (sfIndex < 0)
 		{
-			sfIndex = addScalarField(qPrintable(defaultSFName[d]));
+			sfIndex = addScalarField(defaultSFName[d].toStdString());
 		}
 		if (sfIndex < 0)
 		{

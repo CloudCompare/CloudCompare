@@ -153,7 +153,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 
 			//il faut ecrire le nom du fichier relatif et non absolu !
-			int result = fprintf(mainFile,"\n#POV %u\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
+			int result = fprintf(mainFile, "\n#POV %u\nF %s\nT ASC\n", i, qPrintable(QFileInfo(thisFilename).fileName()));
 
 			if (result > 0)
 			{
@@ -321,8 +321,10 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 						float V[3];
 						sscanf(line + 2, "%f %f %f\n", V, V + 1, V + 2);
 
-						unsigned char col = static_cast<unsigned char>(line[0]) - 88;
+						assert(line[0] >= 88);
+						unsigned char col = static_cast<unsigned char>(line[0] - 88);
 						float* mat = rot.data();
+						assert(col < 3);
 						mat[col + 0] = V[0];
 						mat[col + 4] = V[1];
 						mat[col + 8] = V[2];

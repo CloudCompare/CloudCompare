@@ -58,36 +58,46 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::ScanDirectionFlag:
 			if (field.sf)
 			{
-				point.scan_direction_flag = (static_cast<laszip_U8>(value) > 0);
+				point.scan_direction_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::EdgeOfFlightLine:
 			if (field.sf)
 			{
-				point.edge_of_flight_line = (static_cast<laszip_U8>(value) > 0);
+				point.edge_of_flight_line = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::Classification:
 			if (field.sf)
 			{
-				point.classification = static_cast<laszip_U8>(value);
+				// Before entering the switch, the value is 'clamped',
+				// for the following to work we need the non-clamped value
+				laszip_U8 valueU8    = static_cast<laszip_U8>(field.sf->getValue(pointIndex));
+				point.classification = valueU8 & 31;
+				if (!m_classificationWasDecomposed)
+				{
+					point.synthetic_flag = (valueU8 >> 5) & 1;
+					point.keypoint_flag  = (valueU8 >> 6) & 1;
+					point.withheld_flag  = (valueU8 >> 7) & 1;
+				}
 			}
+			break;
 		case LasScalarField::SyntheticFlag:
 			if (field.sf)
 			{
-				point.synthetic_flag = (static_cast<laszip_U8>(value) > 0);
+				point.synthetic_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::KeypointFlag:
 			if (field.sf)
 			{
-				point.keypoint_flag = (static_cast<laszip_U8>(value) > 0);
+				point.keypoint_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::WithheldFlag:
 			if (field.sf)
 			{
-				point.withheld_flag = (static_cast<laszip_U8>(value) > 0);
+				point.withheld_flag = (static_cast<laszip_U8>(value) != 0);
 			}
 			break;
 		case LasScalarField::ScanAngleRank:
@@ -110,7 +120,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::GpsTime:
 			if (field.sf)
 			{
-				point.gps_time = static_cast<laszip_F64>(value) + field.sf->getGlobalShift();
+				point.gps_time = static_cast<laszip_F64>(value);
 			}
 			break;
 		case LasScalarField::ExtendedScanAngle:
@@ -128,7 +138,7 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 		case LasScalarField::OverlapFlag:
 			if (field.sf)
 			{
-				point.extended_classification_flags |= (static_cast<laszip_U8>(value) > 0) ? LasDetails::OVERLAP_FLAG_BIT_MASK : 0;
+				point.extended_classification_flags |= (static_cast<laszip_U8>(value) != 0) ? LasDetails::OVERLAP_FLAG_BIT_MASK : 0;
 			}
 			break;
 		case LasScalarField::ExtendedClassification:
@@ -177,7 +187,7 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& poi
 
 		for (size_t elemIndex{0}; elemIndex < extraField.numElements(); ++elemIndex)
 		{
-			values[elemIndex] = (*extraField.scalarFields[elemIndex])[pointIndex];
+			values[elemIndex] = extraField.scalarFields[elemIndex]->getValue(pointIndex);
 		}
 
 		if (extraField.scaleIsRelevant() || extraField.offsetIsRelevant())

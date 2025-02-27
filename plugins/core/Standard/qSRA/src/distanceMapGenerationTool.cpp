@@ -282,7 +282,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 	}
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
 	unsigned pointCount = cloud->size();
-	sf->resize(pointCount); //should always be ok
+	sf->resizeSafe(pointCount); //should always be ok
 	assert(sf);
 
 	ccScalarField* radiiSf = nullptr;
@@ -300,7 +300,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		else
 		{
 			radiiSf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdxRadii));
-			radiiSf->resize(pointCount); //should always be ok
+			radiiSf->resizeSafe(pointCount); //should always be ok
 		}
 	}
 

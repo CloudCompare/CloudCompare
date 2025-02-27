@@ -40,7 +40,7 @@
 /************************************/
 
 //useful constant
-static const double SQRT_3_DIV_2 = sqrt(3.0)/2;
+static const double SQRT_3_DIV_2 = sqrt(3.0) / 2;
 
 //! Per-scale "dimensionality" parameters computer (i.e. same as the original CANUPO suite)
 class DimensionalityScaleParamsComputer : public ScaleParamsComputer
@@ -241,10 +241,10 @@ public:
 				// Formula on wikipedia page for barycentric coordinates
 				// using directly the triangle in %variance space, they simplify a lot
 				double a = std::min<double>(1.0, std::max<double>(0.0, sValues.x - sValues.y));
-				double b = std::min<double>(1.0, std::max<double>(0.0, 2*sValues.x + 4*sValues.y - 2.0));
+				double b = std::min<double>(1.0, std::max<double>(0.0, 2 * sValues.x + 4 * sValues.y - 2.0));
 				double c = 1.0 - a - b;
 				// see original Brodu's code for this transformation
-				params[0] = static_cast<float>(b + c/2);
+				params[0] = static_cast<float>(b + c / 2);
 				params[1] = static_cast<float>(c * SQRT_3_DIV_2);
 
 				//save parameters for next scale
@@ -459,7 +459,7 @@ ScaleParamsComputer* ScaleParamsComputer::GetByID(unsigned descID)
 ScaleParamsComputer* ScaleParamsComputer::GetByIndex(unsigned index)
 {
 	QMap<unsigned, ScaleParamsComputer*>::Iterator it = s_vault.map.begin();
-	for (unsigned i=0; i<index; ++i)
+	for (unsigned i = 0; i < index; ++i)
 	{
 		++it;
 		assert(it != s_vault.map.end());
@@ -531,7 +531,7 @@ QByteArray CorePointDescSet::toByteArray() const
 
 bool CorePointDescSet::fromByteArray(const QByteArray& data)
 {
-	if (data.size() < 2*sizeof(int))
+	if (data.size() < 2 * sizeof(int))
 		return false;
 
 	const char* buffer = data.data();
@@ -588,7 +588,7 @@ bool CorePointDescSet::fromByteArray(const QByteArray& data)
 
 	//descriptors
 	{
-		for (int j=0; j<descCount; ++j)
+		for (int j = 0; j < descCount; ++j)
 		{
 			CorePointDesc& desc = at(j);
 			assert(desc.params.size() == static_cast<size_t>(scaleCount) * m_dimPerScale);
@@ -619,8 +619,8 @@ bool CorePointDescSet::setScales(const std::vector<float>& scales)
 	{
 		m_scales = scales;
 		size_t scaleCount = m_scales.size();
-		
-		size_t paramPerDesc = scaleCount*m_dimPerScale;
+
+		size_t paramPerDesc = scaleCount * m_dimPerScale;
 		for (size_t i = 0; i < size(); ++i)
 		{
 			at(i).params.resize(paramPerDesc);
@@ -649,7 +649,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 
 	// read the file header
 	int ncorepoints;
-	mscfile.read((char*)&ncorepoints,sizeof(ncorepoints));
+	mscfile.read((char*)&ncorepoints, sizeof(ncorepoints));
 	int nscales_msc;
 	mscfile.read((char*)&nscales_msc, sizeof(int));
 
@@ -694,7 +694,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 
 		for (int si = 0; si < nscales_msc; ++si)
 			mscfile.read((char*)&scales[si], sizeof(float));
-		
+
 		if (!setScales(scales)) //automatically resize the descriptors 'params' structure
 		{
 			error = "Not enough memory to load scales";
@@ -707,13 +707,13 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 	int ptnparams;
 	mscfile.read((char*)&ptnparams, sizeof(int));
 
-	std::vector<CCCoreLib::ScalarField*> paramsSf(3,nullptr);
+	std::vector<CCCoreLib::ScalarField*> paramsSf(3, nullptr);
 	if (corePoints)
 	{
 		//above 3, ptnparams contains additional scalars
-		for (int i=3; i<ptnparams; ++i)
+		for (int i = 3; i < ptnparams; ++i)
 		{
-			int sfIdx = corePoints->addScalarField(qPrintable(QString("scalar #%1").arg(i-2)));
+			int sfIdx = corePoints->addScalarField(QString("scalar #%1").arg(i - 2).toStdString());
 			paramsSf.push_back(sfIdx >= 0 ? corePoints->getScalarField(sfIdx) : nullptr);
 
 			if (sfIdx < 0)
@@ -725,7 +725,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 	}
 
 	//vector<float> avg_ndist_max_scale(ncorepoints);
-	for (int pt=0; pt<ncorepoints; ++pt)
+	for (int pt = 0; pt < ncorepoints; ++pt)
 	{
 		float x = 0.0f;
 		float y = 0.0f;
@@ -734,40 +734,40 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 		mscfile.read((char*)&y, sizeof(float));
 		mscfile.read((char*)&z, sizeof(float));
 		if (corePoints)
-			corePoints->addPoint(CCVector3(x,y,z));
-		if (ptnparams>=4)
+			corePoints->addPoint(CCVector3(x, y, z));
+		if (ptnparams >= 4)
 		{
 			float dummy;
 			mscfile.read((char*)&dummy, sizeof(float)); //already ignored in Brodu's code...
 
-			for (int i=4; i<ptnparams; ++i)
+			for (int i = 4; i < ptnparams; ++i)
 			{
 				float param;
 				mscfile.read((char*)&param, sizeof(float));
-			
+
 				if (static_cast<int>(paramsSf.size()) > i)
 					paramsSf[i]->addElement(static_cast<ScalarType>(param));
 			}
 		}
 
-		for (int s=0; s<nscales_msc; ++s)
+		for (int s = 0; s < nscales_msc; ++s)
 		{
 			float a = 0.0f;
 			float b = 0.0f;
 			mscfile.read((char*)(&a), sizeof(float));
 			mscfile.read((char*)(&b), sizeof(float));
-			
+
 			// see original Brodu's code for this transformation
 			float c = 1.0f - a - b;
-			float x = b + c/2;
-			float y = c * sqrt(3.0f)/2;
-			at(pt).params[s*2  ] = x;
-			at(pt).params[s*2+1] = y;
+			float x = b + c / 2;
+			float y = c * sqrt(3.0f) / 2;
+			at(pt).params[s * 2] = x;
+			at(pt).params[s * 2 + 1] = y;
 		}
 		// we don't care for number of neighbors at max and min scales
 		{
 			int dummyInt;
-			for (int i=0; i<nscales_msc; ++i)
+			for (int i = 0; i < nscales_msc; ++i)
 				mscfile.read((char*)&dummyInt, sizeof(int));
 		}
 	}
@@ -778,7 +778,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 	if (corePoints)
 	{
 		bool first = true;
-		for (size_t i=3; i<paramsSf.size(); ++i)
+		for (size_t i = 3; i < paramsSf.size(); ++i)
 		{
 			if (paramsSf[i])
 			{

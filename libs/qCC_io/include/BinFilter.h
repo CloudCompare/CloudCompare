@@ -40,7 +40,7 @@ public:
 	static CC_FILE_ERROR LoadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal, const LoadParameters& parameters);
 
 	//! new style BIN loading
-	static CC_FILE_ERROR LoadFileV2(QFile& in, ccHObject& container, int flags);
+	static CC_FILE_ERROR LoadFileV2(QFile& in, ccHObject& container, int flags, bool parallel, QWidget* parentWidget = nullptr);
 
 	//! new style BIN saving
 	static CC_FILE_ERROR SaveFileV2(QFile& out, ccHObject* object);

@@ -50,10 +50,16 @@ static int s_outputSeparatorIndex = 0;
 static bool s_saveSFBeforeColor = false;
 static bool s_saveColumnsNamesHeader = false;
 static bool s_savePointCountHeader = false;
+static bool s_doNotCreateLabels = false;
 
 void AsciiFilter::SetDefaultSkippedLineCount(int count)
 {
 	s_defaultSkippedLineCount = count;
+}
+
+void AsciiFilter::SetNoLabelCreated(bool state)
+{
+	s_doNotCreateLabels = state;
 }
 
 void AsciiFilter::SetOutputCoordsPrecision(int prec)
@@ -276,7 +282,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			//add each associated SF name
 			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
-				QString sfName((*it)->getName());
+				QString sfName(QString::fromStdString((*it)->getName()));
 				sfName.replace(separator, '_');
 				header.append(separator);
 				header.append(sfName);
@@ -377,7 +383,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
 			{
 				line.append(separator);
-				double sfVal = (*it)->getGlobalShift() + (*it)->getValue(i);
+				ScalarType sfVal = (*it)->getValue(i);
 				line.append(QString::number(sfVal, 'f', s_outputSFPrecision));
 			}
 		}
@@ -572,7 +578,7 @@ void clearStructure(cloudAttributesDescriptor &cloudDesc)
 	cloudDesc.reset();
 }
 
-cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequence,
+cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence& openSequence,
 										unsigned numberOfPoints,
 										int& maxIndex,
 										unsigned step = 1)
@@ -662,7 +668,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 					sfName.replace('_', ' ');
 				}
 
-				ccScalarField* sf = new ccScalarField(qPrintable(sfName));
+				ccScalarField* sf = new ccScalarField(sfName.toStdString());
 				int sfIdx = cloud->addScalarField(sf);
 				if (sfIdx >= 0)
 				{
@@ -854,7 +860,6 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
 
 	//buffers
-	ScalarType D = 0;
 	CCVector3d P(0, 0, 0);
 	CCVector3d Pshift(0, 0, 0);
 	CCVector3 N(0, 0, 0);
@@ -1095,22 +1100,22 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			{
 				for (size_t j = 0; j < cloudDesc.scalarIndexes.size(); ++j)
 				{
-					D = static_cast<ScalarType>(locale.toDouble(parts[cloudDesc.scalarIndexes[j]]));
-					cloudDesc.scalarFields[j]->emplace_back(D);
+					ScalarType sfValue = static_cast<ScalarType>(locale.toDouble(parts[cloudDesc.scalarIndexes[j]]));
+					cloudDesc.scalarFields[j]->addElement(sfValue);
 				}
 			}
 
 			//Quaternion
 			if (cloudDesc.hasQuaternion)
 			{
-				double quat[4] = { locale.toDouble(parts[cloudDesc.qwIndex]),
-									locale.toDouble(parts[cloudDesc.qxIndex]),
-									locale.toDouble(parts[cloudDesc.qyIndex]),
-									locale.toDouble(parts[cloudDesc.qzIndex])
+				double quat[4] { locale.toDouble(parts[cloudDesc.qwIndex]),
+								 locale.toDouble(parts[cloudDesc.qxIndex]),
+								 locale.toDouble(parts[cloudDesc.qyIndex]),
+								 locale.toDouble(parts[cloudDesc.qzIndex])
 				};
 
 				ccGLMatrix mat = ccGLMatrix::FromQuaternion(quat);
-				mat.setTranslation(P.u);
+				mat.setTranslation((P + Pshift).u);
 
 				ccCoordinateSystem* cs = new ccCoordinateSystem(ccCoordinateSystem::DEFAULT_DISPLAY_SCALE,
 																CCCoreLib::PC_ONE,
@@ -1124,7 +1129,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 			}
 
 			//Label
-			if (cloudDesc.labelIndex >= 0)
+			if (cloudDesc.labelIndex >= 0 && !s_doNotCreateLabels)
 			{
 				cc2DLabel* label = new cc2DLabel();
 				label->addPickedPoint(cloudDesc.cloud, cloudDesc.cloud->size() - 1);
@@ -1153,22 +1158,30 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream& stream,
 	if (cloudDesc.cloud)
 	{
 		if (cloudDesc.cloud->size() < cloudDesc.cloud->capacity())
+		{
 			cloudDesc.cloud->resize(cloudDesc.cloud->size());
+		}
 
 		//add cloud to output
 		if (!cloudDesc.scalarFields.empty())
 		{
 			for (size_t j = 0; j < cloudDesc.scalarFields.size(); ++j)
 			{
-				cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE);
-				cloudDesc.scalarFields[j]->computeMinAndMax();
+				if (cloudDesc.scalarFields[j]->resizeSafe(cloudDesc.cloud->size(), true, CCCoreLib::NAN_VALUE))
+				{
+					cloudDesc.scalarFields[j]->computeMinAndMax();
+				}
+				else
+				{
+					// nothing will happen, we just use too much memory...
+				}
 			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 			cloudDesc.cloud->showSF(true);
 		}
 
 		//position the labels
-		if (cloudDesc.labelIndex >= 0)
+		if (cloudDesc.labelIndex >= 0 && !s_doNotCreateLabels)
 		{
 			ccHObject::Container labels;
 			cloudDesc.cloud->filterChildren(labels, false, CC_TYPES::LABEL_2D, true);

@@ -6,10 +6,9 @@
 // Qt
 #include <QDate>
 // qCC_db
-#include <ccGlobalShiftManager.h>
 #include <ccPointCloud.h>
 
-constexpr const char* const CC_NORMAL_NAMES[3] = {"Nx", "Ny", "Nz"};
+constexpr const char* const CC_NORMAL_NAMES[3]{"Nx", "Ny", "Nz"};
 
 LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
     : m_cloudToSave(cloud)

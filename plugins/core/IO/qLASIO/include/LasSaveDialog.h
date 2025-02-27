@@ -1,21 +1,21 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: Thomas Montaigu                           #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 of the License.               #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: Thomas Montaigu                           #
+// #                                                                        #
+// ##########################################################################
 
 #include "LasDetails.h"
 #include "LasExtraScalarField.h"
@@ -43,8 +43,10 @@ class LasSaveDialog : public QDialog
 	Q_OBJECT
 
   public:
+	/// Constructor
 	explicit LasSaveDialog(ccPointCloud* cloud, QWidget* parent = nullptr);
 
+	/// Set the file version and the point format
 	void setVersionAndPointFormat(const LasDetails::LasVersion versionAndFmt);
 	/// Set scale that would offer the user the best precision
 	void setOptimalScale(const CCVector3d& scale, bool autoCheck = false);
@@ -53,6 +55,18 @@ class LasSaveDialog : public QDialog
 	void setOriginalScale(const CCVector3d& scale, bool canUseScale, bool autoCheck = true);
 	/// Set the extra LAS scalar fields saved from the original file.
 	void setExtraScalarFields(const std::vector<LasExtraScalarField>& extraScalarFields);
+
+	/// Offsets
+	enum Offset
+	{
+		GLOBAL_SHIFT,
+		ORIGN_LAS_OFFSET,
+		MIN_BB_CORNER,
+		CUSTOM_LAS_OFFSET
+	};
+
+	/// Sets the available offsets
+	void setOffsets(const QMap<Offset, CCVector3d>& availableOffsets, Offset selectedOffsetType);
 
 	/// Returns the point format currently selected
 	uint8_t selectedPointFormat() const;
@@ -66,6 +80,8 @@ class LasSaveDialog : public QDialog
 	bool shouldSaveWaveform() const;
 	/// Returns whether the user wants to save normals as extra las scalar field
 	bool shouldSaveNormalsAsExtraScalarField() const;
+	/// Returns the chosen offset
+	CCVector3d chosenOffset(Offset& offsetType) const;
 	/// Returns the vector of LAS scalar fields the user wants to save.
 	///
 	/// Each LAS scalar fields is mapped to an existing point cloud's ccScalarField.
@@ -74,14 +90,20 @@ class LasSaveDialog : public QDialog
 	std::vector<LasExtraScalarField> extraFieldsToSave() const;
 
   public Q_SLOTS:
-	void handleSelectedVersionChange(const QString&);
-	void handleSelectedPointFormatChange(int index);
-	void handleComboBoxChange(int index);
-	void handleCustomScaleButtontoggled(bool checked);
-	void addExtraScalarFieldCard();
+	void                     handleSelectedVersionChange(const QString&);
+	void                     handleSelectedPointFormatChange(int index);
+	void                     handleComboBoxChange(int index);
+	void                     handleCustomScaleButtontoggled(bool checked);
+	LasExtraScalarFieldCard* addExtraScalarFieldCard();
 
   private:
 	LasExtraScalarFieldCard* createCard() const;
+	/// This will scan the the point cloud scalar fields
+	/// and create a default scalar field extra card if the field is
+	/// neither selected as a standard field nor as an extra field.
+	void assignLeftoverScalarFieldsAsExtra();
+	void unassignDefaultFields();
+	bool shouldAutomaticallyAssignLeftoverSFsAsExtra() const;
 
   private:
 	ccPointCloud* m_cloud{nullptr};
@@ -95,4 +117,6 @@ class LasSaveDialog : public QDialog
 	/// Contains the mapping from a LAS field name to a combo box
 	/// where the user (or us) selected the scalar field to use
 	std::vector<std::pair<MappingLabel*, QComboBox*>> m_scalarFieldMapping;
+	/// Output offsets that the user can choose
+	QMap<Offset, CCVector3d> outputOffsets;
 };

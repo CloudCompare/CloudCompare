@@ -90,7 +90,7 @@ public:
 
 		//options / modifiers
 		INTERACT_TRANSFORM_ENTITIES = 64,
-		
+
 		//signals
 		INTERACT_SIG_RB_CLICKED      =  128, //right button clicked
 		INTERACT_SIG_LB_CLICKED      =  256, //left button clicked
@@ -145,7 +145,7 @@ public:
 	virtual QFont getFont() const = 0;
 	virtual QOpenGLContext* getOpenGLContext() const = 0;
 	virtual void setWindowCursor(const QCursor&) = 0;
-	virtual void doMakeCurrent() = 0;
+	virtual void doMakeCurrent() {};
 	virtual QObject* asQObject() = 0;
 	virtual const QObject* asQObject() const = 0;
 	virtual QString getWindowTitle() const = 0;
@@ -294,7 +294,7 @@ public:
 		automatically disable this mode.
 	**/
 	void setBubbleViewMode(bool state);
-	
+
 	//! Returns whether bubble-view mode is enabled or no
 	inline bool bubbleViewModeEnabled() const { return m_bubbleViewModeEnabled; }
 
@@ -326,7 +326,7 @@ public:
 		(see setPerspectiveState).
 	**/
 	const ccGLMatrixd& getBaseViewMat() { return m_viewportParams.viewMat; }
-	
+
 	//! Sets the base view matrix
 	/** Warning: 'base view' marix is either:
 		- the rotation around the object in object-centered mode
@@ -381,7 +381,7 @@ public:
 		\param silent whether this function can log and/or display messages on the screen
 	**/
 	void setPointSize(float size, bool silent = false);
-	
+
 	//! Minimum line width
 	static constexpr float MIN_LINE_WIDTH_F = 1.0f;
 	//! Maximum line width
@@ -547,7 +547,7 @@ public: //LOD
 	//! Enables or disables LOD on this display
 	/** \return success
 	**/
-	bool setLODEnabled(bool state, bool autoDisable = false);
+	bool setLODEnabled(bool state);
 
 public: //fullscreen
 
@@ -600,7 +600,7 @@ public: //stereo mode
 
 	//! Returns whether the stereo display mode is enabled or not
 	inline bool stereoModeIsEnabled() const { return m_stereoModeEnabled; }
-	
+
 	//! Returns the current stereo mode parameters
 	inline const StereoParams& getStereoParams() const { return m_stereoParams; }
 
@@ -635,7 +635,7 @@ public: // other methods
 	/** The request will be executed if not in auto refresh mode already
 	**/
 	virtual void requestUpdate() = 0;
-	
+
 	//! Returns the signal emitter (const version)
 	const ccGLWindowSignalEmitter* signalEmitter() const { return m_signalEmitter; }
 	//! Returns the signal emitter
@@ -881,8 +881,8 @@ protected: //other methods
 		\param[out] metrics [optional] output other metrics (Znear and Zfar, etc.)
 		\param[out] eyeOffset [optional] eye offset (for stereo display)
 	**/
-	ccGLMatrixd computeProjectionMatrix(	bool withGLfeatures, 
-											ProjectionMetrics* metrics = nullptr, 
+	ccGLMatrixd computeProjectionMatrix(	bool withGLfeatures,
+											ProjectionMetrics* metrics = nullptr,
 											double* eyeOffset = nullptr) const;
 	void updateModelViewMatrix();
 	void updateProjectionMatrix();
@@ -943,7 +943,7 @@ protected: //other methods
 								const CCVector3* nearestPoint = nullptr,
 								const CCVector3d* nearestPointBC = nullptr, //barycentric coordinates
 								const std::unordered_set<int>* selectedIDs = nullptr);
-	
+
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context
 		AND at least one of them must be under the mouse cursor.
@@ -1072,8 +1072,6 @@ protected: //members
 
 	//! Whether L.O.D. (level of detail) is enabled or not
 	bool m_LODEnabled;
-	//! Whether L.O.D. should be automatically disabled at the end of the rendering cycle
-	bool m_LODAutoDisable;
 	//! Whether the display should be refreshed on next call to 'refresh'
 	bool m_shouldBeRefreshed;
 	//! Whether the mouse (cursor) has moved after being pressed or not
@@ -1115,7 +1113,7 @@ protected: //members
 			, position(LOWER_LEFT_MESSAGE)
 			, type(CUSTOM_MESSAGE)
 		{}
-		
+
 		//! Message
 		QString message;
 		//! Message end time (sec)
@@ -1138,7 +1136,7 @@ protected: //members
 	float m_sunLightPos[4];
 	//! Whether sun light is enabled or not
 	bool m_sunLightEnabled;
-	
+
 	//! Custom light position
 	/** Relative to object.
 	**/
@@ -1164,7 +1162,7 @@ protected: //members
 		Role role;
 		QRect area;
 	};
-	
+
 	//! Currently displayed clickable items
 	std::vector<ClickableItem> m_clickableItems;
 
@@ -1220,7 +1218,7 @@ protected: //members
 	//! Rectangular picking polyline
 	ccPolyline* m_rectPickingPoly;
 
-	//! Overridden display parameter 
+	//! Overridden display parameter
 	ccGui::ParamStruct m_overriddenDisplayParameters;
 
 	//! Whether display parameters are overidden for this window
@@ -1274,7 +1272,7 @@ protected: //members
 
 	//! Wether exclusive full screen is enabled or not
 	bool m_exclusiveFullscreen;
-	
+
 	//! Former geometry (for exclusive full-screen display)
 	QByteArray m_formerGeometry;
 
@@ -1294,55 +1292,6 @@ protected: //members
 	bool m_autoRefresh;
 	//! Auto-refresh timer
 	QTimer m_autoRefreshTimer;
-
-	//! Precomputed stuff for the 'hot zone'
-	struct HotZone
-	{
-		//display font
-		QFont font;
-		//text height
-		int textHeight;
-		//text shift
-		int yTextBottomLineShift;
-		//default color
-		ccColor::Rgb color;
-
-		//bubble-view label rect.
-		QString bbv_label;
-		//bubble-view label rect.
-		QRect bbv_labelRect;
-		//bubble-view row width
-		int bbv_totalWidth;
-
-		//fullscreen label rect.
-		QString fs_label;
-		//fullscreen label rect.
-		QRect fs_labelRect;
-		//fullscreen row width
-		int fs_totalWidth;
-
-		//point size label
-		QString psi_label;
-		//point size label rect.
-		QRect psi_labelRect;
-		//point size row width
-		int psi_totalWidth;
-
-		//line size label
-		QString lsi_label;
-		//line size label rect.
-		QRect lsi_labelRect;
-		//line size row width
-		int lsi_totalWidth;
-
-		int margin;
-		int iconSize;
-		QPoint topCorner;
-
-		explicit HotZone(ccGLWindowInterface* win);
-
-		QRect rect(bool clickableItemsVisible, bool bubbleViewModeEnabled, bool fullScreenEnabled) const;
-	};
 
 	//! Hot zone
 	HotZone* m_hotZone;

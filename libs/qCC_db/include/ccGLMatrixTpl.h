@@ -843,6 +843,19 @@ public:
 		return (*this);
 	}
 
+	//! Equality operator
+	bool operator==(const ccGLMatrixTpl<T>& otherMatrix)
+	{
+		for (unsigned i = 0; i < OPENGL_MATRIX_SIZE; ++i)
+		{
+			if (std::abs(m_mat[i] - otherMatrix.m_mat[i]) > std::numeric_limits<T>::epsilon())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	//! Returns the value at a given position
 	T operator () (unsigned row, unsigned col) const
 	{

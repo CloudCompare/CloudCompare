@@ -12,72 +12,146 @@
 //System
 #include <thread>
 
-ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app, ccPointCloud* cloud)
+ccCloudLayersHelper::ccCloudLayersHelper(ccMainAppInterface* app)
 	: m_app ( app )
-	, m_cloud( cloud )
-	, m_formerCloudColors( nullptr )
-	, m_formerCloudColorsWereShown( false )
-	, m_formerCloudSFWasShown( false )
-	, m_scalarFieldIndex( 0 )
-	, m_modified( false )
+	, m_cloud( nullptr )
+	, m_scalarFieldIndex(-1)
+	, m_modified(false)
 	, m_parameters{}
 {
-	m_projectedPoints.resize(m_cloud->size());
-	m_pointInFrustum.resize(m_cloud->size());
-
-	if (m_cloud)
-	{
-		m_formerCloudColorsWereShown = m_cloud->colorsShown();
-		m_formerCloudSFWasShown = m_cloud->sfShown();
-
-		if (m_cloud->hasColors())
-		{
-			// store the original colors
-			m_formerCloudColors = m_cloud->rgbaColors()->clone();
-			if (!m_formerCloudColors)
-			{
-				ccLog::Error("Not enough memory to backup previous colors");
-			}
-		}
-		else
-		{
-			// check memory for rgb colors
-			if (!m_cloud->resizeTheRGBTable())
-			{
-				ccLog::Error("Not enough memory to show colors");
-			}
-		}
-
-		cloud->showColors(true);
-		cloud->showSF(false);
-	}
 }
 
 ccCloudLayersHelper::~ccCloudLayersHelper()
 {
+}
+
+bool ccCloudLayersHelper::setCloud(ccPointCloud* cloud)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return false;
+	}
+	m_cloud = cloud;
+
+	// reserve some memory to project points in 2D
+	try
+	{
+		m_projectedPoints.resize(m_cloud->size());
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error(QObject::tr("Not enough memory"));
+		return false;
+	}
+
+	// backup visibility statuses
+	m_originalCloudState.colorsWereShown = m_cloud->colorsShown();
+	m_originalCloudState.sfWasShown = m_cloud->sfShown();
+	m_originalCloudState.displayedSFIndex = m_cloud->getCurrentDisplayedScalarFieldIndex();
+	m_originalCloudState.hadColors = m_cloud->hasColors();
+
+	// backup colors
+	if (m_originalCloudState.hadColors)
+	{
+		// store the original colors
+		m_originalCloudState.colors.reset(m_cloud->rgbaColors()->clone());
+		if (!m_originalCloudState.colors)
+		{
+			ccLog::Error(QObject::tr("Not enough memory to backup previous colors"));
+			return false;
+		}
+	}
+	else
+	{
+		// check memory for rgb colors
+		if (!m_cloud->resizeTheRGBTable())
+		{
+			ccLog::Error(QObject::tr("Not enough memory"));
+			return false;
+		}
+	}
+
+	// backup the current scalar field
+	if (m_cloud->hasScalarFields())
+	{
+		if (m_cloud->getCurrentDisplayedScalarFieldIndex() < 0)
+		{
+			// force the display of the first SF if none was active!
+			m_cloud->setCurrentDisplayedScalarField(0);
+		}
+
+		if (!setScalarFieldIndexAndStoreValues(m_cloud->getCurrentDisplayedScalarFieldIndex()))
+		{
+			ccLog::Error(QObject::tr("Not enough memory"));
+			return false;
+		}
+	}
+
+	// we can eventually change the cloud state
+	m_cloud->showColors(true);
+	m_cloud->showSF(false);
+
+	return true;
+}
+
+void ccCloudLayersHelper::keepCurrentSFVisible()
+{
 	if (m_cloud)
 	{
-		if (m_formerCloudColors)
+		m_cloud->setCurrentDisplayedScalarField(m_scalarFieldIndex);
+		if (m_cloud->getCurrentDisplayedScalarField())
 		{
+			m_cloud->getCurrentDisplayedScalarField()->computeMinAndMax();
+		}
+		m_cloud->showSF(true);
+	}
+}
+
+void ccCloudLayersHelper::restoreCloud(bool restoreSFValues)
+{
+	if (!m_cloud)
+	{
+		return;
+	}
+
+	// restore the original colors (if any)
+	if (m_originalCloudState.hadColors)
+	{
+		if (m_originalCloudState.colors)
+		{
+			// restore the saved colors
 			if (m_cloud->rgbaColors())
 			{
 				// restore original colors
-				m_formerCloudColors->copy(*m_cloud->rgbaColors());
+				m_originalCloudState.colors->copy(*m_cloud->rgbaColors());
+				m_cloud->colorsHaveChanged();
 			}
-
-			delete m_formerCloudColors;
-			m_formerCloudColors = nullptr;
+			else
+			{
+				assert(false);
+			}
 		}
-		else
-		{
-			m_cloud->unallocateColors();
-		}
-		
-		m_cloud->showColors(m_formerCloudColorsWereShown);
-		m_cloud->showSF(m_formerCloudSFWasShown);
-		m_cloud->redrawDisplay();
 	}
-	m_cloud = nullptr;
+	else
+	{
+		m_cloud->unallocateColors();
+	}
+
+	// restore the color visibility status
+	m_cloud->showColors(m_originalCloudState.colorsWereShown);
+
+	if (restoreSFValues)
+	{
+		// restore the SF values
+		restoreCurrentSFValues();
+
+		// restore the SF visibility status (only in this case, as this means that the process has been cancelled)
+		m_cloud->showSF(m_originalCloudState.sfWasShown);
+		m_cloud->setCurrentDisplayedScalarField(m_originalCloudState.displayedSFIndex);
+	}
+
+	m_cloud->redrawDisplay();
 }
 
 QStringList ccCloudLayersHelper::getScalarFields()
@@ -88,21 +162,24 @@ QStringList ccCloudLayersHelper::getScalarFields()
 	{
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			scalarFields.append(QString(m_cloud->getScalarFieldName(i)));
+			scalarFields.append(QString::fromStdString(m_cloud->getScalarFieldName(i)));
 		}
 	}
 	return scalarFields;
 }
 
-void ccCloudLayersHelper::setScalarFieldIndex(int index)
+bool ccCloudLayersHelper::setScalarFieldIndexAndStoreValues(int index)
 {
-	m_scalarFieldIndex = index;
-}
-
-void ccCloudLayersHelper::keepCurrentSFVisible()
-{
-	m_formerCloudSFWasShown = true;
-	m_cloud->setCurrentDisplayedScalarField(m_scalarFieldIndex);
+	if (saveCurrentSFValues(index))
+	{
+		m_scalarFieldIndex = index;
+		m_modified = false;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void ccCloudLayersHelper::setVisible(bool value)
@@ -118,43 +195,44 @@ void ccCloudLayersHelper::setVisible(bool value)
 	m_cloud->redrawDisplay();
 }
 
-void ccCloudLayersHelper::apply(QList<ccAsprsModel::AsprsItem>& items)
+void ccCloudLayersHelper::applyClassColors(QList<ccAsprsModel::AsprsItem>& items)
 {
-	if (m_scalarFieldIndex >= m_cloud->getNumberOfScalarFields())
-		return;
-
 	m_cloud->setColor(ccColor::black);
 
-	for (int i = 0; i < items.size(); ++i)
+	for (ccAsprsModel::AsprsItem& item : items)
 	{
-		items[i].count = apply(items[i]);
+		item.count = applyClassColor(item);
 	}
 	
 	m_cloud->redrawDisplay();
 }
 
-int ccCloudLayersHelper::apply(ccAsprsModel::AsprsItem& item, bool redrawDisplay)
+int ccCloudLayersHelper::applyClassColor(ccAsprsModel::AsprsItem& item, bool redrawDisplay/*=false*/)
 {
-	ccColor::Rgba ccColor = ccColor::FromQColora(item.color);
-	ccColor.a = item.visible ? ccColor::MAX : 0;
 	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
+	{
 		return 0;
+	}
+
+	ccColor::Rgba ccColor = ccColor::FromQColora(item.color);
+	ccColor.a = item.visible ? ccColor::MAX : 0;
 
 	ScalarType code = static_cast<ScalarType>(item.code);
 	int affected = 0;
-	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i)
 	{
-		if ((*it) == code)
+		if (sf->getValue(i) == code)
 		{
-			m_cloud->setPointColor(counter, ccColor);
+			m_cloud->setPointColor(static_cast<unsigned>(i), ccColor);
 			++affected;
 		}
 	}
 
 	if (redrawDisplay)
+	{
 		m_cloud->redrawDisplay();
+	}
 
 	return affected;
 }
@@ -163,15 +241,16 @@ void ccCloudLayersHelper::changeCode(const ccAsprsModel::AsprsItem& item, Scalar
 {
 	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
+	{
 		return;
+	}
 
 	ScalarType code = static_cast<ScalarType>(item.code);
-	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i)
 	{
-		if ((*it) == oldCode)
+		if (sf->getValue(i) == oldCode)
 		{
-			sf->setValue(counter, code);
+			sf->setValue(static_cast<unsigned>(i), code);
 		}
 	}
 }
@@ -180,72 +259,98 @@ int ccCloudLayersHelper::moveItem(const ccAsprsModel::AsprsItem& from, const ccA
 {
 	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
+	{
 		return 0;
+	}
 
 	ScalarType code = static_cast<ScalarType>(from.code);
-	ScalarType emptyCode = to != nullptr ? static_cast<ScalarType>(to->code) : static_cast<ScalarType>(0);
-	const ccColor::Rgba color = to != nullptr ? ccColor::FromQColora(to->color) : ccColor::black;
+	ScalarType emptyCode = static_cast<ScalarType>(nullptr != to ? to->code : 0);
+	ccColor::Rgba color = (nullptr != to ? ccColor::FromQColora(to->color) : ccColor::black);
 
 	int affected = 0;
-	int counter = 0;
-	for (auto it = sf->begin(); it != sf->end(); ++it, ++counter)
+	for (size_t i = 0; i < sf->size(); ++i)
 	{
-		if ((*it) == code)
+		if (sf->getValue(i) == code)
 		{
-			sf->setValue(counter, emptyCode);
-			m_cloud->setPointColor(counter, color);
+			sf->setValue(static_cast<unsigned>(i), emptyCode);
+			m_cloud->setPointColor(static_cast<unsigned>(i), color);
 			++affected;
 		}
 	}
 
 	if (redrawDisplay)
+	{
 		m_cloud->redrawDisplay();
+	}
 
 	return affected;
 }
 
-void ccCloudLayersHelper::saveState()
+bool ccCloudLayersHelper::saveCurrentSFValues(int sfIndex)
 {
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
+	if (sfIndex < 0)
+	{
+		m_originalCloudState.scalarValues.clear();
+		return true;
+	}
+
+	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(sfIndex);
 	if (!sf)
-		return;
+	{
+		return false;
+	}
 
 	unsigned cloudSize = m_cloud->size();
-	m_cloudState.resize(cloudSize);
+	try
+	{
+		
+		m_originalCloudState.scalarValues.resize(cloudSize);
+	}
+	catch (const std::bad_alloc&)
+	{
+		return false;
+	}
+
 	for (unsigned i = 0; i < cloudSize; ++i)
 	{
-		m_cloudState[i].update(sf->getValue(i), m_cloud->getPointColor(i));
+		m_originalCloudState.scalarValues[i] = sf->getValue(i);
 	}
+
+	return true;
 }
 
-void ccCloudLayersHelper::restoreState()
+void ccCloudLayersHelper::restoreCurrentSFValues()
 {
-	CCCoreLib::ScalarField* sf = (m_cloud ? m_cloud->getScalarField(m_scalarFieldIndex) : nullptr);
+	if (m_scalarFieldIndex < 0)
+	{
+		// nothing to do
+		return;
+	}
+
+	CCCoreLib::ScalarField* sf = (nullptr != m_cloud ? m_cloud->getScalarField(m_scalarFieldIndex) : nullptr);
 	if (!sf)
 	{
 		assert(false);
 		return;
 	}
 
-	unsigned cloudSize = m_cloud->size();
-	if (m_cloudState.size() != cloudSize)
+	if (m_originalCloudState.scalarValues.size() != sf->size())
 	{
 		assert(false);
 		return;
 	}
 
-	for (unsigned i = 0; i < cloudSize; ++i)
+	for (size_t i = 0; i < m_originalCloudState.scalarValues.size(); ++i)
 	{
-		const CloudState& state = m_cloudState[i];
-		sf->setValue(i, state.code);
-		m_cloud->setPointColor(i, state.color);
+		sf->setValue(i, m_originalCloudState.scalarValues[i]);
 	}
+	sf->computeMinAndMax();
 }
 
-void ccCloudLayersHelper::project(ccGLCameraParameters camera, unsigned start, unsigned end)
+void ccCloudLayersHelper::project(const ccGLCameraParameters& camera, unsigned start, unsigned end)
 {
-	const double half_w = camera.viewport[2] / 2.0;
-	const double half_h = camera.viewport[3] / 2.0;
+	const double halfW = camera.viewport[2] / 2.0;
+	const double halfH = camera.viewport[3] / 2.0;
 
 	CCVector3d Q2D;
 	bool pointInFrustum = false;
@@ -253,116 +358,132 @@ void ccCloudLayersHelper::project(ccGLCameraParameters camera, unsigned start, u
 	{
 		const CCVector3* P3D = m_cloud->getPoint(i);
 		camera.project(*P3D, Q2D, &pointInFrustum);
-		m_projectedPoints[i] = CCVector2(static_cast<PointCoordinateType>(Q2D.x - half_w), static_cast<PointCoordinateType>(Q2D.y - half_h));
-		m_pointInFrustum[i] = pointInFrustum;
+		m_projectedPoints[i] = { CCVector2(static_cast<PointCoordinateType>(Q2D.x - halfW), static_cast<PointCoordinateType>(Q2D.y - halfH)), pointInFrustum };
 	}
 }
 
-PointCoordinateType ccCloudLayersHelper::ComputeSquaredEuclideanDistance(const CCVector2& a, const CCVector2& b)
+void ccCloudLayersHelper::mouseMove(const CCVector2& center2D, PointCoordinateType squareDist, std::map<ScalarType, int>& affected)
 {
-	return (b - a).norm2();
-}
-
-void ccCloudLayersHelper::mouseMove(const CCVector2& center, float squareDist, std::map<ScalarType, int>& affected)
-{
-	if (m_parameters.output == nullptr ||
-		((!m_parameters.anyPoints && !m_parameters.visiblePoints) && m_parameters.input == nullptr))
+	if ( m_parameters.output == nullptr
+		|| ((!m_parameters.anyPoints && !m_parameters.visiblePoints) && m_parameters.input == nullptr)
+		)
 	{
 		return;
 	}
 
 	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
+	{
 		return;
+	}
 
-	ScalarType inputCode = m_parameters.input != nullptr ? static_cast<ScalarType>(m_parameters.input->code) : 0;
+	ScalarType inputCode = static_cast<ScalarType>(nullptr != m_parameters.input ? m_parameters.input->code : 0);
 	ScalarType outputCode = static_cast<ScalarType>(m_parameters.output->code);
 
-	unsigned char alpha = m_parameters.output->visible ? ccColor::MAX : 0;
+	unsigned char alpha = (m_parameters.output->visible ? ccColor::MAX : 0);
 	ccColor::Rgba outputColor = ccColor::Rgba(ccColor::FromQColor(m_parameters.output->color), alpha);
 
 	unsigned cloudSize = m_cloud->size();
 	for (unsigned i = 0; i < cloudSize; ++i)
 	{
-		// skip camera outside point
-		if (!m_pointInFrustum[i])
+		// skip points outside of the frustum
+		if (!m_projectedPoints[i].inFrustum)
+		{
 			continue;
-
-		const auto& color = m_cloud->getPointColor(i);
+		}
 
 		// skip invisible points
-		if (m_parameters.visiblePoints && color.a != ccColor::MAX)
-			continue;
-
-		ScalarType code = sf->getValue(i);
-
-		// skip other codes
-		if (m_parameters.input && code != inputCode)
-			continue;
-
-		// skip circle outside point
-		if (ComputeSquaredEuclideanDistance(center, m_projectedPoints[i]) > squareDist)
-			continue;
-		
-		if (code != outputCode)
+		if (m_parameters.visiblePoints)
 		{
-			sf->setValue(i, outputCode);
-			m_cloud->setPointColor(i, outputColor);
-
-			--affected[code];
-			++affected[outputCode];
+			const auto& color = m_cloud->getPointColor(i);
+			if (color.a != ccColor::MAX)
+			{
+				continue;
+			}
 		}
-	
+
+		ScalarType currentCode = sf->getValue(i);
+
+		if (currentCode == outputCode)
+		{
+			// point already has the right code/class
+			continue;
+		}
+
+
+		// if a specific code/class was input, skip the other codes/classes
+		if (m_parameters.input && currentCode != inputCode)
+		{
+			continue;
+		}
+
+		// skip the points outside of the circle
+		if ((m_projectedPoints[i].pos2D - center2D).norm2() > squareDist)
+		{
+			continue;
+		}
+		
+		sf->setValue(i, outputCode);
+		m_cloud->setPointColor(i, outputColor);
+
+		--affected[currentCode];
+		++affected[outputCode];
+
 		m_modified = true;
 	}
 	
 	m_cloud->redrawDisplay();
 }
 
-void ccCloudLayersHelper::projectCloud(const ccGLCameraParameters& camera)
+bool ccCloudLayersHelper::projectCloud(const ccGLCameraParameters& camera)
 {
-	// check camera parameters changes
-	bool hasChanges = false;
-	auto a = m_cameraParameters.modelViewMat.data();
-	auto b = camera.modelViewMat.data();
-	for (int i = 0; i < OPENGL_MATRIX_SIZE; ++i)
+	// check if any camera parameter has changed (else, no need to reproject the points)
+	if (m_cameraParameters == camera)
 	{
-		if (std::abs(a[i] - b[i]) > 1e-6)
-		{
-			hasChanges = true;
-			break;
-		}
+		return true;
 	}
-
-	if (!hasChanges)
-		return;
 
 	m_cameraParameters = camera;
 	unsigned cloudSize = m_cloud->size();
 
 	unsigned processorCount = std::thread::hardware_concurrency();
 	if (processorCount == 0)
+	{
 		processorCount = 1;
+	}
 
-	const size_t part_size = cloudSize / processorCount;
+	const size_t chunkSize = cloudSize / processorCount;
 	std::vector<std::thread*> threads;
-	threads.resize(processorCount, nullptr);
+	try
+	{
+		threads.resize(processorCount, nullptr);
+	}
+	catch (const::std::bad_alloc&)
+	{
+		ccLog::Warning(QObject::tr("Not enough memory to project the points"));
+		return false;
+	}
+
 	for (unsigned i = 0; i < processorCount; ++i)
 	{
-		size_t start = i * part_size;
-		size_t end = start + part_size;
-
-		if (i == processorCount - 1)
-			end = cloudSize;
+		size_t start = i * chunkSize;
+		size_t end = (i + 1 == processorCount ? cloudSize : start + chunkSize);
 
 		threads[i] = new std::thread(&ccCloudLayersHelper::project, this, camera, start, end);
 	}
 
-	for (auto it = threads.begin(); it != threads.end(); ++it)
-		(*it)->join();
+	for (std::thread* thread : threads)
+	{
+		thread->join();
+	}
 
-	for (auto it = threads.begin(); it != threads.end(); ++it)
-		delete (*it);
+	for (std::thread*& thread : threads)
+	{
+		delete thread;
+		thread = nullptr;
+	}
+
+	return true;
 }
 
 ccCloudLayersHelper::Parameters& ccCloudLayersHelper::getParameters()

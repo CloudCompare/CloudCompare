@@ -19,7 +19,6 @@
 #define CC_DB_ROOT_HEADER
 
 //Qt
-#include "ccPointCloud.h"
 #include <QAbstractItemModel>
 #include <QPoint>
 #include <QTreeView>
@@ -49,6 +48,7 @@ struct dbTreeSelectionInfo
 	size_t groupCount = 0;
 	size_t polylineCount = 0;
 	size_t planeCount = 0;
+	size_t circleCount = 0;
 	size_t meshCount = 0;
 	size_t primitiveCount = 0;
 	size_t imageCount = 0;
@@ -62,7 +62,7 @@ struct dbTreeSelectionInfo
 class ccCustomQTreeView : public QTreeView
 {
 	Q_OBJECT
-	
+
 public:
 
 	//! Default constructor
@@ -287,7 +287,7 @@ protected:
 	//! Context menu action: hide/show selected entities SF
 	QAction* m_toggleSelectedEntitiesSF;
 	//! Context menu action: hide/show selected entities 3D name
-	QAction* m_toggleSelectedEntities3DName;	
+	QAction* m_toggleSelectedEntities3DName;
 	//! Context menu action: add empty group
 	QAction* m_addEmptyGroup;
 	//! Context menu action: use 3-points labels or planes to orient camera

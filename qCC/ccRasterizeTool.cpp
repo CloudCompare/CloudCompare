@@ -159,9 +159,9 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 			{
-				m_UI->activeLayerComboBox->addItem(pc->getScalarField(i)->getName(), QVariant(LAYER_SF));
+				m_UI->activeLayerComboBox->addItem(QString::fromStdString(pc->getScalarField(i)->getName()), QVariant(LAYER_SF));
 				//populate std. dev. layer box as well
-				m_UI->stdDevLayerComboBox->addItem(pc->getScalarField(i)->getName());
+				m_UI->stdDevLayerComboBox->addItem(QString::fromStdString(pc->getScalarField(i)->getName()));
 			}
 			m_cloudHasScalarFields = true;
 		}
@@ -393,7 +393,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw/*=true*
 		else
 		{
 			//does the selected 'layer' exist?
-			int sfIndex = m_rasterCloud->getScalarFieldIndexByName(qPrintable(m_UI->activeLayerComboBox->itemText(layerIndex)));
+			int sfIndex = m_rasterCloud->getScalarFieldIndexByName(m_UI->activeLayerComboBox->itemText(layerIndex).toStdString());
 			m_rasterCloud->setCurrentDisplayedScalarField(sfIndex);
 			m_rasterCloud->showSF(true);
 			m_rasterCloud->showColors(false);
@@ -713,7 +713,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(	bool exportHeightStats,
 		}
 
 		//currently displayed SF
-		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(qPrintable(activeSFName));
+		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(activeSFName.toStdString());
 		if (activeSFIndex < 0 && cloudGrid->getNumberOfScalarFields() != 0)
 		{
 			//if no SF is displayed, we should at least set a valid one (for later)
@@ -790,7 +790,7 @@ void ccRasterizeTool::updateGridAndDisplay()
 				&& m_rasterCloud->getNumberOfScalarFields() != 0 )
 			{
 				assert(m_UI->activeLayerComboBox->itemData(0).toInt() == LAYER_HEIGHT);
-				m_UI->activeLayerComboBox->setItemText(0, QString(m_rasterCloud->getScalarField(0)->getName()));
+				m_UI->activeLayerComboBox->setItemText(0, QString::fromStdString(m_rasterCloud->getScalarField(0)->getName()));
 			}
 		}
 		catch (const std::bad_alloc&)
@@ -1112,7 +1112,7 @@ void ccRasterizeTool::generateRaster() const
 	if (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF && m_cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		//the indexes in the 'm_grid.scalarFields' are the same as in the cloud
-		visibleSfIndex = static_cast<ccPointCloud*>(m_cloud)->getScalarFieldIndexByName(qPrintable(m_UI->activeLayerComboBox->currentText()));
+		visibleSfIndex = static_cast<ccPointCloud*>(m_cloud)->getScalarFieldIndexByName(m_UI->activeLayerComboBox->currentText().toStdString());
 	}
 
 	//which (and how many) bands shall we create?
@@ -1802,7 +1802,7 @@ void ccRasterizeTool::generateHillshade()
 	}
 }
 
-void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned subIndex)
+void ccRasterizeTool::addNewContour(ccPolyline* poly, double height)
 {
 	if (!m_cloud || !poly)
 	{
@@ -1812,7 +1812,6 @@ void ccRasterizeTool::addNewContour(ccPolyline* poly, double height, unsigned su
 
 	if (poly->size() > 1)
 	{
-		poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(subIndex));
 		poly->setGlobalScale(m_cloud->getGlobalScale());
 		poly->setGlobalShift(m_cloud->getGlobalShift());
 		poly->setWidth(m_UI->contourWidthSpinBox->value() < 2 ? 0 : m_UI->contourWidthSpinBox->value()); //size 1 is equivalent to the default size
@@ -1919,9 +1918,7 @@ void ccRasterizeTool::generateContours()
 
 	for (ccPolyline* poly : contourLines)
 	{
-		addNewContour(	poly,
-						poly->getMetaData(ccPolyline::MetaKeyConstAltitude()).toUInt(),
-						poly->getMetaData(ccContourLinesGenerator::MetaKeySubIndex()).toUInt() );
+		addNewContour(poly, poly->getMetaData(ccPolyline::MetaKeyConstAltitude()).toUInt());
 	}
 
 	if (!m_contourLines.empty())
@@ -2051,7 +2048,7 @@ void ccRasterizeTool::generateImage() const
 	{
 		//the indexes in the 'm_grid.scalarFields' are the same as in the cloud
 		ccPointCloud* pc = static_cast<ccPointCloud*>(m_cloud);
-		int visibleSfIndex = pc->getScalarFieldIndexByName(qPrintable(m_UI->activeLayerComboBox->currentText()));
+		int visibleSfIndex = pc->getScalarFieldIndexByName(m_UI->activeLayerComboBox->currentText().toStdString());
 		if (visibleSfIndex >= 0 && static_cast<size_t>(visibleSfIndex) < m_grid.scalarFields.size())
 		{
 			cloudSF = pc->getScalarField(visibleSfIndex);

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_MESH_HEADER
-#define CC_MESH_HEADER
 
 //CCCoreLib
 #include <PointProjectionTools.h>
@@ -501,5 +500,3 @@ private:
 	//! Copy of a ccMesh instance is not supported (because of all the pointers to the members)
 	ccMesh(const ccMesh&) {}
 };
-
-#endif //CC_MESH_HEADER

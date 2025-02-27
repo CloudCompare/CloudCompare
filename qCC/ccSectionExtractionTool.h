@@ -143,6 +143,8 @@ protected:
 			: entity(e)
 			, originalDisplay(e->getDisplay())
 			, isInDB(alreadyInDB)
+			, backupColorShown(false)
+			, backupWidth(0)
 		{
 			//specific case: polylines
 			if (e->isA(CC_TYPES::POLY_LINE))

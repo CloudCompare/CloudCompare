@@ -27,6 +27,21 @@
 //System
 #include <cassert>
 
+static QString GetPolylineName(double value, unsigned mainIndex, unsigned partNumber)
+{
+	QString contourLineName = QObject::tr("Contour line [value = %1]").arg(value);
+	if (partNumber != 0)
+	{
+		contourLineName += QObject::tr(" (poly %1-%2)").arg(mainIndex).arg(partNumber);
+	}
+	else
+	{
+		contourLineName += QObject::tr(" (poly %1)").arg(mainIndex);
+	}
+
+	return contourLineName;
+}
+
 #ifndef CC_GDAL_SUPPORT
 
 #include "ccIsolines.h" //old alternative code to generate contour lines (doesn't work very well :( )
@@ -43,16 +58,17 @@
 
 struct ContourGenerationParameters
 {
-	std::vector<ccPolyline*> contourLines;
+	QMultiMap<double, ccPolyline*> contourLines;
+	QMap<double, unsigned> contourLinesMainCount;
 	const ccRasterGrid* grid = nullptr;
 	bool projectContourOnAltitudes = false;
 };
 
 static CPLErr ContourWriter(	double dfLevel,
 								int nPoints,
-								double *padfX,
-								double *padfY,
-								void * userData)
+								double* padfX,
+								double* padfY,
+								void* userData)
 {
 	if (nPoints < 2)
 	{
@@ -70,11 +86,31 @@ static CPLErr ContourWriter(	double dfLevel,
 
 	ccPointCloud* vertices = nullptr;
 	ccPolyline* poly = nullptr;
+	std::vector<ccPolyline*> previousPolylines;
 
-	unsigned subIndex = 0;
+	unsigned contourIndex = 1;
+	if (params->contourLinesMainCount.contains(dfLevel))
+	{
+		contourIndex = params->contourLinesMainCount[dfLevel] + 1;
+	}
+	params->contourLinesMainCount[dfLevel] = contourIndex;
+
+	unsigned partCount = 0;
+
 	for (int i = 0; i < nPoints; ++i)
 	{
 		CCVector3 P(padfX[i], padfY[i], dfLevel);
+
+		//detect potential loops
+		if (i + 1 == nPoints && poly)
+		{
+			const CCVector3* firstPoint = poly->getPoint(0);
+			if (firstPoint->x == P.x && firstPoint->y == P.y)
+			{
+				poly->setClosed(true);
+				break;
+			}
+		}
 
 		if (params->projectContourOnAltitudes)
 		{
@@ -87,13 +123,29 @@ static CPLErr ContourWriter(	double dfLevel,
 			}
 			else
 			{
-				//DGM: we stop the current polyline
+				//we end the current polyline and start a new one
 				if (poly)
 				{
 					if (poly->size() < 2)
 					{
+						//we discard isolated points
 						delete poly;
-						params->contourLines.pop_back();
+						poly = nullptr;
+					}
+					else
+					{
+						poly->shrinkToFit();
+						vertices->shrinkToFit();
+
+						++partCount;
+						poly->setName(GetPolylineName(dfLevel, contourIndex, partCount == 1 && i + 2 >= nPoints ? 0 : partCount)); // if not enough points to add another polyline, we don't need to add the sub-part index
+
+						if (params->contourLines.insert(dfLevel, poly) == params->contourLines.end())
+						{
+							//not enough memory?
+							delete poly;
+							return CE_Failure;
+						}
 					}
 					poly = nullptr;
 					vertices = nullptr;
@@ -104,12 +156,17 @@ static CPLErr ContourWriter(	double dfLevel,
 
 		if (!poly)
 		{
+			if (nPoints < i + 2)
+			{
+				// a single point left? Nothing we can do...
+				//ccLog::Warning("An isolated point was discarded");
+				break;
+			}
 			//we need to instantiate a new polyline
 			vertices = new ccPointCloud("vertices");
 			vertices->setEnabled(false);
 			poly = new ccPolyline(vertices);
 			poly->addChild(vertices);
-			poly->setMetaData(ccContourLinesGenerator::MetaKeySubIndex(), ++subIndex);
 			poly->setClosed(false);
 
 			//add the 'const altitude' meta-data as well
@@ -122,20 +179,24 @@ static CPLErr ContourWriter(	double dfLevel,
 				poly = nullptr;
 				return CE_Failure;
 			}
-
-			try
-			{
-				params->contourLines.push_back(poly);
-			}
-			catch (const std::bad_alloc&)
-			{
-				return CE_Failure;
-			}
 		}
 
 		assert(vertices);
 		poly->addPointIndex(vertices->size());
 		vertices->addPoint(P);
+	}
+
+	if (poly)
+	{
+		poly->shrinkToFit();
+		vertices->shrinkToFit();
+		poly->setName(GetPolylineName(dfLevel, contourIndex, partCount == 0 ? 0 : partCount + 1));
+		if (params->contourLines.insert(dfLevel, poly) == params->contourLines.end())
+		{
+			//not enough memory?
+			delete poly;
+			return CE_Failure;
+		}
 	}
 
 	return CE_None;
@@ -257,12 +318,14 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 			}
 			scanline = nullptr;
 
-			//have we generated any contour line?
-			if (!gdalParams.contourLines.empty())
+			//reproject contour lines from raster C.S. to the cloud C.S.
+			auto levels = gdalParams.contourLines.uniqueKeys();
+			for (double level : levels)
 			{
-				//reproject contour lines from raster C.S. to the cloud C.S.
-				for (ccPolyline*& poly : gdalParams.contourLines)
+				const auto polylinesAtLevel = gdalParams.contourLines.values(level);
+				for (int i = polylinesAtLevel.size() - 1; i >= 0; --i)
 				{
+					ccPolyline* poly = polylinesAtLevel[i];
 					if (static_cast<int>(poly->size()) < params.minVertexCount)
 					{
 						delete poly;
@@ -270,28 +333,22 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 						continue;
 					}
 
-					double height = std::numeric_limits<double>::quiet_NaN();
 					for (unsigned i = 0; i < poly->size(); ++i)
 					{
 						CCVector3* P2D = const_cast<CCVector3*>(poly->getAssociatedCloud()->getPoint(i));
-						if (i == 0)
-						{
-							height = P2D->z;
-						}
 
-						CCVector3 P(	static_cast<PointCoordinateType>((P2D->x - 0.5) * rasterGrid->gridStep + gridMinCornerXY.x),
-										static_cast<PointCoordinateType>((P2D->y - 0.5) * rasterGrid->gridStep + gridMinCornerXY.y),
-										P2D->z );
+						CCVector3 P(static_cast<PointCoordinateType>((P2D->x - 0.5) * rasterGrid->gridStep + gridMinCornerXY.x),
+							static_cast<PointCoordinateType>((P2D->y - 0.5) * rasterGrid->gridStep + gridMinCornerXY.y),
+							P2D->z);
 						*P2D = P;
 					}
 
 					//add contour
-					poly->setName(QString("Contour line value = %1 (#%2)").arg(height).arg(poly->getMetaData(ccContourLinesGenerator::MetaKeySubIndex()).toUInt()));
 					contourLines.push_back(poly);
 				}
-
-				gdalParams.contourLines.clear(); //just in case
 			}
+
+			gdalParams.contourLines.clear(); //just in case
 		}
 
 		GDAL_CG_Destroy(hCG);
@@ -362,10 +419,10 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 				ccLog::PrintDebug(QString("[Rasterize][Isolines] value=%1 : %2 lines").arg(v).arg(lineCount));
 
 				//convert them to poylines
-				int realCount = 0;
 				for (int i = 0; i < lineCount; ++i)
 				{
 					int vertCount = iso.getContourLength(i);
+					unsigned subPartCount = 0;
 					if (vertCount >= params.minVertexCount)
 					{
 						int startVi = 0; //we may have to split the polyline in multiple chunks
@@ -423,14 +480,12 @@ bool ccContourLinesGenerator::GenerateContourLines(	ccRasterGrid* rasterGrid,
 									poly->setClosed(isClosed); //if we have less vertices, it means we have 'chopped' the original contour
 									vertices->setEnabled(false);
 
-									++realCount;
-									poly->setMetaData(ccContourLinesGenerator::MetaKeySubIndex(), realCount);
-
 									//add the 'const altitude' meta-data as well
 									poly->setMetaData(ccPolyline::MetaKeyConstAltitude(), QVariant(v));
 
 									//add contour
-									poly->setName(QString("Contour line value = %1 (#%2)").arg(v).arg(realCount));
+									++subPartCount;
+									poly->setName(GetPolylineName(v, static_cast<unsigned>(lineCount + 1), isClosed ? 0 : subPartCount));
 									try
 									{
 										contourLines.push_back(poly);

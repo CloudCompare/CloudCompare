@@ -141,6 +141,16 @@
           <number>0</number>
          </property>
          <item>
+          <widget class="QPushButton" name="unlockModificationsButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>Unlock Modification</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="advancedOptionsButton">
            <property name="text">
             <string>Advanced Options</string>

@@ -28,7 +28,7 @@
 
 //common dialogs
 #include <ccCameraParamEditDlg.h>
-#include <ccDisplayOptionsDlg.h>
+#include <ccDisplaySettingsDlg.h>
 #include <ccStereoModeDlg.h>
 
 //qCC_db
@@ -383,7 +383,7 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 			//ui.menuSelectSF->clear();
 			for (unsigned i = 0; i < sfCount; ++i)
 			{
-				QAction* action = ui.menuSelectSF->addAction(cloud->getScalarFieldName(i));
+				QAction* action = ui.menuSelectSF->addAction(QString::fromStdString(cloud->getScalarFieldName(i)));
 				action->setData(i);
 				action->setCheckable(true);
 				if (currentSFIndex == static_cast<int>(i))
@@ -606,9 +606,9 @@ void ccViewer::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 
 void ccViewer::showDisplayParameters()
 {
-	ccDisplayOptionsDlg clmDlg(this);
+	ccDisplaySettingsDlg clmDlg(this);
 
-	connect(&clmDlg, &ccDisplayOptionsDlg::aspectHasChanged, this, &ccViewer::updateDisplay);
+	connect(&clmDlg, &ccDisplaySettingsDlg::aspectHasChanged, this, &ccViewer::updateDisplay);
 
 	clmDlg.exec();
 

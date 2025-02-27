@@ -139,7 +139,7 @@ void ccHistogramWindow::setAxisLabels(const QString& xLabel, const QString& yLab
 		xAxis->setVisible(true);
 	}
 
-	if (xLabel.isNull())
+	if (yLabel.isNull())
 	{
 		yAxis->setVisible(false);
 	}

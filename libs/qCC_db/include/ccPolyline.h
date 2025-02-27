@@ -45,10 +45,11 @@ public:
 	ccPolyline(const ccPolyline& poly);
 
 	//! Destructor
-	virtual ~ccPolyline() override = default;
+	~ccPolyline() override = default;
 
 	//! Returns class ID
-	CC_CLASS_ENUM getClassID() const override {return CC_TYPES::POLY_LINE;}
+	CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
+	void onDeletionOf(const ccHObject* obj) override;
 
 	//inherited methods (ccHObject)
 	bool isSerializable() const override { return true; }
@@ -60,6 +61,9 @@ public:
 	void setGlobalScale(double scale) override;
 	const CCVector3d& getGlobalShift() const override;
 	double getGlobalScale() const override;
+
+	//! Removes unused capacity
+	inline void shrinkToFit() { if (size() < capacity()) resize(size()); }
 
 	//! Clones this polyline
 	ccPolyline* clone() const;
@@ -98,14 +102,15 @@ public:
 	inline const ccColor::Rgb& getColor() const { return m_rgbColor; }
 
 	//inherited methods (ccHObject)
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
-	inline virtual void drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) override
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
+	inline void drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) override
 	{
 		//DGM: only for 3D polylines!
 		if (!is2DMode())
+		{
 			ccShiftedObject::drawBB(context, col);
+		}
 	}
-
 
 	//! Splits the polyline into several parts based on a maximum edge length
 	/** \warning output polylines set (parts) may be empty if all the vertices are too far from each other!
@@ -113,8 +118,7 @@ public:
 		\param[out]	parts			output polyline parts
 		\return success
 	**/
-	bool split(	PointCoordinateType maxEdgeLength,
-				std::vector<ccPolyline*>& parts );
+	bool split(	PointCoordinateType maxEdgeLength, std::vector<ccPolyline*>& parts );
 
 	//! Computes the polyline length
 	PointCoordinateType computeLength() const;
@@ -162,16 +166,13 @@ public:
 
 	//! Creates a polyline mesh with the selected vertices only
 	/** This method is called after a graphical segmentation.
-		It creates one or several new polylines with the segments having their two
+		It creates one or several new polylines with the segments having both
 		vertices tagged as "visible" (see ccGenericPointCloud::visibilityArray).
 	**/
 	bool createNewPolylinesFromSelection(std::vector<ccPolyline*>& output);
 
 	//! Helper to determine if the input cloud acts as vertices of a polyline
 	static bool IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline = nullptr);
-
-	//! Creates a circle as a polyline
-	static ccPolyline* Circle(const CCVector3& center, PointCoordinateType radius, unsigned resolution = 48);
 
 public: //meta-data keys
 	

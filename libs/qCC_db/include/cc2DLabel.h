@@ -217,8 +217,6 @@ protected:
 		ccColor::Rgba color;
 		bool hasSF;
 		ScalarType sfValue;
-		double sfShiftedValue;
-		bool sfValueIsShifted;
 		QString sfName;
 		//! Default constructor
 		LabelInfo1()
@@ -228,8 +226,6 @@ protected:
 			, color(0, 0, 0, 0)
 			, hasSF(false)
 			, sfValue(0)
-			, sfShiftedValue(0)
-			, sfValueIsShifted(false)
 		{}
 	};
 	

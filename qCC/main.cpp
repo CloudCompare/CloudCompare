@@ -19,6 +19,7 @@
 
 //Qt
 #include <QDir>
+#include <QGLFormat>
 #include <QMessageBox>
 #include <QPixmap>
 #include <QSettings>
@@ -185,6 +186,12 @@ int main(int argc, char** argv)
 
 	ccApplication app(argc, argv, commandLine);
 
+	if (!commandLine)
+	{
+		// if not in CLI mode, we set the default log verbosity level
+		ccLog::SetVerbosityLevel(ccGui::Parameters().logVerbosityLevel);
+	}
+
 #ifdef CC_GAMEPAD_SUPPORT
 #if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
@@ -315,9 +322,9 @@ int main(int argc, char** argv)
 		//change the default path to the application one (do this AFTER processing the command line)
 		QDir workingDir = QCoreApplication::applicationDirPath();
 
-#ifdef Q_OS_MAC
+	#ifdef Q_OS_MAC
 		// This makes sure that our "working directory" is not within the application bundle
-		if (workingDir.dirName() == "MacOS")
+		if ( workingDir.dirName() == "MacOS" )
 		{
 			workingDir.cdUp();
 			workingDir.cdUp();

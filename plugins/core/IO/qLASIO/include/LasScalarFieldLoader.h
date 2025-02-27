@@ -63,11 +63,13 @@ class LasScalarFieldLoader
 		m_force8bitRgbMode = state;
 	}
 
-	/// If nan, this value will be ignored and the time shift
-	/// will be taken using the first value encountered.
-	inline void setManualTimeShift(double timeShift)
+	/// Sets whether the classification field should be decomposed into
+	/// the classification, synthetic flag, key_point flag, withheld flag.
+	///
+	/// Only applies to point format <= 5 (ie field Classification, not ExtendedClassification)
+	inline void setDecomposeClassification(bool state)
 	{
-		m_manualTimeShiftValue = timeShift;
+		m_decomposeClassification = state;
 	}
 
 	inline const std::vector<LasScalarField>& standardFields() const
@@ -89,9 +91,6 @@ class LasScalarFieldLoader
 	/// currentValue: The current value of the LAS field we are loading.
 	template <typename T>
 	CC_FILE_ERROR handleScalarField(LasScalarField& sfInfo, ccPointCloud& pointCloud, T currentValue);
-
-	/// Same thing as `handleScalarField` but for Gps Time.
-	CC_FILE_ERROR handleGpsTime(LasScalarField& sfInfo, ccPointCloud& pointCloud, double currentValue);
 
 	/// creates the ccScalarFields that correspond to the LAS extra dimensions
 	bool createScalarFieldsForExtraBytes(ccPointCloud& pointCloud);
@@ -116,8 +115,8 @@ class LasScalarFieldLoader
 
   private:
 	bool                              m_force8bitRgbMode{false};
+	bool                              m_decomposeClassification{true};
 	bool                              m_ignoreFieldsWithDefaultValues{true};
-	double                            m_manualTimeShiftValue{std::numeric_limits<double>::quiet_NaN()};
 	unsigned char                     m_colorCompShift{0};
 	std::vector<LasScalarField>&      m_standardFields;
 	std::vector<LasExtraScalarField>& m_extraScalarFields;

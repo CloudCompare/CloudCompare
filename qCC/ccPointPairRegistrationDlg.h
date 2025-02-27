@@ -110,11 +110,12 @@ protected:
 	//! Enables (or not) buttons depending on the number of points in both lists
 	void onPointCountChanged();
 
-	//! Calls Horn registration (CCCoreLib::HornRegistrationTools)
-	bool callHornRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
-								double& rms,
-								bool autoUpdateTab,
-								QStringList* report = nullptr);
+	//! Calls the registration routine
+	bool callRegistration(	CCCoreLib::PointProjectionTools::Transformation& trans,
+							double& rms,
+							bool autoUpdateTab,
+							bool& withUmeyama,
+							QStringList* report = nullptr );
 
 	//! Clears the RMS rows
 	void clearRMSColumns();
@@ -186,9 +187,6 @@ protected: //members
 
 	//! Reference points set
 	ccPointCloud m_refPoints;
-
-	//! Dedicated window
-	ccGLWindowInterface* m_win;
 
 	//! Whether the dialog is paused or not
 	bool m_paused;

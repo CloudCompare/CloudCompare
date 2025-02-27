@@ -34,6 +34,8 @@ bool ccMeshGroup::toFile_MeOnly(QFile& out, short dataVersion) const
 
 bool ccMeshGroup::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
+	ccLog::PrintVerbose(QString("Loading mesh group %1...").arg(m_name));
+
 	//Mesh groups are deprecated since version 2.9
 	assert(dataVersion < 29);
 	if (dataVersion >= 29)

@@ -69,17 +69,17 @@ void ccGeoObject::assignGID()
 void ccGeoObject::init(bool singleSurface)
 {
 	//add metadata tag defining the ccCompass class type
-	QVariantMap* map = new QVariantMap();
+	QVariantMap map;
 	if (singleSurface)
 	{
-		map->insert("ccCompassType", "GeoObjectSS"); //single-surface GeoObject
+		map.insert("ccCompassType", "GeoObjectSS"); //single-surface GeoObject
 	}
 	else
 	{
-		map->insert("ccCompassType", "GeoObject");
+		map.insert("ccCompassType", "GeoObject");
 	}
-	map->insert("GID", getGID());
-	setMetaData(*map, true);
+	map.insert("GID", getGID());
+	setMetaData(map, true);
 }
 
 ccPointCloud* ccGeoObject::getAssociatedCloud()
@@ -322,9 +322,9 @@ void ccGeoObject::generateInterior()
 	m_interior = new ccHObject("Interior");
 	
 	//give them associated property flags
-	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "GeoInterior");
-	m_interior->setMetaData(*map, true);
+	QVariantMap map;
+	map.insert("ccCompassType", "GeoInterior");
+	m_interior->setMetaData(map, true);
 
 	//add these to the scene graph
 	addChild(m_interior);
@@ -347,9 +347,9 @@ void ccGeoObject::generateUpper()
 
 	m_upper = new ccHObject("Upper Boundary");
 
-	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "GeoUpperBoundary");
-	m_upper->setMetaData(*map, true);
+	QVariantMap map;
+	map.insert("ccCompassType", "GeoUpperBoundary");
+	m_upper->setMetaData(map, true);
 
 	addChild(m_upper);
 	m_upper_id = m_upper->getUniqueID();
@@ -371,9 +371,9 @@ void ccGeoObject::generateLower()
 
 	m_lower = new ccHObject("Lower Boundary");
 
-	QVariantMap* map = new QVariantMap();
-	map->insert("ccCompassType", "GeoLowerBoundary");
-	m_lower->setMetaData(*map, true);
+	QVariantMap map;
+	map.insert("ccCompassType", "GeoLowerBoundary");
+	m_lower->setMetaData(map, true);
 
 	addChild(m_lower);
 	m_lower_id = m_lower->getUniqueID();

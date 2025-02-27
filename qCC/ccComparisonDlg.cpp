@@ -104,8 +104,8 @@ ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
 	split3DCheckBox->setEnabled(false);
 	okButton->setEnabled(false);
 
-	compName->setText(m_compEnt->getName());
-	refName->setText(m_refEnt->getName());
+	compName->setText(m_compEnt ? m_compEnt->getName() : QString());
+	refName->setText(m_refEnt ? m_refEnt->getName() : QString());
 	preciseResultsTabWidget->setCurrentIndex(0);
 
 	m_refVisibility = (m_refEnt ? m_refEnt->isVisible() : false);
@@ -186,7 +186,9 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	//backup currently displayed SF (on compared cloud)
 	int oldSfIdx = m_compCloud->getCurrentDisplayedScalarFieldIndex();
 	if (oldSfIdx >= 0)
-		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
+	{
+		m_oldSfName = QString::fromStdString(m_compCloud->getScalarFieldName(oldSfIdx));
+	}
 
 	//reference entity
 	if (	(m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_TYPES::MESH))
@@ -664,7 +666,10 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 			theBestOctreeLevel = level;
 		}
 
-		nProgress.oneStep();
+		if (!nProgress.oneStep())
+		{
+			break;
+		}
 	}
 
 	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)", theBestOctreeLevel, maxSearchDist);
@@ -933,13 +938,14 @@ bool ccComparisonDlg::computeDistances()
 		if (split3D)
 		{
 			//we add the corresponding scalar fields (one for each dimension)
-			static const QChar charDim[3] = { 'X', 'Y', 'Z' };
 			for (unsigned j = 0; j < 3; ++j)
 			{
 				CCCoreLib::ScalarField* sf = c2cParams.splitDistances[j];
 				if (sf)
 				{
-					sf->setName(qPrintable(m_sfName + QString(" (%1)").arg(charDim[j])));
+					static const QChar CharDim[3]{ 'X', 'Y', 'Z' };
+					QString dimSFName = m_sfName + QString(" (%1)").arg(CharDim[j]);
+					sf->setName(dimSFName.toStdString());
 					sf->computeMinAndMax();
 					//check that SF doesn't already exist
 					int sfExit = m_compCloud->getScalarFieldIndexByName(sf->getName());
@@ -950,25 +956,28 @@ bool ccComparisonDlg::computeDistances()
 				}
 			}
 			ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
-            if (mergeXY)
-            {
-                ccLog::Warning("[ComputeDistances] compute 2D distances (xy plane)");
-                int sf2D = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName + QString(" (XY)")));
-                if (sf2D < 0)
-                    sf2D = m_compCloud->addScalarField(qPrintable(m_sfName + QString(" (XY)")));
-                if (sf2D < 0)
-                {
-                    ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
-                    return 0;
-                }
-                CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
-                for (unsigned idx = 0; idx < m_compCloud->size(); idx++)
-                {
-                    float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) +  pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
-                    sf->setValue(idx, d2D);
-                }
-                sf->computeMinAndMax();
-            }
+			if (mergeXY)
+			{
+				ccLog::Warning("[ComputeDistances] compute 2D distances (xy plane)");
+				QString sfNameXY = m_sfName + " (XY)";
+				int sf2D = m_compCloud->getScalarFieldIndexByName(sfNameXY.toStdString());
+				if (sf2D < 0)
+				{
+					sf2D = m_compCloud->addScalarField(sfNameXY.toStdString());
+				}
+				if (sf2D < 0)
+				{
+					ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
+					return 0;
+				}
+				CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
+				for (unsigned idx = 0; idx < m_compCloud->size(); idx++)
+				{
+					float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) + pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
+					sf->setValue(idx, d2D);
+				}
+				sf->computeMinAndMax();
+			}
 		}
 	}
 	else
@@ -1046,7 +1055,7 @@ void ccComparisonDlg::applyAndExit()
 			else
 			{
 				//we delete any existing scalar field with the exact same name
-				int _sfIdx = m_compCloud->getScalarFieldIndexByName(qPrintable(m_sfName));
+				int _sfIdx = m_compCloud->getScalarFieldIndexByName(m_sfName.toStdString());
 				if (_sfIdx >= 0)
 				{
 					m_compCloud->deleteScalarField(_sfIdx);
@@ -1054,7 +1063,7 @@ void ccComparisonDlg::applyAndExit()
 					sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 				}
 
-				m_compCloud->renameScalarField(sfIdx,qPrintable(m_sfName));
+				m_compCloud->renameScalarField(sfIdx,m_sfName.toStdString());
 				m_compCloud->setCurrentDisplayedScalarField(sfIdx);
 				m_compCloud->showSF(sfIdx >= 0);
 			}
@@ -1096,7 +1105,7 @@ void ccComparisonDlg::cancelAndExit()
 
 		if (!m_oldSfName.isEmpty())
 		{
-			int oldSfIdx = m_compCloud->getScalarFieldIndexByName(qPrintable(m_oldSfName));
+			int oldSfIdx = m_compCloud->getScalarFieldIndexByName(m_oldSfName.toStdString());
 			if (oldSfIdx)
 			{
 				m_compCloud->setCurrentDisplayedScalarField(oldSfIdx);

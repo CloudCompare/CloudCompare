@@ -149,7 +149,7 @@ struct LasField
 			{
 				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(i));
 				//find an equivalent in official LAS fields
-				QString sfName = QString(sf->getName()).toUpper();
+				QString sfName = QString::fromStdString(sf->getName()).toUpper();
 				bool outBounds = false;
 				for (size_t j = 0; j < lasFields.size(); ++j)
 				{
@@ -157,11 +157,11 @@ struct LasField
 					if (sfName == lasFields[j].getName().toUpper())
 					{
 						//check bounds
-						double sfMin = sf->getGlobalShift() + sf->getMax();
-						double sfMax = sf->getGlobalShift() + sf->getMax();
+						double sfMin = sf->getMin();
+						double sfMax = sf->getMax();
 						if (sfMin < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sfMax > lasFields[j].maxValue)) //outbounds?
 						{
-							ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
+							ccLog::Warning(QString("[LAS] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(QString::fromStdString(sf->getName())).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
 							outBounds = true;
 						}
 						else

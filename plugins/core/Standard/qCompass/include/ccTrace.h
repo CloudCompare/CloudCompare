@@ -61,32 +61,34 @@ class ccTrace :
 public:
 	ccTrace(ccPointCloud* associatedCloud);
 	ccTrace(ccPolyline* obj); //used for constructing from polylines with the correct metadata
-	virtual ~ccTrace() {}
+	~ccTrace() override {}
 
 	//inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override { return CC_TYPES::POLY_LINE; }
+	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_H_OBJECT | CC_TYPES::POLY_LINE; }
+	void onDeletionOf(const ccHObject* obj) override;
 
 	/*
 	Adds waypoint to the end of this trace.
 	@Args
-	 *pointIndex* = the index of the point (in the cloud associated with this object) that is the new waypoint
+	 *pointId* = the index of the point (in the cloud associated with this object) that is the new waypoint
 	*/
 	void pushWaypoint(int pointId) { m_waypoints.push_back(pointId); }
 
 	/*
 	Deletes the specified waypoint.
 	@Args
-	*pointIndex* = the index of the point (in the cloud associated with this object) that represents the waypoint to be deleted. If this point is not
+	*pointId* = the index of the point (in the cloud associated with this object) that represents the waypoint to be deleted. If this point is not
 	               a waypoint then the function does nothing.
 	*/
-	void deleteWaypoint(int pointId) { 
+	inline void deleteWaypoint(int pointId)
+	{ 
 		m_waypoints.erase(std::remove(m_waypoints.begin(), m_waypoints.end(), pointId), m_waypoints.end()); 
 	}
 
 	/*
 	Retrieves the global point index of the n'th waypoint
 	*/
-	int getWaypoint(int n)
+	inline int getWaypoint(int n) const
 	{
 		return m_waypoints[n];
 	}
@@ -102,7 +104,7 @@ public:
 	/*
 	Returns the normal of the point at the specified index in this trace. If no normal exists, it returns the vector 0,0,0.
 	*/
-	CCVector3f getPointNormal(int pointIdx)
+	inline CCVector3f getPointNormal(int pointIdx) const
 	{
 		if (!m_cloud->hasNormals())
 		{
@@ -125,7 +127,7 @@ public:
 		}
 	}
 
-	size_t waypoint_count() const { return m_waypoints.size(); }
+	inline size_t waypoint_count() const { return m_waypoints.size(); }
 
 	/*
 	Calculates the most "structure-like" path between each waypoint using the A* least cost path algorithm. Can be expensive...
@@ -196,13 +198,8 @@ protected:
 	//overidden from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
-	/*
-	Gets the closest waypoint to the point described by pID.
-	*/
-	int getClosestWaypoint(int pointID);
-
 	//contains grunt of shortest path algorithm. "offset" inserts points at the specified distance from the END of the trace (used for updating)
-	std::deque<int> optimizeSegment(int start, int end, int offset=0);
+	std::deque<int> optimizeSegment(int start, int end, int offset = 0);
 
 	//specific cost algorithms (getSegmentCost(...) sums combinations of these depending on the COST_MODE flag.
 	//NOTE: to ensure each cost function makes an equal contribution to the result (when multiples are being used), each
@@ -223,11 +220,12 @@ protected:
 
 	//ccTrace variables
 	float m_relMarkerScale = 1.0f;
-	ccPointCloud* m_cloud=0; //pointer to ccPointCloud object this is linked to (slightly different to polylines as we know this data is sampled from a real cloud)
+	ccPointCloud* m_cloud = nullptr; //pointer to ccPointCloud object this is linked to (slightly different to polylines as we know this data is sampled from a real cloud)
 
 	std::vector<std::deque<int>> m_trace; //contains an ordered list of indices which define this trace. Note that indices representing nodes MAY be inserted twice.
 	std::vector<int> m_waypoints; //list of waypoint indices
 	std::vector<int> m_previous; //for undoing waypoints
+
 private:
 
 	//class for storing point index & path costs (from the path start) in sorted lists
@@ -242,15 +240,16 @@ private:
 			previous = prev_node;
 		}
 
-		int index=-1;
-		int total_cost=0;
-		Node* previous=nullptr;
+		int index = -1;
+		int total_cost = 0;
+		Node* previous = nullptr;
 	};
 
 	//class for comparing Node pointers in priority_queue
 	class Compare
 	{
 	public:
+
 		bool operator() (Node* t1, Node* t2)
 		{
 			//n.b. the priority queue puts "higher" priorities at the front of the queue.
@@ -273,7 +272,7 @@ private:
 	Test if a point falls within a circle who's diameter equals the line from segStart to segEnd. This is used to test if a newly added point should be
 	(1) appended to the end of the trace [falls outside of all segment-circles], or (2) inserted to split a segment [falls into a segment-circle]
 	*/
-	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
+	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query) const;
 
 	//used by various constructors to do initialization
 	void init(ccPointCloud* associatedCloud);
@@ -281,9 +280,10 @@ private:
 	//used to update metadata flags
 	void updateMetadata();
 
-//static functions
-public:
-	static bool isTrace(ccHObject* object); //return true if object is a valid trace [regardless of it's class type]
+public: //static functions
+
+	//! Returns true if object is a valid trace [regardless of its class type]
+	static bool isTrace(ccHObject* object);
 };
 
 #endif

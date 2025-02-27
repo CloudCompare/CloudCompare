@@ -50,14 +50,14 @@ namespace
 	constexpr char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
 	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
 	constexpr char s_e57PoseKey[] = "E57_pose";
+	constexpr char s_e57NodeInfoKey[] = "E57_node_info";
+	constexpr char s_e57CameraInfoKey[] = "E57_camera_representation";
 
 	constexpr uint8_t VALID_DATA = 0;
 	constexpr uint8_t INVALID_DATA = 1;
 
 	unsigned s_absoluteScanIndex = 0;
 	bool s_cancelRequestedByUser = false;
-	
-	unsigned s_absoluteImageIndex = 0;
 	
 	ScalarType s_maxIntensity = 0;
 	ScalarType s_minIntensity = 0;
@@ -102,6 +102,47 @@ namespace
 	}
 }
 
+QString GetStringFromNode(const e57::StructureNode& node, const char* fieldName, const QString& defaultValue)
+{
+	if (node.isDefined(fieldName))
+	{
+		return QString::fromStdString(e57::StringNode(node.get(fieldName)).value());
+	}
+	else
+	{
+		return defaultValue;
+	}
+}
+
+void AddToE57NodeMap(E57NodeMap& nodeMap, const e57::StructureNode& node, const char* fieldName)
+{
+	E57NodeDesc nodeDesc;
+	if (node.isDefined(fieldName))
+	{
+		e57::Node childNode = node.get(fieldName);
+		switch (childNode.type())
+		{
+		case e57::TypeInteger:
+			nodeDesc.type = "INT";
+			nodeDesc.content = QString::number(e57::IntegerNode(node.get(fieldName)).value());
+			break;
+		case e57::TypeFloat:
+			nodeDesc.type = "FLT";
+			nodeDesc.content = QString::number(e57::FloatNode(node.get(fieldName)).value(), 'f', 12);
+			break;
+		case e57::TypeString:
+			nodeDesc.type = "STR";
+			nodeDesc.content = QString::fromStdString(e57::StringNode(node.get(fieldName)).value());
+			break;
+		default:
+			//unhandled node type
+			return;
+		}
+
+		nodeMap.insert(fieldName, nodeDesc);
+	}
+}
+
 E57Filter::E57Filter()
     : FileIOFilter( {
                     "_E57 Filter",
@@ -127,12 +168,20 @@ bool E57Filter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 }
 
 //Helper: save pose information
-static void SavePoseInformation(e57::StructureNode& parentNode, const e57::ImageFile& imf, const ccGLMatrixd& poseMat)
+static void SavePoseInformation(e57::StructureNode& parentNode,
+								const e57::ImageFile& imf,
+								ccGLMatrixd& poseMat,
+								const CCVector3d& globalShift)
 {
 	e57::StructureNode pose = e57::StructureNode(imf);
 	parentNode.set("pose", pose);
 
 	CCCoreLib::SquareMatrixd transMat(poseMat.data(), true);
+	if (transMat.computeDet() < 0)
+	{
+		ccLog::Warning("[E57] Pose matrix seems to be a reflection. Can't save it as a quaternion (required by the E57 format). We will use the non-reflective form.");
+	}
+
 	double q[4];
 	if (transMat.toQuaternion(q))
 	{
@@ -145,16 +194,74 @@ static void SavePoseInformation(e57::StructureNode& parentNode, const e57::Image
 	}
 
 	//translation
+	CCVector3d tr = poseMat.getTranslationAsVec3D();
 	{
 		e57::StructureNode translation = e57::StructureNode(imf);
-		translation.set("x", e57::FloatNode(imf, poseMat.getTranslation()[0]));
-		translation.set("y", e57::FloatNode(imf, poseMat.getTranslation()[1]));
-		translation.set("z", e57::FloatNode(imf, poseMat.getTranslation()[2]));
+		translation.set("x", e57::FloatNode(imf, tr.x - globalShift.x));
+		translation.set("y", e57::FloatNode(imf, tr.y - globalShift.y));
+		translation.set("z", e57::FloatNode(imf, tr.z - globalShift.z));
 		pose.set("translation", translation);
+	}
+
+	//it happens that the saved pose matrix doesn't capture everything (such as reflections)
+	//because of the quaternion form. Therefore we update the input 'poseMat' with what we
+	//have actually saved
+	poseMat = ccGLMatrixd::FromQuaternion(q);
+	poseMat.setTranslation(tr);
+}
+
+static void SaveNodeInfo(	const E57NodeMap& nodeMap,
+							e57::StructureNode& outputNode,
+							e57::ImageFile& imf )
+{
+	for (auto it = nodeMap.begin(); it != nodeMap.end(); ++it)
+	{
+		if (!it.value().content.isEmpty())
+		{
+			if (it.value().type == "STR")
+			{
+				outputNode.set(it.key().toStdString(), e57::StringNode(imf, it.value().content.toStdString()));
+			}
+			else if (it.value().type == "FLT")
+			{
+				bool ok = false;
+				double value = it.value().content.toDouble(&ok);
+				if (ok)
+				{
+					outputNode.set(it.key().toStdString(), e57::FloatNode(imf, value));
+				}
+				else
+				{
+					ccLog::Warning("[E57] Invalid value in meta-data for field " + it.key());
+				}
+			}
+			else if (it.value().type == "INT")
+			{
+				bool ok = false;
+				int64_t value = it.value().content.toLongLong(&ok);
+				if (ok)
+				{
+					outputNode.set(it.key().toStdString(), e57::IntegerNode(imf, value));
+				}
+				else
+				{
+					ccLog::Warning("[E57] Invalid value in meta-data for field " + it.key());
+				}
+			}
+			else
+			{
+				ccLog::Warning(QString("[E57] Unkown E57 type %1 in meta-data for field %2").arg(it.value().type).arg(it.key()));
+			}
+		}
 	}
 }
 
-static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile& imf, e57::VectorNode& data3D, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
+static bool SaveScan(	ccPointCloud* cloud,
+						e57::StructureNode& scanNode,
+						e57::ImageFile& imf,
+						e57::VectorNode& data3D,
+						QString& guidStr,
+						ccProgressDialog* progressDlg = nullptr )
 {
 	assert(cloud);
 
@@ -163,6 +270,16 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	{
 		ccLog::Error(QString("[E57Filter::SaveScan] Cloud '%1' is empty!").arg(cloud->getName()));
 		return false;
+	}
+
+	//Restore scan (node) information if any
+	if (cloud->hasMetaData(s_e57NodeInfoKey))
+	{
+		QStringList stringList = cloud->getMetaData(s_e57NodeInfoKey).toString().split("\n");
+
+		E57NodeMap nodeMap;
+		E57NodeMap::FromStringList(nodeMap, stringList);
+		SaveNodeInfo(nodeMap, scanNode, imf);
 	}
 
 	ccGLMatrixd toSensorCS; // 'Sensor' output coordinate system (no Global Shift applied)
@@ -185,11 +302,24 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 			{
 				//apply transformation history (i.e. transformations applied after the entity has been loaded)
 				//--> we assume they have been implicitly applied to the sensor as well
-				toSensorCS = ccGLMatrixd(cloud->getGLTransformationHistory().data()) * toSensorCS;
+				ccGLMatrixd historyTransform(cloud->getGLTransformationHistory().data());
+				toSensorCS = historyTransform * toSensorCS;
 			}
 			else
 			{
-				ccLog::Warning("[E57Filter::saveFile] Sernsor pose meta-data is invalid");
+				ccLog::Warning("[E57Filter::saveFile] Sensor pose meta-data is invalid");
+				toSensorCS.toIdentity();
+			}
+		}
+		else
+		{
+			// look for a sensor
+			ccHObject::Container sensors;
+			cloud->filterChildren(sensors, false, CC_TYPES::GBL_SENSOR, false);
+			if (sensors.size() != 0)
+			{
+				hasSensorPoseMat = true;
+				toSensorCS = ccGLMatrixd(sensors.front()->getGLTransformationHistory().data());
 			}
 		}
 
@@ -198,14 +328,12 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		if (globalShift.norm2d() != 0)
 		{
 			//add the Global Shift to the 'pose' matrix
-			ccGLMatrixd toGlobalCS = toSensorCS;
-			toGlobalCS.setTranslation((toSensorCS.getTranslationAsVec3D() - globalShift).u);
-			SavePoseInformation(scanNode, imf, toGlobalCS);
+			SavePoseInformation(scanNode, imf, toSensorCS, globalShift);
 		}
 		else if (hasSensorPoseMat)
 		{
 			//simply save the sensor pose matrix
-			SavePoseInformation(scanNode, imf, toSensorCS);
+			SavePoseInformation(scanNode, imf, toSensorCS, {});
 		}
 	}
 
@@ -228,15 +356,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 			//DGM: according to E57 specifications, the bounding-box is local
 			//(i.e. in the sensor 'input' coordinate system)
-			CCVector3d Plocal;
-			if (hasSensorPoseMat)
-			{
-				Plocal = fromSensorToLocalCS * Psensor;
-			}
-			else
-			{
-				Plocal = Psensor;
-			}
+			CCVector3d Plocal = fromSensorToLocalCS * Psensor;
 
 			if (i != 0)
 			{
@@ -356,7 +476,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			if (intensitySFIndex >= 0)
-				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex));
+				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex).c_str());
 		}
 		if (intensitySFIndex >= 0)
 		{
@@ -487,6 +607,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 		arrays.scanIndexData.resize(chunkSize);
 		dbufs.emplace_back( imf, "returnIndex",  arrays.scanIndexData.data(),  chunkSize, true, true );
 	}
+
 	//Intensity field
 	if (intensitySF)
 	{
@@ -564,15 +685,7 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 
 			//DGM: according to E57 specifications, the points are saved in the local CS
 			//(i.e. in the sensor 'input' coordinate system)
-			CCVector3d Plocal;
-			if (hasSensorPoseMat)
-			{
-				Plocal = fromSensorToLocalCS * Psensor;
-			}
-			else
-			{
-				Plocal = Psensor;
-			}
+			CCVector3d Plocal = (hasSensorPoseMat ? fromSensorToLocalCS * Psensor : Psensor);
 
 			arrays.xData[i] = Plocal.x;
 			arrays.yData[i] = Plocal.y;
@@ -631,35 +744,42 @@ static bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::Ima
 	return true;
 }
 
-void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57::VectorNode& images2D)
+void SaveImage(	const ccImage* image,
+				const QString& scanGUID,
+				e57::ImageFile& imf,
+				e57::VectorNode& images2D,
+				unsigned imageIndex,
+				const CCVector3d& globalShift)
 {
 	assert(image);
 
 	e57::StructureNode imageNode = e57::StructureNode(imf);
 
 	//GUID
-	imageNode.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));	//required
+	imageNode.set("guid", e57::StringNode(imf, GetNewGuid().toStdString())); //required
 
 	//Name
 	if (!image->getName().isEmpty())
+	{
 		imageNode.set("name", e57::StringNode(imf, image->getName().toStdString()));
+	}
 	else
-		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(s_absoluteImageIndex).toStdString()));
-
-	//Description
-	//imageNode.set("description", e57::StringNode(imf, "Imported from CloudCompare (EDF R&D / Telecom ParisTech)"));
-
-	// Add various sensor and version strings to image (TODO)
-	//scan.set("sensorVendor",			e57::StringNode(imf,sensorVendor));
-	//scan.set("sensorModel",				e57::StringNode(imf,sensorModel));
-	//scan.set("sensorSerialNumber",		e57::StringNode(imf,sensorSerialNumber));
-
-	// Add temp/humidity to scan (TODO)
-	//scanNode.set("temperature",			e57::FloatNode(imf,temperature));
-	//scanNode.set("relativeHumidity",	e57::FloatNode(imf,relativeHumidity));
-	//scanNode.set("atmosphericPressure",	e57::FloatNode(imf,atmosphericPressure));
+	{
+		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(imageIndex).toStdString()));
+	}
 
 	imageNode.set("associatedData3DGuid", e57::StringNode(imf, scanGUID.toStdString()));
+
+	//Restore scan (node) information if any
+	if (image->hasMetaData(s_e57NodeInfoKey))
+	{
+		QString metaData = image->getMetaData(s_e57NodeInfoKey).toString();
+		QStringList stringList = metaData.split("\n", Qt::SkipEmptyParts);
+
+		E57NodeMap nodeMap;
+		E57NodeMap::FromStringList(nodeMap, stringList);
+		SaveNodeInfo(nodeMap, imageNode, imf);
+	}
 
 	//acquisitionDateTime
 	{
@@ -670,56 +790,189 @@ void SaveImage(const ccImage* image, const QString& scanGUID, e57::ImageFile& im
 	}
 
 	// Create pose structure for image (if any)
-	//if (image->isA(CC_TYPES::IMAGE))
-	//{
-	//	const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
-	//	if (sensor)
-	//	{
-	//		ccIndexedTransformation poseMat;
-	//		if (sensor->getActiveAbsoluteTransformation(poseMat))
-	//		{
-	//			SavePoseInformation(imageNode, imf, ccGLMatrixd(poseMat.data()));
-	//		}
-	//
-	//		TODO: take care of the Global Shift meta-data ("Global Shift X", "Global Shift Y", and "Global Shift Z")
-	//	}
-	//}
+	const ccCameraSensor* sensor = static_cast<const ccImage*>(image)->getAssociatedSensor();
+	{
+		ccGLMatrixd toSensorCS; // 'Sensor' output coordinate system (no Global Shift applied)
+		toSensorCS.toIdentity();
+		bool hasSensorPoseMat = false;
+		{
+			//restore original sensor pose (if any)
+			if (sensor)
+			{
+				ccIndexedTransformation poseMat;
+				if (sensor->getActiveAbsoluteTransformation(poseMat))
+				{
+					hasSensorPoseMat = true;
+					toSensorCS = ccGLMatrixd(poseMat.data());
+				}
+			}
+			else
+			{
+				// look for the saved sensor position in the meta-data
+				QString poseStr = image->getMetaData(s_e57PoseKey).toString();
+				if (!poseStr.isEmpty())
+				{
+					toSensorCS = ccGLMatrixd::FromString(poseStr, hasSensorPoseMat);
+					if (hasSensorPoseMat)
+					{
+						//apply transformation history (i.e. transformations applied after the entity has been loaded)
+						//--> we assume they have been implicitly applied to the sensor as well
+						ccGLMatrixd historyTransform(image->getGLTransformationHistory().data());
+						toSensorCS = historyTransform * toSensorCS;
+					}
+					else
+					{
+						ccLog::Warning("[E57Filter::saveFile] Sensor pose meta-data is invalid");
+						toSensorCS.toIdentity();
+					}
+				}
+			}
+		}
+
+		if (hasSensorPoseMat)
+		{
+			SavePoseInformation(imageNode, imf, toSensorCS, globalShift);
+		}
+	}
 
 	//save image data as PNG
 	QByteArray ba;
 	{
 		QBuffer buffer(&ba);
 		buffer.open(QIODevice::WriteOnly);
-		image->data().save(&buffer, "JPG"); // writes image into ba in PNG format
+		image->data().save(&buffer, "JPG"); // writes image into ba in JPG format
 	}
 	int imageSize = ba.size();
 
-	e57::StructureNode cameraRepresentation = e57::StructureNode(imf);
+	e57::StructureNode cameraRepresentationNode = e57::StructureNode(imf);
 	QString cameraRepresentationStr("visualReferenceRepresentation");
 
+	//restore camera data from meta-data
+	VisualReferenceRepresentation* cameraRepresentation = nullptr;
+	if (image->hasMetaData(s_e57CameraInfoKey))
+	{
+		QStringList stringList = image->getMetaData(s_e57CameraInfoKey).toString().split("\n");
+		if (stringList.size() != 0 && stringList.front().startsWith("type="))
+		{
+			QString sensorType = stringList.front().mid(5);
+			stringList.pop_front();
+			if (sensorType == VisualReferenceRepresentation::GetName())
+			{
+				cameraRepresentation = new VisualReferenceRepresentation;
+			}
+			else if (sensorType == PinholeRepresentation::GetName())
+			{
+				cameraRepresentation = new PinholeRepresentation;
+			}
+			else if (sensorType == SphericalRepresentation::GetName())
+			{
+				cameraRepresentation = new SphericalRepresentation;
+			}
+			else if (sensorType == CylindricalRepresentation::GetName())
+			{
+				cameraRepresentation = new CylindricalRepresentation;
+			}
+			else
+			{
+				ccLog::Warning("[E57] Invalid 'E57 camera info' meta-data (unkown sensor type)");
+			}
+		}
+		else
+		{
+			ccLog::Warning("[E57] Invalid 'E57 camera info' meta-data (invalid format: no 'type' key)");
+		}
+
+		if (cameraRepresentation && !cameraRepresentation->fromStringList(stringList))
+		{
+			// failed to unserialize the meta-data
+			ccLog::Warning("[E57] Invalid 'E57 camera info' meta-data (invalid format)");
+		}
+	}
+
+	if (!cameraRepresentation && sensor)
+	{
+		// we still need to look if there's a camera sensor attached to the image
+		// (in case the image comes from another source than E57)
+		const auto& sensorParams = sensor->getIntrinsicParameters();
+
+		const double& pixelWidth_mm = sensorParams.pixelSize_mm[0];
+		const double& pixelHeight_mm = sensorParams.pixelSize_mm[1];
+		double focal_mm = sensorParams.vertFocal_pix * pixelHeight_mm;
+
+
+		PinholeRepresentation* pinholeRepresentation = new PinholeRepresentation;
+		{
+			pinholeRepresentation->focalLength = focal_mm / 1000.0;
+			pinholeRepresentation->pixelWidth = pixelWidth_mm / 1000.0;
+			pinholeRepresentation->pixelHeight = pixelHeight_mm / 1000.0;
+			pinholeRepresentation->principalPointX = sensorParams.principal_point[0];
+			pinholeRepresentation->principalPointY = sensorParams.principal_point[1];
+
+			pinholeRepresentation->imageMaskSize = 0;
+			pinholeRepresentation->imageWidth = image->data().width();
+			pinholeRepresentation->imageHeight = image->data().height();
+			pinholeRepresentation->imageSize = static_cast<int64_t>(pinholeRepresentation->imageWidth) * pinholeRepresentation->imageHeight;
+		}
+		cameraRepresentation = pinholeRepresentation;
+	}
+
+	if (cameraRepresentation)
+	{
+		cameraRepresentationStr = cameraRepresentation->getName();
+
+		if (cameraRepresentation->getType() == E57_VISUAL
+			|| cameraRepresentation->getType() == E57_SPHERICAL
+			|| cameraRepresentation->getType() == E57_PINHOLE
+			|| cameraRepresentation->getType() == E57_CYLINDRICAL
+			)
+		{
+			//cameraRepresentationNode.set("imageWidth", e57::IntegerNode(imf, cameraRepresentation->imageWidth));		//overwritten later with the real image size
+			//cameraRepresentationNode.set("imageHeight", e57::IntegerNode(imf, cameraRepresentation->imageHeight));	//overwritten later with the real image size
+			//TODO: should we manage the image mask?
+
+			if (cameraRepresentation->getType() == E57_SPHERICAL
+				|| cameraRepresentation->getType() == E57_PINHOLE
+				|| cameraRepresentation->getType() == E57_CYLINDRICAL
+				)
+			{
+				SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
+
+				cameraRepresentationNode.set("pixelWidth", e57::FloatNode(imf, spherical->pixelWidth));
+				cameraRepresentationNode.set("pixelHeight", e57::FloatNode(imf, spherical->pixelHeight));
+
+				if (cameraRepresentation->getType() == E57_PINHOLE)
+				{
+					PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+
+					cameraRepresentationNode.set("focalLength", e57::FloatNode(imf, pinhole->focalLength));
+					cameraRepresentationNode.set("principalPointX", e57::FloatNode(imf, pinhole->principalPointX));
+					cameraRepresentationNode.set("principalPointY", e57::FloatNode(imf, pinhole->principalPointY));
+				}
+				else if (cameraRepresentation->getType() == E57_CYLINDRICAL)
+				{
+					PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+
+					cameraRepresentationNode.set("focalLength", e57::FloatNode(imf, pinhole->focalLength));
+					cameraRepresentationNode.set("principalPointX", e57::FloatNode(imf, pinhole->principalPointX));
+					cameraRepresentationNode.set("principalPointY", e57::FloatNode(imf, pinhole->principalPointY));
+				}
+			}
+		}
+		else
+		{
+			ccLog::Warning("[E57] Invalid 'E57 camera info' meta-data (wrong camera type)");
+		}
+
+		delete cameraRepresentation;
+		cameraRepresentation = nullptr;
+	}
+
 	e57::BlobNode blob(imf, imageSize);
-	cameraRepresentation.set("jpegImage", blob);
-	cameraRepresentation.set("imageHeight", e57::IntegerNode(imf, image->getH()));
-	cameraRepresentation.set("imageWidth", e57::IntegerNode(imf, image->getW()));
+	cameraRepresentationNode.set("jpegImage", blob);
+	cameraRepresentationNode.set("imageHeight", e57::IntegerNode(imf, image->getH()));
+	cameraRepresentationNode.set("imageWidth", e57::IntegerNode(imf, image->getW()));
 
-	//'pinhole' camera image
-	//if (image->isKindOf(CC_TYPES::IMAGE))
-	//{
-	//	cameraRepresentationStr = "pinholeRepresentation";
-	//	ccImage* calibImage = static_cast<ccImage*>(image);
-	//	//DGM FIXME
-	//	cameraRepresentation.set("focalLength", e57::FloatNode(imf, calibImage->getFocal()));
-	//	cameraRepresentation.set("pixelHeight", e57::FloatNode(imf, image2DHeader.pinholeRepresentation.pixelHeight));
-	//	cameraRepresentation.set("pixelWidth", e57::FloatNode(imf, image2DHeader.pinholeRepresentation.pixelWidth));
-	//	cameraRepresentation.set("principalPointX", e57::FloatNode(imf, static_cast<double>(image->getW())/2.0));
-	//	cameraRepresentation.set("principalPointY", e57::FloatNode(imf, static_cast<double>(image->getH())/2.0));
-	//}
-	//else //standard image (TODO: handle cylindrical and spherical cameras!)
-	//{
-	//	//nothing to do
-	//}
-
-	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentation);
+	imageNode.set(cameraRepresentationStr.toStdString(), cameraRepresentationNode);
 	images2D.append(imageNode);
 	blob.write((uint8_t*)ba.data(), 0, static_cast<size_t>(imageSize));
 }
@@ -846,7 +1099,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		if (result == CC_FERR_NO_ERROR)
 		{
 			//Save images
-			s_absoluteImageIndex = 0;
+			unsigned imageIndex = 0;
 			size_t scanCount = scans.size();
 			for (size_t i = 0; i < scanCount; ++i)
 			{
@@ -871,8 +1124,8 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 						assert(images[j]->isKindOf(CC_TYPES::IMAGE));
 						assert(scansGUID.contains(cloud));
 						QString scanGUID = scansGUID.value(cloud);
-						SaveImage(static_cast<ccImage*>(images[j]), scanGUID, imf, images2D);
-						++s_absoluteImageIndex;
+						SaveImage(static_cast<ccImage*>(images[j]), scanGUID, imf, images2D, imageIndex, cloud->getGlobalShift());
+						++imageIndex;
 						if (!nprogress.oneStep())
 						{
 							s_cancelRequestedByUser = true;
@@ -1482,9 +1735,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 	e57::StructureNode scanNode(node);
 
-	QString scanName("none");
-	if (scanNode.isDefined("name"))
-		scanName = QString::fromStdString( e57::StringNode(scanNode.get("name")).value() );
+	QString scanName = GetStringFromNode(scanNode, "name", "unnamed");
 
 	//log
 	ccLog::Print(QString("[E57] Reading new scan node (%1) - %2").arg(scanNode.elementName().c_str()).arg(scanName));
@@ -1543,10 +1794,8 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	
 	if (scanNode.isDefined("description"))
 	{
-		ccLog::Print( QStringLiteral("[E57] Internal description: %1").arg(
-						  QString::fromStdString( e57::StringNode(scanNode.get("description")).value() ) ) );
+		ccLog::Print( QStringLiteral("[E57] Internal description: %1").arg(GetStringFromNode(scanNode, "description", QString())) );
 	}
-
 
 	int64_t gridRowCount = 0, gridColumnCount = 0;
 	{
@@ -1647,22 +1896,27 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 	}
 
-	/* //Ignored fields (for the moment)
-	if (scanNode.isDefined("originalGuids"))
-	if (scanNode.isDefined("sensorVendor"))
-	if (scanNode.isDefined("sensorModel"))
-	if (scanNode.isDefined("sensorSerialNumber"))
-	if (scanNode.isDefined("sensorHardwareVersion"))
-	if (scanNode.isDefined("sensorSoftwareVersion"))
-	if (scanNode.isDefined("sensorFirmwareVersion"))
-	if (scanNode.isDefined("temperature"))
-	if (scanNode.isDefined("relativeHumidity"))
-	if (scanNode.isDefined("atmosphericPressure"))
-	if (scanNode.isDefined("cartesianBounds"))
-	if (scanNode.isDefined("sphericalBounds"))
-	if (scan.isDefined("acquisitionStart"))
-	if (scan.isDefined("acquisitionEnd"))
-	//*/
+	//Collect generic node information
+	{
+		E57NodeMap nodeInfo;
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorVendor");
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorModel");
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorSerialNumber");
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorHardwareVersion");
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorSoftwareVersion");
+		AddToE57NodeMap(nodeInfo, scanNode, "sensorFirmwareVersion");
+		AddToE57NodeMap(nodeInfo, scanNode, "temperature");
+		AddToE57NodeMap(nodeInfo, scanNode, "relativeHumidity");
+		AddToE57NodeMap(nodeInfo, scanNode, "atmosphericPressure");
+		AddToE57NodeMap(nodeInfo, scanNode, "acquisitionStart");
+		AddToE57NodeMap(nodeInfo, scanNode, "acquisitionEnd");
+		cloud->setMetaData(s_e57NodeInfoKey, nodeInfo.toStringList().join("\n"));
+	}
+
+	//Currently ignored fields
+	//if (scanNode.isDefined("originalGuids"))
+	//if (scanNode.isDefined("cartesianBounds"))
+	//if (scanNode.isDefined("sphericalBounds"))
 
 	//scan "pose" relatively to the others
 	ccGLMatrixd poseMat;
@@ -1921,6 +2175,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	unsigned size = 0;
 	int64_t realCount = 0;
 	int64_t invalidCount = 0;
+	int64_t zeroCount = 0;
 	int col = 0, row = 0;
 	while ((size = dataReader.read()))
 	{
@@ -1975,6 +2230,11 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 					Pd.y = arrays.yData[i];
 				if (!arrays.zData.empty())
 					Pd.z = arrays.zData[i];
+			}
+
+			if (Pd.x == 0 && Pd.y == 0 && Pd.z == 0)
+			{
+				++zeroCount;
 			}
 
 			//first point: check for 'big' coordinates
@@ -2074,6 +2334,11 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 
 	dataReader.close();
 
+	if (zeroCount > 1)
+	{
+		ccLog::Warning(QString("[E57] Number of points clustured at the origin: %1 (consider removing duplicate points)").arg(zeroCount));
+	}
+
 	if (realCount == 0)
 	{
 		ccLog::Warning(QString("[E57] No valid point in scan '%1'!").arg(scanNode.elementName().c_str()));
@@ -2166,20 +2431,40 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 	e57::StructureNode imageNode(node);
 
-	QString imageName("none");
-	if (imageNode.isDefined("name"))
-		imageName = QString::fromStdString(e57::StringNode(imageNode.get("name")).value());
+	QString imageName = GetStringFromNode(imageNode, "name", "unnamed");
+
+	//Collect generic node information
+	E57NodeMap nodeInfo;
+	{
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorVendor");
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorModel");
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorSerialNumber");
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorHardwareVersion");
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorSoftwareVersion");
+		AddToE57NodeMap(nodeInfo, imageNode, "sensorFirmwareVersion");
+		AddToE57NodeMap(nodeInfo, imageNode, "temperature");
+		AddToE57NodeMap(nodeInfo, imageNode, "relativeHumidity");
+		AddToE57NodeMap(nodeInfo, imageNode, "atmosphericPressure");
+		AddToE57NodeMap(nodeInfo, imageNode, "acquisitionStart");
+		AddToE57NodeMap(nodeInfo, imageNode, "acquisitionEnd");
+	}
 
 	//log
 	ccLog::Print(QString("[E57] Reading new image node (%1) - %2").arg(imageNode.elementName().c_str()).arg(imageName));
 
 	if (imageNode.isDefined("description"))
+	{
 		ccLog::Print(QString("[E57] Description: %1").arg(e57::StringNode(imageNode.get("description")).value().c_str()));
+	}
 
 	if (imageNode.isDefined("associatedData3DGuid"))
+	{
 		associatedData3DGuid = e57::StringNode(imageNode.get("associatedData3DGuid")).value().c_str();
+	}
 	else
+	{
 		associatedData3DGuid.clear();
+	}
 
 	//output
 	LoadedImage output;
@@ -2188,68 +2473,62 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	output.validPoseMat = GetPoseInformation(imageNode, output.poseMat);
 
 	//camera information
-	e57::ustring cameraRepresentationStr("none");
-	CameraRepresentation* cameraRepresentation = nullptr;
-	if (imageNode.isDefined("visualReferenceRepresentation"))
+	QSharedPointer<VisualReferenceRepresentation> cameraRepresentation(nullptr);
+	if (imageNode.isDefined(VisualReferenceRepresentation::GetName()))
 	{
-		cameraRepresentation = new VisualReferenceRepresentation;
-		cameraRepresentationStr = "visualReferenceRepresentation";
+		cameraRepresentation.reset(new VisualReferenceRepresentation);
 	}
-	else if (imageNode.isDefined("pinholeRepresentation"))
+	else if (imageNode.isDefined(PinholeRepresentation::GetName()))
 	{
-		cameraRepresentation = new PinholeRepresentation;
-		cameraRepresentationStr = "pinholeRepresentation";
+		cameraRepresentation.reset(new PinholeRepresentation);
 	}
-	else if (imageNode.isDefined("sphericalRepresentation"))
+	else if (imageNode.isDefined(SphericalRepresentation::GetName()))
 	{
-		cameraRepresentation = new SphericalRepresentation;
-		cameraRepresentationStr = "sphericalRepresentation";
+		cameraRepresentation.reset(new SphericalRepresentation);
 	}
-	else if (imageNode.isDefined("cylindricalRepresentation"))
+	else if (imageNode.isDefined(CylindricalRepresentation::GetName()))
 	{
-		cameraRepresentation = new CylindricalRepresentation;
-		cameraRepresentationStr = "cylindricalRepresentation";
-	}
-
-	if (!cameraRepresentation)
-	{
-		ccLog::Warning(QString("[E57] Image %1 has no associated camera representation!").arg(imageName));
-		return {};
-	}
-	Image2DProjection cameraType = cameraRepresentation->getType();
-
-	assert(cameraRepresentationStr != "none");
-	assert(cameraType != E57_NO_PROJECTION);
-	e57::StructureNode cameraRepresentationNode(imageNode.get(cameraRepresentationStr));
-
-	//read standard image information
-	VisualReferenceRepresentation* visualRefRepresentation = static_cast<VisualReferenceRepresentation*>(cameraRepresentation);
-	visualRefRepresentation->imageType = E57_NO_IMAGE;
-	visualRefRepresentation->imageMaskSize = 0;
-
-	if (cameraRepresentationNode.isDefined("jpegImage"))
-	{
-		visualRefRepresentation->imageType = E57_JPEG_IMAGE;
-		visualRefRepresentation->imageSize = e57::BlobNode(cameraRepresentationNode.get("jpegImage")).byteCount();
-	}
-	else if (cameraRepresentationNode.isDefined("pngImage"))
-	{
-		visualRefRepresentation->imageType = E57_PNG_IMAGE;
-		visualRefRepresentation->imageSize = e57::BlobNode(cameraRepresentationNode.get("pngImage")).byteCount();
+		cameraRepresentation.reset(new CylindricalRepresentation);
 	}
 	else
 	{
-		ccLog::Warning("[E57] Image format not handled (only jpg and png for the moment)");
+		ccLog::Warning(QString("[E57] Image %1 has no or an unknown associated camera representation!").arg(imageName));
+		return {};
+	}
+	assert(cameraRepresentation);
+
+	Image2DProjection cameraType = cameraRepresentation->getType();
+
+	assert(cameraType != E57_NO_PROJECTION);
+	e57::StructureNode cameraRepresentationNode(imageNode.get(e57::ustring(cameraRepresentation->getName())));
+
+	//read standard image information
+	cameraRepresentation->imageType = E57_NO_IMAGE;
+	cameraRepresentation->imageMaskSize = 0;
+
+	if (cameraRepresentationNode.isDefined("jpegImage"))
+	{
+		cameraRepresentation->imageType = E57_JPEG_IMAGE;
+		cameraRepresentation->imageSize = e57::BlobNode(cameraRepresentationNode.get("jpegImage")).byteCount();
+	}
+	else if (cameraRepresentationNode.isDefined("pngImage"))
+	{
+		cameraRepresentation->imageType = E57_PNG_IMAGE;
+		cameraRepresentation->imageSize = e57::BlobNode(cameraRepresentationNode.get("pngImage")).byteCount();
+	}
+	else
+	{
+		ccLog::Warning("[E57] Unhandled image format (only JPG and PNG are currently supported)");
 		return {};
 	}
 
-	if (visualRefRepresentation->imageSize == 0)
+	if (cameraRepresentation->imageSize == 0)
 	{
 		ccLog::Warning("[E57] Invalid image size!");
 		return {};
 	}
 
-	uint8_t* imageBits = new uint8_t[visualRefRepresentation->imageSize];
+	uint8_t* imageBits = new uint8_t[cameraRepresentation->imageSize];
 	if (!imageBits)
 	{
 		ccLog::Warning("[E57] Not enough memory to load image!");
@@ -2257,31 +2536,34 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 	
 	if (cameraRepresentationNode.isDefined("imageMask"))
-		visualRefRepresentation->imageMaskSize = e57::BlobNode(cameraRepresentationNode.get("imageMask")).byteCount();
+	{
+		cameraRepresentation->imageMaskSize = e57::BlobNode(cameraRepresentationNode.get("imageMask")).byteCount();
+	}
 
-	visualRefRepresentation->imageHeight = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageHeight")).value());
-	visualRefRepresentation->imageWidth = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageWidth")).value());
+	cameraRepresentation->imageHeight = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageHeight")).value());
+	cameraRepresentation->imageWidth = static_cast<int32_t>(e57::IntegerNode(cameraRepresentationNode.get("imageWidth")).value());
 
 	//Pixel size
-	switch(cameraType)
+	switch (cameraType)
 	{
 	case E57_PINHOLE:
 	case E57_CYLINDRICAL:
 	case E57_SPHERICAL:
 		{
-			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
+			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation.data());
 			spherical->pixelHeight = e57::FloatNode(cameraRepresentationNode.get("pixelHeight")).value();
 			spherical->pixelWidth = e57::FloatNode(cameraRepresentationNode.get("pixelWidth")).value();
 		}
 		break;
+
 	case E57_NO_PROJECTION:
 	case E57_VISUAL:
-			break;
+		break;
 	}
 
 	if (cameraType == E57_PINHOLE)
 	{
-		PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+		PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation.data());
 
 		pinhole->focalLength = e57::FloatNode(cameraRepresentationNode.get("focalLength")).value();
 		pinhole->principalPointX = e57::FloatNode(cameraRepresentationNode.get("principalPointX")).value();
@@ -2289,7 +2571,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 	}
 	else if (cameraType == E57_CYLINDRICAL)
 	{
-		CylindricalRepresentation* cylindrical = static_cast<CylindricalRepresentation*>(cameraRepresentation);
+		CylindricalRepresentation* cylindrical = static_cast<CylindricalRepresentation*>(cameraRepresentation.data());
 
 		cylindrical->principalPointY = e57::FloatNode(cameraRepresentationNode.get("principalPointY")).value();
 		cylindrical->radius = e57::FloatNode(cameraRepresentationNode.get("radius")).value();
@@ -2297,18 +2579,13 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 
 	//reading image data
 	char imageFormat[4] = "jpg";
-	switch (visualRefRepresentation->imageType)
+	switch (cameraRepresentation->imageType)
 	{
 	case E57_JPEG_IMAGE:
 		{
 			assert(cameraRepresentationNode.isDefined("jpegImage"));
 			e57::BlobNode jpegImage(cameraRepresentationNode.get("jpegImage"));
-			jpegImage.read(imageBits, 0, static_cast<size_t>(visualRefRepresentation->imageSize));
-//#ifdef QT_DEBUG
-//			FILE* fp = fopen("test_e57.jpg","wb");
-//			fwrite(imageBits,visualRefRepresentation->imageSize,1,fp);
-//			fclose(fp);
-//#endif
+			jpegImage.read(imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
 			break;
 		}
 	case E57_PNG_IMAGE:
@@ -2316,30 +2593,32 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 			strcpy(imageFormat, "png");
 			assert(cameraRepresentationNode.isDefined("pngImage"));
 			e57::BlobNode pngImage(cameraRepresentationNode.get("pngImage"));
-			pngImage.read((uint8_t*)imageBits, 0, static_cast<size_t>(visualRefRepresentation->imageSize));
+			pngImage.read((uint8_t*)imageBits, 0, static_cast<size_t>(cameraRepresentation->imageSize));
 			break;
 		}
 	default:
 		assert(false);
+		break;
 	}
 
 	//handle mask?
-	if (visualRefRepresentation->imageMaskSize > 0)
+	if (cameraRepresentation->imageMaskSize > 0)
 	{
 		assert(cameraRepresentationNode.isDefined("imageMask"));
 		e57::BlobNode imageMask(cameraRepresentationNode.get("imageMask"));
 		//imageMask.read((uint8_t*)pBuffer, start, (size_t) count);
 		//DGM: TODO
+		cameraRepresentation->imageMaskSize = 0;
 	}
 
 	QImage qImage;
 	assert(imageBits);
-	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(visualRefRepresentation->imageSize), imageFormat);
+	bool loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), imageFormat);
 
 	// a bug in some 2.13.alpha versions was causing CC to save JPEG images declared as PNG images :(
-	if (!loadResult && visualRefRepresentation->imageType == E57_PNG_IMAGE)
+	if (!loadResult && cameraRepresentation->imageType == E57_PNG_IMAGE)
 	{
-		loadResult = qImage.loadFromData(imageBits, static_cast<int>(visualRefRepresentation->imageSize), "jpegImage");
+		loadResult = qImage.loadFromData(imageBits, static_cast<int>(cameraRepresentation->imageSize), "jpegImage");
 		ccLog::Warning("[E57] JPG image was wrongly tagged as PNG. You should save this E57 again to fix this...");
 	}
 
@@ -2365,7 +2644,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 		break;
 	case E57_PINHOLE:
 		{
-			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
+			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation.data());
 			float focal_mm        = static_cast<float>(pinhole->focalLength * 1000.0);
 			float pixelWidth_mm   = static_cast<float>(pinhole->pixelWidth * 1000.0);
 			float pixelHeight_mm  = static_cast<float>(pinhole->pixelHeight * 1000.0);
@@ -2384,7 +2663,7 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 			output.sensor = new ccCameraSensor(params);
 			if (output.validPoseMat)
 			{
-				ccGLMatrix poseMatf = ccGLMatrix(output.poseMat.data()); //we'll use it as is for now (will be updated later with a potential Global Shift)
+				ccGLMatrix poseMatf(output.poseMat.data()); //we'll use it as is for now (will be updated later with a potential Global Shift)
 				output.sensor->setRigidTransformation(poseMatf);
 			}
 
@@ -2396,26 +2675,34 @@ static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGui
 			output.entity->setAssociatedSensor(output.sensor);
 		}
 		break;
+
 	case E57_NO_PROJECTION:
 		assert(false);
 		break;
 	}
 
-	assert(output.entity);
-	output.entity->setData(qImage);
-	output.entity->setName(imageName);
-
-	//don't forget image aspect ratio
-	if (cameraType == E57_CYLINDRICAL ||
-		cameraType == E57_PINHOLE ||
-		cameraType == E57_SPHERICAL)
+	if (output.entity)
 	{
-		SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
-		output.entity->setAspectRatio(static_cast<float>(spherical->pixelWidth / spherical->pixelHeight) * output.entity->getAspectRatio());
-	}
+		output.entity->setData(qImage);
+		output.entity->setName(imageName);
+		output.entity->setMetaData(s_e57NodeInfoKey, nodeInfo.toStringList().join("\n"));
+		output.entity->setMetaData(s_e57CameraInfoKey, cameraRepresentation->toStringList().join("\n"));
 
-	delete cameraRepresentation;
-	cameraRepresentation = nullptr;
+		//save the original pose matrix as meta-data
+		if (output.validPoseMat)
+		{
+			output.entity->setMetaData(s_e57PoseKey, output.poseMat.toString(12, ' ')); //we'll use it as is for now (will be updated later with a potential Global Shift)
+		}
+
+		//don't forget image aspect ratio
+		if (cameraType == E57_CYLINDRICAL ||
+			cameraType == E57_PINHOLE ||
+			cameraType == E57_SPHERICAL)
+		{
+			SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation.data());
+			output.entity->setAspectRatio(static_cast<float>(spherical->pixelWidth / spherical->pixelHeight) * output.entity->getAspectRatio());
+		}
+	}
 
 	return output;
 }
@@ -2617,53 +2904,65 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 
 						//existing link to a loaded scan?
 						LoadedScan parentScan;
-						if (!associatedData3DGuid.isEmpty())
+						if (!associatedData3DGuid.isEmpty() && scans.contains(associatedData3DGuid))
 						{
-							if (scans.contains(associatedData3DGuid))
-								parentScan = scans.value(associatedData3DGuid);
+							parentScan = scans.value(associatedData3DGuid);
 						}
-
-						bool applySensorGlobalShift = false;
-						bool preserveCoordinateShift = true;
-						CCVector3d poseMatShift;
 
 						if (parentScan.entity)
 						{
 							parentScan.entity->addChild(image.entity);
-
-							//we need to apply the scan Global Shift to the sensor (if any)
-							if (image.sensor && parentScan.globalShiftApplied)
-							{
-								applySensorGlobalShift = true;
-								poseMatShift = parentScan.globalShift;
-								preserveCoordinateShift = parentScan.preserveCoordinateShift;
-							}
 						}
 						else // no parent scan
 						{
 							container.addChild(image.entity);
+						}
 
-							if (image.sensor)
+						if (image.validPoseMat)
+						{
+							bool applySensorGlobalShift = false;
+							bool preserveCoordinateShift = true;
+							CCVector3d poseMatShift(0, 0, 0);
+
+							if (parentScan.entity)
+							{
+								//we need to apply the scan Global Shift to the sensor (if any)
+								if (parentScan.globalShiftApplied)
+								{
+									applySensorGlobalShift = true;
+									poseMatShift = parentScan.globalShift;
+									preserveCoordinateShift = parentScan.preserveCoordinateShift;
+								}
+							}
+							else // no parent scan
 							{
 								//we may have to apply a Gloal Shift to the sensor (if any)
 								const CCVector3d T = image.poseMat.getTranslationAsVec3D();
 								applySensorGlobalShift = FileIOFilter::HandleGlobalShift(T, poseMatShift, preserveCoordinateShift, s_loadParameters);
+
+								if (image.sensor && preserveCoordinateShift)
+								{
+									image.sensor->setMetaData("Global Shift X", poseMatShift.x);
+									image.sensor->setMetaData("Global Shift Y", poseMatShift.y);
+									image.sensor->setMetaData("Global Shift Z", poseMatShift.z);
+								}
 							}
-						}
 
-						if (image.sensor && applySensorGlobalShift)
-						{
-							image.poseMat.setTranslation((image.poseMat.getTranslationAsVec3D() + poseMatShift).u);
-							ccGLMatrix poseMatf = ccGLMatrix(image.poseMat.data());
-							image.sensor->setRigidTransformation(poseMatf);
-
-							if (preserveCoordinateShift)
+							if (applySensorGlobalShift)
 							{
-								image.sensor->setMetaData("Global Shift X", poseMatShift.x);
-								image.sensor->setMetaData("Global Shift Y", poseMatShift.y);
-								image.sensor->setMetaData("Global Shift Z", poseMatShift.z);
+								image.poseMat.setTranslation((image.poseMat.getTranslationAsVec3D() + poseMatShift).u);
+
+								if (image.sensor)
+								{
+									ccGLMatrix poseMatf(image.poseMat.data());
+									image.sensor->setRigidTransformation(poseMatf);
+
+									ccLog::Warning("[E57Filter::loadFile] The sensor of image %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
+								}
 							}
-							ccLog::Warning("[E57Filter::loadFile] Image %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
+
+							//save the potentially shifted pose matrix as meta-data
+							image.entity->setMetaData(s_e57PoseKey, image.poseMat.toString(12, ' '));
 						}
 					}
 

@@ -23,56 +23,165 @@
 #include <QPair>
 #include <QVector>
 
-//! Translation manager
+/**
+ * \brief Manages internationalization and translation of the CloudCompare application.
+ * 
+ * \details The ccTranslationManager provides functionality for:
+ * - Registering translation files
+ * - Loading translations for different languages
+ * - Generating language selection menus
+ * 
+ * Key features:
+ * - Supports translation files with ISO 639 language codes
+ * - Allows dynamic language switching
+ * - Provides a centralized translation management system
+ * 
+ * \note Follows the Singleton pattern to ensure a single, global translation manager
+ * 
+ * \example
+ * \code
+ * // Get the singleton translation manager instance
+ * ccTranslationManager& translationMgr = ccTranslationManager::Get();
+ * 
+ * // Register translation files for the application
+ * translationMgr.registerTranslatorFile("CloudCompare", "/path/to/translations");
+ * 
+ * // Load translations for the preferred language
+ * translationMgr.loadTranslations();
+ * 
+ * // Alternatively, load a specific language
+ * translationMgr.loadTranslation("fr");  // Load French translations
+ * 
+ * // Populate a menu with available languages
+ * QMenu* languageMenu = new QMenu("Language");
+ * translationMgr.populateMenu(languageMenu, "/path/to/translations");
+ * \endcode
+ */
 class CCAPPCOMMON_LIB_API ccTranslationManager : public QObject
 {
 	Q_OBJECT
 
 public:
+	/**
+	 * \brief Get the singleton instance of the translation manager
+	 * 
+	 * \return Reference to the single ccTranslationManager instance
+	 */
 	static ccTranslationManager& Get();
 
+	/**
+	 * \brief Destructor for the translation manager
+	 * 
+	 * Cleans up resources associated with translations
+	 */
 	~ccTranslationManager() override = default;
 
-	//! Register a file prefix for translation files.
-	/** The files should be named <prefix>_<lang>.ts where <lang> is the 2-letter ISO 639
-		language code in lowercase.
-		 e.g. CloudCompare_fr.ts
-		\param prefix	The prefix of the file to register
-		\param path		The path to look for the files in
-	**/
+	/**
+	 * \brief Register a translation file prefix for loading translations
+	 * 
+	 * \details Translation files should follow the naming convention:
+	 * <prefix>_<lang>.ts, where <lang> is the 2-letter ISO 639 language code
+	 * 
+	 * Example: CloudCompare_fr.ts for French translations
+	 * 
+	 * \param[in] prefix Prefix of the translation files
+	 * \param[in] path Directory path where translation files are located
+	 */
 	void registerTranslatorFile(const QString& prefix, const QString& path);
 
-	//! Using the translation file prefixes that were registered, load the actual translations
+	/**
+	 * \brief Load translations for the preferred language
+	 * 
+	 * Uses the current language preference to load translations
+	 */
 	inline void loadTranslations() { loadTranslation(languagePref()); }
 
-	//! Using the translation file prefixes that were registered, load the actual
-	//! translation by the 2-letter ISO 639 language code in lowercase.
+	/**
+	 * \brief Load translations for a specific language
+	 * 
+	 * \param[in] language 2-letter ISO 639 language code (lowercase)
+	 * 
+	 * \note Example: "fr" for French, "en" for English
+	 */
 	void loadTranslation(QString language);
 
-	//! Populate the menu with a list of languages found using files in 'pathToTranslationFiles'
+	/**
+	 * \brief Populate a menu with available language options
+	 * 
+	 * Generates a menu containing language selection items based on 
+	 * available translation files
+	 * 
+	 * \param[in,out] menu Pointer to the QMenu to populate with languages
+	 * \param[in] pathToTranslationFiles Directory containing translation files
+	 */
 	void populateMenu(QMenu *menu, const QString &pathToTranslationFiles);
 
 protected:
+	/**
+	 * \brief Protected default constructor to enforce Singleton pattern
+	 */
 	explicit ccTranslationManager() = default;
 
-private: // methods
+private: // types
+	/**
+	 * \brief Structure to store translation file information
+	 * 
+	 * Contains the prefix and path for a translation file
+	 */
 	struct CCAPPCOMMON_LIB_API TranslatorFile
 	{
-		QString	prefix;
-		QString path;
+		QString	prefix; ///< Prefix of the translation file
+		QString path;   ///< Path to the translation file
 	};
+
+	/**
+	 * \brief List of translator files
+	 */
 	using TranslatorFileList = QVector<TranslatorFile>;
 
+	/**
+	 * \brief Pair representing translation information
+	 * 
+	 * First element is the language code, second is the language name
+	 */
 	using TranslationInfo = QPair<QString, QString>;
+
+	/**
+	 * \brief List of available translations
+	 */
 	using LanguageList = QVector<TranslationInfo>;
 
+private: // methods
+	/**
+	 * \brief Get the current language preference
+	 * 
+	 * \return Current language code
+	 */
 	QString languagePref() const;
 
-	//! Generate a list of available languages based on the files in the "translation" directory.
+	/**
+	 * \brief Generate a list of available languages
+	 * 
+	 * Scans the translation directory to find available translation files
+	 * 
+	 * \param[in] appName Name of the application
+	 * \param[in] pathToTranslationFiles Directory containing translation files
+	 * \return List of available languages with their codes and names
+	 */
 	LanguageList availableLanguages(const QString& appName, const QString& pathToTranslationFiles) const;
 
+	/**
+	 * \brief Set the preferred language
+	 * 
+	 * \param[in] languageCode 2-letter ISO 639 language code
+	 */
 	void setLanguagePref(const QString& languageCode);
 
 private: // members
+	/**
+	 * \brief List of registered translator files
+	 * 
+	 * Stores information about translation files to be loaded
+	 */
 	TranslatorFileList	mTranslatorFileInfo;
 };

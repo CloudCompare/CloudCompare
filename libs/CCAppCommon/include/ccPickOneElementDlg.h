@@ -15,22 +15,41 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
 #include "CCAppCommon.h"
 
 //Qt
 #include <QDialog>
 
 class Ui_PickOneElementDialog;
-
-//! Minimal dialog to pick one element in a list (combox box)
+//! \brief Minimal dialog to pick one element in a list (combox box)
+//!
+//! This dialog presents a combo box containing the elements of the list
+//! passed to the constructor. A label and a window title can also be
+//! passed.
+//!
+//! Example of usage:
+//! \code
+//! QStringList elements = {"Element 1", "Element 2", "Element 3"};
+//! ccPickOneElementDlg dlg(elements, "Pick one element", "My dialog");
+//! if (dlg.exec())
+//! {
+//!     int index = dlg.getSelectedIndex();
+//!     // Do something with the selected index
+//! }
+//! \endcode
 class CCAPPCOMMON_LIB_API ccPickOneElementDlg : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	//! Default constructor
+	/**
+	 * \brief Default constructor
+	 *
+	 * \param label the label to be displayed
+	 * \param windowTitle the window title
+	 * \param parent the parent widget
+	 */
 	ccPickOneElementDlg(const QString &label,
 						const QString &windowTitle = QString(),
 						QWidget* parent = nullptr);
@@ -38,11 +57,23 @@ public:
 	//! Destructor
 	~ccPickOneElementDlg() override;
 
-	//! Add an element to the combo box
+	/**
+	 * \brief Add an element to the combo box
+	 *
+	 * \param elementName the element name to add
+	 */
 	void addElement(const QString &elementName);
-	//! Sets the combo box default index
+
+	/**
+	 * \brief Sets the combo box default index
+	 *
+	 * \param index the index to set
+	 */
 	void setDefaultIndex(int index);
-	//! Returns the combo box current index (after completion)
+
+	/**
+	 * \brief Returns the combo box current index (after completion)
+	 */
 	int getSelectedIndex();
 
 private:

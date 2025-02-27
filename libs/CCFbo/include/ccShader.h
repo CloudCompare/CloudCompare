@@ -24,36 +24,102 @@
 
 class QObject;
 
-//! Shader program
-/** Now a simple encapsulation of QOpenGLShaderProgram providing two helper functions.
-**/
+/**
+ * \brief Wrapper for QOpenGLShaderProgram with enhanced shader loading capabilities
+ * 
+ * \details Provides a simplified interface for loading and managing OpenGL shader programs
+ * 
+ * Key features:
+ * - Extends QOpenGLShaderProgram with additional helper methods
+ * - Supports loading shaders from files with automatic path and extension handling
+ * - Provides error reporting for shader compilation and linking
+ * 
+ * Typical use cases:
+ * - Loading vertex and fragment shaders
+ * - Creating custom rendering effects
+ * - Implementing advanced rendering techniques
+ * 
+ * \note Inherits from QOpenGLShaderProgram and adds convenience methods
+ * 
+ * \example
+ * \code
+ * // Creating and loading a shader program
+ * ccShader* shader = new ccShader();
+ * QString errorMsg;
+ * 
+ * // Load shader from files with automatic extension handling
+ * if (shader->fromFile("/path/to/shaders/", "myShader", errorMsg))
+ * {
+ *     // Shader loaded successfully
+ *     shader->bind(); // Activate the shader
+ *     
+ *     // Set shader uniforms
+ *     shader->setUniformValue("u_resolution", QVector2D(width, height));
+ *     shader->setUniformValue("u_time", elapsedTime);
+ *     
+ *     // Render using the shader
+ *     // ...
+ *     
+ *     shader->release(); // Deactivate the shader
+ * }
+ * else
+ * {
+ *     // Handle shader loading error
+ *     qDebug() << "Shader loading failed:" << errorMsg;
+ * }
+ * 
+ * // Alternatively, load shaders directly with full paths
+ * shader->loadProgram("/path/to/vertex.vert", "/path/to/fragment.frag", errorMsg);
+ * \endcode
+ */
 class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 {
 	Q_OBJECT
 	
 public:
-
-	//! Default constructor
+	/**
+	 * \brief Default constructor
+	 * 
+	 * \param[in] parent Optional parent QObject for memory management
+	 */
 	ccShader(QObject* parent = 0);
 
-	//! Destructor
+	/**
+	 * \brief Virtual destructor
+	 * 
+	 * Ensures proper cleanup of shader resources
+	 */
 	virtual ~ccShader() = default;
 
-	//! Creates program from two shader files with same base filename
-	/** Path and extensions (.vert and .frag) are automatically
-		added to shader base filename (shortcut to ccShader::loadProgram).
-		\param shaderBasePath shader files path
-		\param shaderBaseFilename shader base filename
-		\param error error string (if any error occurred)
-		\return success
-	**/
+	/**
+	 * \brief Create shader program from two shader files with same base filename
+	 * 
+	 * \details Automatically adds .vert and .frag extensions to shader base filename
+	 * 
+	 * \param[in] shaderBasePath Path to shader files
+	 * \param[in] shaderBaseFilename Base filename for vertex and fragment shaders
+	 * \param[out] error String to store any loading errors
+	 * 
+	 * \return True if shader program loaded successfully, false otherwise
+	 * 
+	 * \note Shortcut to ccShader::loadProgram
+	 * 
+	 * \sa loadProgram
+	 */
 	virtual bool fromFile(QString shaderBasePath, QString shaderBaseFilename, QString& error);
 
-	//! Creates program from one or two shader files
-	/** Filenames must be absolute (full path).
-		\param vertShaderFile vertex shader filename
-		\param fragShaderFile fragment shader filename
-		\param error error string (if any error occurred)
-	**/
+	/**
+	 * \brief Create shader program from one or two shader files
+	 * 
+	 * \details Loads vertex and fragment shaders from specified absolute file paths
+	 * 
+	 * \param[in] vertShaderFile Full path to vertex shader file
+	 * \param[in] fragShaderFile Full path to fragment shader file
+	 * \param[out] error String to store any loading errors
+	 * 
+	 * \return True if shader program loaded and linked successfully, false otherwise
+	 * 
+	 * \note Filenames must be absolute (full path)
+	 */
 	virtual bool loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error);
 };

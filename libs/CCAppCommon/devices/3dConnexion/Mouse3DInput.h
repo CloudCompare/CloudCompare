@@ -35,23 +35,33 @@
 class ccGLWindowInterface;
 
 //! 3DxWare driver wrapper for 3D mouse handling
+/**
+ * \class Mouse3DInput
+ * \brief Handles 3D mouse events
+ *
+ * This class provides a wrapper around the 3DxWare driver and
+ * manages the connection/disconnection of the 3D mouse.
+ */
 class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	//! Default constructor
+	/// \brief Default constructor
 	explicit Mouse3DInput(QObject* parent);
-	//! Destructor
+	/// \brief Destructor
 	virtual ~Mouse3DInput();
 
-	//! Attempts to connect with the 3DxWare driver
+	/// \brief Attempts to connect with the 3DxWare driver
+	/// \param mainWidget The main widget to connect to
+	/// \param appName The name of the application
+	/// \return true if the connection was successful
 	bool connect(QWidget* mainWidget, QString appName);
-	//! Disconnects from the 3DxWare driver
+	/// \brief Disconnects from the 3DxWare driver
 	void disconnectDriver();
 
-	//! Default key codes
+	/// \brief Default key codes
 	enum VirtualKey
 	{
 		V3DK_INVALID				= 0,
@@ -66,6 +76,11 @@ public:
 		V3DK_PLUS, V3DK_MINUS
 	};
 
+	/// \enum V3DCMD
+	/// \brief Enumerates the available key codes
+	///
+	/// These codes are used to send events to the connected application
+	/// when a key is pressed on the 3D mouse
 	enum V3DCMD
 	{
 		V3DCMD_NOOP = 0,
@@ -236,29 +251,54 @@ public:
 		V3DCMD_MENU_16 = 165,
 		/* Add here as needed. Don't change any values that may be in use */
 	};
-
 	//! Converts 'rotation' part of motion data to a rotation matrix
+	/**
+	 * \param[in] motionData 3D mouse motion data
+	 * \param[out] mat resulting rotation matrix
+	 */
 	static void GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& mat);
 
 	//! Applies motion data to a given 3D window
+	/**
+	 * \param[in] motionData 3D mouse motion data
+	 * \param[in] win 3D window to apply motion data to
+	 */
 	static void Apply(const std::vector<float>& motionData, ccGLWindowInterface* win);
 
 	//! Called when a new system message is available
-	/** For 'internal' use only
-	**/
+	/**
+	 * For 'internal' use only
+	 * \param[in] siGetEventData system message data
+	 * \return true if event was processed, false otherwise
+	 */
 	bool onSiEvent(void* siGetEventData);
 
 Q_SIGNALS:
 
+	/// Emitted when a 3D mouse motion event is received
+	/// \param[in] motionData 3D mouse motion data
 	void sigMove3d(std::vector<float>& motionData);
+
+	/// Emitted when the 3D mouse is released
 	void sigReleased();
+
+	/// Emitted when a 3D mouse key is pressed
+	/// \param[in] virtualKeyCode key code of the pressed key
 	void sigOn3dmouseKeyDown(int virtualKeyCode);
+
+	/// Emitted when a 3D mouse key is pressed after translation to CMD
+	/// \param[in] virtualCMDCode key code of the pressed key
 	void sigOn3dmouseCMDKeyDown(int virtualCMDCode);
+
+	/// Emitted when a 3D mouse key is released
+	/// \param[in] virtualKeyCode key code of the released key
 	void sigOn3dmouseKeyUp(int virtualKeyCode);
+
+	/// Emitted when a 3D mouse key is released after translation to CMD
+	/// \param[in] virtualCMDCode key code of the released key
 	void sigOn3dmouseCMDKeyUp(int virtualCMDCode);
 
 protected:
-
 	//! Called with the processed motion data when a 3D mouse event is received
 	/** The default implementation emits a sigMove3d signal with the motion data
 	*/
@@ -285,5 +325,6 @@ protected:
 	virtual void on3dmouseCMDKeyUp(int virtualCMDCode);
 
 	//! 3DxWare handle
+	/// \internal
 	void* m_siHandle;
 };

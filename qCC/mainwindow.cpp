@@ -9117,6 +9117,9 @@ void MainWindow::doActionExportPlaneInfo()
 
 	//write CSV header
 	QTextStream csvStream(&csvFile);
+	csvStream.setRealNumberNotation(QTextStream::FixedNotation);
+	csvStream.setRealNumberPrecision(12);
+
 	csvStream << "Name;";
 	csvStream << "Width;";
 	csvStream << "Height;";
@@ -9234,6 +9237,9 @@ void MainWindow::doActionExportCloudInfo()
 
 	//write CSV header
 	QTextStream csvStream(&csvFile);
+	csvStream.setRealNumberNotation(QTextStream::FixedNotation);
+	csvStream.setRealNumberPrecision(12);
+
 	csvStream << "Name;";
 	csvStream << "Points;";
 	csvStream << "meanX;";

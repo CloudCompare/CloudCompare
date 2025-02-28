@@ -196,6 +196,7 @@ Bug fixes:
 	- Normals shown has lines were not automatically update after applying a transformation to a cloud
 	- The 'conical span ratio' of the Unroll dialog was not properly restored from persistent settings
 	- The circular cursor of the 'Cloud layers' and 'Compass' plugins was not displayed at the right position on high DPI screens
+	- The Compass plugin was not transferring the Global Shift & Scale information from the cloud to the generated planes or polylines
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

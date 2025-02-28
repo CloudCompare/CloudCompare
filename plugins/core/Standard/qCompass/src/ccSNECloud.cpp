@@ -27,12 +27,21 @@ ccSNECloud::ccSNECloud()
 
 ccSNECloud::ccSNECloud(ccPointCloud* obj)
 	: ccPointCloud()
-{ 
-	//copy points, normals and scalar fields from obj.
-	*this += obj;
+{
+	if (obj)
+	{
+		//copy points, normals and scalar fields from obj.
+		*this += obj;
 
-	//set name
-	setName(obj->getName());
+		copyGlobalShiftAndScale(*obj);
+
+		//set name
+		setName(obj->getName());
+	}
+	else
+	{
+		assert(false);
+	}
 
 	//update metadata
 	updateMetadata();

@@ -30,43 +30,91 @@
 
 class ccGLWindowInterface;
 
-//! Gaempad handler
+/**
+ * \class GamepadInput
+ * \brief Handles gamepad events through polling mechanism
+ *
+ * This class provides a wrapper around QGamepad to manage gamepad input
+ * and translate gamepad events into 3D window interactions.
+ *
+ * \note Currently used primarily for testing purposes
+ * \warning Functionality may be experimental or subject to change
+ */
 class CCAPPCOMMON_LIB_API GamepadInput : public QGamepad
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
+    /**
+     * \brief Constructs a new GamepadInput object
+     * 
+     * \param parent Optional parent QObject for memory management
+     * 
+     * \note Initializes gamepad input with default settings
+     */
+    explicit GamepadInput(QObject* parent = nullptr);
 
-	//! Default constructor
-	explicit GamepadInput(QObject* parent = nullptr);
-	//! Destructor
-	virtual ~GamepadInput();
+    /**
+     * \brief Destructor for GamepadInput
+     * 
+     * Ensures proper cleanup of gamepad resources
+     */
+    virtual ~GamepadInput();
 
-	void start();
-	void stop();
+    /**
+     * \brief Starts polling for gamepad input
+     * 
+     * Begins periodic checks of gamepad state using internal timer
+     * 
+     * \note Activates updateInternalState() at regular intervals
+     */
+    void start();
 
-	//! Updates a window with the current gamepad state
-	void update(ccGLWindowInterface* win);
+    /**
+     * \brief Stops polling for gamepad input
+     * 
+     * Halts periodic checks of gamepad state
+     */
+    void stop();
+
+    /**
+     * \brief Updates a 3D window based on current gamepad state
+     * 
+     * \param win Pointer to the 3D window to be updated
+     * 
+     * \note Translates gamepad input into 3D window transformations
+     */
+    void update(ccGLWindowInterface* win);
 
 Q_SIGNALS:
-
-	void updated();
+    /**
+     * \brief Emitted when gamepad state is updated
+     * 
+     * Signals that internal gamepad state has changed
+     */
+    void updated();
 
 protected:
-
-	void updateInternalState();
+    /**
+     * \brief Updates the internal gamepad state
+     * 
+     * Processes current gamepad input and updates internal tracking variables
+     * 
+     * \note Called periodically by the internal timer
+     */
+    void updateInternalState();
 
 private:
+    QTimer m_timer;             ///< Timer for polling gamepad state
 
-	//! Timer to poll the gamepad state
-	QTimer m_timer;
+    CCVector3 m_panning;        ///< Current panning vector
+    bool m_hasPanning;          ///< Flag indicating if panning is active
 
-	//! Last state
-	CCVector3 m_panning;
-	bool m_hasPanning;
-	CCVector3 m_translation;
-	bool m_hasTranslation;
-	ccGLMatrixd m_rotation;
-	bool m_hasRotation;
-	float m_zoom;
+    CCVector3 m_translation;    ///< Current translation vector
+    bool m_hasTranslation;      ///< Flag indicating if translation is active
+
+    ccGLMatrixd m_rotation;     ///< Current rotation matrix
+    bool m_hasRotation;         ///< Flag indicating if rotation is active
+
+    float m_zoom;               ///< Current zoom level
 };

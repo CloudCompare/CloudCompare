@@ -28,46 +28,126 @@ class QComboBox;
 class QToolButton;
 class ccColorScalesManager;
 
-//! Advanced editor for color scales
-/** Combo-box + shortcut to color scale editor
-**/
+/**
+ * \brief Advanced color scale selection widget
+ * 
+ * \details Provides an interactive widget for selecting and managing color scales
+ * with a combo box and a dedicated editor button
+ * 
+ * Key features:
+ * - Combo box for selecting predefined color scales
+ * - Quick access to color scale editor
+ * - Integration with CloudCompare's color scales manager
+ * 
+ * Typical use cases:
+ * - Selecting color scales for data visualization
+ * - Customizing color mappings
+ * - Providing user-friendly color scale management
+ * 
+ * \note Inherits from QFrame and provides a comprehensive color scale selection interface
+ * 
+ * \example
+ * \code
+ * // Creating a color scale selector
+ * ccColorScalesManager* scaleManager = ccColorScalesManager::GetUniqueInstance();
+ * 
+ * ccColorScaleSelector* scaleSelector = new ccColorScaleSelector(
+ *     scaleManager,        // Color scales manager
+ *     parentWidget,        // Parent widget
+ *     ":/path/to/icon.png" // Optional button icon path
+ * );
+ * 
+ * // Initialize the selector
+ * scaleSelector->init();
+ * 
+ * // Connect to selection and editor signals
+ * connect(scaleSelector, &ccColorScaleSelector::colorScaleSelected,
+ *         [](int index) {
+ *             qDebug() << "Selected color scale index:" << index;
+ *         });
+ * 
+ * connect(scaleSelector, &ccColorScaleSelector::colorScaleEditorSummoned,
+ *         []() {
+ *             // Open color scale editor
+ *         });
+ * 
+ * // Get the currently selected color scale
+ * ccColorScale::Shared selectedScale = scaleSelector->getSelectedScale();
+ * 
+ * // Set a specific color scale by UUID
+ * scaleSelector->setSelectedScale("unique-color-scale-uuid");
+ * \endcode
+ */
 class CCPLUGIN_LIB_API ccColorScaleSelector : public QFrame
 {
 	Q_OBJECT
 
 public:
-
-	//! Default constructor
+	/**
+	 * \brief Constructor for color scale selector
+	 * 
+	 * \param[in] manager Pointer to the color scales manager
+	 * \param[in] parent Optional parent widget
+	 * \param[in] defaultButtonIconPath Optional path to a custom button icon
+	 */
 	ccColorScaleSelector(ccColorScalesManager* manager, QWidget* parent, QString defaultButtonIconPath = QString());
 
-	//! Inits selector with the Color Scales Manager
+	/**
+	 * \brief Initialize the selector with the Color Scales Manager
+	 * 
+	 * \note Must be called after construction to set up the widget
+	 */
 	void init();
 
-	//! Sets selected combo box item (scale) by UUID
+	/**
+	 * \brief Set the selected color scale by its unique identifier
+	 * 
+	 * \param[in] uuid Unique identifier of the color scale to select
+	 */
 	void setSelectedScale(QString uuid);
 
-	//! Returns currently selected color scale
+	/**
+	 * \brief Get the currently selected color scale
+	 * 
+	 * \return Shared pointer to the selected color scale
+	 */
 	ccColorScale::Shared getSelectedScale() const;
 
-	//! Returns a given color scale by index
+	/**
+	 * \brief Get a color scale by its index in the combo box
+	 * 
+	 * \param[in] index Index of the color scale
+	 * 
+	 * \return Shared pointer to the color scale at the specified index
+	 */
 	ccColorScale::Shared getScale(int index) const;
 
 Q_SIGNALS:
-
-	//! Signal emitted when a color scale is selected
+	/**
+	 * \brief Signal emitted when a color scale is selected
+	 * 
+	 * \param[out] index Index of the selected color scale
+	 */
 	void colorScaleSelected(int);
 
-	//! Signal emitted when the user clicks on the 'Spawn Color scale editor' button
+	/**
+	 * \brief Signal emitted when the user requests to open the color scale editor
+	 */
 	void colorScaleEditorSummoned();
 
 protected:
-
-	//! Color scales manager
+	/**
+	 * \brief Pointer to the color scales manager
+	 */
 	ccColorScalesManager* m_manager;
 
-	//! Color scales combo-box
+	/**
+	 * \brief Combo box for selecting color scales
+	 */
 	QComboBox* m_comboBox;
 
-	//! Spawn color scale editor button
+	/**
+	 * \brief Button to spawn the color scale editor
+	 */
 	QToolButton* m_button;
 };

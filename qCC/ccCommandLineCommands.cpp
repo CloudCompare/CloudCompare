@@ -42,6 +42,8 @@
 #include <QDateTime>
 #include <QFileInfo>
 
+#include "ccSubsamplingDlg.h"
+
 //commands
 constexpr char COMMAND_CLOUD_EXPORT_FORMAT[]			= "C_EXPORT_FMT";
 constexpr char COMMAND_EXPORT_EXTENSION[]				= "EXT";
@@ -1309,9 +1311,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Missing parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 		}
-		bool isPercent = false;
-		double percent = 0.0;
-		unsigned count = 0;
+		SubsamplingParams params;
 
 		//handle percent argument
 		if (cmd.arguments().front() == OPTION_PERCENT)
@@ -1324,70 +1324,50 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			}
 
 			bool ok;
-			percent = cmd.arguments().takeFirst().toDouble(&ok);
+			const double percent = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok || percent < 0 || percent > 100)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: number after \"-%1 RANDOM %2\" must be decimal between 0 and 100").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 
-			isPercent = true;
+			params = SubsamplingParams::RandomPercent(percent);
 		}
 		else
 		{
 			bool ok;
-			count = cmd.arguments().takeFirst().toUInt(&ok);
+			const unsigned count = cmd.arguments().takeFirst().toUInt(&ok);
 			if (!ok)
 			{
 				return cmd.error(QObject::tr("Invalid parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 			}
 			cmd.print(QObject::tr("\tOutput points: %1").arg(count));
+
+			params = SubsamplingParams::Random(count);
 		}
 		
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
 
-			if (isPercent)
-			{
-				size_t nrOfPoints = desc.pc->size();
-				count = static_cast<unsigned>(ceil(nrOfPoints * percent / 100));
-				cmd.print(QObject::tr("\tOutput points: %1 * %2% = %3").arg(nrOfPoints).arg(percent).arg(count));
+			CCCoreLib::ReferenceCloud* refCloud = nullptr;
+			try {
+				refCloud = DoSubSample(params, desc.pc, cmd.progressDialog());
+			} catch (const std::exception& e) {
+				return cmd.error(QObject::tr("Failed to subsample %1: %2").arg(desc.pc->getName(), e.what()));
 			}
 
-			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(desc.pc, count, cmd.progressDialog());
-			if (!refCloud)
-			{
-				return cmd.error(QObject::tr("Subsampling process failed!"));
-			}
 			cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 			
 			//save output
 			ccPointCloud* result = desc.pc->partialClone(refCloud);
 			delete refCloud;
 			refCloud = nullptr;
-			
-			if (result)
-			{
-				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
-				if (cmd.autoSaveMode())
-				{
-					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(newDesc, "RANDOM_SUBSAMPLED");
-					if (!errorStr.isEmpty())
-					{
-						delete result;
-						return cmd.error(errorStr);
-					}
-				}
-				//replace current cloud by this one
-				delete desc.pc;
-				desc.pc = result;
-				desc.basename += "_RANDOM_SUBSAMPLED";
-			}
-			else
-			{
+
+			if (!result) {
 				return cmd.error(QObject::tr("Not enough memory!"));
 			}
+			
+			return ReplaceAndSaveCloud(cmd, desc, result, params);
 		}
 	}
 	else if (method == "SPATIAL")
@@ -1397,8 +1377,9 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			return cmd.error(QObject::tr("Missing parameter: spatial step after \"-%1 SPATIAL\"").arg(COMMAND_SUBSAMPLE));
 		}
 
+
 		bool ok;
-		double step = cmd.arguments().takeFirst().toDouble(&ok);
+		const double step = cmd.arguments().takeFirst().toDouble(&ok);
 		if (!ok || step <= 0)
 		{
 			return cmd.error(QObject::tr("Invalid step value for spatial subsampling!"));
@@ -1415,29 +1396,33 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				//enable USE_ACTIVE_SF
 				useActiveSF = true;
 				cmd.arguments().pop_front();
-				if (cmd.arguments().size() >= 2)
-				{
-					bool validMin = false;
-					sfMinSpacing = cmd.arguments().takeFirst().toDouble(&validMin);
-					bool validMax = false;
-					sfMaxSpacing = cmd.arguments().takeFirst().toDouble(&validMax);
-					if (!validMin || !validMax || sfMinSpacing < 0 || sfMaxSpacing < 0)
-					{
-						return cmd.error(QObject::tr("Invalid parameters: Two positive decimal number required after '%1'").arg(OPTION_USE_ACTIVE_SF));
-					}
-				}
-				else
+				if (cmd.arguments().size() < 2)
 				{
 					return cmd.error(QObject::tr("Missing parameters: Two positive decimal number required after '%1'").arg(OPTION_USE_ACTIVE_SF));
+				}
+
+				bool validMin = false;
+				sfMinSpacing = cmd.arguments().takeFirst().toDouble(&validMin);
+				bool validMax = false;
+				sfMaxSpacing = cmd.arguments().takeFirst().toDouble(&validMax);
+				if (!validMin || !validMax || sfMinSpacing < 0 || sfMaxSpacing < 0)
+				{
+					return cmd.error(QObject::tr("Invalid parameters: Two positive decimal number required after '%1'").arg(OPTION_USE_ACTIVE_SF));
 				}
 			}
 		}
 
+		SubsamplingParams params;
+		params.method = SubsamplingParams::Method::Spatial;
+		params.spatial.minDist = static_cast<PointCoordinateType>(step);
+		params.spatial.useOctree = false;
+		params.spatial.modulationEnabled = false;
+		params.spatial.sfMinSpacing = sfMinSpacing;
+		params.spatial.sfMaxSpacing = sfMaxSpacing;
+
 		for (CLCloudDesc& desc : cmd.clouds())
 		{
 			cmd.print(QObject::tr("\tProcessing cloud %1").arg(!desc.pc->getName().isEmpty() ? desc.pc->getName() : "no name"));
-
-			CCCoreLib::CloudSamplingTools::SFModulationParams modParams(false);
 
 			//handle Use Active SF on each cloud
 			if (useActiveSF)
@@ -1451,63 +1436,28 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				}
 				else
 				{
-					//found active scalar field
-					ScalarType sfMin = CCCoreLib::NAN_VALUE;
-					ScalarType sfMax = CCCoreLib::NAN_VALUE;
-					if (sf->countValidValues() > 0)
-					{
-						if (!ccScalarField::ValidValue(sfMin) || sfMin > sf->getMin())
-							sfMin = sf->getMin();
-						if (!ccScalarField::ValidValue(sfMax) || sfMax < sf->getMax())
-							sfMax = sf->getMax();
-						if (!ccScalarField::ValidValue(sfMin) || !ccScalarField::ValidValue(sfMax))
-						{
-							//warn the user, don't use 'Use Active SF' and keep going
-							cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%1' has invalid min/max values.").arg(QString::fromStdString(sf->getName())));
-						}
-						else
-						{
-							//everything validated use acitve SF for modulation
-							//implementation of modParams.a/b values come from MainWindow::doActionSubsample()
-							modParams.enabled = true;
-
-							double deltaSF = static_cast<double>(sfMax) - static_cast<double>(sfMin);
-
-							if (CCCoreLib::GreaterThanEpsilon(deltaSF))
-							{
-								modParams.a = (sfMaxSpacing - sfMinSpacing) / deltaSF;
-								modParams.b = sfMinSpacing - modParams.a * sfMin;
-							}
-							else
-							{
-								modParams.a = 0.0;
-								modParams.b = sfMin;
-							}
-							cmd.print(QObject::tr("\tUse active SF: enabled\n\t\tSpacing at SF min (%1): %2\n\t\tSpacing at SF max (%3): %4")
-								.arg(sfMin)
-								.arg(sfMinSpacing)
-								.arg(sfMax)
-								.arg(sfMaxSpacing));
-						}
-					}
-					else
-					{
-						//warn the user, not use Use Active SF and keep going
-						cmd.warning(QObject::tr("\tCan't use 'Use active SF': scalar field '%2' does not have any valid value.").arg(COMMAND_SET_ACTIVE_SF).arg(QString::fromStdString(sf->getName())));
-
+					if (params.spatial.tryEnableSfModulation(*sf)) {
+						cmd.print(QObject::tr("\tUse active SF: enabled\n\t\tSpacing at SF min (%1): %2\n\t\tSpacing at SF max (%3): %4")
+							.arg(params.spatial.sfMin)
+							.arg(params.spatial.sfMinSpacing)
+							.arg(params.spatial.sfMax)
+							.arg(params.spatial.sfMaxSpacing));
+					} else {
+						cmd.warning(QObject::tr("\tCan't use 'Use active SF' with scalar field '%2'").arg(QString::fromStdString(sf->getName())));
 					}
 				}
 			}
 
-			if (useActiveSF && !modParams.enabled)
+			if (useActiveSF && !params.spatial.modulationEnabled)
 			{
 				cmd.print(QObject::tr("\t'Use active SF' disabled. Falling back to constant spacing."));
 			}
 
-			CCCoreLib::ReferenceCloud* refCloud = CCCoreLib::CloudSamplingTools::resampleCloudSpatially(desc.pc, static_cast<PointCoordinateType>(step), modParams, nullptr, cmd.progressDialog());
-			if (!refCloud)
-			{
-				return cmd.error("Subsampling process failed!");
+			CCCoreLib::ReferenceCloud* refCloud = nullptr;
+			try {
+				refCloud = DoSubSample(params, desc.pc, cmd.progressDialog());
+			} catch (const std::exception& e) {
+				return cmd.error(QObject::tr("Failed to subsample %1: %2").arg(desc.pc->getName(), e.what()));
 			}
 			cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 			
@@ -1515,29 +1465,12 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			ccPointCloud* result = desc.pc->partialClone(refCloud);
 			delete refCloud;
 			refCloud = nullptr;
-			
-			if (result)
-			{
-				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
-				if (cmd.autoSaveMode())
-				{
-					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(newDesc, "SPATIAL_SUBSAMPLED");
-					if (!errorStr.isEmpty())
-					{
-						delete result;
-						return cmd.error(errorStr);
-					}
-				}
-				//replace current cloud by this one
-				delete desc.pc;
-				desc.pc = result;
-				desc.basename += "_SPATIAL_SUBSAMPLED";
-			}
-			else
-			{
+
+			if (!result) {
 				return cmd.error(QObject::tr("Not enough memory!"));
 			}
+			
+			return ReplaceAndSaveCloud(cmd, desc, result, params);
 		}
 	}
 	else if (method == "OCTREE")
@@ -1553,7 +1486,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 
 		if (!cmd.arguments().empty())
 		{
-			//params for automatic OCTREE level calculation based on cell size
+			// params for automatic OCTREE level calculation based on cell size
 			if (cmd.arguments().front() == "CELL_SIZE")
 			{
 				cmd.arguments().pop_front();
@@ -1648,12 +1581,13 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			if (!octree)
 			{
 				octree = desc.pc->computeOctree(nullptr, false).data();
+
+				if (!octree)
+				{
+					return cmd.error("Octree calculation failed, not enough memory?");
+				}
 			}
-			if (!octree)
-			{
-				return cmd.error("Octree calculation failed, not enough memory?");
-			}
-			CCCoreLib::ReferenceCloud* refCloud = nullptr;
+
 			ccPointCloud* result = nullptr;
 			unsigned sizeOfInputCloud = desc.pc->size();
 
@@ -1663,9 +1597,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			{
 				//calculate OCTREE level for each cloud based on required octree cell size
 				octreeLevel = static_cast<int>(ceil(log(desc.pc->getOwnBB().getMaxBoxDim() / cellSize) / log(2.0)));
-			}
-
-			if (byMaxNumberOfPoints)
+			} else if (byMaxNumberOfPoints)
 			{
 				if (isPercent)
 				{
@@ -1689,6 +1621,10 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				}
 			}
 
+			SubsamplingParams params;
+			params.method = SubsamplingParams::Method::Octree;
+			params.octreeLevel = static_cast<unsigned char>(octreeLevel);
+
 			//only process further if CELL_SIZE or octree level was given, or the numberOfPoints smaller than the input cloud
 			if (!byMaxNumberOfPoints || (byMaxNumberOfPoints && sizeOfInputCloud > maxNumberOfPoints))
 			{
@@ -1699,22 +1635,24 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 					octreeLevel = std::max(std::min(octreeLevel, maxOctreeLevel), 1);
 					cmd.print(QObject::tr("\tCalculated octree level: %1").arg(octreeLevel));
 				}
-				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	desc.pc,
-																							static_cast<unsigned char>(octreeLevel),
-																							CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																							progressDialog.data(),
-																							octree);
 
-				if (!refCloud)
-				{
-					return cmd.error(QObject::tr("Subsampling process failed!"));
+				CCCoreLib::ReferenceCloud* refCloud = nullptr;
+				try {
+					refCloud = DoSubSample(params, desc.pc, cmd.progressDialog());
+				} catch (const std::exception& e) {
+					return cmd.error(QObject::tr("Failed to subsample %1: %2").arg(desc.pc->getName(), e.what()));
 				}
+
 				cmd.print(QObject::tr("\tResult: %1 points").arg(refCloud->size()));
 
 				//save output
 				result = desc.pc->partialClone(refCloud);
 				delete refCloud;
 				refCloud = nullptr;
+
+				if (!result) {
+					return cmd.error(QObject::tr("Not enough memory!"));
+				}
 			}
 			else
 			{
@@ -1725,32 +1663,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				octreeLevel = -1;
 			}
 
-			if (result)
-			{
-				result->setName(desc.pc->getName() + QObject::tr(".subsampled"));
-				QString suffix = QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel);
-				if (cmd.autoSaveMode())
-				{
-					CLCloudDesc newDesc(result, desc.basename, desc.path, desc.indexInFile);
-					QString errorStr = cmd.exportEntity(newDesc, suffix);
-					if (!errorStr.isEmpty())
-					{
-						delete result;
-						return cmd.error(errorStr);
-					}
-				}
-				if (desc.pc != result)
-				{
-					//replace current cloud by subsampled one if it was changed
-					delete desc.pc;
-					desc.pc = result;
-					desc.basename += '_' + suffix;
-				}
-			}
-			else
-			{
-				return cmd.error(QObject::tr("Not enough memory!"));
-			}
+			return ReplaceAndSaveCloud(cmd, desc, result, params);
 		}
 		
 		if (progressDialog)
@@ -1766,6 +1679,45 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	
 	return true;
 }
+
+bool CommandSubsample::ReplaceAndSaveCloud(ccCommandLineInterface& cmd, CLCloudDesc& orignalDesc, ccPointCloud *newPointCloud, const SubsamplingParams& params) {
+	newPointCloud->setName(orignalDesc.pc->getName() + QObject::tr(".subsampled"));
+	QString suffix;
+	switch (params.method) {
+		case SubsamplingParams::Method::Random:
+		case SubsamplingParams::Method::RandomPercent:
+			suffix = "RANDOM_SUBSAMPLED";
+			break;
+		case SubsamplingParams::Method::Spatial:
+			suffix = "SPATIAL_SUBSAMPLED";
+			break;
+		case SubsamplingParams::Method::Octree:
+			suffix = QObject::tr("OCTREE_LEVEL_%1_SUBSAMPLED").arg(params.octreeLevel);
+			break;
+	}
+
+	if (cmd.autoSaveMode())
+	{
+		CLCloudDesc newDesc(newPointCloud, orignalDesc.basename, orignalDesc.path, orignalDesc.indexInFile);
+		const QString errorStr = cmd.exportEntity(newDesc, suffix);
+		if (!errorStr.isEmpty())
+		{
+			delete newPointCloud;
+			return cmd.error(errorStr);
+		}
+	}
+
+	if (orignalDesc.pc != newPointCloud)
+	{
+		// replace current cloud by subsampled one if it was changed
+		delete orignalDesc.pc;
+		orignalDesc.pc = newPointCloud;
+		orignalDesc.basename += '_' + suffix;
+	}
+
+	return true;
+}
+
 
 CommandExtractCCs::CommandExtractCCs()
 	: ccCommandLineInterface::Command(QObject::tr("ExtractCCs"), COMMAND_EXTRACT_CC)

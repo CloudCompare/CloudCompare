@@ -18,6 +18,7 @@
 #include <ccVolumeCalcTool.h>
 #include <ccSubMesh.h>
 #include <ccPointCloudInterpolator.h>
+#include <ccSensor.h>
 
 //qCC_io
 #include <AsciiFilter.h>
@@ -177,6 +178,9 @@ constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
 constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
 constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
+constexpr char COMMAND_COMPUTE_DISTANCES_FROM_SENSOR[]	= "COMPUTE_DISTANCES_FROM_SENSOR";
+constexpr char COMMAND_COMPUTE_SQUARED_DISTANCES[]		= "SQUARED";
+constexpr char COMMAND_COMPUTE_SCATTERING_ANGLES[]		= "COMPUTE_SCATTERING_ANGLES";
 constexpr char COMMAND_FILTER[]							= "FILTER";
 
 //options / modifiers
@@ -7968,3 +7972,96 @@ bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
 
 	return true;
 }
+
+CommandComputeDistancesFromSensor::CommandComputeDistancesFromSensor()
+	: ccCommandLineInterface::Command(QObject::tr("Compute distances from sensor"), COMMAND_COMPUTE_DISTANCES_FROM_SENSOR)
+{}
+
+bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
+{
+	bool squared = false;
+
+	//optional parameter: compute squared distances
+	if (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_COMPUTE_SQUARED_DISTANCES))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			squared = true;
+		}
+	}
+
+	//Call MainWindow generic method
+	ccHObject::Container entities;
+	entities.resize(cmd.clouds().size());
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	{
+		entities[i] = cmd.clouds()[i].pc;
+	}
+
+	for ( ccHObject *entity : entities )
+	{
+		ccSensor* sensor = ccHObjectCaster::ToSensor( entity );
+		if (!sensor)
+			continue; //skip this entity
+		assert(sensor);
+
+		//get associated cloud
+		ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : nullptr;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(defaultCloud);
+		if (!cloud)
+		{
+			cmd.error(QObject::tr("Sensor not associated with a cloud"));
+			return false;
+		}
+
+		//sensor center
+		CCVector3 sensorCenter;
+		if (!sensor->getActiveAbsoluteCenter(sensorCenter))
+		{
+			cmd.error(QObject::tr("Sensor center not detected"));
+			return false;
+		}
+
+		//set up a new scalar field
+		const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
+		int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
+		if (sfIdx < 0)
+		{
+			sfIdx = cloud->addScalarField(defaultRangesSFname);
+			if (sfIdx < 0)
+			{
+				cmd.error(QObject::tr("Not enough memory!"));
+				return false;
+			}
+		}
+		CCCoreLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+
+		for (unsigned i = 0; i < cloud->size(); ++i)
+		{
+			const CCVector3* P = cloud->getPoint(i);
+			ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() : (*P-sensorCenter).norm());
+			distances->setValue(i, s);
+		}
+
+		//save output
+		if (cmd.autoSaveMode() && !cmd.saveClouds("RANGES"))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+CommandComputeScatteringAngles::CommandComputeScatteringAngles()
+	: ccCommandLineInterface::Command(QObject::tr("Compute distances from sensor"), COMMAND_COMPUTE_SCATTERING_ANGLES)
+{}
+
+bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
+{
+	return true;
+}
+

@@ -179,9 +179,7 @@ constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
 constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
 constexpr char COMMAND_COMPUTE_DISTANCES_FROM_SENSOR[]	= "DISTANCES_FROM_SENSOR";
-constexpr char COMMAND_COMPUTE_SQUARED_DISTANCES[]		= "SQUARED";
 constexpr char COMMAND_COMPUTE_SCATTERING_ANGLES[]		= "SCATTERING_ANGLES";
-constexpr char COMMAND_COMPUTE_ANGLES_IN_DEGREE[]		= "DEGREES";
 constexpr char COMMAND_FILTER[]							= "FILTER";
 
 //options / modifiers
@@ -213,6 +211,9 @@ constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
 constexpr char OPTION_BLEND_GRAYSCALE[]					= "BLEND_GRAYSCALE";
+constexpr char OPTION_SQUARED[]							= "SQUARED";
+constexpr char OPTION_DEGREES[]							= "DEGREES";
+constexpr char OPTION_WITH_GRIDS[]						= "WITH_GRIDS";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -997,6 +998,9 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	CCCoreLib::LOCAL_MODEL_TYPES model = CCCoreLib::QUADRIC;
 	ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 	
+	bool useGridStructure = false;
+	bool orientNormalsWithGrids = false;
+	float angle = std::numeric_limits<float>::quiet_NaN(); //if this stays
 	while (!cmd.arguments().isEmpty())
 	{
 		QString argument = cmd.arguments().front().toUpper();
@@ -1058,6 +1062,11 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 				{
 					orientation = ccNormalVectors::Orientation::MINUS_SENSOR_ORIGIN;
 				}
+				else if (orient_argument == OPTION_WITH_GRIDS)
+				{
+					orientation = ccNormalVectors::Orientation::UNDEFINED;
+					orientNormalsWithGrids = true;
+				}
 				else
 				{
 					return cmd.error(QObject::tr("Invalid parameter: unknown orientation '%1'").arg(orient_argument));
@@ -1094,6 +1103,26 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			else
 			{
 				return cmd.error(QObject::tr("Missing model"));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_WITH_GRIDS))
+		{
+			cmd.arguments().takeFirst();
+			if (!cmd.arguments().isEmpty())
+			{
+				bool ok = false;
+				QString angleArg = cmd.arguments().takeFirst();
+				angle = angleArg.toFloat(&ok);
+				if (!ok)
+				{
+					return cmd.error(QObject::tr("Invalid angle for scan grids"));
+				}
+				cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(angleArg));
+				useGridStructure = true;
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Missing min angle for scan grids"));
 			}
 		}
 		else
@@ -1139,15 +1168,45 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			cmd.print(QObject::tr("\tCloud %1 radius = %2").arg(cloud->getName()).arg(thisCloudRadius));
 		}
 
-		cmd.print(QObject::tr("computeNormalsWithOctree started..."));
-		bool success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
-		if(success)
+		bool success = false;
+		if (useGridStructure)
 		{
-			cmd.print(QObject::tr("computeNormalsWithOctree success"));
+			cmd.print(QObject::tr("computeNormalsWithGrids started..."));
+			success = cloud->computeNormalsWithGrids(angle, progressDialog.data());
+			if(success)
+			{
+				cmd.print(QObject::tr("computeNormalsWithGrids success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("computeNormalsWithGrids failed"));
+			}
 		}
 		else
 		{
-			return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
+			cmd.print(QObject::tr("computeNormalsWithOctree started..."));
+			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
+			if(success)
+			{
+				cmd.print(QObject::tr("computeNormalsWithOctree success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
+			}
+		}
+
+		if (cloud->gridCount() && orientNormalsWithGrids)
+		{
+			//we can use the grid structure(s) to orient the normals
+			if(cloud->orientNormalsWithGrids())
+			{
+				cmd.print(QObject::tr("orientNormalsWithGrids success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("orientNormalsWithGrids failed"));
+			}
 		}
 		
 		cloud->setName(cloud->getName() + QObject::tr(".OctreeNormal"));
@@ -7986,7 +8045,7 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 	if (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
-		if (ccCommandLineInterface::IsCommand(argument, COMMAND_COMPUTE_SQUARED_DISTANCES))
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_SQUARED))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();
@@ -8068,7 +8127,7 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 }
 
 CommandComputeScatteringAngles::CommandComputeScatteringAngles()
-	: ccCommandLineInterface::Command(QObject::tr("Compute distances from sensor"), COMMAND_COMPUTE_SCATTERING_ANGLES)
+	: ccCommandLineInterface::Command(QObject::tr("Compute scattering angles"), COMMAND_COMPUTE_SCATTERING_ANGLES)
 {}
 
 bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
@@ -8079,7 +8138,7 @@ bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
 	if (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
-		if (ccCommandLineInterface::IsCommand(argument, COMMAND_COMPUTE_ANGLES_IN_DEGREE))
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_DEGREES))
 		{
 			//local option confirmed, we can move on
 			cmd.arguments().pop_front();

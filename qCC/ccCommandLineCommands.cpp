@@ -214,6 +214,7 @@ constexpr char OPTION_BLEND_GRAYSCALE[]					= "BLEND_GRAYSCALE";
 constexpr char OPTION_SQUARED[]							= "SQUARED";
 constexpr char OPTION_DEGREES[]							= "DEGREES";
 constexpr char OPTION_WITH_GRIDS[]						= "WITH_GRIDS";
+constexpr char OPTION_WITH_SENSOR[]						= "WITH_SENSOR";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -1000,6 +1001,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	
 	bool useGridStructure = false;
 	bool orientNormalsWithGrids = false;
+	bool orientNormalsWithSensors = false;
 	float angle = std::numeric_limits<float>::quiet_NaN(); //if this stays
 	while (!cmd.arguments().isEmpty())
 	{
@@ -1066,6 +1068,11 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 				{
 					orientation = ccNormalVectors::Orientation::UNDEFINED;
 					orientNormalsWithGrids = true;
+				}
+				else if (orient_argument == OPTION_WITH_SENSOR)
+				{
+					orientation = ccNormalVectors::Orientation::UNDEFINED;
+					orientNormalsWithSensors = true;
 				}
 				else
 				{
@@ -1196,6 +1203,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			}
 		}
 
+		// ORIENT WITH_GRID
 		if (cloud->gridCount() && orientNormalsWithGrids)
 		{
 			//we can use the grid structure(s) to orient the normals
@@ -1206,6 +1214,37 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			else
 			{
 				return cmd.error(QObject::tr("orientNormalsWithGrids failed"));
+			}
+		}
+
+		// ORIENT WITH_SENSOR
+		else if (cloud->hasSensor() && orientNormalsWithSensors)
+		{
+			// RJ: TODO: the issue here is that a cloud can have multiple sensors.
+			// As the association to sensor is not explicit in CC, given a cloud
+			// some points can belong to one sensor and some others can belongs to others sensors.
+			// so it's why here grid orientation has precedence over sensor orientation because in this
+			// case association is more explicit.
+			// Here we take the first valid viewpoint for now even if it's not a good one...
+			for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+			{
+				ccHObject* child = cloud->getChild(i);
+				if (child && child->isKindOf(CC_TYPES::SENSOR))
+				{
+					ccSensor* sensor = ccHObjectCaster::ToSensor(child);
+					CCVector3 sensorPosition;
+					if (sensor->getActiveAbsoluteCenter(sensorPosition))
+					{
+						if(cloud->orientNormalsTowardViewPoint(sensorPosition))
+						{
+							cmd.print(QObject::tr("orientNormalsWithSensor success"));
+						}
+						else
+						{
+							return cmd.error(QObject::tr("orientNormalsWithSensor failed"));
+						}
+					}
+				}
 			}
 		}
 		

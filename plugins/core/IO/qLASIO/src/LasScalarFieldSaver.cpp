@@ -167,6 +167,18 @@ void LasScalarFieldSaver::handleScalarFields(size_t pointIndex, laszip_point& po
 			break;
 		}
 	}
+
+	if (point.extended_point_type)
+	{
+		// We set the 'legacy' data members earlier
+		// but we need to also set the extended_classification_flags
+		// otherwise laszip will throw an error if the overflap flag
+		// (which is also stored extended_classification_flags)
+		// has a value set
+		point.extended_classification_flags |= point.synthetic_flag;
+		point.extended_classification_flags |= point.keypoint_flag << 1;
+		point.extended_classification_flags |= point.withheld_flag << 2;
+	}
 }
 
 void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& point)

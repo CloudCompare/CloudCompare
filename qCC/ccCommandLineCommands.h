@@ -617,4 +617,18 @@ struct CommandSetVerbosity : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandComputeDistancesFromSensor : public ccCommandLineInterface::Command
+{
+	CommandComputeDistancesFromSensor();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandComputeScatteringAngles : public ccCommandLineInterface::Command
+{
+	CommandComputeScatteringAngles();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 #endif //COMMAND_LINE_COMMANDS_HEADER

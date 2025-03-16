@@ -6276,7 +6276,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFFIndex, true, &sf2))
 				{
-					return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
+					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -6310,7 +6310,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFFIndex, true, &sf2))
 				{
-					return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{

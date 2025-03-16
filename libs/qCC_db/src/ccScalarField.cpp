@@ -690,6 +690,10 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		}
 		setOffset(baseOffset + offset);
 	}
+	else if (size() != 0)
+	{
+		setOffset(baseOffset);
+	}
 
 	//update values
 	computeMinAndMax();

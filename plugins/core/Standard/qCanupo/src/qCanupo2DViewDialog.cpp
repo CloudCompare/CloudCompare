@@ -103,7 +103,7 @@ qCanupo2DViewDialog::qCanupo2DViewDialog(	const CorePointDescSet* descriptors1,
 		viewFrame->setLayout(new QHBoxLayout());
 		viewFrame->layout()->addWidget(glWidget);
 
-		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,		this, &qCanupo2DViewDialog::addOrSelectPoint);
+		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,	this, &qCanupo2DViewDialog::addOrSelectPoint);
 		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked,	this, &qCanupo2DViewDialog::removePoint);
 		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &qCanupo2DViewDialog::moveSelectedPoint);
 		connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased,		this, &qCanupo2DViewDialog::deselectPoint);

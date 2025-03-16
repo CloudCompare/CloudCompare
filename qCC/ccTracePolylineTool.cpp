@@ -308,8 +308,8 @@ bool ccTracePolylineTool::linkWith(ccGLWindowInterface* win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked, this, &ccTracePolylineTool::closePolyLine);
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,		  this, &ccTracePolylineTool::updatePolyLineTip);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked,	this, &ccTracePolylineTool::closePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &ccTracePolylineTool::updatePolyLineTip);
 	}
 
 	return true;

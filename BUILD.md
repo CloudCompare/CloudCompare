@@ -266,7 +266,7 @@ If you are compiling and running locally, add `-DCC_MAC_DEV_PATHS` to the `CMAKE
 will look for the plugins in your build directory rather than the application bundle. If you need the shaders as well,
 you will have to create a `shaders` folder in the build directory and copy the shaders you need into it.
 
-For convenience, we provide a 100% self contained build system based on `pixi`. Simply install `pixi` from the [official website](www.pixi.sh) and in the root directory of CC code repository simply launch `pixi run build` and then `pixi run CloudCompare`.
+For convenience, we provide a 100% self contained build system based on `pixi`. Simply install `pixi` from the [official website](https://pixi.sh) and in the root directory of CC code repository simply launch `pixi run build` and then `pixi run CloudCompare`.
 You can also create a portable (relocatable) `.app` by using `pixi run bundle`. You could find the bundle in `.build/install/CloudCompare` directory.
 
 ## Working with Visual Studio on Windows

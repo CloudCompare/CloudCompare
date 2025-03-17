@@ -57,6 +57,8 @@ New plugin
 
 	- VoxFall: non-parametric volumetric change detection for rockfalls
 		- computes volume differences between 2 meshes, with some visual representation
+  		- exports detected volumes as individual meshes
+		- option to generate CSV report
 
 Improvements:
 

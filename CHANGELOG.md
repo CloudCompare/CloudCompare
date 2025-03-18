@@ -208,6 +208,7 @@ Bug fixes:
 	- The circular cursor of the 'Cloud layers' and 'Compass' plugins was not displayed at the right position on high DPI screens
 	- The Compass plugin was not transferring the Global Shift & Scale information from the cloud to the generated planes or polylines
 	- UHD screens were not properly supported (rotation center picking with double click, entity selection with a rectangle, etc.)
+	- ASCII cloud file import will now respect empty fields instead of shifting all following columns left
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

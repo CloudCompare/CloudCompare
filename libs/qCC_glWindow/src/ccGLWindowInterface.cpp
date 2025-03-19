@@ -2028,7 +2028,7 @@ bool ccGLWindowInterface::processClickableItems(int x, int y)
 
 	//correction for HD screens
 	const auto devicePixelRatio = getDevicePixelRatio();
-	x = static_cast<int>(x *devicePixelRatio);
+	x = static_cast<int>(x * devicePixelRatio);
 	y = static_cast<int>(y * devicePixelRatio);
 
 	ClickableItem::Role clickedItem = ClickableItem::NO_ROLE;
@@ -2145,6 +2145,8 @@ void ccGLWindowInterface::startPicking(PickingParameters& params)
 	const auto devicePixelRatio = getDevicePixelRatio();
 	params.centerX = static_cast<int>(params.centerX * devicePixelRatio);
 	params.centerY = static_cast<int>(params.centerY * devicePixelRatio);
+	params.pickWidth = static_cast<int>(params.pickWidth * devicePixelRatio);
+	params.pickHeight = static_cast<int>(params.pickHeight * devicePixelRatio);
 
 	if (!m_globalDBRoot && !m_winDBRoot)
 	{
@@ -6239,8 +6241,10 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent *event)
 	m_deferredPickingTimer.stop(); //prevent the picking process from starting
 	m_ignoreMouseReleaseEvent = true;
 
-	const int x = event->x();
-	const int y = event->y();
+	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
+
+	const int x = event->x() * devicePixelRatio;
+	const int y = event->y() * devicePixelRatio;
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))
@@ -6272,14 +6276,16 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 	++s_counter;
 #endif
 
-	const int x = event->x();
-	const int y = event->y();
-
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
-		Q_EMIT m_signalEmitter->mouseMoved(x, y, event->buttons());
+		Q_EMIT m_signalEmitter->mouseMoved(event->x(), event->y(), event->buttons());
 		event->accept();
 	}
+
+	const auto devicePixelRatio = getDevicePixelRatio();
+
+	const int x = static_cast<int>(event->x() * devicePixelRatio);
+	const int y = static_cast<int>(event->y() * devicePixelRatio);
 
 	//no button pressed
 	if (event->buttons() == Qt::NoButton)
@@ -6293,9 +6299,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 			}
 			QRect areaRect = m_hotZone->rect(true, m_bubbleViewModeEnabled, exclusiveFullScreen());
 
-			const int devicePixelRatio = getDevicePixelRatio();
-			bool inZone = (x * devicePixelRatio * 3 < m_hotZone->topCorner.x() + areaRect.width() * 4   //25% margin
-				&& y * devicePixelRatio * 2 < m_hotZone->topCorner.y() + areaRect.height() * 4); //50% margin
+			bool inZone = (	x * 3 < m_hotZone->topCorner.x() + areaRect.width()  * 4    //25% margin
+						&&	y * 2 < m_hotZone->topCorner.y() + areaRect.height() * 4 ); //50% margin
 
 			if (inZone != m_clickableItemsVisible)
 			{
@@ -6322,8 +6327,9 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 		return;
 	}
 
-	int dx = x - m_lastMousePos.x();
-	int dy = y - m_lastMousePos.y();
+	int dx = event->x() - m_lastMousePos.x();
+	int dy = event->y() - m_lastMousePos.y();
+
 	setLODEnabled(true);
 
 	if ((event->buttons() & Qt::RightButton)
@@ -6336,11 +6342,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 		if (m_interactionFlags & INTERACT_PAN)
 		{
 			//displacement vector (in "3D")
-			double pixSize = computeActualPixelSize();
+			double pixSize = computeActualPixelSize() * devicePixelRatio;
 			CCVector3d u(dx * pixSize / m_displayScale.x, -dy * pixSize / m_displayScale.y, 0.0);
-
-			const auto devicePixelRatio = getDevicePixelRatio();
-			u *= devicePixelRatio;
 
 			bool entityMovingMode = (m_interactionFlags & INTERACT_TRANSFORM_ENTITIES)
 				|| ((QApplication::keyboardModifiers() & Qt::ControlModifier) && m_customLightEnabled);
@@ -6386,8 +6389,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 					//&&	m_pickingMode != TRIANGLE_PICKING
 					//&&	m_pickingMode != POINT_OR_TRIANGLE_PICKING
 					//&&	m_pickingMode != POINT_OR_TRIANGLE_OR_LABEL_PICKING
-					&& (QApplication::keyboardModifiers() == Qt::NoModifier
-						|| QApplication::keyboardModifiers() == Qt::ControlModifier))
+					&& (	QApplication::keyboardModifiers() == Qt::NoModifier
+						||	QApplication::keyboardModifiers() == Qt::ControlModifier))
 				{
 					updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
 				}
@@ -6402,16 +6405,13 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 		if (!m_activeItems.empty())
 		{
 			//displacement vector (in "3D")
-			double pixSize = computeActualPixelSize();
+			double pixSize = computeActualPixelSize() * devicePixelRatio;
 			CCVector3d u(dx * pixSize, -dy * pixSize, 0.0);
 			m_viewportParams.viewMat.transposed().applyRotation(u);
 
-			const auto devicePixelRatio = getDevicePixelRatio();
-			u *= devicePixelRatio;
-
 			for (auto& activeItem : m_activeItems)
 			{
-				if (activeItem->move2D(x * devicePixelRatio, y * devicePixelRatio, dx * devicePixelRatio, dy * devicePixelRatio, glWidth(), glHeight()))
+				if (activeItem->move2D(x, y, dx * devicePixelRatio, dy * devicePixelRatio, glWidth(), glHeight()))
 				{
 					invalidateViewport();
 				}
@@ -6446,8 +6446,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 						QPointF posA = toCenteredGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
 
 						CCVector3 A(static_cast<PointCoordinateType>(posA.x()),
-							static_cast<PointCoordinateType>(posA.y()),
-							0);
+									static_cast<PointCoordinateType>(posA.y()),
+									0);
 						//we add 4 times the same point (just to fill the cloud!)
 						vertices->addPoint(A);
 						vertices->addPoint(A);
@@ -6519,7 +6519,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 				case StandardMode:
 				{
 					static CCVector3d s_lastMouseOrientation;
-					CCVector3d currentMouseOrientation = convertMousePositionToOrientation(x, y);
+					CCVector3d currentMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
 
 					if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
 					{
@@ -6571,8 +6571,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 							C2D = CCVector3d(width() / 2.0, height() / 2.0, 0.0);
 						}
 
-						CCVector3d previousMousePos(static_cast<double>(m_lastMousePos.x()), static_cast<double>(height() - m_lastMousePos.y()), 0.0);
-						CCVector3d currentMousePos(static_cast<double>(x), static_cast<double>(height() - y), 0.0);
+						CCVector3d previousMousePos(m_lastMousePos.x(), height() - m_lastMousePos.y(), 0.0);
+						CCVector3d currentMousePos(event->x(), height() - event->y(), 0.0);
 
 						CCVector3d a = (currentMousePos - C2D);
 						CCVector3d b = (previousMousePos - C2D);
@@ -6732,10 +6732,12 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent *event)
 				const CCVector3* A = vertices->getPointPersistentPtr(0);
 				const CCVector3* C = vertices->getPointPersistentPtr(2);
 
-				int pickX = static_cast<int>(A->x + C->x) / 2;
-				int pickY = static_cast<int>(A->y + C->y) / 2;
-				int pickW = static_cast<int>(std::abs(C->x - A->x));
-				int pickH = static_cast<int>(std::abs(C->y - A->y));
+				// we need to counter-act the automatic scaling performed in startPicking
+				const auto devicePixelRatio = getDevicePixelRatio();
+				int pickX = static_cast<int>((A->x + C->x) / (2 * devicePixelRatio));
+				int pickY = static_cast<int>((A->y + C->y) / (2 * devicePixelRatio));
+				int pickW = static_cast<int>(std::abs(C->x - A->x) / devicePixelRatio);
+				int pickH = static_cast<int>(std::abs(C->y - A->y) / devicePixelRatio);
 
 				removeFromOwnDB(m_rectPickingPoly);
 				m_rectPickingPoly = nullptr;

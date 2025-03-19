@@ -146,6 +146,7 @@ namespace ccCompassImport {
 	
 			//build plane and get its orientation 
 			ccPlane* plane = new ccPlane(QString("%1/%2").arg(static_cast<int>(dip), 2, 10, QChar('0')).arg(static_cast<int>(dipdir), 3, 10, QChar('0')));
+			plane->copyGlobalShiftAndScale(*cld); //copy global shift & scale
 			plane->showNameIn3D(true);
 			cld->addChild(plane);
 			app->addToDB(plane, false, true, false, false);
@@ -267,6 +268,7 @@ namespace ccCompassImport {
 
 			//create lineation graphic
 			ccLineation* lineation = new ccLineation(points);
+			lineation->copyGlobalShiftAndScale(*cld); //copy global shift & scale (just in case)
 			lineation->addChild(points);
 			lineation->addPointIndex(0);
 			lineation->addPointIndex(1);

@@ -21,7 +21,7 @@
 ccFitPlane::ccFitPlane(ccPlane* p)
 	: ccPlane(p->getXWidth(), p->getYWidth(), &p->getTransformation(), p->getName()) //create an identical plane
 {
-	p->clone();
+	importParametersFrom(p);
 
 	//add metadata tag defining the ccCompass class type
 	QVariantMap map;
@@ -52,7 +52,7 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	{
 		search_r = p->getMetaData("Radius").toFloat();
 	}
-	updateAttributes(rms,search_r);
+	updateAttributes(rms, search_r);
 
 	//update drawing properties based on ccCompass state
 	enableStippling(ccCompass::drawStippled);
@@ -128,6 +128,15 @@ ccFitPlane* ccFitPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double
 	{
 		ccFitPlane* fp = new ccFitPlane(p);
 		p->transferChildren(*fp);
+		delete p;
+		p = nullptr;
+
+		ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
+		if (pc)
+		{
+			fp->copyGlobalShiftAndScale(*pc);
+		}
+
 		return fp;
 	}
 	else

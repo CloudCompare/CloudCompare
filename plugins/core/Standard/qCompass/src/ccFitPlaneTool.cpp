@@ -85,6 +85,8 @@ void ccFitPlaneTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPoi
 
 	if (pPlane) //valid fit
 	{
+		pPlane->copyGlobalShiftAndScale(*cloud);
+
 		//we can orient the plane normal to face the viewer
 		if (m_app->getActiveGLWindow())
 		{

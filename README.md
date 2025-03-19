@@ -29,7 +29,7 @@ This project is under the GPL license: https://www.gnu.org/licenses/gpl-3.0.html
 This means that you can use it as is for any purpose. But if you want to distribute
 it, or if you want to reuse its code or part of its code in a project you distribute,
 you have to comply with the GPL license. In effect, all the code you mix or link with
-CloudCompare's code must be made public as well. **This code cannot be used in in a
+CloudCompare's code must be made public as well. **This code cannot be used in a
 closed source software**.
 
 Installation

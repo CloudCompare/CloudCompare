@@ -18,6 +18,7 @@
 #include <ccVolumeCalcTool.h>
 #include <ccSubMesh.h>
 #include <ccPointCloudInterpolator.h>
+#include <ccSensor.h>
 
 //qCC_io
 #include <AsciiFilter.h>
@@ -177,6 +178,8 @@ constexpr char COMMAND_RGB_CONVERT_TO_SF[]				= "RGB_CONVERT_TO_SF";
 constexpr char COMMAND_FLIP_TRIANGLES[]					= "FLIP_TRI";
 constexpr char COMMAND_DEBUG[]							= "DEBUG";
 constexpr char COMMAND_VERBOSITY[]						= "VERBOSITY";
+constexpr char COMMAND_COMPUTE_DISTANCES_FROM_SENSOR[]	= "DISTANCES_FROM_SENSOR";
+constexpr char COMMAND_COMPUTE_SCATTERING_ANGLES[]		= "SCATTERING_ANGLES";
 constexpr char COMMAND_FILTER[]							= "FILTER";
 
 //options / modifiers
@@ -208,6 +211,10 @@ constexpr char OPTION_SIGMA[]							= "SIGMA";
 constexpr char OPTION_SIGMA_SF[]						= "SIGMA_SF";
 constexpr char OPTION_BURNT_COLOR_THRESHOLD[]			= "BURNT_COLOR_THRESHOLD";
 constexpr char OPTION_BLEND_GRAYSCALE[]					= "BLEND_GRAYSCALE";
+constexpr char OPTION_SQUARED[]							= "SQUARED";
+constexpr char OPTION_DEGREES[]							= "DEGREES";
+constexpr char OPTION_WITH_GRIDS[]						= "WITH_GRIDS";
+constexpr char OPTION_WITH_SENSOR[]						= "WITH_SENSOR";
 
 static bool GetSFIndexOrName(ccCommandLineInterface& cmd, int& sfIndex, QString& sfName, bool allowMinusOne = false)
 {
@@ -992,6 +999,10 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	CCCoreLib::LOCAL_MODEL_TYPES model = CCCoreLib::QUADRIC;
 	ccNormalVectors::Orientation  orientation = ccNormalVectors::Orientation::UNDEFINED;
 	
+	bool useGridStructure = false;
+	bool orientNormalsWithGrids = false;
+	bool orientNormalsWithSensors = false;
+	float angle = std::numeric_limits<float>::quiet_NaN(); //if this stays
 	while (!cmd.arguments().isEmpty())
 	{
 		QString argument = cmd.arguments().front().toUpper();
@@ -1053,6 +1064,16 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 				{
 					orientation = ccNormalVectors::Orientation::MINUS_SENSOR_ORIGIN;
 				}
+				else if (orient_argument == OPTION_WITH_GRIDS)
+				{
+					orientation = ccNormalVectors::Orientation::UNDEFINED;
+					orientNormalsWithGrids = true;
+				}
+				else if (orient_argument == OPTION_WITH_SENSOR)
+				{
+					orientation = ccNormalVectors::Orientation::UNDEFINED;
+					orientNormalsWithSensors = true;
+				}
 				else
 				{
 					return cmd.error(QObject::tr("Invalid parameter: unknown orientation '%1'").arg(orient_argument));
@@ -1089,6 +1110,26 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			else
 			{
 				return cmd.error(QObject::tr("Missing model"));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, OPTION_WITH_GRIDS))
+		{
+			cmd.arguments().takeFirst();
+			if (!cmd.arguments().isEmpty())
+			{
+				bool ok = false;
+				QString angleArg = cmd.arguments().takeFirst();
+				angle = angleArg.toFloat(&ok);
+				if (!ok)
+				{
+					return cmd.error(QObject::tr("Invalid angle for scan grids"));
+				}
+				cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(angleArg));
+				useGridStructure = true;
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Missing min angle for scan grids"));
 			}
 		}
 		else
@@ -1134,15 +1175,77 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			cmd.print(QObject::tr("\tCloud %1 radius = %2").arg(cloud->getName()).arg(thisCloudRadius));
 		}
 
-		cmd.print(QObject::tr("computeNormalsWithOctree started..."));
-		bool success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
-		if(success)
+		bool success = false;
+		if (useGridStructure)
 		{
-			cmd.print(QObject::tr("computeNormalsWithOctree success"));
+			cmd.print(QObject::tr("computeNormalsWithGrids started..."));
+			success = cloud->computeNormalsWithGrids(angle, progressDialog.data());
+			if(success)
+			{
+				cmd.print(QObject::tr("computeNormalsWithGrids success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("computeNormalsWithGrids failed"));
+			}
 		}
 		else
 		{
-			return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
+			cmd.print(QObject::tr("computeNormalsWithOctree started..."));
+			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
+			if(success)
+			{
+				cmd.print(QObject::tr("computeNormalsWithOctree success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
+			}
+		}
+
+		// ORIENT WITH_GRID
+		if (cloud->gridCount() && orientNormalsWithGrids)
+		{
+			//we can use the grid structure(s) to orient the normals
+			if(cloud->orientNormalsWithGrids())
+			{
+				cmd.print(QObject::tr("orientNormalsWithGrids success"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("orientNormalsWithGrids failed"));
+			}
+		}
+
+		// ORIENT WITH_SENSOR
+		else if (cloud->hasSensor() && orientNormalsWithSensors)
+		{
+			// RJ: TODO: the issue here is that a cloud can have multiple sensors.
+			// As the association to sensor is not explicit in CC, given a cloud
+			// some points can belong to one sensor and some others can belongs to others sensors.
+			// so it's why here grid orientation has precedence over sensor orientation because in this
+			// case association is more explicit.
+			// Here we take the first valid viewpoint for now even if it's not a good one...
+			for (unsigned i = 0; i < cloud->getChildrenNumber(); ++i)
+			{
+				ccHObject* child = cloud->getChild(i);
+				if (child && child->isKindOf(CC_TYPES::SENSOR))
+				{
+					ccSensor* sensor = ccHObjectCaster::ToSensor(child);
+					CCVector3 sensorPosition;
+					if (sensor->getActiveAbsoluteCenter(sensorPosition))
+					{
+						if(cloud->orientNormalsTowardViewPoint(sensorPosition))
+						{
+							cmd.print(QObject::tr("orientNormalsWithSensor success"));
+						}
+						else
+						{
+							return cmd.error(QObject::tr("orientNormalsWithSensor failed"));
+						}
+					}
+				}
+			}
 		}
 		
 		cloud->setName(cloud->getName() + QObject::tr(".OctreeNormal"));
@@ -6173,7 +6276,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(desc.pc, operation, thisSFFIndex, true, &sf2))
 				{
-					return cmd.error(QObject::tr("Failed top apply operation on cloud '%1'").arg(desc.pc->getName()));
+					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -6207,7 +6310,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 
 				if (!ccScalarFieldArithmeticsDlg::Apply(cloud, operation, thisSFFIndex, true, &sf2))
 				{
-					return cmd.error(QObject::tr("Failed top apply operation on mesh '%1'").arg(mesh->getName()));
+					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}
 				else if (cmd.autoSaveMode())
 				{
@@ -7968,3 +8071,214 @@ bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
 
 	return true;
 }
+
+CommandComputeDistancesFromSensor::CommandComputeDistancesFromSensor()
+	: ccCommandLineInterface::Command(QObject::tr("Compute distances from sensor"), COMMAND_COMPUTE_DISTANCES_FROM_SENSOR)
+{}
+
+bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
+{
+	bool squared = false;
+
+	//optional parameter: compute squared distances
+	if (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_SQUARED))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			squared = true;
+			cmd.print(QObject::tr("Squared distances"));
+		}
+	}
+
+	//Call MainWindow generic method
+	ccHObject::Container entities;
+	entities.resize(cmd.clouds().size());
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	{
+		entities[i] = cmd.clouds()[i].pc;
+	}
+
+	for ( ccHObject *entity : entities )
+	{
+		unsigned childrenNumber = entity->getChildrenNumber();
+		ccSensor* sensor{nullptr};
+		for (unsigned childPos = 0; childPos < childrenNumber; childPos++)
+		{
+			sensor = ccHObjectCaster::ToSensor( entity->getChild(childPos) );
+			if (sensor)
+				break; // once a sensor is found, break the loop
+		}
+
+		if (!sensor)
+			continue;
+
+		assert(sensor); // at this step we should have a sensor associated to the cloud
+
+		//get associated cloud
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud)
+		{
+			cmd.error(QObject::tr("Do not manage to associate the sensor with a cloud"));
+			return false;
+		}
+
+		//sensor center
+		CCVector3 sensorCenter;
+		if (!sensor->getActiveAbsoluteCenter(sensorCenter))
+		{
+			cmd.error(QObject::tr("Sensor center not detected"));
+			return false;
+		}
+
+		//set up a new scalar field
+		const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
+		int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
+		if (sfIdx < 0)
+		{
+			sfIdx = cloud->addScalarField(defaultRangesSFname);
+			if (sfIdx < 0)
+			{
+				cmd.error(QObject::tr("Not enough memory!"));
+				return false;
+			}
+		}
+		CCCoreLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+
+		// perform computation
+		for (unsigned i = 0; i < cloud->size(); ++i)
+		{
+			const CCVector3* P = cloud->getPoint(i);
+			ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() : (*P-sensorCenter).norm());
+			distances->setValue(i, s);
+		}
+
+		//save output
+		if (cmd.autoSaveMode() && !cmd.saveClouds("RANGES"))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+CommandComputeScatteringAngles::CommandComputeScatteringAngles()
+	: ccCommandLineInterface::Command(QObject::tr("Compute scattering angles"), COMMAND_COMPUTE_SCATTERING_ANGLES)
+{}
+
+bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
+{
+	bool toDegreeFlag = false;
+
+	//optional parameter: compute squared distances
+	if (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, OPTION_DEGREES))
+		{
+			//local option confirmed, we can move on
+			cmd.arguments().pop_front();
+			toDegreeFlag = true;
+			cmd.print(QObject::tr("Scattering angles in degrees"));
+		}
+	}
+
+	//Call MainWindow generic method
+	ccHObject::Container entities;
+	entities.resize(cmd.clouds().size());
+	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	{
+		entities[i] = cmd.clouds()[i].pc;
+	}
+
+	for ( ccHObject *entity : entities )
+	{
+		unsigned childrenNumber = entity->getChildrenNumber();
+		ccSensor* sensor{nullptr};
+		for (unsigned childPos = 0; childPos < childrenNumber; childPos++)
+		{
+			sensor = ccHObjectCaster::ToSensor( entity->getChild(childPos) );
+			if (sensor)
+				break; // once a sensor is found, break the loop
+		}
+
+		if (!sensor)
+			continue;
+
+		assert(sensor); // at this step we should have a sensor associated to the cloud
+
+		//get associated cloud
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
+		if (!cloud)
+		{
+			cmd.error(QObject::tr("Do not manage to associate the sensor with a cloud"));
+			return false;
+		}
+
+		if (!cloud->hasNormals())
+		{
+			cmd.print(QObject::tr(("The cloud must have normals for scattering angles calculations, skip calculation for cloud " + cloud->getName()).toLatin1()));
+			continue;
+		}
+
+		//sensor center
+		CCVector3 sensorCenter;
+		if (!sensor->getActiveAbsoluteCenter(sensorCenter))
+		{
+			cmd.error(QObject::tr("Sensor center not detected"));
+			return false;
+		}
+
+		//set up a new scalar field
+		const char* defaultScatAnglesSFname = toDegreeFlag ? CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME : CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME;
+		int sfIdx = cloud->getScalarFieldIndexByName(defaultScatAnglesSFname);
+		if (sfIdx < 0)
+		{
+			sfIdx = cloud->addScalarField(defaultScatAnglesSFname);
+			if (sfIdx < 0)
+			{
+				cmd.error(QObject::tr("Not enough memory!"));
+				return false;
+			}
+		}
+		CCCoreLib::ScalarField* angles = cloud->getScalarField(sfIdx);
+
+		// perform computation
+		for (unsigned i = 0; i < cloud->size(); ++i)
+		{
+			// the point position
+			const CCVector3* P = cloud->getPoint(i);
+
+			// build the ray
+			CCVector3 ray = *P - sensorCenter;
+			ray.normalize();
+
+			// get the current normal
+			CCVector3 normal(cloud->getPointNormal(i));
+			//normal.normalize(); //should already be the case!
+
+			//compute the angle
+			PointCoordinateType cosTheta = ray.dot(normal);
+			ScalarType theta = std::acos(std::min(std::abs(cosTheta), 1.0f));
+
+			if (toDegreeFlag)
+			{
+				theta = CCCoreLib::RadiansToDegrees( theta );
+			}
+
+			angles->setValue(i,theta);
+		}
+
+		//save output
+		if (cmd.autoSaveMode() && !cmd.saveClouds("SCATTERING_ANGLES"))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+

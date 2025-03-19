@@ -123,7 +123,7 @@ LasScalarField::Id LasScalarField::IdFromName(const char* name, unsigned targetP
 
 	if (strcmp(name, LasNames::WithheldFlag) == 0)
 	{
-		return LasScalarField::Id::KeypointFlag;
+		return LasScalarField::Id::WithheldFlag;
 	}
 
 	if (strcmp(name, LasNames::ScanAngleRank) == 0)

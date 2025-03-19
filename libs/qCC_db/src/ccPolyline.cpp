@@ -41,7 +41,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
 	{
-		//no need to call ccPolyline::the copyGlobalShiftAndScalemethod
+		//no need to call ccPolyline::the copyGlobalShiftAndScale method
 		//as it will try to set the Global Shift & Scale info on the associated cloud!
 		ccShiftedObject::copyGlobalShiftAndScale(*cloud);
 	}

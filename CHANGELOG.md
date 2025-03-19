@@ -57,6 +57,8 @@ New plugin
 
 	- VoxFall: non-parametric volumetric change detection for rockfalls
 		- computes volume differences between 2 meshes, with some visual representation
+  		- exports detected volumes as individual meshes
+		- option to generate CSV report
 
 Improvements:
 
@@ -84,6 +86,10 @@ Improvements:
 			this means the user really wants to apply the input Global shift to all the entities (instead of showing the dialog again and again)
 
 	- Command line:
+		- new options
+			- -DISTANCES_FROM_SENSOR [-SQUARED]
+			- -SCATTERING_ANGLES [-DEGREES]
+			- -OCTREE_NORMALS {radius} [-WITH_GRIDS {angle}] [-ORIENT WITH_GRIDS] [-ORIENT WITH_SENSOR] 
 		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'
@@ -164,11 +170,11 @@ Improvements:
 			(in case the clouds or planes have been shifted to a local coordinate system)
 
 	- Others:
-		- The shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
+		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the
 			GUI is frozen, but not the View toolbar.
 		- the Box primitive is now a real box mesh, with only 8 vertices, instead of 6 independent planes.
-		- Better naming of M3C2 output clouds
+		- better naming of M3C2 output clouds
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
@@ -196,6 +202,8 @@ Bug fixes:
 	- Normals shown has lines were not automatically update after applying a transformation to a cloud
 	- The 'conical span ratio' of the Unroll dialog was not properly restored from persistent settings
 	- The circular cursor of the 'Cloud layers' and 'Compass' plugins was not displayed at the right position on high DPI screens
+	- The Compass plugin was not transferring the Global Shift & Scale information from the cloud to the generated planes or polylines
+	- UHD screens were not properly supported (rotation center picking with double click, entity selection with a rectangle, etc.)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

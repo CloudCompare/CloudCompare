@@ -942,6 +942,8 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandRGBConvertToSF));
 	registerCommand(Command::Shared(new CommandFlipTriangles));
 	registerCommand(Command::Shared(new CommandSetVerbosity));
+	registerCommand(Command::Shared(new CommandComputeDistancesFromSensor));
+	registerCommand(Command::Shared(new CommandComputeScatteringAngles));
 }
 
 void ccCommandLineParser::cleanup()

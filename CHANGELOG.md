@@ -53,7 +53,11 @@ New features:
 		
 	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
-New plugin
+New plugins
+
+	- G3 Point - Granulometry made simple in CloudCompare
+		- github repository: https://github.com/p-leroy/qG3Point
+		- author page: https://lidar.univ-rennes.fr/en/g3point
 
 	- VoxFall: non-parametric volumetric change detection for rockfalls
 		- computes volume differences between 2 meshes, with some visual representation

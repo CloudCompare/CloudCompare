@@ -179,6 +179,7 @@ Improvements:
 			GUI is frozen, but not the View toolbar.
 		- the Box primitive is now a real box mesh, with only 8 vertices, instead of 6 independent planes.
 		- better naming of M3C2 output clouds
+		- Ukrainian translation is now available
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

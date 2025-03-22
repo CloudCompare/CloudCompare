@@ -55,7 +55,7 @@ New features:
 
 New plugins
 
-	- G3 Point - Granulometry made simple in CloudCompare
+	- G3 Point: granulometry made simple in CloudCompare
 		- github repository: https://github.com/p-leroy/qG3Point
 		- author page: https://lidar.univ-rennes.fr/en/g3point
 

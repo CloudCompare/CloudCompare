@@ -257,26 +257,26 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 	//context menu on DB tree elements
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	m_expandBranch = new QAction("Expand branch", this);
-	m_collapseBranch = new QAction("Collapse branch", this);
-	m_gatherInformation = new QAction("Information (recursive)", this);
-	m_sortChildrenType = new QAction("Sort children by type", this);
-	m_sortChildrenAZ = new QAction("Sort children by name (A-Z)", this);
-	m_sortChildrenZA = new QAction("Sort children by name (Z-A)", this);
-	m_selectByTypeAndName = new QAction("Select children by type and/or name", this);
-	m_deleteSelectedEntities = new QAction("Delete", this);
-	m_toggleSelectedEntities = new QAction("Toggle", this);
-	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility", this);
-	m_toggleSelectedEntitiesColor = new QAction("Toggle color", this);
-	m_toggleSelectedEntitiesNormals = new QAction("Toggle normals", this);
-	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures", this);
-	m_toggleSelectedEntitiesSF = new QAction("Toggle SF", this);
-	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name", this);
-	m_addEmptyGroup = new QAction("Add empty group", this);
-	m_alignCameraWithEntity = new QAction("Align camera", this);
-	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)", this);
-	m_enableBubbleViewMode = new QAction("Bubble-view", this);
-	m_editLabelScalarValue = new QAction("Edit scalar value", this);
+	m_expandBranch = new QAction(tr("Expand branch"), this);
+	m_collapseBranch = new QAction(tr("Collapse branch"), this);
+	m_gatherInformation = new QAction(tr("Information (recursive)"), this);
+	m_sortChildrenType = new QAction(tr("Sort children by type"), this);
+	m_sortChildrenAZ = new QAction(tr("Sort children by name (A-Z)"), this);
+	m_sortChildrenZA = new QAction(tr("Sort children by name (Z-A)"), this);
+	m_selectByTypeAndName = new QAction(tr("Select children by type and/or name"), this);
+	m_deleteSelectedEntities = new QAction(tr("Delete"), this);
+	m_toggleSelectedEntities = new QAction(tr("Toggle"), this);
+	m_toggleSelectedEntitiesVisibility = new QAction(tr("Toggle visibility"), this);
+	m_toggleSelectedEntitiesColor = new QAction(tr("Toggle color"), this);
+	m_toggleSelectedEntitiesNormals = new QAction(tr("Toggle normals"), this);
+	m_toggleSelectedEntitiesMat = new QAction(tr("Toggle materials/textures"), this);
+	m_toggleSelectedEntitiesSF = new QAction(tr("Toggle SF"), this);
+	m_toggleSelectedEntities3DName = new QAction(tr("Toggle 3D name"), this);
+	m_addEmptyGroup = new QAction(tr("Add empty group"), this);
+	m_alignCameraWithEntity = new QAction(tr("Align camera"), this);
+	m_alignCameraWithEntityReverse = new QAction(tr("Align camera (reverse)"), this);
+	m_enableBubbleViewMode = new QAction(tr("Bubble-view"), this);
+	m_editLabelScalarValue = new QAction(tr("Edit scalar value"), this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 

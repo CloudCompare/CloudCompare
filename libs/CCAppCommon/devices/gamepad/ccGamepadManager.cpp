@@ -261,7 +261,7 @@ void ccGamepadManager::setupMenu()
 {
 	if (!m_menu)
 	{
-		m_menu = new QMenu("Gamepad");
+		m_menu = new QMenu(tr("Gamepad"));
 		m_menu->setIcon(QIcon(":/CC/images/gamepad.png"));
 	}
 	

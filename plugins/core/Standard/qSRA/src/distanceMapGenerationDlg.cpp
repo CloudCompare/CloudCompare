@@ -1328,7 +1328,7 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	if (!m_window)
 		return;
 
-	ccRenderToFileDlg rtfDlg(m_window->glWidth(), m_window->glHeight(), m_app->getMainWindow());
+	ccRenderToFileDlg rtfDlg(m_window, m_app->getMainWindow());
 
 	rtfDlg.hideOptions();
 

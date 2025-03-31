@@ -7224,3 +7224,57 @@ void ccGLWindowInterface::setCustomLightPosition(const CCVector3f& pos)
 	invalidateViewport();
 	deprecate3DLayer();
 }
+
+QStringList ccGLWindowInterface::getWindowInfo(double scaling/*=1.0*/) const
+{
+	QStringList info;
+
+	// projection mode
+	if (m_viewportParams.perspectiveView)
+	{
+		info << QString("Projection: ") + (m_viewportParams.objectCenteredView ? "object-centered" : "viewer-based") + " perspective";
+	}
+	else
+	{
+		info << "Projection: orthographic";
+	}
+
+	// resolution
+	unsigned w = glWidth();
+	unsigned h = glHeight();
+
+	unsigned w2 = static_cast<unsigned>(w*scaling);
+	unsigned h2 = static_cast<unsigned>(h*scaling);
+
+	info << QString("Resolution: %1 x %2").arg(w2).arg(h2);
+
+	// pixel size
+	double pixelSize = computeActualPixelSize();
+	info << QString("Pixel size: %1").arg(pixelSize / scaling);
+
+	// Image size
+	info << QString("Image size: %1 x %2").arg(w * pixelSize).arg(h * pixelSize);
+
+	// Camera parameters
+	CCVector3d camCenter = m_viewportParams.getCameraCenter();
+	CCVector3d viewDir = m_viewportParams.getViewDir();
+	CCVector3d upDir = m_viewportParams.getUpDir();
+	CCVector3d rightDir = viewDir.cross(upDir);
+	info << QString("Camera");
+	info << QString("    View dir:  (%1, %2, %3)").arg(viewDir.x).arg(viewDir.y).arg(viewDir.z);
+	info << QString("    Up dir:    (%1, %2, %3)").arg(upDir.x).arg(upDir.y).arg(upDir.z);
+	info << QString("    Right dir: (%1, %2, %3)").arg(rightDir.x).arg(rightDir.y).arg(rightDir.z);
+	info << QString("    Center:    (%1, %2, %3)").arg(camCenter.x).arg(camCenter.y).arg(camCenter.z);
+
+	if (!m_viewportParams.perspectiveView)
+	{
+		double maxViewDirComp = std::max(std::abs(viewDir.x), std::max(std::abs(viewDir.y), std::abs(viewDir.z)));
+		if (maxViewDirComp > 0.99999) // the view is (almost) aligned with one of the main direction
+		{
+			CCVector3d topLeftCorner = camCenter - (((w / 2.0) * pixelSize) * rightDir) + (((h / 2.0) * pixelSize) * upDir);
+			info << QString("Top left corner: (%1, %2, %3)").arg(topLeftCorner.x).arg(topLeftCorner.y).arg(topLeftCorner.z);
+		}
+	}
+
+	return info;
+}

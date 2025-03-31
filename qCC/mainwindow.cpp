@@ -123,6 +123,9 @@
 #include "ccEntitySelectionDlg.h"
 #include "ccSmoothPolylineDlg.h"
 
+//CCPluginAPI
+#include <ccInfoDlg.h>
+
 //other
 #include "ccCropTool.h"
 #include "ccPersistentSettings.h"
@@ -714,24 +717,25 @@ void MainWindow::connectActions()
 	connect(m_UI->actionComputeBestICPRmsMatrix,	&QAction::triggered, this, &MainWindow::doActionComputeBestICPRmsMatrix);
 
 	//"Display" menu
-	connect(m_UI->actionFullScreen,						&QAction::toggled, this, &MainWindow::toggleFullScreen);
-	connect(m_UI->actionExclusiveFullScreen,			&QAction::toggled, this, &MainWindow::toggleExclusiveFullScreen);
+	connect(m_UI->actionFullScreen,						&QAction::toggled,   this, &MainWindow::toggleFullScreen);
+	connect(m_UI->actionExclusiveFullScreen,			&QAction::toggled,   this, &MainWindow::toggleExclusiveFullScreen);
 	connect(m_UI->actionRefresh,						&QAction::triggered, this, &MainWindow::refreshAll);
 	connect(m_UI->actionTestFrameRate,					&QAction::triggered, this, &MainWindow::testFrameRate);
 	connect(m_UI->actionToggleCenteredPerspective,		&QAction::triggered, this, &MainWindow::toggleActiveWindowCenteredPerspective);
 	connect(m_UI->actionToggleViewerBasedPerspective,	&QAction::triggered, this, &MainWindow::toggleActiveWindowViewerBasedPerspective);
-	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled, this, &MainWindow::toggleActiveWindowShowCursorCoords);
+	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled,   this, &MainWindow::toggleActiveWindowShowCursorCoords);
 	connect(m_UI->actionLockRotationAxis,				&QAction::triggered, this, &MainWindow::toggleLockRotationAxis);
 	connect(m_UI->actionEnterBubbleViewMode,			&QAction::triggered, this, &MainWindow::doActionEnableBubbleViewMode);
+	connect(m_UI->actionRenderToFile,					&QAction::triggered, this, &MainWindow::doActionRenderToFile);
 	connect(m_UI->actionEditCamera,						&QAction::triggered, this, &MainWindow::doActionEditCamera);
 	connect(m_UI->actionAdjustZoom,						&QAction::triggered, this, &MainWindow::doActionAdjustZoom);
+	connect(m_UI->actionViewInformation,				&QAction::triggered, this, &MainWindow::doActionShowCurrent3DViewInfo);
 	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
 	connect(m_UI->actionDisplaySettings,			&QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
-	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
 	//"Display > Shaders & filters" menu
 	connect(m_UI->actionLoadShader,					&QAction::triggered, this, &MainWindow::doActionLoadShader);
 	connect(m_UI->actionDeleteShader,				&QAction::triggered, this, &MainWindow::doActionDeleteShader);
@@ -7210,7 +7214,7 @@ void MainWindow::doActionRenderToFile()
 	if (!win)
 		return;
 
-	ccRenderToFileDlg rtfDlg(win->glWidth(), win->glHeight(), this);
+	ccRenderToFileDlg rtfDlg(win, this);
 
 	if (rtfDlg.exec())
 	{
@@ -7241,6 +7245,22 @@ void MainWindow::doActionEditCamera()
 	m_cpeDlg->start();
 
 	updateOverlayDialogsPlacement();
+}
+
+void MainWindow::doActionShowCurrent3DViewInfo()
+{
+	//current active MDI area
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	QStringList info = win->getWindowInfo();
+
+	ccInfoDlg infoDlg(this);
+
+	infoDlg.showText(info.join('\n'));
+
+	infoDlg.exec();
 }
 
 void MainWindow::doActionAdjustZoom()

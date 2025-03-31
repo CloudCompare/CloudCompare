@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>425</width>
-    <height>165</height>
+    <width>423</width>
+    <height>158</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Render to file</string>
   </property>
-  <layout class="QVBoxLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout">
      <item>
@@ -69,6 +69,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="infoToolButton">
+       <property name="text">
+        <string>info</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -96,6 +103,19 @@
       <string>Render overlay items (scale, trihedron, etc.)</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

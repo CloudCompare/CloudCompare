@@ -53,6 +53,10 @@ New features:
 		
 	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
+	- New tool: 'Display > Current 3D view Information'
+		- display some pieces of information on the current 3D view (resolution, pixel size, image size, camera orientation, etc.)
+		- also available via the new 'info' button of the 'Display > Render to file' option (taking into account a potential scaling)
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare
@@ -172,6 +176,10 @@ Improvements:
 	- 'Tools > Batch export'
 		- the 'Export cloud info' and 'Export plane info' tools will now also export the center global coordinates
 			(in case the clouds or planes have been shifted to a local coordinate system)
+
+	- 'Display > Render to file'
+		- new 'info' button, to display some pieces of information about the exported image (resolution, pixel size,
+			image size, camera orientation, etc.) taking into account a potential scaling
 
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

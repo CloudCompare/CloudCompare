@@ -1,8 +1,6 @@
-#pragma once
-
 //##########################################################################
 //#                                                                        #
-//#                            CLOUDCOMPARE                                #
+//#                              CLOUDCOMPARE                              #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -13,14 +11,31 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#include <QtCore/QtGlobal>
+#include "../include/ccInfoDlg.h"
 
-#if defined( CCPLUGIN_API_LIBRARY_BUILD )
-#define CCPLUGIN_LIB_API Q_DECL_EXPORT
-#else
-#define CCPLUGIN_LIB_API Q_DECL_IMPORT
-#endif
+#include "ui_infoDlg.h"
+
+ccInfoDlg::ccInfoDlg(QWidget* parent)
+	: QDialog(parent)
+	, m_ui(new Ui::InfoDialog)
+{
+	m_ui->setupUi(this);
+}
+
+ccInfoDlg::~ccInfoDlg()
+{
+	if (m_ui)
+	{
+		delete m_ui;
+		m_ui = nullptr;
+	}
+}
+
+void ccInfoDlg::showText(const QString& text)
+{
+	m_ui->textEdit->setText(text);
+}

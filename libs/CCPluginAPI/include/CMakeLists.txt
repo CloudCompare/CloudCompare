@@ -6,6 +6,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScaleEditorDlg.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScaleEditorWidget.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCommandLineInterface.h
+		${CMAKE_CURRENT_LIST_DIR}/ccInfoDlg.h
 		${CMAKE_CURRENT_LIST_DIR}/ccMainAppInterface.h
 		${CMAKE_CURRENT_LIST_DIR}/ccOverlayDialog.h
 		${CMAKE_CURRENT_LIST_DIR}/ccPersistentSettings.h

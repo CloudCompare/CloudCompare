@@ -389,6 +389,7 @@ private:
 
 	void doActionEditCamera();
 	void doActionAdjustZoom();
+	void doActionShowCurrent3DViewInfo();
 	void doActionSaveViewportAsCamera();
 	void doActionResetGUIElementsPos();
 	void doActionToggleRestoreWindowOnStartup(bool);

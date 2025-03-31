@@ -18,12 +18,15 @@
 
 #include "CCPluginAPI.h"
 
+//Qt
 #include <QDialog>
 
 namespace Ui
 {
 	class RenderToFileDialog;	
 }
+
+class ccGLWindowInterface;
 
 //! Dialog for screen to file rendering
 class CCPLUGIN_LIB_API ccRenderToFileDlg : public QDialog
@@ -33,7 +36,7 @@ class CCPLUGIN_LIB_API ccRenderToFileDlg : public QDialog
 public:
 
 	//! Default constructor
-	ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = nullptr);
+	ccRenderToFileDlg(ccGLWindowInterface* win, QWidget* parent = nullptr);
 
 	~ccRenderToFileDlg() override;
 	
@@ -54,13 +57,14 @@ private:
 	void chooseFile();
 	void updateInfo();
 	void saveSettings();
+	void showOutputInfo();
 
-	unsigned w;
-	unsigned h;
+private:
+	ccGLWindowInterface* m_associatedWindow;
 
-	QString selectedFilter;
-	QString currentPath;
-	QString filters;
+	QString m_selectedFilter;
+	QString m_currentPath;
+	QString m_filters;
 
 	Ui::RenderToFileDialog* m_ui;
 };

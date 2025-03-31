@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>18</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -108,6 +108,7 @@
     <addaction name="actionEditCamera"/>
     <addaction name="actionSaveViewportAsObject"/>
     <addaction name="actionAdjustZoom"/>
+    <addaction name="actionViewInformation"/>
     <addaction name="actionTestFrameRate"/>
     <addaction name="separator"/>
     <addaction name="menuLights"/>
@@ -3279,6 +3280,14 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="text">
     <string>Promote to cylinder</string>
+   </property>
+  </action>
+  <action name="actionViewInformation">
+   <property name="text">
+    <string>Current 3D view Information</string>
+   </property>
+   <property name="toolTip">
+    <string>Show information on current 3D view</string>
    </property>
   </action>
  </widget>

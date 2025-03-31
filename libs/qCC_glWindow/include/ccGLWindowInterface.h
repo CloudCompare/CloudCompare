@@ -539,6 +539,9 @@ public:
 	//! Returns the OpenGL context size
 	inline QSize glSize() const { return m_glViewport.size(); }
 
+	//! Returns some pieces of information about the 3D view (resolution, pixel size, image size, camera orientation, etc.)
+	QStringList getWindowInfo(double scaling = 1.0) const;
+
 public: //LOD
 
 	//! Returns whether LOD is enabled on this display or not

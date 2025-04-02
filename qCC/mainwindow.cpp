@@ -11643,7 +11643,16 @@ void MainWindow::destroyGLWindow(ccGLWindowInterface* view3D) const
 {
 	if (view3D)
 	{
-		view3D->asQObject()->setParent(nullptr);
+		if (QWidget* widget = dynamic_cast<QWidget*>(view3D))
+		{
+			// If view3D is of type QWidget, we have to use QWidget::setParent
+			widget->setParent(nullptr);
+		}
+		else
+		{
+			// Else, we can use the QObject::setParent method
+			view3D->asQObject()->setParent(nullptr);
+		}
 		delete view3D;
 	}
 }

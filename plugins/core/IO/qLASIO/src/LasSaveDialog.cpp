@@ -508,11 +508,21 @@ void LasSaveDialog::setExtraScalarFields(const std::vector<LasExtraScalarField>&
 		return;
 	}
 
+	// We received extra scalar fields spec saved from the file's metadata
+	// But we may have already default-assigned some fields as extra scalar fields
+	// so we have to clear them
+	unassignDefaultFields();
+
 	for (const LasExtraScalarField& field : extraScalarFields)
 	{
 		auto* card = createCard();
 		extraScalarFieldsLayout->insertWidget(extraScalarFieldsLayout->count(), card);
 		card->fillFrom(field);
+	}
+
+	if (shouldAutomaticallyAssignLeftoverSFsAsExtra())
+	{
+		assignLeftoverScalarFieldsAsExtra();
 	}
 }
 

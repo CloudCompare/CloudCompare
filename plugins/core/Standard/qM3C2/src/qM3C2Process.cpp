@@ -464,6 +464,37 @@ bool qM3C2Process::Compute(const qM3C2Dialog& dlg, QString& errorMessage, ccPoin
 	double normalScale = dlg.normalScaleDoubleSpinBox->value();
 	double projectionScale = dlg.cylDiameterDoubleSpinBox->value();
 	qM3C2Normals::ComputationMode normMode = dlg.getNormalsComputationMode();
+	// 		DEFAULT_MODE			= 0, //compute normals on core points
+	// USE_CLOUD1_NORMALS		= 1,
+	// 	MULTI_SCALE_MODE		= 2,
+	// 	VERT_MODE				= 3,
+	// 	HORIZ_MODE				= 4,
+	// 	USE_CORE_POINTS_NORMALS	= 5,
+	QString msg("[qM3C2Process::Compute] normal mode: ");
+	switch (normMode) {
+	case qM3C2Normals::DEFAULT_MODE:
+		msg += "DEFAULT_MODE";
+		break;
+	case qM3C2Normals::USE_CLOUD1_NORMALS:
+		msg += "USE_CLOUD1_NORMALS";
+		break;
+	case qM3C2Normals::MULTI_SCALE_MODE:
+		msg += "MULTI_SCALE_MODE";
+		break;
+	case qM3C2Normals::VERT_MODE:
+		msg += "VERT_MODE";
+		break;
+	case qM3C2Normals::HORIZ_MODE:
+		msg += "HORIZ_MODE";
+		break;
+	case qM3C2Normals::USE_CORE_POINTS_NORMALS:
+		msg += "USE_CORE_POINTS_NORMALS";
+		break;
+	default:
+		ccLog::Error("[qM3C2Process::Compute] Unexpected normal mode " + QString::number(normMode));
+		break;
+	}
+	ccLog::Print(msg);
 	double samplingDist = dlg.cpSubsamplingDoubleSpinBox->value();
 	ccScalarField* normalScaleSF = nullptr; //normal scale (multi-scale mode only)
 

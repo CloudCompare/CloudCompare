@@ -42,9 +42,14 @@ void qM3C2Plugin::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
 	{
-		m_action->setEnabled(	selectedEntities.size() == 2
-							&&	selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
-							&&	selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD) );
+		bool twoCloudsSelection = selectedEntities.size() == 2
+								  &&	selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
+								  &&	selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD);
+		bool threeCloudsSelection = selectedEntities.size() == 3
+									&&	selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
+									&&	selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD)
+									&&	selectedEntities[2]->isA(CC_TYPES::POINT_CLOUD);
+		m_action->setEnabled(twoCloudsSelection || threeCloudsSelection);
 	}
 
 	m_selectedEntities = selectedEntities;
@@ -74,19 +79,26 @@ void qM3C2Plugin::doAction()
 	if (!m_app)
 		return;
 
-	if (m_selectedEntities.size() != 2
-		|| !m_selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
-		|| !m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
+	bool twoCloudsSelection = m_selectedEntities.size() == 2
+							  &&	m_selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
+							  &&	m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD);
+	bool threeCloudsSelection = m_selectedEntities.size() == 3
+								&&	m_selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)
+								&&	m_selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD)
+								&&	m_selectedEntities[2]->isA(CC_TYPES::POINT_CLOUD);
+
+	if (!twoCloudsSelection && !threeCloudsSelection)
 	{
-		m_app->dispToConsole("Select two point clouds!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Select two or three point clouds!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	ccPointCloud* cloud1 = ccHObjectCaster::ToPointCloud(m_selectedEntities[0]);
 	ccPointCloud* cloud2 = ccHObjectCaster::ToPointCloud(m_selectedEntities[1]);
+	ccPointCloud* cloud3 = threeCloudsSelection ? ccHObjectCaster::ToPointCloud(m_selectedEntities[2]) : nullptr;
 
 	//display dialog
-	qM3C2Dialog dlg(cloud1, cloud2, m_app);
+	qM3C2Dialog dlg(cloud1, cloud2, m_app, cloud3);
 	if (!dlg.exec())
 	{
 		//process cancelled by the user

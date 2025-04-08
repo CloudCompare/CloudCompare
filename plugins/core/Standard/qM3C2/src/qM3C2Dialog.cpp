@@ -427,21 +427,6 @@ void qM3C2Dialog::setCloud2Visibility(bool state)
 
 qM3C2Normals::ComputationMode qM3C2Dialog::getNormalsComputationMode() const
 {
-	// force vertical mode if needed in command line mode
-	if (!m_app)
-	{
-		// if (getRequestedComputationMode() == qM3C2Normals::VERT_MODE)
-		// {
-		// 	ccLog::Print("[M3C2] force computation mode VERT_MODE as requested in the parameter file");
-		// 	return qM3C2Normals::VERT_MODE;
-		// }
-		// else if (getRequestedComputationMode() == qM3C2Normals::USE_CORE_POINTS_NORMALS)
-		// {
-		// 	ccLog::Print("[M3C2] force computation mode USE_CORE_POINTS_NORMALS as requested in the parameter file");
-		// 	return qM3C2Normals::USE_CORE_POINTS_NORMALS;
-		// }
-	}
-
 	//special case
 	if (normalSourceComboBox->currentIndex() >= 0)
 	{

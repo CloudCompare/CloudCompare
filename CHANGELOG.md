@@ -169,6 +169,10 @@ Improvements:
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
 
+	- M3C2 plugin
+		- better handling of the normal mode
+		- option to select either 2 (ref + comp) or 3 (ref + comp + core) clouds to activate the plugin
+
 	- TreeIso plugin
 		- updated version, faster and more robust
 		- detection of ill-formed clouds (i.e. with ground points for instance)
@@ -201,10 +205,8 @@ Bug fixes:
 	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
-	- M3C2: 
-		- better handling of the normal mode
+	- M3C2:
 		- bug corrected: when the "use other cloud" is checked, do not propose the use of cloud #1 as a possible source for the normals
-		- option to select either 2 (ref + comp) or 3 (ref + comp + core) clouds to activate the plugin
 		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
 	- Waveform
 		- each LAS point with missing waveform data was triggering a warning message

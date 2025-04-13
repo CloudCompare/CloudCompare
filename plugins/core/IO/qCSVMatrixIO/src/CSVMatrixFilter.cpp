@@ -115,7 +115,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 		}
 
 		//we split the current line
-		QStringList parts = line.split(s_separator,QString::SkipEmptyParts);
+		QStringList parts = line.split(s_separator, QString::KeepEmptyParts);
 
 		//if we have reached the max. number of points per cloud
 		if (width < 0)
@@ -139,11 +139,17 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 
 		bool ok = true;
 		CCVector3 P(0, static_cast<PointCoordinateType>((s_inverseRows ? -row : row) * s_ySpacing), 0);
-		for (int i=0; i<width; ++i)
+		for (int i = 0; i < width; ++i)
 		{
+			if (parts[i].isEmpty())
+			{
+				continue;
+			}
 			P.z = parts[i].toDouble(&ok);
 			if (!ok)
+			{
 				break;
+			}
 			P.x = static_cast<PointCoordinateType>(i * s_xSpacing);
 
 			cloud->addPoint(P);

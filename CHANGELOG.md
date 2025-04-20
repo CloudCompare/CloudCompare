@@ -193,6 +193,7 @@ Improvements:
 		- better naming of M3C2 output clouds
 		- Ukrainian translation is now available
 		- CSV matrix files can now be loaded with empty cells
+		- the 'Escape' key should now allow to close any currently opened 'overlay' dialog in the top right corner of the 3D views (point picking, rotate/translate, etc.)
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

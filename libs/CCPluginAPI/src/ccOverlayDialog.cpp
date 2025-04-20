@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QShortcut>
 
 //system
 #include <cassert>
@@ -36,6 +37,8 @@ ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=nullptr*/, Qt::WindowFlags fl
 	, m_associatedWin(nullptr)
 	, m_processing(false)
 {
+	QShortcut* escShortcut = new QShortcut(QKeySequence::Cancel, this);
+	connect(escShortcut, &QShortcut::activated, [this]() { close(); });
 }
 
 ccOverlayDialog::~ccOverlayDialog()
@@ -148,6 +151,11 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 		if (m_overriddenKeys.contains(keyEvent->key()))
 		{
 			Q_EMIT shortcutTriggered(keyEvent->key());
+			return true;
+		}
+		else if (keyEvent->key() == Qt::Key_Escape)
+		{
+			close();
 			return true;
 		}
 		else

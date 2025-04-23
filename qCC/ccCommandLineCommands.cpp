@@ -1176,22 +1176,31 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		}
 
 		bool success = false;
+		bool normalsAlreadyOriented = false;
 		if (useGridStructure)
 		{
-			cmd.print(QObject::tr("computeNormalsWithGrids started..."));
-			success = cloud->computeNormalsWithGrids(angle, progressDialog.data());
-			if(success)
+			if (orientation == ccNormalVectors::UNDEFINED)
 			{
-				cmd.print(QObject::tr("computeNormalsWithGrids success"));
+				ccLog::Print("\tcompute + orient normals with grids");
+				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), ccNormalVectors::UNDEFINED);
+				if (orientNormalsWithGrids)
+				{
+					normalsAlreadyOriented = true;
+				}
 			}
 			else
+			{
+				ccLog::Print("\tcompute normals with grids, preferred orientation: " + QString::number(orientation));
+				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), orientation);
+			}
+			if(!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithGrids failed"));
 			}
 		}
 		else
 		{
-			cmd.print(QObject::tr("computeNormalsWithOctree started..."));
+			ccLog::Print("\tcompute normals with octree, preferred orientation: " + QString::number(orientation));
 			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
 			if(success)
 			{
@@ -1204,16 +1213,16 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		}
 
 		// ORIENT WITH_GRID
-		if (cloud->gridCount() && orientNormalsWithGrids)
+		if (cloud->gridCount() && orientNormalsWithGrids  && !normalsAlreadyOriented)
 		{
 			//we can use the grid structure(s) to orient the normals
 			if(cloud->orientNormalsWithGrids())
 			{
-				cmd.print(QObject::tr("orientNormalsWithGrids success"));
+				cmd.print(QObject::tr("\torient normals with grids"));
 			}
 			else
 			{
-				return cmd.error(QObject::tr("orientNormalsWithGrids failed"));
+				return cmd.error(QObject::tr("orient normals with grids failed"));
 			}
 		}
 
@@ -1237,11 +1246,11 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 					{
 						if(cloud->orientNormalsTowardViewPoint(sensorPosition))
 						{
-							cmd.print(QObject::tr("orientNormalsWithSensor success"));
+							cmd.print(QObject::tr("\torient normals with sensors"));
 						}
 						else
 						{
-							return cmd.error(QObject::tr("orientNormalsWithSensor failed"));
+							return cmd.error(QObject::tr("orient normals with sensors failed"));
 						}
 					}
 				}

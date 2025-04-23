@@ -5855,8 +5855,9 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 	ccGenericPointCloud::removeFromDisplay(win);
 }
 
-bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
-											ccProgressDialog* pDlg/*=nullptr*/)
+bool ccPointCloud::computeNormalsWithGrids(double minTriangleAngle_deg/*=1.0*/,
+										   ccProgressDialog* pDlg/*=nullptr*/,
+										   ccNormalVectors::Orientation preferredOrientation)
 {
 	unsigned pointCount = size();
 	if (pointCount < 3)
@@ -6067,15 +6068,30 @@ bool ccPointCloud::computeNormalsWithGrids(	double minTriangleAngle_deg/*=1.0*/,
 		}
 	}
 
-	//for each vertex
+	//preferred orientation
+	NormsIndexesTableType theNormsCodes;
+	//reserve some memory to store the (compressed) normals
+	if (!theNormsCodes.resizeSafe(pointCount))
 	{
-		for (unsigned i = 0; i < pointCount; i++)
-		{
-			CCVector3& N = theNorms[i];
-			//normalize the 'mean' normal
-			N.normalize();
-			setPointNormal(i, N);
-		}
+		return false;
+	}
+	for (unsigned i = 0; i < pointCount; i++)
+	{
+		CCVector3& N = theNorms[i];
+		//normalize the 'mean' normal
+		N.normalize();
+		theNormsCodes.at(i) = ccNormalVectors::GetNormIndex(N);
+	}
+
+	if (preferredOrientation != ccNormalVectors::UNDEFINED)
+	{
+		ccNormalVectors::UpdateNormalOrientations(this, theNormsCodes, preferredOrientation);
+	}
+
+	//for each vertex
+	for (unsigned i = 0; i < pointCount; i++)
+	{
+		setPointNormalIndex(i, theNormsCodes.at(i));
 	}
 
 	//We must update the VBOs

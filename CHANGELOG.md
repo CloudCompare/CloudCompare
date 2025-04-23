@@ -196,6 +196,9 @@ Improvements:
 	- 'Tools > Fit > Sphere'
 		- introduction of a dialog to let the user set the fitting parameters or force the sphere radius
 
+	- 'Edit > Normals > Compute'
+		- When "use scan grid(s) whenever possible" is checked for Neighbors, it is now possible to use a preferred orientation when "Use scan grid(s) whenever possible" and "Use sensor(s) whenever possible" are unchecked
+
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

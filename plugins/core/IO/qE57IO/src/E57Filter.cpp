@@ -704,7 +704,11 @@ static bool SaveScan(	ccPointCloud* cloud,
 
 			if (hasNormals)
 			{
-				const CCVector3& N = cloud->getPointNormal(index);
+				CCVector3 N = cloud->getPointNormal(index);
+				if (hasSensorPoseMat)
+				{
+					fromSensorToLocalCS.applyRotation(N);
+				}
 				arrays.xNormData[i] = static_cast<double>(N.x);
 				arrays.yNormData[i] = static_cast<double>(N.y);
 				arrays.zNormData[i] = static_cast<double>(N.z);

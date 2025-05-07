@@ -4110,17 +4110,20 @@ void ccGLWindowInterface::drawCross()
 	ccQOpenGLFunctions* glFunc = functions();
 	assert(glFunc);
 
+	const float pixel_ratio=getDevicePixelRatio();
+
 	//force line width
 	glFunc->glPushAttrib(GL_LINE_BIT);
-	glFunc->glLineWidth(1.0f);
+	glFunc->glLineWidth(2.0f * pixel_ratio);
 
 	//cross OpenGL drawing
 	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);
 	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
-	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
+	const float cross_length = pixel_ratio * CC_DISPLAYED_CENTER_CROSS_LENGTH;
+	glFunc->glVertex3f(0.0f, -cross_length, 0.0f);
+	glFunc->glVertex3f(0.0f, cross_length, 0.0f);
+	glFunc->glVertex3f(-cross_length, 0.0f, 0.0f);
+	glFunc->glVertex3f(cross_length, 0.0f, 0.0f);
 	glFunc->glEnd();
 
 	glFunc->glPopAttrib(); //GL_LINE_BIT
@@ -4994,7 +4997,10 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		&& (!renderingParams.useFBO || !m_activeGLFilter))
 	{
 		setStandardOrthoCenter();
+		glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+		glFunc->glDisable(GL_DEPTH_TEST);
 		drawCross();
+		glFunc->glPopAttrib();
 	}
 
 	logGLError("ccGLWindow::draw3D");

@@ -340,7 +340,8 @@ public: //normals computation/orientation
 	/** Can also orient the normals in the same run.
 	**/
 	bool computeNormalsWithGrids(	double minTriangleAngle_deg = 1.0,
-									ccProgressDialog* pDlg = nullptr );
+									ccProgressDialog* pDlg = nullptr,
+									ccNormalVectors::Orientation preferredOrientation = ccNormalVectors::Orientation::UNDEFINED);
 
 	//! Orient the normals with the associated grid structure(s)
 	bool orientNormalsWithGrids(    ccProgressDialog* pDlg = nullptr );

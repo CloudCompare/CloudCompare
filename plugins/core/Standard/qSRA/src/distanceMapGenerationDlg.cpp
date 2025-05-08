@@ -584,7 +584,7 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 			//update pixel size accordingly
 			float screenHeight = m_window->glHeight();
 			double pixelSize = std::max(box.getDiagVec().x * m_window->getDisplayScale().x / mapWidth, box.getDiagVec().y * m_window->getDisplayScale().y / screenHeight);
-			double distanceToWidthRatio = params.computeDistanceToWidthRatio();
+			double distanceToWidthRatio = params.computeDistanceToWidthRatio(m_window->glWidth(), m_window->glHeight());
 			double focalDistance = (pixelSize * screenWidth) / (distanceToWidthRatio);
 			params.setFocalDistance(focalDistance);
 		}

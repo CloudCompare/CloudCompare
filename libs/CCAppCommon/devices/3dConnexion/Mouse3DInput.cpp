@@ -354,12 +354,12 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 		{
 			if (viewParams.perspectiveView)
 			{
-				double distanceToWidthRatio = win->getViewportParameters().computeDistanceToWidthRatio();
+				double distanceToWidthRatio = win->getViewportParameters().computeDistanceToWidthRatio(win->glWidth(), win->glHeight());
 				X *= distanceToWidthRatio;
 				Y *= distanceToWidthRatio;
 			}
 
-			double screenWidth3D = viewParams.computeWidthAtFocalDist();
+			double screenWidth3D = viewParams.computeWidthAtFocalDist(win->glWidth(), win->glHeight());
 			if (viewParams.objectCenteredView)
 			{
 				screenWidth3D = -screenWidth3D;

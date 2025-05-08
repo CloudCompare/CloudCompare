@@ -191,13 +191,13 @@ void cc2Point5DimEditor::update2DDisplayZoom(ccBBox& box)
 			}
 		}
 
-		double targetWidth = realGridWidth;
+		double targetDimension = realGridWidth;
 		if (realGridHeight / screenHeight > realGridWidth / screenWidth)
 		{
-			targetWidth = (realGridHeight * screenWidth) / screenHeight;
+			targetDimension = (realGridHeight * screenWidth) / screenHeight;
 		}
 
-		m_glWindow->setCameraFocalToFitWidth(static_cast<float>(targetWidth));
+		m_glWindow->setCameraFocalToFitWidth(targetDimension);
 		m_glWindow->setPointSize(pointSize);
 	}
 	

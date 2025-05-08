@@ -227,6 +227,7 @@ Bug fixes:
 	- UHD screens were not properly supported (rotation center picking with double click, entity selection with a rectangle, etc.)
 	- ASCII cloud file import will now respect empty fields instead of shifting all following columns left
 	- The ICP registration tool could lead to mirrored transformations in some cases (since version 2.12.0)
+	- The 'Display > Adjust zoom' could result in a wrong pixel size if the height of the 3D view was larger than its width
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

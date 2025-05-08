@@ -95,15 +95,16 @@ public: //functions
 	double computeDistanceToHalfWidthRatio() const;
 
 	//! Computes the ratio 'distance to width' (based on the current FOV)
-	/** Width = ratio * distance = (2 * tan(fov / 2)) * distance
+	/** \warning The ratio changes if the aspect ratio (W/H) is less than 1.0.
+		Width = ratio * distance = (2 * tan(fov / 2)) * distance / std::min(ar, 1.0)
 	**/
-	double computeDistanceToWidthRatio() const;
+	double computeDistanceToWidthRatio(int screenWidth, int screenHeight) const;
 
-	//! Computes the object 'width' at the 'focal' distance
-	double computeWidthAtFocalDist() const;
+	//! Computes the width of the screen at the current focal distance
+	double computeWidthAtFocalDist(int screenWidth, int screenHeight) const;
 
 	//! Computes the pixel size at the 'focal' distance
-	double computePixelSize(int glWidth) const;
+	double computePixelSize(int screenWidth, int screenHeight) const;
 
 	//! Logs the viewport parameters
 	void log() const;

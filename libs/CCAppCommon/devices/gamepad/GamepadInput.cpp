@@ -52,7 +52,7 @@ void GamepadInput::update(ccGLWindowInterface* win)
 	//panning
 	if (m_hasPanning)
 	{
-		double screenWidth3D = viewParams.computeWidthAtFocalDist();
+		double screenWidth3D = viewParams.computeWidthAtFocalDist(win->glWidth(), win->glHeight());
 		if (!viewParams.objectCenteredView)
 		{
 			screenWidth3D = -screenWidth3D;
@@ -75,7 +75,7 @@ void GamepadInput::update(ccGLWindowInterface* win)
 			{
 				X *= win->getViewportParameters().computeDistanceToHalfWidthRatio();
 			}
-			double screenWidth3D = viewParams.computeWidthAtFocalDist();
+			double screenWidth3D = viewParams.computeWidthAtFocalDist(win->glWidth(), win->glHeight());
 			if (!viewParams.objectCenteredView)
 			{
 				screenWidth3D = -screenWidth3D;

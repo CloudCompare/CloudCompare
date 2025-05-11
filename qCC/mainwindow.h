@@ -174,9 +174,9 @@ public:
 	
 private:
 	//! Creates a new 3D GL sub-window
-	ccGLWindowInterface* new3DView() { return new3DViewInternal(true); }
+	ccGLWindowInterface* new3DView() { return new3DViewInternal(true, false); }
 	//! Creates a new 3D GL sub-window (choose whether entity selection is allowed or not)
-	ccGLWindowInterface* new3DViewInternal(bool allowEntitySelection);
+	ccGLWindowInterface* new3DViewInternal(bool allowEntitySelection, bool warnAboutLockedRotationAxis = false);
 
 	//! Zooms in (current 3D view)
 	void zoomIn();

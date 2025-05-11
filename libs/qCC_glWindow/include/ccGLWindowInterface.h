@@ -623,6 +623,14 @@ public: //stereo mode
 	//! Returns whether the rotation axis is locaked or not
 	inline bool isRotationAxisLocked() const { return m_rotationAxisLocked; }
 
+	//! Returns the default 'vertical' orientation
+	inline CCVector3d getDefaultVertDir() const { return m_rotationAxisLocked ? m_lockedRotationAxis : CCVector3d(0, 0, 1); }
+
+	//! Sets the current view position if the rotation axis is locked
+	void setLockedRotationAngles(double lockedRotationAngle_rad, double lockedRotationOrthoAngle_rad);
+	//! Returns the current view angular position if the rotation axis is locked
+	void getLockedRotationAngles(double& lockedRotationAngle_rad, double& lockedRotationOrthoAngle_rad) const;
+
 public: // other methods
 
 	//! Applies a 1:1 global zoom
@@ -1315,6 +1323,13 @@ protected: //members
 	bool m_rotationAxisLocked;
 	//! Locked rotation axis
 	CCVector3d m_lockedRotationAxis;
+	//! Locked rotation angle
+	double m_lockedRotationAngle_rad;
+	//! Locked rotation orthogonal angle
+	double m_lockedRotationOrthoAngle_rad;
+	//! Locked rotation base matrix
+	ccGLMatrixd m_lockedRotationBaseMat;
+
 
 	//! Shared texture type
 	using SharedTexture = QSharedPointer<QOpenGLTexture>;

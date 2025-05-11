@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/lockedAxis.png</file>
     <file>images/ccSaveProject.png</file>
     <file>images/clipboard.png</file>
     <file>images/gearIcon.png</file>

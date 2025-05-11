@@ -64,56 +64,85 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int 
 
 //*********** OPENGL MATRICES ***********//
 
-ccGLMatrixd ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
+ccGLMatrixd ccGLUtils::GenerateViewMat(	CC_VIEW_ORIENTATION orientation,
+										const CCVector3d& vertDir/*=CCVector3d(0, 0, 1)*/,
+										double* _vertAngle_rad/*=nullptr*/,
+										double* _orthoAngle_rad/*=nullptr*/)
 {
-	CCVector3d eye(0,0,0);
-	CCVector3d center(0,0,0);
-	CCVector3d top(0,0,0);
+	double vertAngle_rad = 0.0;
+	double orthoAngle_rad = 0.0;
 
-	//we look at (0,0,0) by default
 	switch (orientation)
 	{
 	case CC_TOP_VIEW:
-		eye.z =  1.0;
-		top.y =  1.0;
+		vertAngle_rad = 0.0;
+		orthoAngle_rad = M_PI_2;
 		break;
 	case CC_BOTTOM_VIEW:
-		eye.z = -1.0;
-		top.y =  1.0;
+		vertAngle_rad = -M_PI;
+		orthoAngle_rad = -M_PI_2;
 		break;
 	case CC_FRONT_VIEW:
-		eye.y = -1.0;
-		top.z =  1.0;
+		vertAngle_rad = 0.0;
+		orthoAngle_rad = 0.0;
 		break;
 	case CC_BACK_VIEW:
-		eye.y =  1.0;
-		top.z =  1.0;
+		vertAngle_rad = -M_PI;
+		orthoAngle_rad = 0.0;
 		break;
 	case CC_LEFT_VIEW:
-		eye.x = -1.0;
-		top.z =  1.0;
+		vertAngle_rad = M_PI_2;
+		orthoAngle_rad = 0.0;
 		break;
 	case CC_RIGHT_VIEW:
-		eye.x =  1.0;
-		top.z =  1.0;
+		vertAngle_rad = -M_PI_2;
+		orthoAngle_rad = 0.0;
 		break;
 	case CC_ISO_VIEW_1:
-		eye.x = -1.0;
-		eye.y = -1.0;
-		eye.z =  1.0;
-		top.x =  1.0;
-		top.y =  1.0;
-		top.z =  1.0;
+		vertAngle_rad = M_PI / 4;
+		orthoAngle_rad = M_PI / 4;
 		break;
 	case CC_ISO_VIEW_2:
-		eye.x =  1.0;
-		eye.y =  1.0;
-		eye.z =  1.0;
-		top.x = -1.0;
-		top.y = -1.0;
-		top.z =  1.0;
+		vertAngle_rad = -M_PI / 4;
+		orthoAngle_rad = -M_PI / 4;
 		break;
+	default:
+		ccLog::Warning("Internal error: unhandled view mode");
+		if (_vertAngle_rad)
+		{
+			*_vertAngle_rad = std::numeric_limits<double>::quiet_NaN();
+		}
+		if (_orthoAngle_rad)
+		{
+			*_orthoAngle_rad = std::numeric_limits<double>::quiet_NaN();
+		}
+		return {};
 	}
 
-	return ccGLMatrixd::FromViewDirAndUpDir(center-eye,top);
+	if (_vertAngle_rad)
+	{
+		*_vertAngle_rad = vertAngle_rad;
+	}
+	if (_orthoAngle_rad)
+	{
+		*_orthoAngle_rad = orthoAngle_rad;
+	}
+
+	return GenerateViewMat(vertDir, vertAngle_rad, orthoAngle_rad);
+}
+
+ccGLMatrixd ccGLUtils::GenerateViewMat(	const CCVector3d& vertDir,
+										double vertAngle_rad,
+										double orthoAngle_rad)
+{
+	ccGLMatrixd vertRot;
+	vertRot.initFromParameters(vertAngle_rad, vertDir, CCVector3d(0, 0, 0));
+	ccGLMatrixd horizRot;
+	horizRot.initFromParameters(orthoAngle_rad, CCVector3d(1, 0, 0), CCVector3d(0, 0, 0));
+
+	CCVector3d orthoDir = vertDir.orthogonal(); // returns +Y if vertDir = +Z
+
+	ccGLMatrixd viewMat = horizRot * ccGLMatrixd::FromViewDirAndUpDir(orthoDir, vertDir) * vertRot;
+
+	return viewMat;
 }

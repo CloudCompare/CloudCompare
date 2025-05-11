@@ -166,6 +166,9 @@ static MainWindow* s_instance  = nullptr;
 //default file filter separator
 static const QString s_fileFilterSeparator(";;");
 
+//default (locked) rotation axis
+static CCVector3d s_lockedRotationAxis(0, 0, 1);
+
 enum PickingOperation {	NO_PICKING_OPERATION,
 						PICKING_ROTATION_CENTER,
 						PICKING_LEVEL_POINTS,
@@ -304,7 +307,7 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	new3DView();
+	new3DViewInternal(true, true);
 
 	setupInputDevices();
 
@@ -525,7 +528,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
-	connect(m_UI->actionColorFromScalarField,       &QAction::triggered, this, &MainWindow::doActionColorFromScalars);
+	connect(m_UI->actionColorFromScalarField,		&QAction::triggered, this, &MainWindow::doActionColorFromScalars);
 	connect(m_UI->actionClearColor,					&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
@@ -625,7 +628,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRenameSF,					&QAction::triggered, this, &MainWindow::doActionRenameSF);
 	connect(m_UI->actionOpenColorScalesManager,		&QAction::triggered, this, &MainWindow::doActionOpenColorScalesManager);
 	connect(m_UI->actionAddIdField,					&QAction::triggered, this, &MainWindow::doActionAddIdField);
-    connect(m_UI->actionSplitCloudUsingSF,          &QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
+    connect(m_UI->actionSplitCloudUsingSF,			&QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
 	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
 	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
 	connect(m_UI->actionDeleteScalarField,			&QAction::triggered, this, [=]() {
@@ -777,32 +780,33 @@ void MainWindow::connectActions()
 	//View toolbar
 	connect(m_UI->actionGlobalZoom,					&QAction::triggered, this, &MainWindow::setGlobalZoom);
 	connect(m_UI->actionPickRotationCenter,			&QAction::triggered, this, &MainWindow::doPickRotationCenter);
+	connect(m_UI->actionLockView3DRotationAxis,		&QAction::triggered, this, &MainWindow::toggleLockRotationAxis);
 	connect(m_UI->actionZoomAndCenter,				&QAction::triggered, this, &MainWindow::zoomOnSelectedEntities);
 	connect(m_UI->actionSetPivotAlwaysOn,			&QAction::triggered, this, &MainWindow::setPivotAlwaysOn);
 	connect(m_UI->actionSetPivotRotationOnly,		&QAction::triggered, this, &MainWindow::setPivotRotationOnly);
 	connect(m_UI->actionSetPivotOff,				&QAction::triggered, this, &MainWindow::setPivotOff);
 	
-	connect(m_UI->actionSetOrthoView,               &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetOrthoView,				&QAction::triggered, this, [this] () {
 		setOrthoView( getActiveGLWindow() );
 	});
-	connect(m_UI->actionSetCenteredPerspectiveView, &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetCenteredPerspectiveView,	&QAction::triggered, this, [this] () {
 		setCenteredPerspectiveView( getActiveGLWindow() );
 	});
-	connect(m_UI->actionSetViewerPerspectiveView,   &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetViewerPerspectiveView,	&QAction::triggered, this, [this] () {
 		setViewerPerspectiveView( getActiveGLWindow() );
 	});
 	
 	connect(m_UI->actionEnableStereo,				&QAction::toggled, this, &MainWindow::toggleActiveWindowStereoVision);
 	connect(m_UI->actionAutoPickRotationCenter,		&QAction::toggled, this, &MainWindow::toggleActiveWindowAutoPickRotCenter);
 	
-	connect(m_UI->actionSetViewTop,                 &QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
-	connect(m_UI->actionSetViewBottom,              &QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
-	connect(m_UI->actionSetViewFront,               &QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
-	connect(m_UI->actionSetViewBack,                &QAction::triggered, this, [=]() { setView( CC_BACK_VIEW ); });
-	connect(m_UI->actionSetViewLeft,                &QAction::triggered, this, [=]() { setView( CC_LEFT_VIEW ); });
-	connect(m_UI->actionSetViewRight,               &QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
-	connect(m_UI->actionSetViewIso1,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
-	connect(m_UI->actionSetViewIso2,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
+	connect(m_UI->actionSetViewTop,					&QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
+	connect(m_UI->actionSetViewBottom,				&QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
+	connect(m_UI->actionSetViewFront,				&QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
+	connect(m_UI->actionSetViewBack,				&QAction::triggered, this, [=]() { setView( CC_BACK_VIEW ); });
+	connect(m_UI->actionSetViewLeft,				&QAction::triggered, this, [=]() { setView( CC_LEFT_VIEW ); });
+	connect(m_UI->actionSetViewRight,				&QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
+	connect(m_UI->actionSetViewIso1,				&QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
+	connect(m_UI->actionSetViewIso2,				&QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
 	
 	//hidden
 	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);
@@ -6138,7 +6142,7 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
+ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection, bool warnAboutLockedRotationAxis/*=false*/)
 {
 	assert(m_ccRoot && m_mdiArea);
 
@@ -6158,6 +6162,29 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 		QSettings settings;
 		bool autoPickRotationCenter = settings.value(ccPS::AutoPickRotationCenter(), true).toBool();
 		view3D->setAutoPickPivotAtCenter(autoPickRotationCenter);
+
+		bool rotationAxisLocked = settings.value(ccPS::View3dRotationAxisLocked(), false).toBool();
+		if (rotationAxisLocked)
+		{
+			s_lockedRotationAxis.x = settings.value(ccPS::View3dLockedAxisRotation() + ".x", 0.0).toDouble();
+			s_lockedRotationAxis.y = settings.value(ccPS::View3dLockedAxisRotation() + ".y", 0.0).toDouble();
+			s_lockedRotationAxis.z = settings.value(ccPS::View3dLockedAxisRotation() + ".z", 1.0).toDouble();
+			s_lockedRotationAxis.normalize();
+
+			if (warnAboutLockedRotationAxis)
+			{
+				ccLog::Warning(QString("[3D view] ") + tr("Rotation axis locked to") + QString(" (%1 ; %2 ; %3)").arg(s_lockedRotationAxis.x).arg(s_lockedRotationAxis.y).arg(s_lockedRotationAxis.z));
+			}
+		}
+		view3D->lockRotationAxis(rotationAxisLocked, s_lockedRotationAxis);
+
+		m_UI->actionLockRotationAxis->blockSignals(true);
+		m_UI->actionLockRotationAxis->setChecked(rotationAxisLocked);
+		m_UI->actionLockRotationAxis->blockSignals(false);
+
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(rotationAxisLocked);
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
 	}
 
 	viewWidget->setMinimumSize(400, 300);
@@ -7228,7 +7255,9 @@ void MainWindow::doActionEditCamera()
 	//current active MDI area
 	QMdiSubWindow* qWin = m_mdiArea->activeSubWindow();
 	if (!qWin)
+	{
 		return;
+	}
 
 	if (!m_cpeDlg)
 	{
@@ -10107,33 +10136,58 @@ void MainWindow::toggleLockRotationAxis()
 		bool wasLocked = win->isRotationAxisLocked();
 		bool isLocked = !wasLocked;
 
-		static CCVector3d s_lastAxis(0.0, 0.0, 1.0);
+		if (m_cpeDlg)
+		{
+			//will invalidate the Camera Parameters editing dialog
+			m_cpeDlg->close();
+		}
+
 		if (isLocked)
 		{
-			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastAxis.x, s_lastAxis.y, s_lastAxis.z, 4, tr("Lock rotation axis"), this);
+			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lockedRotationAxis.x, s_lockedRotationAxis.y, s_lockedRotationAxis.z, 4, tr("Lock rotation axis"), this);
 			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
+			{
 				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+			}
 			if (!axisDlg.exec())
+			{
 				return;
-			s_lastAxis.x = axisDlg.doubleSpinBox1->value();
-			s_lastAxis.y = axisDlg.doubleSpinBox2->value();
-			s_lastAxis.z = axisDlg.doubleSpinBox3->value();
+			}
+			s_lockedRotationAxis.x = axisDlg.doubleSpinBox1->value();
+			s_lockedRotationAxis.y = axisDlg.doubleSpinBox2->value();
+			s_lockedRotationAxis.z = axisDlg.doubleSpinBox3->value();
 		}
-		win->lockRotationAxis(isLocked, s_lastAxis);
+		win->lockRotationAxis(isLocked, s_lockedRotationAxis);
 
 		m_UI->actionLockRotationAxis->blockSignals(true);
 		m_UI->actionLockRotationAxis->setChecked(isLocked);
 		m_UI->actionLockRotationAxis->blockSignals(false);
 
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(isLocked);
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
+
 		if (isLocked)
 		{
-			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
 			win->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
-		win->redraw(true, false);
+		win->redraw(false, false);
+
+		//save the option
+		{
+			QSettings settings;
+			settings.setValue(ccPS::View3dRotationAxisLocked(), isLocked);
+			if (isLocked)
+			{
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".x", s_lockedRotationAxis.x);
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".y", s_lockedRotationAxis.y);
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".z", s_lockedRotationAxis.z);
+			}
+		}
 	}
 }
 
@@ -10961,6 +11015,10 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionLockRotationAxis->setChecked(win->isRotationAxisLocked());
 		m_UI->actionLockRotationAxis->blockSignals(false);
 
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(win->isRotationAxisLocked());
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
+
 		m_UI->actionEnableStereo->blockSignals(true);
 		m_UI->actionEnableStereo->setChecked(win->stereoModeIsEnabled());
 		m_UI->actionEnableStereo->blockSignals(false);
@@ -10979,6 +11037,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	}
 
 	m_UI->actionLockRotationAxis->setEnabled(win != nullptr);
+	m_UI->actionLockView3DRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionEnableStereo->setEnabled(win != nullptr);
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }

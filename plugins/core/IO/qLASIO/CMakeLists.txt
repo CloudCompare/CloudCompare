@@ -18,5 +18,8 @@ if (PLUGIN_IO_QLAS)
 
     if (WIN32)
         copy_files( "${LASZIP_DLL}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 )
+        if (${OPTION_BUILD_CCVIEWER})
+            copy_files( "${LASZIP_DLL}" "${CCVIEWER_DEST_FOLDER}" 1 )
+		endif()
     endif ()
 endif ()

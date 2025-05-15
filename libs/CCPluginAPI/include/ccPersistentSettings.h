@@ -48,4 +48,5 @@ namespace ccPS
 	inline const QString Options                     () { return QStringLiteral( "Options" ); }
 	inline const QString Plugins                     () { return QStringLiteral( "Plugins" ); }
 	inline const QString Translation                 () { return QStringLiteral( "Translation" ); }
+	inline const QString Shortcuts                   () { return QStringLiteral( "Shortcuts" ); }
 };

@@ -50,6 +50,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSaveProject"/>
     <addaction name="actionGlobalShiftSettings"/>
+    <addaction name="actionShortcutSettings"/>
     <addaction name="separator"/>
     <addaction name="actionPrimitiveFactory"/>
     <addaction name="separator"/>
@@ -3308,6 +3309,11 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="toolTip">
     <string>Lock 3D camera rotation about an axis (turntable mode)</string>
+   </property>
+  </action>
+  <action name="actionShortcutSettings">
+   <property name="text">
+    <string>Shortcut settings</string>
    </property>
   </action>
  </widget>

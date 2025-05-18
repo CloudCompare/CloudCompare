@@ -19,7 +19,7 @@
 
 #include "qE57ImageExtractor.h"
 
-#include "qE57ImageExtractorAction"
+#include "qE57ImageExtractorAction.h"
 
 
 qE57ImageExtractor::E57ImageExtractor( QObject *parent )

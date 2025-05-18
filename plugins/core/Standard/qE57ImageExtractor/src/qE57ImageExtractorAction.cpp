@@ -1,4 +1,4 @@
-#include "../include/ActionA.h"
+#include "../include/qE57ImageExtractorAction"
 #include "ccMainAppInterface.h"
 #include <iostream>
 

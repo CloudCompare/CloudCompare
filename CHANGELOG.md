@@ -63,6 +63,8 @@ New features:
 		- choice is now persistent, and will be reactivated when running CC again, or creating a new 3D view
 		- currently ignored by 3D mice and controllers
 
+	- New setting dialog to customize keyboard shortcuts for common CC actions
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

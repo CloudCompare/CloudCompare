@@ -199,6 +199,8 @@ private:
 	void sortChildrenZA();
 	void sortChildrenType();
 	void selectByTypeAndName();
+	void saveSelectedImagesE57(ccMainAppInterface *appInterface,
+							   const ccHObject::Container &selectedEntities);
 
 	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
 	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
@@ -243,6 +245,9 @@ protected:
                                      bool typeIsExclusive = true,
                                      QString name = QString(),
                                      bool nameIsRegex = false);
+
+	int saveSelectedImagesE57_saveImages(const QString& directory,
+												const ccHObject::Container& selectedEntities);
 
 	//! Associated DB root
 	ccHObject* m_treeRoot;

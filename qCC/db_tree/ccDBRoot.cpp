@@ -264,6 +264,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_sortChildrenAZ = new QAction(tr("Sort children by name (A-Z)"), this);
 	m_sortChildrenZA = new QAction(tr("Sort children by name (Z-A)"), this);
 	m_selectByTypeAndName = new QAction(tr("Select children by type and/or name"), this);
+	m_saveSelectedImagesE57 = new QAction(tr("Save selected images from E57 file"), this);
 	m_deleteSelectedEntities = new QAction(tr("Delete"), this);
 	m_toggleSelectedEntities = new QAction(tr("Toggle"), this);
 	m_toggleSelectedEntitiesVisibility = new QAction(tr("Toggle visibility"), this);
@@ -289,6 +290,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_sortChildrenZA,					&QAction::triggered,					this, &ccDBRoot::sortChildrenZA);
 	connect(m_sortChildrenType,					&QAction::triggered,					this, &ccDBRoot::sortChildrenType);
 	connect(m_selectByTypeAndName,              &QAction::triggered,					this, &ccDBRoot::selectByTypeAndName);
+	connect(m_saveSelectedImagesE57,			&QAction::triggered,					this, &ccDBRoot::saveSelectedImagesE57);
 	connect(m_deleteSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::deleteSelectedEntities);
 	connect(m_toggleSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntities);
 	connect(m_toggleSelectedEntitiesVisibility,	&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesVisibility);
@@ -1966,6 +1968,100 @@ void ccDBRoot::selectByTypeAndName()
 
 
 	selectChildrenByTypeAndName(type, exclusive, name, regex);
+}
+
+void ccDBRoot::saveSelectedImagesE57(ccMainAppInterface *appInterface,
+									 const ccHObject::Container &selectedEntities)
+{
+	if (selectedEntities.empty())
+	{
+		QMessageBox::warning(nullptr, "Warning", "No images selected");
+	}
+
+	auto saveDirectory = QString();
+	while (saveDirectory.isEmpty())
+	{
+		saveDirectory = QFileDialog::getExistingDirectory(nullptr, "Choose destination directory", {},
+															QFileDialog::ShowDirsOnly |
+															QFileDialog::DontResolveSymlinks);
+	}
+	appInterface->dispToConsole("Destination directory: " + saveDirectory, ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+	int numSavedImages = saveSelectedImagesE57_saveImages(saveDirectory, selectedEntities);
+	appInterface->dispToConsole(QString::fromStdString("Images saved: " + std::to_string(numSavedImages)), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+}
+
+int ccDBRoot::saveSelectedImagesE57_saveImages(const QString& directory,
+											   const ccHObject::Container& selectedEntities)
+{
+	auto savedImageCount {0};
+	std::unordered_set<ccImage*> imagesToSave{};
+	std::unordered_map<QString, int> imageGroupCount{};
+	std::mutex imageGroupCountMutex;
+	std::vector<std::future<void>> futures{};
+
+	// Search all selected entities for images
+	for (const auto& entity : selectedEntities)
+	{
+		// If the current entity is of type image, cast to QImage and store in imagesToSave
+		if (entity->isKindOf(CC_TYPES::IMAGE))
+		{
+			auto image = ccHObjectCaster::ToImage(entity);
+			if (image)
+			{
+				imagesToSave.insert(image);
+			}
+		}
+		// If the current entity is of type Point Cloud, search children for images
+		else if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			for (int i = 0; i < entity->getChildrenNumber(); ++i)
+			{
+				auto child = entity->getChild(i);
+
+				// In case image was found among the children, check if the image is already stored, if not store it
+				// This is necessary for cases when both the point cloud and the child images were selected by the user
+				if (child && child->isKindOf(CC_TYPES::IMAGE))
+				{
+					auto image = ccHObjectCaster::ToImage(child);
+					if (image)
+					{
+						imagesToSave.insert(image);
+					}
+				}
+			}
+		}
+	}
+
+	auto saveCurrentImage = [&](ccImage* image)
+	{
+		if (image)
+		{
+			QString filename;
+			{
+				std::lock_guard<std::mutex> lock(imageGroupCountMutex);
+				filename = directory + OS_FILE_SEP + image->getName() + "_" + QString::fromStdString(std::to_string(imageGroupCount[image->getName()]++)) + ".png";
+			}
+			if (image->data().save(filename))
+			{
+				std::lock_guard<std::mutex> lock(imageGroupCountMutex);
+				++savedImageCount;
+			}
+		}
+	};
+	
+	// Save the images to the provided directory
+	for (const auto& image : imagesToSave)
+	{
+		futures.push_back(std::async(std::launch::async, saveCurrentImage, image));
+	}
+
+	// Sync finished threads
+	for (const auto& future : futures)
+	{
+		future.wait();
+	}
+	return savedImageCount;
 }
 
 /* name is optional, if passed it is used to restrict the selection by type */

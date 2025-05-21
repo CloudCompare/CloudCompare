@@ -28,6 +28,9 @@
 //Qt
 #include <QSettings>
 
+#include "ccPointCloud.h"
+#include "ccScalarField.h"
+
 //Exponent of the 'log' scale used for 'SPATIAL' interval
 static const double SPACE_RANGE_EXPONENT = 0.05;
 
@@ -66,108 +69,152 @@ ccSubsamplingDlg::~ccSubsamplingDlg()
 	delete m_ui;
 }
 
-CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
-{
+CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/) const {
+	CCCoreLib::ReferenceCloud *result = nullptr;
+
+	try {
+		result = DoSubSample(subSamplingParams(), cloud, progressCb);
+	} catch (std::exception& e) {
+		ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to subsample %1: %2!").arg(cloud->getName(), e.what()));
+	}
+	return result;
+}
+
+
+bool SubsamplingParams::Spatial::tryEnableSfModulation(const ccScalarField& sf) {
+	sfMin = CCCoreLib::NAN_VALUE;
+	sfMax = CCCoreLib::NAN_VALUE;
+	if (!ccScalarField::ValidValue(sfMin) || sfMin > sf.getMin())
+		sfMin = sf.getMin();
+	if (!ccScalarField::ValidValue(sfMax) || sfMax < sf.getMax())
+		sfMax = sf.getMax();
+
+	if (!ccScalarField::ValidValue(sfMin) || !ccScalarField::ValidValue(sfMax))
+	{
+		// warn the user, don't use 'Use Active SF' and keep going
+		ccLog::Warning(QObject::tr("\tCan't use 'scalar field modulation': scalar field '%1' has invalid min/max values.").arg(QString::fromStdString(sf.getName())));
+		modulationEnabled = false;
+	} else {
+		modulationEnabled = true;
+	}
+	return modulationEnabled;
+}
+
+
+CCCoreLib::ReferenceCloud* DoSubSample(const SubsamplingParams &params, ccGenericPointCloud *cloud, CCCoreLib::GenericProgressCallback *progressCb /*=nullptr*/) {
 	if (!cloud || cloud->size() == 0)
 	{
-		ccLog::Warning("[ccSubsamplingDlg::getSampledCloud] Invalid input cloud!");
-		return nullptr;
+		throw std::runtime_error("Invalid input cloud!");
 	}
+
+	switch (params.method)
+	{
+		case SubsamplingParams::Method::Random:
+		{
+			return CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
+																			params.randomCount,
+																			progressCb);
+		}
+	case SubsamplingParams::Method::RandomPercent:
+		{
+			unsigned count = cloud->size();
+			count = static_cast<unsigned>(count * params.randomPercent);
+			return CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
+																			count,
+																			progressCb);
+		}
+	case SubsamplingParams::Method::Spatial:
+		{
+			ccOctree::Shared octree = cloud->getOctree();
+			if (!octree && params.spatial.useOctree)
+			{
+				octree = cloud->computeOctree(progressCb);
+
+				if (!octree) {
+					throw std::runtime_error("Failed to compute octree!");
+				}
+			}
+
+			return CCCoreLib::CloudSamplingTools::resampleCloudSpatially(	cloud,
+																			params.spatial.minDist,
+																			params.spatial.modulationParams(),
+																			octree.data(),
+																			progressCb);
+		}
+	case SubsamplingParams::Method::Octree:
+		{
+			ccOctree::Shared octree = cloud->getOctree();
+			if (!octree) {
+				octree = cloud->computeOctree(progressCb);
+
+				if (!octree) {
+					throw std::runtime_error("Failed to compute octree!");
+				}
+			}
+			const unsigned char level = params.octreeLevel;
+			if (level > CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL) {
+				throw std::runtime_error("Octree level out of range!");
+			}
+			return CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
+																					level,
+																					CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																					progressCb,
+																					octree.data());
+		}
+	}
+
+	// unhandled subsampling method
+	assert(false);
+	return nullptr;
+}
+
+SubsamplingParams ccSubsamplingDlg::subSamplingParams() const {
+	SubsamplingParams params = { };
 
 	switch (m_ui->samplingMethodComboBox->currentIndex())
 	{
 	case RANDOM:
 		{
 			assert(m_ui->valueDoubleSpinBox->value() >= 0);
-			unsigned count = static_cast<unsigned>(m_ui->valueDoubleSpinBox->value());
-			return CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
-																			count,
-																			progressCb);
+			const auto count = static_cast<unsigned>(m_ui->valueDoubleSpinBox->value());
+			params.method = SubsamplingParams::Method::Random;
+			params.randomCount = count;
+			return params;
 		}
-		break;
-
 	case RANDOM_PERCENT:
 		{
 			assert(m_ui->valueDoubleSpinBox->value() >= 0);
-			unsigned count = cloud->size();
-			count = static_cast<unsigned>(count * (m_ui->valueDoubleSpinBox->value() / 100.0));
-			return CCCoreLib::CloudSamplingTools::subsampleCloudRandomly(	cloud,
-																			count,
-																			progressCb);
+			params.method = SubsamplingParams::Method::RandomPercent;
+			params.randomPercent = m_ui->valueDoubleSpinBox->value();
+			return params;
 		}
-		break;
-
-	case SPATIAL:
-		{
-			ccOctree::Shared octree = cloud->getOctree();
-			if (!octree)
-			{
-				octree = cloud->computeOctree(progressCb);
-			}
-			if (octree)
-			{
-				PointCoordinateType minDist = static_cast<PointCoordinateType>(m_ui->valueDoubleSpinBox->value());
-				CCCoreLib::CloudSamplingTools::SFModulationParams modParams;
-				{
-					modParams.enabled = m_ui->sfGroupBox->isEnabled() && m_ui->sfGroupBox->isChecked();
-				}
-				if (modParams.enabled)
-				{
-					double deltaSF = static_cast<double>(m_sfMax) - m_sfMin;
-					assert(deltaSF >= 0);
-					if ( CCCoreLib::GreaterThanEpsilon( deltaSF ) )
-					{
-						double sfMinSpacing = m_ui->minSFSpacingDoubleSpinBox->value();
-						double sfMaxSpacing = m_ui->maxSFSpacingDoubleSpinBox->value();
-						modParams.a = (sfMaxSpacing - sfMinSpacing) / deltaSF;
-						modParams.b = sfMinSpacing - modParams.a * m_sfMin;
-					}
-					else
-					{
-						modParams.a = 0.0;
-						modParams.b = m_sfMin;
-					}
-				}
-				return CCCoreLib::CloudSamplingTools::resampleCloudSpatially(	cloud, 
-																				minDist,
-																				modParams,
-																				octree.data(),
-																				progressCb);
-			}
-			else
-			{
-				ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-			}
+	case SPATIAL: {
+		params.method = SubsamplingParams::Method::Spatial;
+		params.spatial.minDist = m_ui->valueDoubleSpinBox->value();
+		params.spatial.useOctree = true;
+		params.spatial.modulationEnabled = m_ui->sfGroupBox->isEnabled() && m_ui->sfGroupBox->isChecked();
+		if (params.spatial.modulationEnabled) {
+			params.spatial.sfMax = m_sfMax;
+			params.spatial.sfMin = m_sfMin;
+			params.spatial.sfMinSpacing = m_ui->minSFSpacingDoubleSpinBox->value();
+			params.spatial.sfMaxSpacing = m_ui->maxSFSpacingDoubleSpinBox->value();
 		}
-		break;
-
+		return params;
+	}
 	case OCTREE:
 		{
-			ccOctree::Shared octree = cloud->getOctree();
-			if (!octree)
-				octree = cloud->computeOctree(progressCb);
-			if (octree)
-			{
-				assert(m_ui->valueDoubleSpinBox->value() >= 0);
-				unsigned char level = static_cast<unsigned char>(m_ui->valueDoubleSpinBox->value());
-				assert(level <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
-				return CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	cloud,
-																						level,
-																						CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-																						progressCb,
-																						octree.data());
-			}
-			else
-			{
-				ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-			}
+			params.method = SubsamplingParams::Method::Octree;
+			assert(m_ui->valueDoubleSpinBox->value() >= 0);
+			const auto level = static_cast<unsigned char>(m_ui->valueDoubleSpinBox->value());
+			assert(level <= CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
+			params.octreeLevel = level;
+			return params;
 		}
-		break;
 	}
 
-	//something went wrong!
-	return nullptr;
+	return params;
 }
+
 
 void ccSubsamplingDlg::updateLabels()
 {

@@ -193,7 +193,8 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		}
 		else
 		{
-			focalDistance = pixelSize * 2048 / computeDistanceToWidthRatio(); //2048 = average screen size? Sadly we don't have this information
+			static int DefaultScreenSize_pix = 2048;  // average screen size - sadly we don't have this information
+			focalDistance = pixelSize * DefaultScreenSize_pix / computeDistanceToWidthRatio(DefaultScreenSize_pix, DefaultScreenSize_pix);
 		}
 		setFocalDistance(focalDistance / zoom);
 		ccLog::Warning("[ccViewportParameters] Approximate focal distance (sorry, the parameters of viewport objects have changed!)");
@@ -320,19 +321,27 @@ double ccViewportParameters::computeDistanceToHalfWidthRatio() const
 	return std::tan(CCCoreLib::DegreesToRadians(fov_deg / 2.0));
 }
 
-double ccViewportParameters::computeDistanceToWidthRatio() const
+double ccViewportParameters::computeDistanceToWidthRatio(int screenWidth, int screenHeight) const
 {
-	return 2.0 * computeDistanceToHalfWidthRatio();
+	if (screenHeight <= 0 || screenWidth <= 0)
+	{
+		assert(false);
+		return 1.0;
+	}
+
+	double ar = std::min(1.0, static_cast<double>(screenWidth / (screenHeight * cameraAspectRatio))); // <= 1
+
+	return (2.0 * computeDistanceToHalfWidthRatio()) / ar;
 }
 
-double ccViewportParameters::computeWidthAtFocalDist() const
+double ccViewportParameters::computeWidthAtFocalDist(int screenWidth, int screenHeight) const
 {
-	return getFocalDistance() * computeDistanceToWidthRatio();
+	return getFocalDistance() * computeDistanceToWidthRatio(screenWidth, screenHeight);
 }
 
-double ccViewportParameters::computePixelSize(int glWidth) const
+double ccViewportParameters::computePixelSize(int screenWidth, int screenHeight) const
 {
-	return (glWidth > 0 ? computeWidthAtFocalDist() / glWidth : 1.0);
+	return (screenWidth > 0 ? computeWidthAtFocalDist(screenWidth, screenHeight) / screenWidth : 1.0);
 }
 
 void ccViewportParameters::log() const

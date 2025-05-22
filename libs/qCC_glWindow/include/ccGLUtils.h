@@ -55,8 +55,23 @@ public:
 
 	//! Returns a 4x4 'OpenGL' matrix corresponding to a default 'view' orientation
 	/** \param orientation view orientation
+		\param vertDir vertical direction
+		\param[out] _vertAngle_rad rotation angle about the vertical direction
+		\param[out] _orthoAngle_rad rotation angle about a direction orhogonal to the vertical one
 		\return corresponding GL matrix
 	**/
-	static ccGLMatrixd GenerateViewMat(CC_VIEW_ORIENTATION orientation);
+	static ccGLMatrixd GenerateViewMat(	CC_VIEW_ORIENTATION orientation,
+										const CCVector3d& vertDir = CCVector3d(0, 0, 1),
+										double* _vertAngle_rad = nullptr,
+										double* _orthoAngle_rad = nullptr);
 
+	//! Returns a 4x4 'OpenGL' matrix from a vertical orientation and 2 angles
+	/** The 2 angles represent the rotation about the vertical direction and another rotation about
+		a direction orhogonal to the vertical one
+		\param vertDir vertical direction
+		\return corresponding GL matrix
+	**/
+	static ccGLMatrixd GenerateViewMat(	const CCVector3d& vertDir,
+										double vertAngle_rad,
+										double orthoAngle_rad);
 };

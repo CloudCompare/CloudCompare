@@ -486,8 +486,34 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 		m_ui->nearClippingDepthDoubleSpinBox->setSingleStep(increment);
 		m_ui->farClippingDepthDoubleSpinBox->setSingleStep(increment);
 
-		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
-		m_ui->buttonsFrame->setEnabled(it != pushedMatrices.end());
+		if (m_associatedWin->isRotationAxisLocked())
+		{
+			m_ui->matrixStoreFrame->setVisible(false);
+			m_ui->matrixStoreFrame->setEnabled(false);
+
+			m_ui->xLabel->setText("X");
+			m_ui->zLabel->setText("Z");
+
+			// hide the 'Y' (theta) axis
+			m_ui->yLabel->setVisible(false);
+			m_ui->thetaSlider->setVisible(false);
+			m_ui->thetaSpinBox->setVisible(false);
+
+			// we want the 'psi' angle to remain within [-pi/2 ; pi/2]
+			m_ui->psiSpinBox->setRange(-900, 900);
+			m_ui->psiSlider->setRange(-900, 900);
+		}
+		else // standard mode
+		{
+			PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
+			m_ui->buttonsFrame->setEnabled(it != pushedMatrices.end());
+			m_ui->matrixStoreFrame->setVisible(true);
+			m_ui->matrixStoreFrame->setEnabled(true);
+
+			m_ui->xLabel->setText("X1");
+			m_ui->yLabel->setText("Y2");
+			m_ui->zLabel->setText("Z3");
+		}
 	}
 	else
 	{
@@ -503,9 +529,18 @@ void ccCameraParamEditDlg::reflectParamChange()
 	if (!m_associatedWin)
 		return;
 
-	ccGLMatrixd mat = getMatrix();
 	m_associatedWin->signalEmitter()->blockSignals(true);
-	m_associatedWin->setBaseViewMat(mat);
+	if (m_associatedWin->isRotationAxisLocked())
+	{
+		double lockedRotationAngle_rad = CCCoreLib::DegreesToRadians(m_ui->phiSpinBox->value());
+		double lockedRotationOrthoAngle_rad = CCCoreLib::DegreesToRadians(m_ui->psiSpinBox->value());
+		m_associatedWin->setLockedRotationAngles(lockedRotationAngle_rad, lockedRotationOrthoAngle_rad);
+	}
+	else
+	{
+		ccGLMatrixd mat = getMatrix();
+		m_associatedWin->setBaseViewMat(mat);
+	}
 	m_associatedWin->signalEmitter()->blockSignals(false);
 	m_associatedWin->redraw();
 }
@@ -517,11 +552,22 @@ void ccCameraParamEditDlg::updateViewMode()
 		bool objectBased = true;
 		bool perspective = m_associatedWin->getPerspectiveState(objectBased);
 
+		QString modeDescription;
 		if (!perspective)
-			m_ui->currentModeLabel->setText("parallel projection");
+		{
+			modeDescription = tr("parallel projection");
+		}
 		else
-			m_ui->currentModeLabel->setText(QString(objectBased ? "object" : "viewer") + QString("-based perspective"));
+		{
+			modeDescription = (objectBased ? tr("object") : tr("viewer")) + tr("-based perspective");
+		}
 
+		if (m_associatedWin->isRotationAxisLocked())
+		{
+			modeDescription += " " + tr("(rotation axis locked)");
+		}
+
+		m_ui->currentModeLabel->setText(modeDescription);
 		m_ui->rotationCenterFrame->setEnabled(objectBased);
 		m_ui->pivotPickingToolButton->setEnabled(objectBased);
 		m_ui->eyePositionFrame->setEnabled(perspective);
@@ -530,23 +576,26 @@ void ccCameraParamEditDlg::updateViewMode()
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
-	double phi = 0;
-	double theta = 0;
 	double psi = 0;
-	CCVector3d trans;
-	mat.getParameters(phi,theta,psi,trans);
+	double theta = 0;
+	double phi = 0;
+
+	if (m_associatedWin->isRotationAxisLocked())
+	{
+		m_associatedWin->getLockedRotationAngles(phi, psi);
+	}
+	else
+	{
+		CCVector3d trans;
+		mat.getParameters(phi, theta, psi, trans);
+	}
 
 	//to avoid retro-action
 	ccGLWindowInterface* win = m_associatedWin;
 	m_associatedWin = nullptr;
 
-	m_ui->phiSpinBox->blockSignals(true);
-	m_ui->phiSpinBox->setValue( CCCoreLib::RadiansToDegrees( phi ) );
-	dPhiValueChanged(m_ui->phiSpinBox->value());
-	m_ui->phiSpinBox->blockSignals(false);
-	
 	m_ui->psiSpinBox->blockSignals(true);
-	m_ui->psiSpinBox->setValue( CCCoreLib::RadiansToDegrees( psi ) );
+	m_ui->psiSpinBox->setValue(CCCoreLib::RadiansToDegrees(psi));
 	dPsiValueChanged(m_ui->psiSpinBox->value());
 	m_ui->psiSpinBox->blockSignals(false);
 
@@ -554,6 +603,11 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 	m_ui->thetaSpinBox->setValue( CCCoreLib::RadiansToDegrees( theta ) );
 	dThetaValueChanged(m_ui->thetaSpinBox->value());
 	m_ui->thetaSpinBox->blockSignals(false);
+
+	m_ui->phiSpinBox->blockSignals(true);
+	m_ui->phiSpinBox->setValue(CCCoreLib::RadiansToDegrees(phi));
+	dPhiValueChanged(m_ui->phiSpinBox->value());
+	m_ui->phiSpinBox->blockSignals(false);
 
 	m_associatedWin = win;
 }

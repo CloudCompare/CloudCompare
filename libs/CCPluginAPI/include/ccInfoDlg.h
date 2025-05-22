@@ -1,3 +1,4 @@
+#pragma once
 //##########################################################################
 //#                                                                        #
 //#                              CLOUDCOMPARE                              #
@@ -11,51 +12,34 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#include <QtGlobal>
+#include "CCPluginAPI.h"
 
-#ifdef Q_OS_MAC
-#include <QFileOpenEvent>
-#endif
+//Qt
+#include <QDialog>
 
-#include "ccviewer.h"
-#include "ccViewerApplication.h"
-
-
-ccViewerApplication::ccViewerApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QString( "1.42.alpha (%1)" ).arg(__DATE__))
+namespace Ui
 {
-	setApplicationName( "CloudCompareViewer" );
+	class InfoDialog;
 }
 
-void ccViewerApplication::setViewer(ccViewer *inViewer)
+//! Dialog to display some pieces of information in 
+class CCPLUGIN_LIB_API ccInfoDlg : public QDialog
 {
-	mViewer = inViewer;
-}
+public:
 
-bool ccViewerApplication::event(QEvent *inEvent)
-{
-#ifdef Q_OS_MAC
-	switch ( inEvent->type() )
-	{
-		case QEvent::FileOpen:
-		{			
-			if ( mViewer == nullptr )
-			{
-				return false;
-			}
-			
-			mViewer->addToDB( { static_cast<QFileOpenEvent *>(inEvent)->file() } );
-			return true;
-		}
-			
-		default:
-			break;
-	}
-#endif
+	//! Default constructor
+	ccInfoDlg(QWidget* parent);
 
-	return ccApplicationBase::event( inEvent );
-}
+	//! Destructor
+	~ccInfoDlg() override;
+
+	//! Shows a text in the info dialog
+	void showText(const QString& text);
+
+private:
+	Ui::InfoDialog* m_ui;
+};

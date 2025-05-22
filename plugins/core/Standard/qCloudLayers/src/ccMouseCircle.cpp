@@ -109,7 +109,7 @@ void ccMouseCircle::draw(CC_DRAW_CONTEXT& context)
 	//test viewport parameters
 	const ccViewportParameters& params = context.display->getViewportParameters();
 
-	m_pixelSize = (context.glW != 0 ? params.computeWidthAtFocalDist() / context.glW : 0);
+	m_pixelSize = params.computePixelSize(context.glW, context.glH);
 
 	//get mouse position
 	QPoint p = m_owner->asWidget()->mapFromGlobal(QCursor::pos()) * context.devicePixelRatio;

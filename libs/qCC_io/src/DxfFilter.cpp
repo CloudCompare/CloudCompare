@@ -107,9 +107,13 @@ public:
 		if (m_preserveCoordinateShift)
 		{
 			if (m_points)
+			{
 				m_points->setGlobalShift(m_globalShift);
+			}
 			if (m_polyVertices)
+			{
 				m_polyVertices->setGlobalShift(m_globalShift);
+			}
 		}
 	}
 
@@ -269,17 +273,21 @@ public:
 			return;
 		}
 
-		int vertIndexes[4] = { -1, -1, -1, -1 };
+		int vertIndexes[4] { -1, -1, -1, -1 };
 		unsigned addedVertCount = 4;
 		//check if the two last vertices are the same
 		if (P[2].x == P[3].x && P[2].y == P[3].y && P[2].z == P[3].z)
+		{
 			addedVertCount = 3;
+		}
 
 		//current face color
 		ccColor::Rgb col;
 		ccColor::Rgb* faceCol = nullptr;
 		if (getCurrentColour(col))
+		{
 			faceCol = &col;
+		}
 
 		//look for already defined vertices
 		unsigned vertCount = vertices->size();
@@ -317,8 +325,12 @@ public:
 		unsigned createdVertCount = 0;
 		{
 			for (unsigned i = 0; i < addedVertCount; ++i)
+			{
 				if (vertIndexes[i] < 0)
+				{
 					++createdVertCount;
+				}
+			}
 		}
 
 		if (createdVertCount != 0)
@@ -351,7 +363,9 @@ public:
 		}
 		m_faces->addTriangle(vertIndexes[0], vertIndexes[1], vertIndexes[2]);
 		if (addedVertCount == 4)
+		{
 			m_faces->addTriangle(vertIndexes[0], vertIndexes[2], vertIndexes[3]);
+		}
 
 		//add per-triangle normals
 		{
@@ -409,14 +423,18 @@ public:
 			if (vertices->hasColors())
 			{
 				for (unsigned i = 0; i < createdVertCount; ++i)
+				{
 					vertices->addColor(*faceCol);
+				}
 			}
 			//otherwise, reserve memory and set all previous points to white by default
 			else if (vertices->setColor(ccColor::white))
 			{
 				//then replace the last color(s) by the current one
 				for (unsigned i = 0; i < createdVertCount; ++i)
+				{
 					vertices->setPointColor(vertCount - 1 - i, ccColor::Rgba(*faceCol, ccColor::MAX));
+				}
 				m_faces->showColors(true);
 			}
 		}
@@ -424,7 +442,9 @@ public:
 		{
 			//add default color if none is defined!
 			for (unsigned i = 0; i < createdVertCount; ++i)
+			{
 				vertices->addColor(ccColor::white);
+			}
 		}
 	}
 
@@ -662,20 +682,28 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 #else
 
 	if (!root || filename.isEmpty())
+	{
 		return CC_FERR_BAD_ARGUMENT;
+	}
 
 	ccHObject::Container polylines;
 	root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
 	if (root->isKindOf(CC_TYPES::POLY_LINE))
+	{
 		polylines.push_back(root);
+	}
 	ccHObject::Container meshes;
 	root->filterChildren(meshes, true, CC_TYPES::MESH);
 	if (root->isKindOf(CC_TYPES::MESH))
+	{
 		meshes.push_back(root);
+	}
 	ccHObject::Container clouds;
 	root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true); //we don't want polylines!
 	if (root->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
 		clouds.push_back(root);
+	}
 
 	if (!clouds.empty())
 	{
@@ -721,7 +749,9 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 	size_t meshCount = meshes.size();
 	size_t cloudCount = clouds.size();
 	if (polyCount + meshCount + cloudCount == 0)
+	{
 		return CC_FERR_NO_SAVE;
+	}
 
 	//get global bounding box
 	ccHObject::GlobalBoundingBox globalBB;
@@ -943,7 +973,9 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 				unsigned vertexCount = poly->size();
 				int flags = poly->isClosed() ? 1 : 0;
 				if (!poly->is2DMode())
+				{
 					flags |= 8; //3D polyline
+				}
 				dxf.writePolyline(*dw,
 					DL_PolylineData(static_cast<int>(vertexCount), 0, 0, flags),
 					DL_Attributes(qPrintable(polyLayerNames[i]), DL_Codes::bylayer, -1, "BYLAYER", 1.0)); //DGM: warning, toStdString doesn't preserve "local" characters
@@ -1046,7 +1078,9 @@ CC_FILE_ERROR DxfFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			importer.applyGlobalShift(); //apply the (potential) global shift to shared clouds
 			if (container.getChildrenNumber() != 0)
+			{
 				result = CC_FERR_NO_ERROR;
+			}
 		}
 		else
 		{

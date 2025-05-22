@@ -502,7 +502,10 @@ public: //other methods
 	const CCVector3& getPointNormal(unsigned pointIndex) const override;
 	CCCoreLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true) override;
 	void scale(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz, CCVector3 center = CCVector3(0,0,0)) override;
-	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. **/
+	/** \warning if removeSelectedPoints is true, any attached octree will be deleted, as well as the visibility table. 
+	    \warning If the visibility table selects all points from this point cloud, the return value will be the original point cloud
+	             rather than a new one.
+	**/
 	ccGenericPointCloud* createNewCloudFromVisibilitySelection(	bool removeSelectedPoints = false,
 																VisibilityTableType* visTable = nullptr,
 																std::vector<int>* newIndexesOfRemainingPoints = nullptr,

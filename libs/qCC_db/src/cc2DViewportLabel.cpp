@@ -91,7 +91,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		return;
 	
 	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert( glFunc != nullptr );
 	
 	if ( glFunc == nullptr )
@@ -130,7 +130,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	double relativeZoom = m_params.getFocalDistance() / params.getFocalDistance();
 	
 	//camera center shift compensation
-	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist();
+	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist(context.glW, context.glH);
 
 	//thick dotted line
 	glFunc->glLineWidth(2);

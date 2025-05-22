@@ -11,51 +11,31 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                    COPYRIGHT: CloudCompare project                     #
 //#                                                                        #
 //##########################################################################
 
-#include <QtGlobal>
+#include "../include/ccInfoDlg.h"
 
-#ifdef Q_OS_MAC
-#include <QFileOpenEvent>
-#endif
+#include "ui_infoDlg.h"
 
-#include "ccviewer.h"
-#include "ccViewerApplication.h"
-
-
-ccViewerApplication::ccViewerApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QString( "1.42.alpha (%1)" ).arg(__DATE__))
+ccInfoDlg::ccInfoDlg(QWidget* parent)
+	: QDialog(parent)
+	, m_ui(new Ui::InfoDialog)
 {
-	setApplicationName( "CloudCompareViewer" );
+	m_ui->setupUi(this);
 }
 
-void ccViewerApplication::setViewer(ccViewer *inViewer)
+ccInfoDlg::~ccInfoDlg()
 {
-	mViewer = inViewer;
-}
-
-bool ccViewerApplication::event(QEvent *inEvent)
-{
-#ifdef Q_OS_MAC
-	switch ( inEvent->type() )
+	if (m_ui)
 	{
-		case QEvent::FileOpen:
-		{			
-			if ( mViewer == nullptr )
-			{
-				return false;
-			}
-			
-			mViewer->addToDB( { static_cast<QFileOpenEvent *>(inEvent)->file() } );
-			return true;
-		}
-			
-		default:
-			break;
+		delete m_ui;
+		m_ui = nullptr;
 	}
-#endif
+}
 
-	return ccApplicationBase::event( inEvent );
+void ccInfoDlg::showText(const QString& text)
+{
+	m_ui->textEdit->setText(text);
 }

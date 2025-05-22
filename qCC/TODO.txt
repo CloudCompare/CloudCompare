@@ -76,6 +76,8 @@ Scissors/segmentation tool
 [*] Enable or Disable other clouds while using the scissors tool (for visual reference) (https://www.cloudcompare.org/forum/viewtopic.php?t=6143)
 
 Various:
+[*] Computing the distance to each point's nearest neighbor (https://github.com/CloudCompare/CloudCompare/issues/2166)
+[*] Support the Dotbim (.bim) triangular mesh format (https://github.com/CloudCompare/CloudCompare/issues/2167)
 [*] Display a dialog when loading E57 files to choose which scan and image to load (https://www.cloudcompare.org/forum/viewtopic.php?p=30783)
 [*] Create a compressed version of the BIN format (https://www.cloudcompare.org/forum/viewtopic.php?p=30722)
 [*] ASCII load file dialog: display the extracted colum title directly under the role of each column (https://www.cloudcompare.org/forum/viewtopic.php?t=7085)

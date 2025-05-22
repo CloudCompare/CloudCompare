@@ -83,7 +83,7 @@ QStatusBar
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -250,8 +250,8 @@ QStatusBar
   </action>
   <action name="actionEditCamera">
    <property name="icon">
-    <iconset>
-     <normaloff>:/CC/images/ccCamera.png</normaloff>:/CC/images/ccCamera.png</iconset>
+    <iconset resource="../../qCC/icons.qrc">
+     <normaloff>:/CC/images/photo-camera.svg</normaloff>:/CC/images/photo-camera.svg</iconset>
    </property>
    <property name="text">
     <string>Camera parameters</string>
@@ -662,6 +662,10 @@ QStatusBar
   <action name="actionLockRotationVertAxis">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icons.qrc">
+     <normaloff>:/CC/images/lockedAxis.png</normaloff>:/CC/images/lockedAxis.png</iconset>
    </property>
    <property name="text">
     <string>Lock rotation around vert. axis</string>

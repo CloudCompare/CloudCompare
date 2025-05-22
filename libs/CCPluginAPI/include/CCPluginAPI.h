@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                            CLOUDCOMPARE                                #
@@ -15,12 +17,10 @@
 //#                                                                        #
 //##########################################################################
 
-#pragma once
-
 #include <QtCore/QtGlobal>
 
 #if defined( CCPLUGIN_API_LIBRARY_BUILD )
-#  define CCPLUGIN_LIB_API Q_DECL_EXPORT
+#define CCPLUGIN_LIB_API Q_DECL_EXPORT
 #else
-#  define CCPLUGIN_LIB_API Q_DECL_IMPORT
+#define CCPLUGIN_LIB_API Q_DECL_IMPORT
 #endif

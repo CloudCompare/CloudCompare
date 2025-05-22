@@ -37,7 +37,7 @@ class qM3C2Dialog : public QDialog, public Ui::M3C2Dialog
 public:
 
 	//! Default constructor
-	qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppInterface* app);
+	qM3C2Dialog(ccPointCloud* cloud1, ccPointCloud* cloud2, ccMainAppInterface* app, ccPointCloud* corePointsCloud=nullptr);
 
 	//! Returns cloud #1
 	ccPointCloud* getCloud1() const { return m_cloud1; }
@@ -52,7 +52,7 @@ public:
 	ccPointCloud* getCorePointsCloud() const;
 
 	//! Sets the core points cloud
-	void setCorePointsCloud(ccPointCloud* cloud) { m_corePointsCloud = cloud; }
+	void setCorePointsCloud(ccPointCloud* cloud);
 
 	//! Returns the cloud to be used for normals orientation (if any)
 	ccPointCloud* getNormalsOrientationCloud() const;

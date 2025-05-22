@@ -333,10 +333,10 @@ void cc3DMouseManager::on3DMouseReleased()
 
 void cc3DMouseManager::setupMenu()
 {
-	m_menu = new QMenu( "3D Mouse" );
+	m_menu = new QMenu(tr("3D mouse"));
 	m_menu->setIcon( QIcon(":/CC/images/im3DxLogo.png") );
 
-	m_actionEnable = new QAction( tr( "Enable" ), this );
+	m_actionEnable = new QAction(tr("Enable"), this);
 	m_actionEnable->setCheckable( true );
 
 	connect( m_actionEnable, &QAction::toggled, [this](bool state) {

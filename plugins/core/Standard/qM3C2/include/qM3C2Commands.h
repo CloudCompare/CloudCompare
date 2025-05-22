@@ -32,7 +32,6 @@ struct CommandM3C2 : public ccCommandLineInterface::Command
 
 	virtual bool process(ccCommandLineInterface& cmd) override
 	{
-		cmd.print("[M3C2]");
 		if (cmd.arguments().empty())
 		{
 			return cmd.error(QString("Missing parameter: parameters filename after \"-%1\"").arg(COMMAND_M3C2));
@@ -53,12 +52,11 @@ struct CommandM3C2 : public ccCommandLineInterface::Command
 		ccPointCloud* corePointsCloud = (cmd.clouds().size() > 2 ? cmd.clouds()[2].pc : nullptr);
 
 		//display dialog
-		qM3C2Dialog dlg(cloud1, cloud2, nullptr);
+		qM3C2Dialog dlg(cloud1, cloud2, nullptr, corePointsCloud);
 		if (!dlg.loadParamsFromFile(paramFilename))
 		{
 			return false;
 		}
-		dlg.setCorePointsCloud(corePointsCloud);
 
 		QString errorMessage;
 		ccPointCloud* outputCloud = nullptr; //only necessary for the command line version in fact

@@ -43,7 +43,10 @@ namespace ccPS
 	inline const QString MaxAbsCoord                 () { return QStringLiteral( "MaxAbsCoord" ); }
 	inline const QString MaxAbsDiag                  () { return QStringLiteral( "MaxAbsDiag" ); }
 	inline const QString AutoPickRotationCenter      () { return QStringLiteral( "AutoPickRotationCenter" ); }
+	inline const QString View3dRotationAxisLocked    () { return QStringLiteral( "View3dRotationAxisLocked" ); }
+	inline const QString View3dLockedAxisRotation    () { return QStringLiteral( "View3dLockedAxisRotation" ); }
 	inline const QString Options                     () { return QStringLiteral( "Options" ); }
 	inline const QString Plugins                     () { return QStringLiteral( "Plugins" ); }
 	inline const QString Translation                 () { return QStringLiteral( "Translation" ); }
+	inline const QString Shortcuts                   () { return QStringLiteral( "Shortcuts" ); }
 };

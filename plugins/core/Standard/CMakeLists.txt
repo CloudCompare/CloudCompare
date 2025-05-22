@@ -18,12 +18,13 @@ add_subdirectory( qMeshBoolean )
 
 #plugins integrated as submodules
 set( submod_plugins
+		${CMAKE_CURRENT_SOURCE_DIR}/q3DMASC
 		${CMAKE_CURRENT_SOURCE_DIR}/qColorimetricSegmenter
+		${CMAKE_CURRENT_SOURCE_DIR}/qG3Point
+		${CMAKE_CURRENT_SOURCE_DIR}/qJSonRPCPlugin
 		${CMAKE_CURRENT_SOURCE_DIR}/qMasonry
 		${CMAKE_CURRENT_SOURCE_DIR}/qMPlane
-		${CMAKE_CURRENT_SOURCE_DIR}/qJSonRPCPlugin
 		${CMAKE_CURRENT_SOURCE_DIR}/qTreeIso
-		${CMAKE_CURRENT_SOURCE_DIR}/q3DMASC
 		${CMAKE_CURRENT_SOURCE_DIR}/qVoxFall
 )
 

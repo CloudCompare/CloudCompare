@@ -36,21 +36,22 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent/*=nul
 		assert(!params.perspectiveView);
 
 		m_windowWidth_pix = win->glWidth();
-		m_distanceToWidthRatio = params.computeDistanceToWidthRatio();
-		double focalDist = params.getFocalDistance();
-
 		if (m_windowWidth_pix < 1)
 		{
 			assert(false);
 			m_windowWidth_pix = 1;
 		}
+
+		m_distanceToWidthRatio = params.computeDistanceToWidthRatio(win->glWidth(), win->glHeight());
 		if (m_distanceToWidthRatio <= 0.0)
 		{
 			assert(false);
 			m_distanceToWidthRatio = 1.0;
 		}
 
+		double focalDist = params.getFocalDistance();
 		focalDoubleSpinBox->setValue(focalDist);
+
 		pixelCountSpinBox->setValue(1);
 		pixelSizeDoubleSpinBox->setValue(focalDist * m_distanceToWidthRatio / m_windowWidth_pix);
 	}

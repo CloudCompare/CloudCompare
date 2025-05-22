@@ -56,6 +56,7 @@ class ccRecentFiles;
 class ccSectionExtractionTool;
 class ccStdPluginInterface;
 class ccTracePolylineTool;
+class ccShortcutDialog;
 
 struct dbTreeSelectionInfo;
 
@@ -174,9 +175,9 @@ public:
 	
 private:
 	//! Creates a new 3D GL sub-window
-	ccGLWindowInterface* new3DView() { return new3DViewInternal(true); }
+	ccGLWindowInterface* new3DView() { return new3DViewInternal(true, false); }
 	//! Creates a new 3D GL sub-window (choose whether entity selection is allowed or not)
-	ccGLWindowInterface* new3DViewInternal(bool allowEntitySelection);
+	ccGLWindowInterface* new3DViewInternal(bool allowEntitySelection, bool warnAboutLockedRotationAxis = false);
 
 	//! Zooms in (current 3D view)
 	void zoomIn();
@@ -389,6 +390,7 @@ private:
 
 	void doActionEditCamera();
 	void doActionAdjustZoom();
+	void doActionShowCurrent3DViewInfo();
 	void doActionSaveViewportAsCamera();
 	void doActionResetGUIElementsPos();
 	void doActionToggleRestoreWindowOnStartup(bool);
@@ -560,6 +562,9 @@ private:
 	//! Adds a single value SF to the active point cloud
 	void addConstantSF(ccPointCloud* cloud, QString sfName, bool integerValue);
 
+	void populateActionList();
+	void showShortcutDialog();
+
 private: //members
 
 	//! Main UI
@@ -643,10 +648,14 @@ private: //members
 	ccPointPairRegistrationDlg* m_pprDlg;
 	//! Primitive factory dialog
 	ccPrimitiveFactoryDlg* m_pfDlg;
+	//! Shortcut management dialog
+	ccShortcutDialog *m_shortcutDlg;
 
 	/*** plugins ***/
 	//! Manages plugins - menus, toolbars, and the about dialog
 	ccPluginUIManager	*m_pluginUIManager;
+
+	QList<QAction *> m_actions;
 };
 
 #endif

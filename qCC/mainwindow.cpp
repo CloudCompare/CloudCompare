@@ -123,6 +123,9 @@
 #include "ccEntitySelectionDlg.h"
 #include "ccSmoothPolylineDlg.h"
 
+//CCPluginAPI
+#include <ccInfoDlg.h>
+
 //other
 #include "ccCropTool.h"
 #include "ccPersistentSettings.h"
@@ -157,11 +160,17 @@
 #include <iostream>
 #include <random>
 
+
+#include "ccShortcutDialog.h"
+
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance  = nullptr;
 
 //default file filter separator
 static const QString s_fileFilterSeparator(";;");
+
+//default (locked) rotation axis
+static CCVector3d s_lockedRotationAxis(0, 0, 1);
 
 enum PickingOperation {	NO_PICKING_OPERATION,
 						PICKING_ROTATION_CENTER,
@@ -207,6 +216,8 @@ MainWindow::MainWindow()
 	, m_plpDlg(nullptr)
 	, m_pprDlg(nullptr)
 	, m_pfDlg(nullptr)
+    , m_shortcutDlg(nullptr)
+	, m_actions()
 {
 	m_UI->setupUi( this );
 
@@ -223,9 +234,6 @@ MainWindow::MainWindow()
 	m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	m_UI->actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
-
-	// Set up dynamic menus
-	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
 
 	//Console
 	ccConsole::Init(m_UI->consoleWidget, this, this);
@@ -301,7 +309,22 @@ MainWindow::MainWindow()
 
 	connectActions();
 
-	new3DView();
+	// Shortcut management
+	{
+		populateActionList();
+		// Alphabetical sort
+		std::sort(m_actions.begin(), m_actions.end(), [](const QAction *a, const QAction *b)
+		{
+			return a->text() < b->text();
+		});
+
+		m_shortcutDlg = new ccShortcutDialog(m_actions, this);
+		m_shortcutDlg->restoreShortcutsFromQSettings();
+
+		connect(m_UI->actionShortcutSettings, &QAction::triggered, this, &MainWindow::showShortcutDialog);
+	}
+
+	new3DViewInternal(true, true);
 
 	setupInputDevices();
 
@@ -522,7 +545,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRGBToGreyScale,				&QAction::triggered, this, &MainWindow::doActionRGBToGreyScale);
 	connect(m_UI->actionInterpolateColors,			&QAction::triggered, this, &MainWindow::doActionInterpolateColors);
 	connect(m_UI->actionEnhanceRGBWithIntensities,	&QAction::triggered, this, &MainWindow::doActionEnhanceRGBWithIntensities);
-	connect(m_UI->actionColorFromScalarField,       &QAction::triggered, this, &MainWindow::doActionColorFromScalars);
+	connect(m_UI->actionColorFromScalarField,		&QAction::triggered, this, &MainWindow::doActionColorFromScalars);
 	connect(m_UI->actionClearColor,					&QAction::triggered, this, [=]() {
 		clearSelectedEntitiesProperty( ccEntityAction::CLEAR_PROPERTY::COLORS );
 	});
@@ -622,7 +645,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionRenameSF,					&QAction::triggered, this, &MainWindow::doActionRenameSF);
 	connect(m_UI->actionOpenColorScalesManager,		&QAction::triggered, this, &MainWindow::doActionOpenColorScalesManager);
 	connect(m_UI->actionAddIdField,					&QAction::triggered, this, &MainWindow::doActionAddIdField);
-    connect(m_UI->actionSplitCloudUsingSF,          &QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
+    connect(m_UI->actionSplitCloudUsingSF,			&QAction::triggered, this, &MainWindow::doActionSplitCloudUsingSF);
 	connect(m_UI->actionSetSFAsCoord,				&QAction::triggered, this, &MainWindow::doActionSetSFAsCoord);
 	connect(m_UI->actionInterpolateSFs,				&QAction::triggered, this, &MainWindow::doActionInterpolateScalarFields);
 	connect(m_UI->actionDeleteScalarField,			&QAction::triggered, this, [=]() {
@@ -714,24 +737,25 @@ void MainWindow::connectActions()
 	connect(m_UI->actionComputeBestICPRmsMatrix,	&QAction::triggered, this, &MainWindow::doActionComputeBestICPRmsMatrix);
 
 	//"Display" menu
-	connect(m_UI->actionFullScreen,						&QAction::toggled, this, &MainWindow::toggleFullScreen);
-	connect(m_UI->actionExclusiveFullScreen,			&QAction::toggled, this, &MainWindow::toggleExclusiveFullScreen);
+	connect(m_UI->actionFullScreen,						&QAction::toggled,   this, &MainWindow::toggleFullScreen);
+	connect(m_UI->actionExclusiveFullScreen,			&QAction::toggled,   this, &MainWindow::toggleExclusiveFullScreen);
 	connect(m_UI->actionRefresh,						&QAction::triggered, this, &MainWindow::refreshAll);
 	connect(m_UI->actionTestFrameRate,					&QAction::triggered, this, &MainWindow::testFrameRate);
 	connect(m_UI->actionToggleCenteredPerspective,		&QAction::triggered, this, &MainWindow::toggleActiveWindowCenteredPerspective);
 	connect(m_UI->actionToggleViewerBasedPerspective,	&QAction::triggered, this, &MainWindow::toggleActiveWindowViewerBasedPerspective);
-	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled, this, &MainWindow::toggleActiveWindowShowCursorCoords);
+	connect(m_UI->actionShowCursor3DCoordinates,		&QAction::toggled,   this, &MainWindow::toggleActiveWindowShowCursorCoords);
 	connect(m_UI->actionLockRotationAxis,				&QAction::triggered, this, &MainWindow::toggleLockRotationAxis);
 	connect(m_UI->actionEnterBubbleViewMode,			&QAction::triggered, this, &MainWindow::doActionEnableBubbleViewMode);
+	connect(m_UI->actionRenderToFile,					&QAction::triggered, this, &MainWindow::doActionRenderToFile);
 	connect(m_UI->actionEditCamera,						&QAction::triggered, this, &MainWindow::doActionEditCamera);
 	connect(m_UI->actionAdjustZoom,						&QAction::triggered, this, &MainWindow::doActionAdjustZoom);
+	connect(m_UI->actionViewInformation,				&QAction::triggered, this, &MainWindow::doActionShowCurrent3DViewInfo);
 	connect(m_UI->actionSaveViewportAsObject,			&QAction::triggered, this, &MainWindow::doActionSaveViewportAsCamera);
 
 	//"Display > Lights & Materials" menu
 	connect(m_UI->actionDisplaySettings,			&QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight,				&QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight,			&QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
-	connect(m_UI->actionRenderToFile,				&QAction::triggered, this, &MainWindow::doActionRenderToFile);
 	//"Display > Shaders & filters" menu
 	connect(m_UI->actionLoadShader,					&QAction::triggered, this, &MainWindow::doActionLoadShader);
 	connect(m_UI->actionDeleteShader,				&QAction::triggered, this, &MainWindow::doActionDeleteShader);
@@ -773,32 +797,32 @@ void MainWindow::connectActions()
 	//View toolbar
 	connect(m_UI->actionGlobalZoom,					&QAction::triggered, this, &MainWindow::setGlobalZoom);
 	connect(m_UI->actionPickRotationCenter,			&QAction::triggered, this, &MainWindow::doPickRotationCenter);
+	connect(m_UI->actionLockView3DRotationAxis,		&QAction::triggered, this, &MainWindow::toggleLockRotationAxis);
 	connect(m_UI->actionZoomAndCenter,				&QAction::triggered, this, &MainWindow::zoomOnSelectedEntities);
 	connect(m_UI->actionSetPivotAlwaysOn,			&QAction::triggered, this, &MainWindow::setPivotAlwaysOn);
 	connect(m_UI->actionSetPivotRotationOnly,		&QAction::triggered, this, &MainWindow::setPivotRotationOnly);
 	connect(m_UI->actionSetPivotOff,				&QAction::triggered, this, &MainWindow::setPivotOff);
-
-	connect(m_UI->actionSetOrthoView,               &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetOrthoView,				&QAction::triggered, this, [this] () {
 		setOrthoView( getActiveGLWindow() );
 	});
-	connect(m_UI->actionSetCenteredPerspectiveView, &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetCenteredPerspectiveView,	&QAction::triggered, this, [this] () {
 		setCenteredPerspectiveView( getActiveGLWindow() );
 	});
-	connect(m_UI->actionSetViewerPerspectiveView,   &QAction::triggered, this, [this] () {
+	connect(m_UI->actionSetViewerPerspectiveView,	&QAction::triggered, this, [this] () {
 		setViewerPerspectiveView( getActiveGLWindow() );
 	});
 
 	connect(m_UI->actionEnableStereo,				&QAction::toggled, this, &MainWindow::toggleActiveWindowStereoVision);
 	connect(m_UI->actionAutoPickRotationCenter,		&QAction::toggled, this, &MainWindow::toggleActiveWindowAutoPickRotCenter);
 
-	connect(m_UI->actionSetViewTop,                 &QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
-	connect(m_UI->actionSetViewBottom,              &QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
-	connect(m_UI->actionSetViewFront,               &QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
-	connect(m_UI->actionSetViewBack,                &QAction::triggered, this, [=]() { setView( CC_BACK_VIEW ); });
-	connect(m_UI->actionSetViewLeft,                &QAction::triggered, this, [=]() { setView( CC_LEFT_VIEW ); });
-	connect(m_UI->actionSetViewRight,               &QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
-	connect(m_UI->actionSetViewIso1,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
-	connect(m_UI->actionSetViewIso2,                &QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
+	connect(m_UI->actionSetViewTop,					&QAction::triggered, this, [=]() { setView( CC_TOP_VIEW ); });
+	connect(m_UI->actionSetViewBottom,				&QAction::triggered, this, [=]() { setView( CC_BOTTOM_VIEW ); });
+	connect(m_UI->actionSetViewFront,				&QAction::triggered, this, [=]() { setView( CC_FRONT_VIEW ); });
+	connect(m_UI->actionSetViewBack,				&QAction::triggered, this, [=]() { setView( CC_BACK_VIEW ); });
+	connect(m_UI->actionSetViewLeft,				&QAction::triggered, this, [=]() { setView( CC_LEFT_VIEW ); });
+	connect(m_UI->actionSetViewRight,				&QAction::triggered, this, [=]() { setView( CC_RIGHT_VIEW ); });
+	connect(m_UI->actionSetViewIso1,				&QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_1 ); });
+	connect(m_UI->actionSetViewIso2,				&QAction::triggered, this, [=]() { setView( CC_ISO_VIEW_2 ); });
 
 	//hidden
 	connect(m_UI->actionEnableVisualDebugTraces,	&QAction::triggered, this, &MainWindow::toggleVisualDebugTraces);
@@ -6134,7 +6158,7 @@ void MainWindow::zoomOut()
 	}
 }
 
-ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
+ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection, bool warnAboutLockedRotationAxis/*=false*/)
 {
 	assert(m_ccRoot && m_mdiArea);
 
@@ -6154,6 +6178,29 @@ ccGLWindowInterface* MainWindow::new3DViewInternal( bool allowEntitySelection )
 		QSettings settings;
 		bool autoPickRotationCenter = settings.value(ccPS::AutoPickRotationCenter(), true).toBool();
 		view3D->setAutoPickPivotAtCenter(autoPickRotationCenter);
+
+		bool rotationAxisLocked = settings.value(ccPS::View3dRotationAxisLocked(), false).toBool();
+		if (rotationAxisLocked)
+		{
+			s_lockedRotationAxis.x = settings.value(ccPS::View3dLockedAxisRotation() + ".x", 0.0).toDouble();
+			s_lockedRotationAxis.y = settings.value(ccPS::View3dLockedAxisRotation() + ".y", 0.0).toDouble();
+			s_lockedRotationAxis.z = settings.value(ccPS::View3dLockedAxisRotation() + ".z", 1.0).toDouble();
+			s_lockedRotationAxis.normalize();
+
+			if (warnAboutLockedRotationAxis)
+			{
+				ccLog::Warning(QString("[3D view] ") + tr("Rotation axis locked to") + QString(" (%1 ; %2 ; %3)").arg(s_lockedRotationAxis.x).arg(s_lockedRotationAxis.y).arg(s_lockedRotationAxis.z));
+			}
+		}
+		view3D->lockRotationAxis(rotationAxisLocked, s_lockedRotationAxis);
+
+		m_UI->actionLockRotationAxis->blockSignals(true);
+		m_UI->actionLockRotationAxis->setChecked(rotationAxisLocked);
+		m_UI->actionLockRotationAxis->blockSignals(false);
+
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(rotationAxisLocked);
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
 	}
 
 	viewWidget->setMinimumSize(400, 300);
@@ -7210,7 +7257,7 @@ void MainWindow::doActionRenderToFile()
 	if (!win)
 		return;
 
-	ccRenderToFileDlg rtfDlg(win->glWidth(), win->glHeight(), this);
+	ccRenderToFileDlg rtfDlg(win, this);
 
 	if (rtfDlg.exec())
 	{
@@ -7224,7 +7271,9 @@ void MainWindow::doActionEditCamera()
 	//current active MDI area
 	QMdiSubWindow* qWin = m_mdiArea->activeSubWindow();
 	if (!qWin)
+	{
 		return;
+	}
 
 	if (!m_cpeDlg)
 	{
@@ -7241,6 +7290,22 @@ void MainWindow::doActionEditCamera()
 	m_cpeDlg->start();
 
 	updateOverlayDialogsPlacement();
+}
+
+void MainWindow::doActionShowCurrent3DViewInfo()
+{
+	//current active MDI area
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	QStringList info = win->getWindowInfo();
+
+	ccInfoDlg infoDlg(this);
+
+	infoDlg.showText(info.join('\n'));
+
+	infoDlg.exec();
 }
 
 void MainWindow::doActionAdjustZoom()
@@ -10087,33 +10152,58 @@ void MainWindow::toggleLockRotationAxis()
 		bool wasLocked = win->isRotationAxisLocked();
 		bool isLocked = !wasLocked;
 
-		static CCVector3d s_lastAxis(0.0, 0.0, 1.0);
+		if (m_cpeDlg)
+		{
+			//will invalidate the Camera Parameters editing dialog
+			m_cpeDlg->close();
+		}
+
 		if (isLocked)
 		{
-			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastAxis.x, s_lastAxis.y, s_lastAxis.z, 4, tr("Lock rotation axis"), this);
+			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lockedRotationAxis.x, s_lockedRotationAxis.y, s_lockedRotationAxis.z, 4, tr("Lock rotation axis"), this);
 			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
+			{
 				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+			}
 			if (!axisDlg.exec())
+			{
 				return;
-			s_lastAxis.x = axisDlg.doubleSpinBox1->value();
-			s_lastAxis.y = axisDlg.doubleSpinBox2->value();
-			s_lastAxis.z = axisDlg.doubleSpinBox3->value();
+			}
+			s_lockedRotationAxis.x = axisDlg.doubleSpinBox1->value();
+			s_lockedRotationAxis.y = axisDlg.doubleSpinBox2->value();
+			s_lockedRotationAxis.z = axisDlg.doubleSpinBox3->value();
 		}
-		win->lockRotationAxis(isLocked, s_lastAxis);
+		win->lockRotationAxis(isLocked, s_lockedRotationAxis);
 
 		m_UI->actionLockRotationAxis->blockSignals(true);
 		m_UI->actionLockRotationAxis->setChecked(isLocked);
 		m_UI->actionLockRotationAxis->blockSignals(false);
 
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(isLocked);
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
+
 		if (isLocked)
 		{
-			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 24 * 3600, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
+			win->displayNewMessage(tr("[ROTATION LOCKED]"), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
 		else
 		{
 			win->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 0, ccGLWindowInterface::ROTAION_LOCK_MESSAGE);
 		}
-		win->redraw(true, false);
+		win->redraw(false, false);
+
+		//save the option
+		{
+			QSettings settings;
+			settings.setValue(ccPS::View3dRotationAxisLocked(), isLocked);
+			if (isLocked)
+			{
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".x", s_lockedRotationAxis.x);
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".y", s_lockedRotationAxis.y);
+				settings.setValue(ccPS::View3dLockedAxisRotation() + ".z", s_lockedRotationAxis.z);
+			}
+		}
 	}
 }
 
@@ -10941,6 +11031,10 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionLockRotationAxis->setChecked(win->isRotationAxisLocked());
 		m_UI->actionLockRotationAxis->blockSignals(false);
 
+		m_UI->actionLockView3DRotationAxis->blockSignals(true);
+		m_UI->actionLockView3DRotationAxis->setChecked(win->isRotationAxisLocked());
+		m_UI->actionLockView3DRotationAxis->blockSignals(false);
+
 		m_UI->actionEnableStereo->blockSignals(true);
 		m_UI->actionEnableStereo->setChecked(win->stereoModeIsEnabled());
 		m_UI->actionEnableStereo->blockSignals(false);
@@ -10959,6 +11053,7 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	}
 
 	m_UI->actionLockRotationAxis->setEnabled(win != nullptr);
+	m_UI->actionLockView3DRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionEnableStereo->setEnabled(win != nullptr);
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
 }
@@ -11623,7 +11718,16 @@ void MainWindow::destroyGLWindow(ccGLWindowInterface* view3D) const
 {
 	if (view3D)
 	{
-		view3D->asQObject()->setParent(nullptr);
+		if (QWidget* widget = dynamic_cast<QWidget*>(view3D))
+		{
+			// If view3D is of type QWidget, we have to use QWidget::setParent
+			widget->setParent(nullptr);
+		}
+		else
+		{
+			// Else, we can use the QObject::setParent method
+			view3D->asQObject()->setParent(nullptr);
+		}
 		delete view3D;
 	}
 }
@@ -11891,4 +11995,245 @@ void MainWindow::doActionPromoteCircleToCylinder()
 	addToDB(cylinder, true, true);
 	setSelectedInDB(circle, false);
 	setSelectedInDB(cylinder, true);
+}
+
+
+void MainWindow::populateActionList()
+{
+   	m_actions.push_back(m_UI->actionOpen);
+    m_actions.push_back(m_UI->actionSave);
+    m_actions.push_back(m_UI->actionQuit);
+    m_actions.push_back(m_UI->actionFullScreen);
+    m_actions.push_back(m_UI->actionDisplaySettings);
+    m_actions.push_back(m_UI->actionHelp);
+    m_actions.push_back(m_UI->actionAbout);
+    m_actions.push_back(m_UI->actionSetUniqueColor);
+    m_actions.push_back(m_UI->actionSetColorGradient);
+    m_actions.push_back(m_UI->actionComputeNormals);
+    m_actions.push_back(m_UI->actionInvertNormals);
+    m_actions.push_back(m_UI->actionComputeOctree);
+    m_actions.push_back(m_UI->actionConsole);
+    m_actions.push_back(m_UI->actionClose3DView);
+    m_actions.push_back(m_UI->actionCloseAll3DViews);
+    m_actions.push_back(m_UI->actionTile3DViews);
+    m_actions.push_back(m_UI->actionCascade3DViews);
+    m_actions.push_back(m_UI->actionPrevious3DView);
+    m_actions.push_back(m_UI->actionNext3DView);
+    m_actions.push_back(m_UI->actionNew3DView);
+    m_actions.push_back(m_UI->actionClone);
+    m_actions.push_back(m_UI->actionMerge);
+    m_actions.push_back(m_UI->actionDelete);
+    m_actions.push_back(m_UI->actionRegister);
+    m_actions.push_back(m_UI->actionCloudCloudDist);
+    m_actions.push_back(m_UI->actionCloudMeshDist);
+    m_actions.push_back(m_UI->actionStatisticalTest);
+    m_actions.push_back(m_UI->actionSamplePointsOnMesh);
+    m_actions.push_back(m_UI->actionLabelConnectedComponents);
+    m_actions.push_back(m_UI->actionSegment);
+    m_actions.push_back(m_UI->actionTranslateRotate);
+    m_actions.push_back(m_UI->actionShowHistogram);
+    m_actions.push_back(m_UI->actionComputeStatParams);
+    m_actions.push_back(m_UI->actionFilterByValue);
+    m_actions.push_back(m_UI->actionGaussianFilter);
+    m_actions.push_back(m_UI->actionDeleteScalarField);
+    m_actions.push_back(m_UI->actionScalarFieldArithmetic);
+    m_actions.push_back(m_UI->actionColorize);
+    m_actions.push_back(m_UI->actionSmoothMeshSF);
+    m_actions.push_back(m_UI->actionEnhanceMeshSF);
+    m_actions.push_back(m_UI->actionClearColor);
+    m_actions.push_back(m_UI->actionRGBGaussianFilter);
+    m_actions.push_back(m_UI->actionRGBBilateralFilter);
+    m_actions.push_back(m_UI->actionRGBMeanFilter);
+    m_actions.push_back(m_UI->actionRGBMedianFilter);
+    m_actions.push_back(m_UI->actionClearNormals);
+    m_actions.push_back(m_UI->actionResampleWithOctree);
+    m_actions.push_back(m_UI->actionComputeMeshAA);
+    m_actions.push_back(m_UI->actionComputeMeshLS);
+    m_actions.push_back(m_UI->actionMeasureMeshSurface);
+    m_actions.push_back(m_UI->actionCPS);
+    m_actions.push_back(m_UI->actionDeleteAllSF);
+    m_actions.push_back(m_UI->actionMultiplySF);
+    m_actions.push_back(m_UI->actionKMeans);
+    m_actions.push_back(m_UI->actionFrontPropagation);
+    m_actions.push_back(m_UI->actionApplyScale);
+    m_actions.push_back(m_UI->actionMatchBBCenters);
+    m_actions.push_back(m_UI->actionUnroll);
+    m_actions.push_back(m_UI->actionSFGradient);
+    m_actions.push_back(m_UI->actionZoomAndCenter);
+    m_actions.push_back(m_UI->actionSetViewTop);
+    m_actions.push_back(m_UI->actionSetViewFront);
+    m_actions.push_back(m_UI->actionSetViewBack);
+    m_actions.push_back(m_UI->actionSetViewLeft);
+    m_actions.push_back(m_UI->actionSetViewRight);
+    m_actions.push_back(m_UI->actionSetViewBottom);
+    m_actions.push_back(m_UI->actionDisplayMainTools);
+    m_actions.push_back(m_UI->actionDisplayViewTools);
+    m_actions.push_back(m_UI->actionDisplayScalarFieldsTools);
+    m_actions.push_back(m_UI->actionToggleSunLight);
+    m_actions.push_back(m_UI->actionToggleCustomLight);
+    m_actions.push_back(m_UI->actionGlobalZoom);
+    m_actions.push_back(m_UI->actionToggleCenteredPerspective);
+    m_actions.push_back(m_UI->actionToggleViewerBasedPerspective);
+    m_actions.push_back(m_UI->actionRefresh);
+    m_actions.push_back(m_UI->actionTestFrameRate);
+    m_actions.push_back(m_UI->actionRenderToFile);
+    m_actions.push_back(m_UI->actionAboutPlugins);
+    m_actions.push_back(m_UI->actionConvertToRGB);
+    m_actions.push_back(m_UI->actionShowDepthBuffer);
+    m_actions.push_back(m_UI->actionExportDepthBuffer);
+    m_actions.push_back(m_UI->actionModifySensor);
+    m_actions.push_back(m_UI->actionRasterize);
+    m_actions.push_back(m_UI->actionAlign);
+    m_actions.push_back(m_UI->actionSubsample);
+    m_actions.push_back(m_UI->actionLoadShader);
+    m_actions.push_back(m_UI->actionDeleteShader);
+    m_actions.push_back(m_UI->actionPointPicking);
+    m_actions.push_back(m_UI->actionComputeBestFitBB);
+    m_actions.push_back(m_UI->actionEditCamera);
+    m_actions.push_back(m_UI->actionPointListPicking);
+    m_actions.push_back(m_UI->actionCurvature);
+    m_actions.push_back(m_UI->actionRoughness);
+    m_actions.push_back(m_UI->actionFitPlane);
+    m_actions.push_back(m_UI->actionRenameSF);
+    m_actions.push_back(m_UI->actionFitQuadric);
+    m_actions.push_back(m_UI->actionSNETest);
+    m_actions.push_back(m_UI->actionToggleVisibility);
+    m_actions.push_back(m_UI->actionToggleNormals);
+    m_actions.push_back(m_UI->actionToggleColors);
+    m_actions.push_back(m_UI->actionToggleSF);
+    m_actions.push_back(m_UI->actionApplyTransformation);
+    m_actions.push_back(m_UI->actionSmoothMeshLaplacian);
+    m_actions.push_back(m_UI->actionConvertNormalToHSV);
+    m_actions.push_back(m_UI->actionSaveViewportAsObject);
+    m_actions.push_back(m_UI->actionPickRotationCenter);
+    m_actions.push_back(m_UI->actionComputeDistancesFromSensor);
+    m_actions.push_back(m_UI->actionBilateralFilter);
+    m_actions.push_back(m_UI->actionComputeScatteringAngles);
+    m_actions.push_back(m_UI->actionToggleActiveSFColorScale);
+    m_actions.push_back(m_UI->actionShowActiveSFPrevious);
+    m_actions.push_back(m_UI->actionShowActiveSFNext);
+    m_actions.push_back(m_UI->actionPointPairsAlign);
+    m_actions.push_back(m_UI->actionAddConstantSF);
+    m_actions.push_back(m_UI->actionExportCoordToSF);
+    m_actions.push_back(m_UI->actionSubdivideMesh);
+    m_actions.push_back(m_UI->actionToggleShowName);
+    m_actions.push_back(m_UI->actionPrimitiveFactory);
+    m_actions.push_back(m_UI->actionToggleMaterials);
+    m_actions.push_back(m_UI->actionSetOrthoView);
+    m_actions.push_back(m_UI->actionSetCenteredPerspectiveView);
+    m_actions.push_back(m_UI->actionSetViewerPerspectiveView);
+    m_actions.push_back(m_UI->actionSetPivotAlwaysOn);
+    m_actions.push_back(m_UI->actionSetPivotRotationOnly);
+    m_actions.push_back(m_UI->actionSetPivotOff);
+    m_actions.push_back(m_UI->actionSetViewIso1);
+    m_actions.push_back(m_UI->actionSetViewIso2);
+    m_actions.push_back(m_UI->actionConvertTextureToColor);
+    m_actions.push_back(m_UI->actionOpenColorScalesManager);
+    m_actions.push_back(m_UI->actionCrossSection);
+    m_actions.push_back(m_UI->actionEditGlobalShiftAndScale);
+    m_actions.push_back(m_UI->actionScalarFieldFromColor);
+    m_actions.push_back(m_UI->actionColorFromScalarField);
+    m_actions.push_back(m_UI->actionComputeKdTree);
+    m_actions.push_back(m_UI->actionTest);
+    m_actions.push_back(m_UI->actionAddIdField);
+    m_actions.push_back(m_UI->actionFitFacet);
+    m_actions.push_back(m_UI->actionAdjustZoom);
+    m_actions.push_back(m_UI->actionSetSFAsCoord);
+    m_actions.push_back(m_UI->actionCloseAll);
+    m_actions.push_back(m_UI->actionEditGlobalScale);
+    m_actions.push_back(m_UI->actionViewFromSensor);
+    m_actions.push_back(m_UI->actionFindBiggestInnerRectangle);
+    m_actions.push_back(m_UI->actionCreateGBLSensor);
+    m_actions.push_back(m_UI->actionCreateCameraSensor);
+    m_actions.push_back(m_UI->actionCheckPointsInsideFrustum);
+    m_actions.push_back(m_UI->actionProjectUncertainty);
+    m_actions.push_back(m_UI->actionOrientNormalsMST);
+    m_actions.push_back(m_UI->actionOrientNormalsFM);
+    m_actions.push_back(m_UI->actionCNETest);
+    m_actions.push_back(m_UI->actionApproximateDensity);
+    m_actions.push_back(m_UI->actionComputeDensity);
+    m_actions.push_back(m_UI->actionRemoveDuplicatePoints);
+    m_actions.push_back(m_UI->actionCrop);
+    m_actions.push_back(m_UI->actionConvertNormalToDipDir);
+    m_actions.push_back(m_UI->actionExportCloudInfo);
+    m_actions.push_back(m_UI->actionInterpolateColors);
+    m_actions.push_back(m_UI->actionDistanceToBestFitQuadric3D);
+    m_actions.push_back(m_UI->actionChangeColorLevels);
+    m_actions.push_back(m_UI->actionResetGUIElementsPos);
+    m_actions.push_back(m_UI->actionConvertToRandomRGB);
+    m_actions.push_back(m_UI->actionNoiseFilter);
+    m_actions.push_back(m_UI->actionComputeStatParams2);
+    m_actions.push_back(m_UI->actionMeasureMeshVolume);
+    m_actions.push_back(m_UI->actionFlagMeshVertices);
+    m_actions.push_back(m_UI->actionToggleActivation);
+    m_actions.push_back(m_UI->actionLockRotationAxis);
+    m_actions.push_back(m_UI->actionCreateCloudFromEntCenters);
+    m_actions.push_back(m_UI->actionComputeBestICPRmsMatrix);
+    m_actions.push_back(m_UI->actionEnterBubbleViewMode);
+    m_actions.push_back(m_UI->actionExtractSections);
+    m_actions.push_back(m_UI->actionConvertPolylinesToMesh);
+    m_actions.push_back(m_UI->actionLevel);
+    m_actions.push_back(m_UI->actionFitSphere);
+    m_actions.push_back(m_UI->actionMatchScales);
+    m_actions.push_back(m_UI->actionZoomIn);
+    m_actions.push_back(m_UI->actionZoomOut);
+    m_actions.push_back(m_UI->actionDistanceMap);
+    m_actions.push_back(m_UI->actionSORFilter);
+    m_actions.push_back(m_UI->actionEnableStereo);
+    m_actions.push_back(m_UI->actionComputePointsVisibility);
+    m_actions.push_back(m_UI->actionCompute2HalfDimVolume);
+    m_actions.push_back(m_UI->actionExclusiveFullScreen);
+    m_actions.push_back(m_UI->actionEnableVisualDebugTraces);
+    m_actions.push_back(m_UI->actionRGBToGreyScale);
+    m_actions.push_back(m_UI->actionTracePolyline);
+    m_actions.push_back(m_UI->actionEnableQtWarnings);
+    m_actions.push_back(m_UI->actionGlobalShiftSettings);
+    m_actions.push_back(m_UI->actionEnableCameraLink);
+    m_actions.push_back(m_UI->actionShowWaveDialog);
+    m_actions.push_back(m_UI->actionCreatePlane);
+    m_actions.push_back(m_UI->actionEditPlane);
+    m_actions.push_back(m_UI->actionCreateSurfaceBetweenTwoPolylines);
+    m_actions.push_back(m_UI->actionMeshTwoPolylines);
+    m_actions.push_back(m_UI->actionFitPlaneProxy);
+    m_actions.push_back(m_UI->actionEnhanceRGBWithIntensities);
+    m_actions.push_back(m_UI->actionMeshScanGrids);
+    m_actions.push_back(m_UI->actionAutoPickRotationCenter);
+    m_actions.push_back(m_UI->actionShowCursor3DCoordinates);
+    m_actions.push_back(m_UI->actionDeleteScanGrid);
+    m_actions.push_back(m_UI->actionCompressFWFData);
+    m_actions.push_back(m_UI->actionInterpolateSFs);
+    m_actions.push_back(m_UI->actionExportPlaneInfo);
+    m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
+    m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
+    m_actions.push_back(m_UI->actionNoTranslation);
+    m_actions.push_back(m_UI->actionComputeGeometricFeature);
+    m_actions.push_back(m_UI->actionBBMinCornerToOrigin);
+    m_actions.push_back(m_UI->actionBBMaxCornerToOrigin);
+    m_actions.push_back(m_UI->actionBBCenterToOrigin);
+    m_actions.push_back(m_UI->actionFlipPlane);
+    m_actions.push_back(m_UI->actionComparePlanes);
+    m_actions.push_back(m_UI->actionFlipMeshTriangles);
+    m_actions.push_back(m_UI->actionCloudPrimitiveDist);
+    m_actions.push_back(m_UI->actionExportNormalToSF);
+    m_actions.push_back(m_UI->actionSmoothPolyline);
+    m_actions.push_back(m_UI->actionResetAllVBOs);
+    m_actions.push_back(m_UI->actionCreateSinglePointCloud);
+    m_actions.push_back(m_UI->actionPasteCloudFromClipboard);
+    m_actions.push_back(m_UI->actionSplitCloudUsingSF);
+    m_actions.push_back(m_UI->actionAddClassificationSF);
+    m_actions.push_back(m_UI->actionRestoreWindowOnStartup);
+    m_actions.push_back(m_UI->actionShiftPointsAlongNormals);
+    m_actions.push_back(m_UI->actionFitCircle);
+    m_actions.push_back(m_UI->actionSetSFsAsNormal);
+    m_actions.push_back(m_UI->actionOpen_project);
+    m_actions.push_back(m_UI->actionSaveProject);
+    m_actions.push_back(m_UI->actionPromoteCircleToCylinder);
+    m_actions.push_back(m_UI->actionViewInformation);
+    m_actions.push_back(m_UI->actionLockView3DRotationAxis);
+}
+
+
+void MainWindow::showShortcutDialog()
+{
+	m_shortcutDlg->exec();
 }

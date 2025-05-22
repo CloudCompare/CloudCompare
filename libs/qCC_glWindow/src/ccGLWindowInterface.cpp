@@ -320,6 +320,8 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent/*=nullptr*/, bool silen
 	, m_ignoreMouseReleaseEvent(false)
 	, m_rotationAxisLocked(false)
 	, m_lockedRotationAxis(0, 0, 1)
+	, m_lockedRotationAngle_rad(0.0)
+	, m_lockedRotationOrthoAngle_rad(0.0)
 	, m_texturePoolLastIndex(0)
 	, m_clippingPlanesEnabled(true)
 	, m_defaultCursorShape(Qt::ArrowCursor)
@@ -1276,12 +1278,7 @@ void ccGLWindowInterface::updateConstellationCenterAndZoom(const ccBBox* boundin
 	setPivotPoint(P, false, false);
 
 	//compute the right distance for the camera to see the whole bounding-box
-	double targetWidth = bbDiag;
-	if (glHeight() < glWidth())
-	{
-		targetWidth *= static_cast<double>(glWidth()) / glHeight();
-	}
-	double focalDistance = targetWidth / m_viewportParams.computeDistanceToWidthRatio();
+	double focalDistance = bbDiag / m_viewportParams.computeDistanceToWidthRatio(glWidth(), glHeight());
 
 	//set the camera position
 	setCameraPos(P);
@@ -1345,7 +1342,7 @@ void ccGLWindowInterface::setGlFilter(ccGlFilter* filter)
 
 void ccGLWindowInterface::setCameraFocalToFitWidth(double width)
 {
-	double focalDistance = width / m_viewportParams.computeDistanceToWidthRatio();
+	double focalDistance = width / m_viewportParams.computeDistanceToWidthRatio(glWidth(), glHeight());
 
 	setFocalDistance(focalDistance);
 }
@@ -3000,17 +2997,7 @@ void ccGLWindowInterface::togglePerspective(bool objectCentered)
 
 double ccGLWindowInterface::computeActualPixelSize() const
 {
-	double pixelSize = m_viewportParams.computePixelSize(glWidth()); // we now use the width as the driving dimension for scaling
-
-	// but we have to compensate for the aspect ratio is h > w
-	double ar = static_cast<double>(glHeight()) / glWidth();
-	if (ar > 1.0)
-	{
-		pixelSize *= ar;
-	}
-
-	return pixelSize;
-
+	return m_viewportParams.computePixelSize(glWidth(), glHeight());
 }
 
 void ccGLWindowInterface::setBubbleViewMode(bool state)
@@ -3378,16 +3365,44 @@ void ccGLWindowInterface::setCustomView(const CCVector3d& forward, const CCVecto
 		redraw();
 }
 
+void ccGLWindowInterface::setLockedRotationAngles(double lockedRotationAngle_rad, double lockedRotationOrthoAngle_rad)
+{
+	m_lockedRotationAngle_rad = lockedRotationAngle_rad;
+	m_lockedRotationOrthoAngle_rad = lockedRotationOrthoAngle_rad;
+
+	if (m_rotationAxisLocked)
+	{
+		ccGLMatrixd viewMat = ccGLUtils::GenerateViewMat(	getDefaultVertDir(),
+															m_lockedRotationAngle_rad,
+															m_lockedRotationOrthoAngle_rad);
+
+		setBaseViewMat(viewMat);
+	}
+}
+
+void ccGLWindowInterface::getLockedRotationAngles(double& lockedRotationAngle_rad, double& lockedRotationOrthoAngle_rad) const
+{
+	lockedRotationAngle_rad = m_lockedRotationAngle_rad;
+	lockedRotationOrthoAngle_rad = m_lockedRotationOrthoAngle_rad;
+}
+
 void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=true*/)
 {
 	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
+	{
 		setPerspectiveState(m_viewportParams.perspectiveView, true);
+	}
 
-	m_viewportParams.viewMat = ccGLUtils::GenerateViewMat(orientation);
+	m_viewportParams.viewMat = ccGLUtils::GenerateViewMat(	orientation,
+															getDefaultVertDir(),
+															&m_lockedRotationAngle_rad,
+															&m_lockedRotationOrthoAngle_rad);
 
 	if (wasViewerBased)
+	{
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
+	}
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -3397,7 +3412,9 @@ void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRed
 	Q_EMIT m_signalEmitter->baseViewMatChanged(m_viewportParams.viewMat);
 
 	if (forceRedraw)
+	{
 		redraw();
+	}
 }
 
 bool ccGLWindowInterface::renderToFile(	QString filename,
@@ -4160,6 +4177,15 @@ void ccGLWindowInterface::lockRotationAxis(bool state, const CCVector3d& axis)
 	m_rotationAxisLocked = state;
 	m_lockedRotationAxis = axis;
 	m_lockedRotationAxis.normalize();
+	if (state)
+	{
+		// reset the parameters
+		m_lockedRotationAngle_rad = 0.0;
+		m_lockedRotationOrthoAngle_rad = 0.0;
+		CCVector3d orthoDir = m_lockedRotationAxis.orthogonal();
+		m_lockedRotationBaseMat = ccGLMatrixd::FromViewDirAndUpDir(orthoDir, m_lockedRotationAxis);
+		setBaseViewMat(m_lockedRotationBaseMat);
+	}
 }
 
 void ccGLWindowInterface::drawCross()
@@ -6545,76 +6571,39 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent *event)
 				case LockedAxisMode:
 				{
 					//apply rotation about the locked axis
-					CCVector3d axis = m_lockedRotationAxis;
-					getBaseViewMat().applyRotation(axis);
+					int mousePosDeltaY = event->y() - m_lastMousePos.y();
+					int mousePosDeltaX = event->x() - m_lastMousePos.x();
 
-
-					//determine whether we are in a side or top view
-					bool topView = (std::abs(axis.z) > 0.5);
-
-					//m_viewportParams.objectCenteredView
-					ccGLCameraParameters camera;
-					getGLCameraParameters(camera);
-
-					if (topView)
+					//horizontal mouse motion rotates the view about the fixed axis
 					{
-						//rotation origin
-						CCVector3d C2D;
-						if (m_viewportParams.objectCenteredView)
+						double horizAngleDelta_rad = mousePosDeltaX * ((2 * M_PI) / width());
+						m_lockedRotationAngle_rad += horizAngleDelta_rad;
+						while (m_lockedRotationAngle_rad < M_PI)
 						{
-							//project the current pivot point on screen
-							camera.project(m_viewportParams.getPivotPoint(), C2D);
-							C2D.z = 0.0;
+							m_lockedRotationAngle_rad += 2 * M_PI;
 						}
-						else
+						while (m_lockedRotationAngle_rad > M_PI)
 						{
-							C2D = CCVector3d(width() / 2.0, height() / 2.0, 0.0);
-						}
-
-						CCVector3d previousMousePos(m_lastMousePos.x(), height() - m_lastMousePos.y(), 0.0);
-						CCVector3d currentMousePos(event->x(), height() - event->y(), 0.0);
-
-						CCVector3d a = (currentMousePos - C2D);
-						CCVector3d b = (previousMousePos - C2D);
-						CCVector3d u = a * b;
-						double u_norm = std::abs(u.z); //a and b are in the XY plane
-						if (u_norm > 1.0e-6)
-						{
-							double sin_angle = u_norm / (a.norm() * b.norm());
-
-							//determine the rotation direction
-							if (u.z * m_lockedRotationAxis.z > 0)
-							{
-								sin_angle = -sin_angle;
-							}
-
-							double angle_rad = asin(sin_angle); //in [-pi/2 ; pi/2]
-							rotMat.initFromParameters(angle_rad, axis, CCVector3d(0, 0, 0));
+							m_lockedRotationAngle_rad -= 2 * M_PI;
 						}
 					}
-					else //side view
+
+					//vertical mouse motion rotates the view about the current view horizontal axis
 					{
-						//project the current pivot point on screen
-						CCVector3d A2D;
-						CCVector3d B2D;
-						if (camera.project(m_viewportParams.getPivotPoint(), A2D)
-							&& camera.project(m_viewportParams.getPivotPoint() + m_viewportParams.zFar * m_lockedRotationAxis, B2D))
+						double vertAngleDelta_rad = mousePosDeltaY * (M_PI / height());
+						m_lockedRotationOrthoAngle_rad += vertAngleDelta_rad;
+						if (m_lockedRotationOrthoAngle_rad < -M_PI_2)
 						{
-							CCVector3d lockedRotationAxis2D = B2D - A2D;
-							lockedRotationAxis2D.z = 0; //just in case
-							lockedRotationAxis2D.normalize();
-
-							CCVector3d mouseShift(static_cast<double>(dx), -static_cast<double>(dy), 0.0);
-							mouseShift -= mouseShift.dot(lockedRotationAxis2D) * lockedRotationAxis2D; //we only keep the orthogonal part
-							double angle_rad = 2.0 * M_PI * mouseShift.norm() / (width() + height());
-							if ((lockedRotationAxis2D * mouseShift).z > 0.0)
-							{
-								angle_rad = -angle_rad;
-							}
-
-							rotMat.initFromParameters(angle_rad, axis, CCVector3d(0, 0, 0));
+							m_lockedRotationOrthoAngle_rad = -M_PI_2;
+						}
+						else if (m_lockedRotationOrthoAngle_rad > M_PI_2)
+						{
+							m_lockedRotationOrthoAngle_rad = M_PI_2;
 						}
 					}
+
+					m_viewportParams.viewMat.toIdentity();
+					rotMat = ccGLUtils::GenerateViewMat(m_lockedRotationAxis, m_lockedRotationAngle_rad, m_lockedRotationOrthoAngle_rad);
 				}
 				break;
 
@@ -7223,4 +7212,58 @@ void ccGLWindowInterface::setCustomLightPosition(const CCVector3f& pos)
 	m_customLightPos[2] = pos.z;
 	invalidateViewport();
 	deprecate3DLayer();
+}
+
+QStringList ccGLWindowInterface::getWindowInfo(double scaling/*=1.0*/) const
+{
+	QStringList info;
+
+	// projection mode
+	if (m_viewportParams.perspectiveView)
+	{
+		info << QString("Projection: ") + (m_viewportParams.objectCenteredView ? "object-centered" : "viewer-based") + " perspective";
+	}
+	else
+	{
+		info << "Projection: orthographic";
+	}
+
+	// resolution
+	unsigned w = glWidth();
+	unsigned h = glHeight();
+
+	unsigned w2 = static_cast<unsigned>(w*scaling);
+	unsigned h2 = static_cast<unsigned>(h*scaling);
+
+	info << QString("Resolution: %1 x %2").arg(w2).arg(h2);
+
+	// pixel size
+	double pixelSize = computeActualPixelSize();
+	info << QString("Pixel size: %1").arg(pixelSize / scaling);
+
+	// Image size
+	info << QString("Image size: %1 x %2").arg(w * pixelSize).arg(h * pixelSize);
+
+	// Camera parameters
+	CCVector3d camCenter = m_viewportParams.getCameraCenter();
+	CCVector3d viewDir = m_viewportParams.getViewDir();
+	CCVector3d upDir = m_viewportParams.getUpDir();
+	CCVector3d rightDir = viewDir.cross(upDir);
+	info << QString("Camera");
+	info << QString("    View dir:  (%1, %2, %3)").arg(viewDir.x).arg(viewDir.y).arg(viewDir.z);
+	info << QString("    Up dir:    (%1, %2, %3)").arg(upDir.x).arg(upDir.y).arg(upDir.z);
+	info << QString("    Right dir: (%1, %2, %3)").arg(rightDir.x).arg(rightDir.y).arg(rightDir.z);
+	info << QString("    Center:    (%1, %2, %3)").arg(camCenter.x).arg(camCenter.y).arg(camCenter.z);
+
+	if (!m_viewportParams.perspectiveView)
+	{
+		double maxViewDirComp = std::max(std::abs(viewDir.x), std::max(std::abs(viewDir.y), std::abs(viewDir.z)));
+		if (maxViewDirComp > 0.99999) // the view is (almost) aligned with one of the main direction
+		{
+			CCVector3d topLeftCorner = camCenter - (((w / 2.0) * pixelSize) * rightDir) + (((h / 2.0) * pixelSize) * upDir);
+			info << QString("Top left corner: (%1, %2, %3)").arg(topLeftCorner.x).arg(topLeftCorner.y).arg(topLeftCorner.z);
+		}
+	}
+
+	return info;
 }

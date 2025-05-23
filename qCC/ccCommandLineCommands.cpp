@@ -1218,7 +1218,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				return cmd.error(QObject::tr("orient normals with grids failed"));
+				return cmd.error(QObject::tr("Orient normals with grids failed"));
 			}
 		}
 

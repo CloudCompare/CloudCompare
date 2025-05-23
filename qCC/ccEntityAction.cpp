@@ -2251,7 +2251,7 @@ namespace ccEntityAction
 					{
 						if (orientNormalsWithGrids || orientNormalsWithSensors) // withGrids and withSensors take precedence over other methods
 						{
-							ccLog::Print("[computeNormals] compute + orient normals with grids");
+							ccLog::Print("[computeNormals] Compute + orient normals with grids");
 							result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, ccNormalVectors::UNDEFINED);
 							if (orientNormalsWithGrids) // it is possible to orient the normals later with sensors of MST
 							{

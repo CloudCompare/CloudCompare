@@ -1202,7 +1202,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		{
 			ccLog::Print("\tcompute normals with octree, preferred orientation: " + QString::number(orientation));
 			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
-			if(!success)
+			if (!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
 			}

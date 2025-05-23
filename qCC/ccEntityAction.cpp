@@ -2253,7 +2253,7 @@ namespace ccEntityAction
 						{
 							ccLog::Print("[computeNormals] Compute + orient normals with grids");
 							result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, ccNormalVectors::UNDEFINED);
-							if (orientNormalsWithGrids) // it is possible to orient the normals later with sensors of MST
+							if (orientNormalsWithGrids) // it is possible to orient the normals later with sensors or MST
 							{
 								normalsAlreadyOriented = true;
 							}

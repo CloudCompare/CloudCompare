@@ -2260,7 +2260,7 @@ namespace ccEntityAction
 						}
 						else
 						{
-							ccLog::Print("[computeNormals] compute normals with grids, preferred orientation: " + QString::number(preferredOrientation) + " (255 = undefined)");
+							ccLog::Print("[computeNormals] Compute normals with grids, preferred orientation: " + QString::number(preferredOrientation) + " (255 = undefined)");
 							normalsAlreadyOriented = preferredOrientation != ccNormalVectors::UNDEFINED;
 							result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, preferredOrientation); // the previous normals are overwritten if any
 						}

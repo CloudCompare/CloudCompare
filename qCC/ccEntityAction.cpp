@@ -2247,7 +2247,7 @@ namespace ccEntityAction
 						addToDB(newCloud);
 					}
 #endif
-					if(s_orientNormals)
+					if (s_orientNormals)
 					{
 						if (orientNormalsWithGrids || orientNormalsWithSensors) // withGrids and withSensors take precedence over other methods
 						{

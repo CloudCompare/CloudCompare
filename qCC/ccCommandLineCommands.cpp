@@ -1193,7 +1193,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 				ccLog::Print("\tcompute normals with grids, preferred orientation: " + QString::number(orientation));
 				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), orientation);
 			}
-			if(!success)
+			if (!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithGrids failed"));
 			}

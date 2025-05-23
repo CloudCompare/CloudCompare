@@ -1193,7 +1193,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 				ccLog::Print("\tcompute normals with grids, preferred orientation: " + QString::number(orientation));
 				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), orientation);
 			}
-			if(!success)
+			if (!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithGrids failed"));
 			}
@@ -1202,11 +1202,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		{
 			ccLog::Print("\tcompute normals with octree, preferred orientation: " + QString::number(orientation));
 			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
-			if(success)
-			{
-				cmd.print(QObject::tr("computeNormalsWithOctree success"));
-			}
-			else
+			if (!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
 			}
@@ -1222,7 +1218,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				return cmd.error(QObject::tr("orient normals with grids failed"));
+				return cmd.error(QObject::tr("Orient normals with grids failed"));
 			}
 		}
 
@@ -1250,7 +1246,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 						}
 						else
 						{
-							return cmd.error(QObject::tr("orient normals with sensors failed"));
+							return cmd.error(QObject::tr("Orient normals with sensors failed"));
 						}
 					}
 				}

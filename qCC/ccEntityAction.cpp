@@ -2247,27 +2247,27 @@ namespace ccEntityAction
 						addToDB(newCloud);
 					}
 #endif
-					if(s_orientNormals)
+					if (s_orientNormals)
 					{
 						if (orientNormalsWithGrids || orientNormalsWithSensors) // withGrids and withSensors take precedence over other methods
 						{
-							ccLog::Print("[computeNormals] compute + orient normals with grids");
+							ccLog::Print("[computeNormals] Compute + orient normals with grids");
 							result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, ccNormalVectors::UNDEFINED);
-							if (orientNormalsWithGrids) // it is possible to orient the normals later with sensors of MST
+							if (orientNormalsWithGrids) // it is possible to orient the normals later with sensors or MST
 							{
 								normalsAlreadyOriented = true;
 							}
 						}
 						else
 						{
-							ccLog::Print("[computeNormals] compute normals with grids, preferred orientation: " + QString::number(preferredOrientation) + " (255 = undefined)");
+							ccLog::Print("[computeNormals] Compute normals with grids, preferred orientation: " + QString::number(preferredOrientation) + " (255 = undefined)");
 							normalsAlreadyOriented = preferredOrientation != ccNormalVectors::UNDEFINED;
 							result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, preferredOrientation); // the previous normals are overwritten if any
 						}
 					}
 					else
 					{
-						ccLog::Print("[computeNormals] compute + orient normals with grids");
+						ccLog::Print("[computeNormals] Compute + orient normals with grids");
 						normalsAlreadyOriented = true;
 						result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, ccNormalVectors::UNDEFINED);
 					}

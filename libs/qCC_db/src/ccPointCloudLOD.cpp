@@ -1112,7 +1112,7 @@ void ccNestedOctreePointCloudLODVisibilityFlagger::computeNodeFootprint(ccAbstra
 
 	if (m_camera.perspective)
 	{
-		const float distance = (m_camera.modelViewMat * (node.center, 0)).norm();
+		const float distance = (m_camera.modelViewMat * node.center).norm();
 		if (distance < node.radius)
 		{
 			node.score = std::numeric_limits<float>::max();

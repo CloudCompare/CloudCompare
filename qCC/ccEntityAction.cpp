@@ -2267,7 +2267,7 @@ namespace ccEntityAction
 					}
 					else
 					{
-						ccLog::Print("[computeNormals] compute + orient normals with grids");
+						ccLog::Print("[computeNormals] Compute + orient normals with grids");
 						normalsAlreadyOriented = true;
 						result = cloud->computeNormalsWithGrids(minGridAngle_deg, &pDlg, ccNormalVectors::UNDEFINED);
 					}

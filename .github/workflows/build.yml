@@ -103,6 +103,10 @@ jobs:
             -DPLUGIN_STANDARD_QVOXFALL=ON \
             .
 
+      - name: Check Format
+        if: matrix.config.os == 'windows-latest'
+        run: cmake --build build --target check-format
+
       - name: Build
         run: cmake --build build --parallel
 

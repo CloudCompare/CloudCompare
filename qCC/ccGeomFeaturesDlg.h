@@ -1,36 +1,35 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: Daniel Girardeau-Montaut                  #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: Daniel Girardeau-Montaut                  #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_GEOM_FEATURES_DIALOG_HEADER
 #define CC_GEOM_FEATURES_DIALOG_HEADER
 
-//Local
+// Local
 #include "ccLibAlgorithms.h"
 
-//Qt
+// Qt
 #include <QDialog>
-
 #include <ui_geomFeaturesDlg.h>
 
 //! Dialog for computing the density of a point clouds
-class ccGeomFeaturesDlg: public QDialog, public Ui::GeomFeaturesDialog
+class ccGeomFeaturesDlg : public QDialog
+    , public Ui::GeomFeaturesDialog
 {
-public:
-
+  public:
 	//! Default constructor
 	explicit ccGeomFeaturesDlg(QWidget* parent = nullptr);
 
@@ -51,18 +50,18 @@ public:
 	//! Reset the whole dialog
 	void reset();
 
-protected:
-
+  protected:
 	struct Option : ccLibAlgorithms::GeomCharacteristic
 	{
 		Option(QCheckBox* cb, CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c, int option = 0)
-			: ccLibAlgorithms::GeomCharacteristic(c, option)
-			, checkBox(cb)
-		{}
+		    : ccLibAlgorithms::GeomCharacteristic(c, option)
+		    , checkBox(cb)
+		{
+		}
 
 		QCheckBox* checkBox = nullptr;
 	};
-	
+
 	std::vector<Option> m_options;
 };
 

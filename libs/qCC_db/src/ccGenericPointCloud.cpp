@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifdef CC_CORE_LIB_USES_TBB
 #include <tbb/parallel_for.h>
@@ -21,13 +21,13 @@
 
 #include "ccGenericPointCloud.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
 #include <Neighbourhood.h>
 #include <ReferenceCloud.h>
 
-//Local
+// Local
 #include "ccGenericGLDisplay.h"
 #include "ccOctreeProxy.h"
 #include "ccPointCloud.h"
@@ -36,22 +36,22 @@
 #include "ccSensor.h"
 
 #if defined(_OPENMP)
-//OpenMP
+// OpenMP
 #include <omp.h>
 #endif
 
 ccGenericPointCloud::ccGenericPointCloud(QString name, unsigned uniqueID)
-	: ccShiftedObject(name, uniqueID)
-	, m_pointSize(0)
+    : ccShiftedObject(name, uniqueID)
+    , m_pointSize(0)
 {
 	setVisible(true);
 	lockVisibility(false);
 }
 
 ccGenericPointCloud::ccGenericPointCloud(const ccGenericPointCloud& cloud)
-	: ccShiftedObject(cloud)
-	, m_pointsVisibility(cloud.m_pointsVisibility)
-	, m_pointSize(cloud.m_pointSize)
+    : ccShiftedObject(cloud)
+    , m_pointsVisibility(cloud.m_pointsVisibility)
+    , m_pointSize(cloud.m_pointSize)
 {
 }
 
@@ -79,7 +79,7 @@ bool ccGenericPointCloud::resetVisibilityArray()
 		return false;
 	}
 
-	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), CCCoreLib::POINT_VISIBLE); //by default, all points are visible
+	std::fill(m_pointsVisibility.begin(), m_pointsVisibility.end(), CCCoreLib::POINT_VISIBLE); // by default, all points are visible
 
 	return true;
 }
@@ -143,7 +143,7 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	}
 }
 
-void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild/*=true*/)
+void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild /*=true*/)
 {
 	if (!octree || octree->getNumberOfProjectedPoints() == 0)
 	{
@@ -163,10 +163,10 @@ void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild/*
 	}
 }
 
-ccOctree::Shared ccGenericPointCloud::computeOctree(CCCoreLib::GenericProgressCallback* progressCb, bool autoAddChild/*=true*/)
+ccOctree::Shared ccGenericPointCloud::computeOctree(CCCoreLib::GenericProgressCallback* progressCb, bool autoAddChild /*=true*/)
 {
 	deleteOctree();
-	
+
 	ccOctree::Shared octree(new ccOctree(this));
 	if (octree->build(progressCb) > 0)
 	{
@@ -180,7 +180,7 @@ ccOctree::Shared ccGenericPointCloud::computeOctree(CCCoreLib::GenericProgressCa
 	return octree;
 }
 
-ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
+ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	ccBBox box;
 
@@ -189,7 +189,7 @@ ccBBox ccGenericPointCloud::getOwnBB(bool withGLFeatures/*=false*/)
 		getBoundingBox(box.minCorner(), box.maxCorner());
 		box.setValidity(true);
 	}
-	
+
 	return box;
 }
 
@@ -301,31 +301,32 @@ void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
 		return;
 	}
 
-	//original center
+	// original center
 	copyGlobalShiftAndScale(*cloud);
-	//keep the transformation history!
+	// keep the transformation history!
 	setGLTransformationHistory(cloud->getGLTransformationHistory());
-	//custom point size
+	// custom point size
 	setPointSize(cloud->getPointSize());
-	//meta-data
+	// meta-data
 	setMetaData(cloud->metaData());
 }
 
 #ifdef QT_DEBUG
-//for tests
+// for tests
 #include "ccPointCloud.h"
+
 #include <ScalarField.h>
 #endif
 
-bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
-										const ccGLCameraParameters& camera,
-										int& nearestPointIndex,
-										double& nearestSquareDist,
-										double pickWidth/*=2.0*/,
-										double pickHeight/*=2.0*/,
-										bool autoComputeOctree/*=false*/)
+bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
+                                       const ccGLCameraParameters& camera,
+                                       int&                        nearestPointIndex,
+                                       double&                     nearestSquareDist,
+                                       double                      pickWidth /*=2.0*/,
+                                       double                      pickHeight /*=2.0*/,
+                                       bool                        autoComputeOctree /*=false*/)
 {
-	//can we use the octree to accelerate the point picking process?
+	// can we use the octree to accelerate the point picking process?
 	if (pickWidth == pickHeight)
 	{
 		ccOctree::Shared octree = getOctree();
@@ -337,13 +338,13 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 
 		if (octree)
 		{
-			//we can now use the octree to do faster point picking
+			// we can now use the octree to do faster point picking
 #ifdef DEBUG_PICKING
 			CCCoreLib::ScalarField* sf = nullptr;
 			if (getClassID() == CC_TYPES::POINT_CLOUD)
 			{
-				ccPointCloud* pc = static_cast<ccPointCloud*>(this);
-				int sfIdx = pc->getScalarFieldIndexByName("octree_picking");
+				ccPointCloud* pc    = static_cast<ccPointCloud*>(this);
+				int           sfIdx = pc->getScalarFieldIndexByName("octree_picking");
 				if (sfIdx < 0)
 				{
 					sfIdx = pc->addScalarField("octree_picking");
@@ -376,7 +377,7 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 				}
 				else
 				{
-					//nothing found
+					// nothing found
 					return false;
 				}
 			}
@@ -387,11 +388,11 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 		}
 	}
 
-	//otherwise we go 'brute force' (works quite well in fact?!)
+	// otherwise we go 'brute force' (works quite well in fact?!)
 	nearestPointIndex = -1;
 	nearestSquareDist = -1.0;
 	{
-		//back project the clicked point in 3D
+		// back project the clicked point in 3D
 		CCVector3d clickPosd(clickPos.x, clickPos.y, 0);
 		CCVector3d X(0, 0, 0);
 		if (!camera.unproject(clickPosd, X))
@@ -399,48 +400,47 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 			return false;
 		}
 
-		//warning: we have to handle the relative GL transformation!
+		// warning: we have to handle the relative GL transformation!
 		ccGLMatrix trans;
-		bool noGLTrans = !getAbsoluteGLTransformation(trans);
+		bool       noGLTrans = !getAbsoluteGLTransformation(trans);
 
-		//visibility table (if any)
+		// visibility table (if any)
 		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? &getTheVisibilityArray() : nullptr;
 
-		//scalar field with hidden values (if any)
+		// scalar field with hidden values (if any)
 		ccScalarField* activeSF = nullptr;
-		if (	sfShown()
-			&&	isA(CC_TYPES::POINT_CLOUD)
-			&&	!visTable //if the visibility table is instantiated, we always display ALL points
-			)
+		if (sfShown()
+		    && isA(CC_TYPES::POINT_CLOUD)
+		    && !visTable // if the visibility table is instantiated, we always display ALL points
+		)
 		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
+			ccPointCloud*  pc = static_cast<ccPointCloud*>(this);
 			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 			{
-				//we must take this SF display parameters into account as some points may be hidden!
+				// we must take this SF display parameters into account as some points may be hidden!
 				activeSF = sf;
 			}
 		}
 
 		int pointCount = static_cast<int>(size());
 #ifdef CC_CORE_LIB_USES_TBB
-		tbb::parallel_for( 0, pointCount, [&](int i)
+		tbb::parallel_for(0, pointCount, [&](int i)
 #else
 #if defined(_OPENMP)
-		#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 		for (int i = 0; i < pointCount; ++i)
 #endif
-		{
-			//we shouldn't test points that are actually hidden!
-			if (	(!visTable || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
-				&&	(!activeSF || activeSF->getColor(activeSF->getValue(i)))
-				)
+		                  {
+			// we shouldn't test points that are actually hidden!
+			if ((!visTable || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
+			    && (!activeSF || activeSF->getColor(activeSF->getValue(i))))
 			{
 				const CCVector3* P = getPoint(i);
 
 				CCVector3d Q2D;
-				bool insideFrustum = false;
+				bool       insideFrustum = false;
 				if (noGLTrans)
 				{
 					camera.project(*P, Q2D, &insideFrustum);
@@ -462,8 +462,8 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 #endif
 				}
 
-				if (	std::abs(Q2D.x - clickPos.x) <= pickWidth
-					&&	std::abs(Q2D.y - clickPos.y) <= pickHeight)
+				if (std::abs(Q2D.x - clickPos.x) <= pickWidth
+				    && std::abs(Q2D.y - clickPos.y) <= pickHeight)
 				{
 					const double squareDist = CCVector3d(X.x - P->x, X.y - P->y, X.z - P->z).norm2d();
 					if (nearestPointIndex < 0 || squareDist < nearestSquareDist)
@@ -472,19 +472,18 @@ bool ccGenericPointCloud::pointPicking(	const CCVector2d& clickPos,
 						nearestPointIndex = i;
 					}
 				}
-			}
-		}
+			} }
 #ifdef CC_CORE_LIB_USES_TBB
 		);
 #endif
 	}
-	
+
 	return (nearestPointIndex >= 0);
 }
 
-CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable/*=nullptr*/,
-																	bool silent/*=false*/,
-																	CCCoreLib::ReferenceCloud* selection/*=nullptr*/) const
+CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const VisibilityTableType* visTable /*=nullptr*/,
+                                                                    bool                       silent /*=false*/,
+                                                                    CCCoreLib::ReferenceCloud* selection /*=nullptr*/) const
 {
 	if (!visTable)
 	{
@@ -499,7 +498,7 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 		return nullptr;
 	}
 
-	//count the number of points to copy
+	// count the number of points to copy
 	unsigned pointCount = 0;
 	{
 		for (unsigned i = 0; i < count; ++i)
@@ -511,7 +510,7 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 		}
 	}
 
-	//we create an entity with the 'visible' vertices only
+	// we create an entity with the 'visible' vertices only
 	CCCoreLib::ReferenceCloud* rc = nullptr;
 	if (selection)
 	{
@@ -532,7 +531,7 @@ CCCoreLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints(const Visibi
 			{
 				if (visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 				{
-					rc->addPointIndex(i); //can't fail (see above)
+					rc->addPointIndex(i); // can't fail (see above)
 				}
 			}
 		}

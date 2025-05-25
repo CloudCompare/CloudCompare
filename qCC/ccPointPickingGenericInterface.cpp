@@ -1,39 +1,39 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccPointPickingGenericInterface.h"
 
-//Local
-#include "mainwindow.h"
+// Local
 #include "db_tree/ccDBRoot.h"
+#include "mainwindow.h"
 
-//common
+// common
 #include <ccPickingHub.h>
 
-//qCC_db
+// qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-//qCCC_gl
+// qCCC_gl
 #include <ccGLWindowInterface.h>
 
-ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent/*=nullptr*/)
-	: ccOverlayDialog(parent)
-	, m_pickingHub(pickingHub)
+ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent /*=nullptr*/)
+    : ccOverlayDialog(parent)
+    , m_pickingHub(pickingHub)
 {
 	assert(m_pickingHub);
 }
@@ -42,12 +42,12 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindowInterface* win)
 {
 	if (win == m_associatedWin)
 	{
-		//nothing to do
+		// nothing to do
 		return false;
 	}
 	ccGLWindowInterface* oldWin = m_associatedWin;
 
-	//just in case
+	// just in case
 	if (m_pickingHub)
 	{
 		m_pickingHub->removeListener(this);
@@ -58,7 +58,7 @@ bool ccPointPickingGenericInterface::linkWith(ccGLWindowInterface* win)
 		return false;
 	}
 
-	//if the dialog is already linked to a window, we must disconnect the 'point picked' signal
+	// if the dialog is already linked to a window, we must disconnect the 'point picked' signal
 	if (oldWin)
 	{
 		oldWin->signalEmitter()->disconnect(this);
@@ -75,14 +75,14 @@ bool ccPointPickingGenericInterface::start()
 		return false;
 	}
 
-	//activate "point picking mode" in associated GL window
+	// activate "point picking mode" in associated GL window
 	if (!m_pickingHub->addListener(this, true, true, ccGLWindowInterface::POINT_PICKING))
 	{
 		ccLog::Error("Picking mechanism already in use. Close the tool using it first.");
 		return false;
 	}
 
-	//the user must not close this window!
+	// the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->redraw(true, false);
 
@@ -95,10 +95,10 @@ void ccPointPickingGenericInterface::stop(bool state)
 {
 	if (m_pickingHub)
 	{
-		//deactivate "point picking mode" in all GL windows
+		// deactivate "point picking mode" in all GL windows
 		m_pickingHub->removeListener(this);
 
-		if ( m_associatedWin != nullptr )
+		if (m_associatedWin != nullptr)
 		{
 			m_associatedWin->setUnclosable(false);
 			m_associatedWin->redraw(true, false);

@@ -1,54 +1,54 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccPickingHub.h"
 
-//Qt
+// Qt
 #include <QMdiSubWindow>
 #include <QMessageBox>
 
-//qCC_gl
+// qCC_gl
 #include <ccGLWindowInterface.h>
 
-//qCC_db
+// qCC_db
 #include <ccSphere.h>
 
-//Plugins
+// Plugins
 #include <ccMainAppInterface.h>
 
-ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent/*=nullptr*/)
-	: QObject(parent)
-	, m_app(app)
-	, m_activeGLWindow(nullptr)
-	, m_pickingMode(ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING)
-	, m_autoEnableOnActivatedWindow(true)
-	, m_exclusive(false)
+ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent /*=nullptr*/)
+    : QObject(parent)
+    , m_app(app)
+    , m_activeGLWindow(nullptr)
+    , m_pickingMode(ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING)
+    , m_autoEnableOnActivatedWindow(true)
+    , m_exclusive(false)
 {
 }
 
-//void ccPickingHub::setPickingMode(ccGLWindowInterface::PICKING_MODE mode, bool autoEnableOnActivatedWindow/*=true*/)
+// void ccPickingHub::setPickingMode(ccGLWindowInterface::PICKING_MODE mode, bool autoEnableOnActivatedWindow/*=true*/)
 //{
 //	m_pickingMode = mode;
 //	m_autoEnableOnActivatedWindow = autoEnableOnActivatedWindow;
-//}
+// }
 
 void ccPickingHub::togglePickingMode(bool state)
 {
-	//ccLog::Warning(QString("Toggle picking mode: ") + (state ? "ON" : "OFF") + " --> " + (m_activeGLWindow ? QString("View ") + QString::number(m_activeGLWindow->getUniqueID()) : QString("no view")));
+	// ccLog::Warning(QString("Toggle picking mode: ") + (state ? "ON" : "OFF") + " --> " + (m_activeGLWindow ? QString("View ") + QString::number(m_activeGLWindow->getUniqueID()) : QString("no view")));
 	if (m_activeGLWindow)
 	{
 		m_activeGLWindow->setPickingMode(state ? m_pickingMode : ccGLWindowInterface::DEFAULT_PICKING);
@@ -58,20 +58,20 @@ void ccPickingHub::togglePickingMode(bool state)
 void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 {
 	ccGLWindowInterface* glWindow = (mdiSubWindow ? ccGLWindowInterface::FromWidget(mdiSubWindow->widget()) : nullptr);
-	//if (glWindow)
+	// if (glWindow)
 	//	ccLog::Warning("New active GL window: " + QString::number(glWindow->getUniqueID()));
-	//else
+	// else
 	//	ccLog::Warning("No more active GL window");
 
 	if (m_activeGLWindow == glWindow)
 	{
-		//nothing to do
+		// nothing to do
 		return;
 	}
 
 	if (m_activeGLWindow)
 	{
-		//take care of the previously linked window
+		// take care of the previously linked window
 		togglePickingMode(false);
 		disconnect(m_activeGLWindow->signalEmitter());
 		m_activeGLWindow = nullptr;
@@ -79,9 +79,9 @@ void ccPickingHub::onActiveWindowChanged(QMdiSubWindow* mdiSubWindow)
 
 	if (glWindow)
 	{
-		//link this new window
-		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::itemPicked,	this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
-		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose,	this, &ccPickingHub::onActiveWindowDeleted);
+		// link this new window
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::itemPicked, this, &ccPickingHub::processPickedItem, Qt::UniqueConnection);
+		connect(glWindow->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, this, &ccPickingHub::onActiveWindowDeleted);
 		m_activeGLWindow = glWindow;
 
 		if (m_autoEnableOnActivatedWindow && !m_listeners.empty())
@@ -109,14 +109,14 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 	ccPickingListener::PickedItem item;
 	{
 		item.clickPoint = QPoint(x, y);
-		item.entity = entity;
-		item.itemIndex = itemIndex;
-		item.P3D = P3D;
-		item.uvw = uvw;
+		item.entity     = entity;
+		item.itemIndex  = itemIndex;
+		item.P3D        = P3D;
+		item.uvw        = uvw;
 
 		if (entity && entity->isA(CC_TYPES::SPHERE))
 		{
-			//whether the center of sphere entities should be used when a point is picked on the surface
+			// whether the center of sphere entities should be used when a point is picked on the surface
 			static QMessageBox::StandardButton s_pickSphereCenter = QMessageBox::Yes;
 
 			if (s_pickSphereCenter != QMessageBox::YesToAll && s_pickSphereCenter != QMessageBox::NoToAll)
@@ -125,15 +125,15 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 			}
 			if (s_pickSphereCenter == QMessageBox::Yes || s_pickSphereCenter == QMessageBox::YesToAll)
 			{
-				//replace the input point by the sphere center
-				item.P3D = static_cast<ccSphere*>(entity)->getOwnBB().getCenter();
+				// replace the input point by the sphere center
+				item.P3D          = static_cast<ccSphere*>(entity)->getOwnBB().getCenter();
 				item.entityCenter = true;
 			}
 		}
 	}
 
-	//copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'
-	std::set< ccPickingListener* > listeners = m_listeners;
+	// copy the list of listeners, in case the user call 'removeListener' in 'onItemPicked'
+	std::set<ccPickingListener*> listeners = m_listeners;
 	for (ccPickingListener* listener : listeners)
 	{
 		if (listener)
@@ -143,10 +143,10 @@ void ccPickingHub::processPickedItem(ccHObject* entity, unsigned itemIndex, int 
 	}
 }
 
-bool ccPickingHub::addListener(	ccPickingListener* listener,
-								bool exclusive/*=false*/,
-								bool autoStartPicking/*=true*/,
-								ccGLWindowInterface::PICKING_MODE mode/*=ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING*/)
+bool ccPickingHub::addListener(ccPickingListener*                listener,
+                               bool                              exclusive /*=false*/,
+                               bool                              autoStartPicking /*=true*/,
+                               ccGLWindowInterface::PICKING_MODE mode /*=ccGLWindowInterface::POINT_OR_TRIANGLE_PICKING*/)
 {
 	if (!listener)
 	{
@@ -154,10 +154,10 @@ bool ccPickingHub::addListener(	ccPickingListener* listener,
 		return false;
 	}
 
-	//if listeners are already registered
+	// if listeners are already registered
 	if (!m_listeners.empty())
 	{
-		if (m_exclusive) //a previous listener is exclusive
+		if (m_exclusive) // a previous listener is exclusive
 		{
 			assert(m_listeners.size() == 1);
 			if (m_listeners.find(listener) == m_listeners.end())
@@ -166,7 +166,7 @@ bool ccPickingHub::addListener(	ccPickingListener* listener,
 				return false;
 			}
 		}
-		else if (exclusive) //this new listener is exclusive
+		else if (exclusive) // this new listener is exclusive
 		{
 			if (m_listeners.size() > 1 || m_listeners.find(listener) == m_listeners.end())
 			{
@@ -183,19 +183,19 @@ bool ccPickingHub::addListener(	ccPickingListener* listener,
 			}
 		}
 	}
-	
+
 	try
 	{
 		m_listeners.insert(listener);
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		ccLog::Warning("[ccPickingHub::addListener] Not enough memory");
 		return false;
 	}
 
-	m_exclusive = exclusive;
+	m_exclusive   = exclusive;
 	m_pickingMode = mode;
 
 	if (autoStartPicking)
@@ -206,13 +206,13 @@ bool ccPickingHub::addListener(	ccPickingListener* listener,
 	return true;
 }
 
-void ccPickingHub::removeListener(ccPickingListener* listener, bool autoStopPickingIfLast/*=true*/)
+void ccPickingHub::removeListener(ccPickingListener* listener, bool autoStopPickingIfLast /*=true*/)
 {
 	m_listeners.erase(listener);
 
 	if (m_listeners.empty())
 	{
-		m_exclusive = false; //auto drop the 'exclusive' flag
+		m_exclusive = false; // auto drop the 'exclusive' flag
 		togglePickingMode(false);
 	}
 }

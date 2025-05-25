@@ -1,96 +1,107 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccDisplaySettingsDlg.h"
-#include "ccApplicationBase.h"
 
+#include "ccApplicationBase.h"
 #include "ui_displaySettingsDlg.h"
 
-//local
-#include "ccQtHelpers.h"
+// local
 #include "ccPersistentSettings.h"
+#include "ccQtHelpers.h"
 
 #include <ccLog.h>
 
-//Qt
+// Qt
 #include <QColorDialog>
-#include <QStyleFactory>
-
-#include <cassert>
 #include <QSettings>
+#include <QStyleFactory>
+#include <cassert>
 
-//Default 'min cloud size' for LoD  when VBOs are activated
+// Default 'min cloud size' for LoD  when VBOs are activated
 constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
 
 ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
-	: QDialog(parent, Qt::Tool)
-	, m_ui( new Ui::DisplaySettingsDlg )
-	, m_defaultAppStyleIndex(-1)
+    : QDialog(parent, Qt::Tool)
+    , m_ui(new Ui::DisplaySettingsDlg)
+    , m_defaultAppStyleIndex(-1)
 {
 	m_ui->setupUi(this);
 
-	connect(m_ui->ambientColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightAmbientColor);
-	connect(m_ui->diffuseColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightDiffuseColor);
-	connect(m_ui->specularColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLightSpecularColor);
-	connect(m_ui->meshBackColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshBackDiffuseColor);
-	connect(m_ui->meshSpecularColorButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshSpecularColor);
-	connect(m_ui->meshFrontColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeMeshFrontDiffuseColor);
-	connect(m_ui->bbColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeBBColor);
-	connect(m_ui->bkgColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeBackgroundColor);
-	connect(m_ui->labelBkgColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLabelBackgroundColor);
-	connect(m_ui->labelMarkerColorButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeLabelMarkerColor);
-	connect(m_ui->pointsColorButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changePointsColor);
-	connect(m_ui->textColorButton,			&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeTextColor);
+	connect(m_ui->ambientColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeLightAmbientColor);
+	connect(m_ui->diffuseColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeLightDiffuseColor);
+	connect(m_ui->specularColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeLightSpecularColor);
+	connect(m_ui->meshBackColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeMeshBackDiffuseColor);
+	connect(m_ui->meshSpecularColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeMeshSpecularColor);
+	connect(m_ui->meshFrontColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeMeshFrontDiffuseColor);
+	connect(m_ui->bbColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeBBColor);
+	connect(m_ui->bkgColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeBackgroundColor);
+	connect(m_ui->labelBkgColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeLabelBackgroundColor);
+	connect(m_ui->labelMarkerColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeLabelMarkerColor);
+	connect(m_ui->pointsColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changePointsColor);
+	connect(m_ui->textColorButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeTextColor);
 
-	connect(m_ui->doubleSidedCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_parameters.lightDoubleSided = state; });
-	connect(m_ui->enableGradientCheckBox,          &QCheckBox::toggled, this, [&](bool state) { m_parameters.drawBackgroundGradient = state; });
-	connect(m_ui->showCrossCheckBox,               &QCheckBox::toggled, this, [&](bool state) { m_parameters.displayCross = state; });
-	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state) { m_parameters.colorScaleShowHistogram = state; });
-	connect(m_ui->useColorScaleShaderCheckBox,     &QCheckBox::toggled, this, [&](bool state) { m_parameters.colorScaleUseShader = state; });
-	connect(m_ui->decimateMeshBox,                 &QCheckBox::toggled, this, [&](bool state) { m_parameters.decimateMeshOnMove = state; });
-	connect(m_ui->decimateCloudBox,                &QCheckBox::toggled, this, [&](bool state) { m_parameters.decimateCloudOnMove = state; });
-	connect(m_ui->drawRoundedPointsCheckBox,       &QCheckBox::toggled, this, [&](bool state) { m_parameters.drawRoundedPoints = state; });
-	connect(m_ui->singleClickPickingCheckBox,	   &QCheckBox::toggled, this, [&](bool state) { m_parameters.singleClickPicking = state; });
-	connect(m_ui->autoDisplayNormalsCheckBox,      &QCheckBox::toggled, this, [&](bool state) { m_options.normalsDisplayedByDefault = state; });
-	connect(m_ui->useNativeDialogsCheckBox,        &QCheckBox::toggled, this, [&](bool state) { m_options.useNativeDialogs = state; });
-	connect(m_ui->confirmQuitCheckBox,             &QCheckBox::toggled, this, [&](bool state) { m_options.confirmQuit = state; });
+	connect(m_ui->doubleSidedCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.lightDoubleSided = state; });
+	connect(m_ui->enableGradientCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.drawBackgroundGradient = state; });
+	connect(m_ui->showCrossCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.displayCross = state; });
+	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.colorScaleShowHistogram = state; });
+	connect(m_ui->useColorScaleShaderCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.colorScaleUseShader = state; });
+	connect(m_ui->decimateMeshBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.decimateMeshOnMove = state; });
+	connect(m_ui->decimateCloudBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.decimateCloudOnMove = state; });
+	connect(m_ui->drawRoundedPointsCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.drawRoundedPoints = state; });
+	connect(m_ui->singleClickPickingCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.singleClickPicking = state; });
+	connect(m_ui->autoDisplayNormalsCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_options.normalsDisplayedByDefault = state; });
+	connect(m_ui->useNativeDialogsCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_options.useNativeDialogs = state; });
+	connect(m_ui->confirmQuitCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_options.confirmQuit = state; });
 
-	connect(m_ui->useVBOCheckBox,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::changeVBOUsage);
+	connect(m_ui->useVBOCheckBox, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeVBOUsage);
 
-	connect(m_ui->colorRampWidthSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeColorScaleRampWidth);
+	connect(m_ui->colorRampWidthSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeColorScaleRampWidth);
 
-	connect(m_ui->defaultFontSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeDefaultFontSize);
-	connect(m_ui->labelFontSizeSpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelFontSize);
-	connect(m_ui->numberPrecisionSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeNumberPrecision);
-	connect(m_ui->labelOpacitySpinBox,		qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelOpacity);
-	connect(m_ui->labelMarkerSizeSpinBox,	qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelMarkerSize);
+	connect(m_ui->defaultFontSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeDefaultFontSize);
+	connect(m_ui->labelFontSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelFontSize);
+	connect(m_ui->numberPrecisionSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeNumberPrecision);
+	connect(m_ui->labelOpacitySpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelOpacity);
+	connect(m_ui->labelMarkerSizeSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeLabelMarkerSize);
 
-	connect(m_ui->zoomSpeedDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeZoomSpeed);
-	connect(m_ui->maxCloudSizeDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxCloudSize);
-	connect(m_ui->maxMeshSizeDoubleSpinBox,		qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxMeshSize);
+	connect(m_ui->zoomSpeedDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeZoomSpeed);
+	connect(m_ui->maxCloudSizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxCloudSize);
+	connect(m_ui->maxMeshSizeDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccDisplaySettingsDlg::changeMaxMeshSize);
 
-	connect(m_ui->autoComputeOctreeComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeAutoComputeOctreeOption);
-	connect(m_ui->pickingCursorComboBox,		qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changePickingCursor);
-	connect(m_ui->logVerbosityComboBox,			qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeLogVerbosity);
+	connect(m_ui->autoComputeOctreeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeAutoComputeOctreeOption);
+	connect(m_ui->pickingCursorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changePickingCursor);
+	connect(m_ui->logVerbosityComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccDisplaySettingsDlg::changeLogVerbosity);
 
-	connect(m_ui->okButton,		&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::doAccept);
-	connect(m_ui->applyButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::apply);
-	connect(m_ui->resetButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::reset);
-	connect(m_ui->cancelButton,	&QAbstractButton::clicked,	this, &ccDisplaySettingsDlg::doReject);
+	connect(m_ui->okButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::doAccept);
+	connect(m_ui->applyButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::apply);
+	connect(m_ui->resetButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::reset);
+	connect(m_ui->cancelButton, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::doReject);
 
 	// fill the application style combo-box
 	{
@@ -106,7 +117,7 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 
 		// fill the combo-box
 		QStringList appStyles = QStyleFactory::keys();
-		for (const auto & style : appStyles)
+		for (const auto& style : appStyles)
 		{
 			m_ui->appStyleComboBox->addItem(style);
 		}
@@ -444,7 +455,6 @@ void ccDisplaySettingsDlg::changeLogVerbosity(int index)
 		assert(false);
 	}
 }
-
 
 void ccDisplaySettingsDlg::changeColorScaleRampWidth(int val)
 {

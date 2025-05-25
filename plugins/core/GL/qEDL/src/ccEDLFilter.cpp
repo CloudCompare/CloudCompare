@@ -1,69 +1,69 @@
-//##########################################################################
-//#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qEDL                        #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                       CLOUDCOMPARE PLUGIN: qEDL                        #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccEDLFilter.h"
 
-//ccFBO
-#include <ccFrameBufferObject.h>
+// ccFBO
 #include <ccBilateralFilter.h>
+#include <ccFrameBufferObject.h>
 #include <ccShader.h>
-//qCC_gl
+// qCC_gl
 #include <ccGLUtils.h>
 
-//Qt
+// Qt
 #include <QOpenGLContext>
 
-//system
+// system
 #include <assert.h>
 #include <cmath>
 
-//For MSVC
+// For MSVC
 #ifndef M_PI
 #define M_PI 3.141592653589793238462643
 #endif
 
 ccEDLFilter::ccEDLFilter()
-	: ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)")
-	, m_screenWidth(0)
-	, m_screenHeight(0)
-	, m_EDLShader(nullptr)
-	, m_fboMix(nullptr)
-	, m_mixShader(nullptr)
-	, m_expScale(100.0f)
-	, m_glFuncIsValid(false)
+    : ccGlFilter("EyeDome Lighting (disable normals and increase points size for a better result!)")
+    , m_screenWidth(0)
+    , m_screenHeight(0)
+    , m_EDLShader(nullptr)
+    , m_fboMix(nullptr)
+    , m_mixShader(nullptr)
+    , m_expScale(100.0f)
+    , m_glFuncIsValid(false)
 {
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
 		m_fbos[i] = nullptr;
 	}
 
-	//smoothing filter for full resolution
+	// smoothing filter for full resolution
 	m_bilateralFilters[0].enabled  = false;
 	m_bilateralFilters[0].halfSize = 1;
 	m_bilateralFilters[0].sigma    = 1.0f;
 	m_bilateralFilters[0].sigmaZ   = 0.2f;
 
-	//smoothing filter for half resolution
+	// smoothing filter for half resolution
 	m_bilateralFilters[1].enabled  = true;
 	m_bilateralFilters[1].halfSize = 2;
 	m_bilateralFilters[1].sigma    = 2.0f;
 	m_bilateralFilters[1].sigmaZ   = 0.4f;
 
-	//smoothing filter for quarter resolution
+	// smoothing filter for quarter resolution
 	m_bilateralFilters[2].enabled  = true;
 	m_bilateralFilters[2].halfSize = 2;
 	m_bilateralFilters[2].sigma    = 2.0f;
@@ -88,7 +88,7 @@ ccGlFilter* ccEDLFilter::clone() const
 {
 	ccEDLFilter* filter = new ccEDLFilter();
 
-	//copy parameters (only those that can be changed by the user!)
+	// copy parameters (only those that can be changed by the user!)
 	filter->setStrength(m_expScale);
 	filter->m_lightDir[0] = m_lightDir[0];
 	filter->m_lightDir[1] = m_lightDir[1];
@@ -156,16 +156,16 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
 		unsigned scale = (1 << i);
-		unsigned w = width / scale;
-		unsigned h = height / scale;
+		unsigned w     = width / scale;
+		unsigned h     = height / scale;
 
-		ccFrameBufferObject* &fbo = m_fbos[i];
+		ccFrameBufferObject*& fbo = m_fbos[i];
 		if (!fbo)
 		{
 			fbo = new ccFrameBufferObject();
 		}
-		if (	!fbo->init(w, h)
-			||	!fbo->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter))
+		if (!fbo->init(w, h)
+		    || !fbo->initColor(internalFormat, GL_RGBA, GL_FLOAT, minMagFilter))
 		{
 			error = QString("[EDL Filter] FBO 1:%1 initialization failed!").arg(scale);
 			reset();
@@ -185,7 +185,7 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 			else
 			{
 				delete m_bilateralFilters[i].filter;
-				m_bilateralFilters[i].filter = nullptr;
+				m_bilateralFilters[i].filter  = nullptr;
 				m_bilateralFilters[i].enabled = false;
 			}
 		}
@@ -221,14 +221,14 @@ bool ccEDLFilter::init(unsigned width, unsigned height, GLenum internalFormat, G
 	if (!m_mixShader)
 	{
 		m_mixShader = new ccShader();
-		if (!m_mixShader->fromFile(shadersPath,"EDL/edl_mix",error))
+		if (!m_mixShader->fromFile(shadersPath, "EDL/edl_mix", error))
 		{
 			reset();
 			return false;
 		}
 	}
 
-	m_screenWidth = width;
+	m_screenWidth  = width;
 	m_screenHeight = height;
 
 	setValid(true);
@@ -245,11 +245,11 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 	if (m_screenWidth < 4 || m_screenHeight < 4)
 	{
-		//ccLog::Warning("[ccEDLFilter::shade] Screen is too small!");
+		// ccLog::Warning("[ccEDLFilter::shade] Screen is too small!");
 		return;
 	}
 
-	//we must use corner-based screen coordinates
+	// we must use corner-based screen coordinates
 	m_glFunc.glMatrixMode(GL_PROJECTION);
 	m_glFunc.glPushMatrix();
 	m_glFunc.glLoadIdentity();
@@ -260,14 +260,14 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
-	float lightMod = parameters.perspectiveMode ? 3.0f : 1.2f; //FIXME: we would need to be smarter and depend on the actual 'zoom' (= the focal distance now)
+	float lightMod = parameters.perspectiveMode ? 3.0f : 1.2f; // FIXME: we would need to be smarter and depend on the actual 'zoom' (= the focal distance now)
 	lightMod *= parameters.zoomFactor;
-	//ccLog::Print(QString("Zm = %1 / ZM = %2 (%3)").arg(parameters.zNear).arg(parameters.zFar).arg(parameters.zFar - parameters.zNear));
+	// ccLog::Print(QString("Zm = %1 / ZM = %2 (%3)").arg(parameters.zNear).arg(parameters.zFar).arg(parameters.zFar - parameters.zNear));
 
 	for (unsigned i = 0; i < FBO_COUNT; ++i)
 	{
-		ccFrameBufferObject* fbo = m_fbos[i];
-		unsigned scale = (1 << i); //1, 2, 4
+		ccFrameBufferObject* fbo   = m_fbos[i];
+		unsigned             scale = (1 << i); // 1, 2, 4
 
 		fbo->start();
 
@@ -300,7 +300,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 
 		assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
-		//smooth the result
+		// smooth the result
 		const BilateralFilterDesc& bl = m_bilateralFilters[i];
 		if (bl.filter)
 		{
@@ -340,7 +340,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		m_glFunc.glActiveTexture(GL_TEXTURE0);
 		ccGLUtils::DisplayTexture2DPosition(texCol0, 0, 0, m_screenWidth, m_screenHeight);
 
-		//m_glFunc.glBindTexture(GL_TEXTURE_2D,0);
+		// m_glFunc.glBindTexture(GL_TEXTURE_2D,0);
 		m_glFunc.glActiveTexture(GL_TEXTURE1);
 		m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
 		m_glFunc.glActiveTexture(GL_TEXTURE2);
@@ -354,9 +354,9 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& pa
 		assert(m_glFunc.glGetError() == GL_NO_ERROR);
 	}
 
-	//restore GL_TEXTURE_0 by default
+	// restore GL_TEXTURE_0 by default
 	m_glFunc.glActiveTexture(GL_TEXTURE0);
-	
+
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
 
 	m_glFunc.glMatrixMode(GL_PROJECTION);
@@ -373,7 +373,7 @@ GLuint ccEDLFilter::getTexture()
 
 void ccEDLFilter::setLightDir(float theta_rad, float phi_rad)
 {
-	m_lightDir[0] = std::sin(phi_rad)*std::cos(theta_rad);
+	m_lightDir[0] = std::sin(phi_rad) * std::cos(theta_rad);
 	m_lightDir[1] = std::cos(phi_rad);
-	m_lightDir[2] = std::sin(phi_rad)*std::sin(theta_rad);
+	m_lightDir[2] = std::sin(phi_rad) * std::sin(theta_rad);
 }

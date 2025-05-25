@@ -1,31 +1,31 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_SF_EDIT_DIALOG_HEADER
 #define CC_SF_EDIT_DIALOG_HEADER
 
-//Qt
+// Qt
 #include <QWidget>
-
 
 class ccScalarField;
 class ccHistogramWindow;
 
-namespace Ui {
+namespace Ui
+{
 	class SFEditDlg;
 }
 
@@ -34,18 +34,16 @@ class sfEditDlg : public QWidget
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit sfEditDlg(QWidget* parent = nullptr);
 
 	~sfEditDlg();
-	
+
 	//! Updates dialog with a given scalar field
 	void fillDialogWith(ccScalarField* sf);
 
-public:
-
+  public:
 	void minValSBChanged(double);
 	void maxValSBChanged(double);
 	void minSatSBChanged(double);
@@ -61,14 +59,13 @@ public:
 	void symmetricalScaleChanged(bool);
 	void logScaleChanged(bool);
 
-Q_SIGNALS:
+  Q_SIGNALS:
 
 	//! Signal emitted when the SF display parameters have changed
 	void entitySFHasChanged();
 
-protected:
-
-	//conversionb between sliders (integer) and checkbox (double) values
+  protected:
+	// conversionb between sliders (integer) and checkbox (double) values
 	double dispSpin2slider(double val) const;
 	double satSpin2slider(double val) const;
 	double dispSlider2spin(int pos) const;
@@ -78,8 +75,8 @@ protected:
 	ccScalarField* m_associatedSF;
 	//! Associated scalar field histogram
 	ccHistogramWindow* m_associatedSFHisto;
-	
+
 	Ui::SFEditDlg* m_ui;
 };
 
-#endif //CC_SF_EDIT_DIALOG_HEADER
+#endif // CC_SF_EDIT_DIALOG_HEADER

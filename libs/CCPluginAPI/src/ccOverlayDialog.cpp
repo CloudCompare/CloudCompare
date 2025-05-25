@@ -1,44 +1,45 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccOverlayDialog.h"
 
-//qCC_glWindow
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
-//qCC_db
+// qCC_db
 #include <ccLog.h>
 
-//Qt
+// Qt
 #include <QApplication>
 #include <QEvent>
 #include <QKeyEvent>
 #include <QShortcut>
 
-//system
+// system
 #include <cassert>
 
-ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=nullptr*/, Qt::WindowFlags flags/*=Qt::FramelessWindowHint | Qt::Tool*/)
-	: QDialog(parent, flags)
-	, m_associatedWin(nullptr)
-	, m_processing(false)
+ccOverlayDialog::ccOverlayDialog(QWidget* parent /*=nullptr*/, Qt::WindowFlags flags /*=Qt::FramelessWindowHint | Qt::Tool*/)
+    : QDialog(parent, flags)
+    , m_associatedWin(nullptr)
+    , m_processing(false)
 {
 	QShortcut* escShortcut = new QShortcut(QKeySequence::Cancel, this);
-	connect(escShortcut, &QShortcut::activated, [this]() { close(); });
+	connect(escShortcut, &QShortcut::activated, [this]()
+	        { close(); });
 }
 
 ccOverlayDialog::~ccOverlayDialog()
@@ -54,7 +55,7 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 		return false;
 	}
 
-	//same dialog? nothing to do
+	// same dialog? nothing to do
 	if (m_associatedWin == win)
 	{
 		return true;
@@ -62,10 +63,10 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 
 	if (m_associatedWin)
 	{
-		//we automatically detach the former dialog
+		// we automatically detach the former dialog
 		{
 			QWidgetList topWidgets = QApplication::topLevelWidgets();
-			foreach(QWidget* widget, topWidgets)
+			foreach (QWidget* widget, topWidgets)
 			{
 				widget->removeEventFilter(this);
 			}
@@ -78,7 +79,7 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 	if (m_associatedWin)
 	{
 		QWidgetList topWidgets = QApplication::topLevelWidgets();
-		foreach(QWidget* widget, topWidgets)
+		foreach (QWidget* widget, topWidgets)
 		{
 			widget->installEventFilter(this);
 		}
@@ -88,7 +89,7 @@ bool ccOverlayDialog::linkWith(ccGLWindowInterface* win)
 	return true;
 }
 
-void ccOverlayDialog::onLinkedWindowDeletion(ccGLWindowInterface* object/*=nullptr*/)
+void ccOverlayDialog::onLinkedWindowDeletion(ccGLWindowInterface* object /*=nullptr*/)
 {
 	if (m_associatedWin == object)
 	{
@@ -112,7 +113,7 @@ bool ccOverlayDialog::start()
 
 	m_processing = true;
 
-	//auto-show
+	// auto-show
 	show();
 
 	return true;
@@ -122,7 +123,7 @@ void ccOverlayDialog::stop(bool accepted)
 {
 	m_processing = false;
 
-	//auto-hide
+	// auto-hide
 	hide();
 
 	linkWith(nullptr);
@@ -142,7 +143,7 @@ void ccOverlayDialog::addOverriddenShortcut(Qt::Key key)
 	m_overriddenKeys.push_back(key);
 }
 
-bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
+bool ccOverlayDialog::eventFilter(QObject* obj, QEvent* e)
 {
 	if (e->type() == QEvent::KeyPress)
 	{
@@ -169,7 +170,7 @@ bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
 		{
 			Q_EMIT shown();
 		}
-		
+
 		// standard event processing
 		return QDialog::eventFilter(obj, e);
 	}

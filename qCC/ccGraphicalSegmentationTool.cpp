@@ -1,122 +1,123 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccGraphicalSegmentationTool.h"
+
 #include "ccGraphicalSegmentationOptionsDlg.h"
 
-//Local
-#include "mainwindow.h"
+// Local
 #include "ccItemSelectionDlg.h"
 #include "ccReservedIDs.h"
+#include "mainwindow.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <ManualSegmentationTools.h>
 #include <SquareMatrix.h>
 
-//qCC_db
-#include <ccLog.h>
-#include <ccPolyline.h>
-#include <ccGenericPointCloud.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
-#include <ccHObjectCaster.h>
+// qCC_db
 #include <cc2DViewportObject.h>
+#include <ccGenericPointCloud.h>
+#include <ccHObjectCaster.h>
+#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 
-//for the helper (apply)
+// for the helper (apply)
 #include <cc2DLabel.h>
 #include <ccCameraSensor.h>
 #include <ccGBLSensor.h>
 #include <ccSubMesh.h>
 
-//qCC_gl
+// qCC_gl
 #include <ccGLWindowInterface.h>
 
-//Qt
+// Qt
+#include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QInputDialog>
 #include <QSettings>
 
-//System
+// System
 #include <assert.h>
 
 #if defined(_OPENMP)
-//OpenMP
+// OpenMP
 #include <omp.h>
 #endif
 
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
-	: ccOverlayDialog(parent)
-	, Ui::GraphicalSegmentationDlg()
-	, m_somethingHasChanged(false)
-	, m_state(0)
-	, m_segmentationPoly(nullptr)
-	, m_polyVertices(nullptr)
-	, m_rectangularSelection(false)
-	, m_deleteHiddenParts(false)
+    : ccOverlayDialog(parent)
+    , Ui::GraphicalSegmentationDlg()
+    , m_somethingHasChanged(false)
+    , m_state(0)
+    , m_segmentationPoly(nullptr)
+    , m_polyVertices(nullptr)
+    , m_rectangularSelection(false)
+    , m_deleteHiddenParts(false)
 {
 	// Set QDialog background as transparent (DGM: doesn't work over an OpenGL context)
-	//setAttribute(Qt::WA_NoSystemBackground);
+	// setAttribute(Qt::WA_NoSystemBackground);
 
 	setupUi(this);
 
-	connect(inButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
-	connect(outButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
-	connect(exportSelectionButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
-	connect(razButton,				&QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
-	connect(optionsButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
-	connect(validButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
-	connect(validAndDeleteButton,	&QToolButton::clicked, this, &ccGraphicalSegmentationTool::applyAndDelete);
-	connect(cancelButton,			&QToolButton::clicked, this, &ccGraphicalSegmentationTool::cancel);
-	connect(pauseButton,			&QToolButton::toggled, this, &ccGraphicalSegmentationTool::pauseSegmentationMode);
-	connect(addClassToolButton,		&QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
+	connect(inButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
+	connect(outButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
+	connect(exportSelectionButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
+	connect(razButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
+	connect(optionsButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
+	connect(validButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
+	connect(validAndDeleteButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::applyAndDelete);
+	connect(cancelButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::cancel);
+	connect(pauseButton, &QToolButton::toggled, this, &ccGraphicalSegmentationTool::pauseSegmentationMode);
+	connect(addClassToolButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::setClassificationValue);
 
-	//selection modes
-	connect(actionSetPolylineSelection,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetPolylineSelection);
-	connect(actionSetRectangularSelection,		&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doSetRectangularSelection);
-	//import/export options
-	connect(actionUseExistingPolyline,			&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doActionUseExistingPolyline);
-	connect(actionExportSegmentationPolyline,	&QAction::triggered,	this,	&ccGraphicalSegmentationTool::doExportSegmentationPolyline);
+	// selection modes
+	connect(actionSetPolylineSelection, &QAction::triggered, this, &ccGraphicalSegmentationTool::doSetPolylineSelection);
+	connect(actionSetRectangularSelection, &QAction::triggered, this, &ccGraphicalSegmentationTool::doSetRectangularSelection);
+	// import/export options
+	connect(actionUseExistingPolyline, &QAction::triggered, this, &ccGraphicalSegmentationTool::doActionUseExistingPolyline);
+	connect(actionExportSegmentationPolyline, &QAction::triggered, this, &ccGraphicalSegmentationTool::doExportSegmentationPolyline);
 
-	//add shortcuts
-	addOverriddenShortcut(Qt::Key_Space);	//space bar for the "pause" button
-	addOverriddenShortcut(Qt::Key_Escape);	//escape key for the "cancel" button
-	addOverriddenShortcut(Qt::Key_Return);	//return key for the "apply" button
-	addOverriddenShortcut(Qt::Key_Delete);	//delete key for the "apply and delete" button
-	addOverriddenShortcut(Qt::Key_Tab);		//tab key to switch between rectangular and polygonal selection modes
-	addOverriddenShortcut(Qt::Key_I);		//'I' key for the "segment in" button
-	addOverriddenShortcut(Qt::Key_O);		//'O' key for the "segment out" button
-	addOverriddenShortcut(Qt::Key_C);		//'C' key for the "classify" button
-	addOverriddenShortcut(Qt::Key_E);		//'E' key for the "export" button
+	// add shortcuts
+	addOverriddenShortcut(Qt::Key_Space);  // space bar for the "pause" button
+	addOverriddenShortcut(Qt::Key_Escape); // escape key for the "cancel" button
+	addOverriddenShortcut(Qt::Key_Return); // return key for the "apply" button
+	addOverriddenShortcut(Qt::Key_Delete); // delete key for the "apply and delete" button
+	addOverriddenShortcut(Qt::Key_Tab);    // tab key to switch between rectangular and polygonal selection modes
+	addOverriddenShortcut(Qt::Key_I);      //'I' key for the "segment in" button
+	addOverriddenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
+	addOverriddenShortcut(Qt::Key_C);      //'C' key for the "classify" button
+	addOverriddenShortcut(Qt::Key_E);      //'E' key for the "export" button
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
-	QMenu *selectionModeMenu = new QMenu(this);
+	QMenu* selectionModeMenu = new QMenu(this);
 	selectionModeMenu->addAction(actionSetPolylineSelection);
 	selectionModeMenu->addAction(actionSetRectangularSelection);
 	selectionModelButton->setDefaultAction(actionSetPolylineSelection);
 	selectionModelButton->setMenu(selectionModeMenu);
 
-	QMenu *importExportMenu = new QMenu(this);
+	QMenu* importExportMenu = new QMenu(this);
 	importExportMenu->addAction(actionUseExistingPolyline);
 	importExportMenu->addAction(actionExportSegmentationPolyline);
 	loadSaveToolButton->setMenu(importExportMenu);
 
-	m_polyVertices = new ccPointCloud("vertices", static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES));
+	m_polyVertices     = new ccPointCloud("vertices", static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE_VERTICES));
 	m_segmentationPoly = new ccPolyline(m_polyVertices, static_cast<unsigned>(ReservedIDs::INTERACTIVE_SEGMENTATION_TOOL_POLYLINE));
 	m_segmentationPoly->setForeground(true);
 	m_segmentationPoly->setColor(ccColor::green);
@@ -156,7 +157,7 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 	case Qt::Key_Space:
 		// toggle pause mode
 		pauseSegmentationMode(!pauseButton->isChecked());
-		//pauseButton->toggle();
+		// pauseButton->toggle();
 		return;
 
 	case Qt::Key_I:
@@ -178,18 +179,18 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 	case Qt::Key_Return:
 		if (m_somethingHasChanged)
 			apply();
-		//validButton->click();
+		// validButton->click();
 		return;
 
 	case Qt::Key_Delete:
 		if (m_somethingHasChanged)
 			applyAndDelete();
-		//validAndDeleteButton->click();
+		// validAndDeleteButton->click();
 		return;
 
 	case Qt::Key_Escape:
 		cancel();
-		//cancelButton->click();
+		// cancelButton->click();
 		return;
 
 	case Qt::Key_Tab:
@@ -200,12 +201,12 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 		return;
 
 	default:
-		//nothing to do
+		// nothing to do
 		break;
 	}
 }
 
-bool ccGraphicalSegmentationTool::linkWith(ccGLWindowInterface *win)
+bool ccGraphicalSegmentationTool::linkWith(ccGLWindowInterface* win)
 {
 	assert(m_segmentationPoly);
 
@@ -227,10 +228,10 @@ bool ccGraphicalSegmentationTool::linkWith(ccGLWindowInterface *win)
 
 	if (m_associatedWin)
 	{
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked,	this, &ccGraphicalSegmentationTool::addPointToPolyline);
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked,	this, &ccGraphicalSegmentationTool::closePolyLine);
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved,			this, &ccGraphicalSegmentationTool::updatePolyLine);
-		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased,		this, &ccGraphicalSegmentationTool::closeRectangle);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked, this, &ccGraphicalSegmentationTool::addPointToPolyline);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::rightButtonClicked, this, &ccGraphicalSegmentationTool::closePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved, this, &ccGraphicalSegmentationTool::updatePolyLine);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased, this, &ccGraphicalSegmentationTool::closeRectangle);
 
 		if (m_segmentationPoly)
 		{
@@ -255,7 +256,7 @@ bool ccGraphicalSegmentationTool::start()
 	m_polyVertices->clear();
 	allowPolylineExport(false);
 
-	//the user must not close this window!
+	// the user must not close this window!
 	m_associatedWin->setUnclosable(true);
 	m_associatedWin->addToOwnDB(m_segmentationPoly);
 	m_associatedWin->setPickingMode(ccGLWindowInterface::NO_PICKING);
@@ -268,7 +269,7 @@ bool ccGraphicalSegmentationTool::start()
 	return ccOverlayDialog::start();
 }
 
-void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, bool unallocateVisibilityArrays)
+void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject* entity, bool unallocateVisibilityArrays)
 {
 	if (!entity)
 	{
@@ -291,7 +292,7 @@ void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, boo
 	// specific case: we may have automatically hidden the mesh or the polyline associated to a cloud
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud *>(entity);
+		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 
 		ccGenericMesh* associatedMesh = nullptr;
 		if (ccGenericMesh::IsCloudVerticesOfMesh(cloud, &associatedMesh) && associatedMesh)
@@ -311,9 +312,9 @@ void ccGraphicalSegmentationTool::prepareEntityForRemoval(ccHObject *entity, boo
 
 void ccGraphicalSegmentationTool::removeAllEntities()
 {
-	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
-		ccHObject *entity = *p;
+		ccHObject* entity = *p;
 
 		prepareEntityForRemoval(entity, true);
 	}
@@ -328,10 +329,10 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	if (m_associatedWin)
 	{
 		m_associatedWin->displayNewMessage("Segmentation [OFF]",
-											ccGLWindowInterface::UPPER_CENTER_MESSAGE,
-											false,
-											2,
-											ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
+		                                   ccGLWindowInterface::UPPER_CENTER_MESSAGE,
+		                                   false,
+		                                   2,
+		                                   ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 
 		m_associatedWin->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA);
 		m_associatedWin->setPickingMode(ccGLWindowInterface::DEFAULT_PICKING);
@@ -364,9 +365,9 @@ void ccGraphicalSegmentationTool::reset()
 {
 	if (m_somethingHasChanged)
 	{
-		for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+		for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		{
-			ccGenericPointCloud *asCloud = ccHObjectCaster::ToGenericPointCloud(*p);
+			ccGenericPointCloud* asCloud = ccHObjectCaster::ToGenericPointCloud(*p);
 			if (asCloud)
 			{
 				asCloud->unallocateVisibilityArray();
@@ -386,7 +387,7 @@ void ccGraphicalSegmentationTool::reset()
 	loadSaveToolButton->setDefaultAction(actionUseExistingPolyline);
 }
 
-bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=false*/)
+bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=false*/)
 {
 	if (!entity)
 	{
@@ -401,9 +402,9 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		ccGenericPointCloud *cloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
-		ccGenericMesh *associatedMesh = nullptr;
+		ccGenericMesh* associatedMesh = nullptr;
 		if (ccGenericMesh::IsCloudVerticesOfMesh(cloud, &associatedMesh))
 		{
 			assert(nullptr != associatedMesh);
@@ -421,7 +422,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 			associatedMesh->setVisible(false);
 		}
 
-		ccPolyline *associatedPolyline = nullptr;
+		ccPolyline* associatedPolyline = nullptr;
 		if (ccPolyline::IsCloudVerticesOfPolyline(cloud, &associatedPolyline))
 		{
 			assert(nullptr != associatedPolyline);
@@ -444,17 +445,17 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 		cloud->setVisible(true);
 		cloud->setEnabled(true);
 
-		//DGM: not sure what was the idea behind the code below?
+		// DGM: not sure what was the idea behind the code below?
 		//
-		//automatically add cloud's children
-		//for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
+		// automatically add cloud's children
+		// for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 		//{
 		//	ccHObject* child = entity->getChild(i);
 		//	if (child != associatedMesh && child != associatedPolyline) // we don't add the associated mesh or polyline (if any)
 		//	{
 		//		result |= addEntity(entity->getChild(i), /*silent=*/true);
 		//	}
-		//}
+		// }
 
 		return true;
 	}
@@ -477,13 +478,13 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 			return false;
 		}
 
-		ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(entity);
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 		assert(mesh);
 
-		//DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
+		// DGM: the code below is useless since we don't allow CC_TYPES::SUB_MESH entities (see above)
 		//
-		// first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
-		//for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+		//  first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
+		// for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 		//{
 		//	if ((*p)->isKindOf(CC_TYPES::MESH))
 		//	{
@@ -501,9 +502,9 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 		//			}
 		//		}
 		//	}
-		//}
+		// }
 
-		ccGenericPointCloud *vertices = mesh->getAssociatedCloud();
+		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 		if (!vertices)
 		{
 			assert(false);
@@ -513,7 +514,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 		// Make sure the vertices of this mesh are not already in the 'to segment' list
 		if (m_toSegment.contains(vertices))
 		{
-			//let's remove the vertices
+			// let's remove the vertices
 			mesh->pushDisplayState(); // just in case the vertices were inserted before the mesh)
 			vertices->popDisplayState();
 			m_toSegment.remove(vertices);
@@ -528,10 +529,10 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 	}
 	else if (entity->isKindOf(CC_TYPES::POLY_LINE))
 	{
-		ccPolyline *poly = ccHObjectCaster::ToPolyline(entity);
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
 		assert(poly);
 
-		ccGenericPointCloud *verticesCloud = dynamic_cast<ccGenericPointCloud *>(poly->getAssociatedCloud());
+		ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(poly->getAssociatedCloud());
 		if (!verticesCloud)
 		{
 			assert(false);
@@ -541,7 +542,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 		// Make sure the vertices of this polyline are not already in the 'to segment' list
 		if (verticesCloud && m_toSegment.contains(verticesCloud))
 		{
-			//let's remove the vertices
+			// let's remove the vertices
 			poly->pushDisplayState(); // just in case the vertices were inserted before the polyline)
 			verticesCloud->popDisplayState();
 			m_toSegment.remove(verticesCloud);
@@ -556,7 +557,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject *entity, bool silent/*=fal
 	}
 	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
-		//automatically add the entities contained in the group
+		// automatically add the entities contained in the group
 		bool result = false;
 		for (unsigned i = 0; i < entity->getChildrenNumber(); ++i)
 			result |= addEntity(entity->getChild(i));
@@ -580,7 +581,7 @@ unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities() const
 
 void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons buttons)
 {
-	//process not started yet?
+	// process not started yet?
 	if ((m_state & RUNNING) == 0)
 	{
 		return;
@@ -596,25 +597,25 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 
 	unsigned vertCount = m_polyVertices->size();
 
-	//new point (expressed relatively to the screen center)
-	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	// new point (expressed relatively to the screen center)
+	QPointF   pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
-				static_cast<PointCoordinateType>(pos2D.y()),
-				0);
+	            static_cast<PointCoordinateType>(pos2D.y()),
+	            0);
 
 	if (m_state & RECTANGLE)
 	{
-		//we need 4 points for the rectangle!
+		// we need 4 points for the rectangle!
 		if (vertCount != 4)
 			m_polyVertices->resize(4);
 
-		const CCVector3 *A = m_polyVertices->getPointPersistentPtr(0);
-		CCVector3 *B = const_cast<CCVector3 *>(m_polyVertices->getPointPersistentPtr(1));
-		CCVector3 *C = const_cast<CCVector3 *>(m_polyVertices->getPointPersistentPtr(2));
-		CCVector3 *D = const_cast<CCVector3 *>(m_polyVertices->getPointPersistentPtr(3));
-		*B = CCVector3(A->x, P.y, 0);
-		*C = P;
-		*D = CCVector3(P.x, A->y, 0);
+		const CCVector3* A = m_polyVertices->getPointPersistentPtr(0);
+		CCVector3*       B = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(1));
+		CCVector3*       C = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(2));
+		CCVector3*       D = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(3));
+		*B                 = CCVector3(A->x, P.y, 0);
+		*C                 = P;
+		*D                 = CCVector3(P.x, A->y, 0);
 
 		if (vertCount != 4)
 		{
@@ -632,9 +633,9 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 	{
 		if (vertCount < 2)
 			return;
-		//we replace last point by the current one
-		CCVector3 *lastP = const_cast<CCVector3 *>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
-		*lastP = P;
+		// we replace last point by the current one
+		CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
+		*lastP           = P;
 	}
 
 	m_associatedWin->redraw(true, false);
@@ -652,11 +653,10 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 		return;
 	}
 
-	if (	!allowClicksOutside
-			&&	(x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight())
-	   )
+	if (!allowClicksOutside
+	    && (x < 0 || y < 0 || x >= m_associatedWin->qtWidth() || y >= m_associatedWin->qtHeight()))
 	{
-		//ignore clicks outside of the 3D view
+		// ignore clicks outside of the 3D view
 		return;
 	}
 
@@ -664,32 +664,32 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 	assert(m_segmentationPoly);
 	unsigned vertCount = m_polyVertices->size();
 
-	//particular case: we close the rectangular selection by a 2nd click
-	if (	m_rectangularSelection
-		&&	(vertCount == 4)
-		&&	(m_state & RUNNING) )
+	// particular case: we close the rectangular selection by a 2nd click
+	if (m_rectangularSelection
+	    && (vertCount == 4)
+	    && (m_state & RUNNING))
 	{
 		return;
 	}
 
-	//new point
-	QPointF pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
+	// new point
+	QPointF   pos2D = m_associatedWin->toCenteredGLCoordinates(x, y);
 	CCVector3 P(static_cast<PointCoordinateType>(pos2D.x()),
-				static_cast<PointCoordinateType>(pos2D.y()),
-				0);
+	            static_cast<PointCoordinateType>(pos2D.y()),
+	            0);
 
-	//CTRL key pressed at the same time?
+	// CTRL key pressed at the same time?
 	bool ctrlKeyPressed = m_rectangularSelection || ((QApplication::keyboardModifiers() & Qt::ControlModifier) == Qt::ControlModifier);
 
-	//start new polyline?
+	// start new polyline?
 	if (((m_state & RUNNING) == 0) || vertCount == 0 || ctrlKeyPressed)
 	{
-		//reset state
+		// reset state
 		m_state = (ctrlKeyPressed ? RECTANGLE : POLYLINE);
 		m_state |= STARTED;
 		run();
 
-		//reset polyline
+		// reset polyline
 		m_polyVertices->clear();
 		if (!m_polyVertices->reserve(2))
 		{
@@ -697,7 +697,7 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 			allowPolylineExport(false);
 			return;
 		}
-		//we add the same point twice (the last point will be used for display only)
+		// we add the same point twice (the last point will be used for display only)
 		m_polyVertices->addPoint(P);
 		m_polyVertices->addPoint(P);
 		m_segmentationPoly->clear();
@@ -708,12 +708,12 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 			return;
 		}
 	}
-	else //next points in "polyline mode" only
+	else // next points in "polyline mode" only
 	{
-		//we were already in 'polyline' mode?
+		// we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			//ALT key pressed at the same time?
+			// ALT key pressed at the same time?
 			bool altKeyPressed = ((QApplication::keyboardModifiers() & Qt::AltModifier) == Qt::AltModifier);
 			if (altKeyPressed)
 			{
@@ -723,11 +723,10 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 					m_polyVertices->resize(vertCount - 1);
 					m_segmentationPoly->resize(m_segmentationPoly->size() - 1);
 
-					//we replace last but one point by the current one
-					CCVector3 *lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 2));
-					*lastP = P;
+					// we replace last but one point by the current one
+					CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 2));
+					*lastP           = P;
 					m_polyVertices->invalidateBoundingBox();
-
 				}
 				else
 				{
@@ -743,10 +742,10 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 					return;
 				}
 
-				//we replace last point by the current one
-				CCVector3 *lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
-				*lastP = P;
-				//and add a new (equivalent) one
+				// we replace last point by the current one
+				CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(vertCount - 1));
+				*lastP           = P;
+				// and add a new (equivalent) one
 				m_polyVertices->addPoint(P);
 				if (!m_segmentationPoly->addPointIndex(vertCount))
 				{
@@ -756,17 +755,17 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 				m_segmentationPoly->setClosed(true);
 			}
 		}
-		else //we must change mode
+		else // we must change mode
 		{
-			assert(false); //we shouldn't fall here?!
+			assert(false); // we shouldn't fall here?!
 			stopRunning();
 			addPointToPolylineExt(x, y, allowClicksOutside);
 			return;
 		}
 	}
 
-	//DGM: to increase the poll rate of the mouse movements in ccGLWindow::mouseMoveEvent
-	//we have to completely grab the mouse focus!
+	// DGM: to increase the poll rate of the mouse movements in ccGLWindow::mouseMoveEvent
+	// we have to completely grab the mouse focus!
 	//(the only way to take back the control is to right-click now...)
 	m_associatedWin->doGrabMouse();
 	m_associatedWin->redraw(true, false);
@@ -774,7 +773,7 @@ void ccGraphicalSegmentationTool::addPointToPolylineExt(int x, int y, bool allow
 
 void ccGraphicalSegmentationTool::closeRectangle()
 {
-	//only for rectangle selection in RUNNING mode
+	// only for rectangle selection in RUNNING mode
 	if ((m_state & RECTANGLE) == 0 || (m_state & RUNNING) == 0)
 		return;
 
@@ -782,7 +781,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 	unsigned vertCount = m_segmentationPoly->size();
 	if (vertCount < 4)
 	{
-		//first point only? we keep the real time update mechanism
+		// first point only? we keep the real time update mechanism
 		if (m_rectangularSelection)
 			return;
 		m_segmentationPoly->clear();
@@ -794,7 +793,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 		allowPolylineExport(true);
 	}
 
-	//stop
+	// stop
 	stopRunning();
 
 	if (m_associatedWin)
@@ -806,7 +805,7 @@ void ccGraphicalSegmentationTool::closeRectangle()
 
 void ccGraphicalSegmentationTool::closePolyLine(int, int)
 {
-	//only for polyline in RUNNING mode
+	// only for polyline in RUNNING mode
 	if ((m_state & POLYLINE) == 0 || (m_state & RUNNING) == 0)
 		return;
 
@@ -824,15 +823,15 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	}
 	else
 	{
-		//remove last point!
-		m_segmentationPoly->resize(vertCount - 1); //can't fail --> smaller
+		// remove last point!
+		m_segmentationPoly->resize(vertCount - 1); // can't fail --> smaller
 		m_segmentationPoly->setClosed(true);
 	}
 
-	//stop
+	// stop
 	stopRunning();
 
-	//set the default import/export icon to 'export' mode
+	// set the default import/export icon to 'export' mode
 	loadSaveToolButton->setDefaultAction(actionExportSegmentationPolyline);
 	allowPolylineExport(m_segmentationPoly->size() > 1);
 
@@ -857,7 +856,7 @@ void ccGraphicalSegmentationTool::exportSelection()
 	segment(true, CCCoreLib::NAN_VALUE, true);
 }
 
-void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue/*=CCCoreLib::NAN_VALUE*/, bool exportSelection/*=false*/)
+void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType classificationValue /*=CCCoreLib::NAN_VALUE*/, bool exportSelection /*=false*/)
 {
 	if (!m_associatedWin)
 	{
@@ -891,7 +890,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	const double half_w = camera.viewport[2] / 2.0;
 	const double half_h = camera.viewport[3] / 2.0;
 
-	//check if the polyline is totally inside the frustum or not
+	// check if the polyline is totally inside the frustum or not
 	bool polyInsideViewport = true;
 	{
 		int vertexCount = static_cast<int>(m_segmentationPoly->size());
@@ -900,7 +899,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			const CCVector3* P2D = m_segmentationPoly->getPoint(i);
 
 			if (P2D->x < -half_w || P2D->x > half_w
-				|| P2D->y < -half_h || P2D->y > half_h)
+			    || P2D->y < -half_h || P2D->y > half_h)
 			{
 				polyInsideViewport = false;
 				break;
@@ -913,10 +912,10 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 	// for each selected entity
 	int errorCount = 0;
-	for (QSet<ccHObject *>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
 	{
-		ccHObject* entity = (*p);
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
+		ccHObject*           entity = (*p);
+		ccGenericPointCloud* cloud  = ccHObjectCaster::ToGenericPointCloud(*p);
 		assert(cloud);
 
 		// we enable the visibility array if not done already
@@ -926,7 +925,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			continue;
 		}
 		ccGenericPointCloud::VisibilityTableType& visibilityArray = cloud->getTheVisibilityArray();
-		ccGenericPointCloud::VisibilityTableType outVisibilityArray;
+		ccGenericPointCloud::VisibilityTableType  outVisibilityArray;
 		if (exportSelection) // simply copy the current visibility array
 		{
 			outVisibilityArray = visibilityArray;
@@ -976,14 +975,14 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				const CCVector3* P3D = cloud->getPoint(i);
 
 				CCVector3d Q2D;
-				bool pointInFrustum = false;
+				bool       pointInFrustum = false;
 				camera.project(*P3D, Q2D, &pointInFrustum);
 
 				bool pointInside = false;
-				if (pointInFrustum || !polyInsideViewport) //we can only skip the test if the point is outside the viewport/frustum AND the polyline is fully inside the viewport
+				if (pointInFrustum || !polyInsideViewport) // we can only skip the test if the point is outside the viewport/frustum AND the polyline is fully inside the viewport
 				{
-					CCVector2 P2D(	static_cast<PointCoordinateType>(Q2D.x - half_w),
-									static_cast<PointCoordinateType>(Q2D.y - half_h));
+					CCVector2 P2D(static_cast<PointCoordinateType>(Q2D.x - half_w),
+					              static_cast<PointCoordinateType>(Q2D.y - half_h));
 
 					pointInside = CCCoreLib::ManualSegmentationTools::isPointInsidePoly(P2D, m_segmentationPoly);
 				}
@@ -1049,7 +1048,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			}
 			else if (entity->isKindOf(CC_TYPES::MESH))
 			{
-				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
+				ccMesh* mesh          = ccHObjectCaster::ToMesh(entity);
 				ccMesh* segmentedMesh = mesh->createNewMeshFromSelection(false);
 
 				if (segmentedMesh != nullptr)
@@ -1128,7 +1127,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 	if (!m_associatedWin)
 		return;
 
-	if (state/*=activate pause mode*/)
+	if (state /*=activate pause mode*/)
 	{
 		stopRunning();
 		m_state = PAUSED;
@@ -1164,7 +1163,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 		}
 	}
 
-	//update mini-GUI
+	// update mini-GUI
 	pauseButton->blockSignals(true);
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
@@ -1175,8 +1174,8 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
 void ccGraphicalSegmentationTool::setClassificationValue()
 {
 	static int s_classValue = 0;
-	bool ok = false;
-	int iValue = QInputDialog::getInt(m_associatedWin->asWidget(), QT_TR_NOOP("Classification"), QT_TR_NOOP("value"), s_classValue, -1000000, 1000000, 1, &ok);
+	bool       ok           = false;
+	int        iValue       = QInputDialog::getInt(m_associatedWin->asWidget(), QT_TR_NOOP("Classification"), QT_TR_NOOP("value"), s_classValue, -1000000, 1000000, 1, &ok);
 	if (!ok)
 	{
 		return;
@@ -1200,7 +1199,7 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); // clear the area
 	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 }
@@ -1212,14 +1211,14 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 
 	selectionModelButton->setDefaultAction(actionSetRectangularSelection);
 
-	m_rectangularSelection=true;
+	m_rectangularSelection = true;
 	if (m_state != PAUSED)
 	{
 		pauseSegmentationMode(true);
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage(QString(), ccGLWindowInterface::UPPER_CENTER_MESSAGE); // clear the area
 	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)", ccGLWindowInterface::UPPER_CENTER_MESSAGE, false, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 	m_associatedWin->displayNewMessage("Right click: set opposite corners", ccGLWindowInterface::UPPER_CENTER_MESSAGE, true, 3600, ccGLWindowInterface::MANUAL_SEGMENTATION_MESSAGE);
 }
@@ -1232,10 +1231,10 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 		return;
 	}
 
-	MainWindow *mainWindow = MainWindow::TheInstance();
+	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
-		ccHObject *root = mainWindow->dbRootObject();
+		ccHObject*           root = mainWindow->dbRootObject();
 		ccHObject::Container polylines;
 		if (root)
 		{
@@ -1251,40 +1250,41 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 			assert(polylines[index]->isA(CC_TYPES::POLY_LINE));
 			ccPolyline* poly = static_cast<ccPolyline*>(polylines[index]);
 
-			//look for an associated viewport
+			// look for an associated viewport
 			ccHObject::Container viewports;
 			if (poly->filterChildren(viewports, false, CC_TYPES::VIEWPORT_2D_OBJECT, true) == 1)
 			{
-				//shall we apply this viewport?
-				if (QMessageBox::question(	m_associatedWin->asWidget(),
-											"Associated viewport",
-											"The selected polyline has an associated viewport: do you want to apply it?",
-											QMessageBox::Yes,
-											QMessageBox::No) == QMessageBox::Yes)
+				// shall we apply this viewport?
+				if (QMessageBox::question(m_associatedWin->asWidget(),
+				                          "Associated viewport",
+				                          "The selected polyline has an associated viewport: do you want to apply it?",
+				                          QMessageBox::Yes,
+				                          QMessageBox::No)
+				    == QMessageBox::Yes)
 				{
-					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject *>(viewports.front())->getParameters());
+					m_associatedWin->setViewportParameters(static_cast<cc2DViewportObject*>(viewports.front())->getParameters());
 					m_associatedWin->redraw(false);
 				}
 			}
 
-			CCCoreLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
-			bool mode3D = !poly->is2DMode();
+			CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+			bool                                   mode3D   = !poly->is2DMode();
 
-			//viewing parameters (for conversion from 3D to 2D)
+			// viewing parameters (for conversion from 3D to 2D)
 			ccGLCameraParameters camera;
 			m_associatedWin->getGLCameraParameters(camera);
 			const double half_w = camera.viewport[2] / 2.0;
 			const double half_h = camera.viewport[3] / 2.0;
 
-			//force polygonal selection mode
+			// force polygonal selection mode
 			doSetPolylineSelection();
 			m_segmentationPoly->clear();
 			m_polyVertices->clear();
 			allowPolylineExport(false);
 
-			//duplicate polyline 'a minima' (only points and indexes + closed state)
-			if (	m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
-				&&	m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
+			// duplicate polyline 'a minima' (only points and indexes + closed state)
+			if (m_polyVertices->reserve(vertices->size() + (poly->isClosed() ? 0 : 1))
+			    && m_segmentationPoly->reserve(poly->size() + (poly->isClosed() ? 0 : 1)))
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
 				{
@@ -1308,14 +1308,14 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 				m_segmentationPoly->setClosed(poly->isClosed());
 				if (m_segmentationPoly->isClosed())
 				{
-					//stop (but we can't call pauseSegmentationMode as it would remove the current polyline)
+					// stop (but we can't call pauseSegmentationMode as it would remove the current polyline)
 					stopRunning();
 
 					allowPolylineExport(m_segmentationPoly->size() > 1);
 				}
 				else if (vertices->size())
 				{
-					//we make as if the segmentation was in progress
+					// we make as if the segmentation was in progress
 					pauseSegmentationMode(false);
 					unsigned lastIndex = vertices->size() - 1;
 					m_polyVertices->addPoint(*m_polyVertices->getPoint(lastIndex));
@@ -1341,9 +1341,9 @@ void ccGraphicalSegmentationTool::doActionUseExistingPolyline()
 }
 
 static unsigned s_polylineExportCount = 0;
-void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
+void            ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 {
-	MainWindow *mainWindow = MainWindow::TheInstance();
+	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow && m_segmentationPoly)
 	{
 		bool mode2D = false;
@@ -1351,41 +1351,41 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 		QMessageBox messageBox(nullptr);
 		messageBox.setWindowTitle("Choose export type");
 		messageBox.setText("Export polyline in:\n - 2D (with coordinates relative to the screen)\n - 3D (with coordinates relative to the segmented entities)");
-		QPushButton *button2D = new QPushButton("2D");
-		QPushButton *button3D = new QPushButton("3D");
-		messageBox.addButton(button2D,QMessageBox::AcceptRole);
-		messageBox.addButton(button3D,QMessageBox::AcceptRole);
+		QPushButton* button2D = new QPushButton("2D");
+		QPushButton* button3D = new QPushButton("3D");
+		messageBox.addButton(button2D, QMessageBox::AcceptRole);
+		messageBox.addButton(button3D, QMessageBox::AcceptRole);
 		messageBox.addButton(QMessageBox::Cancel);
 		messageBox.setDefaultButton(button3D);
 		messageBox.exec();
 		if (messageBox.clickedButton() == messageBox.button(QMessageBox::Cancel))
 		{
-			//process cancelled by user
+			// process cancelled by user
 			return;
 		}
 		mode2D = (messageBox.clickedButton() == button2D);
 #endif
 
-		ccPolyline *poly = new ccPolyline(*m_segmentationPoly);
+		ccPolyline* poly = new ccPolyline(*m_segmentationPoly);
 
-		//if the polyline is 2D and we export the polyline in 3D, we must project its vertices
+		// if the polyline is 2D and we export the polyline in 3D, we must project its vertices
 		if (!mode2D)
 		{
-			//get current display parameters
+			// get current display parameters
 			ccGLCameraParameters camera;
 			m_associatedWin->getGLCameraParameters(camera);
 			const double half_w = camera.viewport[2] / 2.0;
 			const double half_h = camera.viewport[3] / 2.0;
 
-			//project the 2D polyline in 3D
-			CCCoreLib::GenericIndexedCloudPersist *vertices = poly->getAssociatedCloud();
-			ccPointCloud *verticesPC = dynamic_cast<ccPointCloud *>(vertices);
+			// project the 2D polyline in 3D
+			CCCoreLib::GenericIndexedCloudPersist* vertices   = poly->getAssociatedCloud();
+			ccPointCloud*                          verticesPC = dynamic_cast<ccPointCloud*>(vertices);
 			if (verticesPC)
 			{
 				for (unsigned i = 0; i < vertices->size(); ++i)
 				{
-					CCVector3 *Pscreen = const_cast<CCVector3 *>(verticesPC->getPoint(i));
-					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0/*Pscreen->z*/);
+					CCVector3* Pscreen = const_cast<CCVector3*>(verticesPC->getPoint(i));
+					CCVector3d Pd(half_w + Pscreen->x, half_h + Pscreen->y, 0 /*Pscreen->z*/);
 					CCVector3d Q3D;
 					camera.unproject(Pd, Q3D);
 					*Pscreen = Q3D.toPC();
@@ -1399,19 +1399,19 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 				mode2D = false;
 			}
 
-			//export Global Shift & Scale info (if any)
-			bool hasGlobalShift = false;
+			// export Global Shift & Scale info (if any)
+			bool       hasGlobalShift = false;
 			CCVector3d globalShift(0, 0, 0);
-			double globalScale = 1.0;
+			double     globalScale = 1.0;
 			{
-				for (QSet<ccHObject *>::const_iterator it = m_toSegment.constBegin(); it != m_toSegment.constEnd(); ++it)
+				for (QSet<ccHObject*>::const_iterator it = m_toSegment.constBegin(); it != m_toSegment.constEnd(); ++it)
 				{
-					ccShiftedObject *shifted = ccHObjectCaster::ToShifted(*it);
-					bool isShifted = (shifted && shifted->isShifted());
+					ccShiftedObject* shifted   = ccHObjectCaster::ToShifted(*it);
+					bool             isShifted = (shifted && shifted->isShifted());
 					if (isShifted)
 					{
-						globalShift = shifted->getGlobalShift();
-						globalScale = shifted->getGlobalScale();
+						globalShift    = shifted->getGlobalShift();
+						globalScale    = shifted->getGlobalScale();
 						hasGlobalShift = true;
 						break;
 					}
@@ -1432,12 +1432,12 @@ void ccGraphicalSegmentationTool::doExportSegmentationPolyline()
 
 		QString polyName = QString("Segmentation polyline #%1").arg(++s_polylineExportCount);
 		poly->setName(polyName);
-		poly->setEnabled(false); //we don't want it to appear while the segmentation mode is enabled! (anyway it's 2D only...)
+		poly->setEnabled(false); // we don't want it to appear while the segmentation mode is enabled! (anyway it's 2D only...)
 		poly->set2DMode(mode2D);
-		poly->setColor(ccColor::yellow); //we use a different color so as to differentiate them from the active polyline!
+		poly->setColor(ccColor::yellow); // we use a different color so as to differentiate them from the active polyline!
 
-		//save associated viewport
-		cc2DViewportObject *viewportObject = new cc2DViewportObject(polyName + QString(" viewport"));
+		// save associated viewport
+		cc2DViewportObject* viewportObject = new cc2DViewportObject(polyName + QString(" viewport"));
 		viewportObject->setParameters(m_associatedWin->getViewportParameters());
 		viewportObject->setDisplay(m_associatedWin);
 		poly->addChild(viewportObject);
@@ -1473,10 +1473,10 @@ void ccGraphicalSegmentationTool::cancel()
 	stop(false);
 }
 
-static void RemoveUnusedLabelsAndUpdateTheOthers(	std::set<cc2DLabel*>& watchedLabels,
-													ccHObject* entity,
-													const std::vector<int>& newIndexesOfRemainingPointsOrTriangles,
-													ccMainAppInterface* app )
+static void RemoveUnusedLabelsAndUpdateTheOthers(std::set<cc2DLabel*>&   watchedLabels,
+                                                 ccHObject*              entity,
+                                                 const std::vector<int>& newIndexesOfRemainingPointsOrTriangles,
+                                                 ccMainAppInterface*     app)
 {
 	if (!app)
 	{
@@ -1495,7 +1495,7 @@ static void RemoveUnusedLabelsAndUpdateTheOthers(	std::set<cc2DLabel*>& watchedL
 			if (pp.entity() == entity)
 			{
 				if (pp.index < newIndexesOfRemainingPointsOrTriangles.size()
-					&& newIndexesOfRemainingPointsOrTriangles[pp.index] >= 0)
+				    && newIndexesOfRemainingPointsOrTriangles[pp.index] >= 0)
 				{
 					// update the 'pointer'
 					pp.index = newIndexesOfRemainingPointsOrTriangles[pp.index];
@@ -1503,9 +1503,9 @@ static void RemoveUnusedLabelsAndUpdateTheOthers(	std::set<cc2DLabel*>& watchedL
 				else
 				{
 					// delete the label
-					ccHObject* labelParent = label->getParent();
+					ccHObject*                           labelParent = label->getParent();
 					ccMainAppInterface::ccHObjectContext parentContext;
-					bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+					bool                                 saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
 					if (saveContext)
 						parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
 					labelParent->removeChild(label);
@@ -1513,7 +1513,7 @@ static void RemoveUnusedLabelsAndUpdateTheOthers(	std::set<cc2DLabel*>& watchedL
 						app->putObjectBackIntoDBTree(labelParent, parentContext);
 
 					label = nullptr;
-					it = watchedLabels.erase(it);
+					it    = watchedLabels.erase(it);
 					break;
 				}
 			}
@@ -1575,7 +1575,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		return false;
 	}
 
-	for (QSet<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); )
+	for (QSet<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end();)
 	{
 		ccHObject* entity = (*p);
 
@@ -1583,7 +1583,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		bool canModify = true;
 		if (entity->isLocked())
 		{
-			//we can't delete this entity
+			// we can't delete this entity
 			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it");
 			canModify = false;
 		}
@@ -1593,7 +1593,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 			if (cloud->size() == 0)
 			{
-				//ignore this cloud
+				// ignore this cloud
 				ccLog::Warning("Cloud " + cloud->getName() + " is empty. We will ignore it");
 				continue;
 			}
@@ -1602,13 +1602,13 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				// check that the point cloud is not the vertices of a mesh or of a polyline
 				if (ccGenericMesh::IsCloudVerticesOfMesh(cloud))
 				{
-					//we can't delete this cloud
+					// we can't delete this cloud
 					ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a mesh. We won't be able to modify it");
 					canModify = false;
 				}
 				else if (ccPolyline::IsCloudVerticesOfPolyline(cloud))
 				{
-					//we can't delete this cloud
+					// we can't delete this cloud
 					ccLog::Warning("Cloud " + cloud->getName() + " seems to be the vertices of a polyine. We won't be able to modify it");
 					canModify = false;
 				}
@@ -1619,7 +1619,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
 			if (mesh->size() == 0 || mesh->getAssociatedCloud()->size() == 0)
 			{
-				//ignore this mesh
+				// ignore this mesh
 				ccLog::Warning("Mesh " + mesh->getName() + " is empty. We will ignore it");
 				continue;
 			}
@@ -1629,7 +1629,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			ccPolyline* poly = static_cast<ccPolyline*>(entity);
 			if (poly->size() == 0 || poly->getAssociatedCloud()->size() == 0)
 			{
-				//ignore this polyline
+				// ignore this polyline
 				ccLog::Warning("Polyline " + poly->getName() + " is empty. We will ignore it");
 				continue;
 			}
@@ -1657,16 +1657,16 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 			bool removeSelectedElementsFromEntity = (canModify && !m_deleteHiddenParts);
 
 			// apply segmentation
-			ccHObject* segmentationResult = nullptr;
-			bool deleteOriginalEntity = (canModify && m_deleteHiddenParts);
+			ccHObject* segmentationResult   = nullptr;
+			bool       deleteOriginalEntity = (canModify && m_deleteHiddenParts);
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
-				std::vector<int> newIndexesOfRemainingPoints;
-				ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection(	removeSelectedElementsFromEntity,
-																									nullptr,
-																									deleteOriginalEntity ? nullptr : &newIndexesOfRemainingPoints);
+				std::vector<int>     newIndexesOfRemainingPoints;
+				ccGenericPointCloud* segmentedCloud = cloud->createNewCloudFromVisibilitySelection(removeSelectedElementsFromEntity,
+				                                                                                   nullptr,
+				                                                                                   deleteOriginalEntity ? nullptr : &newIndexesOfRemainingPoints);
 				if (segmentedCloud)
 				{
 					if (segmentedCloud->size() == 0)
@@ -1677,7 +1677,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					}
 					else if (segmentedCloud == cloud)
 					{
-						//specific case: all points were selected, nothing to do
+						// specific case: all points were selected, nothing to do
 						app->putObjectBackIntoDBTree(entity, objContext);
 						++p;
 						continue;
@@ -1701,9 +1701,9 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
 
 				std::vector<int> newIndexesOfRemainingTriangles;
-				ccMesh* segmentatedMesh = mesh->createNewMeshFromSelection(	removeSelectedElementsFromEntity,
-																			deleteOriginalEntity ? nullptr : &newIndexesOfRemainingTriangles,
-																			true );
+				ccMesh*          segmentatedMesh = mesh->createNewMeshFromSelection(removeSelectedElementsFromEntity,
+                                                                           deleteOriginalEntity ? nullptr : &newIndexesOfRemainingTriangles,
+                                                                           true);
 
 				if (segmentatedMesh)
 				{
@@ -1715,7 +1715,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					}
 					else if (segmentatedMesh == mesh)
 					{
-						//specific case: all triangles were selected, nothing to do
+						// specific case: all triangles were selected, nothing to do
 						app->putObjectBackIntoDBTree(entity, objContext);
 						++p;
 						continue;
@@ -1740,7 +1740,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 				assert(false);
 			}
 
-			if (segmentationResult) //we have a result (= a new entity)
+			if (segmentationResult) // we have a result (= a new entity)
 			{
 				// update suffix
 				{
@@ -1759,9 +1759,9 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					if (segmentationResult->isKindOf(CC_TYPES::MESH) && entity->isKindOf(CC_TYPES::MESH))
 					{
 						// update the mesh vertices as well
-						ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-						ccGenericMesh* resultMesh = ccHObjectCaster::ToGenericMesh(segmentationResult);
-						QString verticesName = mesh->getAssociatedCloud()->getName();
+						ccGenericMesh* mesh         = ccHObjectCaster::ToGenericMesh(entity);
+						ccGenericMesh* resultMesh   = ccHObjectCaster::ToGenericMesh(segmentationResult);
+						QString        verticesName = mesh->getAssociatedCloud()->getName();
 						if (!verticesName.endsWith(segmentedSuffix))
 						{
 							verticesName += segmentedSuffix;
@@ -1784,27 +1784,27 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 					if (entity->isKindOf(CC_TYPES::MESH))
 					{
 						// update the mesh vertices as well
-						ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-						QString verticesName = mesh->getAssociatedCloud()->getName();
+						ccGenericMesh* mesh         = ccHObjectCaster::ToGenericMesh(entity);
+						QString        verticesName = mesh->getAssociatedCloud()->getName();
 						if (!verticesName.endsWith(remainingSuffix))
 						{
 							mesh->getAssociatedCloud()->setName(verticesName + remainingSuffix);
 						}
 					}
 
-					//specific case: deprecate GBL sensors' depth buffer
+					// specific case: deprecate GBL sensors' depth buffer
 					ccHObject::Container gblSensors;
 					entity->filterChildren(gblSensors, false, CC_TYPES::GBL_SENSOR);
 					for (ccHObject* child : gblSensors)
 					{
 						ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(child);
-						//clear the associated depth buffer of the original sensor (deprecated)
+						// clear the associated depth buffer of the original sensor (deprecated)
 						sensor->clearDepthBuffer();
 						assert(entity->isKindOf(CC_TYPES::POINT_CLOUD));
 					}
 				}
 
-				//we look for first non-mesh or non-cloud parent
+				// we look for first non-mesh or non-cloud parent
 				ccHObject* resultParent = objContext.parent;
 				while (resultParent && (resultParent->isKindOf(CC_TYPES::MESH) || resultParent->isKindOf(CC_TYPES::POINT_CLOUD)))
 				{
@@ -1822,7 +1822,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 				newEntities.push_back(segmentationResult);
 			}
-			
+
 			if (!deleteOriginalEntity)
 			{
 				app->putObjectBackIntoDBTree(entity, objContext);
@@ -1842,9 +1842,9 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 						if (pp.entity() == entity)
 						{
 							// delete the label
-							ccHObject* labelParent = label->getParent();
+							ccHObject*                           labelParent = label->getParent();
 							ccMainAppInterface::ccHObjectContext parentContext;
-							bool saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
+							bool                                 saveContext = (labelParent != entity && !entity->isAncestorOf(labelParent));
 							if (saveContext)
 								parentContext = app->removeObjectTemporarilyFromDBTree(labelParent);
 							labelParent->removeChild(label);
@@ -1852,7 +1852,7 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 								app->putObjectBackIntoDBTree(labelParent, parentContext);
 
 							label = nullptr;
-							it = watchedLabels.erase(it);
+							it    = watchedLabels.erase(it);
 							break;
 						}
 					}
@@ -1874,8 +1874,8 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		}
 		else if (entity->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline* poly = static_cast<ccPolyline*>(entity);
-			ccHObject* polyParent = poly->getParent();
+			ccPolyline* poly       = static_cast<ccPolyline*>(entity);
+			ccHObject*  polyParent = poly->getParent();
 			if (!polyParent)
 			{
 				polyParent = app->dbRootObject();
@@ -1909,4 +1909,3 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 
 	return true;
 }
-

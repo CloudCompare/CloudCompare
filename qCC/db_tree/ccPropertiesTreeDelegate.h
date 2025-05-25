@@ -1,28 +1,28 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_ITEM_DELEGATE_HEADER
 #define CC_ITEM_DELEGATE_HEADER
 
-//qCC_db
+// qCC_db
 #include <ccArray.h>
 #include <ccPointCloud.h>
 
-//Qt
+// Qt
 #include <QStyledItemDelegate>
 
 class cc2DLabel;
@@ -55,78 +55,79 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Delegate items roles
-	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY					= 0	,
-							OBJECT_NAME								,
-							OBJECT_VISIBILITY						,
-							OBJECT_CURRENT_DISPLAY					,
-							OBJECT_NORMALS_SHOWN					,
-							OBJECT_COLOR_SOURCE						,
-							OBJECT_POLYLINE_WIDTH					,
-							OBJECT_SENSOR_DRAW_FRUSTUM				,
-							OBJECT_SENSOR_DRAW_FRUSTUM_PLANES		,
-							OBJECT_SF_SHOW_SCALE					,
-							OBJECT_OCTREE_LEVEL						,
-							OBJECT_OCTREE_TYPE						,
-							OBJECT_MESH_WIRE						,
-							OBJECT_MESH_STIPPLING					,
-							OBJECT_CURRENT_SCALAR_FIELD				,
-							OBJECT_CURRENT_COLOR_RAMP				,
-							OBJECT_IMAGE_ALPHA						,
-							OBJECT_APPLY_IMAGE_VIEWPORT				,
-							OBJECT_APPLY_SENSOR_VIEWPORT			,
-							OBJECT_CLOUD_SF_EDITOR					,
-							OBJECT_SENSOR_MATRIX_EDITOR				,
-							OBJECT_SENSOR_DISPLAY_SCALE				,
-							OBJECT_SENSOR_UNCERTAINTY				,
-							OBJECT_COLOR_RAMP_STEPS					,
-							OBJECT_MATERIALS						,
-							OBJECT_APPLY_LABEL_VIEWPORT				,
-							OBJECT_UPDATE_LABEL_VIEWPORT			,
-							OBJECT_LABEL_DISP_2D					,
-							OBJECT_LABEL_POINT_LEGEND				,
-							OBJECT_PRIMITIVE_PRECISION				,
-							OBJECT_CIRCLE_RESOLUTION				,
-							OBJECT_SPHERE_RADIUS					,
-							OBJECT_CIRCLE_RADIUS					,
-							OBJECT_CONE_HEIGHT						,
-							OBJECT_CONE_BOTTOM_RADIUS				,
-							OBJECT_CONE_TOP_RADIUS					,
-							OBJECT_CLOUD_POINT_SIZE					,
-							OBJECT_NAME_IN_3D						,
-							OBJECT_FACET_CONTOUR					,
-							OBJECT_FACET_MESH						,
-							OBJECT_PLANE_NORMAL_VECTOR				,
-							OBJECT_SENSOR_INDEX						,
-							OBJECT_SHOW_TRANS_BUFFER_PATH			,
-							OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS		,
-							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
-							OBJECT_HISTORY_MATRIX_EDITOR			,
-							OBJECT_GLTRANS_MATRIX_EDITOR			,
-							OBJECT_COORDINATE_SYSTEM_DISP_PLANES	,
-							OBJECT_COORDINATE_SYSTEM_DISP_AXES		,
-							OBJECT_COORDINATE_SYSTEM_AXES_WIDTH		,
-							OBJECT_COORDINATE_SYSTEM_DISP_SCALE		,
-							TREE_VIEW_HEADER						,
-							OBJECT_CLOUD_NORMAL_COLOR				,
-							OBJECT_CLOUD_NORMAL_LENGTH				,
-							OBJECT_CLOUD_DRAW_NORMALS				,
-							OBJECT_CLOUD_USE_LOD					,
+	enum CC_PROPERTY_ROLE
+	{
+		OBJECT_NO_PROPERTY = 0,
+		OBJECT_NAME,
+		OBJECT_VISIBILITY,
+		OBJECT_CURRENT_DISPLAY,
+		OBJECT_NORMALS_SHOWN,
+		OBJECT_COLOR_SOURCE,
+		OBJECT_POLYLINE_WIDTH,
+		OBJECT_SENSOR_DRAW_FRUSTUM,
+		OBJECT_SENSOR_DRAW_FRUSTUM_PLANES,
+		OBJECT_SF_SHOW_SCALE,
+		OBJECT_OCTREE_LEVEL,
+		OBJECT_OCTREE_TYPE,
+		OBJECT_MESH_WIRE,
+		OBJECT_MESH_STIPPLING,
+		OBJECT_CURRENT_SCALAR_FIELD,
+		OBJECT_CURRENT_COLOR_RAMP,
+		OBJECT_IMAGE_ALPHA,
+		OBJECT_APPLY_IMAGE_VIEWPORT,
+		OBJECT_APPLY_SENSOR_VIEWPORT,
+		OBJECT_CLOUD_SF_EDITOR,
+		OBJECT_SENSOR_MATRIX_EDITOR,
+		OBJECT_SENSOR_DISPLAY_SCALE,
+		OBJECT_SENSOR_UNCERTAINTY,
+		OBJECT_COLOR_RAMP_STEPS,
+		OBJECT_MATERIALS,
+		OBJECT_APPLY_LABEL_VIEWPORT,
+		OBJECT_UPDATE_LABEL_VIEWPORT,
+		OBJECT_LABEL_DISP_2D,
+		OBJECT_LABEL_POINT_LEGEND,
+		OBJECT_PRIMITIVE_PRECISION,
+		OBJECT_CIRCLE_RESOLUTION,
+		OBJECT_SPHERE_RADIUS,
+		OBJECT_CIRCLE_RADIUS,
+		OBJECT_CONE_HEIGHT,
+		OBJECT_CONE_BOTTOM_RADIUS,
+		OBJECT_CONE_TOP_RADIUS,
+		OBJECT_CLOUD_POINT_SIZE,
+		OBJECT_NAME_IN_3D,
+		OBJECT_FACET_CONTOUR,
+		OBJECT_FACET_MESH,
+		OBJECT_PLANE_NORMAL_VECTOR,
+		OBJECT_SENSOR_INDEX,
+		OBJECT_SHOW_TRANS_BUFFER_PATH,
+		OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS,
+		OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE,
+		OBJECT_HISTORY_MATRIX_EDITOR,
+		OBJECT_GLTRANS_MATRIX_EDITOR,
+		OBJECT_COORDINATE_SYSTEM_DISP_PLANES,
+		OBJECT_COORDINATE_SYSTEM_DISP_AXES,
+		OBJECT_COORDINATE_SYSTEM_AXES_WIDTH,
+		OBJECT_COORDINATE_SYSTEM_DISP_SCALE,
+		TREE_VIEW_HEADER,
+		OBJECT_CLOUD_NORMAL_COLOR,
+		OBJECT_CLOUD_NORMAL_LENGTH,
+		OBJECT_CLOUD_DRAW_NORMALS,
+		OBJECT_CLOUD_USE_LOD,
 	};
 
 	//! Default constructor
-	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = nullptr);
+	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject* parent = nullptr);
 
 	//! Default destructor
 	~ccPropertiesTreeDelegate() override;
 
-	//inherited from QStyledItemDelegate
-	QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const override;
-	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-	void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-	void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+	// inherited from QStyledItemDelegate
+	QSize    sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void     updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+	void     setEditorData(QWidget* editor, const QModelIndex& index) const override;
 
 	void unbind();
 
@@ -136,12 +137,12 @@ public:
 	//! Returns currently bound object
 	ccHObject* getCurrentObject();
 
-Q_SIGNALS:
+  Q_SIGNALS:
 	void ccObjectPropertiesChanged(ccHObject* hObject) const;
 	void ccObjectAppearanceChanged(ccHObject* hObject) const;
 	void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
-private:
+  private:
 	static const char* s_noneString;
 	static const char* s_rgbColor;
 	static const char* s_sfColor;
@@ -168,8 +169,8 @@ private:
 	void applyLabelViewport();
 	void updateLabelViewport();
 	void updateDisplay();
-	void objectDisplayChanged(const QString &);
-	void colorSourceChanged(const QString &);
+	void objectDisplayChanged(const QString&);
+	void colorSourceChanged(const QString&);
 	void sensorScaleChanged(double);
 	void coordinateSystemDisplayScaleChanged(double);
 	void sensorUncertaintyChanged();
@@ -210,7 +211,7 @@ private:
 	void fillWithShifted(const ccShiftedObject*);
 	void fillWithCoordinateSystem(const ccCoordinateSystem*);
 
-	template<class Type, int N, class ComponentType>
+	template <class Type, int N, class ComponentType>
 	void fillWithCCArray(const ccArray<Type, N, ComponentType>*);
 
 	//! Returns whether the editor is wide (i.e. spans on two columns) or not
@@ -219,10 +220,10 @@ private:
 	//! Updates the current model (assuming object is the same)
 	void updateModel();
 
-	ccHObject* m_currentObject;
+	ccHObject*          m_currentObject;
 	QStandardItemModel* m_model;
-	QAbstractItemView* m_view;
-	CC_PROPERTY_ROLE m_lastFocusItemRole;
+	QAbstractItemView*  m_view;
+	CC_PROPERTY_ROLE    m_lastFocusItemRole;
 };
 
 #endif

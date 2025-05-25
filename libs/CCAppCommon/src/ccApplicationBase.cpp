@@ -1,23 +1,23 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 #include <clocale>
 
-//Qt
+// Qt
 #include <QDir>
 #include <QProcessEnvironment>
 #include <QSettings>
@@ -25,15 +25,16 @@
 #include <QString>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
+#include <QTextCodec>
 #include <QTranslator>
 #include <QtGlobal>
-#include <QTextCodec>
 
 // CCCoreLib
 #include "CCPlatform.h"
 
 // qCC_db
 #include "ccMaterial.h"
+
 #include <ccPointCloud.h>
 
 // qCC_glWindow
@@ -56,23 +57,23 @@
 
 void ccApplicationBase::InitOpenGL()
 {
-	//See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
+	// See http://doc.qt.io/qt-5/qopenglwidget.html#opengl-function-calls-headers-and-qopenglfunctions
 	/** Calling QSurfaceFormat::setDefaultFormat() before constructing the QApplication instance is mandatory
-		on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
-		ensure that resource sharing between contexts stays functional as all internal contexts are created
-		using the correct version and profile.
+	    on some platforms (for example, OS X) when an OpenGL core profile context is requested. This is to
+	    ensure that resource sharing between contexts stays functional as all internal contexts are created
+	    using the correct version and profile.
 	**/
 	{
 		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 		format.setStencilBufferSize(0);
-#ifndef CC_LINUX // seems to cause some big issues on Linux if Quad-buffering is not supported
-				// we would need to find a way to check whether it's supported or not in advance...
-		format.setStereo(true); //we request stereo support by default, but this may not be supported!
+#ifndef CC_LINUX                // seems to cause some big issues on Linux if Quad-buffering is not supported
+                                // we would need to find a way to check whether it's supported or not in advance...
+		format.setStereo(true); // we request stereo support by default, but this may not be supported!
 #endif
 		format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
 
 #ifdef Q_OS_MAC
-		format.setVersion(2, 1);	// must be 2.1 - see ccGLWindowInterface::functions()
+		format.setVersion(2, 1); // must be 2.1 - see ccGLWindowInterface::functions()
 		format.setProfile(QSurfaceFormat::CoreProfile);
 #endif
 
@@ -89,9 +90,9 @@ void ccApplicationBase::InitOpenGL()
 }
 
 ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine, const QString& version)
-	: QApplication(argc, argv)
-	, m_versionStr(version)
-	, m_isCommandLine(isCommandLine)
+    : QApplication(argc, argv)
+    , m_versionStr(version)
+    , m_isCommandLine(isCommandLine)
 {
 	setOrganizationName("CCCorp");
 
@@ -140,7 +141,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	ccTranslationManager::Get().registerTranslatorFile(QStringLiteral("CloudCompare"), m_translationPath);
 	ccTranslationManager::Get().loadTranslations();
 
-	connect(this, &ccApplicationBase::aboutToQuit, [=]() { ccMaterial::ReleaseTextures(); });
+	connect(this, &ccApplicationBase::aboutToQuit, [=]()
+	        { ccMaterial::ReleaseTextures(); });
 }
 
 QString ccApplicationBase::versionLongStr(bool includeOS) const
@@ -203,37 +205,37 @@ void ccApplicationBase::setupPaths()
 	bundleDir.cdUp();
 
 	m_pluginPaths << (bundleDir.absolutePath() + "/ccPlugins");
-	m_shaderPath = (bundleDir.absolutePath() + "/shaders");
+	m_shaderPath      = (bundleDir.absolutePath() + "/shaders");
 	m_translationPath = (bundleDir.absolutePath() + "/qCC/translations");
 #else
-	m_shaderPath = (bundleDir.absolutePath() + "/Shaders");
+	m_shaderPath      = (bundleDir.absolutePath() + "/Shaders");
 	m_translationPath = (bundleDir.absolutePath() + "/translations");
 #endif
 #elif defined(Q_OS_WIN)
 	m_pluginPaths << (appDir.absolutePath() + "/plugins");
-	m_shaderPath = (appDir.absolutePath() + "/shaders");
+	m_shaderPath      = (appDir.absolutePath() + "/shaders");
 	m_translationPath = (appDir.absolutePath() + "/translations");
 #elif defined(Q_OS_LINUX)
 	// Shaders & plugins are relative to the bin directory where the executable is found
-	QDir  theDir = appDir;
+	QDir theDir = appDir;
 
 	if (theDir.dirName() == "bin")
 	{
 		theDir.cdUp();
 
 		m_pluginPaths << (theDir.absolutePath() + "/lib/cloudcompare/plugins");
-		m_shaderPath = (theDir.absolutePath() + "/share/cloudcompare/shaders");
+		m_shaderPath      = (theDir.absolutePath() + "/share/cloudcompare/shaders");
 		m_translationPath = (theDir.absolutePath() + "/share/cloudcompare/translations");
 	}
 	else
 	{
 		// Choose a reasonable default to look in
 		m_pluginPaths << "/usr/lib/cloudcompare/plugins";
-		m_shaderPath = "/usr/share/cloudcompare/shaders";
+		m_shaderPath      = "/usr/share/cloudcompare/shaders";
 		m_translationPath = "/usr/share/cloudcompare/translations";
 	}
 #else
-	#warning Need to specify the shader path for this OS.
+#warning Need to specify the shader path for this OS.
 #endif
 
 	// If the environment variables are specified, overwrite the shader and translation paths.
@@ -254,10 +256,10 @@ void ccApplicationBase::setupPaths()
 	// This allows users to put plugins outside of the install directories.
 	const QStringList appDataPaths = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation);
 
-	for (const QString &appDataPath : appDataPaths)
+	for (const QString& appDataPath : appDataPaths)
 	{
 		QString path = appDataPath + "/plugins";
-		if (!m_pluginPaths.contains(path)) //avoid duplicate entries (can happen, at least on Windows)
+		if (!m_pluginPaths.contains(path)) // avoid duplicate entries (can happen, at least on Windows)
 		{
 			m_pluginPaths << path;
 		}
@@ -329,4 +331,3 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 
 	return true;
 }
-

@@ -1,26 +1,26 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccLog.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCPlatform.h>
 
-//System
+// System
 #include <cassert>
 #include <vector>
 
@@ -32,36 +32,37 @@
  *** Globals ***
  ***************/
 
-//buffer for formatted string generation
+// buffer for formatted string generation
 static const size_t s_bufferMaxSize = 4096;
-static char s_buffer[s_bufferMaxSize];
+static char         s_buffer[s_bufferMaxSize];
 
 //! Message
 struct Message
 {
 	Message(const QString& t, int f)
-		: text(t)
-		, flags(f)
-	{}
+	    : text(t)
+	    , flags(f)
+	{
+	}
 
 	QString text;
-	int flags;
+	int     flags;
 };
 
-//message backup system
+// message backup system
 static bool s_backupEnabled;
 
-//message verbosity level
+// message verbosity level
 #ifdef QT_DEBUG
 static int s_verbosityLevel = ccLog::LOG_VERBOSE;
 #else
 static int s_verbosityLevel = ccLog::LOG_STANDARD;
 #endif
 
-//backed up messages
+// backed up messages
 static std::vector<Message> s_backupMessages;
 
-//unique console instance
+// unique console instance
 static ccLog* s_instance = nullptr;
 
 ccLog* ccLog::TheInstance()
@@ -86,7 +87,7 @@ void ccLog::SetVerbosityLevel(int level)
 
 void ccLog::LogMessage(const QString& message, int level)
 {
-	//skip messages below the current 'verbosity' level
+	// skip messages below the current 'verbosity' level
 	if ((level & 7) < s_verbosityLevel)
 	{
 		return;
@@ -104,7 +105,7 @@ void ccLog::LogMessage(const QString& message, int level)
 		}
 		catch (const std::bad_alloc&)
 		{
-			//nothing to do, the message will be lost...
+			// nothing to do, the message will be lost...
 		}
 	}
 }
@@ -114,7 +115,7 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 	s_instance = logInstance;
 	if (s_instance)
 	{
-		//if we have a valid instance, we can now flush the backed up messages
+		// if we have a valid instance, we can now flush the backed up messages
 		for (const Message& message : s_backupMessages)
 		{
 			s_instance->logMessage(message.text, message.flags);
@@ -123,17 +124,17 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 	}
 }
 
-//Conversion from '...' parameters to QString so as to call ccLog::logMessage
+// Conversion from '...' parameters to QString so as to call ccLog::logMessage
 //(we get the "..." parameters as "printf" would do)
-#define LOG_ARGS(flags)\
-	if (s_instance || s_backupEnabled)\
-	{\
-		va_list args;\
-		va_start(args, format);\
-		_vsnprintf(s_buffer, s_bufferMaxSize, format, args);\
-		va_end(args);\
-		LogMessage(QString(s_buffer), flags);\
-	}\
+#define LOG_ARGS(flags) \
+	if (s_instance || s_backupEnabled) \
+	{ \
+		va_list args; \
+		va_start(args, format); \
+		_vsnprintf(s_buffer, s_bufferMaxSize, format, args); \
+		va_end(args); \
+		LogMessage(QString(s_buffer), flags); \
+	}
 
 bool ccLog::PrintVerbose(const char* format, ...)
 {

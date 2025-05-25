@@ -1,31 +1,32 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                       COPYRIGHT: SAGE INGENIERIE                       #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                       COPYRIGHT: SAGE INGENIERIE                       #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_PLANE_EDIT_DLG_HEADER
 #define CC_PLANE_EDIT_DLG_HEADER
 
-//Local
-#include <ui_planeEditDlg.h>
+// Local
 #include "ccPickingListener.h"
 
-//CCCoreLib
+#include <ui_planeEditDlg.h>
+
+// CCCoreLib
 #include <CCGeom.h>
 
-//Qt
+// Qt
 #include <QDialog>
 
 class ccGLWindowInterface;
@@ -34,12 +35,13 @@ class ccHObject;
 class ccPickingHub;
 
 //! Dialog to create (or edit the parameters) of a plane
-class ccPlaneEditDlg : public QDialog, public ccPickingListener, public Ui::PlaneEditDlg
+class ccPlaneEditDlg : public QDialog
+    , public ccPickingListener
+    , public Ui::PlaneEditDlg
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent);
 
@@ -55,19 +57,16 @@ public:
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi);
 
-public:
-
+  public:
 	void pickPointAsCenter(bool);
 	void onDipDirChanged(double);
 	void onDipDirModified(bool);
 	void onNormalChanged(double);
 
-protected:
-
+  protected:
 	void saveParamsAndAccept();
 
-protected: //members
-
+  protected: // members
 	//! Picking window (if any)
 	ccGLWindowInterface* m_pickingWin;
 

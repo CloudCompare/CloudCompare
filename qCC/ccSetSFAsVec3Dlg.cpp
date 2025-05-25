@@ -1,38 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: CloudCompare project                      #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: CloudCompare project                      #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSetSFAsVec3Dlg.h"
 
 // qCC_db
 #include <ccPointCloud.h>
 
-ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(	const ccPointCloud* cloud,
-											const QString& xLabel,
-											const QString& yLabel,
-											const QString& zLabel,
-											bool allowUnchanged,
-											QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, Ui::SetSFsAsVec3Dialog()
-	, m_constFields(0)
+ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(const ccPointCloud* cloud,
+                                           const QString&      xLabel,
+                                           const QString&      yLabel,
+                                           const QString&      zLabel,
+                                           bool                allowUnchanged,
+                                           QWidget*            parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , Ui::SetSFsAsVec3Dialog()
+    , m_constFields(0)
 {
 	setupUi(this);
 
-	QStringList fields{ "0", "1" };
+	QStringList fields{"0", "1"};
 
 	// default fields ('0 0 1' by default)
 	int xIndex = SF_INDEX_ZERO;
@@ -170,7 +170,6 @@ void ccSetSFsAsVec3Dialog::setSFIndexes(int sf1Index, int sf2Index, int sf3Index
 	yComboBox->setCurrentIndex(toComboBoxIndex(sf2Index));
 	zComboBox->setCurrentIndex(toComboBoxIndex(sf3Index));
 }
-
 
 void ccSetSFsAsVec3Dialog::getSFIndexes(int& sf1Index, int& sf2Index, int& sf3Index) const
 {

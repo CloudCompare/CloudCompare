@@ -194,7 +194,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		else
 		{
 			static int DefaultScreenSize_pix = 2048;  // average screen size - sadly we don't have this information
-			focalDistance = pixelSize * DefaultScreenSize_pix / computeDistanceToWidthRatio(DefaultScreenSize_pix, DefaultScreenSize_pix);
+			focalDistance = pixelSize * static_cast<double>(DefaultScreenSize_pix) / computeDistanceToWidthRatio(DefaultScreenSize_pix, DefaultScreenSize_pix);
 		}
 		setFocalDistance(focalDistance / zoom);
 		ccLog::Warning("[ccViewportParameters] Approximate focal distance (sorry, the parameters of viewport objects have changed!)");

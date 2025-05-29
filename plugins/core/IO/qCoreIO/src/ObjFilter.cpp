@@ -1202,7 +1202,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					QString mtlPath = QFileInfo(filename).absolutePath();
 					if (ccMaterialSet::ParseMTL(mtlPath, mtlFilename, *materials, errors))
 					{
-						ccLog::Print("[OBJ] %i materials loaded", materials->size() - oldSize);
+						ccLog::Print("[OBJ] %zu materials loaded", materials->size() - oldSize);
 						materialsLoadFailed = false;
 					}
 					else
@@ -1347,7 +1347,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			//create sub-meshes if necessary
-			ccLog::Print("[OBJ] 1 mesh loaded - %i group(s)", groups.size());
+			ccLog::Print("[OBJ] 1 mesh loaded - %zu group(s)", groups.size());
 			if (groups.size() > 1)
 			{
 				for (size_t i = 0; i < groups.size(); ++i)

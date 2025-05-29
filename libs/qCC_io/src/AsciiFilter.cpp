@@ -677,7 +677,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence& openSequen
 				}
 				else
 				{
-					ccLog::Warning("Failed to add scalar field #%i to cloud #%i! (skipped)", sfIndex);
+					ccLog::Warning("Failed to add scalar field #%i to cloud! (skipped)", sfIndex);
 					sf->release();
 					sf = nullptr;
 				}

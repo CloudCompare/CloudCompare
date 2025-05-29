@@ -682,7 +682,7 @@ int ply_write(p_ply ply, double value) {
         ply->wlength = 0;
     }
     if (!ply->odriver->ohandler[type](ply, value)) {
-        ply_ferror(ply, "Failed writing %s of %s %d (%s: %s)", 
+        ply_ferror(ply, "Failed writing %s of %s %ld (%s: %s)",
                     property->name, element->name, 
                     ply->winstance_index, 
                     ply->odriver->name, ply_type_list[type]);
@@ -852,7 +852,7 @@ static int ply_read_list_property(p_ply ply, p_ply_element element,
     p_ply_ihandler handler = driver[property->length_type];
     double length;
     if (!handler(ply, &length)) {
-        ply_ferror(ply, "Error reading '%s' of '%s' number %d",
+        ply_ferror(ply, "Error reading '%s' of '%s' number %ld",
                 property->name, element->name, argument->instance_index);
         return 0;
     }
@@ -872,7 +872,7 @@ static int ply_read_list_property(p_ply ply, p_ply_element element,
         argument->value_index = l;
         if (!handler(ply, &argument->value)) {
             ply_ferror(ply, "Error reading value number %d of '%s' of "
-                    "'%s' number %d", l+1, property->name, 
+                    "'%s' number %ld", l+1, property->name,
                     element->name, argument->instance_index);
             return 0;
         }

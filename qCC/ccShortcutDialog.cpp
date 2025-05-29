@@ -102,6 +102,10 @@ void ccShortcutDialog::handleDoubleClick(QTableWidgetItem *item)
 		return;
 	}
 
+	if (item->column() != KEY_SEQUENCE_COLUMN) {
+		item = m_ui->tableWidget->item(item->row(), KEY_SEQUENCE_COLUMN);
+	}
+
 	auto *action = item->data(Qt::UserRole).value<QAction *>();
 	m_editDialog->setKeySequence(action->shortcut());
 

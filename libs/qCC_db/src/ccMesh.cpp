@@ -1424,7 +1424,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 				//fill the indexes table with default values
 				{
 					Tuple3i defaultElement(-1, -1, -1);
-					for (unsigned i = 0; i < mesh->m_texCoordIndexes->size(); ++i)
+					for (unsigned i = 0; i < triAdded; ++i)
 						m_texCoordIndexes->emplace_back(defaultElement);
 				}
 			}

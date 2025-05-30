@@ -122,6 +122,7 @@
 #include "ccWaveformDialog.h"
 #include "ccEntitySelectionDlg.h"
 #include "ccSmoothPolylineDlg.h"
+#include "ccFitSphereDlg.h"
 
 //CCPluginAPI
 #include <ccInfoDlg.h>
@@ -8277,8 +8278,27 @@ void MainWindow::doActionScalarFieldArithmetic()
 
 void MainWindow::doActionFitSphere()
 {
-	double outliersRatio = 0.5;
-	double confidence = 0.99;
+	static double s_outliersRatio = 0.5;
+	static double s_confidence = 0.99;
+	static double s_radius = 0.99;
+	static bool s_autoDetectRadius = true;
+
+	ccFitSphereDlg fsDlg(	s_outliersRatio,
+							s_confidence,
+							s_autoDetectRadius,
+							s_radius,
+							this);
+
+	if (!fsDlg.exec())
+	{
+		//process cancelled by user
+		return;
+	}
+
+	s_outliersRatio = fsDlg.maxOutliersRatio();
+	s_confidence = fsDlg.confidence();
+	s_autoDetectRadius = fsDlg.autoDetectSphereRadius();
+	s_radius = fsDlg.sphereRadius();
 
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
@@ -8290,15 +8310,16 @@ void MainWindow::doActionFitSphere()
 			continue;
 
 		CCVector3 center;
-		PointCoordinateType radius = 0;
+		PointCoordinateType radius = (s_autoDetectRadius ? 0 : static_cast<PointCoordinateType>(s_radius));
 		double rms = std::numeric_limits<double>::quiet_NaN();
 		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(cloud,
-			outliersRatio,
+			s_outliersRatio,
 			center,
 			radius,
 			rms,
+			!s_autoDetectRadius,
 			&pDlg,
-			confidence) != CCCoreLib::GeometricalAnalysisTools::NoError)
+			s_confidence) != CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
 			ccLog::Warning(tr("[Fit sphere] Failed to fit a sphere on cloud '%1'").arg(cloud->getName()));
 			continue;

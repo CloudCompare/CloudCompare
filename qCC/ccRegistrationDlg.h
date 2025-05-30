@@ -77,10 +77,10 @@ public:
 	unsigned randomSamplingLimit() const;
 
 	//! Returns 'model' entity
-	ccHObject *getModelEntity();
+	ccHObject* getModelEntity();
 
 	//! Returns 'data' entity
-	ccHObject *getDataEntity();
+	ccHObject* getDataEntity();
 
 	//! Whether to use data displayed SF as weights
 	bool useDataSFAsWeights() const;
@@ -116,6 +116,7 @@ protected:
 
 protected:
 
+	//! Forces the update of the GUI
 	void updateGUI();
 
 	//! 'Model' entity

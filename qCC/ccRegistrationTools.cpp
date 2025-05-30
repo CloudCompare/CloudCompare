@@ -35,6 +35,9 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
+//Qt
+#include <QElapsedTimer>
+
 //system
 #include <set>
 
@@ -54,6 +57,9 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 								bool useModelSFAsWeights/*=false*/,
 								QWidget* parent/*=nullptr*/)
 {
+	QElapsedTimer timer;
+	timer.start();
+
 	bool restoreColorState = false;
 	bool restoreSFState = false;
 	CCCoreLib::ICPRegistrationTools::Parameters params = inputParameters;
@@ -285,10 +291,16 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	{
 		ccLog::Error("Registration failed: an error occurred (code %i)",result);
 	}
-	else if (result == CCCoreLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
+	else
 	{
-		transMat = FromCCLibMatrix<double, float>(transform.R, transform.T, transform.s);
-		finalScale = transform.s;
+		qint64 duration_ms = timer.elapsed();
+		ccLog::Print(QObject::tr("[ICP] Registration done in %1 sec").arg(duration_ms / 1000.0, 0, 'f', 3));
+
+		if (result == CCCoreLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
+		{
+			transMat = FromCCLibMatrix<double, float>(transform.R, transform.T, transform.s);
+			finalScale = transform.s;
+		}
 	}
 
 	//remove temporary SF (if any)

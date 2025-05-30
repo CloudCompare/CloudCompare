@@ -3810,7 +3810,9 @@ void MainWindow::doActionRegister()
 
 	ccRegistrationDlg rDlg(data, model, this);
 	if (!rDlg.exec())
+	{
 		return;
+	}
 
 	//model and data order may have changed!
 	model = rDlg.getModelEntity();

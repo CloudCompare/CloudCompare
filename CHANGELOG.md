@@ -193,6 +193,9 @@ Improvements:
 		- new 'info' button, to display some pieces of information about the exported image (resolution, pixel size,
 			image size, camera orientation, etc.) taking into account a potential scaling
 
+	- 'Tools > Fit > Sphere'
+		- introduction of a dialog to let the user set the fitting parameters or force the sphere radius
+
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

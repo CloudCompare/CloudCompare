@@ -510,12 +510,12 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 	bool success = false;
 	if (part && part->size() > 16)
 	{
-		PointCoordinateType radius;
+		PointCoordinateType radius = 0;
 		CCVector3 C;
-		double rms;
+		double rms = 0.0;
 		ccProgressDialog pDlg(true, this);
 		//first roughly search for the sphere
-		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.9) == CCCoreLib::GeometricalAnalysisTools::NoError)
+		if (CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, false, &pDlg, 0.9) == CCCoreLib::GeometricalAnalysisTools::NoError)
 		{
 			if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
 			{
@@ -525,13 +525,17 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 			{
 				//now look again (more precisely)
 				{
-					delete part;
 					box.clear();
 					box.add(C - CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
 					box.add(C + CCVector3(1, 1, 1)*radius*static_cast<PointCoordinateType>(1.05)); //add 5%
 					part = cloud->crop(box, true);
+
+					//replace the old subset by a slightly larger one
+					delete part;
 					if (part && part->size() > 16)
-						CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, &pDlg, 0.99);
+					{
+						CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, false, &pDlg, 0.99);
+					}
 				}
 				ccLog::Print(QString("[ccPointPairRegistrationDlg] Detected sphere radius = %1 (rms = %2)").arg(radius).arg(rms));
 				if (radius / searchRadius < 0.5 || radius / searchRadius > 2.0)
@@ -562,7 +566,10 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 	}
 
 	if (part)
+	{
 		delete part;
+		part = nullptr;
+	}
 
 	return success;
 }

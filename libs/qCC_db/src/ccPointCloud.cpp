@@ -5857,7 +5857,7 @@ void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
 
 bool ccPointCloud::computeNormalsWithGrids(double minTriangleAngle_deg/*=1.0*/,
 										   ccProgressDialog* pDlg/*=nullptr*/,
-										   ccNormalVectors::Orientation preferredOrientation)
+										   ccNormalVectors::Orientation preferredOrientation/*=ccNormalVectors::Orientation::UNDEFINED*/)
 {
 	unsigned pointCount = size();
 	if (pointCount < 3)

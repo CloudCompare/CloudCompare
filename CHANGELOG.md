@@ -65,6 +65,10 @@ New features:
 
 	- New setting dialog to customize keyboard shortcuts for common CC actions
 
+	- DB tree: new context menu option 'Export images'
+		- to export as PNG files all images highlighted or children of highlighted entities (recursive)
+		- thanks to https://github.com/stolariks for the initial contribution
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

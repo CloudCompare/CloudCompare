@@ -22,28 +22,33 @@
 
 //Qt
 #include <QApplication>
+#include <QFileDialog>
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QRegExp>
+#include <QSettings>
 #include <QStandardItemModel>
 #include <QTreeView>
 
 //qCC_db
 #include <cc2DLabel.h>
 #include <ccFacet.h>
+#include <ccFileUtils.h>
 #include <ccGBLSensor.h>
 #include <ccGenericPointCloud.h>
 #include <ccGenericPrimitive.h>
 #include <ccHObject.h>
+#include <ccImage.h>
 #include <ccLog.h>
 #include <ccMaterialSet.h>
 #include <ccMesh.h>
 #include <ccPlane.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
 //CClib
@@ -53,9 +58,10 @@
 #include <ccPickOneElementDlg.h>
 
 //local
+#include "mainwindow.h"
+#include "ccPersistentSettings.h"
 #include "ccPropertiesTreeDelegate.h"
 #include "ccSelectChildrenDlg.h"
-#include "mainwindow.h"
 
 //system
 #include <algorithm>
@@ -264,6 +270,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_sortChildrenAZ = new QAction(tr("Sort children by name (A-Z)"), this);
 	m_sortChildrenZA = new QAction(tr("Sort children by name (Z-A)"), this);
 	m_selectByTypeAndName = new QAction(tr("Select children by type and/or name"), this);
+	m_exportImages = new QAction(tr("Export images"), this);
 	m_deleteSelectedEntities = new QAction(tr("Delete"), this);
 	m_toggleSelectedEntities = new QAction(tr("Toggle"), this);
 	m_toggleSelectedEntitiesVisibility = new QAction(tr("Toggle visibility"), this);
@@ -288,7 +295,8 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_sortChildrenAZ,					&QAction::triggered,					this, &ccDBRoot::sortChildrenAZ);
 	connect(m_sortChildrenZA,					&QAction::triggered,					this, &ccDBRoot::sortChildrenZA);
 	connect(m_sortChildrenType,					&QAction::triggered,					this, &ccDBRoot::sortChildrenType);
-	connect(m_selectByTypeAndName,              &QAction::triggered,					this, &ccDBRoot::selectByTypeAndName);
+	connect(m_selectByTypeAndName,				&QAction::triggered,					this, &ccDBRoot::selectByTypeAndName);
+	connect(m_exportImages,						&QAction::triggered,					this, &ccDBRoot::exportImages);
 	connect(m_deleteSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::deleteSelectedEntities);
 	connect(m_toggleSelectedEntities,			&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntities);
 	connect(m_toggleSelectedEntitiesVisibility,	&QAction::triggered,					this, &ccDBRoot::toggleSelectedEntitiesVisibility);
@@ -1834,7 +1842,9 @@ void ccDBRoot::sortSelectedEntitiesChildren(SortRules sortRule)
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
 	int selCount = selectedIndexes.size();
 	if (selCount == 0)
+	{
 		return;
+	}
 
 	for (int i = 0; i < selCount; ++i)
 	{
@@ -1924,7 +1934,9 @@ void ccDBRoot::selectByTypeAndName()
 	scDlg.addType("Custom Types",      CC_TYPES::CUSTOM_H_OBJECT);
 
 	if (!scDlg.exec())
+	{
 		return;
+	}
 
 	// for type checking
 	CC_CLASS_ENUM type = CC_TYPES::OBJECT; // all objects are matched by def
@@ -1964,8 +1976,144 @@ void ccDBRoot::selectByTypeAndName()
 		name = scDlg.getSelectedName();
 	}
 
-
 	selectChildrenByTypeAndName(type, exclusive, name, regex);
+}
+
+void ccDBRoot::exportImages()
+{
+	QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+	int selCount = selectedIndexes.size();
+	if (selCount == 0)
+	{
+		return;
+	}
+
+	// find the images in the current selection
+	std::set<ccImage*> images;
+	try
+	{
+		for (int i = 0; i < selCount; ++i)
+		{
+			ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+			if (item->isKindOf(CC_TYPES::IMAGE))
+			{
+				images.insert(ccHObjectCaster::ToImage(item));
+			}
+			else
+			{
+				// look for the children
+				ccHObject::Container filteredChildren;
+				if (item->filterChildren(filteredChildren, true, CC_TYPES::IMAGE) != 0)
+				{
+					for (ccHObject* obj : filteredChildren)
+					{
+						images.insert(ccHObjectCaster::ToImage(obj));
+					}
+				}
+			}
+		}
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
+	if (images.empty())
+	{
+		ccLog::Warning(tr("No image in selection"));
+		return;
+	}
+
+	// get default export folder from persistent settings
+	QString saveDirectoryName;
+	{
+		QSettings settings;
+		settings.beginGroup(ccPS::SaveFile());
+		QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+
+		saveDirectoryName = QFileDialog::getExistingDirectory(	MainWindow::TheInstance(),
+																		tr("Choose destination directory"),
+																		currentPath,
+																		QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks );
+
+		if (saveDirectoryName.isEmpty())
+		{
+			// process cancelled by the user
+			return;
+		}
+
+		// save last saving location
+		settings.setValue(ccPS::CurrentPath(), saveDirectoryName);
+		settings.endGroup();
+	}
+
+	QDir saveDirectory(saveDirectoryName);
+
+	if (false == saveDirectory.exists())
+	{
+		ccLog::Error(tr("Directory doesn't exist"));
+		return;
+	}
+
+	ccProgressDialog pDlg(true, MainWindow::TheInstance());
+	pDlg.setRange(0, static_cast<int>(images.size()));
+	pDlg.setWindowTitle(tr("Export images"));
+	pDlg.start();
+	pDlg.show();
+	QCoreApplication::processEvents();
+
+	// Save the images to the provided directory
+	int overwriteImagesAnswer = QMessageBox::StandardButton::Default;
+	QMap<QString, size_t> duplicateNameCounter;
+	int imageCounter = 0;
+	for (const ccImage* image : images)
+	{
+		QString baseName = image->getName();
+		{
+			// make sure the name is unique
+			if (duplicateNameCounter.contains(baseName))
+			{
+				baseName += QString("_%1").arg(duplicateNameCounter[baseName] + 1);
+			}
+			duplicateNameCounter[baseName] += 1;
+		}
+
+		baseName += ".png";
+		QString filename = saveDirectory.absoluteFilePath(baseName);
+
+		bool skipImage = false;
+		if (QFile(filename).exists())
+		{
+			if (overwriteImagesAnswer == QMessageBox::StandardButton::Default)
+			{
+				// first time: ask the question to the user
+				overwriteImagesAnswer = QMessageBox::question(	MainWindow::TheInstance(),
+																tr("Overwriting files"),
+																tr("Overwrite existing files?"),
+																QMessageBox::StandardButton::YesToAll,
+																QMessageBox::StandardButton::NoToAll );
+			}
+
+			if (overwriteImagesAnswer == QMessageBox::StandardButton::NoToAll)
+			{
+				ccLog::Warning(tr("Image %1 has not been saved so as to not overwrite an existing file").arg(baseName));
+				skipImage = true;
+			}
+		}
+
+		if (!skipImage)
+		{
+			image->data().save(filename);
+		}
+
+		if (pDlg.isCancelRequested())
+		{
+			break;
+		}
+		pDlg.setValue(++imageCounter);
+	}
 }
 
 /* name is optional, if passed it is used to restrict the selection by type */
@@ -1976,16 +2124,22 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
 {
 	//not initialized?
 	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
+	{
 		return;
+	}
 
 	QModelIndex clickIndex = m_dbTreeWidget->indexAt(m_contextMenuPos);
 	if (!clickIndex.isValid())
+	{
 		return;
+	}
 	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
 	assert(item);
 
 	if (!item || item->getChildrenNumber() == 0)
+	{
 		return;
+	}
 
 	ccHObject::Container filteredByType;
 	item->filterChildren(filteredByType, true, type, typeIsExclusive);
@@ -2003,7 +2157,7 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
 		}
 		else
 		{
-			for (size_t i=0; i<filteredByType.size(); ++i)
+			for (size_t i = 0; i < filteredByType.size(); ++i)
 			{
 				ccHObject* child = filteredByType[i];
 
@@ -2273,13 +2427,12 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			}
 			if (hasExactlyOnePlane)
 			{
-				MainWindow::TheInstance()->addEditPlaneAction( menu );
+				MainWindow::TheInstance()->addEditPlaneAction(menu);
 			}
 			if (hasExacltyOneGBLSenor)
 			{
 				menu.addAction(m_enableBubbleViewMode);
 			}
-			
 			menu.addAction(m_gatherInformation);
 			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);
@@ -2315,6 +2468,9 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addSeparator();
 				menu.addAction(m_addEmptyGroup);
 			}
+
+			menu.addSeparator();
+			menu.addAction(m_exportImages);
 
 			if (canEditLabelScalarValue)
 			{

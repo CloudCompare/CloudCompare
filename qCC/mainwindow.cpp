@@ -235,6 +235,10 @@ MainWindow::MainWindow()
 	m_UI->actionFullScreen->setText( tr( "Enter Full Screen" ) );
 	m_UI->actionFullScreen->setShortcut( QKeySequence( Qt::CTRL + Qt::META + Qt::Key_F ) );
 #endif
+
+	// Set up dynamic menus
+	m_UI->menuFile->insertMenu(m_UI->actionSave, m_recentFiles->menu());
+
 	//Console
 	ccConsole::Init(m_UI->consoleWidget, this, this);
 	m_UI->actionEnableQtWarnings->setChecked(ccConsole::QtMessagesEnabled());

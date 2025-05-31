@@ -199,6 +199,7 @@ private:
 	void sortChildrenZA();
 	void sortChildrenType();
 	void selectByTypeAndName();
+	void exportImages();
 
 	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
 	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
@@ -272,6 +273,8 @@ protected:
 	QAction* m_sortChildrenType;
 	//! Context menu action: select object by type and/or by name
 	QAction* m_selectByTypeAndName;
+	//! Context menu action: export images
+	QAction* m_exportImages;
 	//! Context menu action: delete selected entities
 	QAction* m_deleteSelectedEntities;
 	//! Context menu action: enabled/disable selected entities

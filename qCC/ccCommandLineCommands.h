@@ -6,6 +6,8 @@
 #include "ccCommandLineInterface.h"
 
 
+struct SubsamplingParams;
+
 struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
 {
 	CommandChangeOutputFormat(const QString& name, const QString& keyword);
@@ -95,6 +97,9 @@ struct CommandSubsample : public ccCommandLineInterface::Command
 	CommandSubsample();
 
 	bool process(ccCommandLineInterface& cmd) override;
+
+protected:
+	static bool ReplaceAndSaveCloud(ccCommandLineInterface& cmd, CLCloudDesc& orignalDesc, ccPointCloud *newPointCloud, const SubsamplingParams& params);
 };
 
 struct CommandExtractCCs : public ccCommandLineInterface::Command

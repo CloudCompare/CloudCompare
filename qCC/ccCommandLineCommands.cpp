@@ -8160,6 +8160,8 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 			distances->setValue(i, s);
 		}
 
+		distances->computeMinAndMax();
+
 		//save output
 		if (cmd.autoSaveMode() && !cmd.saveClouds("RANGES"))
 		{

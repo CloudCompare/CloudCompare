@@ -1,35 +1,35 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "LASOpenDlg.h"
 
-//Qt
-#include <QMessageBox>
+// Qt
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 
-//System
-#include <string.h>
+// System
 #include <assert.h>
+#include <string.h>
 
 LASOpenDlg::LASOpenDlg(QWidget* parent)
-	: QDialog(parent)
-	, Ui::OpenLASFileDialog()
-	, m_autoSkip(false)
+    : QDialog(parent)
+    , Ui::OpenLASFileDialog()
+    , m_autoSkip(false)
 {
 	setupUi(this);
 
@@ -39,7 +39,7 @@ LASOpenDlg::LASOpenDlg(QWidget* parent)
 	connect(browseToolButton, &QAbstractButton::clicked, this, &LASOpenDlg::onBrowse);
 	connect(tileGroupBox, &QGroupBox::toggled, applyAllButton, &QWidget::setDisabled);
 
-	//can't use the 'Apply all' button if tiling mode is enabled
+	// can't use the 'Apply all' button if tiling mode is enabled
 	applyAllButton->setEnabled(!tileGroupBox->isChecked());
 
 	if (tileGroupBox->isChecked())
@@ -64,7 +64,7 @@ void LASOpenDlg::onBrowse()
 	QString outputPath = QFileDialog::getExistingDirectory(this, "Output path", outputPathLineEdit->text());
 	if (outputPath.isEmpty())
 	{
-		//cancelled
+		// cancelled
 		return;
 	}
 
@@ -84,34 +84,34 @@ bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field
 
 void LASOpenDlg::setDimensions(const std::vector<std::string>& dimensions)
 {
-	redCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_RED));
-	greenCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_GREEN));
-	blueCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_BLUE));
-	intensityCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_INTENSITY));
+	redCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_RED));
+	greenCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_GREEN));
+	blueCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_BLUE));
+	intensityCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_INTENSITY));
 
-	bool hasClassif = FieldIsPresent(dimensions,LAS_CLASSIFICATION);
+	bool hasClassif = FieldIsPresent(dimensions, LAS_CLASSIFICATION);
 	classifCheckBox->setEnabled(hasClassif);
 	decomposeClassifGroupBox->setEnabled(hasClassif);
 
-	timeCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_TIME));
+	timeCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_TIME));
 
-	returnNumberCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_RETURN_NUMBER));
-	numberOfReturnsCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_NUMBER_OF_RETURNS));
-	scanDirFlagCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_SCAN_DIRECTION));
-	edgeOfFlightCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_FLIGHT_LINE_EDGE));
-	scanAngleRankCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_SCAN_ANGLE_RANK));
-	userDataCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_USER_DATA));
-	pointSourceIDCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_POINT_SOURCE_ID));
+	returnNumberCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_RETURN_NUMBER));
+	numberOfReturnsCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_NUMBER_OF_RETURNS));
+	scanDirFlagCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_SCAN_DIRECTION));
+	edgeOfFlightCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_FLIGHT_LINE_EDGE));
+	scanAngleRankCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_SCAN_ANGLE_RANK));
+	userDataCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_USER_DATA));
+	pointSourceIDCheckBox->setEnabled(FieldIsPresent(dimensions, LAS_POINT_SOURCE_ID));
 
-	//classifValueCheckBox;
-	//classifSyntheticCheckBox;
-	//classifKeypointCheckBox;
-	//classifWithheldCheckBox;
+	// classifValueCheckBox;
+	// classifSyntheticCheckBox;
+	// classifKeypointCheckBox;
+	// classifWithheldCheckBox;
 }
 
 bool LASOpenDlg::doLoad(LAS_FIELDS field) const
 {
-	switch(field)
+	switch (field)
 	{
 	case LAS_X:
 	case LAS_Y:
@@ -171,31 +171,34 @@ void LASOpenDlg::clearEVLRs()
 	extraFieldGroupBox->setChecked(false);
 }
 
-void LASOpenDlg::setInfos(	QString filename,
-							unsigned pointCount,
-							const CCVector3d& bbMin,
-							const CCVector3d& bbMax)
+void LASOpenDlg::setInfos(QString           filename,
+                          unsigned          pointCount,
+                          const CCVector3d& bbMin,
+                          const CCVector3d& bbMax)
 {
-	//default output path (for tiling)
+	// default output path (for tiling)
 	outputPathLineEdit->setText(QFileInfo(filename).absolutePath());
 
-	//number of points
+	// number of points
 	pointCountLineEdit->setText(QLocale().toString(static_cast<uint>(pointCount)));
 
-	//bounding-box
+	// bounding-box
 	bbTextEdit->setText(QString("X = [%1 ; %2]\nY = [%3 ; %4]\nZ = [%5 ; %6]")
-								.arg(bbMin.x, 0, 'f').arg(bbMax.x, 0, 'f')
-								.arg(bbMin.y, 0, 'f').arg(bbMax.y, 0, 'f')
-								.arg(bbMin.z, 0, 'f').arg(bbMax.z, 0, 'f'));
+	                        .arg(bbMin.x, 0, 'f')
+	                        .arg(bbMax.x, 0, 'f')
+	                        .arg(bbMin.y, 0, 'f')
+	                        .arg(bbMax.y, 0, 'f')
+	                        .arg(bbMin.z, 0, 'f')
+	                        .arg(bbMax.z, 0, 'f'));
 }
 
 void LASOpenDlg::addEVLR(QString description)
 {
 	QListWidgetItem* item = new QListWidgetItem(description);
 	evlrListWidget->addItem(item);
-	//auto select the entry
+	// auto select the entry
 	item->setSelected(true);
-	//auto enable the extraFieldGroupBox
+	// auto enable the extraFieldGroupBox
 	extraFieldGroupBox->setEnabled(true);
 	extraFieldGroupBox->setChecked(true);
 }
@@ -204,7 +207,7 @@ bool LASOpenDlg::doLoadEVLR(size_t index) const
 {
 	if (!extraFieldGroupBox->isChecked())
 		return false;
-	
+
 	QListWidgetItem* item = evlrListWidget->item(static_cast<int>(index));
 	return item && item->isSelected();
 }

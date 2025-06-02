@@ -1,30 +1,29 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_COMPARISON_DIALOG_HEADER
 #define CC_COMPARISON_DIALOG_HEADER
 
-//qCC_db
+// qCC_db
 #include <ccOctree.h>
 
-//Qt
+// Qt
 #include <QDialog>
 #include <QString>
-
 #include <ui_comparisonDlg.h>
 
 class ccHObject;
@@ -33,12 +32,12 @@ class ccGenericPointCloud;
 class ccGenericMesh;
 
 //! Dialog for cloud/cloud or cloud/mesh comparison setting
-class ccComparisonDlg: public QDialog, public Ui::ComparisonDialog
+class ccComparisonDlg : public QDialog
+    , public Ui::ComparisonDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Comparison type
 	enum CC_COMPARISON_TYPE
 	{
@@ -47,41 +46,49 @@ public:
 	};
 
 	//! Default constructor
-	ccComparisonDlg(ccHObject* compEntity,
-					ccHObject* refEntity,
-					CC_COMPARISON_TYPE cpType,
-					QWidget* parent = nullptr,
-					bool noDisplay = false);
+	ccComparisonDlg(ccHObject*         compEntity,
+	                ccHObject*         refEntity,
+	                CC_COMPARISON_TYPE cpType,
+	                QWidget*           parent    = nullptr,
+	                bool               noDisplay = false);
 
 	//! Default destructor
 	~ccComparisonDlg();
 
 	//! Should be called once after the dialog is created
-	inline bool initDialog() { return computeApproxDistances(); }
+	inline bool initDialog()
+	{
+		return computeApproxDistances();
+	}
 
 	//! Returns compared entity
-	ccHObject* getComparedEntity() const { return m_compEnt; }
+	ccHObject* getComparedEntity() const
+	{
+		return m_compEnt;
+	}
 	//! Returns compared entity
-	ccHObject* getReferenceEntity() { return m_refEnt; }
+	ccHObject* getReferenceEntity()
+	{
+		return m_refEnt;
+	}
 
-public:
+  public:
 	bool computeDistances();
 	void applyAndExit();
 	void cancelAndExit();
 
-protected:
+  protected:
 	void showHisto();
 	void locaModelChanged(int);
 	void maxDistUpdated();
-    void enableCompute2D(bool);
+	void enableCompute2D(bool);
 
-protected:
-
+  protected:
 	bool isValid();
 	bool prepareEntitiesForComparison();
 	bool computeApproxDistances();
-	int getBestOctreeLevel();
-	int determineBestOctreeLevel(double);
+	int  getBestOctreeLevel();
+	int  determineBestOctreeLevel(double);
 	void updateDisplay(bool showSF, bool hideRef);
 	void releaseOctrees();
 

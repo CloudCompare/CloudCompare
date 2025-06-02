@@ -1,28 +1,28 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSectionExtractionSubDlg.h"
 
-//system
+// system
 #include <assert.h>
 
-ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, Ui::SectionExtractionSubDlg()
+ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , Ui::SectionExtractionSubDlg()
 {
 	setupUi(this);
 }
@@ -71,7 +71,7 @@ void ccSectionExtractionSubDlg::doExtractEnvelopes(bool state, ccEnvelopeExtract
 {
 	extractEnvelopesGroupBox->setChecked(state);
 
-	switch(type)
+	switch (type)
 	{
 	case ccEnvelopeExtractor::LOWER:
 		envelopeTypeComboBox->setCurrentIndex(0);
@@ -110,7 +110,7 @@ void ccSectionExtractionSubDlg::doUseMultiPass(bool state)
 
 ccEnvelopeExtractor::EnvelopeType ccSectionExtractionSubDlg::getEnvelopeType() const
 {
-	switch(envelopeTypeComboBox->currentIndex())
+	switch (envelopeTypeComboBox->currentIndex())
 	{
 	case 0:
 		return ccEnvelopeExtractor::LOWER;

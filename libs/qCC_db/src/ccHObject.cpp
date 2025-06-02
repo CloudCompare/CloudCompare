@@ -1,34 +1,34 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccHObject.h"
 
-//Local
+// Local
 #include "ccIncludeGL.h"
 
-//Objects handled by factory
+// Objects handled by factory
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
 #include "ccBox.h"
 #include "ccCameraSensor.h"
 #include "ccCircle.h"
+#include "ccCoordinateSystem.h"
 #include "ccCustomObject.h"
 #include "ccCylinder.h"
-#include "ccCoordinateSystem.h"
 #include "ccDish.h"
 #include "ccExternalFactory.h"
 #include "ccExtru.h"
@@ -45,29 +45,29 @@
 #include "ccSubMesh.h"
 #include "ccTorus.h"
 
-//Qt
+// Qt
 #include <QIcon>
 
-ccHObject::ccHObject(const QString& name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccObject(name, uniqueID)
-	, ccDrawableObject()
-	, m_parent(nullptr)
-	, m_selectionBehavior(SELECTION_AA_BBOX)
-	, m_isDeleting(false)
+ccHObject::ccHObject(const QString& name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccObject(name, uniqueID)
+    , ccDrawableObject()
+    , m_parent(nullptr)
+    , m_selectionBehavior(SELECTION_AA_BBOX)
+    , m_isDeleting(false)
 {
 	setVisible(false);
 	lockVisibility(true);
-	
+
 	m_glTransHistory.toIdentity();
 }
 
 ccHObject::ccHObject(const ccHObject& object)
-	: ccObject(object)
-	, ccDrawableObject(object)
-	, m_parent(nullptr)
-	, m_selectionBehavior(object.m_selectionBehavior)
-	, m_glTransHistory(object.m_glTransHistory)
-	, m_isDeleting(false)
+    : ccObject(object)
+    , ccDrawableObject(object)
+    , m_parent(nullptr)
+    , m_selectionBehavior(object.m_selectionBehavior)
+    , m_glTransHistory(object.m_glTransHistory)
+    , m_isDeleting(false)
 {
 }
 
@@ -75,21 +75,21 @@ ccHObject::~ccHObject()
 {
 	m_isDeleting = true;
 
-	//process dependencies
+	// process dependencies
 	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
 	{
 		assert(it->first);
-		//notify deletion to other object?
+		// notify deletion to other object?
 		if ((it->second & DP_NOTIFY_OTHER_ON_DELETE) == DP_NOTIFY_OTHER_ON_DELETE)
 		{
 			it->first->onDeletionOf(this);
 		}
 
-		//delete other object?
+		// delete other object?
 		if ((it->second & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
-			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); //in order to avoid any loop!
-			//delete object
+			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); // in order to avoid any loop!
+			// delete object
 			if (it->first->isShareable())
 			{
 				CCShareable* shareable = dynamic_cast<CCShareable*>(it->first);
@@ -115,18 +115,18 @@ ccHObject::~ccHObject()
 
 void ccHObject::notifyGeometryUpdate()
 {
-	//the associated display bounding-box is (potentially) deprecated!!!
+	// the associated display bounding-box is (potentially) deprecated!!!
 	if (m_currentDisplay)
 	{
 		m_currentDisplay->invalidateViewport();
 		m_currentDisplay->deprecate3DLayer();
 	}
 
-	//process dependencies
+	// process dependencies
 	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
 	{
 		assert(it->first);
-		//notify deletion to other object?
+		// notify deletion to other object?
 		if ((it->second & DP_NOTIFY_OTHER_ON_UPDATE) == DP_NOTIFY_OTHER_ON_UPDATE)
 		{
 			it->first->onUpdateOf(this);
@@ -134,27 +134,27 @@ void ccHObject::notifyGeometryUpdate()
 	}
 }
 
-ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/)
+ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*/)
 {
-	switch(objectType)
+	switch (objectType)
 	{
 	case CC_TYPES::HIERARCHY_OBJECT:
 		return new ccHObject(name);
 	case CC_TYPES::POINT_CLOUD:
 		return new ccPointCloud(name);
 	case CC_TYPES::MESH:
-		//warning: no associated vertices --> retrieved later
+		// warning: no associated vertices --> retrieved later
 		return new ccMesh(nullptr);
 	case CC_TYPES::SUB_MESH:
-		//warning: no associated mesh --> retrieved later
+		// warning: no associated mesh --> retrieved later
 		return new ccSubMesh(nullptr);
 	case CC_TYPES::MESH_GROUP:
-		//warning: deprecated
+		// warning: deprecated
 		ccLog::Warning("[ccHObject::New] Mesh groups are deprecated!");
-		//warning: no associated vertices --> retrieved later
+		// warning: no associated vertices --> retrieved later
 		return new ccMeshGroup();
 	case CC_TYPES::POLY_LINE:
-		//warning: no associated vertices --> retrieved later
+		// warning: no associated vertices --> retrieved later
 		return new ccPolyline(nullptr);
 	case CC_TYPES::CIRCLE:
 		return new ccCircle;
@@ -175,9 +175,9 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/
 	case CC_TYPES::IMAGE:
 		return new ccImage();
 	case CC_TYPES::CALIBRATED_IMAGE:
-		return nullptr; //deprecated
+		return nullptr; // deprecated
 	case CC_TYPES::GBL_SENSOR:
-		//warning: default sensor type set in constructor (see CCCoreLib::GroundBasedLidarSensor::setRotationOrder)
+		// warning: default sensor type set in constructor (see CCCoreLib::GroundBasedLidarSensor::setRotationOrder)
 		return new ccGBLSensor();
 	case CC_TYPES::CAMERA_SENSOR:
 		return new ccCameraSensor();
@@ -216,12 +216,12 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=nullptr*/
 		return new ccCoordinateSystem(name);
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
-		//construction this way is not supported (yet)
-		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!",objectType);
+		// construction this way is not supported (yet)
+		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!", objectType);
 		break;
 	default:
-		//unhandled ID
-		ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!",objectType);
+		// unhandled ID
+		ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!", objectType);
 		break;
 	}
 
@@ -235,20 +235,20 @@ ccHObject* ccHObject::New(const QString& pluginId, const QString& classId, const
 	{
 		return nullptr;
 	}
-	
+
 	ccExternalFactory* factory = externalFactories->getFactoryByName(pluginId);
 	if (!factory)
 	{
 		return nullptr;
 	}
-	
+
 	ccHObject* obj = factory->buildObject(classId);
 
 	if (name && obj)
 	{
 		obj->setName(name);
 	}
-	
+
 	return obj;
 }
 
@@ -257,7 +257,7 @@ QIcon ccHObject::getIcon() const
 	return QIcon();
 }
 
-void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*=true*/)
+void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /*=true*/)
 {
 	if (!otherObject || flags < 0)
 	{
@@ -272,12 +272,12 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 
 	if (additive)
 	{
-		//look for already defined flags for this object
-		std::map<ccHObject*,int>::iterator it = m_dependencies.find(otherObject);
+		// look for already defined flags for this object
+		std::map<ccHObject*, int>::iterator it = m_dependencies.find(otherObject);
 		if (it != m_dependencies.end())
 		{
-			//nothing changes? we stop here (especially to avoid infinite
-			//loop when setting the DP_NOTIFY_OTHER_ON_DELETE flag below!)
+			// nothing changes? we stop here (especially to avoid infinite
+			// loop when setting the DP_NOTIFY_OTHER_ON_DELETE flag below!)
 			if ((it->second & flags) == flags)
 				return;
 			flags |= it->second;
@@ -287,22 +287,22 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 
 	m_dependencies[otherObject] = flags;
 
-	//whenever we add a dependency, we must be sure to be notified
-	//by the other object when its deleted! Otherwise we'll keep
-	//bad pointers in the dependency list...
+	// whenever we add a dependency, we must be sure to be notified
+	// by the other object when its deleted! Otherwise we'll keep
+	// bad pointers in the dependency list...
 	otherObject->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 {
-	std::map<ccHObject*, int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	std::map<ccHObject*, int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); // DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 
 	return (it != m_dependencies.end() ? it->second : 0);
 }
 
 void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
-	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); // DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 	if (!otherObject->m_isDeleting)
 		otherObject->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
 }
@@ -313,31 +313,31 @@ void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS fl
 	if ((flags & flag) == flag)
 	{
 		flags = (flags & (~flag));
-		//either update the flags (if some bits remain)
+		// either update the flags (if some bits remain)
 		if (flags != 0)
 			m_dependencies[otherObject] = flags;
-		else //otherwise remove the dependency
+		else // otherwise remove the dependency
 			m_dependencies.erase(otherObject);
 	}
 }
 
 void ccHObject::onDeletionOf(const ccHObject* obj)
 {
-	//remove any dependency declared with this object
-	//and remove it from the children list as well (in case of)
-	//DGM: we can't call 'detachChild' as this method will try to
-	//modify the child contents!
-	removeDependencyWith(const_cast<ccHObject*>(obj)); //this method will only modify the dependency flags of obj
+	// remove any dependency declared with this object
+	// and remove it from the children list as well (in case of)
+	// DGM: we can't call 'detachChild' as this method will try to
+	// modify the child contents!
+	removeDependencyWith(const_cast<ccHObject*>(obj)); // this method will only modify the dependency flags of obj
 
 	int pos = getChildIndex(obj);
 	if (pos >= 0)
 	{
-		//we can't swap children as we want to keep the order!
+		// we can't swap children as we want to keep the order!
 		m_children.erase(m_children.begin() + pos);
 	}
 }
 
-bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OTHER*/, int insertIndex/*=-1*/)
+bool ccHObject::addChild(ccHObject* child, int dependencyFlags /*=DP_PARENT_OF_OTHER*/, int insertIndex /*=-1*/)
 {
 	if (!child)
 	{
@@ -356,7 +356,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 		return false;
 	}
 
-	//insert child
+	// insert child
 	try
 	{
 		if (insertIndex < 0 || static_cast<size_t>(insertIndex) >= m_children.size())
@@ -366,19 +366,19 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory!
+		// not enough memory!
 		return false;
 	}
 
-	//we want to be notified whenever this child is deleted!
-	child->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
+	// we want to be notified whenever this child is deleted!
+	child->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE); // DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
 	if (dependencyFlags != 0)
 	{
 		addDependency(child, dependencyFlags);
 	}
 
-	//the strongest link: between a parent and a child ;)
+	// the strongest link: between a parent and a child ;)
 	if ((dependencyFlags & DP_PARENT_OF_OTHER) == DP_PARENT_OF_OTHER)
 	{
 		child->setParent(this);
@@ -405,25 +405,25 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 
 unsigned int ccHObject::getChildCountRecursive() const
 {
-	unsigned int	count = static_cast<unsigned>(m_children.size());
-	
-	for ( auto child : m_children )
+	unsigned int count = static_cast<unsigned>(m_children.size());
+
+	for (auto child : m_children)
 	{
 		count += child->getChildCountRecursive();
 	}
-	
+
 	return count;
 }
 
 ccHObject* ccHObject::find(unsigned uniqueID) const
 {
-	//found the right item?
+	// found the right item?
 	if (getUniqueID() == uniqueID)
 	{
-		return const_cast<ccHObject *>(this);
+		return const_cast<ccHObject*>(this);
 	}
-	
-	//otherwise we are going to test all children recursively
+
+	// otherwise we are going to test all children recursively
 	for (unsigned i = 0; i < getChildrenNumber(); ++i)
 	{
 		ccHObject* match = getChild(i)->find(uniqueID);
@@ -436,21 +436,21 @@ ccHObject* ccHObject::find(unsigned uniqueID) const
 	return nullptr;
 }
 
-unsigned ccHObject::filterChildren(	Container& filteredChildren,
-									bool recursive/*=false*/,
-									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
-									bool strict/*=false*/,
-									ccGenericGLDisplay* inDisplay/*=nullptr*/) const
+unsigned ccHObject::filterChildren(Container&          filteredChildren,
+                                   bool                recursive /*=false*/,
+                                   CC_CLASS_ENUM       filter /*=CC_TYPES::OBJECT*/,
+                                   bool                strict /*=false*/,
+                                   ccGenericGLDisplay* inDisplay /*=nullptr*/) const
 {
 	for (auto child : m_children)
 	{
-		if (	(!strict && child->isKindOf(filter))
-			||	( strict && child->isA(filter)))
+		if ((!strict && child->isKindOf(filter))
+		    || (strict && child->isA(filter)))
 		{
 			if (!inDisplay || child->getDisplay() == inDisplay)
 			{
-				//warning: we have to handle unicity as a sibling may be in the same container as its parent!
-				if (std::find(filteredChildren.begin(), filteredChildren.end(), child) == filteredChildren.end()) //not yet in output vector?
+				// warning: we have to handle unicity as a sibling may be in the same container as its parent!
+				if (std::find(filteredChildren.begin(), filteredChildren.end(), child) == filteredChildren.end()) // not yet in output vector?
 				{
 					filteredChildren.push_back(child);
 				}
@@ -468,7 +468,7 @@ unsigned ccHObject::filterChildren(	Container& filteredChildren,
 
 int ccHObject::getChildIndex(const ccHObject* child) const
 {
-	for (size_t i=0; i<m_children.size(); ++i)
+	for (size_t i = 0; i < m_children.size(); ++i)
 		if (m_children[i] == child)
 			return static_cast<int>(i);
 
@@ -479,35 +479,35 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 {
 	assert(child);
 
-	//remove link from old parent
-	int childDependencyFlags = child->getDependencyFlagsWith(this);
+	// remove link from old parent
+	int childDependencyFlags  = child->getDependencyFlagsWith(this);
 	int parentDependencyFlags = getDependencyFlagsWith(child);
-	
-	detachChild(child); //automatically removes any dependency with this object
 
-	newParent.addChild(child,parentDependencyFlags);
-	child->addDependency(&newParent,childDependencyFlags);
+	detachChild(child); // automatically removes any dependency with this object
 
-	//after a successful transfer, either the parent is 'newParent' or a null pointer
+	newParent.addChild(child, parentDependencyFlags);
+	child->addDependency(&newParent, childDependencyFlags);
+
+	// after a successful transfer, either the parent is 'newParent' or a null pointer
 	assert(child->getParent() == &newParent || child->getParent() == nullptr);
 }
 
-void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent/*=false*/)
+void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent /*=false*/)
 {
 	for (auto child : m_children)
 	{
-		//remove link from old parent
-		int childDependencyFlags = child->getDependencyFlagsWith(this);
+		// remove link from old parent
+		int childDependencyFlags  = child->getDependencyFlagsWith(this);
 		int fatherDependencyFlags = getDependencyFlagsWith(child);
-	
-		//we must explicitly remove any dependency with the child as we don't call 'detachChild'
+
+		// we must explicitly remove any dependency with the child as we don't call 'detachChild'
 		removeDependencyWith(child);
 		child->removeDependencyWith(this);
 
-		newParent.addChild(child,fatherDependencyFlags);
-		child->addDependency(&newParent,childDependencyFlags);
+		newParent.addChild(child, fatherDependencyFlags);
+		child->addDependency(&newParent, childDependencyFlags);
 
-		//after a successful transfer, either the parent is 'newParent' or a null pointer
+		// after a successful transfer, either the parent is 'newParent' or a null pointer
 		assert(child->getParent() == &newParent || child->getParent() == nullptr);
 	}
 	m_children.clear();
@@ -518,7 +518,7 @@ void ccHObject::swapChildren(unsigned firstChildIndex, unsigned secondChildIndex
 	assert(firstChildIndex < m_children.size());
 	assert(secondChildIndex < m_children.size());
 
-	std::swap(m_children[firstChildIndex],m_children[secondChildIndex]);
+	std::swap(m_children[firstChildIndex], m_children[secondChildIndex]);
 }
 
 int ccHObject::getIndex() const
@@ -526,7 +526,7 @@ int ccHObject::getIndex() const
 	return (m_parent ? m_parent->getChildIndex(this) : -1);
 }
 
-bool ccHObject::isAncestorOf(const ccHObject *anObject) const
+bool ccHObject::isAncestorOf(const ccHObject* anObject) const
 {
 	assert(anObject);
 	ccHObject* parent = anObject->getParent();
@@ -543,14 +543,14 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 {
 	trans.toIdentity();
 	bool hasGLTrans = false;
-	
-	//recurse among ancestors to get the absolute GL transformation
+
+	// recurse among ancestors to get the absolute GL transformation
 	const ccHObject* obj = this;
 	while (obj)
 	{
 		if (obj->isGLTransEnabled())
 		{
-			trans = trans * obj->getGLTransformation();
+			trans      = trans * obj->getGLTransformation();
 			hasGLTrans = true;
 		}
 		obj = obj->getParent();
@@ -559,28 +559,28 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 	return hasGLTrans;
 }
 
-ccBBox ccHObject::getOwnBB(bool withGLFeatures/*=false*/)
+ccBBox ccHObject::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	return ccBBox();
 }
 
-ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures/*=false*/)
+ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
 {
-	//by default this method returns the local bounding-box!
+	// by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
 	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
 }
 
 bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
 {
-	//by default this method returns the local bounding-box!
+	// by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
-	minCorner = box.minCorner();
-	maxCorner = box.maxCorner();
+	minCorner  = box.minCorner();
+	maxCorner  = box.maxCorner();
 	return box.isValid();
 }
 
-ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnabledChildren/*=true*/)
+ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabledChildren /*=true*/)
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
@@ -588,14 +588,14 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnable
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
-			box += child->getBB_recursive(withGLFeatures,onlyEnabledChildren);
+			box += child->getBB_recursive(withGLFeatures, onlyEnabledChildren);
 		}
 	}
 
 	return box;
 }
 
-ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeatures/*=false*/, bool onlyEnabledChildren/*=true*/)
+ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabledChildren /*=true*/)
 {
 	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
 
@@ -610,7 +610,7 @@ ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeature
 	return box;
 }
 
-ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display/*=nullptr*/)
+ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay* display /*=nullptr*/)
 {
 	ccBBox box;
 
@@ -632,7 +632,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 
 	if (!relative && box.isValid())
 	{
-		//get absolute bounding-box?
+		// get absolute bounding-box?
 		ccGLMatrix trans;
 		getAbsoluteGLTransformation(trans);
 		box = box * trans;
@@ -655,7 +655,7 @@ bool ccHObject::isBranchEnabled() const
 {
 	if (!isEnabled())
 		return false;
-	
+
 	if (m_parent)
 		return m_parent->isBranchEnabled();
 
@@ -664,7 +664,7 @@ bool ccHObject::isBranchEnabled() const
 
 void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 {
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -678,23 +678,23 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 	case SELECTION_AA_BBOX:
 		getDisplayBB_recursive(true, m_currentDisplay).draw(context, col);
 		break;
-	
+
 	case SELECTION_FIT_BBOX:
+	{
+		// get the set of OpenGL functions (version 2.1)
+		ccGLMatrix trans;
+		ccBBox     box = getOwnFitBB(trans);
+		if (box.isValid())
 		{
-			//get the set of OpenGL functions (version 2.1)
-			ccGLMatrix trans;
-			ccBBox box = getOwnFitBB(trans);
-			if (box.isValid())
-			{
-				glFunc->glMatrixMode(GL_MODELVIEW);
-				glFunc->glPushMatrix();
-				glFunc->glMultMatrixf(trans.data());
-				box.draw(context, col);
-				glFunc->glPopMatrix();
-			}
+			glFunc->glMatrixMode(GL_MODELVIEW);
+			glFunc->glPushMatrix();
+			glFunc->glMultMatrixf(trans.data());
+			box.draw(context, col);
+			glFunc->glPopMatrix();
 		}
-		break;
-	
+	}
+	break;
+
 	case SELECTION_IGNORED:
 		break;
 
@@ -702,21 +702,21 @@ void ccHObject::drawBB(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col)
 		assert(false);
 	}
 
-	glFunc->glPopAttrib(); //GL_LINE_BIT
+	glFunc->glPopAttrib(); // GL_LINE_BIT
 }
 
 void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 {
 	if (context.display && m_nameIn3DPosIsValid)
 	{
-		QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
-		context.display->displayText(	getName(),
-										static_cast<int>(m_nameIn3DPos.x),
-										static_cast<int>(m_nameIn3DPos.y),
-										ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
-										0.75f,
-										nullptr,
-										&font);
+		QFont font = context.display->getTextDisplayFont(); // takes rendering zoom into account!
+		context.display->displayText(getName(),
+		                             static_cast<int>(m_nameIn3DPos.x),
+		                             static_cast<int>(m_nameIn3DPos.y),
+		                             ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+		                             0.75f,
+		                             nullptr,
+		                             &font);
 	}
 }
 
@@ -724,23 +724,23 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 {
 	if (!isEnabled())
 		return;
-	
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
+
+	// get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
 
-	//are we currently drawing objects in 2D or 3D?
+	// are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
-	
-	//the entity must be either visible or selected, and of course it should be displayed in this context
+
+	// the entity must be either visible or selected, and of course it should be displayed in this context
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context.display);
 
 	if (draw3D)
 	{
-		//apply 3D 'temporary' transformation (for display only)
+		// apply 3D 'temporary' transformation (for display only)
 		if (m_glTransEnabled)
 		{
 			glFunc->glMatrixMode(GL_MODELVIEW);
@@ -748,25 +748,24 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 			glFunc->glMultMatrixf(m_glTrans.data());
 		}
 
-		//LOD for clouds is enabled?
-		if (	context.decimateCloudOnMove
-			&&	context.currentLODLevel > 0)
+		// LOD for clouds is enabled?
+		if (context.decimateCloudOnMove
+		    && context.currentLODLevel > 0)
 		{
-			//only for real clouds
+			// only for real clouds
 			drawInThisContext &= isA(CC_TYPES::POINT_CLOUD);
 		}
 	}
 
-	//draw entity
+	// draw entity
 	if (m_visible && drawInThisContext)
 	{
-		if (( !m_selected || !MACRO_SkipSelected(context) ) &&
-			(  m_selected || !MACRO_SkipUnselected(context) ))
+		if ((!m_selected || !MACRO_SkipSelected(context)) && (m_selected || !MACRO_SkipUnselected(context)))
 		{
-			//apply default color (in case of)
+			// apply default color (in case of)
 			ccGL::Color(glFunc, context.pointsDefaultCol);
 
-			//enable clipping planes (if any)
+			// enable clipping planes (if any)
 			bool useClipPlanes = (draw3D && !m_clipPlanes.empty());
 			if (useClipPlanes)
 			{
@@ -775,7 +774,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 
 			drawMeOnly(context);
 
-			//disable clipping planes (if any)
+			// disable clipping planes (if any)
 			if (useClipPlanes)
 			{
 				toggleClipPlanes(context, false);
@@ -783,13 +782,13 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		}
 	}
 
-	//draw name - container objects are not visible but can still show a name
+	// draw name - container objects are not visible but can still show a name
 	if (m_currentDisplay == context.display && m_showNameIn3D && !MACRO_EntityPicking(context))
 	{
 		if (MACRO_Draw3D(context))
 		{
-			//we have to compute the 2D position during the 3D pass!
-			ccBBox bBox = getBB_recursive(true); //DGM: take the OpenGL features into account (as some entities are purely 'GL'!)
+			// we have to compute the 2D position during the 3D pass!
+			ccBBox bBox = getBB_recursive(true); // DGM: take the OpenGL features into account (as some entities are purely 'GL'!)
 			if (bBox.isValid())
 			{
 				ccGLCameraParameters camera;
@@ -797,7 +796,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 				glFunc->glGetDoublev(GL_PROJECTION_MATRIX, camera.projectionMat.data());
 				glFunc->glGetDoublev(GL_MODELVIEW_MATRIX, camera.modelViewMat.data());
 
-				CCVector3 C = bBox.getCenter();
+				CCVector3 C          = bBox.getCenter();
 				m_nameIn3DPosIsValid = camera.project(C, m_nameIn3DPos);
 			}
 			else
@@ -807,18 +806,18 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		}
 		else if (MACRO_Draw2D(context) && MACRO_Foreground(context))
 		{
-			//then we can display the name during the 2D pass
+			// then we can display the name during the 2D pass
 			drawNameIn3D(context);
 		}
 	}
 
-	//draw entity's children
+	// draw entity's children
 	for (auto child : m_children)
 	{
 		child->draw(context);
 	}
-	
-	//if the entity is currently selected, we draw its bounding-box
+
+	// if the entity is currently selected, we draw its bounding-box
 	if (m_selected && draw3D && drawInThisContext && !MACRO_EntityPicking(context) && context.currentLODLevel == 0)
 	{
 		drawBB(context, context.bbDefaultCol);
@@ -833,22 +832,22 @@ void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
 	m_glTransHistory = trans * m_glTransHistory;
 }
 
-void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput/*=nullptr*/)
+void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput /*=nullptr*/)
 {
-	ccGLMatrix transTemp;
+	ccGLMatrix        transTemp;
 	const ccGLMatrix* transToApply = transInput;
 
 	if (m_glTransEnabled)
 	{
 		if (!transInput)
 		{
-			//if no transformation is provided (by father)
-			//we initiate it with the current one
+			// if no transformation is provided (by father)
+			// we initiate it with the current one
 			transToApply = &m_glTrans;
 		}
 		else
 		{
-			transTemp = *transInput * m_glTrans;
+			transTemp    = *transInput * m_glTrans;
 			transToApply = &transTemp;
 		}
 	}
@@ -890,7 +889,7 @@ void ccHObject::detachChild(ccHObject* child)
 		return;
 	}
 
-	//remove any dependency (bilateral)
+	// remove any dependency (bilateral)
 	removeDependencyWith(child);
 	child->removeDependencyWith(this);
 
@@ -898,12 +897,12 @@ void ccHObject::detachChild(ccHObject* child)
 	{
 		child->setParent(nullptr);
 	}
-	
+
 	int pos = getChildIndex(child);
 	if (pos >= 0)
 	{
-		//we can't swap children as we want to keep the order!
-		m_children.erase(m_children.begin()+pos);
+		// we can't swap children as we want to keep the order!
+		m_children.erase(m_children.begin() + pos);
 	}
 }
 
@@ -911,7 +910,7 @@ void ccHObject::detachAllChildren()
 {
 	for (auto child : m_children)
 	{
-		//remove any dependency (bilateral)
+		// remove any dependency (bilateral)
 		removeDependencyWith(child);
 		child->removeDependencyWith(this);
 
@@ -942,21 +941,21 @@ void ccHObject::removeChild(int pos)
 
 	ccHObject* child = m_children[pos];
 
-	//we can't swap as we want to keep the order!
+	// we can't swap as we want to keep the order!
 	//(DGM: do this BEFORE deleting the object (otherwise
-	//the dependency mechanism can 'backfire' ;)
+	// the dependency mechanism can 'backfire' ;)
 	m_children.erase(m_children.begin() + pos);
 
-	//backup dependency flags
+	// backup dependency flags
 	int flags = getDependencyFlagsWith(child);
 
-	//remove any dependency
+	// remove any dependency
 	removeDependencyWith(child);
-	//child->removeDependencyWith(this); //DGM: no, don't do this otherwise this entity won't be warned that the child has been removed!
+	// child->removeDependencyWith(this); //DGM: no, don't do this otherwise this entity won't be warned that the child has been removed!
 
 	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 	{
-		//delete object
+		// delete object
 		if (child->isShareable())
 		{
 			CCShareable* shareable = dynamic_cast<CCShareable*>(child);
@@ -969,7 +968,7 @@ void ccHObject::removeChild(int pos)
 				assert(false);
 			}
 		}
-		else/* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
+		else /* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
 		{
 			delete child;
 		}
@@ -1012,7 +1011,7 @@ void ccHObject::removeAllChildren()
 
 bool ccHObject::isSerializable() const
 {
-	//we only handle pure CC_TYPES::HIERARCHY_OBJECT here (object groups)
+	// we only handle pure CC_TYPES::HIERARCHY_OBJECT here (object groups)
 	return (getClassID() == CC_TYPES::HIERARCHY_OBJECT);
 }
 
@@ -1025,11 +1024,11 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//write 'ccObject' header
+	// write 'ccObject' header
 	if (!ccObject::toFile(out, dataVersion))
 		return false;
 
-	//write own data
+	// write own data
 	if (!toFile_MeOnly(out, dataVersion))
 		return false;
 
@@ -1042,11 +1041,11 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 			++serializableCount;
 		}
 	}
-	
+
 	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
 		return WriteError();
 
-	//write serializable children (if any)
+	// write serializable children (if any)
 	for (auto child : m_children)
 	{
 		if (child->isSerializable())
@@ -1056,13 +1055,13 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 		}
 	}
 
-	//write current selection behavior (dataVersion >= 23)
+	// write current selection behavior (dataVersion >= 23)
 	if (out.write(reinterpret_cast<const char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
 		return WriteError();
 
 	if (dataVersion >= 45)
 	{
-		//write transformation history (dataVersion >= 45)
+		// write transformation history (dataVersion >= 45)
 		m_glTransHistory.toFile(out, dataVersion);
 	}
 
@@ -1079,43 +1078,42 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	if (in.read(reinterpret_cast<char*>(&serializableCount), 4) < 0)
 		return ReadError();
 
-	//read serializable children (if any)
+	// read serializable children (if any)
 	for (uint32_t i = 0; i < serializableCount; ++i)
 	{
-		//read children class ID
+		// read children class ID
 		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
 		if (dataVersion >= 35 && dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
 		{
-			//bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
-			//with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
-			if (	(classID & CC_TYPES::CAMERA_SENSOR) == CC_TYPES::CAMERA_SENSOR
-				||	(classID & CC_TYPES::QUADRIC) == CC_TYPES::QUADRIC
-				)
+			// bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
+			// with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
+			if ((classID & CC_TYPES::CAMERA_SENSOR) == CC_TYPES::CAMERA_SENSOR
+			    || (classID & CC_TYPES::QUADRIC) == CC_TYPES::QUADRIC)
 			{
 				classID &= (~CC_CUSTOM_BIT);
 			}
 		}
 
-		//create corresponding child object
+		// create corresponding child object
 		ccHObject* child = New(classID);
 
-		//specific case of custom objects (defined by plugins)
+		// specific case of custom objects (defined by plugins)
 		if ((classID & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
 		{
-			//store current position
+			// store current position
 			size_t originalFilePos = in.pos();
-			//we need to load the custom object as plain ccCustomHObject
+			// we need to load the custom object as plain ccCustomHObject
 			child->fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap);
-			//go back to original position
+			// go back to original position
 			in.seek(originalFilePos);
-			//get custom object name and plugin name
+			// get custom object name and plugin name
 			QString childName = child->getName();
-			QString classId = child->getMetaData(ccCustomHObject::DefaultMetaDataClassName()).toString();
-			QString pluginId = child->getMetaData(ccCustomHObject::DefaultMetaDataPluginName()).toString();
-			//dont' need this instance anymore
+			QString classId   = child->getMetaData(ccCustomHObject::DefaultMetaDataClassName()).toString();
+			QString pluginId  = child->getMetaData(ccCustomHObject::DefaultMetaDataPluginName()).toString();
+			// dont' need this instance anymore
 			delete child;
 			child = nullptr;
 
@@ -1141,7 +1139,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 			}
 			else
 			{
-				//delete child; //we can't do this as the object might be invalid
+				// delete child; //we can't do this as the object might be invalid
 				addChild(child); // but it might still be partly 'valid', we'll let the user decide if (s)he takes the risk to load it
 				return false;
 			}
@@ -1152,7 +1150,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 		}
 	}
 
-	//read the selection behavior (dataVersion>=23)
+	// read the selection behavior (dataVersion>=23)
 	if (dataVersion >= 23)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
@@ -1165,7 +1163,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 		m_selectionBehavior = SELECTION_AA_BBOX;
 	}
 
-	//read transformation history (dataVersion >= 45)
+	// read transformation history (dataVersion >= 45)
 	if (dataVersion >= 45)
 	{
 		if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
@@ -1180,10 +1178,10 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 short ccHObject::minimumFileVersion() const
 {
 	short minVersion = m_glTransHistory.isIdentity() ? 23 : 45;
-	minVersion = std::max(minVersion, ccObject::minimumFileVersion());
-	minVersion = std::max(minVersion, minimumFileVersion_MeOnly());
+	minVersion       = std::max(minVersion, ccObject::minimumFileVersion());
+	minVersion       = std::max(minVersion, minimumFileVersion_MeOnly());
 
-	//write serializable children (if any)
+	// write serializable children (if any)
 	for (auto child : m_children)
 	{
 		minVersion = std::max(minVersion, child->minimumFileVersion());
@@ -1196,11 +1194,11 @@ bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, Load
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	//read 'ccObject' header
+	// read 'ccObject' header
 	if (!ccObject::fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//read own data
+	// read own data
 	return fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap);
 }
 
@@ -1249,7 +1247,7 @@ bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
 		if (m_colorIsOverridden)
 		{
 			//'tempColor' (dataVersion>=20)
-			if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType) * 3) < 0) //TODO: save the alpha channel?
+			if (out.write(reinterpret_cast<const char*>(m_tempColor.rgba), sizeof(ColorCompType) * 3) < 0) // TODO: save the alpha channel?
 			{
 				return WriteError();
 			}
@@ -1368,12 +1366,15 @@ short ccHObject::minimumFileVersion_MeOnly() const
 
 struct HObjectDisplayState : ccDrawableObject::DisplayState
 {
-	HObjectDisplayState() {}
+	HObjectDisplayState()
+	{
+	}
 
 	HObjectDisplayState(const ccHObject& obj)
-		: ccDrawableObject::DisplayState(obj)
-		, isEnabled(obj.isEnabled())
-	{}
+	    : ccDrawableObject::DisplayState(obj)
+	    , isEnabled(obj.isEnabled())
+	{
+	}
 
 	bool isEnabled = false;
 };
@@ -1393,7 +1394,7 @@ bool ccHObject::pushDisplayState()
 	return true;
 }
 
-void ccHObject::popDisplayState(bool apply/*=true*/)
+void ccHObject::popDisplayState(bool apply /*=true*/)
 {
 	if (!m_displayStateStack.empty())
 	{

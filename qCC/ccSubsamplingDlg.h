@@ -1,29 +1,29 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Qt
+// Qt
 #include <QDialog>
 
-//CCCoreLib
+// CCCoreLib
 #include <CCTypes.h>
 
-//System
+// System
 #include <array>
 
 class ccGenericPointCloud;
@@ -32,7 +32,7 @@ namespace CCCoreLib
 {
 	class GenericProgressCallback;
 	class ReferenceCloud;
-}
+} // namespace CCCoreLib
 
 namespace Ui
 {
@@ -44,8 +44,7 @@ class ccSubsamplingDlg : public QDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Sub-sampling method
 	enum CC_SUBSAMPLING_METHOD
 	{
@@ -53,7 +52,7 @@ public:
 		RANDOM_PERCENT = 1,
 		SPATIAL        = 2,
 		OCTREE         = 3,
-		COUNT          = 4 //Should always be the last one
+		COUNT          = 4 // Should always be the last one
 	};
 
 	//! Default constructor
@@ -64,7 +63,7 @@ public:
 
 	//! Returns the subsampled version of a cloud according to the current parameters
 	/** Should only be called after the dialog has been validated.
-	**/
+	 **/
 	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 	//! Enables the SF modulation option (SPATIAL method)
@@ -75,19 +74,16 @@ public:
 	//! Loads the state from persistent settings
 	void loadFromPersistentSettings();
 
-protected:
-
+  protected:
 	void sliderMoved(int sliderPos);
 	void valueChanged(double value);
 	void changeSamplingMethod(int index);
 
-protected: //methods
-
+  protected: // methods
 	//! Updates the dialog lables depending on the active mode
 	void updateLabels();
 
-protected: //members
-
+  protected: // members
 	//! Max point count (for RANDOM method)
 	unsigned m_maxPointCount;
 

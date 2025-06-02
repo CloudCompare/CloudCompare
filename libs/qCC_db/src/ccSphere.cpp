@@ -1,43 +1,42 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSphere.h"
 
-//Local
+// Local
 #include "ccPointCloud.h"
 
-//QT
+// QT
 #include <QFontMetrics>
 
-
-ccSphere::ccSphere(	PointCoordinateType radius,
-					const ccGLMatrix* transMat/*=nullptr*/,
-					QString name/*=QString("Sphere")*/,
-					unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
-					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_radius(radius)
+ccSphere::ccSphere(PointCoordinateType radius,
+                   const ccGLMatrix*   transMat /*=nullptr*/,
+                   QString             name /*=QString("Sphere")*/,
+                   unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/,
+                   unsigned            uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccGenericPrimitive(name, transMat, uniqueID)
+    , m_radius(radius)
 {
-	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION));  //automatically calls updateRepresentation
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls updateRepresentation
 }
 
-ccSphere::ccSphere(QString name/*=QString("Sphere")*/)
-	: ccGenericPrimitive(name)
-	, m_radius(0)
+ccSphere::ccSphere(QString name /*=QString("Sphere")*/)
+    : ccGenericPrimitive(name)
+    , m_radius(0)
 {
 }
 
@@ -53,13 +52,13 @@ bool ccSphere::buildUp()
 
 	const unsigned steps = m_drawPrecision;
 
-	//vertices
+	// vertices
 	ccPointCloud* verts = vertices();
 	assert(verts);
 
-	//vertices
+	// vertices
 	unsigned count = steps * (steps - 1) + 2;
-	//faces
+	// faces
 	unsigned faces = steps * ((steps - 2) * 2 + 2);
 
 	if (!init(count, true, faces, 0))
@@ -68,22 +67,22 @@ bool ccSphere::buildUp()
 		return false;
 	}
 
-	//2 first points: poles
+	// 2 first points: poles
 	verts->addPoint(CCVector3(0, 0, m_radius));
 	verts->addNorm(CCVector3(0, 0, 1));
 
 	verts->addPoint(CCVector3(0, 0, -m_radius));
 	verts->addNorm(CCVector3(0, 0, -1));
 
-	//then, angular sweep
+	// then, angular sweep
 	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(M_PI) / static_cast<PointCoordinateType>(steps);
-	CCVector3 N0;
-	CCVector3 N;
-	CCVector3 P;
+	CCVector3           N0;
+	CCVector3           N;
+	CCVector3           P;
 	{
 		for (unsigned j = 1; j < steps; ++j)
 		{
-			PointCoordinateType theta = static_cast<PointCoordinateType>(j) * angle_rad_step;
+			PointCoordinateType theta     = static_cast<PointCoordinateType>(j) * angle_rad_step;
 			PointCoordinateType cos_theta = cos(theta);
 			PointCoordinateType sin_theta = sin(theta);
 
@@ -93,12 +92,12 @@ bool ccSphere::buildUp()
 
 			for (unsigned i = 0; i < steps; ++i)
 			{
-				PointCoordinateType phi = static_cast<PointCoordinateType>(2 * i) * angle_rad_step;
+				PointCoordinateType phi     = static_cast<PointCoordinateType>(2 * i) * angle_rad_step;
 				PointCoordinateType cos_phi = cos(phi);
 				PointCoordinateType sin_phi = sin(phi);
 
-				N.x = N0.x*cos_phi;
-				N.y = N0.x*sin_phi;
+				N.x = N0.x * cos_phi;
+				N.y = N0.x * sin_phi;
 				N.z = N0.z;
 				N.normalize();
 
@@ -110,11 +109,11 @@ bool ccSphere::buildUp()
 		}
 	}
 
-	//faces
+	// faces
 	{
 		assert(m_triVertIndexes);
 
-		//north pole
+		// north pole
 		{
 			for (unsigned i = 0; i < steps; ++i)
 			{
@@ -124,10 +123,10 @@ bool ccSphere::buildUp()
 			}
 		}
 
-		//slices
+		// slices
 		for (unsigned j = 1; j + 1 < steps; ++j)
 		{
-			unsigned shift = 2 + (j - 1)*steps;
+			unsigned shift = 2 + (j - 1) * steps;
 			for (unsigned i = 0; i < steps; ++i)
 			{
 				unsigned A = shift + i;
@@ -138,9 +137,9 @@ bool ccSphere::buildUp()
 			}
 		}
 
-		//south pole
+		// south pole
 		{
-			unsigned shift = 2 + (steps - 2)*steps;
+			unsigned shift = 2 + (steps - 2) * steps;
 			for (unsigned i = 0; i < steps; ++i)
 			{
 				unsigned A = shift + i;
@@ -183,7 +182,7 @@ bool ccSphere::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//parameters (dataVersion >= 21)
+	// parameters (dataVersion >= 21)
 	QDataStream outStream(&out);
 	outStream << m_radius;
 
@@ -195,7 +194,7 @@ bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion >= 21)
+	// parameters (dataVersion >= 21)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius, 1);
 
@@ -212,7 +211,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	if (!context.display)
 		return;
 
-	//we display it in the 2D layer in fact!
+	// we display it in the 2D layer in fact!
 	ccBBox bBox = getOwnBB();
 	if (!bBox.isValid())
 		return;
@@ -223,22 +222,22 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	ccGLCameraParameters camera;
 	context.display->getGLCameraParameters(camera);
 
-	CCVector3 C = bBox.getCenter();
+	CCVector3  C = bBox.getCenter();
 	CCVector3d Q2D;
 	trans.apply(C);
 	camera.project(C, Q2D);
 
-	//we want to display this name next to the sphere, and not above it!
+	// we want to display this name next to the sphere, and not above it!
 	const ccViewportParameters& params = context.display->getViewportParameters();
-	int dPix = static_cast<int>(ceil(m_radius / camera.pixelSize));
+	int                         dPix   = static_cast<int>(ceil(m_radius / camera.pixelSize));
 
-	int bkgBorder = QFontMetrics(context.display->getTextDisplayFont()).height() / 4 + 4;
-	QFont font = context.display->getTextDisplayFont(); //takes rendering zoom into account!
-	context.display->displayText(	getName(),
-									static_cast<int>(Q2D.x) + dPix + bkgBorder,
-									static_cast<int>(Q2D.y),
-									ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,
-									0.75f,
-									nullptr,
-									&font);
+	int   bkgBorder = QFontMetrics(context.display->getTextDisplayFont()).height() / 4 + 4;
+	QFont font      = context.display->getTextDisplayFont(); // takes rendering zoom into account!
+	context.display->displayText(getName(),
+	                             static_cast<int>(Q2D.x) + dPix + bkgBorder,
+	                             static_cast<int>(Q2D.y),
+	                             ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,
+	                             0.75f,
+	                             nullptr,
+	                             &font);
 }

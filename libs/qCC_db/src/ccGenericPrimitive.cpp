@@ -1,31 +1,31 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Always first
-#include "ccIncludeGL.h"
-
+// Always first
 #include "ccGenericPrimitive.h"
+
+#include "ccIncludeGL.h"
 #include "ccPointCloud.h"
 
-ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
-										const ccGLMatrix* transMat/*=nullptr*/,
-										unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccMesh(new ccPointCloud("vertices"), uniqueID)
-	, m_drawPrecision(0)
+ccGenericPrimitive::ccGenericPrimitive(QString           name /*=QString()*/,
+                                       const ccGLMatrix* transMat /*=nullptr*/,
+                                       unsigned          uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccMesh(new ccPointCloud("vertices"), uniqueID)
+    , m_drawPrecision(0)
 {
 	setName(name);
 	showNormals(true);
@@ -34,7 +34,7 @@ ccGenericPrimitive::ccGenericPrimitive(	QString name/*=QString()*/,
 	assert(vert);
 	addChild(vert);
 	vert->setEnabled(false);
-	//we don't want the user to transform the vertices for instance (as they are only temporary)
+	// we don't want the user to transform the vertices for instance (as they are only temporary)
 	vert->setLocked(true);
 
 	if (transMat)
@@ -54,34 +54,34 @@ ccPointCloud* ccGenericPrimitive::vertices()
 	return static_cast<ccPointCloud*>(m_associatedCloud);
 }
 
-const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimitive& prim)
+const ccGenericPrimitive& ccGenericPrimitive::operator+=(const ccGenericPrimitive& prim)
 {
-	ccPointCloud* verts = vertices();
-	unsigned vertCount = verts->size();
-	unsigned facesCount = size();
-	unsigned triFacesNormCount = (m_triNormals ? m_triNormals->currentSize() : 0);
+	ccPointCloud* verts             = vertices();
+	unsigned      vertCount         = verts->size();
+	unsigned      facesCount        = size();
+	unsigned      triFacesNormCount = (m_triNormals ? m_triNormals->currentSize() : 0);
 
-	//count new number of vertices & faces
-	unsigned newVertCount = vertCount + prim.getAssociatedCloud()->size();
-	unsigned newFacesCount = facesCount + prim.size();
-	bool primHasVertNorms = prim.getAssociatedCloud()->hasNormals();
-	bool primHasFaceNorms = prim.hasTriNormals();
-	bool primHasColors = prim.getAssociatedCloud()->hasColors();
-	
+	// count new number of vertices & faces
+	unsigned newVertCount     = vertCount + prim.getAssociatedCloud()->size();
+	unsigned newFacesCount    = facesCount + prim.size();
+	bool     primHasVertNorms = prim.getAssociatedCloud()->hasNormals();
+	bool     primHasFaceNorms = prim.hasTriNormals();
+	bool     primHasColors    = prim.getAssociatedCloud()->hasColors();
+
 	if (primHasColors && !verts->hasColors())
-		{
+	{
 		if (verts->size() > 0 && !verts->setColor(ccColor::white))
-			{
-				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
-				return *this;
-			}
+		{
+			ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
+			return *this;
 		}
+	}
 
-	//reserve memory
-	if (	verts->reserve(newVertCount)
-		&&	(!primHasVertNorms || verts->reserveTheNormsTable())
-		&&	reserve(newFacesCount)
-		&&	(!primHasFaceNorms || m_triNormalIndexes || reservePerTriangleNormalIndexes()))
+	// reserve memory
+	if (verts->reserve(newVertCount)
+	    && (!primHasVertNorms || verts->reserveTheNormsTable())
+	    && reserve(newFacesCount)
+	    && (!primHasFaceNorms || m_triNormalIndexes || reservePerTriangleNormalIndexes()))
 	{
 		if (primHasColors && !verts->hasColors())
 		{
@@ -92,7 +92,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			}
 		}
 
-		//copy vertices & normals & colors
+		// copy vertices & normals & colors
 		ccGenericPointCloud* cloud = prim.getAssociatedCloud();
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
@@ -105,13 +105,13 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			{
 				verts->addColor(cloud->getPointColor(i));
 			}
-			else if(verts->hasColors())
+			else if (verts->hasColors())
 			{
 				verts->addColor(ccColor::white);
 			}
 		}
 
-		//copy face normals
+		// copy face normals
 		if (primHasFaceNorms)
 		{
 			const NormsIndexesTableType* primNorms = prim.getTriNormsTable();
@@ -125,7 +125,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 				return *this;
 			}
 
-			//attach table if not done already
+			// attach table if not done already
 			if (!m_triNormals)
 			{
 				setTriNormsTable(normsTable);
@@ -138,7 +138,7 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 			}
 		}
 
-		//copy faces
+		// copy faces
 		for (unsigned i = 0; i < prim.size(); ++i)
 		{
 			const CCCoreLib::VerticesIndexes* tsi = prim.getTriangleVertIndexes(i);
@@ -170,7 +170,7 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out, short dataVersion) const
 	if (!ccMesh::toFile_MeOnly(out, dataVersion))
 		return false;
 
-	//Transformation matrix backup (dataVersion>=21)
+	// Transformation matrix backup (dataVersion>=21)
 	if (!m_transformation.toFile(out, dataVersion))
 		return false;
 
@@ -186,15 +186,15 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 	if (!ccMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
+	// HACK: first, we have to remove any 'wrongly' associated vertices cloud!
 	//(this is in fact the default one - automatically created on construction)
-	//while the true vertices come as a child (at least it should ;)
+	// while the true vertices come as a child (at least it should ;)
 	if (getChildrenNumber() && getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && getChild(0) != m_associatedCloud)
 	{
 		removeChild(0);
 	}
 
-	//Transformation matrix backup (dataVersion>=21)
+	// Transformation matrix backup (dataVersion>=21)
 	if (!m_transformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
@@ -236,10 +236,10 @@ bool ccGenericPrimitive::updateRepresentation()
 
 void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
 {
-	//transparent call
+	// transparent call
 	ccMesh::applyGLTransformation(trans);
 
-	//we update the vertices transformation
+	// we update the vertices transformation
 	m_transformation = trans * m_transformation;
 }
 
@@ -250,10 +250,10 @@ const ccGLMatrix& ccGenericPrimitive::getGLTransformationHistory() const
 
 void ccGenericPrimitive::applyTransformationToVertices()
 {
-	//we apply associated transformation but as a call 
-	//to 'applyGLTransformation_recursive' will multiply
-	//this matrix by the new one, we must set the
-	//m_transformation matrix to identity first! (tricky, isn't it?)
+	// we apply associated transformation but as a call
+	// to 'applyGLTransformation_recursive' will multiply
+	// this matrix by the new one, we must set the
+	// m_transformation matrix to identity first! (tricky, isn't it?)
 	ccGLMatrix oldTrans = m_transformation;
 	m_transformation.toIdentity();
 	setGLTransformation(oldTrans);
@@ -269,8 +269,8 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 
 	/*** clear existing structures ***/
 
-	//clear vertices & normals
-	bool keepOtherProps = (vertCount ==  verts->size());
+	// clear vertices & normals
+	bool keepOtherProps = (vertCount == verts->size());
 	if (keepOtherProps)
 	{
 		verts->unallocatePoints();
@@ -281,20 +281,20 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 		verts->clear();
 	}
 
-	//clear triangles indexes
+	// clear triangles indexes
 	assert(m_triVertIndexes);
 	m_triVertIndexes->clear();
 
-	//clear per triangle normals
+	// clear per triangle normals
 	removePerTriangleNormalIndexes();
 	if (m_triNormals)
 		m_triNormals->clear();
-	//DGM: if we do this we'll have issues with the DB tree depending on where when we call this method!
+	// DGM: if we do this we'll have issues with the DB tree depending on where when we call this method!
 	//{
 	//	removeChild(m_triNormals);
 	//	setTriNormsTable(nullptr);
 	//	assert(!m_triNormals);
-	//}
+	// }
 
 	/*** init necessary structures ***/
 
@@ -324,7 +324,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 			return false;
 		}
 
-		//attach table if not done already
+		// attach table if not done already
 		if (!m_triNormals)
 		{
 			setTriNormsTable(normsTable);
@@ -349,15 +349,15 @@ ccGenericPrimitive* ccGenericPrimitive::finishCloneJob(ccGenericPrimitive* primi
 		primitive->showNormals(normalsShown());
 		primitive->showColors(colorsShown());
 		primitive->showSF(sfShown());
-		//primitive->showMaterials(materialsShown());
-		//primitive->setName(getName()+QString(".clone"));
+		// primitive->showMaterials(materialsShown());
+		// primitive->setName(getName()+QString(".clone"));
 		primitive->setVisible(isVisible());
 		primitive->setEnabled(isEnabled());
 		primitive->importParametersFrom(this);
 	}
 	else
 	{
-		//if the calling primitive provide a null pointer, it means that the cloned version creation failed!
+		// if the calling primitive provide a null pointer, it means that the cloned version creation failed!
 		ccLog::Warning("[ccGenericPrimitive::clone] Not enough memory!");
 	}
 

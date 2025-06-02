@@ -1,35 +1,35 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                   CLOUDCOMPARE LIGHT VIEWER                            #
-//#                                                                        #
-//#  This project has been initiated under funding from ANR/CIFRE          #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                   CLOUDCOMPARE LIGHT VIEWER                            #
+// #                                                                        #
+// #  This project has been initiated under funding from ANR/CIFRE          #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
+// #                                                                        #
+// ##########################################################################
 
-//Qt
+// Qt
 #include <QMainWindow>
 #include <QStringList>
 
-//CCPluginAPI
+// CCPluginAPI
 #include <ccMainAppInterface.h>
 
-//GUIs
+// GUIs
 #include <ui_ccviewer.h>
 
-//System
+// System
 #include <set>
 
 class ccGLWindowInterface;
@@ -38,69 +38,85 @@ class Mouse3DInput;
 class ccGamepadManager;
 
 //! Application main window
-class ccViewer : public QMainWindow, public ccMainAppInterface
+class ccViewer : public QMainWindow
+    , public ccMainAppInterface
 {
 	Q_OBJECT
 
-public:
+  public:
 	//! Default constructor
-	ccViewer(QWidget *parent = 0, Qt::WindowFlags flags = 0);
+	ccViewer(QWidget* parent = 0, Qt::WindowFlags flags = 0);
 
 	//! Default destructor
 	~ccViewer() override;
 
 	//! Adds entity to display db
-	void addToDB(	ccHObject* entity,
-					bool updateZoom = false,
-					bool autoExpandDBTree = true,
-					bool checkDimensions = false,
-					bool autoRedraw = true) override;
+	void addToDB(ccHObject* entity,
+	             bool       updateZoom       = false,
+	             bool       autoExpandDBTree = true,
+	             bool       checkDimensions  = false,
+	             bool       autoRedraw       = true) override;
 
 	//! Removes an entity from display db
 	void removeFromDB(ccHObject* obj, bool autoDelete = true) override;
 
 	//! Checks for loaded entities
 	/** If none, a message is displayed to invite the user
-		to drag & drop files.
+	    to drag & drop files.
 	**/
 	bool checkForLoadedEntities();
 
-public:
-
+  public:
 	//! Tries to load (and then adds to main db) a list of entity (files)
 	/** \param filenames filenames to load
-		\return the first loaded entity/group
+	    \return the first loaded entity/group
 	**/
 	ccHObject* addToDB(QStringList filenames);
 
-public: // ccMainInterface compliance
-
-	QMainWindow* getMainWindow() override { return this; }
-	ccGLWindowInterface* getActiveGLWindow() override { return m_glWindow; }
-	ccHObject* loadFile(QString filename, bool silent) override { return addToDB(QStringList{ filename }); }
-	void setSelectedInDB(ccHObject* obj, bool selected) override {}
+  public: // ccMainInterface compliance
+	QMainWindow* getMainWindow() override
+	{
+		return this;
+	}
+	ccGLWindowInterface* getActiveGLWindow() override
+	{
+		return m_glWindow;
+	}
+	ccHObject* loadFile(QString filename, bool silent) override
+	{
+		return addToDB(QStringList{filename});
+	}
+	void setSelectedInDB(ccHObject* obj, bool selected) override
+	{
+	}
 	const ccHObject::Container& getSelectedEntities() const override;
-	void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
-	ccHObject* dbRootObject() override;
-	void redrawAll(bool only2D = false) override;
-	void refreshAll(bool only2D = false) override;
-	void enableAll() override;
-	void disableAll() override;
-	void disableAllBut(ccGLWindowInterface* win) override;
-	void updateUI() override {}
-	void freezeUI(bool state) override {}
+	void                        dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) override;
+	ccHObject*                  dbRootObject() override;
+	void                        redrawAll(bool only2D = false) override;
+	void                        refreshAll(bool only2D = false) override;
+	void                        enableAll() override;
+	void                        disableAll() override;
+	void                        disableAllBut(ccGLWindowInterface* win) override;
+	void                        updateUI() override
+	{
+	}
+	void freezeUI(bool state) override
+	{
+	}
 	void setView(CC_VIEW_ORIENTATION view) override;
 	void toggleActiveWindowCenteredPerspective() override;
 	void toggleActiveWindowCustomLight() override;
 	void toggleActiveWindowSunLight() override;
 	void toggleActiveWindowViewerBasedPerspective() override;
-	void zoomOnSelectedEntities() override { zoomOnSelectedEntity(); }
-	void increasePointSize() override;
-	void decreasePointSize() override;
+	void zoomOnSelectedEntities() override
+	{
+		zoomOnSelectedEntity();
+	}
+	void                        increasePointSize() override;
+	void                        decreasePointSize() override;
 	ccUniqueIDGenerator::Shared getUniqueIDGenerator() override;
 
-protected:
-
+  protected:
 	//! Shows display parameters dialog
 	void showDisplayParameters();
 
@@ -133,7 +149,7 @@ protected:
 	void setGlobalZoom() override;
 	void zoomOnSelectedEntity();
 
-	//default views
+	// default views
 	void setFrontView();
 	void setBottomView();
 	void setTopView();
@@ -143,7 +159,7 @@ protected:
 	void setIsoView1();
 	void setIsoView2();
 
-	//selected entity properties
+	// selected entity properties
 	void toggleColorsShown(bool);
 	void toggleNormalsShown(bool);
 	void toggleMaterialsShown(bool);
@@ -151,7 +167,7 @@ protected:
 	void toggleColorbarShown(bool);
 	void changeCurrentScalarField(bool);
 
-	//3D mouse
+	// 3D mouse
 	void on3DMouseMove(std::vector<float>&);
 	void on3DMouseKeyUp(int);
 	void on3DMouseKeyDown(int);
@@ -160,12 +176,11 @@ protected:
 	void on3DMouseReleased();
 	void enable3DMouse(bool state);
 
-	//GL filters
+	// GL filters
 	void doEnableGLFilter();
 	void doDisableGLFilter();
 
-protected: //methods
-
+  protected: // methods
 	//! Loads plugins (from files)
 	void loadPlugins();
 
@@ -184,8 +199,7 @@ protected: //methods
 	//! Checks whether stereo mode can be stopped (if necessary) or not
 	bool checkStereoMode();
 
-protected: //members
-
+  protected: // members
 	//! Releases any connected 3D mouse (if any)
 	void release3DMouse();
 
@@ -201,7 +215,7 @@ protected: //members
 	//! Gamepad handler
 	ccGamepadManager* m_gamepadManager;
 
-private:
+  private:
 	//! Associated GUI
 	Ui::ccViewerClass ui;
 };

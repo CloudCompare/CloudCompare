@@ -1,59 +1,60 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccScalarFieldArithmeticsDlg.h"
+
 #include "ui_sfArithmeticsDlg.h"
 
-//Qt
+// Qt
 #include <QMessageBox>
 #include <QPushButton>
 
-//qCC_db
+// qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-//system
+// system
 #include <cassert>
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
 #include <cmath>
 
-//number of valid operations
+// number of valid operations
 constexpr unsigned s_opCount = 22;
-//operation names
-constexpr char s_opNames[s_opCount][8] {"add", "sub", "mult", "div", "min", "max", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs" };
+// operation names
+constexpr char s_opNames[s_opCount][8]{"add", "sub", "mult", "div", "min", "max", "sqrt", "pow2", "pow3", "exp", "log", "log10", "cos", "sin", "tan", "acos", "asin", "atan", "int", "inverse", "set", "abs"};
 
-//semi persitent
-static int s_previouslySelectedOperationIndex = 1;
-static bool s_applyInPlace = false;
-static double s_previousConstValue = 1.0;
+// semi persitent
+static int    s_previouslySelectedOperationIndex = 1;
+static bool   s_applyInPlace                     = false;
+static double s_previousConstValue               = 1.0;
 
-ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
-															QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, m_ui( new Ui::SFArithmeticsDlg )
+ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(ccPointCloud* cloud,
+                                                         QWidget*      parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , m_ui(new Ui::SFArithmeticsDlg)
 {
 	assert(cloud);
 
 	m_ui->setupUi(this);
 
 	QStringList sfLabels;
-	unsigned sfCount = cloud ? cloud->getNumberOfScalarFields() : 0;
+	unsigned    sfCount = cloud ? cloud->getNumberOfScalarFields() : 0;
 	if (sfCount < 1)
 	{
 		m_ui->sf1ComboBox->setEnabled(false);
@@ -75,10 +76,10 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 		m_ui->sf2ComboBox->setCurrentIndex(std::min<unsigned>(1, sfCount - 1));
 	}
 
-	//connect signals/slots
-	connect(m_ui->operationComboBox,	qOverload<int>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onOperationIndexChanged);
-	connect(m_ui->sf2ComboBox,			qOverload<int>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onSF2IndexChanged);
-	
+	// connect signals/slots
+	connect(m_ui->operationComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onOperationIndexChanged);
+	connect(m_ui->sf2ComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccScalarFieldArithmeticsDlg::onSF2IndexChanged);
+
 	m_ui->operationComboBox->setCurrentIndex(s_previouslySelectedOperationIndex);
 	m_ui->constantDoubleSpinBox->setValue(s_previousConstValue);
 	m_ui->updateSF1CheckBox->setChecked(s_applyInPlace);
@@ -94,7 +95,7 @@ void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 {
 	if (index == Operation::SET)
 	{
-		//force the last element of the SF2 field (= always the 'constant' field)
+		// force the last element of the SF2 field (= always the 'constant' field)
 		m_ui->sf2ComboBox->setCurrentIndex(m_ui->sf2ComboBox->count() - 1);
 		m_ui->sf2ComboBox->setEnabled(false);
 		m_ui->updateSF1CheckBox->setChecked(true);
@@ -102,14 +103,14 @@ void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 	}
 	else
 	{
-		m_ui->sf2ComboBox->setEnabled(index <= MAX); //only the 6 first operations are	applied with 2 SFs
+		m_ui->sf2ComboBox->setEnabled(index <= MAX); // only the 6 first operations are	applied with 2 SFs
 		m_ui->updateSF1CheckBox->setEnabled(true);
 	}
 }
 
 void ccScalarFieldArithmeticsDlg::onSF2IndexChanged(int index)
 {
-	//the last element is always the 'constant' field
+	// the last element is always the 'constant' field
 	m_ui->constantDoubleSpinBox->setEnabled(m_ui->sf2ComboBox->currentIndex() + 1 == m_ui->sf2ComboBox->count());
 }
 
@@ -141,10 +142,10 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperation
 {
 	auto lowerName = name.toLower();
 
-	//test all known names...
+	// test all known names...
 	for (unsigned i = 0; i < s_opCount; ++i)
 	{
-		if (lowerName == QString( s_opNames[i] ))
+		if (lowerName == QString(s_opNames[i]))
 		{
 			return static_cast<ccScalarFieldArithmeticsDlg::Operation>(i);
 		}
@@ -153,7 +154,7 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperation
 	return INVALID;
 }
 
-QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QString& sf1, const QString& sf2/*=QString()*/)
+QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QString& sf1, const QString& sf2 /*=QString()*/)
 {
 	switch (op)
 	{
@@ -184,29 +185,29 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QStrin
 
 bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 {
-	Operation op = getOperation();
-	int sf1Idx = getSF1Index();
-	int sf2Idx = getSF2Index();
+	Operation op     = getOperation();
+	int       sf1Idx = getSF1Index();
+	int       sf2Idx = getSF2Index();
 
-	//save persistent parameters
+	// save persistent parameters
 	s_previouslySelectedOperationIndex = m_ui->operationComboBox->currentIndex();
-	s_previousConstValue = m_ui->constantDoubleSpinBox->value();
-	s_applyInPlace = m_ui->updateSF1CheckBox->isChecked();
+	s_previousConstValue               = m_ui->constantDoubleSpinBox->value();
+	s_applyInPlace                     = m_ui->updateSF1CheckBox->isChecked();
 
 	SF2 sf2Desc;
 	sf2Desc.isConstantValue = m_ui->constantDoubleSpinBox->isEnabled() || (sf1Idx == Operation::SET);
-	sf2Desc.constantValue = m_ui->constantDoubleSpinBox->value();
-	sf2Desc.sfIndex = sf2Desc.isConstantValue ? -1 : sf2Idx;
+	sf2Desc.constantValue   = m_ui->constantDoubleSpinBox->value();
+	sf2Desc.sfIndex         = sf2Desc.isConstantValue ? -1 : sf2Idx;
 
 	return Apply(cloud, op, sf1Idx, s_applyInPlace, &sf2Desc, this);
 }
 
 bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
-										Operation op,
-										int sf1Idx,
-										bool inplace,
-										SF2* sf2Desc/*=nullptr*/,
-										QWidget* parent/*=nullptr*/)
+                                        Operation     op,
+                                        int           sf1Idx,
+                                        bool          inplace,
+                                        SF2*          sf2Desc /*=nullptr*/,
+                                        QWidget*      parent /*=nullptr*/)
 {
 	assert(cloud);
 
@@ -224,8 +225,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		return false;
 	}
 
-	unsigned sfCount = cloud->getNumberOfScalarFields();
-	CCCoreLib::ScalarField* sf1 = nullptr;
+	unsigned                sfCount = cloud->getNumberOfScalarFields();
+	CCCoreLib::ScalarField* sf1     = nullptr;
 	{
 		if (sf1Idx >= static_cast<int>(sfCount))
 		{
@@ -259,21 +260,21 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		sf2 = (!sf2Desc->isConstantValue && sf2Desc->sfIndex >= 0 ? cloud->getScalarField(sf2Desc->sfIndex) : nullptr);
 	}
 
-	//output SF
+	// output SF
 	int sfIdx = -1;
 	if (!inplace)
 	{
-		//generate new sf name based on the operation
+		// generate new sf name based on the operation
 		QString sf1Name = QString::fromStdString(sf1->getName());
 		QString sf2Name;
 		if (sf2)
 		{
-			sf2Name = QString::fromStdString(sf2->getName());
-			QString sfName = GetOperationName(op,sf1Name,sf2Name);
+			sf2Name        = QString::fromStdString(sf2->getName());
+			QString sfName = GetOperationName(op, sf1Name, sf2Name);
 			if (sfName.length() > 24)
 			{
 				assert(sf2Desc);
-				//if the resulting SF name is too long, we use shortcuts instead
+				// if the resulting SF name is too long, we use shortcuts instead
 				sf1Name = QString("(SF#%1)").arg(sf1Idx);
 				sf2Name = QString("(SF#%1)").arg(sf2Desc->sfIndex);
 			}
@@ -293,11 +294,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				ccLog::Warning(QString("[ccScalarFieldArithmeticsDlg::apply] Resulting scalar field would have the same name as one of the operand (%1)! Rename it first...").arg(sfName));
 				return false;
 			}
-			if (parent && QMessageBox::warning(	parent,
-												"Same scalar field name",
-												"Resulting scalar field already exists! Overwrite it?",
-												QMessageBox::Ok | QMessageBox::Cancel,
-												QMessageBox::Ok ) != QMessageBox::Ok)
+			if (parent && QMessageBox::warning(parent, "Same scalar field name", "Resulting scalar field already exists! Overwrite it?", QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) != QMessageBox::Ok)
 			{
 				return false;
 			}
@@ -327,9 +324,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				cloud->setCurrentDisplayedScalarField(sf1Idx);
 
 				ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
-					.arg(QString::fromStdString(sf1->getName()))
-					.arg(sf1PreviousOffset)
-					.arg(sf1->getOffset()));
+				                        .arg(QString::fromStdString(sf1->getName()))
+				                        .arg(sf1PreviousOffset)
+				                        .arg(sf1->getOffset()));
 				return true;
 			}
 			else
@@ -348,9 +345,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				cloud->setCurrentDisplayedScalarField(sf1Idx);
 
 				ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
-					.arg(QString::fromStdString(sf1->getName()))
-					.arg(sf1PreviousOffset)
-					.arg(sf1->getOffset()));
+				                        .arg(QString::fromStdString(sf1->getName()))
+				                        .arg(sf1PreviousOffset)
+				                        .arg(sf1->getOffset()));
 				return true;
 			}
 			else
@@ -479,9 +476,9 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		if (sf1->getOffset() != sf1PreviousOffset)
 		{
 			ccLog::PrintVerbose(QString("SF %1 offset has been changed: from %2 to %3")
-				.arg(QString::fromStdString(sf1->getName()))
-				.arg(sf1PreviousOffset)
-				.arg(sf1->getOffset()));
+			                        .arg(QString::fromStdString(sf1->getName()))
+			                        .arg(sf1PreviousOffset)
+			                        .arg(sf1->getOffset()));
 		}
 
 		sfIdx = sf1Idx;
@@ -492,7 +489,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	unsigned valCount = sf1->currentSize();
 	assert(!sf2 || valCount == sf2->currentSize());
 
-	//resize destination SF
+	// resize destination SF
 	if (!sfDest->resizeSafe(valCount))
 	{
 		ccLog::Warning("[ccScalarFieldArithmeticsDlg::apply] Not enough memory!");
@@ -506,82 +503,82 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	{
 		double val = std::numeric_limits<double>::quiet_NaN();
 
-		//we must handle 'invalid' values
+		// we must handle 'invalid' values
 		double val1 = sf1PreviousOffset + sf1->getLocalValue(i);
 		if (ccScalarField::ValidValue(val1))
 		{
 			switch (op)
 			{
 			case PLUS:
+			{
+				assert(sf2Desc);
+				if (sf2Desc->isConstantValue)
 				{
-					assert(sf2Desc);
-					if (sf2Desc->isConstantValue)
+					val = val1 + sf2Desc->constantValue;
+				}
+				else
+				{
+					assert(sf2);
+					ScalarType val2 = sf2->getValue(i);
+					if (ccScalarField::ValidValue(val2))
 					{
-						val = val1 + sf2Desc->constantValue;
-					}
-					else
-					{
-						assert(sf2);
-						ScalarType val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2))
-						{
-							val = val1 + val2;
-						}
+						val = val1 + val2;
 					}
 				}
-				break;
+			}
+			break;
 			case MINUS:
+			{
+				assert(sf2Desc);
+				if (sf2Desc->isConstantValue)
 				{
-					assert(sf2Desc);
-					if (sf2Desc->isConstantValue)
+					val = val1 - sf2Desc->constantValue;
+				}
+				else
+				{
+					assert(sf2);
+					ScalarType val2 = sf2->getValue(i);
+					if (ccScalarField::ValidValue(val2))
 					{
-						val = val1 - sf2Desc->constantValue;
-					}
-					else
-					{
-						assert(sf2);
-						ScalarType val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2))
-						{
-							val = val1 - val2;
-						}
+						val = val1 - val2;
 					}
 				}
-				break;
+			}
+			break;
 			case MULTIPLY:
+			{
+				assert(sf2Desc);
+				if (sf2Desc->isConstantValue)
 				{
-					assert(sf2Desc);
-					if (sf2Desc->isConstantValue)
-					{
-						val = val1 * sf2Desc->constantValue;
-					}
-					else
-					{
-						assert(sf2);
-						const ScalarType& val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2))
-							val = val1 * val2;
-					}
+					val = val1 * sf2Desc->constantValue;
 				}
-				break;
+				else
+				{
+					assert(sf2);
+					const ScalarType& val2 = sf2->getValue(i);
+					if (ccScalarField::ValidValue(val2))
+						val = val1 * val2;
+				}
+			}
+			break;
 			case DIVIDE:
+			{
+				assert(sf2Desc);
+				if (sf2Desc->isConstantValue)
 				{
-					assert(sf2Desc);
-					if (sf2Desc->isConstantValue)
+					val = val1 / static_cast<ScalarType>(sf2Desc->constantValue);
+				}
+				else
+				{
+					assert(sf2);
+					const ScalarType& val2 = sf2->getValue(i);
+					if (ccScalarField::ValidValue(val2) && CCCoreLib::GreaterThanEpsilon(std::abs(val2)))
 					{
-						val = val1 / static_cast<ScalarType>(sf2Desc->constantValue);
-					}
-					else
-					{
-						assert(sf2);
-						const ScalarType& val2 = sf2->getValue(i);
-						if (ccScalarField::ValidValue(val2) && CCCoreLib::GreaterThanEpsilon(std::abs(val2) ) )
-						{
-							val = val1 / val2;
-						}
+						val = val1 / val2;
 					}
 				}
-				break;
+			}
+			break;
 			case SQRT:
 				if (val1 >= 0)
 				{
@@ -634,7 +631,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				val = std::atan(val1);
 				break;
 			case INT:
-				val = std::round(val1); //integer part
+				val = std::round(val1); // integer part
 				break;
 			case INVERSE:
 				val = CCCoreLib::LessThanEpsilon(std::abs(val1)) ? std::numeric_limits<double>::quiet_NaN() : (1.0 / val1);
@@ -673,7 +670,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 			}
 		}
 
-		sfDest->setValue(i,val);
+		sfDest->setValue(i, val);
 	}
 
 	sfDest->computeMinAndMax();

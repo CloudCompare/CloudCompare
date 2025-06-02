@@ -1,48 +1,47 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
 #define CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
 
-//Local
+// Local
 #include <ccOverlayDialog.h>
-
 #include <ui_graphicalTransformationDlg.h>
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
 class ccGLWindowInterface;
 
 //! Dialog + mechanism for graphical transformation of entities
 /** Mouse driven rotation and translation of selected entities at screen.
-**/
-class ccGraphicalTransformationTool : public ccOverlayDialog, public Ui::GraphicalTransformationDlg
+ **/
+class ccGraphicalTransformationTool : public ccOverlayDialog
+    , public Ui::GraphicalTransformationDlg
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccGraphicalTransformationTool(QWidget* parent);
 	//! Default destructor
 	virtual ~ccGraphicalTransformationTool();
 
-	//inherited from ccOverlayDialog
+	// inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindowInterface* win) override;
 	virtual bool start() override;
 	virtual void stop(bool state) override;
@@ -52,7 +51,7 @@ public:
 
 	//! Adds an entity to the 'selected' entities set
 	/** Only the 'selected' entities are moved.
-		\return success, if the entity is eligible for graphical transformation
+	    \return success, if the entity is eligible for graphical transformation
 	**/
 	bool addEntity(ccHObject* anObject);
 
@@ -60,7 +59,10 @@ public:
 	unsigned getNumberOfValidEntities() const;
 
 	//! Returns the 'to be transformed' entities set (see addEntity)
-	const ccHObject& getValidEntities() const { return m_toTransform; }
+	const ccHObject& getValidEntities() const
+	{
+		return m_toTransform;
+	}
 
 	//! Sets the rotation center
 	void setRotationCenter(CCVector3d& center);
@@ -71,11 +73,16 @@ public:
 	//! Returns the transform for rotation around an arbitrary vector
 	ccGLMatrixd arbitraryVectorRotation(double angle, const CCVector3d&);
 
-
-protected:
-
+  protected:
 	//! rotComboBox enum
-	enum rotComboBoxItems { XYZ, X, Y, Z, NONE };
+	enum rotComboBoxItems
+	{
+		XYZ,
+		X,
+		Y,
+		Z,
+		NONE
+	};
 
 	//! Applies transformation to selected entities
 	void apply();
@@ -102,12 +109,12 @@ protected:
 
 	//! Updates the axis center of rotation to the ref object in adv rotate/translate mode
 	void advRefAxisRadioToggled(bool state);
-	
+
 	//! Enables/disables incremental translation field in accordance with the state of tx/ty/tz checkboxes
 	void incrementalTranslationToggle();
 
 	//! Enables/disables incremental rotation field in accordance with the state of the rotComboBox
-	void incrementalRotationToggle(const rotComboBoxItems & selectedRotationItem);
+	void incrementalRotationToggle(const rotComboBoxItems& selectedRotationItem);
 
 	//! Updates the axis center of rotation to the object center in adv rotate/translate mode
 	void advObjectAxisRadioToggled(bool state);
@@ -183,12 +190,11 @@ protected:
 
 	//! Rotation center
 	/** The rotation center is actually the center of gravity of the selected 'entities'
-	**/
+	 **/
 	CCVector3d m_rotationCenter;
 
 	//! Objects found in the dbtree for adv transate/rotate
 	ccHObject::Container m_advancedModeObjectList;
-
 };
 
-#endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
+#endif // CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

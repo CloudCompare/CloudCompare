@@ -1,40 +1,44 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_COLOR_GRADIENT_DLG_HEADER
 #define CC_COLOR_GRADIENT_DLG_HEADER
 
-//Qt
+// Qt
 #include <QColor>
-
 #include <ui_colorGradientDlg.h>
 
 //! Dialog to define a color gradient (default, with 2 colors, banding, etc.)
-class ccColorGradientDlg : public QDialog, public Ui::ColorGradientDialog
+class ccColorGradientDlg : public QDialog
+    , public Ui::ColorGradientDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccColorGradientDlg(QWidget* parent);
 
 	//! Gradient types
-	enum GradientType { Default, TwoColors, Banding };
+	enum GradientType
+	{
+		Default,
+		TwoColors,
+		Banding
+	};
 
 	//! Returns selected gradient type
 	GradientType getType() const;
@@ -50,10 +54,9 @@ public:
 	//! Returns the ramp dimension
 	unsigned char getDimension() const;
 
-protected:
-
+  protected:
 	void changeFirstColor();
 	void changeSecondColor();
 };
 
-#endif //CC_COLOR_GRADIENT_DLG_HEADER
+#endif // CC_COLOR_GRADIENT_DLG_HEADER

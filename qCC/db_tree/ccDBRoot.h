@@ -1,32 +1,32 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_DB_ROOT_HEADER
 #define CC_DB_ROOT_HEADER
 
-//Qt
+// Qt
 #include <QAbstractItemModel>
 #include <QPoint>
 #include <QTreeView>
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
-//System
+// System
 #include <unordered_set>
 
 class QAction;
@@ -38,24 +38,24 @@ class ccHObject;
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
 {
-	size_t selCount = 0;
-	size_t sfCount = 0;
-	size_t colorCount = 0;
-	size_t normalsCount = 0;
-	size_t octreeCount = 0;
-	size_t cloudCount = 0;
-	size_t gridCound = 0;
-	size_t groupCount = 0;
-	size_t polylineCount = 0;
-	size_t planeCount = 0;
-	size_t circleCount = 0;
-	size_t meshCount = 0;
-	size_t primitiveCount = 0;
-	size_t imageCount = 0;
-	size_t sensorCount = 0;
-	size_t gblSensorCount = 0;
+	size_t selCount          = 0;
+	size_t sfCount           = 0;
+	size_t colorCount        = 0;
+	size_t normalsCount      = 0;
+	size_t octreeCount       = 0;
+	size_t cloudCount        = 0;
+	size_t gridCound         = 0;
+	size_t groupCount        = 0;
+	size_t polylineCount     = 0;
+	size_t planeCount        = 0;
+	size_t circleCount       = 0;
+	size_t meshCount         = 0;
+	size_t primitiveCount    = 0;
+	size_t imageCount        = 0;
+	size_t sensorCount       = 0;
+	size_t gblSensorCount    = 0;
 	size_t cameraSensorCount = 0;
-	size_t kdTreeCount = 0;
+	size_t kdTreeCount       = 0;
 };
 
 //! Custom QTreeView widget (for advanced selection behavior)
@@ -63,15 +63,16 @@ class ccCustomQTreeView : public QTreeView
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
-	explicit ccCustomQTreeView(QWidget* parent) : QTreeView(parent) {}
+	explicit ccCustomQTreeView(QWidget* parent)
+	    : QTreeView(parent)
+	{
+	}
 
-protected:
-
-	//inherited from QTreeView
-	QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event=nullptr) const override;
+  protected:
+	// inherited from QTreeView
+	QItemSelectionModel::SelectionFlags selectionCommand(const QModelIndex& index, const QEvent* event = nullptr) const override;
 };
 
 //! GUI database tree root
@@ -79,12 +80,11 @@ class ccDBRoot : public QAbstractItemModel
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	/** \param dbTreeWidget widget for DB tree display
-		\param propertiesTreeWidget widget for selected entity's properties tree display
-		\param parent widget QObject parent
+	    \param propertiesTreeWidget widget for selected entity's properties tree display
+	    \param parent widget QObject parent
 	**/
 	ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent = nullptr);
 
@@ -104,13 +104,13 @@ public:
 
 	//! Removes an element from the DB tree
 	/** Automatically calls prepareDisplayForRefresh on the object.
-	**/
+	 **/
 	void removeElement(ccHObject* object);
 
 	//! Removes several elements at once from the DB tree
 	/** Faster than multiple calls to removeElement.
-		Automatically calls prepareDisplayForRefresh on the objects.
-		\warning The input container will be cleared.
+	    Automatically calls prepareDisplayForRefresh on the objects.
+	    \warning The input container will be cleared.
 	**/
 	void removeElements(ccHObject::Container& objects);
 
@@ -121,9 +121,9 @@ public:
 	int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
 
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
-	size_t getSelectedEntities(	ccHObject::Container& selectedEntities,
-								CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
-								dbTreeSelectionInfo* info = nullptr);
+	size_t getSelectedEntities(ccHObject::Container& selectedEntities,
+	                           CC_CLASS_ENUM         filter = CC_TYPES::OBJECT,
+	                           dbTreeSelectionInfo*  info   = nullptr);
 
 	//! Expands tree at a given node
 	void expandElement(ccHObject* object, bool state);
@@ -137,21 +137,24 @@ public:
 	//! Unloads all entities
 	void unloadAll();
 
-	//inherited from QAbstractItemModel
-	QVariant data(const QModelIndex &index, int role) const override;
-	QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const override;
-	QModelIndex index(ccHObject* object);
-	QModelIndex parent(const QModelIndex &index) const override;
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	Qt::ItemFlags flags(const QModelIndex &index) const override;
-	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-	Qt::DropActions supportedDropActions() const override;
-	bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
-	QMap<int,QVariant> itemData(const QModelIndex& index) const override;
-	Qt::DropActions supportedDragActions() const override { return Qt::MoveAction; }
+	// inherited from QAbstractItemModel
+	QVariant            data(const QModelIndex& index, int role) const override;
+	QModelIndex         index(int row, int column, const QModelIndex& parentIndex = QModelIndex()) const override;
+	QModelIndex         index(ccHObject* object);
+	QModelIndex         parent(const QModelIndex& index) const override;
+	int                 rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int                 columnCount(const QModelIndex& parent = QModelIndex()) const override;
+	Qt::ItemFlags       flags(const QModelIndex& index) const override;
+	bool                setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
+	Qt::DropActions     supportedDropActions() const override;
+	bool                dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+	QMap<int, QVariant> itemData(const QModelIndex& index) const override;
+	Qt::DropActions     supportedDragActions() const override
+	{
+		return Qt::MoveAction;
+	}
 
-	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
+	void changeSelection(const QItemSelection& selected, const QItemSelection& deselected);
 	void reflectObjectPropChange(ccHObject* obj);
 	void redrawCCObject(ccHObject* object);
 	void redrawCCObjectAndChildren(ccHObject* object);
@@ -160,32 +163,35 @@ public:
 
 	//! Selects a given entity
 	/** If ctrl is pressed by the user at the same time,
-		previous selection will be simply updated accordingly.
-		\param obj entity to select
-		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
+	    previous selection will be simply updated accordingly.
+	    \param obj entity to select
+	    \param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
 	**/
 	void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
 
 	//! Selects multiple entities at once (shortcut to the other version)
 	/** \param entIDs list of the IDs of the entities to select
-	**/
+	 **/
 	void selectEntities(std::unordered_set<int> entIDs);
 
 	//! Selects multiple entities at once
 	/** \param entities set of the entities to 'select'
-		\param incremental whether to 'add' the input set to the selected entities set or to use it as replacement
+	    \param incremental whether to 'add' the input set to the selected entities set or to use it as replacement
 	**/
 	void selectEntities(const ccHObject::Container& entities, bool incremental = false);
 
-private:
+  private:
 	//! Entity property that can be toggled
-	enum TOGGLE_PROPERTY {	TG_ENABLE,
-							TG_VISIBLE,
-							TG_COLOR,
-							TG_SF,
-							TG_NORMAL,
-							TG_MATERIAL,
-							TG_3D_NAME };
+	enum TOGGLE_PROPERTY
+	{
+		TG_ENABLE,
+		TG_VISIBLE,
+		TG_COLOR,
+		TG_SF,
+		TG_NORMAL,
+		TG_MATERIAL,
+		TG_3D_NAME
+	};
 
 	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
 	void toggleSelectedEntitiesProperty(TOGGLE_PROPERTY prop);
@@ -201,37 +207,68 @@ private:
 	void selectByTypeAndName();
 	void exportImages();
 
-	inline void toggleSelectedEntities()			{ toggleSelectedEntitiesProperty(TG_ENABLE); }
-	inline void toggleSelectedEntitiesVisibility()	{ toggleSelectedEntitiesProperty(TG_VISIBLE); }
-	inline void toggleSelectedEntitiesColor()		{ toggleSelectedEntitiesProperty(TG_COLOR); }
-	inline void toggleSelectedEntitiesNormals()		{ toggleSelectedEntitiesProperty(TG_NORMAL); }
-	inline void toggleSelectedEntitiesSF()			{ toggleSelectedEntitiesProperty(TG_SF); }
-	inline void toggleSelectedEntitiesMat()         { toggleSelectedEntitiesProperty(TG_MATERIAL); }
-	inline void toggleSelectedEntities3DName()      { toggleSelectedEntitiesProperty(TG_3D_NAME); }
+	inline void toggleSelectedEntities()
+	{
+		toggleSelectedEntitiesProperty(TG_ENABLE);
+	}
+	inline void toggleSelectedEntitiesVisibility()
+	{
+		toggleSelectedEntitiesProperty(TG_VISIBLE);
+	}
+	inline void toggleSelectedEntitiesColor()
+	{
+		toggleSelectedEntitiesProperty(TG_COLOR);
+	}
+	inline void toggleSelectedEntitiesNormals()
+	{
+		toggleSelectedEntitiesProperty(TG_NORMAL);
+	}
+	inline void toggleSelectedEntitiesSF()
+	{
+		toggleSelectedEntitiesProperty(TG_SF);
+	}
+	inline void toggleSelectedEntitiesMat()
+	{
+		toggleSelectedEntitiesProperty(TG_MATERIAL);
+	}
+	inline void toggleSelectedEntities3DName()
+	{
+		toggleSelectedEntitiesProperty(TG_3D_NAME);
+	}
 
 	void addEmptyGroup();
-	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
-	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
+	void alignCameraWithEntityDirect()
+	{
+		alignCameraWithEntity(false);
+	}
+	void alignCameraWithEntityIndirect()
+	{
+		alignCameraWithEntity(true);
+	}
 	void enableBubbleViewMode();
 	void editLabelScalarValue();
 
-Q_SIGNALS:
+  Q_SIGNALS:
 	void selectionChanged();
 	void dbIsEmpty();
 	void dbIsNotEmptyAnymore();
 
-protected:
-
+  protected:
 	//! Aligns the camera with the currently selected entity
 	/** \param reverse whether to use the entity's normal (false) or its inverse (true)
-	**/
+	 **/
 	void alignCameraWithEntity(bool reverse);
 
 	//! Shows properties view for a given element
 	void showPropertiesView(ccHObject* obj);
 
 	//! Entities sorting schemes
-	enum SortRules { SORT_A2Z, SORT_Z2A, SORT_BY_TYPE };
+	enum SortRules
+	{
+		SORT_A2Z,
+		SORT_Z2A,
+		SORT_BY_TYPE
+	};
 
 	//! Sorts selected entities children
 	void sortSelectedEntitiesChildren(SortRules rule);
@@ -240,10 +277,10 @@ protected:
 	void expandOrCollapseHoveredBranch(bool expand);
 
 	//! Selects objects by type and/or name
-    void selectChildrenByTypeAndName(CC_CLASS_ENUM type,
-                                     bool typeIsExclusive = true,
-                                     QString name = QString(),
-                                     bool nameIsRegex = false);
+	void selectChildrenByTypeAndName(CC_CLASS_ENUM type,
+	                                 bool          typeIsExclusive = true,
+	                                 QString       name            = QString(),
+	                                 bool          nameIsRegex     = false);
 
 	//! Associated DB root
 	ccHObject* m_treeRoot;

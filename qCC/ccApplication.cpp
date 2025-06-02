@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 #include <QtGlobal>
 
@@ -23,7 +23,6 @@
 
 // qCC_io
 #include "FileIO.h"
-
 #include "ccApplication.h"
 #include "mainwindow.h"
 
@@ -89,36 +88,36 @@ QString ccApplication::GetMinCCVersionForFileVersion(short fileVersion)
 	return s_fileVersionToCCVersion.getMinCCVersion(fileVersion);
 }
 
-ccApplication::ccApplication( int &argc, char **argv, bool isCommandLine )
-	: ccApplicationBase( argc, argv, isCommandLine, QString( "2.14.alpha (%1)" ).arg(__DATE__))
+ccApplication::ccApplication(int& argc, char** argv, bool isCommandLine)
+    : ccApplicationBase(argc, argv, isCommandLine, QString("2.14.alpha (%1)").arg(__DATE__))
 {
-	setApplicationName( "CloudCompare" );
-	
-	FileIO::setWriterInfo( applicationName(), versionStr() );
+	setApplicationName("CloudCompare");
+
+	FileIO::setWriterInfo(applicationName(), versionStr());
 }
 
 bool ccApplication::event(QEvent* inEvent)
 {
 #ifdef Q_OS_MAC
-	switch ( inEvent->type() )
+	switch (inEvent->type())
 	{
-		case QEvent::FileOpen:
+	case QEvent::FileOpen:
+	{
+		MainWindow* mainWindow = MainWindow::TheInstance();
+
+		if (mainWindow == nullptr)
 		{
-			MainWindow* mainWindow = MainWindow::TheInstance();
-			
-			if ( mainWindow == nullptr )
-			{
-				return false;
-			}
-			
-			mainWindow->addToDB( QStringList(static_cast<QFileOpenEvent *>(inEvent)->file()) );
-			return true;
+			return false;
 		}
-			
-		default:
-			break;
+
+		mainWindow->addToDB(QStringList(static_cast<QFileOpenEvent*>(inEvent)->file()));
+		return true;
+	}
+
+	default:
+		break;
 	}
 #endif
-	
-	return ccApplicationBase::event( inEvent );
+
+	return ccApplicationBase::event(inEvent);
 }

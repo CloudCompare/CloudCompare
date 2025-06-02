@@ -17,26 +17,26 @@
 
 class TestShpFilter : public QObject
 {
-Q_OBJECT
-private:
+	Q_OBJECT
+  private:
 	/* Reading tests */
-	void readPolylineFile(const QString &filePath = LINE_FILE) const;
+	void readPolylineFile(const QString& filePath = LINE_FILE) const;
 
-	void readPolylineMFile(const QString &filePath = LINEM_FILE) const;
+	void readPolylineMFile(const QString& filePath = LINEM_FILE) const;
 
-	void readPolylineZFile(const QString &filePath = LINEZ_FILE) const;
+	void readPolylineZFile(const QString& filePath = LINEZ_FILE) const;
 
-	void readMultiPointFile(const QString &filePath = MULTIPOINT_FILE) const;
+	void readMultiPointFile(const QString& filePath = MULTIPOINT_FILE) const;
 
-	void readMultiPointZFile(const QString &filePath = MULTIPOINT_Z) const;
+	void readMultiPointZFile(const QString& filePath = MULTIPOINT_Z) const;
 
-	void readMultipatchFile(const QString &filePath = MULTIPATCH_FILE) const;
+	void readMultipatchFile(const QString& filePath = MULTIPATCH_FILE) const;
 
-	void readPolygonFile(const QString &filePath = POLYGON_FILE) const;
+	void readPolygonFile(const QString& filePath = POLYGON_FILE) const;
 
-	void readPolygonZFile(const QString &filePath = POLYGONZ_FILE) const;
+	void readPolygonZFile(const QString& filePath = POLYGONZ_FILE) const;
 
-	void readSinglePointZFile(const QString &filePath = POINTZ_FILE) const;
+	void readSinglePointZFile(const QString& filePath = POINTZ_FILE) const;
 
 	/*
 	 * Writing Tests, these tests do a cycle:
@@ -61,5 +61,4 @@ private:
 	void testWritePolygonZFile() const;
 };
 
-
-#endif //CC_TEST_SHAPEFILE_HEADER
+#endif // CC_TEST_SHAPEFILE_HEADER

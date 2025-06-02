@@ -1,57 +1,56 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 #include "../include/DRCFilter.h"
+
 #include "../include/SaveDracoFileDlg.h"
 
-//qCC_db
+// qCC_db
 #include <ccLog.h>
+#include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
-#include <ccMesh.h>
 
-//CCCoreLib
+// CCCoreLib
 #include <CCPlatform.h>
 
-//draco
+// draco
 #include <draco/compression/decode.h>
 #include <draco/compression/encode.h>
 #include <draco/mesh/mesh.h>
 #include <draco/point_cloud/point_cloud.h>
 
 DRCFilter::DRCFilter()
-    : FileIOFilter( {
-                    "_Draco DRC Filter",
-                    12.0f,	// priority
-                    QStringList{ "drc" },
+    : FileIOFilter({"_Draco DRC Filter",
+                    12.0f, // priority
+                    QStringList{"drc"},
                     "drc",
-                    QStringList{ "DRC cloud or mesh (*.drc)" },
-                    QStringList{ "DRC cloud or mesh (*.drc)" },
-                    Import | Export
-                    } )
+                    QStringList{"DRC cloud or mesh (*.drc)"},
+                    QStringList{"DRC cloud or mesh (*.drc)"},
+                    Import | Export})
 {
 }
 
 bool DRCFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == static_cast<CC_CLASS_ENUM>(CC_TYPES::POINT_CLOUD)
-		|| type == static_cast<CC_CLASS_ENUM>(CC_TYPES::MESH))
+	    || type == static_cast<CC_CLASS_ENUM>(CC_TYPES::MESH))
 	{
-		multiple = false;
+		multiple  = false;
 		exclusive = true;
 		return true;
 	}
@@ -63,8 +62,8 @@ static CC_FILE_ERROR CCCloudToDraco(const ccGenericPointCloud& ccCloud, draco::P
 	unsigned pointCount = ccCloud.size();
 	dracoCloud.set_num_points(pointCount);
 
-	draco::DataType dt = draco::DT_FLOAT32;
-	bool shifted = ccCloud.isShifted();
+	draco::DataType dt      = draco::DT_FLOAT32;
+	bool            shifted = ccCloud.isShifted();
 	if (shifted)
 	{
 		dt = draco::DT_FLOAT64;
@@ -89,7 +88,7 @@ static CC_FILE_ERROR CCCloudToDraco(const ccGenericPointCloud& ccCloud, draco::P
 				pointAttribute->SetAttributeValue(draco::AttributeValueIndex(i), ccCloud.getPoint(i)->u);
 			}
 		}
-		else //draco::DT_FLOAT64
+		else // draco::DT_FLOAT64
 		{
 			for (draco::PointIndex::ValueType i = 0; i < pointCount; ++i)
 			{
@@ -215,7 +214,7 @@ static CC_FILE_ERROR CCMeshToDraco(ccGenericMesh& ccMesh, draco::Mesh& dracoMesh
 	draco::FaceIndex faceIndex(0);
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		const auto tri = ccMesh.getTriangleVertIndexes(i);
+		const auto        tri = ccMesh.getTriangleVertIndexes(i);
 		draco::Mesh::Face face;
 		{
 			face[0] = tri->i1;
@@ -276,14 +275,14 @@ CC_FILE_ERROR DRCFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		assert(false);
 		return CC_FERR_BAD_ARGUMENT;
 	}
-	
+
 	draco::Encoder encoder;
 	encoder.SetSpeedOptions(0, 0);
 
-	int coordQuantization = 11;
+	int coordQuantization    = 11;
 	int texCoordQuantization = 10;
-	int normalQuantization = 8;
-	int sfQuantization = 8;
+	int normalQuantization   = 8;
+	int sfQuantization       = 8;
 
 	// we always create the dialog, even if we don't display it, to retrieve the default values
 	SaveDracoFileDlg drcDialog(parameters.parentWidget);
@@ -294,11 +293,11 @@ CC_FILE_ERROR DRCFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			return CC_FILE_ERROR::CC_FERR_CANCELED_BY_USER;
 		}
 	}
-	
+
 	coordQuantization = drcDialog.coordsQuantSpinBox->value();
-	//texCoordQuantization = XXX; //not available yet since we don't know how to save the texture!
+	// texCoordQuantization = XXX; //not available yet since we don't know how to save the texture!
 	normalQuantization = drcDialog.normQuantSpinBox->value();
-	sfQuantization = drcDialog.sfQuantSpinBox->value();
+	sfQuantization     = drcDialog.sfQuantSpinBox->value();
 
 	encoder.SetAttributeQuantization(draco::GeometryAttribute::POSITION, coordQuantization);
 	encoder.SetAttributeQuantization(draco::GeometryAttribute::TEX_COORD, texCoordQuantization);
@@ -311,7 +310,7 @@ CC_FILE_ERROR DRCFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		ccGenericMesh* ccMesh = static_cast<ccGenericMesh*>(entity);
 
 		// save mesh
-		draco::Mesh dracoMesh;
+		draco::Mesh   dracoMesh;
 		CC_FILE_ERROR error = CCMeshToDraco(*ccMesh, dracoMesh);
 		if (error != CC_FERR_NO_ERROR)
 		{
@@ -329,7 +328,7 @@ CC_FILE_ERROR DRCFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		// save cloud
 		draco::PointCloud dracoCloud;
-		CC_FILE_ERROR error = CCCloudToDraco(*ccCloud, dracoCloud);
+		CC_FILE_ERROR     error = CCCloudToDraco(*ccCloud, dracoCloud);
 		if (error != CC_FERR_NO_ERROR)
 		{
 			return error;
@@ -361,7 +360,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 	{
 		return CC_FERR_NO_LOAD;
 	}
-	
+
 	unsigned pointCount = dracoCloud.num_points();
 	if (!ccCloud.reserve(pointCount))
 	{
@@ -391,13 +390,13 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 	else if (dt == draco::DT_FLOAT64)
 	{
 		CCVector3d Pshift(0, 0, 0);
-		bool preserveCoordinateShift = true;
+		bool       preserveCoordinateShift = true;
 		for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(pointAttribute->size()); ++i)
 		{
 			CCVector3d P;
 			pointAttribute->GetValue(i, P.u);
 
-			//first point: check for large coordinates
+			// first point: check for large coordinates
 			if (i == 0)
 			{
 				if (FileIOFilter::HandleGlobalShift(P, Pshift, preserveCoordinateShift, parameters))
@@ -416,10 +415,9 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 
 	// load normals?
 	const draco::PointAttribute* normalAttribute = dracoCloud.GetNamedAttribute(draco::GeometryAttribute::NORMAL);
-	if (	(nullptr != normalAttribute)
-		&&	(normalAttribute->data_type() == draco::DataType::DT_FLOAT32)
-		&&	(pointCount == normalAttribute->size())
-		)
+	if ((nullptr != normalAttribute)
+	    && (normalAttribute->data_type() == draco::DataType::DT_FLOAT32)
+	    && (pointCount == normalAttribute->size()))
 	{
 		if (ccCloud.reserveTheNormsTable())
 		{
@@ -439,12 +437,11 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 
 	// load colors?
 	const draco::PointAttribute* colorAttribute = dracoCloud.GetNamedAttribute(draco::GeometryAttribute::COLOR);
-	if (	(nullptr != colorAttribute)
-		&&	(colorAttribute->data_type() == draco::DataType::DT_UINT8)
-		&&	(pointCount == colorAttribute->size())
-		)
+	if ((nullptr != colorAttribute)
+	    && (colorAttribute->data_type() == draco::DataType::DT_UINT8)
+	    && (pointCount == colorAttribute->size()))
 	{
-		bool rgb = (colorAttribute->num_components() == 3);
+		bool rgb  = (colorAttribute->num_components() == 3);
 		bool rgba = (colorAttribute->num_components() == 4);
 		if (rgb || rgba)
 		{
@@ -479,10 +476,9 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 
 	// load SF?
 	const draco::PointAttribute* sfAttribute = dracoCloud.GetNamedAttribute(draco::GeometryAttribute::GENERIC);
-	if (	(nullptr != sfAttribute)
-		&&	(sfAttribute->data_type() == draco::DataType::DT_FLOAT32)
-		&&	(sfAttribute->size() == pointCount)
-		)
+	if ((nullptr != sfAttribute)
+	    && (sfAttribute->data_type() == draco::DataType::DT_FLOAT32)
+	    && (sfAttribute->size() == pointCount))
 	{
 		ccScalarField* sf = new ccScalarField();
 		if (sf->reserveSafe(pointCount))
@@ -534,15 +530,15 @@ CC_FILE_ERROR DRCFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
-		const std::unique_ptr<draco::Mesh>& meshDraco = resultMesh.value();
-		const draco::PointAttribute *const pointAttribute = meshDraco->GetNamedAttribute(draco::GeometryAttribute::POSITION);
+		const std::unique_ptr<draco::Mesh>& meshDraco      = resultMesh.value();
+		const draco::PointAttribute* const  pointAttribute = meshDraco->GetNamedAttribute(draco::GeometryAttribute::POSITION);
 		if (!pointAttribute)
 		{
 			return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 		}
 		ccLog::Print("[DRACO] Mesh size: " + QString::number(meshDraco->num_faces()) + " / vertex count: " + QString::number(meshDraco->num_points()));
 
-		ccPointCloud* vertices = new ccPointCloud("vertices");
+		ccPointCloud* vertices      = new ccPointCloud("vertices");
 		CC_FILE_ERROR verticesError = LoadCloud(*vertices, *meshDraco, parameters);
 		if (CC_FERR_NO_ERROR != verticesError)
 		{
@@ -591,7 +587,7 @@ CC_FILE_ERROR DRCFilter::loadFile(const QString& filename, ccHObject& container,
 		const std::unique_ptr<draco::PointCloud>& cloudDraco = resultCloud.value();
 		ccLog::Print("[DRACO] Cloud size: " + QString::number(cloudDraco->num_points()));
 
-		ccPointCloud* cloudCC = new ccPointCloud("unnamed - Cloud");
+		ccPointCloud* cloudCC    = new ccPointCloud("unnamed - Cloud");
 		CC_FILE_ERROR cloudError = LoadCloud(*cloudCC, *cloudDraco, parameters);
 		if (CC_FERR_NO_ERROR != cloudError)
 		{

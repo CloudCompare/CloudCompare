@@ -1,23 +1,23 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "STLFilter.h"
 
-//Qt
+// Qt
 #include <QApplication>
 #include <QFile>
 #include <QFileInfo>
@@ -27,7 +27,7 @@
 #include <QStringList>
 #include <QTextStream>
 
-//qCC_db
+// qCC_db
 #include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
@@ -36,28 +36,25 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-//System
+// System
 #include <cstring>
 
-
 STLFilter::STLFilter()
-	: FileIOFilter( {
-					"_STL Filter",
-					10.0f,	// priority
-					QStringList{ "stl" },
-					"stl",
-					QStringList{ "STL mesh (*.stl)" },
-					QStringList{ "STL mesh (*.stl)" },
-					Import | Export
-					} )
-{	
+    : FileIOFilter({"_STL Filter",
+                    10.0f, // priority
+                    QStringList{"stl"},
+                    "stl",
+                    QStringList{"STL mesh (*.stl)"},
+                    QStringList{"STL mesh (*.stl)"},
+                    Import | Export})
+{
 }
 
 bool STLFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::MESH)
 	{
-		multiple = false;
+		multiple  = false;
 		exclusive = true;
 		return true;
 	}
@@ -76,22 +73,22 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (!mesh || mesh->size() == 0)
 	{
 		ccLog::Warning(QString("[STL] No facet in mesh '%1'!")
-					   .arg(mesh ? mesh->getName() : QStringLiteral("unnamed")));
+		                   .arg(mesh ? mesh->getName() : QStringLiteral("unnamed")));
 		return CC_FERR_NO_ERROR;
 	}
 
-	//ask for output format
+	// ask for output format
 	bool binaryMode = true;
 	if (parameters.alwaysDisplaySaveDialog)
 	{
-		QMessageBox msgBox(QMessageBox::Question, "Choose output format", "Save in BINARY or ASCII format?");
-		QPushButton *binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
+		QMessageBox  msgBox(QMessageBox::Question, "Choose output format", "Save in BINARY or ASCII format?");
+		QPushButton* binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
 		msgBox.addButton("ASCII", QMessageBox::AcceptRole);
 		msgBox.exec();
 		binaryMode = (msgBox.clickedButton() == binaryButton);
 	}
 
-	//try to open file for saving
+	// try to open file for saving
 	QFile theFile(filename);
 	if (!theFile.open(QFile::WriteOnly))
 	{
@@ -103,7 +100,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		result = saveToBINFile(mesh, theFile);
 	}
-	else //if (msgBox.clickedButton() == asciiButton)
+	else // if (msgBox.clickedButton() == asciiButton)
 	{
 		result = saveToASCIIFile(mesh, theFile);
 	}
@@ -111,12 +108,12 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return result;
 }
 
-CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=nullptr*/)
+CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget /*=nullptr*/)
 {
 	assert(theFile.isOpen() && mesh && mesh->size() != 0);
 	unsigned faceCount = mesh->size();
 
-	//progress
+	// progress
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
@@ -128,7 +125,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	}
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
 
-	//header
+	// header
 	{
 		char header[80];
 		memset(header, 0, 80);
@@ -137,7 +134,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 			return CC_FERR_WRITING;
 	}
 
-	//UINT32 Number of triangles
+	// UINT32 Number of triangles
 	{
 		uint32_t tmpInt32 = static_cast<uint32_t>(faceCount);
 		if (theFile.write((const char*)&tmpInt32, 4) < 4)
@@ -147,7 +144,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	assert(vertices);
 
-	//Can't save global shift information....
+	// Can't save global shift information....
 	if (vertices->isShifted())
 	{
 		ccLog::Warning("[STL] Global shift information can't be restored in STL Binary format! (too low precision)");
@@ -156,39 +153,39 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
 		const CCVector3* C = vertices->getPointPersistentPtr(tsi->i3);
-		//compute face normal (right hand rule)
+		// compute face normal (right hand rule)
 		CCVector3 N = (*B - *A).cross(*C - *A);
 
-		//REAL32[3] Normal vector
-		CCVector3f buffer = N.toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		// REAL32[3] Normal vector
+		CCVector3f buffer = N.toFloat(); // convert to an explicit float array (as PointCoordinateType may be a double!)
 		assert(sizeof(float) == 4);
 		if (theFile.write((const char*)buffer.u, 12) < 12)
 			return CC_FERR_WRITING;
 
-		//REAL32[3] Vertex 1,2 & 3
-		buffer = A->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		// REAL32[3] Vertex 1,2 & 3
+		buffer = A->toFloat(); // convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (theFile.write((const char*)buffer.u, 12) < 12)
 			return CC_FERR_WRITING;
-		buffer = B->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = B->toFloat(); // convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (theFile.write((const char*)buffer.u, 12) < 12)
 			return CC_FERR_WRITING;
-		buffer = C->toFloat(); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		buffer = C->toFloat(); // convert to an explicit float array (as PointCoordinateType may be a double!)
 		if (theFile.write((const char*)buffer.u, 12) < 12)
 			return CC_FERR_WRITING;
 
-		//UINT16 Attribute byte count (not used)
+		// UINT16 Attribute byte count (not used)
 		{
-			char byteCount[2] = { 0, 0 };
+			char byteCount[2] = {0, 0};
 			if (theFile.write(byteCount, 2) < 2)
 				return CC_FERR_WRITING;
 		}
 
-		//progress
+		// progress
 		if (pDlg && !nprogress.oneStep())
 		{
 			return CC_FERR_CANCELED_BY_USER;
@@ -203,12 +200,12 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget/*=nullptr*/)
+CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QWidget* parentWidget /*=nullptr*/)
 {
 	assert(theFile.isOpen() && mesh && mesh->size() != 0);
 	unsigned faceCount = mesh->size();
 
-	//progress
+	// progress
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
@@ -222,23 +219,23 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 
 	QTextStream stream(&theFile);
 	stream << "solid " << mesh->getName() << endl;
-	if (theFile.error() != QFile::NoError) //empty names are acceptable!
+	if (theFile.error() != QFile::NoError) // empty names are acceptable!
 	{
 		return CC_FERR_WRITING;
 	}
 
-	//vertices
+	// vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 
 	mesh->placeIteratorAtBeginning();
 	for (unsigned i = 0; i < faceCount; ++i)
 	{
-		CCCoreLib::VerticesIndexes*tsi = mesh->getNextTriangleVertIndexes();
+		CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes();
 
 		const CCVector3* A = vertices->getPointPersistentPtr(tsi->i1);
 		const CCVector3* B = vertices->getPointPersistentPtr(tsi->i2);
 		const CCVector3* C = vertices->getPointPersistentPtr(tsi->i3);
-		//compute face normal (right hand rule)
+		// compute face normal (right hand rule)
 		CCVector3 N = (*B - *A).cross(*C - *A);
 
 		//%e = scientific notation
@@ -259,7 +256,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 			return CC_FERR_WRITING;
 		}
 
-		//progress
+		// progress
 		if (pDlg && !nprogress.oneStep())
 		{
 			return CC_FERR_CANCELED_BY_USER;
@@ -279,57 +276,57 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 {
 	ccLog::Print(QString("[STL] Loading '%1'").arg(filename));
 
-	//try to open the file
+	// try to open the file
 	QFile fp(filename);
 	if (!fp.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
 
-	//ASCII OR BINARY?
+	// ASCII OR BINARY?
 	QString name("mesh");
-	bool ascii = true;
+	bool    ascii = true;
 	{
-		//buffer
-		char header[80] = { 0 };
-		qint64 sz = fp.read(header, 80);
+		// buffer
+		char   header[80] = {0};
+		qint64 sz         = fp.read(header, 80);
 		if (sz < 80)
 		{
-			//either ASCII or BINARY STL FILES are always > 80 bytes
+			// either ASCII or BINARY STL FILES are always > 80 bytes
 			return sz == 0 ? CC_FERR_READING : CC_FERR_MALFORMED_FILE;
 		}
-		//normally, binary files shouldn't start by 'solid'
+		// normally, binary files shouldn't start by 'solid'
 		if (!QString(header).trimmed().toUpper().startsWith("SOLID"))
 		{
 			ascii = false;
 		}
 		else //... but sadly some BINARY files does start by SOLID?!!!! (wtf)
 		{
-			//go back to the beginning of the file
+			// go back to the beginning of the file
 			fp.seek(0);
 
 			QTextStream stream(&fp);
-			//skip first line
+			// skip first line
 			stream.readLine();
-			//we look if the second line (if any) starts by 'facet'
+			// we look if the second line (if any) starts by 'facet'
 			QString line = stream.readLine();
-			ascii = true;
+			ascii        = true;
 			if (line.isEmpty()
-				|| fp.error() != QFile::NoError
-				|| !QString(line).trimmed().toUpper().startsWith("FACET"))
+			    || fp.error() != QFile::NoError
+			    || !QString(line).trimmed().toUpper().startsWith("FACET"))
 			{
 				ascii = false;
 			}
 		}
-		//go back to the beginning of the file
+		// go back to the beginning of the file
 		fp.seek(0);
 	}
 	ccLog::Print("[STL] Detected format: %s", ascii ? "ASCII" : "BINARY");
 
-	//vertices
+	// vertices
 	ccPointCloud* vertices = new ccPointCloud("vertices");
-	//mesh
+	// mesh
 	ccMesh* mesh = new ccMesh(vertices);
 	mesh->setName(name);
-	//add normals
+	// add normals
 	mesh->setTriNormsTable(new NormsIndexesTableType());
 
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
@@ -347,7 +344,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	unsigned faceCount = mesh->size();
 	ccLog::Print("[STL] %i points, %i face(s)", vertCount, faceCount);
 
-	//do some cleaning
+	// do some cleaning
 	{
 		vertices->shrinkToFit();
 		mesh->shrinkToFit();
@@ -358,33 +355,33 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 	}
 
-	//remove duplicated vertices
+	// remove duplicated vertices
 	mesh->mergeDuplicatedVertices(ccMesh::DefaultMergeDuplicateVerticesLevel, parameters.parentWidget);
-	vertices = nullptr; //warning, after this point, 'vertices' is not valid anymore
+	vertices = nullptr; // warning, after this point, 'vertices' is not valid anymore
 
 	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
-	if (mesh->size() != 0 && meshVertices) //their might not remain anymore triangle after 'mergeDuplicatedVertices'
+	if (mesh->size() != 0 && meshVertices) // their might not remain anymore triangle after 'mergeDuplicatedVertices'
 	{
 		NormsIndexesTableType* normals = mesh->getTriNormsTable();
 		if (normals)
 		{
-			//normals->link();
-			//mesh->addChild(normals); //automatically done by setTriNormsTable
+			// normals->link();
+			// mesh->addChild(normals); //automatically done by setTriNormsTable
 			mesh->showNormals(true);
 		}
 		else
 		{
-			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
-			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-			//if (mesh->computeNormals())
+			// DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+			// Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+			// if (mesh->computeNormals())
 			//	mesh->showNormals(true);
-			//else
+			// else
 			//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
 			ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 		}
 
 		meshVertices->setEnabled(false);
-		//meshVertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
+		// meshVertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 		mesh->addChild(meshVertices);
 
 		container.addChild(mesh);
@@ -395,21 +392,21 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 		mesh = nullptr;
 		return CC_FERR_NO_LOAD;
 	}
-	
+
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
-	ccMesh* mesh,
-	ccPointCloud* vertices,
-	LoadParameters& parameters)
+CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
+                                       ccMesh*         mesh,
+                                       ccPointCloud*   vertices,
+                                       LoadParameters& parameters)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
-	//text stream
+	// text stream
 	QTextStream stream(&fp);
 
-	//1st line: 'solid name'
+	// 1st line: 'solid name'
 	QString name("mesh");
 	{
 		QString currentLine = stream.readLine();
@@ -423,7 +420,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			ccLog::Warning("[STL] File should begin by 'solid [name]'!");
 			return CC_FERR_MALFORMED_FILE;
 		}
-		//Extract name
+		// Extract name
 		if (tokens.size() > 1)
 		{
 			tokens.removeAt(0);
@@ -432,7 +429,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	}
 	mesh->setName(name);
 
-	//progress dialog
+	// progress dialog
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
@@ -444,14 +441,14 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		QApplication::processEvents();
 	}
 
-	//current vertex shift
+	// current vertex shift
 	CCVector3d Pshift(0, 0, 0);
 
-	unsigned pointCount = 0;
-	unsigned faceCount = 0;
-	static const unsigned s_defaultMemAllocCount = 65536;
-	bool normalWarningAlreadyDisplayed = false;
-	NormsIndexesTableType* normals = mesh->getTriNormsTable();
+	unsigned               pointCount                    = 0;
+	unsigned               faceCount                     = 0;
+	static const unsigned  s_defaultMemAllocCount        = 65536;
+	bool                   normalWarningAlreadyDisplayed = false;
+	NormsIndexesTableType* normals                       = mesh->getTriNormsTable();
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -459,9 +456,9 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	while (true)
 	{
 		CCVector3 N;
-		bool normalIsOk = false;
+		bool      normalIsOk = false;
 
-		//1st line of a 'facet': "facet normal ni nj nk" / or 'endsolid' (i.e. end of file)
+		// 1st line of a 'facet': "facet normal ni nj nk" / or 'endsolid' (i.e. end of file)
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty())
@@ -488,7 +485,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 			if (normals && tokens.size() >= 5)
 			{
-				//let's try to read normal
+				// let's try to read normal
 				if (tokens[1].toUpper() == "NORMAL")
 				{
 					N.x = static_cast<PointCoordinateType>(tokens[2].toDouble(&normalIsOk));
@@ -519,12 +516,12 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			}
 		}
 
-		//2nd line: 'outer loop'
+		// 2nd line: 'outer loop'
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
-				|| fp.error() != QFile::NoError
-				|| !QString(currentLine).trimmed().toUpper().startsWith("OUTER LOOP"))
+			    || fp.error() != QFile::NoError
+			    || !QString(currentLine).trimmed().toUpper().startsWith("OUTER LOOP"))
 			{
 				ccLog::Warning("[STL] Error: expecting 'outer loop' on line #%i", lineCount + 1);
 				result = CC_FERR_READING;
@@ -533,15 +530,15 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			++lineCount;
 		}
 
-		//3rd to 5th lines: 'vertex vix viy viz'
-		unsigned vertIndexes[3]{ 0, 0, 0 };
-		//unsigned pointCountBefore = pointCount;
+		// 3rd to 5th lines: 'vertex vix viy viz'
+		unsigned vertIndexes[3]{0, 0, 0};
+		// unsigned pointCountBefore = pointCount;
 		for (unsigned i = 0; i < 3; ++i)
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
-				|| fp.error() != QFile::NoError
-				|| !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
+			    || fp.error() != QFile::NoError
+			    || !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
 			{
 				ccLog::Warning("[STL] Error: expecting a line starting by 'vertex' on line #%i", lineCount + 1);
 				result = CC_FERR_MALFORMED_FILE;
@@ -557,11 +554,11 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				break;
 			}
 
-			//read vertex
+			// read vertex
 			CCVector3d Pd(0, 0, 0);
 			{
 				bool vertexIsOk = false;
-				Pd.x = tokens[1].toDouble(&vertexIsOk);
+				Pd.x            = tokens[1].toDouble(&vertexIsOk);
 				if (vertexIsOk)
 				{
 					Pd.y = tokens[2].toDouble(&vertexIsOk);
@@ -576,7 +573,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				}
 			}
 
-			//first point: check for 'big' coordinates
+			// first point: check for 'big' coordinates
 			if (pointCount == 0)
 			{
 				bool preserveCoordinateShift = true;
@@ -592,13 +589,13 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 			CCVector3 P = (Pd + Pshift).toPC();
 
-			//cloud is already full?
+			// cloud is already full?
 			if (vertices->capacity() == pointCount && !vertices->reserve(pointCount + s_defaultMemAllocCount))
 			{
 				return CC_FERR_NOT_ENOUGH_MEMORY;
 			}
 
-			//insert new point
+			// insert new point
 			vertIndexes[i] = pointCount++;
 			vertices->addPoint(P);
 		}
@@ -608,10 +605,10 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			break;
 		}
 
-		//we have successfully read the 3 vertices
-		//let's add a new triangle
+		// we have successfully read the 3 vertices
+		// let's add a new triangle
 		{
-			//mesh is full?
+			// mesh is full?
 			if (mesh->capacity() == faceCount)
 			{
 				if (!mesh->reserve(faceCount + s_defaultMemAllocCount))
@@ -623,7 +620,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				if (normals)
 				{
 					bool success = normals->reserveSafe(mesh->capacity());
-					if (success && faceCount == 0) //specific case: allocate per triangle normal indexes the first time!
+					if (success && faceCount == 0) // specific case: allocate per triangle normal indexes the first time!
 					{
 						success = mesh->reservePerTriangleNormalIndexes();
 					}
@@ -643,26 +640,26 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			++faceCount;
 		}
 
-		//and a new normal?
+		// and a new normal?
 		if (normals)
 		{
 			int index = -1;
 			if (normalIsOk)
 			{
-				//compress normal
-				index = static_cast<int>(normals->currentSize());
+				// compress normal
+				index                     = static_cast<int>(normals->currentSize());
 				CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 				normals->addElement(nIndex);
 			}
 			mesh->addTriangleNormalIndexes(index, index, index);
 		}
 
-		//6th line: 'endloop'
+		// 6th line: 'endloop'
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
-				|| fp.error() != QFile::NoError
-				|| !QString(currentLine).trimmed().toUpper().startsWith("ENDLOOP"))
+			    || fp.error() != QFile::NoError
+			    || !QString(currentLine).trimmed().toUpper().startsWith("ENDLOOP"))
 			{
 				ccLog::Warning("[STL] Error: expecting 'endnloop' on line #%i", lineCount + 1);
 				result = CC_FERR_MALFORMED_FILE;
@@ -671,12 +668,12 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			++lineCount;
 		}
 
-		//7th and last line: 'endfacet'
+		// 7th and last line: 'endfacet'
 		{
 			QString currentLine = stream.readLine();
 			if (currentLine.isEmpty()
-				|| fp.error() != QFile::NoError
-				|| !QString(currentLine).trimmed().toUpper().startsWith("ENDFACET"))
+			    || fp.error() != QFile::NoError
+			    || !QString(currentLine).trimmed().toUpper().startsWith("ENDFACET"))
 			{
 				ccLog::Warning("[STL] Error: expecting 'endfacet' on line #%i", lineCount + 1);
 				result = CC_FERR_MALFORMED_FILE;
@@ -685,7 +682,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			++lineCount;
 		}
 
-		//progress
+		// progress
 		if (pDlg && (faceCount % 1024) == 0)
 		{
 			if (pDlg->wasCanceled())
@@ -707,21 +704,21 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	return result;
 }
 
-CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
-	ccMesh* mesh,
-	ccPointCloud* vertices,
-	LoadParameters& parameters)
+CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
+                                        ccMesh*         mesh,
+                                        ccPointCloud*   vertices,
+                                        LoadParameters& parameters)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
 	unsigned pointCount = 0;
-	unsigned faceCount = 0;
+	unsigned faceCount  = 0;
 
-	//UINT8[80] Header (we skip it)
+	// UINT8[80] Header (we skip it)
 	fp.seek(80);
-	mesh->setName("Mesh"); //hard to guess solid name with binary files!
+	mesh->setName("Mesh"); // hard to guess solid name with binary files!
 
-	//UINT32 Number of triangles
+	// UINT32 Number of triangles
 	{
 		unsigned tmpInt32;
 		if (fp.read((char*)&tmpInt32, 4) < 4)
@@ -741,7 +738,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		mesh->setTriNormsTable(nullptr);
 	}
 
-	//progress dialog
+	// progress dialog
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
@@ -753,27 +750,27 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	}
 	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
 
-	//current vertex shift
+	// current vertex shift
 	CCVector3d Pshift(0, 0, 0);
 
 	for (unsigned f = 0; f < faceCount; ++f)
 	{
-		//REAL32[3] Normal vector
+		// REAL32[3] Normal vector
 		assert(sizeof(float) == 4);
 		CCVector3 N;
 		if (fp.read((char*)N.u, 12) < 12)
 			return CC_FERR_READING;
 
-		//3 vertices
+		// 3 vertices
 		unsigned vertIndexes[3];
 		for (unsigned i = 0; i < 3; ++i)
 		{
-			//REAL32[3] Vertex 1,2 & 3
+			// REAL32[3] Vertex 1,2 & 3
 			float Pf[3];
 			if (fp.read((char*)Pf, 12) < 0)
 				return CC_FERR_READING;
 
-			//first point: check for 'big' coordinates
+			// first point: check for 'big' coordinates
 			CCVector3d Pd(Pf[0], Pf[1], Pf[2]);
 			if (pointCount == 0)
 			{
@@ -790,35 +787,35 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 			CCVector3 P = (Pd + Pshift).toPC();
 
-			//insert new point
+			// insert new point
 			vertIndexes[i] = pointCount++;
 			vertices->addPoint(P);
 		}
 
-		//UINT16 Attribute byte count (not used)
+		// UINT16 Attribute byte count (not used)
 		{
 			char a[2];
 			if (fp.read(a, 2) < 0)
 				return CC_FERR_READING;
 		}
 
-		//we have successfully read the 3 vertices
-		//let's add a new triangle
+		// we have successfully read the 3 vertices
+		// let's add a new triangle
 		{
 			mesh->addTriangle(vertIndexes[0], vertIndexes[1], vertIndexes[2]);
 		}
 
-		//and a new normal?
+		// and a new normal?
 		if (normals)
 		{
-			//compress normal
-			int index = static_cast<int>(normals->currentSize());
+			// compress normal
+			int                index  = static_cast<int>(normals->currentSize());
 			CompressedNormType nIndex = ccNormalVectors::GetNormIndex(N.u);
 			normals->addElement(nIndex);
 			mesh->addTriangleNormalIndexes(index, index, index);
 		}
 
-		//progress
+		// progress
 		if (pDlg && !nProgress.oneStep())
 		{
 			break;

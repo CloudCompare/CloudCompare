@@ -1,52 +1,52 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
+// Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
 
 #include "ccColorScaleEditorWidget.h"
 
-//Qt
+// Qt
 #include <QColorDialog>
 #include <QHBoxLayout>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QVBoxLayout>
 
-//System
+// System
 #include <cassert>
 #include <cmath>
 
 constexpr int DEFAULT_SLIDER_SYMBOL_SIZE = 8;
-constexpr int DEFAULT_MARGIN = DEFAULT_SLIDER_SYMBOL_SIZE / 2 + 1;
-constexpr int DEFAULT_TEXT_MARGIN = 2;
-constexpr int DEFAULT_LABEL_HEIGHT = 12;
+constexpr int DEFAULT_MARGIN             = DEFAULT_SLIDER_SYMBOL_SIZE / 2 + 1;
+constexpr int DEFAULT_TEXT_MARGIN        = 2;
+constexpr int DEFAULT_LABEL_HEIGHT       = 12;
 
 /*******************************/
 /*** ColorScaleElementSlider ***/
 /*******************************/
 
-ColorScaleElementSlider::ColorScaleElementSlider(	double relativePos/*=0.0*/,
-													QColor color/*=Qt::black*/,
-													QWidget* parent/*=nullptr*/,
-													Qt::Orientation orientation/*=Qt::Horizontal*/ )
-	: QWidget(parent)
-	, ccColorScaleElement(relativePos, color)
-	, m_selected(false)
-	, m_orientation(orientation)
+ColorScaleElementSlider::ColorScaleElementSlider(double          relativePos /*=0.0*/,
+                                                 QColor          color /*=Qt::black*/,
+                                                 QWidget*        parent /*=nullptr*/,
+                                                 Qt::Orientation orientation /*=Qt::Horizontal*/)
+    : QWidget(parent)
+    , ccColorScaleElement(relativePos, color)
+    , m_selected(false)
+    , m_orientation(orientation)
 {
 	if (m_orientation == Qt::Horizontal)
 		setFixedSize(DEFAULT_SLIDER_SYMBOL_SIZE, 2 * DEFAULT_SLIDER_SYMBOL_SIZE);
@@ -61,7 +61,7 @@ void ColorScaleElementSlider::paintEvent(QPaintEvent* e)
 	painter.setPen(m_selected ? Qt::red : Qt::black);
 	painter.setBrush(m_color);
 
-	QRect box(0, 0, DEFAULT_SLIDER_SYMBOL_SIZE - 1, DEFAULT_SLIDER_SYMBOL_SIZE - 1);
+	QRect    box(0, 0, DEFAULT_SLIDER_SYMBOL_SIZE - 1, DEFAULT_SLIDER_SYMBOL_SIZE - 1);
 	QPolygon pointyHead;
 	if (m_orientation == Qt::Horizontal)
 	{
@@ -149,8 +149,8 @@ int ColorScaleElementSliders::indexOf(ColorScaleElementSlider* slider)
 /*** ColorBarWidget ***/
 /**********************/
 
-ColorBarWidget::ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
-	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
+ColorBarWidget::ColorBarWidget(SharedColorScaleElementSliders sliders, QWidget* parent /*=nullptr*/, Qt::Orientation orientation /*=Qt::Horizontal*/)
+    : ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
 {
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 	setContentsMargins(0, 0, 0, 0);
@@ -210,7 +210,7 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 
 		assert(m_sliders->elements().front()->getRelativePos() == 0.0 && m_sliders->elements().back()->getRelativePos() == 1.0);
 
-		//color gradient
+		// color gradient
 		{
 			// QColorGradient is not accurate enough, instead we create a gradient image ourselves
 			QImage colorMap;
@@ -225,9 +225,9 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 
 			int length = (m_orientation == Qt::Horizontal ? colorMap.width() : colorMap.height());
 
-			ColorScaleElementSlider* previousStep = m_sliders->element(0);
-			int nextStepIndex = 0;
-			ColorScaleElementSlider* nextStep = m_sliders->element(nextStepIndex);
+			ColorScaleElementSlider* previousStep  = m_sliders->element(0);
+			int                      nextStepIndex = 0;
+			ColorScaleElementSlider* nextStep      = m_sliders->element(nextStepIndex);
 			for (int i = 0; i < length; ++i)
 			{
 				double p = (i + 0.5) / length;
@@ -246,13 +246,12 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 				QColor interpColor;
 				if (previousStep->getRelativePos() < nextStep->getRelativePos())
 				{
-					QColor nextColor = nextStep->getColor();
+					QColor nextColor      = nextStep->getColor();
 					double distToPrevious = p - previousStep->getRelativePos();
-					double ratio = std::min(distToPrevious / (nextStep->getRelativePos() - previousStep->getRelativePos()), 1.0);
-					interpColor = qRgb(	InterpColorValue(previousColor.red(), nextColor.red(), ratio),
-										InterpColorValue(previousColor.green(), nextColor.green(), ratio),
-										InterpColorValue(previousColor.blue(), nextColor.blue(), ratio));
-
+					double ratio          = std::min(distToPrevious / (nextStep->getRelativePos() - previousStep->getRelativePos()), 1.0);
+					interpColor           = qRgb(InterpColorValue(previousColor.red(), nextColor.red(), ratio),
+                                       InterpColorValue(previousColor.green(), nextColor.green(), ratio),
+                                       InterpColorValue(previousColor.blue(), nextColor.blue(), ratio));
 				}
 				else
 				{
@@ -273,7 +272,7 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 			painter.drawRect(contentRect);
 		}
 
-		//draw a line for each slider position (apart from the first and the last one)
+		// draw a line for each slider position (apart from the first and the last one)
 		{
 			QPoint A = contentRect.topLeft();
 			QPoint B = contentRect.bottomRight();
@@ -306,8 +305,8 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 /*** SlidersWidget ***/
 /*********************/
 
-SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
-	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
+SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent /*=nullptr*/, Qt::Orientation orientation /*=Qt::Horizontal*/)
+    : ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
 {
 	setContentsMargins(0, 0, 0, 0);
 	if (m_orientation == Qt::Horizontal)
@@ -322,21 +321,21 @@ SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* pa
 	}
 }
 
-void SlidersWidget::select(int index, bool silent/*=false*/)
+void SlidersWidget::select(int index, bool silent /*=false*/)
 {
 	assert(m_sliders);
 
-	//look for previously selected slider
+	// look for previously selected slider
 	int activeSliderIndex = m_sliders->selected();
 
-	if (index == activeSliderIndex) //nothing to do
+	if (index == activeSliderIndex) // nothing to do
 		return;
 
-	//deselect old one (if any)
+	// deselect old one (if any)
 	if (activeSliderIndex >= 0)
 		m_sliders->element(activeSliderIndex)->setSelected(false);
 
-	//select new one (if any)
+	// select new one (if any)
 	if (index >= 0)
 		m_sliders->element(index)->setSelected(true);
 
@@ -346,7 +345,7 @@ void SlidersWidget::select(int index, bool silent/*=false*/)
 
 ColorScaleElementSlider* SlidersWidget::addNewSlider(double relativePos, QColor color)
 {
-	select(-1); //be sure to deselect any selected slider before modifying the global set contents!
+	select(-1); // be sure to deselect any selected slider before modifying the global set contents!
 
 	ColorScaleElementSlider* slider = new ColorScaleElementSlider(relativePos, color, this, m_orientation);
 
@@ -384,7 +383,7 @@ void SlidersWidget::updateAllSlidersPos()
 	for (auto it = m_sliders->elements().begin(); it != m_sliders->elements().end(); ++it)
 	{
 		ColorScaleElementSlider* slider = *it;
-		int pos = static_cast<int>(slider->getRelativePos() * rectLength);
+		int                      pos    = static_cast<int>(slider->getRelativePos() * rectLength);
 
 		if (m_orientation == Qt::Horizontal)
 		{
@@ -445,14 +444,14 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 	if (!m_sliders || m_sliders->size() <= 2)
 		return;
 
-	int pos = (m_orientation == Qt::Horizontal ? e->pos().x() : e->pos().y());
+	int    pos         = (m_orientation == Qt::Horizontal ? e->pos().x() : e->pos().y());
 	double relativePos = static_cast<double>(pos - DEFAULT_MARGIN) / static_cast<double>(length());
 
 	if (relativePos > 0.0 && relativePos < 1.0)
 	{
 		int activeSliderIndex = m_sliders->selected();
 
-		if (activeSliderIndex > 0 && activeSliderIndex + 1 < m_sliders->size()) //first and last sliders can't move!
+		if (activeSliderIndex > 0 && activeSliderIndex + 1 < m_sliders->size()) // first and last sliders can't move!
 		{
 			ColorScaleElementSlider* slider = m_sliders->element(activeSliderIndex);
 			assert(slider && slider->isSelected());
@@ -470,7 +469,7 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 
 			e->accept();
 
-			//update();
+			// update();
 		}
 	}
 }
@@ -489,7 +488,7 @@ void SlidersWidget::mouseDoubleClickEvent(QMouseEvent* e)
 				ColorScaleElementSlider* slider = m_sliders->element(i);
 				assert(slider && slider->isSelected());
 
-				//spawn a color choosing dialog?
+				// spawn a color choosing dialog?
 				QColor newColor = QColorDialog::getColor(slider->getColor(), this);
 				if (newColor.isValid() && newColor != slider->getColor())
 				{
@@ -507,10 +506,10 @@ void SlidersWidget::mouseDoubleClickEvent(QMouseEvent* e)
 /*** SliderLabelWidget ***/
 /*************************/
 
-SliderLabelWidget::SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
-	: ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
-	, m_textColor(Qt::black)
-	, m_precision(6)
+SliderLabelWidget::SliderLabelWidget(SharedColorScaleElementSliders sliders, QWidget* parent /*=nullptr*/, Qt::Orientation orientation /*=Qt::Horizontal*/)
+    : ColorScaleEditorBaseWidget(sliders, orientation, DEFAULT_MARGIN, parent)
+    , m_textColor(Qt::black)
+    , m_precision(6)
 {
 	setContentsMargins(0, 0, 0, 0);
 }
@@ -534,16 +533,16 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 		{
 			int labelHeight = fm.height() + DEFAULT_TEXT_MARGIN;
 
-			//adjust height if necessary
+			// adjust height if necessary
 			setMinimumSize(0, labelHeight);
 
 			for (int i = 0; i < m_sliders->size(); i++)
 			{
 				ColorScaleElementSlider* slider = m_sliders->element(i);
-				int pos = slider->pos().x();
+				int                      pos    = slider->pos().x();
 
-				double val = slider->getRelativePos();
-				QString label = QString("%1 %").arg(val*100.0, 0, 'f', std::max(m_precision - 2, 0)); //display as a percentage
+				double  val   = slider->getRelativePos();
+				QString label = QString("%1 %").arg(val * 100.0, 0, 'f', std::max(m_precision - 2, 0)); // display as a percentage
 
 				int labelWidth = fm.width(label);
 				if (pos + labelWidth > width())
@@ -554,11 +553,11 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 		}
 		else
 		{
-			//adjust width if necessary
+			// adjust width if necessary
 			{
 				QString firstLabel = QString::number(m_sliders->elements().first()->getRelativePos(), 'f', m_precision);
-				QString lastLabel = QString::number(m_sliders->elements().last()->getRelativePos(), 'f', m_precision);
-				int labelWidth = std::max(fm.width(firstLabel), fm.width(lastLabel)) + 2 * DEFAULT_TEXT_MARGIN;
+				QString lastLabel  = QString::number(m_sliders->elements().last()->getRelativePos(), 'f', m_precision);
+				int     labelWidth = std::max(fm.width(firstLabel), fm.width(lastLabel)) + 2 * DEFAULT_TEXT_MARGIN;
 				setMinimumSize(labelWidth, 0);
 			}
 			// draw the text for vertical orientation
@@ -568,8 +567,8 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 
 				int pos = slider->pos().y();
 
-				double val = slider->getRelativePos();
-				QString label = QString("%1 %").arg(val*100.0, 0, 'f', std::max(m_precision - 2, 0)); //display as a percentage
+				double  val   = slider->getRelativePos();
+				QString label = QString("%1 %").arg(val * 100.0, 0, 'f', std::max(m_precision - 2, 0)); // display as a percentage
 
 				painter.drawText(DEFAULT_TEXT_MARGIN, pos + slider->height(), label);
 			}
@@ -583,20 +582,20 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 /*** ccColorScaleEditorWidget ***/
 /********************************/
 
-ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=nullptr*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
-	: ColorScaleEditorBaseWidget(SharedColorScaleElementSliders(new ColorScaleElementSliders), orientation, 0, parent)
+ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent /*=nullptr*/, Qt::Orientation orientation /*=Qt::Horizontal*/)
+    : ColorScaleEditorBaseWidget(SharedColorScaleElementSliders(new ColorScaleElementSliders), orientation, 0, parent)
 {
-	//size and margin
+	// size and margin
 	setMinimumSize(40, 40);
 	setContentsMargins(0, 0, 0, 0);
 
-	//layout
+	// layout
 	setLayout(m_orientation == Qt::Horizontal ? static_cast<QLayout*>(new QVBoxLayout()) : static_cast<QLayout*>(new QHBoxLayout()));
 	layout()->setMargin(0);
 	layout()->setSpacing(0);
 	layout()->setContentsMargins(0, 0, 0, 0);
 
-	//color bar
+	// color bar
 	{
 		m_colorBarWidget = new ColorBarWidget(m_sliders, parent, orientation);
 		m_colorBarWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -606,13 +605,13 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=nullptr*/, 
 		connect(m_colorBarWidget, &ColorBarWidget::pointClicked, this, &ccColorScaleEditorWidget::onPointClicked);
 	}
 
-	//sliders widget
+	// sliders widget
 	{
 		m_slidersWidget = new SlidersWidget(m_sliders, parent, orientation);
 		m_slidersWidget->setContentsMargins(0, 0, 0, 0);
 		layout()->addWidget(m_slidersWidget);
 
-		//add default min and max elements
+		// add default min and max elements
 		m_slidersWidget->addNewSlider(0.0, Qt::blue);
 		m_slidersWidget->addNewSlider(1.0, Qt::red);
 
@@ -620,7 +619,7 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=nullptr*/, 
 		connect(m_slidersWidget, &SlidersWidget::sliderSelected, this, &ccColorScaleEditorWidget::onSliderSelected);
 	}
 
-	//Labels widget
+	// Labels widget
 	{
 		m_labelsWidget = new SliderLabelWidget(m_sliders, parent, orientation);
 		if (m_orientation == Qt::Horizontal)
@@ -634,7 +633,7 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=nullptr*/, 
 			m_labelsWidget->setFixedWidth(DEFAULT_LABEL_HEIGHT);
 		}
 		layout()->addWidget(m_labelsWidget);
-		m_labelsWidget->setVisible(false); //hidden by default
+		m_labelsWidget->setVisible(false); // hidden by default
 	}
 }
 
@@ -646,7 +645,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 	if (!m_sliders)
 		return;
 
-	//look first if this position corresponds to an already existing slider
+	// look first if this position corresponds to an already existing slider
 	const double maxDist = static_cast<double>(DEFAULT_SLIDER_SYMBOL_SIZE) / m_colorBarWidget->length();
 	for (int i = 0; i < m_sliders->size(); ++i)
 	{
@@ -657,19 +656,19 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 		}
 	}
 
-	//determine the new slider default color
+	// determine the new slider default color
 	QColor color = Qt::white;
 	if (m_sliders->size() > 1)
 	{
 		QLinearGradient gradient(0, 0, 256, 0);
-		//fill gradient with sliders
+		// fill gradient with sliders
 		for (int i = 0; i < m_sliders->size(); i++)
 		{
 			ColorScaleElementSlider* slider = m_sliders->element(i);
 			gradient.setColorAt(slider->getRelativePos(), slider->getColor());
 		}
-		//generate fake color bar (1 pixel high)
-		QPixmap pix(256, 1);
+		// generate fake color bar (1 pixel high)
+		QPixmap  pix(256, 1);
 		QPainter painter(&pix);
 		painter.fillRect(pix.rect(), gradient);
 		color = pix.toImage().pixel(static_cast<int>(relativePos * 255), 0);
@@ -711,8 +710,8 @@ void ccColorScaleEditorWidget::setSliders(SharedColorScaleElementSliders sliders
 {
 	if (m_sliders)
 	{
-		//onSliderSelected(-1);
-		//release all previously defined sliders
+		// onSliderSelected(-1);
+		// release all previously defined sliders
 		m_sliders->clear();
 	}
 
@@ -742,8 +741,8 @@ void ccColorScaleEditorWidget::importColorScale(ccColorScale::Shared scale)
 		assert(scale->stepCount() >= 2);
 		for (int i = 0; i < scale->stepCount(); ++i)
 		{
-			double relativePos = scale->step(i).getRelativePos();
-			const QColor& color = scale->step(i).getColor();
+			double        relativePos = scale->step(i).getRelativePos();
+			const QColor& color       = scale->step(i).getColor();
 			m_slidersWidget->addNewSlider(relativePos, color);
 		}
 	}
@@ -807,7 +806,7 @@ void ccColorScaleEditorWidget::deleteStep(int index)
 	}
 }
 
-void ccColorScaleEditorWidget::setSelectedStepIndex(int index, bool silent/*=false*/)
+void ccColorScaleEditorWidget::setSelectedStepIndex(int index, bool silent /*=false*/)
 {
 	if (m_slidersWidget)
 		m_slidersWidget->select(index, silent);
@@ -833,12 +832,12 @@ void ccColorScaleEditorWidget::setStepRelativePosition(int index, double relativ
 	{
 		if (index == 0 || index + 1 == m_sliders->size())
 		{
-			//update all sliders!
+			// update all sliders!
 			m_slidersWidget->updateAllSlidersPos();
 		}
 		else
 		{
-			//update only the selected one
+			// update only the selected one
 			m_slidersWidget->updateSliderPos(index);
 		}
 	}

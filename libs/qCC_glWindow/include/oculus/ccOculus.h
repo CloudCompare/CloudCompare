@@ -1,47 +1,47 @@
-//##########################################################################
-//#                                                                        #
-//#                            CLOUDCOMPARE                                #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: CloudCompare project                      #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                            CLOUDCOMPARE                                #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 of the License.               #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: CloudCompare project                      #
+// #                                                                        #
+// ##########################################################################
 
-//qCC_db
+// qCC_db
 #include <ccIncludeGL.h>
 #include <ccLog.h>
 
-//CCLib
+// CCLib
 #include <CCGeom.h>
 
-//CCFbo
+// CCFbo
 #include <ccFrameBufferObject.h>
 
-//OVRlib
+// OVRlib
+#include <Extras/OVR_Math.h>
 #include <OVR_CAPI.h>
 #include <OVR_CAPI_GL.h>
-#include <Extras/OVR_Math.h>
 
-//system
+// system
 #include <vector>
 
-//Oculus SDK 'session'
+// Oculus SDK 'session'
 struct OculusHMD
 {
 	OculusHMD()
-		: session(nullptr)
-		, fbo(nullptr)
-		, hasTextureSet(false)
-		, lastOVRPos(0, 0, 0)
-		, hasLastOVRPos(false)
+	    : session(nullptr)
+	    , fbo(nullptr)
+	    , hasTextureSet(false)
+	    , lastOVRPos(0, 0, 0)
+	    , hasLastOVRPos(false)
 	{
 		textureSize.w = textureSize.h = 0;
 	}
@@ -55,7 +55,7 @@ struct OculusHMD
 	{
 		if (session && session != s)
 		{
-			//auto-stop
+			// auto-stop
 			stop(false);
 		}
 
@@ -78,37 +78,38 @@ struct OculusHMD
 			return false;
 		}
 
-		ovrHmdDesc hmdDesc = ovr_GetHmdDesc(session);
-		ovrSizei recommendedTex0Size = ovr_GetFovTextureSize(session, ovrEye_Left, hmdDesc.DefaultEyeFov[0], 1.0f);
-		ovrSizei recommendedTex1Size = ovr_GetFovTextureSize(session, ovrEye_Right, hmdDesc.DefaultEyeFov[1], 1.0f);
+		ovrHmdDesc hmdDesc             = ovr_GetHmdDesc(session);
+		ovrSizei   recommendedTex0Size = ovr_GetFovTextureSize(session, ovrEye_Left, hmdDesc.DefaultEyeFov[0], 1.0f);
+		ovrSizei   recommendedTex1Size = ovr_GetFovTextureSize(session, ovrEye_Right, hmdDesc.DefaultEyeFov[1], 1.0f);
 
-		//determine the rendering FOV and allocate the required ovrSwapTextureSet (see https://developer.oculus.com/documentation/pcsdk/latest/concepts/dg-render/)
+		// determine the rendering FOV and allocate the required ovrSwapTextureSet (see https://developer.oculus.com/documentation/pcsdk/latest/concepts/dg-render/)
 		ovrSizei bufferSize;
 		{
-			bufferSize.w  = recommendedTex0Size.w + recommendedTex1Size.w;
+			bufferSize.w = recommendedTex0Size.w + recommendedTex1Size.w;
 			bufferSize.h = std::max(recommendedTex0Size.h, recommendedTex1Size.h);
 		}
 
-		if (	!hasTextureSet
-			||	!fbo
-			||	textureSize.w != bufferSize.w
-			||	textureSize.h != bufferSize.h )
+		if (!hasTextureSet
+		    || !fbo
+		    || textureSize.w != bufferSize.w
+		    || textureSize.h != bufferSize.h)
 		{
 			destroyTextureSet();
 
 			ovrTextureSwapChainDesc desc = {};
-			desc.Type = ovrTexture_2D;
-			desc.ArraySize = 1;
-			desc.Format = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
-			desc.Width = bufferSize.w;
-			desc.Height = bufferSize.h;
-			desc.MipLevels = 1;
-			desc.SampleCount = 1;
-			desc.StaticImage = ovrFalse;
+			desc.Type                    = ovrTexture_2D;
+			desc.ArraySize               = 1;
+			desc.Format                  = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
+			desc.Width                   = bufferSize.w;
+			desc.Height                  = bufferSize.h;
+			desc.MipLevels               = 1;
+			desc.SampleCount             = 1;
+			desc.StaticImage             = ovrFalse;
 
 			if (!ovr_CreateTextureSwapChainGL(session,
-				&desc,
-				&textureSwapChain) == ovrSuccess)
+			                                  &desc,
+			                                  &textureSwapChain)
+			    == ovrSuccess)
 			{
 				return false;
 			}
@@ -116,17 +117,17 @@ struct OculusHMD
 
 			assert(!fbo);
 			fbo = new ccFrameBufferObject;
-			if (	!fbo->init(	static_cast<unsigned>(bufferSize.w),
-								static_cast<unsigned>(bufferSize.h) )
-				//||	!fbo->initDepth()
-				)
+			if (!fbo->init(static_cast<unsigned>(bufferSize.w),
+			               static_cast<unsigned>(bufferSize.h))
+			    //||	!fbo->initDepth()
+			)
 			{
 				destroyTextureSet();
 				return false;
 			}
 
 			QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
-			//we create a depth texture for each color texture
+			// we create a depth texture for each color texture
 			assert(depthTextures.empty());
 
 			int textureCount = 0;
@@ -134,14 +135,14 @@ struct OculusHMD
 			depthTextures.resize(textureCount, 0);
 			for (int i = 0; i < textureCount; ++i)
 			{
-				//set the color texture
+				// set the color texture
 				{
 					unsigned int texId;
 					ovr_GetTextureSwapChainBufferGL(session, textureSwapChain, 0, &texId);
 					glFunc->glBindTexture(GL_TEXTURE_2D, texId);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR/*GL_LINEAR_MIPMAP_LINEAR*/);
+					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR /*GL_LINEAR_MIPMAP_LINEAR*/);
 					glFunc->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 					if (context->hasExtension(QByteArrayLiteral("GLE_EXT_texture_filter_anisotropic")))
 					{
@@ -150,7 +151,7 @@ struct OculusHMD
 					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 				}
 
-				//create the depth texture
+				// create the depth texture
 				{
 					glFunc->glPushAttrib(GL_ENABLE_BIT);
 					glFunc->glEnable(GL_TEXTURE_2D);
@@ -173,19 +174,19 @@ struct OculusHMD
 				}
 			}
 
-			//DGM: doesn't work :(
-			//fbo->initDepth();
+			// DGM: doesn't work :(
+			// fbo->initDepth();
 
 			textureSize = bufferSize;
 		}
 
 		// Initialize our single full screen Fov layer.
-		layer.Header.Type      = ovrLayerType_EyeFov;
-		layer.Header.Flags     = ovrLayerFlag_TextureOriginAtBottomLeft;
-		layer.ColorTexture[0]  = textureSwapChain;
-		layer.ColorTexture[1]  = textureSwapChain;
-		layer.Fov[0]           = eyeRenderDesc[0].Fov;
-		layer.Fov[1]           = eyeRenderDesc[1].Fov;
+		layer.Header.Type       = ovrLayerType_EyeFov;
+		layer.Header.Flags      = ovrLayerFlag_TextureOriginAtBottomLeft;
+		layer.ColorTexture[0]   = textureSwapChain;
+		layer.ColorTexture[1]   = textureSwapChain;
+		layer.Fov[0]            = eyeRenderDesc[0].Fov;
+		layer.Fov[1]            = eyeRenderDesc[1].Fov;
 		layer.Viewport[0].Pos.x = 0;
 		layer.Viewport[0].Pos.y = 0;
 		layer.Viewport[0].Size  = recommendedTex0Size;
@@ -204,12 +205,12 @@ struct OculusHMD
 			return false;
 		}
 
-		//mirrorTexture
+		// mirrorTexture
 		if (!mirror.texture)
 		{
 			ovrMirrorTextureDesc desc;
 			memset(&desc, 0, sizeof(desc));
-			desc.Width = w;
+			desc.Width  = w;
 			desc.Height = h;
 			desc.Format = OVR_FORMAT_R8G8B8A8_UNORM_SRGB;
 
@@ -227,7 +228,6 @@ struct OculusHMD
 				glExt.glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirror.textureID, 0);
 				glExt.glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 				glExt.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
 			}
 			else
 			{
@@ -246,7 +246,7 @@ struct OculusHMD
 			glExt.glDeleteFramebuffers(1, &mirror.fbo);
 			mirror.fbo = 0;
 		}
-		
+
 		if (mirror.texture)
 		{
 			ovr_DestroyMirrorTexture(session, mirror.texture);
@@ -257,11 +257,11 @@ struct OculusHMD
 	void stop(bool autoShutdown = true)
 	{
 		if (session)
-		{ 
-			//destroy the textures (if any)
+		{
+			// destroy the textures (if any)
 			destroyTextureSet();
 
-			//then destroy the session
+			// then destroy the session
 			ovr_Destroy(session);
 			session = 0;
 		}
@@ -321,9 +321,8 @@ struct OculusHMD
 		QSize size;
 		//! FBO
 		GLuint fbo = 0;
-
 	};
-	
+
 	//! Mirror
 	Mirror mirror;
 
@@ -336,7 +335,7 @@ struct OculusHMD
 	//! Texture(s) size
 	ovrSizei textureSize;
 
-	//stereo pair rendering parameters
+	// stereo pair rendering parameters
 	ovrEyeRenderDesc eyeRenderDesc[2];
 	ovrVector3f      hmdToEyeViewOffset[2];
 	ovrLayerEyeFov   layer;
@@ -350,11 +349,23 @@ struct OculusHMD
 static ccGLMatrixd FromOVRMat(const OVR::Matrix4f& ovrMat)
 {
 	ccGLMatrixd ccMat;
-	double* data = ccMat.data();
-	data[0] = ovrMat.M[0][0]; data[4] = ovrMat.M[0][1]; data[8]  = ovrMat.M[0][2]; data[12] = ovrMat.M[0][3];
-	data[1] = ovrMat.M[1][0]; data[5] = ovrMat.M[1][1];	data[9]  = ovrMat.M[1][2]; data[13] = ovrMat.M[1][3];
-	data[2] = ovrMat.M[2][0]; data[6] = ovrMat.M[2][1];	data[10] = ovrMat.M[2][2]; data[14] = ovrMat.M[2][3];
-	data[3] = ovrMat.M[3][0]; data[7] = ovrMat.M[3][1];	data[11] = ovrMat.M[3][2]; data[15] = ovrMat.M[3][3];
+	double*     data = ccMat.data();
+	data[0]          = ovrMat.M[0][0];
+	data[4]          = ovrMat.M[0][1];
+	data[8]          = ovrMat.M[0][2];
+	data[12]         = ovrMat.M[0][3];
+	data[1]          = ovrMat.M[1][0];
+	data[5]          = ovrMat.M[1][1];
+	data[9]          = ovrMat.M[1][2];
+	data[13]         = ovrMat.M[1][3];
+	data[2]          = ovrMat.M[2][0];
+	data[6]          = ovrMat.M[2][1];
+	data[10]         = ovrMat.M[2][2];
+	data[14]         = ovrMat.M[2][3];
+	data[3]          = ovrMat.M[3][0];
+	data[7]          = ovrMat.M[3][1];
+	data[11]         = ovrMat.M[3][2];
+	data[15]         = ovrMat.M[3][3];
 
 	return ccMat;
 }
@@ -362,10 +373,7 @@ static ccGLMatrixd FromOVRMat(const OVR::Matrix4f& ovrMat)
 static OVR::Matrix4f ToOVRMat(const ccGLMatrixd& ccMat)
 {
 	const double* M = ccMat.data();
-	return OVR::Matrix4f(	M[0], M[4], M[8],  M[12],
-							M[1], M[5], M[9],  M[13],
-							M[2], M[6], M[10], M[14],
-							M[3], M[7], M[11], M[15]);
+	return OVR::Matrix4f(M[0], M[4], M[8], M[12], M[1], M[5], M[9], M[13], M[2], M[6], M[10], M[14], M[3], M[7], M[11], M[15]);
 }
 
 static void OVR_CDECL LogCallback(uintptr_t /*userData*/, int level, const char* message)

@@ -1,54 +1,52 @@
 
-//local
+// local
 #include "ccRasterizeTool.h"
 
-//Qt
-#include <QString>
+// Qt
 #include <QMessageBox>
+#include <QString>
 
-//qCC_db
+// qCC_db
 #include "ccCommandRaster.h"
 
+#include <QDateTime>
 #include <ccMesh.h>
 #include <ccProgressDialog.h>
 #include <ccVolumeCalcTool.h>
 
-#include <QDateTime>
+// shared commands
+constexpr char COMMAND_GRID_VERT_DIR[]               = "VERT_DIR";
+constexpr char COMMAND_GRID_STEP[]                   = "GRID_STEP";
+constexpr char COMMAND_GRID_OUTPUT_CLOUD[]           = "OUTPUT_CLOUD";
+constexpr char COMMAND_GRID_OUTPUT_MESH[]            = "OUTPUT_MESH";
+constexpr char COMMAND_GRID_OUTPUT_RASTER_Z[]        = "OUTPUT_RASTER_Z";
+constexpr char COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF[] = "OUTPUT_RASTER_Z_AND_SF";
+constexpr char COMMAND_GRID_OUTPUT_RASTER_RGB[]      = "OUTPUT_RASTER_RGB";
 
-//shared commands
-constexpr char COMMAND_GRID_VERT_DIR[]					= "VERT_DIR";
-constexpr char COMMAND_GRID_STEP[]						= "GRID_STEP";
-constexpr char COMMAND_GRID_OUTPUT_CLOUD[]				= "OUTPUT_CLOUD";
-constexpr char COMMAND_GRID_OUTPUT_MESH[]				= "OUTPUT_MESH";
-constexpr char COMMAND_GRID_OUTPUT_RASTER_Z[]			= "OUTPUT_RASTER_Z";
-constexpr char COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF[]	= "OUTPUT_RASTER_Z_AND_SF";
-constexpr char COMMAND_GRID_OUTPUT_RASTER_RGB[]			= "OUTPUT_RASTER_RGB";
+// Rasterize specific commands
+constexpr char COMMAND_RASTERIZE[]                     = "RASTERIZE";
+constexpr char COMMAND_RASTER_CUSTOM_HEIGHT[]          = "CUSTOM_HEIGHT";
+constexpr char COMMAND_RASTER_FILL_EMPTY_CELLS[]       = "EMPTY_FILL";
+constexpr char COMMAND_RASTER_FILL_MIN_HEIGHT[]        = "MIN_H";
+constexpr char COMMAND_RASTER_FILL_MAX_HEIGHT[]        = "MAX_H";
+constexpr char COMMAND_RASTER_FILL_CUSTOM_HEIGHT[]     = "CUSTOM_H";
+constexpr char COMMAND_RASTER_FILL_INTERPOLATE[]       = "INTERP";
+constexpr char COMMAND_RASTER_FILL_KRIGING[]           = "KRIGING";
+constexpr char COMMAND_RASTER_FILL_KRIGING_KNN[]       = "KRIGING_KNN";
+constexpr char COMMAND_RASTER_PROJ_TYPE[]              = "PROJ";
+constexpr char COMMAND_RASTER_SF_PROJ_TYPE[]           = "SF_PROJ";
+constexpr char COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH[] = "MAX_EDGE_LENGTH";
+constexpr char COMMAND_RASTER_PROJ_MIN[]               = "MIN";
+constexpr char COMMAND_RASTER_PROJ_MAX[]               = "MAX";
+constexpr char COMMAND_RASTER_PROJ_AVG[]               = "AVG";
+constexpr char COMMAND_RASTER_PROJ_MED[]               = "MED";
+constexpr char COMMAND_RASTER_PROJ_INVERSE_VAR[]       = "INV_VAR";
+constexpr char COMMAND_RASTER_RESAMPLE[]               = "RESAMPLE";
 
-//Rasterize specific commands
-constexpr char COMMAND_RASTERIZE[]						= "RASTERIZE";
-constexpr char COMMAND_RASTER_CUSTOM_HEIGHT[]			= "CUSTOM_HEIGHT";
-constexpr char COMMAND_RASTER_FILL_EMPTY_CELLS[]		= "EMPTY_FILL";
-constexpr char COMMAND_RASTER_FILL_MIN_HEIGHT[]			= "MIN_H";
-constexpr char COMMAND_RASTER_FILL_MAX_HEIGHT[]			= "MAX_H";
-constexpr char COMMAND_RASTER_FILL_CUSTOM_HEIGHT[]		= "CUSTOM_H";
-constexpr char COMMAND_RASTER_FILL_INTERPOLATE[]		= "INTERP";
-constexpr char COMMAND_RASTER_FILL_KRIGING[]			= "KRIGING";
-constexpr char COMMAND_RASTER_FILL_KRIGING_KNN[]		= "KRIGING_KNN";
-constexpr char COMMAND_RASTER_PROJ_TYPE[]				= "PROJ";
-constexpr char COMMAND_RASTER_SF_PROJ_TYPE[]			= "SF_PROJ";
-constexpr char COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH[]	= "MAX_EDGE_LENGTH";
-constexpr char COMMAND_RASTER_PROJ_MIN[]				= "MIN";
-constexpr char COMMAND_RASTER_PROJ_MAX[]				= "MAX";
-constexpr char COMMAND_RASTER_PROJ_AVG[]				= "AVG";
-constexpr char COMMAND_RASTER_PROJ_MED[]				= "MED";
-constexpr char COMMAND_RASTER_PROJ_INVERSE_VAR[]		= "INV_VAR";
-constexpr char COMMAND_RASTER_RESAMPLE[]				= "RESAMPLE";
-
-//2.5D Volume calculation specific commands
-constexpr char COMMAND_VOLUME[] = "VOLUME";
-constexpr char COMMAND_VOLUME_GROUND_IS_FIRST[]			= "GROUND_IS_FIRST";
-constexpr char COMMAND_VOLUME_CONST_HEIGHT[]			= "CONST_HEIGHT";
-
+// 2.5D Volume calculation specific commands
+constexpr char COMMAND_VOLUME[]                 = "VOLUME";
+constexpr char COMMAND_VOLUME_GROUND_IS_FIRST[] = "GROUND_IS_FIRST";
+constexpr char COMMAND_VOLUME_CONST_HEIGHT[]    = "CONST_HEIGHT";
 
 static bool ReadProjectionType(ccCommandLineInterface& cmd, ccRasterGrid::ProjectionType& projType, QString& stdDevSFDesc)
 {
@@ -128,27 +126,28 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 
 CommandRasterize::CommandRasterize()
     : ccCommandLineInterface::Command("Rasterize", COMMAND_RASTERIZE)
-{}
+{
+}
 
-bool CommandRasterize::process(ccCommandLineInterface &cmd)
+bool CommandRasterize::process(ccCommandLineInterface& cmd)
 {
 	cmd.print("[RASTERIZE]");
 
-	//look for local options
-	double gridStep = 0;
-	bool outputCloud = false;
-	bool outputRasterZ = false;
-	bool outputRasterSFs = false;
-	bool outputRasterRGB = false;
-	bool outputMesh = false;
-	bool resample = false;
-	double customHeight = std::numeric_limits<double>::quiet_NaN();
-	int vertDir = 2;
-	ccRasterGrid::ProjectionType projectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
-	ccRasterGrid::ProjectionType sfProjectionType = ccRasterGrid::PROJ_AVERAGE_VALUE;
-	ccRasterGrid::EmptyCellFillOption emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
+	// look for local options
+	double                                    gridStep              = 0;
+	bool                                      outputCloud           = false;
+	bool                                      outputRasterZ         = false;
+	bool                                      outputRasterSFs       = false;
+	bool                                      outputRasterRGB       = false;
+	bool                                      outputMesh            = false;
+	bool                                      resample              = false;
+	double                                    customHeight          = std::numeric_limits<double>::quiet_NaN();
+	int                                       vertDir               = 2;
+	ccRasterGrid::ProjectionType              projectionType        = ccRasterGrid::PROJ_AVERAGE_VALUE;
+	ccRasterGrid::ProjectionType              sfProjectionType      = ccRasterGrid::PROJ_AVERAGE_VALUE;
+	ccRasterGrid::EmptyCellFillOption         emptyCellFillStrategy = ccRasterGrid::LEAVE_EMPTY;
 	ccRasterGrid::DelaunayInterpolationParams dInterpParams;
-	ccRasterGrid::KrigingParams krigingParams;
+	ccRasterGrid::KrigingParams               krigingParams;
 	{
 		// force auto-guess
 		krigingParams.autoGuess = true;
@@ -160,7 +159,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		QString argument = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_CLOUD))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			if (outputMesh)
@@ -174,7 +173,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_MESH))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			if (outputCloud)
@@ -188,30 +187,30 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_Z))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			outputRasterZ = true;
+			outputRasterZ   = true;
 			outputRasterSFs = false;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			outputRasterZ = true;
+			outputRasterZ   = true;
 			outputRasterSFs = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_RASTER_RGB))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			outputRasterRGB = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_STEP))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -223,7 +222,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_CUSTOM_HEIGHT))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -235,7 +234,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_VERT_DIR))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -247,14 +246,14 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_FILL_EMPTY_CELLS))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			emptyCellFillStrategy = GetEmptyCellFillingStrategy(cmd.arguments().takeFirst().toUpper(), cmd);
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_PROJ_TYPE))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			if (!ReadProjectionType(cmd, projectionType, projStdDevSFDesc))
@@ -264,7 +263,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_SF_PROJ_TYPE))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			if (!ReadProjectionType(cmd, sfProjectionType, sfProjStdDevSFDesc))
@@ -274,10 +273,10 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_INTERP_MAX_EDGE_LENGTH))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			bool ok = false;
+			bool ok                     = false;
 			dInterpParams.maxEdgeLength = cmd.arguments().takeFirst().toDouble(&ok);
 			if (!ok || dInterpParams.maxEdgeLength < 0.0)
 			{
@@ -286,10 +285,10 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_FILL_KRIGING_KNN))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
-			bool ok = false;
+			bool ok           = false;
 			krigingParams.kNN = cmd.arguments().takeFirst().toInt(&ok);
 			if (!ok || krigingParams.kNN <= 0)
 			{
@@ -298,7 +297,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_RESAMPLE))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			resample = true;
@@ -344,7 +343,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 	if (!outputCloud && !outputMesh && !outputRasterZ && !outputRasterRGB)
 	{
-		//if no export target is specified, we chose the cloud by default
+		// if no export target is specified, we chose the cloud by default
 		outputCloud = true;
 	}
 
@@ -353,7 +352,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		cmd.warning("[Rasterize] The 'resample' option is set while the raster won't be exported as a cloud nor as a mesh");
 	}
 
-	//we'll get the first two clouds
+	// we'll get the first two clouds
 	for (CLCloudDesc& cloudDesc : cmd.clouds())
 	{
 		if (!cloudDesc.pc)
@@ -370,7 +369,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			if (invVarProjSFIndex < 0)
 			{
 				// let's check if it's a (valid) index then
-				bool validValue = false;
+				bool validValue   = false;
 				invVarProjSFIndex = stdDevSFDesc.toInt(&validValue);
 				if (!validValue)
 				{
@@ -385,8 +384,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 		ccBBox gridBBox = cloudDesc.pc->getOwnBB();
 
-		//compute the grid size
-		unsigned gridWidth = 0;
+		// compute the grid size
+		unsigned gridWidth  = 0;
 		unsigned gridHeight = 0;
 		if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 		{
@@ -395,7 +394,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 		cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
 
-		if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+		if (gridWidth * gridHeight > (1 << 26)) // 64 million of cells
 		{
 			if (cmd.silentMode())
 			{
@@ -414,23 +413,23 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 		ccRasterGrid grid;
 		{
-			//memory allocation
+			// memory allocation
 			CCVector3d minCorner = gridBBox.minCorner();
 			if (!grid.init(gridWidth, gridHeight, gridStep, minCorner))
 			{
-				//not enough memory
+				// not enough memory
 				return cmd.error("Not enough memory");
 			}
 
-			//progress dialog
+			// progress dialog
 			QScopedPointer<ccProgressDialog> pDlg(nullptr);
 			if (!cmd.silentMode())
 			{
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
 			}
 
-			ccRasterGrid::InterpolationType interpolationType = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);
-			void* interpolationParams = nullptr;
+			ccRasterGrid::InterpolationType interpolationType   = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);
+			void*                           interpolationParams = nullptr;
 			switch (interpolationType)
 			{
 			case ccRasterGrid::InterpolationType::DELAUNAY:
@@ -444,15 +443,14 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				break;
 			}
 
-			if (grid.fillWith(	cloudDesc.pc,
-								vertDir,
-								projectionType,
-								interpolationType,
-								interpolationParams,
-								sfProjectionType,
-								pDlg.data(),
-								invVarProjSFIndex )
-				)
+			if (grid.fillWith(cloudDesc.pc,
+			                  vertDir,
+			                  projectionType,
+			                  interpolationType,
+			                  interpolationParams,
+			                  sfProjectionType,
+			                  pDlg.data(),
+			                  invVarProjSFIndex))
 			{
 				grid.fillEmptyCells(emptyCellFillStrategy, customHeight);
 				cmd.print(QString("[Rasterize] Raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(grid.width).arg(grid.height).arg(grid.minHeight).arg(grid.maxHeight));
@@ -463,32 +461,30 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			}
 		}
 
-		//generate the result entity (cloud by default)
+		// generate the result entity (cloud by default)
 		if (outputCloud || outputMesh)
 		{
 			ccPointCloud* rasterCloud = nullptr;
 			try
 			{
-				//we always compute the default 'height' layer
+				// we always compute the default 'height' layer
 				std::vector<ccRasterGrid::ExportableFields> exportedStatistics(1);
 				exportedStatistics.back() = ccRasterGrid::PER_CELL_VALUE;
 
-				rasterCloud = grid.convertToCloud(	true,
-													false,
-													exportedStatistics,
-													true,
-													true,
-													resample,
-													resample,
-													cloudDesc.pc,
-													vertDir,
-													gridBBox,
-													0.0,
-													true,
-													true,
-													nullptr
-												);
-
+				rasterCloud = grid.convertToCloud(true,
+				                                  false,
+				                                  exportedStatistics,
+				                                  true,
+				                                  true,
+				                                  resample,
+				                                  resample,
+				                                  cloudDesc.pc,
+				                                  vertDir,
+				                                  gridBBox,
+				                                  0.0,
+				                                  true,
+				                                  true,
+				                                  nullptr);
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -506,13 +502,13 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 				rasterCloud->showSF(!cloudDesc.pc->hasColors());
 				rasterCloud->setCurrentDisplayedScalarField(0);
 			}
-			//don't forget the original shift
+			// don't forget the original shift
 			rasterCloud->copyGlobalShiftAndScale(*cloudDesc.pc);
 
 			if (outputCloud)
 			{
 				assert(!outputMesh);
-				//replace current cloud by the restarized version
+				// replace current cloud by the restarized version
 				delete cloudDesc.pc;
 				cloudDesc.pc = rasterCloud;
 				cloudDesc.basename += QString("_RASTER");
@@ -530,15 +526,13 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			}
 			else if (outputMesh)
 			{
-				std::string errorStr;
-				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation
-				                                      (
-				                                          rasterCloud,
-				                                          CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
-				                                          CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
-				                                          vertDir,
-				                                          errorStr
-				                                          );
+				std::string                    errorStr;
+				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(
+				    rasterCloud,
+				    CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
+				    CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
+				    vertDir,
+				    errorStr);
 
 				if (baseMesh)
 				{
@@ -550,17 +544,17 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 					rasterCloud->setVisible(true);
 					rasterMesh->addChild(rasterCloud);
 					rasterMesh->setName(rasterCloud->getName());
-					//rasterCloud->setName("vertices");
+					// rasterCloud->setName("vertices");
 					rasterMesh->showSF(rasterCloud->sfShown());
 					rasterMesh->showColors(rasterCloud->colorsShown());
-					rasterCloud = nullptr; //to avoid deleting it later
+					rasterCloud = nullptr; // to avoid deleting it later
 
 					cmd.print(QString("[Rasterize] Mesh '%1' successfully generated").arg(rasterMesh->getName()));
 
 					CLMeshDesc meshDesc;
-					meshDesc.mesh = rasterMesh;
+					meshDesc.mesh     = rasterMesh;
 					meshDesc.basename = cloudDesc.basename + QString("_RASTER_MESH");
-					meshDesc.path = cloudDesc.path;
+					meshDesc.path     = cloudDesc.path;
 
 					QString errorStr = cmd.exportEntity(meshDesc);
 					if (!errorStr.isEmpty())
@@ -569,15 +563,15 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 						return cmd.error(errorStr);
 					}
 
-					//we keep the mesh loaded
+					// we keep the mesh loaded
 					cmd.meshes().push_back(meshDesc);
-					//delete rasterMesh;
-					//rasterMesh = 0;
+					// delete rasterMesh;
+					// rasterMesh = 0;
 				}
 				else
 				{
-					cmd.warning( QStringLiteral("[Rasterize] Failed to create output mesh ('%1')")
-								 .arg( QString::fromStdString( errorStr ) ) );
+					cmd.warning(QStringLiteral("[Rasterize] Failed to create output mesh ('%1')")
+					                .arg(QString::fromStdString(errorStr)));
 				}
 			}
 
@@ -593,7 +587,7 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 			ccRasterizeTool::ExportBands bands;
 			{
 				bands.height = true;
-				bands.rgb = false; //not a good idea to mix RGB and height values!
+				bands.rgb    = false; // not a good idea to mix RGB and height values!
 				bands.allSFs = outputRasterSFs;
 			}
 			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", outputRasterSFs ? "RASTER_Z_AND_SF" : "RASTER_Z", nullptr, !cmd.addTimestamp());
@@ -609,8 +603,8 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 		{
 			ccRasterizeTool::ExportBands bands;
 			{
-				bands.rgb = true;
-				bands.height = false; //not a good idea to mix RGB and height values!
+				bands.rgb    = true;
+				bands.height = false; // not a good idea to mix RGB and height values!
 				bands.allSFs = outputRasterSFs;
 			}
 			QString exportFilename = cmd.getExportFilename(cloudDesc, "tif", "RASTER_RGB", nullptr, !cmd.addTimestamp());
@@ -628,39 +622,40 @@ bool CommandRasterize::process(ccCommandLineInterface &cmd)
 
 CommandVolume25D::CommandVolume25D()
     : ccCommandLineInterface::Command("2.5D Volume Calculation", COMMAND_VOLUME)
-{}
+{
+}
 
-bool CommandVolume25D::process(ccCommandLineInterface &cmd)
+bool CommandVolume25D::process(ccCommandLineInterface& cmd)
 {
 	cmd.print("[2.5D VOLUME]");
 
-	//look for local options
-	bool groundIsFirst = false;
-	double gridStep = 0;
-	double constHeight = std::numeric_limits<double>::quiet_NaN();
-	bool outputMesh = false;
-	int vertDir = 2;
+	// look for local options
+	bool   groundIsFirst = false;
+	double gridStep      = 0;
+	double constHeight   = std::numeric_limits<double>::quiet_NaN();
+	bool   outputMesh    = false;
+	int    vertDir       = 2;
 
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_GROUND_IS_FIRST))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			groundIsFirst = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_MESH))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			outputMesh = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_STEP))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -672,7 +667,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_VOLUME_CONST_HEIGHT))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -684,7 +679,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_VERT_DIR))
 		{
-			//local option confirmed, we can move on
+			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 
 			bool ok;
@@ -696,7 +691,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		}
 		else
 		{
-			//unrecognized argument (probably another command?)
+			// unrecognized argument (probably another command?)
 			break;
 		}
 	}
@@ -706,12 +701,12 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		return cmd.error(QString("Grid step value not defined (use %1)").arg(COMMAND_GRID_STEP));
 	}
 
-	//we'll get the first two clouds
-	CLCloudDesc *ground = nullptr;
-	CLCloudDesc *ceil = nullptr;
+	// we'll get the first two clouds
+	CLCloudDesc* ground = nullptr;
+	CLCloudDesc* ceil   = nullptr;
 	{
-		CLCloudDesc* clouds[2] = { nullptr, nullptr };
-		int index = 0;
+		CLCloudDesc* clouds[2] = {nullptr, nullptr};
+		int          index     = 0;
 		if (!cmd.clouds().empty())
 		{
 			clouds[index++] = &cmd.clouds()[0];
@@ -729,11 +724,11 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 
 		if (index == 2 && groundIsFirst)
 		{
-			//put them in the right order (ground then ceil)
+			// put them in the right order (ground then ceil)
 			std::swap(clouds[0], clouds[1]);
 		}
 
-		ceil = clouds[0];
+		ceil   = clouds[0];
 		ground = clouds[1];
 	}
 
@@ -743,8 +738,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		gridBBox += ground->pc->getOwnBB();
 	}
 
-	//compute the grid size
-	unsigned gridWidth = 0;
+	// compute the grid size
+	unsigned gridWidth  = 0;
 	unsigned gridHeight = 0;
 	if (!ccRasterGrid::ComputeGridSize(vertDir, gridBBox, gridStep, gridWidth, gridHeight))
 	{
@@ -753,7 +748,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 
 	cmd.print(QString("Grid size: %1 x %2").arg(gridWidth).arg(gridHeight));
 
-	if (gridWidth * gridHeight > (1 << 26)) //64 million of cells
+	if (gridWidth * gridHeight > (1 << 26)) // 64 million of cells
 	{
 		if (cmd.silentMode())
 		{
@@ -770,31 +765,31 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 		}
 	}
 
-	ccRasterGrid grid;
+	ccRasterGrid                 grid;
 	ccVolumeCalcTool::ReportInfo reportInfo;
 	if (ccVolumeCalcTool::ComputeVolume(
-	            grid,
-	            ground ? ground->pc : nullptr,
-	            ceil ? ceil->pc : nullptr,
-	            gridBBox,
-	            vertDir,
-	            gridStep,
-	            gridWidth,
-	            gridHeight,
-	            ccRasterGrid::PROJ_AVERAGE_VALUE,
-	            ccRasterGrid::LEAVE_EMPTY,
-				0.0,
-	            ccRasterGrid::LEAVE_EMPTY,
-				0.0,
-	            reportInfo,
-	            constHeight,
-	            constHeight,
-	            cmd.silentMode() ? nullptr : cmd.widgetParent()))
+	        grid,
+	        ground ? ground->pc : nullptr,
+	        ceil ? ceil->pc : nullptr,
+	        gridBBox,
+	        vertDir,
+	        gridStep,
+	        gridWidth,
+	        gridHeight,
+	        ccRasterGrid::PROJ_AVERAGE_VALUE,
+	        ccRasterGrid::LEAVE_EMPTY,
+	        0.0,
+	        ccRasterGrid::LEAVE_EMPTY,
+	        0.0,
+	        reportInfo,
+	        constHeight,
+	        constHeight,
+	        cmd.silentMode() ? nullptr : cmd.widgetParent()))
 	{
 		CLCloudDesc* desc = ceil ? ceil : ground;
 		assert(desc);
 
-		//save repot in a separate text file
+		// save repot in a separate text file
 		{
 			QString txtFilename = QString("%1/VolumeCalculationReport").arg(desc->path);
 			if (cmd.addTimestamp())
@@ -808,7 +803,7 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			txtFile.close();
 		}
 
-		//generate the result entity (cloud by default)
+		// generate the result entity (cloud by default)
 		{
 			ccPointCloud* rasterCloud = ccVolumeCalcTool::ConvertGridToCloud(grid, gridBBox, vertDir, true);
 			if (!rasterCloud)
@@ -817,8 +812,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			}
 			if (rasterCloud->hasScalarFields())
 			{
-				//convert SF to RGB
-				//rasterCloud->setCurrentDisplayedScalarField(0);
+				// convert SF to RGB
+				// rasterCloud->setCurrentDisplayedScalarField(0);
 				rasterCloud->convertCurrentScalarFieldToColors(false);
 				rasterCloud->showColors(true);
 			}
@@ -826,12 +821,12 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			ccMesh* rasterMesh = nullptr;
 			if (outputMesh)
 			{
-				std::string errorStr;
+				std::string                    errorStr;
 				CCCoreLib::GenericIndexedMesh* baseMesh = CCCoreLib::PointProjectionTools::computeTriangulation(rasterCloud,
-				                                                                                        CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
-				                                                                                        CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
-				                                                                                        vertDir,
-				                                                                                        errorStr);
+				                                                                                                CCCoreLib::DELAUNAY_2D_AXIS_ALIGNED,
+				                                                                                                CCCoreLib::PointProjectionTools::IGNORE_MAX_EDGE_LENGTH,
+				                                                                                                vertDir,
+				                                                                                                errorStr);
 
 				if (baseMesh)
 				{
@@ -855,8 +850,8 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 				else
 				{
 					delete rasterCloud;
-					return cmd.error( QStringLiteral("[Voume] Failed to create output mesh ('%1')")
-									  .arg( QString::fromStdString( errorStr ) ) );
+					return cmd.error(QStringLiteral("[Voume] Failed to create output mesh ('%1')")
+					                     .arg(QString::fromStdString(errorStr)));
 				}
 			}
 
@@ -864,23 +859,23 @@ bool CommandVolume25D::process(ccCommandLineInterface &cmd)
 			if (rasterMesh)
 			{
 				CLMeshDesc meshDesc;
-				meshDesc.mesh = rasterMesh;
+				meshDesc.mesh     = rasterMesh;
 				meshDesc.basename = desc->basename;
-				meshDesc.path = desc->path;
+				meshDesc.path     = desc->path;
 				cmd.meshes().push_back(meshDesc);
 				outputDesc = &cmd.meshes().back();
 			}
 			else
 			{
 				CLCloudDesc cloudDesc;
-				cloudDesc.pc = rasterCloud;
+				cloudDesc.pc       = rasterCloud;
 				cloudDesc.basename = desc->basename;
-				cloudDesc.path = desc->path;
+				cloudDesc.path     = desc->path;
 				cmd.clouds().push_back(cloudDesc);
 				outputDesc = &cmd.clouds().back();
 			}
 
-			//save result
+			// save result
 			if (outputDesc && cmd.autoSaveMode())
 			{
 				QString outputFilename;

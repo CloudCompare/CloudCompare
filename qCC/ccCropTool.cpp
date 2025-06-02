@@ -1,36 +1,36 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccCropTool.h"
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
-#include <ccPointCloud.h>
-#include <ccMesh.h>
 #include <ccLog.h>
-#include <ccScalarField.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+#include <ccScalarField.h>
 
-//CCCoreLib
+// CCCoreLib
 #include <ManualSegmentationTools.h>
 #include <SimpleMesh.h>
 
-ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=true*/, const ccGLMatrix* meshRotation/*=nullptr*/)
+ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*=true*/, const ccGLMatrix* meshRotation /*=nullptr*/)
 {
 	assert(entity);
 	if (!entity)
@@ -45,20 +45,20 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		CCCoreLib::ReferenceCloud* selection = cloud->crop(box, inside);
 		if (!selection)
 		{
-			//process failed!
+			// process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop cloud '%1'!").arg(cloud->getName()));
 			return nullptr;
 		}
 
 		if (selection->size() == 0)
 		{
-			//no points fall inside selection!
+			// no points fall inside selection!
 			ccLog::Warning(QString("[Crop] No point of the cloud '%1' falls %2side the input box!").arg(cloud->getName(), (inside ? "in" : "out")));
 			delete selection;
 			return nullptr;
 		}
 
-		//crop
+		// crop
 		ccPointCloud* croppedEnt = cloud->partialClone(selection);
 		delete selection;
 		selection = nullptr;
@@ -67,12 +67,12 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 	}
 	else if (entity->isKindOf(CC_TYPES::MESH))
 	{
-		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+		ccGenericMesh*                                       mesh = static_cast<ccGenericMesh*>(entity);
 		CCCoreLib::ManualSegmentationTools::MeshCutterParams params;
-		params.bbMin = box.minCorner();
-		params.bbMax = box.maxCorner();
+		params.bbMin               = box.minCorner();
+		params.bbMax               = box.maxCorner();
 		params.generateOutsideMesh = !inside;
-		params.trackOrigIndexes = mesh->hasColors() || mesh->hasScalarFields() || mesh->hasMaterials();
+		params.trackOrigIndexes    = mesh->hasColors() || mesh->hasScalarFields() || mesh->hasMaterials();
 
 		ccGenericPointCloud* origVertices = mesh->getAssociatedCloud();
 		assert(origVertices);
@@ -92,20 +92,20 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 
 		if (!CCCoreLib::ManualSegmentationTools::segmentMeshWithAABox(mesh, cropVertices, params))
 		{
-			//process failed!
+			// process failed!
 			ccLog::Warning(QString("[Crop] Failed to crop mesh '%1'!").arg(mesh->getName()));
 		}
 
 		if (cropVertices != origVertices)
 		{
-			//don't need those anymore
+			// don't need those anymore
 			delete cropVertices;
 			cropVertices = origVertices;
 		}
 
 		CCCoreLib::SimpleMesh* tempMesh = inside ? params.insideMesh : params.outsideMesh;
 
-		//output
+		// output
 		ccMesh* croppedMesh = nullptr;
 
 		if (tempMesh)
@@ -115,7 +115,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			{
 				if (meshRotation)
 				{
-					//apply inverse transformation
+					// apply inverse transformation
 					croppedVertices->setGLTransformation(meshRotation->inverse());
 					croppedVertices->applyGLTransformation_recursive();
 				}
@@ -124,7 +124,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 				croppedVertices->setEnabled(false);
 				if (croppedMesh->size() == 0)
 				{
-					//no points fall inside selection!
+					// no points fall inside selection!
 					ccLog::Warning(QString("[Crop] No triangle of the mesh '%1' falls %2side the input box!").arg(mesh->getName(), (inside ? "in" : "out")));
 					delete croppedMesh;
 					croppedMesh = nullptr;
@@ -132,12 +132,12 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 				else
 				{
 					assert(origVertices);
-					
-					//import parameters
+
+					// import parameters
 					croppedVertices->importParametersFrom(origVertices);
 					croppedMesh->importParametersFrom(mesh);
 
-					//compute normals if necessary
+					// compute normals if necessary
 					if (mesh->hasNormals())
 					{
 						bool success = false;
@@ -153,20 +153,20 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 						croppedMesh->showNormals(success && mesh->normalsShown());
 					}
 
-					//import other features if necessary
+					// import other features if necessary
 					if (params.trackOrigIndexes)
 					{
 						const std::vector<unsigned>& origTriIndexes = inside ? params.origTriIndexesMapInside : params.origTriIndexesMapOutside;
 
 						try
 						{
-							//per vertex features (RGB color & scalar fields)
+							// per vertex features (RGB color & scalar fields)
 							if (origVertices->hasColors() || origVertices->hasScalarFields())
 							{
-								//we use flags to avoid processing the same vertex multiple times
+								// we use flags to avoid processing the same vertex multiple times
 								std::vector<bool> vertProcessed(croppedVertices->size(), false);
 
-								//colors
+								// colors
 								bool importColors = false;
 								if (origVertices->hasColors())
 								{
@@ -174,16 +174,16 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									if (!importColors)
 										ccLog::Warning("[Crop] Failed to transfer RGB colors on the output mesh (not enough memory)");
 								}
-								
-								//scalar fields
+
+								// scalar fields
 								std::vector<ccScalarField*> importedSFs;
-								ccPointCloud* origVertices_pc = nullptr;
+								ccPointCloud*               origVertices_pc = nullptr;
 								if (origVertices->hasScalarFields())
 								{
-									origVertices_pc = origVertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(origVertices) : nullptr;
+									origVertices_pc  = origVertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(origVertices) : nullptr;
 									unsigned sfCount = origVertices_pc ? origVertices_pc->getNumberOfScalarFields() : 1;
-									
-									//now try to import each SF
+
+									// now try to import each SF
 									for (unsigned i = 0; i < sfCount; ++i)
 									{
 										int sfIdx = croppedVertices->addScalarField(origVertices_pc ? origVertices_pc->getScalarField(i)->getName() : "Scalar field");
@@ -193,10 +193,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 											sf->fill(CCCoreLib::NAN_VALUE);
 											if (origVertices_pc)
 											{
-												//import display parameters if possible
+												// import display parameters if possible
 												ccScalarField* originSf = static_cast<ccScalarField*>(origVertices_pc->getScalarField(i));
 												assert(originSf);
-												//copy display parameters
+												// copy display parameters
 												sf->importParametersFrom(originSf);
 											}
 											importedSFs.push_back(sf);
@@ -204,14 +204,14 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 										else
 										{
 											ccLog::Warning("[Crop] Failed to transfer one or several scalar fields on the output mesh (not enough memory)");
-											//we can stop right now as all SFs have the same size!
+											// we can stop right now as all SFs have the same size!
 											break;
 										}
 									}
 
-									//default displayed SF
+									// default displayed SF
 									if (origVertices_pc)
-										croppedVertices->setCurrentDisplayedScalarField(std::max(static_cast<int>(croppedVertices->getNumberOfScalarFields())-1, origVertices_pc->getCurrentDisplayedScalarFieldIndex()));
+										croppedVertices->setCurrentDisplayedScalarField(std::max(static_cast<int>(croppedVertices->getNumberOfScalarFields()) - 1, origVertices_pc->getCurrentDisplayedScalarFieldIndex()));
 									else
 										croppedVertices->setCurrentDisplayedScalarField(0);
 								}
@@ -219,30 +219,30 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 
 								if (importColors || importSFs)
 								{
-									//for each new triangle
+									// for each new triangle
 									for (unsigned i = 0; i < croppedMesh->size(); ++i)
 									{
-										//get the origin triangle
-										unsigned origTriIndex = origTriIndexes[i];
-										const CCCoreLib::VerticesIndexes* tsio = mesh->getTriangleVertIndexes(origTriIndex);
+										// get the origin triangle
+										unsigned                          origTriIndex = origTriIndexes[i];
+										const CCCoreLib::VerticesIndexes* tsio         = mesh->getTriangleVertIndexes(origTriIndex);
 
-										//get the new triangle
+										// get the new triangle
 										const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
-										//we now have to test the 3 vertices of the new triangle
+										// we now have to test the 3 vertices of the new triangle
 										for (unsigned j = 0; j < 3; ++j)
 										{
 											unsigned vertIndex = tsic->i[j];
-											
+
 											if (vertProcessed[vertIndex])
 											{
-												//vertex has already been process
+												// vertex has already been process
 												continue;
 											}
 
 											const CCVector3* Vcj = croppedVertices->getPoint(vertIndex);
 
-											//we'll deduce its color and SFs values by triangulation
+											// we'll deduce its color and SFs values by triangulation
 											if (importColors)
 											{
 												ccColor::Rgb col;
@@ -257,16 +257,16 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 												CCVector3d w;
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
-												//import SFs
+												// import SFs
 												for (unsigned s = 0; s < static_cast<unsigned>(importedSFs.size()); ++s)
 												{
 													CCVector3d scalarValues(0, 0, 0);
 													if (origVertices_pc)
 													{
 														const CCCoreLib::ScalarField* sf = origVertices_pc->getScalarField(s);
-														scalarValues.x = sf->getValue(tsio->i1);
-														scalarValues.y = sf->getValue(tsio->i2);
-														scalarValues.z = sf->getValue(tsio->i3);
+														scalarValues.x                   = sf->getValue(tsio->i1);
+														scalarValues.y                   = sf->getValue(tsio->i2);
+														scalarValues.z                   = sf->getValue(tsio->i3);
 													}
 													else
 													{
@@ -277,11 +277,11 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 													}
 
 													ScalarType sVal = static_cast<ScalarType>(scalarValues.dot(w));
-													importedSFs[s]->setValue(vertIndex,sVal);
+													importedSFs[s]->setValue(vertIndex, sVal);
 												}
 											}
 
-											//update 'processed' flag
+											// update 'processed' flag
 											vertProcessed[vertIndex] = true;
 										}
 									}
@@ -290,7 +290,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									{
 										importedSFs[s]->computeMinAndMax();
 									}
-								
+
 									croppedVertices->showColors(importColors && origVertices->colorsShown());
 									croppedVertices->showSF(importSFs && origVertices->sfShown());
 									croppedMesh->showColors(importColors && mesh->colorsShown());
@@ -298,29 +298,29 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 								}
 							}
 
-							//per-triangle features (materials)
+							// per-triangle features (materials)
 							if (mesh->hasMaterials())
 							{
 								const ccMaterialSet* origMaterialSet = mesh->getMaterialSet();
 								assert(origMaterialSet);
-								
+
 								if (origMaterialSet && !origMaterialSet->empty() && croppedMesh->reservePerTriangleMtlIndexes())
 								{
-									std::vector<int> materialUsed(origMaterialSet->size(),-1);
-									
-									//per-triangle materials
+									std::vector<int> materialUsed(origMaterialSet->size(), -1);
+
+									// per-triangle materials
 									for (unsigned i = 0; i < croppedMesh->size(); ++i)
 									{
-										//get the origin triangle
+										// get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
-										int mtlIndex = mesh->getTriangleMtlIndex(origTriIndex);
+										int      mtlIndex     = mesh->getTriangleMtlIndex(origTriIndex);
 										croppedMesh->addTriangleMtlIndex(mtlIndex);
-										
+
 										if (mtlIndex >= 0)
 											materialUsed[mtlIndex] = 1;
 									}
 
-									//import materials
+									// import materials
 									{
 										size_t materialUsedCount = 0;
 										{
@@ -331,12 +331,12 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 
 										if (materialUsedCount == materialUsed.size())
 										{
-											//nothing to do, we use all input materials
+											// nothing to do, we use all input materials
 											croppedMesh->setMaterialSet(origMaterialSet->clone());
 										}
 										else
 										{
-											//create a subset of the input materials
+											// create a subset of the input materials
 											ccMaterialSet* matSet = new ccMaterialSet(origMaterialSet->getName());
 											{
 												matSet->reserve(materialUsedCount);
@@ -345,21 +345,21 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 													if (materialUsed[i] >= 0)
 													{
 														matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
-														//update index
+														// update index
 														materialUsed[i] = static_cast<int>(matSet->size()) - 1;
 													}
 												}
 											}
 											croppedMesh->setMaterialSet(matSet);
-											
-											//and update the materials indexes!
+
+											// and update the materials indexes!
 											for (unsigned i = 0; i < croppedMesh->size(); ++i)
 											{
 												int mtlIndex = croppedMesh->getTriangleMtlIndex(i);
 												if (mtlIndex >= 0)
 												{
 													assert(mtlIndex < static_cast<int>(materialUsed.size()));
-													croppedMesh->setTriangleMtlIndex(i,materialUsed[mtlIndex]);
+													croppedMesh->setTriangleMtlIndex(i, materialUsed[mtlIndex]);
 												}
 											}
 										}
@@ -372,49 +372,49 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 									ccLog::Warning("[Crop] Failed to transfer materials on the output mesh (not enough memory)");
 								}
 
-								//per-triangle texture coordinates
+								// per-triangle texture coordinates
 								if (mesh->hasPerTriangleTexCoordIndexes())
 								{
 									TextureCoordsContainer* texCoords = new TextureCoordsContainer;
-									if (	croppedMesh->reservePerTriangleTexCoordIndexes()
-										&&	texCoords->reserveSafe(croppedMesh->size()*3))
+									if (croppedMesh->reservePerTriangleTexCoordIndexes()
+									    && texCoords->reserveSafe(croppedMesh->size() * 3))
 									{
-										//for each new triangle
+										// for each new triangle
 										for (unsigned i = 0; i < croppedMesh->size(); ++i)
 										{
-											//get the origin triangle
-											unsigned origTriIndex = origTriIndexes[i];
-											TexCoords2D* tx1 = nullptr;
-											TexCoords2D* tx2 = nullptr;
-											TexCoords2D* tx3 = nullptr;
+											// get the origin triangle
+											unsigned     origTriIndex = origTriIndexes[i];
+											TexCoords2D* tx1          = nullptr;
+											TexCoords2D* tx2          = nullptr;
+											TexCoords2D* tx3          = nullptr;
 											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
-											//get the new triangle
+											// get the new triangle
 											const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
-											//for each vertex of the new triangle
-											int texIndexes[3] = { -1, -1, -1 };
+											// for each vertex of the new triangle
+											int texIndexes[3] = {-1, -1, -1};
 											for (unsigned j = 0; j < 3; ++j)
 											{
-												unsigned vertIndex = tsic->i[j];
-												const CCVector3* Vcj = croppedVertices->getPoint(vertIndex);
+												unsigned         vertIndex = tsic->i[j];
+												const CCVector3* Vcj       = croppedVertices->getPoint(vertIndex);
 
-												//intepolation weights
+												// intepolation weights
 												CCVector3d w;
 												mesh->computeInterpolationWeights(origTriIndex, *Vcj, w);
 
-												if (	(tx1 || CCCoreLib::LessThanEpsilon( w.u[0] ) )
-													&&	(tx2 || CCCoreLib::LessThanEpsilon( w.u[1] ) )
-													&&	(tx3 || CCCoreLib::LessThanEpsilon( w.u[2] ) ) )
+												if ((tx1 || CCCoreLib::LessThanEpsilon(w.u[0]))
+												    && (tx2 || CCCoreLib::LessThanEpsilon(w.u[1]))
+												    && (tx3 || CCCoreLib::LessThanEpsilon(w.u[2])))
 												{
-													TexCoords2D t(	static_cast<float>((tx1 ? tx1->tx*w.u[0] : 0.0) + (tx2 ? tx2->tx*w.u[1] : 0.0) + (tx3 ? tx3->tx*w.u[2] : 0.0)),
-																	static_cast<float>((tx1 ? tx1->ty*w.u[0] : 0.0) + (tx2 ? tx2->ty*w.u[1] : 0.0) + (tx3 ? tx3->ty*w.u[2] : 0.0)) );
+													TexCoords2D t(static_cast<float>((tx1 ? tx1->tx * w.u[0] : 0.0) + (tx2 ? tx2->tx * w.u[1] : 0.0) + (tx3 ? tx3->tx * w.u[2] : 0.0)),
+													              static_cast<float>((tx1 ? tx1->ty * w.u[0] : 0.0) + (tx2 ? tx2->ty * w.u[1] : 0.0) + (tx3 ? tx3->ty * w.u[2] : 0.0)));
 
 													texCoords->addElement(t);
 													texIndexes[j] = static_cast<int>(texCoords->currentSize()) - 1;
 												}
 											}
-											
+
 											croppedMesh->addTriangleTexCoordIndexes(texIndexes[0], texIndexes[1], texIndexes[2]);
 										}
 										croppedMesh->setTexCoordinatesTable(texCoords);
@@ -443,7 +443,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 			}
 		}
 
-		//clean memory
+		// clean memory
 		if (params.insideMesh)
 		{
 			delete params.insideMesh;
@@ -462,7 +462,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside/*=
 		return croppedMesh;
 	}
 
-	//unhandled entity
+	// unhandled entity
 	ccLog::Warning("[Crop] Unhandled entity type");
 	return nullptr;
 }

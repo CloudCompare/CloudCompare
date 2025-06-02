@@ -1,35 +1,35 @@
-//##########################################################################
-//#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qSSAO                       #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                       CLOUDCOMPARE PLUGIN: qSSAO                       #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSSAOFilter.h"
 
-//CC_FBO
-#include <ccFrameBufferObject.h>
+// CC_FBO
 #include <ccBilateralFilter.h>
+#include <ccFrameBufferObject.h>
 #include <ccShader.h>
-//qCC_gl
+// qCC_gl
 #include <ccGLUtils.h>
 
-//RandomKit
+// RandomKit
 #include <randomkit.h>
 
-//system
-#include <stdlib.h>
+// system
 #include <math.h>
+#include <stdlib.h>
 #include <vector>
 
 #ifndef GL_RGBA32F
@@ -41,15 +41,15 @@
 #endif
 
 ccSSAOFilter::ccSSAOFilter()
-	: ccGlFilter("Screen Space Ambient Occlusion")
-	, m_w(0)
-	, m_h(0)
-	, m_fbo(nullptr)
-	, m_shader(nullptr)
-	, m_texReflect(0)
-	, m_glFuncIsValid(0)
+    : ccGlFilter("Screen Space Ambient Occlusion")
+    , m_w(0)
+    , m_h(0)
+    , m_fbo(nullptr)
+    , m_shader(nullptr)
+    , m_texReflect(0)
+    , m_glFuncIsValid(0)
 {
-	setParameters(/*N=*/32,/*Kz=*/500.0f,/*R=*/0.05f,/*F=*/50.0f);
+	setParameters(/*N=*/32, /*Kz=*/500.0f, /*R=*/0.05f, /*F=*/50.0f);
 
 	m_bilateralFilterEnabled = false;
 	m_bilateralFilter        = nullptr;
@@ -70,7 +70,7 @@ ccGlFilter* ccSSAOFilter::clone() const
 {
 	ccSSAOFilter* filter = new ccSSAOFilter();
 
-	//copy parameters
+	// copy parameters
 	filter->setParameters(m_N, m_Kz, m_R, m_F);
 
 	return filter;
@@ -108,12 +108,12 @@ bool ccSSAOFilter::init(unsigned width, unsigned height, const QString& shadersP
 	return init(width, height, true, true, shadersPath, error);
 }
 
-bool ccSSAOFilter::init(unsigned width,
-						unsigned height,
-						bool enableBilateralFilter,
-						bool useReflectTexture,
-						const QString& shadersPath,
-						QString& error )
+bool ccSSAOFilter::init(unsigned       width,
+                        unsigned       height,
+                        bool           enableBilateralFilter,
+                        bool           useReflectTexture,
+                        const QString& shadersPath,
+                        QString&       error)
 {
 	if (width == 0 || height == 0)
 	{
@@ -132,14 +132,14 @@ bool ccSSAOFilter::init(unsigned width,
 
 	setValid(false);
 
-	//in case of reinit
+	// in case of reinit
 	if (!m_fbo)
 	{
 		m_fbo = new ccFrameBufferObject();
 	}
 
-	if (	!m_fbo->init(width, height)
-		||	!m_fbo->initColor(GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_LINEAR) )
+	if (!m_fbo->init(width, height)
+	    || !m_fbo->initColor(GL_RGBA32F, GL_RGBA, GL_FLOAT, GL_LINEAR))
 	{
 		error = "[SSAO] FrameBufferObject initialization failed!";
 		reset();
@@ -165,7 +165,7 @@ bool ccSSAOFilter::init(unsigned width,
 		if (!m_bilateralFilter->init(width, height, shadersPath, error))
 		{
 			delete m_bilateralFilter;
-			m_bilateralFilter = nullptr;
+			m_bilateralFilter        = nullptr;
 			m_bilateralFilterEnabled = false;
 		}
 		else
@@ -188,7 +188,7 @@ bool ccSSAOFilter::init(unsigned width,
 	}
 	else
 	{
-		//remove the existing texture
+		// remove the existing texture
 		if (m_glFuncIsValid && m_glFunc.glIsTexture(m_texReflect))
 		{
 			m_glFunc.glDeleteTextures(1, &m_texReflect);
@@ -214,16 +214,16 @@ void ccSSAOFilter::sampleSphere()
 	//	draw in sphere
 	float* ssao_neighbours = m_ssao_neighbours;
 
-	for (unsigned n_in_sphere = 0; n_in_sphere < MAX_N; )
+	for (unsigned n_in_sphere = 0; n_in_sphere < MAX_N;)
 	{
 		double x[5];
 		rk_sobol_double(&s, x);
-		
+
 		double px = x[0] * 2 - 1.0;
 		double py = x[1] * 2 - 1.0;
 		double pz = x[2] * 2 - 1.0;
-		
-		if ( px*px + py*py + pz*pz <= 1.0 )
+
+		if (px * px + py * py + pz * pz <= 1.0)
 		{
 			*ssao_neighbours++ = static_cast<float>(px);
 			*ssao_neighbours++ = static_cast<float>(py);
@@ -244,7 +244,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	}
 	assert(m_fbo);
 
-	//we must use corner-based screen coordinates
+	// we must use corner-based screen coordinates
 	m_glFunc.glMatrixMode(GL_PROJECTION);
 	m_glFunc.glPushMatrix();
 	m_glFunc.glLoadIdentity();
@@ -259,13 +259,13 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 	m_fbo->start();
 
 	m_shader->bind();
-	m_shader->setUniformValue("s2_Z",0);
-	m_shader->setUniformValue("s2_R",1);
-	m_shader->setUniformValue("s2_C",2);
-	m_shader->setUniformValue("R",   m_R);
-	m_shader->setUniformValue("F",   m_F);
-	m_shader->setUniformValue("Kz",  m_Kz);
-	//m_shader->setUniformValue("N", N);
+	m_shader->setUniformValue("s2_Z", 0);
+	m_shader->setUniformValue("s2_R", 1);
+	m_shader->setUniformValue("s2_C", 2);
+	m_shader->setUniformValue("R", m_R);
+	m_shader->setUniformValue("F", m_F);
+	m_shader->setUniformValue("Kz", m_Kz);
+	// m_shader->setUniformValue("N", N);
 	m_shader->setUniformValue("B_REF", hasReflectTexture ? 1 : 0);
 	m_shader->setUniformValueArray("P", m_ssao_neighbours, MAX_N, 3);
 
@@ -301,7 +301,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& p
 		assert(m_glFunc.glGetError() == GL_NO_ERROR);
 	}
 
-	//restore GL_TEXTURE_0 by default
+	// restore GL_TEXTURE_0 by default
 	m_glFunc.glActiveTexture(GL_TEXTURE0);
 
 	m_glFunc.glMatrixMode(GL_PROJECTION);
@@ -341,39 +341,38 @@ void randomPointInSphere(double& vx, double& vy, double& vz)
 		vx = frand();
 		vy = frand();
 		vz = frand();
-	}
-	while (vx*vx + vy*vy + vz*vz > 1.0);
+	} while (vx * vx + vy * vy + vz * vz > 1.0);
 }
 
 void ccSSAOFilter::initReflectTexture()
 {
 	/***	INIT TEXTURE OF RELFECT VECTORS		***/
 	/**		Fully random texture	**/
-	int texSize = m_w*m_h;
+	int                texSize = m_w * m_h;
 	std::vector<float> reflectTexture;
 	try
 	{
-		reflectTexture.resize(3*texSize, 0);
+		reflectTexture.resize(3 * texSize, 0);
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return;
 	}
 
-	for (int i=0; i<texSize; i++)
+	for (int i = 0; i < texSize; i++)
 	{
 		double x = 0.0;
 		double y = 0.0;
 		double z = 0.0;
 		randomPointInSphere(x, y, z);
 
-		double norm = x*x + y*y + z*z;
-		norm = (norm > 1.0e-8 ? 1.0 / sqrt(norm) : 0.0);
+		double norm = x * x + y * y + z * z;
+		norm        = (norm > 1.0e-8 ? 1.0 / sqrt(norm) : 0.0);
 
-		reflectTexture[i * 3    ] = static_cast<float>((1.0 + x*norm) / 2);
-		reflectTexture[i * 3 + 1] = static_cast<float>((1.0 + y*norm) / 2);
-		reflectTexture[i * 3 + 2] = static_cast<float>((1.0 + z*norm) / 2);
+		reflectTexture[i * 3]     = static_cast<float>((1.0 + x * norm) / 2);
+		reflectTexture[i * 3 + 1] = static_cast<float>((1.0 + y * norm) / 2);
+		reflectTexture[i * 3 + 2] = static_cast<float>((1.0 + z * norm) / 2);
 	}
 
 	assert(m_glFuncIsValid);
@@ -381,18 +380,17 @@ void ccSSAOFilter::initReflectTexture()
 	m_glFunc.glPushAttrib(GL_ENABLE_BIT);
 	m_glFunc.glEnable(GL_TEXTURE_2D);
 
-	m_glFunc.glGenTextures  (1, &m_texReflect);
-	m_glFunc.glBindTexture  (GL_TEXTURE_2D, m_texReflect);
+	m_glFunc.glGenTextures(1, &m_texReflect);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, m_texReflect);
 	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	m_glFunc.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	m_glFunc.glTexImage2D   (GL_TEXTURE_2D, 0, GL_RGB16F, m_w, m_h, 0, GL_RGB, GL_FLOAT, &reflectTexture[0]);
-	m_glFunc.glBindTexture  (GL_TEXTURE_2D, 0);
+	m_glFunc.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, m_w, m_h, 0, GL_RGB, GL_FLOAT, &reflectTexture[0]);
+	m_glFunc.glBindTexture(GL_TEXTURE_2D, 0);
 
 	m_glFunc.glPopAttrib();
 	assert(m_glFunc.glGetError() == GL_NO_ERROR);
-
 
 	// According to Wikipedia, noise is made of 4*4 repeated tiles	to have only high frequency
 }

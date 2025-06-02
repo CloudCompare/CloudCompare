@@ -1,56 +1,53 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "VTKFilter.h"
 
-//qCC_db
+// qCC_db
 #include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-//Qt
+// Qt
 #include <QFile>
 #include <QTextStream>
 
-//System
+// System
 #include <cstring>
 
-
 VTKFilter::VTKFilter()
-	: FileIOFilter( {
-					"_VTK Filter",
-					9.0f,	// priority
-					QStringList{ "vtk" },
-					"vtk",
-					QStringList{ "VTK cloud or mesh (*.vtk)" },
-					QStringList{ "VTK cloud or mesh (*.vtk)" },
-					Import | Export
-					} )
+    : FileIOFilter({"_VTK Filter",
+                    9.0f, // priority
+                    QStringList{"vtk"},
+                    "vtk",
+                    QStringList{"VTK cloud or mesh (*.vtk)"},
+                    QStringList{"VTK cloud or mesh (*.vtk)"},
+                    Import | Export})
 {
 }
 
 bool VTKFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const
 {
 	if (type == CC_TYPES::MESH
-		|| type == CC_TYPES::POINT_CLOUD)
+	    || type == CC_TYPES::POINT_CLOUD)
 	{
-		multiple = false;
+		multiple  = false;
 		exclusive = true;
 		return true;
 	}
@@ -62,13 +59,13 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
-	//look for either a cloud or a mesh
-	ccMesh* mesh = ccHObjectCaster::ToMesh(entity);
-	unsigned triCount = 0;
+	// look for either a cloud or a mesh
+	ccMesh*              mesh     = ccHObjectCaster::ToMesh(entity);
+	unsigned             triCount = 0;
 	ccGenericPointCloud* vertices = nullptr;
 	if (mesh)
 	{
-		//input entity is a mesh
+		// input entity is a mesh
 		triCount = mesh->size();
 		if (triCount == 0)
 		{
@@ -79,11 +76,11 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		//no mesh? maybe the input entity is a cloud?
+		// no mesh? maybe the input entity is a cloud?
 		vertices = ccHObjectCaster::ToGenericPointCloud(entity);
 	}
 
-	//in any case, we must have a valid 'vertices' entity now
+	// in any case, we must have a valid 'vertices' entity now
 	if (!vertices)
 	{
 		ccLog::Warning("[VTK] No point cloud nor mesh in input selection!");
@@ -96,7 +93,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		return CC_FERR_NO_SAVE;
 	}
 
-	//open ASCII file for writing
+	// open ASCII file for writing
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return CC_FERR_WRITING;
@@ -105,13 +102,13 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	outFile.setRealNumberNotation(QTextStream::FixedNotation);
 	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !vertices->isShifted() ? 8 : 12);
 
-	//write header
+	// write header
 	outFile << "# vtk DataFile Version 3.0" << endl;
 	outFile << "vtk output" << endl;
 	outFile << "ASCII" << endl;
 	outFile << "DATASET " << (mesh ? "POLYDATA" : "UNSTRUCTURED_GRID") << endl;
 
-	//data type
+	// data type
 	QString floatType = (sizeof(PointCoordinateType) == 4 ? "float" : "double");
 
 	/*** what shall we save now? ***/
@@ -121,11 +118,11 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		outFile << "POINTS " << ptsCount << " " << floatType << endl;
 		for (unsigned i = 0; i < ptsCount; ++i)
 		{
-			const CCVector3* P = vertices->getPoint(i);
-			CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
+			const CCVector3* P       = vertices->getPoint(i);
+			CCVector3d       Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
 			outFile << Pglobal.x << " "
-					<< Pglobal.y << " "
-					<< Pglobal.z << endl;
+			        << Pglobal.y << " "
+			        << Pglobal.z << endl;
 		}
 	}
 
@@ -136,7 +133,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		mesh->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < triCount; ++i)
 		{
-			const CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); //DGM: getNextTriangleVertIndexes is faster for mesh groups!
+			const CCCoreLib::VerticesIndexes* tsi = mesh->getNextTriangleVertIndexes(); // DGM: getNextTriangleVertIndexes is faster for mesh groups!
 			outFile << "3 " << tsi->i1 << " " << tsi->i2 << " " << tsi->i3 << endl;
 		}
 	}
@@ -151,8 +148,6 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < ptsCount; ++i)
 			outFile << "1 " << endl;
 	}
-
-	
 
 	// write normals
 	if (vertices->hasNormals())
@@ -182,7 +177,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* pointCloud = static_cast<ccPointCloud*>(vertices);
-		unsigned sfCount = pointCloud->getNumberOfScalarFields();
+		unsigned      sfCount    = pointCloud->getNumberOfScalarFields();
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
@@ -196,7 +191,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 		}
 	}
-	else //virtual point cloud, we only have access to its currently displayed scalar field
+	else // virtual point cloud, we only have access to its currently displayed scalar field
 	{
 		if (vertices->hasScalarFields())
 		{
@@ -218,11 +213,11 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 {
-	//allow blank lines
+	// allow blank lines
 	line = stream.readLine();
 	while (line.isEmpty())
 	{
-		//end of file?
+		// end of file?
 		if (line.isNull())
 			return false;
 		line = stream.readLine().toUpper();
@@ -233,40 +228,40 @@ static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 
 CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
-	//open ASCII file for reading
+	// open ASCII file for reading
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 		return CC_FERR_READING;
 
 	QTextStream inFile(&file);
 
-	//read header
+	// read header
 	QString nextline = inFile.readLine();
 	if (!nextline.startsWith("# vtk"))
 		return CC_FERR_MALFORMED_FILE;
 
-	//comment
+	// comment
 	nextline = inFile.readLine();
 	ccLog::Print(QString("[VTK] ") + nextline);
 
-	ccMesh* mesh = nullptr;
+	ccMesh*       mesh     = nullptr;
 	ccPointCloud* vertices = nullptr;
 
-	std::vector<int> indexes; //global so as to avoid unnecessary mem. allocations
-	QString lastSfName;
-	bool acceptLookupTables = true;
-	unsigned lastDataSize = 0;
+	std::vector<int> indexes; // global so as to avoid unnecessary mem. allocations
+	QString          lastSfName;
+	bool             acceptLookupTables = true;
+	unsigned         lastDataSize       = 0;
 
 	QString fileType = inFile.readLine().toUpper();
 	if (fileType.startsWith("BINARY"))
 	{
-		//binary not supported yet!
+		// binary not supported yet!
 		ccLog::Error("VTK binary format not supported yet!");
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
 	else if (fileType.startsWith("ASCII"))
 	{
-		//allow blank lines
+		// allow blank lines
 		QString dataType;
 		if (!GetNextNonEmptyLine(inFile, dataType))
 			return CC_FERR_MALFORMED_FILE;
@@ -276,7 +271,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		if (dataType.startsWith("POLYDATA"))
 		{
 			vertices = new ccPointCloud("vertices");
-			mesh = new ccMesh(vertices);
+			mesh     = new ccMesh(vertices);
 		}
 		else if (dataType.startsWith("UNSTRUCTURED_GRID"))
 		{
@@ -290,14 +285,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 	assert(nullptr != vertices);
 
-	//loop on keywords/data
+	// loop on keywords/data
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
-	CCVector3d Pshift(0, 0, 0);
-	bool skipReadLine = false;
+	CCVector3d    Pshift(0, 0, 0);
+	bool          skipReadLine = false;
 	while (error == CC_FERR_NO_ERROR)
 	{
 		if (!skipReadLine && !GetNextNonEmptyLine(inFile, nextline))
-			break; //end of file
+			break; // end of file
 		skipReadLine = false;
 
 		assert(!nextline.isEmpty());
@@ -311,7 +306,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			bool ok = false;
+			bool     ok       = false;
 			unsigned ptsCount = parts[1].toInt(&ok);
 			if (!ok)
 			{
@@ -319,19 +314,19 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			//QString dataFormat = parts[3].toUpper();
-			//char buffer[8];
-			//unsigned char datSize = 4;
-			//if (dataFormat == "DOUBLE")
+			// QString dataFormat = parts[3].toUpper();
+			// char buffer[8];
+			// unsigned char datSize = 4;
+			// if (dataFormat == "DOUBLE")
 			//{
 			//	datSize = 8;
-			//}
-			//else if (dataFormat != "FLOAT")
+			// }
+			// else if (dataFormat != "FLOAT")
 			//{
 			//	ccLog::Error(QString("Non floating point data (%1) is not supported!").arg(dataFormat));
 			//	error = CC_FERR_WRONG_FILE_TYPE;
 			//	break;
-			//}
+			// }
 
 			if (!vertices->reserve(ptsCount))
 			{
@@ -339,14 +334,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			//warning: multiple points can be stored on a single line!
-			unsigned iPt = 0;
+			// warning: multiple points can be stored on a single line!
+			unsigned   iPt = 0;
 			CCVector3d Pd(0, 0, 0);
-			unsigned coordIndex = 0;
+			unsigned   coordIndex = 0;
 			while (iPt < ptsCount)
 			{
 				nextline = inFile.readLine();
-				parts = nextline.split(" ", QString::SkipEmptyParts);
+				parts    = nextline.split(" ", QString::SkipEmptyParts);
 
 				for (int i = 0; i < parts.size(); ++i)
 				{
@@ -355,13 +350,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						ccLog::Warning("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
 						error = CC_FERR_MALFORMED_FILE;
-						iPt = ptsCount;
+						iPt   = ptsCount;
 						break;
 					}
 
 					if (coordIndex == 2)
 					{
-						//first point: check for 'big' coordinates
+						// first point: check for 'big' coordinates
 						if (iPt == 0)
 						{
 							bool preserveCoordinateShift = true;
@@ -387,7 +382,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 				}
 			}
-			//end POINTS
+			// end POINTS
 		}
 		else if (nextline.startsWith("POLYGONS") || nextline.startsWith("TRIANGLE_STRIPS"))
 		{
@@ -398,11 +393,11 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			//current type name (i.e. POLYGONS or TRIANGLE_STRIPS)
-			QString typeName = parts[0];
-			bool isPolygon = (typeName == "POLYGONS");
+			// current type name (i.e. POLYGONS or TRIANGLE_STRIPS)
+			QString typeName  = parts[0];
+			bool    isPolygon = (typeName == "POLYGONS");
 
-			bool ok = false;
+			bool     ok        = false;
 			unsigned elemCount = parts[1].toUInt(&ok);
 			if (!ok)
 			{
@@ -421,13 +416,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			if (!mesh)
 			{
 				ccLog::Warning(QString("[VTK] We found %1 data while file is not composed of POLYDATA!").arg(typeName));
-				mesh = new ccMesh(vertices); //however, we can still try to load it?
+				mesh = new ccMesh(vertices); // however, we can still try to load it?
 			}
 
 			for (unsigned i = 0; i < elemCount; ++i)
 			{
 				nextline = inFile.readLine();
-				parts = nextline.split(" ", QString::SkipEmptyParts);
+				parts    = nextline.split(" ", QString::SkipEmptyParts);
 				if (parts.empty())
 				{
 					error = CC_FERR_MALFORMED_FILE;
@@ -445,13 +440,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					ccLog::Warning(QString("[VTK] Element #%1 of %2 data is corrupted! (not enough indexes)").arg(i).arg(typeName));
 				}
 
-				if (isPolygon && (vertCount != 3 && vertCount != 4)) //quads are easy to handle as well!
+				if (isPolygon && (vertCount != 3 && vertCount != 4)) // quads are easy to handle as well!
 				{
 					ccLog::Warning(QString("[VTK] POLYGON element #%1 has an unhandled size (> 4 vertices)").arg(i));
 					continue;
 				}
 
-				//reserve mem to. store indexes
+				// reserve mem to. store indexes
 				if (indexes.size() < vertCount)
 				{
 					try
@@ -464,7 +459,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 						break;
 					}
 				}
-				//decode indexes
+				// decode indexes
 				for (unsigned j = 0; j < vertCount; ++j)
 				{
 					indexes[j] = parts[j + 1].toUInt(&ok);
@@ -476,13 +471,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 				}
 
-				//add the triangles
+				// add the triangles
 				{
 					assert(vertCount > 2);
 					unsigned triCount = vertCount - 2;
 					if (mesh->size() + triCount > mesh->capacity())
 					{
-						if (!mesh->reserve(mesh->size() + triCount + 256)) //take some advance to avoid too many allocations
+						if (!mesh->reserve(mesh->size() + triCount + 256)) // take some advance to avoid too many allocations
 						{
 							error = CC_FERR_NOT_ENOUGH_MEMORY;
 							break;
@@ -491,14 +486,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 					if (isPolygon)
 					{
-						//triangle or quad
+						// triangle or quad
 						mesh->addTriangle(indexes[0], indexes[1], indexes[2]);
 						if (vertCount == 4)
 							mesh->addTriangle(indexes[0], indexes[2], indexes[3]);
 					}
 					else
 					{
-						//triangle strip
+						// triangle strip
 						for (unsigned j = 0; j < triCount; ++j)
 							mesh->addTriangle(indexes[j], indexes[j + 1], indexes[j + 2]);
 					}
@@ -509,7 +504,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			{
 				mesh->shrinkToFit();
 			}
-			//end POLYGONS or TRIANGLE_STRIPS
+			// end POLYGONS or TRIANGLE_STRIPS
 		}
 		else if (nextline.startsWith("NORMALS"))
 		{
@@ -530,13 +525,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					loadNormals = true;
 			}
 
-			//warning: multiple normals can be stored on a single line!
-			unsigned iNorm = 0;
+			// warning: multiple normals can be stored on a single line!
+			unsigned  iNorm = 0;
 			CCVector3 N;
-			unsigned coordIndex = 0;
+			unsigned  coordIndex = 0;
 			while (iNorm < lastDataSize)
 			{
-				nextline = inFile.readLine();
+				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
 
 				for (int i = 0; i < parts.size(); ++i)
@@ -564,9 +559,9 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 				}
 			}
-			lastDataSize = 0; //lastDataSize is consumed
+			lastDataSize = 0; // lastDataSize is consumed
 
-			//end NORMALS
+			// end NORMALS
 		}
 		else if (nextline.startsWith("COLOR_SCALARS"))
 		{
@@ -582,13 +577,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			if (!loadRGBColors)
 				ccLog::Warning("[VTK] Not enough memory to load RGB colors!");
 
-			//warning: multiple colors can be stored on a single line!
-			unsigned iCol = 0;
+			// warning: multiple colors can be stored on a single line!
+			unsigned     iCol = 0;
 			ccColor::Rgb rgb;
-			unsigned coordIndex = 0;
+			unsigned     coordIndex = 0;
 			while (iCol < lastDataSize)
 			{
-				nextline = inFile.readLine();
+				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
 
 				for (int i = 0; i < parts.size(); ++i)
@@ -599,7 +594,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						ccLog::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
 						error = CC_FERR_MALFORMED_FILE;
-						iCol = lastDataSize;
+						iCol  = lastDataSize;
 						break;
 					}
 
@@ -616,33 +611,33 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 				}
 			}
-			lastDataSize = 0; //lastDataSize is consumed
+			lastDataSize = 0; // lastDataSize is consumed
 
-			//end COLOR_SCALARS
+			// end COLOR_SCALARS
 		}
 		else if (nextline.startsWith("SCALARS"))
 		{
 			QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
-			lastSfName = "ScalarField";
+			lastSfName        = "ScalarField";
 			if (parts.size() > 1)
 				lastSfName = parts[1].replace("_", " ");
 
-			//SF already exists?
+			// SF already exists?
 			if (vertices->getScalarFieldIndexByName(lastSfName.toStdString()) >= 0)
 				lastSfName += QString(" (%1)").arg(vertices->getNumberOfScalarFields());
-			//end of SCALARS
+			// end of SCALARS
 		}
 		else if (nextline.startsWith("LOOKUP_TABLE") || nextline.startsWith("VECTORS"))
 		{
 			bool expected = (lastDataSize != 0);
-			assert(!acceptLookupTables || expected); //i.e. lastDataSize shouldn't be 0 for 'accepted' lookup tables
+			assert(!acceptLookupTables || expected); // i.e. lastDataSize shouldn't be 0 for 'accepted' lookup tables
 
-			QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
-			QString itemName = parts[0];
+			QStringList parts    = nextline.split(" ", QString::SkipEmptyParts);
+			QString     itemName = parts[0];
 			if (parts.size() > 2)
 			{
-				bool ok = false;
-				int valCount = parts[2].toUInt(&ok);
+				bool ok       = false;
+				int  valCount = parts[2].toUInt(&ok);
 				if (ok)
 					lastDataSize = valCount;
 			}
@@ -669,7 +664,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				ccLog::Warning(QString("[VTK] field %1 was not expected (will be ignored)").arg(itemName));
 			}
 
-			//create scalar field?
+			// create scalar field?
 			ccScalarField* sf = nullptr;
 			if (createSF)
 			{
@@ -682,20 +677,20 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 			}
 
-			lastSfName.clear(); //name is "consumed"
+			lastSfName.clear(); // name is "consumed"
 
-			//warning: multiple colors can be stored on a single line!
+			// warning: multiple colors can be stored on a single line!
 			unsigned iScal = 0;
 			while (iScal < lastDataSize)
 			{
-				nextline = inFile.readLine();
+				nextline          = inFile.readLine();
 				QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
 
 				if (expected)
 				{
 					for (int i = 0; i < parts.size(); ++i)
 					{
-						bool ok;
+						bool       ok;
 						ScalarType d = static_cast<ScalarType>(parts[i].toDouble(&ok));
 						if (!ok)
 						{
@@ -717,12 +712,12 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				else
 				{
-					//hard to guess the right format, but an unexpected field seem to always be
-					//organized as 'one element per line'
+					// hard to guess the right format, but an unexpected field seem to always be
+					// organized as 'one element per line'
 					++iScal;
 				}
 			}
-			//lastDataSize = 0; //lastDataSize is "consumed"
+			// lastDataSize = 0; //lastDataSize is "consumed"
 			acceptLookupTables = false;
 
 			if (sf)
@@ -733,17 +728,17 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					vertices->setCurrentDisplayedScalarField(newSFIndex);
 				vertices->showSF(true);
 			}
-			//end of SCALARS
+			// end of SCALARS
 		}
 		else if (nextline.startsWith("POINT_DATA"))
 		{
-			//check that the number of 'point_data' match the number of points
-			QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
+			// check that the number of 'point_data' match the number of points
+			QStringList parts  = nextline.split(" ", QString::SkipEmptyParts);
 			acceptLookupTables = false;
 			if (parts.size() > 1)
 			{
 				bool ok;
-				lastDataSize = parts[1].toUInt(&ok);
+				lastDataSize       = parts[1].toUInt(&ok);
 				acceptLookupTables = ok && vertices;
 			}
 		}
@@ -756,7 +751,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			bool ok;
+			bool     ok;
 			unsigned elements = parts[2].toUInt(&ok);
 			if (!ok)
 			{
@@ -764,15 +759,15 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			elements *= 2;	//we don't know how to handle those properly but at least
-			//we know that for FIELD elements, there's 2 lines per element...
+			elements *= 2; // we don't know how to handle those properly but at least
+			// we know that for FIELD elements, there's 2 lines per element...
 
 			for (unsigned i = 0; i < elements; ++i)
 			{
-				inFile.readLine(); //ignore
+				inFile.readLine(); // ignore
 			}
 		}
-		else //unhandled property (CELLS, CELL_TYPES, etc.)
+		else // unhandled property (CELLS, CELL_TYPES, etc.)
 		{
 			QStringList parts = nextline.split(" ", QString::SkipEmptyParts);
 			if (parts.size() < 2)
@@ -782,7 +777,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				break;
 			}
 
-			bool ok;
+			bool     ok;
 			unsigned elements = parts[1].toUInt(&ok);
 			if (!ok)
 			{
@@ -792,7 +787,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 
 			if (nextline.startsWith("CELL_DATA"))
 			{
-				//read next line (in case we actually know how to read it!
+				// read next line (in case we actually know how to read it!
 				if (!GetNextNonEmptyLine(inFile, nextline))
 				{
 					error = CC_FERR_MALFORMED_FILE;
@@ -801,20 +796,20 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 				skipReadLine = true;
 
 				if (nextline.startsWith("SCALARS")
-					|| nextline.startsWith("NORMALS")
-					|| nextline.startsWith("COLOR_SCALARS"))
+				    || nextline.startsWith("NORMALS")
+				    || nextline.startsWith("COLOR_SCALARS"))
 				{
-					lastDataSize = elements;
-					acceptLookupTables = false; //this property is for triangles!
+					lastDataSize       = elements;
+					acceptLookupTables = false; // this property is for triangles!
 					continue;
 				}
 			}
-			//we'll try to blindly skip the elements...
+			// we'll try to blindly skip the elements...
 			for (unsigned i = 0; i < elements; ++i)
 			{
-				inFile.readLine(); //ignore
+				inFile.readLine(); // ignore
 			}
-			//end unhandled property
+			// end unhandled property
 		}
 
 		if (error != CC_FERR_NO_ERROR)
@@ -847,10 +842,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		mesh->addChild(vertices);
 		vertices->setEnabled(false);
 		vertices->setName("Vertices");
-		//vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+		// vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
 
-		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
-		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+		// DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+		// Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
 		if (!mesh->hasNormals())
 		{
 			//	mesh->computeNormals();

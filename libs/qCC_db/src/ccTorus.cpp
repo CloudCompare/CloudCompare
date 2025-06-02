@@ -1,52 +1,52 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccTorus.h"
 
-//Local
-#include "ccPointCloud.h"
+// Local
 #include "ccNormalVectors.h"
+#include "ccPointCloud.h"
 
-ccTorus::ccTorus(	PointCoordinateType insideRadius,
-					PointCoordinateType outsideRadius,
-					double angle_rad/*=2.0*M_PI*/,
-					bool rectangularSection/*=false*/,
-					PointCoordinateType rectSectionHeight/*=0*/,
-					const ccGLMatrix* transMat/*=nullptr*/,
-					QString name/*=QString("Torus")*/,
-					unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
-					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_insideRadius(std::abs(insideRadius))
-	, m_outsideRadius(std::abs(outsideRadius))
-	, m_rectSection(rectangularSection)
-	, m_rectSectionHeight(std::abs(rectSectionHeight))
-	, m_angle_rad(std::abs(angle_rad))
+ccTorus::ccTorus(PointCoordinateType insideRadius,
+                 PointCoordinateType outsideRadius,
+                 double              angle_rad /*=2.0*M_PI*/,
+                 bool                rectangularSection /*=false*/,
+                 PointCoordinateType rectSectionHeight /*=0*/,
+                 const ccGLMatrix*   transMat /*=nullptr*/,
+                 QString             name /*=QString("Torus")*/,
+                 unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/,
+                 unsigned            uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccGenericPrimitive(name, transMat, uniqueID)
+    , m_insideRadius(std::abs(insideRadius))
+    , m_outsideRadius(std::abs(outsideRadius))
+    , m_rectSection(rectangularSection)
+    , m_rectSectionHeight(std::abs(rectSectionHeight))
+    , m_angle_rad(std::abs(angle_rad))
 {
-	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); //automatically calls updateRepresentation
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls updateRepresentation
 }
 
-ccTorus::ccTorus(QString name/*=QString("Torus")*/)
-	: ccGenericPrimitive(name)
-	, m_insideRadius(0)
-	, m_outsideRadius(0)
-	, m_rectSection(false)
-	, m_rectSectionHeight(0)
-	, m_angle_rad(0)
+ccTorus::ccTorus(QString name /*=QString("Torus")*/)
+    : ccGenericPrimitive(name)
+    , m_insideRadius(0)
+    , m_outsideRadius(0)
+    , m_rectSection(false)
+    , m_rectSectionHeight(0)
+    , m_angle_rad(0)
 {
 }
 
@@ -60,28 +60,28 @@ bool ccTorus::buildUp()
 	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
-	//invalid parameters?
-	if (	(m_rectSection && CCCoreLib::LessThanEpsilon(m_rectSectionHeight))
-		||	m_insideRadius >= m_outsideRadius
-		||	CCCoreLib::LessThanEpsilon(m_angle_rad))
+	// invalid parameters?
+	if ((m_rectSection && CCCoreLib::LessThanEpsilon(m_rectSectionHeight))
+	    || m_insideRadius >= m_outsideRadius
+	    || CCCoreLib::LessThanEpsilon(m_angle_rad))
 	{
 		return false;
 	}
 
-	//topology
-	bool closed = (m_angle_rad >= 2.0*M_PI);
+	// topology
+	bool closed = (m_angle_rad >= 2.0 * M_PI);
 
 	const unsigned steps = m_drawPrecision;
 
-	unsigned sweepSteps = 4 * (closed ? steps : static_cast<unsigned>(ceil((m_angle_rad * steps) / (2.0*M_PI))));
-	unsigned sectSteps = (m_rectSection ? 4 : steps);
+	unsigned sweepSteps = 4 * (closed ? steps : static_cast<unsigned>(ceil((m_angle_rad * steps) / (2.0 * M_PI))));
+	unsigned sectSteps  = (m_rectSection ? 4 : steps);
 
-	//vertices
-	unsigned vertCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
-	//faces
+	// vertices
+	unsigned vertCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; // DGM: +1 row for non closed loops
+	// faces
 	unsigned facesCount = sweepSteps * sectSteps * 2;
-	//faces normals
-	unsigned faceNormCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; //DGM: +1 row for non closed loops
+	// faces normals
+	unsigned faceNormCount = (sweepSteps + (closed ? 0 : 1)) * sectSteps; // DGM: +1 row for non closed loops
 	if (!closed)
 		facesCount += (m_rectSection ? 2 : sectSteps) * 2;
 
@@ -91,7 +91,7 @@ bool ccTorus::buildUp()
 		return false;
 	}
 
-	//2D section
+	// 2D section
 	std::vector<CCVector3> sectPoints;
 	try
 	{
@@ -105,12 +105,12 @@ bool ccTorus::buildUp()
 	}
 
 	double sweepStep_rad = m_angle_rad / sweepSteps;
-	double sectStep_rad = (2.0*M_PI) / sectSteps;
+	double sectStep_rad  = (2.0 * M_PI) / sectSteps;
 
 	PointCoordinateType sectionRadius = (m_outsideRadius - m_insideRadius) / 2;
 	if (m_rectSection)
 	{
-		//rectangular section
+		// rectangular section
 		sectPoints[0].x = (m_outsideRadius - m_insideRadius) / 2;
 		sectPoints[0].z = m_rectSectionHeight / 2;
 		sectPoints[1].x = -sectPoints[0].x;
@@ -122,12 +122,12 @@ bool ccTorus::buildUp()
 	}
 	else
 	{
-		//circular section
+		// circular section
 		for (unsigned i = 0; i < sectSteps; ++i)
 		{
 			double sect_angle_rad = i * sectStep_rad;
-			sectPoints[i].x = static_cast<PointCoordinateType>(cos(sect_angle_rad) * sectionRadius);
-			sectPoints[i].z = static_cast<PointCoordinateType>(sin(sect_angle_rad) * sectionRadius);
+			sectPoints[i].x       = static_cast<PointCoordinateType>(cos(sect_angle_rad) * sectionRadius);
+			sectPoints[i].z       = static_cast<PointCoordinateType>(sin(sect_angle_rad) * sectionRadius);
 		}
 	}
 
@@ -135,25 +135,25 @@ bool ccTorus::buildUp()
 	assert(verts);
 	assert(m_triNormals);
 
-	//main sweep
-	PointCoordinateType sweepRadius = (m_insideRadius + m_outsideRadius)/2;
+	// main sweep
+	PointCoordinateType sweepRadius = (m_insideRadius + m_outsideRadius) / 2;
 	for (unsigned t = 0; t < (closed ? sweepSteps : sweepSteps + 1); ++t)
 	{
-		//unit director vector
-		CCVector3 sweepU(static_cast<PointCoordinateType>(cos(t*sweepStep_rad)),
-						 static_cast<PointCoordinateType>(sin(t*sweepStep_rad)),
-						 0);
+		// unit director vector
+		CCVector3 sweepU(static_cast<PointCoordinateType>(cos(t * sweepStep_rad)),
+		                 static_cast<PointCoordinateType>(sin(t * sweepStep_rad)),
+		                 0);
 
-		//section points
+		// section points
 		for (unsigned i = 0; i < sectSteps; ++i)
 		{
 			CCVector3 P(sweepU.x * (sweepRadius + sectPoints[i].x),
-						sweepU.y * (sweepRadius + sectPoints[i].x),
-						sectPoints[i].z);
+			            sweepU.y * (sweepRadius + sectPoints[i].x),
+			            sectPoints[i].z);
 			verts->addPoint(P);
 		}
 
-		//normals
+		// normals
 		if (m_rectSection)
 		{
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, 1.0).u));
@@ -161,15 +161,15 @@ bool ccTorus::buildUp()
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0, 0.0, -1.0).u));
 			m_triNormals->addElement(ccNormalVectors::GetNormIndex(sweepU.u));
 		}
-		else //circular section
+		else // circular section
 		{
 			for (unsigned i = 0; i < sectSteps; ++i)
 			{
-				double sectAngle_rad = i * sectStep_rad;
+				double    sectAngle_rad = i * sectStep_rad;
 				CCVector3 sectU(cos(sectAngle_rad), 0.0, sin(sectAngle_rad));
 				CCVector3 N(sweepU.x * sectU.x,
-							sweepU.y * sectU.x,
-							sectU.z);
+				            sweepU.y * sectU.x,
+				            sectU.z);
 				m_triNormals->addElement(ccNormalVectors::GetNormIndex(N.u));
 			}
 		}
@@ -179,25 +179,26 @@ bool ccTorus::buildUp()
 	{
 		CCVector3 P(sweepRadius, 0, 0);
 		verts->addPoint(P);
-		CCVector3 P2(	static_cast<PointCoordinateType>(cos(m_angle_rad))*sweepRadius,
-						static_cast<PointCoordinateType>(sin(m_angle_rad))*sweepRadius,
-						 0);
+		CCVector3 P2(static_cast<PointCoordinateType>(cos(m_angle_rad)) * sweepRadius,
+		             static_cast<PointCoordinateType>(sin(m_angle_rad)) * sweepRadius,
+		             0);
 		verts->addPoint(P2);
 	}
 
 	if (!closed)
 	{
-		//first section (left side)
+		// first section (left side)
 		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0, -1, 0).u));
-		//last section (right side)
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(	static_cast<PointCoordinateType>(-sin(m_angle_rad)),
-																			static_cast<PointCoordinateType>(cos(m_angle_rad)),
-																			0).u));
+		// last section (right side)
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(static_cast<PointCoordinateType>(-sin(m_angle_rad)),
+		                                                                 static_cast<PointCoordinateType>(cos(m_angle_rad)),
+		                                                                 0)
+		                                                           .u));
 	}
 
 	sectPoints.clear();
 
-	//mesh faces
+	// mesh faces
 	{
 		assert(m_triVertIndexes);
 
@@ -225,12 +226,12 @@ bool ccTorus::buildUp()
 			unsigned lastSectionShift = sweepSteps * sectSteps;
 			if (m_rectSection)
 			{
-				//rectangular left section
+				// rectangular left section
 				addTriangle(0, 1, 2);
 				addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
 				addTriangle(0, 2, 3);
 				addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
-				//rectangular right section
+				// rectangular right section
 				addTriangle(lastSectionShift, lastSectionShift + 2, lastSectionShift + 1);
 				addTriangleNormalIndexes(faceNormCount + 1, faceNormCount + 1, faceNormCount + 1);
 				addTriangle(lastSectionShift, lastSectionShift + 3, lastSectionShift + 2);
@@ -239,14 +240,14 @@ bool ccTorus::buildUp()
 			else
 			{
 				unsigned lastSectionCenterShift = vertCount;
-				//circular 'left' section
+				// circular 'left' section
 				for (unsigned i = 0; i < sectSteps; ++i)
 				{
 					unsigned iNext = (i + 1) % sectSteps;
 					addTriangle(lastSectionCenterShift, i, iNext);
 					addTriangleNormalIndexes(faceNormCount, faceNormCount, faceNormCount);
 				}
-				//circular 'right' section
+				// circular 'right' section
 				for (unsigned i = 0; i < sectSteps; ++i)
 				{
 					unsigned iNext = (i + 1) % sectSteps;
@@ -277,7 +278,7 @@ bool ccTorus::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//parameters (dataVersion>=21)
+	// parameters (dataVersion>=21)
 	QDataStream outStream(&out);
 	outStream << m_insideRadius;
 	outStream << m_outsideRadius;
@@ -293,7 +294,7 @@ bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion>=21)
+	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_insideRadius, 1);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_outsideRadius, 1);
@@ -308,4 +309,3 @@ short ccTorus::minimumFileVersion_MeOnly() const
 {
 	return std::max(static_cast<short>(21), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }
-

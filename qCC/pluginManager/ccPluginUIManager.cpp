@@ -1,22 +1,23 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
+
+#include "ccPluginUIManager.h"
 
 #include "ccPluginInfoDlg.h"
-#include "ccPluginUIManager.h"
 
 #include <ccConsole.h>
 #include <ccGLPluginInterface.h>
@@ -33,17 +34,17 @@
 #include <QWidget>
 
 ccPluginUIManager::ccPluginUIManager(ccMainAppInterface* appInterface, QWidget* parent)
-	: QObject(parent)
-	, m_parentWidget(parent)
-	, m_appInterface(appInterface)
-	, m_pluginMenu(nullptr)
-	, m_glFilterMenu(nullptr)
-	, m_actionRemoveFilter(nullptr)
-	, m_glFilterActions(this)
-	, m_mainPluginToolbar(nullptr)
-	, m_showPluginToolbar(nullptr)
-	, m_glFiltersToolbar(nullptr)
-	, m_showGLFilterToolbar(nullptr)
+    : QObject(parent)
+    , m_parentWidget(parent)
+    , m_appInterface(appInterface)
+    , m_pluginMenu(nullptr)
+    , m_glFilterMenu(nullptr)
+    , m_actionRemoveFilter(nullptr)
+    , m_glFilterActions(this)
+    , m_mainPluginToolbar(nullptr)
+    , m_showPluginToolbar(nullptr)
+    , m_glFiltersToolbar(nullptr)
+    , m_showGLFilterToolbar(nullptr)
 {
 	setupActions();
 	setupMenus();
@@ -59,11 +60,11 @@ void ccPluginUIManager::init()
 
 	m_mainPluginToolbar->setVisible(false);
 
-	QVector<ccStdPluginInterface*>	coreStdPlugins;
-	QVector<ccStdPluginInterface*>	thirdPartyStdPlugins;
+	QVector<ccStdPluginInterface*> coreStdPlugins;
+	QVector<ccStdPluginInterface*> thirdPartyStdPlugins;
 
-	QVector<QAction*>	coreGLActions;
-	QVector<QAction*>	thirdPartyGLActions;
+	QVector<QAction*> coreGLActions;
+	QVector<QAction*> thirdPartyGLActions;
 
 	for (ccPluginInterface* plugin : plugins)
 	{
@@ -92,7 +93,7 @@ void ccPluginUIManager::init()
 
 		switch (plugin->getType())
 		{
-		case CC_STD_PLUGIN: //standard plugin
+		case CC_STD_PLUGIN: // standard plugin
 		{
 			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin);
 
@@ -112,7 +113,7 @@ void ccPluginUIManager::init()
 			break;
 		}
 
-		case CC_GL_FILTER_PLUGIN: //GL filter
+		case CC_GL_FILTER_PLUGIN: // GL filter
 		{
 			ccGLPluginInterface* glPlugin = static_cast<ccGLPluginInterface*>(plugin);
 
@@ -212,7 +213,7 @@ void ccPluginUIManager::init()
 	}
 
 	m_glFilterMenu->setEnabled(!m_glFilterMenu->isEmpty());
-	m_glFiltersToolbar->setEnabled(!m_glFilterMenu->isEmpty());	// [sic] we have toolbar actions if we have them in the menu
+	m_glFiltersToolbar->setEnabled(!m_glFilterMenu->isEmpty()); // [sic] we have toolbar actions if we have them in the menu
 
 	m_showPluginToolbar->setChecked(m_mainPluginToolbar->isEnabled());
 
@@ -261,8 +262,8 @@ QAction* ccPluginUIManager::actionShowGLFilterToolbar()
 
 void ccPluginUIManager::updateMenus()
 {
-	ccGLWindowInterface* active3DView = m_appInterface->getActiveGLWindow();
-	const bool hasActiveView = (active3DView != nullptr);
+	ccGLWindowInterface* active3DView  = m_appInterface->getActiveGLWindow();
+	const bool           hasActiveView = (active3DView != nullptr);
 
 	const QList<QAction*> actionList = m_glFilterActions.actions();
 
@@ -274,7 +275,7 @@ void ccPluginUIManager::updateMenus()
 
 void ccPluginUIManager::handleSelectionChanged()
 {
-	const ccHObject::Container &selectedEntities = m_appInterface->getSelectedEntities();
+	const ccHObject::Container& selectedEntities = m_appInterface->getSelectedEntities();
 
 	const auto& list = m_plugins;
 
@@ -291,7 +292,7 @@ void ccPluginUIManager::handleSelectionChanged()
 
 void ccPluginUIManager::showAboutDialog() const
 {
-	ccPluginInfoDlg	about;
+	ccPluginInfoDlg about;
 
 	about.setPluginPaths(ccPluginManager::Get().pluginPaths());
 	about.setPluginList(m_plugins);
@@ -326,7 +327,7 @@ void ccPluginUIManager::setupMenus()
 	m_glFilterActions.setExclusive(true);
 }
 
-void ccPluginUIManager::addActionsToMenu(ccStdPluginInterface* stdPlugin, const QList<QAction*> &actions)
+void ccPluginUIManager::addActionsToMenu(ccStdPluginInterface* stdPlugin, const QList<QAction*>& actions)
 {
 	// If the plugin has more than one action we create its own menu
 	if (actions.size() > 1)
@@ -367,7 +368,7 @@ void ccPluginUIManager::setupToolbars()
 	connect(m_showGLFilterToolbar, &QAction::toggled, m_glFiltersToolbar, &QToolBar::setVisible);
 }
 
-void ccPluginUIManager::addActionsToToolBar(ccStdPluginInterface* stdPlugin, const QList<QAction*> &actions)
+void ccPluginUIManager::addActionsToToolBar(ccStdPluginInterface* stdPlugin, const QList<QAction*>& actions)
 {
 	const QString pluginName = stdPlugin->getName();
 

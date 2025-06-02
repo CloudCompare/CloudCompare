@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qSSAO                       #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                       CLOUDCOMPARE PLUGIN: qSSAO                       #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 /***************************************************************/
 //
@@ -32,16 +32,16 @@
 //
 /*****************************************************************/
 
-#ifndef	CC_FILTER_SSAO_H
-#define	CC_FILTER_SSAO_H
+#ifndef CC_FILTER_SSAO_H
+#define CC_FILTER_SSAO_H
 
-//CC_FBO
+// CC_FBO
 #include <ccGlFilter.h>
 
-//Qt
+// Qt
 #include <QOpenGLFunctions_2_1>
 
-//system
+// system
 #include <vector>
 
 class ccShader;
@@ -50,30 +50,28 @@ class ccFrameBufferObject;
 
 class ccSSAOFilter : public ccGlFilter
 {
-public:
-
+  public:
 	ccSSAOFilter();
 	virtual ~ccSSAOFilter();
 
 	void reset();
 
-	//inherited from ccGlFilter
+	// inherited from ccGlFilter
 	virtual ccGlFilter* clone() const override;
-	virtual bool init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
-	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
-	virtual GLuint getTexture() override;
+	virtual bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
+	virtual void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	virtual GLuint      getTexture() override;
 
-	bool init(	unsigned width,
-				unsigned height,
-				bool enableBilateralFilter,
-				bool useReflectTexture,
-				const QString& shadersPath,
-				QString& error);
+	bool init(unsigned       width,
+	          unsigned       height,
+	          bool           enableBilateralFilter,
+	          bool           useReflectTexture,
+	          const QString& shadersPath,
+	          QString&       error);
 
 	void setParameters(int N, float Kz, float R, float F);
 
-protected:
-
+  protected:
 	void initReflectTexture();
 	void sampleSphere();
 
@@ -81,13 +79,13 @@ protected:
 	unsigned m_h;
 
 	ccFrameBufferObject* m_fbo;
-	ccShader* m_shader;
-	GLuint m_texReflect;
+	ccShader*            m_shader;
+	GLuint               m_texReflect;
 
-	int   m_N;								// nb of neighbours
-	float m_Kz;								// attenuation with distance
-	float m_R;								// radius in image of neighbour sphere
-	float m_F;								// amplification
+	int   m_N;  // nb of neighbours
+	float m_Kz; // attenuation with distance
+	float m_R;  // radius in image of neighbour sphere
+	float m_F;  // amplification
 
 	//! Maximum number of sampling directions
 	static const int MAX_N = 256;

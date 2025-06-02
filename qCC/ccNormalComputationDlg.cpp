@@ -1,45 +1,45 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccNormalComputationDlg.h"
 
-//qCC_db
-#include <ccPointCloud.h>
+// qCC_db
 #include <ccOctree.h>
+#include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-//Qt
+// Qt
 #include <QComboBox>
 
-//system
+// system
 #include <assert.h>
 
-ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, Ui::NormalComputationDlg()
-	, m_cloud(nullptr)
+ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , Ui::NormalComputationDlg()
+    , m_cloud(nullptr)
 {
 	setupUi(this);
 
-	//by default, the 'auto' button is hidden (as long as setCloud is not called)
+	// by default, the 'auto' button is hidden (as long as setCloud is not called)
 	autoRadiusToolButton->setVisible(false);
 
 	connect(localModelComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccNormalComputationDlg::localModelChanged);
-	connect(autoRadiusToolButton, &QToolButton::clicked,												this, &ccNormalComputationDlg::autoEstimateRadius);
+	connect(autoRadiusToolButton, &QToolButton::clicked, this, &ccNormalComputationDlg::autoEstimateRadius);
 
 	if (withScanGrid)
 	{
@@ -48,7 +48,7 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	}
 	else
 	{
-		//disable 'scan grid' options
+		// disable 'scan grid' options
 		useScanGridCheckBox->setChecked(false);
 		useScanGridCheckBox->setEnabled(false);
 		gridAngleFrame->setEnabled(false);
@@ -63,13 +63,13 @@ ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSenso
 	}
 	else
 	{
-		//disable 'sensor' options
+		// disable 'sensor' options
 		sensorOrientCheckBox->setChecked(false);
 		sensorOrientCheckBox->setEnabled(false);
 	}
 }
 
-void ccNormalComputationDlg::setLocalModel(CCCoreLib::LOCAL_MODEL_TYPES  model)
+void ccNormalComputationDlg::setLocalModel(CCCoreLib::LOCAL_MODEL_TYPES model)
 {
 	int index = -1;
 	switch (model)
@@ -108,7 +108,7 @@ CCCoreLib::LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 
 void ccNormalComputationDlg::localModelChanged(int index)
 {
-	//DGM: we don't disable the parent frame anymore as it is used by the octree/grid toggling
+	// DGM: we don't disable the parent frame anymore as it is used by the octree/grid toggling
 	radiusDoubleSpinBox->setEnabled(index != 2);
 	autoRadiusToolButton->setEnabled(index != 2);
 }
@@ -210,9 +210,9 @@ void ccNormalComputationDlg::autoEstimateRadius()
 	ccOctree::BestRadiusParams params;
 	{
 		params.aimedPopulationPerCell = 16;
-		params.aimedPopulationRange = 4;
-		params.minCellPopulation = 6;
-		params.minAboveMinRatio = 0.97;
+		params.aimedPopulationRange   = 4;
+		params.minCellPopulation      = 6;
+		params.minAboveMinRatio       = 0.97;
 	}
 
 	PointCoordinateType radius = ccOctree::GuessBestRadiusAutoComputeOctree(m_cloud, params, this);

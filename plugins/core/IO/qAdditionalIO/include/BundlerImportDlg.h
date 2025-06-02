@@ -1,39 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_BUNDLER_IMPORT_DIALOG_HEADER
 #define CC_BUNDLER_IMPORT_DIALOG_HEADER
 
 #include <QDialog>
 
-//local
+// local
 #include "qCC_io.h"
-
 #include "ui_openBundlerFileDlg.h"
 
 class ccGLMatrix;
 
 //! Dialog for importation of Snavely's Bundler files
-class /*QCC_IO_LIB_API*/ BundlerImportDlg : public QDialog, public Ui::BundlerImportDlg
+class /*QCC_IO_LIB_API*/ BundlerImportDlg : public QDialog
+    , public Ui::BundlerImportDlg
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit BundlerImportDlg(QWidget* parent = nullptr);
 
@@ -58,7 +57,12 @@ public:
 	bool keepImagesInMemory() const;
 
 	//! Image ortho-rectification methods
-	enum OrthoRectMethod { OPTIMIZED, DIRECT_UNDISTORTED, DIRECT };
+	enum OrthoRectMethod
+	{
+		OPTIMIZED,
+		DIRECT_UNDISTORTED,
+		DIRECT
+	};
 	//! Returns the ortho-rectification method (for images)
 	OrthoRectMethod getOrthorectificationMethod() const;
 
@@ -88,19 +92,17 @@ public:
 	//! Returns the optional transformation matrix (if defined)
 	bool getOptionalTransfoMatrix(ccGLMatrix& mat);
 
-protected:
+  protected:
 	void browseImageListFilename();
 	void browseAltKeypointsFilename();
 	void acceptAndSaveSettings();
 
-protected:
-
+  protected:
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
 
 	//! Saves dialog state from persistent settings
 	void saveToPersistentSettings();
-
 };
 
-#endif //CC_BUNDLER_IMPORT_DIALOG_HEADER
+#endif // CC_BUNDLER_IMPORT_DIALOG_HEADER

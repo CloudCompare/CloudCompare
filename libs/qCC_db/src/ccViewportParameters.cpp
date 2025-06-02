@@ -1,63 +1,63 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccViewportParameters.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCConst.h>
 
-//Qt
+// Qt
 #include <QRect>
 
 ccViewportParameters::ccViewportParameters()
-	: defaultPointSize(1)
-	, defaultLineWidth(1)
-	, perspectiveView(false)
-	, objectCenteredView(true)
-	, zNearCoef(0.005)
-	, nearClippingDepth(std::numeric_limits<double>::quiet_NaN())
-	, farClippingDepth(std::numeric_limits<double>::quiet_NaN())
-	, zNear(0)
-	, zFar(0)
-	, fov_deg(50.0f)
-	, cameraAspectRatio(1.0f)
-	, focalDistance(1.0)
-	, pivotPoint(0, 0, 0)
-	, cameraCenter(0, 0, focalDistance)
+    : defaultPointSize(1)
+    , defaultLineWidth(1)
+    , perspectiveView(false)
+    , objectCenteredView(true)
+    , zNearCoef(0.005)
+    , nearClippingDepth(std::numeric_limits<double>::quiet_NaN())
+    , farClippingDepth(std::numeric_limits<double>::quiet_NaN())
+    , zNear(0)
+    , zFar(0)
+    , fov_deg(50.0f)
+    , cameraAspectRatio(1.0f)
+    , focalDistance(1.0)
+    , pivotPoint(0, 0, 0)
+    , cameraCenter(0, 0, focalDistance)
 {
 	viewMat.toIdentity();
 }
 
 ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
-	: viewMat(params.viewMat)
-	, defaultPointSize(params.defaultPointSize)
-	, defaultLineWidth(params.defaultLineWidth)
-	, perspectiveView(params.perspectiveView)
-	, objectCenteredView(params.objectCenteredView)
-	, zNearCoef(params.zNearCoef)
-	, nearClippingDepth(params.nearClippingDepth)
-	, farClippingDepth(params.farClippingDepth)
-	, zNear(params.zNear)
-	, zFar(params.zFar)
-	, fov_deg(params.fov_deg)
-	, cameraAspectRatio(params.cameraAspectRatio)
-	, focalDistance(params.focalDistance)
-	, pivotPoint(params.pivotPoint)
-	, cameraCenter(params.cameraCenter)
+    : viewMat(params.viewMat)
+    , defaultPointSize(params.defaultPointSize)
+    , defaultLineWidth(params.defaultLineWidth)
+    , perspectiveView(params.perspectiveView)
+    , objectCenteredView(params.objectCenteredView)
+    , zNearCoef(params.zNearCoef)
+    , nearClippingDepth(params.nearClippingDepth)
+    , farClippingDepth(params.farClippingDepth)
+    , zNear(params.zNear)
+    , zFar(params.zFar)
+    , fov_deg(params.fov_deg)
+    , cameraAspectRatio(params.cameraAspectRatio)
+    , focalDistance(params.focalDistance)
+    , pivotPoint(params.pivotPoint)
+    , cameraCenter(params.cameraCenter)
 {
 }
 
@@ -70,11 +70,11 @@ bool ccViewportParameters::toFile(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//base modelview matrix (dataVersion>=20)
+	// base modelview matrix (dataVersion>=20)
 	if (!viewMat.toFile(out, dataVersion))
 		return false;
 
-	//other parameters (dataVersion>=20)
+	// other parameters (dataVersion>=20)
 	QDataStream outStream(&out);
 	outStream << focalDistance;
 	outStream << defaultPointSize;
@@ -101,28 +101,28 @@ bool ccViewportParameters::toFile(QFile& out, short dataVersion) const
 
 bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	//base modelview matrix (dataVersion>=20)
-	if (dataVersion >= 36) //we now save the camera matrix in double precision
+	// base modelview matrix (dataVersion>=20)
+	if (dataVersion >= 36) // we now save the camera matrix in double precision
 	{
 		if (!viewMat.fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return false;
 	}
 	else
 	{
-		//camera matrix was saved in standard (float) precision
+		// camera matrix was saved in standard (float) precision
 		ccGLMatrix _viewMat;
 		if (!_viewMat.fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return false;
 		viewMat = ccGLMatrixd(_viewMat.data());
 	}
 
-	//other parameters (dataVersion>=20)
+	// other parameters (dataVersion>=20)
 	QDataStream inStream(&in);
-	float zoom = 1.0f;
-	float pixelSize = 0.0f;
+	float       zoom      = 1.0f;
+	float       pixelSize = 0.0f;
 	if (dataVersion < 51)
 	{
-		//we read these values for backward compatibility only: we don't handle them this way anymore
+		// we read these values for backward compatibility only: we don't handle them this way anymore
 		inStream >> pixelSize;
 		inStream >> zoom;
 	}
@@ -135,7 +135,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	inStream >> defaultLineWidth;
 	inStream >> perspectiveView;
 	inStream >> objectCenteredView;
-	if (dataVersion >= 36) //we now save the camera center and pivot point in double precision
+	if (dataVersion >= 36) // we now save the camera center and pivot point in double precision
 	{
 		inStream >> pivotPoint.x;
 		inStream >> pivotPoint.y;
@@ -149,7 +149,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		CCVector3 _pivotPoint;
 		ccSerializationHelper::CoordsFromDataStream(inStream, flags, _pivotPoint.u, 3);
 		pivotPoint = _pivotPoint;
-		if (dataVersion >= 25) //after version 25 the camera center is saved as a separate point!
+		if (dataVersion >= 25) // after version 25 the camera center is saved as a separate point!
 		{
 			CCVector3 _cameraCenter;
 			ccSerializationHelper::CoordsFromDataStream(inStream, flags, _cameraCenter.u, 3);
@@ -157,14 +157,14 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		}
 		else
 		{
-			//FIXME: doesn't work in object-centered perspective!
+			// FIXME: doesn't work in object-centered perspective!
 			cameraCenter = pivotPoint;
 		}
 	}
 
 	inStream >> fov_deg;
 	inStream >> cameraAspectRatio;
-	if (dataVersion < 25) //screenPan has been replaced by cameraCenter(x,y) in object centered mode!
+	if (dataVersion < 25) // screenPan has been replaced by cameraCenter(x,y) in object centered mode!
 	{
 		float screenPan[2];
 		inStream >> screenPan[0];
@@ -179,12 +179,12 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 
 	if (dataVersion >= 30 && dataVersion < 51)
 	{
-		//ortho mode aspect ratio (30 >= dataVersion < 51)
+		// ortho mode aspect ratio (30 >= dataVersion < 51)
 		float orthoAspectRatio = 0.0f;
 		inStream >> orthoAspectRatio;
 	}
 
-	//for older version, deduce the focal distance from the old parameters (pixelSize and zoom)
+	// for older version, deduce the focal distance from the old parameters (pixelSize and zoom)
 	if (dataVersion < 51 && zoom != 1.0f)
 	{
 		if (perspectiveView)
@@ -193,8 +193,8 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		}
 		else
 		{
-			static int DefaultScreenSize_pix = 2048;  // average screen size - sadly we don't have this information
-			focalDistance = pixelSize * static_cast<double>(DefaultScreenSize_pix) / computeDistanceToWidthRatio(DefaultScreenSize_pix, DefaultScreenSize_pix);
+			static int DefaultScreenSize_pix = 2048; // average screen size - sadly we don't have this information
+			focalDistance                    = pixelSize * static_cast<double>(DefaultScreenSize_pix) / computeDistanceToWidthRatio(DefaultScreenSize_pix, DefaultScreenSize_pix);
 		}
 		setFocalDistance(focalDistance / zoom);
 		ccLog::Warning("[ccViewportParameters] Approximate focal distance (sorry, the parameters of viewport objects have changed!)");
@@ -234,13 +234,13 @@ ccGLMatrixd ccViewportParameters::computeViewMatrix() const
 
 	const CCVector3d& rotationCenter = getRotationCenter();
 
-	//place origin on rotation center
+	// place origin on rotation center
 	viewMatd.setTranslation(/*viewMatd.getTranslationAsVec3D()*/ -rotationCenter); // viewMatd.getTranslationAsVec3D() = (0, 0, 0)
 
-	//rotation (viewMat is simply a rotation matrix)
+	// rotation (viewMat is simply a rotation matrix)
 	viewMatd = viewMat * viewMatd;
 
-	//go back to initial origin, then place origin on camera center
+	// go back to initial origin, then place origin on camera center
 	viewMatd.setTranslation(viewMatd.getTranslationAsVec3D() + rotationCenter - cameraCenter);
 
 	return viewMatd;
@@ -251,13 +251,13 @@ ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) co
 	ccGLMatrixd scaleMatd;
 	scaleMatd.toIdentity();
 
-	//for proper aspect ratio handling
+	// for proper aspect ratio handling
 	if (glViewport.height() != 0)
 	{
 		double ar = static_cast<double>(glViewport.width() / (glViewport.height() * cameraAspectRatio));
 		if (ar < 1.0)
 		{
-			//glScalef(ar, ar, 1.0);
+			// glScalef(ar, ar, 1.0);
 			scaleMatd.data()[0] = ar;
 			scaleMatd.data()[5] = ar;
 		}
@@ -268,9 +268,9 @@ ccGLMatrixd ccViewportParameters::computeScaleMatrix(const QRect& glViewport) co
 
 CCVector3d ccViewportParameters::getViewDir() const
 {
-	//view direction is (the opposite of) the 3rd line of the current view matrix
+	// view direction is (the opposite of) the 3rd line of the current view matrix
 	const double* M = viewMat.data();
-	CCVector3d axis(-M[2], -M[6], -M[10]);
+	CCVector3d    axis(-M[2], -M[6], -M[10]);
 	axis.normalize();
 
 	return axis;
@@ -278,9 +278,9 @@ CCVector3d ccViewportParameters::getViewDir() const
 
 CCVector3d ccViewportParameters::getUpDir() const
 {
-	//up direction is the 2nd line of the current view matrix
+	// up direction is the 2nd line of the current view matrix
 	const double* M = viewMat.data();
-	CCVector3d axis(M[1], M[5], M[9]);
+	CCVector3d    axis(M[1], M[5], M[9]);
 	axis.normalize();
 
 	return axis;
@@ -291,7 +291,7 @@ void ccViewportParameters::setPivotPoint(const CCVector3d& P, bool autoUpdateFoc
 	pivotPoint = P;
 	if (autoUpdateFocal && objectCenteredView)
 	{
-		//update focal distance accordingly
+		// update focal distance accordingly
 		focalDistance = cameraCenter.z - pivotPoint.z;
 	}
 }
@@ -301,7 +301,7 @@ void ccViewportParameters::setCameraCenter(const CCVector3d& C, bool autoUpdateF
 	cameraCenter = C;
 	if (autoUpdateFocal && objectCenteredView)
 	{
-		//update focal distance accordingly
+		// update focal distance accordingly
 		focalDistance = cameraCenter.z - pivotPoint.z;
 	}
 }

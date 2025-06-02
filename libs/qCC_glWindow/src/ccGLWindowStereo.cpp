@@ -1,62 +1,65 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//qCC
+// qCC
 #include "ccGLWindowStereo.h"
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
-//CCFbo
+// CCFbo
 #include <ccFrameBufferObject.h>
 
-//Qt
+// Qt
 #include <QMessageBox>
-#include <QResizeEvent>
 #include <QOpenGLPaintDevice>
+#include <QResizeEvent>
 
 #ifdef CC_OCULUS_SUPPORT
 #include "oculus/ccOculus.h"
 static OculusHMD s_oculus;
-#endif //CC_OCULUS_SUPPORT
+#endif // CC_OCULUS_SUPPORT
 
-ccGLWindowStereo::ccGLWindowStereo(	QSurfaceFormat* format/*=nullptr*/,
-									QWindow* parent/*=nullptr*/,
-									bool silentInitialization/*=false*/)
-	: QWindow(parent)
-	, ccGLWindowInterface(this, silentInitialization)
-	, m_context(nullptr)
-	, m_parentWidget(nullptr)
+ccGLWindowStereo::ccGLWindowStereo(QSurfaceFormat* format /*=nullptr*/,
+                                   QWindow*        parent /*=nullptr*/,
+                                   bool            silentInitialization /*=false*/)
+    : QWindow(parent)
+    , ccGLWindowInterface(this, silentInitialization)
+    , m_context(nullptr)
+    , m_parentWidget(nullptr)
 {
 	setSurfaceType(QWindow::OpenGLSurface);
 
 	m_format = format ? *format : requestedFormat();
 
-	//default picking mode
+	// default picking mode
 	setPickingMode(DEFAULT_PICKING);
 
-	//default interaction mode
+	// default interaction mode
 	setInteractionMode(MODE_TRANSFORM_CAMERA);
 
-	//signal/slot connections
+	// signal/slot connections
 	connect(m_signalEmitter, &ccGLWindowSignalEmitter::itemPickedFast, this, &ccGLWindowStereo::onItemPickedFastSlot, Qt::DirectConnection);
-	connect(&m_scheduleTimer, &QTimer::timeout, [&]() { checkScheduledRedraw(); });
-	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [&]() { update(); });
-	connect(&m_deferredPickingTimer, &QTimer::timeout, this, [&]() { doPicking(); });
+	connect(&m_scheduleTimer, &QTimer::timeout, [&]()
+	        { checkScheduledRedraw(); });
+	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [&]()
+	        { update(); });
+	connect(&m_deferredPickingTimer, &QTimer::timeout, this, [&]()
+	        { doPicking(); });
 
 	QString windowTitle = QString("3D View Stereo %1").arg(m_uniqueID);
 	setWindowTitle(windowTitle);
@@ -65,7 +68,7 @@ ccGLWindowStereo::ccGLWindowStereo(	QSurfaceFormat* format/*=nullptr*/,
 
 ccGLWindowStereo::~ccGLWindowStereo()
 {
-	//disable the stereo mode (mainly to release the Oculus FBO ;)
+	// disable the stereo mode (mainly to release the Oculus FBO ;)
 	disableStereoMode();
 
 	uninitializeGL();
@@ -92,7 +95,7 @@ void ccGLWindowStereo::setParentWidget(QWidget* widget)
 
 	if (widget)
 	{
-		//drag & drop handling
+		// drag & drop handling
 		widget->setAcceptDrops(true);
 		widget->setAttribute(Qt::WA_AcceptTouchEvents, true);
 		widget->setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -165,7 +168,7 @@ bool ccGLWindowStereo::event(QEvent* evt)
 		resizeGL(newSize.width(), newSize.height());
 		evt->accept();
 	}
-	return true;
+		return true;
 
 	case QEvent::Expose:
 	{
@@ -175,7 +178,7 @@ bool ccGLWindowStereo::event(QEvent* evt)
 		}
 		evt->accept();
 	}
-	return true;
+		return true;
 
 	case QEvent::UpdateRequest:
 	case QEvent::Show:
@@ -184,12 +187,11 @@ bool ccGLWindowStereo::event(QEvent* evt)
 		requestUpdate();
 		evt->accept();
 	}
-	return true;
+		return true;
 
 	default:
 		// nothing to do
-	break;
-	
+		break;
 	}
 
 	return QWindow::event(evt);
@@ -238,12 +240,12 @@ bool ccGLWindowStereo::initPaintGL()
 
 void ccGLWindowStereo::swapGLBuffers()
 {
-	if (	!m_stereoModeEnabled
-		||	m_stereoParams.glassType != StereoParams::OCULUS
+	if (!m_stereoModeEnabled
+	    || m_stereoParams.glassType != StereoParams::OCULUS
 #ifdef CC_OCULUS_SUPPORT
-		||	s_oculus.mirror.texture
+	    || s_oculus.mirror.texture
 #endif
-		)
+	)
 	{
 		if (m_context)
 		{
@@ -256,27 +258,27 @@ void ccGLWindowStereo::swapGLBuffers()
 	}
 }
 
-bool ccGLWindowStereo::prepareOtherStereoGlassType(	CC_DRAW_CONTEXT& CONTEXT,
-												RenderingParams& renderingParams,
-												ccFrameBufferObject*& currentFBO)
+bool ccGLWindowStereo::prepareOtherStereoGlassType(CC_DRAW_CONTEXT&      CONTEXT,
+                                                   RenderingParams&      renderingParams,
+                                                   ccFrameBufferObject*& currentFBO)
 {
 #ifdef CC_OCULUS_SUPPORT
 	if (m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
 	{
-		renderingParams.useFBO = true;
+		renderingParams.useFBO         = true;
 		renderingParams.drawBackground = (CONTEXT.currentLODLevel == 0);
-		renderingParams.draw3DPass = true;
-		currentFBO = s_oculus.fbo;
+		renderingParams.draw3DPass     = true;
+		currentFBO                     = s_oculus.fbo;
 
 		if (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS)
 		{
-			//Get both eye poses simultaneously, with IPD offset already included.
+			// Get both eye poses simultaneously, with IPD offset already included.
 			double displayMidpointSeconds = ovr_GetPredictedDisplayTime(s_oculus.session, 0);
-			//Query the HMD for the current tracking state.
+			// Query the HMD for the current tracking state.
 			ovrTrackingState hmdState = ovr_GetTrackingState(s_oculus.session, displayMidpointSeconds, ovrTrue);
 			if (hmdState.StatusFlags & (ovrStatus_OrientationTracked | ovrStatus_PositionTracked))
 			{
-				//compute the eye positions
+				// compute the eye positions
 				ovr_CalcEyePoses(hmdState.HeadPose.ThePose, s_oculus.hmdToEyeViewOffset, s_oculus.layer.RenderPose);
 				s_oculus.hasLastOVRPos = true;
 			}
@@ -285,7 +287,7 @@ bool ccGLWindowStereo::prepareOtherStereoGlassType(	CC_DRAW_CONTEXT& CONTEXT,
 				s_oculus.hasLastOVRPos = false;
 			}
 
-			//Increment to use next texture, just before writing
+			// Increment to use next texture, just before writing
 			int currentIndex = 0;
 			ovr_GetTextureSwapChainCurrentIndex(s_oculus.session, s_oculus.textureSwapChain, &currentIndex);
 
@@ -297,11 +299,11 @@ bool ccGLWindowStereo::prepareOtherStereoGlassType(	CC_DRAW_CONTEXT& CONTEXT,
 			s_oculus.fbo->attachDepth(depthTexID);
 		}
 
-		//set the right viewport
+		// set the right viewport
 		{
 			bindFBO(s_oculus.fbo);
 
-			//s_oculus.fbo->setDrawBuffer(renderingParams.pass);
+			// s_oculus.fbo->setDrawBuffer(renderingParams.pass);
 			const ovrRecti& vp = s_oculus.layer.Viewport[renderingParams.pass];
 			setGLViewport(vp.Pos.x, vp.Pos.y, vp.Size.w, vp.Size.h);
 			CONTEXT.glW = vp.Size.w;
@@ -312,25 +314,25 @@ bool ccGLWindowStereo::prepareOtherStereoGlassType(	CC_DRAW_CONTEXT& CONTEXT,
 
 		return true;
 	}
-#endif //CC_OCULUS_SUPPORT
+#endif // CC_OCULUS_SUPPORT
 	return false;
 }
 
 void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingParams)
 {
 #ifdef CC_OCULUS_SUPPORT
-	if (	m_stereoModeEnabled
-		&&	m_stereoParams.glassType == StereoParams::OCULUS
-		&&	s_oculus.session
-		&&	renderingParams.pass == RIGHT_RENDERING_PASS)
+	if (m_stereoModeEnabled
+	    && m_stereoParams.glassType == StereoParams::OCULUS
+	    && s_oculus.session
+	    && renderingParams.pass == RIGHT_RENDERING_PASS)
 	{
 		ovr_CommitTextureSwapChain(s_oculus.session, s_oculus.textureSwapChain);
 
 		// Submit frame
 		ovrLayerHeader* layers = &s_oculus.layer.Header;
-		//glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
+		// glFunc->glEnable(GL_FRAMEBUFFER_SRGB);
 		ovrResult result = ovr_SubmitFrame(s_oculus.session, 0, nullptr, &layers, 1);
-		//glFunc->glDisable(GL_FRAMEBUFFER_SRGB);
+		// glFunc->glDisable(GL_FRAMEBUFFER_SRGB);
 
 		if (s_oculus.mirror.texture)
 		{
@@ -339,7 +341,7 @@ void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingPar
 			assert(m_glExtFuncSupported);
 			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_oculus.mirror.fbo);
 			m_glExtFunc.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			//compute the size of the destination texture
+			// compute the size of the destination texture
 			int ow = s_oculus.mirror.size.width();
 			int oh = s_oculus.mirror.size.height();
 			int sx = 0;
@@ -347,11 +349,11 @@ void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingPar
 			int sw = width();
 			int sh = height();
 
-			GLfloat cw = static_cast<GLfloat>(sw) / ow;
-			GLfloat ch = static_cast<GLfloat>(sh) / oh;
+			GLfloat cw         = static_cast<GLfloat>(sw) / ow;
+			GLfloat ch         = static_cast<GLfloat>(sh) / oh;
 			GLfloat zoomFactor = std::min(cw, ch);
-			int sw2 = static_cast<int>(ow * zoomFactor);
-			int sh2 = static_cast<int>(oh * zoomFactor);
+			int     sw2        = static_cast<int>(ow * zoomFactor);
+			int     sh2        = static_cast<int>(oh * zoomFactor);
 			sx += (sw - sw2) / 2;
 			sy += (sh - sh2) / 2;
 			sw = sw2;
@@ -360,9 +362,8 @@ void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingPar
 			m_glExtFunc.glBlitFramebuffer(0, oh, ow, 0, sx, sy, sx + sw, sy + sh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		}
-
 	}
-#endif //CC_OCULUS_SUPPORT
+#endif // CC_OCULUS_SUPPORT
 }
 
 bool ccGLWindowStereo::setCustomCameraProjection(RenderingParams& renderingParams, ccGLMatrixd& modelViewMat, ccGLMatrixd& projectionMat)
@@ -370,34 +371,34 @@ bool ccGLWindowStereo::setCustomCameraProjection(RenderingParams& renderingParam
 #ifdef CC_OCULUS_SUPPORT
 	if (m_stereoParams.glassType == StereoParams::OCULUS && s_oculus.session)
 	{
-		//we use the standard modelview matrix
+		// we use the standard modelview matrix
 		modelViewMat = getModelViewMatrix();
 
 		if (s_oculus.hasLastOVRPos)
 		{
 			s_oculus.layer.RenderPose[renderingParams.pass].Position;
-			OVR::Quatf q(s_oculus.layer.RenderPose[renderingParams.pass].Orientation);
+			OVR::Quatf    q(s_oculus.layer.RenderPose[renderingParams.pass].Orientation);
 			OVR::Matrix4f sensorRot(q);
 
-			ccGLMatrixd sensorMat = FromOVRMat(sensorRot);
-			const ovrVector3f& P = s_oculus.layer.RenderPose[renderingParams.pass].Position;
+			ccGLMatrixd        sensorMat = FromOVRMat(sensorRot);
+			const ovrVector3f& P         = s_oculus.layer.RenderPose[renderingParams.pass].Position;
 			sensorMat.setTranslation(sensorMat.getTranslationAsVec3D() + CCVector3d(P.x, P.y, P.z));
 
 			modelViewMat = sensorMat.inverse() * modelViewMat;
 		}
 
-		//projection matrix
+		// projection matrix
 		m_viewportParams.zNear = 0.001;
-		m_viewportParams.zFar = 1000.0;
-		OVR::Matrix4f proj = ovrMatrix4f_Projection(s_oculus.layer.Fov[renderingParams.pass],
-													static_cast<float>(m_viewportParams.zNear),
-													static_cast<float>(m_viewportParams.zFar),
-													ovrProjection_ClipRangeOpenGL);
-		projectionMat = FromOVRMat(proj);
+		m_viewportParams.zFar  = 1000.0;
+		OVR::Matrix4f proj     = ovrMatrix4f_Projection(s_oculus.layer.Fov[renderingParams.pass],
+                                                    static_cast<float>(m_viewportParams.zNear),
+                                                    static_cast<float>(m_viewportParams.zFar),
+                                                    ovrProjection_ClipRangeOpenGL);
+		projectionMat          = FromOVRMat(proj);
 
 		return true;
 	}
-#endif //CC_OCULUS_SUPPORT
+#endif // CC_OCULUS_SUPPORT
 	return false;
 }
 
@@ -416,7 +417,7 @@ bool ccGLWindowStereo::enableStereoMode(const StereoParams& params)
 			}
 
 			ovrGraphicsLuid luid;
-			ovrSession session;
+			ovrSession      session;
 			result = ovr_Create(&session, &luid);
 			if (OVR_FAILURE(result))
 			{
@@ -425,7 +426,7 @@ bool ccGLWindowStereo::enableStereoMode(const StereoParams& params)
 				return false;
 			}
 
-			//get device description
+			// get device description
 			ovrHmdDesc desc = ovr_GetHmdDesc(s_oculus.session);
 			ccLog::Print(QString("[Oculus] HMD '%0' detected (resolution: %1 x %2)").arg(desc.ProductName).arg(desc.Resolution.w).arg(desc.Resolution.h));
 
@@ -445,25 +446,25 @@ bool ccGLWindowStereo::enableStereoMode(const StereoParams& params)
 			s_oculus.initMirrorTexture(width(), height(), m_glExtFunc);
 		}
 
-		//configure tracking
+		// configure tracking
 		{
-			//No longer necessary
-			//ovr_ConfigureTracking(s_oculus.session,
+			// No longer necessary
+			// ovr_ConfigureTracking(s_oculus.session,
 			//						/*requested = */ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection | ovrTrackingCap_Position,
 			//						/*required  = */ovrTrackingCap_Orientation );
 
-			//reset tracking
+			// reset tracking
 			s_oculus.hasLastOVRPos = false;
 			ovr_RecenterTrackingOrigin(s_oculus.session);
 		}
 
 		displayNewMessage("Look into your headset", ccGLWindowStereo::SCREEN_CENTER_MESSAGE, false, 3600);
-		//force the screen update before we freeze it! (see doPaintGL)
+		// force the screen update before we freeze it! (see doPaintGL)
 		update();
 
 		return ccGLWindowInterface::enableStereoMode(params, false, true);
 
-#else //no CC_OCULUS_SUPPORT
+#else // no CC_OCULUS_SUPPORT
 
 		QMessageBox::critical(asWidget(), "Oculus", "The Oculus device is not supported by this version\n(use the 'Stereo' version)");
 		return false;
@@ -501,7 +502,7 @@ void ccGLWindowStereo::disableStereoMode()
 	ccGLWindowInterface::disableStereoMode();
 }
 
-void ccGLWindowStereo::Create(ccGLWindowStereo*& window, QWidget*& widget, bool silentInitialization/*=false*/)
+void ccGLWindowStereo::Create(ccGLWindowStereo*& window, QWidget*& widget, bool silentInitialization /*=false*/)
 {
 	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);

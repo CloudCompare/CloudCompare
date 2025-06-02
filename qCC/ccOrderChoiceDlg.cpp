@@ -1,48 +1,48 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccOrderChoiceDlg.h"
 
-//common
+// common
 #include <ccQtHelpers.h>
 
-//qCC_plugins
+// qCC_plugins
 #include <ccMainAppInterface.h>
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
-//Qt
+// Qt
 #include <QMainWindow>
 
-//ui template
+// ui template
 #include <ui_roleChoiceDlg.h>
 
-ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
-									QString firstRole,
-									ccHObject* secondEntity,
-									QString secondRole,
-									ccMainAppInterface* app/*=nullptr*/)
-	: QDialog(app ? app->getMainWindow() : nullptr, Qt::Tool)
-	, m_gui(new Ui_RoleChoiceDialog)
-	, m_app(app)
-	, m_firstEnt(firstEntity)
-	, m_secondEnt(secondEntity)
-	, m_useInputOrder(true)
+ccOrderChoiceDlg::ccOrderChoiceDlg(ccHObject*          firstEntity,
+                                   QString             firstRole,
+                                   ccHObject*          secondEntity,
+                                   QString             secondRole,
+                                   ccMainAppInterface* app /*=nullptr*/)
+    : QDialog(app ? app->getMainWindow() : nullptr, Qt::Tool)
+    , m_gui(new Ui_RoleChoiceDialog)
+    , m_app(app)
+    , m_firstEnt(firstEntity)
+    , m_secondEnt(secondEntity)
+    , m_useInputOrder(true)
 {
 	m_gui->setupUi(this);
 
@@ -69,12 +69,12 @@ ccOrderChoiceDlg::~ccOrderChoiceDlg()
 		m_secondEnt->enableTempColor(false);
 		m_secondEnt->prepareDisplayForRefresh_recursive();
 	}
-	
+
 	if (m_app)
 	{
 		m_app->refreshAll();
 	}
-	
+
 	if (m_gui)
 	{
 		delete m_gui;

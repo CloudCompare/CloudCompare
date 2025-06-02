@@ -1,26 +1,26 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-#include "ccIncludeGL.h"
 #include "ccColorBasedEntityPicking.h"
+#include "ccIncludeGL.h"
 
-//Local
+// Local
 #include "ccMaterial.h"
 
 class ccGenericGLDisplay;
@@ -42,32 +42,32 @@ struct glDrawParams
 // Drawing flags (type: short)
 enum CC_DRAWING_FLAGS
 {
-	CC_DRAW_2D								= 0x0001,
-	CC_DRAW_3D								= 0x0002,
-	CC_DRAW_FOREGROUND						= 0x0004,
-	CC_LIGHT_ENABLED						= 0x0008,
-	CC_SKIP_UNSELECTED						= 0x0010,
-	CC_SKIP_SELECTED						= 0x0020,
-	CC_SKIP_ALL								= 0x0030,		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
-	CC_ENTITY_PICKING						= 0x0040,		// formerly named CC_DRAW_ENTITY_NAMES
-	//CC_FREE_FLAG							= 0x0080,		// UNUSED (formerly CC_DRAW_POINT_NAMES)
-	//CC_FREE_FLAG							= 0x0100,		// UNUSED (formerly CC_DRAW_TRI_NAMES)
-	CC_FAST_ENTITY_PICKING					= 0x0200,		// formerly named CC_DRAW_FAST_NAMES_ONLY
-	//CC_FREE_FLAG							= 0x03C0,		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
-	CC_LOD_ACTIVATED						= 0x0400,
-	CC_VIRTUAL_TRANS_ENABLED				= 0x0800
+	CC_DRAW_2D         = 0x0001,
+	CC_DRAW_3D         = 0x0002,
+	CC_DRAW_FOREGROUND = 0x0004,
+	CC_LIGHT_ENABLED   = 0x0008,
+	CC_SKIP_UNSELECTED = 0x0010,
+	CC_SKIP_SELECTED   = 0x0020,
+	CC_SKIP_ALL        = 0x0030, // = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
+	CC_ENTITY_PICKING  = 0x0040, // formerly named CC_DRAW_ENTITY_NAMES
+	// CC_FREE_FLAG							= 0x0080,		// UNUSED (formerly CC_DRAW_POINT_NAMES)
+	// CC_FREE_FLAG							= 0x0100,		// UNUSED (formerly CC_DRAW_TRI_NAMES)
+	CC_FAST_ENTITY_PICKING = 0x0200, // formerly named CC_DRAW_FAST_NAMES_ONLY
+	// CC_FREE_FLAG							= 0x03C0,		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
+	CC_LOD_ACTIVATED         = 0x0400,
+	CC_VIRTUAL_TRANS_ENABLED = 0x0800
 };
 
 // Drawing flags testing macros (see ccDrawableObject)
-#define MACRO_Draw2D(context)              (context.drawingFlags & CC_DRAW_2D)
-#define MACRO_Draw3D(context)              (context.drawingFlags & CC_DRAW_3D)
-#define MACRO_EntityPicking(context)       (context.drawingFlags & CC_ENTITY_PICKING)
-#define MACRO_FastEntityPicking(context)   (context.drawingFlags & CC_FAST_ENTITY_PICKING)
-#define MACRO_SkipUnselected(context)      (context.drawingFlags & CC_SKIP_UNSELECTED)
-#define MACRO_SkipSelected(context)        (context.drawingFlags & CC_SKIP_SELECTED)
-#define MACRO_LightIsEnabled(context)      (context.drawingFlags & CC_LIGHT_ENABLED)
-#define MACRO_Foreground(context)          (context.drawingFlags & CC_DRAW_FOREGROUND)
-#define MACRO_LODActivated(context)        (context.drawingFlags & CC_LOD_ACTIVATED)
+#define MACRO_Draw2D(context) (context.drawingFlags & CC_DRAW_2D)
+#define MACRO_Draw3D(context) (context.drawingFlags & CC_DRAW_3D)
+#define MACRO_EntityPicking(context) (context.drawingFlags & CC_ENTITY_PICKING)
+#define MACRO_FastEntityPicking(context) (context.drawingFlags & CC_FAST_ENTITY_PICKING)
+#define MACRO_SkipUnselected(context) (context.drawingFlags & CC_SKIP_UNSELECTED)
+#define MACRO_SkipSelected(context) (context.drawingFlags & CC_SKIP_SELECTED)
+#define MACRO_LightIsEnabled(context) (context.drawingFlags & CC_LIGHT_ENABLED)
+#define MACRO_Foreground(context) (context.drawingFlags & CC_DRAW_FOREGROUND)
+#define MACRO_LODActivated(context) (context.drawingFlags & CC_LOD_ACTIVATED)
 #define MACRO_VirtualTransEnabled(context) (context.drawingFlags & CC_VIRTUAL_TRANS_ENABLED)
 
 //! Display context
@@ -75,7 +75,7 @@ struct ccGLDrawContext
 {
 	//! Drawing options (see below)
 	int drawingFlags;
-	
+
 	//! GL screen width
 	int glW;
 	//! GL screen height
@@ -86,7 +86,7 @@ struct ccGLDrawContext
 	ccGenericGLDisplay* display;
 
 	//! OpenGL context used to access functions for particular profiles \see glFunctions()
-	QOpenGLContext *qGLContext;
+	QOpenGLContext* qGLContext;
 
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
@@ -126,7 +126,7 @@ struct ccGLDrawContext
 
 	//! Currently displayed color scale (the corresponding scalar field in fact)
 	ccScalarField* sfColorScaleToDisplay;
-	
+
 	//! Shader for fast dynamic color ramp lookup
 	ccColorRampShader* colorRampShader;
 	//! Custom rendering shader (OpenGL 3.3+)
@@ -159,49 +159,50 @@ struct ccGLDrawContext
 	//! Entity picking mechanism
 	ccColorBasedEntityPicking entityPicking;
 
-	//Default constructor
+	// Default constructor
 	ccGLDrawContext()
-		: drawingFlags(0)
-		, glW(0)
-		, glH(0)
-		, devicePixelRatio(1.0f)
-		, display(nullptr)
-		, qGLContext(nullptr)
-		, renderZoom(1.0f)
-		, defaultMat(new ccMaterial("default"))
-		, defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
-		, defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
-		, pointsDefaultCol(ccColor::defaultColor)
-		, textDefaultCol(ccColor::defaultColor)
-		, labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
-		, labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
-		, bbDefaultCol(ccColor::yellow)
-		, decimateCloudOnMove(true)
-		, minLODPointCount(10000000)
-		, currentLODLevel(0)
-		, moreLODPointsAvailable(false)
-		, higherLODLevelsAvailable(false)
-		, decimateMeshOnMove(true)
-		, minLODTriangleCount(2500000)
-		, sfColorScaleToDisplay(nullptr)
-		, colorRampShader(nullptr)
-		, customRenderingShader(nullptr)
-		, useVBOs(true)
-		, labelMarkerSize(5)
-		, labelMarkerTextShift_pix(5)
-		, dispNumberPrecision(6)
-		, labelOpacity(100)
-		, sourceBlend(GL_SRC_ALPHA)
-		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
-		, stereoPassIndex(0)
-		, drawRoundedPoints(false)
-	{}
-   
-	template<class TYPE>
-	TYPE *glFunctions() const
-	{				
+	    : drawingFlags(0)
+	    , glW(0)
+	    , glH(0)
+	    , devicePixelRatio(1.0f)
+	    , display(nullptr)
+	    , qGLContext(nullptr)
+	    , renderZoom(1.0f)
+	    , defaultMat(new ccMaterial("default"))
+	    , defaultMeshFrontDiff(ccColor::defaultMeshFrontDiff)
+	    , defaultMeshBackDiff(ccColor::defaultMeshBackDiff)
+	    , pointsDefaultCol(ccColor::defaultColor)
+	    , textDefaultCol(ccColor::defaultColor)
+	    , labelDefaultBkgCol(ccColor::defaultLabelBkgColor)
+	    , labelDefaultMarkerCol(ccColor::defaultLabelMarkerColor)
+	    , bbDefaultCol(ccColor::yellow)
+	    , decimateCloudOnMove(true)
+	    , minLODPointCount(10000000)
+	    , currentLODLevel(0)
+	    , moreLODPointsAvailable(false)
+	    , higherLODLevelsAvailable(false)
+	    , decimateMeshOnMove(true)
+	    , minLODTriangleCount(2500000)
+	    , sfColorScaleToDisplay(nullptr)
+	    , colorRampShader(nullptr)
+	    , customRenderingShader(nullptr)
+	    , useVBOs(true)
+	    , labelMarkerSize(5)
+	    , labelMarkerTextShift_pix(5)
+	    , dispNumberPrecision(6)
+	    , labelOpacity(100)
+	    , sourceBlend(GL_SRC_ALPHA)
+	    , destBlend(GL_ONE_MINUS_SRC_ALPHA)
+	    , stereoPassIndex(0)
+	    , drawRoundedPoints(false)
+	{
+	}
+
+	template <class TYPE>
+	TYPE* glFunctions() const
+	{
 		return qGLContext ? qGLContext->versionFunctions<TYPE>() : 0;
-	}   
+	}
 };
 
 using CC_DRAW_CONTEXT = ccGLDrawContext;

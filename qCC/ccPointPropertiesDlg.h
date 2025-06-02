@@ -1,26 +1,26 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_POINT_PROPERTIES_DIALOG_HEADER
 #define CC_POINT_PROPERTIES_DIALOG_HEADER
 
 #include "ccPointPickingGenericInterface.h"
 
-//Local
+// Local
 #include <ui_pointPropertiesDlg.h>
 
 class cc2DLabel;
@@ -28,24 +28,23 @@ class cc2DViewportLabel;
 class ccHObject;
 
 //! Dialog for simple point picking (information, distance, etc.)
-class ccPointPropertiesDlg : public ccPointPickingGenericInterface, public Ui::PointPropertiesDlg
+class ccPointPropertiesDlg : public ccPointPickingGenericInterface
+    , public Ui::PointPropertiesDlg
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* parent);
 	//! Default destructor
 	virtual ~ccPointPropertiesDlg();
 
-	//inherited from ccPointPickingGenericInterface
+	// inherited from ccPointPickingGenericInterface
 	virtual bool start() override;
 	virtual void stop(bool state) override;
 	virtual bool linkWith(ccGLWindowInterface* win) override;
 
-protected:
-
+  protected:
 	void onClose();
 	void activatePointPropertiesDisplay();
 	void activateDistanceDisplay();
@@ -57,13 +56,12 @@ protected:
 	void processClickedPoint(int x, int y);
 	void close2DZone();
 
-Q_SIGNALS:
+  Q_SIGNALS:
 
 	//! Signal emitted when a new label is created
 	void newLabel(ccHObject*);
 
-protected:
-
+  protected:
 	//! Picking mode
 	enum Mode
 	{
@@ -73,7 +71,7 @@ protected:
 		RECT_ZONE
 	};
 
-	//inherited from ccPointPickingGenericInterface
+	// inherited from ccPointPickingGenericInterface
 	void processPickedPoint(const PickedItem& picked) override;
 
 	//! Current picking mode
@@ -84,7 +82,6 @@ protected:
 
 	//! Associated 2D label
 	cc2DViewportLabel* m_rect2DLabel;
-
 };
 
 #endif

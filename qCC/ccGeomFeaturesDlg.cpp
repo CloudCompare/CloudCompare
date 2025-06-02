@@ -1,29 +1,29 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccGeomFeaturesDlg.h"
 
-//Qt
-#include <QPushButton>
+// Qt
 #include <QDialogButtonBox>
+#include <QPushButton>
 
-ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, Ui::GeomFeaturesDialog()
+ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , Ui::GeomFeaturesDialog()
 {
 	setupUi(this);
 
@@ -85,14 +85,13 @@ CCVector3* ccGeomFeaturesDlg::getUpDirection() const
 	}
 }
 
-
 void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features)
 {
 	reset();
 
 	for (const ccLibAlgorithms::GeomCharacteristic& f : features)
 	{
-		//find the corresponding checkbox
+		// find the corresponding checkbox
 		for (const Option& opt : m_options)
 		{
 			if (opt.charac == f.charac && opt.subOption == f.subOption)
@@ -107,10 +106,10 @@ void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacter
 bool ccGeomFeaturesDlg::getSelectedFeatures(ccLibAlgorithms::GeomCharacteristicSet& features) const
 {
 	features.clear();
-	
+
 	try
 	{
-		//test each check-box and add the corresponding feature descriptor if necessary
+		// test each check-box and add the corresponding feature descriptor if necessary
 		for (const Option& opt : m_options)
 		{
 			assert(opt.checkBox);

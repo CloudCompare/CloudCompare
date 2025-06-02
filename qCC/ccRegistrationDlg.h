@@ -1,47 +1,46 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_REGISTRATION_DLG_HEADER
 #define CC_REGISTRATION_DLG_HEADER
 
 #include <QDialog>
 
-//CCCoreLib
-#include <RegistrationTools.h>
-
-#include <ui_registrationDlg.h>
+// CCCoreLib
 #include <ReferenceCloud.h>
+#include <RegistrationTools.h>
+#include <ui_registrationDlg.h>
 
 class ccHObject;
 
 //! Point cloud or mesh registration dialog
-class ccRegistrationDlg : public QDialog, public Ui::RegistrationDialog
+class ccRegistrationDlg : public QDialog
+    , public Ui::RegistrationDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent = nullptr);
 
 	//! Default destructor
 	virtual ~ccRegistrationDlg();
 
-	//shortcuts
+	// shortcuts
 	typedef CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
 
 	//! Returns convergence method
@@ -49,7 +48,7 @@ public:
 
 	//! Returns max number of iterations
 	/** Only valid if registration method is 'ITERATION_REG'.
-	**/
+	 **/
 	unsigned getMaxIterationCount() const;
 
 	//! Returns the approximated final overlap
@@ -57,7 +56,7 @@ public:
 
 	//! Returns minimum RMS decrease between two consecutive iterations
 	/** Only valid if registration method is 'MAX_ERROR_REG'.
-	**/
+	 **/
 	double getMinRMSDecrease() const;
 
 	//! Returns the theoretical mininmum RMS decrease between two consecutive iterations
@@ -65,12 +64,12 @@ public:
 
 	//! Sets the minimum RMS decrease between two consecutive iterations
 	/** Only valid if registration method is 'MAX_ERROR_REG'.
-	**/
+	 **/
 	void setMinRMSDecrease(double value);
 
 	//! Returns whether farthest points should be ignored at each iteration
 	/** This is a trick to improve registration for slightly different clouds.
-	**/
+	 **/
 	bool removeFarthestPoints() const;
 
 	//! Returns the limit above which clouds should be randomly resampled
@@ -102,7 +101,7 @@ public:
 
 	//! Returns active transformation filters
 	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
-	**/
+	 **/
 	int getTransformationFilters() const;
 
 	//! Returns the maximum number of threads
@@ -111,11 +110,10 @@ public:
 	//! Saves parameters for next call
 	void saveParameters() const;
 
-protected:
+  protected:
 	void swapModelAndData();
 
-protected:
-
+  protected:
 	//! Forces the update of the GUI
 	void updateGUI();
 
@@ -126,4 +124,4 @@ protected:
 	ccHObject* dataEntity;
 };
 
-#endif //CC_REGISTRATION_DLG_HEADER
+#endif // CC_REGISTRATION_DLG_HEADER

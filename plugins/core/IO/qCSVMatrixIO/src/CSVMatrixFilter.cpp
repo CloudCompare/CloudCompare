@@ -1,66 +1,64 @@
-//##########################################################################
-//#                                                                        #
-//#                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                  CLOUDCOMPARE PLUGIN: qCSVMatrixIO                     #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+// #                                                                        #
+// ##########################################################################
 
 #include "CSVMatrixFilter.h"
 
-//Local
+// Local
 #include "CSVMatrixOpenDialog.h"
 
-//Qt
+// Qt
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
 
-//qCC_db
-#include <ccPointCloud.h>
-#include <ccMesh.h>
+// qCC_db
 #include <ccHObject.h>
+#include <ccLog.h>
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
-#include <ccLog.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
 
-//System
-#include <string.h>
+// System
 #include <assert.h>
+#include <string.h>
 
-//semi-persistent parameters
-static QChar s_separator(',');
-static double s_xSpacing = 1.0;
-static double s_ySpacing = 1.0;
-static bool s_inverseRows = false;
-static bool s_loadAsMesh = false;
-static bool s_useTexture = false;
+// semi-persistent parameters
+static QChar  s_separator(',');
+static double s_xSpacing    = 1.0;
+static double s_ySpacing    = 1.0;
+static bool   s_inverseRows = false;
+static bool   s_loadAsMesh  = false;
+static bool   s_useTexture  = false;
 
 CSVMatrixFilter::CSVMatrixFilter()
-    : FileIOFilter( {
-                    "_CSV Matrix Filter",
-					DEFAULT_PRIORITY,	// priority
-                    QStringList{ "csv" },
+    : FileIOFilter({"_CSV Matrix Filter",
+                    DEFAULT_PRIORITY, // priority
+                    QStringList{"csv"},
                     "csv",
-                    QStringList{ "CSV matrix cloud (*.csv)" },
+                    QStringList{"CSV matrix cloud (*.csv)"},
                     QStringList(),
-                    Import
-                    } )
+                    Import})
 {
 }
 
-CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
-									ccHObject& container,
-									LoadParameters& parameters)
+CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
+                                        ccHObject&      container,
+                                        LoadParameters& parameters)
 {
 	CSVMatrixOpenDialog openDlg(nullptr);
 	openDlg.lineEditSeparator->setText(s_separator);
@@ -81,12 +79,12 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
-	s_separator = openDlg.lineEditSeparator->text().at(0);
-	s_xSpacing = openDlg.xDoubleSpinBox->value();
-	s_ySpacing = openDlg.yDoubleSpinBox->value();
+	s_separator   = openDlg.lineEditSeparator->text().at(0);
+	s_xSpacing    = openDlg.xDoubleSpinBox->value();
+	s_ySpacing    = openDlg.yDoubleSpinBox->value();
 	s_inverseRows = openDlg.inverseRowCheckBox->isChecked();
-	s_loadAsMesh = openDlg.loadAsMeshCheckBox->isChecked();
-	s_useTexture = openDlg.useTextureCheckBox->isChecked();
+	s_loadAsMesh  = openDlg.loadAsMeshCheckBox->isChecked();
+	s_useTexture  = openDlg.useTextureCheckBox->isChecked();
 
 	QFile file(filename);
 	if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -94,17 +92,17 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 
 	QTextStream stream(&file);
 
-	unsigned lineIndex = 0;
-	int width = -1;
-	int row = 0;
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	ccPointCloud* cloud = new ccPointCloud();
+	unsigned      lineIndex = 0;
+	int           width     = -1;
+	int           row       = 0;
+	CC_FILE_ERROR result    = CC_FERR_NO_ERROR;
+	ccPointCloud* cloud     = new ccPointCloud();
 	while (file.error() == QFile::NoError && !file.atEnd())
 	{
 		QString line = stream.readLine();
 		++lineIndex;
 
-		//skip comments
+		// skip comments
 		if (line.startsWith("//"))
 			continue;
 
@@ -114,10 +112,10 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			continue;
 		}
 
-		//we split the current line
+		// we split the current line
 		QStringList parts = line.split(s_separator, QString::KeepEmptyParts);
 
-		//if we have reached the max. number of points per cloud
+		// if we have reached the max. number of points per cloud
 		if (width < 0)
 		{
 			width = parts.size();
@@ -130,14 +128,14 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			break;
 		}
 
-		//reserve memory for next row
+		// reserve memory for next row
 		if (!cloud->reserve(cloud->size() + static_cast<unsigned>(width)))
 		{
 			result = CC_FERR_NOT_ENOUGH_MEMORY;
 			break;
 		}
 
-		bool ok = true;
+		bool      ok = true;
 		CCVector3 P(0, static_cast<PointCoordinateType>((s_inverseRows ? -row : row) * s_ySpacing), 0);
 		for (int i = 0; i < width; ++i)
 		{
@@ -163,13 +161,13 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 
 	if (result == CC_FERR_NO_ERROR && rowCount != 0 && colCount != 0)
 	{
-		//load as mesh
+		// load as mesh
 		ccMesh* mesh = nullptr;
 		if (s_loadAsMesh)
 		{
 			cloud->setName("vertices");
 			mesh = new ccMesh(cloud);
-			
+
 			unsigned triCount = (colCount - 1) * (rowCount - 1) * 2;
 			if (!mesh->reserve(triCount))
 			{
@@ -180,17 +178,17 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			{
 				mesh->addChild(cloud);
 				cloud->setEnabled(false);
-				//add triangles
-				for (unsigned j=0; j<rowCount-1; ++j)
+				// add triangles
+				for (unsigned j = 0; j < rowCount - 1; ++j)
 				{
-					unsigned index = j*colCount;
-					for (unsigned i=0; i<colCount-1; ++i)
+					unsigned index = j * colCount;
+					for (unsigned i = 0; i < colCount - 1; ++i)
 					{
-						mesh->addTriangle(index+i,index+colCount+i,index+i+1);
-						mesh->addTriangle(index+i+1,index+colCount+i,index+colCount+i+1);
+						mesh->addTriangle(index + i, index + colCount + i, index + i + 1);
+						mesh->addTriangle(index + i + 1, index + colCount + i, index + colCount + i + 1);
 					}
 				}
-				//compute normals
+				// compute normals
 				if (mesh->computePerVertexNormals())
 				{
 					mesh->showNormals(true);
@@ -202,11 +200,11 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			}
 		}
 
-		//texture
+		// texture
 		if (s_useTexture)
 		{
 			QString filename = openDlg.textureFilenameLineEdit->text();
-			QImage texture;
+			QImage  texture;
 			if (!texture.load(filename))
 			{
 				ccLog::Warning(QString("[CSVMatrixFilter] Failed to load texture from file '%1'").arg(filename));
@@ -216,11 +214,11 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 				if (mesh)
 				{
 					TextureCoordsContainer* texCoords = new TextureCoordsContainer();
-					if (	texCoords->reserveSafe(cloud->size())
-						&&	mesh->reservePerTriangleTexCoordIndexes()
-						&&	mesh->reservePerTriangleMtlIndexes())
+					if (texCoords->reserveSafe(cloud->size())
+					    && mesh->reservePerTriangleTexCoordIndexes()
+					    && mesh->reservePerTriangleMtlIndexes())
 					{
-						//generate texture coordinates
+						// generate texture coordinates
 						{
 							for (unsigned j = 0; j < rowCount; ++j)
 							{
@@ -234,14 +232,14 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 						}
 						mesh->setTexCoordinatesTable(texCoords);
 
-						//create material
+						// create material
 						ccMaterial::Shared mat(new ccMaterial("texture"));
-						mat->setTexture(texture,filename,false);
+						mat->setTexture(texture, filename, false);
 						ccMaterialSet* matSet = new ccMaterialSet("Materials");
 						matSet->push_back(mat);
 						mesh->setMaterialSet(matSet);
 
-						//assign texture coordinaetes and material to each triangle
+						// assign texture coordinaetes and material to each triangle
 						for (unsigned i = 0; i < mesh->size(); ++i)
 						{
 							CCCoreLib::VerticesIndexes* tsi = mesh->getTriangleVertIndexes(i);
@@ -260,8 +258,8 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 				}
 				else
 				{
-					if (	texture.width() < static_cast<int>(colCount)
-						||	texture.height() < static_cast<int>(rowCount) )
+					if (texture.width() < static_cast<int>(colCount)
+					    || texture.height() < static_cast<int>(rowCount))
 					{
 						ccLog::Warning(QString("[CSVMatrixFilter] To map a texture on the cloud, the image size should equal or greater than the grid size (%1x%2)").arg(colCount).arg(rowCount));
 					}
@@ -285,14 +283,13 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString& filename,
 			}
 		}
 
-
 		if (s_inverseRows)
 		{
-			CCVector3 T(0,static_cast<PointCoordinateType>((rowCount-1) * s_ySpacing),0);
+			CCVector3  T(0, static_cast<PointCoordinateType>((rowCount - 1) * s_ySpacing), 0);
 			ccGLMatrix trans;
 			trans.setTranslation(T);
 			cloud->applyGLTransformation_recursive(&trans);
-			//this transformation is of no interest for the user
+			// this transformation is of no interest for the user
 			cloud->resetGLTransformationHistory_recursive();
 		}
 		ccLog::Print(QString("[CSVMatrixFilter] Number of rows: %1").arg(rowCount));

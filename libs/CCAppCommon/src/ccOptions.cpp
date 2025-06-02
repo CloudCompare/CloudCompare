@@ -1,29 +1,29 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                 COPYRIGHT: Daniel Girardeau-Montaut                    #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                 COPYRIGHT: Daniel Girardeau-Montaut                    #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccOptions.h"
 
 // ccPluginAPI
 #include <ccPersistentSettings.h>
 
-//Qt
+// Qt
 #include <QSettings>
 
-//qCC_db
+// qCC_db
 #include <ccSingleton.h>
 
 //! Unique instance of ccOptions
@@ -58,8 +58,8 @@ ccOptions::ccOptions()
 void ccOptions::reset()
 {
 	normalsDisplayedByDefault = false;
-	useNativeDialogs = true;
-	confirmQuit = true;
+	useNativeDialogs          = true;
+	confirmQuit               = true;
 }
 
 void ccOptions::fromPersistentSettings()
@@ -68,8 +68,8 @@ void ccOptions::fromPersistentSettings()
 	settings.beginGroup(ccPS::Options());
 	{
 		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
-		useNativeDialogs = settings.value("useNativeDialogs", true).toBool();
-		confirmQuit = settings.value("confirmQuit", true).toBool();
+		useNativeDialogs          = settings.value("useNativeDialogs", true).toBool();
+		confirmQuit               = settings.value("confirmQuit", true).toBool();
 	}
 	settings.endGroup();
 }

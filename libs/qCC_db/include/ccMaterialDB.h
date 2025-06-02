@@ -1,27 +1,27 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Always first
-//#include "ccIncludeGL.h"
+// Always first
+// #include "ccIncludeGL.h"
 #include "ccLog.h"
 
-//Qt
-#include <QFileSystemWatcher>
+// Qt
 #include <QFileInfo>
+#include <QFileSystemWatcher>
 #include <QImage>
 #include <QOpenGLTexture>
 
@@ -30,11 +30,11 @@ class ccMaterialDB : public QObject
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	ccMaterialDB()
-		: m_initialized(false)
-	{}
+	    : m_initialized(false)
+	{
+	}
 
 	void init()
 	{
@@ -53,14 +53,14 @@ public:
 			m_watcher.removePath(filename);
 			return;
 		}
-		
-		if (QFileInfo(filename).exists()) //make sure the image still exists
+
+		if (QFileInfo(filename).exists()) // make sure the image still exists
 		{
 			ccLog::Warning(tr("File '%1' has been updated").arg(filename));
 			QImage image;
 			if (image.load(filename))
 			{
-				//update the texture
+				// update the texture
 				m_textures[filename].image = image;
 				openGLTextures.remove(filename);
 			}
@@ -96,7 +96,7 @@ public:
 		}
 		else
 		{
-			m_textures[filename].image = image;
+			m_textures[filename].image   = image;
 			m_textures[filename].counter = 1;
 			m_watcher.addPath(filename);
 		}
@@ -139,17 +139,16 @@ public:
 		openGLTextures.remove(filename);
 	}
 
-	QMap<QString, QSharedPointer<QOpenGLTexture> > openGLTextures;
+	QMap<QString, QSharedPointer<QOpenGLTexture>> openGLTextures;
 
-protected:
-
+  protected:
 	struct TextureInfo
 	{
-		QImage image;
+		QImage   image;
 		unsigned counter = 0;
 	};
 
-	bool m_initialized;
-	QFileSystemWatcher m_watcher;
+	bool                       m_initialized;
+	QFileSystemWatcher         m_watcher;
 	QMap<QString, TextureInfo> m_textures;
 };

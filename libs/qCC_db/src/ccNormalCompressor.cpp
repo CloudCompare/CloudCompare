@@ -1,33 +1,33 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccNormalCompressor.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCConst.h>
 
-//System
+// System
 #include <assert.h>
 
-void ccNormalCompressor::InvertNormal(CompressedNormType &code)
+void ccNormalCompressor::InvertNormal(CompressedNormType& code)
 {
 	if (code != NULL_NORM_CODE)
 	{
-		//see 'Decompress' for a better understanding
+		// see 'Decompress' for a better understanding
 		code ^= (static_cast<CompressedNormType>(7) << 2 * QUANTIZE_LEVEL);
 	}
 }
@@ -37,13 +37,37 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 	assert(QUANTIZE_LEVEL != 0);
 
 	/// compute in which sector lie the elements
-	unsigned res = 0;
+	unsigned            res = 0;
 	PointCoordinateType x;
 	PointCoordinateType y;
 	PointCoordinateType z;
-	if (n[0] >= 0) { x = n[0]; } else { res |= 4; x = -n[0]; }
-	if (n[1] >= 0) { y = n[1]; } else { res |= 2; y = -n[1]; }
-	if (n[2] >= 0) { z = n[2]; } else { res |= 1; z = -n[2]; }
+	if (n[0] >= 0)
+	{
+		x = n[0];
+	}
+	else
+	{
+		res |= 4;
+		x = -n[0];
+	}
+	if (n[1] >= 0)
+	{
+		y = n[1];
+	}
+	else
+	{
+		res |= 2;
+		y = -n[1];
+	}
+	if (n[2] >= 0)
+	{
+		z = n[2];
+	}
+	else
+	{
+		res |= 1;
+		z = -n[2];
+	}
 
 	/// scale the sectored vector - early return for null vector
 	PointCoordinateType psnorm = x + y + z;
@@ -51,38 +75,46 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 	{
 		return NULL_NORM_CODE;
 	}
-	x /= psnorm; y /= psnorm; z /= psnorm;
+	x /= psnorm;
+	y /= psnorm;
+	z /= psnorm;
 
 	/// compute the box
-	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
+	PointCoordinateType box[6] = {0, 0, 0, 1, 1, 1};
 	/// then for each required level, quantize...
 	bool flip = false;
-	for (unsigned char level = QUANTIZE_LEVEL; level != 0; )
+	for (unsigned char level = QUANTIZE_LEVEL; level != 0;)
 	{
-		//next level
+		// next level
 		res <<= 2;
 		--level;
 
-		PointCoordinateType halfBox[3] = {	(box[0] + box[3]) / 2,
-											(box[1] + box[4]) / 2,
-											(box[2] + box[5]) / 2 };
+		PointCoordinateType halfBox[3] = {(box[0] + box[3]) / 2,
+		                                  (box[1] + box[4]) / 2,
+		                                  (box[2] + box[5]) / 2};
 
 		unsigned sector = 3;
 		if (flip)
 		{
-			     if (z < halfBox[2]) sector = 2;
-			else if (y < halfBox[1]) sector = 1;
-			else if (x < halfBox[0]) sector = 0;
+			if (z < halfBox[2])
+				sector = 2;
+			else if (y < halfBox[1])
+				sector = 1;
+			else if (x < halfBox[0])
+				sector = 0;
 		}
 		else
 		{
-			     if (z > halfBox[2]) sector = 2;
-			else if (y > halfBox[1]) sector = 1;
-			else if (x > halfBox[0]) sector = 0;
+			if (z > halfBox[2])
+				sector = 2;
+			else if (y > halfBox[1])
+				sector = 1;
+			else if (x > halfBox[0])
+				sector = 0;
 		}
 		res |= sector;
-		
-		if (level != 0) //skip this at the last level
+
+		if (level != 0) // skip this at the last level
 		{
 			if (flip)
 			{
@@ -94,7 +126,7 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 				if (sector != 3)
 				{
 					box[3 + sector] = box[sector];
-					box[sector] = psnorm;
+					box[sector]     = psnorm;
 				}
 				else
 				{
@@ -110,7 +142,7 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 				box[5] = halfBox[2];
 				if (sector != 3)
 				{
-					box[sector] = box[3 + sector];
+					box[sector]     = box[3 + sector];
 					box[3 + sector] = psnorm;
 				}
 				else
@@ -124,7 +156,7 @@ unsigned ccNormalCompressor::Compress(const PointCoordinateType n[3])
 	return res;
 }
 
-void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], unsigned char level/*=QUANTIZE_LEVEL*/)
+void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], unsigned char level /*=QUANTIZE_LEVEL*/)
 {
 	assert(level != 0);
 
@@ -136,8 +168,8 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 	}
 
 	/// recompute the box in the sector...
-	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
-	bool flip = false;
+	PointCoordinateType box[6] = {0, 0, 0, 1, 1, 1};
+	bool                flip   = false;
 
 	unsigned char l_shift = level * 2;
 	for (unsigned char k = 0; k < level; ++k)
@@ -147,13 +179,13 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 		if (flip)
 		{
 			const PointCoordinateType tmp = box[sector];
-			box[0] = (box[0] + box[3]) / 2;
-			box[1] = (box[1] + box[4]) / 2;
-			box[2] = (box[2] + box[5]) / 2;
+			box[0]                        = (box[0] + box[3]) / 2;
+			box[1]                        = (box[1] + box[4]) / 2;
+			box[2]                        = (box[2] + box[5]) / 2;
 			if (sector != 3)
 			{
-				box[3+sector] = box[sector];
-				box[sector] = tmp;
+				box[3 + sector] = box[sector];
+				box[sector]     = tmp;
 			}
 			else
 			{
@@ -163,14 +195,14 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 		else
 		{
 			const PointCoordinateType tmp = (sector != 3 ? box[3 + sector] : 0);
-			
+
 			box[3] = (box[0] + box[3]) / 2;
 			box[4] = (box[1] + box[4]) / 2;
 			box[5] = (box[2] + box[5]) / 2;
-			
+
 			if (sector != 3)
 			{
-				box[sector] = box[3 + sector];
+				box[sector]     = box[3 + sector];
 				box[3 + sector] = tmp;
 			}
 			else
@@ -180,7 +212,7 @@ void ccNormalCompressor::Decompress(unsigned index, PointCoordinateType n[3], un
 		}
 	}
 
-	//get the sector
+	// get the sector
 	const unsigned sector = index >> (level + level);
 
 	n[0] = ((sector & 4) != 0 ? -(box[3] + box[0]) : box[3] + box[0]);

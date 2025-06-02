@@ -1,50 +1,50 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSubMesh.h"
 
-//Local
+// Local
 #include "ccGenericPointCloud.h"
 #include "ccMaterialSet.h"
 #include "ccMesh.h"
 
-//Qt
+// Qt
 #include <QString>
 
-//CCCoreLib
+// CCCoreLib
 #include <ManualSegmentationTools.h>
 
-//system
+// system
 #include <cassert>
 #include <cstring>
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
-	: ccGenericMesh("Sub-mesh")
-	, m_associatedMesh(nullptr)
-	, m_globalIterator(0)
+    : ccGenericMesh("Sub-mesh")
+    , m_associatedMesh(nullptr)
+    , m_globalIterator(0)
 {
-	setAssociatedMesh(parentMesh); //must be called so as to set the right dependency!
+	setAssociatedMesh(parentMesh); // must be called so as to set the right dependency!
 
 	showColors(parentMesh ? parentMesh->colorsShown() : true);
 	showNormals(parentMesh ? parentMesh->normalsShown() : true);
 	showSF(parentMesh ? parentMesh->sfShown() : true);
 }
 
-void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne/*=true*/)
+void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne /*=true*/)
 {
 	if (m_associatedMesh == mesh)
 		return;
@@ -55,7 +55,7 @@ void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne/*=true*/)
 	m_associatedMesh = mesh;
 
 	if (m_associatedMesh)
-		m_associatedMesh->addDependency(this,DP_NOTIFY_OTHER_ON_UPDATE);
+		m_associatedMesh->addDependency(this, DP_NOTIFY_OTHER_ON_UPDATE);
 }
 
 void ccSubMesh::onUpdateOf(ccHObject* obj)
@@ -81,7 +81,7 @@ ccGenericPointCloud* ccSubMesh::getAssociatedCloud() const
 	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : nullptr;
 }
 
-CCCoreLib::GenericTriangle* ccSubMesh::_getNextTriangle() //temporary object
+CCCoreLib::GenericTriangle* ccSubMesh::_getNextTriangle() // temporary object
 {
 	return m_associatedMesh && m_globalIterator < size() ? m_associatedMesh->_getTriangle(m_triIndexes[m_globalIterator++]) : nullptr;
 }
@@ -96,7 +96,7 @@ bool ccSubMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVect
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateNormals(getTriGlobalIndex(triIndex), P, N);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -106,7 +106,7 @@ bool ccSubMesh::interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCV
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateNormalsBC(getTriGlobalIndex(triIndex), w, N);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -116,7 +116,7 @@ bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -126,7 +126,7 @@ bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccCo
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, color);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -136,7 +136,7 @@ bool ccSubMesh::interpolateColors(unsigned triIndex, const CCVector3& P, ccColor
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateColors(getTriGlobalIndex(triIndex), P, color);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -146,7 +146,7 @@ bool ccSubMesh::interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccCo
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->interpolateColorsBC(getTriGlobalIndex(triIndex), w, color);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -156,7 +156,7 @@ bool ccSubMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccCo
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->getColorFromMaterial(getTriGlobalIndex(triIndex), P, color, interpolateColorIfNoTexture);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
@@ -166,17 +166,17 @@ bool ccSubMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vert
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->getVertexColorFromMaterial(getTriGlobalIndex(triIndex), vertIndex, color, returnColorIfNoTexture);
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return false;
 }
 
-CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) //temporary object
+CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) // temporary object
 {
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->_getTriangle(getTriGlobalIndex(triIndex));
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return nullptr;
 }
@@ -189,7 +189,7 @@ void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& 
 	}
 	else
 	{
-		//shouldn't happen
+		// shouldn't happen
 		assert(false);
 	}
 }
@@ -199,12 +199,12 @@ CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
 	if (m_associatedMesh && triIndex < size())
 		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triIndex));
 
-	//shouldn't happen
+	// shouldn't happen
 	assert(false);
 	return nullptr;
 }
 
-ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles, IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles, IndexMap* newRemainingTriangleIndexes /*=nullptr*/)
 {
 	ccGenericPointCloud* vertices = getAssociatedCloud();
 	if (!vertices || !m_associatedMesh)
@@ -237,10 +237,10 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 	for (unsigned globalIndex : m_triIndexes)
 	{
 		const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
-		//triangle is visible?
-		if (	verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
-			&&	verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
-			&&	verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
+		// triangle is visible?
+		if (verticesVisibility[tsi->i1] == CCCoreLib::POINT_VISIBLE
+		    && verticesVisibility[tsi->i2] == CCCoreLib::POINT_VISIBLE
+		    && verticesVisibility[tsi->i3] == CCCoreLib::POINT_VISIBLE)
 		{
 			selectedTriangleIndexes.push_back(++validIndex);
 		}
@@ -253,9 +253,9 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 	return createNewSubMeshFromSelection(removeSelectedTriangles, selectedTriangleIndexes, newRemainingTriangleIndexes);
 }
 
-ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles,
-													const std::vector<int>& selectedTriangleIndexes,
-													IndexMap* newRemainingTriangleIndexes/*=nullptr*/)
+ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool                    removeSelectedTriangles,
+                                                    const std::vector<int>& selectedTriangleIndexes,
+                                                    IndexMap*               newRemainingTriangleIndexes /*=nullptr*/)
 {
 	if (!m_associatedMesh)
 	{
@@ -268,12 +268,12 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 		return nullptr;
 	}
 
-	//we count the number of selected triangles
+	// we count the number of selected triangles
 	size_t selectedTriangleCount = 0;
 	{
 		for (unsigned globalIndex : m_triIndexes)
 		{
-			//triangle is selected?
+			// triangle is selected?
 			if (selectedTriangleIndexes[globalIndex] >= 0)
 			{
 				++selectedTriangleCount;
@@ -281,10 +281,10 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 		}
 	}
 
-	//nothing to do
+	// nothing to do
 	if (selectedTriangleCount == 0)
 	{
-		if (newRemainingTriangleIndexes) //we still have to translate global indexes!
+		if (newRemainingTriangleIndexes) // we still have to translate global indexes!
 		{
 			for (unsigned& globalIndex : m_triIndexes)
 			{
@@ -301,30 +301,30 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedTriangles
 		return nullptr;
 	}
 
-	//create sub-mesh
+	// create sub-mesh
 	{
 		size_t triCount = m_triIndexes.size();
 
 		unsigned lastTriIndex = 0;
 		for (size_t i = 0; i < triCount; ++i)
 		{
-			unsigned globalIndex = m_triIndexes[i];
-			const CCCoreLib::VerticesIndexes* tsi = m_associatedMesh->getTriangleVertIndexes(globalIndex);
+			unsigned                          globalIndex = m_triIndexes[i];
+			const CCCoreLib::VerticesIndexes* tsi         = m_associatedMesh->getTriangleVertIndexes(globalIndex);
 
-			//triangle is selected?
+			// triangle is selected?
 			if (selectedTriangleIndexes[globalIndex] >= 0)
 			{
 				newSubMesh->addTriangleIndex(static_cast<unsigned>(selectedTriangleIndexes[globalIndex]));
 			}
-			else if (removeSelectedTriangles) //triangle is not selected? It stays in the original mesh!
+			else if (removeSelectedTriangles) // triangle is not selected? It stays in the original mesh!
 			{
-				//we replace the 'last' valid triangle by this one
+				// we replace the 'last' valid triangle by this one
 				assert(lastTriIndex <= i);
 				m_triIndexes[lastTriIndex++] = newRemainingTriangleIndexes ? newRemainingTriangleIndexes->at(globalIndex) : globalIndex;
 			}
 		}
 
-		//resize original mesh
+		// resize original mesh
 		if (removeSelectedTriangles && lastTriIndex < triCount)
 		{
 			resize(lastTriIndex); // can't fail, always smaller
@@ -360,7 +360,11 @@ bool ccSubMesh::normalsShown() const
 	return (ccHObject::normalsShown() || triNormsShown());
 }
 
-#define CC_SUB_MESH_TRANSIENT_CONST_TEST(method) bool ccSubMesh::method() const { return m_associatedMesh ? m_associatedMesh->method() : false; }
+#define CC_SUB_MESH_TRANSIENT_CONST_TEST(method) \
+	bool ccSubMesh::method() const \
+	{ \
+		return m_associatedMesh ? m_associatedMesh->method() : false; \
+	}
 
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasColors);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasNormals);
@@ -385,7 +389,7 @@ TextureCoordsContainer* ccSubMesh::getTexCoordinatesTable() const
 	return m_associatedMesh ? m_associatedMesh->getTexCoordinatesTable() : nullptr;
 }
 
-void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, TexCoords2D* &tx2, TexCoords2D* &tx3) const
+void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const
 {
 	if (m_associatedMesh && triIndex < size())
 	{
@@ -393,7 +397,7 @@ void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, TexCoords2D* &tx1, 
 	}
 	else
 	{
-		//shouldn't happen
+		// shouldn't happen
 		tx1 = tx2 = tx3 = nullptr;
 		assert(false);
 	}
@@ -455,7 +459,7 @@ bool ccSubMesh::addTriangleIndex(unsigned globalIndex)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return false;
 	}
 
@@ -472,7 +476,7 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 		return false;
 	}
 
-	unsigned range = lastIndex - firstIndex; //lastIndex is excluded
+	unsigned range = lastIndex - firstIndex; // lastIndex is excluded
 
 	try
 	{
@@ -480,10 +484,10 @@ bool ccSubMesh::addTriangleIndex(unsigned firstIndex, unsigned lastIndex)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return false;
 	}
-	
+
 	for (unsigned i = firstIndex; i < lastIndex; ++i)
 	{
 		m_triIndexes.emplace_back(i);
@@ -509,7 +513,7 @@ bool ccSubMesh::reserve(size_t n)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return false;
 	}
 	return true;
@@ -523,7 +527,7 @@ bool ccSubMesh::resize(size_t n)
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return false;
 	}
 	return true;
@@ -552,9 +556,9 @@ void ccSubMesh::refreshBB()
 	notifyGeometryUpdate();
 }
 
-ccBBox ccSubMesh::getOwnBB(bool withGLFeatures/*=false*/)
+ccBBox ccSubMesh::getOwnBB(bool withGLFeatures /*=false*/)
 {
-	//force BB refresh if necessary
+	// force BB refresh if necessary
 	if (!m_bBox.isValid() && size() != 0)
 	{
 		refreshBB();
@@ -565,7 +569,7 @@ ccBBox ccSubMesh::getOwnBB(bool withGLFeatures/*=false*/)
 
 void ccSubMesh::getBoundingBox(CCVector3& bbMin, CCVector3& bbMax)
 {
-	//force BB refresh if necessary
+	// force BB refresh if necessary
 	if (!m_bBox.isValid() && size() != 0)
 	{
 		refreshBB();
@@ -589,14 +593,14 @@ bool ccSubMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//we can't save the associated mesh here (as it may already be saved)
-	//so instead we save it's unique ID (dataVersion>=29)
-	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
+	// we can't save the associated mesh here (as it may already be saved)
+	// so instead we save it's unique ID (dataVersion>=29)
+	// WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t meshUniqueID = (m_associatedMesh ? static_cast<uint32_t>(m_associatedMesh->getUniqueID()) : 0);
 	if (out.write((const char*)&meshUniqueID, 4) < 0)
 		return WriteError();
 
-	//references (dataVersion>=29)
+	// references (dataVersion>=29)
 	if (!ccSerializationHelper::GenericArrayToFile<unsigned, 1, unsigned>(m_triIndexes, out))
 		return WriteError();
 
@@ -608,16 +612,16 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//as the associated mesh can't be saved directly
-	//we only store its unique ID (dataVersion>=29) --> we hope we will find it at loading time (i.e. this
-	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	// as the associated mesh can't be saved directly
+	// we only store its unique ID (dataVersion>=29) --> we hope we will find it at loading time (i.e. this
+	// is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t meshUniqueID = 0;
 	if (in.read((char*)&meshUniqueID, 4) < 0)
 		return ReadError();
 	//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'm_associatedMesh' pointer!!!
 	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
 
-	//references (dataVersion>=29)
+	// references (dataVersion>=29)
 	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, dataVersion, "triangle indexes"))
 		return ReadError();
 
@@ -629,4 +633,3 @@ short ccSubMesh::minimumFileVersion_MeOnly() const
 	short minVersion = std::max(static_cast<short>(29), ccSerializationHelper::GenericArrayToFileMinVersion());
 	return std::max(minVersion, ccGenericMesh::minimumFileVersion_MeOnly());
 }
-

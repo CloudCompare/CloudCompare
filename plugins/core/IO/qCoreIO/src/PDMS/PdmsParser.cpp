@@ -1,30 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "PdmsParser.h"
 
-//system
+// system
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 
 //////////// STRING HANDLING ////////////////////
-inline void upperStr(char *s) { while (*s) { if (((*s) >= 'a') && ((*s) <= 'z')) (*s) += 'A' - 'a'; s++; } }
+inline void upperStr(char* s)
+{
+	while (*s)
+	{
+		if (((*s) >= 'a') && ((*s) <= 'z'))
+			(*s) += 'A' - 'a';
+		s++;
+	}
+}
 
 ////////////////////////////
 // PDMS LEXER
@@ -37,14 +45,14 @@ PdmsLexer::PdmsLexer()
     , metaGroupMask(0)
 {
 	tokenBuffer[0] = 0;
-	nextBuffer[0] = 0;
+	nextBuffer[0]  = 0;
 }
 
 bool PdmsLexer::initializeSession()
 {
 	loadedObject = nullptr;
 	currentToken = PDMS_INVALID_TOKEN;
-	stop = false;
+	stop         = false;
 	memset(tokenBuffer, 0, c_max_buff_size);
 	memset(nextBuffer, 0, c_max_buff_size);
 	metaGroupMask = 0;
@@ -134,22 +142,34 @@ bool PdmsLexer::gotoNextToken()
 	const int enter_meta_group_mask = 1;
 	const int leave_meta_group_mask = 100;
 
-	//Special case: in meta group, the lexer splits Meta Group comments into appropriated tokens
+	// Special case: in meta group, the lexer splits Meta Group comments into appropriated tokens
 	if (metaGroupMask)
 	{
 		metaGroupMask++;
 		switch (metaGroupMask)
 		{
-		case enter_meta_group_mask + 1: currentToken = PDMS_CREATE; return true;
-		case enter_meta_group_mask + 2: currentToken = PDMS_GROUP; return true;
-		case enter_meta_group_mask + 3: currentToken = PDMS_NAME_STR; return true;
-		case leave_meta_group_mask + 1: currentToken = PDMS_END; return true;
-		case leave_meta_group_mask + 2: currentToken = PDMS_GROUP; return true;
-		default: metaGroupMask = 0; break;
+		case enter_meta_group_mask + 1:
+			currentToken = PDMS_CREATE;
+			return true;
+		case enter_meta_group_mask + 2:
+			currentToken = PDMS_GROUP;
+			return true;
+		case enter_meta_group_mask + 3:
+			currentToken = PDMS_NAME_STR;
+			return true;
+		case leave_meta_group_mask + 1:
+			currentToken = PDMS_END;
+			return true;
+		case leave_meta_group_mask + 2:
+			currentToken = PDMS_GROUP;
+			return true;
+		default:
+			metaGroupMask = 0;
+			break;
 		}
 	}
 
-	//Usual cases
+	// Usual cases
 	currentToken = PDMS_INVALID_TOKEN;
 	if (stop)
 	{
@@ -159,7 +179,8 @@ bool PdmsLexer::gotoNextToken()
 	{
 		if (!moveForward())
 			currentToken = PDMS_EOS;
-		else {
+		else
+		{
 			parseCurrentToken();
 			switch (currentToken)
 			{
@@ -221,9 +242,9 @@ void PdmsLexer::parseCurrentToken()
 
 PointCoordinateType PdmsLexer::valueFromBuffer()
 {
-	size_t index = strlen(tokenBuffer);
+	size_t index  = strlen(tokenBuffer);
 	size_t length = 0;
-	while (index > 0) //go back until we meet a number symbol
+	while (index > 0) // go back until we meet a number symbol
 	{
 		if ((tokenBuffer[index - 1] >= '0' && tokenBuffer[index - 1] <= '9') || tokenBuffer[index - 1] == '.')
 			break;
@@ -231,20 +252,20 @@ PointCoordinateType PdmsLexer::valueFromBuffer()
 		length++;
 	}
 
-	//Read units
+	// Read units
 	if (length > 0)
 	{
 		strcpy(nextBuffer, tokenBuffer + index);
 		memset(tokenBuffer + index, 0, length);
 	}
 
-	//Replace comma
+	// Replace comma
 	length = strlen(tokenBuffer);
 	for (index = 0; index < length; index++)
 		if (tokenBuffer[index] == ',')
 			tokenBuffer[index] = '.';
 
-	//convert value
+	// convert value
 	PointCoordinateType value = static_cast<PointCoordinateType>(atof(tokenBuffer));
 
 	return value;
@@ -266,7 +287,7 @@ bool PdmsLexer::moveForward()
 	return false;
 }
 
-void PdmsLexer::pushIntoDictionary(const char *str, Token token, int minSize)
+void PdmsLexer::pushIntoDictionary(const char* str, Token token, int minSize)
 {
 	int n = static_cast<int>(strlen(str));
 	if (minSize == 0 || minSize > n)
@@ -280,7 +301,8 @@ PdmsFileSession::PdmsFileSession(const QString& filename)
     , m_currentLine(-1)
     , m_eol(false)
     , m_eof(false)
-{}
+{
+}
 
 bool PdmsFileSession::initializeSession()
 {
@@ -292,8 +314,8 @@ bool PdmsFileSession::initializeSession()
 	}
 
 	m_currentLine = 1;
-	m_eol = false;
-	m_eof = false;
+	m_eol         = false;
+	m_eof         = false;
 
 	return true;
 }
@@ -322,9 +344,9 @@ bool PdmsFileSession::moveForward()
 	if (PdmsLexer::moveForward())
 		return true;
 
-	m_eol = false;
-	bool tokenFilled = false;
-	unsigned n = 0;
+	m_eol                = false;
+	bool     tokenFilled = false;
+	unsigned n           = 0;
 	while (!tokenFilled)
 	{
 		int car = readChar();
@@ -334,7 +356,7 @@ bool PdmsFileSession::moveForward()
 			if (n > 0)
 			{
 				tokenFilled = true;
-				m_eol = true;
+				m_eol       = true;
 			}
 			m_currentLine++;
 			break;
@@ -345,7 +367,7 @@ bool PdmsFileSession::moveForward()
 			break;
 		case EOF:
 			tokenFilled = true;
-			m_eof = true;
+			m_eof       = true;
 			break;
 		default:
 			if (n >= c_max_buff_size)
@@ -369,16 +391,19 @@ void PdmsFileSession::skipComment()
 	switch (currentToken)
 	{
 	case PDMS_COMMENT_LINE:
-		//skip line only if the end of line has not been read in current buffer
+		// skip line only if the end of line has not been read in current buffer
 		if (!m_eol)
 		{
-			int n = 0;
+			int n   = 0;
 			int car = 0;
-			do {
+			do
+			{
 				car = readChar();
-				if (car == '\t') car = ' ';
+				if (car == '\t')
+					car = ' ';
 				tokenBuffer[n] = car;
-				if (((n + 1) < c_max_buff_size) && ((car != ' ') || (n > 0 && tokenBuffer[n - 1] != ' '))) n++;
+				if (((n + 1) < c_max_buff_size) && ((car != ' ') || (n > 0 && tokenBuffer[n - 1] != ' ')))
+					n++;
 			} while (car != EOF && car != '\n');
 			if (car == '\n')
 				m_currentLine++;
@@ -388,28 +413,35 @@ void PdmsFileSession::skipComment()
 		break;
 	case PDMS_COMMENT_BLOCK:
 	{
-		//comment block opening symbol has been met. Search for comment block ending symbol
-		//don't forget that some other comments could be embedded in this comment
-		bool commentSymb = false;
-		int commentBlockLevel = 1;
-		int n = 0;
-		int car = 0;
-		do {
+		// comment block opening symbol has been met. Search for comment block ending symbol
+		// don't forget that some other comments could be embedded in this comment
+		bool commentSymb       = false;
+		int  commentBlockLevel = 1;
+		int  n                 = 0;
+		int  car               = 0;
+		do
+		{
 			car = readChar();
-			if (car == '\n') m_currentLine++;
-			if (car == '\n' || car == '\t') car = ' ';
-			if (car == '$') commentSymb = true;
-			else if (car == '(' && commentSymb) commentBlockLevel++;
-			else if (car == ')' && commentSymb) commentBlockLevel--;
+			if (car == '\n')
+				m_currentLine++;
+			if (car == '\n' || car == '\t')
+				car = ' ';
+			if (car == '$')
+				commentSymb = true;
+			else if (car == '(' && commentSymb)
+				commentBlockLevel++;
+			else if (car == ')' && commentSymb)
+				commentBlockLevel--;
 			else
 			{
-				commentSymb = false;
+				commentSymb    = false;
 				tokenBuffer[n] = car;
-				if (((n + 1) < c_max_buff_size) && ((car != ' ') || (n > 0 && tokenBuffer[n - 1] != ' '))) n++;
+				if (((n + 1) < c_max_buff_size) && ((car != ' ') || (n > 0 && tokenBuffer[n - 1] != ' ')))
+					n++;
 			}
 		} while (car != EOF && commentBlockLevel > 0);
 		tokenBuffer[n - 1] = '\0';
-		m_eol = false;
+		m_eol              = false;
 	}
 	break;
 	default:
@@ -420,25 +452,28 @@ void PdmsFileSession::skipComment()
 	if (strncmp(tokenBuffer, "ENTERING IN GROUP:", 18) == 0)
 	{
 		currentToken = PDMS_ENTER_METAGROUP;
-		//The meta group name starts after the "entering in group:" statement, after the last slash
-		//But we still store the whole path
+		// The meta group name starts after the "entering in group:" statement, after the last slash
+		// But we still store the whole path
 		char* ptr2 = tokenBuffer + 18;
-		while ((*ptr2) == ' ') { ptr2++; }
-		//Copy the meta group name at the beginning of tokenbuffer
+		while ((*ptr2) == ' ')
+		{
+			ptr2++;
+		}
+		// Copy the meta group name at the beginning of tokenbuffer
 		tokenBuffer[0] = '/';
-		char* ptr1 = tokenBuffer + 1;
+		char* ptr1     = tokenBuffer + 1;
 		while ((*ptr2) && (*ptr2) != ' ')
 		{
 			*ptr1 = *ptr2;
 			ptr1++;
 			ptr2++;
 		}
-		*ptr1 = '\0';
+		*ptr1         = '\0';
 		metaGroupMask = 0;
 	}
 	else if (strncmp(tokenBuffer, "LEAVING GROUP", 13) == 0)
 	{
-		currentToken = PDMS_LEAVE_METAGROUP;
+		currentToken  = PDMS_LEAVE_METAGROUP;
 		metaGroupMask = 0;
 	}
 }
@@ -446,13 +481,18 @@ void PdmsFileSession::skipComment()
 void PdmsFileSession::skipHandleCommand()
 {
 	int opened = 0;
-	int state = 0;
+	int state  = 0;
 
-	//Search for "HANDLE(...)" and remove this string from tokenBuffer
+	// Search for "HANDLE(...)" and remove this string from tokenBuffer
 	for (unsigned i = 0; i < strlen(tokenBuffer); i++)
 	{
-		if (tokenBuffer[i] == '(') { opened++; state++; }
-		else if (tokenBuffer[i] == ')') state--;
+		if (tokenBuffer[i] == '(')
+		{
+			opened++;
+			state++;
+		}
+		else if (tokenBuffer[i] == ')')
+			state--;
 		if (opened > 0 && state == 0)
 			return;
 	}
@@ -460,8 +500,13 @@ void PdmsFileSession::skipHandleCommand()
 	while (!(opened > 0 && state == 0))
 	{
 		int car = readChar();
-		if (car == '(') { opened++; state++; }
-		else if (car == ')') state--;
+		if (car == '(')
+		{
+			opened++;
+			state++;
+		}
+		else if (car == ')')
+			state--;
 	}
 	memset(tokenBuffer, 0, c_max_str_length);
 }
@@ -502,12 +547,12 @@ PdmsParser::~PdmsParser()
 	PdmsObjects::Stack::Clear();
 }
 
-void PdmsParser::linkWithSession(PdmsLexer *s)
+void PdmsParser::linkWithSession(PdmsLexer* s)
 {
-	session = s;
+	session        = s;
 	currentCommand = nullptr;
-	currentItem = nullptr;
-	root = nullptr;
+	currentItem    = nullptr;
+	root           = nullptr;
 	PdmsCommands::DistanceValue::setWorkingUnit(PDMS_MILLIMETRE);
 }
 
@@ -533,7 +578,7 @@ bool PdmsParser::processCurrentToken()
 		break;
 
 	case PDMS_NUM_VALUE:
-		//There should be a active command, and it should handle the value
+		// There should be a active command, and it should handle the value
 		if (!currentCommand || !currentCommand->handle(session->valueFromBuffer()))
 		{
 			session->printWarning("Unexpected numerical value");
@@ -542,7 +587,7 @@ bool PdmsParser::processCurrentToken()
 		break;
 
 	case PDMS_NAME_STR:
-		//There should be a active command, and it should handle the char string
+		// There should be a active command, and it should handle the char string
 		if (!currentCommand || !currentCommand->handle(session->nameFromBuffer()))
 		{
 			session->printWarning("Last token cannot be associated with a name");
@@ -551,16 +596,16 @@ bool PdmsParser::processCurrentToken()
 		break;
 
 	default:
-		//If there is an active command
+		// If there is an active command
 		if (currentCommand)
 		{
-			//If the active command can handle the new token, it's ok
+			// If the active command can handle the new token, it's ok
 			if (currentCommand->handle(currentToken))
 				return true;
 
-			//Else, the token must be a new command. We execute the active command and delete it
-			PdmsObjects::GenericItem* item = currentItem;
-			bool success = currentCommand->execute(item);
+			// Else, the token must be a new command. We execute the active command and delete it
+			PdmsObjects::GenericItem* item    = currentItem;
+			bool                      success = currentCommand->execute(item);
 			delete currentCommand;
 			currentCommand = nullptr;
 			if (!success)
@@ -569,7 +614,7 @@ bool PdmsParser::processCurrentToken()
 				session->printWarning("Unable to resolve previous command (this token may be unexpected in current command)");
 				return false;
 			}
-			//The command execution could have changed the current item
+			// The command execution could have changed the current item
 			if (item)
 			{
 				currentItem = item;
@@ -578,7 +623,7 @@ bool PdmsParser::processCurrentToken()
 			{
 				if (!root)
 				{
-					root = currentItem->getRoot();
+					root        = currentItem->getRoot();
 					currentItem = nullptr;
 				}
 				else
@@ -595,7 +640,7 @@ bool PdmsParser::processCurrentToken()
 		}
 		else
 		{
-			//Here, we must create a new command from the token speciffied by the lexer
+			// Here, we must create a new command from the token speciffied by the lexer
 			currentCommand = PdmsCommands::Command::Create(currentToken);
 			if (!currentCommand)
 			{
@@ -629,10 +674,10 @@ bool PdmsParser::parseSessionContent()
 			return false;
 		}
 	}
-	//If the hierarchy root has not yet been computed, do it now.
+	// If the hierarchy root has not yet been computed, do it now.
 	if (!root)
 		root = currentItem->getRoot();
-	//else check that the current item doesn't belong to a new root
+	// else check that the current item doesn't belong to a new root
 	else if (currentItem->getRoot() != root)
 		session->printWarning("there could be several hierarchy root specified in this file");
 	if (root)
@@ -645,13 +690,13 @@ bool PdmsParser::parseSessionContent()
 
 PdmsObjects::GenericItem* PdmsParser::getLoadedObject(bool forgetIt)
 {
-	PdmsObjects::GenericItem *result = nullptr;
+	PdmsObjects::GenericItem* result = nullptr;
 	if (session)
 		result = session->getLoadedObject();
 	if (forgetIt)
 	{
 		currentItem = nullptr;
-		root = nullptr;
+		root        = nullptr;
 	}
 	return result;
 }

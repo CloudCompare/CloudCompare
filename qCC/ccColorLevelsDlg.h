@@ -1,53 +1,56 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_COLOR_LEVELS_DLG_HEADER
 #define CC_COLOR_LEVELS_DLG_HEADER
 
-//Qt
+// Qt
 #include <QColor>
-
 #include <ui_colorLevelsDlg.h>
 
 class ccHistogramWindow;
 class ccGenericPointCloud;
 
 //! Dialog to change the color levels
-class ccColorLevelsDlg : public QDialog, public Ui::ColorLevelsDialog
+class ccColorLevelsDlg : public QDialog
+    , public Ui::ColorLevelsDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud);
 
 	//! Scales some RGB fields of the input cloud
 	static bool ScaleColorFields(ccGenericPointCloud* cloud, int inputLevelMin, int inputLevelMax, int outputLevelMin, int outputLevelMax, const bool applyRGB[3]);
 
-protected:
-
+  protected:
 	void onChannelChanged(int);
 	void onApply();
 
-protected:
-
+  protected:
 	//! Channels
-	enum CHANNELS { RGB = 0, RED = 1, GREEN = 2, BLUE = 3 };
+	enum CHANNELS
+	{
+		RGB   = 0,
+		RED   = 1,
+		GREEN = 2,
+		BLUE  = 3
+	};
 
 	//! Updates histogram
 	void updateHistogram();
@@ -57,8 +60,6 @@ protected:
 
 	//! Associated point cloud (color source)
 	ccGenericPointCloud* m_cloud;
-
-
 };
 
-#endif //CC_COLOR_LEVELS_DLG_HEADER
+#endif // CC_COLOR_LEVELS_DLG_HEADER

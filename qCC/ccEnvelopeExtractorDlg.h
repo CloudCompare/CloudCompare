@@ -1,42 +1,42 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Qt
+// Qt
 #include <QDialog>
 #include <QEventLoop>
 
-//qCC_db
+// qCC_db
 #include <ccBBox.h>
 
-//GUI
+// GUI
 #include <ui_envelopeExtractorDlg.h>
 
 class ccGLWindowInterface;
 class ccHObject;
 
 //! Dialog for debugging envelope extraction
-class ccEnvelopeExtractorDlg : public QDialog, public Ui::EnvelopeExtractorDlg
+class ccEnvelopeExtractorDlg : public QDialog
+    , public Ui::EnvelopeExtractorDlg
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit ccEnvelopeExtractorDlg(QWidget* parent = nullptr);
 
@@ -50,7 +50,10 @@ public:
 	void waitForUser(unsigned defaultDelay_ms = 100);
 
 	//! Returns associated GL window
-	inline ccGLWindowInterface* win() { return m_glWindow; }
+	inline ccGLWindowInterface* win()
+	{
+		return m_glWindow;
+	}
 
 	//! Zooms on a given 2D region (3D bouding-box considered in 2D only)
 	void zoomOn(const ccBBox& bbox);
@@ -66,13 +69,11 @@ public:
 	//! Returns whether the dialog has been 'skipped' or not
 	bool isSkipped() const;
 
-protected:
-
+  protected:
 	//! When the skip button is clicked
 	void onSkipButtonClicked();
 
-protected:
-
+  protected:
 	//! Skip flag
 	bool m_skipped;
 	//! Local event loop

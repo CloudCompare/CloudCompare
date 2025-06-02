@@ -1,42 +1,42 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//qCC
+// qCC
 #include "ccGLWindow.h"
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
-//CCFbo
+// CCFbo
 #include <ccFrameBufferObject.h>
 
-//Qt
+// Qt
 #include <QMessageBox>
 #include <QResizeEvent>
 
-ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
-						QOpenGLWidget* parent/*=nullptr*/,
-						bool silentInitialization/*=false*/)
-	: QOpenGLWidget(parent)
-	, ccGLWindowInterface(this, silentInitialization)
+ccGLWindow::ccGLWindow(QSurfaceFormat* format /*=nullptr*/,
+                       QOpenGLWidget*  parent /*=nullptr*/,
+                       bool            silentInitialization /*=false*/)
+    : QOpenGLWidget(parent)
+    , ccGLWindowInterface(this, silentInitialization)
 {
 	m_font = font();
 
-	//drag & drop handling
+	// drag & drop handling
 	setAcceptDrops(true);
 
 	if (format)
@@ -44,17 +44,20 @@ ccGLWindow::ccGLWindow(	QSurfaceFormat* format/*=nullptr*/,
 		setFormat(*format);
 	}
 
-	//default picking mode
+	// default picking mode
 	setPickingMode(DEFAULT_PICKING);
 
-	//default interaction mode
+	// default interaction mode
 	setInteractionMode(MODE_TRANSFORM_CAMERA);
 
-	//signal/slot connections
+	// signal/slot connections
 	connect(m_signalEmitter, &ccGLWindowSignalEmitter::itemPickedFast, this, &ccGLWindow::onItemPickedFastSlot, Qt::DirectConnection);
-	connect(&m_scheduleTimer, &QTimer::timeout, [&]() { checkScheduledRedraw(); });
-	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [&]() { update(); });
-	connect(&m_deferredPickingTimer, &QTimer::timeout, this, [&]() { doPicking(); });
+	connect(&m_scheduleTimer, &QTimer::timeout, [&]()
+	        { checkScheduledRedraw(); });
+	connect(&m_autoRefreshTimer, &QTimer::timeout, this, [&]()
+	        { update(); });
+	connect(&m_deferredPickingTimer, &QTimer::timeout, this, [&]()
+	        { doPicking(); });
 
 	setAttribute(Qt::WA_AcceptTouchEvents, true);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -99,8 +102,7 @@ bool ccGLWindow::event(QEvent* evt)
 
 	default:
 		// nothing to do
-	break;
-	
+		break;
 	}
 
 	return QOpenGLWidget::event(evt);
@@ -139,7 +141,7 @@ bool ccGLWindow::enableStereoMode(const StereoParams& params)
 	}
 }
 
-void ccGLWindow::Create(ccGLWindow*& window, QWidget*& widget, bool silentInitialization/*=false*/)
+void ccGLWindow::Create(ccGLWindow*& window, QWidget*& widget, bool silentInitialization /*=false*/)
 {
 	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 	format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);

@@ -26,6 +26,10 @@
 //System
 #include <array>
 
+#include "CCMath.h"
+#include "CloudSamplingTools.h"
+
+class ccScalarField;
 class ccGenericPointCloud;
 
 namespace CCCoreLib
@@ -38,6 +42,98 @@ namespace Ui
 {
 	class SubsamplingDialog;
 }
+
+struct SubsamplingParams {
+	enum class Method
+	{
+		Random         = 0,
+		RandomPercent  = 1,
+		Spatial        = 2,
+		Octree         = 3,
+	};
+
+	struct Spatial
+	{
+		PointCoordinateType minDist;
+
+		//! Use the octree if the point cloud or compute one and use it
+		bool useOctree;
+
+		//! Enable (or not) scalar modulation
+		bool modulationEnabled;
+		//! Scalar modulation (min SF value)
+		double sfMin;
+		//! Scalar modulation (max SF value)
+		double sfMax;
+		double sfMinSpacing;
+		double sfMaxSpacing;
+
+		bool tryEnableSfModulation(const ccScalarField& sf);
+
+		CCCoreLib::CloudSamplingTools::SFModulationParams modulationParams() const
+		{
+			CCCoreLib::CloudSamplingTools::SFModulationParams modParams(modulationEnabled);
+			if (modulationEnabled)
+			{
+				const double deltaSF = sfMax - sfMin;
+				assert(deltaSF >= 0);
+				if ( CCCoreLib::GreaterThanEpsilon( deltaSF ) )
+				{
+					modParams.a = (sfMaxSpacing - sfMinSpacing) / deltaSF;
+					modParams.b = sfMinSpacing - modParams.a * sfMin;
+				}
+				else
+				{
+					modParams.a = 0.0;
+					modParams.b = sfMin;
+				}
+			}
+			return modParams;
+		}
+	};
+
+	union
+	{
+		//! The number of points the point cloud will have after subsampling
+		//! Method::Random
+		unsigned int randomCount;
+		//! Method::RandomPercent
+		double randomPercent;
+		//! Method::Octree
+		unsigned char octreeLevel;
+		//! Method::spatial
+		Spatial spatial;
+	};
+	Method method;
+
+
+	//explicit SubsamplingParams(const Spatial &params_) : spatial(params_), method(Method::Spatial) {}
+
+	static SubsamplingParams RandomPercent(const double percent)
+	{
+		SubsamplingParams p;
+		p.method = Method::RandomPercent;
+		p.randomPercent = percent;
+
+		return p;
+	}
+
+	static SubsamplingParams Random(const unsigned count)
+	{
+		SubsamplingParams p;
+		p.method = Method::Random;
+		p.randomCount = count;
+
+		return p;
+	}
+};
+
+CCCoreLib::ReferenceCloud*  DoSubSample(
+	const SubsamplingParams &params,
+	ccGenericPointCloud* cloud,
+	CCCoreLib::GenericProgressCallback* progressCb=nullptr
+);
+
 
 //! Subsampling cloud dialog
 class ccSubsamplingDlg : public QDialog
@@ -65,7 +161,7 @@ public:
 	//! Returns the subsampled version of a cloud according to the current parameters
 	/** Should only be called after the dialog has been validated.
 	**/
-	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr);
+	CCCoreLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb = nullptr) const;
 
 	//! Enables the SF modulation option (SPATIAL method)
 	void enableSFModulation(ScalarType sfMin, ScalarType sfMax);
@@ -83,8 +179,10 @@ protected:
 
 protected: //methods
 
-	//! Updates the dialog lables depending on the active mode
+	//! Updates the dialog labels depending on the active mode
 	void updateLabels();
+
+	SubsamplingParams subSamplingParams() const;
 
 protected: //members
 

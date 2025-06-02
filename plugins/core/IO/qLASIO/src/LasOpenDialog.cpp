@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 of the License.               #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: Thomas Montaigu                           #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                CLOUDCOMPARE PLUGIN: LAS-IO Plugin                      #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 of the License.               #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: Thomas Montaigu                           #
+// #                                                                        #
+// ##########################################################################
 
 #include "LasOpenDialog.h"
 
@@ -27,7 +27,7 @@
 #include <algorithm>
 
 constexpr int TILING_TAB_INDEX = 1;
-constexpr int COPC_TAB_INDEX = 2;
+constexpr int COPC_TAB_INDEX   = 2;
 
 static QListWidgetItem* CreateItem(const char* name, bool checked = true)
 {
@@ -100,11 +100,12 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(decomposeClassificationCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onDecomposeClassificationToggled);
 
-	{}
-	const auto extentSpinBoxes = copcExtentGroupBox->findChildren<QDoubleSpinBox *>();
-	for(auto extentSpinBox : extentSpinBoxes)
 	{
-		connect(extentSpinBox, (void(QDoubleSpinBox::*)(double))(&QDoubleSpinBox::valueChanged),  this, &LasOpenDialog::checkExtentConsistency);
+	}
+	const auto extentSpinBoxes = copcExtentGroupBox->findChildren<QDoubleSpinBox*>();
+	for (auto extentSpinBox : extentSpinBoxes)
+	{
+		connect(extentSpinBox, (void(QDoubleSpinBox::*)(double))(&QDoubleSpinBox::valueChanged), this, &LasOpenDialog::checkExtentConsistency);
 	}
 	// reload the last tiling output path
 	{
@@ -269,8 +270,8 @@ void LasOpenDialog::setCopcInformations(const std::vector<uint64_t>& pointCountP
 LasDetails::UnscaledExtent LasOpenDialog::copcExtent() const
 {
 	LasDetails::UnscaledExtent extent;
-	CCVector3d minCorner(copcExtentSpinMinX->value(), copcExtentSpinMinY->value(), copcExtentSpinMinZ->value());
-	CCVector3d maxCorner(copcExtentSpinMaxX->value(), copcExtentSpinMaxY->value(), copcExtentSpinMaxZ->value());
+	CCVector3d                 minCorner(copcExtentSpinMinX->value(), copcExtentSpinMinY->value(), copcExtentSpinMinZ->value());
+	CCVector3d                 maxCorner(copcExtentSpinMaxX->value(), copcExtentSpinMaxY->value(), copcExtentSpinMaxZ->value());
 	extent.add(minCorner);
 	extent.add(maxCorner);
 	return extent;
@@ -288,9 +289,7 @@ bool LasOpenDialog::hasUsableExtent() const
 
 void LasOpenDialog::checkExtentConsistency(double value)
 {
-	m_validExtent = copcExtentSpinMaxX->value() - copcExtentSpinMinX->value() > 0 &&
-	copcExtentSpinMaxY->value() - copcExtentSpinMinY->value() > 0 &&
-	copcExtentSpinMaxZ->value() - copcExtentSpinMinZ->value() > 0;
+	m_validExtent = copcExtentSpinMaxX->value() - copcExtentSpinMinX->value() > 0 && copcExtentSpinMaxY->value() - copcExtentSpinMinY->value() > 0 && copcExtentSpinMaxZ->value() - copcExtentSpinMinZ->value() > 0;
 	copcLabelWarningExtent->setVisible(!m_validExtent);
 }
 

@@ -1,14 +1,14 @@
 #ifndef CC_RECENTER_CLOUD_DIALOG
 #define CC_RECENTER_CLOUD_DIALOG
 
-//local
-#include "qCC_io.h"
+// local
 #include "ccGlobalShiftManager.h"
+#include "qCC_io.h"
 
-//Qt
+// Qt
 #include <QDialog>
 
-//CCCoreLib
+// CCCoreLib
 #include <CCGeom.h>
 
 class Ui_GlobalShiftAndScaleDlg;
@@ -19,23 +19,22 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	/** \param Pg a point expressed in the original coordinate system
-		\param Dg bounding box diagonal in the original coordinate system (or <= 0 to ignore)
-		\param parent parent widget
+	    \param Dg bounding box diagonal in the original coordinate system (or <= 0 to ignore)
+	    \param parent parent widget
 	**/
 	ccShiftAndScaleCloudDlg(const CCVector3d& Pg, double Dg = 0, QWidget* parent = nullptr);
 
 	//! Reverse mode constructor
 	/** \param Pl a point expressed in the local coordinate system
-		\param Dl bounding box diagonal in the local coordinate system
-		\param Pg a point expressed in the original coordinate system
-		\param Dg bounding box diagonal in the original coordinate system
-		\param parent parent widget
+	    \param Dl bounding box diagonal in the local coordinate system
+	    \param Pg a point expressed in the original coordinate system
+	    \param Dg bounding box diagonal in the original coordinate system
+	    \param parent parent widget
 	**/
-	ccShiftAndScaleCloudDlg(const CCVector3d& Pl, double Dl, const CCVector3d& Pg, double Dg, QWidget* parent= nullptr);
+	ccShiftAndScaleCloudDlg(const CCVector3d& Pl, double Dl, const CCVector3d& Pg, double Dg, QWidget* parent = nullptr);
 
 	//! Sets the Shift fields (X, Y and Z) precision (default should be 2)
 	void setShiftFieldsPrecision(int precision);
@@ -50,10 +49,16 @@ public:
 	double getScale() const;
 
 	//! Whether shift should be applied to all files
-	bool applyAll() const { return m_applyAll; }
+	bool applyAll() const
+	{
+		return m_applyAll;
+	}
 
 	//! Whether the user has clicked on the cancel button or not
-	bool cancelled() const { return m_cancel; }
+	bool cancelled() const
+	{
+		return m_cancel;
+	}
 
 	//! Whether to show dialog items related to scale
 	void showScaleItems(bool state);
@@ -79,7 +84,7 @@ public:
 	bool keepGlobalPos() const;
 	//! Sets whether the global position should be preserved or not
 	void setKeepGlobalPos(bool state);
-	
+
 	//! Whether to show or not the 'Preserve shift on save' checkbox
 	void showPreserveShiftOnSave(bool state);
 	//! Returns whether the global shift should be preserved or not
@@ -89,13 +94,13 @@ public:
 
 	//! Adds shift info to the combox
 	/** \param info shift info
-		\return index in combo-box
+	    \return index in combo-box
 	**/
 	int addShiftInfo(const ccGlobalShiftManager::ShiftInfo& info);
 
 	//! Adds shift info to the combox
 	/** \param info shift info
-		\return index in combo-box
+	    \return index in combo-box
 	**/
 	int addShiftInfo(const std::vector<ccGlobalShiftManager::ShiftInfo>& info);
 
@@ -103,16 +108,18 @@ public:
 	bool getInfo(size_t index, ccGlobalShiftManager::ShiftInfo& info) const;
 
 	//! Returns the number of info currently stored
-	size_t infoCount() const { return m_defaultInfos.size(); }
+	size_t infoCount() const
+	{
+		return m_defaultInfos.size();
+	}
 
 	//! Sets the current combo-box entry (profile)
 	void setCurrentProfile(int index);
 
-    //! Sets the last shift and scale information
-    static void SetLastInfo(const CCVector3d& shift, double scale);
+	//! Sets the last shift and scale information
+	static void SetLastInfo(const CCVector3d& shift, double scale);
 
-protected:
-
+  protected:
 	//! Slot called when the 'loadComboBox' index changes
 	void onLoadIndexChanged(int);
 	//! Slot called when the 'Keep global position' checkbox is toggled
@@ -124,8 +131,7 @@ protected:
 	//! Displays more info about global shift mechanism
 	void displayMoreInfo();
 
-protected:
-
+  protected:
 	//! Initialization routine
 	void init();
 

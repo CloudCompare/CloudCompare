@@ -1,30 +1,30 @@
 #pragma once
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "CCAppCommon.h"
 
-//Local
+// Local
 #include "ccOptions.h"
 
-//qCC_gl
+// qCC_gl
 #include <ccGuiParameters.h>
 
-//Qt
+// Qt
 #include <QDialog>
 
 namespace Ui
@@ -37,14 +37,14 @@ class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 {
 	Q_OBJECT
 
-public:
+  public:
 	explicit ccDisplaySettingsDlg(QWidget* parent);
 	~ccDisplaySettingsDlg() override;
 
-Q_SIGNALS:
+  Q_SIGNALS:
 	void aspectHasChanged();
 
-protected:
+  protected:
 	void changeLightDiffuseColor();
 	void changeLightAmbientColor();
 	void changeLightSpecularColor();
@@ -79,8 +79,7 @@ protected:
 	void apply();
 	void reset();
 
-protected:
-
+  protected:
 	//! Refreshes dialog to reflect new parameters values
 	void refresh();
 
@@ -110,7 +109,7 @@ protected:
 
 	//! Default style (active when the dialog was first shown)
 	int m_defaultAppStyleIndex;
-	
-private:
+
+  private:
 	Ui::DisplaySettingsDlg* m_ui;
 };

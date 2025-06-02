@@ -1,24 +1,24 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_2_5D_EDITOR_HEADER
 #define CC_2_5D_EDITOR_HEADER
 
-//qCC_db
+// qCC_db
 #include <ccRasterGrid.h>
 
 class ccBoundingBoxEditorDlg;
@@ -30,21 +30,20 @@ class QComboBox;
 //! 2.5D data editor (generic interface)
 class cc2Point5DimEditor
 {
-public:
+  public:
 	//! Default constructor
 	cc2Point5DimEditor();
 
 	//! Destructor
 	virtual ~cc2Point5DimEditor();
 
-protected: //standard methods
-
+  protected: // standard methods
 	//! Returns projection grid step
 	virtual double getGridStep() const = 0;
 
 	//! Returns projection dimension
 	/** \return dimension as int (0: X, 1: Y, 2:Z)
-	**/
+	 **/
 	virtual unsigned char getProjectionDimension() const = 0;
 
 	//! Returns type of projection
@@ -59,11 +58,10 @@ protected: //standard methods
 	//! Updates the 2D display zoom
 	virtual void update2DDisplayZoom(ccBBox& box);
 
-protected: //raster grid related stuff
-
-	//! Show grid box editor and update 
+  protected: // raster grid related stuff
+	//! Show grid box editor and update
 	/** \return whether the box was modified or not
-	**/
+	 **/
 	virtual bool showGridBoxEditor();
 
 	//! Returns the grid size as a string
@@ -82,21 +80,20 @@ protected: //raster grid related stuff
 	ccRasterGrid::EmptyCellFillOption getFillEmptyCellsStrategy(QComboBox* comboBox) const;
 
 	//! Shortcut to ccRasterGrid::convertToCloud
-	ccPointCloud* convertGridToCloud(	bool exportHeightStats,
-										bool exportSFStats,
-										const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
-										bool projectSFs,
-										bool projectColors,
-										bool resampleInputCloudXY,
-										bool resampleInputCloudZ, //only considered if resampleInputCloudXY is true!
-										ccGenericPointCloud* inputCloud,
-										double percentileValue,
-										bool exportToOriginalCS,
-										bool appendGridSizeToSFNames,
-										ccProgressDialog* progressDialog = nullptr) const;
+	ccPointCloud* convertGridToCloud(bool                                               exportHeightStats,
+	                                 bool                                               exportSFStats,
+	                                 const std::vector<ccRasterGrid::ExportableFields>& exportedStatistics,
+	                                 bool                                               projectSFs,
+	                                 bool                                               projectColors,
+	                                 bool                                               resampleInputCloudXY,
+	                                 bool                                               resampleInputCloudZ, // only considered if resampleInputCloudXY is true!
+	                                 ccGenericPointCloud*                               inputCloud,
+	                                 double                                             percentileValue,
+	                                 bool                                               exportToOriginalCS,
+	                                 bool                                               appendGridSizeToSFNames,
+	                                 ccProgressDialog*                                  progressDialog = nullptr) const;
 
-protected: //members
-
+  protected: // members
 	//! Raster grid
 	ccRasterGrid m_grid;
 
@@ -110,4 +107,4 @@ protected: //members
 	ccPointCloud* m_rasterCloud;
 };
 
-#endif //CC_2_5D_EDITOR_HEADER
+#endif // CC_2_5D_EDITOR_HEADER

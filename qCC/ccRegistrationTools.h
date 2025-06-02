@@ -1,27 +1,27 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_REGISTRATION_TOOLS_HEADER
 #define CC_REGISTRATION_TOOLS_HEADER
 
-//CCCoreLib
+// CCCoreLib
 #include <RegistrationTools.h>
 
-//qCC_db
+// qCC_db
 #include <ccGLMatrix.h>
 
 class QWidget;
@@ -32,22 +32,20 @@ class ccHObject;
 class ccRegistrationTools
 {
 
-public:
-
+  public:
 	//! Applies ICP registration on two entities
 	/** \warning Automatically samples points on meshes if necessary (see code for magic numbers ;)
-	**/
-	static bool ICP(ccHObject* data,
-					ccHObject* model,
-					ccGLMatrix& transMat,
-					double& finalScale,
-					double& finalRMS,
-					unsigned& finalPointCount,
-					const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
-					bool useDataSFAsWeights = false,
-					bool useModelSFAsWeights = false,
-					QWidget* parent = nullptr);
-
+	 **/
+	static bool ICP(ccHObject*                                         data,
+	                ccHObject*                                         model,
+	                ccGLMatrix&                                        transMat,
+	                double&                                            finalScale,
+	                double&                                            finalRMS,
+	                unsigned&                                          finalPointCount,
+	                const CCCoreLib::ICPRegistrationTools::Parameters& inputParameters,
+	                bool                                               useDataSFAsWeights  = false,
+	                bool                                               useModelSFAsWeights = false,
+	                QWidget*                                           parent              = nullptr);
 };
 
-#endif //CC_REGISTRATION_TOOLS_HEADER
+#endif // CC_REGISTRATION_TOOLS_HEADER

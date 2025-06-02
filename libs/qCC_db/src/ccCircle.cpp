@@ -1,31 +1,31 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                   COPYRIGHT: CloudCompare project                      #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: CloudCompare project                      #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccCircle.h"
 
 // qCC_db
 #include <ccPointCloud.h>
 
-ccCircle::ccCircle(	double radius/*=0.0*/,
-					unsigned resolution/*=48*/,
-					unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccPolyline(new ccPointCloud("vertices"), uniqueID)
-	, m_radius(std::max(0.0, radius))
-	, m_resolution(std::max(resolution, 4u))
+ccCircle::ccCircle(double   radius /*=0.0*/,
+                   unsigned resolution /*=48*/,
+                   unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccPolyline(new ccPointCloud("vertices"), uniqueID)
+    , m_radius(std::max(0.0, radius))
+    , m_resolution(std::max(resolution, 4u))
 {
 	if (radius > 0.0)
 	{
@@ -47,7 +47,7 @@ ccCircle::ccCircle(	double radius/*=0.0*/,
 }
 
 ccCircle::ccCircle(const ccCircle& circle)
-	: ccCircle(circle.m_radius, circle.m_resolution)
+    : ccCircle(circle.m_radius, circle.m_resolution)
 {
 	updateInternalRepresentation();
 }
@@ -55,22 +55,22 @@ ccCircle::ccCircle(const ccCircle& circle)
 ccCircle* ccCircle::clone() const
 {
 	ccCircle* clonedCircle = new ccCircle(*this);
-	clonedCircle->setLocked(false); //there's no reason to keep the clone locked
+	clonedCircle->setLocked(false); // there's no reason to keep the clone locked
 
 	return clonedCircle;
 }
 
 void ccCircle::applyGLTransformation(const ccGLMatrix& trans)
 {
-	//we call the ccHObject method instead of the ccPolyline one,
-	//to only update the transformation history matrix, and not
-	//trigger any coordinate modification
+	// we call the ccHObject method instead of the ccPolyline one,
+	// to only update the transformation history matrix, and not
+	// trigger any coordinate modification
 	ccHObject::applyGLTransformation(trans);
 
-	//now we can update the vertices
+	// now we can update the vertices
 	updateInternalRepresentation();
 
-	//invalidate the bounding-box
+	// invalidate the bounding-box
 	invalidateBoundingBox();
 }
 
@@ -108,9 +108,9 @@ bool ccCircle::toFile_MeOnly(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//Radius (dataVersion>=56)
+	// Radius (dataVersion>=56)
 	outStream << m_radius;
-	//Resolution (dataVersion>=56)
+	// Resolution (dataVersion>=56)
 	outStream << m_resolution;
 
 	return true;
@@ -139,9 +139,9 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 
 	QDataStream inStream(&in);
 
-	//Radius (dataVersion>=56)
+	// Radius (dataVersion>=56)
 	inStream >> m_radius;
-	//Resolution (dataVersion>=56)
+	// Resolution (dataVersion>=56)
 	inStream >> m_resolution;
 
 	return true;

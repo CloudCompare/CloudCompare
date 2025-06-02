@@ -1,30 +1,31 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_MATRIX_DISPLAY_DIALOG_HEADER
 #define CC_MATRIX_DISPLAY_DIALOG_HEADER
 
-//Qt
+// Qt
 #include <QWidget>
 
-//qCC_db
+// qCC_db
 #include <ccGLMatrix.h>
 
-namespace Ui {
+namespace Ui
+{
 	class MatrixDisplayDlg;
 }
 
@@ -33,13 +34,12 @@ class MatrixDisplayDlg : public QWidget
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit MatrixDisplayDlg(QWidget* parent = nullptr);
 
 	~MatrixDisplayDlg();
-	
+
 	//! Clears widget
 	void clear();
 
@@ -48,17 +48,15 @@ public:
 	//! Updates dialog with a given (double) matrix
 	void fillDialogWith(const ccGLMatrixd& mat);
 
-public:
-
+  public:
 	//! Exports current matrix to an ASCII file
 	/** Will display a file selection dialog!
-	**/
+	 **/
 	void exportToASCII();
 	//! Exports current matrix to the clipboard
 	void exportToClipboard();
 
-protected:
-
+  protected:
 	//! Fills the second part of the dialog
 	void fillDialogWith(const CCVector3d& axis, double angle_rad, const CCVector3d& T, int precision);
 
@@ -68,4 +66,4 @@ protected:
 	Ui::MatrixDisplayDlg* m_ui;
 };
 
-#endif //CC_MATRIX_DISPLAY_DIALOG_HEADER
+#endif // CC_MATRIX_DISPLAY_DIALOG_HEADER

@@ -1,36 +1,37 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
+
+#include "ccPluginManager.h"
 
 #include "ccApplicationBase.h"
-#include "ccPluginManager.h"
 
 // ccPluginAPI
 #include <ccPersistentSettings.h>
 
-//qCC_db
+// qCC_db
 #include <ccExternalFactory.h>
 #include <ccLog.h>
 
-//plugins
+// plugins
 #include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccStdPluginInterface.h"
 
-//Qt
+// Qt
 #include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
@@ -42,8 +43,10 @@
 namespace
 {
 	// This is used to avoid having to make the ccPluginManager constructor public
-	class PrivatePluginManager : public ccPluginManager {};
-}
+	class PrivatePluginManager : public ccPluginManager
+	{
+	};
+} // namespace
 
 Q_GLOBAL_STATIC(PrivatePluginManager, s_pluginManager);
 
@@ -66,7 +69,7 @@ static QString GetPluginIID(QPluginLoader* loader)
 
 // Check for metadata and error if it's not there
 // This indicates that a plugin hasn't been converted to the new JSON metadata.
-static bool	IsMetaDataValid(QPluginLoader* loader)
+static bool IsMetaDataValid(QPluginLoader* loader)
 {
 	const QJsonObject metaObject = loader->metaData();
 
@@ -80,17 +83,17 @@ static bool	IsMetaDataValid(QPluginLoader* loader)
 	}
 	else
 	{
-		const QJsonObject	data = metaObject["MetaData"].toObject();
+		const QJsonObject data = metaObject["MetaData"].toObject();
 
 		// The plugin type is going to be required
-		const QStringList validTypes{ "GL", "I/O", "Standard" };
+		const QStringList validTypes{"GL", "I/O", "Standard"};
 
 		const QString pluginType = data["type"].toString();
 
 		if (!validTypes.contains(pluginType))
 		{
 			ccLog::Error(QStringLiteral("%1 does not supply a valid plugin type in its info.json.\n\nFound: %2\n\nIt must be one of: %3")
-				.arg(fileName, pluginType, validTypes.join(", ")));
+			                 .arg(fileName, pluginType, validTypes.join(", ")));
 
 			return false;
 		}
@@ -99,9 +102,8 @@ static bool	IsMetaDataValid(QPluginLoader* loader)
 	return true;
 }
 
-
 ccPluginManager::ccPluginManager(QObject* parent)
-	: QObject(parent)
+    : QObject(parent)
 {
 }
 
@@ -177,12 +179,12 @@ void ccPluginManager::loadPlugins()
 		{
 			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(plugin);
 
-			//see if this plugin provides an additional factory for objects
+			// see if this plugin provides an additional factory for objects
 			ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
 
 			if (factory != nullptr)
 			{
-				//if it's valid, add it to the factories set
+				// if it's valid, add it to the factories set
 				Q_ASSERT(ccExternalFactory::Container::GetUniqueInstance());
 				ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
 			}
@@ -190,13 +192,13 @@ void ccPluginManager::loadPlugins()
 			break;
 		}
 
-		case CC_IO_FILTER_PLUGIN: //I/O filter
+		case CC_IO_FILTER_PLUGIN: // I/O filter
 		{
 			ccIOPluginInterface* ioPlugin = static_cast<ccIOPluginInterface*>(plugin);
 
-			QStringList	ioExtensions;
+			QStringList ioExtensions;
 
-			for (auto &filter : ioPlugin->getFilters())
+			for (auto& filter : ioPlugin->getFilters())
 			{
 				if (filter)
 				{
@@ -211,20 +213,20 @@ void ccPluginManager::loadPlugins()
 				ioExtensions.sort();
 
 				ccLog::Print(tr("[Plugin][%1] New file extensions registered: %2")
-					.arg(ioPlugin->getName(), ioExtensions.join(' ')));
+				                 .arg(ioPlugin->getName(), ioExtensions.join(' ')));
 			}
 
 			break;
 		}
 
 		default:
-			//nothing to do at this point
+			// nothing to do at this point
 			break;
 		}
 	}
 }
 
-ccPluginInterfaceList &ccPluginManager::pluginList()
+ccPluginInterfaceList& ccPluginManager::pluginList()
 {
 #ifdef QT_DEBUG
 	if (m_pluginList.empty())
@@ -251,7 +253,7 @@ void ccPluginManager::setPluginEnabled(const ccPluginInterface* plugin, bool ena
 	QStringList disabledList;
 	getDisabledPluginIIDs(disabledList);
 
-	const QString &iid = plugin->IID();
+	const QString& iid = plugin->IID();
 
 	if (enabled)
 	{
@@ -273,7 +275,7 @@ void ccPluginManager::setPluginEnabled(const ccPluginInterface* plugin, bool ena
 	settings.endGroup();
 }
 
-bool ccPluginManager::isEnabled(const ccPluginInterface *plugin) const
+bool ccPluginManager::isEnabled(const ccPluginInterface* plugin) const
 {
 	QStringList disabledList;
 	getDisabledPluginIIDs(disabledList);
@@ -285,11 +287,11 @@ void ccPluginManager::loadFromPathsAndAddToList()
 {
 	const QStringList nameFilters{
 #if defined(Q_OS_MAC)
-		"*.dylib"
+	    "*.dylib"
 #elif defined(Q_OS_WIN)
-		"*.dll"
+	    "*.dll"
 #elif defined(Q_OS_UNIX)
-		"*.so"
+	    "*.so"
 #else
 #error Need to specify the dynamic library extension for this OS.
 #endif
@@ -297,7 +299,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 
 	// Map the plugin's IID to its loader so we can unload it if necessary.
 	// This lets us override plugins by path.
-	QMap<QString, QSharedPointer<QPluginLoader> > pluginIIDToLoaderMap;
+	QMap<QString, QSharedPointer<QPluginLoader>> pluginIIDToLoaderMap;
 
 	const auto paths = pluginPaths();
 
@@ -327,7 +329,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				continue;
 			}
 
-			QObject* plugin = loader->instance();
+			QObject*           plugin   = loader->instance();
 			ccPluginInterface* ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
 
 			if ((plugin == nullptr) || (ccPlugin == nullptr))
@@ -361,7 +363,7 @@ void ccPluginManager::loadFromPathsAndAddToList()
 				QSharedPointer<QPluginLoader> previousLoader = pluginIIDToLoaderMap[pluginIID];
 				assert(previousLoader);
 
-				ccPluginInterface* pluginInterface = qobject_cast<ccPluginInterface *>(previousLoader->instance());
+				ccPluginInterface* pluginInterface = qobject_cast<ccPluginInterface*>(previousLoader->instance());
 
 				// maintain the order of the plugin list
 				const int index = m_pluginList.indexOf(pluginInterface);

@@ -1,30 +1,30 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Local
+// Local
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
 
-//qCC_db
+// qCC_db
 #include <ccGenericGLDisplay.h>
 
-//system
+// system
 #include <vector>
 
 class ccPolyline;
@@ -38,30 +38,36 @@ namespace Ui
 }
 
 //! Graphical Polyline Tracing tool
-class ccTracePolylineTool : public ccOverlayDialog, public ccPickingListener
+class ccTracePolylineTool : public ccOverlayDialog
+    , public ccPickingListener
 {
 	Q_OBJECT
 
-public:
+  public:
 	//! Default constructor
 	explicit ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent);
 	//! Destructor
 	virtual ~ccTracePolylineTool();
 
-	//inherited from ccOverlayDialog
+	// inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindowInterface* win) override;
 	virtual bool start() override;
 	virtual void stop(bool accepted) override;
 
-protected:
+  protected:
+	void        apply();
+	void        cancel();
+	void        exportLine();
+	inline void continueEdition()
+	{
+		restart(false);
+	}
+	inline void resetLine()
+	{
+		restart(true);
+	}
 
-	void apply();
-	void cancel();
-	void exportLine();
-	inline void continueEdition()  { restart(false); }
-	inline void resetLine() { restart(true); }
-
-	void closePolyLine(int x = 0, int y = 0); //arguments for compatibility with ccGlWindow::rightButtonClicked signal
+	void closePolyLine(int x = 0, int y = 0); // arguments for compatibility with ccGlWindow::rightButtonClicked signal
 	void updatePolyLineTip(int x, int y, Qt::MouseButtons buttons);
 
 	void onWidthSizeChanged(int);
@@ -72,18 +78,19 @@ protected:
 	//! Inherited from ccPickingListener
 	virtual void onItemPicked(const PickedItem& pi) override;
 
-protected:
-
+  protected:
 	//! Restarts the edition mode
 	void restart(bool reset);
 
 	//! Viewport parameters (used for picking)
 	struct SegmentGLParams
 	{
-		SegmentGLParams() {}
+		SegmentGLParams()
+		{
+		}
 		SegmentGLParams(ccGenericGLDisplay* display, int x, int y);
 		ccGLCameraParameters params;
-		CCVector2d clickPos;
+		CCVector2d           clickPos;
 	};
 
 	//! Oversamples the active 3D polyline

@@ -1,78 +1,79 @@
-//##########################################################################
-//#                                                                        #
-//#                   CLOUDCOMPARE LIGHT VIEWER                            #
-//#                                                                        #
-//#  This project has been initiated under funding from ANR/CIFRE          #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                   CLOUDCOMPARE LIGHT VIEWER                            #
+// #                                                                        #
+// #  This project has been initiated under funding from ANR/CIFRE          #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccviewer.h"
+
 #include "ccViewerApplication.h"
 
-//Qt
+// Qt
 #include <QMessageBox>
 #include <QShortcut>
 
-//qCC_glWindow
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
-//common dialogs
+// common dialogs
 #include <ccCameraParamEditDlg.h>
 #include <ccDisplaySettingsDlg.h>
 #include <ccStereoModeDlg.h>
 
-//qCC_db
+// qCC_db
 #include <ccGenericMesh.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
-//plugins
+// plugins
 #include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccPluginManager.h"
 
-//3D mouse handler
+// 3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
 #include "Mouse3DInput.h"
 #endif
 
-//Gamepads
+// Gamepads
 #ifdef CC_GAMEPAD_SUPPORT
 #include "ccGamepadManager.h"
 #endif
 
-//Camera parameters dialog
+// Camera parameters dialog
 static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
 ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
-	: QMainWindow(parent, flags)
-	, m_glWindow(nullptr)
-	, m_selectedObject(nullptr)
-	, m_3dMouseInput(nullptr)
-	, m_gamepadManager(nullptr)
+    : QMainWindow(parent, flags)
+    , m_glWindow(nullptr)
+    , m_selectedObject(nullptr)
+    , m_3dMouseInput(nullptr)
+    , m_gamepadManager(nullptr)
 {
 	ui.setupUi(this);
 
 #ifdef Q_OS_LINUX
-	 //we reset the whole stylesheet but we keep the StatusBar style
-	setStyleSheet(QString());	
+	// we reset the whole stylesheet but we keep the StatusBar style
+	setStyleSheet(QString());
 	setStyleSheet("QStatusBar{background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(200,200,200), stop:1 rgb(255,255,255));}");
 #endif
-	
+
 	setWindowTitle(QString("ccViewer v%1").arg(ccApp->versionLongStr(false)));
 
-	//insert GL window in a vertical layout
+	// insert GL window in a vertical layout
 	{
 		QVBoxLayout* verticalLayout = new QVBoxLayout(ui.GLframe);
 		verticalLayout->setSpacing(0);
@@ -90,9 +91,9 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 
 	updateGLFrameGradient();
 
-	m_glWindow->setRectangularPickingAllowed(false); //multiple entities picking not supported
+	m_glWindow->setRectangularPickingAllowed(false); // multiple entities picking not supported
 
-	//UI/display synchronization
+	// UI/display synchronization
 	ui.actionFullScreen->setChecked(false);
 	ui.menuSelected->setEnabled(false);
 	reflectLightsState();
@@ -110,67 +111,68 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	ui.menuOptions->insertMenu(ui.menu3DMouse->menuAction(), m_gamepadManager->menu());
 #endif
 
+	// Signals & slots connection
+	connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::filesDropped, this, qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
+	connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::entitySelectionChanged, this, &ccViewer::selectEntity);
+	connect(m_glWindow->signalEmitter(), &ccGLWindowSignalEmitter::exclusiveFullScreenToggled, this, &ccViewer::onExclusiveFullScreenToggled);
 
-	//Signals & slots connection
-	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::filesDropped,				this,	qOverload<QStringList>(&ccViewer::addToDB), Qt::QueuedConnection);
-	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::entitySelectionChanged,	this,	&ccViewer::selectEntity);
-	connect(m_glWindow->signalEmitter(),			&ccGLWindowSignalEmitter::exclusiveFullScreenToggled,this,	&ccViewer::onExclusiveFullScreenToggled);
-	
 	//"Options" menu
-	connect(ui.actionDisplayParameters,				&QAction::triggered,					this,	&ccViewer::showDisplayParameters);
-	connect(ui.actionEditCamera,					&QAction::triggered,					this,	&ccViewer::doActionEditCamera);
+	connect(ui.actionDisplayParameters, &QAction::triggered, this, &ccViewer::showDisplayParameters);
+	connect(ui.actionEditCamera, &QAction::triggered, this, &ccViewer::doActionEditCamera);
 	//"Display > Standard views" menu
-	connect(ui.actionSetViewTop,					&QAction::triggered,					this,	&ccViewer::setTopView);
-	connect(ui.actionSetViewBottom,					&QAction::triggered,					this,	&ccViewer::setBottomView);
-	connect(ui.actionSetViewFront,					&QAction::triggered,					this,	&ccViewer::setFrontView);
-	connect(ui.actionSetViewBack,					&QAction::triggered,					this,	&ccViewer::setBackView);
-	connect(ui.actionSetViewLeft,					&QAction::triggered,					this,	&ccViewer::setLeftView);
-	connect(ui.actionSetViewRight,					&QAction::triggered,					this,	&ccViewer::setRightView);
-	connect(ui.actionSetViewIso1,					&QAction::triggered,					this,	&ccViewer::setIsoView1);
-	connect(ui.actionSetViewIso2,					&QAction::triggered,					this,	&ccViewer::setIsoView2);
+	connect(ui.actionSetViewTop, &QAction::triggered, this, &ccViewer::setTopView);
+	connect(ui.actionSetViewBottom, &QAction::triggered, this, &ccViewer::setBottomView);
+	connect(ui.actionSetViewFront, &QAction::triggered, this, &ccViewer::setFrontView);
+	connect(ui.actionSetViewBack, &QAction::triggered, this, &ccViewer::setBackView);
+	connect(ui.actionSetViewLeft, &QAction::triggered, this, &ccViewer::setLeftView);
+	connect(ui.actionSetViewRight, &QAction::triggered, this, &ccViewer::setRightView);
+	connect(ui.actionSetViewIso1, &QAction::triggered, this, &ccViewer::setIsoView1);
+	connect(ui.actionSetViewIso2, &QAction::triggered, this, &ccViewer::setIsoView2);
 
 	//"Options > Perspective" menu
-	connect(ui.actionSetOrthoView,					&QAction::triggered,					this,	&ccViewer::setOrthoView);
-	connect(ui.actionSetCenteredPerspectiveView,	&QAction::triggered,					this,	&ccViewer::setCenteredPerspectiveView);
-	connect(ui.actionSetViewerPerspectiveView,		&QAction::triggered,					this,	&ccViewer::setViewerPerspectiveView);
+	connect(ui.actionSetOrthoView, &QAction::triggered, this, &ccViewer::setOrthoView);
+	connect(ui.actionSetCenteredPerspectiveView, &QAction::triggered, this, &ccViewer::setCenteredPerspectiveView);
+	connect(ui.actionSetViewerPerspectiveView, &QAction::triggered, this, &ccViewer::setViewerPerspectiveView);
 	//"Options > Rotation symbol" menu
-	connect(ui.actionSetPivotAlwaysOn,				&QAction::triggered,					this,	&ccViewer::setPivotAlwaysOn);
-	connect(ui.actionSetPivotRotationOnly,			&QAction::triggered,					this,	&ccViewer::setPivotRotationOnly);
-	connect(ui.actionSetPivotOff,					&QAction::triggered,					this,	&ccViewer::setPivotOff);
+	connect(ui.actionSetPivotAlwaysOn, &QAction::triggered, this, &ccViewer::setPivotAlwaysOn);
+	connect(ui.actionSetPivotRotationOnly, &QAction::triggered, this, &ccViewer::setPivotRotationOnly);
+	connect(ui.actionSetPivotOff, &QAction::triggered, this, &ccViewer::setPivotOff);
 	//"Options > 3D mouse" menu
-	connect(ui.actionEnable3DMouse,					&QAction::toggled,						this,	&ccViewer::enable3DMouse);
+	connect(ui.actionEnable3DMouse, &QAction::toggled, this, &ccViewer::enable3DMouse);
 	//"Display > Lights & Materials" menu
-	connect(ui.actionToggleSunLight,				&QAction::toggled,						this,	&ccViewer::toggleSunLight);
-	connect(ui.actionToggleCustomLight,				&QAction::toggled,						this,	&ccViewer::toggleCustomLight);
+	connect(ui.actionToggleSunLight, &QAction::toggled, this, &ccViewer::toggleSunLight);
+	connect(ui.actionToggleCustomLight, &QAction::toggled, this, &ccViewer::toggleCustomLight);
 	//"Options" menu
-	connect(ui.actionGlobalZoom,					&QAction::triggered,					this,	&ccViewer::setGlobalZoom);
-	connect(ui.actionEnableStereo,					&QAction::toggled,						this,	&ccViewer::toggleStereoMode);
-	connect(ui.actionFullScreen,					&QAction::toggled,						this,	&ccViewer::toggleFullScreen);
-	connect(ui.actionLockRotationVertAxis,			&QAction::triggered,					this,   &ccViewer::toggleRotationAboutVertAxis);
+	connect(ui.actionGlobalZoom, &QAction::triggered, this, &ccViewer::setGlobalZoom);
+	connect(ui.actionEnableStereo, &QAction::toggled, this, &ccViewer::toggleStereoMode);
+	connect(ui.actionFullScreen, &QAction::toggled, this, &ccViewer::toggleFullScreen);
+	connect(ui.actionLockRotationVertAxis, &QAction::triggered, this, &ccViewer::toggleRotationAboutVertAxis);
 
 	//"Options > Selected" menu
-	connect(ui.actionShowColors,					&QAction::toggled,						this,	&ccViewer::toggleColorsShown);
-	connect(ui.actionShowNormals,					&QAction::toggled,						this,	&ccViewer::toggleNormalsShown);
-	connect(ui.actionShowMaterials,					&QAction::toggled,						this,	&ccViewer::toggleMaterialsShown);
-	connect(ui.actionShowScalarField,				&QAction::toggled,						this,	&ccViewer::toggleScalarShown);
-	connect(ui.actionShowColorRamp,					&QAction::toggled,						this,	&ccViewer::toggleColorbarShown);
-	connect(ui.actionZoomOnSelectedEntity,			&QAction::triggered,					this,	&ccViewer::zoomOnSelectedEntity);
-	connect(ui.actionDelete,						&QAction::triggered,					this,	&ccViewer::doActionDeleteSelectedEntity);
+	connect(ui.actionShowColors, &QAction::toggled, this, &ccViewer::toggleColorsShown);
+	connect(ui.actionShowNormals, &QAction::toggled, this, &ccViewer::toggleNormalsShown);
+	connect(ui.actionShowMaterials, &QAction::toggled, this, &ccViewer::toggleMaterialsShown);
+	connect(ui.actionShowScalarField, &QAction::toggled, this, &ccViewer::toggleScalarShown);
+	connect(ui.actionShowColorRamp, &QAction::toggled, this, &ccViewer::toggleColorbarShown);
+	connect(ui.actionZoomOnSelectedEntity, &QAction::triggered, this, &ccViewer::zoomOnSelectedEntity);
+	connect(ui.actionDelete, &QAction::triggered, this, &ccViewer::doActionDeleteSelectedEntity);
 
 	//"Shaders" menu
-	connect(ui.actionNoFilter,						&QAction::triggered,					this,	&ccViewer::doDisableGLFilter);
+	connect(ui.actionNoFilter, &QAction::triggered, this, &ccViewer::doDisableGLFilter);
 
 	//"Help" menu
-	connect(ui.actionAbout,							&QAction::triggered,					this,	&ccViewer::doActionAbout);
-	connect(ui.actionHelpShortcuts,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
+	connect(ui.actionAbout, &QAction::triggered, this, &ccViewer::doActionAbout);
+	connect(ui.actionHelpShortcuts, &QAction::triggered, this, &ccViewer::doActionDisplayShortcuts);
 
-	//Additional shortcuts
+	// Additional shortcuts
 	{
 		QShortcut* plusKey = new QShortcut(QKeySequence(tr("+", "Zoom in")), this);
-		connect(plusKey, &QShortcut::activated, [this]() { m_glWindow->onWheelEvent(8.0); });
+		connect(plusKey, &QShortcut::activated, [this]()
+		        { m_glWindow->onWheelEvent(8.0); });
 
 		QShortcut* minusKey = new QShortcut(QKeySequence(tr("=", "Zoom out")), this);
-		connect(minusKey, &QShortcut::activated, [this]() { m_glWindow->onWheelEvent(-8.0); });
+		connect(minusKey, &QShortcut::activated, [this]()
+		        { m_glWindow->onWheelEvent(-8.0); });
 	}
 
 	loadPlugins();
@@ -195,7 +197,7 @@ ccViewer::~ccViewer()
 	if (currentRoot)
 	{
 		m_glWindow->setSceneDB(nullptr);
-		//m_glWindow->redraw();
+		// m_glWindow->redraw();
 		delete currentRoot;
 	}
 }
@@ -275,7 +277,7 @@ void ccViewer::doEnableGLFilter()
 		return;
 	}
 
-	ccGLPluginInterface	*plugin = action->data().value<ccGLPluginInterface *>();
+	ccGLPluginInterface* plugin = action->data().value<ccGLPluginInterface*>();
 	if (plugin == nullptr)
 	{
 		return;
@@ -320,7 +322,7 @@ void ccViewer::doActionDeleteSelectedEntity()
 		{
 			if (obj->getParent())
 			{
-				obj->getParent()->addDependency(obj,ccHObject::DP_DELETE_OTHER); //we force deletion!
+				obj->getParent()->addDependency(obj, ccHObject::DP_DELETE_OTHER); // we force deletion!
 				obj->getParent()->removeChild(obj);
 			}
 			else
@@ -379,18 +381,18 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 		}
 
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(toSelect);
-		bool hasSF = (cloud ? cloud->hasScalarFields() : false);
+		bool          hasSF = (cloud ? cloud->hasScalarFields() : false);
 		ui.actionShowScalarField->setEnabled(hasSF);
 		ui.actionShowScalarField->setChecked(toSelect->sfShown());
 		ui.actionShowColorRamp->setEnabled(hasSF);
 		ui.actionShowColorRamp->setChecked(cloud ? cloud->sfColorScaleShown() && cloud->sfShown() : false);
 
 		unsigned sfCount = (cloud ? cloud->getNumberOfScalarFields() : 0);
-		ui.menuSelectSF->setEnabled(hasSF && sfCount>1);
+		ui.menuSelectSF->setEnabled(hasSF && sfCount > 1);
 		if (hasSF && sfCount > 1)
 		{
 			int currentSFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
-			//ui.menuSelectSF->clear();
+			// ui.menuSelectSF->clear();
 			for (unsigned i = 0; i < sfCount; ++i)
 			{
 				QAction* action = ui.menuSelectSF->addAction(QString::fromStdString(cloud->getScalarFieldName(i)));
@@ -419,7 +421,7 @@ void ccViewer::selectEntity(ccHObject* toSelect)
 bool ccViewer::checkForLoadedEntities()
 {
 	bool loadedEntities = true;
-	m_glWindow->displayNewMessage(QString(), ccGLWindowInterface::SCREEN_CENTER_MESSAGE); //clear (any) message in the middle area
+	m_glWindow->displayNewMessage(QString(), ccGLWindowInterface::SCREEN_CENTER_MESSAGE); // clear (any) message in the middle area
 
 	if (!m_glWindow->getSceneDB())
 	{
@@ -430,7 +432,7 @@ bool ccViewer::checkForLoadedEntities()
 	if (m_glWindow->getDisplayParameters().displayCross != loadedEntities)
 	{
 		ccGui::ParamStruct params = m_glWindow->getDisplayParameters();
-		params.displayCross = loadedEntities;
+		params.displayCross       = loadedEntities;
 		m_glWindow->setDisplayParameters(params);
 	}
 
@@ -446,21 +448,21 @@ void ccViewer::updateDisplay()
 
 void ccViewer::updateGLFrameGradient()
 {
-	//display parameters
+	// display parameters
 	static const ccColor::Rgbub s_black(0, 0, 0);
 	static const ccColor::Rgbub s_white(255, 255, 255);
-	bool stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
-	const ccColor::Rgbub& bkgCol = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
-	const ccColor::Rgbub& forCol = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
+	bool                        stereoModeEnabled = m_glWindow->stereoModeIsEnabled();
+	const ccColor::Rgbub&       bkgCol            = stereoModeEnabled ? s_black : m_glWindow->getDisplayParameters().backgroundCol;
+	const ccColor::Rgbub&       forCol            = stereoModeEnabled ? s_white : m_glWindow->getDisplayParameters().pointsDefaultCol;
 
 	QString styleSheet = QString("QFrame#GLframe{border: 2px solid white; border-radius: 10px; background: qlineargradient(x1:0, y1:0, x2:0, y2:1,stop:0 rgb(%1,%2,%3), stop:1 rgb(%4,%5,%6));}")
-								.arg(bkgCol.r)
-								.arg(bkgCol.g)
-								.arg(bkgCol.b)
-								.arg(255-forCol.r)
-								.arg(255-forCol.g)
-								.arg(255-forCol.b);
-	
+	                         .arg(bkgCol.r)
+	                         .arg(bkgCol.g)
+	                         .arg(bkgCol.b)
+	                         .arg(255 - forCol.r)
+	                         .arg(255 - forCol.g)
+	                         .arg(255 - forCol.b);
+
 	ui.GLframe->setStyleSheet(styleSheet);
 }
 
@@ -480,8 +482,8 @@ ccHObject* ccViewer::addToDB(QStringList filenames)
 
 	FileIOFilter::LoadParameters parameters;
 	parameters.alwaysDisplayLoadDialog = false;
-	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
-	parameters.parentWidget = this;
+	parameters.shiftHandlingMode       = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+	parameters.parentWidget            = this;
 
 	const ccOptions& options = ccOptions::Instance();
 	FileIOFilter::ResetSesionCounter();
@@ -490,14 +492,14 @@ ccHObject* ccViewer::addToDB(QStringList filenames)
 
 	for (int i = 0; i < filenames.size(); ++i)
 	{
-		CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
+		CC_FILE_ERROR result   = CC_FERR_NO_ERROR;
+		ccHObject*    newGroup = FileIOFilter::LoadFromFile(filenames[i], parameters, result);
 
 		if (newGroup)
 		{
 			if (!options.normalsDisplayedByDefault)
 			{
-				//disable the normals on all loaded clouds!
+				// disable the normals on all loaded clouds!
 				ccHObject::Container clouds;
 				newGroup->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 				for (ccHObject* cloud : clouds)
@@ -533,7 +535,7 @@ ccHObject* ccViewer::addToDB(QStringList filenames)
 						{
 							mesh->showSF(true);
 							scaleAlreadyDisplayed = true;
-							ccPointCloud* pc = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
+							ccPointCloud* pc      = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
 							pc->showSFColorsScale(true);
 						}
 					}
@@ -548,7 +550,7 @@ ccHObject* ccViewer::addToDB(QStringList filenames)
 
 		if (result == CC_FERR_CANCELED_BY_USER)
 		{
-			//stop importing the file if the user has cancelled the current process!
+			// stop importing the file if the user has cancelled the current process!
 			break;
 		}
 	}
@@ -558,11 +560,11 @@ ccHObject* ccViewer::addToDB(QStringList filenames)
 	return firstLoadedEntity;
 }
 
-void ccViewer::addToDB(	ccHObject* entity,
-						bool updateZoom/*=false*/,
-						bool autoExpandDBTree/*=true*/,
-						bool checkDimensions/*=false*/,
-						bool autoRedraw/*=true*/)
+void ccViewer::addToDB(ccHObject* entity,
+                       bool       updateZoom /*=false*/,
+                       bool       autoExpandDBTree /*=true*/,
+                       bool       checkDimensions /*=false*/,
+                       bool       autoRedraw /*=true*/)
 {
 	assert(entity && m_glWindow);
 
@@ -571,7 +573,7 @@ void ccViewer::addToDB(	ccHObject* entity,
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
 	{
-		//already a pure 'root'
+		// already a pure 'root'
 		if (currentRoot->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			currentRoot->addChild(entity);
@@ -592,7 +594,7 @@ void ccViewer::addToDB(	ccHObject* entity,
 	checkForLoadedEntities();
 }
 
-void ccViewer::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
+void ccViewer::removeFromDB(ccHObject* obj, bool autoDelete /*=true*/)
 {
 	ccHObject* currentRoot = m_glWindow->getSceneDB();
 	if (currentRoot)
@@ -637,10 +639,10 @@ void ccViewer::doActionEditCamera()
 
 void ccViewer::reflectPerspectiveState()
 {
-	if ( m_glWindow == nullptr )
+	if (m_glWindow == nullptr)
 		return;
-	
-	bool objectCentered = false;
+
+	bool objectCentered     = false;
 	bool perspectiveEnabled = m_glWindow->getPerspectiveState(objectCentered);
 
 	ui.actionSetOrthoView->setChecked(!perspectiveEnabled);
@@ -650,11 +652,11 @@ void ccViewer::reflectPerspectiveState()
 
 bool ccViewer::checkStereoMode()
 {
-	if (	m_glWindow
-		&&	m_glWindow->getViewportParameters().perspectiveView
-		&&	m_glWindow->stereoModeIsEnabled())
+	if (m_glWindow
+	    && m_glWindow->getViewportParameters().perspectiveView
+	    && m_glWindow->stereoModeIsEnabled())
 	{
-		if (QMessageBox::question(this,"Stereo mode", "Stereo-mode only works in perspective mode. Do you want to enable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::question(this, "Stereo mode", "Stereo-mode only works in perspective mode. Do you want to enable it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 		{
 			return false;
 		}
@@ -673,7 +675,7 @@ void ccViewer::setOrthoView()
 	{
 		if (!checkStereoMode())
 			return;
-		m_glWindow->setPerspectiveState(false,true);
+		m_glWindow->setPerspectiveState(false, true);
 		m_glWindow->redraw();
 	}
 	reflectPerspectiveState();
@@ -693,7 +695,7 @@ void ccViewer::setViewerPerspectiveView()
 {
 	if (m_glWindow)
 	{
-		m_glWindow->setPerspectiveState(true,false);
+		m_glWindow->setPerspectiveState(true, false);
 		m_glWindow->redraw();
 	}
 	reflectPerspectiveState();
@@ -701,9 +703,9 @@ void ccViewer::setViewerPerspectiveView()
 
 void ccViewer::reflectPivotVisibilityState()
 {
-	if ( m_glWindow == nullptr )
+	if (m_glWindow == nullptr)
 		return;
-	
+
 	ccGLWindowInterface::PivotVisibility vis = m_glWindow->getPivotVisibility();
 
 	ui.actionSetPivotAlwaysOn->setChecked(vis == ccGLWindowInterface::PIVOT_ALWAYS_SHOW);
@@ -743,9 +745,9 @@ void ccViewer::setPivotOff()
 
 void ccViewer::reflectLightsState()
 {
-	if ( m_glWindow == nullptr )
+	if (m_glWindow == nullptr)
 		return;
-	
+
 	ui.actionToggleSunLight->blockSignals(true);
 	ui.actionToggleCustomLight->blockSignals(true);
 
@@ -778,28 +780,28 @@ void ccViewer::toggleStereoMode(bool state)
 	bool isActive = m_glWindow->stereoModeIsEnabled();
 	if (isActive == state)
 	{
-		//nothing to do
+		// nothing to do
 		return;
 	}
 
 	if (isActive)
 	{
 		m_glWindow->disableStereoMode();
-		if (	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+		if (m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+		    || m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 		{
-			//disable full screen
+			// disable full screen
 			ui.actionFullScreen->setChecked(false);
 		}
 	}
 	else
 	{
-		//display a parameters dialog
+		// display a parameters dialog
 		ccStereoModeDlg smDlg(this);
 		smDlg.setParameters(m_glWindow->getStereoParams());
 		if (!smDlg.exec())
 		{
-			//cancelled by the user
+			// cancelled by the user
 			ui.actionEnableStereo->blockSignals(true);
 			ui.actionEnableStereo->setChecked(false);
 			ui.actionEnableStereo->blockSignals(false);
@@ -810,30 +812,30 @@ void ccViewer::toggleStereoMode(bool state)
 		if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
 		{
 			ccLog::Error(tr("It seems your graphic card doesn't support Quad Buffered Stereo rendering"));
-			//activation of the stereo mode failed: cancel selection
+			// activation of the stereo mode failed: cancel selection
 			ui.actionEnableStereo->blockSignals(true);
 			ui.actionEnableStereo->setChecked(false);
 			ui.actionEnableStereo->blockSignals(false);
 			return;
 		}
 
-		//force perspective state!
+		// force perspective state!
 		if (!m_glWindow->getViewportParameters().perspectiveView)
 		{
 			m_glWindow->setPerspectiveState(true, true);
 			reflectPerspectiveState();
 		}
 
-		if (	params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			||	params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+		if (params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+		    || params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
 		{
-			//force full screen
+			// force full screen
 			ui.actionFullScreen->setChecked(true);
 		}
 
 		if (!m_glWindow->enableStereoMode(params))
 		{
-			//activation of the stereo mode failed: cancel selection
+			// activation of the stereo mode failed: cancel selection
 			ui.actionEnableStereo->blockSignals(true);
 			ui.actionEnableStereo->setChecked(false);
 			ui.actionEnableStereo->blockSignals(false);
@@ -847,12 +849,11 @@ void ccViewer::toggleFullScreen(bool state)
 {
 	if (m_glWindow)
 	{
-		if (	m_glWindow->stereoModeIsEnabled()
-			&&	(	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-				||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
-			)
+		if (m_glWindow->stereoModeIsEnabled()
+		    && (m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+		        || m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY))
 		{
-			//auto disable stereo mode as NVidia Vision only works in full screen mode!
+			// auto disable stereo mode as NVidia Vision only works in full screen mode!
 			ui.actionEnableStereo->setChecked(false);
 		}
 
@@ -866,14 +867,13 @@ void ccViewer::onExclusiveFullScreenToggled(bool state)
 	ui.actionFullScreen->setChecked(m_glWindow ? m_glWindow->exclusiveFullScreen() : false);
 	ui.actionFullScreen->blockSignals(false);
 
-	if (	!state
-		&&	m_glWindow
-		&&	m_glWindow->stereoModeIsEnabled()
-		&&	(	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			||	m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
-		)
+	if (!state
+	    && m_glWindow
+	    && m_glWindow->stereoModeIsEnabled()
+	    && (m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
+	        || m_glWindow->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY))
 	{
-		//auto disable stereo mode as NVidia Vision only works in full screen mode!
+		// auto disable stereo mode as NVidia Vision only works in full screen mode!
 		ui.actionEnableStereo->setChecked(false);
 	}
 }
@@ -884,7 +884,7 @@ void ccViewer::toggleRotationAboutVertAxis()
 		return;
 
 	bool wasLocked = m_glWindow->isRotationAxisLocked();
-	bool isLocked = !wasLocked;
+	bool isLocked  = !wasLocked;
 
 	m_glWindow->lockRotationAxis(isLocked, CCVector3d(0.0, 0.0, 1.0));
 
@@ -1045,7 +1045,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 	if (!action)
 		return;
 
-	//disable all other actions
+	// disable all other actions
 	const QObjectList& children = ui.menuSelectSF->children();
 	for (int i = 0; i < children.size(); ++i)
 	{
@@ -1059,7 +1059,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 	if (sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 	{
 		cloud->setCurrentDisplayedScalarField(sfIndex);
-		//when 'setCurrentDisplayedScalarField' is called, scalar field is automatically shown!
+		// when 'setCurrentDisplayedScalarField' is called, scalar field is automatically shown!
 		ui.actionShowScalarField->blockSignals(true);
 		ui.actionShowScalarField->setChecked(true);
 		ui.actionShowScalarField->blockSignals(false);
@@ -1091,7 +1091,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccApp->versionLongStr( true )));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccApp->versionLongStr(true)));
 
 	aboutDialog.exec();
 }
@@ -1103,8 +1103,8 @@ void ccViewer::release3DMouse()
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
 	{
-		m_3dMouseInput->disconnect(); //disconnect from the driver
-		disconnect(m_3dMouseInput); //disconnect from Qt ;)
+		m_3dMouseInput->disconnect(); // disconnect from the driver
+		disconnect(m_3dMouseInput);   // disconnect from Qt ;)
 
 		delete m_3dMouseInput;
 		m_3dMouseInput = 0;
@@ -1121,20 +1121,20 @@ void ccViewer::enable3DMouse(bool state)
 	if (state)
 	{
 		m_3dMouseInput = new Mouse3DInput(this);
-		if (m_3dMouseInput->connect(this,"ccViewer"))
+		if (m_3dMouseInput->connect(this, "ccViewer"))
 		{
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigMove3d,				this,	&ccViewer::on3DMouseMove);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigReleased,			this,	&ccViewer::on3DMouseReleased);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown,	this,	&ccViewer::on3DMouseKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp,		this,	&ccViewer::on3DMouseKeyUp);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this,	&ccViewer::on3DMouseCMDKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp,	this,	&ccViewer::on3DMouseCMDKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigMove3d, this, &ccViewer::on3DMouseMove);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigReleased, this, &ccViewer::on3DMouseReleased);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &ccViewer::on3DMouseKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &ccViewer::on3DMouseKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &ccViewer::on3DMouseCMDKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &ccViewer::on3DMouseCMDKeyUp);
 		}
 		else
 		{
 			delete m_3dMouseInput;
 			m_3dMouseInput = 0;
-			
+
 			ccLog::Warning("[3D Mouse] No device found");
 			state = false;
 		}
@@ -1154,7 +1154,7 @@ void ccViewer::enable3DMouse(bool state)
 
 void ccViewer::on3DMouseKeyUp(int)
 {
-	//nothing right now
+	// nothing right now
 }
 
 // ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
@@ -1162,19 +1162,19 @@ void ccViewer::on3DMouseKeyDown(int key)
 {
 #ifdef CC_3DXWARE_SUPPORT
 
-	switch(key)
+	switch (key)
 	{
 	case Mouse3DInput::V3DK_MENU:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_FIT:
-		{
-			if (m_selectedObject)
-				zoomOnSelectedEntity();
-			else
-				setGlobalZoom();
-		}
-		break;
+	{
+		if (m_selectedObject)
+			zoomOnSelectedEntity();
+		else
+			setGlobalZoom();
+	}
+	break;
 	case Mouse3DInput::V3DK_TOP:
 		setTopView();
 		break;
@@ -1194,10 +1194,10 @@ void ccViewer::on3DMouseKeyDown(int key)
 		setBackView();
 		break;
 	case Mouse3DInput::V3DK_ROTATE:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_PANZOOM:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_ISO1:
 		setIsoView1();
@@ -1206,38 +1206,38 @@ void ccViewer::on3DMouseKeyDown(int key)
 		setIsoView2();
 		break;
 	case Mouse3DInput::V3DK_PLUS:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_MINUS:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_DOMINANT:
-		//should be handled by the driver now!
+		// should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_CW:
 	case Mouse3DInput::V3DK_CCW:
+	{
+		if (m_glWindow)
 		{
-			if (m_glWindow)
-			{
-				CCVector3d axis(0,0,-1);
-				CCVector3d trans(0,0,0);
-				ccGLMatrixd mat;
-				double angle = M_PI/2;
-				if (key == Mouse3DInput::V3DK_CCW)
-					angle = -angle;
-				mat.initFromParameters(angle,axis,trans);
-				m_glWindow->rotateBaseViewMat(mat);
-				m_glWindow->redraw();
-			}
+			CCVector3d  axis(0, 0, -1);
+			CCVector3d  trans(0, 0, 0);
+			ccGLMatrixd mat;
+			double      angle = M_PI / 2;
+			if (key == Mouse3DInput::V3DK_CCW)
+				angle = -angle;
+			mat.initFromParameters(angle, axis, trans);
+			m_glWindow->rotateBaseViewMat(mat);
+			m_glWindow->redraw();
 		}
-		break;
+	}
+	break;
 	case Mouse3DInput::V3DK_ESC:
 	case Mouse3DInput::V3DK_ALT:
 	case Mouse3DInput::V3DK_SHIFT:
 	case Mouse3DInput::V3DK_CTRL:
 	default:
 		ccLog::Warning("[3D mouse] This button is not handled (yet)");
-		//TODO
+		// TODO
 		break;
 	}
 
@@ -1245,7 +1245,7 @@ void ccViewer::on3DMouseKeyDown(int key)
 }
 void ccViewer::on3DMouseCMDKeyUp(int cmd)
 {
-	//nothing right now
+	// nothing right now
 }
 
 void ccViewer::on3DMouseCMDKeyDown(int cmd)
@@ -1253,7 +1253,7 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 #ifdef CC_3DXWARE_SUPPORT
 	switch (cmd)
 	{
-		//ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
+		// ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
 	case Mouse3DInput::V3DCMD_VIEW_FIT:
 	{
 		if (m_selectedObject)
@@ -1291,10 +1291,10 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 	{
 		if (m_glWindow)
 		{
-			CCVector3d axis(0, 0, -1);
-			CCVector3d trans(0, 0, 0);
+			CCVector3d  axis(0, 0, -1);
+			CCVector3d  trans(0, 0, 0);
 			ccGLMatrixd mat;
-			double angle = M_PI / 2;
+			double      angle = M_PI / 2;
 			if (cmd == Mouse3DInput::V3DCMD_VIEW_ROLLCCW)
 				angle = -angle;
 			mat.initFromParameters(angle, axis, trans);
@@ -1308,10 +1308,10 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 	{
 		if (m_glWindow)
 		{
-			CCVector3d axis(0, 1, 0);
-			CCVector3d trans(0, 0, 0);
+			CCVector3d  axis(0, 1, 0);
+			CCVector3d  trans(0, 0, 0);
 			ccGLMatrixd mat;
-			double angle = M_PI / 2;
+			double      angle = M_PI / 2;
 			if (cmd == Mouse3DInput::V3DCMD_VIEW_SPINCCW)
 				angle = -angle;
 			mat.initFromParameters(angle, axis, trans);
@@ -1324,10 +1324,10 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 	{
 		if (m_glWindow)
 		{
-			CCVector3d axis(1, 0, 0);
-			CCVector3d trans(0, 0, 0);
+			CCVector3d  axis(1, 0, 0);
+			CCVector3d  trans(0, 0, 0);
 			ccGLMatrixd mat;
-			double angle = M_PI / 2;
+			double      angle = M_PI / 2;
 			if (cmd == Mouse3DInput::V3DCMD_VIEW_TILTCCW)
 				angle = -angle;
 			mat.initFromParameters(angle, axis, trans);
@@ -1338,7 +1338,7 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 	break;
 	default:
 		ccLog::Warning("[3D mouse] This button is not handled (yet)");
-		//TODO
+		// TODO
 		break;
 	}
 #endif
@@ -1354,10 +1354,10 @@ void ccViewer::on3DMouseMove(std::vector<float>& vec)
 
 void ccViewer::on3DMouseReleased()
 {
-	//active window?
+	// active window?
 	if (m_glWindow && m_glWindow->getPivotVisibility() == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE)
 	{
-		//we have to hide the pivot symbol!
+		// we have to hide the pivot symbol!
 		m_glWindow->showPivotSymbol(false);
 		m_glWindow->redraw();
 	}
@@ -1379,12 +1379,12 @@ ccHObject* ccViewer::dbRootObject()
 	return m_glWindow->getSceneDB();
 }
 
-void ccViewer::redrawAll(bool only2D/*=false*/)
+void ccViewer::redrawAll(bool only2D /*=false*/)
 {
 	m_glWindow->redraw(only2D);
 }
 
-void ccViewer::refreshAll(bool only2D/*=false*/)
+void ccViewer::refreshAll(bool only2D /*=false*/)
 {
 	m_glWindow->refresh(only2D);
 }

@@ -1,36 +1,36 @@
 #include "ccCommandLineParser.h"
 
-//Local
+// Local
 #include "ccCommandCrossSection.h"
 #include "ccCommandLineCommands.h"
 #include "ccCommandRaster.h"
 #include "ccPluginInterface.h"
 
-//qCC_db
+// qCC_db
 #include <ccGenericMesh.h>
 #include <ccHObjectCaster.h>
 #include <ccProgressDialog.h>
 
-//qCC_io
+// qCC_io
 #include <AsciiFilter.h>
 #include <BinFilter.h>
 
-//qCC
+// qCC
 #include "ccConsole.h"
 
 #include <ui_commandLineDlg.h>
 
-//Qt
+// Qt
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMessageBox>
 
-//system
+// system
 #include <unordered_set>
 
-//commands
-constexpr char COMMAND_HELP[]			= "HELP";
-constexpr char COMMAND_SILENT_MODE[]	= "SILENT";
+// commands
+constexpr char COMMAND_HELP[]        = "HELP";
+constexpr char COMMAND_SILENT_MODE[] = "SILENT";
 
 /*****************************************************/
 /*************** ccCommandLineParser *****************/
@@ -88,19 +88,19 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		return EXIT_SUCCESS;
 	}
 
-	//load arguments
+	// load arguments
 	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
-	
+
 	parser->registerBuiltInCommands();
 
 	ccConsole::SetRefreshCycle(200);
 
 	// 'massage' the arguments to properly handle single quotes
 	{
-		bool insideSingleQuoteSection = false;
-		QString buffer;
-		static const QChar SingleQuote{ '\'' };
-		for (int currentArgIndex = 1; currentArgIndex < arguments.size(); ++currentArgIndex) 	// start from 1, as the first argument is always the executable file
+		bool               insideSingleQuoteSection = false;
+		QString            buffer;
+		static const QChar SingleQuote{'\''};
+		for (int currentArgIndex = 1; currentArgIndex < arguments.size(); ++currentArgIndex) // start from 1, as the first argument is always the executable file
 		{
 			QString arg = arguments[currentArgIndex];
 			// argument starts with a single quote
@@ -114,7 +114,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 				{
 					// we'll collect the next pieces to get the full argument
 					insideSingleQuoteSection = true;
-					buffer = arg.mid(1); // remove the single quote
+					buffer                   = arg.mid(1); // remove the single quote
 				}
 			}
 			else if (insideSingleQuoteSection)
@@ -123,7 +123,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 				if (arg.endsWith(SingleQuote))
 				{
 					insideSingleQuoteSection = false;
-					arg = buffer.left(buffer.length() - 1); // remove the single quote
+					arg                      = buffer.left(buffer.length() - 1); // remove the single quote
 				}
 			}
 
@@ -142,7 +142,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		}
 	}
 
-	//specific command: silent mode (will prevent the console dialog from appearing!
+	// specific command: silent mode (will prevent the console dialog from appearing!
 	if (ccCommandLineInterface::IsCommand(parser->arguments().front(), COMMAND_SILENT_MODE))
 	{
 		parser->arguments().pop_front();
@@ -152,23 +152,23 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	QScopedPointer<QDialog> consoleDlg(nullptr);
 	if (!parser->silentMode())
 	{
-		//show console
+		// show console
 		consoleDlg.reset(new QDialog);
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(consoleDlg.data());
 		consoleDlg->show();
 		ccConsole::Init(commandLineDlg.consoleWidget, consoleDlg.data());
 		parser->fileLoadingParams().parentWidget = consoleDlg.data();
-		QApplication::processEvents(); //Get rid of the spinner
+		QApplication::processEvents(); // Get rid of the spinner
 	}
 	else
 	{
-		//allows ccLog/ccConsole or ccCommandLineParser (print, warning, error) to output to the console 
-		ccConsole::Init(nullptr, nullptr, nullptr, true); 
+		// allows ccLog/ccConsole or ccCommandLineParser (print, warning, error) to output to the console
+		ccConsole::Init(nullptr, nullptr, nullptr, true);
 	}
 
-	//load the plugins commands
-	for ( ccPluginInterface *plugin : plugins )
+	// load the plugins commands
+	for (ccPluginInterface* plugin : plugins)
 	{
 		if (!plugin)
 		{
@@ -179,7 +179,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		plugin->registerCommands(parser.data());
 	}
 
-	//parse input
+	// parse input
 	int result = parser->start(consoleDlg.data());
 
 	if (!parser->silentMode())
@@ -190,7 +190,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 			QMessageBox::warning(consoleDlg.data(), "Processed finished", "An error occurred! Check console");
 	}
 
-	//release the parser before the console (as its dialogs may be chidren of the console)
+	// release the parser before the console (as its dialogs may be chidren of the console)
 	parser->cleanup();
 	parser.reset();
 
@@ -200,16 +200,16 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 }
 
 ccCommandLineParser::ccCommandLineParser()
-	: ccCommandLineInterface()
-	, m_cloudExportFormat(BinFilter::GetFileFilter())
-	, m_cloudExportExt(BinFilter::GetDefaultExtension())
-	, m_meshExportFormat(BinFilter::GetFileFilter())
-	, m_meshExportExt(BinFilter::GetDefaultExtension())
-	, m_hierarchyExportFormat(BinFilter::GetFileFilter())
-	, m_hierarchyExportExt(BinFilter::GetDefaultExtension())
-	, m_orphans("orphans")
-	, m_progressDialog(nullptr)
-	, m_parentWidget(nullptr)
+    : ccCommandLineInterface()
+    , m_cloudExportFormat(BinFilter::GetFileFilter())
+    , m_cloudExportExt(BinFilter::GetDefaultExtension())
+    , m_meshExportFormat(BinFilter::GetFileFilter())
+    , m_meshExportExt(BinFilter::GetDefaultExtension())
+    , m_hierarchyExportFormat(BinFilter::GetFileFilter())
+    , m_hierarchyExportExt(BinFilter::GetDefaultExtension())
+    , m_orphans("orphans")
+    , m_progressDialog(nullptr)
+    , m_parentWidget(nullptr)
 {
 }
 
@@ -242,13 +242,13 @@ bool ccCommandLineParser::registerCommand(Command::Shared command)
 	return true;
 }
 
-QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
-												QString extension/*=QString()*/,
-												QString suffix/*=QString()*/,
-												QString* baseOutputFilename/*=nullptr*/,
-												bool forceNoTimestamp/*=false*/) const
+QString ccCommandLineParser::getExportFilename(const CLEntityDesc& entityDesc,
+                                               QString             extension /*=QString()*/,
+                                               QString             suffix /*=QString()*/,
+                                               QString*            baseOutputFilename /*=nullptr*/,
+                                               bool                forceNoTimestamp /*=false*/) const
 {
-	//fetch the real entity
+	// fetch the real entity
 	const ccHObject* entity = entityDesc.getEntity();
 	if (!entity)
 	{
@@ -257,7 +257,7 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 		return QString();
 	}
 
-	//sub-item?
+	// sub-item?
 	if (entityDesc.indexInFile >= 0)
 	{
 		if (suffix.isEmpty())
@@ -296,14 +296,14 @@ QString ccCommandLineParser::getExportFilename(	const CLEntityDesc& entityDesc,
 	return outputFilename;
 }
 
-QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
-											const QString& suffix/*=QString()*/,
-											QString* baseOutputFilename/*=nullptr*/,
-											ccCommandLineInterface::ExportOptions options/*ExportOptiopn::NoOption*/)
+QString ccCommandLineParser::exportEntity(CLEntityDesc&                         entityDesc,
+                                          const QString&                        suffix /*=QString()*/,
+                                          QString*                              baseOutputFilename /*=nullptr*/,
+                                          ccCommandLineInterface::ExportOptions options /*ExportOptiopn::NoOption*/)
 {
 	print("[SAVING]");
 
-	//fetch the real entity
+	// fetch the real entity
 	ccHObject* entity = entityDesc.getEntity();
 	if (!entity)
 	{
@@ -312,44 +312,46 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	}
 
 	bool anyForced = options.testFlag(ExportOption::ForceCloud) | options.testFlag(ExportOption::ForceHierarchy) | options.testFlag(ExportOption::ForceMesh);
-	//specific case: clouds
+	// specific case: clouds
 	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD) || entityDesc.getCLEntityType() == CL_ENTITY_TYPE::CLOUD;
 
-	//specific case: mesh
+	// specific case: mesh
 	bool isMesh = entity->isKindOf(CC_TYPES::MESH) || entityDesc.getCLEntityType() == CL_ENTITY_TYPE::MESH;
 
-	QString extension = isCloud ? m_cloudExportExt : isMesh ? m_meshExportExt : m_hierarchyExportExt;
-	QString format = isCloud ? m_cloudExportFormat : isMesh ? m_meshExportFormat : m_hierarchyExportFormat;
+	QString extension = isCloud ? m_cloudExportExt : isMesh ? m_meshExportExt
+	                                                        : m_hierarchyExportExt;
+	QString format    = isCloud ? m_cloudExportFormat : isMesh ? m_meshExportFormat
+	                                                           : m_hierarchyExportFormat;
 	if (anyForced)
 	{
 		if (options.testFlag(ExportOption::ForceCloud))
 		{
 			extension = m_cloudExportExt;
-			format = m_cloudExportFormat;
+			format    = m_cloudExportFormat;
 		}
 		if (options.testFlag(ExportOption::ForceMesh))
 		{
 			extension = m_meshExportExt;
-			format = m_meshExportFormat;
+			format    = m_meshExportFormat;
 		}
 		if (options.testFlag(ExportOption::ForceHierarchy))
 		{
 			extension = m_hierarchyExportExt;
-			format = m_hierarchyExportFormat;
+			format    = m_hierarchyExportFormat;
 		}
 	}
 
-	QString outputFilename = getExportFilename(	entityDesc,
-												extension,
-												suffix,
-												baseOutputFilename,
-												options.testFlag(ExportOption::ForceNoTimestamp) );
+	QString outputFilename = getExportFilename(entityDesc,
+	                                           extension,
+	                                           suffix,
+	                                           baseOutputFilename,
+	                                           options.testFlag(ExportOption::ForceNoTimestamp));
 	if (outputFilename.isEmpty())
 	{
 		return QString();
 	}
 
-	//update the entity name as well
+	// update the entity name as well
 	{
 		QString entName = entity->getName();
 		if (entName.isEmpty())
@@ -365,26 +367,26 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 		entity->setName(entName);
 	}
 
-	bool tempDependencyCreated = false;
-	ccGenericMesh* mesh = nullptr;
+	bool           tempDependencyCreated = false;
+	ccGenericMesh* mesh                  = nullptr;
 	if (entity->isKindOf(CC_TYPES::MESH) && m_meshExportFormat == BinFilter::GetFileFilter())
 	{
-		//in a BIN file we must save the vertices cloud as well if it's not a child of the mesh!
-		mesh = static_cast<ccGenericMesh*>(entity);
+		// in a BIN file we must save the vertices cloud as well if it's not a child of the mesh!
+		mesh                          = static_cast<ccGenericMesh*>(entity);
 		ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 		if (vertices && !mesh->isAncestorOf(vertices))
 		{
-			//we save the cloud first!
-			vertices->addChild(mesh, ccHObject::DP_NONE); //we simply add a fake dependency
-			entity = vertices;
+			// we save the cloud first!
+			vertices->addChild(mesh, ccHObject::DP_NONE); // we simply add a fake dependency
+			entity                = vertices;
 			tempDependencyCreated = true;
 		}
 	}
 
-	//save file
+	// save file
 	FileIOFilter::SaveParameters parameters;
 	{
-		//no dialog by default for command line mode!
+		// no dialog by default for command line mode!
 		parameters.alwaysDisplaySaveDialog = false;
 		if (!silentMode() && ccConsole::TheInstance())
 		{
@@ -396,11 +398,11 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	print("Output filename: " + outputFilename);
 #endif
 	CC_FILE_ERROR result = FileIOFilter::SaveToFile(entity,
-													outputFilename,
-													parameters,
-													format);
+	                                                outputFilename,
+	                                                parameters,
+	                                                format);
 
-	//restore input state!
+	// restore input state!
 	if (tempDependencyCreated)
 	{
 		if (mesh && entity)
@@ -416,16 +418,17 @@ QString ccCommandLineParser::exportEntity(	CLEntityDesc& entityDesc,
 	return (result != CC_FERR_NO_ERROR ? QString("Failed to save result in file '%1'").arg(outputFilename) : QString());
 }
 
-template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options,
-												const ccCommandLineParser& cmd,
-												std::vector<EntityDesc>& selectedEntities,
-												std::vector<EntityDesc>& unselectedEntities,
-												QString entityType)
+template <class EntityDesc>
+bool SelectEntities(ccCommandLineInterface::SelectEntitiesOptions options,
+                    const ccCommandLineParser&                    cmd,
+                    std::vector<EntityDesc>&                      selectedEntities,
+                    std::vector<EntityDesc>&                      unselectedEntities,
+                    QString                                       entityType)
 {
-	//early abort if no cloud found
+	// early abort if no cloud found
 	if (selectedEntities.empty() && unselectedEntities.empty())
 	{
-		//do not stop execution, just warn the user and return
+		// do not stop execution, just warn the user and return
 		cmd.warning(QObject::tr("\tNo %1 loaded. Load some with the -O command").arg(entityType));
 		return true;
 	}
@@ -437,30 +440,31 @@ template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEn
 
 	try
 	{
-		//store everthyng in the unselected vector
+		// store everthyng in the unselected vector
 		unselectedEntities.insert(unselectedEntities.end(), selectedEntities.begin(), selectedEntities.end());
 		selectedEntities.clear();
 
-		//sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
-		std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b) { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
+		// sort the unselected clouds by uniqueID (so as to restore the order in which they were loaded/created)
+		std::sort(unselectedEntities.begin(), unselectedEntities.end(), [](const EntityDesc& a, const EntityDesc& b)
+		          { return (a.getEntity()->getUniqueID() < b.getEntity()->getUniqueID()); });
 
-		//put elements to the front facing vector
+		// put elements to the front facing vector
 		unsigned index = 0;
 		assert(!unselectedEntities.empty()); // we have tested above that neither selectedEntities and unselectedEntities are both empty
 		size_t lastIndex = unselectedEntities.size() - 1;
 		for (typename std::vector<EntityDesc>::iterator it = unselectedEntities.begin(); it != unselectedEntities.end();)
 		{
 			QString nameToValidate = QObject::tr("%1/%2").arg(it->basename).arg(it->getEntity()->getName());
-			bool toBeSelected = false;
+			bool    toBeSelected   = false;
 			if (!options.reverse)
 			{
-				//first {n}
+				// first {n}
 				if (options.selectFirst && index < options.firstNr)
 				{
 					toBeSelected = true;
 				}
 
-				//last {n}
+				// last {n}
 				if (options.selectLast && index > lastIndex - options.lastNr)
 				{
 					toBeSelected = true;
@@ -468,41 +472,41 @@ template<class EntityDesc > bool SelectEntities(ccCommandLineInterface::SelectEn
 			}
 			else
 			{
-				//not first {n}
+				// not first {n}
 				if (options.selectFirst && index >= options.firstNr && !options.selectLast)
 				{
 					toBeSelected = true;
 				}
 
-				//not last {n}
+				// not last {n}
 				if (options.selectLast && index <= lastIndex - options.lastNr && !options.selectFirst)
 				{
 					toBeSelected = true;
 				}
 
-				//not first and not last
+				// not first and not last
 				if (options.selectFirst && options.selectLast && index >= options.firstNr && index <= lastIndex - options.lastNr)
 				{
 					toBeSelected = true;
 				}
 			}
 
-			//regex has higher priority than first/last overwrite
+			// regex has higher priority than first/last overwrite
 			if (options.selectRegex)
 			{
 				if (options.regex.indexIn(nameToValidate) > -1)
 				{
-					//regex matched
+					// regex matched
 					toBeSelected = !options.reverse;
 				}
 				else
 				{
-					//regex not matched
+					// regex not matched
 					toBeSelected = options.reverse;
 				}
 			}
 
-			//selectAll has higher priority than first/last/regex overwrite
+			// selectAll has higher priority than first/last/regex overwrite
 			if (options.selectAll)
 			{
 				toBeSelected = !options.reverse;
@@ -540,7 +544,7 @@ bool ccCommandLineParser::selectMeshes(const SelectEntitiesOptions& options)
 	return SelectEntities(options, *this, m_meshes, m_unselectedMeshes, "mesh");
 }
 
-void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
+void ccCommandLineParser::removeClouds(bool onlyLast /*=false*/)
 {
 	while (!m_clouds.empty())
 	{
@@ -552,7 +556,7 @@ void ccCommandLineParser::removeClouds(bool onlyLast/*=false*/)
 	}
 }
 
-void ccCommandLineParser::removeMeshes(bool onlyLast/*=false*/)
+void ccCommandLineParser::removeMeshes(bool onlyLast /*=false*/)
 {
 	while (!m_meshes.empty())
 	{
@@ -573,20 +577,20 @@ static bool s_globalShiftFirstTime = true;
 
 void ccCommandLineParser::setGlobalShiftOptions(const GlobalShiftOptions& globalShiftOptions)
 {
-	//default Global Shift handling parameters
-	m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+	// default Global Shift handling parameters
+	m_loadingParameters.shiftHandlingMode       = ccGlobalShiftManager::NO_DIALOG;
 	m_loadingParameters.coordinatesShiftEnabled = false;
-	m_loadingParameters.coordinatesShift = CCVector3d(0, 0, 0);
+	m_loadingParameters.coordinatesShift        = CCVector3d(0, 0, 0);
 
 	switch (globalShiftOptions.mode)
 	{
 	case GlobalShiftOptions::AUTO_GLOBAL_SHIFT:
-		//let CC handle the global shift automatically
+		// let CC handle the global shift automatically
 		m_loadingParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 		break;
 
 	case GlobalShiftOptions::FIRST_GLOBAL_SHIFT:
-		//use the first encountered global shift value (if any)
+		// use the first encountered global shift value (if any)
 		if (s_globalShiftFirstTime)
 		{
 			ccLog::Warning("Can't reuse the first Global Shift (no global shift set yet)");
@@ -595,18 +599,18 @@ void ccCommandLineParser::setGlobalShiftOptions(const GlobalShiftOptions& global
 		else
 		{
 			m_loadingParameters.coordinatesShiftEnabled = s_firstCoordinatesShiftEnabled;
-			m_loadingParameters.coordinatesShift = s_firstGlobalShift;
+			m_loadingParameters.coordinatesShift        = s_firstGlobalShift;
 		}
 		break;
 
 	case GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT:
-		//set the user defined shift vector as default shift information
+		// set the user defined shift vector as default shift information
 		m_loadingParameters.coordinatesShiftEnabled = true;
-		m_loadingParameters.coordinatesShift = globalShiftOptions.customGlobalShift;
+		m_loadingParameters.coordinatesShift        = globalShiftOptions.customGlobalShift;
 		break;
 
 	default:
-		//nothing to do
+		// nothing to do
 		break;
 	}
 }
@@ -619,8 +623,8 @@ void ccCommandLineParser::updateInteralGlobalShift(const GlobalShiftOptions& glo
 		{
 			// remember the first Global Shift parameters used
 			s_firstCoordinatesShiftEnabled = m_loadingParameters.coordinatesShiftEnabled;
-			s_firstGlobalShift = m_loadingParameters.coordinatesShift;
-			s_globalShiftFirstTime = false;
+			s_firstGlobalShift             = m_loadingParameters.coordinatesShift;
+			s_globalShiftFirstTime         = false;
 		}
 	}
 }
@@ -632,7 +636,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 	setGlobalShiftOptions(globalShiftOptions);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	ccHObject* db = nullptr;
+	ccHObject*    db     = nullptr;
 	if (filter)
 	{
 		db = FileIOFilter::LoadFromFile(filename, m_loadingParameters, filter, result);
@@ -644,17 +648,17 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 
 	if (!db)
 	{
-		return false/*cmd.error(QString("Failed to open file '%1'").arg(filename))*/; //Error message already issued
+		return false /*cmd.error(QString("Failed to open file '%1'").arg(filename))*/; // Error message already issued
 	}
 
 	updateInteralGlobalShift(globalShiftOptions);
 
 	std::unordered_set<unsigned> verticesIDs;
-	//first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
+	// first look for meshes inside loaded DB (so that we don't consider mesh vertices as clouds!)
 	{
 		ccHObject::Container meshes;
-		size_t count = 0;
-		//first look for all REAL meshes (so as to no consider sub-meshes)
+		size_t               count = 0;
+		// first look for all REAL meshes (so as to no consider sub-meshes)
 		if (db->filterChildren(meshes, true, CC_TYPES::MESH, true) != 0)
 		{
 			count += meshes.size();
@@ -682,7 +686,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 			}
 		}
 
-		//then look for the other meshes
+		// then look for the other meshes
 		meshes.clear();
 		if (db->filterChildren(meshes, true, CC_TYPES::MESH, false) != 0)
 		{
@@ -711,7 +715,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 		}
 	}
 
-	//now look for the remaining clouds inside loaded DB
+	// now look for the remaining clouds inside loaded DB
 	{
 		ccHObject::Container clouds;
 		db->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
@@ -724,7 +728,7 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 				pc->getParent()->detachChild(pc);
 			}
 
-			//if the cloud is a set of vertices, we ignore it!
+			// if the cloud is a set of vertices, we ignore it!
 			if (verticesIDs.find(pc->getUniqueID()) != verticesIDs.end())
 			{
 				m_orphans.addChild(pc);
@@ -741,13 +745,13 @@ bool ccCommandLineParser::importFile(QString filename, const GlobalShiftOptions&
 	return true;
 }
 
-bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=nullptr*/)
+bool ccCommandLineParser::saveClouds(QString suffix /*=QString()*/, bool allAtOnce /*=false*/, const QString* allAtOnceFileName /*=nullptr*/)
 {
-	//all-at-once: all clouds in a single file
+	// all-at-once: all clouds in a single file
 	if (allAtOnce)
 	{
-		FileIOFilter::Shared filter = FileIOFilter::GetFilter(m_cloudExportFormat, false);
-		bool multiple = false;
+		FileIOFilter::Shared filter   = FileIOFilter::GetFilter(m_cloudExportFormat, false);
+		bool                 multiple = false;
 		if (filter)
 		{
 			bool exclusive = true;
@@ -764,7 +768,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 				}
 			}
 
-			//save output
+			// save output
 			CLGroupDesc desc(&tempContainer, "AllClouds", m_clouds.front().path);
 			if (allAtOnceFileName)
 			{
@@ -780,15 +784,15 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 		else
 		{
 			error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
-			//will proceed with the standard way
+			// will proceed with the standard way
 		}
 	}
 
-	//standard way: one file per cloud
+	// standard way: one file per cloud
 	{
 		for (CLCloudDesc& desc : m_clouds)
 		{
-			//save output
+			// save output
 			QString errorStr = exportEntity(desc, suffix);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
@@ -798,13 +802,13 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/, bool allAtOnc
 	return true;
 }
 
-bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnce/*=false*/, const QString* allAtOnceFileName/*=nullptr*/)
+bool ccCommandLineParser::saveMeshes(QString suffix /*=QString()*/, bool allAtOnce /*=false*/, const QString* allAtOnceFileName /*=nullptr*/)
 {
-	//all-at-once: all meshes in a single file
+	// all-at-once: all meshes in a single file
 	if (allAtOnce)
 	{
-		FileIOFilter::Shared filter = FileIOFilter::GetFilter(m_meshExportFormat, false);
-		bool multiple = false;
+		FileIOFilter::Shared filter   = FileIOFilter::GetFilter(m_meshExportFormat, false);
+		bool                 multiple = false;
 		if (filter)
 		{
 			bool exclusive = true;
@@ -815,13 +819,13 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		{
 			ccHObject tempContainer("Meshes");
 			{
-				for (auto &mesh : m_meshes)
+				for (auto& mesh : m_meshes)
 				{
 					tempContainer.addChild(mesh.getEntity(), ccHObject::DP_NONE);
 				}
 			}
 
-			//save output
+			// save output
 			CLGroupDesc desc(&tempContainer, "AllMeshes", m_meshes.front().path);
 			if (allAtOnceFileName)
 			{
@@ -837,14 +841,14 @@ bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/, bool allAtOnc
 		else
 		{
 			error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
-			//will proceed with the standard way
+			// will proceed with the standard way
 		}
 	}
 
-	//standard way: one file per mesh
-	for (auto &mesh : m_meshes)
+	// standard way: one file per mesh
+	for (auto& mesh : m_meshes)
 	{
-		//save output
+		// save output
 		QString errorStr = exportEntity(mesh, suffix);
 		if (!errorStr.isEmpty())
 			return error(errorStr);
@@ -896,13 +900,13 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandColorLevels));
 	registerCommand(Command::Shared(new CommandC2MDist));
 	registerCommand(Command::Shared(new CommandC2CDist));
-    registerCommand(Command::Shared(new CommandCPS));
+	registerCommand(Command::Shared(new CommandCPS));
 	registerCommand(Command::Shared(new CommandStatTest));
 	registerCommand(Command::Shared(new CommandDelaunayTri));
 	registerCommand(Command::Shared(new CommandSFArithmetic));
 	registerCommand(Command::Shared(new CommandSFOperation));
-    registerCommand(Command::Shared(new CommandSFOperationSF));
-    registerCommand(Command::Shared(new CommandSFInterpolation));
+	registerCommand(Command::Shared(new CommandSFOperationSF));
+	registerCommand(Command::Shared(new CommandSFInterpolation));
 	registerCommand(Command::Shared(new CommandColorInterpolation));
 	registerCommand(Command::Shared(new CommandFilter));
 	registerCommand(Command::Shared(new CommandRenameEntities));
@@ -952,7 +956,7 @@ void ccCommandLineParser::cleanup()
 	removeMeshes();
 }
 
-int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
+int ccCommandLineParser::start(QDialog* parent /*=nullptr*/)
 {
 	if (m_arguments.empty())
 	{
@@ -961,13 +965,13 @@ int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 	}
 
 	m_parentWidget = parent;
-	//if (!m_silentMode)
+	// if (!m_silentMode)
 	//{
 	//	m_progressDialog = new ccProgressDialog(false, parent);
 	//	//m_progressDialog->setAttribute(Qt::WA_DeleteOnClose);
 	//	m_progressDialog->setAutoClose(false);
 	//	m_progressDialog->hide();
-	//}
+	// }
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -975,7 +979,7 @@ int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 	bool success = true;
 	while (success && !m_arguments.empty())
 	{
-		QApplication::processEvents();	//Without this the console is just a spinner until the end of all processing
+		QApplication::processEvents(); // Without this the console is just a spinner until the end of all processing
 		QString argument = m_arguments.takeFirst();
 
 		if (!argument.startsWith("-"))
@@ -996,7 +1000,7 @@ int ccCommandLineParser::start(QDialog* parent/*=nullptr*/)
 			success = m_commands[keyword]->process(*this);
 			printHigh(QString("[%2] finished in %1 s.").arg(eTimerSubProcess.elapsed() / 1.0e3, 0, 'f', 2).arg(processName));
 		}
-		//silent mode (i.e. no console)
+		// silent mode (i.e. no console)
 		else if (keyword == COMMAND_SILENT_MODE)
 		{
 			warning(QString("Misplaced command: '%1' (must be first)").arg(COMMAND_SILENT_MODE));

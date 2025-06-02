@@ -1,81 +1,82 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "LASFilter.h"
 
-//Local
+// Local
 #include "LASOpenDlg.h"
 
-//qCC_db
+// qCC_db
+#include "ccColorScalesManager.h"
+
+#include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
-#include <ccHObjectCaster.h>
-#include "ccColorScalesManager.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCPlatform.h>
 
-//Qt
+// Qt
 #include <QFileInfo>
-#include <QSharedPointer>
-#include <QInputDialog>
 #include <QFuture>
+#include <QInputDialog>
+#include <QSharedPointer>
 #include <QtConcurrent>
 
-//pdal
+// pdal
 #include <memory>
+#include <pdal/Dimension.hpp>
+#include <pdal/Filter.hpp>
+#include <pdal/Options.hpp>
 #include <pdal/PointTable.hpp>
 #include <pdal/PointView.hpp>
-#include <pdal/Options.hpp>
-#include <pdal/Dimension.hpp>
-#include <pdal/io/LasReader.hpp>
-#include <pdal/io/LasHeader.hpp>
-#include <pdal/io/LasWriter.hpp>
-#include <pdal/io/LasVLR.hpp>
-#include <pdal/io/BufferReader.hpp>
-#include <pdal/Filter.hpp>
 #include <pdal/filters/StreamCallbackFilter.hpp>
+#include <pdal/io/BufferReader.hpp>
+#include <pdal/io/LasHeader.hpp>
+#include <pdal/io/LasReader.hpp>
+#include <pdal/io/LasVLR.hpp>
+#include <pdal/io/LasWriter.hpp>
 
 Q_DECLARE_METATYPE(pdal::SpatialReference)
 
 using namespace pdal::Dimension;
 using namespace pdal;
 
-//Qt gui
+// Qt gui
 #include <ui_saveLASFileDlg.h>
 
-//System
-#include <string.h>
+// System
 #include <bitset>
+#include <string.h>
 
-static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; //DGM: added the '.nosave' suffix because this custom type can't be streamed properly
+static const char s_LAS_SRS_Key[] = "LAS.spatialReference.nosave"; // DGM: added the '.nosave' suffix because this custom type can't be streamed properly
 
 //! Custom ("Extra bytes") field (EVLR)
 struct ExtraLasField : LasField
 {
 	//! Default constructor
 	ExtraLasField(QString name, Id id, double defaultVal = 0.0, double min = 0.0, double max = -1.0)
-		: LasField(LAS_EXTRA, defaultVal, min, max)
-		, fieldName(SanitizeString(name))
-		, pdalId(id)
-		, scale(1.0)
-		, offset(0.0)
+	    : LasField(LAS_EXTRA, defaultVal, min, max)
+	    , fieldName(SanitizeString(name))
+	    , pdalId(id)
+	    , scale(1.0)
+	    , offset(0.0)
 	{
 		if (fieldName != name)
 		{
@@ -85,21 +86,25 @@ struct ExtraLasField : LasField
 
 	typedef QSharedPointer<ExtraLasField> Shared;
 
-	inline QString getName() const override { return fieldName; }
+	inline QString getName() const override
+	{
+		return fieldName;
+	}
 
 	QString fieldName;
-	Id pdalId;
-	double scale;
-	double offset;
+	Id      pdalId;
+	double  scale;
+	double  offset;
 };
 
 //! LAS Save dialog
-class LASSaveDlg : public QDialog, public Ui::SaveLASFileDialog
+class LASSaveDlg : public QDialog
+    , public Ui::SaveLASFileDialog
 {
-public:
+  public:
 	explicit LASSaveDlg(QWidget* parent = nullptr)
-		: QDialog(parent)
-		, Ui::SaveLASFileDialog()
+	    : QDialog(parent)
+	    , Ui::SaveLASFileDialog()
 	{
 		setupUi(this);
 		clearEVLRs();
@@ -112,13 +117,13 @@ public:
 		extraFieldGroupBox->setChecked(false);
 	}
 
-	void addEVLR(const QString &description)
+	void addEVLR(const QString& description)
 	{
 		QListWidgetItem* item = new QListWidgetItem(description);
 		evlrListWidget->addItem(item);
-		//auto select the entry
+		// auto select the entry
 		item->setSelected(true);
-		//auto enable the extraFieldGroupBox
+		// auto enable the extraFieldGroupBox
 		extraFieldGroupBox->setEnabled(true);
 		extraFieldGroupBox->setChecked(false);
 	}
@@ -133,17 +138,14 @@ public:
 	}
 };
 
-
 LASFilter::LASFilter()
-    : FileIOFilter( {
-                    "_PDAL LAS Filter",
-                    DEFAULT_PRIORITY,	// deprecated: lower priority
-                    QStringList{ "las", "laz" },
+    : FileIOFilter({"_PDAL LAS Filter",
+                    DEFAULT_PRIORITY, // deprecated: lower priority
+                    QStringList{"las", "laz"},
                     "las",
-                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
-                    QStringList{ "LAS cloud with PDAL (*.las *.laz)" },
-                    Import | Export
-                    } )
+                    QStringList{"LAS cloud with PDAL (*.las *.laz)"},
+                    QStringList{"LAS cloud with PDAL (*.las *.laz)"},
+                    Import | Export})
 {
 }
 
@@ -151,7 +153,7 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 {
 	if (type == static_cast<CC_CLASS_ENUM>(CC_TYPES::POINT_CLOUD))
 	{
-		multiple = false;
+		multiple  = false;
 		exclusive = true;
 		return true;
 	}
@@ -160,7 +162,7 @@ bool LASFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 
 //! Semi persistent save dialog
 QSharedPointer<LASSaveDlg> s_saveDlg(nullptr);
-pdal::Dimension::Id typeToId(LAS_FIELDS sfType, uint8_t pointFormat)
+pdal::Dimension::Id        typeToId(LAS_FIELDS sfType, uint8_t pointFormat)
 {
 	switch (sfType)
 	{
@@ -181,7 +183,7 @@ pdal::Dimension::Id typeToId(LAS_FIELDS sfType, uint8_t pointFormat)
 	case LAS_FIELDS::LAS_FLIGHT_LINE_EDGE:
 		return pdal::Dimension::Id::EdgeOfFlightLine;
 	case LAS_FIELDS::LAS_CLASSIFICATION:
-		return  pdal::Dimension::Id::Classification;
+		return pdal::Dimension::Id::Classification;
 	case LAS_FIELDS::LAS_SCAN_ANGLE_RANK:
 		return pdal::Dimension::Id::ScanAngleRank;
 	case LAS_FIELDS::LAS_USER_DATA:
@@ -198,16 +200,16 @@ pdal::Dimension::Id typeToId(LAS_FIELDS sfType, uint8_t pointFormat)
 		return pdal::Dimension::Id::GpsTime;
 	case LAS_FIELDS::LAS_EXTRA:
 		return pdal::Dimension::Id::Unknown;
-		//Sub fields
+		// Sub fields
 	case LAS_FIELDS::LAS_CLASSIF_VALUE:
 		return pdal::Dimension::Id::Classification;
 	case LAS_FIELDS::LAS_CLASSIF_SYNTHETIC:
 	case LAS_FIELDS::LAS_CLASSIF_KEYPOINT:
 	case LAS_FIELDS::LAS_CLASSIF_WITHHELD:
-			return pointFormat < 6 ? pdal::Dimension::Id::Classification : pdal::Dimension::Id::ClassFlags;
+		return pointFormat < 6 ? pdal::Dimension::Id::Classification : pdal::Dimension::Id::ClassFlags;
 	case LAS_FIELDS::LAS_CLASSIF_OVERLAP:
-		return pointFormat < 6 ? pdal::Dimension::Id::Unknown : pdal::Dimension::Id::ClassFlags; //only for point formats >= 6
-		//Invalid flag
+		return pointFormat < 6 ? pdal::Dimension::Id::Unknown : pdal::Dimension::Id::ClassFlags; // only for point formats >= 6
+		                                                                                         // Invalid flag
 	case LAS_FIELDS::LAS_INVALID:
 	default:
 		return pdal::Dimension::Id::Unknown;
@@ -230,15 +232,15 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	if (numberOfPoints == 0)
 	{
 		ccLog::Warning("[LAS] Cloud is empty!");
-		//return CC_FERR_NO_SAVE;
+		// return CC_FERR_NO_SAVE;
 	}
 
-	//colors
+	// colors
 	bool hasColors = theCloud->hasColors();
 
-	//standard las fields (as scalar fields)
+	// standard las fields (as scalar fields)
 	std::vector<LasField> fieldsToSave;
-	//extra las fields (as scalar fields)
+	// extra las fields (as scalar fields)
 	std::vector<ExtraLasField::Shared> extraFields;
 
 	uint8_t minPointFormat = 0;
@@ -252,10 +254,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
-			//find an equivalent in official LAS fields
+			// find an equivalent in official LAS fields
 			QString sfName = QString(sf->getName()).toUpper();
 
-			auto name_matches = [&sfName](const LasField &field) { return sfName == field.getName().toUpper(); };
+			auto name_matches = [&sfName](const LasField& field)
+			{ return sfName == field.getName().toUpper(); };
 			auto pos = std::find_if(fieldsToSave.begin(), fieldsToSave.end(), name_matches);
 			if (pos == fieldsToSave.end())
 			{
@@ -267,7 +270,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	bool hasClassification = false;
-	bool hasClassifFlags = false;
+	bool hasClassifFlags   = false;
 	for (const LasField& field : fieldsToSave)
 	{
 		switch (field.type)
@@ -294,16 +297,16 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			break;
 
 		default:
-			//nothing to do
+			// nothing to do
 			break;
 		}
 	}
 
-	//progress dialog
+	// progress dialog
 	QScopedPointer<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
 		pDlg->setMethodTitle(QObject::tr("Save LAS file"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
@@ -315,7 +318,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	{
 		if (theCloud->size() != 0)
 		{
-			//it can only be acceptable if the cloud is empty
+			// it can only be acceptable if the cloud is empty
 			//(yes, some people expect to save empty clouds!)
 			return CC_FERR_NO_SAVE;
 		}
@@ -325,9 +328,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	//let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
+	// let the user choose between the original scale and the 'optimal' one (for accuracy, not for compression ;)
 	CCVector3d originalLasScale(0, 0, 0);
-	bool hasScaleMetaData = false;
+	bool       hasScaleMetaData = false;
 	{
 		originalLasScale.x = theCloud->getMetaData(LAS_SCALE_X_META_DATA).toDouble(&hasScaleMetaData);
 		if (hasScaleMetaData)
@@ -341,7 +344,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	CCVector3d lasOffset(0, 0, 0);
-	bool hasOffsetMetaData = false;
+	bool       hasOffsetMetaData = false;
 	{
 		lasOffset.x = theCloud->getMetaData(LAS_OFFSET_X_META_DATA).toDouble(&hasOffsetMetaData);
 		if (hasOffsetMetaData)
@@ -356,18 +359,18 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 	if (!hasOffsetMetaData)
 	{
-		//Try to use the global shift if no LAS offset is defined
+		// Try to use the global shift if no LAS offset is defined
 		if (theCloud->isShifted())
 		{
-			lasOffset = -theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
+			lasOffset         = -theCloud->getGlobalShift(); //'global shift' is the opposite of LAS offset ;)
 			hasOffsetMetaData = true;
 		}
 		else
 		{
-			//If we don't have any offset, let's use the min bounding-box corner
+			// If we don't have any offset, let's use the min bounding-box corner
 			if (ccGlobalShiftManager::NeedShift(bbMax))
 			{
-				//we have no choice, we'll use the min bounding box
+				// we have no choice, we'll use the min bounding box
 				lasOffset.x = bbMin.x;
 				lasOffset.y = bbMin.y;
 				lasOffset.z = 0;
@@ -376,7 +379,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		//We should still check that the offset 'works'
+		// We should still check that the offset 'works'
 		if (ccGlobalShiftManager::NeedShift(bbMax - lasOffset))
 		{
 			ccLog::Warning("[LAS] The former LAS_OFFSET doesn't seem to be optimal. Using the minimum bounding-box corner instead.");
@@ -397,13 +400,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 	}
 
-	//maximum cloud 'extents' relatively to the 'offset' point
+	// maximum cloud 'extents' relatively to the 'offset' point
 	CCVector3d diagPos = bbMax - lasOffset;
 	CCVector3d diagNeg = lasOffset - bbMin;
 	CCVector3d diag(std::max(diagPos.x, diagNeg.x),
-					std::max(diagPos.y, diagNeg.y),
-					std::max(diagPos.z, diagNeg.z));
-	//optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
+	                std::max(diagPos.y, diagNeg.y),
+	                std::max(diagPos.z, diagNeg.z));
+	// optimal scale (for accuracy) --> 1e-9 because the maximum integer is roughly +/-2e+9
 	CCVector3d optimalScale(1.0e-9 * std::max<double>(diag.x, 1.0),
 	                        1.0e-9 * std::max<double>(diag.y, 1.0),
 	                        1.0e-9 * std::max<double>(diag.z, 1.0));
@@ -411,17 +414,17 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	bool canUseOriginalScale = false;
 	if (hasScaleMetaData)
 	{
-		//we may not be able to use the previous LAS scale
-		canUseOriginalScale = (		originalLasScale.x >= optimalScale.x
-								&&	originalLasScale.y >= optimalScale.y
-								&&	originalLasScale.z >= optimalScale.z );
+		// we may not be able to use the previous LAS scale
+		canUseOriginalScale = (originalLasScale.x >= optimalScale.x
+		                       && originalLasScale.y >= optimalScale.y
+		                       && originalLasScale.z >= optimalScale.z);
 	}
 
-	//uniformize the value to make it less disturbing to some lastools users ;)
+	// uniformize the value to make it less disturbing to some lastools users ;)
 	{
 		double maxScale = std::max(optimalScale.x, std::max(optimalScale.y, optimalScale.z));
-		double n = ceil(log10(maxScale)); //ceil because n should be negative
-		maxScale = pow(10.0, n);
+		double n        = ceil(log10(maxScale)); // ceil because n should be negative
+		maxScale        = pow(10.0, n);
 		optimalScale.x = optimalScale.y = optimalScale.z = maxScale;
 	}
 
@@ -440,7 +443,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 			if (!canUseOriginalScale)
 			{
-				s_saveDlg->labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); //add two whitespaces to avoid issues with italic characters justification
+				s_saveDlg->labelOriginal->setText(QObject::tr("Original scale is too small for this cloud  ")); // add two whitespaces to avoid issues with italic characters justification
 				s_saveDlg->labelOriginal->setStyleSheet("color: red;");
 			}
 		}
@@ -458,7 +461,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		s_saveDlg->clearEVLRs();
 
-		for (const ExtraLasField::Shared &extraField : extraFields)
+		for (const ExtraLasField::Shared& extraField : extraFields)
 		{
 			s_saveDlg->addEVLR(extraField->getName());
 		}
@@ -502,12 +505,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	//manage the point format
+	// manage the point format
 	minPointFormat = LasField::UpdateMinPointFormat(minPointFormat, hasColors, false, true);
 
-	if (theCloud->hasMetaData(LAS_POINT_FORMAT_META_DATA)) //DGM: is it really necessary?
+	if (theCloud->hasMetaData(LAS_POINT_FORMAT_META_DATA)) // DGM: is it really necessary?
 	{
-		bool ok = false;
+		bool     ok                  = false;
 		unsigned previousPointFormat = theCloud->getMetaData(LAS_POINT_FORMAT_META_DATA).toUInt(&ok);
 		if (ok && previousPointFormat < 256)
 		{
@@ -520,7 +523,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
-	unsigned ptsWritten = 0;
+	unsigned      ptsWritten    = 0;
 
 	auto convertOne = [&](PointRef& point)
 	{
@@ -543,17 +546,17 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		if (hasColors)
 		{
-			//DGM: LAS colors are stored on 16 bits!
+			// DGM: LAS colors are stored on 16 bits!
 			const ccColor::Rgb& rgb = theCloud->getPointColor(ptsWritten);
-			point.setField(Id::Red,   static_cast<uint16_t>(rgb.r) << 8);
+			point.setField(Id::Red, static_cast<uint16_t>(rgb.r) << 8);
 			point.setField(Id::Green, static_cast<uint16_t>(rgb.g) << 8);
-			point.setField(Id::Blue,  static_cast<uint16_t>(rgb.b) << 8);
+			point.setField(Id::Blue, static_cast<uint16_t>(rgb.b) << 8);
 		}
 
 		// standard las fields
-		uint8_t classFlags = 0;
+		uint8_t classFlags     = 0;
 		uint8_t classification = 0;
-		for (const LasField &lasField: fieldsToSave)
+		for (const LasField& lasField : fieldsToSave)
 		{
 			assert(lasField.sf);
 			Id pdalId = typeToId(lasField.type, minPointFormat);
@@ -580,34 +583,34 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
-						classification |= 32; //bit #5 of the 'Classification' field
+						classification |= 32; // bit #5 of the 'Classification' field
 					else
-						classFlags |= 1;      //bit #0 of the 'Classification Flags' field
+						classFlags |= 1; // bit #0 of the 'Classification Flags' field
 				}
 				break;
 			case LAS_CLASSIF_KEYPOINT:
 				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
-						classification |= 64; //bit #6 of the 'Classification' field
+						classification |= 64; // bit #6 of the 'Classification' field
 					else
-						classFlags |= 2;      //bit #1 of the 'Classification Flags' field
+						classFlags |= 2; // bit #1 of the 'Classification Flags' field
 				}
 				break;
 			case LAS_CLASSIF_WITHHELD:
 				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat < 6)
-						classification |= 128; //bit #7 of the 'Classification' field
+						classification |= 128; // bit #7 of the 'Classification' field
 					else
-						classFlags |= 4;       //bit #2 of the 'Classification Flags' field
+						classFlags |= 4; // bit #2 of the 'Classification Flags' field
 				}
 				break;
 			case LAS_CLASSIF_OVERLAP:
 				if (lasField.getSafeValue(ptsWritten) != 0)
 				{
 					if (minPointFormat >= 6)
-						classFlags |= 8;      //bit #3 of the 'Classification Flags' field
+						classFlags |= 8; // bit #3 of the 'Classification Flags' field
 					else
 						assert(false);
 				}
@@ -625,7 +628,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			point.setField(Id::ClassFlags, classFlags);
 
 		// extra las fields
-		for (const ExtraLasField::Shared &extraField : extraFieldsToSave)
+		for (const ExtraLasField::Shared& extraField : extraFieldsToSave)
 		{
 			point.setField(extraField->pdalId, extraField->getSafeValue(ptsWritten) + extraField->sf->getGlobalShift());
 		}
@@ -639,11 +642,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	try
 	{
 		LasWriter writer;
-		Options writerOptions;
+		Options   writerOptions;
 
 		if (theCloud->hasMetaData(s_LAS_SRS_Key))
 		{
-			//restore the SRS if possible
+			// restore the SRS if possible
 			QString wkt = theCloud->getMetaData(s_LAS_SRS_Key).value<QString>();
 			writerOptions.add("a_srs", wkt.toStdString());
 		}
@@ -662,9 +665,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		if (theCloud->hasMetaData(LAS_GLOBAL_ENCODING_META_DATA))
 		{
-			bool ok = false;
+			bool     ok              = false;
 			unsigned global_encoding = theCloud->getMetaData(LAS_GLOBAL_ENCODING_META_DATA).toUInt(&ok);
-			if (ok) {
+			if (ok)
+			{
 				writerOptions.add("global_encoding", global_encoding);
 			}
 		}
@@ -677,8 +681,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 
 		if (theCloud->hasMetaData(LAS_VERSION_MINOR_META_DATA))
 		{
-			bool ok = false;
-			int minor_version = theCloud->getMetaData(LAS_VERSION_MINOR_META_DATA).toInt(&ok);
+			bool ok            = false;
+			int  minor_version = theCloud->getMetaData(LAS_VERSION_MINOR_META_DATA).toInt(&ok);
 			if (ok && minor_version != 0) // PDAL can read but not write LAS 1.0
 				writerOptions.add("minor_version", minor_version);
 			else if (!ok)
@@ -690,10 +694,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		writer.setInput(f);
 		writer.setOptions(writerOptions);
 
-		//field count
-		point_count_t tableSize = 3; //XYZ
+		// field count
+		point_count_t tableSize = 3; // XYZ
 		if (hasColors)
-			tableSize += 3; //RGB
+			tableSize += 3; // RGB
 		tableSize += fieldsToSave.size();
 		tableSize += extraFieldsToSave.size();
 
@@ -710,10 +714,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			table.layout()->registerDim(Id::Blue);
 		}
 
-		for (const LasField &lasField : fieldsToSave)
+		for (const LasField& lasField : fieldsToSave)
 		{
 			std::string dimName = lasField.getName().toStdString();
-			Id pdalId = id(dimName);
+			Id          pdalId  = id(dimName);
 			table.layout()->registerDim(pdalId);
 		}
 
@@ -722,7 +726,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			std::string dimName = extraField->getName().toStdString();
 			// All extra scalar fields are written as double.
 			// A more specific solution would be welcome.
-			Type t = Type::Double;
+			Type t             = Type::Double;
 			extraField->pdalId = table.layout()->registerOrAssignDim(dimName, t);
 		}
 
@@ -752,36 +756,40 @@ QSharedPointer<LASOpenDlg> s_lasOpenDlg(nullptr);
 //! Class describing the current tiling process
 class Tiler
 {
-public:
+  public:
 	Tiler()
 	    : w(1)
 	    , h(1)
 	    , X(0)
 	    , Y(1)
 	    , Z(2)
-	{}
+	{
+	}
 
 	~Tiler() = default;
 
-	inline size_t tileCount() const { return tilePointViews.size(); }
-
-	bool init(unsigned width,
-	    unsigned height,
-	    unsigned Zdim,
-	    const QString &absoluteBaseFilename,
-	    const CCVector3d& bbMin,
-	    const CCVector3d& bbMax,
-	    PointTableRef table,
-	    const LasHeader& header)
+	inline size_t tileCount() const
 	{
-		//init tiling dimensions
+		return tilePointViews.size();
+	}
+
+	bool init(unsigned          width,
+	          unsigned          height,
+	          unsigned          Zdim,
+	          const QString&    absoluteBaseFilename,
+	          const CCVector3d& bbMin,
+	          const CCVector3d& bbMax,
+	          PointTableRef     table,
+	          const LasHeader&  header)
+	{
+		// init tiling dimensions
 		assert(Zdim < 3);
 		Z = Zdim;
 		X = (Z == 2 ? 0 : Z + 1);
 		Y = (X == 2 ? 0 : X + 1);
 
 		bbMinCorner = bbMin;
-		tileDiag = bbMax - bbMin;
+		tileDiag    = bbMax - bbMin;
 		tileDiag.u[X] /= width;
 		tileDiag.u[Y] /= height;
 		unsigned count = width * height;
@@ -793,24 +801,24 @@ public:
 		}
 		catch (const std::bad_alloc&)
 		{
-			//not enough memory
+			// not enough memory
 			return false;
 		}
 
 		w = width;
 		h = height;
 
-		//File extension
+		// File extension
 		QString ext = (header.compressed() ? "laz" : "las");
 
 		for (unsigned i = 0; i < width; ++i)
 		{
 			for (unsigned j = 0; j < height; ++j)
 			{
-				unsigned ii = index(i, j);
-				QString filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), ext);
+				unsigned ii       = index(i, j);
+				QString  filename = absoluteBaseFilename + QString("_%1_%2.%3").arg(QString::number(i), QString::number(j), ext);
 
-				fileNames[ii] = filename;
+				fileNames[ii]      = filename;
 				tilePointViews[ii] = std::make_shared<PointView>(table);
 			}
 		}
@@ -818,17 +826,17 @@ public:
 		return true;
 	}
 
-	void addPoint(const PointViewPtr &buffer, unsigned pointIndex)
+	void addPoint(const PointViewPtr& buffer, unsigned pointIndex)
 	{
-		//determine the right tile
-		CCVector3d Prel = CCVector3d(	buffer->getFieldAs<double>(Id::X, pointIndex),
-		                                buffer->getFieldAs<double>(Id::Y, pointIndex),
-		                                buffer->getFieldAs<double>(Id::Z, pointIndex));
+		// determine the right tile
+		CCVector3d Prel = CCVector3d(buffer->getFieldAs<double>(Id::X, pointIndex),
+		                             buffer->getFieldAs<double>(Id::Y, pointIndex),
+		                             buffer->getFieldAs<double>(Id::Z, pointIndex));
 		Prel -= bbMinCorner;
-		int ii = static_cast<int>(floor(Prel.u[X] / tileDiag.u[X]));
-		int ji = static_cast<int>(floor(Prel.u[Y] / tileDiag.u[Y]));
-		unsigned i = std::min(static_cast<unsigned>(std::max(ii, 0)), w - 1);
-		unsigned j = std::min(static_cast<unsigned>(std::max(ji, 0)), h - 1);
+		int          ii         = static_cast<int>(floor(Prel.u[X] / tileDiag.u[X]));
+		int          ji         = static_cast<int>(floor(Prel.u[Y] / tileDiag.u[Y]));
+		unsigned     i          = std::min(static_cast<unsigned>(std::max(ii, 0)), w - 1);
+		unsigned     j          = std::min(static_cast<unsigned>(std::max(ji, 0)), h - 1);
 		PointViewPtr outputView = tilePointViews[index(i, j)];
 		outputView->appendPoint(*buffer, pointIndex);
 	}
@@ -837,9 +845,9 @@ public:
 	{
 		for (unsigned i = 0; i < tilePointViews.size(); ++i)
 		{
-			LasWriter writer;
-			Options writerOptions;
-			PointTable table;
+			LasWriter    writer;
+			Options      writerOptions;
+			PointTable   table;
 			BufferReader bufferReader;
 
 			writerOptions.add("filename", fileNames[i].toStdString());
@@ -860,34 +868,45 @@ public:
 		}
 	}
 
-protected:
+  protected:
+	inline unsigned index(unsigned i, unsigned j) const
+	{
+		return i + j * w;
+	}
 
-	inline unsigned index(unsigned i, unsigned j) const { return i + j * w; }
-
-	unsigned w, h;
-	unsigned X, Y, Z;
-	CCVector3d bbMinCorner, tileDiag;
+	unsigned                  w, h;
+	unsigned                  X, Y, Z;
+	CCVector3d                bbMinCorner, tileDiag;
 	std::vector<PointViewPtr> tilePointViews;
-	std::vector<QString> fileNames;
+	std::vector<QString>      fileNames;
 };
-
 
 struct LasCloudChunk
 {
-	LasCloudChunk() : loadedCloud(nullptr), size(0) {}
+	LasCloudChunk()
+	    : loadedCloud(nullptr)
+	    , size(0)
+	{
+	}
 
-	ccPointCloud* loadedCloud;
-	std::vector< LasField::Shared > lasFields;
-	unsigned size;
+	ccPointCloud*                 loadedCloud;
+	std::vector<LasField::Shared> lasFields;
+	unsigned                      size;
 
-	ccPointCloud* getLoadedCloud() const { return loadedCloud; }
+	ccPointCloud* getLoadedCloud() const
+	{
+		return loadedCloud;
+	}
 
-	bool hasColors() const { return loadedCloud->hasColors(); }
+	bool hasColors() const
+	{
+		return loadedCloud->hasColors();
+	}
 
 	bool reserveSize(unsigned nbPoints)
 	{
-		size = nbPoints;
-		loadedCloud = new ccPointCloud();
+		size         = nbPoints;
+		loadedCloud  = new ccPointCloud();
 		bool success = loadedCloud->reserveThePointsTable(nbPoints);
 		if (!success)
 			delete loadedCloud;
@@ -902,44 +921,44 @@ struct LasCloudChunk
 			assert(false);
 			return;
 		}
-		
-		//DGM: from now on, we only enable scalar fields when we detect a valid value!
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); //unsigned char: between 0 and 255
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); //5 bits: between 0 and 31
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_OVERLAP))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_OVERLAP, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); //16 bits: between 0 and 65536
-		if (s_lasOpenDlg->doLoad(LAS_TIME))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); //8 bytes (double) --> we use global shift!
-		if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); //3 bits: between 1 and 7
-		if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); //3 bits: between 1 and 7
-		if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); //1 bit: 0 or 1
-		if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); //signed char: between -90 and +90
-		if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); //unsigned char: between 0 and 255
-		if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
-			lasFields.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); //16 bits: between 0 and 65536
 
-		//extra fields
+		// DGM: from now on, we only enable scalar fields when we detect a valid value!
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIFICATION, 0, 0, 255))); // unsigned char: between 0 and 255
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_VALUE, 0, 0, 31))); // 5 bits: between 0 and 31
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_SYNTHETIC, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_KEYPOINT, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_WITHHELD, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_CLASSIF_OVERLAP))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_CLASSIF_OVERLAP, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_INTENSITY, 0, 0, 65535))); // 16 bits: between 0 and 65536
+		if (s_lasOpenDlg->doLoad(LAS_TIME))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_TIME, 0, 0, -1.0))); // 8 bytes (double) --> we use global shift!
+		if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_RETURN_NUMBER, 1, 1, 7))); // 3 bits: between 1 and 7
+		if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_NUMBER_OF_RETURNS, 1, 1, 7))); // 3 bits: between 1 and 7
+		if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_SCAN_DIRECTION, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_FLIGHT_LINE_EDGE, 0, 0, 1))); // 1 bit: 0 or 1
+		if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_SCAN_ANGLE_RANK, 0, -90, 90))); // signed char: between -90 and +90
+		if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_USER_DATA, 0, 0, 255))); // unsigned char: between 0 and 255
+		if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
+			lasFields.push_back(LasField::Shared(new LasField(LAS_POINT_SOURCE_ID, 0, 0, 65535))); // 16 bits: between 0 and 65536
+
+		// extra fields
 		for (size_t i = 0; i < extraNamesToLoad.size(); ++i)
 		{
-			QString name = QString::fromStdString(extraNamesToLoad[i]);
-			ExtraLasField *eField = new ExtraLasField(name, extraFieldsToLoad[i]);
+			QString        name   = QString::fromStdString(extraNamesToLoad[i]);
+			ExtraLasField* eField = new ExtraLasField(name, extraFieldsToLoad[i]);
 			lasFields.emplace_back(eField);
 		}
 	}
@@ -956,7 +975,7 @@ struct LasCloudChunk
 			{
 				field->sf->computeMinAndMax();
 
-				if (   field->type == LAS_CLASSIFICATION
+				if (field->type == LAS_CLASSIFICATION
 				    || field->type == LAS_CLASSIF_VALUE
 				    || field->type == LAS_CLASSIF_SYNTHETIC
 				    || field->type == LAS_CLASSIF_KEYPOINT
@@ -968,8 +987,7 @@ struct LasCloudChunk
 					int cMin = static_cast<int>(field->sf->getMin());
 					int cMax = static_cast<int>(field->sf->getMax());
 					field->sf->setColorRampSteps(std::min<int>(cMax - cMin + 1, 256));
-					//classifSF->setMinSaturation(cMin);
-
+					// classifSF->setMinSaturation(cMin);
 				}
 				else if (field->type == LAS_INTENSITY)
 				{
@@ -997,7 +1015,7 @@ struct LasCloudChunk
 
 struct ExtraDimDescriptor
 {
-	std::string name;
+	std::string           name;
 	pdal::Dimension::Type dimType;
 };
 
@@ -1011,7 +1029,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		LasReader lasReader;
 		lasReader.setOptions(las_opts);
 		FixedPointTable fields(100);
-		PointLayoutPtr layout(fields.layout());
+		PointLayoutPtr  layout(fields.layout());
 		if (nullptr == layout)
 		{
 			ccLog::Warning("PDAL failed to retrieve the file layout");
@@ -1025,8 +1043,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			ccPointCloud* emptyCloud = new ccPointCloud("empty");
 			container.addChild(emptyCloud);
-			//strange file ;)
-			return CC_FERR_NO_ERROR; //Its still strange
+			// strange file ;)
+			return CC_FERR_NO_ERROR; // Its still strange
 		}
 
 		CCVector3d bbMin(lasHeader.minX(), lasHeader.minY(), lasHeader.minZ());
@@ -1084,7 +1102,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				default:
 					// extended fields
 					ExtraDimDescriptor dim;
-					dim.name = layout->dimName(pdalId);
+					dim.name    = layout->dimName(pdalId);
 					dim.dimType = layout->dimType(pdalId);
 					extraDims.push_back(dim);
 
@@ -1098,9 +1116,9 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (parameters.sessionStart)
 		{
-			//we do this AFTER restoring the previous context because it may still be
-			//good that the previous configuration is restored even though the user needs
-			//to confirm it
+			// we do this AFTER restoring the previous context because it may still be
+			// good that the previous configuration is restored even though the user needs
+			// to confirm it
 			s_lasOpenDlg->resetApplyAll();
 		}
 
@@ -1111,16 +1129,16 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 		bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
 
-		bool loadRGBComponent[3] = { s_lasOpenDlg->doLoad(LAS_RED), s_lasOpenDlg->doLoad(LAS_GREEN), s_lasOpenDlg->doLoad(LAS_BLUE) };
-		bool loadColor = (loadRGBComponent[0] || loadRGBComponent[1] || loadRGBComponent[2]);
+		bool loadRGBComponent[3] = {s_lasOpenDlg->doLoad(LAS_RED), s_lasOpenDlg->doLoad(LAS_GREEN), s_lasOpenDlg->doLoad(LAS_BLUE)};
+		bool loadColor           = (loadRGBComponent[0] || loadRGBComponent[1] || loadRGBComponent[2]);
 
-		//by default we read colors as triplets of 8 bits integers but we might dynamically change this
-		//if we encounter values using 16 bits (16 bits is the standard!)
+		// by default we read colors as triplets of 8 bits integers but we might dynamically change this
+		// if we encounter values using 16 bits (16 bits is the standard!)
 		unsigned char colorCompBitShift = 0;
-		bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
-		ccColor::Rgb rgb(0, 0, 0);
+		bool          forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
+		ccColor::Rgb  rgb(0, 0, 0);
 
-		StringList extraNamesToLoad;
+		StringList  extraNamesToLoad;
 		std::string extraDimsArg;
 		for (unsigned i = 0; i < extraDims.size(); ++i)
 		{
@@ -1142,7 +1160,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		std::vector<Id> extraDimensionsIds;
-		for (std::string &dim : extraNamesToLoad)
+		for (std::string& dim : extraNamesToLoad)
 		{
 			extraDimensionsIds.push_back(layout->findDim(dim));
 		}
@@ -1152,7 +1170,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		QScopedPointer<ccProgressDialog> pDlg(nullptr);
 		if (parameters.parentWidget)
 		{
-			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
 			pDlg->setMethodTitle(QObject::tr("Open LAS file"));
 			pDlg->setInfo(QObject::tr("Points: %L1").arg(nbOfPoints));
 			pDlg->start();
@@ -1160,21 +1178,21 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (tiling)
 		{
-			Tiler tiler;
-			PointTable table;
+			Tiler        tiler;
+			PointTable   table;
 			PointViewSet pointViewSet;
 
 			// tiling (vertical) dimension
 			unsigned vertDim = 2;
 			switch (s_lasOpenDlg->tileDimComboBox->currentIndex())
 			{
-			case 0: //XY
+			case 0: // XY
 				vertDim = 2;
 				break;
-			case 1: //XZ
+			case 1: // XZ
 				vertDim = 1;
 				break;
-			case 2: //YZ
+			case 2: // YZ
 				vertDim = 0;
 				break;
 			default:
@@ -1191,7 +1209,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				return CC_FERR_NOT_ENOUGH_MEMORY;
 			}
 
-			auto prepareAndExecute = [&lasReader, &table]() -> PointViewSet {
+			auto prepareAndExecute = [&lasReader, &table]() -> PointViewSet
+			{
 				lasReader.prepare(table);
 				lasReader.prepare(table);
 				return lasReader.execute(table);
@@ -1217,12 +1236,12 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 			reader.waitForFinished();
 
-			PointViewSet viewSet = reader.result();
+			PointViewSet viewSet   = reader.result();
 			PointViewPtr pointView = *viewSet.begin();
 
 			if (parameters.parentWidget && pDlg)
 			{
-				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); //cancel available
+				pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
 				pDlg->setMethodTitle(QObject::tr("Tiling points"));
 				pDlg->setInfo(QObject::tr("Points: %L1").arg(nbOfPoints));
 				pDlg->start();
@@ -1250,7 +1269,8 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 			QFutureWatcher<void> writer;
 			QObject::connect(&writer, SIGNAL(finished()), pDlg.data(), SLOT(reset()));
-			writer.setFuture(QtConcurrent::run([&tiler]() {tiler.writeAll(); }));
+			writer.setFuture(QtConcurrent::run([&tiler]()
+			                                   { tiler.writeAll(); }));
 
 			pDlg->exec();
 			writer.waitForFinished();
@@ -1259,20 +1279,20 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		CCCoreLib::NormalizedProgress nProgress(pDlg.data(), nbOfPoints);
-		CCVector3d Pshift(0, 0, 0);
-		bool preserveCoordinateShift = true;
+		CCVector3d                    Pshift(0, 0, 0);
+		bool                          preserveCoordinateShift = true;
 
 		unsigned fileChunkSize = 0;
-		unsigned nbPointsRead = 0;
+		unsigned nbPointsRead  = 0;
 
 		StreamCallbackFilter f;
 		f.setInput(lasReader);
 
-		unsigned nbOfChunks = (nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD) + 1;
+		unsigned                   nbOfChunks = (nbOfPoints / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD) + 1;
 		std::vector<LasCloudChunk> chunks(nbOfChunks, LasCloudChunk());
 
 		CC_FILE_ERROR callbackError = CC_FERR_NO_ERROR;
-		auto ccProcessOne = [&](PointRef& point)
+		auto          ccProcessOne  = [&](PointRef& point)
 		{
 			if (pDlg && pDlg->isCancelRequested())
 			{
@@ -1280,13 +1300,13 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				return false;
 			}
 
-			LasCloudChunk &pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
+			LasCloudChunk& pointChunk = chunks[nbPointsRead / CC_MAX_NUMBER_OF_POINTS_PER_CLOUD];
 
 			if (pointChunk.getLoadedCloud() == nullptr)
 			{
 				// create a new cloud
 				unsigned pointsToRead = nbOfPoints - nbPointsRead;
-				fileChunkSize = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+				fileChunkSize         = std::min(pointsToRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 				if (!pointChunk.reserveSize(fileChunkSize))
 				{
 					ccLog::Warning("[LAS] Not enough memory!");
@@ -1299,7 +1319,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					pointChunk.loadedCloud->setGlobalShift(Pshift);
 				}
 
-				//save the Spatial reference as meta-data
+				// save the Spatial reference as meta-data
 				SpatialReference srs = lasHeader.srs();
 				if (!srs.empty())
 				{
@@ -1315,27 +1335,27 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				pointChunk.createFieldsToLoad(extraDimensionsIds, extraNamesToLoad);
 			}
 
-			ccPointCloud* loadedCloud = pointChunk.loadedCloud;
+			ccPointCloud*                  loadedCloud  = pointChunk.loadedCloud;
 			std::vector<LasField::Shared>& fieldsToLoad = pointChunk.lasFields;
 
-			//first point check for 'big' coordinates
+			// first point check for 'big' coordinates
 			if (nbPointsRead == 0)
 			{
-				CCVector3d P(	static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::X)),
-								static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
-								static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)) );
+				CCVector3d P(static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::X)),
+				             static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Y)),
+				             static_cast<PointCoordinateType>(point.getFieldAs<int>(Id::Z)));
 
-				//backup input global parameters
+				// backup input global parameters
 				ccGlobalShiftManager::Mode csModeBackup = parameters.shiftHandlingMode;
-				bool useLasOffset = false;
-				//set the LAS offset as default if none was provided
+				bool                       useLasOffset = false;
+				// set the LAS offset as default if none was provided
 				CCVector3d lasOffsetXY(lasOffset.x, lasOffset.y, 0.0);
 				if (lasOffsetXY.norm2() != 0 && ((nullptr == parameters._coordinatesShiftEnabled) || (false == *parameters._coordinatesShiftEnabled)))
 				{
-				    if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) //No dialog, practically means that we don't want any shift!
+					if (csModeBackup != ccGlobalShiftManager::NO_DIALOG) // No dialog, practically means that we don't want any shift!
 					{
 						useLasOffset = true;
-						Pshift = -lasOffsetXY;
+						Pshift       = -lasOffsetXY;
 						if (csModeBackup != ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT)
 						{
 							parameters.shiftHandlingMode = ccGlobalShiftManager::ALWAYS_DISPLAY_DIALOG;
@@ -1352,7 +1372,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					ccLog::Warning("[LAS] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 
-				//restore previous parameters
+				// restore previous parameters
 				parameters.shiftHandlingMode = csModeBackup;
 			}
 
@@ -1363,9 +1383,9 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 			if (loadColor)
 			{
-				uint16_t red   = loadRGBComponent[0] ? point.getFieldAs<uint16_t>(Id::Red  ) : 0;
+				uint16_t red   = loadRGBComponent[0] ? point.getFieldAs<uint16_t>(Id::Red) : 0;
 				uint16_t green = loadRGBComponent[1] ? point.getFieldAs<uint16_t>(Id::Green) : 0;
-				uint16_t blue  = loadRGBComponent[2] ? point.getFieldAs<uint16_t>(Id::Blue ) : 0;
+				uint16_t blue  = loadRGBComponent[2] ? point.getFieldAs<uint16_t>(Id::Blue) : 0;
 
 				// if we don't have reserved a color field yet, we check that color is not black
 				bool pushColor = true;
@@ -1384,37 +1404,37 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 						else
 						{
 							ccLog::Warning("[LAS]: Not enough memory, color field will be ignored!");
-							loadColor = false; //no need to retry with the other chunks anyway
+							loadColor = false; // no need to retry with the other chunks anyway
 							pushColor = false;
 						}
 					}
-					else //otherwise we ignore it for the moment (we'll add it later if necessary)
+					else // otherwise we ignore it for the moment (we'll add it later if necessary)
 					{
 						pushColor = false;
 					}
 				}
 				if (pushColor)
 				{
-					//we test if the color components are coded on 16 bits (standard) or only on 8 bits (it happens ;)
+					// we test if the color components are coded on 16 bits (standard) or only on 8 bits (it happens ;)
 					if (!forced8bitRgbMode && colorCompBitShift == 0)
 					{
-						if (   (red   & 0xFF00)
+						if ((red & 0xFF00)
 						    || (green & 0xFF00)
-						    || (blue  & 0xFF00) )
+						    || (blue & 0xFF00))
 						{
-							//the color components are coded on 16 bits!
+							// the color components are coded on 16 bits!
 							ccLog::Print("[LAS] Color components are coded on 16 bits");
 							colorCompBitShift = 8;
-							//we fix all the previously read colors
+							// we fix all the previously read colors
 							for (unsigned i = 0; i + 1 < loadedCloud->size(); ++i)
 							{
-								loadedCloud->setPointColor(i, ccColor::black); //255 >> 8 = 0!
+								loadedCloud->setPointColor(i, ccColor::black); // 255 >> 8 = 0!
 							}
 						}
 					}
-					rgb.r = static_cast<ColorCompType>(red   >> colorCompBitShift);
+					rgb.r = static_cast<ColorCompType>(red >> colorCompBitShift);
 					rgb.g = static_cast<ColorCompType>(green >> colorCompBitShift);
-					rgb.b = static_cast<ColorCompType>(blue  >> colorCompBitShift);
+					rgb.b = static_cast<ColorCompType>(blue >> colorCompBitShift);
 
 					loadedCloud->addColor(rgb);
 				}
@@ -1423,57 +1443,57 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			// additional fields
 			for (LasField::Shared& field : fieldsToLoad)
 			{
-				double value = 0.0;
-				Id pdalId = typeToId(field->type, pointFormat);
+				double value  = 0.0;
+				Id     pdalId = typeToId(field->type, pointFormat);
 
 				switch (field->type)
 				{
 				case LAS_EXTRA:
 				{
 					ExtraLasField* extraField = static_cast<ExtraLasField*>(field.data());
-					value = point.getFieldAs<double>(extraField->pdalId);
+					value                     = point.getFieldAs<double>(extraField->pdalId);
 					break;
 				}
 				case LAS_TIME:
 					value = point.getFieldAs<double>(Id::GpsTime);
 					if (field->sf)
 					{
-						//shift time values (so as to avoid losing accuracy)
+						// shift time values (so as to avoid losing accuracy)
 						value -= field->sf->getGlobalShift();
 					}
 					break;
 				case LAS_CLASSIF_VALUE:
 					if (pointFormat <= 5)
-						value = (point.getFieldAs<int>(pdalId) & 31);  //bit #0-4 of the 'Classification' field
+						value = (point.getFieldAs<int>(pdalId) & 31); // bit #0-4 of the 'Classification' field
 					else
 						value = point.getFieldAs<int>(pdalId);
 					break;
 				case LAS_CLASSIF_SYNTHETIC:
 					if (pointFormat <= 5)
-						value = (point.getFieldAs<int>(pdalId) & 32) ? 1.0 : 0.0;  //bit #5 of the 'Classification' field
+						value = (point.getFieldAs<int>(pdalId) & 32) ? 1.0 : 0.0; // bit #5 of the 'Classification' field
 					else
-						value = (point.getFieldAs<int>(pdalId) & 1)  ? 1.0 : 0.0;   //bit #0 of the 'Classification Flags' field
+						value = (point.getFieldAs<int>(pdalId) & 1) ? 1.0 : 0.0; // bit #0 of the 'Classification Flags' field
 					break;
 				case LAS_CLASSIF_KEYPOINT:
 					if (pointFormat <= 5)
-						value = (point.getFieldAs<int>(pdalId) & 64) ? 1.0 : 0.0;  //bit #6 of the 'Classification' field
+						value = (point.getFieldAs<int>(pdalId) & 64) ? 1.0 : 0.0; // bit #6 of the 'Classification' field
 					else
-						value = (point.getFieldAs<int>(pdalId) & 2 ) ? 1.0 : 0.0;   //bit #1 of the 'Classification Flags' field
+						value = (point.getFieldAs<int>(pdalId) & 2) ? 1.0 : 0.0; // bit #1 of the 'Classification Flags' field
 					break;
 				case LAS_CLASSIF_WITHHELD:
 					if (pointFormat <= 5)
-						value = (point.getFieldAs<int>(pdalId) & 128) ? 1.0 : 0.0; //bit #7 of the 'Classification' field
+						value = (point.getFieldAs<int>(pdalId) & 128) ? 1.0 : 0.0; // bit #7 of the 'Classification' field
 					else
-						value = (point.getFieldAs<int>(pdalId) & 4)   ? 1.0 : 0.0;   //bit #2 of the 'Classification Flags' field
+						value = (point.getFieldAs<int>(pdalId) & 4) ? 1.0 : 0.0; // bit #2 of the 'Classification Flags' field
 					break;
 				case LAS_CLASSIF_OVERLAP:
 					if (pointFormat <= 5)
 					{
-						assert(false);                                 //not present before point format 6
+						assert(false); // not present before point format 6
 					}
 					else
 					{
-						value = (point.getFieldAs<int>(pdalId) & 8) ? 1.0 : 0.0;   //bit #3 of the 'Classification Flags' field
+						value = (point.getFieldAs<int>(pdalId) & 8) ? 1.0 : 0.0; // bit #3 of the 'Classification Flags' field
 					}
 					break;
 				default:
@@ -1487,14 +1507,14 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				else
 				{
-					//first point? we track its value
+					// first point? we track its value
 					if (loadedCloud->size() == 1)
 					{
 						field->firstValue = value;
 					}
-					if (	!ignoreDefaultFields
-					    ||	value != field->firstValue
-					    ||	(field->firstValue != field->defaultValue && field->firstValue >= field->minValue))
+					if (!ignoreDefaultFields
+					    || value != field->firstValue
+					    || (field->firstValue != field->defaultValue && field->firstValue >= field->minValue))
 					{
 						field->sf = new ccScalarField(qPrintable(LasField::DesanitizeString(field->getName())));
 						if (field->sf->reserveSafe(fileChunkSize))
@@ -1505,7 +1525,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 								double timeShift = 0.0;
 								if (!s_lasOpenDlg->getTimeShift(timeShift))
 								{
-									//we use the first value as 'global shift' (otherwise we will lose accuracy)
+									// we use the first value as 'global shift' (otherwise we will lose accuracy)
 									timeShift = static_cast<int64_t>(field->firstValue / 10000.0) * 10000.0;
 								}
 								field->sf->setGlobalShift(timeShift);
@@ -1540,9 +1560,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 							field->sf = nullptr;
 						}
 					}
-
 				}
-
 			}
 			++nbPointsRead;
 			nProgress.oneStep();
@@ -1558,7 +1576,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 			return callbackError;
 		}
 
-		for (auto &chunk : chunks)
+		for (auto& chunk : chunks)
 		{
 			chunk.addLasFieldsToCloud();
 			ccPointCloud* loadedCloud = chunk.getLoadedCloud();
@@ -1580,7 +1598,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 						loadedCloud->resize(loadedCloud->size());
 					}
 
-					QString chunkName("unnamed - Cloud");
+					QString  chunkName("unnamed - Cloud");
 					unsigned n = container.getChildrenNumber();
 					if (n != 0)
 					{
@@ -1601,11 +1619,11 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 					loadedCloud->setMetaData(LAS_GLOBAL_ENCODING_META_DATA, QVariant(lasHeader.globalEncoding()));
 
 					const pdal::Uuid projectUUID = lasHeader.projectId();
-					if (!projectUUID.isNull()) {
+					if (!projectUUID.isNull())
+					{
 						loadedCloud->setMetaData(
-							LAS_PROJECT_UUID_META_DATA,
-							QVariant(QString::fromStdString(projectUUID.toString()))
-						);
+						    LAS_PROJECT_UUID_META_DATA,
+						    QVariant(QString::fromStdString(projectUUID.toString())));
 					}
 
 					loadedCloud->setMetaData(LAS_VERSION_MAJOR_META_DATA, QVariant(lasHeader.versionMajor()));
@@ -1617,7 +1635,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				else
 				{
-					//empty cloud?!
+					// empty cloud?!
 					delete loadedCloud;
 					loadedCloud = nullptr;
 				}

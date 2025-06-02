@@ -1,30 +1,30 @@
 #pragma once
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                  COPYRIGHT: Daniel Girardeau-Montaut                   #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                  COPYRIGHT: Daniel Girardeau-Montaut                   #
+// #                                                                        #
+// ##########################################################################
 
 #include "CCAppCommon.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCConst.h>
 
-//qCC_db
+// qCC_db
 #include <ccGLMatrix.h>
 
-//Qt
+// Qt
 #include <QGamepad>
 #include <QTimer>
 
@@ -35,8 +35,7 @@ class CCAPPCOMMON_LIB_API GamepadInput : public QGamepad
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	//! Default constructor
 	explicit GamepadInput(QObject* parent = nullptr);
 	//! Destructor
@@ -48,25 +47,23 @@ public:
 	//! Updates a window with the current gamepad state
 	void update(ccGLWindowInterface* win);
 
-Q_SIGNALS:
+  Q_SIGNALS:
 
 	void updated();
 
-protected:
-
+  protected:
 	void updateInternalState();
 
-private:
-
+  private:
 	//! Timer to poll the gamepad state
 	QTimer m_timer;
 
 	//! Last state
-	CCVector3 m_panning;
-	bool m_hasPanning;
-	CCVector3 m_translation;
-	bool m_hasTranslation;
+	CCVector3   m_panning;
+	bool        m_hasPanning;
+	CCVector3   m_translation;
+	bool        m_hasTranslation;
 	ccGLMatrixd m_rotation;
-	bool m_hasRotation;
-	float m_zoom;
+	bool        m_hasRotation;
+	float       m_zoom;
 };

@@ -1,66 +1,66 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccColorLevelsDlg.h"
 
-//local
-#include "ccHistogramWindow.h"
+// local
 #include "ccGenericPointCloud.h"
+#include "ccHistogramWindow.h"
 
-//qCC_db
+// qCC_db
 #include <ccGenericGLDisplay.h>
-#include <ccPointCloud.h>
 #include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
 
-//Qt
+// Qt
 #include <QPushButton>
 
-//system
-#include <string.h>
+// system
 #include <assert.h>
+#include <string.h>
 
-//persistent parameters
-static int s_inputLevels[2] = {0,255};
-static int s_outputLevels[2] = {0,255};
+// persistent parameters
+static int  s_inputLevels[2]      = {0, 255};
+static int  s_outputLevels[2]     = {0, 255};
 static bool s_outputLevelsEnabled = false;
 
 ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud)
-	: QDialog(parent, Qt::Tool)
-	, Ui::ColorLevelsDialog()
-	, m_histogram(nullptr)
-	, m_cloud(pointCloud)
+    : QDialog(parent, Qt::Tool)
+    , Ui::ColorLevelsDialog()
+    , m_histogram(nullptr)
+    , m_cloud(pointCloud)
 {
 	setupUi(this);
 
-	//connect GUI elements
-	connect(channelComboBox, qOverload<int>(&QComboBox::currentIndexChanged),	this,	&ccColorLevelsDlg::onChannelChanged);
-	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,	this,	&ccColorLevelsDlg::onApply);
+	// connect GUI elements
+	connect(channelComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccColorLevelsDlg::onChannelChanged);
+	connect(buttonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, &ccColorLevelsDlg::onApply);
 
-	//create histogram view
+	// create histogram view
 	m_histogram = new ccHistogramWindow(this);
 	{
 		m_histogram->setColorScheme(ccHistogramWindow::USE_SOLID_COLOR);
 		m_histogram->setSolidColor(Qt::black);
-		//add view
+		// add view
 		histoFrame->setLayout(new QHBoxLayout());
-		histoFrame->layout()->addWidget(m_histogram);		
+		histoFrame->layout()->addWidget(m_histogram);
 	}
 
-	//restore previous parameters
+	// restore previous parameters
 	minInputSpinBox->setValue(s_inputLevels[0]);
 	maxInputSpinBox->setValue(s_inputLevels[1]);
 	minOutputSpinBox->setValue(s_outputLevels[0]);
@@ -77,7 +77,7 @@ void ccColorLevelsDlg::updateHistogram()
 		unsigned pointCount = (m_cloud ? m_cloud->size() : 0);
 		if (pointCount == 0)
 		{
-			//nothing to do
+			// nothing to do
 			m_histogram->clear();
 			return;
 		}
@@ -87,8 +87,8 @@ void ccColorLevelsDlg::updateHistogram()
 		{
 			for (int i = 0; i < 3; ++i)
 			{
-				if (	channelComboBox->currentIndex() == RGB
-					||	channelComboBox->currentIndex() == i + 1)
+				if (channelComboBox->currentIndex() == RGB
+				    || channelComboBox->currentIndex() == i + 1)
 				{
 					histoValues[i].resize(1 << (sizeof(ColorCompType) * 8), 0);
 				}
@@ -96,7 +96,7 @@ void ccColorLevelsDlg::updateHistogram()
 		}
 		catch (const std::bad_alloc&)
 		{
-			//not enough memory
+			// not enough memory
 			m_histogram->clear();
 			return;
 		}
@@ -110,7 +110,7 @@ void ccColorLevelsDlg::updateHistogram()
 		case RGB:
 			m_histogram->setSolidColor(Qt::black);
 			m_histogram->setAxisLabels("R,G,B", QString());
-			//test: for now we send all data into the same histogram!
+			// test: for now we send all data into the same histogram!
 			histoValuesG = histoValuesR;
 			histoValuesB = histoValuesR;
 			break;
@@ -128,7 +128,7 @@ void ccColorLevelsDlg::updateHistogram()
 			break;
 		}
 
-		//project points
+		// project points
 		{
 			for (unsigned i = 0; i < pointCount; ++i)
 			{
@@ -161,41 +161,40 @@ void ccColorLevelsDlg::onChannelChanged(int channel)
 
 void ccColorLevelsDlg::onApply()
 {
-	//save parameters
-	s_inputLevels[0] = minInputSpinBox->value();
-	s_inputLevels[1] = maxInputSpinBox->value();
-	s_outputLevels[0] = minOutputSpinBox->value();
-	s_outputLevels[1] = maxOutputSpinBox->value();
+	// save parameters
+	s_inputLevels[0]      = minInputSpinBox->value();
+	s_inputLevels[1]      = maxInputSpinBox->value();
+	s_outputLevels[0]     = minOutputSpinBox->value();
+	s_outputLevels[1]     = maxOutputSpinBox->value();
 	s_outputLevelsEnabled = outputLevelsCheckBox->isChecked();
 
-	if (	m_cloud
-		&&	(	minInputSpinBox->value() != 0
-			||	maxInputSpinBox->value() != 255
-			||	minOutputSpinBox->value() != 0
-			||	maxOutputSpinBox->value() != 255
-			) )
+	if (m_cloud
+	    && (minInputSpinBox->value() != 0
+	        || maxInputSpinBox->value() != 255
+	        || minOutputSpinBox->value() != 0
+	        || maxOutputSpinBox->value() != 255))
 	{
 
-		bool applyRGB[3] = {	channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
-								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
-								channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE };
+		bool applyRGB[3] = {channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == RED,
+		                    channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == GREEN,
+		                    channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == BLUE};
 
-		ScaleColorFields(	m_cloud,
-							s_inputLevels[0],
-							s_inputLevels[1],
-							s_outputLevels[0],
-							s_outputLevels[1],
-							applyRGB );
+		ScaleColorFields(m_cloud,
+		                 s_inputLevels[0],
+		                 s_inputLevels[1],
+		                 s_outputLevels[0],
+		                 s_outputLevels[1],
+		                 applyRGB);
 
-		//update display
+		// update display
 		m_cloud->getDisplay()->redraw();
 
-		//update histogram
+		// update histogram
 		onChannelChanged(channelComboBox->currentIndex());
 	}
 
-	//after applying the filter we reset the boundaries to (0,255)
-	//in case the user clicks multiple times on the "Apply" button!
+	// after applying the filter we reset the boundaries to (0,255)
+	// in case the user clicks multiple times on the "Apply" button!
 	minInputSpinBox->setValue(0);
 	maxInputSpinBox->setValue(255);
 	minOutputSpinBox->setValue(0);
@@ -218,36 +217,36 @@ bool ccColorLevelsDlg::ScaleColorFields(ccGenericPointCloud* cloud, int inputLev
 	ccPointCloud* pc = ccHObjectCaster::ToPointCloud(cloud);
 
 	unsigned pointCount = cloud->size();
-	int qIn = inputLevelMax - inputLevelMin;
+	int      qIn        = inputLevelMax - inputLevelMin;
 	if (qIn == 0)
 	{
 		ccLog::Warning("(ccColorLevelsDlg::ScaleColorFields] Flat input range (input range can't be 0)");
 		return false;
 	}
 
-	int pOut = outputLevelMax - outputLevelMin;
+	int    pOut      = outputLevelMax - outputLevelMin;
 	double convRatio = pOut / static_cast<double>(qIn);
 	for (unsigned i = 0; i < pointCount; ++i)
 	{
-		const ccColor::Rgba& col = cloud->getPointColor(i);
-		ccColor::Rgba newRgb = col;
+		const ccColor::Rgba& col    = cloud->getPointColor(i);
+		ccColor::Rgba        newRgb = col;
 		for (unsigned c = 0; c < 3; ++c)
 		{
 			if (applyRGB[c])
 			{
-				double newC = outputLevelMin + (static_cast<int>(col.rgba[c]) - inputLevelMin) * convRatio;
+				double newC    = outputLevelMin + (static_cast<int>(col.rgba[c]) - inputLevelMin) * convRatio;
 				newRgb.rgba[c] = static_cast<ColorCompType>(std::max(std::min(newC, static_cast<double>(ccColor::MAX)), 0.0));
 			}
 		}
 
-		//set the new color
+		// set the new color
 		if (pc)
 		{
 			pc->setPointColor(i, newRgb);
 		}
 		else
 		{
-			//DGM FIXME: dirty!
+			// DGM FIXME: dirty!
 			const_cast<ccColor::Rgba&>(col) = newRgb;
 		}
 	}

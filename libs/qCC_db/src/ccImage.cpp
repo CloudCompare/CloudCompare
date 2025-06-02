@@ -1,55 +1,55 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Always first
-#include "ccIncludeGL.h"
-
+// Always first
 #include "ccImage.h"
 
-//Local
+#include "ccIncludeGL.h"
+
+// Local
 #include "ccCameraSensor.h"
 
-//Qt
+// Qt
 #include <QFileInfo>
 #include <QImageReader>
 #include <QOpenGLTexture>
 
 ccImage::ccImage()
-	: ccHObject("Not loaded")
-	, m_width(0)
-	, m_height(0)
-	, m_aspectRatio(1.0f)
-	, m_texAlpha(1.0f)
-	, m_associatedSensor(nullptr)
+    : ccHObject("Not loaded")
+    , m_width(0)
+    , m_height(0)
+    , m_aspectRatio(1.0f)
+    , m_texAlpha(1.0f)
+    , m_associatedSensor(nullptr)
 {
 	setVisible(true);
 	lockVisibility(false);
-	setSelectionBehavior(SELECTION_FIT_BBOX); //same as the camera sensors that are (generally) associated to images
+	setSelectionBehavior(SELECTION_FIT_BBOX); // same as the camera sensors that are (generally) associated to images
 	setEnabled(false);
 }
 
 ccImage::ccImage(const QImage& image, const QString& name)
-	: ccHObject(name)
-	, m_width(image.width())
-	, m_height(image.height())
-	, m_aspectRatio(1.0f)
-	, m_texAlpha(1.0f)
-	, m_image(image)
-	, m_associatedSensor(nullptr)
+    : ccHObject(name)
+    , m_width(image.width())
+    , m_height(image.height())
+    , m_aspectRatio(1.0f)
+    , m_texAlpha(1.0f)
+    , m_image(image)
+    , m_associatedSensor(nullptr)
 {
 	updateAspectRatio();
 	setVisible(true);
@@ -57,14 +57,14 @@ ccImage::ccImage(const QImage& image, const QString& name)
 	setEnabled(true);
 }
 
-ccImage::ccImage(const ccImage& image, bool keepSensorLink/*=true*/)
-	: ccHObject(image)
-	, m_width(image.m_width)
-	, m_height(image.m_height)
-	, m_aspectRatio(image.m_aspectRatio)
-	, m_texAlpha(image.m_texAlpha)
-	, m_image(image.m_image)
-	, m_associatedSensor(nullptr)
+ccImage::ccImage(const ccImage& image, bool keepSensorLink /*=true*/)
+    : ccHObject(image)
+    , m_width(image.m_width)
+    , m_height(image.m_height)
+    , m_aspectRatio(image.m_aspectRatio)
+    , m_texAlpha(image.m_texAlpha)
+    , m_image(image.m_image)
+    , m_associatedSensor(nullptr)
 {
 	if (image.m_associatedSensor && keepSensorLink)
 	{
@@ -75,7 +75,7 @@ ccImage::ccImage(const ccImage& image, bool keepSensorLink/*=true*/)
 bool ccImage::load(const QString& filename, QString& error)
 {
 	QImageReader reader(filename);
-	//m_image = QImage(filename);
+	// m_image = QImage(filename);
 	QImage image = reader.read();
 	if (image.isNull())
 	{
@@ -93,8 +93,8 @@ bool ccImage::load(const QString& filename, QString& error)
 
 void ccImage::setData(const QImage& image)
 {
-	m_image = image;
-	m_width = m_image.width();
+	m_image  = image;
+	m_width  = m_image.width();
 	m_height = m_image.height();
 	updateAspectRatio();
 }
@@ -106,14 +106,14 @@ void ccImage::updateAspectRatio()
 
 QSizeF ccImage::computeDisplayedSize(int glWidth, int glHeight) const
 {
-	int realWidth = static_cast<int>(m_height * m_aspectRatio); //take aspect ratio into account!
-	float cw = realWidth > 0 ? static_cast<float>(glWidth) / realWidth : 0;
-	float ch = m_height > 0 ? static_cast<float>(glHeight) / m_height : 0;
+	int   realWidth  = static_cast<int>(m_height * m_aspectRatio); // take aspect ratio into account!
+	float cw         = realWidth > 0 ? static_cast<float>(glWidth) / realWidth : 0;
+	float ch         = m_height > 0 ? static_cast<float>(glHeight) / m_height : 0;
 	float zoomFactor = (cw > ch ? ch : cw);
-	float dX = realWidth * zoomFactor;
-	float dY = m_height * zoomFactor;
+	float dX         = realWidth * zoomFactor;
+	float dY         = m_height * zoomFactor;
 
-	return { dX, dY };
+	return {dX, dY};
 }
 
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -123,12 +123,12 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (!MACRO_Draw2D(context) || !MACRO_Foreground(context))
 		return;
-		
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert( glFunc != nullptr );
-	
-	if ( glFunc == nullptr )
+
+	// get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	assert(glFunc != nullptr);
+
+	if (glFunc == nullptr)
 		return;
 
 	glFunc->glPushAttrib(GL_COLOR_BUFFER_BIT);
@@ -141,7 +141,7 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 	QOpenGLTexture texture(m_image);
 	texture.bind();
 	{
-		//we make the texture fit inside viewport
+		// we make the texture fit inside viewport
 		QSizeF displayedSize = computeDisplayedSize(context.glW, context.glH);
 
 		float w = static_cast<float>(displayedSize.width() / 2);
@@ -149,10 +149,14 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glFunc->glColor4f(1.0f, 1.0f, 1.0f, m_texAlpha);
 		glFunc->glBegin(GL_QUADS);
-		glFunc->glTexCoord2f(0, 1); glFunc->glVertex2f(-w, -h);
-		glFunc->glTexCoord2f(1, 1); glFunc->glVertex2f( w, -h);
-		glFunc->glTexCoord2f(1, 0); glFunc->glVertex2f( w,  h);
-		glFunc->glTexCoord2f(0, 0); glFunc->glVertex2f(-w,  h);
+		glFunc->glTexCoord2f(0, 1);
+		glFunc->glVertex2f(-w, -h);
+		glFunc->glTexCoord2f(1, 1);
+		glFunc->glVertex2f(w, -h);
+		glFunc->glTexCoord2f(1, 0);
+		glFunc->glVertex2f(w, h);
+		glFunc->glTexCoord2f(0, 0);
+		glFunc->glVertex2f(-w, h);
 		glFunc->glEnd();
 	}
 	texture.release();
@@ -201,14 +205,14 @@ bool ccImage::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//we can't save the associated sensor here (as it may be shared by multiple images)
-	//so instead we save it's unique ID (dataVersion>=38)
-	//WARNING: the sensor must be saved in the same BIN file! (responsibility of the caller)
+	// we can't save the associated sensor here (as it may be shared by multiple images)
+	// so instead we save it's unique ID (dataVersion>=38)
+	// WARNING: the sensor must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t sensorUniqueID = (m_associatedSensor ? (uint32_t)m_associatedSensor->getUniqueID() : 0);
 	if (out.write((const char*)&sensorUniqueID, 4) < 0)
 		return WriteError();
 
-	//for backward compatibility
+	// for backward compatibility
 	float texU = 1.0f;
 	float texV = 1.0f;
 
@@ -221,7 +225,7 @@ bool ccImage::toFile_MeOnly(QFile& out, short dataVersion) const
 	outStream << m_texAlpha;
 	outStream << m_image;
 	QString fakeString;
-	outStream << fakeString; //formerly: 'complete filename'
+	outStream << fakeString; // formerly: 'complete filename'
 
 	return true;
 }
@@ -231,9 +235,9 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//as the associated sensor can't be saved directly (as it may be shared by multiple images)
-	//we only store its unique ID (dataVersion >= 38) --> we hope we will find it at loading time (i.e. this
-	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	// as the associated sensor can't be saved directly (as it may be shared by multiple images)
+	// we only store its unique ID (dataVersion >= 38) --> we hope we will find it at loading time (i.e. this
+	// is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t sensorUniqueID = 0;
 	if (in.read((char*)&sensorUniqueID, 4) < 0)
 		return ReadError();
@@ -252,7 +256,7 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	inStream >> m_texAlpha;
 	inStream >> m_image;
 	QString fakeString;
-	inStream >> fakeString; //formerly: 'complete filename'
+	inStream >> fakeString; // formerly: 'complete filename'
 
 	return true;
 }
@@ -267,12 +271,12 @@ ccBBox ccImage::getOwnFitBB(ccGLMatrix& trans)
 	ccHObject::Container sensors;
 	filterChildren(sensors, false, CC_TYPES::SENSOR, false, m_currentDisplay);
 
-	//if we have exactly one sensor child, we use its own bounding-box
+	// if we have exactly one sensor child, we use its own bounding-box
 	if (sensors.size() == 1)
 	{
 		return sensors.front()->getOwnFitBB(trans);
 	}
 
-	//otherwise we stick to the default behavior
+	// otherwise we stick to the default behavior
 	return ccHObject::getOwnFitBB(trans);
 }

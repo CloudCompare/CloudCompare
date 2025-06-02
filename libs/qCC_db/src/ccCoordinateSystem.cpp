@@ -1,58 +1,58 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: Chris Brown                                        #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: Chris Brown                                        #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccCoordinateSystem.h"
 
-//qCC_db
+// qCC_db
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale, 
-									   PointCoordinateType axisWidth, 
-									   const ccGLMatrix* transMat/*=nullptr*/,
-									   QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), 
-	  m_DisplayScale(displayScale), 
-	  m_width(axisWidth), 
-	  m_showAxisPlanes(true), 
-	  m_showAxisLines(true)
+ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
+                                       PointCoordinateType axisWidth,
+                                       const ccGLMatrix*   transMat /*=nullptr*/,
+                                       QString             name /*=QString("CoordinateSystem")*/)
+    : ccGenericPrimitive(name, transMat)
+    , m_DisplayScale(displayScale)
+    , m_width(axisWidth)
+    , m_showAxisPlanes(true)
+    , m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
 }
 
-ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat/*=nullptr*/,
-									   QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name, transMat), 
-	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
-	  m_width(AXIS_DEFAULT_WIDTH), 
-	  m_showAxisPlanes(true), 
-	  m_showAxisLines(true)
+ccCoordinateSystem::ccCoordinateSystem(const ccGLMatrix* transMat /*=nullptr*/,
+                                       QString           name /*=QString("CoordinateSystem")*/)
+    : ccGenericPrimitive(name, transMat)
+    , m_DisplayScale(DEFAULT_DISPLAY_SCALE)
+    , m_width(AXIS_DEFAULT_WIDTH)
+    , m_showAxisPlanes(true)
+    , m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
 }
 
-ccCoordinateSystem::ccCoordinateSystem(QString name/*=QString("CoordinateSystem")*/)
-	: ccGenericPrimitive(name), 
-	  m_DisplayScale(DEFAULT_DISPLAY_SCALE), 
-	  m_width(AXIS_DEFAULT_WIDTH), 
-	  m_showAxisPlanes(true), 
-	  m_showAxisLines(true)
+ccCoordinateSystem::ccCoordinateSystem(QString name /*=QString("CoordinateSystem")*/)
+    : ccGenericPrimitive(name)
+    , m_DisplayScale(DEFAULT_DISPLAY_SCALE)
+    , m_width(AXIS_DEFAULT_WIDTH)
+    , m_showAxisPlanes(true)
+    , m_showAxisLines(true)
 {
 	updateRepresentation();
 	showColors(true);
@@ -112,10 +112,10 @@ ccPlane* ccCoordinateSystem::createXYplane(const ccGLMatrix* transMat) const
 ccPlane* ccCoordinateSystem::createYZplane(const ccGLMatrix* transMat) const
 {
 	ccGLMatrix yzPlaneMat;
-	yzPlaneMat.initFromParameters(	static_cast<PointCoordinateType>(M_PI_2),
-										static_cast<PointCoordinateType>(0),
-										static_cast<PointCoordinateType>(M_PI_2),
-										CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
+	yzPlaneMat.initFromParameters(static_cast<PointCoordinateType>(M_PI_2),
+	                              static_cast<PointCoordinateType>(0),
+	                              static_cast<PointCoordinateType>(M_PI_2),
+	                              CCVector3(0.0, m_DisplayScale / 2, m_DisplayScale / 2));
 	if (transMat)
 	{
 		yzPlaneMat = *transMat * yzPlaneMat;
@@ -129,9 +129,9 @@ ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
 {
 	ccGLMatrix zxPlaneMat;
 	zxPlaneMat.initFromParameters(static_cast<PointCoordinateType>(0),
-									static_cast<PointCoordinateType>(-M_PI_2),
-									static_cast<PointCoordinateType>(-M_PI_2),
-		CCVector3(m_DisplayScale / 2, 0, m_DisplayScale / 2));
+	                              static_cast<PointCoordinateType>(-M_PI_2),
+	                              static_cast<PointCoordinateType>(-M_PI_2),
+	                              CCVector3(m_DisplayScale / 2, 0, m_DisplayScale / 2));
 	if (transMat)
 	{
 		zxPlaneMat = *transMat * zxPlaneMat;
@@ -143,18 +143,18 @@ ccPlane* ccCoordinateSystem::createZXplane(const ccGLMatrix* transMat) const
 
 bool ccCoordinateSystem::buildUp()
 {
-	//clear triangles indexes
+	// clear triangles indexes
 	if (m_triVertIndexes)
 	{
 		m_triVertIndexes->clear();
 	}
-	//clear per triangle normals
+	// clear per triangle normals
 	removePerTriangleNormalIndexes();
 	if (m_triNormals)
 	{
 		m_triNormals->clear();
 	}
-	//clear vertices
+	// clear vertices
 	ccPointCloud* verts = vertices();
 	if (verts)
 	{
@@ -167,7 +167,6 @@ bool ccCoordinateSystem::buildUp()
 
 	return (vertices() && vertices()->size() == 12 && this->size() == 6);
 }
-
 
 ccGenericPrimitive* ccCoordinateSystem::clone() const
 {
@@ -186,7 +185,7 @@ bool ccCoordinateSystem::toFile_MeOnly(QFile& out, short dataVersion) const
 	if (!ccGenericPrimitive::toFile_MeOnly(out, dataVersion))
 		return false;
 
-	//parameters (dataVersion>=52)
+	// parameters (dataVersion>=52)
 	QDataStream outStream(&out);
 	outStream << m_DisplayScale;
 	outStream << m_width;
@@ -199,7 +198,7 @@ bool ccCoordinateSystem::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion>=52)
+	// parameters (dataVersion>=52)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_DisplayScale, 1);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
@@ -215,11 +214,11 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (m_showAxisPlanes)
 	{
-		//call parent method to draw the Planes
+		// call parent method to draw the Planes
 		ccGenericPrimitive::drawMeOnly(context);
 	}
 
-	//show axis
+	// show axis
 	if (m_showAxisLines && MACRO_Draw3D(context))
 	{
 		QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
@@ -228,12 +227,12 @@ void ccCoordinateSystem::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (glFunc == nullptr)
 			return;
 
-		//color-based entity picking
-		bool entityPickingMode = MACRO_EntityPicking(context);
+		// color-based entity picking
+		bool         entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
-			//not fast at all!
+			// not fast at all!
 			if (MACRO_FastEntityPicking(context))
 			{
 				return;

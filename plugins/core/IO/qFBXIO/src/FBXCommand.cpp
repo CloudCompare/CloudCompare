@@ -1,36 +1,36 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 #include "FBXCommand.h"
+
 #include "FBXFilter.h"
 
-constexpr char COMMAND_FBX[] = "FBX";
+constexpr char COMMAND_FBX[]               = "FBX";
 constexpr char COMMAND_FBX_EXPORT_FORMAT[] = "EXPORT_FMT";
 
-
-FBXCommand::FBXCommand() :
-	Command( "FBX", COMMAND_FBX )
+FBXCommand::FBXCommand()
+    : Command("FBX", COMMAND_FBX)
 {
 }
 
-bool FBXCommand::process( ccCommandLineInterface &cmd )
+bool FBXCommand::process(ccCommandLineInterface& cmd)
 {
-	cmd.print( "[FBX]" );
-	
+	cmd.print("[FBX]");
+
 	const QString& arg = cmd.arguments().front();
 
 	if (ccCommandLineInterface::IsCommand(arg, COMMAND_FBX_EXPORT_FORMAT))
@@ -49,5 +49,5 @@ bool FBXCommand::process( ccCommandLineInterface &cmd )
 		FBXFilter::SetDefaultOutputFormat(format);
 	}
 
-	return true;	
+	return true;
 }

@@ -1,20 +1,20 @@
 #include "GamepadInput.h"
 
-//Qt
+// Qt
 #include <QGamepadManager>
 
-//qCC_gl
+// qCC_gl
 #include <ccGLWindowInterface.h>
 
-//system
+// system
 #include <assert.h>
 
-GamepadInput::GamepadInput(QObject* parent/*=nullptr*/)
-	: QGamepad(0, parent)
-	, m_hasPanning(false)
-	, m_hasTranslation(false)
-	, m_hasRotation(false)
-	, m_zoom(0)
+GamepadInput::GamepadInput(QObject* parent /*=nullptr*/)
+    : QGamepad(0, parent)
+    , m_hasPanning(false)
+    , m_hasTranslation(false)
+    , m_hasRotation(false)
+    , m_zoom(0)
 {
 	connect(&m_timer, &QTimer::timeout, this, &GamepadInput::updateInternalState);
 }
@@ -41,7 +41,7 @@ void GamepadInput::update(ccGLWindowInterface* win)
 		return;
 	}
 
-	//rotation
+	// rotation
 	if (m_hasRotation)
 	{
 		win->rotateBaseViewMat(m_rotation);
@@ -49,7 +49,7 @@ void GamepadInput::update(ccGLWindowInterface* win)
 
 	const ccViewportParameters& viewParams = win->getViewportParameters();
 
-	//panning
+	// panning
 	if (m_hasPanning)
 	{
 		double screenWidth3D = viewParams.computeWidthAtFocalDist(win->glWidth(), win->glHeight());
@@ -57,19 +57,19 @@ void GamepadInput::update(ccGLWindowInterface* win)
 		{
 			screenWidth3D = -screenWidth3D;
 		}
-		CCVector3d v(-m_panning.x*screenWidth3D, -m_panning.y*screenWidth3D, 0);
+		CCVector3d v(-m_panning.x * screenWidth3D, -m_panning.y * screenWidth3D, 0);
 		win->moveCamera(v);
 	}
 
-	//zoom
+	// zoom
 	if (m_hasTranslation)
 	{
 		double X = m_translation.x;
-		//double Y = m_translation.y; //always 0
+		// double Y = m_translation.y; //always 0
 		double Z = m_translation.z;
 
-		if (	CCCoreLib::GreaterThanEpsilon(std::abs(X))
-			||	CCCoreLib::GreaterThanEpsilon(std::abs(Z)))
+		if (CCCoreLib::GreaterThanEpsilon(std::abs(X))
+		    || CCCoreLib::GreaterThanEpsilon(std::abs(Z)))
 		{
 			if (viewParams.perspectiveView)
 			{
@@ -88,77 +88,77 @@ void GamepadInput::update(ccGLWindowInterface* win)
 	win->redraw();
 }
 
-static double s_gamepadSpeed = 0.005;
+static double s_gamepadSpeed    = 0.005;
 static double s_gamepadRotSpeed = 0.02;
 
 void GamepadInput::updateInternalState()
 {
-	//reset
-	m_panning = CCVector3(0, 0, 0);
-	m_hasPanning = false;
-	m_translation = CCVector3(0, 0, 0);
+	// reset
+	m_panning        = CCVector3(0, 0, 0);
+	m_hasPanning     = false;
+	m_translation    = CCVector3(0, 0, 0);
 	m_hasTranslation = false;
 	m_rotation.toIdentity();
 	m_hasRotation = false;
-	m_zoom = 0;
+	m_zoom        = 0;
 
-	//rotation
+	// rotation
 	{
 		CCVector3d u(axisRightX() * s_gamepadRotSpeed, -axisRightY() * s_gamepadRotSpeed, 1);
 		u.normalize();
 
 		if (u.z != 1.0)
 		{
-			m_rotation = ccGLMatrixd::FromToRotation(CCVector3d(0, 0, 1), u);
+			m_rotation    = ccGLMatrixd::FromToRotation(CCVector3d(0, 0, 1), u);
 			m_hasRotation = true;
 		}
 
 		if (buttonL2() || buttonR2())
 		{
-			double angle_deg = buttonL2() ? 20 * s_gamepadRotSpeed : -20 * s_gamepadRotSpeed;
+			double      angle_deg = buttonL2() ? 20 * s_gamepadRotSpeed : -20 * s_gamepadRotSpeed;
 			ccGLMatrixd rot;
-			rot.initFromParameters( CCCoreLib::DegreesToRadians( angle_deg ), CCVector3d(0, 0, 1), CCVector3d(0, 0, 0) );
-			m_rotation = rot * m_rotation;
+			rot.initFromParameters(CCCoreLib::DegreesToRadians(angle_deg), CCVector3d(0, 0, 1), CCVector3d(0, 0, 0));
+			m_rotation    = rot * m_rotation;
 			m_hasRotation = true;
 		}
 	}
 
-	//panning
+	// panning
 	{
 		if (buttonLeft())
 		{
-			m_panning.x = -s_gamepadSpeed;
+			m_panning.x  = -s_gamepadSpeed;
 			m_hasPanning = true;
 		}
 		else if (buttonRight())
 		{
-			m_panning.x = s_gamepadSpeed;
+			m_panning.x  = s_gamepadSpeed;
 			m_hasPanning = true;
 		}
 		if (buttonUp())
 		{
-			m_panning.y = s_gamepadSpeed;
+			m_panning.y  = s_gamepadSpeed;
 			m_hasPanning = true;
 		}
 		else if (buttonDown())
 		{
-			m_panning.y = -s_gamepadSpeed;
+			m_panning.y  = -s_gamepadSpeed;
 			m_hasPanning = true;
 		}
 	}
 
-	//translation
+	// translation
 	{
 		double x = axisLeftX();
 		double z = axisLeftY();
 		if (x != 0 || z != 0)
 		{
-			m_translation = CCVector3(x * s_gamepadRotSpeed, 0, z * s_gamepadRotSpeed);
+			m_translation    = CCVector3(x * s_gamepadRotSpeed, 0, z * s_gamepadRotSpeed);
 			m_hasTranslation = true;
 		}
 	}
 
-	//zoom
+	// zoom
 	{
 		m_zoom = -axisLeftY() * s_gamepadSpeed;
 	}

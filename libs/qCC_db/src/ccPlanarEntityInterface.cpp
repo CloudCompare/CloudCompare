@@ -1,25 +1,25 @@
 #include "ccPlanarEntityInterface.h"
 
-//Local
-#include <ccCylinder.h>
+// Local
 #include <ccCone.h>
+#include <ccCylinder.h>
 
-//Qt
+// Qt
 #include <QSharedPointer>
 
 ccPlanarEntityInterface::ccPlanarEntityInterface()
-	: m_showNormalVector(false)
+    : m_showNormalVector(false)
 {
 }
 
-//unit normal representation
+// unit normal representation
 static QSharedPointer<ccCylinder> c_unitNormalSymbol(nullptr);
-static QSharedPointer<ccCone> c_unitNormalHeadSymbol(nullptr);
+static QSharedPointer<ccCone>     c_unitNormalHeadSymbol(nullptr);
 
-void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color/*=nullptr*/)
+void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVector3& pos, float scale, const ccColor::Rgb* color /*=nullptr*/)
 {
-	//get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
+	// get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
@@ -42,9 +42,9 @@ void ccPlanarEntityInterface::glDrawNormal(CC_DRAW_CONTEXT& context, const CCVec
 		c_unitNormalHeadSymbol->setTempColor(ccColor::green);
 	}
 
-	//build-up the normal representation own 'context'
+	// build-up the normal representation own 'context'
 	CC_DRAW_CONTEXT normalContext = context;
-	normalContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the primitives don't push their own!
+	normalContext.drawingFlags &= (~CC_ENTITY_PICKING); // we must remove the 'entity picking flag' so that the primitives don't push their own!
 	normalContext.display = nullptr;
 
 	if (color)

@@ -166,12 +166,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
 
 	connect(versionComboBox,
-	        (void (QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void (QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -850,7 +850,7 @@ void LasSaveDialog::setOffsets(const QMap<Offset, CCVector3d>& availableOffsets,
 		else if (!outputOffsets.contains(selectedOffsetType))
 		{
 			ccLog::Warning("Internal error: selected output offset is not in the input map");
-			//we choose the custom one
+			// we choose the custom one
 			useCustomLASOffsetRadioButton->setChecked(true);
 		}
 	}

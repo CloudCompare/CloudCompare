@@ -183,7 +183,6 @@ namespace copc
 		}
 
 	  private: // static members
-
 	  private: // members
 		bool           m_isValid{false};
 		int32_t        m_maxLevel{0};

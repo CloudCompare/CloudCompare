@@ -1,37 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Local
+// Local
 #include "ccGlobalShiftManager.h"
+
 #include "ccShiftAndScaleCloudDlg.h"
 
-//Qt
+// Qt
 #include <QCoreApplication>
 #include <QFile>
 
-//qCC_db
+// qCC_db
 #include <ccHObject.h>
 
-//System
-#include <string.h>
+// System
 #include <assert.h>
+#include <string.h>
 
 double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
-double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH = 1.0e6;
+double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH      = 1.0e6;
 
 // default name for the Global Shift 'bookmarks' file
 static QString s_defaultGlobalShiftListFilename("global_shift_list.txt");
@@ -58,11 +59,11 @@ static bool IsDefaultShift(const CCVector3d& shift, double scale)
 
 static bool SameShift(const ccGlobalShiftManager::ShiftInfo& shiftInfo, const CCVector3d& shift, double scale)
 {
-	return (	(shiftInfo.shift - shift).norm() <= CCCoreLib::ZERO_TOLERANCE_D
-			&&	std::abs(shiftInfo.scale - scale) <= CCCoreLib::ZERO_TOLERANCE_D );
+	return ((shiftInfo.shift - shift).norm() <= CCCoreLib::ZERO_TOLERANCE_D
+	        && std::abs(shiftInfo.scale - scale) <= CCCoreLib::ZERO_TOLERANCE_D);
 }
 
-void ccGlobalShiftManager::StoreShift(const CCVector3d& shift, double scale, bool preserve/*=true*/)
+void ccGlobalShiftManager::StoreShift(const CCVector3d& shift, double scale, bool preserve /*=true*/)
 {
 	if (IsDefaultShift(shift, scale))
 	{
@@ -75,28 +76,28 @@ void ccGlobalShiftManager::StoreShift(const CCVector3d& shift, double scale, boo
 	{
 		if (SameShift(shiftInfo, shift, scale))
 		{
-			//we already know this one
+			// we already know this one
 			return;
 		}
 	}
 
 	static unsigned lastInputIndex = 0;
-	ShiftInfo info("Previous input");
+	ShiftInfo       info("Previous input");
 	if (lastInputIndex != 0)
 	{
 		info.name += QString(" (%1)").arg(lastInputIndex);
 	}
 	++lastInputIndex;
 
-	info.scale = scale;
-	info.shift = shift;
+	info.scale    = scale;
+	info.shift    = shift;
 	info.preserve = preserve;
 	s_lastInfoBuffer.emplace_back(info);
 }
 
 bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
 {
-	return	NeedShift(P.x) || NeedShift(P.y) || NeedShift(P.z);
+	return NeedShift(P.x) || NeedShift(P.y) || NeedShift(P.z);
 }
 
 bool ccGlobalShiftManager::NeedShift(double d)
@@ -109,22 +110,22 @@ bool ccGlobalShiftManager::NeedRescale(double d)
 	return std::abs(d) >= MAX_DIAGONAL_LENGTH;
 }
 
-static bool ShiftAndScaleAreSimilar(double scale1,
-									const CCVector3d& shift1,
-									double scale2,
-									const CCVector3d& shift2)
+static bool ShiftAndScaleAreSimilar(double            scale1,
+                                    const CCVector3d& shift1,
+                                    double            scale2,
+                                    const CCVector3d& shift2)
 {
 	return ((shift1 - shift2).norm() <= CCCoreLib::ZERO_TOLERANCE_D) && (std::abs(scale1 - scale2) <= CCCoreLib::ZERO_TOLERANCE_D);
 }
 
-bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
-									double diagonal,
-									Mode mode,
-									bool useInputCoordinatesShiftIfPossible,
-									CCVector3d& coordinatesShift,
-									bool* _preserveCoordinateShift/*=nullptr*/,
-									double* _coordinatesScale/*=nullptr*/,
-									bool* _applyAll/*=nullptr*/)
+bool ccGlobalShiftManager::Handle(const CCVector3d& P,
+                                  double            diagonal,
+                                  Mode              mode,
+                                  bool              useInputCoordinatesShiftIfPossible,
+                                  CCVector3d&       coordinatesShift,
+                                  bool*             _preserveCoordinateShift /*=nullptr*/,
+                                  double*           _coordinatesScale /*=nullptr*/,
+                                  bool*             _applyAll /*=nullptr*/)
 {
 	assert(diagonal >= 0.0);
 	bool preserveCoordinateShift = true;
@@ -138,38 +139,38 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		*_applyAll = false;
 	}
 
-	//default scale
+	// default scale
 	double scale = 1.0;
 
-	bool needShift = false;
+	bool needShift   = false;
 	bool needRescale = false;
 
 	// if shift info was provided as input (typically from a previous entity)
-	bool canUseInputCoordinatesShift = false;
+	bool       canUseInputCoordinatesShift = false;
 	CCVector3d inputCoordinatesShift(0, 0, 0);
-	double inputScale = 1.0;
+	double     inputScale = 1.0;
 	if (useInputCoordinatesShiftIfPossible)
 	{
 		if (nullptr != _coordinatesScale)
 		{
 			// use the input scale if specified
 			*_coordinatesScale = std::max(*_coordinatesScale, CCCoreLib::ZERO_TOLERANCE_D);
-			scale = *_coordinatesScale;
+			scale              = *_coordinatesScale;
 		}
 
 		inputCoordinatesShift = coordinatesShift;
-		inputScale = scale;
+		inputScale            = scale;
 
 		if (mode == NO_DIALOG)
 		{
 			// without a dialog, we don't have the choice, we will use the input shift...
-			//canUseInputCoordinatesShift = true;
+			// canUseInputCoordinatesShift = true;
 			return true;
 		}
 		else
 		{
-			needShift = NeedShift(P*scale + coordinatesShift);
-			needRescale = NeedRescale(diagonal*scale);
+			needShift   = NeedShift(P * scale + coordinatesShift);
+			needRescale = NeedRescale(diagonal * scale);
 
 			canUseInputCoordinatesShift = (!needShift && !needRescale);
 		}
@@ -190,14 +191,14 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 			return false;
 		}
 
-		needShift = NeedShift(P);
+		needShift   = NeedShift(P);
 		needRescale = NeedRescale(diagonal);
 
-		if (	!needShift
-			&&	!needRescale
-			&&	mode != ALWAYS_DISPLAY_DIALOG)
+		if (!needShift
+		    && !needRescale
+		    && mode != ALWAYS_DISPLAY_DIALOG)
 		{
-			return false; //no need to apply any shift
+			return false; // no need to apply any shift
 		}
 	}
 
@@ -224,9 +225,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		// try to find an already used Global Shift that would work
 		for (size_t i = 0; i < lastInfoBuffer.size(); ++i)
 		{
-			const ShiftInfo& shiftInfo = lastInfoBuffer[i];
-			bool tempNeedShift = NeedShift(P*shiftInfo.scale + shiftInfo.shift);
-			bool tempNeedRescale = NeedRescale(diagonal*shiftInfo.scale);
+			const ShiftInfo& shiftInfo       = lastInfoBuffer[i];
+			bool             tempNeedShift   = NeedShift(P * shiftInfo.scale + shiftInfo.shift);
+			bool             tempNeedRescale = NeedRescale(diagonal * shiftInfo.scale);
 			if (!tempNeedShift && !tempNeedRescale)
 			{
 				// we found a valid candidate
@@ -235,9 +236,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				{
 					// use this shift & scale if the input one was not working
 					coordinatesShift = shiftInfo.shift;
-					scale = shiftInfo.scale;
-					needShift = tempNeedShift;
-					needRescale = tempNeedRescale;
+					scale            = shiftInfo.scale;
+					needShift        = tempNeedShift;
+					needRescale      = tempNeedRescale;
 				}
 				break;
 			}
@@ -257,9 +258,9 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 		}
 	}
 	// should we still display the dialog?
-	else if (	needShift
-			||	needRescale
-			||	mode == ALWAYS_DISPLAY_DIALOG)
+	else if (needShift
+	         || needRescale
+	         || mode == ALWAYS_DISPLAY_DIALOG)
 	{
 		ccShiftAndScaleCloudDlg sasDlg(P, diagonal);
 		sasDlg.showApplyAllButton(_applyAll != nullptr);
@@ -271,8 +272,8 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 
 		// always add the "suggested" entry
 		CCVector3d suggestedShift = BestShift(P);
-		double suggestedScale = BestScale(diagonal);
-		int index = sasDlg.addShiftInfo(ShiftInfo("Automatic", suggestedShift, suggestedScale));
+		double     suggestedScale = BestScale(diagonal);
+		int        index          = sasDlg.addShiftInfo(ShiftInfo("Automatic", suggestedShift, suggestedScale));
 
 		// add the input shift if any, and if it's different from the others
 		if (useInputCoordinatesShiftIfPossible)
@@ -304,7 +305,7 @@ bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
 				}
 			}
 		}
-		
+
 		// add the previous entries (if any)
 		if (!lastInfoBuffer.empty())
 		{
@@ -364,14 +365,14 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 	{
 		return CCVector3d(0, 0, 0);
 	}
-	
-	CCVector3d shift(	std::abs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
-						std::abs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,
-						std::abs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0 );
 
-	//round-off the shift value
+	CCVector3d shift(std::abs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
+	                 std::abs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,
+	                 std::abs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0);
+
+	// round-off the shift value
 	{
-		//make sure the round off scale is not larger than the max coordinate value ;)
+		// make sure the round off scale is not larger than the max coordinate value ;)
 		int roundOffScalePower = 3;
 		assert(MAX_COORDINATE_ABS_VALUE >= 1.0);
 		while (pow(10.0, roundOffScalePower) > MAX_COORDINATE_ABS_VALUE)
@@ -381,11 +382,11 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 		}
 
 		double roundOffScale = pow(10.0, 1.0 * roundOffScalePower);
-		shift.x = static_cast<int>(shift.x / roundOffScale) * roundOffScale;
-		shift.y = static_cast<int>(shift.y / roundOffScale) * roundOffScale;
-		shift.z = static_cast<int>(shift.z / roundOffScale) * roundOffScale;
+		shift.x              = static_cast<int>(shift.x / roundOffScale) * roundOffScale;
+		shift.y              = static_cast<int>(shift.y / roundOffScale) * roundOffScale;
+		shift.z              = static_cast<int>(shift.z / roundOffScale) * roundOffScale;
 	}
-	
+
 	return shift;
 }
 
@@ -401,11 +402,11 @@ bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftI
 		return false;
 
 	QTextStream stream(&file);
-	unsigned lineNumber = 0;
+	unsigned    lineNumber = 0;
 
 	while (true)
 	{
-		//read next line
+		// read next line
 		QString line = stream.readLine();
 		if (line.isEmpty())
 			break;
@@ -414,33 +415,37 @@ bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftI
 		if (line.startsWith("//"))
 			continue;
 
-		//split line in 5 items
+		// split line in 5 items
 		QStringList tokens = line.split(";", QString::SkipEmptyParts);
 		if (tokens.size() != 5)
 		{
-			//invalid file
+			// invalid file
 			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] File '%1' is malformed (5 items expected per line)").arg(filename));
 			return false;
 		}
 
-		//decode items
-		bool ok = true;
-		unsigned errors = 0;
+		// decode items
+		bool                            ok     = true;
+		unsigned                        errors = 0;
 		ccGlobalShiftManager::ShiftInfo info;
-		info.name = tokens[0].trimmed();
+		info.name    = tokens[0].trimmed();
 		info.shift.x = tokens[1].toDouble(&ok);
-		if (!ok) ++errors;
+		if (!ok)
+			++errors;
 		info.shift.y = tokens[2].toDouble(&ok);
-		if (!ok) ++errors;
+		if (!ok)
+			++errors;
 		info.shift.z = tokens[3].toDouble(&ok);
-		if (!ok) ++errors;
+		if (!ok)
+			++errors;
 		info.scale = tokens[4].toDouble(&ok);
-		if (!ok) ++errors;
+		if (!ok)
+			++errors;
 
-		//process errors
+		// process errors
 		if (errors)
 		{
-			//invalid file
+			// invalid file
 			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] File '%1' is malformed (wrong item type encountered on line %2)").arg(filename).arg(lineNumber));
 			return false;
 		}
@@ -451,7 +456,7 @@ bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftI
 		}
 		catch (const std::bad_alloc&)
 		{
-			//not enough memory
+			// not enough memory
 			ccLog::Warning(QString("[ccGlobalShiftManager::LoadInfoFromFile] Not enough memory to read file '%1'").arg(filename));
 			return false;
 		}
@@ -459,4 +464,3 @@ bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftI
 
 	return true;
 }
-

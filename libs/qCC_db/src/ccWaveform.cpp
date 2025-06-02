@@ -1,25 +1,26 @@
 #include "ccWaveform.h"
 
-//Qt
+// Qt
 #include <QDataStream>
 #include <QFile>
 #include <QTextStream>
 
 WaveformDescriptor::WaveformDescriptor()
-	: numberOfSamples(0)
-	, samplingRate_ps(0)
-	, digitizerGain(0)
-	, digitizerOffset(0)
-	, bitsPerSample(0)
-{}
-
-bool WaveformDescriptor::operator != (const WaveformDescriptor& d) const
+    : numberOfSamples(0)
+    , samplingRate_ps(0)
+    , digitizerGain(0)
+    , digitizerOffset(0)
+    , bitsPerSample(0)
 {
-	return	d.bitsPerSample != bitsPerSample
-		|| d.digitizerGain != digitizerGain
-		|| d.digitizerOffset != digitizerOffset
-		|| d.numberOfSamples != numberOfSamples
-		|| d.samplingRate_ps != samplingRate_ps;
+}
+
+bool WaveformDescriptor::operator!=(const WaveformDescriptor& d) const
+{
+	return d.bitsPerSample != bitsPerSample
+	       || d.digitizerGain != digitizerGain
+	       || d.digitizerOffset != digitizerOffset
+	       || d.numberOfSamples != numberOfSamples
+	       || d.samplingRate_ps != samplingRate_ps;
 }
 
 bool WaveformDescriptor::toFile(QFile& out, short dataVersion) const
@@ -33,7 +34,7 @@ bool WaveformDescriptor::toFile(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//dataVersion >= 44
+	// dataVersion >= 44
 	outStream << numberOfSamples;
 	outStream << samplingRate_ps;
 	outStream << digitizerGain;
@@ -50,7 +51,7 @@ bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags, Loade
 	if (dataVersion < 44)
 		return false;
 
-	//dataVersion >= 44
+	// dataVersion >= 44
 	inStream >> numberOfSamples;
 	inStream >> samplingRate_ps;
 	inStream >> digitizerGain;
@@ -65,20 +66,20 @@ short WaveformDescriptor::minimumFileVersion() const
 	return 44;
 }
 
-ccWaveform::ccWaveform(uint8_t descriptorID/*=0*/)
-	: m_byteCount(0)
-	, m_dataOffset(0)
-	, m_beamDir(0, 0, 0)
-	, m_echoTime_ps(0)
-	, m_descriptorID(descriptorID)
-	, m_returnIndex(1)
+ccWaveform::ccWaveform(uint8_t descriptorID /*=0*/)
+    : m_byteCount(0)
+    , m_dataOffset(0)
+    , m_beamDir(0, 0, 0)
+    , m_echoTime_ps(0)
+    , m_descriptorID(descriptorID)
+    , m_returnIndex(1)
 {
 }
 
 void ccWaveform::setDataDescription(uint64_t dataOffset, uint32_t byteCount)
 {
 	m_dataOffset = dataOffset;
-	m_byteCount = byteCount;
+	m_byteCount  = byteCount;
 }
 
 uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descriptor, const uint8_t* dataStorage) const
@@ -88,7 +89,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 		assert(false);
 		return 0;
 	}
-	
+
 	const uint8_t* _data = data(dataStorage);
 	switch (descriptor.bitsPerSample)
 	{
@@ -110,12 +111,12 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 	case 32:
 		return reinterpret_cast<const uint32_t*>(_data)[i];
 
-	default: //other 'strange' bps values ;)
+	default: // other 'strange' bps values ;)
 	{
-		uint32_t firstBitIndex = descriptor.bitsPerSample * i;
+		uint32_t firstBitIndex  = descriptor.bitsPerSample * i;
 		uint32_t firstByteIndex = (firstBitIndex >> 3); // = divide by 8
 
-		uint32_t lastBitIndex = firstBitIndex + descriptor.bitsPerSample - 1;
+		uint32_t lastBitIndex  = firstBitIndex + descriptor.bitsPerSample - 1;
 		uint32_t lastByteIndex = (lastBitIndex >> 3); // = divide by 8
 		if (lastByteIndex >= m_byteCount)
 		{
@@ -123,19 +124,19 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 			return 0;
 		}
 
-		//last byte (may be the first one!)
+		// last byte (may be the first one!)
 		uint32_t value = _data[lastByteIndex];
 		{
-			//number of bits used in the current byte
+			// number of bits used in the current byte
 			uint32_t r = ((lastByteIndex + 1) % 8);
 			if (r != 0)
 			{
-				//we keep only the used bits
+				// we keep only the used bits
 				value &= ((1 << r) - 1);
 			}
 		}
 
-		//other bytes (if any)
+		// other bytes (if any)
 		while (lastByteIndex != firstByteIndex)
 		{
 			--lastByteIndex;
@@ -143,7 +144,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 			value |= _data[lastByteIndex];
 		}
 
-		//remove the first unused bits (if any)
+		// remove the first unused bits (if any)
 		{
 			uint32_t r = firstBitIndex - 8 * firstByteIndex;
 			if (r != 0)
@@ -156,7 +157,7 @@ uint32_t ccWaveform::getRawSample(uint32_t i, const WaveformDescriptor& descript
 	}
 	}
 
-	//we should never arrive here
+	// we should never arrive here
 	assert(false);
 	return 0;
 }
@@ -180,7 +181,7 @@ bool ccWaveform::decodeSamples(std::vector<double>& values, const WaveformDescri
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return false;
 	}
 
@@ -246,8 +247,8 @@ double ccWaveform::getRange(double& minVal, double& maxVal, const WaveformDescri
 	for (uint32_t i = 1; i < descriptor.numberOfSamples; ++i)
 	{
 		double c = getSample(i, descriptor, dataStorage);
-		maxVal = std::max(maxVal, c);
-		minVal = std::min(minVal, c);
+		maxVal   = std::max(maxVal, c);
+		minVal   = std::min(minVal, c);
 	}
 
 	return maxVal - minVal;
@@ -261,7 +262,7 @@ CCVector3 ccWaveform::getSamplePos(float index, const CCVector3& P0, const Wavef
 
 void ccWaveform::applyRigidTransformation(const ccGLMatrix& trans)
 {
-	//we apply only the rotation
+	// we apply only the rotation
 	CCVector3 u = m_beamDir.toPC();
 	trans.applyRotation(u);
 	m_beamDir = u.toFloat();
@@ -278,12 +279,12 @@ bool ccWaveform::toFile(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//dataVersion >= 46
+	// dataVersion >= 46
 	outStream << m_descriptorID;
-	if (m_descriptorID != 0) //no need to save invalid waveforms
+	if (m_descriptorID != 0) // no need to save invalid waveforms
 	{
 		outStream << m_byteCount;
-		outStream << static_cast<quint64>(m_dataOffset); //see comment below (in 'fromFile')
+		outStream << static_cast<quint64>(m_dataOffset); // see comment below (in 'fromFile')
 		outStream << m_beamDir.x;
 		outStream << m_beamDir.y;
 		outStream << m_beamDir.z;
@@ -291,7 +292,7 @@ bool ccWaveform::toFile(QFile& out, short dataVersion) const
 
 		if (dataVersion >= 47)
 		{
-			//dataVersion >= 47
+			// dataVersion >= 47
 			outStream << m_returnIndex;
 		}
 	}
@@ -306,13 +307,13 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	if (dataVersion < 46)
 		return CorruptError();
 
-	//dataVersion >= 46
+	// dataVersion >= 46
 	inStream >> m_descriptorID;
 	if (m_descriptorID != 0)
 	{
 		inStream >> m_byteCount;
 
-		//for compilation with gcc/clang, we need to be 'more explicit'...
+		// for compilation with gcc/clang, we need to be 'more explicit'...
 		//(apparently uint64_t is not 'evidently' casted to quint64?!)
 		quint64 dataOffset;
 		inStream >> dataOffset;
@@ -325,7 +326,7 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 
 		if (dataVersion > 46)
 		{
-			//dataVersion >= 47
+			// dataVersion >= 47
 			inStream >> m_returnIndex;
 		}
 		else

@@ -1,30 +1,30 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccShiftedObject.h"
 
-//local
+// local
 #include "ccLog.h"
 #include "ccSerializableObject.h"
 
-ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccHObject(name, uniqueID)
-	, m_globalShift(0, 0, 0)
-	, m_globalScale(1.0)
+ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccHObject(name, uniqueID)
+    , m_globalShift(0, 0, 0)
+    , m_globalScale(1.0)
 {
 }
 
@@ -79,14 +79,14 @@ bool ccShiftedObject::loadShiftInfoFromFile(QFile& in)
 bool ccShiftedObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
 {
 	ccBBox box = getOwnBB(false);
-	minCorner = toGlobal3d(box.minCorner());
-	maxCorner = toGlobal3d(box.maxCorner());
+	minCorner  = toGlobal3d(box.minCorner());
+	maxCorner  = toGlobal3d(box.maxCorner());
 	return box.isValid();
 }
 
-ccHObject::GlobalBoundingBox ccShiftedObject::getOwnGlobalBB(bool withGLFeatures/*=false*/)
+ccHObject::GlobalBoundingBox ccShiftedObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
 {
-	ccBBox box = getOwnBB(false);
+	ccBBox     box       = getOwnBB(false);
 	CCVector3d minCorner = toGlobal3d(box.minCorner());
 	CCVector3d maxCorner = toGlobal3d(box.maxCorner());
 	return GlobalBoundingBox(minCorner, maxCorner, box.isValid());

@@ -1,48 +1,47 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccMaterialSet.h"
 
-//Local
+// Local
 #include "ccGenericGLDisplay.h"
 
-//Qt
+// Qt
 #include <QFileInfo>
 #include <QImage>
 #include <QSet>
 
-//System
+// System
 #include <set>
 
-
 ccMaterialSet::ccMaterialSet(const QString& name)
-	: std::vector<ccMaterial::CShared>()
-	, CCShareable()
-	, ccHObject(name)
+    : std::vector<ccMaterial::CShared>()
+    , CCShareable()
+    , ccHObject(name)
 {
-	setFlagState(CC_LOCKED,true);
+	setFlagState(CC_LOCKED, true);
 }
 
 int ccMaterialSet::findMaterialByName(const QString& mtlName)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByName] Query: ") + mtlName);
-	
+
 	int i = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it,++i)
+	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
 		ccMaterial::CShared mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 name: %2").arg(i).arg(mtl->getName()));
@@ -56,9 +55,9 @@ int ccMaterialSet::findMaterialByName(const QString& mtlName)
 int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByUniqueID] Query: ") + uniqueID);
-	
+
 	int i = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it,++i)
+	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
 		ccMaterial::CShared mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 ID: %2").arg(i).arg(mtl->getUniqueIdentifier()));
@@ -69,34 +68,34 @@ int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 	return -1;
 }
 
-int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames/*=false*/)
+int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames /*=false*/)
 {
 	if (!mtl)
 	{
-		//invalid input material
+		// invalid input material
 		return -1;
 	}
-	 
-	//material already exists?
+
+	// material already exists?
 	int previousIndex = findMaterialByName(mtl->getName());
-	//DGM: warning, the materials may have the same name, but they may be different in reality (other texture, etc.)!
+	// DGM: warning, the materials may have the same name, but they may be different in reality (other texture, etc.)!
 	if (previousIndex >= 0)
 	{
 		const ccMaterial::CShared& previousMtl = (*this)[previousIndex];
 		if (!previousMtl->compare(*mtl))
 		{
-			//in fact the material is a bit different
+			// in fact the material is a bit different
 			previousIndex = -1;
 			if (!allowDuplicateNames)
 			{
-				//generate a new name
+				// generate a new name
 				static const unsigned MAX_ATTEMPTS = 100;
-				for (unsigned i=1 ; i < MAX_ATTEMPTS; i++)
+				for (unsigned i = 1; i < MAX_ATTEMPTS; i++)
 				{
 					QString newMtlName = previousMtl->getName() + QString("_%1").arg(i);
 					if (findMaterialByName(newMtlName) < 0)
 					{
-						//we duplicate the material and we change its name
+						// we duplicate the material and we change its name
 						ccMaterial::Shared newMtl(new ccMaterial(*mtl));
 						newMtl->setName(newMtlName);
 						mtl = newMtl;
@@ -115,19 +114,19 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		return -1;
 	}
 
-	return static_cast<int>(size())-1;
+	return static_cast<int>(size()) - 1;
 }
 
-//MTL PARSER INSPIRED BY KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
-bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMaterialSet &materials, QStringList& errors)
+// MTL PARSER INSPIRED BY KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
+bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMaterialSet& materials, QStringList& errors)
 {
 	// open mtl file
 	QString fullPathFilename = path + '/' + filename;
-	QFile file(fullPathFilename);
+	QFile   file(fullPathFilename);
 	if (!file.open(QFile::ReadOnly))
 	{
 		errors << QString("Error reading file: %1").arg(filename);
@@ -139,8 +138,8 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 
 	QTextStream stream(&file);
 
-	QString currentLine = stream.readLine();
-	unsigned currentLineIndex = 0;
+	QString            currentLine      = stream.readLine();
+	unsigned           currentLineIndex = 0;
 	ccMaterial::Shared currentMaterial(nullptr);
 
 	while (!currentLine.isNull())
@@ -149,7 +148,7 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 
 		QStringList tokens = currentLine.simplified().split(QChar(' '), QString::SkipEmptyParts);
 
-		//skip comments & empty lines
+		// skip comments & empty lines
 		if (tokens.empty() || tokens.front().startsWith('/', Qt::CaseInsensitive) || tokens.front().startsWith('#', Qt::CaseInsensitive))
 		{
 			currentLine = stream.readLine();
@@ -167,23 +166,22 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			}
 
 			// get the name
-			QString materialName = currentLine.mid(7).trimmed(); //we must take the whole line! (see OBJ filter)
+			QString materialName = currentLine.mid(7).trimmed(); // we must take the whole line! (see OBJ filter)
 			if (materialName.isEmpty())
 				materialName = "undefined";
 			currentMaterial = ccMaterial::Shared(new ccMaterial(materialName));
-
 		}
-		else if (currentMaterial) //we already have a "current" material
+		else if (currentMaterial) // we already have a "current" material
 		{
 			// ambient
 			if (tokens.front() == "Ka")
 			{
 				if (tokens.size() > 3)
 				{
-					ccColor::Rgbaf ambient(	tokens[1].toFloat(),
-											tokens[2].toFloat(),
-											tokens[3].toFloat(),
-											1.0f);
+					ccColor::Rgbaf ambient(tokens[1].toFloat(),
+					                       tokens[2].toFloat(),
+					                       tokens[3].toFloat(),
+					                       1.0f);
 					currentMaterial->setAmbient(ambient);
 				}
 			}
@@ -193,10 +191,10 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			{
 				if (tokens.size() > 3)
 				{
-					ccColor::Rgbaf diffuse(	tokens[1].toFloat(),
-											tokens[2].toFloat(),
-											tokens[3].toFloat(),
-											1.0f);
+					ccColor::Rgbaf diffuse(tokens[1].toFloat(),
+					                       tokens[2].toFloat(),
+					                       tokens[3].toFloat(),
+					                       1.0f);
 					currentMaterial->setDiffuse(diffuse);
 				}
 			}
@@ -207,9 +205,9 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 				if (tokens.size() > 3)
 				{
 					ccColor::Rgbaf specular(tokens[1].toFloat(),
-											tokens[2].toFloat(),
-											tokens[3].toFloat(),
-											1.0f);
+					                        tokens[2].toFloat(),
+					                        tokens[3].toFloat(),
+					                        1.0f);
 					currentMaterial->setSpecular(specular);
 				}
 			}
@@ -220,9 +218,9 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 				if (tokens.size() > 3)
 				{
 					ccColor::Rgbaf emission(tokens[1].toFloat(),
-						tokens[2].toFloat(),
-						tokens[3].toFloat(),
-						1.0f);
+					                        tokens[2].toFloat(),
+					                        tokens[3].toFloat(),
+					                        1.0f);
 					currentMaterial->setEmission(emission);
 				}
 			}
@@ -266,7 +264,7 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			else if (tokens.front() == "r")
 			{
 				// ignored
-				//if (tokens.size() > 1)
+				// if (tokens.size() > 1)
 				//	currentMaterial->reflect = tokens[1].toFloat();
 			}
 
@@ -274,7 +272,7 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			else if (tokens.front() == "sharpness")
 			{
 				// ignored
-				//if (tokens.size() > 1)
+				// if (tokens.size() > 1)
 				//	currentMaterial->glossy = tokens[1].toFloat();
 			}
 
@@ -282,7 +280,7 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			else if (tokens.front() == "Ni")
 			{
 				// ignored
-				//if (tokens.size() > 1)
+				// if (tokens.size() > 1)
 				//	currentMaterial->refract_index = tokens[1].toFloat();
 			}
 
@@ -300,11 +298,11 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 
 			// texture map
 			else if (tokens.front() == "map_Ka"
-					|| tokens.front() == "map_Kd"
-					|| tokens.front() == "map_Ks")
+			         || tokens.front() == "map_Kd"
+			         || tokens.front() == "map_Ks")
 			{
-				//DGM: in case there's hidden or space characters at the beginning of the line...
-				int shift = currentLine.indexOf("map_K",0);
+				// DGM: in case there's hidden or space characters at the beginning of the line...
+				int     shift           = currentLine.indexOf("map_K", 0);
 				QString textureFilename = (shift + 7 < currentLine.size() ? currentLine.mid(shift + 7).trimmed() : QString());
 				// remove any quotes around the filename (Photoscan 1.4 bug)
 				if (textureFilename.startsWith("\""))
@@ -342,9 +340,9 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 
 bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const
 {
-	//open mtl file
+	// open mtl file
 	QString filename = path + '/' + baseFilename + ".mtl";
-	QFile file(filename);
+	QFile   file(filename);
 	if (!file.open(QFile::WriteOnly))
 	{
 		errors << QString("Error writing file: %1").arg(filename);
@@ -354,15 +352,16 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 
 	stream << "# Generated by CloudCompare" << endl;
 
-	//texture filenames already used
+	// texture filenames already used
 	QMap<QString, QString> absFilenamesSaved;
-	QSet<QString> filenamesUsed;
+	QSet<QString>          filenamesUsed;
 
 	size_t matIndex = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++matIndex)
 	{
 		ccMaterial::CShared mtl = *it;
-		stream << endl << "newmtl " << mtl->getName() << endl;
+		stream << endl
+		       << "newmtl " << mtl->getName() << endl;
 
 		const ccColor::Rgbaf& Ka = mtl->getAmbient();
 		const ccColor::Rgbaf& Kd = mtl->getDiffuseFront();
@@ -371,16 +370,16 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 		stream << "Kd " << Kd.r << " " << Kd.g << " " << Kd.b << endl;
 		stream << "Ks " << Ks.r << " " << Ks.g << " " << Ks.b << endl;
 		// we take the ambient's alpha by default
-		// openGL "a = 1.0" is for "full opacity" / MTL "Tr = 1.0" is for "full transparency" 
+		// openGL "a = 1.0" is for "full opacity" / MTL "Tr = 1.0" is for "full transparency"
 		stream << "Tr " << 1.0 - Ka.a << endl;
 		stream << "illum 1" << endl;
-		stream << "Ns " << mtl->getShininessFront() << endl; //we take the front's by default
+		stream << "Ns " << mtl->getShininessFront() << endl; // we take the front's by default
 
 		if (mtl->hasTexture())
 		{
 			QString absFilename = mtl->getTextureFilename();
 
-			//if the file has not already been saved
+			// if the file has not already been saved
 			if (!absFilenamesSaved.contains(absFilename))
 			{
 				QFileInfo fileInfo(absFilename);
@@ -391,7 +390,7 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 					texName += ".jpg";
 				}
 
-				//make sure that the local filename is unique!
+				// make sure that the local filename is unique!
 				if (filenamesUsed.contains(texName))
 				{
 					texName.prepend(QString("t%1_").arg(matIndex));
@@ -400,9 +399,9 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 				filenamesUsed.insert(texName);
 
 				QString destFilename = path + '/' + texName;
-				if (mtl->getTexture().mirrored().save(destFilename)) //mirrored: see ccMaterial
+				if (mtl->getTexture().mirrored().save(destFilename)) // mirrored: see ccMaterial
 				{
-					//new absolute filename
+					// new absolute filename
 					absFilenamesSaved[absFilename] = texName;
 				}
 				else
@@ -421,7 +420,6 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 
 	file.close();
 
-
 	return true;
 }
 
@@ -429,7 +427,7 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 {
 	try
 	{
-		for (const auto &mtl : source)
+		for (const auto& mtl : source)
 		{
 			if (addMaterial(mtl) <= 0)
 			{
@@ -437,7 +435,7 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 			}
 		}
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
+	catch (... /*const std::bad_alloc&*/) // out of memory
 	{
 		ccLog::Warning("[ccMaterialSet::append] Not enough memory");
 		return false;
@@ -473,34 +471,34 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//Materials count (dataVersion>=20)
+	// Materials count (dataVersion>=20)
 	uint32_t count = (uint32_t)size();
 	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 
-	//texture filenames
+	// texture filenames
 	std::set<QString> texFilenames;
 
-	//Write each material
-	for (const auto &mtl : *this)
+	// Write each material
+	for (const auto& mtl : *this)
 	{
 		mtl->toFile(out, dataVersion);
 
-		//remember its texture as well (if any)
+		// remember its texture as well (if any)
 		QString texFilename = mtl->getTextureFilename();
 		if (!texFilename.isEmpty())
 			texFilenames.insert(texFilename);
 	}
 
-	//now save the number of textures (dataVersion>=37)
+	// now save the number of textures (dataVersion>=37)
 	QDataStream outStream(&out);
 	outStream << static_cast<uint32_t>(texFilenames.size());
-	//and save the textures (dataVersion>=37)
+	// and save the textures (dataVersion>=37)
 	{
-		for (const auto &texFilename : texFilenames)
+		for (const auto& texFilename : texFilenames)
 		{
-			outStream << texFilename; //name
-			outStream << ccMaterial::GetTexture(texFilename); //then image
+			outStream << texFilename;                         // name
+			outStream << ccMaterial::GetTexture(texFilename); // then image
 		}
 	}
 
@@ -512,21 +510,22 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//Materials count (dataVersion>=20)
-	uint32_t count = 0;;
+	// Materials count (dataVersion>=20)
+	uint32_t count = 0;
+	;
 	if (in.read((char*)&count, 4) < 0)
 		return ReadError();
 	if (count == 0)
 		return true;
 
-	//Load each material
+	// Load each material
 	{
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			ccMaterial::Shared mtl(new ccMaterial);
 			if (!mtl->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				return false;
-			addMaterial(mtl, true); //if we load a file, we can't allow that materials are not in the same order as before!
+			addMaterial(mtl, true); // if we load a file, we can't allow that materials are not in the same order as before!
 		}
 	}
 
@@ -534,10 +533,10 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 	{
 		QDataStream inStream(&in);
 
-		//now load the number of textures (dataVersion>=37)
+		// now load the number of textures (dataVersion>=37)
 		uint32_t texCount = 0;
 		inStream >> texCount;
-		//and load the textures (dataVersion>=37)
+		// and load the textures (dataVersion>=37)
 		{
 			for (uint32_t i = 0; i < texCount; ++i)
 			{
@@ -563,6 +562,4 @@ short ccMaterialSet::minimumFileVersion_MeOnly() const
 	{
 		return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
 	}
-
 }
-

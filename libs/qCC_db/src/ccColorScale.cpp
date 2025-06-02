@@ -1,39 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccColorScale.h"
 
-//Qt
+// Qt
 #include <QUuid>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
-//CCCoreLib
+// CCCoreLib
 #include <CCGeom.h>
 
-//Local
+// Local
 #include "ccLog.h"
-
 
 static const QString s_xmlCloudCompare("CloudCompare");
 static const QString s_xmlColorScaleTitle("ColorScale");
 static const QString s_xmlColorScaleProperties("Properties");
 static const QString s_xmlColorScaleData("Data");
-constexpr int s_xmlColorScaleVer = 1;
+constexpr int        s_xmlColorScaleVer = 1;
 
 // These extra definitions are required in C++11.
 // In C++17, "static constexpr" is implicitly inline, so these are not required.
@@ -46,14 +45,14 @@ ccColorScale::Shared ccColorScale::Create(const QString& name)
 	return ccColorScale::Shared(new ccColorScale(name));
 }
 
-ccColorScale::ccColorScale(const QString& name, const QString& uuid/*=QString()*/)
-	: m_name(name)
-	, m_uuid(uuid)
-	, m_updated(false)
-	, m_relative(true)
-	, m_locked(false)
-	, m_absoluteMinValue(0.0)
-	, m_absoluteRange(1.0)
+ccColorScale::ccColorScale(const QString& name, const QString& uuid /*=QString()*/)
+    : m_name(name)
+    , m_uuid(uuid)
+    , m_updated(false)
+    , m_relative(true)
+    , m_locked(false)
+    , m_absoluteMinValue(0.0)
+    , m_absoluteRange(1.0)
 {
 	if (m_uuid.isNull())
 		generateNewUuid();
@@ -64,17 +63,17 @@ void ccColorScale::generateNewUuid()
 	m_uuid = QUuid::createUuid().toString();
 }
 
-ccColorScale::Shared ccColorScale::copy(const QString& uuid/*=QString()*/) const
+ccColorScale::Shared ccColorScale::copy(const QString& uuid /*=QString()*/) const
 {
 	ccColorScale::Shared newCS(new ccColorScale(m_name, uuid));
 	try
 	{
-		newCS->m_relative = m_relative;
-		newCS->m_locked = m_locked;
+		newCS->m_relative         = m_relative;
+		newCS->m_locked           = m_locked;
 		newCS->m_absoluteMinValue = m_absoluteMinValue;
-		newCS->m_absoluteRange = m_absoluteRange;
-		newCS->m_steps = m_steps;
-		newCS->m_customLabels = m_customLabels;
+		newCS->m_absoluteRange    = m_absoluteRange;
+		newCS->m_steps            = m_steps;
+		newCS->m_customLabels     = m_customLabels;
 		newCS->update();
 	}
 	catch (const std::bad_alloc&)
@@ -86,7 +85,7 @@ ccColorScale::Shared ccColorScale::copy(const QString& uuid/*=QString()*/) const
 	return newCS;
 }
 
-void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=true*/)
+void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate /*=true*/)
 {
 	if (m_locked)
 	{
@@ -117,7 +116,7 @@ void ccColorScale::clear()
 	m_updated = false;
 }
 
-void ccColorScale::remove(int index, bool autoUpdate/*=true*/)
+void ccColorScale::remove(int index, bool autoUpdate /*=true*/)
 {
 	if (m_locked)
 	{
@@ -155,32 +154,32 @@ void ccColorScale::update()
 		}
 		else
 		{
-			unsigned j = 0; //current interval
+			unsigned j = 0; // current interval
 			for (unsigned i = 0; i < MAX_STEPS; ++i)
 			{
 				const double relativePos = static_cast<double>(i) / (MAX_STEPS - 1);
 
-				//forward to the right interval
+				// forward to the right interval
 				while (j + 2 < stepCount && m_steps[j + 1].getRelativePos() < relativePos)
 					++j;
 
 				// linear interpolation
-				const CCVector3d colBefore (m_steps[j].getColor().redF(),
-											m_steps[j].getColor().greenF(),
-											m_steps[j].getColor().blueF());
-				
-				const CCVector3d colNext(	m_steps[j + 1].getColor().redF(),
-											m_steps[j + 1].getColor().greenF(),
-											m_steps[j + 1].getColor().blueF());
+				const CCVector3d colBefore(m_steps[j].getColor().redF(),
+				                           m_steps[j].getColor().greenF(),
+				                           m_steps[j].getColor().blueF());
 
-				//interpolation coef
+				const CCVector3d colNext(m_steps[j + 1].getColor().redF(),
+				                         m_steps[j + 1].getColor().greenF(),
+				                         m_steps[j + 1].getColor().blueF());
+
+				// interpolation coef
 				const double alpha = (relativePos - m_steps[j].getRelativePos()) / (m_steps[j + 1].getRelativePos() - m_steps[j].getRelativePos());
 
 				const CCVector3d interpCol = colBefore + (colNext - colBefore) * alpha;
 
-				m_rgbaScale[i] = ccColor::Rgb(	static_cast<ColorCompType>(interpCol.x * ccColor::MAX),
-												static_cast<ColorCompType>(interpCol.y * ccColor::MAX),
-												static_cast<ColorCompType>(interpCol.z * ccColor::MAX) );
+				m_rgbaScale[i] = ccColor::Rgb(static_cast<ColorCompType>(interpCol.x * ccColor::MAX),
+				                              static_cast<ColorCompType>(interpCol.y * ccColor::MAX),
+				                              static_cast<ColorCompType>(interpCol.z * ccColor::MAX));
 			}
 
 			m_updated = true;
@@ -193,7 +192,7 @@ void ccColorScale::update()
 
 	if (!m_updated)
 	{
-		//I saw an invalid scale and I want it painted black ;)
+		// I saw an invalid scale and I want it painted black ;)
 		for (unsigned i = 0; i < MAX_STEPS; ++i)
 		{
 			m_rgbaScale[i] = ccColor::black;
@@ -212,35 +211,35 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//name (dataVersion>=27)
+	// name (dataVersion>=27)
 	outStream << m_name;
 
-	//UUID (dataVersion>=27)
+	// UUID (dataVersion>=27)
 	outStream << m_uuid;
 
-	//relative state (dataVersion>=27)
+	// relative state (dataVersion>=27)
 	if (out.write((const char*)&m_relative, sizeof(bool)) < 0)
 		return WriteError();
 
-	//Absolute min value (dataVersion>=27)
+	// Absolute min value (dataVersion>=27)
 	if (out.write((const char*)&m_absoluteMinValue, sizeof(double)) < 0)
 		return WriteError();
-	//Absolute range (dataVersion>=27)
+	// Absolute range (dataVersion>=27)
 	if (out.write((const char*)&m_absoluteRange, sizeof(double)) < 0)
 		return WriteError();
 
-	//locked state (dataVersion>=27)
+	// locked state (dataVersion>=27)
 	if (out.write((const char*)&m_locked, sizeof(bool)) < 0)
 		return WriteError();
 
-	//steps list (dataVersion>=27)
+	// steps list (dataVersion>=27)
 	{
-		//steps count
+		// steps count
 		uint32_t stepCount = static_cast<uint32_t>(m_steps.size());
 		if (out.write((const char*)&stepCount, 4) < 0)
 			return WriteError();
 
-		//write each step
+		// write each step
 		for (uint32_t i = 0; i < stepCount; ++i)
 		{
 			outStream << m_steps[i].getRelativePos();
@@ -248,15 +247,15 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 		}
 	}
 
-	//custom labels (dataVersion>=40)
+	// custom labels (dataVersion>=40)
 	if (dataVersion >= 40)
 	{
-		//custom label count
+		// custom label count
 		uint32_t labelCount = static_cast<uint32_t>(m_customLabels.size());
 		if (out.write((const char*)&labelCount, 4) < 0)
 			return WriteError();
 
-		//write each custom label
+		// write each custom label
 		for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
 		{
 			outStream << it->value;
@@ -272,40 +271,40 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 
 bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
 {
-	if (dataVersion < 27) //structure appeared at version 27!
+	if (dataVersion < 27) // structure appeared at version 27!
 		return false;
 
 	QDataStream inStream(&in);
 
-	//name (dataVersion>=27)
+	// name (dataVersion>=27)
 	inStream >> m_name;
 
-	//UUID (dataVersion>=27)
+	// UUID (dataVersion>=27)
 	inStream >> m_uuid;
 
-	//relative state (dataVersion>=27)
+	// relative state (dataVersion>=27)
 	if (in.read((char*)&m_relative, sizeof(bool)) < 0)
 		return ReadError();
 
-	//Absolute min value (dataVersion>=27)
+	// Absolute min value (dataVersion>=27)
 	if (in.read((char*)&m_absoluteMinValue, sizeof(double)) < 0)
 		return ReadError();
-	//Absolute range (dataVersion>=27)
+	// Absolute range (dataVersion>=27)
 	if (in.read((char*)&m_absoluteRange, sizeof(double)) < 0)
 		return ReadError();
 
-	//locked state (dataVersion>=27)
+	// locked state (dataVersion>=27)
 	if (in.read((char*)&m_locked, sizeof(bool)) < 0)
 		return ReadError();
 
-	//steps list (dataVersion>=27)
+	// steps list (dataVersion>=27)
 	{
-		//steps count
+		// steps count
 		uint32_t stepCount = 0;
 		if (in.read((char*)&stepCount, 4) < 0)
 			return ReadError();
 
-		//read each step
+		// read each step
 		m_steps.clear();
 		for (uint32_t i = 0; i < stepCount; ++i)
 		{
@@ -320,10 +319,10 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 		update();
 	}
 
-	//custom labels (dataVersion>=40)
+	// custom labels (dataVersion>=40)
 	if (dataVersion >= 40)
 	{
-		//custom label count
+		// custom label count
 		uint32_t labelCount = 0;
 		if (in.read((char*)&labelCount, 4) < 0)
 			return ReadError();
@@ -332,7 +331,7 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 		{
 			for (uint32_t i = 0; i < labelCount; ++i)
 			{
-				double label = 0.0;
+				double  label = 0.0;
 				QString text;
 
 				inStream >> label;
@@ -341,12 +340,12 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 					inStream >> text;
 				}
 
-				m_customLabels.insert({ label, text });
+				m_customLabels.insert({label, text});
 			}
 		}
 		catch (const std::bad_alloc&)
 		{
-			//not enough memory
+			// not enough memory
 			return MemoryError();
 		}
 	}
@@ -384,9 +383,9 @@ void ccColorScale::setAbsolute(double minVal, double maxVal)
 	m_relative = false;
 
 	m_absoluteMinValue = minVal;
-	m_absoluteRange = maxVal - minVal;
+	m_absoluteRange    = maxVal - minVal;
 
-	//as 'm_absoluteRange' is used for division, we make sure it is not left to 0!
+	// as 'm_absoluteRange' is used for division, we make sure it is not left to 0!
 	m_absoluteRange = std::max(m_absoluteRange, 1e-12);
 }
 
@@ -405,19 +404,19 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 		return false;
 	}
 
-	//write content
+	// write content
 	QXmlStreamWriter stream(&file);
 	stream.setAutoFormatting(true);
 	stream.writeStartDocument();
 	{
-		stream.writeStartElement(s_xmlCloudCompare);	// CloudCompare
+		stream.writeStartElement(s_xmlCloudCompare); // CloudCompare
 		{
-			stream.writeStartElement(s_xmlColorScaleTitle);	// ColorScale
+			stream.writeStartElement(s_xmlColorScaleTitle); // ColorScale
 			{
-				//file version
+				// file version
 				stream.writeAttribute("version", QString::number(s_xmlColorScaleVer));
 
-				//Properties
+				// Properties
 				stream.writeStartElement(s_xmlColorScaleProperties);
 				{
 					stream.writeTextElement("name", getName());
@@ -429,31 +428,31 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 						stream.writeTextElement("range", QString::number(m_absoluteRange, 'g', 12));
 					}
 				}
-				stream.writeEndElement(); //Properties
+				stream.writeEndElement(); // Properties
 
-				//Data
+				// Data
 				stream.writeStartElement(s_xmlColorScaleData);
 				{
-					//write each step
+					// write each step
 					{
 						for (QList<ccColorScaleElement>::const_iterator it = m_steps.begin(); it != m_steps.end(); ++it)
 						{
 							stream.writeStartElement("step");
 							{
-								const ccColorScaleElement& elem = *it;
-								const QColor& color = elem.getColor();
-								double relativePos = elem.getRelativePos();
+								const ccColorScaleElement& elem        = *it;
+								const QColor&              color       = elem.getColor();
+								double                     relativePos = elem.getRelativePos();
 
 								stream.writeAttribute("r", QString::number(color.red()));
 								stream.writeAttribute("g", QString::number(color.green()));
 								stream.writeAttribute("b", QString::number(color.blue()));
 								stream.writeAttribute("pos", QString::number(relativePos, 'g', 12));
 							}
-							stream.writeEndElement(); //step
+							stream.writeEndElement(); // step
 						}
 					}
 
-					//write custom labels as well (if any)
+					// write custom labels as well (if any)
 					{
 						for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
 						{
@@ -465,12 +464,11 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 									stream.writeAttribute("text", it->text);
 								}
 							}
-							stream.writeEndElement(); //label
+							stream.writeEndElement(); // label
 						}
 					}
-
 				}
-				stream.writeEndElement(); //Data
+				stream.writeEndElement(); // Data
 			}
 			stream.writeEndElement(); // ColorScale
 		}
@@ -492,33 +490,33 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 
 	Shared scale(nullptr);
 
-	//read content
+	// read content
 	QXmlStreamReader stream(&file);
-	bool error = true;
-	while (true) //fake loop for easy break
+	bool             error = true;
+	while (true) // fake loop for easy break
 	{
-		//expected: CloudCompare
-		if (	!stream.readNextStartElement()
-			||	stream.name() != s_xmlCloudCompare)
+		// expected: CloudCompare
+		if (!stream.readNextStartElement()
+		    || stream.name() != s_xmlCloudCompare)
 		{
 			break;
 		}
 
-		//expected: ColorScale
-		if (	!stream.readNextStartElement()
-			||	stream.name() != s_xmlColorScaleTitle)
+		// expected: ColorScale
+		if (!stream.readNextStartElement()
+		    || stream.name() != s_xmlColorScaleTitle)
 		{
 			break;
 		}
 
-		//read version number
+		// read version number
 		QXmlStreamAttributes attributes = stream.attributes();
 		if (attributes.size() == 0 || attributes[0].name() != "version")
 		{
 			break;
 		}
-		bool ok = false;
-		int version = attributes[0].value().toString().toInt(&ok);
+		bool ok      = false;
+		int  version = attributes[0].value().toString().toInt(&ok);
 		if (!ok || version > s_xmlColorScaleVer)
 		{
 			if (ok)
@@ -526,17 +524,17 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 			break;
 		}
 
-		//expected: Properties
-		if (	!stream.readNextStartElement()
-			||	stream.name() != s_xmlColorScaleProperties)
+		// expected: Properties
+		if (!stream.readNextStartElement()
+		    || stream.name() != s_xmlColorScaleProperties)
 		{
 			break;
 		}
 
-		//we can now create the scale structure
+		// we can now create the scale structure
 		scale = Shared(new ccColorScale("temp"));
 
-		//read elements
+		// read elements
 		int missingItems = 3;
 		while (!stream.atEnd() && missingItems > 0)
 		{
@@ -544,8 +542,8 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 			{
 				break;
 			}
-			QStringRef itemName = stream.name();
-			QString itemValue = stream.readElementText();
+			QStringRef itemName  = stream.name();
+			QString    itemValue = stream.readElementText();
 			ccLog::Print(QString("[XML] Item '%1': '%2'").arg(itemName.toString(), itemValue));
 
 			if (itemName == "name")
@@ -562,8 +560,8 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 			{
 				if (itemValue == "1")
 				{
-					scale->setAbsolute(0, 1); //the true values will be updated afterwards
-					missingItems += 2; //we need the minValue and range items!
+					scale->setAbsolute(0, 1); // the true values will be updated afterwards
+					missingItems += 2;        // we need the minValue and range items!
 				}
 				--missingItems;
 			}
@@ -590,15 +588,15 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 		}
 		stream.skipCurrentElement();
 
-		//expected: Data
-		if (	!stream.readNextStartElement()
-			||	stream.name() != s_xmlColorScaleData)
+		// expected: Data
+		if (!stream.readNextStartElement()
+		    || stream.name() != s_xmlColorScaleData)
 		{
 			ccLog::Warning(QString("[ccColorScale::LoadFromXML] Unexpected element: %1").arg(stream.name().toString()));
 			break;
 		}
 
-		//read data
+		// read data
 		bool dataError = false;
 		try
 		{
@@ -608,8 +606,8 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 					break;
 				if (stream.name() == "step")
 				{
-					QXmlStreamAttributes attributes = stream.attributes();
-					int attributeCount = attributes.size();
+					QXmlStreamAttributes attributes     = stream.attributes();
+					int                  attributeCount = attributes.size();
 					if (attributeCount < 4)
 					{
 						dataError = true;
@@ -619,7 +617,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 					double pos = 0;
 					for (int i = 0; i < attributes.size(); ++i)
 					{
-						QString name = attributes[i].name().toString().toUpper();
+						QString name  = attributes[i].name().toString().toUpper();
 						QString value = attributes[i].value().toString();
 						if (name == "R")
 							rgb.setRed(value.toInt());
@@ -645,15 +643,15 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 				}
 				else if (stream.name() == "label")
 				{
-					QXmlStreamAttributes attributes = stream.attributes();
-					int attributeCount = attributes.size();
+					QXmlStreamAttributes attributes     = stream.attributes();
+					int                  attributeCount = attributes.size();
 					if (attributeCount < 1)
 					{
 						dataError = true;
 						break;
 					}
 
-					double value = std::numeric_limits<double>::quiet_NaN();
+					double  value = std::numeric_limits<double>::quiet_NaN();
 					QString text;
 					for (int i = 0; i < attributes.size(); ++i)
 					{
@@ -661,12 +659,12 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 						if (name == "VAL")
 						{
 							QString valueStr = attributes[i].value().toString();
-							bool ok = false;
-							value = valueStr.toDouble(&ok);
+							bool    ok       = false;
+							value            = valueStr.toDouble(&ok);
 							if (!ok)
 							{
 								ccLog::Warning(QString("[ccColorScale::LoadFromXML] Invalid value:") + valueStr);
-								value = std::numeric_limits<double>::quiet_NaN();
+								value     = std::numeric_limits<double>::quiet_NaN();
 								dataError = true;
 							}
 						}
@@ -679,7 +677,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 					if (std::isfinite(value))
 					{
 						// we have a valid label
-						scale->m_customLabels.insert({ value, text });
+						scale->m_customLabels.insert({value, text});
 					}
 
 					stream.skipCurrentElement();
@@ -693,7 +691,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 		}
 		scale->update();
 
-		//end
+		// end
 		error = dataError;
 		break;
 	}

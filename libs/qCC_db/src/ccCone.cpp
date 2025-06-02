@@ -1,53 +1,53 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccCone.h"
 
-//Local
-#include "ccPointCloud.h"
+// Local
 #include "ccNormalVectors.h"
+#include "ccPointCloud.h"
 
 ccCone::ccCone(PointCoordinateType bottomRadius,
-				PointCoordinateType topRadius,
-				PointCoordinateType height,
-				PointCoordinateType xOff/*=0*/,
-				PointCoordinateType yOff/*=0*/,
-				const ccGLMatrix* transMat/*=nullptr*/,
-				QString name/*="Cylinder"*/,
-				unsigned precision/*=DEFAULT_DRAWING_PRECISION*/,
-				unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
+               PointCoordinateType topRadius,
+               PointCoordinateType height,
+               PointCoordinateType xOff /*=0*/,
+               PointCoordinateType yOff /*=0*/,
+               const ccGLMatrix*   transMat /*=nullptr*/,
+               QString             name /*="Cylinder"*/,
+               unsigned            precision /*=DEFAULT_DRAWING_PRECISION*/,
+               unsigned            uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
 
-	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_bottomRadius(std::abs(bottomRadius))
-	, m_topRadius(std::abs(topRadius))
-	, m_xOff(xOff)
-	, m_yOff(yOff)
-	, m_height(std::abs(height))
+    : ccGenericPrimitive(name, transMat, uniqueID)
+    , m_bottomRadius(std::abs(bottomRadius))
+    , m_topRadius(std::abs(topRadius))
+    , m_xOff(xOff)
+    , m_yOff(yOff)
+    , m_height(std::abs(height))
 {
-	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); //automatically calls buildUp & applyTransformationToVertices
+	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls buildUp & applyTransformationToVertices
 }
 
-ccCone::ccCone(QString name/*="Cylinder"*/)
-	: ccGenericPrimitive(name)
-	, m_bottomRadius(0)
-	, m_topRadius(0)
-	, m_xOff(0)
-	, m_yOff(0)
-	, m_height(0)
+ccCone::ccCone(QString name /*="Cylinder"*/)
+    : ccGenericPrimitive(name)
+    , m_bottomRadius(0)
+    , m_topRadius(0)
+    , m_xOff(0)
+    , m_yOff(0)
+    , m_height(0)
 {
 }
 
@@ -61,28 +61,28 @@ bool ccCone::buildUp()
 	if (m_drawPrecision < MIN_DRAWING_PRECISION)
 		return false;
 
-	//invalid dimensions?
+	// invalid dimensions?
 	if (CCCoreLib::LessThanEpsilon(m_height) || CCCoreLib::LessThanEpsilon(m_bottomRadius + m_topRadius))
 	{
 		return false;
 	}
-	
-	//topology
+
+	// topology
 	bool singlePointBottom = CCCoreLib::LessThanEpsilon(m_bottomRadius);
-	bool singlePointTop = CCCoreLib::LessThanEpsilon(m_topRadius);
+	bool singlePointTop    = CCCoreLib::LessThanEpsilon(m_topRadius);
 	assert(!singlePointBottom || !singlePointTop);
 
 	unsigned steps = m_drawPrecision;
 
-	//vertices
+	// vertices
 	unsigned vertCount = 2;
 	if (!singlePointBottom)
 		vertCount += steps;
 	if (!singlePointTop)
 		vertCount += steps;
-	//normals
+	// normals
 	unsigned faceNormCounts = steps + 2;
-	//vertices
+	// vertices
 	unsigned facesCount = steps;
 	if (!singlePointBottom)
 		facesCount += steps;
@@ -91,7 +91,7 @@ bool ccCone::buildUp()
 	if (!singlePointBottom && !singlePointTop)
 		facesCount += steps;
 
-	//allocate (& clear) structures
+	// allocate (& clear) structures
 	if (!init(vertCount, false, facesCount, faceNormCounts))
 	{
 		ccLog::Error("[ccCone::buildUp] Not enough memory");
@@ -102,54 +102,54 @@ bool ccCone::buildUp()
 	assert(verts);
 	assert(m_triNormals);
 
-	//2 first points: centers of the top & bottom surfaces
+	// 2 first points: centers of the top & bottom surfaces
 	CCVector3 bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
-	CCVector3 topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
+	CCVector3 topCenter    = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
 	{
-		//bottom center
+		// bottom center
 		verts->addPoint(bottomCenter);
 		CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, -1).u);
 		m_triNormals->addElement(nIndex);
-		//top center
+		// top center
 		verts->addPoint(topCenter);
 		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1).u);
 		m_triNormals->addElement(nIndex);
 	}
 
-	//then, angular sweep for top and/or bottom surfaces
+	// then, angular sweep for top and/or bottom surfaces
 	{
-		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI) / static_cast<PointCoordinateType>(steps);
-		//bottom surface
+		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0 * M_PI) / static_cast<PointCoordinateType>(steps);
+		// bottom surface
 		if (!singlePointBottom)
 		{
 			for (unsigned i = 0; i < steps; ++i)
 			{
-				CCVector3 P(bottomCenter.x + cos(angle_rad_step*i)*m_bottomRadius,
-							bottomCenter.y + sin(angle_rad_step*i)*m_bottomRadius,
-							bottomCenter.z);
+				CCVector3 P(bottomCenter.x + cos(angle_rad_step * i) * m_bottomRadius,
+				            bottomCenter.y + sin(angle_rad_step * i) * m_bottomRadius,
+				            bottomCenter.z);
 				verts->addPoint(P);
 			}
 		}
-		//top surface
+		// top surface
 		if (!singlePointTop)
 		{
 			for (unsigned i = 0; i < steps; ++i)
 			{
-				CCVector3 P(topCenter.x + cos(angle_rad_step*i)*m_topRadius,
-							topCenter.y + sin(angle_rad_step*i)*m_topRadius,
-							topCenter.z);
+				CCVector3 P(topCenter.x + cos(angle_rad_step * i) * m_topRadius,
+				            topCenter.y + sin(angle_rad_step * i) * m_topRadius,
+				            topCenter.z);
 				verts->addPoint(P);
 			}
 		}
-		//side normals
+		// side normals
 		{
 			for (unsigned i = 0; i < steps; ++i)
 			{
-				//slope
-				CCVector3 u(-sin(angle_rad_step*i), cos(angle_rad_step*i), 0);
-				CCVector3 v(bottomCenter.x-topCenter.x + u.y*(m_bottomRadius-m_topRadius),
-							bottomCenter.y-topCenter.y - u.x*(m_bottomRadius-m_topRadius),
-							bottomCenter.z-topCenter.z);
+				// slope
+				CCVector3 u(-sin(angle_rad_step * i), cos(angle_rad_step * i), 0);
+				CCVector3 v(bottomCenter.x - topCenter.x + u.y * (m_bottomRadius - m_topRadius),
+				            bottomCenter.y - topCenter.y - u.x * (m_bottomRadius - m_topRadius),
+				            bottomCenter.z - topCenter.z);
 				CCVector3 N = v.cross(u);
 				N.normalize();
 
@@ -158,15 +158,15 @@ bool ccCone::buildUp()
 			}
 		}
 	}
-	
-	//mesh faces
+
+	// mesh faces
 	{
 		assert(m_triVertIndexes);
 
 		unsigned bottomIndex = 2;
-		unsigned topIndex = 2 + (singlePointBottom ? 0 : steps);
+		unsigned topIndex    = 2 + (singlePointBottom ? 0 : steps);
 
-		//bottom surface
+		// bottom surface
 		if (!singlePointBottom)
 		{
 			for (unsigned i = 0; i < steps; ++i)
@@ -175,7 +175,7 @@ bool ccCone::buildUp()
 				addTriangleNormalIndexes(0, 0, 0);
 			}
 		}
-		//top surface
+		// top surface
 		if (!singlePointTop)
 		{
 			for (unsigned i = 0; i < steps; ++i)
@@ -202,16 +202,16 @@ bool ccCone::buildUp()
 			{
 				unsigned iNext = (i + 1) % steps;
 				addTriangle(topIndex + i, 0, topIndex + iNext);
-				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + iNext); //TODO: middle normal should be halfbetween?!
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + iNext); // TODO: middle normal should be halfbetween?!
 			}
 		}
-		else //if (!singlePointBottom)
+		else // if (!singlePointBottom)
 		{
 			for (unsigned i = 0; i < steps; ++i)
 			{
 				unsigned iNext = (i + 1) % steps;
 				addTriangle(bottomIndex + i, bottomIndex + iNext, 1);
-				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + i); //TODO: last normal should be halfbetween?!
+				addTriangleNormalIndexes(2 + i, 2 + iNext, 2 + i); // TODO: last normal should be halfbetween?!
 			}
 		}
 	}
@@ -229,7 +229,7 @@ void ccCone::setHeight(PointCoordinateType height)
 
 	assert(height > 0);
 	m_height = height;
-	
+
 	buildUp();
 	applyTransformationToVertices();
 }
@@ -241,7 +241,7 @@ void ccCone::setBottomRadius(PointCoordinateType radius)
 
 	assert(radius > 0);
 	m_bottomRadius = radius;
-	
+
 	buildUp();
 	applyTransformationToVertices();
 }
@@ -253,22 +253,22 @@ void ccCone::setTopRadius(PointCoordinateType radius)
 
 	assert(radius > 0);
 	m_topRadius = radius;
-	
+
 	buildUp();
 	applyTransformationToVertices();
 }
 
 CCVector3 ccCone::getBottomCenter() const
 {
-	CCVector3 bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
-	ccGLMatrix trans = getGLTransformationHistory();
+	CCVector3  bottomCenter = CCVector3(m_xOff, m_yOff, -m_height) / 2;
+	ccGLMatrix trans        = getGLTransformationHistory();
 	trans.apply(bottomCenter);
 	return bottomCenter;
 }
 CCVector3 ccCone::getTopCenter() const
 {
-	CCVector3 topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
-	ccGLMatrix trans = getGLTransformationHistory();
+	CCVector3  topCenter = CCVector3(-m_xOff, -m_yOff, m_height) / 2;
+	ccGLMatrix trans     = getGLTransformationHistory();
 	trans.apply(topCenter);
 	return topCenter;
 }
@@ -323,7 +323,7 @@ bool ccCone::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//parameters (dataVersion>=21)
+	// parameters (dataVersion>=21)
 	QDataStream outStream(&out);
 	outStream << m_bottomRadius;
 	outStream << m_topRadius;
@@ -339,7 +339,7 @@ bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//parameters (dataVersion>=21)
+	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_bottomRadius);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_topRadius);
@@ -372,14 +372,14 @@ CCVector3 ccCone::computeApex() const
 	}
 
 	PointCoordinateType deltaRadius = getLargeRadius() - smallRadius;
-	CCVector3 slope = (smallCenter - largeCenter) / std::max(deltaRadius, std::numeric_limits<PointCoordinateType>::quiet_NaN());
+	CCVector3           slope       = (smallCenter - largeCenter) / std::max(deltaRadius, std::numeric_limits<PointCoordinateType>::quiet_NaN());
 
 	return smallCenter + smallRadius * slope;
 }
 
 double ccCone::computeHalfAngle_deg() const
 {
-	double height = (getTopCenter() - getBottomCenter()).normd();
+	double height      = (getTopCenter() - getBottomCenter()).normd();
 	double deltaRadius = getLargeRadius() - getSmallRadius();
 
 	return CCCoreLib::RadiansToDegrees(atan2(deltaRadius, height));

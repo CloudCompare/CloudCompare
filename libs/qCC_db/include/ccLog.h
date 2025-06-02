@@ -1,42 +1,43 @@
 #pragma once
 
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Local
+// Local
 #include "qCC_db.h"
 
-//system
+// system
 #include <stdio.h>
 #include <string>
 
-//Qt
+// Qt
 #include <QString>
 
 //! Main log interface
 /** This interface is meant to be used as a unique (static) instance.
-	It should be thread safe!
+    It should be thread safe!
 **/
 class QCC_DB_LIB_API ccLog
 {
-public:
-
+  public:
 	//! Destructor
-	virtual ~ccLog() {}
+	virtual ~ccLog()
+	{
+	}
 
 	//! Returns the static and unique instance
 	static ccLog* TheInstance();
@@ -46,19 +47,19 @@ public:
 
 	//! Enables the message backup system
 	/** Stores the messages until a valid logging instance is registered.
-	**/
+	 **/
 	static void EnableMessageBackup(bool state);
 
 	//! Message level
 	enum MessageLevelFlags
 	{
-		LOG_VERBOSE         = 0, /**< Verbose message (Debug) **/
-		LOG_STANDARD		= 1, /**< Standard message (Print) **/
-		LOG_IMPORTANT       = 2, /**< Important messages (PrintHigh) **/
-		LOG_WARNING			= 3, /**< Warning message (Warning) **/
-		LOG_ERROR			= 4, /**< Error message (Error) **/
+		LOG_VERBOSE   = 0, /**< Verbose message (Debug) **/
+		LOG_STANDARD  = 1, /**< Standard message (Print) **/
+		LOG_IMPORTANT = 2, /**< Important messages (PrintHigh) **/
+		LOG_WARNING   = 3, /**< Warning message (Warning) **/
+		LOG_ERROR     = 4, /**< Error message (Error) **/
 
-		DEBUG_FLAG          = 8  /**< Debug flag (reserved) **/
+		DEBUG_FLAG = 8 /**< Debug flag (reserved) **/
 	};
 
 	//! Returns the current verbosity level
@@ -72,15 +73,15 @@ public:
 
 	//! Generic message logging method
 	/** To be implemented by child class.
-		\warning MUST BE THREAD SAFE!
-		\param message message
-		\param level message severity (see MessageLevelFlags)
+	    \warning MUST BE THREAD SAFE!
+	    \param message message
+	    \param level message severity (see MessageLevelFlags)
 	**/
 	virtual void logMessage(const QString& message, int level) = 0;
 
 	//! Prints out a verbose formatted message in console
 	/** Works just like the 'printf' command.
-		\return always 'true'
+	    \return always 'true'
 	**/
 	static bool PrintVerbose(const char* format, ...);
 
@@ -89,7 +90,7 @@ public:
 
 	//! Prints out a formatted message in console
 	/** Works just like the 'printf' command.
-		\return always 'true'
+	    \return always 'true'
 	**/
 	static bool Print(const char* format, ...);
 
@@ -98,7 +99,7 @@ public:
 
 	//! Prints out an important formatted message in console
 	/** Works just like the 'printf' command.
-		\return always 'true'
+	    \return always 'true'
 	**/
 	static bool PrintHigh(const char* format, ...);
 
@@ -107,7 +108,7 @@ public:
 
 	//! Same as Print, but works only in Debug mode
 	/** Works just like the 'printf' command.
-		\return always 'true'
+	    \return always 'true'
 	**/
 	static bool PrintDebug(const char* format, ...);
 
@@ -116,7 +117,7 @@ public:
 
 	//! Prints out a formatted warning message in console
 	/** Works just like the 'printf' command.
-		\return always 'false'
+	    \return always 'false'
 	**/
 	static bool Warning(const char* format, ...);
 
@@ -125,7 +126,7 @@ public:
 
 	//! Same as Warning, but works only in Debug mode
 	/** Works just like the 'printf' command.
-		\return always 'false'
+	    \return always 'false'
 	**/
 	static bool WarningDebug(const char* format, ...);
 
@@ -134,7 +135,7 @@ public:
 
 	//! Display an error dialog with formatted message
 	/** Works just like the 'printf' command.
-		\return always 'false'
+	    \return always 'false'
 	**/
 	static bool Error(const char* format, ...);
 
@@ -143,7 +144,7 @@ public:
 
 	//! Same as Error, but works only in Debug mode
 	/** Works just like the 'printf' command.
-		\return always 'false'
+	    \return always 'false'
 	**/
 	static bool ErrorDebug(const char* format, ...);
 

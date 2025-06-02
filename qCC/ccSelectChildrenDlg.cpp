@@ -1,34 +1,34 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSelectChildrenDlg.h"
 
 #include "ui_selectChildrenDlg.h"
 
-static QString s_lastName;
-static bool s_lastNameState = false;
-static CC_CLASS_ENUM s_lastType = CC_TYPES::POINT_CLOUD;
-static bool s_lastTypeState = true;
-static bool s_lastTypeStrictState = true;
-static bool s_lastUseRegex = true;
+static QString       s_lastName;
+static bool          s_lastNameState       = false;
+static CC_CLASS_ENUM s_lastType            = CC_TYPES::POINT_CLOUD;
+static bool          s_lastTypeState       = true;
+static bool          s_lastTypeStrictState = true;
+static bool          s_lastUseRegex        = true;
 
-ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, mUI( new Ui::SelectChildrenDialog )
+ccSelectChildrenDlg::ccSelectChildrenDlg(QWidget* parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , mUI(new Ui::SelectChildrenDialog)
 {
 	mUI->setupUi(this);
 
@@ -49,23 +49,23 @@ ccSelectChildrenDlg::~ccSelectChildrenDlg()
 
 void ccSelectChildrenDlg::addType(QString typeName, CC_CLASS_ENUM type)
 {
-	mUI->typeComboBox->addItem(typeName,QVariant::fromValue<qint64>(type));
+	mUI->typeComboBox->addItem(typeName, QVariant::fromValue<qint64>(type));
 
-	//auto select last selected type
+	// auto select last selected type
 	if (type == s_lastType)
 	{
-		mUI->typeComboBox->setCurrentIndex(mUI->typeComboBox->count()-1);
+		mUI->typeComboBox->setCurrentIndex(mUI->typeComboBox->count() - 1);
 	}
 }
 
 void ccSelectChildrenDlg::onAccept()
 {
-	s_lastNameState = mUI->nameCheckBox->isChecked();
-	s_lastName = mUI->nameLineEdit->text();
-	s_lastTypeState = mUI->typeCheckBox->isChecked();
+	s_lastNameState       = mUI->nameCheckBox->isChecked();
+	s_lastName            = mUI->nameLineEdit->text();
+	s_lastTypeState       = mUI->typeCheckBox->isChecked();
 	s_lastTypeStrictState = mUI->typeCheckBox->isChecked();
-	s_lastType = getSelectedType();
-	s_lastUseRegex = getNameIsRegex();
+	s_lastType            = getSelectedType();
+	s_lastUseRegex        = getNameIsRegex();
 }
 
 CC_CLASS_ENUM ccSelectChildrenDlg::getSelectedType()
@@ -74,7 +74,7 @@ CC_CLASS_ENUM ccSelectChildrenDlg::getSelectedType()
 	{
 		return CC_TYPES::HIERARCHY_OBJECT;
 	}
-	
+
 	int currentIndex = mUI->typeComboBox->currentIndex();
 	return static_cast<CC_CLASS_ENUM>(mUI->typeComboBox->itemData(currentIndex).value<qint64>());
 }
@@ -85,7 +85,7 @@ QString ccSelectChildrenDlg::getSelectedName()
 	{
 		return QString();
 	}
-	
+
 	return mUI->nameLineEdit->text();
 }
 

@@ -1,35 +1,35 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_QCUSTOMPLOT_HEADER
 #define CC_QCUSTOMPLOT_HEADER
 
-//QCustomPlot
+// QCustomPlot
 #ifdef _MSC_VER
-//To get rid of the really annoying warnings about unsafe methods
-#pragma warning( push )
-#pragma warning( disable : 4996 )
+// To get rid of the really annoying warnings about unsafe methods
+#pragma warning(push)
+#pragma warning(disable : 4996)
 #endif
 #include <qcustomplot.h>
 #ifdef _MSC_VER
-#pragma warning( pop )
+#pragma warning(pop)
 #endif
 
-//System
+// System
 #include <assert.h>
 
 /*********************************/
@@ -41,53 +41,67 @@ class QCPBarsWithText : public QCPBars
 {
 	Q_OBJECT
 
-public:
-
-	QCPBarsWithText(QCPAxis* keyAxis, QCPAxis* valueAxis) : QCPBars(keyAxis,valueAxis), m_textOnTheLeft(false) {}
-
-	void setText(QString text) { m_text = QStringList(text); }
-	void appendText(QString text) { m_text.append(text); }
-	void setTextAlignment(bool left) { m_textOnTheLeft = left; }
-
-protected:
-	
-	QStringList m_text;
-	bool m_textOnTheLeft;
-	
-	// reimplemented virtual draw method
-	virtual void draw(QCPPainter *painter)
+  public:
+	QCPBarsWithText(QCPAxis* keyAxis, QCPAxis* valueAxis)
+	    : QCPBars(keyAxis, valueAxis)
+	    , m_textOnTheLeft(false)
 	{
-		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
+	}
 
-		//switch to standard display
+	void setText(QString text)
+	{
+		m_text = QStringList(text);
+	}
+	void appendText(QString text)
+	{
+		m_text.append(text);
+	}
+	void setTextAlignment(bool left)
+	{
+		m_textOnTheLeft = left;
+	}
+
+  protected:
+	QStringList m_text;
+	bool        m_textOnTheLeft;
+
+	// reimplemented virtual draw method
+	virtual void draw(QCPPainter* painter)
+	{
+		if (!mKeyAxis || !mValueAxis)
+		{
+			qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+			return;
+		}
+
+		// switch to standard display
 		QCPBars::draw(painter);
 
 		int fontHeight = painter->fontMetrics().height();
 
 		if (!data()->isEmpty())
 		{
-			double& key = data()->begin()->key;
+			double& key   = data()->begin()->key;
 			double& value = data()->begin()->value;
-			QPointF P = coordsToPixels(key, value);
-			//apply a small shift
-			int margin = 5; //in pixels
+			QPointF P     = coordsToPixels(key, value);
+			// apply a small shift
+			int margin = 5; // in pixels
 			if (m_textOnTheLeft)
 				margin = -margin;
 			P.setX(P.x() + margin);
-			//we draw at the 'base' line
+			// we draw at the 'base' line
 			P.setY(P.y() + fontHeight);
 
-			for (int i=0; i<m_text.size(); ++i)
+			for (int i = 0; i < m_text.size(); ++i)
 			{
 				QPointF Pstart = P;
 				if (m_textOnTheLeft)
 					Pstart.setX(P.x() - painter->fontMetrics().width(m_text[i]));
-				painter->drawText(Pstart,m_text[i]);
+				painter->drawText(Pstart, m_text[i]);
 				P.setY(P.y() + fontHeight);
 			}
 		}
 	}
-
 };
 
 //! QCustomPlot: colored histogram
@@ -95,72 +109,85 @@ class QCPColoredBars : public QCPBars
 {
 	Q_OBJECT
 
-public:
-
+  public:
 	class QCPColoredBarData : public QCPBarsData
 	{
-	public:
+	  public:
 		QCPColoredBarData()
-			: color(Qt::blue)
-		{}
+		    : color(Qt::blue)
+		{
+		}
 
 		QColor color;
 	};
 	typedef QMap<double, QCPColoredBarData> QCPColoredBarDataMap;
 
-	QCPColoredBars(QCPAxis *keyAxis, QCPAxis *valueAxis) : QCPBars(keyAxis,valueAxis) {}
-	
-	void setData(const QVector<double> &key, const QVector<double> &value)
+	QCPColoredBars(QCPAxis* keyAxis, QCPAxis* valueAxis)
+	    : QCPBars(keyAxis, valueAxis)
 	{
-		//no colors? we switch to the standard QCPBars object
-		m_coloredData.clear();
-		QCPBars::setData(key,value);
 	}
 
-	void setData(const QVector<double> &key, const QVector<double> &value, const QVector<QColor>& colors)
+	void setData(const QVector<double>& key, const QVector<double>& value)
+	{
+		// no colors? we switch to the standard QCPBars object
+		m_coloredData.clear();
+		QCPBars::setData(key, value);
+	}
+
+	void setData(const QVector<double>& key, const QVector<double>& value, const QVector<QColor>& colors)
 	{
 		Q_ASSERT(colors.size() == key.size());
 
-		data()->clear(); //we duplicate the structures so that other stuff in QCPBarData works!
+		data()->clear(); // we duplicate the structures so that other stuff in QCPBarData works!
 
 		int n = qMin(key.size(), value.size());
 
-		for (int i=0; i<n; ++i)
+		for (int i = 0; i < n; ++i)
 		{
 			QCPColoredBarData newData;
-			newData.key = key[i];
+			newData.key   = key[i];
 			newData.value = value[i];
 			if (colors.size() > i)
 				newData.color = colors[i];
 			m_coloredData.insertMulti(newData.key, newData);
-			QCPBars::addData(newData.key,newData.value);
+			QCPBars::addData(newData.key, newData.value);
 		}
 	}
 
-	inline QRect rect() const { return clipRect(); }
+	inline QRect rect() const
+	{
+		return clipRect();
+	}
 
 	// reimplemented virtual methods:
-	virtual void clearData() { QCPBars::data().clear(); m_coloredData.clear(); }
-
-protected:
-
-	// reimplemented virtual draw method
-	virtual void draw(QCPPainter *painter)
+	virtual void clearData()
 	{
-		//no colors?
+		QCPBars::data().clear();
+		m_coloredData.clear();
+	}
+
+  protected:
+	// reimplemented virtual draw method
+	virtual void draw(QCPPainter* painter)
+	{
+		// no colors?
 		if (m_coloredData.empty())
 		{
-			//switch to standard display
+			// switch to standard display
 			QCPBars::draw(painter);
 		}
 
-		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
+		if (!mKeyAxis || !mValueAxis)
+		{
+			qDebug() << Q_FUNC_INFO << "invalid key or value axis";
+			return;
+		}
 
 		QCPColoredBarDataMap::const_iterator it;
 		for (it = m_coloredData.constBegin(); it != m_coloredData.constEnd(); ++it)
 		{
 			// skip bar if not visible in key axis range:
-			if (it.key()+mWidth*0.5 < mKeyAxis.data()->range().lower || it.key()-mWidth*0.5 > mKeyAxis.data()->range().upper)
+			if (it.key() + mWidth * 0.5 < mKeyAxis.data()->range().lower || it.key() - mWidth * 0.5 > mKeyAxis.data()->range().upper)
 				continue;
 
 			QRectF barRect = getBarRect(it.key(), it.value().value);
@@ -169,7 +196,7 @@ protected:
 			{
 				QBrush theBrush = brush();
 				theBrush.setColor(it.value().color);
-				
+
 				applyFillAntialiasingHint(painter);
 				painter->setPen(Qt::NoPen);
 				painter->setBrush(theBrush);
@@ -197,17 +224,17 @@ class QCPSelectableCursor : public QCPAbstractPlottable
 {
 	Q_OBJECT
 
-public:
-	
+  public:
 	//! Default constructor
-	explicit QCPSelectableCursor(QCPAxis *keyAxis, QCPAxis *valueAxis)
-		: QCPAbstractPlottable(keyAxis, valueAxis)
-		, mCurrentVal(0)
-		, mMinVal(0)
-		, mMaxVal(0)
-		, mLastPos(-1,-1)
-		, mLastRadius(0)
-	{}
+	explicit QCPSelectableCursor(QCPAxis* keyAxis, QCPAxis* valueAxis)
+	    : QCPAbstractPlottable(keyAxis, valueAxis)
+	    , mCurrentVal(0)
+	    , mMinVal(0)
+	    , mMaxVal(0)
+	    , mLastPos(-1, -1)
+	    , mLastRadius(0)
+	{
+	}
 
 	//! Returns whether the item is "selectable" when the mouse is clicked at a given position
 	inline virtual bool isSelectable(QPoint click) const
@@ -215,40 +242,80 @@ public:
 		if (mLastPos.x() < 0 || mLastPos.y() < 0)
 			return false;
 		QPoint d = mLastPos - click;
-		return (d.x()*d.x() + d.y()*d.y() <= mLastRadius*mLastRadius);
+		return (d.x() * d.x() + d.y() * d.y() <= mLastRadius * mLastRadius);
 	}
 
 	// getters
-	inline double currentVal() const { return mCurrentVal; }
-	inline double minVal() const { return mMinVal; }
-	inline double maxVal() const { return mMaxVal; }
-	inline void range(double& minVal, double& maxVal) const { minVal = mMinVal; maxVal = mMaxVal; }
+	inline double currentVal() const
+	{
+		return mCurrentVal;
+	}
+	inline double minVal() const
+	{
+		return mMinVal;
+	}
+	inline double maxVal() const
+	{
+		return mMaxVal;
+	}
+	inline void range(double& minVal, double& maxVal) const
+	{
+		minVal = mMinVal;
+		maxVal = mMaxVal;
+	}
 
 	// setters
-	inline void setCurrentVal(double val) { mCurrentVal = std::max(std::min(val,mMaxVal),mMinVal); }
-	inline void setRange(double minVal, double maxVal) { mMinVal = minVal; mMaxVal = maxVal; }
+	inline void setCurrentVal(double val)
+	{
+		mCurrentVal = std::max(std::min(val, mMaxVal), mMinVal);
+	}
+	inline void setRange(double minVal, double maxVal)
+	{
+		mMinVal = minVal;
+		mMaxVal = maxVal;
+	}
 
 	//! Converts a pixel value (X) to the equivalent key
-	inline double pixelToKey(int pixX) const { return keyAxis() ? keyAxis()->pixelToCoord(pixX) : 0; }
+	inline double pixelToKey(int pixX) const
+	{
+		return keyAxis() ? keyAxis()->pixelToCoord(pixX) : 0;
+	}
 	//! Converts a pixel value (Y) to the equivalent value
-	inline double pixelToValue(int pixY) const { return valueAxis() ? valueAxis()->pixelToCoord(pixY) : 0; }
-
+	inline double pixelToValue(int pixY) const
+	{
+		return valueAxis() ? valueAxis()->pixelToCoord(pixY) : 0;
+	}
 
 	// reimplemented virtual methods:
-	virtual void clearData() {}
-	double selectTest(const QPointF &pos, bool onlySelectable, QVariant *details=0) const override { return -1; } //we don't use the QCP internal selection mechanism!
+	virtual void clearData()
+	{
+	}
+	double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = 0) const override
+	{
+		return -1;
+	} // we don't use the QCP internal selection mechanism!
 
-protected:
+  protected:
 	// reimplemented virtual methods:
-	void drawLegendIcon(QCPPainter *painter, const QRectF &rect) const override {}
-	QCPRange getKeyRange(bool &foundRange, QCP::SignDomain inSignDomain=QCP::sdBoth) const override { foundRange = false; return QCPRange(); }
-	QCPRange getValueRange(bool &foundRange, QCP::SignDomain inSignDomain=QCP::sdBoth, const QCPRange &inKeyRange=QCPRange()) const override { foundRange = false; return QCPRange(); }
+	void drawLegendIcon(QCPPainter* painter, const QRectF& rect) const override
+	{
+	}
+	QCPRange getKeyRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const override
+	{
+		foundRange = false;
+		return QCPRange();
+	}
+	QCPRange getValueRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth, const QCPRange& inKeyRange = QCPRange()) const override
+	{
+		foundRange = false;
+		return QCPRange();
+	}
 
 	// property members:
 	double mCurrentVal;
-	double mMinVal,mMaxVal;
+	double mMinVal, mMaxVal;
 	QPoint mLastPos;
-	int mLastRadius;
+	int    mLastRadius;
 };
 
 //! QCustomPlot: greyed areas
@@ -256,23 +323,22 @@ class QCPHiddenArea : public QCPSelectableCursor
 {
 	Q_OBJECT
 
-public:
-	explicit QCPHiddenArea(bool leftSide, QCPAxis *keyAxis, QCPAxis *valueAxis)
-		: QCPSelectableCursor(keyAxis, valueAxis)
-		, mLeftSide(leftSide)
+  public:
+	explicit QCPHiddenArea(bool leftSide, QCPAxis* keyAxis, QCPAxis* valueAxis)
+	    : QCPSelectableCursor(keyAxis, valueAxis)
+	    , mLeftSide(leftSide)
 	{
-		mPen = QPen(QColor(80, 80, 80),Qt::SolidLine); // dark grey
+		mPen = QPen(QColor(80, 80, 80), Qt::SolidLine); // dark grey
 		mPen.setWidth(2);
-		setPen( mPen );
-		
-		mBrush = QBrush(Qt::white,Qt::SolidPattern); // white
-		setBrush( mBrush );
+		setPen(mPen);
+
+		mBrush = QBrush(Qt::white, Qt::SolidPattern); // white
+		setBrush(mBrush);
 	}
 
-protected:
-
+  protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter *painter)
+	virtual void draw(QCPPainter* painter)
 	{
 		if (!keyAxis())
 			return;
@@ -283,7 +349,7 @@ protected:
 		if (mLeftSide)
 		{
 			int x2 = static_cast<int>(ceil(currentPosd));
-			//assert(x2 >= rect.x());
+			// assert(x2 >= rect.x());
 			if (x2 < rect.x())
 				return;
 			rect.setWidth(x2 - rect.x());
@@ -291,7 +357,7 @@ protected:
 		else
 		{
 			int x1 = static_cast<int>(floor(currentPosd));
-			//assert(x1 >= rect.x());
+			// assert(x1 >= rect.x());
 			if (x1 < rect.x())
 				return;
 			int newWidth = rect.width() - (x1 - rect.x());
@@ -300,37 +366,37 @@ protected:
 		}
 
 		// draw greyed rect
-		if (	(mLeftSide && mCurrentVal > mMinVal)
-			||	(!mLeftSide && mCurrentVal < mMaxVal) )
+		if ((mLeftSide && mCurrentVal > mMinVal)
+		    || (!mLeftSide && mCurrentVal < mMaxVal))
 		{
 			applyFillAntialiasingHint(painter);
 			painter->setPen(Qt::NoPen);
-			painter->setBrush(QBrush(QColor(128, 128, 128, 128),Qt::SolidPattern)); // semi-transparent grey
+			painter->setBrush(QBrush(QColor(128, 128, 128, 128), Qt::SolidPattern)); // semi-transparent grey
 			painter->drawPolygon(rect);
 		}
 
-		//draw circle (handle)
+		// draw circle (handle)
 		if (pen().style() != Qt::NoPen && pen().color().alpha() != 0)
 		{
-			//circle
-			QPoint C(mLeftSide ? rect.x()+rect.width() : rect.x(), rect.y()+rect.height()/2);
-			int r = rect.height() / 10;
+			// circle
+			QPoint C(mLeftSide ? rect.x() + rect.width() : rect.x(), rect.y() + rect.height() / 2);
+			int    r = rect.height() / 10;
 
 			painter->setPen(pen());
 			painter->setBrush(brush());
-			painter->drawEllipse(C,r,r);
+			painter->drawEllipse(C, r, r);
 
-			painter->setPen(QPen(QColor(128, 128, 128, 128),Qt::SolidLine)); // semi-transparent grey
-			painter->drawLine(C+QPoint(0,r),C-QPoint(0,r));
+			painter->setPen(QPen(QColor(128, 128, 128, 128), Qt::SolidLine)); // semi-transparent grey
+			painter->drawLine(C + QPoint(0, r), C - QPoint(0, r));
 
-			//save last circle position
-			mLastPos = C;
+			// save last circle position
+			mLastPos    = C;
 			mLastRadius = r;
 		}
 		else
 		{
-			//no circle
-			mLastPos = QPoint(-1,-1);
+			// no circle
+			mLastPos    = QPoint(-1, -1);
 			mLastRadius = 0;
 		}
 	}
@@ -344,31 +410,30 @@ class QCPArrow : public QCPSelectableCursor
 {
 	Q_OBJECT
 
-public:
-	explicit QCPArrow(QCPAxis *keyAxis, QCPAxis *valueAxis)
-		: QCPSelectableCursor(keyAxis, valueAxis)
+  public:
+	explicit QCPArrow(QCPAxis* keyAxis, QCPAxis* valueAxis)
+	    : QCPSelectableCursor(keyAxis, valueAxis)
 	{
 		mPen.setColor(QColor(128, 128, 0)); // dark yellow
 		mPen.setStyle(Qt::SolidLine);
 		mPen.setWidth(2);
-		setPen( mPen );
-		
+		setPen(mPen);
+
 		mBrush.setColor(QColor(255, 255, 0, 196)); // semi-transparent yellow
 		mBrush.setStyle(Qt::SolidPattern);
-		setBrush( mBrush );
+		setBrush(mBrush);
 	}
 
 	//! Sets triangle 'inside' color
 	void setColor(int r, int g, int b)
 	{
 		mBrush.setColor(QColor(r, g, b, 196)); // semi-transparent color
-		setBrush( mBrush );
+		setBrush(mBrush);
 	}
-	
-protected:
 
+  protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter *painter)
+	virtual void draw(QCPPainter* painter)
 	{
 		if (!keyAxis())
 			return;
@@ -381,37 +446,36 @@ protected:
 
 		// draw dashed line
 		{
-			QPen pen(QColor(128, 128, 128, 128),Qt::DashLine);
+			QPen pen(QColor(128, 128, 128, 128), Qt::DashLine);
 			pen.setWidth(1);
 			painter->setPen(pen); // semi-transparent grey
-			painter->drawLine(QPoint(currentPos,rect.y()+2*r), QPoint(currentPos,rect.y()+rect.height()));
+			painter->drawLine(QPoint(currentPos, rect.y() + 2 * r), QPoint(currentPos, rect.y() + rect.height()));
 		}
 
-		//draw triangle(handle)
+		// draw triangle(handle)
 		if (pen().style() != Qt::NoPen && pen().color().alpha() != 0)
 		{
-			//QPoint O(currentPos,rect.y() + rect.height() - r);
-			//QPoint T[3] = { O - QPoint(0,r), O + QPoint(r,r), O + QPoint(-r,r) };
+			// QPoint O(currentPos,rect.y() + rect.height() - r);
+			// QPoint T[3] = { O - QPoint(0,r), O + QPoint(r,r), O + QPoint(-r,r) };
 
-			QPoint O(currentPos,rect.y() + r);
-			QPoint T[3] = { O + QPoint(0,r), O - QPoint(r,r), O - QPoint(-r,r) };
+			QPoint O(currentPos, rect.y() + r);
+			QPoint T[3] = {O + QPoint(0, r), O - QPoint(r, r), O - QPoint(-r, r)};
 
 			painter->setPen(pen());
 			painter->setBrush(brush());
-			painter->drawPolygon(T,3);
+			painter->drawPolygon(T, 3);
 
-			//save last circle position
-			mLastPos = O;
+			// save last circle position
+			mLastPos    = O;
 			mLastRadius = r;
 		}
 		else
 		{
-			//no circle
-			mLastPos = QPoint(-1,-1);
+			// no circle
+			mLastPos    = QPoint(-1, -1);
 			mLastRadius = 0;
 		}
 	}
 };
 
-
-#endif //CC_QCUSTOMPLOT_HEADER
+#endif // CC_QCUSTOMPLOT_HEADER

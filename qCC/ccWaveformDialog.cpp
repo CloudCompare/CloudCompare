@@ -1,58 +1,58 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                       COPYRIGHT: CNRS / OSUR                           #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                       COPYRIGHT: CNRS / OSUR                           #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccWaveformDialog.h"
 
-//Local
+// Local
 #include "ccFileUtils.h"
 #include "ccPersistentSettings.h"
 #include "ccQCustomPlot.h"
 
-//common
+// common
 #include <ccPickingHub.h>
 
-//qCC_db
+// qCC_db
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-//Qt
+// Qt
 #include <QCloseEvent>
 #include <QSettings>
 
-//System
+// System
 #include <cassert>
 #include <cmath>
 
-//Gui
+// Gui
 #include "ui_waveDlg.h"
 
-ccWaveWidget::ccWaveWidget(QWidget* parent/*=nullptr*/)
-	: QCustomPlot(parent)
-	, m_titlePlot(nullptr)
-	, m_curve(nullptr)
-	, m_dt(0.0)
-	, m_minA(0.0)
-	, m_maxA(0.0)
-	, m_echoPos(-1.0)
-	, m_vertBar(nullptr)
-	, m_drawVerticalIndicator(false)
-	, m_verticalIndicatorPositionPercent(0.0)
-	, m_peakBar(nullptr)
-	, m_lastMouseClick(0, 0)
+ccWaveWidget::ccWaveWidget(QWidget* parent /*=nullptr*/)
+    : QCustomPlot(parent)
+    , m_titlePlot(nullptr)
+    , m_curve(nullptr)
+    , m_dt(0.0)
+    , m_minA(0.0)
+    , m_maxA(0.0)
+    , m_echoPos(-1.0)
+    , m_vertBar(nullptr)
+    , m_drawVerticalIndicator(false)
+    , m_verticalIndicatorPositionPercent(0.0)
+    , m_peakBar(nullptr)
+    , m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -61,10 +61,10 @@ ccWaveWidget::ccWaveWidget(QWidget* parent/*=nullptr*/)
 
 	setAutoAddPlottableToLegend(false);
 
-	//default font for text rendering
+	// default font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
 	m_renderingFont.setBold(false);
-	//m_renderingFont.setWeight(75);
+	// m_renderingFont.setWeight(75);
 
 	// make ticks on bottom axis go outward
 	assert(xAxis && yAxis);
@@ -88,7 +88,7 @@ void ccWaveWidget::clear()
 void ccWaveWidget::clearInternal()
 {
 	m_curveValues.resize(0);
-	m_dt = 0;
+	m_dt   = 0;
 	m_minA = m_maxA = 0;
 }
 
@@ -122,9 +122,12 @@ void ccWaveWidget::setAxisLabels(const QString& xLabel, const QString& yLabel)
 	}
 }
 
-static double AbsLog(double c) { return (c >= 0 ? log1p(c) : -log1p(-c)); }
+static double AbsLog(double c)
+{
+	return (c >= 0 ? log1p(c) : -log1p(-c));
+}
 
-void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue/*=0.0*/)
+void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale, double maxValue /*=0.0*/)
 {
 	clearInternal();
 
@@ -136,7 +139,7 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 	const ccWaveformProxy& w = cloud->waveformProxy(pointIndex);
 	if (!w.isValid())
 	{
-		//no valid descriptor
+		// no valid descriptor
 		return;
 	}
 
@@ -151,7 +154,7 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory
+		// not enough memory
 		ccLog::Error("Not enough memory");
 		return;
 	}
@@ -181,7 +184,7 @@ void ccWaveWidget::init(ccPointCloud* cloud, unsigned pointIndex, bool logScale,
 		m_maxA = logScale ? AbsLog(maxValue) : maxValue;
 	}
 
-	m_dt = w.descriptor().samplingRate_ps;
+	m_dt      = w.descriptor().samplingRate_ps;
 	m_echoPos = w.echoTime_ps();
 }
 
@@ -196,37 +199,37 @@ void ccWaveWidget::refresh()
 		// add title layout element
 		if (!m_titlePlot)
 		{
-			//add a row for the title
+			// add a row for the title
 			plotLayout()->insertRow(0);
 		}
 		else
 		{
-			//remove previous title
+			// remove previous title
 			plotLayout()->remove(m_titlePlot);
 			m_titlePlot = nullptr;
 		}
 		m_titlePlot = new QCPTextElement(this, m_titleStr);
-		
-		//title font
+
+		// title font
 		m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
 		m_titlePlot->setFont(m_renderingFont);
 		plotLayout()->addElement(0, 0, m_titlePlot);
 	}
 
-	//clear previous display
+	// clear previous display
 	m_vertBar = nullptr;
-	m_curve = nullptr;
+	m_curve   = nullptr;
 	m_peakBar = nullptr;
 	this->clearGraphs();
 	this->clearPlottables();
 
-	//wave curve
+	// wave curve
 	int curveSize = static_cast<int>(m_curveValues.size());
 	if (curveSize != 0)
 	{
 		QVector<double> x(curveSize);
 		QVector<double> y(curveSize);
-		
+
 		for (int i = 0; i < curveSize; ++i)
 		{
 			x[i] = i * m_dt;
@@ -238,18 +241,18 @@ void ccWaveWidget::refresh()
 		m_curve->setData(x, y);
 		m_curve->setName("WaveCurve");
 
-		//set pen color
+		// set pen color
 		QPen pen(Qt::blue);
 		m_curve->setPen(pen);
 
-		//set width
+		// set width
 		updateCurveWidth(rect().width(), rect().height());
 	}
-	
-	if (m_drawVerticalIndicator) //vertical hint
+
+	if (m_drawVerticalIndicator) // vertical hint
 	{
 		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
-		
+
 		// now we can modify properties of vertBar
 		m_vertBar->setName("VertLine");
 		m_vertBar->setWidth(0);
@@ -259,14 +262,14 @@ void ccWaveWidget::refresh()
 		QVector<double> keyData(1);
 		QVector<double> valueData(1);
 
-		//horizontal position
+		// horizontal position
 		int curvePos = static_cast<int>(curveSize * m_verticalIndicatorPositionPercent);
-		keyData[0] = curvePos * m_dt;
+		keyData[0]   = curvePos * m_dt;
 		valueData[0] = m_maxA;
 
 		m_vertBar->setData(keyData, valueData);
 
-		//precision		
+		// precision
 		QString valueStr = QString("Sample %0").arg(curvePos);
 		m_vertBar->setText(valueStr);
 		valueStr = QString("= %0").arg(curvePos < curveSize ? m_curveValues[curvePos] : 0);
@@ -287,18 +290,18 @@ void ccWaveWidget::refresh()
 		QVector<double> keyData(1);
 		QVector<double> valueData(1);
 
-		//horizontal position
-		keyData[0] = m_echoPos;
+		// horizontal position
+		keyData[0]   = m_echoPos;
 		valueData[0] = m_maxA;
 
 		m_peakBar->setData(keyData, valueData);
 
-		//precision
+		// precision
 		m_peakBar->setText("Peak");
 		m_peakBar->setTextAlignment(m_echoPos > 0.5 * curveSize * m_dt);
 	}
 
-	//rescaleAxes();
+	// rescaleAxes();
 
 	// redraw
 	replot();
@@ -318,32 +321,32 @@ void ccWaveWidget::updateCurveWidth(int w, int h)
 	}
 }
 
-void ccWaveWidget::resizeEvent(QResizeEvent * event)
+void ccWaveWidget::resizeEvent(QResizeEvent* event)
 {
 	QCustomPlot::resizeEvent(event);
 
 	updateCurveWidth(event->size().width(), event->size().height());
-	
+
 	refresh();
 }
 
-void ccWaveWidget::mousePressEvent(QMouseEvent *event)
+void ccWaveWidget::mousePressEvent(QMouseEvent* event)
 {
 	m_lastMouseClick = event->pos();
 
 	mouseMoveEvent(event);
 }
 
-void ccWaveWidget::mouseMoveEvent(QMouseEvent *event)
+void ccWaveWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	if (event->buttons() & Qt::LeftButton)
 	{
 		if (m_curve && !m_curveValues.empty())
 		{
-			QRect roi = /*m_curve->*/rect();
+			QRect roi = /*m_curve->*/ rect();
 			if (roi.contains(event->pos(), false))
 			{
-				m_drawVerticalIndicator = true;
+				m_drawVerticalIndicator            = true;
 				m_verticalIndicatorPositionPercent = static_cast<double>(event->x() - roi.x()) / roi.width();
 				refresh();
 			}
@@ -355,20 +358,20 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent *event)
 	}
 }
 
-ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
-							ccPickingHub* pickingHub,
-							QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
-	, m_cloud(cloud)
-	, m_widget(new ccWaveWidget(this))
-	, m_pickingHub(pickingHub)
-	, m_gui(new Ui_WaveDialog)
-	, m_waveMax(0)
-	, m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
-	, m_display(cloud ? cloud->getDisplay() : nullptr)
+ccWaveDialog::ccWaveDialog(ccPointCloud* cloud,
+                           ccPickingHub* pickingHub,
+                           QWidget*      parent /*=nullptr*/)
+    : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
+    , m_cloud(cloud)
+    , m_widget(new ccWaveWidget(this))
+    , m_pickingHub(pickingHub)
+    , m_gui(new Ui_WaveDialog)
+    , m_waveMax(0)
+    , m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
+    , m_display(cloud ? cloud->getDisplay() : nullptr)
 {
 	m_gui->setupUi(this);
-	
+
 	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->waveFrame);
 	hboxLayout->addWidget(m_widget);
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
@@ -379,8 +382,8 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 		m_gui->pointIndexSpinBox->setMaximum(static_cast<int>(cloud->size()));
 		m_gui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size() - 1));
 
-		//init m_waveMax
-		double waveMin = 0;
+		// init m_waveMax
+		double           waveMin = 0;
 		ccProgressDialog pDlg(parent);
 		if (cloud->computeFWFAmplitude(waveMin, m_waveMax, &pDlg))
 		{
@@ -393,13 +396,14 @@ ccWaveDialog::ccWaveDialog(	ccPointCloud* cloud,
 	}
 
 	connect(m_gui->pointIndexSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
-	connect(m_gui->logScaleCheckBox,		&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
-	connect(m_gui->fixedAmplitudeCheckBox,	&QCheckBox::toggled,	this,	&ccWaveDialog::updateCurrentWaveform);
-	connect(m_gui->pointPickingToolButton,	&QToolButton::toggled,	this,	&ccWaveDialog::onPointPickingButtonToggled);
-	connect(m_gui->saveWaveToolButton,		&QToolButton::clicked,	this,	&ccWaveDialog::onExportWaveAsCSV);
-	connect(this, &QDialog::finished, [&]() { m_gui->pointPickingToolButton->setChecked(false); }); //auto disable picking mode when the dialog is closed
+	connect(m_gui->logScaleCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
+	connect(m_gui->fixedAmplitudeCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
+	connect(m_gui->pointPickingToolButton, &QToolButton::toggled, this, &ccWaveDialog::onPointPickingButtonToggled);
+	connect(m_gui->saveWaveToolButton, &QToolButton::clicked, this, &ccWaveDialog::onExportWaveAsCSV);
+	connect(this, &QDialog::finished, [&]()
+	        { m_gui->pointPickingToolButton->setChecked(false); }); // auto disable picking mode when the dialog is closed
 
-	//force update
+	// force update
 	onPointIndexChanged(0);
 }
 
@@ -438,7 +442,7 @@ void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 	m_display->getGLCameraParameters(camera);
 
 	const CCVector3& P = *cloud->getPoint(pointIndex);
-	CCVector3d Y;
+	CCVector3d       Y;
 	camera.project(P, Y);
 	Y.y = m_display->getScreenSize().height() - Y.y;
 
@@ -446,7 +450,7 @@ void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 	m_label->addPickedPoint(cloud, pointIndex, false);
 	m_label->setVisible(true);
 	m_label->setPosition(static_cast<float>(Y.x + 20) / m_display->getScreenSize().width(),
-						 static_cast<float>(Y.y + 20) / m_display->getScreenSize().height());
+	                     static_cast<float>(Y.y + 20) / m_display->getScreenSize().height());
 
 	m_label->setDisplayedIn2D(true);
 	m_label->displayPointLegend(false);
@@ -514,38 +518,38 @@ void ccWaveDialog::onExportWaveAsCSV()
 		assert(false);
 		return;
 	}
-	
+
 	const ccWaveformProxy& w = m_cloud->waveformProxy(pointIndex);
 	if (!w.isValid())
 	{
-		//no valid descriptor
+		// no valid descriptor
 		return;
 	}
 	if (w.numberOfSamples() == 0)
 	{
-		//nothing to do
+		// nothing to do
 		return;
 	}
 
-	//persistent settings
+	// persistent settings
 	QSettings settings;
 	settings.beginGroup(ccPS::SaveFile());
 	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
 
 	currentPath += QString("/") + QString("waveform_%1.csv").arg(pointIndex);
 
-	//ask for a filename
+	// ask for a filename
 	QString filename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (filename.isEmpty())
 	{
-		//process cancelled by user
+		// process cancelled by user
 		return;
 	}
 
-	//save last saving location
+	// save last saving location
 	settings.setValue(ccPS::CurrentPath(), QFileInfo(filename).absolutePath());
 	settings.endGroup();
 
-	//save file
+	// save file
 	w.toASCII(filename);
 }

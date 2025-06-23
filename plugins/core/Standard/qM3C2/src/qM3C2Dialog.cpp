@@ -431,7 +431,11 @@ qM3C2Normals::ComputationMode qM3C2Dialog::getNormalsComputationMode() const
 	if (normalSourceComboBox->currentIndex() >= 0)
 	{
 		int selectedItem = normalSourceComboBox->currentData().toInt();
-		if (selectedItem == qM3C2Normals::USE_CLOUD1_NORMALS)
+		if (normMultiScaleRadioButton->isChecked()) // MULTI_SCALE_MODE whatever the normalSourceComboBox value
+		{
+			return qM3C2Normals::MULTI_SCALE_MODE;
+		}
+		else if (selectedItem == qM3C2Normals::USE_CLOUD1_NORMALS)
 		{
 			assert(m_cloud1 && m_cloud1->hasNormals());
 			return qM3C2Normals::USE_CLOUD1_NORMALS;

@@ -1,10 +1,9 @@
 #ifndef COMMAND_LINE_COMMANDS_HEADER
 #define COMMAND_LINE_COMMANDS_HEADER
 
-#include <QStringList>
-
 #include "ccCommandLineInterface.h"
 
+#include <QStringList>
 
 struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
 {
@@ -297,7 +296,7 @@ struct CommandNoiseFilter : public ccCommandLineInterface::Command
 
 struct CommandRemoveDuplicatePoints : public ccCommandLineInterface::Command
 {
-    CommandRemoveDuplicatePoints();
+	CommandRemoveDuplicatePoints();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
@@ -393,9 +392,9 @@ struct CommandC2CDist : public CommandDist
 
 struct CommandCPS : public ccCommandLineInterface::Command
 {
-    CommandCPS();
+	CommandCPS();
 
-    bool process(ccCommandLineInterface& cmd) override;
+	bool process(ccCommandLineInterface& cmd) override;
 };
 
 struct CommandStatTest : public ccCommandLineInterface::Command
@@ -428,16 +427,16 @@ struct CommandSFOperation : public ccCommandLineInterface::Command
 
 struct CommandSFOperationSF : public ccCommandLineInterface::Command
 {
-    CommandSFOperationSF();
+	CommandSFOperationSF();
 
-    bool process(ccCommandLineInterface& cmd) override;
+	bool process(ccCommandLineInterface& cmd) override;
 };
 
 struct CommandSFInterpolation : public ccCommandLineInterface::Command
 {
-    CommandSFInterpolation();
+	CommandSFInterpolation();
 
-    bool process(ccCommandLineInterface& cmd) override;
+	bool process(ccCommandLineInterface& cmd) override;
 };
 
 struct CommandColorInterpolation : public ccCommandLineInterface::Command
@@ -470,9 +469,9 @@ struct CommandSFRename : public ccCommandLineInterface::Command
 
 struct CommandSFAddConst : public ccCommandLineInterface::Command
 {
-    CommandSFAddConst();
+	CommandSFAddConst();
 
-    bool process(ccCommandLineInterface& cmd) override;
+	bool process(ccCommandLineInterface& cmd) override;
 };
 
 struct CommandSFAddId : public ccCommandLineInterface::Command
@@ -631,4 +630,4 @@ struct CommandComputeScatteringAngles : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
-#endif //COMMAND_LINE_COMMANDS_HEADER
+#endif // COMMAND_LINE_COMMANDS_HEADER

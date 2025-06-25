@@ -1,24 +1,24 @@
 #pragma once
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 #include "CCAppCommon.h"
 
-//Qt
+// Qt
 #include <QMenu>
 #include <QPair>
 #include <QVector>
@@ -28,43 +28,46 @@ class CCAPPCOMMON_LIB_API ccTranslationManager : public QObject
 {
 	Q_OBJECT
 
-public:
+  public:
 	static ccTranslationManager& Get();
 
 	~ccTranslationManager() override = default;
 
 	//! Register a file prefix for translation files.
 	/** The files should be named <prefix>_<lang>.ts where <lang> is the 2-letter ISO 639
-		language code in lowercase.
-		 e.g. CloudCompare_fr.ts
-		\param prefix	The prefix of the file to register
-		\param path		The path to look for the files in
+	    language code in lowercase.
+	     e.g. CloudCompare_fr.ts
+	    \param prefix	The prefix of the file to register
+	    \param path		The path to look for the files in
 	**/
 	void registerTranslatorFile(const QString& prefix, const QString& path);
 
 	//! Using the translation file prefixes that were registered, load the actual translations
-	inline void loadTranslations() { loadTranslation(languagePref()); }
+	inline void loadTranslations()
+	{
+		loadTranslation(languagePref());
+	}
 
 	//! Using the translation file prefixes that were registered, load the actual
 	//! translation by the 2-letter ISO 639 language code in lowercase.
 	void loadTranslation(QString language);
 
 	//! Populate the menu with a list of languages found using files in 'pathToTranslationFiles'
-	void populateMenu(QMenu *menu, const QString &pathToTranslationFiles);
+	void populateMenu(QMenu* menu, const QString& pathToTranslationFiles);
 
-protected:
+  protected:
 	explicit ccTranslationManager() = default;
 
-private: // methods
+  private: // methods
 	struct CCAPPCOMMON_LIB_API TranslatorFile
 	{
-		QString	prefix;
+		QString prefix;
 		QString path;
 	};
 	using TranslatorFileList = QVector<TranslatorFile>;
 
 	using TranslationInfo = QPair<QString, QString>;
-	using LanguageList = QVector<TranslationInfo>;
+	using LanguageList    = QVector<TranslationInfo>;
 
 	QString languagePref() const;
 
@@ -73,6 +76,6 @@ private: // methods
 
 	void setLanguagePref(const QString& languageCode);
 
-private: // members
-	TranslatorFileList	mTranslatorFileInfo;
+  private: // members
+	TranslatorFileList mTranslatorFileInfo;
 };

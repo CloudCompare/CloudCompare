@@ -1,38 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccComputeOctreeDlg.h"
 
-//Local
+// Local
 #include "ccBoundingBoxEditorDlg.h"
 
-//qCC_db
+// qCC_db
 #include <ccOctree.h>
 
-ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSize, QWidget* parent/*=nullptr*/)
-	: QDialog(parent)
-	, Ui::ComputeOctreeDialog()
-	, m_bbEditorDlg(nullptr)
+ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSize, QWidget* parent /*=nullptr*/)
+    : QDialog(parent)
+    , Ui::ComputeOctreeDialog()
+    , m_bbEditorDlg(nullptr)
 {
 	setupUi(this);
 
 	headerLabel->setText(QString("Max subdivision level: %1").arg(ccOctree::MAX_OCTREE_LEVEL));
 
-	//minimum cell size
+	// minimum cell size
 	if (minCellSize > 0.0)
 	{
 		cellSizeDoubleSpinBox->setMinimum(minCellSize);
@@ -41,14 +41,14 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 	else
 	{
 		ccLog::Warning("[ccComputeOctreeDlg] Invalid minimum cell size specified!");
-		cellSizeRadioButton->setEnabled(false);	
+		cellSizeRadioButton->setEnabled(false);
 	}
 
-	//custom bbox editor
+	// custom bbox editor
 	if (baseBBox.isValid())
 	{
 		m_bbEditorDlg = new ccBoundingBoxEditorDlg(false, false, this);
-		m_bbEditorDlg->setBaseBBox(baseBBox,true);
+		m_bbEditorDlg->setBaseBBox(baseBBox, true);
 		m_bbEditorDlg->forceKeepSquare(true);
 		connect(customBBToolButton, &QAbstractButton::clicked, m_bbEditorDlg, &ccBoundingBoxEditorDlg::exec);
 	}
@@ -61,7 +61,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 
 ccComputeOctreeDlg::ComputationMode ccComputeOctreeDlg::getMode() const
 {
-	//defaultRadioButton
+	// defaultRadioButton
 	if (cellSizeRadioButton->isChecked())
 		return MIN_CELL_SIZE;
 	else if (customBBRadioButton->isChecked())

@@ -1,32 +1,32 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Always first
-#include "ccIncludeGL.h"
-
+// Always first
 #include "ccPolyline.h"
 
-//Local
+#include "ccIncludeGL.h"
+
+// Local
 #include "ccCone.h"
 #include "ccPointCloud.h"
 
-ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID/*=ccUniqueIDGenerator::InvalidUniqueID*/)
-	: Polyline(associatedCloud)
-	, ccShiftedObject("Polyline", uniqueID)
+ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
+    : Polyline(associatedCloud)
+    , ccShiftedObject("Polyline", uniqueID)
 {
 	set2DMode(false);
 	setForeground(true);
@@ -41,15 +41,15 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uni
 	ccGenericPointCloud* cloud = dynamic_cast<ccGenericPointCloud*>(associatedCloud);
 	if (cloud)
 	{
-		//no need to call ccPolyline::the copyGlobalShiftAndScale method
-		//as it will try to set the Global Shift & Scale info on the associated cloud!
+		// no need to call ccPolyline::the copyGlobalShiftAndScale method
+		// as it will try to set the Global Shift & Scale info on the associated cloud!
 		ccShiftedObject::copyGlobalShiftAndScale(*cloud);
 	}
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
-	: Polyline(nullptr)
-	, ccShiftedObject(poly)
+    : Polyline(nullptr)
+    , ccShiftedObject(poly)
 {
 	ccPointCloud* vertices = nullptr;
 	initWith(vertices, poly);
@@ -58,7 +58,7 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 ccPolyline* ccPolyline::clone() const
 {
 	ccPolyline* clonedPoly = new ccPolyline(*this);
-	clonedPoly->setLocked(false); //there's no reason to keep the clone locked
+	clonedPoly->setLocked(false); // there's no reason to keep the clone locked
 
 	return clonedPoly;
 }
@@ -73,13 +73,13 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 		if (clone)
 		{
 			if (cloud)
-				clone->setName(cloud->getName()); //as 'partialClone' adds the '.extract' suffix by default
+				clone->setName(cloud->getName()); // as 'partialClone' adds the '.extract' suffix by default
 			else
 				clone->setGLTransformationHistory(poly.getGLTransformationHistory());
 		}
 		else
 		{
-			//not enough memory?
+			// not enough memory?
 			ccLog::Warning("[ccPolyline::initWith] Not enough memory to duplicate vertices!");
 			success = false;
 		}
@@ -91,7 +91,7 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 	{
 		setAssociatedCloud(vertices);
 		addChild(vertices);
-		//vertices->setEnabled(false);
+		// vertices->setEnabled(false);
 		assert(m_theAssociatedCloud);
 		if (m_theAssociatedCloud)
 		{
@@ -138,16 +138,16 @@ void ccPolyline::setForeground(bool state)
 
 void ccPolyline::showArrow(bool state, unsigned vertIndex, PointCoordinateType length)
 {
-	m_showArrow = state;
-	m_arrowIndex = vertIndex;
+	m_showArrow   = state;
+	m_arrowIndex  = vertIndex;
 	m_arrowLength = length;
 }
 
-ccBBox ccPolyline::getOwnBB(bool withGLFeatures/*=false*/)
+ccBBox ccPolyline::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	ccBBox emptyBox;
 	getBoundingBox(emptyBox.minCorner(), emptyBox.maxCorner());
-	emptyBox.setValidity((!is2DMode() || !withGLFeatures) && size() != 0); //a 2D polyline is considered as a purely 'GL' fature
+	emptyBox.setValidity((!is2DMode() || !withGLFeatures) && size() != 0); // a 2D polyline is considered as a purely 'GL' fature
 	return emptyBox;
 }
 
@@ -158,15 +158,15 @@ bool ccPolyline::hasColors() const
 
 void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 {
-	//transparent call
+	// transparent call
 	ccHObject::applyGLTransformation(trans);
 
-	//invalidate the bounding-box
+	// invalidate the bounding-box
 	//(and we hope the vertices will be updated as well!)
 	invalidateBoundingBox();
 }
 
-//unit arrow
+// unit arrow
 static QSharedPointer<ccCone> c_unitArrow(nullptr);
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -189,25 +189,25 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	else if (m_mode2D)
 	{
 		bool drawFG = MACRO_Foreground(context);
-		draw = ((drawFG && m_foreground) || (!drawFG && !m_foreground));
+		draw        = ((drawFG && m_foreground) || (!drawFG && !m_foreground));
 	}
 
 	if (!draw)
 		return;
 
-	//get the set of OpenGL functions (version 2.1)
+	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (glFunc == nullptr)
 		return;
 
-	//color-based entity picking
-	bool entityPickingMode = MACRO_EntityPicking(context);
+	// color-based entity picking
+	bool         entityPickingMode = MACRO_EntityPicking(context);
 	ccColor::Rgb pickingColor;
 	if (entityPickingMode)
 	{
-		//not fast at all!
+		// not fast at all!
 		if (MACRO_FastEntityPicking(context))
 		{
 			return;
@@ -223,14 +223,14 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	else if (colorsShown())
 		ccGL::Color(glFunc, m_rgbColor);
 
-	//display polyline
+	// display polyline
 	if (m_width != 0)
 	{
 		glFunc->glPushAttrib(GL_LINE_BIT);
 		glFunc->glLineWidth(static_cast<GLfloat>(m_width));
 	}
 
-	//vertices visibility
+	// vertices visibility
 	const ccGenericPointCloud::VisibilityTableType* _verticesVisibility = nullptr;
 	{
 		ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(getAssociatedCloud());
@@ -250,8 +250,8 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			unsigned pointIndex = getPointGlobalIndex(i);
 			if (_verticesVisibility->at(pointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
-			
-			unsigned nextIndex = ((i + 1) % vertCount);
+
+			unsigned nextIndex      = ((i + 1) % vertCount);
 			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
 			if (_verticesVisibility->at(nextPointIndex) != CCCoreLib::POINT_VISIBLE) // segment is hidden
 				continue;
@@ -263,9 +263,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 	else
 	{
-		//DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
-		//on one on my graphic cards with this mode!
-		//glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+		// DGM: we do the 'GL_LINE_LOOP' manually as I have a strange bug
+		// on one on my graphic cards with this mode!
+		// glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 		glFunc->glBegin(GL_LINE_STRIP);
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
@@ -278,7 +278,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glEnd();
 	}
 
-	//display arrow
+	// display arrow
 	if (m_showArrow && m_arrowIndex < vertCount && (m_arrowIndex > 0 || m_isClosed))
 	{
 		unsigned i0 = (m_arrowIndex == 0 ? vertCount - 1 : m_arrowIndex - 1);
@@ -288,7 +288,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			const CCVector3* P0 = getPoint(i0);
 			const CCVector3* P1 = getPoint(i1);
-			//direction of the last polyline chunk
+			// direction of the last polyline chunk
 			CCVector3 u = *P1 - *P0;
 			u.normalize();
 
@@ -296,10 +296,10 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				u *= -m_arrowLength;
 				static const PointCoordinateType s_defaultArrowAngle = CCCoreLib::DegreesToRadians(static_cast<PointCoordinateType>(15.0));
-				static const PointCoordinateType cost = cos(s_defaultArrowAngle);
-				static const PointCoordinateType sint = sin(s_defaultArrowAngle);
-				CCVector3 A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
-				CCVector3 B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
+				static const PointCoordinateType cost                = cos(s_defaultArrowAngle);
+				static const PointCoordinateType sint                = sin(s_defaultArrowAngle);
+				CCVector3                        A(cost * u.x - sint * u.y, sint * u.x + cost * u.y, 0);
+				CCVector3                        B(cost * u.x + sint * u.y, -sint * u.x + cost * u.y, 0);
 				glFunc->glBegin(GL_POLYGON);
 				ccGL::Vertex3v(glFunc, (A + *P1).u);
 				ccGL::Vertex3v(glFunc, (B + *P1).u);
@@ -322,9 +322,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 					c_unitArrow->setTempColor(m_rgbColor);
 				else
 					c_unitArrow->setTempColor(context.pointsDefaultCol);
-				//build-up unit arrow own 'context'
+				// build-up unit arrow own 'context'
 				CC_DRAW_CONTEXT markerContext = context;
-				markerContext.drawingFlags &= (~CC_ENTITY_PICKING); //we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
+				markerContext.drawingFlags &= (~CC_ENTITY_PICKING); // we must remove the 'entity picking flag' so that the sphere doesn't override the picking color!
 				markerContext.display = nullptr;
 
 				glFunc->glMatrixMode(GL_MODELVIEW);
@@ -345,7 +345,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glFunc->glPopAttrib();
 	}
 
-	//display vertices
+	// display vertices
 	if (m_showVertices)
 	{
 		glFunc->glPushAttrib(GL_POINT_BIT);
@@ -384,21 +384,21 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//we can't save the associated cloud here (as it may be shared by multiple polylines)
-	//so instead we save it's unique ID (dataVersion>=28)
-	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
+	// we can't save the associated cloud here (as it may be shared by multiple polylines)
+	// so instead we save it's unique ID (dataVersion>=28)
+	// WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
 
 	uint32_t vertUniqueID = (vertices ? static_cast<uint32_t>(vertices->getUniqueID()) : 0);
 	if (out.write((const char*)&vertUniqueID, 4) < 0)
 		return WriteError();
 
-	//number of points (references to) (dataVersion>=28)
+	// number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = vertices ? size() : 0;
 	if (out.write((const char*)&pointCount, 4) < 0)
 		return WriteError();
 
-	//points (references to) (dataVersion>=28)
+	// points (references to) (dataVersion>=28)
 	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = getPointGlobalIndex(i);
@@ -414,21 +414,21 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//Closing state (dataVersion>=28)
+	// Closing state (dataVersion>=28)
 	outStream << m_isClosed;
 
-	//RGB Color (dataVersion>=28)
+	// RGB Color (dataVersion>=28)
 	outStream << m_rgbColor.r;
 	outStream << m_rgbColor.g;
 	outStream << m_rgbColor.b;
 
-	//2D mode (dataVersion>=28)
+	// 2D mode (dataVersion>=28)
 	outStream << m_mode2D;
 
-	//Foreground mode (dataVersion>=28)
+	// Foreground mode (dataVersion>=28)
 	outStream << m_foreground;
 
-	//The width of the line (dataVersion>=31)
+	// The width of the line (dataVersion>=31)
 	outStream << m_width;
 
 	return true;
@@ -448,9 +448,9 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 		return false;
 	}
 
-	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
-	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
-	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	// as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
+	// we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
+	// is the responsibility of the caller to make sure that all dependencies are saved together)
 	{
 		uint32_t vertUniqueID = 0;
 		if (in.read((char*)&vertUniqueID, 4) < 0)
@@ -461,7 +461,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
 	}
 
-	//number of points (references to) (dataVersion>=28)
+	// number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = 0;
 	if (in.read((char*)&pointCount, 4) < 0)
 	{
@@ -474,7 +474,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 
 	ccLog::PrintVerbose(QString("Polyline has %1 vertices").arg(pointCount));
 
-	//points (references to) (dataVersion>=28)
+	// points (references to) (dataVersion>=28)
 	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = 0;
@@ -498,18 +498,18 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 
 	QDataStream inStream(&in);
 
-	//Closing state (dataVersion>=28)
+	// Closing state (dataVersion>=28)
 	inStream >> m_isClosed;
 
-	//RGB Color (dataVersion>=28)
+	// RGB Color (dataVersion>=28)
 	inStream >> m_rgbColor.r;
 	inStream >> m_rgbColor.g;
 	inStream >> m_rgbColor.b;
 
-	//2D mode (dataVersion>=28)
+	// 2D mode (dataVersion>=28)
 	inStream >> m_mode2D;
 
-	//Foreground mode (dataVersion>=28)
+	// Foreground mode (dataVersion>=28)
 	inStream >> m_foreground;
 
 	if (inStream.status() != QDataStream::Status::Ok)
@@ -517,7 +517,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 		return ReadError();
 	}
 
-	//Width of the line (dataVersion>=31)
+	// Width of the line (dataVersion>=31)
 	m_width = 0;
 	if (dataVersion >= 31)
 	{
@@ -533,8 +533,8 @@ short ccPolyline::minimumFileVersion_MeOnly() const
 	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
 }
 
-bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
-						std::vector<ccPolyline*>& parts)
+bool ccPolyline::split(PointCoordinateType       maxEdgeLength,
+                       std::vector<ccPolyline*>& parts)
 {
 	if (!m_theAssociatedCloud)
 	{
@@ -543,7 +543,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 
 	parts.clear();
 
-	//not enough vertices?
+	// not enough vertices?
 	unsigned vertCount = size();
 	if (vertCount <= 2)
 	{
@@ -552,7 +552,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 	}
 
 	unsigned startIndex = 0;
-	unsigned lastIndex = vertCount-1;
+	unsigned lastIndex  = vertCount - 1;
 	while (startIndex <= lastIndex)
 	{
 		unsigned stopIndex = startIndex;
@@ -561,10 +561,10 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 			++stopIndex;
 		}
 
-		//number of vertices for the current part
+		// number of vertices for the current part
 		unsigned partSize = stopIndex - startIndex + 1;
 
-		//if the polyline is closed we have to look backward for the first segment!
+		// if the polyline is closed we have to look backward for the first segment!
 		if (startIndex == 0)
 		{
 			if (isClosed())
@@ -577,7 +577,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 
 				if (realStartIndex == stopIndex)
 				{
-					//whole loop
+					// whole loop
 					parts.push_back(new ccPolyline(*this));
 					return true;
 				}
@@ -585,23 +585,23 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 				{
 					partSize += (vertCount - realStartIndex);
 					assert(realStartIndex != 0);
-					lastIndex = realStartIndex-1;
-					//warning: we shift the indexes!
-					startIndex = realStartIndex; 
+					lastIndex = realStartIndex - 1;
+					// warning: we shift the indexes!
+					startIndex = realStartIndex;
 					stopIndex += vertCount;
 				}
 			}
 			else if (partSize == vertCount)
 			{
-				//whole polyline
+				// whole polyline
 				parts.push_back(new ccPolyline(*this));
 				return true;
 			}
 		}
 
-		if (partSize > 1) //otherwise we skip that point
+		if (partSize > 1) // otherwise we skip that point
 		{
-			//create the corresponding part
+			// create the corresponding part
 			CCCoreLib::ReferenceCloud ref(m_theAssociatedCloud);
 			if (!ref.reserve(partSize))
 			{
@@ -609,20 +609,20 @@ bool ccPolyline::split(	PointCoordinateType maxEdgeLength,
 				return false;
 			}
 
-			for (unsigned i=startIndex; i<=stopIndex; ++i)
+			for (unsigned i = startIndex; i <= stopIndex; ++i)
 			{
 				ref.addPointIndex(i % vertCount);
 			}
 
 			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
-			ccPointCloud* subset = vertices ? vertices->partialClone(&ref) : ccPointCloud::From(&ref);
-			ccPolyline* part = new ccPolyline(subset);
+			ccPointCloud* subset   = vertices ? vertices->partialClone(&ref) : ccPointCloud::From(&ref);
+			ccPolyline*   part     = new ccPolyline(subset);
 			part->initWith(subset, *this);
-			part->setClosed(false); //by definition!
+			part->setClosed(false); // by definition!
 			parts.push_back(part);
 		}
 
-		//forward
+		// forward
 		startIndex = (stopIndex % vertCount) + 1;
 	}
 
@@ -668,7 +668,7 @@ void ccPolyline::setGlobalShift(const CCVector3d& shift)
 	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//auto transfer the global shift info to the vertices
+		// auto transfer the global shift info to the vertices
 		pc->setGlobalShift(shift);
 	}
 }
@@ -680,7 +680,7 @@ void ccPolyline::setGlobalScale(double scale)
 	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//auto transfer the global scale info to the vertices
+		// auto transfer the global scale info to the vertices
 		pc->setGlobalScale(scale);
 	}
 }
@@ -690,7 +690,7 @@ const CCVector3d& ccPolyline::getGlobalShift() const
 	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//by default we use the vertices global shift info
+		// by default we use the vertices global shift info
 		return pc->getGlobalShift();
 	}
 	else
@@ -704,7 +704,7 @@ double ccPolyline::getGlobalScale() const
 	const ccPointCloud* pc = dynamic_cast<const ccPointCloud*>(m_theAssociatedCloud);
 	if (pc && pc->getParent() == this)
 	{
-		//by default we use the vertices global scale info
+		// by default we use the vertices global scale info
 		return pc->getGlobalScale();
 	}
 	else
@@ -713,9 +713,9 @@ double ccPolyline::getGlobalScale() const
 	}
 }
 
-ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
-										double samplingParameter,
-										bool withRGB)
+ccPointCloud* ccPolyline::samplePoints(bool   densityBased,
+                                       double samplingParameter,
+                                       bool   withRGB)
 {
 	if (samplingParameter <= 0 || size() < 2)
 	{
@@ -723,7 +723,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		return nullptr;
 	}
 
-	//we must compute the total length of the polyline
+	// we must compute the total length of the polyline
 	double L = this->computeLength();
 
 	unsigned pointCount = 0;
@@ -742,7 +742,7 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		return nullptr;
 	}
 
-	//convert to real point cloud
+	// convert to real point cloud
 	ccPointCloud* cloud = new ccPointCloud(getName() + "." + QObject::tr("sampled"));
 	if (!cloud->reserve(pointCount))
 	{
@@ -751,29 +751,29 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 		return nullptr;
 	}
 
-	double samplingStep = L / pointCount;
-	double s = 0.0; //current sampled point curvilinear position
-	unsigned indexA = 0; //index of the segment start vertex
-	double sA = 0.0; //curvilinear pos of the segment start vertex
+	double   samplingStep = L / pointCount;
+	double   s            = 0.0; // current sampled point curvilinear position
+	unsigned indexA       = 0;   // index of the segment start vertex
+	double   sA           = 0.0; // curvilinear pos of the segment start vertex
 
-	for (unsigned i = 0; i < pointCount; )
+	for (unsigned i = 0; i < pointCount;)
 	{
-		unsigned indexB = ((indexA + 1) % size());
-		const CCVector3& A = *getPoint(indexA);
-		const CCVector3& B = *getPoint(indexB);
-		CCVector3 AB = B - A;
-		double lAB = AB.normd();
+		unsigned         indexB = ((indexA + 1) % size());
+		const CCVector3& A      = *getPoint(indexA);
+		const CCVector3& B      = *getPoint(indexB);
+		CCVector3        AB     = B - A;
+		double           lAB    = AB.normd();
 
 		double relativePos = s - sA;
 		if (relativePos >= lAB)
 		{
-			//specific case: last point
+			// specific case: last point
 			if (i + 1 == pointCount)
 			{
-				assert(relativePos < lAB * 1.01); //it should only be a rounding issue in the worst case
+				assert(relativePos < lAB * 1.01); // it should only be a rounding issue in the worst case
 				relativePos = lAB;
 			}
-			else //skip this segment
+			else // skip this segment
 			{
 				++indexA;
 				sA += lAB;
@@ -781,15 +781,15 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 			}
 		}
 
-		//now for the interpolation work
+		// now for the interpolation work
 		double alpha = relativePos / lAB;
-		alpha = std::max(alpha, 0.0); //just in case
-		alpha = std::min(alpha, 1.0);
+		alpha        = std::max(alpha, 0.0); // just in case
+		alpha        = std::min(alpha, 1.0);
 
 		CCVector3 P = A + static_cast<PointCoordinateType>(alpha) * AB;
 		cloud->addPoint(P);
 
-		//proceed to the next point
+		// proceed to the next point
 		++i;
 		s += samplingStep;
 	}
@@ -798,17 +798,17 @@ ccPointCloud* ccPolyline::samplePoints(	bool densityBased,
 	{
 		if (isColorOverridden())
 		{
-			//we use the default 'temporary' color
+			// we use the default 'temporary' color
 			cloud->setColor(getTempColor());
 		}
 		else if (colorsShown())
 		{
-			//we use the default color
+			// we use the default color
 			cloud->setColor(m_rgbColor);
 		}
 	}
 
-	//import parameters from the source
+	// import parameters from the source
 	cloud->copyGlobalShiftAndScale(*this);
 	cloud->setGLTransformationHistory(getGLTransformationHistory());
 
@@ -837,15 +837,15 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		return nullptr;
 	}
 
-	const CCCoreLib::GenericIndexedCloudPersist* currentIterationVertices = this; //a polyline is actually a ReferenceCloud!
-	ccPolyline* smoothPoly = nullptr;
+	const CCCoreLib::GenericIndexedCloudPersist* currentIterationVertices = this; // a polyline is actually a ReferenceCloud!
+	ccPolyline*                                  smoothPoly               = nullptr;
 
 	bool openPoly = !isClosed();
 
 	for (unsigned it = 0; it < iterationCount; ++it)
 	{
-		//reserve memory for the new vertices
-		unsigned vertCount = currentIterationVertices->size();
+		// reserve memory for the new vertices
+		unsigned vertCount    = currentIterationVertices->size();
 		unsigned segmentCount = (openPoly ? vertCount - 1 : vertCount);
 
 		ccPointCloud* newStateVertices = new ccPointCloud("vertices");
@@ -861,7 +861,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 		if (openPoly)
 		{
-			//we always keep the first vertex
+			// we always keep the first vertex
 			newStateVertices->addPoint(*currentIterationVertices->getPoint(0));
 		}
 
@@ -888,7 +888,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 
 		if (openPoly)
 		{
-			//we always keep the last vertex
+			// we always keep the last vertex
 			newStateVertices->addPoint(*currentIterationVertices->getPoint(currentIterationVertices->size() - 1));
 		}
 
@@ -899,7 +899,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 		}
 		currentIterationVertices = newStateVertices;
 
-		//last iteration?
+		// last iteration?
 		if (it + 1 == iterationCount)
 		{
 			smoothPoly = new ccPolyline(newStateVertices);
@@ -913,7 +913,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 			}
 			smoothPoly->addPointIndex(0, newStateVertices->size());
 
-			//copy state
+			// copy state
 			smoothPoly->importParametersFrom(*this);
 			smoothPoly->setName(getName() + QString(".smoothed (ratio=%1)").arg(ratio));
 		}
@@ -922,7 +922,7 @@ ccPolyline* ccPolyline::smoothChaikin(PointCoordinateType ratio, unsigned iterat
 	return smoothPoly;
 }
 
-bool ccPolyline::IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline/*=nullptr*/)
+bool ccPolyline::IsCloudVerticesOfPolyline(ccGenericPointCloud* cloud, ccPolyline** polyline /*=nullptr*/)
 {
 	if (!cloud)
 	{
@@ -968,8 +968,8 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		return false;
 	}
 	unsigned vertCount = size();
-	
-	//vertices visibility
+
+	// vertices visibility
 	ccGenericPointCloud* verticesCloud = dynamic_cast<ccGenericPointCloud*>(m_theAssociatedCloud);
 	if (!verticesCloud)
 	{
@@ -987,7 +987,7 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 
 	bool success = true;
 	{
-		ccPolyline* chunkPoly = nullptr;
+		ccPolyline*   chunkPoly  = nullptr;
 		ccPointCloud* chunkCloud = nullptr;
 
 		unsigned maxIndex = (m_isClosed ? vertCount : vertCount - 1);
@@ -995,12 +995,12 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 		{
 			unsigned nextIndex = ((i + 1) % vertCount);
 
-			unsigned pointIndex = getPointGlobalIndex(i);
+			unsigned pointIndex     = getPointGlobalIndex(i);
 			unsigned nextPointIndex = getPointGlobalIndex(nextIndex);
 
 			bool kept = false;
-			if (	verticesVisibility.at(pointIndex) == CCCoreLib::POINT_VISIBLE
-				&&	verticesVisibility.at(nextPointIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
+			if (verticesVisibility.at(pointIndex) == CCCoreLib::POINT_VISIBLE
+			    && verticesVisibility.at(nextPointIndex) == CCCoreLib::POINT_VISIBLE) // segment should be kept
 			{
 				kept = true;
 
@@ -1078,14 +1078,14 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 
 void ccPolyline::onDeletionOf(const ccHObject* obj)
 {
-	ccShiftedObject::onDeletionOf(obj); //remove dependencies, etc.
+	ccShiftedObject::onDeletionOf(obj); // remove dependencies, etc.
 
 	// can't cast to a point cloud or anything else than ccHObject, as this is called by the ccHObject destructor
 	const ccHObject* associatedObj = dynamic_cast<const ccHObject*>(getAssociatedCloud());
 
 	if (associatedObj == obj)
 	{
-		//we have to "detach" the cloud from the polyine... (ideally this object should be deleted)
+		// we have to "detach" the cloud from the polyine... (ideally this object should be deleted)
 		clear();
 		setAssociatedCloud(nullptr);
 		setName(getName() + " (emptied)");

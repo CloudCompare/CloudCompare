@@ -1,19 +1,19 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccColorRampShader.h"
 
@@ -37,7 +37,7 @@ GLint ccColorRampShader::MinRequiredBytes()
 }
 
 ccColorRampShader::ccColorRampShader()
-	: ccShader()
+    : ccShader()
 {
 }
 
@@ -56,22 +56,22 @@ bool ccColorRampShader::setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, flo
 
 	static const double resolution = static_cast<double>(1 << 24);
 
-	//set 'grayed' points color as a float-packed value
+	// set 'grayed' points color as a float-packed value
 	{
-		int rgb = (ccColor::lightGrey.a << 24) | (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
+		int   rgb             = (ccColor::lightGrey.a << 24) | (ccColor::lightGrey.r << 16) | (ccColor::lightGrey.g << 8) | ccColor::lightGrey.b;
 		float packedColorGray = static_cast<float>(rgb / resolution);
 		setUniformValue("uf_colorGray", packedColorGray);
 	}
 
-	//send colormap to shader
+	// send colormap to shader
 	assert(colorScale);
 	for (unsigned i = 0; i < colorSteps; ++i)
 	{
 		const ccColor::Rgb* col = colorScale->getColorByRelativePos(static_cast<double>(i) / (colorSteps - 1), colorSteps);
 		if (col)
 		{
-			//set ramp colors as float-packed values
-			int rgb = (col->r << 16) | (col->g << 8) | col->b;
+			// set ramp colors as float-packed values
+			int rgb              = (col->r << 16) | (col->g << 8) | col->b;
 			s_packedColormapf[i] = static_cast<float>(rgb / resolution);
 		}
 		else

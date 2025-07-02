@@ -149,6 +149,7 @@ Improvements:
 		- it will then restore these pieces of information when saving the clouds and images back as an E57 file, effectively
 			preserving the image sensor definition
 		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
+		- Empty scans will not trigger an error anymore (just a warning message)
 
 	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 

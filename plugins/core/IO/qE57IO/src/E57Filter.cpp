@@ -1957,6 +1957,12 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	TempArrays arrays;
 	std::vector<e57::SourceDestBuffer> dbufs;
 
+	if (0 == pointCount)
+	{
+		ccLog::Warning(QString("[E57] Scan '%1' is empty").arg(scanName));
+		return { cloud, globalShiftApplied, poseMatShift, preserveCoordinateShift };
+	}
+
 	if (!cloud->reserve(static_cast<unsigned>(pointCount)))
 	{
 		ccLog::Error("[E57] Not enough memory!");

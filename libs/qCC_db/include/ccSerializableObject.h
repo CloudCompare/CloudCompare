@@ -1,70 +1,75 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #ifndef CC_SERIALIZABLE_OBJECT_HEADER
 #define CC_SERIALIZABLE_OBJECT_HEADER
 
-//Local
+// Local
 #include "ccLog.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <CCPlatform.h>
 #include <CCTypes.h>
 
-//System
+// System
 #include <cassert>
 #include <cstdint>
 
-//Qt
+// Qt
 #include <QDataStream>
-#include <QMultiMap>
 #include <QFile>
+#include <QMultiMap>
 
 //! Serializable object interface
 class ccSerializableObject
 {
-public:
-
+  public:
 	//! Destructor
 	virtual ~ccSerializableObject() = default;
 
 	//! Returns whether object is serializable of not
-	virtual bool isSerializable() const { return false; }
+	virtual bool isSerializable() const
+	{
+		return false;
+	}
 
 	//! Saves data to binary stream
 	/** \param out			output file (already opened)
-		\param dataVersion	target file version
-		\return success
+	    \param dataVersion	target file version
+	    \return success
 	**/
-	virtual bool toFile(QFile& out, short dataVersion) const { return false; }
+	virtual bool toFile(QFile& out, short dataVersion) const
+	{
+		return false;
+	}
 
 	//! Returns the minimum file version required to save this instance
 	/** To be overridden
-		\param out output file (already opened)
-		\return success
+	    \param out output file (already opened)
+	    \return success
 	**/
 	virtual short minimumFileVersion() const = 0;
 
 	//! Deserialization flags (bit-field)
 	enum DeserializationFlags
 	{
-		DF_POINT_COORDS_64_BITS	= 1, /**< Point coordinates are stored as 64 bits double (otherwise 32 bits floats) **/
-		//DGM: inversion is 'historical' ;)
-		DF_SCALAR_VAL_32_BITS	= 2, /**< Scalar values are stored as 32 bits floats (otherwise 64 bits double) **/
+		DF_POINT_COORDS_64_BITS = 1, /**< Point coordinates are stored as 64 bits double (otherwise 32 bits floats) **/
+		// DGM: inversion is 'historical' ;)
+		DF_SCALAR_VAL_32_BITS = 2, /**< Scalar values are stored as 32 bits floats (otherwise 64 bits double) **/
 	};
 
 	//! Map of loaded unique IDs (old ID --> new ID)
@@ -72,43 +77,61 @@ public:
 
 	//! Loads data from binary stream
 	/** \param in input file (already opened)
-		\param dataVersion file version
-		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-		\param oldToNewIDMap map to link old IDs with new IDs
-		\return success
+	    \param dataVersion file version
+	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
+	    \param oldToNewIDMap map to link old IDs with new IDs
+	    \return success
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) { return false; }
+	virtual bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+	{
+		return false;
+	}
 
 	//! Sends a custom error message (write error) and returns 'false'
 	/** Shortcut for returning a standardized error message in the toFile method.
-		\return always false
+	    \return always false
 	**/
-	static bool WriteError() { ccLog::Error("Write error (disk full or no access right?)"); return false; }
+	static bool WriteError()
+	{
+		ccLog::Error("Write error (disk full or no access right?)");
+		return false;
+	}
 
 	//! Sends a custom error message (read error) and returns 'false'
 	/** Shortcut for returning a standardized error message in the fromFile method.
-		\return always false
+	    \return always false
 	**/
-	static bool ReadError() { ccLog::Error("Read error (corrupted file or no access right?)"); return false; }
+	static bool ReadError()
+	{
+		ccLog::Error("Read error (corrupted file or no access right?)");
+		return false;
+	}
 
 	//! Sends a custom error message (not enough memory) and returns 'false'
 	/** Shortcut for returning a standardized error message in the fromFile method.
-		\return always false
+	    \return always false
 	**/
-	static bool MemoryError() { ccLog::Error("Not enough memory"); return false; }
+	static bool MemoryError()
+	{
+		ccLog::Error("Not enough memory");
+		return false;
+	}
 
 	//! Sends a custom error message (corrupted file) and returns 'false'
 	/** Shortcut for returning a standardized error message in the fromFile method.
-		\return always false
+	    \return always false
 	**/
-	static bool CorruptError() { ccLog::Error("File seems to be corrupted"); return false; }
+	static bool CorruptError()
+	{
+		ccLog::Error("File seems to be corrupted");
+		return false;
+	}
 };
 
 //! Serialization helpers
 class ccSerializationHelper
 {
-public:
-
+  public:
 	//! Reads one or several 'PointCoordinateType' values from a QDataStream either in float or double format depending on the 'flag' value
 	static void CoordsFromDataStream(QDataStream& stream, int flags, PointCoordinateType* out, unsigned count = 1)
 	{
@@ -156,43 +179,47 @@ public:
 	}
 
 	//! Returns the minimum file version to save/load a 'generic array'
-	static short GenericArrayToFileMinVersion() { return 20;  }
+	static short GenericArrayToFileMinVersion()
+	{
+		return 20;
+	}
 
 	//! Helper: saves a vector to file
 	/** \param data vector to save (must be allocated)
-		\param out output file (must be already opened)
-		\return success
+	    \param out output file (must be already opened)
+	    \return success
 	**/
-	template <class Type, int N, class ComponentType> static bool GenericArrayToFile(const std::vector<Type>& data, QFile& out)
+	template <class Type, int N, class ComponentType>
+	static bool GenericArrayToFile(const std::vector<Type>& data, QFile& out)
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
-		
-		//removed to allow saving empty clouds
-		//if (data.empty())
+
+		// removed to allow saving empty clouds
+		// if (data.empty())
 		//{
 		//	return ccSerializableObject::MemoryError();
-		//}
+		// }
 
-		//component count (dataVersion>=20)
+		// component count (dataVersion>=20)
 		::uint8_t componentCount = static_cast<::uint8_t>(N);
 		if (out.write((const char*)&componentCount, 1) < 0)
 			return ccSerializableObject::WriteError();
 
-		//element count = array size (dataVersion>=20)
+		// element count = array size (dataVersion>=20)
 		::uint32_t elementCount = static_cast<::uint32_t>(data.size());
 		if (out.write((const char*)&elementCount, 4) < 0)
 			return ccSerializableObject::WriteError();
 
-		//array data (dataVersion>=20)
+		// array data (dataVersion>=20)
 		{
-			//DGM: do it by chunks, in case it's too big to be processed by the system
-			const char* _data = (const char*)data.data();
-			qint64 byteCount = static_cast<qint64>(elementCount);
+			// DGM: do it by chunks, in case it's too big to be processed by the system
+			const char* _data     = (const char*)data.data();
+			qint64      byteCount = static_cast<qint64>(elementCount);
 			byteCount *= sizeof(Type);
 			while (byteCount != 0)
 			{
-				static const qint64 s_maxByteSaveCount = (1 << 26); //64 Mb each time
-				qint64 saveCount = std::min(byteCount, s_maxByteSaveCount);
+				static const qint64 s_maxByteSaveCount = (1 << 26); // 64 Mb each time
+				qint64              saveCount          = std::min(byteCount, s_maxByteSaveCount);
 				if (out.write(_data, saveCount) < 0)
 					return ccSerializableObject::WriteError();
 				_data += saveCount;
@@ -204,18 +231,18 @@ public:
 
 	//! Helper: loads a vector structure from file
 	/** \param data vector to load
-		\param in input file (must be already opened)
-		\param dataVersion version current data version
-		\return success
+	    \param in input file (must be already opened)
+	    \param dataVersion version current data version
+	    \return success
 	**/
 	template <class Type, int N, class ComponentType>
-	static bool GenericArrayFromFile(	std::vector<Type>& data,
-										QFile& in,
-										short dataVersion,
-										const QString& verboseDescription )
+	static bool GenericArrayFromFile(std::vector<Type>& data,
+	                                 QFile&             in,
+	                                 short              dataVersion,
+	                                 const QString&     verboseDescription)
 	{
-		::uint8_t componentCount = 0;
-		::uint32_t elementCount = 0;
+		::uint8_t  componentCount = 0;
+		::uint32_t elementCount   = 0;
 		if (!ReadArrayHeader(in, dataVersion, componentCount, elementCount))
 		{
 			return false;
@@ -229,7 +256,7 @@ public:
 
 		if (elementCount)
 		{
-			//try to allocate memory
+			// try to allocate memory
 			try
 			{
 				data.resize(elementCount);
@@ -239,13 +266,13 @@ public:
 				return ccSerializableObject::MemoryError();
 			}
 
-			//array data (dataVersion>=20)
+			// array data (dataVersion>=20)
 			{
-				//Apparently Qt and/or Windows don't like to read too many bytes in a row...
+				// Apparently Qt and/or Windows don't like to read too many bytes in a row...
 				static const qint64 MaxElementPerChunk = (static_cast<qint64>(1) << 24);
 				assert(sizeof(ComponentType) * N == sizeof(Type));
 				qint64 byteCount = static_cast<qint64>(data.size()) * (sizeof(ComponentType) * N);
-				char* dest = (char*)data.data();
+				char*  dest      = (char*)data.data();
 				while (byteCount > 0)
 				{
 					qint64 chunkSize = std::min(MaxElementPerChunk, byteCount);
@@ -264,20 +291,20 @@ public:
 
 	//! Helper: loads a vector structure from a file stored with a different type
 	/** \param data vector to load
-		\param in input file (must be already opened)
-		\param dataVersion version current data version
-		\param _autoOffset optional: automatic offset to be applied at loading time (based on the first eleemnt)
-		\return success
+	    \param in input file (must be already opened)
+	    \param dataVersion version current data version
+	    \param _autoOffset optional: automatic offset to be applied at loading time (based on the first eleemnt)
+	    \return success
 	**/
 	template <class Type, int N, class ComponentType, class FileComponentType>
-	static bool GenericArrayFromTypedFile(	std::vector<Type>& data,
-											QFile& in,
-											short dataVersion,
-											const QString& verboseDescription,
-											FileComponentType* _autoOffset = nullptr)
+	static bool GenericArrayFromTypedFile(std::vector<Type>& data,
+	                                      QFile&             in,
+	                                      short              dataVersion,
+	                                      const QString&     verboseDescription,
+	                                      FileComponentType* _autoOffset = nullptr)
 	{
-		::uint8_t componentCount = 0;
-		::uint32_t elementCount = 0;
+		::uint8_t  componentCount = 0;
+		::uint32_t elementCount   = 0;
 		if (!ReadArrayHeader(in, dataVersion, componentCount, elementCount))
 		{
 			return false;
@@ -291,7 +318,7 @@ public:
 
 		if (elementCount)
 		{
-			//try to allocate memory
+			// try to allocate memory
 			try
 			{
 				data.resize(elementCount);
@@ -301,10 +328,10 @@ public:
 				return ccSerializableObject::MemoryError();
 			}
 
-			//array data (dataVersion>=20)
+			// array data (dataVersion>=20)
 			//--> sadly we can't read it as a block...
-			//we must convert each element, value by value!
-			FileComponentType dummyArray[N] { 0 };
+			// we must convert each element, value by value!
+			FileComponentType dummyArray[N]{0};
 
 			ComponentType* _data = (ComponentType*)data.data();
 
@@ -312,13 +339,13 @@ public:
 
 			if (_autoOffset)
 			{
-				//read the first element
+				// read the first element
 				if (in.read((char*)dummyArray, elementSize) >= 0)
 				{
 					for (unsigned k = 0; k < N; ++k)
 					{
 						*_autoOffset = dummyArray[k];
-						*_data++ = 0;
+						*_data++     = 0;
 					}
 				}
 				else
@@ -326,7 +353,7 @@ public:
 					return ccSerializableObject::ReadError();
 				}
 
-				//read the next elements
+				// read the next elements
 				for (unsigned i = 1; i < elementCount; ++i)
 				{
 					if (in.read((char*)dummyArray, elementSize) >= 0)
@@ -365,23 +392,22 @@ public:
 		return true;
 	}
 
-protected:
-
-	static bool ReadArrayHeader(QFile& in,
-								short dataVersion,
-								::uint8_t &componentCount,
-								::uint32_t &elementCount)
+  protected:
+	static bool ReadArrayHeader(QFile&      in,
+	                            short       dataVersion,
+	                            ::uint8_t&  componentCount,
+	                            ::uint32_t& elementCount)
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
 		if (dataVersion < 20)
 			return ccSerializableObject::CorruptError();
 
-		//component count (dataVersion>=20)
+		// component count (dataVersion>=20)
 		if (in.read((char*)&componentCount, 1) < 0)
 			return ccSerializableObject::ReadError();
 
-		//element count = array size (dataVersion>=20)
+		// element count = array size (dataVersion>=20)
 		if (in.read((char*)&elementCount, 4) < 0)
 			return ccSerializableObject::ReadError();
 
@@ -389,4 +415,4 @@ protected:
 	}
 };
 
-#endif //CC_SERIALIZABLE_OBJECT_HEADER
+#endif // CC_SERIALIZABLE_OBJECT_HEADER

@@ -1,39 +1,39 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccSensor.h"
 
 ccSensor::ccSensor(const QString& name)
-	: ccHObject(name)
-	, m_posBuffer(nullptr)
-	, m_activeIndex(0)
-	, m_color(ccColor::green)
-	, m_scale(CCCoreLib::PC_ONE)
+    : ccHObject(name)
+    , m_posBuffer(nullptr)
+    , m_activeIndex(0)
+    , m_color(ccColor::green)
+    , m_scale(CCCoreLib::PC_ONE)
 {
 	m_rigidTransformation.toIdentity();
 }
 
 ccSensor::ccSensor(const ccSensor& sensor)
-	: ccHObject(sensor)
-	, m_posBuffer(nullptr)
-	, m_rigidTransformation(sensor.m_rigidTransformation)
-	, m_activeIndex(sensor.m_activeIndex)
-	, m_color(sensor.m_color)
-	, m_scale(sensor.m_scale)
+    : ccHObject(sensor)
+    , m_posBuffer(nullptr)
+    , m_rigidTransformation(sensor.m_rigidTransformation)
+    , m_activeIndex(sensor.m_activeIndex)
+    , m_color(sensor.m_color)
+    , m_scale(sensor.m_scale)
 {
 	if (sensor.m_posBuffer)
 	{
@@ -63,11 +63,11 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	bool sort = (!m_posBuffer->empty() && m_posBuffer->back().getIndex() > index);
 	try
 	{
-		m_posBuffer->emplace_back(trans,index);
+		m_posBuffer->emplace_back(trans, index);
 	}
 	catch (const std::bad_alloc&)
 	{
-		//not enough memory!
+		// not enough memory!
 		return false;
 	}
 
@@ -81,10 +81,10 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 
 void ccSensor::applyGLTransformation(const ccGLMatrix& trans)
 {
-	//transparent call
+	// transparent call
 	ccHObject::applyGLTransformation(trans);
 
-	//we update the rigid transformation
+	// we update the rigid transformation
 	m_rigidTransformation = trans * m_rigidTransformation;
 }
 
@@ -127,7 +127,7 @@ bool ccSensor::getActiveAbsoluteTransformation(ccIndexedTransformation& trans) c
 bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec) const
 {
 	ccIndexedTransformation trans;
-	
+
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
@@ -138,12 +138,12 @@ bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec) const
 bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation) const
 {
 	ccIndexedTransformation trans;
-	
+
 	if (!getActiveAbsoluteTransformation(trans))
 		return false;
 
 	ccGLMatrix mat = trans;
-	mat.setTranslation(CCVector3(0.0,0.0,0.0));
+	mat.setTranslation(CCVector3(0.0, 0.0, 0.0));
 	rotation = mat;
 
 	return true;
@@ -163,26 +163,26 @@ bool ccSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	//rigid transformation (dataVersion>=34)
+	// rigid transformation (dataVersion>=34)
 	if (!m_rigidTransformation.toFile(out, dataVersion))
 	{
 		return WriteError();
 	}
 
-	//various parameters (dataVersion>=35)
+	// various parameters (dataVersion>=35)
 	QDataStream outStream(&out);
-	outStream << m_activeIndex;		//active index
-	outStream << m_scale;			//scale
+	outStream << m_activeIndex; // active index
+	outStream << m_scale;       // scale
 
-	//color (dataVersion>=35)
+	// color (dataVersion>=35)
 	if (out.write((const char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
 	{
 		return WriteError();
 	}
 
-	//we can't save the associated position buffer (as it may be shared by multiple sensors)
-	//so instead we save it's unique ID (dataVersion>=34)
-	//WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
+	// we can't save the associated position buffer (as it may be shared by multiple sensors)
+	// so instead we save it's unique ID (dataVersion>=34)
+	// WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
 	uint32_t bufferUniqueID = (m_posBuffer ? static_cast<uint32_t>(m_posBuffer->getUniqueID()) : 0);
 	if (out.write((const char*)&bufferUniqueID, 4) < 0)
 	{
@@ -197,26 +197,26 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	//serialization wasn't possible before v3.4!
+	// serialization wasn't possible before v3.4!
 	if (dataVersion < 34)
 		return false;
 
-	//rigid transformation (dataVersion>=34)
+	// rigid transformation (dataVersion>=34)
 	if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
 		return ReadError();
 
-	//various parameters (dataVersion>=35)
+	// various parameters (dataVersion>=35)
 	QDataStream inStream(&in);
 	inStream >> m_activeIndex;
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_scale);
 
-	//color (dataVersion>=35)
+	// color (dataVersion>=35)
 	if (in.read((char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
 		return ReadError();
 
-	//as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)
-	//we only store its unique ID (dataVersion>=34) --> we hope we will find it at loading time (i.e. this
-	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	// as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)
+	// we only store its unique ID (dataVersion>=34) --> we hope we will find it at loading time (i.e. this
+	// is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t bufferUniqueID = 0;
 	if (in.read((char*)&bufferUniqueID, 4) < 0)
 	{
@@ -234,9 +234,9 @@ short ccSensor::minimumFileVersion_MeOnly() const
 	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
 }
 
-bool ccSensor::applyViewport(ccGenericGLDisplay* win/*=nullptr*/) const
+bool ccSensor::applyViewport(ccGenericGLDisplay* win /*=nullptr*/) const
 {
-	//not supported by default, must be reimplemented by the child class
+	// not supported by default, must be reimplemented by the child class
 	ccLog::Warning("[ccSensor::applyViewport] Unhandled sensor type!");
 	return false;
 }

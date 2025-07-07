@@ -1,37 +1,37 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccProgressDialog.h"
 
-//Qt
+// Qt
 #include <QCoreApplication>
-#include <QPushButton>
 #include <QProgressBar>
+#include <QPushButton>
 
-ccProgressDialog::ccProgressDialog(	bool showCancelButton,
-									QWidget* parent/*=nullptr*/ )
-	: QProgressDialog(parent)
-	, m_currentValue(0)
-	, m_lastRefreshValue(-1)
+ccProgressDialog::ccProgressDialog(bool     showCancelButton,
+                                   QWidget* parent /*=nullptr*/)
+    : QProgressDialog(parent)
+    , m_currentValue(0)
+    , m_lastRefreshValue(-1)
 {
 	// Make sure the dialog doesn't steal focus
 	setAttribute(Qt::WA_ShowWithoutActivating);
 	setWindowFlag(Qt::WindowDoesNotAcceptFocus);
-	
+
 	setAutoClose(true);
 
 	resize(400, 200);
@@ -47,7 +47,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	}
 	setCancelButton(cancelButton);
 
-	connect(this, &ccProgressDialog::scheduleRefresh, this, &ccProgressDialog::refresh, Qt::QueuedConnection); //can't use DirectConnection here!
+	connect(this, &ccProgressDialog::scheduleRefresh, this, &ccProgressDialog::refresh, Qt::QueuedConnection); // can't use DirectConnection here!
 }
 
 void ccProgressDialog::refresh()
@@ -56,13 +56,13 @@ void ccProgressDialog::refresh()
 	if (m_lastRefreshValue != value)
 	{
 		m_lastRefreshValue = value;
-		setValue(value); //See Qt doc: if the progress dialog is modal, setValue() calls QApplication::processEvents()
+		setValue(value); // See Qt doc: if the progress dialog is modal, setValue() calls QApplication::processEvents()
 	}
 }
 
 void ccProgressDialog::update(float percent)
 {
-	//thread-safe
+	// thread-safe
 	int value = static_cast<int>(percent);
 	if (value != m_currentValue)
 	{

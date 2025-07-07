@@ -1,89 +1,94 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccCameraParamEditDlg.h"
+
 #include "ui_cameraParamDlg.h"
 
-//Local
+// Local
 #include "ccPickingHub.h"
 
-//qCC_db
+// qCC_db
 #include <ccGLUtils.h>
 #include <ccGenericMesh.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
-//qCC_gl
+// qCC_gl
 #include <ccGLWindowInterface.h>
 
-//CCCoreLib
+// CCCoreLib
 #include <CCMath.h>
 #include <GenericTriangle.h>
 
-//Qt
+// Qt
 #include <QMdiSubWindow>
 #include <QtMath>
 
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub)
-	: ccOverlayDialog(parent, pickingHub ? Qt::FramelessWindowHint | Qt::Tool : Qt::Tool) //pickingHub = CloudCompare / otherwise = ccViewer
-	, m_pickingHub(pickingHub)
-	, m_ui( new Ui::CameraParamDlg )
+    : ccOverlayDialog(parent, pickingHub ? Qt::FramelessWindowHint | Qt::Tool : Qt::Tool) // pickingHub = CloudCompare / otherwise = ccViewer
+    , m_pickingHub(pickingHub)
+    , m_ui(new Ui::CameraParamDlg)
 {
 	m_ui->setupUi(this);
 
-	connect(m_ui->phiSlider,	&QAbstractSlider::valueChanged,	this,	&ccCameraParamEditDlg::iPhiValueChanged);
-	connect(m_ui->thetaSlider,	&QAbstractSlider::valueChanged,	this,	&ccCameraParamEditDlg::iThetaValueChanged);
-	connect(m_ui->psiSlider,	&QAbstractSlider::valueChanged,	this,	&ccCameraParamEditDlg::iPsiValueChanged);
-	
-	connect(m_ui->phiSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPhiValueChanged);
-	connect(m_ui->thetaSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dThetaValueChanged);
-	connect(m_ui->psiSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::dPsiValueChanged);
+	connect(m_ui->phiSlider, &QAbstractSlider::valueChanged, this, &ccCameraParamEditDlg::iPhiValueChanged);
+	connect(m_ui->thetaSlider, &QAbstractSlider::valueChanged, this, &ccCameraParamEditDlg::iThetaValueChanged);
+	connect(m_ui->psiSlider, &QAbstractSlider::valueChanged, this, &ccCameraParamEditDlg::iPsiValueChanged);
 
-	//rotation center
-	connect(m_ui->rcxDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
-	connect(m_ui->rcyDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
-	connect(m_ui->rczDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::pivotChanged);
+	connect(m_ui->phiSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::dPhiValueChanged);
+	connect(m_ui->thetaSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::dThetaValueChanged);
+	connect(m_ui->psiSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::dPsiValueChanged);
 
-	//camera center
-	connect(m_ui->exDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
-	connect(m_ui->eyDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
-	connect(m_ui->ezDoubleSpinBox,	qOverload<double>(&QDoubleSpinBox::valueChanged),	this,	&ccCameraParamEditDlg::cameraCenterChanged);
+	// rotation center
+	connect(m_ui->rcxDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::pivotChanged);
+	connect(m_ui->rcyDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::pivotChanged);
+	connect(m_ui->rczDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::pivotChanged);
 
-	connect(m_ui->fovDoubleSpinBox,					qOverload<double>(&QDoubleSpinBox::valueChanged),		this,	&ccCameraParamEditDlg::fovChanged);
-	connect(m_ui->nearClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,						[&] { nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value()); });
-	connect(m_ui->farClippingDepthDoubleSpinBox,	&QDoubleSpinBox::editingFinished,						[&] { farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value()); });
-	connect(m_ui->nearClippingDepthDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	[&] (double d) { if (d != 0) nearClippingDepthChanged(d); });
-	connect(m_ui->farClippingDepthDoubleSpinBox,	QOverload<double>::of(&QDoubleSpinBox::valueChanged),	[&] (double d) { if (d != 0) farClippingDepthChanged(d); });
-	connect(m_ui->nearClippingCheckBox,				&QCheckBox::toggled,									this,	&ccCameraParamEditDlg::nearClippingCheckBoxToggled);
-	connect(m_ui->farClippingCheckBox,				&QCheckBox::toggled,									this,	&ccCameraParamEditDlg::farClippingCheckBoxToggled);
+	// camera center
+	connect(m_ui->exDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::cameraCenterChanged);
+	connect(m_ui->eyDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::cameraCenterChanged);
+	connect(m_ui->ezDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::cameraCenterChanged);
 
-	connect(m_ui->viewUpToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setTopView);
-	connect(m_ui->viewDownToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setBottomView);
-	connect(m_ui->viewFrontToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setFrontView);
-	connect(m_ui->viewBackToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setBackView);
-	connect(m_ui->viewLeftToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setLeftView);
-	connect(m_ui->viewRightToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setRightView);
-	connect(m_ui->viewIso1ToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setIso1View);
-	connect(m_ui->viewIso2ToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::setIso2View);
+	connect(m_ui->fovDoubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ccCameraParamEditDlg::fovChanged);
+	connect(m_ui->nearClippingDepthDoubleSpinBox, &QDoubleSpinBox::editingFinished, [&]
+	        { nearClippingDepthChanged(m_ui->nearClippingDepthDoubleSpinBox->value()); });
+	connect(m_ui->farClippingDepthDoubleSpinBox, &QDoubleSpinBox::editingFinished, [&]
+	        { farClippingDepthChanged(m_ui->farClippingDepthDoubleSpinBox->value()); });
+	connect(m_ui->nearClippingDepthDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double d)
+	        { if (d != 0) nearClippingDepthChanged(d); });
+	connect(m_ui->farClippingDepthDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double d)
+	        { if (d != 0) farClippingDepthChanged(d); });
+	connect(m_ui->nearClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::nearClippingCheckBoxToggled);
+	connect(m_ui->farClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
-	connect(m_ui->pushMatrixToolButton,		&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::pushCurrentMatrix);
-	connect(m_ui->revertMatrixToolButton,	&QAbstractButton::clicked,	this,	&ccCameraParamEditDlg::revertToPushedMatrix);
+	connect(m_ui->viewUpToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setTopView);
+	connect(m_ui->viewDownToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setBottomView);
+	connect(m_ui->viewFrontToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setFrontView);
+	connect(m_ui->viewBackToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setBackView);
+	connect(m_ui->viewLeftToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setLeftView);
+	connect(m_ui->viewRightToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setRightView);
+	connect(m_ui->viewIso1ToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setIso1View);
+	connect(m_ui->viewIso2ToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::setIso2View);
 
-	connect(m_ui->pivotPickingToolButton,	&QAbstractButton::toggled,	this,	&ccCameraParamEditDlg::pickPointAsPivot);
+	connect(m_ui->pushMatrixToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::pushCurrentMatrix);
+	connect(m_ui->revertMatrixToolButton, &QAbstractButton::clicked, this, &ccCameraParamEditDlg::revertToPushedMatrix);
+
+	connect(m_ui->pivotPickingToolButton, &QAbstractButton::toggled, this, &ccCameraParamEditDlg::pickPointAsPivot);
 }
 
 ccCameraParamEditDlg::~ccCameraParamEditDlg()
@@ -154,9 +159,9 @@ void ccCameraParamEditDlg::cameraCenterChanged()
 		return;
 
 	m_associatedWin->signalEmitter()->blockSignals(true);
-	m_associatedWin->setCameraPos( CCVector3d(	m_ui->exDoubleSpinBox->value(),
-												m_ui->eyDoubleSpinBox->value(),
-												m_ui->ezDoubleSpinBox->value() ));
+	m_associatedWin->setCameraPos(CCVector3d(m_ui->exDoubleSpinBox->value(),
+	                                         m_ui->eyDoubleSpinBox->value(),
+	                                         m_ui->ezDoubleSpinBox->value()));
 	m_associatedWin->signalEmitter()->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -169,9 +174,9 @@ void ccCameraParamEditDlg::pivotChanged()
 
 	m_associatedWin->signalEmitter()->blockSignals(true);
 	m_associatedWin->setPivotPoint(
-		CCVector3d(	m_ui->rcxDoubleSpinBox->value(),
-					m_ui->rcyDoubleSpinBox->value(),
-					m_ui->rczDoubleSpinBox->value() ));
+	    CCVector3d(m_ui->rcxDoubleSpinBox->value(),
+	               m_ui->rcyDoubleSpinBox->value(),
+	               m_ui->rczDoubleSpinBox->value()));
 	m_associatedWin->signalEmitter()->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -274,8 +279,8 @@ void ccCameraParamEditDlg::pushCurrentMatrix()
 	ccGLMatrixd mat = m_associatedWin->getBaseViewMat();
 
 	std::pair<PushedMatricesMapType::iterator, bool> ret;
-	ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
-	if (ret.second == false) //already exists
+	ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin, mat));
+	if (ret.second == false) // already exists
 		ret.first->second = mat;
 
 	m_ui->buttonsFrame->setEnabled(true);
@@ -332,7 +337,7 @@ void ccCameraParamEditDlg::pickPointAsPivot(bool state)
 
 void ccCameraParamEditDlg::onItemPicked(const PickedItem& pi)
 {
-	//with picking hub (CloudCompare)
+	// with picking hub (CloudCompare)
 	if (!m_associatedWin || !m_pickingHub)
 	{
 		assert(false);
@@ -354,13 +359,13 @@ void ccCameraParamEditDlg::onItemPicked(const PickedItem& pi)
 
 void ccCameraParamEditDlg::processPickedItem(ccHObject* entity, unsigned, int, int, const CCVector3& P, const CCVector3d& uvw)
 {
-	//without picking hub (ccViewer)
+	// without picking hub (ccViewer)
 	if (!m_associatedWin)
 	{
 		assert(false);
 		return;
 	}
-	
+
 	if (!entity)
 	{
 		return;
@@ -437,14 +442,14 @@ bool ccCameraParamEditDlg::start()
 {
 	ccOverlayDialog::start();
 
-	m_processing = false; //no such concept for this dialog! (+ we want to allow dynamic change of associated window)
+	m_processing = false; // no such concept for this dialog! (+ we want to allow dynamic change of associated window)
 
 	return true;
 }
 
 void ccCameraParamEditDlg::linkWith(QMdiSubWindow* qWin)
 {
-	//corresponding ccGLWindow
+	// corresponding ccGLWindow
 	ccGLWindowInterface* associatedWin = (qWin ? ccGLWindowInterface::FromWidget(qWin->widget()) : nullptr);
 
 	linkWith(associatedWin);
@@ -461,7 +466,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 
 	if (oldWin != m_associatedWin && m_ui->pivotPickingToolButton->isChecked())
 	{
-		//automatically disable picking mode when changing th
+		// automatically disable picking mode when changing th
 		pickPointAsPivot(false);
 	}
 
@@ -473,14 +478,14 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 	if (m_associatedWin)
 	{
 		initWith(m_associatedWin);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::baseViewMatChanged,		this,	&ccCameraParamEditDlg::initWithMatrix);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::cameraPosChanged,			this,	&ccCameraParamEditDlg::updateCameraCenter);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::pivotPointChanged,		this,	&ccCameraParamEditDlg::updatePivotPoint);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::perspectiveStateChanged,	this,	&ccCameraParamEditDlg::updateViewMode);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::aboutToClose,				this,	&QWidget::hide);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::fovChanged,				this,	&ccCameraParamEditDlg::updateWinFov);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::nearClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateNearClippingDepth);
-		connect(m_associatedWin->signalEmitter(),	&ccGLWindowSignalEmitter::farClippingDepthChanged,	this,	&ccCameraParamEditDlg::updateFarClippingDepth);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::baseViewMatChanged, this, &ccCameraParamEditDlg::initWithMatrix);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::cameraPosChanged, this, &ccCameraParamEditDlg::updateCameraCenter);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::pivotPointChanged, this, &ccCameraParamEditDlg::updatePivotPoint);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::perspectiveStateChanged, this, &ccCameraParamEditDlg::updateViewMode);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::aboutToClose, this, &QWidget::hide);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::fovChanged, this, &ccCameraParamEditDlg::updateWinFov);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::nearClippingDepthChanged, this, &ccCameraParamEditDlg::updateNearClippingDepth);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::farClippingDepthChanged, this, &ccCameraParamEditDlg::updateFarClippingDepth);
 
 		double increment = m_associatedWin->computeActualPixelSize();
 		m_ui->nearClippingDepthDoubleSpinBox->setSingleStep(increment);
@@ -532,7 +537,7 @@ void ccCameraParamEditDlg::reflectParamChange()
 	m_associatedWin->signalEmitter()->blockSignals(true);
 	if (m_associatedWin->isRotationAxisLocked())
 	{
-		double lockedRotationAngle_rad = CCCoreLib::DegreesToRadians(m_ui->phiSpinBox->value());
+		double lockedRotationAngle_rad      = CCCoreLib::DegreesToRadians(m_ui->phiSpinBox->value());
 		double lockedRotationOrthoAngle_rad = CCCoreLib::DegreesToRadians(m_ui->psiSpinBox->value());
 		m_associatedWin->setLockedRotationAngles(lockedRotationAngle_rad, lockedRotationOrthoAngle_rad);
 	}
@@ -576,9 +581,9 @@ void ccCameraParamEditDlg::updateViewMode()
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
-	double psi = 0;
+	double psi   = 0;
 	double theta = 0;
-	double phi = 0;
+	double phi   = 0;
 
 	if (m_associatedWin->isRotationAxisLocked())
 	{
@@ -590,9 +595,9 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 		mat.getParameters(phi, theta, psi, trans);
 	}
 
-	//to avoid retro-action
+	// to avoid retro-action
 	ccGLWindowInterface* win = m_associatedWin;
-	m_associatedWin = nullptr;
+	m_associatedWin          = nullptr;
 
 	m_ui->psiSpinBox->blockSignals(true);
 	m_ui->psiSpinBox->setValue(CCCoreLib::RadiansToDegrees(psi));
@@ -600,7 +605,7 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 	m_ui->psiSpinBox->blockSignals(false);
 
 	m_ui->thetaSpinBox->blockSignals(true);
-	m_ui->thetaSpinBox->setValue( CCCoreLib::RadiansToDegrees( theta ) );
+	m_ui->thetaSpinBox->setValue(CCCoreLib::RadiansToDegrees(theta));
 	dThetaValueChanged(m_ui->thetaSpinBox->value());
 	m_ui->thetaSpinBox->blockSignals(false);
 
@@ -618,23 +623,23 @@ void ccCameraParamEditDlg::initWith(ccGLWindowInterface* win)
 	if (!win)
 		return;
 
-	//update matrix (angles)
+	// update matrix (angles)
 	initWithMatrix(win->getBaseViewMat());
 
 	const ccViewportParameters& params = m_associatedWin->getViewportParameters();
 
-	//update view mode
+	// update view mode
 	updateViewMode();
 
-	//update pivot point
+	// update pivot point
 	updatePivotPoint(params.getPivotPoint());
-	//update camera center
+	// update camera center
 	updateCameraCenter(params.getCameraCenter());
 
-	//update FOV
+	// update FOV
 	updateWinFov(win->getFov());
 
-	//update the clipping depths
+	// update the clipping depths
 	updateNearClippingDepth(params.nearClippingDepth);
 	updateFarClippingDepth(params.farClippingDepth);
 }
@@ -692,12 +697,12 @@ void ccCameraParamEditDlg::updateFarClippingDepth(double depth)
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 {
-	const double phi = CCCoreLib::DegreesToRadians(m_ui->phiSpinBox->value());
-	const double psi = CCCoreLib::DegreesToRadians(m_ui->psiSpinBox->value());
+	const double phi   = CCCoreLib::DegreesToRadians(m_ui->phiSpinBox->value());
+	const double psi   = CCCoreLib::DegreesToRadians(m_ui->psiSpinBox->value());
 	const double theta = CCCoreLib::DegreesToRadians(m_ui->thetaSpinBox->value());
 
 	ccGLMatrixd mat;
-	CCVector3d T(0, 0, 0);
+	CCVector3d  T(0, 0, 0);
 	mat.initFromParameters(phi, theta, psi, T);
 
 	return mat;

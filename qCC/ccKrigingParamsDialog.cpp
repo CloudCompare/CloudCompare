@@ -1,31 +1,31 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                    COPYRIGHT: CloudCompare project                     #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                    COPYRIGHT: CloudCompare project                     #
+// #                                                                        #
+// ##########################################################################
 
 #include "ccKrigingParamsDialog.h"
 
-//ui
+// ui
 #include <ui_krigingParamsDialog.h>
 
-//system
+// system
 #include <assert.h>
 
-ccKrigingParamsDialog::ccKrigingParamsDialog(QWidget* parent/*=nullptr*/)
-	: QDialog(parent, Qt::Tool)
-	, m_ui(new Ui_KrigingParamsDialog)
+ccKrigingParamsDialog::ccKrigingParamsDialog(QWidget* parent /*=nullptr*/)
+    : QDialog(parent, Qt::Tool)
+    , m_ui(new Ui_KrigingParamsDialog)
 {
 	m_ui->setupUi(this);
 }
@@ -58,10 +58,10 @@ void ccKrigingParamsDialog::getParameters(ccRasterGrid::KrigingParams& krigingPa
 {
 	krigingParams.autoGuess = !m_ui->krigeParamsGroupBox->isChecked();
 	{
-		krigingParams.params.model = static_cast<Kriging::Model>(m_ui->modelComboBox->currentIndex());
+		krigingParams.params.model  = static_cast<Kriging::Model>(m_ui->modelComboBox->currentIndex());
 		krigingParams.params.nugget = m_ui->nuggetDoubleSpinBox->value();
-		krigingParams.params.sill = m_ui->sillDoubleSpinBox->value();
-		krigingParams.params.range = m_ui->rangeDoubleSpinBox->value();
+		krigingParams.params.sill   = m_ui->sillDoubleSpinBox->value();
+		krigingParams.params.range  = m_ui->rangeDoubleSpinBox->value();
 	}
 
 	krigingParams.kNN = m_ui->knnSpinBox->value();

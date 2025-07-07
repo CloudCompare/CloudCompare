@@ -1,60 +1,60 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-//Always first
+// Always first
 #include "ccIncludeGL.h"
 
-//Local
+// Local
 #include "ccMaterial.h"
 #include "ccMaterialDB.h"
 
-//Qt
+// Qt
 #include <QUuid>
 
-//Textures DB
+// Textures DB
 static ccMaterialDB s_materialDB;
 
 ccMaterial::ccMaterial(const QString& name)
-	: m_name(name)
-	, m_uniqueID(QUuid::createUuid().toString())
-	, m_diffuseFront(ccColor::bright)
-	, m_diffuseBack(ccColor::bright)
-	, m_ambient(ccColor::night)
-	, m_specular(ccColor::night)
-	, m_emission(ccColor::night)
-	, m_texMinificationFilter(QOpenGLTexture::Nearest)
-	, m_texMagnificationFilter(QOpenGLTexture::Linear)
+    : m_name(name)
+    , m_uniqueID(QUuid::createUuid().toString())
+    , m_diffuseFront(ccColor::bright)
+    , m_diffuseBack(ccColor::bright)
+    , m_ambient(ccColor::night)
+    , m_specular(ccColor::night)
+    , m_emission(ccColor::night)
+    , m_texMinificationFilter(QOpenGLTexture::Nearest)
+    , m_texMagnificationFilter(QOpenGLTexture::Linear)
 {
 	setShininess(50.0);
 };
 
 ccMaterial::ccMaterial(const ccMaterial& mtl)
-	: m_name(mtl.m_name)
-	, m_textureFilename(mtl.m_textureFilename)
-	, m_uniqueID(mtl.m_uniqueID)
-	, m_diffuseFront(mtl.m_diffuseFront)
-	, m_diffuseBack(mtl.m_diffuseBack)
-	, m_ambient(mtl.m_ambient)
-	, m_specular(mtl.m_specular)
-	, m_emission(mtl.m_emission)
-	, m_shininessFront(mtl.m_shininessFront)
-	, m_shininessBack(mtl.m_shininessFront)
-	, m_texMinificationFilter(mtl.m_texMinificationFilter)
-	, m_texMagnificationFilter(mtl.m_texMagnificationFilter)
+    : m_name(mtl.m_name)
+    , m_textureFilename(mtl.m_textureFilename)
+    , m_uniqueID(mtl.m_uniqueID)
+    , m_diffuseFront(mtl.m_diffuseFront)
+    , m_diffuseBack(mtl.m_diffuseBack)
+    , m_ambient(mtl.m_ambient)
+    , m_specular(mtl.m_specular)
+    , m_emission(mtl.m_emission)
+    , m_shininessFront(mtl.m_shininessFront)
+    , m_shininessBack(mtl.m_shininessFront)
+    , m_texMinificationFilter(mtl.m_texMinificationFilter)
+    , m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
 }
 
@@ -62,7 +62,6 @@ ccMaterial::~ccMaterial()
 {
 	releaseTexture();
 }
-
 
 void ccMaterial::setDiffuse(const ccColor::Rgbaf& color)
 {
@@ -87,7 +86,7 @@ void ccMaterial::setTransparency(float val)
 
 void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool skipDiffuse) const
 {
-	//get the set of OpenGL functions (version 2.1)
+	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
@@ -99,13 +98,13 @@ void ccMaterial::applyGL(const QOpenGLContext* context, bool lightEnabled, bool 
 		if (!skipDiffuse)
 		{
 			glFunc->glMaterialfv(GL_FRONT, GL_DIFFUSE, m_diffuseFront.rgba);
-			glFunc->glMaterialfv(GL_BACK,  GL_DIFFUSE, m_diffuseBack.rgba);
+			glFunc->glMaterialfv(GL_BACK, GL_DIFFUSE, m_diffuseBack.rgba);
 		}
-		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,   m_ambient.rgba);
-		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  m_specular.rgba);
-		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  m_emission.rgba);
-		glFunc->glMaterialf (GL_FRONT,          GL_SHININESS, std::max(0.0f, std::min(m_shininessFront, 128.0f)));
-		glFunc->glMaterialf (GL_BACK,           GL_SHININESS, std::max(0.0f, std::min(m_shininessBack, 128.0f)));
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, m_ambient.rgba);
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, m_specular.rgba);
+		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, m_emission.rgba);
+		glFunc->glMaterialf(GL_FRONT, GL_SHININESS, std::max(0.0f, std::min(m_shininessFront, 128.0f)));
+		glFunc->glMaterialf(GL_BACK, GL_SHININESS, std::max(0.0f, std::min(m_shininessBack, 128.0f)));
 	}
 	else
 	{
@@ -124,13 +123,13 @@ bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 
 	if (s_materialDB.hasTexture(absoluteFilename))
 	{
-		//if the image is already in memory, we simply update the texture filename for this material
+		// if the image is already in memory, we simply update the texture filename for this material
 		m_textureFilename = absoluteFilename;
 		s_materialDB.increaseTextureCounter(absoluteFilename);
 	}
 	else
 	{
-		//otherwise, we try to load the corresponding file
+		// otherwise, we try to load the corresponding file
 		QImage image(absoluteFilename);
 		if (image.isNull())
 		{
@@ -146,25 +145,25 @@ bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 	return true;
 }
 
-void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/, bool mirrorImage/*=true*/)
+void ccMaterial::setTexture(QImage image, QString absoluteFilename /*=QString()*/, bool mirrorImage /*=true*/)
 {
 	ccLog::PrintDebug(QString("[ccMaterial::setTexture] absoluteFilename = '%1' / size = %2 x %3").arg(absoluteFilename).arg(image.width()).arg(image.height()));
 
 	if (absoluteFilename.isEmpty())
 	{
-		//if the user hasn't provided any filename, we generate a fake one
+		// if the user hasn't provided any filename, we generate a fake one
 		absoluteFilename = QString("tex_%1.jpg").arg(m_uniqueID);
 		assert(!s_materialDB.hasTexture(absoluteFilename));
 	}
 	else
 	{
-		//if the texture has already been loaded
+		// if the texture has already been loaded
 		if (s_materialDB.hasTexture(absoluteFilename))
 		{
-			//check that the size is compatible at least
+			// check that the size is compatible at least
 			if (s_materialDB.getTexture(absoluteFilename).size() != image.size())
 			{
-				assert(false); //shouldn't happen anymore
+				assert(false); // shouldn't happen anymore
 				ccLog::Warning(QString("[ccMaterial] A texture with the same name (%1) but with a different size has already been loaded!").arg(absoluteFilename));
 			}
 			m_textureFilename = absoluteFilename;
@@ -175,7 +174,7 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/
 
 	m_textureFilename = absoluteFilename;
 
-	//insert image into DB if necessary
+	// insert image into DB if necessary
 	s_materialDB.addTexture(m_textureFilename, mirrorImage ? image.mirrored() : image);
 }
 
@@ -224,7 +223,7 @@ bool ccMaterial::hasTexture() const
 
 void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 {
-	//get the set of OpenGL functions (version 2.1)
+	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
@@ -246,9 +245,9 @@ void ccMaterial::MakeLightsNeutral(const QOpenGLContext* context)
 			glFunc->glGetLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
 			glFunc->glGetLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
 
-			 diffuse[0] =  diffuse[1] =  diffuse[2] = ( diffuse[0] +  diffuse[1] +  diffuse[2]) / 3;	//'mean' (gray) value
-			 ambiant[0] =  ambiant[1] =  ambiant[2] = ( ambiant[0] +  ambiant[1] +  ambiant[2]) / 3;	//'mean' (gray) value
-			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3;	//'mean' (gray) value
+			diffuse[0] = diffuse[1] = diffuse[2] = (diffuse[0] + diffuse[1] + diffuse[2]) / 3;       //'mean' (gray) value
+			ambiant[0] = ambiant[1] = ambiant[2] = (ambiant[0] + ambiant[1] + ambiant[2]) / 3;       //'mean' (gray) value
+			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3; //'mean' (gray) value
 
 			glFunc->glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
 			glFunc->glLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
@@ -298,12 +297,12 @@ bool ccMaterial::toFile(QFile& out, short dataVersion) const
 
 	QDataStream outStream(&out);
 
-	//material name (dataVersion >= 20)
+	// material name (dataVersion >= 20)
 	outStream << m_name;
-	//texture (dataVersion >= 20)
+	// texture (dataVersion >= 20)
 	outStream << m_textureFilename;
-	//material colors (dataVersion >= 20)
-	//we don't use QByteArray here as it has its own versions!
+	// material colors (dataVersion >= 20)
+	// we don't use QByteArray here as it has its own versions!
 	if (out.write((const char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
 	if (out.write((const char*)m_diffuseBack.rgba, sizeof(float) * 4) < 0)
@@ -314,7 +313,7 @@ bool ccMaterial::toFile(QFile& out, short dataVersion) const
 		return WriteError();
 	if (out.write((const char*)m_emission.rgba, sizeof(float) * 4) < 0)
 		return WriteError();
-	//material shininess (dataVersion >= 20)
+	// material shininess (dataVersion >= 20)
 	outStream << m_shininessFront;
 	outStream << m_shininessBack;
 
@@ -325,21 +324,21 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 {
 	QDataStream inStream(&in);
 
-	//material name (dataVersion>=20)
+	// material name (dataVersion>=20)
 	inStream >> m_name;
 	if (dataVersion < 37)
 	{
-		//texture (dataVersion>=20)
+		// texture (dataVersion>=20)
 		QImage texture;
 		inStream >> texture;
 		setTexture(texture, QString(), false);
 	}
 	else
 	{
-		//texture 'filename' (dataVersion>=37)
+		// texture 'filename' (dataVersion>=37)
 		inStream >> m_textureFilename;
 	}
-	//material colors (dataVersion>=20)
+	// material colors (dataVersion>=20)
 	if (in.read((char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
 	if (in.read((char*)m_diffuseBack.rgba, sizeof(float) * 4) < 0)
@@ -350,7 +349,7 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 		return ReadError();
 	if (in.read((char*)m_emission.rgba, sizeof(float) * 4) < 0)
 		return ReadError();
-	//material shininess (dataVersion>=20)
+	// material shininess (dataVersion>=20)
 	inStream >> m_shininessFront;
 	inStream >> m_shininessBack;
 
@@ -364,16 +363,16 @@ short ccMaterial::minimumFileVersion() const
 
 bool ccMaterial::compare(const ccMaterial& mtl) const
 {
-	if (	mtl.m_name != m_name
-		||	mtl.m_textureFilename != m_textureFilename
-		||	mtl.m_shininessFront != m_shininessFront
-		||	mtl.m_shininessBack != m_shininessBack
-		||	mtl.m_ambient != m_ambient
-		||	mtl.m_specular != m_specular
-		||	mtl.m_emission != m_emission
-		||	mtl.m_diffuseBack != m_diffuseBack
-		||	mtl.m_diffuseFront != m_diffuseFront
-		||	mtl.m_diffuseFront != m_diffuseFront)
+	if (mtl.m_name != m_name
+	    || mtl.m_textureFilename != m_textureFilename
+	    || mtl.m_shininessFront != m_shininessFront
+	    || mtl.m_shininessBack != m_shininessBack
+	    || mtl.m_ambient != m_ambient
+	    || mtl.m_specular != m_specular
+	    || mtl.m_emission != m_emission
+	    || mtl.m_diffuseBack != m_diffuseBack
+	    || mtl.m_diffuseFront != m_diffuseFront
+	    || mtl.m_diffuseFront != m_diffuseFront)
 	{
 		return false;
 	}
@@ -383,15 +382,15 @@ bool ccMaterial::compare(const ccMaterial& mtl) const
 
 void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter)
 {
-	if (	minificationFilter  != m_texMinificationFilter
-		||	magnificationFilter != m_texMagnificationFilter)
+	if (minificationFilter != m_texMinificationFilter
+	    || magnificationFilter != m_texMagnificationFilter)
 	{
-		m_texMinificationFilter = minificationFilter;
+		m_texMinificationFilter  = minificationFilter;
 		m_texMagnificationFilter = magnificationFilter;
 
 		if (!m_textureFilename.isEmpty() && s_materialDB.openGLTextures.contains(m_textureFilename))
 		{
-			//remove the existing texture (if any) so that it's initialized again next time
+			// remove the existing texture (if any) so that it's initialized again next time
 			s_materialDB.openGLTextures.remove(m_textureFilename);
 		}
 	}

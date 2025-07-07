@@ -1,24 +1,24 @@
 #pragma once
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
 
 #include "CCAppCommon.h"
 
-//Qt
+// Qt
 #include <QObject>
 
 class QAction;
@@ -32,27 +32,30 @@ class GamepadInput;
 class CCAPPCOMMON_LIB_API ccGamepadManager : public QObject
 {
 	Q_OBJECT
-	
-public:
+
+  public:
 	ccGamepadManager(ccMainAppInterface* appInterface, QObject* parent);
 	~ccGamepadManager() override;
-	
+
 	//! Returns the menu associated with gamepads
-	QMenu* menu() { return m_menu; }
-	
-protected:
+	QMenu* menu()
+	{
+		return m_menu;
+	}
+
+  protected:
 	void enableDevice(bool state, bool silent, int deviceID = -1);
 	void releaseDevice();
 
 	void showMessage(QString message, bool asWarning);
 	void setupMenu();
 	void setupGamepadInput();
-	
+
 	void onGamepadInput();
-	
-private:
+
+  private:
 	ccMainAppInterface* m_appInterface;
-	GamepadInput* m_gamepadInput;
-	QMenu* m_menu;
-	QAction* m_actionEnable;
+	GamepadInput*       m_gamepadInput;
+	QMenu*              m_menu;
+	QAction*            m_actionEnable;
 };

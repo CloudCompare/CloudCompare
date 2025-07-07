@@ -1,40 +1,40 @@
-//##########################################################################
-//#                                                                        #
-//#                              CLOUDCOMPARE                              #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
-//#                                                                        #
-//##########################################################################
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 #include "BundlerImportDlg.h"
 
-//Qt
-#include <QLineEdit>
+// Qt
 #include <QDoubleSpinBox>
-#include <QToolButton>
-#include <QPushButton>
 #include <QFileDialog>
-#include <QSettings>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QPushButton>
+#include <QSettings>
+#include <QToolButton>
 
-//system
-#include <stdio.h>
+// system
 #include <assert.h>
+#include <stdio.h>
 
-//qCC_db
+// qCC_db
 #include <ccGLMatrix.h>
 
 BundlerImportDlg::BundlerImportDlg(QWidget* parent)
-	: QDialog(parent)
+    : QDialog(parent)
 {
 	setupUi(this);
 
@@ -52,20 +52,20 @@ void BundlerImportDlg::initFromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("BundlerImport");
 
-	//read parameters
-	double scaleFactor			= settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
-	bool orthoRectifyAsCloud	= settings.value("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked()).toBool();
-	bool orthoRectifyAsImage	= settings.value("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked()).toBool();
-	bool undistortImages		= settings.value("undistortImages", undistortImagesCheckBox->isChecked()).toBool();
-	bool generateColoredDTM		= settings.value("generateColoredDTM", generateColoredDTMGroupBox->isChecked()).toBool();
-	bool keepImagesInMemory		= settings.value("keepImagesInMemory", keepImagesInMemoryCheckBox->isChecked()).toBool();
-	bool importImages			= settings.value("importImages", imagesGroupBox->isChecked()).toBool();
-	bool useAltKeypoints		= /*settings.value("useAltKeypoints", altKeypointsCheckBox->isChecked()).toBool()*/false; //DGM: if we don't handle the filename, it's too dangerous
-	bool importKeypoints		= settings.value("importKeypoints", importKeypointsGroupBox->isChecked()).toBool();
-	int dtmVerticesCount		= settings.value("dtmVerticesCount", dtmVerticesSpinBox->value()).toInt();
-	int orthoRectMethod			= settings.value("orthoRectMethod", orthoRectMethodComboBox->currentIndex()).toInt();
+	// read parameters
+	double scaleFactor         = settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
+	bool   orthoRectifyAsCloud = settings.value("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked()).toBool();
+	bool   orthoRectifyAsImage = settings.value("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked()).toBool();
+	bool   undistortImages     = settings.value("undistortImages", undistortImagesCheckBox->isChecked()).toBool();
+	bool   generateColoredDTM  = settings.value("generateColoredDTM", generateColoredDTMGroupBox->isChecked()).toBool();
+	bool   keepImagesInMemory  = settings.value("keepImagesInMemory", keepImagesInMemoryCheckBox->isChecked()).toBool();
+	bool   importImages        = settings.value("importImages", imagesGroupBox->isChecked()).toBool();
+	bool   useAltKeypoints     = /*settings.value("useAltKeypoints", altKeypointsCheckBox->isChecked()).toBool()*/ false; // DGM: if we don't handle the filename, it's too dangerous
+	bool   importKeypoints     = settings.value("importKeypoints", importKeypointsGroupBox->isChecked()).toBool();
+	int    dtmVerticesCount    = settings.value("dtmVerticesCount", dtmVerticesSpinBox->value()).toInt();
+	int    orthoRectMethod     = settings.value("orthoRectMethod", orthoRectMethodComboBox->currentIndex()).toInt();
 
-	//apply parameters
+	// apply parameters
 	imageScaleDoubleSpinBox->setValue(scaleFactor);
 	orthoRectifyAsCloudCheckBox->setChecked(orthoRectifyAsCloud);
 	orthoRectifyAsImageCheckBox->setChecked(orthoRectifyAsImage);
@@ -83,14 +83,14 @@ void BundlerImportDlg::initFromPersistentSettings()
 
 void BundlerImportDlg::acceptAndSaveSettings()
 {
-	//check matrix validity
+	// check matrix validity
 	if (customVertAxisRadioButton->isChecked())
 	{
 		bool success;
-		ccGLMatrixd::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+		ccGLMatrixd::FromString(applyTransfoMatrixTextEdit->toPlainText(), success);
 		if (!success)
 		{
-			QMessageBox::critical(this,"Invalid matrix","Invalid input 4x4 matrix!");
+			QMessageBox::critical(this, "Invalid matrix", "Invalid input 4x4 matrix!");
 			return;
 		}
 	}
@@ -98,7 +98,7 @@ void BundlerImportDlg::acceptAndSaveSettings()
 	QSettings settings;
 	settings.beginGroup("BundlerImport");
 
-	//write parameters
+	// write parameters
 	settings.setValue("scaleFactor", imageScaleDoubleSpinBox->value());
 	settings.setValue("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked());
 	settings.setValue("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked());
@@ -178,7 +178,7 @@ void BundlerImportDlg::setKeypointsCount(unsigned count)
 {
 	keyPointsCountLabel->setText(QString::number(count));
 	importKeypointsGroupBox->setEnabled(count != 0);
-	if (count == 0) //can't ortho-rectify without keypoints!
+	if (count == 0) // can't ortho-rectify without keypoints!
 	{
 		orthoRectifyAsImageCheckBox->setChecked(false);
 		orthoRectifyAsImageCheckBox->setEnabled(false);
@@ -221,10 +221,10 @@ QString BundlerImportDlg::getAltKeypointsFilename() const
 void BundlerImportDlg::browseImageListFilename()
 {
 	QString imageListFilename =
-		QFileDialog::getOpenFileName(	this,
-										"Open image list file",
-										imageListFilePathLineEdit->text(),
-										"Image list (*.txt)");
+	    QFileDialog::getOpenFileName(this,
+	                                 "Open image list file",
+	                                 imageListFilePathLineEdit->text(),
+	                                 "Image list (*.txt)");
 
 	if (!imageListFilename.isEmpty())
 		imageListFilePathLineEdit->setText(imageListFilename);
@@ -233,10 +233,10 @@ void BundlerImportDlg::browseImageListFilename()
 void BundlerImportDlg::browseAltKeypointsFilename()
 {
 	QString altKeypointsFilename =
-		QFileDialog::getOpenFileName(	this,
-										"Open alternative keypoints file",
-										altKeypointsFilePathLineEdit->text(),
-										"Cloud/mesh (*.*)");
+	    QFileDialog::getOpenFileName(this,
+	                                 "Open alternative keypoints file",
+	                                 altKeypointsFilePathLineEdit->text(),
+	                                 "Cloud/mesh (*.*)");
 
 	if (!altKeypointsFilename.isEmpty())
 		altKeypointsFilePathLineEdit->setText(altKeypointsFilename);
@@ -256,31 +256,30 @@ bool BundlerImportDlg::getOptionalTransfoMatrix(ccGLMatrix& mat)
 {
 	if (xVertAxisRadioButton->isChecked())
 	{
-		//rotation around Y
+		// rotation around Y
 		mat.toZero();
 		mat.data()[2]  = -1.0f;
-		mat.data()[5]  =  1.0f;
-		mat.data()[8]  =  1.0f;
-		mat.data()[15] =  1.0f;
+		mat.data()[5]  = 1.0f;
+		mat.data()[8]  = 1.0f;
+		mat.data()[15] = 1.0f;
 		return true;
 	}
 	else if (yVertAxisRadioButton->isChecked())
 	{
-		//rotation around X
+		// rotation around X
 		mat.toZero();
-		mat.data()[0]  =  1.0f;
+		mat.data()[0]  = 1.0f;
 		mat.data()[6]  = -1.0f;
 		mat.data()[9]  = -1.0f;
-		mat.data()[15] =  1.0f;
+		mat.data()[15] = 1.0f;
 		return true;
 	}
 	else if (customVertAxisRadioButton->isChecked())
 	{
 		bool success = false;
-		mat = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+		mat          = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(), success);
 		return success;
 	}
 
 	return false;
-
 }

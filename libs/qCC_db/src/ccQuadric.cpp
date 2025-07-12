@@ -261,7 +261,7 @@ PointCoordinateType ccQuadric::projectOnQuadric(const CCVector3& P, CCVector3& Q
 
 QString ccQuadric::getEquationString() const
 {
-	QString equationStr = QString("X = %1 + %2 * X").arg(m_eq[0]).arg(m_eq[1]);
+	QString equationStr = QString("Z = %1 + %2 * X").arg(m_eq[0]).arg(m_eq[1]);
 	equationStr += QString(" + %1 * Y + %2 * X^2").arg(m_eq[2]).arg(m_eq[3]);
 	equationStr += QString(" + %1 * X*Y + %2 * Y^2").arg(m_eq[4]).arg(m_eq[5]);
 

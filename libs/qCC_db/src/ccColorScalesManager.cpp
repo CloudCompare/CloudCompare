@@ -613,6 +613,8 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(TOPO_LANDSERF));
 		addScale(Create(HIGH_CONTRAST));
 		addScale(Create(CIVIDIS));
+		addScale(Create(ASPRS_CLASSES));
+		addScale(Create(ASPRS_WITH_LABELS));
 	}
 }
 
@@ -823,6 +825,10 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 				return QStringLiteral("High contrast");
 			case CIVIDIS:
 				return QStringLiteral("Cividis");
+			case ASPRS_CLASSES:
+				return QStringLiteral("ASPRS classes");
+			case ASPRS_WITH_LABELS:
+				return QStringLiteral("ASPRS classes (with labels)");
 			default:
 				assert(false);
 				break;
@@ -982,6 +988,68 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		}
 		break;
 	}
+	case ASPRS_CLASSES:
+	case ASPRS_WITH_LABELS:
+	{
+		std::vector<std::tuple<QString, int, QColor>> classes;
+		{
+			// must be sorted
+			classes.push_back({ "Not classified", 0, Qt::white});
+			classes.push_back({ "Unclassified", 1, Qt::lightGray});
+			classes.push_back({ "Ground", 2, qRgb(166, 116, 4)});
+			classes.push_back({ "Low vegetation", 3, qRgb(38, 114, 0)});
+			classes.push_back({ "Medium vegetation", 4, qRgb(69, 229, 0)});
+			classes.push_back({ "High vegetation", 5, qRgb(204, 240, 123)});
+			classes.push_back({ "Building", 6, Qt::yellow});
+			classes.push_back({ "Low Point", 7, Qt::red});
+			classes.push_back({ "Model Key-Point", 8, Qt::magenta});
+			classes.push_back({ "Water", 9, Qt::blue});
+			classes.push_back({ "Rail", 10, qRgb(85, 85, 0)});
+			classes.push_back({ "Road surface", 11, Qt::darkGray});
+			classes.push_back({ "Reserved", 12, qRgb(255, 170, 255)});
+			classes.push_back({ "Wire - Guard (Shield)", 13, qRgb(191, 231, 205)});
+			classes.push_back({ "Wire - Conductor (Phase)", 14, qRgb(193, 230, 125)});
+			classes.push_back({ "Transmission Tower", 15, Qt::darkBlue});
+			classes.push_back({ "Wire-strucutre Connector", 16, Qt::darkYellow});
+			classes.push_back({ "Bridge Deck", 17, Qt::darkCyan});
+			classes.push_back({ "High Noise", 18, Qt::darkRed });
+			classes.push_back({ "Overhead structure", 19, qRgb(270, 170, 255) });
+			classes.push_back({ "Ignored ground", 20, qRgb(50, 255, 198) });
+			classes.push_back({ "Snow", 21, qRgb(255, 250, 250) });
+			classes.push_back({ "Temporal exclusion", 22, Qt::black });
+		}
+
+		const double epsilon = 0.001;
+		const double maxValue = static_cast<double>(/*std::max(*/std::get<1>(classes.back())/*, 255)*/ + 1) - epsilon;
+
+		for (size_t i = 0; i < classes.size(); ++i)
+		{
+			int classNum = std::get<1>(classes[i]);
+			if (i != 0)
+			{
+				int previousClassNum = std::get<1>(classes[i - 1]);
+				if (classNum > previousClassNum + 1)
+				{
+					// fill the gap
+					scale->insert(ccColorScaleElement((previousClassNum + 1) / maxValue, Qt::white), false);
+					scale->insert(ccColorScaleElement((classNum - epsilon) / maxValue, Qt::white), false);
+				}
+			}
+
+			QColor color = std::get<2>(classes[i]);
+			scale->insert(ccColorScaleElement(classNum / maxValue, color), false);
+			scale->insert(ccColorScaleElement(((classNum + 1) - epsilon) / maxValue, color), false);
+
+			if (scaleType == ASPRS_WITH_LABELS)
+			{
+				scale->customLabels().insert(ccColorScale::Label(classNum, std::get<0>(classes[i])));
+			}
+		}
+
+		scale->setAbsolute(0.0, maxValue);
+	}
+	break;
+
 	default:
 		assert(false);
 		break;

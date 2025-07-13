@@ -512,11 +512,14 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		{
 		case LasScalarField::Intensity:
 			field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+			break;
+		case LasScalarField::Classification:
+			field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ASPRS_CLASSES));
+			break;
 		case LasScalarField::ReturnNumber:
 		case LasScalarField::NumberOfReturns:
 		case LasScalarField::ScanDirectionFlag:
 		case LasScalarField::EdgeOfFlightLine:
-		case LasScalarField::Classification:
 		case LasScalarField::SyntheticFlag:
 		case LasScalarField::KeypointFlag:
 		case LasScalarField::WithheldFlag:

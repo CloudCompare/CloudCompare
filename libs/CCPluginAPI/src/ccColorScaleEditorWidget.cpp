@@ -188,6 +188,13 @@ void ColorBarWidget::mousePressEvent(QMouseEvent* e)
 	e->ignore();
 }
 
+static int InterpColorValue(int a, int b, double ratio, int minValue = 0, int maxValue = 255)
+{
+	int x = static_cast<int>(a + ((b - a) * ratio));
+
+	return static_cast<int>(std::min(std::max(x, minValue), maxValue));
+}
+
 void ColorBarWidget::paintEvent(QPaintEvent* e)
 {
 	if (m_sliders && m_sliders->size() >= 2)
@@ -205,22 +212,64 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 
 		//color gradient
 		{
-			QLinearGradient gradient;
+			// QColorGradient is not accurate enough, instead we create a gradient image ourselves
+			QImage colorMap;
 			if (m_orientation == Qt::Horizontal)
-				gradient = QLinearGradient(contentRect.left(), 0, contentRect.right(), 0);
-			else
-				gradient = QLinearGradient(0, contentRect.bottom(), 0, contentRect.top());
-
-			//fill gradient with sliders
 			{
-				for (int i = 0; i < m_sliders->size(); i++)
+				colorMap = QImage(contentRect.width(), 1, QImage::Format_RGB888);
+			}
+			else
+			{
+				colorMap = QImage(1, contentRect.height(), QImage::Format_RGB888);
+			}
+
+			int length = (m_orientation == Qt::Horizontal ? colorMap.width() : colorMap.height());
+
+			ColorScaleElementSlider* previousStep = m_sliders->element(0);
+			int nextStepIndex = 0;
+			ColorScaleElementSlider* nextStep = m_sliders->element(nextStepIndex);
+			for (int i = 0; i < length; ++i)
+			{
+				double p = (i + 0.5) / length;
+				while (p > nextStep->getRelativePos())
 				{
-					ColorScaleElementSlider* slider = m_sliders->element(i);
-					gradient.setColorAt(slider->getRelativePos(), slider->getColor());
+					previousStep = nextStep;
+					if (nextStepIndex + 1 == m_sliders->size())
+					{
+						break;
+					}
+					++nextStepIndex;
+					nextStep = m_sliders->element(nextStepIndex);
+				}
+
+				QColor previousColor = previousStep->getColor();
+				QColor interpColor;
+				if (previousStep->getRelativePos() < nextStep->getRelativePos())
+				{
+					QColor nextColor = nextStep->getColor();
+					double distToPrevious = p - previousStep->getRelativePos();
+					double ratio = std::min(distToPrevious / (nextStep->getRelativePos() - previousStep->getRelativePos()), 1.0);
+					interpColor = qRgb(	InterpColorValue(previousColor.red(), nextColor.red(), ratio),
+										InterpColorValue(previousColor.green(), nextColor.green(), ratio),
+										InterpColorValue(previousColor.blue(), nextColor.blue(), ratio));
+
+				}
+				else
+				{
+					interpColor = previousColor;
+				}
+
+				if (m_orientation == Qt::Horizontal)
+				{
+					colorMap.setPixelColor(i, 0, interpColor);
+				}
+				else
+				{
+					colorMap.setPixelColor(0, i, interpColor);
 				}
 			}
 
-			painter.fillRect(contentRect, gradient);
+			painter.drawImage(contentRect, colorMap);
 			painter.drawRect(contentRect);
 		}
 
@@ -425,10 +474,6 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 		}
 	}
 }
-
-//void SlidersWidget::mouseReleaseEvent(QMouseEvent* e)
-//{
-//}
 
 void SlidersWidget::mouseDoubleClickEvent(QMouseEvent* e)
 {

@@ -578,8 +578,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context, const ccSca
 				VLabelPair nLabels = GetVLabelsAround(yScale, drawnLabels);
 
 				assert(nLabels.first != drawnLabels.end() && nLabels.second != drawnLabels.end());
-				if (	(nLabels.first == drawnLabels.end() || nLabels.first->yMax <= yScale - minGap)
-					&&	(nLabels.second == drawnLabels.end() || nLabels.second->yMin >= yScale + minGap))
+				if (	(nLabels.first == drawnLabels.end() || nLabels.first->yMax <= yScale - minGap / 2)
+					&&	(nLabels.second == drawnLabels.end() || nLabels.second->yMin >= yScale + minGap / 2))
 				{
 					//insert it at the right place (so as to keep a sorted list!)
 					drawnLabels.insert(nLabels.second, VLabel(yScale, yScale - strHeight / 2, yScale + strHeight / 2, sortedKeyValues[i]));

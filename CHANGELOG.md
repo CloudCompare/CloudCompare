@@ -204,6 +204,11 @@ Improvements:
 	- 'Edit > Normals > Compute'
 		- When "use scan grid(s) whenever possible" is checked for Neighbors, it is now possible to use a preferred orientation when "Use scan grid(s) whenever possible" and "Use sensor(s) whenever possible" are unchecked
 
+	- Color scales:
+		- New default color scales: ASPRS classes and ASPRS classes with labels
+			- The 'ASPRS classes' scale will now be used by default when loading the LAS classification field
+		- Improvement of the color scale preview (better accuracy)
+
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

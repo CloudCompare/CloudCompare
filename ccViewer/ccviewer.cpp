@@ -22,6 +22,7 @@
 
 //Qt
 #include <QMessageBox>
+#include <QShortcut>
 
 //qCC_glWindow
 #include <ccGLWindowInterface.h>
@@ -54,7 +55,7 @@
 //Camera parameters dialog
 static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
-ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
+ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	: QMainWindow(parent, flags)
 	, m_glWindow(nullptr)
 	, m_selectedObject(nullptr)
@@ -162,6 +163,15 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	//"Help" menu
 	connect(ui.actionAbout,							&QAction::triggered,					this,	&ccViewer::doActionAbout);
 	connect(ui.actionHelpShortcuts,					&QAction::triggered,					this,	&ccViewer::doActionDisplayShortcuts);
+
+	//Additional shortcuts
+	{
+		QShortcut* plusKey = new QShortcut(QKeySequence(tr("+", "Zoom in")), this);
+		connect(plusKey, &QShortcut::activated, [this]() { m_glWindow->onWheelEvent(8.0); });
+
+		QShortcut* minusKey = new QShortcut(QKeySequence(tr("=", "Zoom out")), this);
+		connect(minusKey, &QShortcut::activated, [this]() { m_glWindow->onWheelEvent(-8.0); });
+	}
 
 	loadPlugins();
 }
@@ -895,36 +905,41 @@ void ccViewer::toggleRotationAboutVertAxis()
 
 void ccViewer::doActionDisplayShortcuts()
 {
-	QMessageBox msgBox;
 	QString text;
-	text += "Shortcuts:\n\n";
-	text += "F2 : Set orthographic view\n";
-	text += "F3 : Set object-centered perspective\n";
-	text += "F4 : Set viewer-based perspective\n";
-	text += "F6 : Toggle sun light\n";
-	text += "F7 : Toggle custom light\n";
-	text += "F8 : Toggle Console display\n";
-	text += "F9 : Toggle full screen\n";
-	text += "F11: Toggle exclusive full screen\n";
-	text += "Z  : Zoom on selected entity\n";
-	text += "L  : Lock rotation around Z\n";
-	text += "B  : Enter/leave bubble view mode\n";
-	text += "DEL: Delete selected entity\n";
-	text += "+  : Zoom in\n";
-	text += "-  : Zoom out\n";
-	text += "\n";
-	text += "Shift + C: Toggle color ramp visibility\n";
-	text += "Shift + up arrow: activate previous SF\n";
-	text += "Shift + down arrow: activate next SF\n";
-	text += "\n";
-	text += "Ctrl + D: Display parameters\n";
-	text += "Ctrl + C: Camera parameters\n";
-	text += "\n";
-	text += "Left click: Select entity\n";
-	//text += "Ctrl + left click: Select multiple entities (toggle)\n";
-	//text += "Alt + left button hold: Select multiple entities (rectangular area)\n";
-	text += "Shift + left click (on a point/triangle): spawn a label\n";
-	text += "Right click (on a label): expand/collapse\n";
+	{
+		text += "Shortcuts:\n\n";
+		text += "F2 : Set orthographic view\n";
+		text += "F3 : Set object-centered perspective\n";
+		text += "F4 : Set viewer-based perspective\n";
+		text += "F6 : Toggle sun light\n";
+		text += "F7 : Toggle custom light\n";
+		text += "F11: Toggle exclusive full screen\n";
+		text += "L  : Lock rotation around Z\n";
+		text += "+  : Zoom in\n";
+		text += "=  : Zoom out\n";
+		text += "0,2,4-9: Set default camera orientation\n";
+		text += "\n";
+		text += "Left click: Select entity\n";
+		text += "On a selected entity:\n";
+		text += "\tC  : Toggle colors visibility\n";
+		text += "\tN  : Toggle normals visibility\n";
+		text += "\tM  : Toggle materials visibility\n";
+		text += "\tS  : Toggle SF visibility\n";
+		text += "\tR  : Toggle color ramp visibility\n";
+		text += "\tZ  : Zoom on entity\n";
+		text += "\tDEL: Delete entity\n";
+		text += "\n";
+		text += "ALT   + mouse wheel: change point size\n";
+		text += "SHIFT + mouse wheel: change Field of View\n";
+		text += "CTRL  + mouse wheel: change near clipping depth\n";
+		text += "\n";
+		text += "Alt + D: Display parameters\n";
+		text += "Alt + C: Camera parameters\n";
+		text += "\n";
+		text += "SHIFT + left click (on a point/triangle): spawn a label\n";
+	}
+
+	QMessageBox msgBox;
 	msgBox.setText(text);
 	msgBox.exec();
 }

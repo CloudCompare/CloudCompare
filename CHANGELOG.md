@@ -253,6 +253,7 @@ Bug fixes:
 	- The ICP registration tool could lead to mirrored transformations in some cases (since version 2.12.0)
 	- The 'Display > Adjust zoom' could result in a wrong pixel size if the height of the 3D view was larger than its width
 	- CC could crash when merging 2 meshes, one having texture (coordinates) and the other not
+	- The list of shortcuts displayed in ccViewer was outdated/wrong. It has been updated, and some shortcuts restored (+/=).
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

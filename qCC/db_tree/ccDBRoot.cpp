@@ -28,7 +28,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QStandardItemModel>
 #include <QTreeView>

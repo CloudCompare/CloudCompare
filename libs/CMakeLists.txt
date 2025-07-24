@@ -1,7 +1,8 @@
-add_subdirectory( CCAppCommon)
+# Ordered by dependency
 add_subdirectory( CCFbo )
-add_subdirectory( CCPluginStub )    # Must come before CCPluginAPI
-add_subdirectory( CCPluginAPI )
 add_subdirectory( qCC_db )
-add_subdirectory( qCC_glWindow )
 add_subdirectory( qCC_io )
+add_subdirectory( qCC_glWindow )
+add_subdirectory( CCPluginStub )
+add_subdirectory( CCPluginAPI )
+add_subdirectory( CCAppCommon )

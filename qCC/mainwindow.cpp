@@ -149,7 +149,6 @@
 
 // Qt
 #include <QClipboard>
-#include <QGLShader>
 
 // Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -233,7 +232,7 @@ MainWindow::MainWindow()
 	m_UI->actionAboutPlugins->setMenuRole(QAction::ApplicationSpecificRole);
 
 	m_UI->actionFullScreen->setText(tr("Enter Full Screen"));
-	m_UI->actionFullScreen->setShortcut(QKeySequence(Qt::CTRL + Qt::META + Qt::Key_F));
+	m_UI->actionFullScreen->setShortcut(QKeySequence(Qt::CTRL | Qt::META | Qt::Key_F));
 #endif
 
 	// Set up dynamic menus
@@ -9133,7 +9132,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << ';';
 					stream << cloud->getName();
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			// rows
@@ -9146,7 +9145,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << rmsMatrix[j * cloudCount + i];
 					stream << ';';
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			ccLog::Print(tr("[DoActionComputeBestICPRmsMatrix] Job done"));
@@ -9234,7 +9233,7 @@ void MainWindow::doActionExportPlaneInfo()
 	csvStream << "Nz;";
 	csvStream << "Dip;";
 	csvStream << "Dip dir;";
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	QChar separator(';');
 
@@ -9264,7 +9263,7 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << N.z << separator;                // Nz
 		csvStream << dip_deg << separator;            // Dip
 		csvStream << dipDir_deg << separator;         // Dip direction
-		csvStream << endl;
+		csvStream << Qt::endl;
 	}
 
 	ccConsole::Print(tr("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
@@ -9359,7 +9358,7 @@ void MainWindow::doActionExportCloudInfo()
 			csvStream << sfIndex << " sum;";
 		}
 	}
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	// write one line per cloud
 	{
@@ -9409,7 +9408,7 @@ void MainWindow::doActionExportCloudInfo()
 				}
 				csvStream << sfSum << ';' /*"SF sum;"*/;
 			}
-			csvStream << endl;
+			csvStream << Qt::endl;
 		}
 	}
 
@@ -10639,7 +10638,7 @@ static bool IsValidFileName(QString filename)
 	                 "\\|<>\\. ]))?$");
 #endif
 
-	return QRegExp(sPattern).exactMatch(filename);
+	return QRegularExpression(sPattern).match(filename).hasMatch();
 }
 
 void MainWindow::doActionSaveFile()
@@ -10836,7 +10835,7 @@ void MainWindow::doActionSaveFile()
 		QString defaultFileName(m_selectedEntities.front()->getName());
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];
@@ -10991,7 +10990,7 @@ void MainWindow::doActionSaveProject()
 			// Hierarchy objects have generally as name: 'filename.ext (fullpath)'
 			// so we must only take the first part! (otherwise this type of name
 			// with a path inside disturbs the QFileDialog a lot ;))
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];

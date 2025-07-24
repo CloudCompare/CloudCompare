@@ -23,7 +23,7 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 target_link_libraries( ${PROJECT_NAME}
-	Qt5::Gui
+	Qt6::Gui
 )
 
 # FFmpeg support

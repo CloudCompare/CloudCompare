@@ -19,7 +19,6 @@
 
 // Qt
 #include <QDir>
-#include <QGLFormat>
 #include <QMessageBox>
 #include <QPixmap>
 #include <QSettings>
@@ -55,6 +54,10 @@
 
 #ifdef USE_VLD
 #include <vld.h>
+#endif
+
+#ifdef _WIN32
+#include <Windows.h>
 #endif
 
 static bool IsCommandLine(int argc, char** argv)
@@ -187,7 +190,16 @@ int main(int argc, char** argv)
 	// standard mode
 	if (!commandLine)
 	{
-		if ((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1) == 0)
+		QOpenGLContext context;
+		if (!context.create())
+		{
+			QMessageBox::critical(nullptr, "Error", "This application needs OpenGL to run!");
+			return EXIT_FAILURE;
+		}
+
+		auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(&context);
+		// Check if we have at least OpenGL 2.1
+		if (!glFunc)
 		{
 			QMessageBox::critical(nullptr, "Error", "This application needs OpenGL 2.1 at least to run!");
 			return EXIT_FAILURE;

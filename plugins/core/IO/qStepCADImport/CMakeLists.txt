@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.23 )
 
 option( PLUGIN_IO_QSTEP "Check to install the STEP reading file plugin" OFF )
 

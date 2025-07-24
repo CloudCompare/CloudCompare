@@ -41,7 +41,6 @@ class MappingLabel : public QWidget
 	    , m_statusLabel(new QLabel)
 	{
 		auto* layout = new QHBoxLayout;
-		layout->setMargin(0);
 		layout->addWidget(m_nameLabel);
 		layout->addWidget(m_statusLabel);
 		setLayout(layout);
@@ -166,12 +165,12 @@ LasSaveDialog::LasSaveDialog(ccPointCloud* cloud, QWidget* parent)
 	m_extraFieldsDataTypesModel->setStringList(extraFieldsDataTypeNames);
 
 	connect(versionComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        &QComboBox::currentTextChanged,
 	        this,
 	        &LasSaveDialog::handleSelectedVersionChange);
 
 	connect(pointFormatComboBox,
-	        (void(QComboBox::*)(int))(&QComboBox::currentIndexChanged),
+	        &QComboBox::currentIndexChanged,
 	        this,
 	        &LasSaveDialog::handleSelectedPointFormatChange);
 
@@ -456,12 +455,13 @@ void LasSaveDialog::setVersionAndPointFormat(const LasDetails::LasVersion versio
 {
 	const QString versionStr = QString("1.%1").arg(versionAndFmt.minorVersion);
 
-	int versionIndex = versionComboBox->findText(versionStr);
+	const int versionIndex = versionComboBox->findText(versionStr);
 	if (versionIndex >= 0)
 	{
-		QString fmtStr = QString::number(versionAndFmt.pointFormat);
 		versionComboBox->setCurrentIndex(versionIndex);
-		int pointFormatIndex = pointFormatComboBox->findText(fmtStr);
+
+		const QString fmtStr           = QString::number(versionAndFmt.pointFormat);
+		const int     pointFormatIndex = pointFormatComboBox->findText(fmtStr);
 		if (pointFormatIndex >= 0)
 		{
 			pointFormatComboBox->setCurrentIndex(pointFormatIndex);
@@ -542,8 +542,8 @@ void LasSaveDialog::selectedVersion(uint8_t& versionMajor, uint8_t& versionMinor
 	versionMajor = 1;
 	versionMinor = 0;
 
-	const QString       versionString = versionComboBox->currentText();
-	QVector<QStringRef> tokens        = versionString.splitRef('.');
+	const QString versionString = versionComboBox->currentText();
+	QStringList   tokens        = versionString.split('.');
 	if (tokens.size() == 2)
 	{
 		versionMajor = static_cast<uint8_t>(std::min(tokens[0].toUInt(), 255u));

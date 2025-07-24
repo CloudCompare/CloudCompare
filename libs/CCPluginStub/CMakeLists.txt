@@ -12,6 +12,6 @@ add_subdirectory( include )
 add_subdirectory( src )
 
 target_link_libraries( ${PROJECT_NAME}
-	PRIVATE
+	PUBLIC
 		QCC_DB_LIB
 )

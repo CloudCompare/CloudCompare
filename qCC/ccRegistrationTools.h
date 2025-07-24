@@ -25,7 +25,6 @@
 #include <ccGLMatrix.h>
 
 class QWidget;
-class QStringList;
 class ccHObject;
 
 //! Registration tools wrapper

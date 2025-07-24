@@ -4212,7 +4212,7 @@ void ccGLWindowInterface::drawCross()
 
 float ccGLWindowInterface::computeTrihedronLength() const
 {
-	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).width('X')) * m_captureMode.zoomFactor;
+	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).horizontalAdvance('X')) * m_captureMode.zoomFactor;
 }
 
 void ccGLWindowInterface::drawTrihedron()
@@ -4380,7 +4380,7 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	double  textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text                = QString::number(textEquivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
-	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.horizontalAdvance(text) / 2,
 	           glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 	           text,
 	           static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),
@@ -6787,7 +6787,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->delta() < 0 ? -1.0f : 1.0f);
+		float sizeModifier = (event->angleDelta().y() < 0 ? -1.0f : 1.0f);
 		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
 
 		doRedraw = true;
@@ -6797,7 +6797,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the zNear or zFar clipping planes
-		double increment    = (event->delta() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		double increment    = (event->angleDelta().y() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
 		bool   shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
 		if (shiftPressed)
 		{
@@ -6827,7 +6827,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the fov value
-		float newFOV = (getFov() + (event->delta() < 0 ? -1.0f : 1.0f));
+		float newFOV = (getFov() + (event->angleDelta().y() < 0 ? -1.0f : 1.0f));
 		newFOV       = std::min(std::max(1.0f, newFOV), 180.0f);
 		if (newFOV != getFov())
 		{
@@ -6840,10 +6840,10 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		int padDelta = event->delta();
+		int padDelta = event->angleDelta().y();
 		if (padDelta != 0)
 		{
-			float wheelDelta_deg = event->delta() / 8.0f;
+			float wheelDelta_deg = event->angleDelta().y() / 8.0f;
 
 			onWheelEvent(wheelDelta_deg);
 
@@ -6866,7 +6866,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
 	assert(context);
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	if (!glFunc)
 	{
 		return;
@@ -7179,7 +7179,7 @@ bool ccGLWindowInterface::TestStereoSupport(bool forceRetest /*=false*/)
 	// context->makeCurrent(testWindow);
 	context->makeCurrent(&offSurface);
 
-	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<ccQOpenGLFunctions>(context.get());
 	if (!glFunc)
 	{
 		ccLog::Warning("Failed to retrieve the OpengGL functions");

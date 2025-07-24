@@ -156,7 +156,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			for (int i = 0; i < 4; ++i)
 			{
 				line               = inFile.readLine();
-				QStringList tokens = line.split(" ", QString::SkipEmptyParts);
+				QStringList tokens = line.split(" ", Qt::SkipEmptyParts);
 				if (tokens.size() != 3)
 					return CC_FERR_MALFORMED_FILE;
 
@@ -187,7 +187,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			for (int i = 0; i < 4; ++i)
 			{
 				line               = inFile.readLine();
-				QStringList tokens = line.split(" ", QString::SkipEmptyParts);
+				QStringList tokens = line.split(" ", Qt::SkipEmptyParts);
 				if (tokens.size() != 4)
 					return CC_FERR_MALFORMED_FILE;
 
@@ -290,7 +290,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 				for (unsigned i = 0; i < width; ++i, ++gridIndex)
 				{
 					QString     line   = inFile.readLine();
-					QStringList tokens = line.split(" ", QString::SkipEmptyParts);
+					QStringList tokens = line.split(" ", Qt::SkipEmptyParts);
 
 					if (firstPoint)
 					{

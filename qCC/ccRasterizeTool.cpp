@@ -80,7 +80,7 @@ static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 	{
 		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
 		// visually disable by greying out - works only if combobox has been painted already and palette returns the wanted color
-		item->setData(comboBox->palette().color(QPalette::Disabled, QPalette::Text), Qt::TextColorRole); // clear item data in order to use default color
+		item->setData(comboBox->palette().color(QPalette::Disabled, QPalette::Text), Qt::ForegroundRole); // clear item data in order to use default color
 	}
 }
 
@@ -2265,7 +2265,7 @@ void ccRasterizeTool::generateASCIIMatrix() const
 		{
 			stream << (std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight) << ' ';
 		}
-		stream << endl;
+		stream << Qt::endl;
 	}
 
 	// save current export path to persistent settings

@@ -264,7 +264,7 @@ void ccCloudLayersDlg::deleteClicked()
 	}
 
 	QModelIndexList mapIndices = select->selectedIndexes();
-	qSort(mapIndices);
+	std::sort(mapIndices.begin(), mapIndices.end());
 
 	QModelIndexList sourceIndices;
 	for (QModelIndex index : mapIndices)

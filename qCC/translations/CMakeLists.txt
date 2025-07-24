@@ -1,6 +1,6 @@
 set_directory_properties( PROPERTIES CLEAN_NO_CUSTOM 1 )
 
-find_package( Qt5LinguistTools REQUIRED )
+find_package(Qt6 COMPONENTS LinguistTools REQUIRED )
 
 # Note that _qt5_linguisttools_install_prefix is from Qt5LinguistToolsConfig.cmake
 #	and probably a private variable...
@@ -9,12 +9,12 @@ if( UNIX AND NOT APPLE )
 	set( QT_PATH "${QT_PATH}/share/qt5" )
 endif()
 
-set( QT_LCONVERT_EXE Qt5::lconvert )
+set( QT_LCONVERT_EXE Qt6::lconvert )
 
 # Now handle our own .ts files
 file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
-qt5_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
+qt6_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
 add_custom_target( translations ALL DEPENDS ${TRANSLATION_QM} )
 
 # For each language we have .ts files for, process Qt's qm files

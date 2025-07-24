@@ -27,12 +27,12 @@
 
 // Qt
 #include <QComboBox>
-#include <QDesktopWidget>
 #include <QDialogButtonBox>
 #include <QFile>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QScreen>
 #include <QSpinBox>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -137,7 +137,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	m_ui->quaternionFrame->setVisible(false);
 	m_ui->quatCSScaleDoubleSpinBox->setValue(s_csEntitiesScale);
 
-	QSize screenSize = QApplication::desktop()->screenGeometry().size();
+	QSize screenSize = QApplication::primaryScreen()->geometry().size();
 	setMaximumSize(screenSize);
 }
 
@@ -1524,7 +1524,7 @@ void AsciiOpenDlg::shortcutButtonPressed()
 void AsciiOpenDlg::setSeparator(QChar sep)
 {
 	m_ui->commaDecimalCheckBox->blockSignals(true);
-	if (sep == 44) // comma
+	if (sep == QChar(','))
 	{
 		m_ui->commaDecimalCheckBox->setEnabled(false);
 		// m_ui->commaDecimalCheckBox->setChecked(false);

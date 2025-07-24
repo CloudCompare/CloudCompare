@@ -38,7 +38,7 @@
 //! Generic shapefile 'field'
 /** Fields contain one value per record (i.e. primitive)
  **/
-class GenericDBFField
+class QCC_IO_LIB_API GenericDBFField
 {
   public:
 	//! Default constructor

@@ -254,6 +254,7 @@ Bug fixes:
 	- The 'Display > Adjust zoom' could result in a wrong pixel size if the height of the 3D view was larger than its width
 	- CC could crash when merging 2 meshes, one having texture (coordinates) and the other not
 	- The list of shortcuts displayed in ccViewer was outdated/wrong. It has been updated, and some shortcuts restored (+/=).
+	- Some SHP files could not be opened due to longer records than specified
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

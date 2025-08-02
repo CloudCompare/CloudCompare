@@ -2113,7 +2113,14 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		        .arg(recordSize16bits)
 		        .arg(filePos - (recordStart + recordSize16bits * 2)));
 
-		assert(shpStream.device()->pos() == recordStart + recordSize16bits * 2); // recordSize is measured in 16-bit words
+		qint64 recordEnd = recordStart + recordSize16bits * 2; // recordSize is measured in 16-bit words
+		if (filePos < recordEnd)
+		{
+			// Seems to happen sometimes?!
+			if (recordNumber < 64)
+				ccLog::Warning(QString("Record size is longer than expected (%1 additional bytes will be skiped)").arg(recordEnd - filePos));
+			shpStream.skipRawData(recordEnd - filePos);
+		}
 
 		if (pDlg)
 		{

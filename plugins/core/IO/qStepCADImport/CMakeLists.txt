@@ -18,6 +18,8 @@ if ( PLUGIN_IO_QSTEP )
 	if( NOT OPENCASCADE_LIB_DIR )
 		message( FATAL_ERROR "OpenCascade library dir not specified (OPENCASCADE_LIB_DIR)" )
 	endif()
+
+	option( OPENCASCADE_78_OR_NEWER "Check if using OpenCascaed 7.8 or newer" OFF )
 	
 	project( QSTEP_IO_PLUGIN )
 
@@ -27,11 +29,15 @@ if ( PLUGIN_IO_QSTEP )
 	add_subdirectory( src )
 
 	target_include_directories( ${PROJECT_NAME} PRIVATE ${OPENCASCADE_INC_DIR} )
+
+	if (OPENCASCADE_78_OR_NEWER)
+		set( OC_LIBRARIES TKDESTEP TKShHealing TKTopAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKernel TKXSBase TKGeomAlgo TKMesh )
+	else()
+		set( OC_LIBRARIES TKSTEP TKSTEPBase TKSTEPAttr TKSTEP209 TKShHealing TKTopAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKernel TKXSBase TKGeomAlgo TKMesh )
+	endif()
 	
-	set( OC_LIBRARIES TKSTEP TKSTEPBase TKSTEPAttr TKSTEP209 TKShHealing TKTopAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKernel TKXSBase TKGeomAlgo TKMesh )
-	
-    	target_link_directories( ${PROJECT_NAME} PRIVATE ${OPENCASCADE_LIB_DIR} )
-		target_link_libraries( ${PROJECT_NAME} ${OC_LIBRARIES} )
+   	target_link_directories( ${PROJECT_NAME} PRIVATE ${OPENCASCADE_LIB_DIR} )
+	target_link_libraries( ${PROJECT_NAME} ${OC_LIBRARIES} )
 
 	if( WIN32 )
 		if( NOT OPENCASCADE_DLL_DIR )
@@ -63,6 +69,4 @@ if ( PLUGIN_IO_QSTEP )
 		unset( OC_DLLS )
 	endif()
 
-
 endif()
-

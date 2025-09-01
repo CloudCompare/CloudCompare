@@ -514,6 +514,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 			field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
 			break;
 		case LasScalarField::Classification:
+		case LasScalarField::ExtendedClassification:
 			field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ASPRS_CLASSES));
 			break;
 		case LasScalarField::ReturnNumber:
@@ -528,7 +529,6 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		case LasScalarField::PointSourceId:
 		case LasScalarField::ExtendedScannerChannel:
 		case LasScalarField::OverlapFlag:
-		case LasScalarField::ExtendedClassification:
 		case LasScalarField::ExtendedReturnNumber:
 		case LasScalarField::ExtendedNumberOfReturns:
 		case LasScalarField::NearInfrared:

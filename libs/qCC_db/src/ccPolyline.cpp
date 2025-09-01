@@ -92,6 +92,7 @@ bool ccPolyline::initWith(ccPointCloud*& vertices, const ccPolyline& poly)
 		setAssociatedCloud(vertices);
 		addChild(vertices);
 		// vertices->setEnabled(false);
+
 		assert(m_theAssociatedCloud);
 		if (m_theAssociatedCloud)
 		{
@@ -1078,16 +1079,40 @@ bool ccPolyline::createNewPolylinesFromSelection(std::vector<ccPolyline*>& outpu
 
 void ccPolyline::onDeletionOf(const ccHObject* obj)
 {
-	ccShiftedObject::onDeletionOf(obj); // remove dependencies, etc.
-
 	// can't cast to a point cloud or anything else than ccHObject, as this is called by the ccHObject destructor
 	const ccHObject* associatedObj = dynamic_cast<const ccHObject*>(getAssociatedCloud());
 
 	if (associatedObj == obj)
 	{
-		// we have to "detach" the cloud from the polyine... (ideally this object should be deleted)
+		// we have to "detach" the cloud from the polyline... (ideally this object should be deleted)
 		clear();
 		setAssociatedCloud(nullptr);
 		setName(getName() + " (emptied)");
 	}
+
+	ccShiftedObject::onDeletionOf(obj); // remove dependencies, etc.
+}
+
+void ccPolyline::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
+{
+	if (nullptr != m_theAssociatedCloud && getAssociatedCloud() != cloud)
+	{
+		// remove dependencies to existing vertices
+		ccHObject* associatedObj = dynamic_cast<ccHObject*>(getAssociatedCloud());
+		if (associatedObj)
+		{
+			associatedObj->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
+		}
+	}
+
+	CCCoreLib::Polyline::setAssociatedCloud(cloud);
+
+	ccHObject* associatedObj = dynamic_cast<ccHObject*>(getAssociatedCloud());
+	if (associatedObj)
+	{
+		associatedObj->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
+	}
+
+	// invalidate the bounding-box
+	invalidateBoundingBox();
 }

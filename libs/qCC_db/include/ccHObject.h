@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_HIERARCHY_OBJECT_HEADER
-#define CC_HIERARCHY_OBJECT_HEADER
 
 // Local
 #include "ccBBox.h"
@@ -98,7 +97,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 		DP_PARENT_OF_OTHER = 24, /**< same as DP_DELETE_OTHER + declares itself as parent of 'other' **/
 	};
 
-	//! Adds a new dependence (additive or not)
+	//! Adds a new dependency (additive or not)
 	/** \param otherObject other object
 	    \param flags dependency flags (see DEPENDENCY_FLAGS)
 	    \param additive whether we should 'add' the flag(s) if there's already a dependence with the other object or not
@@ -109,6 +108,11 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	/** \param otherObject other object
 	 **/
 	int getDependencyFlagsWith(const ccHObject* otherObject) const;
+
+	//! Returns whether the entity has a specific dependency flag with any other object
+	/** \param flag flag
+	 **/
+	bool hasDependencyFlag(int flag) const;
 
 	//! Removes any dependency flags with a given object
 	/** \param otherObject other object
@@ -574,5 +578,3 @@ inline void ConvertToGroup(const ccHObject::Container& origin, ccHObject& dest, 
 		}
 	}
 }
-
-#endif // CC_HIERARCHY_OBJECT_HEADER

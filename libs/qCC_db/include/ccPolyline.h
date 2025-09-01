@@ -61,6 +61,7 @@ class QCC_DB_LIB_API ccPolyline : public CCCoreLib::Polyline
 	}
 	bool hasColors() const override;
 	void applyGLTransformation(const ccGLMatrix& trans) override;
+	void setAssociatedCloud(GenericIndexedCloudPersist* cloud) override;
 
 	// inherited methods (ccShiftedObject)
 	void              setGlobalShift(const CCVector3d& shift) override;
@@ -72,7 +73,9 @@ class QCC_DB_LIB_API ccPolyline : public CCCoreLib::Polyline
 	inline void shrinkToFit()
 	{
 		if (size() < capacity())
+		{
 			resize(size());
+		}
 	}
 
 	//! Clones this polyline

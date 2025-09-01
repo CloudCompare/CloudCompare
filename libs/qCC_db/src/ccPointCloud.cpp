@@ -1476,7 +1476,7 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 {
 	if (newNumberOfPoints < size() && isLocked())
 	{
-		// can't reduce the size if the cloud if it is locked!
+		// can't reduce the size if the cloud is locked!
 		return false;
 	}
 

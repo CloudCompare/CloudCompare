@@ -3622,36 +3622,61 @@ void MainWindow::doActionMerge()
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc = clouds[i];
+			bool isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_DELETE);
+
 			if (!firstCloud)
 			{
-				// we don't delete the first cloud (we'll merge the other one 'inside' it
-				firstCloud = pc;
-				// we still have to temporarily detach the first cloud, as it may undergo
-				//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
-				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+				// we don't delete the first cloud (we'll merge the other one 'inside' it, or create a new one)
+				if (isInUse)
+				{
+					firstCloud = pc->cloneThis(nullptr, true);
+					if (nullptr == firstCloud)
+					{
+						ccConsole::Error(tr("Not enough memory!"));
+						return;
+					}
+				}
+				else
+				{
+					firstCloud = pc;
+
+					// we still have to temporarily detach the first cloud, as it may undergo
+					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
+					firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+				}
 
 				// reserve the final required number of points
 				if (!firstCloud->reserve(totalSize))
 				{
+					if (firstCloud != pc)
+					{
+						delete firstCloud;
+						firstCloud = nullptr;
+					}
 					ccConsole::Error(tr("Not enough memory!"));
-					break;
+					return;
 				}
 
 				if (QMessageBox::question(this, tr("Original cloud index"), tr("Do you want to generate a scalar field with the original cloud index?")) == QMessageBox::Yes)
 				{
-					int sfIdx = pc->getScalarFieldIndexByName(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+					int sfIdx = firstCloud->getScalarFieldIndexByName(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
 					if (sfIdx < 0)
 					{
-						sfIdx = pc->addScalarField(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
+						sfIdx = firstCloud->addScalarField(CC_ORIGINAL_CLOUD_INDEX_SF_NAME);
 					}
 					if (sfIdx < 0)
 					{
+						if (firstCloud != pc)
+						{
+							delete firstCloud;
+							firstCloud = nullptr;
+						}
 						ccConsole::Error(tr("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ..."));
 						return;
 					}
 					else
 					{
-						ocIndexSF = pc->getScalarField(sfIdx);
+						ocIndexSF = firstCloud->getScalarField(sfIdx);
 						if (ocIndexSF)
 						{
 							ocIndexSF->fill(0);
@@ -3672,14 +3697,17 @@ void MainWindow::doActionMerge()
 					firstCloud->prepareDisplayForRefresh_recursive();
 
 					ccHObject* toRemove = nullptr;
-					// if the entity to remove is inside a group with a unique child, we can remove the group as well
-					ccHObject* parent = pc->getParent();
-					if (parent && parent->isA(CC_TYPES::HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent != firstCloudContext.parent)
-						toRemove = parent;
-					else
-						toRemove = pc;
+					if (!isInUse)
+					{
+						// if the entity to remove is inside a group with a unique child, we can remove the group as well
+						ccHObject* parent = pc->getParent();
+						if (parent && parent->isA(CC_TYPES::HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent != firstCloudContext.parent)
+							toRemove = parent;
+						else
+							toRemove = pc;
 
-					AddToRemoveList(toRemove, toBeRemoved);
+						AddToRemoveList(toRemove, toBeRemoved);
+					}
 
 					if (ocIndexSF)
 					{
@@ -3695,7 +3723,6 @@ void MainWindow::doActionMerge()
 					ccConsole::Error(tr("Fusion failed! (not enough memory?)"));
 					break;
 				}
-				pc = nullptr;
 			}
 		}
 
@@ -3734,9 +3761,22 @@ void MainWindow::doActionMerge()
 		// eventually we can put back the first cloud in DB
 		if (firstCloud)
 		{
-			putObjectBackIntoDBTree(firstCloud, firstCloudContext);
+			if (firstCloud == clouds.front())
+			{
+				putObjectBackIntoDBTree(firstCloud, firstCloudContext);
+			}
+			else
+			{
+				if (clouds.front()->getParent())
+				{
+					clouds.front()->getParent()->addChild(firstCloud);
+				}
+				addToDB(firstCloud, false, true, false, false);
+			}
 			if (m_ccRoot)
+			{
 				m_ccRoot->selectEntity(firstCloud);
+			}
 		}
 	}
 	// merge meshes?
@@ -3771,7 +3811,9 @@ void MainWindow::doActionMerge()
 		addToDB(baseMesh);
 
 		if (m_ccRoot)
+		{
 			m_ccRoot->selectEntity(baseMesh);
+		}
 	}
 
 	refreshAll();

@@ -221,13 +221,16 @@ Improvements:
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash
+	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
+		to a crash (warning: now, the polylines will be emptied to prevent a crash)
+	- the display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
+		of polyline vertices
+	- merging polyline vertices could make CC crash (a new point cloud will be created now)
 	- the Ransac Shape Detection plugin dialog was not properly initialzing the min and max radii of the detected shapes,
 		preventing from detecting some or all instances of these shapes if not explicitly defined by the user
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
 		1000 the second time a file was loaded.
-	- The display could be broken, and CC could crash, when segmenting a polyline based on a cloud with more points than the number
-		of polyline vertices
 	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
@@ -241,20 +244,18 @@ Bug fixes:
 	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
 	- the Cloud Layers plugin had several issues (it was not properly restoring the cloud colors or scalar in some cases,
 		and renaming a class would prevent from using it...)
-	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
-		to a crash (warning: now, the polylines will be emptied to prevent a crash)
 	- VBOs are now properly released when using the LoD rendering
-	- Normals shown has lines were not automatically update after applying a transformation to a cloud
-	- The 'conical span ratio' of the Unroll dialog was not properly restored from persistent settings
-	- The circular cursor of the 'Cloud layers' and 'Compass' plugins was not displayed at the right position on high DPI screens
-	- The Compass plugin was not transferring the Global Shift & Scale information from the cloud to the generated planes or polylines
+	- normals shown has lines were not automatically update after applying a transformation to a cloud
+	- the 'conical span ratio' of the Unroll dialog was not properly restored from persistent settings
+	- the circular cursor of the 'Cloud layers' and 'Compass' plugins was not displayed at the right position on high DPI screens
+	- the Compass plugin was not transferring the Global Shift & Scale information from the cloud to the generated planes or polylines
 	- UHD screens were not properly supported (rotation center picking with double click, entity selection with a rectangle, etc.)
 	- ASCII cloud file import will now respect empty fields instead of shifting all following columns left
-	- The ICP registration tool could lead to mirrored transformations in some cases (since version 2.12.0)
-	- The 'Display > Adjust zoom' could result in a wrong pixel size if the height of the 3D view was larger than its width
+	- the ICP registration tool could lead to mirrored transformations in some cases (since version 2.12.0)
+	- the 'Display > Adjust zoom' could result in a wrong pixel size if the height of the 3D view was larger than its width
 	- CC could crash when merging 2 meshes, one having texture (coordinates) and the other not
-	- The list of shortcuts displayed in ccViewer was outdated/wrong. It has been updated, and some shortcuts restored (+/=).
-	- Some SHP files could not be opened due to longer records than specified
+	- the list of shortcuts displayed in ccViewer was outdated/wrong. It has been updated, and some shortcuts restored (+/=).
+	- some SHP files could not be opened due to longer records than specified
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------

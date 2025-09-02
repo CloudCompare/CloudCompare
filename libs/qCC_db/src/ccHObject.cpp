@@ -300,11 +300,26 @@ int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 	return (it != m_dependencies.end() ? it->second : 0);
 }
 
+bool ccHObject::hasDependencyFlag(int dependencyFlag) const
+{
+	for (auto it : m_dependencies)
+	{
+		if (it.second == dependencyFlag)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
 	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); // DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 	if (!otherObject->m_isDeleting)
+	{
 		otherObject->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
+	}
 }
 
 void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag)

@@ -53,8 +53,8 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 		return CC_TYPES::MESH;
 	}
 
-	//! Sets the associated vertices cloud (warning)
-	void setAssociatedCloud(ccGenericPointCloud* cloud);
+	//! Sets the associated vertices cloud
+	void setAssociatedCloud(ccGenericPointCloud* cloud, bool autoRemoveFlags = true);
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree

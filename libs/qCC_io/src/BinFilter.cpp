@@ -629,6 +629,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 				// vertices
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
+
 				if (cloudID > 0)
 				{
 					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
@@ -636,20 +637,12 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					{
 						ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 						assert(genericCloud);
-						mesh->setAssociatedCloud(genericCloud);
-
-						if (!mesh->isAncestorOf(cloud))
-						{
-							// warning: the mesh is not the parent of its vertices!
-							// We want to make sure we will be notified whenever the vertices
-							// are deleted (in which case the mesh will be emptied to avoid any crash)
-							cloud->addDependency(mesh, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
-						}
+						mesh->setAssociatedCloud(genericCloud, false); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
 					}
 					else
 					{
 						// we have a problem here ;)
-						mesh->setAssociatedCloud(nullptr);
+						mesh->setAssociatedCloud(nullptr, false); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
 						if (mesh->getMaterialSet())
 						{
 							mesh->setMaterialSet(nullptr, false);
@@ -808,19 +801,14 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		{
 			ccPolyline* poly        = ccHObjectCaster::ToPolyline(currentObject);
 			intptr_t    cloudID     = (intptr_t)poly->getAssociatedCloud();
+
+			poly->CCCoreLib::Polyline::setAssociatedCloud(nullptr); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
+
 			ccHObject*  cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 			if (cloudEntity)
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
 				poly->setAssociatedCloud(cloud);
-
-				if (!poly->isAncestorOf(cloud))
-				{
-					// warning: the polyline is not the parent of its vertices!
-					// We want to make sure we will be notified whenever the vertices
-					// are deleted (in which case the polyline will be emptied to avoid any crash)
-					cloud->addDependency(poly, ccHObject::DP_NOTIFY_OTHER_ON_DELETE);
-				}
 
 				// now check the indexes
 				unsigned pointCount = cloud->size();

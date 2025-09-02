@@ -125,7 +125,7 @@ ccMesh::~ccMesh()
 		m_triNormalIndexes->release();
 }
 
-void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud, bool autoRemoveFlags/*=true*/)
+void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud, bool autoRemoveFlags /*=true*/)
 {
 	if (autoRemoveFlags && nullptr != m_associatedCloud && m_associatedCloud != cloud)
 	{

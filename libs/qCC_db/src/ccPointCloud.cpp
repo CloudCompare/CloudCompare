@@ -5302,7 +5302,7 @@ short ccPointCloud::minimumFileVersion_MeOnly() const
 		minVersion = std::max(minVersion, m_normals->minimumFileVersion());
 	if (hasScalarFields())
 	{
-		for (auto &sf : m_scalarFields)
+		for (auto& sf : m_scalarFields)
 		{
 			minVersion = std::max(minVersion, static_cast<ccScalarField*>(sf)->minimumFileVersion()); // we have to test each scalar field
 		}

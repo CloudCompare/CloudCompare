@@ -3621,8 +3621,8 @@ void MainWindow::doActionMerge()
 
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
-			ccPointCloud* pc = clouds[i];
-			bool isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_DELETE);
+			ccPointCloud* pc      = clouds[i];
+			bool          isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_DELETE);
 
 			if (!firstCloud)
 			{

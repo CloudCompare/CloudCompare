@@ -5301,7 +5301,12 @@ short ccPointCloud::minimumFileVersion_MeOnly() const
 	if (m_normals)
 		minVersion = std::max(minVersion, m_normals->minimumFileVersion());
 	if (hasScalarFields())
-		minVersion = std::max(minVersion, static_cast<ccScalarField*>(getScalarField(0))->minimumFileVersion()); // we assume they are all the same
+	{
+		for (auto &sf : m_scalarFields)
+		{
+			minVersion = std::max(minVersion, static_cast<ccScalarField*>(sf)->minimumFileVersion()); // we have to test each scalar field
+		}
+	}
 
 	if (gridCount() != 0)
 	{

@@ -131,8 +131,6 @@ CommandRasterize::CommandRasterize()
 
 bool CommandRasterize::process(ccCommandLineInterface& cmd)
 {
-	cmd.print("[RASTERIZE]");
-
 	// look for local options
 	double                                    gridStep              = 0;
 	bool                                      outputCloud           = false;

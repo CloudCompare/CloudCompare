@@ -292,8 +292,7 @@ LasExtraScalarField::Kind LasExtraScalarField::kind() const
 	return Unsigned;
 }
 
-void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct&                 vlr,
-                                            const vector<LasExtraScalarField>& extraFields)
+void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct& vlr, const std::vector<LasExtraScalarField>& extraFields)
 {
 	strcpy(vlr.user_id, "LASF_Spec");
 	vlr.record_id                  = 4;
@@ -369,7 +368,7 @@ void LasExtraScalarField::resetScalarFieldsPointers()
 	}
 }
 
-void LasExtraScalarField::UpdateByteOffsets(vector<LasExtraScalarField>& extraFields)
+void LasExtraScalarField::UpdateByteOffsets(std::vector<LasExtraScalarField>& extraFields)
 {
 	unsigned byteOffset{0};
 	for (LasExtraScalarField& extraScalarField : extraFields)
@@ -379,8 +378,7 @@ void LasExtraScalarField::UpdateByteOffsets(vector<LasExtraScalarField>& extraFi
 	}
 }
 
-void LasExtraScalarField::MatchExtraBytesToScalarFields(vector<LasExtraScalarField>& extraScalarFields,
-                                                        const ccPointCloud&          pointCloud)
+void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScalarField>& extraScalarFields, const ccPointCloud& pointCloud)
 {
 	for (LasExtraScalarField& extraScalarField : extraScalarFields)
 	{

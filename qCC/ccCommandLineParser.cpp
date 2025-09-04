@@ -896,6 +896,8 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandCrop2D));
 	registerCommand(Command::Shared(new CommandCoordToSF));
 	registerCommand(Command::Shared(new CommandSFToCoord));
+	registerCommand(Command::Shared(new CommandNormToSF));
+	registerCommand(Command::Shared(new CommandSFToNorm));
 	registerCommand(Command::Shared(new CommandColorBanding));
 	registerCommand(Command::Shared(new CommandColorLevels));
 	registerCommand(Command::Shared(new CommandC2MDist));

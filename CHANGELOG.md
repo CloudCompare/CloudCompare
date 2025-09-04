@@ -46,6 +46,13 @@ New features:
 					- optional, only used when bilateral filter applied
 		- New SF_OP suboption: -NOT_IN_PLACE
 			- to create new scalar field during the operation.
+		- New SF-to-normals and normals-to-SF conversion methods:
+			- NORM_TO_SF {X/Y/Z}
+				where {X/Y/Z} is any combination of X, Y and Z, such as 'XYZ', 'XZ' or 'Y'
+			- SF_TO_NORM {SFxIndex} {SFyIndex} {SFzIndex}
+				where {SFnIndex} can be a numerical index, a name or 'LAST', or -1 if the
+				dimension should not be initialized from a SF (in which case it will be
+				left at its previous value, or 0 if no normal was previously set)
 
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears

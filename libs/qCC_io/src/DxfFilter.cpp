@@ -76,7 +76,7 @@ class DxfImporter : public DL_CreationAdapter
 	    , m_poly(nullptr)
 	    , m_polyVertices(nullptr)
 	    , m_firstPoint(true)
-		, m_polyElevation(0.0)
+	    , m_polyElevation(0.0)
 	    , m_globalShift(0, 0, 0)
 	    , m_preserveCoordinateShift(false)
 	    , m_loadParameters(parameters)
@@ -202,7 +202,7 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
 		m_polyElevation = poly.elevation;
 	}
 
@@ -488,7 +488,7 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
 		m_polyElevation = 0.0;
 
 		CCVector3 Clocal = convertPoint(data.cx, data.cy, data.cz);
@@ -585,7 +585,7 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
 		m_polyElevation = 0.0;
 
 		// add first point

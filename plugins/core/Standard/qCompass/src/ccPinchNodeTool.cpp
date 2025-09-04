@@ -42,7 +42,7 @@ void ccPinchNodeTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPo
 	}
 
 	//create a 1-point lineation object (highlights node-location)
-	ccPointPair* l = new ccPinchNode(cloud);
+	ccPinchNode* l = new ccPinchNode(cloud);
 	l->setName("tip");
 	l->showNameIn3D(false);
 	l->addPointIndex(itemIdx);

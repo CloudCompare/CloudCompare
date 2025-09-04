@@ -56,11 +56,14 @@ ccTopologyRelation::ccTopologyRelation(ccPolyline* obj)
 void ccTopologyRelation::updateMetadata()
 {
 	//add metadata tag defining the ccCompass class type
+	setMetaData("ccCompassType", "TopologyRelation");
+
 	QVariantMap map;
-	map.insert("ccCompassType", "TopologyRelation");
-	map.insert("RelationType", m_type);
-	map.insert("Older_ID", m_older_id);
-	map.insert("Younger_ID", m_younger_id);
+	{
+		map.insert("RelationType", m_type);
+		map.insert("Older_ID", m_older_id);
+		map.insert("Younger_ID", m_younger_id);
+	}
 	setMetaData(map, true);
 
 	showNameIn3D(true);

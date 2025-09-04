@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: ccCompass                      #
@@ -14,9 +16,6 @@
 //#                     COPYRIGHT: Sam Thiele  2017                        #
 //#                                                                        #
 //##########################################################################
-
-#ifndef CC_TRACE_HEADER
-#define CC_TRACE_HEADER
 
 //#define DEBUG_PATH   //n.b. uncomment this to write point-costs to a scalar field for debug purposes
 
@@ -59,13 +58,19 @@ class ccTrace :
 	public ccMeasurement
 {
 public:
-	ccTrace(ccPointCloud* associatedCloud);
-	ccTrace(ccPolyline* obj); //used for constructing from polylines with the correct metadata
+	ccTrace(ccPointCloud* associatedCloud = nullptr);
+	ccTrace(ccPolyline* poly); //used for constructing from polylines with the correct metadata
 	~ccTrace() override {}
+
+	static QString GetClassName() { return "CompassTrace"; }
 
 	//inherited from ccHObject
 	inline CC_CLASS_ENUM getClassID() const override { return CC_TYPES::CUSTOM_H_OBJECT | CC_TYPES::POLY_LINE; }
 	void onDeletionOf(const ccHObject* obj) override;
+
+	//inherited from ccPolyline
+	void setAssociatedCloud(GenericIndexedCloudPersist* cloud) override;
+	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 
 	/*
 	Adds waypoint to the end of this trace.
@@ -198,6 +203,9 @@ protected:
 	//overidden from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
+	//load waypoints from a string
+	bool loadWaypointsFrom(const QString& waypoints);
+
 	//contains grunt of shortest path algorithm. "offset" inserts points at the specified distance from the END of the trace (used for updating)
 	std::deque<int> optimizeSegment(int start, int end, int offset = 0);
 
@@ -272,7 +280,7 @@ private:
 	Test if a point falls within a circle who's diameter equals the line from segStart to segEnd. This is used to test if a newly added point should be
 	(1) appended to the end of the trace [falls outside of all segment-circles], or (2) inserted to split a segment [falls into a segment-circle]
 	*/
-	bool inCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query) const;
+	static bool InCircle(const CCVector3* segStart, const CCVector3* segEnd, const CCVector3* query);
 
 	//used by various constructors to do initialization
 	void init(ccPointCloud* associatedCloud);
@@ -285,5 +293,3 @@ public: //static functions
 	//! Returns true if object is a valid trace [regardless of its class type]
 	static bool isTrace(ccHObject* object);
 };
-
-#endif

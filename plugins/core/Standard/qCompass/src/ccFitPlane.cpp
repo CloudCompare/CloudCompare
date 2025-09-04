@@ -24,12 +24,10 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	importParametersFrom(p);
 
 	//add metadata tag defining the ccCompass class type
-	QVariantMap map;
-	map.insert("ccCompassType", "FitPlane");
-	setMetaData(map, true);
+	setMetaData("ccCompassType", "FitPlane");
 
 	//update name
-	CCVector3 N(getNormal());
+	CCVector3 N = getNormal();
 	//We always consider the normal with a positive 'Z' by default!
 	if (N.z < 0.0)
 		N *= -1.0;
@@ -42,8 +40,8 @@ ccFitPlane::ccFitPlane(ccPlane* p)
 	setName(dipAndDipDirStr);
 
 	//update metadata
-	float rms = -1;
-	float search_r = -1;
+	float rms = -1.0f;
+	float search_r = -1.0f;
 	if (p->hasMetaData("RMS"))
 	{
 		rms = p->getMetaData("RMS").toFloat();
@@ -64,7 +62,7 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 {
 	//calculate and store plane attributes
 	//get plane normal vector
-	CCVector3 N(getNormal());
+	CCVector3 N = getNormal();
 	//We always consider the normal with a positive 'Z' by default!
 	if (N.z < 0.0)
 		N *= -1.0;
@@ -77,14 +75,14 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 	//ccNormalVectors::ConvertNormalToStrikeAndDip(N, strike, dip); //n.b. this returns result using the british RHR?!?)
 
 	//calculate strike using American RHR
-	strike = dipdir - 90;
+	strike = dipdir - 90.0;
 	while (strike < 0) //ensure strike > 0
 	{
-		strike += 360;
+		strike += 360.0;
 	}
-	while (strike >= 360) //ensure strike < 360
+	while (strike >= 360.0) //ensure strike < 360
 	{
-		strike -= 360;
+		strike -= 360.0;
 	}
 
 	//calculate centroid
@@ -92,11 +90,13 @@ void ccFitPlane::updateAttributes(float rms, float search_r)
 
 	//store attributes (centroid, strike, dip, RMS) on plane
 	QVariantMap map;
-	map.insert("Cx", C.x); map.insert("Cy", C.y); map.insert("Cz", C.z); //centroid
-	map.insert("Nx", N.x); map.insert("Ny", N.y); map.insert("Nz", N.z); //normal
-	map.insert("Strike", strike); map.insert("Dip", dip); map.insert("DipDir", dipdir); //strike & dip
-	map.insert("RMS", rms); //rms
-	map.insert("Radius", search_r); //search radius
+	{
+		map.insert("Cx", C.x); map.insert("Cy", C.y); map.insert("Cz", C.z); //centroid
+		map.insert("Nx", N.x); map.insert("Ny", N.y); map.insert("Nz", N.z); //normal
+		map.insert("Strike", strike); map.insert("Dip", dip); map.insert("DipDir", dipdir); //strike & dip
+		map.insert("RMS", rms); //rms
+		map.insert("Radius", search_r); //search radius
+	}
 	setMetaData(map, true);
 }
 
@@ -127,7 +127,7 @@ ccFitPlane* ccFitPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double
 	if (p) //valid plane
 	{
 		ccFitPlane* fp = new ccFitPlane(p);
-		p->transferChildren(*fp);
+		//p->transferChildren(*fp);
 		delete p;
 		p = nullptr;
 

@@ -33,9 +33,7 @@ ccPinchNode::ccPinchNode(ccPolyline* obj)
 void ccPinchNode::updateMetadata()
 {
 	//add metadata tag defining the ccCompass class type
-	QVariantMap map;
-	map.insert("ccCompassType", "PinchNode");
-	setMetaData(map, true);
+	setMetaData("ccCompassType", "PinchNode");
 
 	//set drawing stuff (not really metadata, but hey!)
 	setDefaultColor(ccColor::blue);

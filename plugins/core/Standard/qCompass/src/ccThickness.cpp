@@ -32,10 +32,8 @@ ccThickness::ccThickness(ccPolyline* obj)
 
 void ccThickness::updateMetadata()
 {
-	QVariantMap map;
-
 	//add metadata tag defining the ccCompass class type
-	map.insert("ccCompassType", "Thickness");
+	setMetaData("ccCompassType", "Thickness");
 
 	//calculate trace orientation (trend/plunge)
 	if (size() == 2) //can't calculate orientation of something smaller than this...
@@ -79,21 +77,20 @@ void ccThickness::updateMetadata()
 		//store trend and plunge info
 		CCVector3 s = *getPoint(0); //start point
 		CCVector3 e = *getPoint(1); //end point
-		float length = (s - e).norm();
-
-		map.insert("Sx", s.x); map.insert("Sy", s.y); map.insert("Sz", s.z);
-		map.insert("Ex", e.x); map.insert("Ey", e.y); map.insert("Ez", e.z);
-		map.insert("Trend", trend); map.insert("Plunge", plunge); map.insert("Length", length);
+		float length = static_cast<float>((s - e).norm());
 
 		//store metadata
+		QVariantMap map;
+		{
+			map.insert("Sx", s.x); map.insert("Sy", s.y); map.insert("Sz", s.z);
+			map.insert("Ex", e.x); map.insert("Ey", e.y); map.insert("Ez", e.z);
+			map.insert("Trend", trend); map.insert("Plunge", plunge); map.insert("Length", length);
+		}
 		setMetaData(map, true);
 
 		//update name
 		setName(QString::asprintf("%.3fT", length));
 	}
-
-	//store
-	setMetaData(map, true);
 }
 
 //returns true if object is a lineation

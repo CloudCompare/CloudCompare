@@ -51,9 +51,9 @@ CCVector3 ccPointPair::getDirection()
 	}
 	else
 	{
-		const CCVector3 start = *getPoint(0);
-		const CCVector3 end = *getPoint(1);
-		return end - start;
+		const CCVector3* start = getPoint(0);
+		const CCVector3* end = getPoint(1);
+		return *end - *start;
 	}
 }
 
@@ -70,7 +70,8 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//get the set of OpenGL functions (version 2.1)
 		QOpenGLFunctions_2_1 *glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-		if (glFunc == nullptr) {
+		if (glFunc == nullptr)
+		{
 			assert(false);
 			return;
 		}
@@ -197,7 +198,6 @@ void ccPointPair::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 	}
 }
-
 
 //returns true if object is a pointPair
 bool ccPointPair::isPointPair(ccHObject* object)

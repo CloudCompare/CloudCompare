@@ -76,7 +76,10 @@ ccHObject::~ccHObject()
 	m_isDeleting = true;
 
 	// process dependencies
-	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
+	std::map<ccHObject*, int> dependencies;
+	m_dependencies.swap(dependencies); // the member might be modified during the following process!
+
+	for (std::map<ccHObject*, int>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
 	{
 		assert(it->first);
 		// notify deletion to other object?
@@ -108,7 +111,6 @@ ccHObject::~ccHObject()
 			}
 		}
 	}
-	m_dependencies.clear();
 
 	removeAllChildren();
 }
@@ -220,8 +222,15 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!", objectType);
 		break;
 	default:
-		// unhandled ID
-		ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!", objectType);
+		if ((objectType & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
+		{
+			return new ccCustomHObject(name);
+		}
+		else
+		{
+			// unhandled ID
+			ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!", objectType);
+		}
 		break;
 	}
 

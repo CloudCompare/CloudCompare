@@ -50,9 +50,7 @@ ccSNECloud::ccSNECloud(ccPointCloud* obj)
 void ccSNECloud::updateMetadata()
 {
 	//add metadata tag defining the ccCompass class type
-	QVariantMap map;
-	map.insert("ccCompassType", "SNECloud");
-	setMetaData(map, true);
+	setMetaData("ccCompassType", "SNECloud");
 }
 
 //returns true if object is a lineation

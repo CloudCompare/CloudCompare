@@ -33,9 +33,7 @@ ccNote::ccNote(ccPolyline* obj)
 void ccNote::updateMetadata()
 {
 	//add metadata tag defining the ccCompass class type
-	QVariantMap map;
-	map.insert("ccCompassType", "Note");
-	setMetaData(map, true);
+	setMetaData("ccCompassType", "Note");
 
 	//update drawing stuff
 	showNameIn3D(true);

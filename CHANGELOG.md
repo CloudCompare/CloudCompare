@@ -216,6 +216,10 @@ Improvements:
 			- The 'ASPRS classes' scale will now be used by default when loading the LAS classification field
 		- Improvement of the color scale preview (better accuracy)
 
+	- ccViewer:
+		- new shortcuts to change the active scalar field: SHIFT + Up or Down arrows
+		- updated shortcuts list (F1)
+
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

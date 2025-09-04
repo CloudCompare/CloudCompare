@@ -350,6 +350,20 @@ struct CommandSFToCoord : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandNormToSF : public ccCommandLineInterface::Command
+{
+	CommandNormToSF();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandSFToNorm : public ccCommandLineInterface::Command
+{
+	CommandSFToNorm();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandCrop2D : public ccCommandLineInterface::Command
 {
 	CommandCrop2D();

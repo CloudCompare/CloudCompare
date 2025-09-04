@@ -134,7 +134,9 @@ constexpr char COMMAND_SF_ADD_ID_AS_INT[]                 = "AS_INT";
 constexpr char COMMAND_RENAME_ENTITIES[]                  = "RENAME_ENTITIES"; //+ base name
 constexpr char COMMAND_RENAME_SF[]                        = "RENAME_SF";
 constexpr char COMMAND_COORD_TO_SF[]                      = "COORD_TO_SF";
+constexpr char COMMAND_NORM_TO_SF[]                       = "NORM_TO_SF";
 constexpr char COMMAND_SF_TO_COORD[]                      = "SF_TO_COORD";
+constexpr char COMMAND_SF_TO_NORM[]                       = "SF_TO_NORM";
 constexpr char COMMAND_EXTRACT_VERTICES[]                 = "EXTRACT_VERTICES";
 constexpr char COMMAND_ICP[]                              = "ICP";
 constexpr char COMMAND_ICP_REFERENCE_IS_FIRST[]           = "REFERENCE_IS_FIRST";
@@ -4864,7 +4866,7 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
 	}
 
-	// now we can export the corresponding coordinate
+	// now we can export the corresponding normal components
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		if (desc.pc->exportCoordToSF(exportDims))
@@ -4882,6 +4884,122 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 		else
 		{
 			return cmd.error(QObject::tr("Failed to export coord. %1 to SF on cloud '%2'!").arg(dimStr, desc.pc->getName()));
+		}
+	}
+
+	return true;
+}
+
+CommandSFToNorm::CommandSFToNorm()
+    : ccCommandLineInterface::Command(QObject::tr("SF to Normals"), COMMAND_SF_TO_NORM)
+{
+}
+
+bool CommandSFToNorm::process(ccCommandLineInterface& cmd)
+{
+	if (cmd.arguments().size() < 3)
+	{
+		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1)").arg(COMMAND_SF_TO_NORM));
+	}
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+	}
+
+	int     sfIndexX = -1;
+	QString sfNameX;
+	if (!GetSFIndexOrName(cmd, sfIndexX, sfNameX, true))
+	{
+		return false;
+	}
+	int     sfIndexY = -1;
+	QString sfNameY;
+	if (!GetSFIndexOrName(cmd, sfIndexY, sfNameY, true))
+	{
+		return false;
+	}
+	int     sfIndexZ = -1;
+	QString sfNameZ;
+	if (!GetSFIndexOrName(cmd, sfIndexZ, sfNameZ, true))
+	{
+		return false;
+	}
+
+	// now we can export the corresponding normals
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		if (desc.pc && desc.pc->hasScalarFields())
+		{
+			CCCoreLib::ScalarField* sfX = GetScalarField(desc.pc, sfIndexX, sfNameX, true);
+			CCCoreLib::ScalarField* sfY = GetScalarField(desc.pc, sfIndexY, sfNameY, true);
+			CCCoreLib::ScalarField* sfZ = GetScalarField(desc.pc, sfIndexZ, sfNameZ, true);
+			if (sfX || sfY || sfZ)
+			{
+				if (desc.pc->setNormalsFromSF(sfX, sfY, sfZ))
+				{
+					desc.basename += "_SF_TO_NORM";
+					if (cmd.autoSaveMode())
+					{
+						QString errorStr = cmd.exportEntity(desc);
+						if (!errorStr.isEmpty())
+						{
+							return cmd.error(errorStr);
+						}
+					}
+				}
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Failed to set SF %1 %2 and %3 as normals on cloud '%4'!").arg(sfNameX).arg(sfNameY).arg(sfNameZ).arg(desc.pc->getName()));
+			}
+		}
+	}
+
+	return true;
+}
+
+CommandNormToSF::CommandNormToSF()
+    : ccCommandLineInterface::Command(QObject::tr("Normals to SF"), COMMAND_NORM_TO_SF)
+{
+}
+
+bool CommandNormToSF::process(ccCommandLineInterface& cmd)
+{
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_NORM_TO_SF));
+	}
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
+	}
+
+	// dimension
+	QString dimStr = cmd.arguments().takeFirst().toUpper();
+	bool    exportDims[3]{dimStr.contains("X"), dimStr.contains("Y"), dimStr.contains("Z")};
+	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
+	{
+		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_NORM_TO_SF));
+	}
+
+	// now we can export the corresponding coordinate
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		if (desc.pc && desc.pc->hasNormals() && desc.pc->exportNormalToSF(exportDims))
+		{
+			desc.basename += QObject::tr("_NORM_%1_TO_SF").arg(dimStr);
+			if (cmd.autoSaveMode())
+			{
+				QString errorStr = cmd.exportEntity(desc);
+				if (!errorStr.isEmpty())
+				{
+					return cmd.error(errorStr);
+				}
+			}
+		}
+		else
+		{
+			return cmd.error(QObject::tr("Failed to export normal %1 to SF on cloud '%2'!").arg(dimStr, desc.pc->getName()));
 		}
 	}
 

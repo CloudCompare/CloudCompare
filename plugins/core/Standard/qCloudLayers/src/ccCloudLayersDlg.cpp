@@ -130,6 +130,8 @@ bool ccCloudLayersDlg::setPointCloud(ccPointCloud* cloud)
 		cbScalarField->addItems(m_helper->getScalarFields());
 		cbScalarField->setCurrentIndex(m_helper->getCurrentScalarFieldIndex());
 		cbScalarField->blockSignals(false);
+
+		m_helper->applyClassColors(m_asprsModel.getData());
 	}
 
 	return true;

@@ -5301,7 +5301,12 @@ short ccPointCloud::minimumFileVersion_MeOnly() const
 	if (m_normals)
 		minVersion = std::max(minVersion, m_normals->minimumFileVersion());
 	if (hasScalarFields())
-		minVersion = std::max(minVersion, static_cast<ccScalarField*>(getScalarField(0))->minimumFileVersion()); // we assume they are all the same
+	{
+		for (auto& sf : m_scalarFields)
+		{
+			minVersion = std::max(minVersion, static_cast<ccScalarField*>(sf)->minimumFileVersion()); // we have to test each scalar field
+		}
+	}
 
 	if (gridCount() != 0)
 	{
@@ -6862,6 +6867,56 @@ bool ccPointCloud::exportCoordToSF(bool exportDims[3])
 	return true;
 }
 
+bool ccPointCloud::setNormalsFromSF(CCCoreLib::ScalarField* sfX, CCCoreLib::ScalarField* sfY, CCCoreLib::ScalarField* sfZ)
+{
+	bool cloudHasNormals = hasNormals();
+	if (!cloudHasNormals && !resizeTheNormsTable())
+	{
+		ccLog::Error("Not enough memory");
+		return false;
+	}
+
+	for (unsigned i = 0; i < size(); ++i)
+	{
+		CCVector3 N(0, 0, 0);
+
+		if (cloudHasNormals)
+		{
+			N = getPointNormal(i);
+		}
+
+		if (sfX)
+		{
+			ScalarType s = sfX->getValue(i);
+			if (CCCoreLib::ScalarField::ValidValue(s))
+			{
+				N.x = static_cast<PointCoordinateType>(s);
+			}
+		}
+		if (sfY)
+		{
+			ScalarType s = sfY->getValue(i);
+			if (CCCoreLib::ScalarField::ValidValue(s))
+			{
+				N.y = static_cast<PointCoordinateType>(s);
+			}
+		}
+		if (sfZ)
+		{
+			ScalarType s = sfZ->getValue(i);
+			if (CCCoreLib::ScalarField::ValidValue(s))
+			{
+				N.z = static_cast<PointCoordinateType>(s);
+			}
+		}
+
+		N.normalize();
+		setPointNormal(i, N);
+	}
+
+	return true;
+}
+
 bool ccPointCloud::exportNormalToSF(bool exportDims[3])
 {
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
@@ -6877,7 +6932,7 @@ bool ccPointCloud::exportNormalToSF(bool exportDims[3])
 		return false;
 	}
 
-	const QString defaultSFName[3] = {"Nx", "Ny", "Nz"};
+	const QString defaultSFName[3]{"Nx", "Ny", "Nz"};
 
 	unsigned ptsCount = static_cast<unsigned>(m_normals->size());
 

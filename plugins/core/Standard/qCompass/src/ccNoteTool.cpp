@@ -34,7 +34,7 @@ void ccNoteTool::pointPicked(ccHObject* insertPoint, unsigned itemIdx, ccPointCl
 	}
 
 	//create a 1-point lineation object (highlights note-location)
-	ccPointPair* l = new ccNote(cloud);
+	ccNote* l = new ccNote(cloud);
 	l->setName(note);
 	l->addPointIndex(itemIdx);
 

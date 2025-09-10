@@ -180,6 +180,9 @@ class ccViewer : public QMainWindow
 	void doEnableGLFilter();
 	void doDisableGLFilter();
 
+	// Change the currently displayed SF
+	void selectNextSF(int deltaPos);
+
   protected: // methods
 	//! Loads plugins (from files)
 	void loadPlugins();

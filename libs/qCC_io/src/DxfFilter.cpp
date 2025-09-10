@@ -76,6 +76,7 @@ class DxfImporter : public DL_CreationAdapter
 	    , m_poly(nullptr)
 	    , m_polyVertices(nullptr)
 	    , m_firstPoint(true)
+	    , m_polyElevation(0.0)
 	    , m_globalShift(0, 0, 0)
 	    , m_preserveCoordinateShift(false)
 	    , m_loadParameters(parameters)
@@ -201,7 +202,8 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
+		m_polyElevation = poly.elevation;
 	}
 
 	void addVertex(const DL_VertexData& vertex) override
@@ -223,7 +225,7 @@ class DxfImporter : public DL_CreationAdapter
 			}
 
 			m_poly->addPointIndex(m_polyVertices->size());
-			m_polyVertices->addPoint(convertPoint(vertex.x, vertex.y, vertex.z));
+			m_polyVertices->addPoint(convertPoint(vertex.x, vertex.y, vertex.z + m_polyElevation));
 
 			if (m_poly->size() == 1)
 			{
@@ -486,7 +488,8 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
+		m_polyElevation = 0.0;
 
 		CCVector3 Clocal = convertPoint(data.cx, data.cy, data.cz);
 
@@ -582,7 +585,8 @@ class DxfImporter : public DL_CreationAdapter
 
 		// some entities can have small coordinates (drawings, origin, etc.)
 		// hiding the fact that other polylines have large coordinates!
-		m_firstPoint = true;
+		m_firstPoint    = true;
+		m_polyElevation = 0.0;
 
 		// add first point
 		polyVertices->addPoint(convertPoint(line.x1, line.y1, line.z1));
@@ -656,6 +660,9 @@ class DxfImporter : public DL_CreationAdapter
 
 	//! Whether the very first point has been loaded or not
 	bool m_firstPoint;
+
+	//! Elevation for the current polyline
+	double m_polyElevation;
 
 	//! Global shift
 	CCVector3d m_globalShift;

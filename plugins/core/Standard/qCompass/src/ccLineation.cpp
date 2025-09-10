@@ -32,10 +32,8 @@ ccLineation::ccLineation(ccPolyline* obj)
 
 void ccLineation::updateMetadata()
 {
-	QVariantMap map;
-
 	//add metadata tag defining the ccCompass class type
-	map.insert("ccCompassType", "Lineation");
+	setMetaData("ccCompassType", "Lineation");
 
 	//calculate trace orientation (trend/plunge)
 	if (size() == 2) //can't calculate orientation of something smaller than this...
@@ -80,13 +78,15 @@ void ccLineation::updateMetadata()
 		//CCVector3d Pg = cloud->toGlobal3d(*P);
 		CCVector3d s = toGlobal3d(*getPoint(0)); //start point
 		CCVector3d e = toGlobal3d(*getPoint(1)); //end point
-		float length = (s - e).norm();
+		float length = static_cast<float>((s - e).norm());
 		
-		map.insert("Sx", s.x); map.insert("Sy", s.y); map.insert("Sz", s.z);
-		map.insert("Ex", e.x); map.insert("Ey", e.y); map.insert("Ez", e.z);
-		map.insert("Trend", trend); map.insert("Plunge", plunge); map.insert("Length", length*getGlobalScale());
-
 		//store metadata
+		QVariantMap map;
+		{
+			map.insert("Sx", s.x); map.insert("Sy", s.y); map.insert("Sz", s.z);
+			map.insert("Ex", e.x); map.insert("Ey", e.y); map.insert("Ez", e.z);
+			map.insert("Trend", trend); map.insert("Plunge", plunge); map.insert("Length", length*getGlobalScale());
+		}
 		setMetaData(map, true);
 
 		//update name

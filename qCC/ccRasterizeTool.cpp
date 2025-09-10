@@ -1478,6 +1478,9 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 		case ccRasterGrid::FILL_AVERAGE_HEIGHT:
 			emptyCellHeight = grid.meanHeight;
 			break;
+		case ccRasterGrid::KRIGING:
+			// nothing to do
+			break;
 		default:
 			assert(false);
 		}

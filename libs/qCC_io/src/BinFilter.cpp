@@ -799,12 +799,12 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		}
 		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline* poly        = ccHObjectCaster::ToPolyline(currentObject);
-			intptr_t    cloudID     = (intptr_t)poly->getAssociatedCloud();
+			ccPolyline* poly    = ccHObjectCaster::ToPolyline(currentObject);
+			intptr_t    cloudID = (intptr_t)poly->getAssociatedCloud();
 
 			poly->CCCoreLib::Polyline::setAssociatedCloud(nullptr); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
 
-			ccHObject*  cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+			ccHObject* cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 			if (cloudEntity)
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);

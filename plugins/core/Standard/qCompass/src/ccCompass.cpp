@@ -21,6 +21,9 @@
 #include <QFileDialog>
 #include <QMouseEvent>
 
+// qCC_db
+#include <ccExternalFactory.h>
+
 //CCCoreLib
 #include <Neighbourhood.h>
 
@@ -56,8 +59,31 @@ int ccCompass::costMode = ccTrace::DARK;
 bool ccCompass::mapMode = false;
 int ccCompass::mapTo = ccGeoObject::LOWER_BOUNDARY;
 
-ccCompass::ccCompass(QObject* parent) :
-	QObject( parent )
+class CompassFactory : public ccExternalFactory
+{
+public:
+
+	CompassFactory()
+		: ccExternalFactory("Compass")
+	{ }
+
+	ccHObject* buildObject(const QString& metaName) override
+	{
+		if (metaName == ccTrace::GetClassName())
+		{
+			return new ccTrace;
+		}
+		else
+		{
+			ccLog::Warning("[CompassFactory::buildObject] Unknown object: " + metaName);
+			return nullptr;
+		}
+	}
+};
+
+
+ccCompass::ccCompass(QObject* parent)
+	: QObject( parent )
   , ccStdPluginInterface( ":/CC/plugin/qCompass/info.json" )
 {
 	//initialize all tools
@@ -183,6 +209,9 @@ void ccCompass::onNewSelection(const ccHObject::Container& selectedEntities)
 //Submit the action to launch ccCompass to CC
 QList<QAction *> ccCompass::getActions()
 {
+	ccExternalFactory::Container::Shared container = ccExternalFactory::Container::GetUniqueInstance();
+	container->addFactory(new CompassFactory);
+
 	//default action (if it has not been already created, it's the moment to do it)
 	if (!m_action) //this is the action triggered by clicking the "Compass" button in the plugin menu
 	{
@@ -316,7 +345,6 @@ void ccCompass::tryLoading()
 	prg.setInfo("Converting Compass types...");
 	prg.start();
 
-
 	//loop through DB_Tree and find any ccCompass objects
 	std::vector<int> originals; //ids of original objects
 	std::vector<ccHObject*> replacements; //pointers to objects that will replace the originals
@@ -344,13 +372,41 @@ void ccCompass::tryLoading()
 		replacement->setEnabled(original->isEnabled());
 
 		//steal all the children
+		ccHObject::Container toDetach;
 		for (unsigned c = 0; c < original->getChildrenNumber(); c++)
 		{
-			replacement->addChild(original->getChild(c));
+			ccHObject* child = original->getChild(c);
+			if (child->isKindOf(CC_TYPES::ARRAY))
+			{
+				// arrays should never be transferred either
+				continue;
+			}
+			if (original->isKindOf(CC_TYPES::POLY_LINE))
+			{
+				// skip vertices
+				if (dynamic_cast<ccHObject*>(static_cast<ccPolyline*>(original)->getAssociatedCloud()) == child)
+				{
+					continue;
+				}
+			}
+			else if (original->isKindOf(CC_TYPES::PRIMITIVE))
+			{
+				// skip vertices
+				if (static_cast<ccGenericPrimitive*>(original)->getAssociatedCloud() == child)
+				{
+					continue;
+				}
+			}
+			replacement->addChild(child);
+			toDetach.push_back(child);
 		}
 
 		//remove them from the orignal parent
-		original->detachAllChildren();
+		while (false == toDetach.empty())
+		{
+			original->detachChild(toDetach.back());
+			toDetach.pop_back();
+		}
 
 		//add new parent to scene graph
 		if (original->getParent())
@@ -502,7 +558,7 @@ bool ccCompass::startMeasuring()
 	if (!m_app->getActiveGLWindow())
 	{
 		//invalid pointer error
-		m_app->dispToConsole("Error: ccCompass could not find the Cloud Compare window. Abort!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("Error: ccCompass could not find the CloudCompare window. Abort!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -1124,9 +1180,7 @@ void ccCompass::fitPlaneToGeoObject()
 		ccFitPlane* p = ccFitPlane::Fit(points, &rms);
 		if (p)
 		{
-			QVariantMap map;
-			map.insert("RMS", rms);
-			p->setMetaData(map, true);
+			p->setMetaData("RMS", rms);
 			upper->addChild(p);
 			m_app->addToDB(p, false, false, false, false);
 		}
@@ -1166,9 +1220,7 @@ void ccCompass::fitPlaneToGeoObject()
 			ccFitPlane* p = ccFitPlane::Fit(points, &rms);
 			if (p)
 			{
-				QVariantMap map;
-				map.insert("RMS", rms);
-				p->setMetaData(map, true);
+				p->setMetaData("RMS", rms);
 				lower->addChild(p);
 				m_app->addToDB(p, false, false, false, true);
 			}
@@ -2716,10 +2768,12 @@ void ccCompass::estimateStrain()
 
 						//store strain tensor on the graphic for reference
 						QVariantMap map;
-						map.insert("Exx", U.getValue(0, 0) - 1.0); map.insert("Exy", U.getValue(0, 1));       map.insert("Exz", U.getValue(0, 2));
-						map.insert("Eyx", U.getValue(1, 0));       map.insert("Eyy", U.getValue(1, 1) - 1.0); map.insert("Eyz", U.getValue(1, 2));
-						map.insert("Ezx", U.getValue(2, 0));       map.insert("Ezy", U.getValue(2, 1));       map.insert("Ezz", U.getValue(2, 2) - 1.0);
-						map.insert("J", J);
+						{
+							map.insert("Exx", U.getValue(0, 0) - 1.0); map.insert("Exy", U.getValue(0, 1));       map.insert("Exz", U.getValue(0, 2));
+							map.insert("Eyx", U.getValue(1, 0));       map.insert("Eyy", U.getValue(1, 1) - 1.0); map.insert("Eyz", U.getValue(1, 2));
+							map.insert("Ezx", U.getValue(2, 0));       map.insert("Ezy", U.getValue(2, 1));       map.insert("Ezz", U.getValue(2, 2) - 1.0);
+							map.insert("J", J);
+						}
 						ellipse->setMetaData(map, true);
 
 						//create cubes to highlight gridding

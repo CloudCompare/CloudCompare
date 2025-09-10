@@ -173,6 +173,14 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 		QShortcut* minusKey = new QShortcut(QKeySequence(tr("=", "Zoom out")), this);
 		connect(minusKey, &QShortcut::activated, [this]()
 		        { m_glWindow->onWheelEvent(-8.0); });
+
+		QShortcut* shiftUpKey = new QShortcut(QKeySequence(Qt::SHIFT | Qt::Key_Up), this);
+		connect(shiftUpKey, &QShortcut::activated, [this]()
+		        { selectNextSF(-1); });
+
+		QShortcut* shiftDownKey = new QShortcut(QKeySequence(Qt::SHIFT | Qt::Key_Down), this);
+		connect(shiftDownKey, &QShortcut::activated, [this]()
+		        { selectNextSF(1); });
 	}
 
 	loadPlugins();
@@ -927,6 +935,8 @@ void ccViewer::doActionDisplayShortcuts()
 		text += "\tS  : Toggle SF visibility\n";
 		text += "\tR  : Toggle color ramp visibility\n";
 		text += "\tZ  : Zoom on entity\n";
+		text += "\tSHIFT + up key: Activate previous scalar field\n";
+		text += "\tSHIFT + down key: Activate next scalar field\n";
 		text += "\tDEL: Delete entity\n";
 		text += "\n";
 		text += "ALT   + mouse wheel: change point size\n";
@@ -1461,4 +1471,42 @@ void ccViewer::decreasePointSize()
 ccUniqueIDGenerator::Shared ccViewer::getUniqueIDGenerator()
 {
 	return ccObject::GetUniqueIDGenerator();
+}
+
+static QAction* FindAction(const QList<QAction*>& actions, const QString& name)
+{
+	for (QAction* action : actions)
+	{
+		if (action->text() == name)
+		{
+			return action;
+		}
+	}
+
+	return nullptr;
+}
+
+void ccViewer::selectNextSF(int deltaPos)
+{
+	if (!m_selectedObject)
+		return;
+
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedObject);
+	if (!cloud || !cloud->hasScalarFields())
+		return;
+
+	int sfIdx = cloud->getCurrentDisplayedScalarFieldIndex();
+	{
+		int newSFIndex = sfIdx + deltaPos;
+		newSFIndex     = std::max(0, newSFIndex);
+		newSFIndex     = std::min(static_cast<int>(cloud->getNumberOfScalarFields()) - 1, newSFIndex);
+		if (newSFIndex != sfIdx)
+		{
+			QAction* newAction = FindAction(ui.menuSelectSF->actions(), QString::fromStdString(cloud->getScalarFieldName(newSFIndex)));
+			if (newAction)
+			{
+				newAction->setChecked(true);
+			}
+		}
+	}
 }

@@ -914,6 +914,9 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Exports the specified normal dimension(s) to scalar field(s)
 	bool exportNormalToSF(bool exportDims[3]);
 
+	//! Sets normals from scalar fields
+	bool setNormalsFromSF(CCCoreLib::ScalarField* sfX, CCCoreLib::ScalarField* sfY, CCCoreLib::ScalarField* sfZ);
+
 	//! Release VBOs
 	void releaseVBOs();
 

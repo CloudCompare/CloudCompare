@@ -534,6 +534,7 @@ void ccRasterizeTool::loadSettings()
 	int    minVertexCount                = settings.value("MinVertexCount", m_UI->minVertexCountSpinBox->value()).toInt();
 	bool   ignoreBorders                 = settings.value("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
 	bool   projectContoursOnAlt          = settings.value("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
+	bool   xRayAutoSaturation            = settings.value("xRayAutoSaturation", m_UI->xRayAutoSaturationCheckBox->isChecked()).toBool();
 
 	// Statistics checkboxes
 	bool   generateHeightStatistics          = settings.value("GenerateHeightStatistics", m_UI->exportHeightStatsCheckBox->isChecked()).toBool();
@@ -562,6 +563,7 @@ void ccRasterizeTool::loadSettings()
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
 	m_UI->ignoreContourBordersCheckBox->setChecked(ignoreBorders);
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
+	m_UI->xRayAutoSaturationCheckBox->setChecked(xRayAutoSaturation);
 
 	// SF Statistics checkboxes
 	m_UI->exportHeightStatsCheckBox->setChecked(generateHeightStatistics);
@@ -628,6 +630,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("MinVertexCount", m_UI->minVertexCountSpinBox->value());
 	settings.setValue("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked());
 	settings.setValue("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked());
+	settings.setValue("xRayAutoSaturation", m_UI->xRayAutoSaturationCheckBox->isChecked());
 
 	// SF Statistics checkboxes
 	settings.setValue("generateStatisticsPopulation", m_UI->generateStatisticsPopulationCheckBox->isChecked());
@@ -801,10 +804,14 @@ void ccRasterizeTool::updateGridAndDisplay()
 		m_rasterCloud = nullptr;
 	}
 
+	setEnabled(false);
+
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	bool projectSFs      = (getTypeOfSFProjection() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
 	bool projectColors   = m_cloud && m_cloud->hasColors();
 	bool success         = updateGrid(projectSFs);
+
+	setEnabled(true);
 
 	if (success && m_glWindow)
 	{
@@ -1842,13 +1849,11 @@ void ccRasterizeTool::generateXRaySF()
 		CCCoreLib::NormalDistribution distrib;
 		distrib.computeParameters(CCCoreLib::GenericDistribution::SFAsScalarContainer(*xraySF));
 		ScalarType saturation = distrib.getMu() + 2.5 * sqrt(distrib.getSigma2());
-		if (saturation < xraySF->getMax())
+		ccLog::Print("[Rasterize][X-ray] Accumulation values automatically capped to " + QString::number(saturation) + " / " + QString::number(xraySF->getMax()));
+
+		for (unsigned i = 0; i < xraySF->size(); ++i)
 		{
-			ccLog::Print("[Rasterize][X-ray] Accumulation values automatically capped to " + QString::number(saturation));
-			for (unsigned i = 0; i < xraySF->size(); ++i)
-			{
-				xraySF->setValue(i, std::min(xraySF->getValue(i), saturation));
-			}
+			xraySF->setValue(i, std::min(xraySF->getValue(i), saturation));
 		}
 	}
 	xraySF->computeMinAndMax();

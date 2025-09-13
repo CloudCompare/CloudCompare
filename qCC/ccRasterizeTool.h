@@ -87,6 +87,9 @@ class ccRasterizeTool : public QDialog
 	//! Generates hillshade
 	void generateHillshade();
 
+	//! Generates an 'x-ray' scalar field
+	void generateXRaySF();
+
 	//! Removes all displayed contour lines
 	void removeContourLines();
 
@@ -200,6 +203,7 @@ class ccRasterizeTool : public QDialog
 	                                 bool                                               projectSFs,
 	                                 bool                                               projectColors,
 	                                 bool                                               copyHillshadeSF,
+	                                 bool                                               copyXRaySF,
 	                                 const QString&                                     activeSFName,
 	                                 double                                             percentileValue,
 	                                 bool                                               exportToOriginalCS,

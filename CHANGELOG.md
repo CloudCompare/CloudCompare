@@ -89,10 +89,14 @@ New plugins
 
 Improvements:
 
-	- Rasterize tool > Contour plot generation
-		- the individual polylines should now be properly named (with the real iso-value)
-		- they should be properly ordered
-		- they should be 'closed' when possible
+	- Rasterize tool
+		- New 'X-ray' field calculation tool (same tab as 'hillshade')
+			- computes a scalar field based on how many 'layers' are filled above each raster grid cell
+			- options to 'compress' the accumulation values to enhance the default contrast
+		- Contour plot generation
+			- the individual polylines should now be properly named (with the real iso-value)
+			- they should be properly ordered
+			- they should be 'closed' when possible
 
 	- BIN file loading
 		- when loading a corrupted/truncated BIN file, or if not enough memory, CloudCompare will give the user

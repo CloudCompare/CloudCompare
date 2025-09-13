@@ -64,8 +64,8 @@ ccScalarField::ccScalarField(const ccScalarField& sf)
 	computeMinAndMax();
 
 	// restore the display ranges after 'computeMinAndMax' is called
-	m_displayRange = sf.m_displayRange;
-	m_saturationRange = sf.m_saturationRange;
+	m_displayRange       = sf.m_displayRange;
+	m_saturationRange    = sf.m_saturationRange;
 	m_logSaturationRange = sf.m_logSaturationRange;
 }
 

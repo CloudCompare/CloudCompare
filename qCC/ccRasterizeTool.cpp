@@ -68,7 +68,7 @@
 #include <cassert>
 
 constexpr char HILLSHADE_FIELD_NAME[] = "Hillshade";
-constexpr char XRAY_FIELD_NAME[] = "X-ray";
+constexpr char XRAY_FIELD_NAME[]      = "X-ray";
 
 static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 {
@@ -356,7 +356,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw /*=true
 	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF)
 	{
 		if ((m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
-			&& (m_UI->activeLayerComboBox->itemText(layerIndex) != XRAY_FIELD_NAME))
+		    && (m_UI->activeLayerComboBox->itemText(layerIndex) != XRAY_FIELD_NAME))
 		{
 			m_UI->projectSFCheckBox->setChecked(true); // force the choice of a SF projection strategy
 			m_UI->projectSFCheckBox->setEnabled(false);
@@ -670,7 +670,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
                                                   bool                                               projectSFs,
                                                   bool                                               projectColors,
                                                   bool                                               copyHillshadeSF,
-	                                              bool                                               copyXRaySF,
+                                                  bool                                               copyXRaySF,
                                                   const QString&                                     activeSFName,
                                                   double                                             percentileValue,
                                                   bool                                               exportToOriginalCS,
@@ -1692,7 +1692,7 @@ void ccRasterizeTool::generateXRaySF()
 
 	// get/create layer
 	ccScalarField* xraySF = nullptr;
-	int            sfIdx = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
+	int            sfIdx  = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
 	if (sfIdx >= 0)
 	{
 		xraySF = static_cast<ccScalarField*>(m_rasterCloud->getScalarField(sfIdx));
@@ -1715,7 +1715,7 @@ void ccRasterizeTool::generateXRaySF()
 	assert(xraySF && xraySF->currentSize() == m_rasterCloud->size());
 	xraySF->fill(CCCoreLib::NAN_VALUE);
 
-	bool sparseSF = (xraySF->currentSize() != m_grid.height * m_grid.width);
+	bool sparseSF             = (xraySF->currentSize() != m_grid.height * m_grid.width);
 	bool resampleInputCloudXY = resampleOriginalCloud();
 
 	// vertical dimension
@@ -1725,7 +1725,7 @@ void ccRasterizeTool::generateXRaySF()
 	// number of vertical steps
 	CCVector3 bbMin, bbMax;
 	m_cloud->getBoundingBox(bbMin, bbMax);
-	double delaH = bbMax.u[Z] - bbMin.u[Z];
+	double   delaH      = bbMax.u[Z] - bbMin.u[Z];
 	unsigned layerCount = std::max(1u, static_cast<unsigned>(ceil(delaH / m_grid.gridStep)));
 	ccLog::Print("[Rasterize][X-ray] Number of vertical steps: " + QString::number(layerCount));
 
@@ -1749,7 +1749,7 @@ void ccRasterizeTool::generateXRaySF()
 	CCCoreLib::NormalizedProgress nProgress(&progressDialog, static_cast<unsigned>(m_grid.width * m_grid.height));
 
 	// for all cells
-	unsigned nonEmptyCellIndex = 0;
+	unsigned nonEmptyCellIndex      = 0;
 	unsigned validButEmptyCellIndex = 0;
 	for (unsigned j = 0; j < m_grid.height - 1; ++j)
 	{
@@ -1775,7 +1775,7 @@ void ccRasterizeTool::generateXRaySF()
 				{
 					const CCVector3* P = m_cloud->getPoint(index);
 
-					unsigned heightIndex = static_cast<unsigned>((P->u[Z] - bbMin.u[Z]) / m_grid.gridStep);
+					unsigned heightIndex     = static_cast<unsigned>((P->u[Z] - bbMin.u[Z]) / m_grid.gridStep);
 					layerFilled[heightIndex] = true;
 				}
 

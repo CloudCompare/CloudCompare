@@ -309,7 +309,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 
 			// we skip points that fall outside of the grid!
 			if (cellPos.x < 0 || cellPos.x >= static_cast<int>(width)
-				|| cellPos.y < 0 || cellPos.y >= static_cast<int>(height))
+			    || cellPos.y < 0 || cellPos.y >= static_cast<int>(height))
 			{
 				if (!nProgress.oneStep())
 				{
@@ -333,7 +333,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 			{
 				// else point previous tail ref to this point, and reset tail
 				*(aCell.pointRefTail) = pointRefList.data() + n;
-				aCell.pointRefTail = pointRefList.data() + n;
+				aCell.pointRefTail    = pointRefList.data() + n;
 			}
 
 			// update the number of points in the cell
@@ -404,16 +404,16 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 			progressDialog->setCancelButton(nullptr);
 			QCoreApplication::processEvents();
 		}
-		CCCoreLib::NormalizedProgress nProgress(progressDialog, height*width);
+		CCCoreLib::NormalizedProgress nProgress(progressDialog, height * width);
 
 		for (unsigned j = 0; j < height; ++j)
 		{
 			Row& row = rows[j];
 			for (unsigned i = 0; i < width; ++i)
 			{
-				ccRasterCell& aCell = row[i];
-				double        cellAvgHeight = 0.0;
-				double        cellStdDevHeight = 0.0;
+				ccRasterCell& aCell                 = row[i];
+				double        cellAvgHeight         = 0.0;
+				double        cellStdDevHeight      = 0.0;
 				double        cellModelStdDevHeight = std::numeric_limits<double>::quiet_NaN(); // for inv. var. projection mode only
 
 				if (aCell.nbPoints)
@@ -423,17 +423,17 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 					void** pRef = aCell.pointRefHead;
 					for (unsigned n = 0; n < aCell.nbPoints; ++n)
 					{
-						unsigned         pointIndex = static_cast<unsigned>(pRef - pointRefList.data());
-						const CCVector3* P = cloud->getPoint(pointIndex);
+						unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
+						const CCVector3* P              = cloud->getPoint(pointIndex);
 						cellPointIndexedHeight[n].index = pointIndex;
-						cellPointIndexedHeight[n].val = P->u[Z];
-						pRef = reinterpret_cast<void**>(*pRef);
+						cellPointIndexedHeight[n].val   = P->u[Z];
+						pRef                            = reinterpret_cast<void**>(*pRef);
 					}
 
 					auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
 					// sorting indexed points in cell based on height in ascending order
 					ParallelSort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](const IndexAndValue& a, const IndexAndValue& b)
-						{ return a.val < b.val; });
+					             { return a.val < b.val; });
 
 					// compute standard statistics on height values
 
@@ -444,7 +444,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 					if (projectionType != PROJ_INVERSE_VAR_VALUE)
 					{
 						// calculate average value and std dev
-						cellAvgHeight = 0.0;
+						cellAvgHeight        = 0.0;
 						double cellSquareSum = 0.0;
 						for (unsigned n = 0; n < aCell.nbPoints; n++)
 						{
@@ -460,8 +460,8 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						assert(zStdDevSF);
 						// Calculate weighted average
 						double sumInverseVariance = 0.0;
-						double weightedSum = 0.0;
-						double weightedSquareSum = 0.0;
+						double weightedSum        = 0.0;
+						double weightedSquareSum  = 0.0;
 						for (unsigned n = 0; n < aCell.nbPoints; ++n)
 						{
 							// Compute inverse variance for all points in the current cell
@@ -483,8 +483,8 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 
 						if (CCCoreLib::GreaterThanEpsilon(sumInverseVariance))
 						{
-							cellAvgHeight = weightedSum / sumInverseVariance;
-							cellStdDevHeight = std::sqrt(std::abs(weightedSquareSum / sumInverseVariance - cellAvgHeight * cellAvgHeight));
+							cellAvgHeight         = weightedSum / sumInverseVariance;
+							cellStdDevHeight      = std::sqrt(std::abs(weightedSquareSum / sumInverseVariance - cellAvgHeight * cellAvgHeight));
 							cellModelStdDevHeight = std::sqrt(1.0 / sumInverseVariance);
 						}
 						else
@@ -498,7 +498,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 					switch (projectionType)
 					{
 					case PROJ_MINIMUM_VALUE:
-						aCell.h = aCell.minHeight;
+						aCell.h                 = aCell.minHeight;
 						aCell.nearestPointIndex = cellPointIndexedHeight.front().index;
 						break;
 					case PROJ_AVERAGE_VALUE:
@@ -507,17 +507,17 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						if (std::isfinite(aCell.h))
 						{
 							// we choose the point which is the closest to the cell center (in 2D)
-							CCVector2d C = computeCellCenter(i, j, X, Y);
+							CCVector2d C                    = computeCellCenter(i, j, X, Y);
 							double     minimumSquareDistToP = 0.0;
 							for (unsigned n = 0; n < aCell.nbPoints; n++)
 							{
 								unsigned         pointIndex = cellPointIndexedHeight[n].index;
-								const CCVector3* P = cloud->getPoint(pointIndex);
+								const CCVector3* P          = cloud->getPoint(pointIndex);
 								CCVector2d       P2D(P->u[X], P->u[Y]);
 								double           squareDistToP = (C - P2D).norm2();
 								if ((squareDistToP < minimumSquareDistToP) || (n == 0))
 								{
-									minimumSquareDistToP = squareDistToP;
+									minimumSquareDistToP    = squareDistToP;
 									aCell.nearestPointIndex = pointIndex;
 								}
 							}
@@ -539,7 +539,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 					}
 					break;
 					case PROJ_MAXIMUM_VALUE:
-						aCell.h = aCell.maxHeight;
+						aCell.h                 = aCell.maxHeight;
 						aCell.nearestPointIndex = cellPointIndexedHeight[aCell.nbPoints - 1].index;
 						break;
 					default:
@@ -558,7 +558,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 							for (unsigned n = 0; n < aCell.nbPoints; n++)
 							{
 								unsigned            pointIndex = cellPointIndexedHeight[n].index;
-								const ccColor::Rgb& col = cloud->getPointColor(pointIndex);
+								const ccColor::Rgb& col        = cloud->getPointColor(pointIndex);
 								aCell.color += CCVector3d(col.r, col.g, col.b);
 							}
 							aCell.color /= aCell.nbPoints;
@@ -567,7 +567,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						{
 							// pick color from selected index
 							const ccColor::Rgb& col = cloud->getPointColor(aCell.nearestPointIndex);
-							aCell.color = CCVector3d(col.r, col.g, col.b);
+							aCell.color             = CCVector3d(col.r, col.g, col.b);
 						}
 					}
 
@@ -594,7 +594,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
 								{
 									unsigned   pointIndex = cellPointIndexedHeight[n].index;
-									ScalarType value = sf->getValue(pointIndex);
+									ScalarType value      = sf->getValue(pointIndex);
 									if (CCCoreLib::ScalarField::ValidValue(value))
 									{
 										if (std::isnan(minValue) || minValue > value)
@@ -614,7 +614,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
 								{
 									unsigned   pointIndex = cellPointIndexedHeight[n].index;
-									ScalarType value = sf->getValue(pointIndex);
+									ScalarType value      = sf->getValue(pointIndex);
 									if (CCCoreLib::ScalarField::ValidValue(value))
 									{
 										sfValues.push_back(value);
@@ -650,7 +650,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
 								{
 									unsigned   pointIndex = cellPointIndexedHeight[n].index;
-									ScalarType value = sf->getValue(pointIndex);
+									ScalarType value      = sf->getValue(pointIndex);
 									if (CCCoreLib::ScalarField::ValidValue(value))
 									{
 										if (std::isnan(maxValue) || maxValue < value)
@@ -667,11 +667,11 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 							{
 								// for average, we do a simple average of unsorted SF-values in cell
 								double   scalarFieldWeightedSum = 0.0;
-								unsigned validPointCount = 0;
+								unsigned validPointCount        = 0;
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
 								{
 									unsigned   pointIndex = cellPointIndexedHeight[n].index;
-									ScalarType value = sf->getValue(pointIndex);
+									ScalarType value      = sf->getValue(pointIndex);
 									if (CCCoreLib::ScalarField::ValidValue(value))
 									{
 										scalarFieldWeightedSum += value;
@@ -694,11 +694,11 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 								{
 									assert(zStdDevSF);
 									double scalarFieldWeightedSum = 0.0;
-									double scalarFieldWeightSum = 0.0;
+									double scalarFieldWeightSum   = 0.0;
 									for (unsigned n = 0; n < aCell.nbPoints; n++)
 									{
 										unsigned   pointIndex = cellPointIndexedHeight[n].index;
-										ScalarType stdDev = zStdDevSF->getValue(pointIndex);
+										ScalarType stdDev     = zStdDevSF->getValue(pointIndex);
 										if (ccScalarField::ValidValue(stdDev) && CCCoreLib::GreaterThanEpsilon(stdDev))
 										{
 											ScalarType value = sf->getValue(pointIndex);

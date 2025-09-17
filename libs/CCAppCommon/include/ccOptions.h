@@ -34,6 +34,9 @@ class CCAPPCOMMON_LIB_API ccOptions
 	//! Should we ask for confirmation when user clicked to quit the app ?
 	bool confirmQuit;
 
+	//! Should we ask for confirmation when user clicked to delete selected entities ?
+	bool confirmDelete;
+
   public: // methods
 	//! Default constructor
 	ccOptions();

@@ -18,7 +18,7 @@
 //#  Zhang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR  #
 //#  Data Filtering Method Based on Cloth Simulation. Remote Sensing. 2016; 8(6):501.   #
 //#                                                                                     #
-//#                                     Copyright ©                                     #
+//#                                     Copyright                                       #
 //#               RAMM laboratory, School of Geography, Beijing Normal University       #
 //#                               (http://ramm.bnu.edu.cn/)                             #
 //#                                                                                     #
@@ -43,7 +43,7 @@
 //* addding a terrain class
 
 //using discrete steps (drop and pull) to approximate the physical process
-//Finding the max height value in nearest N points aroud every particles, as the lowest position where the particles can get.ÔÚÃ¿¸ö²»ÁÏµãÖÜÎ§ÕÒ×îÁÚ½üµÄN¸öµã£¬ÒÔ¸ß³Ì×î´óÖµ×÷ÎªËùÄÜµ½´ïµÄ×îµÍµã¡£
+//Finding the max height value in nearest N points aroud every particles, as the lowest position where the particles can get.
 
 //local
 #include "Vec3.h"

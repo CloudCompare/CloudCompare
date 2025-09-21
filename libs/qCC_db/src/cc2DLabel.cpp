@@ -1218,7 +1218,7 @@ struct Tab
 		{
 			int maxWidth = 0;
 			for (int j = 0; j < colContent[i].size(); ++j)
-				maxWidth = std::max(maxWidth, fm.width(colContent[i][j]));
+				maxWidth = std::max(maxWidth, fm.horizontalAdvance(colContent[i][j]));
 			colWidth[i] = maxWidth;
 			totalWidth += maxWidth;
 		}
@@ -1395,7 +1395,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		// int buttonSize    = static_cast<int>(c_buttonSize * context.renderZoom);
 		{
 			// base box dimension
-			dx = std::max(dx, titleFontMetrics.width(title));
+			dx = std::max(dx, titleFontMetrics.horizontalAdvance(title));
 			dy += margin;      // top vertical margin
 			dy += titleHeight; // title
 
@@ -1762,11 +1762,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				int width  = tab.colWidth[c] + 2 * tabMarginX;
 				int height = rowHeight + 2 * tabMarginY;
 
-				int yRow           = yStartRel;
-				int actualRowCount = std::min(tab.rowCount, tab.colContent[c].size());
-
-				bool                 labelCol  = ((c & 1) == 0);
-				const ccColor::Rgba* textColor = labelCol ? &ccColor::white : &defaultTextColor;
+				int                  yRow           = yStartRel;
+				int                  actualRowCount = std::min(tab.rowCount, static_cast<int>(tab.colContent[c].size()));
+				bool                 labelCol       = ((c & 1) == 0);
+				const ccColor::Rgba* textColor      = labelCol ? &ccColor::white : &defaultTextColor;
 
 				for (int r = 0; r < actualRowCount; ++r)
 				{
@@ -1798,12 +1797,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					if (labelCol)
 					{
 						// align characters in the middle
-						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
+						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str)) / 2;
 					}
 					else
 					{
 						// align digits on the right
-						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
+						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str);
 					}
 
 					context.display->displayText(str,

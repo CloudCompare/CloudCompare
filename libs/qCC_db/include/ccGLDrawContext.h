@@ -20,6 +20,9 @@
 #include "ccColorBasedEntityPicking.h"
 #include "ccIncludeGL.h"
 
+// Qt
+#include <QOpenGLVersionFunctionsFactory>
+
 // Local
 #include "ccMaterial.h"
 
@@ -201,7 +204,7 @@ struct ccGLDrawContext
 	template <class TYPE>
 	TYPE* glFunctions() const
 	{
-		return qGLContext ? qGLContext->versionFunctions<TYPE>() : 0;
+		return qGLContext ? QOpenGLVersionFunctionsFactory::get<TYPE>(qGLContext) : 0;
 	}
 };
 

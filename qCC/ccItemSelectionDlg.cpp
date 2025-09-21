@@ -58,7 +58,7 @@ void ccItemSelectionDlg::setItems(const QStringList& items, int defaultSelectedI
 	// default selection
 	if (defaultSelectedIndex >= 0 && defaultSelectedIndex < items.size())
 	{
-		listWidget->setItemSelected(listWidget->item(defaultSelectedIndex), true);
+		listWidget->item(defaultSelectedIndex)->setSelected(true);
 	}
 }
 

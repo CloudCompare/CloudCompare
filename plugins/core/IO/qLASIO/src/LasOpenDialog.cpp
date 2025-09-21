@@ -87,15 +87,15 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	connect(unselectAllESFToolButton, &QPushButton::clicked, this, [&]
 	        { doSelectAllESF(false); });
 	connect(xNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        &QComboBox::currentTextChanged,
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(yNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        &QComboBox::currentTextChanged,
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(zNormalComboBox,
-	        (void(QComboBox::*)(const QString&))(&QComboBox::currentIndexChanged),
+	        &QComboBox::currentTextChanged,
 	        this,
 	        &LasOpenDialog::onNormalComboBoxChanged);
 	connect(decomposeClassificationCheckBox, &QCheckBox::toggled, this, &LasOpenDialog::onDecomposeClassificationToggled);

@@ -13,26 +13,25 @@ cmd = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
 depends-on = ["install"]
 
 [feature.build.dependencies]
-cmake = ">=3.27,<3.30"
-cxx-compiler = ">=1.8.0,<1.9"
-ninja = "1.12.*"
+cmake = ">=4.1.1,<4.2"
+cxx-compiler = ">=1.9.0,<1.10"
+ninja = "1.13.*"
 
 [dependencies]
-qt = ">=5.15.8,<5.16"
-python = ">=3.11,<3.12"
+qt6-main= ">=6.9.1,<6.10.0"
 laszip = ">=3.4.3,<3.5"
-opencv = ">=4.9.0,<4.10"
-pcl = ">=1.14.0,<1.15"      #osx-64 only accept 1.14.0 (due to pyqt 6 dependency)
-boost = ">=1.84.0,<1.85"
-pybind11 = ">=2.13.0,<2.14"
-pyqt = ">=5.15.7,<=5.15.11"
-scipy = ">=1.15,<1.16"      # Needed by 3DFin
-scikit-learn = ">=1.6,<1.7"
+opencv = ">=4.12.0,<4.13"
+pcl = ">=1.15.1,<1.16"
+libboost = ">=1.88.0,<1.89"
+pybind11 = ">=2.13.0,<2.14" # NOQT6
+#pyqt6 = "" # NOQT6 TODO
+#scipy = ">=1.15,<1.16" # NOQT6  #TODO      # Needed by 3DFin
+#scikit-learn = ">=1.6,<1.7" # NOQT6 #TODO
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
-xerces-c = ">=3.2.5,<3.3"
+xerces-c = ">=3.3.0,<3.4"
 occt = ">=7.7.1,<7.8"       # Opencascade, >=7.8 needs cmake adjustements
-tbb = ">=2022.0.0,<2023"
+tbb = ">=2022.2.0,<2023"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -49,10 +48,11 @@ cmd = [
 	"-DCC_USE_EIGEN=ON",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DPLUGIN_IO_QLAS=ON",
-	"-DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=ON",
-	"-DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=ON",
+	"-DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=OFF", # Deprecated NO QT6
+	"-DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=OFF", # Deprecated NO QT6
 	"-DPLUGIN_STANDARD_3DMASC=ON",
 	"-DPLUGIN_PYTHON=ON",
+	"-DPLUGIN_STANDARD_QM3C2=ON",
 	"-DPLUGIN_STANDARD_QANIMATION=ON",
 	"-DQANIMATION_WITH_FFMPEG_SUPPORT=ON",
 	"-DPLUGIN_STANDARD_QBROOM=ON",
@@ -64,7 +64,7 @@ cmd = [
 	"-DPLUGIN_STANDARD_QFACETS=ON",
 	"-DPLUGIN_STANDARD_QHPR=ON",
 	"-DPLUGIN_STANDARD_QHOUGH_NORMALS=ON",
-	"-DPLUGIN_STANDARD_QM3C2=ON",
+	"-DPLUGIN_STANDARD_QM3C2=OFF",
 	"-DPLUGIN_STANDARD_QMPLANE=ON",
 	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF",           # TODO: need libigl for osx-arm64
 	"-DPLUGIN_STANDARD_QPCL=ON",
@@ -81,7 +81,6 @@ cmd = [
 	"-DPLUGIN_IO_QE57=ON",
 	"-DE57_RELEASE_LTO=OFF",      # TODO: Needed else it won't find the AR/Ranlib binary
 	"-DPLUGIN_IO_QFBX=OFF",       # Possible, but it needs a proprietary SDK
-	#"-DPLUGIN_IO_QLAS_FWF=ON" # Seems to be Windows only, deprecated in favor of qLASIO
 	"-DPLUGIN_IO_QPHOTOSCAN=ON",
 	"-DPLUGIN_IO_QRDB=OFF",                                    # Needs a proprietary lib. The lib is not available for osx-arm64
 	"-DPLUGIN_IO_QSTEP=ON",
@@ -129,5 +128,5 @@ depends-on = ["install"]
 [environments]
 build = ["build"]
 
-[pypi-dependencies]
-3dfin = { version = "==0.5.0" }
+#[pypi-dependencies]
+#3dfin = { version = "==0.5.0" }

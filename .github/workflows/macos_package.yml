@@ -1,0 +1,44 @@
+name: Build macOS Package
+
+on: [push, pull_request]
+
+jobs:
+    build-macos:
+        runs-on: macos-13
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  submodules: recursive
+
+            - name: Clone CC-PythonRuntime
+              uses: actions/checkout@v4
+              with:
+                  repository: "tmontaigu/CloudCompare-PythonRuntime"
+                  path: "plugins/private/CloudCompare-PythonRuntime"
+
+            - name: Set up pixi
+              uses: prefix-dev/setup-pixi@v0.9.1
+              with:
+                  pixi-version: v0.55.0
+                  cache: true
+
+            - name: Build CloudCompare
+              run: pixi run build
+
+            - name: Bundle CloudCompare app
+              run: pixi run bundle
+
+            - name: Sign CloudCompare app
+              run: pixi run sign_bundle
+
+            - name: Archive CloudCompare.app
+              run: |
+                  cd .build/install/CloudCompare
+                  tar -czf ../../../CloudCompare-macOS.tar.gz CloudCompare.app
+
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: CloudCompare-macOS
+                  path: CloudCompare-macOS.tar.gz

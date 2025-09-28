@@ -33,4 +33,11 @@ if( NOT WIN32 )
 	if( OpenMP_CXX_FOUND )
 		target_link_libraries( ${PROJECT_NAME} OpenMP::OpenMP_CXX )
 	endif()
+else()
+	
+	# you'll need to point to pkg-config exectuable and make CMAKE_PREFIX_PATH point to the lz4 'installed' folder
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LZ4 REQUIRED liblz4)
+    include_directories(${LZ4_INCLUDE_DIRS})
+
 endif()

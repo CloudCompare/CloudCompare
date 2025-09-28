@@ -1490,9 +1490,6 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	//! Picking radius (pixels)
 	int m_pickRadius;
 
-	//! FBO support
-	QOpenGLFunctions_3_3_Compatibility m_glExtFunc;
-
 	//! Whether FBO support is on
 	bool m_glExtFuncSupported;
 

@@ -592,8 +592,12 @@ bool ccGLWindowInterface::initialize()
 		invalidateVisualization();
 		deprecate3DLayer();
 
-		// FBO support (TODO: catch error?)
-		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
+		// FBO support
+		// We test if FBOs are supported.
+		// Starting from QT6 QOpenGLExtensions are not available anymore.
+		// We could use an OpenGL 3+ compatibility function but it's not compatible with macOS.
+		// So we will use raw OpenGL functions for FBOs calls to have max compatibility.
+		m_glExtFuncSupported = glContext->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object"));
 
 		// OpenGL version
 		const char*   vendorName    = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
@@ -604,6 +608,8 @@ bool ccGLWindowInterface::initialize()
 			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
 			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
 			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (m_glExtFuncSupported)
+				ccLog::Print("[3D View %i] FBO available", m_uniqueID);
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();
@@ -951,7 +957,7 @@ bool ccGLWindowInterface::bindFBO(ccFrameBufferObject* fbo)
 
 		assert(m_glExtFuncSupported);
 		// we automatically enable the QOpenGLWidget's default FBO
-		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultQtFBO());
+		glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultQtFBO());
 
 		return true;
 	}

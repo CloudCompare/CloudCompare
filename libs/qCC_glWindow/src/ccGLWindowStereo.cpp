@@ -339,8 +339,8 @@ void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingPar
 			bindFBO(nullptr);
 
 			assert(m_glExtFuncSupported);
-			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, s_oculus.mirror.fbo);
-			m_glExtFunc.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, s_oculus.mirror.fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			// compute the size of the destination texture
 			int ow = s_oculus.mirror.size.width();
 			int oh = s_oculus.mirror.size.height();
@@ -359,8 +359,8 @@ void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingPar
 			sw = sw2;
 			sh = sh2;
 
-			m_glExtFunc.glBlitFramebuffer(0, oh, ow, 0, sx, sy, sx + sw, sy + sh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			m_glExtFunc.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+			glBlitFramebuffer(0, oh, ow, 0, sx, sy, sx + sw, sy + sh, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 		}
 	}
 #endif // CC_OCULUS_SUPPORT

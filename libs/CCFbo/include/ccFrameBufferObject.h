@@ -117,7 +117,6 @@ class CCFBO_LIB_API ccFrameBufferObject
 	//! ID
 	GLuint m_fboId;
 
-	// For portability, we need to use 2.1 + extensions to get FBOs
-	QOpenGLFunctions_2_1               m_glFunc;
-	QOpenGLFunctions_3_3_Compatibility m_glExtFunc;
+	// For portability, we need to use 2.1 + raw openGL calls (for macOS)
+	QOpenGLFunctions_2_1 m_glFunc;
 };

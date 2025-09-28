@@ -49,7 +49,7 @@ void ccFrameBufferObject::reset()
 
 	if (m_fboId != 0)
 	{
-		m_glExtFunc.glDeleteFramebuffers(1, &m_fboId);
+		glDeleteFramebuffers(1, &m_fboId);
 		m_fboId = 0;
 	}
 
@@ -65,7 +65,15 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 			return false;
 		}
 
-		if (!m_glExtFunc.initializeOpenGLFunctions())
+		const auto context = QOpenGLContext::currentContext();
+		// We test if FBOs are supported.
+		// Starting from QT6 QOpenGLExtensions are not available anymore.
+		// We could use an OpenGL 3+ compatibility function but it's not compatible with macOS.
+		// So we will use raw OpenGL functions for FBOs calls to have max compatibility.
+
+		// It's unlikely that the context is null since previous GL functions initialization
+		// does not fail but we check it anyway
+		if (!context || !context->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object")))
 		{
 			return false;
 		}
@@ -80,7 +88,7 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 	m_height = h;
 
 	// create a framebuffer object
-	m_glExtFunc.glGenFramebuffers(1, &m_fboId);
+	glGenFramebuffers(1, &m_fboId);
 
 	m_isValid = true;
 
@@ -91,7 +99,7 @@ bool ccFrameBufferObject::start()
 {
 	if (m_isValid && m_fboId != 0)
 	{
-		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
+		glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
 		return true;
 	}
 	else
@@ -104,7 +112,7 @@ void ccFrameBufferObject::stop()
 {
 	if (m_isValid && m_fboId != 0)
 	{
-		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 	}
 }
 
@@ -189,8 +197,8 @@ bool ccFrameBufferObject::attachColor(GLuint texID,
 		return false;
 	}
 
-	m_glExtFunc.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
-	GLenum status = m_glExtFunc.glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
+	glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target, texID, 0);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 
 	stop();
 
@@ -281,8 +289,8 @@ bool ccFrameBufferObject::attachDepth(GLuint texID,
 		return false;
 	}
 
-	m_glExtFunc.glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, texID, 0);
-	GLenum status = m_glExtFunc.glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
+	glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, target, texID, 0);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
 
 	stop();
 

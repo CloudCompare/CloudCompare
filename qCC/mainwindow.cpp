@@ -783,8 +783,8 @@ void MainWindow::connectActions()
 
 	connect(m_UI->actionAbout, &QAction::triggered, this, [this]()
 	        {
-		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
-		aboutDialog->exec(); });
+			ccAboutDialog* aboutDialog = new ccAboutDialog(this);
+			aboutDialog->exec(); });
 
 	/*** Toolbars ***/
 
@@ -5185,11 +5185,11 @@ void MainWindow::doActionFitQuadric()
 
 						const ccGLMatrix& trans = quadric->getTransformation();
 						ccGLMatrix invTrans = trans.inverse();
-						for (unsigned i=0; i<newCloud->size(); ++i)
+						for (unsigned i = 0; i < newCloud->size(); ++i)
 						{
 							CCVector3* P = const_cast<CCVector3*>(newCloud->getPoint(i));
 							CCVector3 Q = invTrans * (*P);
-							Q.u[dZ] = eq[0] + eq[1]*Q.u[dX] + eq[2]*Q.u[dY] + eq[3]*Q.u[dX]*Q.u[dX] + eq[4]*Q.u[dX]*Q.u[dY] + eq[5]*Q.u[dY]*Q.u[dY];
+							Q.u[dZ] = eq[0] + eq[1] * Q.u[dX] + eq[2] * Q.u[dY] + eq[3] * Q.u[dX] * Q.u[dX] + eq[4] * Q.u[dX] * Q.u[dY] + eq[5] * Q.u[dY] * Q.u[dY];
 							*P = trans * Q;
 						}
 						newCloud->invalidateBoundingBox();
@@ -6491,15 +6491,15 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	// automatically update the dialog placement when its shown
 	connect(dlg, &ccOverlayDialog::shown, this, [=]()
 	        {
-		//check for existence
-		for (ccMDIDialogs& mdi : m_mdiDialogs)
-		{
-			if (mdi.dialog == dlg)
+			//check for existence
+			for (ccMDIDialogs& mdi : m_mdiDialogs)
 			{
-				repositionOverlayDialog(mdi);
-				break;
-			}
-		} });
+				if (mdi.dialog == dlg)
+				{
+					repositionOverlayDialog(mdi);
+					break;
+				}
+			} });
 
 	repositionOverlayDialog(m_mdiDialogs.back());
 }
@@ -9028,7 +9028,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		pDlg.start();
 		QApplication::processEvents();
 
-// #define TEST_GENERATION
+		// #define TEST_GENERATION
 #ifdef TEST_GENERATION
 		ccPointCloud* testSphere = new ccPointCloud();
 		testSphere->reserve(matrices.size());

@@ -19,8 +19,8 @@
 #include "CCFbo.h"
 
 // Qt
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLFunctions_2_1>
-#include <QOpenGLFunctions_3_3_Compatibility>
 
 //! F.B.O. encapsulation
 /** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
@@ -117,6 +117,9 @@ class CCFBO_LIB_API ccFrameBufferObject
 	//! ID
 	GLuint m_fboId;
 
-	// For portability, we need to use 2.1 + raw openGL calls (for macOS)
+	// For portability, we need to use 2.1...
 	QOpenGLFunctions_2_1 m_glFunc;
+
+	//... and QOpenGLExtraFunctions
+	QOpenGLExtraFunctions m_glExtFunc;
 };

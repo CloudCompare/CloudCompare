@@ -594,11 +594,13 @@ bool ccGLWindowInterface::initialize()
 
 		// FBO support
 		// We test if FBOs are supported.
-		// Starting from QT6 QOpenGLExtensions are not available anymore.
-		// We could use an OpenGL 3+ compatibility function but it's not compatible with macOS.
-		// So we will use raw OpenGL functions for FBOs calls to have max compatibility.
+		// Starting from QT6 QOpenGLExtensions are not available anymore we use QOpenGLExtraFunctions instead.
 		m_glExtFuncSupported = glContext->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object"));
-
+		if (m_glExtFuncSupported)
+		{
+			// returns void
+			m_glExtFunc.initializeOpenGLFunctions();
+		}
 		// OpenGL version
 		const char*   vendorName    = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		const QString vendorNameStr = QString(vendorName).toUpper();
@@ -957,7 +959,7 @@ bool ccGLWindowInterface::bindFBO(ccFrameBufferObject* fbo)
 
 		assert(m_glExtFuncSupported);
 		// we automatically enable the QOpenGLWidget's default FBO
-		glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultQtFBO());
+		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, defaultQtFBO());
 
 		return true;
 	}

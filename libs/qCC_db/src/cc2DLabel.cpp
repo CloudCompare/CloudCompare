@@ -261,16 +261,16 @@ QString cc2DLabel::getName() const
 
 void cc2DLabel::setPosition(float x, float y)
 {
-	m_screenPos[0] = x;
-	m_screenPos[1] = y;
+	m_screenPos[0] = std::clamp(x, -0.05f, 0.95f);
+	m_screenPos[1] = std::clamp(y, -0.05f, 0.95f);
 }
 
 bool cc2DLabel::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
 {
 	assert(screenHeight > 0 && screenWidth > 0);
 
-	m_screenPos[0] += static_cast<float>(dx) / screenWidth;
-	m_screenPos[1] += static_cast<float>(dy) / screenHeight;
+	setPosition(m_screenPos[0] + static_cast<float>(dx) / screenWidth,
+	            m_screenPos[1] + static_cast<float>(dy) / screenHeight);
 
 	return true;
 }
@@ -595,8 +595,11 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	// Relative screen position (dataVersion >= 20)
-	if (in.read((char*)m_screenPos.data(), sizeof(float) * 2) < 0)
+	RelativePos screenPos;
+	if (in.read((char*)screenPos.data(), sizeof(float) * 2) < 0)
 		return ReadError();
+	// Make sure the old values are within an acceptable range
+	setPosition(screenPos[0], screenPos[1]);
 
 	// Collapsed state (dataVersion >= 20)
 	if (in.read((char*)&m_showFullBody, sizeof(bool)) < 0)
@@ -1317,7 +1320,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				QFont font(context.display->getTextDisplayFont()); // takes rendering zoom into account!
 				// font.setPointSize(font.pointSize() + 2);
 				font.setBold(true);
-				static const QChar ABC[3] = {'A', 'B', 'C'};
+				static const QChar ABC[3]{'A', 'B', 'C'};
 
 				// draw the label 'legend(s)'
 				for (size_t j = 0; j < count; j++)

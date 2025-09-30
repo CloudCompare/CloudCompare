@@ -92,6 +92,7 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 		OBJECT_CIRCLE_RESOLUTION,
 		OBJECT_SPHERE_RADIUS,
 		OBJECT_CIRCLE_RADIUS,
+		OBJECT_DISC_RADIUS,
 		OBJECT_CONE_HEIGHT,
 		OBJECT_CONE_BOTTOM_RADIUS,
 		OBJECT_CONE_TOP_RADIUS,
@@ -160,6 +161,7 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 	void circleResolutionChanged(int);
 	void sphereRadiusChanged(double);
 	void circleRadiusChanged(double);
+	void discRadiusChanged(double);
 	void coneHeightChanged(double);
 	void coneBottomRadiusChanged(double);
 	void coneTopRadiusChanged(double);

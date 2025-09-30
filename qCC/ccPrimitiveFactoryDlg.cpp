@@ -132,9 +132,10 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		}
 		primitive = new ccCoordinateSystem(&mat);
 	}
+	break;
 	case 8:
 	{
-		primitive = new ccDisc(static_cast<PointCoordinateType>(cylRadiusDoubleSpinBox->value()));
+		primitive = new ccDisc(static_cast<PointCoordinateType>(discRadiusDoubleSpinBox->value()));
 	}
 	break;
 	}

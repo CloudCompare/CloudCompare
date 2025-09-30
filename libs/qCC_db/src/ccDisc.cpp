@@ -4,16 +4,12 @@
 #include "ccDisc.h"
 
 ccDisc::ccDisc(PointCoordinateType radius,
-			   PointCoordinateType xOff /*=0*/,
-			   PointCoordinateType yOff /*=0*/,
 			   const ccGLMatrix* transMat  /*= nullptr*/,
 			   QString name /*= QString("Disc")*/,
 			   unsigned precision /*= DEFAULT_DRAWING_PRECISION*/,
 			   unsigned uniqueID  /*= ccUniqueIDGenerator::InvalidUniqueID*/)
 	: ccGenericPrimitive(name, transMat, uniqueID)
 	, m_radius(std::abs(radius))
-	, m_xOff(xOff)
-	, m_yOff(yOff)
 {
 	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls buildUp & applyTransformationToVertices
 }
@@ -21,14 +17,12 @@ ccDisc::ccDisc(PointCoordinateType radius,
 ccDisc::ccDisc(QString name /*="Cylinder"*/)
 	: ccGenericPrimitive(name)
 	, m_radius(0)
-	, m_xOff(0)
-	, m_yOff(0)
 {
 }
 
 ccGenericPrimitive* ccDisc::clone() const
 {
-	return finishCloneJob(new ccDisc(m_radius, m_xOff, m_yOff, &m_transformation, getName(), m_drawPrecision));
+	return finishCloneJob(new ccDisc(m_radius, &m_transformation, getName(), m_drawPrecision));
 }
 
 bool ccDisc::buildUp()
@@ -64,7 +58,7 @@ bool ccDisc::buildUp()
 	assert(m_triNormals);
 
 	// first point: center of the  surface
-	CCVector3 center = CCVector3(m_xOff, m_yOff, 0) / 2;
+	CCVector3 center = CCVector3(0, 0, 0) / 2;
 	// add center to the vertices
 	verts->addPoint(center);
 	CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1).u);
@@ -99,6 +93,18 @@ bool ccDisc::buildUp()
 	return true;
 }
 
+void ccDisc::setRadius(PointCoordinateType radius)
+{
+	if (m_radius == radius)
+		return;
+
+	assert(radius > 0);
+	m_radius = radius;
+
+	buildUp();
+	applyTransformationToVertices();
+}
+
 bool ccDisc::toFile_MeOnly(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
@@ -116,8 +122,6 @@ bool ccDisc::toFile_MeOnly(QFile& out, short dataVersion) const
 	// parameters (dataVersion>=45)
 	QDataStream outStream(&out);
 	outStream << m_radius;
-	outStream << m_xOff;
-	outStream << m_yOff;
 
 	return true;
 }
@@ -130,8 +134,6 @@ bool ccDisc::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	// parameters (dataVersion>=45)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xOff);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yOff);
 
 	return true;
 }

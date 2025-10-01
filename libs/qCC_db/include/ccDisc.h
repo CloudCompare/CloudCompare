@@ -34,7 +34,7 @@ public:
 
 	//! Default constructor
 	/** Simple disc constructor
-		\param radius cylinder radius
+		\param radius disc radius
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision (angular step = 360/precision)

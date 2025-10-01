@@ -58,7 +58,7 @@ bool ccDisc::buildUp()
 	assert(m_triNormals);
 
 	// first point: center of the  surface
-	CCVector3 center = CCVector3(0, 0, 0) / 2;
+	CCVector3 center = CCVector3(0, 0, 0);
 	// add center to the vertices
 	verts->addPoint(center);
 	CompressedNormType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0, 0, 1).u);

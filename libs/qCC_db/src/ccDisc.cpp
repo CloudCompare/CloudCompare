@@ -65,7 +65,7 @@ bool ccDisc::buildUp()
 	m_triNormals->addElement(nIndex);
 
 	// then, angular sweep for the surface
-	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0 * M_PI) / static_cast<PointCoordinateType>(steps);
+	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0 * M_PI) / steps;
 		// bottom surface
 	for (unsigned i = 0; i < steps; ++i)
 	{

@@ -67,8 +67,9 @@
     v5.4 - 01/29/2023 - ccColorScale custom labels can be overridden by a string
     v5.5 - 11/10/2024 - Scalar fields with 'double' offset and names as std::string
     v5.6 - 02/18/2025 - Circle entity
+    v5.7 - 10/01/2025 - Dist entity
 **/
-const unsigned c_currentDBVersion = 56; // 5.6
+const unsigned c_currentDBVersion = 57; // 5.7
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);

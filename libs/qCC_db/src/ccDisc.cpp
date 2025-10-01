@@ -108,7 +108,7 @@ void ccDisc::setRadius(PointCoordinateType radius)
 bool ccDisc::toFile_MeOnly(QFile& out, short dataVersion) const
 {
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
-	if (dataVersion < 45)
+	if (dataVersion < 57)
 	{
 		assert(false);
 		return false;
@@ -119,7 +119,7 @@ bool ccDisc::toFile_MeOnly(QFile& out, short dataVersion) const
 		return false;
 	}
 
-	// parameters (dataVersion>=45)
+	// parameters (dataVersion>=57)
 	QDataStream outStream(&out);
 	outStream << m_radius;
 
@@ -131,7 +131,7 @@ bool ccDisc::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
 		return false;
 
-	// parameters (dataVersion>=45)
+	// parameters (dataVersion>=57)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius);
 

@@ -59,7 +59,7 @@ public:
 	//! Sets top radius
 	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
 	 **/
-	virtual void setRadius(PointCoordinateType radius);
+	void setRadius(PointCoordinateType radius);
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const override

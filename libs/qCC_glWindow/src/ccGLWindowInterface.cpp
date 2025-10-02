@@ -592,9 +592,15 @@ bool ccGLWindowInterface::initialize()
 		invalidateVisualization();
 		deprecate3DLayer();
 
-		// FBO support (TODO: catch error?)
-		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
-
+		// FBO support
+		// We test if FBOs are supported.
+		// Starting from QT6 QOpenGLExtensions are not available anymore we use QOpenGLExtraFunctions instead.
+		m_glExtFuncSupported = glContext->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object"));
+		if (m_glExtFuncSupported)
+		{
+			// returns void
+			m_glExtFunc.initializeOpenGLFunctions();
+		}
 		// OpenGL version
 		const char*   vendorName    = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		const QString vendorNameStr = QString(vendorName).toUpper();
@@ -604,6 +610,8 @@ bool ccGLWindowInterface::initialize()
 			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
 			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
 			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (m_glExtFuncSupported)
+				ccLog::Print("[3D View %i] FBO available", m_uniqueID);
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();

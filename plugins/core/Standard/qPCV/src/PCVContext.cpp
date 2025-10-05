@@ -37,6 +37,7 @@
 
 //system
 #include <cassert>
+#include <cstring>
 
 //type-less glVertex3Xv call (X=f,d)
 static inline void glVertex3v(const float* v) { glVertex3fv(v); }

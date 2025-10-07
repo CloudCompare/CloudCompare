@@ -8,8 +8,7 @@ if( PLUGIN_IO_QPHOTOSCAN )
 	add_subdirectory( include )
 	add_subdirectory( src )
 
-	set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build quazip shared libraries" FORCE )
-	set(QUAZIP_INSTALL OFF CACHE BOOL "Install quazip" FORCE)
+	set(QUAZIP_ENABLE_QTEXTCODEC OFF CACHE BOOL "Disable quazip text codec (not needed anymore)" FORCE)
 
 	add_subdirectory( extern/quazip EXCLUDE_FROM_ALL )
 

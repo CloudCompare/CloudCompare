@@ -41,6 +41,7 @@ cmd = [
 	# We want build in the .build directory
 	"-B.build",
 	"-DCMAKE_BUILD_TYPE=Release",
+	"-DBUILD_SHARED_LIBS=OFF",
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCCCORELIB_USE_TBB=ON",
@@ -81,6 +82,7 @@ cmd = [
 	"-DE57_RELEASE_LTO=OFF",      # TODO: Needed else it won't find the AR/Ranlib binary
 	"-DPLUGIN_IO_QFBX=OFF",       # Possible, but it needs a proprietary SDK
 	"-DPLUGIN_IO_QPHOTOSCAN=ON",
+	"-DQUAZIP_INSTALL=OFF",
 	"-DPLUGIN_IO_QRDB=OFF",                                    # Needs a proprietary lib. The lib is not available for osx-arm64
 	"-DPLUGIN_IO_QSTEP=ON",
 	"-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",

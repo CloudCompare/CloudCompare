@@ -24,7 +24,7 @@ opencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
 python = ">3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
-pybind11 = ">=2.13.0,<2.14" # NOQT6
+pybind11 = ">=2.13.0,<2.14"
 pyside6 = ">=6.8.1"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
@@ -100,7 +100,7 @@ inputs = ["CMakeLists.txt", "qCC/"]
 outputs = [".build/qCC/CloudCompare"]
 
 [feature.build.tasks.install]
-cmd = ["cmake", "--install", ".build"]
+cmd = ["cmake", "--install", ".build", "--config", "Release"]
 depends-on = ["configure"]
 
 #TODO: macos only

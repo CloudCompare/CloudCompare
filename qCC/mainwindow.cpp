@@ -393,11 +393,11 @@ MainWindow::~MainWindow()
 	// m_mdiDialogs.clear();
 	m_mdiArea->closeAllSubWindows();
 
-	if (ccRoot)
-	{
-		delete ccRoot;
-		ccRoot = nullptr;
-	}
+	// if (ccRoot)
+	// {
+	// 	delete ccRoot;
+	// 	ccRoot = nullptr;
+	// }
 
 	delete m_UI;
 	m_UI = nullptr;

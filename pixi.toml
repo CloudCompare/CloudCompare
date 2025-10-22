@@ -22,8 +22,9 @@ qt6-main= ">=6.9.1,<6.10.0" #at least 6.9.1 for PCL 1.15.1
 laszip = ">=3.4.3,<3.5"
 opencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
+python = ">3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
-pybind11 = ">=2.13.0,<2.14" # NOQT6
+pybind11 = ">=2.13.0,<2.14"
 pyside6 = ">=6.8.1"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
@@ -40,6 +41,7 @@ cmd = [
 	# We want build in the .build directory
 	"-B.build",
 	"-DCMAKE_BUILD_TYPE=Release",
+	"-DBUILD_SHARED_LIBS=OFF",
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCCCORELIB_USE_TBB=ON",
@@ -80,6 +82,7 @@ cmd = [
 	"-DE57_RELEASE_LTO=OFF",      # TODO: Needed else it won't find the AR/Ranlib binary
 	"-DPLUGIN_IO_QFBX=OFF",       # Possible, but it needs a proprietary SDK
 	"-DPLUGIN_IO_QPHOTOSCAN=ON",
+	"-DQUAZIP_INSTALL=OFF",
 	"-DPLUGIN_IO_QRDB=OFF",                                    # Needs a proprietary lib. The lib is not available for osx-arm64
 	"-DPLUGIN_IO_QSTEP=ON",
 	"-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
@@ -99,7 +102,7 @@ inputs = ["CMakeLists.txt", "qCC/"]
 outputs = [".build/qCC/CloudCompare"]
 
 [feature.build.tasks.install]
-cmd = ["cmake", "--install", ".build"]
+cmd = ["cmake", "--install", ".build", "--config", "Release"]
 depends-on = ["configure"]
 
 #TODO: macos only

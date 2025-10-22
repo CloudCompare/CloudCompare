@@ -39,3 +39,6 @@
 [submodule "plugins/core/Standard/qG3Point"]
 	path = plugins/core/Standard/qG3Point
 	url = https://github.com/p-leroy/qG3Point
+[submodule "plugins/core/IO/qPhotoscanIO/extern/quazip"]
+	path = plugins/core/IO/qPhotoscanIO/extern/quazip
+	url = https://github.com/stachenov/quazip.git

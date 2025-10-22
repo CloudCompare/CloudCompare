@@ -40,8 +40,8 @@
 #include <quazipfile.h>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 struct CameraDesc
 {

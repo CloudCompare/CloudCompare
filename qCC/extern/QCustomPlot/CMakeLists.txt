@@ -17,5 +17,8 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 target_link_libraries( ${PROJECT_NAME}
-    Qt5::Gui
+	PUBLIC
+		Qt6::Core
+    	Qt6::Gui
+		Qt6::Widgets
 )

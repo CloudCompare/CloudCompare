@@ -1,7 +1,7 @@
 /***************************************************************************
 **                                                                        **
 **  QCustomPlot, an easy to use, modern plotting widget for Qt            **
-**  Copyright (C) 2011-2021 Emanuel Eichhammer                            **
+**  Copyright (C) 2011-2022 Emanuel Eichhammer                            **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
 **  it under the terms of the GNU General Public License as published by  **
@@ -18,16 +18,16 @@
 **                                                                        **
 ****************************************************************************
 **           Author: Emanuel Eichhammer                                   **
-**  Website/Contact: http://www.qcustomplot.com/                          **
-**             Date: 29.03.21                                             **
-**          Version: 2.1.0                                                **
+**  Website/Contact: https://www.qcustomplot.com/                         **
+**             Date: 06.11.22                                             **
+**          Version: 2.1.1                                                **
 ****************************************************************************/
 
 #include "qcustomplot.h"
 
 
 /* including file 'src/vector2d.cpp'       */
-/* modified 2021-03-29T02:30:44, size 7973 */
+/* modified 2022-11-06T12:45:56, size 7973 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPVector2D
@@ -272,7 +272,7 @@ QCPVector2D &QCPVector2D::operator-=(const QCPVector2D &vector)
 
 
 /* including file 'src/painter.cpp'        */
-/* modified 2021-03-29T02:30:44, size 8656 */
+/* modified 2022-11-06T12:45:56, size 8656 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPPainter
@@ -489,7 +489,7 @@ void QCPPainter::makeNonCosmetic()
 
 
 /* including file 'src/paintbuffer.cpp'     */
-/* modified 2021-03-29T02:30:44, size 18915 */
+/* modified 2022-11-06T12:45:56, size 18915 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractPaintBuffer
@@ -976,7 +976,7 @@ void QCPPaintBufferGlFbo::reallocateBuffer()
 
 
 /* including file 'src/layer.cpp'           */
-/* modified 2021-03-29T02:30:44, size 37615 */
+/* modified 2022-11-06T12:45:56, size 37615 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLayer
@@ -1584,7 +1584,7 @@ bool QCPLayerable::moveToLayer(QCPLayer *layer, bool prepend)
   if (mLayer)
     mLayer->addChild(this, prepend);
   if (mLayer != oldLayer)
-    Q_EMIT layerChanged(mLayer);
+    emit layerChanged(mLayer);
   return true;
 }
 
@@ -1836,7 +1836,7 @@ void QCPLayerable::wheelEvent(QWheelEvent *event)
 
 
 /* including file 'src/axis/range.cpp'      */
-/* modified 2021-03-29T02:30:44, size 12221 */
+/* modified 2022-11-06T12:45:56, size 12221 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPRange
@@ -2158,7 +2158,7 @@ bool QCPRange::validRange(const QCPRange &range)
 
 
 /* including file 'src/selection.cpp'       */
-/* modified 2021-03-29T02:30:44, size 21837 */
+/* modified 2022-11-06T12:45:56, size 21837 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPDataRange
@@ -2759,7 +2759,7 @@ QCPDataSelection QCPDataSelection::inverse(const QCPDataRange &outerRange) const
 
 
 /* including file 'src/selectionrect.cpp'  */
-/* modified 2021-03-29T02:30:44, size 9215 */
+/* modified 2022-11-06T12:45:56, size 9215 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionRect
@@ -2772,7 +2772,7 @@ QCPDataSelection QCPDataSelection::inverse(const QCPDataRange &outerRange) const
   \ref QCP::srmNone. When the user drags the mouse across the plot, the current selection rect
   instance (\ref QCustomPlot::setSelectionRect) is forwarded these events and makes sure an
   according rect shape is drawn. At the begin, during, and after completion of the interaction, it
-  Q_EMITs the corresponding signals \ref started, \ref changed, \ref canceled, and \ref accepted.
+  emits the corresponding signals \ref started, \ref changed, \ref canceled, and \ref accepted.
   
   The QCustomPlot instance connects own slots to the current selection rect instance, in order to
   react to an accepted selection rect interaction accordingly.
@@ -2905,7 +2905,7 @@ void QCPSelectionRect::cancel()
   if (mActive)
   {
     mActive = false;
-    Q_EMIT canceled(mRect, nullptr);
+    emit canceled(mRect, nullptr);
   }
 }
 
@@ -2919,7 +2919,7 @@ void QCPSelectionRect::startSelection(QMouseEvent *event)
 {
   mActive = true;
   mRect = QRect(event->pos(), event->pos());
-  Q_EMIT started(event);
+  emit started(event);
 }
 
 /*! \internal
@@ -2931,7 +2931,7 @@ void QCPSelectionRect::startSelection(QMouseEvent *event)
 void QCPSelectionRect::moveSelection(QMouseEvent *event)
 {
   mRect.setBottomRight(event->pos());
-  Q_EMIT changed(mRect, event);
+  emit changed(mRect, event);
   layer()->replot();
 }
 
@@ -2945,7 +2945,7 @@ void QCPSelectionRect::endSelection(QMouseEvent *event)
 {
   mRect.setBottomRight(event->pos());
   mActive = false;
-  Q_EMIT accepted(mRect, event);
+  emit accepted(mRect, event);
 }
 
 /*! \internal
@@ -2959,7 +2959,7 @@ void QCPSelectionRect::keyPressEvent(QKeyEvent *event)
   if (event->key() == Qt::Key_Escape && mActive)
   {
     mActive = false;
-    Q_EMIT canceled(mRect, event);
+    emit canceled(mRect, event);
   }
 }
 
@@ -2988,7 +2988,7 @@ void QCPSelectionRect::draw(QCPPainter *painter)
 
 
 /* including file 'src/layout.cpp'          */
-/* modified 2021-03-29T02:30:44, size 78863 */
+/* modified 2022-11-06T12:45:56, size 78863 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPMarginGroup
@@ -5161,7 +5161,7 @@ void QCPLayoutInset::addElement(QCPLayoutElement *element, const QRectF &rect)
 
 
 /* including file 'src/lineending.cpp'      */
-/* modified 2021-03-29T02:30:44, size 11189 */
+/* modified 2022-11-06T12:45:56, size 11189 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPLineEnding
@@ -5455,7 +5455,7 @@ void QCPLineEnding::draw(QCPPainter *painter, const QCPVector2D &pos, double ang
 
 
 /* including file 'src/axis/labelpainter.cpp' */
-/* modified 2021-03-29T02:30:44, size 27296   */
+/* modified 2022-11-06T12:45:56, size 27519   */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -5653,8 +5653,8 @@ QByteArray QCPLabelPainterPrivate::generateLabelParameterHash() const
   QByteArray result;
   result.append(QByteArray::number(mParentPlot->bufferDevicePixelRatio()));
   result.append(QByteArray::number(mRotation));
-  //result.append(QByteArray::number((int)tickLabelSide)); TODO: check whether this is really a cache-invalidating property
-  result.append(QByteArray::number((int)mSubstituteExponent));
+  //result.append(QByteArray::number(int(tickLabelSide))); TODO: check whether this is really a cache-invalidating property
+  result.append(QByteArray::number(int(mSubstituteExponent)));
   result.append(QString(mMultiplicationSymbol).toUtf8());
   result.append(mColor.name().toLatin1()+QByteArray::number(mColor.alpha(), 16));
   result.append(mFont.toString().toLatin1());
@@ -5757,9 +5757,12 @@ QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
         case asTopRight:    return tickPos+QPointF(-mPadding*M_SQRT1_2, mPadding*M_SQRT1_2);
         case asBottomRight: return tickPos+QPointF(-mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
         case asBottomLeft:  return tickPos+QPointF(mPadding*M_SQRT1_2, -mPadding*M_SQRT1_2);
+        default: qDebug() << Q_FUNC_INFO << "invalid mode for anchor side: " << mAnchorSide; break;
       }
+      break;
     }
     case amSkewedUpright:
+      // fall through
     case amSkewedRotated:
     {
       QCPVector2D anchorNormal(tickPos-mAnchorReference);
@@ -5768,6 +5771,7 @@ QPointF QCPLabelPainterPrivate::getAnchorPos(const QPointF &tickPos)
       anchorNormal.normalize();
       return tickPos+(anchorNormal*mPadding).toPointF();
     }
+    default: qDebug() << Q_FUNC_INFO << "invalid mode for anchor mode: " << mAnchorMode; break;
   }
   return tickPos;
 }
@@ -5985,8 +5989,8 @@ QByteArray QCPLabelPainterPrivate::cacheKey(const QString &text, const QColor &c
 {
   return text.toUtf8()+
       QByteArray::number(color.red()+256*color.green()+65536*color.blue(), 36)+
-      QByteArray::number(color.alpha()+256*(int)side, 36)+
-      QByteArray::number((int)(rotation*100)%36000, 36);
+      QByteArray::number(color.alpha()+256*int(side), 36)+
+      QByteArray::number(int(rotation*100), 36);
 }
 
 QCPLabelPainterPrivate::AnchorSide QCPLabelPainterPrivate::skewedAnchorSide(const QPointF &tickPos, double sideExpandHorz, double sideExpandVert) const
@@ -6054,7 +6058,7 @@ void QCPLabelPainterPrivate::analyzeFontMetrics()
 
 
 /* including file 'src/axis/axisticker.cpp' */
-/* modified 2021-03-29T02:30:44, size 18688 */
+/* modified 2022-11-06T12:45:56, size 18693 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTicker
@@ -6438,7 +6442,7 @@ double QCPAxisTicker::pickClosest(double target, const QVector<double> &candidat
 */
 double QCPAxisTicker::getMantissa(double input, double *magnitude) const
 {
-  const double mag = qPow(10.0, qFloor(qLn(input)/qLn(10.0)));
+  const double mag = std::pow(10.0, std::floor(std::log10(input)));
   if (magnitude) *magnitude = mag;
   return input/mag;
 }
@@ -6474,7 +6478,7 @@ double QCPAxisTicker::cleanMantissa(double input) const
 
 
 /* including file 'src/axis/axistickerdatetime.cpp' */
-/* modified 2021-03-29T02:30:44, size 18829         */
+/* modified 2022-11-06T12:45:56, size 18829         */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerDateTime
@@ -6831,7 +6835,7 @@ double QCPAxisTickerDateTime::dateTimeToKey(const QDate &date, Qt::TimeSpec time
 
 
 /* including file 'src/axis/axistickertime.cpp' */
-/* modified 2021-03-29T02:30:44, size 11745     */
+/* modified 2022-11-06T12:45:56, size 11745     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerTime
@@ -7080,7 +7084,7 @@ void QCPAxisTickerTime::replaceUnit(QString &text, QCPAxisTickerTime::TimeUnit u
 
 
 /* including file 'src/axis/axistickerfixed.cpp' */
-/* modified 2021-03-29T02:30:44, size 5575       */
+/* modified 2022-11-06T12:45:56, size 5575       */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerFixed
@@ -7182,7 +7186,7 @@ double QCPAxisTickerFixed::getTickStep(const QCPRange &range)
 
 
 /* including file 'src/axis/axistickertext.cpp' */
-/* modified 2021-03-29T02:30:44, size 8742      */
+/* modified 2022-11-06T12:45:56, size 8742      */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerText
@@ -7399,7 +7403,7 @@ QVector<double> QCPAxisTickerText::createTickVector(double tickStep, const QCPRa
 
 
 /* including file 'src/axis/axistickerpi.cpp' */
-/* modified 2021-03-29T02:30:44, size 11177   */
+/* modified 2022-11-06T12:45:56, size 11177   */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerPi
@@ -7686,7 +7690,7 @@ QString QCPAxisTickerPi::unicodeSubscript(int number) const
 
 
 /* including file 'src/axis/axistickerlog.cpp' */
-/* modified 2021-03-29T02:30:44, size 7890     */
+/* modified 2022-11-06T12:45:56, size 7890     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAxisTickerLog
@@ -7827,7 +7831,7 @@ QVector<double> QCPAxisTickerLog::createTickVector(double tickStep, const QCPRan
 
 
 /* including file 'src/axis/axis.cpp'       */
-/* modified 2021-03-29T02:30:44, size 99883 */
+/* modified 2022-11-06T12:45:56, size 99911 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8370,7 +8374,7 @@ void QCPAxis::setScaleType(QCPAxis::ScaleType type)
     if (mScaleType == stLogarithmic)
       setRange(mRange.sanitizedForLogScale());
     mCachedMarginValid = false;
-    Q_EMIT scaleTypeChanged(mScaleType);
+    emit scaleTypeChanged(mScaleType);
   }
 }
 
@@ -8396,8 +8400,8 @@ void QCPAxis::setRange(const QCPRange &range)
   {
     mRange = range.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8415,7 +8419,7 @@ void QCPAxis::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    Q_EMIT selectableChanged(mSelectableParts);
+    emit selectableChanged(mSelectableParts);
   }
 }
 
@@ -8429,7 +8433,7 @@ void QCPAxis::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -8439,7 +8443,7 @@ void QCPAxis::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    Q_EMIT selectionChanged(mSelectedParts);
+    emit selectionChanged(mSelectedParts);
   }
 }
 
@@ -8468,8 +8472,8 @@ void QCPAxis::setRange(double lower, double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8511,8 +8515,8 @@ void QCPAxis::setRangeLower(double lower)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -8533,8 +8537,8 @@ void QCPAxis::setRangeUpper(double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -9120,8 +9124,8 @@ void QCPAxis::moveRange(double diff)
     mRange.lower *= diff;
     mRange.upper *= diff;
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -9169,8 +9173,8 @@ void QCPAxis::scaleRange(double factor, double center)
     } else
       qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -10348,7 +10352,7 @@ QCPAxisPainterPrivate::TickLabelData QCPAxisPainterPrivate::getTickLabelData(con
   int eLast = -1; // last index of exponent part, rest of text after this will be suffixPart
   if (substituteExponent)
   {
-    ePos = text.indexOf(QLatin1Char('e'));
+    ePos = text.indexOf(QString(mParentPlot->locale().exponential()));
     if (ePos > 0 && text.at(ePos-1).isDigit())
     {
       eLast = ePos;
@@ -10545,7 +10549,7 @@ void QCPAxisPainterPrivate::getMaxTickLabelSize(const QFont &font, const QString
 
 
 /* including file 'src/scatterstyle.cpp'    */
-/* modified 2021-03-29T02:30:44, size 17466 */
+/* modified 2022-11-06T12:45:56, size 17466 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPScatterStyle
@@ -11018,7 +11022,7 @@ void QCPScatterStyle::drawShape(QCPPainter *painter, double x, double y) const
 
 
 /* including file 'src/plottable.cpp'       */
-/* modified 2021-03-29T02:30:44, size 38818 */
+/* modified 2022-11-06T12:45:56, size 38818 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecorator
@@ -11546,7 +11550,7 @@ void QCPAbstractPlottable::setValueAxis(QCPAxis *axis)
   QCP::SelectionType set via \ref setSelectable, the resulting selection will be adjusted
   accordingly (see \ref QCPDataSelection::enforceType).
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -11556,8 +11560,8 @@ void QCPAbstractPlottable::setSelection(QCPDataSelection selection)
   if (mSelection != selection)
   {
     mSelection = selection;
-    Q_EMIT selectionChanged(selected());
-    Q_EMIT selectionChanged(mSelection);
+    emit selectionChanged(selected());
+    emit selectionChanged(mSelection);
   }
 }
 
@@ -11603,11 +11607,11 @@ void QCPAbstractPlottable::setSelectable(QCP::SelectionType selectable)
     mSelectable = selectable;
     QCPDataSelection oldSelection = mSelection;
     mSelection.enforceType(mSelectable);
-    Q_EMIT selectableChanged(mSelectable);
+    emit selectableChanged(mSelectable);
     if (mSelection != oldSelection)
     {
-      Q_EMIT selectionChanged(selected());
-      Q_EMIT selectionChanged(mSelection);
+      emit selectionChanged(selected());
+      emit selectionChanged(mSelection);
     }
   }
 }
@@ -11989,7 +11993,7 @@ void QCPAbstractPlottable::deselectEvent(bool *selectionStateChanged)
 
 
 /* including file 'src/item.cpp'            */
-/* modified 2021-03-29T02:30:44, size 49486 */
+/* modified 2022-11-06T12:45:56, size 49486 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemAnchor
@@ -12992,7 +12996,7 @@ void QCPAbstractItem::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    Q_EMIT selectableChanged(mSelectable);
+    emit selectableChanged(mSelectable);
   }
 }
 
@@ -13006,7 +13010,7 @@ void QCPAbstractItem::setSelectable(bool selectable)
   
   This function can change the selection state even when \ref setSelectable was set to false.
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -13015,7 +13019,7 @@ void QCPAbstractItem::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    Q_EMIT selectionChanged(mSelected);
+    emit selectionChanged(mSelected);
   }
 }
 
@@ -13261,7 +13265,7 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
 
 
 /* including file 'src/core.cpp'             */
-/* modified 2021-03-29T02:30:44, size 127198 */
+/* modified 2022-11-06T12:45:56, size 127625 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCustomPlot
@@ -13273,7 +13277,7 @@ QCP::Interaction QCPAbstractItem::selectionCategory() const
   interacts with the user.
   
   For tutorials on how to use QCustomPlot, see the website\n
-  http://www.qcustomplot.com/
+  https://www.qcustomplot.com/
 */
 
 /* start of documentation of inline functions */
@@ -13597,7 +13601,7 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   xAxis2(nullptr),
   yAxis2(nullptr),
   legend(nullptr),
-  mBufferDevicePixelRatio(1.0), // will be adapted to primary screen below
+  mBufferDevicePixelRatio(1.0), // will be adapted to true value below
   mPlotLayout(nullptr),
   mAutoAddPlottableToLegend(true),
   mAntialiasedElements(QCP::aeNone),
@@ -13626,7 +13630,6 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   mOpenGlCacheLabelsBackup(true)
 {
   setAttribute(Qt::WA_NoMousePropagation);
-  setAttribute(Qt::WA_OpaquePaintEvent);
   setFocusPolicy(Qt::ClickFocus);
   setMouseTracking(true);
   QLocale currentLocale = locale();
@@ -13849,7 +13852,7 @@ void QCustomPlot::setAutoAddPlottableToLegend(bool on)
   need to check their selected state explicitly.
   
   If the selection state has changed by user interaction, the \ref selectionChangedByUser signal is
-  Q_EMITted. Each selectable object additionally Q_EMITs an individual selectionChanged signal whenever
+  emitted. Each selectable object additionally emits an individual selectionChanged signal whenever
   their selection state has changed, i.e. not only by user interaction.
   
   To allow multiple objects to be selected by holding the selection modifier (\ref
@@ -15128,7 +15131,7 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority)
     return;
   mReplotting = true;
   mReplotQueued = false;
-  Q_EMIT beforeReplot();
+  emit beforeReplot();
   
 # if QT_VERSION < QT_VERSION_CHECK(4, 8, 0)
   QTime replotTimer;
@@ -15161,7 +15164,7 @@ void QCustomPlot::replot(QCustomPlot::RefreshPriority refreshPriority)
   else
     mReplotTimeAverage = mReplotTime; // no previous replots to average with, so initialize with replot time
   
-  Q_EMIT afterReplot();
+  emit afterReplot();
   mReplotting = false;
 }
 
@@ -15466,6 +15469,22 @@ QSize QCustomPlot::sizeHint() const
 void QCustomPlot::paintEvent(QPaintEvent *event)
 {
   Q_UNUSED(event)
+  
+  // detect if the device pixel ratio has changed (e.g. moving window between different DPI screens), and adapt buffers if necessary:
+#ifdef QCP_DEVICEPIXELRATIO_SUPPORTED
+#  ifdef QCP_DEVICEPIXELRATIO_FLOAT
+  double newDpr = devicePixelRatioF();
+#  else
+  double newDpr = devicePixelRatio();
+#  endif
+  if (!qFuzzyCompare(mBufferDevicePixelRatio, newDpr))
+  {
+    setBufferDevicePixelRatio(newDpr);
+    replot(QCustomPlot::rpQueuedRefresh);
+    return;
+  }
+#endif
+  
   QCPPainter painter(this);
   if (painter.isActive())
   {
@@ -15504,7 +15523,7 @@ void QCustomPlot::resizeEvent(QResizeEvent *event)
 */
 void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
 {
-  Q_EMIT mouseDoubleClick(event);
+  emit mouseDoubleClick(event);
   mMouseHasMoved = false;
   mMousePressPos = event->pos();
   
@@ -15531,15 +15550,15 @@ void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
       int dataIndex = 0;
       if (!details.first().value<QCPDataSelection>().isEmpty())
         dataIndex = details.first().value<QCPDataSelection>().dataRange().begin();
-      Q_EMIT plottableDoubleClick(ap, dataIndex, event);
+      emit plottableDoubleClick(ap, dataIndex, event);
     } else if (QCPAxis *ax = qobject_cast<QCPAxis*>(candidates.first()))
-      Q_EMIT axisDoubleClick(ax, details.first().value<QCPAxis::SelectablePart>(), event);
+      emit axisDoubleClick(ax, details.first().value<QCPAxis::SelectablePart>(), event);
     else if (QCPAbstractItem *ai = qobject_cast<QCPAbstractItem*>(candidates.first()))
-      Q_EMIT itemDoubleClick(ai, event);
+      emit itemDoubleClick(ai, event);
     else if (QCPLegend *lg = qobject_cast<QCPLegend*>(candidates.first()))
-      Q_EMIT legendDoubleClick(lg, nullptr, event);
+      emit legendDoubleClick(lg, nullptr, event);
     else if (QCPAbstractLegendItem *li = qobject_cast<QCPAbstractLegendItem*>(candidates.first()))
-      Q_EMIT legendDoubleClick(li->parentLegend(), li, event);
+      emit legendDoubleClick(li->parentLegend(), li, event);
   }
   
   event->accept(); // in case QCPLayerable reimplementation manipulates event accepted state. In QWidget event system, QCustomPlot wants to accept the event.
@@ -15556,7 +15575,7 @@ void QCustomPlot::mouseDoubleClickEvent(QMouseEvent *event)
 */
 void QCustomPlot::mousePressEvent(QMouseEvent *event)
 {
-  Q_EMIT mousePress(event);
+  emit mousePress(event);
   // save some state to tell in releaseEvent whether it was a click:
   mMouseHasMoved = false;
   mMousePressPos = event->pos();
@@ -15606,7 +15625,7 @@ void QCustomPlot::mousePressEvent(QMouseEvent *event)
 */
 void QCustomPlot::mouseMoveEvent(QMouseEvent *event)
 {
-  Q_EMIT mouseMove(event);
+  emit mouseMove(event);
   
   if (!mMouseHasMoved && (mMousePressPos-event->pos()).manhattanLength() > 3)
     mMouseHasMoved = true; // moved too far from mouse press position, don't handle as click on mouse release
@@ -15635,7 +15654,7 @@ void QCustomPlot::mouseMoveEvent(QMouseEvent *event)
 */
 void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
 {
-  Q_EMIT mouseRelease(event);
+  emit mouseRelease(event);
   
   if (!mMouseHasMoved) // mouse hasn't moved (much) between press and release, so handle as click
   {
@@ -15650,15 +15669,15 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
       int dataIndex = 0;
       if (!mMouseSignalLayerableDetails.value<QCPDataSelection>().isEmpty())
         dataIndex = mMouseSignalLayerableDetails.value<QCPDataSelection>().dataRange().begin();
-      Q_EMIT plottableClick(ap, dataIndex, event);
+      emit plottableClick(ap, dataIndex, event);
     } else if (QCPAxis *ax = qobject_cast<QCPAxis*>(mMouseSignalLayerable))
-      Q_EMIT axisClick(ax, mMouseSignalLayerableDetails.value<QCPAxis::SelectablePart>(), event);
+      emit axisClick(ax, mMouseSignalLayerableDetails.value<QCPAxis::SelectablePart>(), event);
     else if (QCPAbstractItem *ai = qobject_cast<QCPAbstractItem*>(mMouseSignalLayerable))
-      Q_EMIT itemClick(ai, event);
+      emit itemClick(ai, event);
     else if (QCPLegend *lg = qobject_cast<QCPLegend*>(mMouseSignalLayerable))
-      Q_EMIT legendClick(lg, nullptr, event);
+      emit legendClick(lg, nullptr, event);
     else if (QCPAbstractLegendItem *li = qobject_cast<QCPAbstractLegendItem*>(mMouseSignalLayerable))
-      Q_EMIT legendClick(li->parentLegend(), li, event);
+      emit legendClick(li->parentLegend(), li, event);
     mMouseSignalLayerable = nullptr;
   }
   
@@ -15689,7 +15708,7 @@ void QCustomPlot::mouseReleaseEvent(QMouseEvent *event)
 */
 void QCustomPlot::wheelEvent(QWheelEvent *event)
 {
-  Q_EMIT mouseWheel(event);
+  emit mouseWheel(event);
   
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
   const QPointF pos = event->pos();
@@ -15756,7 +15775,7 @@ void QCustomPlot::updateLayout()
   mPlotLayout->update(QCPLayoutElement::upMargins);
   mPlotLayout->update(QCPLayoutElement::upLayout);
 
-  Q_EMIT afterLayout();
+  emit afterLayout();
 }
 
 /*! \internal
@@ -16098,7 +16117,7 @@ void QCustomPlot::processRectSelection(QRect rect, QMouseEvent *event)
   
   if (selectionStateChanged)
   {
-    Q_EMIT selectionChangedByUser();
+    emit selectionChangedByUser();
     replot(rpQueuedReplot);
   } else if (mSelectionRect)
     mSelectionRect->layer()->replot();
@@ -16175,7 +16194,7 @@ void QCustomPlot::processPointSelection(QMouseEvent *event)
   }
   if (selectionStateChanged)
   {
-    Q_EMIT selectionChangedByUser();
+    emit selectionChangedByUser();
     replot(rpQueuedReplot);
   }
 }
@@ -16480,7 +16499,7 @@ void QCustomPlot::toPainter(QCPPainter *painter, int width, int height)
 
 
 /* including file 'src/colorgradient.cpp'   */
-/* modified 2021-03-29T02:30:44, size 25278 */
+/* modified 2022-11-06T12:45:56, size 25408 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16710,10 +16729,10 @@ void QCPColorGradient::colorize(const double *data, const QCPRange &range, QRgb 
     const double value = data[dataIndexFactor*i];
     if (skipNanCheck || !std::isnan(value))
     {
-      int index = int((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
+      qint64 index = qint64((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
       if (!mPeriodic)
       {
-        index = qBound(0, index, mLevelCount-1);
+        index = qBound(qint64(0), index, qint64(mLevelCount-1));
       } else
       {
         index %= mLevelCount;
@@ -16771,10 +16790,10 @@ void QCPColorGradient::colorize(const double *data, const unsigned char *alpha, 
     const double value = data[dataIndexFactor*i];
     if (skipNanCheck || !std::isnan(value))
     {
-      int index = int((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
+      qint64 index = qint64((!logarithmic ? value-range.lower : qLn(value/range.lower)) * posToIndexFactor);
       if (!mPeriodic)
       {
-        index = qBound(0, index, mLevelCount-1);
+        index = qBound(qint64(0), index, qint64(mLevelCount-1));
       } else
       {
         index %= mLevelCount;
@@ -17017,7 +17036,7 @@ void QCPColorGradient::updateColorBuffer()
     for (int i=0; i<mLevelCount; ++i)
     {
       double position = i*indexToPosFactor;
-      QMap<double, QColor>::const_iterator it = mColorStops.lowerBound(position);
+      QMap<double, QColor>::const_iterator it = const_cast<const QMap<double, QColor>*>(&mColorStops)->lowerBound(position); // force using the const lowerBound method
       if (it == mColorStops.constEnd()) // position is on or after last stop, use color of last stop
       {
         if (useAlpha)
@@ -17115,7 +17134,7 @@ void QCPColorGradient::updateColorBuffer()
 
 
 /* including file 'src/selectiondecorator-bracket.cpp' */
-/* modified 2021-03-29T02:30:44, size 12308            */
+/* modified 2022-11-06T12:45:56, size 12308            */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPSelectionDecoratorBracket
@@ -17401,7 +17420,7 @@ QPointF QCPSelectionDecoratorBracket::getPixelCoordinates(const QCPPlottableInte
 
 
 /* including file 'src/layoutelements/layoutelement-axisrect.cpp' */
-/* modified 2021-03-29T02:30:44, size 47193                       */
+/* modified 2022-11-06T12:45:56, size 47193                       */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -18686,7 +18705,7 @@ void QCPAxisRect::wheelEvent(QWheelEvent *event)
 
 
 /* including file 'src/layoutelements/layoutelement-legend.cpp' */
-/* modified 2021-03-29T02:30:44, size 31762                     */
+/* modified 2022-11-06T12:45:56, size 31762                     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPAbstractLegendItem
@@ -18796,7 +18815,7 @@ void QCPAbstractLegendItem::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    Q_EMIT selectableChanged(mSelectable);
+    emit selectableChanged(mSelectable);
   }
 }
 
@@ -18813,7 +18832,7 @@ void QCPAbstractLegendItem::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    Q_EMIT selectionChanged(mSelected);
+    emit selectionChanged(mSelected);
   }
 }
 
@@ -19211,7 +19230,7 @@ void QCPLegend::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    Q_EMIT selectableChanged(mSelectableParts);
+    emit selectableChanged(mSelectableParts);
   }
 }
 
@@ -19227,7 +19246,7 @@ void QCPLegend::setSelectableParts(const SelectableParts &selectable)
   This function can change the selection state of a part even when \ref setSelectableParts was set to a
   value that actually excludes the part.
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   Note that it doesn't make sense to set the selected state \ref spItems here when it wasn't set
   before, because there's no way to specify which exact items to newly select. Do this by calling
@@ -19257,7 +19276,7 @@ void QCPLegend::setSelectedParts(const SelectableParts &selected)
       }
     }
     mSelectedParts = newSelected;
-    Q_EMIT selectionChanged(mSelectedParts);
+    emit selectionChanged(mSelectedParts);
   }
 }
 
@@ -19610,7 +19629,7 @@ void QCPLegend::parentPlotInitialized(QCustomPlot *parentPlot)
 
 
 /* including file 'src/layoutelements/layoutelement-textelement.cpp' */
-/* modified 2021-03-29T02:30:44, size 12925                          */
+/* modified 2022-11-06T12:45:56, size 12925                          */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPTextElement
@@ -19856,7 +19875,7 @@ void QCPTextElement::setSelectable(bool selectable)
   if (mSelectable != selectable)
   {
     mSelectable = selectable;
-    Q_EMIT selectableChanged(mSelectable);
+    emit selectableChanged(mSelectable);
   }
 }
 
@@ -19872,7 +19891,7 @@ void QCPTextElement::setSelected(bool selected)
   if (mSelected != selected)
   {
     mSelected = selected;
-    Q_EMIT selectionChanged(mSelected);
+    emit selectionChanged(mSelected);
   }
 }
 
@@ -19979,7 +19998,7 @@ void QCPTextElement::mousePressEvent(QMouseEvent *event, const QVariant &details
 void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startPos)
 {
   if ((QPointF(event->pos())-startPos).manhattanLength() <= 3)
-    Q_EMIT clicked(event);
+    emit clicked(event);
 }
 
 /*!
@@ -19990,7 +20009,7 @@ void QCPTextElement::mouseReleaseEvent(QMouseEvent *event, const QPointF &startP
 void QCPTextElement::mouseDoubleClickEvent(QMouseEvent *event, const QVariant &details)
 {
   Q_UNUSED(details)
-  Q_EMIT doubleClicked(event);
+  emit doubleClicked(event);
 }
 
 /*! \internal
@@ -20016,7 +20035,7 @@ QColor QCPTextElement::mainTextColor() const
 
 
 /* including file 'src/layoutelements/layoutelement-colorscale.cpp' */
-/* modified 2021-03-29T02:30:44, size 26531                         */
+/* modified 2022-11-06T12:45:56, size 26531                         */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20231,7 +20250,7 @@ void QCPColorScale::setDataRange(const QCPRange &dataRange)
     mDataRange = dataRange;
     if (mColorAxis)
       mColorAxis.data()->setRange(mDataRange);
-    Q_EMIT dataRangeChanged(mDataRange);
+    emit dataRangeChanged(mDataRange);
   }
 }
 
@@ -20263,7 +20282,7 @@ void QCPColorScale::setDataScaleType(QCPAxis::ScaleType scaleType)
       mColorAxis.data()->setScaleType(mDataScaleType);
     if (mDataScaleType == QCPAxis::stLogarithmic)
       setDataRange(mDataRange.sanitizedForLogScale());
-    Q_EMIT dataScaleTypeChanged(mDataScaleType);
+    emit dataScaleTypeChanged(mDataScaleType);
   }
 }
 
@@ -20281,7 +20300,7 @@ void QCPColorScale::setGradient(const QCPColorGradient &gradient)
     mGradient = gradient;
     if (mAxisRect)
       mAxisRect.data()->mGradientImageInvalidated = true;
-    Q_EMIT gradientChanged(mGradient);
+    emit gradientChanged(mGradient);
   }
 }
 
@@ -20700,7 +20719,7 @@ void QCPColorScaleAxisRectPrivate::axisSelectableChanged(QCPAxis::SelectablePart
 
 
 /* including file 'src/plottables/plottable-graph.cpp' */
-/* modified 2021-03-29T02:30:44, size 74518            */
+/* modified 2022-11-06T12:45:57, size 74926            */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPGraphData
@@ -21530,21 +21549,37 @@ QVector<QPointF> QCPGraph::dataToImpulseLines(const QVector<QCPGraphData> &data)
   {
     for (int i=0; i<data.size(); ++i)
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(valueAxis->coordToPixel(0));
-      result[i*2+0].setY(key);
-      result[i*2+1].setX(valueAxis->coordToPixel(data.at(i).value));
-      result[i*2+1].setY(key);
+      const QCPGraphData &current = data.at(i);
+      if (!qIsNaN(current.value))
+      {
+        const double key = keyAxis->coordToPixel(current.key);
+        result[i*2+0].setX(valueAxis->coordToPixel(0));
+        result[i*2+0].setY(key);
+        result[i*2+1].setX(valueAxis->coordToPixel(current.value));
+        result[i*2+1].setY(key);
+      } else
+      {
+        result[i*2+0] = QPointF(0, 0);
+        result[i*2+1] = QPointF(0, 0);
+      }
     }
   } else // key axis is horizontal
   {
     for (int i=0; i<data.size(); ++i)
     {
-      const double key = keyAxis->coordToPixel(data.at(i).key);
-      result[i*2+0].setX(key);
-      result[i*2+0].setY(valueAxis->coordToPixel(0));
-      result[i*2+1].setX(key);
-      result[i*2+1].setY(valueAxis->coordToPixel(data.at(i).value));
+      const QCPGraphData &current = data.at(i);
+      if (!qIsNaN(current.value))
+      {
+        const double key = keyAxis->coordToPixel(data.at(i).key);
+        result[i*2+0].setX(key);
+        result[i*2+0].setY(valueAxis->coordToPixel(0));
+        result[i*2+1].setX(key);
+        result[i*2+1].setY(valueAxis->coordToPixel(data.at(i).value));
+      } else
+      {
+        result[i*2+0] = QPointF(0, 0);
+        result[i*2+1] = QPointF(0, 0);
+      }
     }
   }
   return result;
@@ -22458,7 +22493,7 @@ int QCPGraph::findIndexBelowY(const QVector<QPointF> *data, double y) const
 
 
 /* including file 'src/plottables/plottable-curve.cpp' */
-/* modified 2021-03-29T02:30:44, size 63851            */
+/* modified 2022-11-06T12:45:56, size 63851            */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPCurveData
@@ -23916,7 +23951,7 @@ double QCPCurve::pointDistance(const QPointF &pixelPoint, QCPCurveDataContainer:
 
 
 /* including file 'src/plottables/plottable-bars.cpp' */
-/* modified 2021-03-29T02:30:44, size 43907           */
+/* modified 2022-11-06T12:45:56, size 43907           */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -25092,7 +25127,7 @@ void QCPBars::connectBars(QCPBars *lower, QCPBars *upper)
 
 
 /* including file 'src/plottables/plottable-statisticalbox.cpp' */
-/* modified 2021-03-29T02:30:44, size 28951                     */
+/* modified 2022-11-06T12:45:57, size 28951                     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPStatisticalBoxData
@@ -25754,7 +25789,7 @@ QVector<QLineF> QCPStatisticalBox::getWhiskerBarLines(QCPStatisticalBoxDataConta
 
 
 /* including file 'src/plottables/plottable-colormap.cpp' */
-/* modified 2021-03-29T02:30:44, size 48149               */
+/* modified 2022-11-06T12:45:56, size 48189               */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPColorMapData
@@ -26124,8 +26159,8 @@ void QCPColorMapData::recalculateDataBounds()
 {
   if (mKeySize > 0 && mValueSize > 0)
   {
-    double minHeight = mData[0];
-    double maxHeight = mData[0];
+    double minHeight = std::numeric_limits<double>::max();
+    double maxHeight = -std::numeric_limits<double>::max();
     const int dataCount = mValueSize*mKeySize;
     for (int i=0; i<dataCount; ++i)
     {
@@ -26168,8 +26203,7 @@ void QCPColorMapData::clearAlpha()
 void QCPColorMapData::fill(double z)
 {
   const int dataCount = mValueSize*mKeySize;
-  for (int i=0; i<dataCount; ++i)
-    mData[i] = z;
+  memset(mData, z, dataCount*sizeof(*mData));
   mDataBounds = QCPRange(z, z);
   mDataModified = true;
 }
@@ -26188,8 +26222,7 @@ void QCPColorMapData::fillAlpha(unsigned char alpha)
   if (mAlpha || createAlpha(false))
   {
     const int dataCount = mValueSize*mKeySize;
-    for (int i=0; i<dataCount; ++i)
-      mAlpha[i] = alpha;
+    memset(mAlpha, alpha, dataCount*sizeof(*mAlpha));
     mDataModified = true;
   }
 }
@@ -26464,7 +26497,7 @@ void QCPColorMap::setDataRange(const QCPRange &dataRange)
     else
       mDataRange = dataRange.sanitizedForLinScale();
     mMapImageInvalidated = true;
-    Q_EMIT dataRangeChanged(mDataRange);
+    emit dataRangeChanged(mDataRange);
   }
 }
 
@@ -26479,7 +26512,7 @@ void QCPColorMap::setDataScaleType(QCPAxis::ScaleType scaleType)
   {
     mDataScaleType = scaleType;
     mMapImageInvalidated = true;
-    Q_EMIT dataScaleTypeChanged(mDataScaleType);
+    emit dataScaleTypeChanged(mDataScaleType);
     if (mDataScaleType == QCPAxis::stLogarithmic)
       setDataRange(mDataRange.sanitizedForLogScale());
   }
@@ -26502,7 +26535,7 @@ void QCPColorMap::setGradient(const QCPColorGradient &gradient)
   {
     mGradient = gradient;
     mMapImageInvalidated = true;
-    Q_EMIT gradientChanged(mGradient);
+    emit gradientChanged(mGradient);
   }
 }
 
@@ -26887,7 +26920,7 @@ void QCPColorMap::drawLegendIcon(QCPPainter *painter, const QRectF &rect) const
 
 
 /* including file 'src/plottables/plottable-financial.cpp' */
-/* modified 2021-03-29T02:30:44, size 42914                */
+/* modified 2022-11-06T12:45:57, size 42914                */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPFinancialData
@@ -27849,7 +27882,7 @@ QRectF QCPFinancial::selectionHitBox(QCPFinancialDataContainer::const_iterator i
 
 
 /* including file 'src/plottables/plottable-errorbar.cpp' */
-/* modified 2021-03-29T02:30:44, size 37679               */
+/* modified 2022-11-06T12:45:56, size 37679               */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPErrorBarsData
@@ -28817,7 +28850,7 @@ bool QCPErrorBars::rectIntersectsLine(const QRectF &pixelRect, const QLineF &lin
 
 
 /* including file 'src/items/item-straightline.cpp' */
-/* modified 2021-03-29T02:30:44, size 7596          */
+/* modified 2022-11-06T12:45:56, size 7596          */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemStraightLine
@@ -28998,7 +29031,7 @@ QPen QCPItemStraightLine::mainPen() const
 
 
 /* including file 'src/items/item-line.cpp' */
-/* modified 2021-03-29T02:30:44, size 8525  */
+/* modified 2022-11-06T12:45:56, size 8525  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemLine
@@ -29229,7 +29262,7 @@ QPen QCPItemLine::mainPen() const
 
 
 /* including file 'src/items/item-curve.cpp' */
-/* modified 2021-03-29T02:30:44, size 7273   */
+/* modified 2022-11-06T12:45:56, size 7273   */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemCurve
@@ -29398,7 +29431,7 @@ QPen QCPItemCurve::mainPen() const
 
 
 /* including file 'src/items/item-rect.cpp' */
-/* modified 2021-03-29T02:30:44, size 6472  */
+/* modified 2022-11-06T12:45:56, size 6472  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemRect
@@ -29555,7 +29588,7 @@ QBrush QCPItemRect::mainBrush() const
 
 
 /* including file 'src/items/item-text.cpp' */
-/* modified 2021-03-29T02:30:44, size 13335 */
+/* modified 2022-11-06T12:45:56, size 13335 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemText
@@ -29903,7 +29936,7 @@ QBrush QCPItemText::mainBrush() const
 
 
 /* including file 'src/items/item-ellipse.cpp' */
-/* modified 2021-03-29T02:30:44, size 7881     */
+/* modified 2022-11-06T12:45:56, size 7881     */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemEllipse
@@ -30092,7 +30125,7 @@ QBrush QCPItemEllipse::mainBrush() const
 
 
 /* including file 'src/items/item-pixmap.cpp' */
-/* modified 2021-03-29T02:30:44, size 10622   */
+/* modified 2022-11-06T12:45:56, size 10622   */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemPixmap
@@ -30362,7 +30395,7 @@ QPen QCPItemPixmap::mainPen() const
 
 
 /* including file 'src/items/item-tracer.cpp' */
-/* modified 2021-03-29T02:30:44, size 14645   */
+/* modified 2022-11-06T12:45:56, size 14645   */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemTracer
@@ -30732,7 +30765,7 @@ QBrush QCPItemTracer::mainBrush() const
 
 
 /* including file 'src/items/item-bracket.cpp' */
-/* modified 2021-03-29T02:30:44, size 10705    */
+/* modified 2022-11-06T12:45:56, size 10705    */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// QCPItemBracket
@@ -30973,7 +31006,7 @@ QPen QCPItemBracket::mainPen() const
 
 
 /* including file 'src/polar/radialaxis.cpp' */
-/* modified 2021-03-29T02:30:44, size 49415  */
+/* modified 2022-11-06T12:45:57, size 49415  */
 
 
 
@@ -31219,7 +31252,7 @@ void QCPPolarAxisRadial::setScaleType(QCPPolarAxisRadial::ScaleType type)
     if (mScaleType == stLogarithmic)
       setRange(mRange.sanitizedForLogScale());
     //mCachedMarginValid = false;
-    Q_EMIT scaleTypeChanged(mScaleType);
+    emit scaleTypeChanged(mScaleType);
   }
 }
 
@@ -31245,8 +31278,8 @@ void QCPPolarAxisRadial::setRange(const QCPRange &range)
   {
     mRange = range.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31264,7 +31297,7 @@ void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    Q_EMIT selectableChanged(mSelectableParts);
+    emit selectableChanged(mSelectableParts);
   }
 }
 
@@ -31278,7 +31311,7 @@ void QCPPolarAxisRadial::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -31288,7 +31321,7 @@ void QCPPolarAxisRadial::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    Q_EMIT selectionChanged(mSelectedParts);
+    emit selectionChanged(mSelectedParts);
   }
 }
 
@@ -31317,8 +31350,8 @@ void QCPPolarAxisRadial::setRange(double lower, double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31360,8 +31393,8 @@ void QCPPolarAxisRadial::setRangeLower(double lower)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31382,8 +31415,8 @@ void QCPPolarAxisRadial::setRangeUpper(double upper)
   {
     mRange = mRange.sanitizedForLinScale();
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31895,8 +31928,8 @@ void QCPPolarAxisRadial::moveRange(double diff)
     mRange.lower *= diff;
     mRange.upper *= diff;
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -31944,8 +31977,8 @@ void QCPPolarAxisRadial::scaleRange(double factor, double center)
     } else
       qDebug() << Q_FUNC_INFO << "Center of scaling operation doesn't lie in same logarithmic sign domain as range:" << center;
   }
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -32434,7 +32467,7 @@ QCP::Interaction QCPPolarAxisRadial::selectionCategory() const
 
 
 /* including file 'src/polar/layoutelement-angularaxis.cpp' */
-/* modified 2021-03-29T02:30:44, size 57266                 */
+/* modified 2022-11-06T12:45:57, size 57266                 */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -32778,8 +32811,8 @@ void QCPPolarAxisAngular::moveRange(double diff)
   QCPRange oldRange = mRange;
   mRange.lower += diff;
   mRange.upper += diff;
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -32813,8 +32846,8 @@ void QCPPolarAxisAngular::scaleRange(double factor, double center)
   newRange.upper = (mRange.upper-center)*factor + center;
   if (QCPRange::validRange(newRange))
     mRange = newRange.sanitizedForLinScale();
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33185,8 +33218,8 @@ void QCPPolarAxisAngular::setRange(const QCPRange &range)
   if (!QCPRange::validRange(range)) return;
   QCPRange oldRange = mRange;
   mRange = range.sanitizedForLinScale();
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33204,7 +33237,7 @@ void QCPPolarAxisAngular::setSelectableParts(const SelectableParts &selectable)
   if (mSelectableParts != selectable)
   {
     mSelectableParts = selectable;
-    Q_EMIT selectableChanged(mSelectableParts);
+    emit selectableChanged(mSelectableParts);
   }
 }
 
@@ -33218,7 +33251,7 @@ void QCPPolarAxisAngular::setSelectableParts(const SelectableParts &selectable)
   
   This function can change the selection state of a part, independent of the \ref setSelectableParts setting.
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see SelectablePart, setSelectableParts, selectTest, setSelectedBasePen, setSelectedTickPen, setSelectedSubTickPen,
   setSelectedTickLabelFont, setSelectedLabelFont, setSelectedTickLabelColor, setSelectedLabelColor
@@ -33228,7 +33261,7 @@ void QCPPolarAxisAngular::setSelectedParts(const SelectableParts &selected)
   if (mSelectedParts != selected)
   {
     mSelectedParts = selected;
-    Q_EMIT selectionChanged(mSelectedParts);
+    emit selectionChanged(mSelectedParts);
   }
 }
 
@@ -33251,8 +33284,8 @@ void QCPPolarAxisAngular::setRange(double lower, double upper)
   mRange.lower = lower;
   mRange.upper = upper;
   mRange = mRange.sanitizedForLinScale();
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33288,8 +33321,8 @@ void QCPPolarAxisAngular::setRangeLower(double lower)
   QCPRange oldRange = mRange;
   mRange.lower = lower;
   mRange = mRange.sanitizedForLinScale();
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -33304,8 +33337,8 @@ void QCPPolarAxisAngular::setRangeUpper(double upper)
   QCPRange oldRange = mRange;
   mRange.upper = upper;
   mRange = mRange.sanitizedForLinScale();
-  Q_EMIT rangeChanged(mRange);
-  Q_EMIT rangeChanged(mRange, oldRange);
+  emit rangeChanged(mRange);
+  emit rangeChanged(mRange, oldRange);
 }
 
 /*!
@@ -34125,7 +34158,7 @@ bool QCPPolarAxisAngular::registerPolarGraph(QCPPolarGraph *graph)
 
 
 /* including file 'src/polar/polargrid.cpp' */
-/* modified 2021-03-29T02:30:44, size 7493  */
+/* modified 2022-11-06T12:45:57, size 7493  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34313,7 +34346,7 @@ void QCPPolarGrid::drawAngularGrid(QCPPainter *painter, const QPointF &center, d
 
 
 /* including file 'src/polar/polargraph.cpp' */
-/* modified 2021-03-29T02:30:44, size 44035  */
+/* modified 2022-11-06T12:45:57, size 44035  */
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34569,11 +34602,11 @@ void QCPPolarGraph::setSelectable(QCP::SelectionType selectable)
     mSelectable = selectable;
     QCPDataSelection oldSelection = mSelection;
     mSelection.enforceType(mSelectable);
-    Q_EMIT selectableChanged(mSelectable);
+    emit selectableChanged(mSelectable);
     if (mSelection != oldSelection)
     {
-      Q_EMIT selectionChanged(selected());
-      Q_EMIT selectionChanged(mSelection);
+      emit selectionChanged(selected());
+      emit selectionChanged(mSelection);
     }
   }
 }
@@ -34592,7 +34625,7 @@ void QCPPolarGraph::setSelectable(QCP::SelectionType selectable)
   QCP::SelectionType set via \ref setSelectable, the resulting selection will be adjusted
   accordingly (see \ref QCPDataSelection::enforceType).
   
-  Q_EMITs the \ref selectionChanged signal when \a selected is different from the previous selection state.
+  emits the \ref selectionChanged signal when \a selected is different from the previous selection state.
   
   \see setSelectable, selectTest
 */
@@ -34602,8 +34635,8 @@ void QCPPolarGraph::setSelection(QCPDataSelection selection)
   if (mSelection != selection)
   {
     mSelection = selection;
-    Q_EMIT selectionChanged(selected());
-    Q_EMIT selectionChanged(mSelection);
+    emit selectionChanged(selected());
+    emit selectionChanged(mSelection);
   }
 }
 

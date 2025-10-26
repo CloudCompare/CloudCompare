@@ -18,6 +18,7 @@
 #include "ccGLUtils.h"
 
 #include <QOpenGLTexture>
+#include <QOpenGLVersionFunctionsFactory>
 
 //*********** OPENGL TEXTURES ***********//
 
@@ -36,7 +37,7 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int 
 		assert(false);
 		return;
 	}
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	if (glFunc)
 	{
 		glFunc->glBindTexture(GL_TEXTURE_2D, texID);

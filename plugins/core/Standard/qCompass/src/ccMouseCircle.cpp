@@ -163,7 +163,7 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		if (wheelEvent->modifiers().testFlag(Qt::ControlModifier))
 		{
 			//adjust radius (+ avoid really small radius)
-			m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->delta() / 100.0)));
+			m_radius = std::max(m_radiusStep, m_radius - static_cast<int>(m_radiusStep * (wheelEvent->angleDelta().y() / 100.0)));
 			//repaint
 			m_owner->redraw(true, false);
 		}

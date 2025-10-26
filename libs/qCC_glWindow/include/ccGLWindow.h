@@ -137,7 +137,7 @@ class CCGLWINDOW_LIB_API ccGLWindow : public QOpenGLWidget
 	// inherited from ccGLWindowInterface
 	inline ccQOpenGLFunctions* functions() const override
 	{
-		return context() ? context()->versionFunctions<ccQOpenGLFunctions>() : nullptr;
+		return context() ? QOpenGLVersionFunctionsFactory::get<ccQOpenGLFunctions>(context()) : nullptr;
 	}
 	inline QSurfaceFormat getSurfaceFormat() const override
 	{

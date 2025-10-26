@@ -55,7 +55,7 @@ static Mouse3DInput* s_mouseInputInstance = nullptr;
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
   public:
-	bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) override
+	bool nativeEventFilter(const QByteArray& eventType, void* msg, qintptr* result) override
 	{
 		if (!s_mouseInputInstance || !msg)
 		{

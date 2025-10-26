@@ -25,7 +25,6 @@ LasPlugin::LasPlugin(QObject* parent)
     , ccIOPluginInterface(":/CC/plugin/LAS-IO/info.json")
 {
 	qRegisterMetaType<LasVlr>();
-	qRegisterMetaTypeStreamOperators<LasVlr>("LasVlr");
 
 	QMetaType::registerConverter(&LasVlr::toString);
 }

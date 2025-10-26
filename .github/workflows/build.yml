@@ -70,7 +70,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
-            -DOPTION_SUPPORT_GAMEPADS=ON \
+            -DOPTION_SUPPORT_GAMEPADS=OFF \
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
             -DPLUGIN_EXAMPLE_STANDARD=ON \
@@ -98,7 +98,7 @@ jobs:
             -DPLUGIN_STANDARD_QPOISSON_RECON=OFF \
             -DPLUGIN_STANDARD_QSRA=ON \
             -DPLUGIN_STANDARD_QRANSAC_SD=ON \
-            -DPLUGIN_STANDARD_QPCL=ON \
+            -DPLUGIN_STANDARD_QPCL=OFF \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
             -DPLUGIN_STANDARD_QVOXFALL=ON \
             .
@@ -120,7 +120,7 @@ jobs:
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
@@ -139,13 +139,18 @@ jobs:
           sudo apt-get update -qq
 
           sudo apt-get install -qy cmake ninja-build
-          libqt5svg5-dev libqt5opengl5-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev
-          libtbb-dev
-          libavcodec-dev libavformat-dev libavutil-dev libswscale-dev
-          libboost-program-options-dev libboost-thread-dev
+          qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-tools-dev-tools
+          libtbb-dev 
+          libavcodec-dev libavformat-dev
+          libdraco-dev
           libeigen3-dev
-          libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev
-          libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
+          libcgal-dev libgdal-dev
+          liblaszip-dev 
+          libxerces-c-dev
+          zlib1g-dev qt6-5compat-dev
+          libopencv-dev
+          libboost-dev libboost-iostreams-dev libboost-system-dev libpcap-dev libflann-dev
+          xvfb  
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -159,10 +164,17 @@ jobs:
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
 
+      - name: Build PCL Without VTK
+        run: |
+          git clone https://github.com/PointCloudLibrary/pcl.git
+          cd pcl && git checkout pcl-1.15.0 && mkdir build
+          cmake -S . -B build -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF
+          sudo cmake --build build --target install -- -j 2
+
       - name: Configure cmake
         run: >
           mkdir build
-
+  
           cmake
           -B build
           -S .
@@ -194,8 +206,10 @@ jobs:
           -DPLUGIN_STANDARD_QFACETS=ON
           -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON
           -DPLUGIN_STANDARD_QHPR=ON
+          -DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=OFF
+          -DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=OFF
           -DPLUGIN_STANDARD_QM3C2=ON
-          -DPLUGIN_STANDARD_QPCV=ON
+          -DPLUGIN_STANDARD_QPCV=OFF
           -DPLUGIN_STANDARD_QPOISSON_RECON=ON
           -DPLUGIN_STANDARD_QSRA=ON
           -DPLUGIN_STANDARD_QRANSAC_SD=ON

@@ -24,5 +24,3 @@ target_include_directories( ${PROJECT_NAME}
 	PUBLIC
 	    ${CMAKE_CURRENT_SOURCE_DIR}
 )
-
-target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_SHP_SUPPORT )

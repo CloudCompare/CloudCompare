@@ -25,7 +25,7 @@
 //system
 #include <vector>
 
-class QGLPixelBuffer;
+class QOpenGLBuffer;
 
 //! PCV (Portion de Ciel Visible / Ambiant Illumination) OpenGL context
 /** Similar to Cignoni's ShadeVis
@@ -79,7 +79,7 @@ class PCVContext
 		CCVector3 m_viewCenter;
 
 		//associated pixel buffer
-		QGLPixelBuffer* m_pixBuffer;
+		QOpenGLBuffer* m_pixBuffer;
 
 		//! Pixel buffer width (pixels)
 		unsigned m_width;

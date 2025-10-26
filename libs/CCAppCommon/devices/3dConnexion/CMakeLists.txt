@@ -32,10 +32,10 @@ if( WIN32 )
 	
 	function( target_link_3DXWARE ) # 1 argument: ARGV0 = target
 		if( OPTION_SUPPORT_3DCONNEXION_DEVICES )		
-			target_link_libraries( ${ARGV0} optimized ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmath.lib)
+			target_link_libraries( ${ARGV0} PUBLIC optimized ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmath.lib)
 		
 			if ( CMAKE_CONFIGURATION_TYPES )
-				target_link_libraries( ${ARGV0} debug ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmathD.lib )
+				target_link_libraries( ${ARGV0} PUBLIC debug ${3DXWARE_LIB_DIR}/siapp.lib ${3DXWARE_LIB_DIR}/spwmathD.lib )
 			endif()
 		endif()
 	endfunction()

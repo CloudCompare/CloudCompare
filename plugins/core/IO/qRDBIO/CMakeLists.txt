@@ -37,7 +37,9 @@ if( PLUGIN_IO_QRDB )
 		message(STATUS "PLUGIN_IO_QRDB: downloading rdb_sdk version '${_RDB_VERSION}' from URL '${_RDB_URL}'")
 		include(FetchContent)
 		FetchContent_Declare(rdb_sdk
-			URL "${_RDB_URL}")
+			URL "${_RDB_URL}"
+			DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+		)
 		FetchContent_GetProperties(rdb_sdk)
 		if (NOT rdb_sdk_POPULATED)
 			FetchContent_Populate(rdb_sdk)

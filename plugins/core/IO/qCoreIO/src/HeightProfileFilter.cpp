@@ -79,7 +79,7 @@ CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& 
 	QTextStream outFile(&file);
 	outFile.setRealNumberNotation(QTextStream::FixedNotation);
 	outFile.setRealNumberPrecision(sizeof(PointCoordinateType) == 4 && !poly->isShifted() ? 8 : 12);
-	outFile << "Curvilinear abscissa; Z" << endl;
+	outFile << "Curvilinear abscissa; Z" << Qt::endl;
 
 	// curvilinear abscissa
 	double           s     = 0;
@@ -96,7 +96,7 @@ CC_FILE_ERROR HeightProfileFilter::saveToFile(ccHObject* entity, const QString& 
 
 		// convert to 'local' coordinate system
 		CCVector3d Pg = poly->toGlobal3d(*P);
-		outFile << s << "; " << Pg.z << endl;
+		outFile << s << "; " << Pg.z << Qt::endl;
 	}
 
 	file.close();

@@ -14,8 +14,8 @@ file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-qt5_add_resources( generated_qrc_list ${qrc_list} )
+qt6_add_resources( generated_qrc_list ${qrc_list} )
+qt6_wrap_ui( generated_ui_list ${ui_list})
 
 if( MSVC )
 	# App icon with MSVC
@@ -24,16 +24,25 @@ if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
+	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${generated_ui_list} ${source_list}  ${generated_qrc_list} ${rc_list} )
 else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
 endif()
+
+
+#qt6_add_ui(${PROJECT_NAME} SOURCES ${ui_list} ) # Qt >= 6.8
+
+target_link_libraries( ${PROJECT_NAME}
+	PUBLIC
+		CCPluginStub
+)
 
 if( CCCORELIB_USE_QT_CONCURRENT )
 	# We want deployqt to handle this dependency, so instead of just copying the file
 	# link to the target.
 	target_link_libraries( ${PROJECT_NAME}
-		Qt5::Concurrent
+		PRIVATE
+			Qt6::Concurrent
 	)
 endif()
 
@@ -54,7 +63,8 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    CCAppCommon
+	PRIVATE
+    	CCAppCommon
 )
 
 # Add custom preprocessor definitions

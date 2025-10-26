@@ -157,7 +157,7 @@ class ccSectionExtractionTool : public ccOverlayDialog
 			}
 		}
 
-		bool operator==(const ImportedEntity& ie)
+		bool operator==(const ImportedEntity& ie) const
 		{
 			return entity == ie.entity;
 		}

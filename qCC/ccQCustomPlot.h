@@ -96,7 +96,7 @@ class QCPBarsWithText : public QCPBars
 			{
 				QPointF Pstart = P;
 				if (m_textOnTheLeft)
-					Pstart.setX(P.x() - painter->fontMetrics().width(m_text[i]));
+					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(m_text[i]));
 				painter->drawText(Pstart, m_text[i]);
 				P.setY(P.y() + fontHeight);
 			}
@@ -120,7 +120,7 @@ class QCPColoredBars : public QCPBars
 
 		QColor color;
 	};
-	typedef QMap<double, QCPColoredBarData> QCPColoredBarDataMap;
+	typedef QMultiMap<double, QCPColoredBarData> QCPColoredBarDataMap;
 
 	QCPColoredBars(QCPAxis* keyAxis, QCPAxis* valueAxis)
 	    : QCPBars(keyAxis, valueAxis)

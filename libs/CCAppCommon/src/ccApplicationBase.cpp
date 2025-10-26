@@ -25,7 +25,6 @@
 #include <QString>
 #include <QStyleFactory>
 #include <QSurfaceFormat>
-#include <QTextCodec>
 #include <QTranslator>
 #include <QtGlobal>
 
@@ -105,15 +104,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 
 	// Force 'english' locale so as to get a consistent behavior everywhere
 	QLocale::setDefault(QLocale::English);
-	QTextCodec* utf8Codec = QTextCodec::codecForName("UTF-8");
-	if (utf8Codec)
-	{
-		QTextCodec::setCodecForLocale(utf8Codec);
-	}
-	else
-	{
-		ccLog::Warning("Failed to set the UTF-8 codec as default (codec not found)");
-	}
 
 #ifdef Q_OS_UNIX
 	// We reset the numeric locale for POSIX functions

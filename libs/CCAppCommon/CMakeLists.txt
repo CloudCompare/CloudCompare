@@ -8,7 +8,10 @@ add_subdirectory( src )
 add_subdirectory( ui )
 
 target_link_libraries( ${PROJECT_NAME}
-	CCPluginAPI
+	PUBLIC
+		CCPluginAPI
+	PRIVATE
+		CC_FBO_LIB
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCAPPCOMMON_LIBRARY_BUILD )
@@ -25,13 +28,13 @@ target_sources(${PROJECT_NAME}
 )
 
 if( OPTION_SUPPORT_GAMEPADS )
-	find_package( Qt5
+	find_package( Qt6
 		COMPONENTS
 			Gamepad
 		REQUIRED
 	)
 
-	target_link_libraries( ${PROJECT_NAME} Qt5::Gamepad )
+	target_link_libraries( ${PROJECT_NAME} Qt6::Gamepad )
 endif()
 
 if( OPTION_SUPPORT_3DCONNEXION_DEVICES )

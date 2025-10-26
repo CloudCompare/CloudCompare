@@ -246,8 +246,8 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
 
 	// non static parameters
-	int   normalPrecision  = 2 + sizeof(PointCoordinateType);
-	QChar separator        = saveDialog.getSeparator();
+	int   normalPrecision = 2 + sizeof(PointCoordinateType);
+	QChar separator(saveDialog.getSeparator());
 	bool  saveFloatColors  = saveDialog.saveFloatColors();
 	bool  saveAlphaChannel = saveDialog.saveAlphaChannel();
 

@@ -32,7 +32,6 @@
 #include <vector>
 
 class ccPointCloud;
-class QStringList;
 class ccMainAppInterface;
 class RGBAColorsTableType;
 

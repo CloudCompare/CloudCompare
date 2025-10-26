@@ -1,23 +1,23 @@
-find_package( Qt5
+find_package( Qt6
 	COMPONENTS
 		Core
 	REQUIRED
 )
 
-get_target_property( qmake_location Qt5::qmake IMPORTED_LOCATION )
-get_filename_component( qt5_bin_dir ${qmake_location} DIRECTORY )
+get_target_property( qmake_location Qt6::qmake IMPORTED_LOCATION )
+get_filename_component( qt6_bin_dir ${qmake_location} DIRECTORY )
 
 if ( APPLE )
-	find_program( mac_deploy_qt macdeployqt HINTS "${qt5_bin_dir}" )
+	find_program( mac_deploy_qt macdeployqt HINTS "${qt6_bin_dir}" )
 
 	if( NOT EXISTS "${mac_deploy_qt}" )
-		message( FATAL_ERROR "macdeployqt not found in ${qt5_bin_dir}" )
+		message( FATAL_ERROR "macdeployqt not found in ${qt6_bin_dir}" )
 	endif()
 elseif( WIN32 )
-	find_program( win_deploy_qt windeployqt HINTS "${qt5_bin_dir}" )
+	find_program( win_deploy_qt windeployqt HINTS "${qt6_bin_dir}" )
 
 	if( NOT EXISTS "${win_deploy_qt}" )
-		message( FATAL_ERROR "windeployqt not found in ${qt5_bin_dir}" )
+		message( FATAL_ERROR "windeployqt not found in ${qt6_bin_dir}" )
 	endif()
 endif()
 
@@ -84,6 +84,19 @@ function( DeployQt )
 		endif()
 		set( temp_app_path "${temp_dir}/${app_name}" )
 
+		set( deploy_qt_options
+			--no-compiler-runtime
+			--no-quick-import
+			--no-system-d3d-compiler
+			--openglwidgets
+			--concurrent
+			--verbose=1
+		)
+
+		if (OPTION_SUPPORT_GAMEPADS)
+			list(APPEND deploy_qt_options --gamepad)
+		endif ()
+
 		add_custom_command(
 			TARGET ${DEPLOY_QT_TARGET}
 			POST_BUILD
@@ -92,14 +105,7 @@ function( DeployQt )
 			COMMAND ${CMAKE_COMMAND} -E copy ${app_path} ${temp_app_path}
 			COMMAND "${win_deploy_qt}"
 				${temp_app_path}
-				--no-compiler-runtime
-				--no-angle
-				--no-opengl-sw
-				--no-quick-import
-				--no-system-d3d-compiler
-				--concurrent
-				--verbose=1
-				--gamepad
+				${deploy_qt_options}
 			VERBATIM
 		)
 	
@@ -131,4 +137,4 @@ function( DeployQt )
 endfunction()
 
 unset( qmake_location )
-unset( qt5_bin_dir )
+unset( qt6_bin_dir )

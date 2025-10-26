@@ -144,7 +144,7 @@ bool qCanupoTrainingDialog::getScales(std::vector<float>& scales) const
 		}
 		else if (scalesListRadioButton->isChecked())
 		{
-			QStringList scaleList = scalesListLineEdit->text().split(' ',QString::SkipEmptyParts);
+			QStringList scaleList = scalesListLineEdit->text().split(' ', Qt::SkipEmptyParts);
 		
 			int listSize = scaleList.size();
 			scales.resize(listSize);

@@ -30,7 +30,7 @@
 
 // Qt
 #include <QElapsedTimer>
-#include <QOpenGLExtensions>
+#include <QOpenGLFunctions_3_3_Compatibility>
 #include <QOpenGLTexture>
 #include <QTimer>
 
@@ -1491,7 +1491,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	int m_pickRadius;
 
 	//! FBO support
-	QOpenGLExtension_ARB_framebuffer_object m_glExtFunc;
+	QOpenGLFunctions_3_3_Compatibility m_glExtFunc;
 
 	//! Whether FBO support is on
 	bool m_glExtFuncSupported;

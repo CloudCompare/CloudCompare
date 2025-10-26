@@ -19,8 +19,8 @@
 #include "CCFbo.h"
 
 // Qt
-#include <QOpenGLExtensions>
 #include <QOpenGLFunctions_2_1>
+#include <QOpenGLFunctions_3_3_Compatibility>
 
 //! F.B.O. encapsulation
 /** Compared to the QOpenGLFramebufferObject class, this one offers the possibility to:
@@ -118,6 +118,6 @@ class CCFBO_LIB_API ccFrameBufferObject
 	GLuint m_fboId;
 
 	// For portability, we need to use 2.1 + extensions to get FBOs
-	QOpenGLFunctions_2_1                    m_glFunc;
-	QOpenGLExtension_ARB_framebuffer_object m_glExtFunc;
+	QOpenGLFunctions_2_1               m_glFunc;
+	QOpenGLFunctions_3_3_Compatibility m_glExtFunc;
 };

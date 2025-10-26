@@ -1,13 +1,13 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.23 )
 
 option( PLUGIN_IO_QSTEP "Check to install the STEP reading file plugin" OFF )
 
 if ( PLUGIN_IO_QSTEP )
 
-	if( UNIX )
-		set( OPENCASCADE_INC_DIR "" CACHE PATH "OpenCascade include dir" )
-		set( OPENCASCADE_LIB_DIR "" CACHE PATH "OpenCascade library dir" )
-	elseif( WIN32 )
+	set( OPENCASCADE_INC_DIR "" CACHE PATH "OpenCascade include dir" )
+	set( OPENCASCADE_LIB_DIR "" CACHE PATH "OpenCascade library dir" )
+	
+	if( WIN32 )
 		set( OPENCASCADE_DLL_DIR "" CACHE PATH "OpenCascade dll dir" )
 		set( OPENCASCADE_TBB_DLL_DIR "" CACHE PATH "TBB dll dir" )
 	endif()

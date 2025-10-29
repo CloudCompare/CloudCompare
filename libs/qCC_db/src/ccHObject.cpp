@@ -29,6 +29,7 @@
 #include "ccCoordinateSystem.h"
 #include "ccCustomObject.h"
 #include "ccCylinder.h"
+#include "ccDisc.h"
 #include "ccDish.h"
 #include "ccExternalFactory.h"
 #include "ccExtru.h"
@@ -202,6 +203,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 		return new ccBox(name);
 	case CC_TYPES::CONE:
 		return new ccCone(name);
+	case CC_TYPES::DISC:
+		return new ccDisc(name);
 	case CC_TYPES::DISH:
 		return new ccDish(name);
 	case CC_TYPES::EXTRU:

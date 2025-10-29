@@ -25,6 +25,7 @@
 #include "kdTreeForFacetExtraction.h"
 #include "fastMarchingForFacetExtraction.h"
 #include "disclaimerDialog.h"
+#include "qFacetsCommands.h" //Needed for command line
 
 //Qt
 #include <QtGui>
@@ -180,6 +181,11 @@ void qFacets::fuseKdTreeCells()
 	extractFacets(CellsFusionDlg::ALGO_KD_TREE);
 }
 
+//##########################################################################
+//
+// 1.A. FACET EXTRACTION (GUI WRAPPER)
+//
+//##########################################################################
 void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 {
 	//disclaimer accepted?
@@ -205,6 +211,10 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 		return;
 	}
 
+	qFacets::FacetsParams params;
+    params.ALGO = algo;
+	
+	
 	//first time: we compute the max edge length automatically
 	if (s_lastCloud != pc)
 	{
@@ -212,213 +222,268 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 		s_minPointsPerFacet = std::max<unsigned>(pc->size() / 100000, 10);
 		s_lastCloud = pc;
 	}
+	
+	// Apply defaults to params struct
+    params.MAX_EDGE_LENGTH = s_maxEdgeLength;
+    params.MIN_POINTS_PER_FACET = s_minPointsPerFacet;
+    params.ERROR_MAX_PER_FACET = s_errorMaxPerFacet;
+    params.KD_TREE_FUSION_MAX_ANGLE_DEG = s_kdTreeFusionMaxAngle_deg;
+    params.KD_TREE_FUSION_MAX_RELATIVE_DISTANCE = s_kdTreeFusionMaxRelativeDistance;
+    params.OCTREE_LEVEL = s_octreeLevel;
+    params.USE_RETRO_PROJECTION_ERROR = s_fmUseRetroProjectionError;
+	
+	// Convert static int to enum for the param struct
+    switch (s_errorMeasureType)
+    {
+        case 0: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::RMS; break;
+        case 1: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_68_PERCENT; break;
+        case 2: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT; break;
+        case 3: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT; break;
+        case 4: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST; break;
+        default: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT;
+    }
 
 	CellsFusionDlg fusionDlg(algo, m_app->getMainWindow());
 	if (algo == CellsFusionDlg::ALGO_FAST_MARCHING)
 		fusionDlg.octreeLevelSpinBox->setCloud(pc);
 
-	fusionDlg.octreeLevelSpinBox->setValue(s_octreeLevel);
-	fusionDlg.useRetroProjectionCheckBox->setChecked(s_fmUseRetroProjectionError);
-	fusionDlg.minPointsPerFacetSpinBox->setValue(s_minPointsPerFacet);
-	fusionDlg.errorMeasureComboBox->setCurrentIndex(s_errorMeasureType);
-	fusionDlg.maxRMSDoubleSpinBox->setValue(s_errorMaxPerFacet);
-	fusionDlg.maxAngleDoubleSpinBox->setValue(s_kdTreeFusionMaxAngle_deg);
-	fusionDlg.maxRelativeDistDoubleSpinBox->setValue(s_kdTreeFusionMaxRelativeDistance);
-	fusionDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
-	//"no normal" warning
-	fusionDlg.noNormalWarningLabel->setVisible(!pc->hasNormals());
-
+	// Populate dialog from params (which hold the defaults)
+    fusionDlg.octreeLevelSpinBox->setValue(params.OCTREE_LEVEL);
+    fusionDlg.useRetroProjectionCheckBox->setChecked(params.USE_RETRO_PROJECTION_ERROR);
+    fusionDlg.minPointsPerFacetSpinBox->setValue(params.MIN_POINTS_PER_FACET);
+    fusionDlg.errorMeasureComboBox->setCurrentIndex(s_errorMeasureType); // Use static index for dialog
+    fusionDlg.maxRMSDoubleSpinBox->setValue(params.ERROR_MAX_PER_FACET);
+    fusionDlg.maxAngleDoubleSpinBox->setValue(params.KD_TREE_FUSION_MAX_ANGLE_DEG);
+    fusionDlg.maxRelativeDistDoubleSpinBox->setValue(params.KD_TREE_FUSION_MAX_RELATIVE_DISTANCE);
+    fusionDlg.maxEdgeLengthDoubleSpinBox->setValue(params.MAX_EDGE_LENGTH);
+    fusionDlg.noNormalWarningLabel->setVisible(!pc->hasNormals());
+	
+	
 	if (!fusionDlg.exec())
 		return;
+	
+	// Read values back from dialog into params struct
+    params.OCTREE_LEVEL = fusionDlg.octreeLevelSpinBox->value();
+    params.USE_RETRO_PROJECTION_ERROR = fusionDlg.useRetroProjectionCheckBox->isChecked();
+    params.MIN_POINTS_PER_FACET = fusionDlg.minPointsPerFacetSpinBox->value();
+    params.ERROR_MAX_PER_FACET = fusionDlg.maxRMSDoubleSpinBox->value();
+    params.KD_TREE_FUSION_MAX_ANGLE_DEG = fusionDlg.maxAngleDoubleSpinBox->value();
+    params.KD_TREE_FUSION_MAX_RELATIVE_DISTANCE = fusionDlg.maxRelativeDistDoubleSpinBox->value();
+    params.MAX_EDGE_LENGTH = fusionDlg.maxEdgeLengthDoubleSpinBox->value();
 
-	s_octreeLevel = fusionDlg.octreeLevelSpinBox->value();
-	s_fmUseRetroProjectionError = fusionDlg.useRetroProjectionCheckBox->isChecked();
-	s_minPointsPerFacet = fusionDlg.minPointsPerFacetSpinBox->value();
-	s_errorMeasureType = fusionDlg.errorMeasureComboBox->currentIndex();
-	s_errorMaxPerFacet = fusionDlg.maxRMSDoubleSpinBox->value();
-	s_kdTreeFusionMaxAngle_deg = fusionDlg.maxAngleDoubleSpinBox->value();
-	s_kdTreeFusionMaxRelativeDistance = fusionDlg.maxRelativeDistDoubleSpinBox->value();
-	s_maxEdgeLength = fusionDlg.maxEdgeLengthDoubleSpinBox->value();
+    // Save static defaults
+    s_octreeLevel = params.OCTREE_LEVEL;
+    s_fmUseRetroProjectionError = params.USE_RETRO_PROJECTION_ERROR;
+    s_minPointsPerFacet = params.MIN_POINTS_PER_FACET;
+    s_errorMaxPerFacet = params.ERROR_MAX_PER_FACET;
+    s_kdTreeFusionMaxAngle_deg = params.KD_TREE_FUSION_MAX_ANGLE_DEG;
+    s_kdTreeFusionMaxRelativeDistance = params.KD_TREE_FUSION_MAX_RELATIVE_DISTANCE;
+    s_maxEdgeLength = params.MAX_EDGE_LENGTH;
+    s_errorMeasureType = fusionDlg.errorMeasureComboBox->currentIndex(); // Save static index
 
-	//convert 'errorMeasureComboBox' index to enum
-	CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure = CCCoreLib::DistanceComputationTools::RMS;
-	switch (s_errorMeasureType)
-	{
-	case 0:
-		errorMeasure = CCCoreLib::DistanceComputationTools::RMS;
-		break;
-	case 1:
-		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_68_PERCENT;
-		break;
-	case 2:
-		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT;
-		break;
-	case 3:
-		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT;
-		break;
-	case 4:
-		errorMeasure = CCCoreLib::DistanceComputationTools::MAX_DIST;
-		break;
-	default:
-		assert(false);
-		break;
-	}
-
-	//create scalar field to host the fusion result
-	const char c_defaultSFName[] = "facet indexes";
-	int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
-	if (sfIdx < 0)
-		sfIdx = pc->addScalarField(c_defaultSFName);
-	if (sfIdx < 0)
-	{
-		m_app->dispToConsole("Couldn't allocate a new scalar field for computing fusion labels! Try to free some memory ...", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	pc->setCurrentScalarField(sfIdx);
-
-	//computation
-	QElapsedTimer eTimer;
-	eTimer.start();
+    // Convert dialog index back to enum
+    switch (s_errorMeasureType)
+    {
+        case 0: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::RMS; break;
+        case 1: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_68_PERCENT; break;
+        case 2: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_95_PERCENT; break;
+        case 3: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT; break;
+        case 4: params.ERROR_MEASURE = CCCoreLib::DistanceComputationTools::MAX_DIST; break;
+    }
+	
 	ccProgressDialog pDlg(true, m_app->getMainWindow());
+    CCCoreLib::GenericProgressCallback* progress = static_cast<CCCoreLib::GenericProgressCallback*>(&pDlg);
 
-	bool success = true;
-	if (algo == CellsFusionDlg::ALGO_KD_TREE)
-	{
-		//we need a kd-tree
-		QElapsedTimer eTimer;
-		eTimer.start();
-		ccKdTree kdtree(pc);
+    QElapsedTimer eTimer;
+    eTimer.start();
 
-		if (kdtree.build(s_errorMaxPerFacet / 2, errorMeasure, s_minPointsPerFacet, 1000, &pDlg))
-		{
-			qint64 elapsedTime_ms = eTimer.elapsed();
-			m_app->dispToConsole(QString("[qFacets] Kd-tree construction timing: %1 s").arg(static_cast<double>(elapsedTime_ms) / 1.0e3, 0, 'f', 3), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+    bool errorDuringFacetCreation = false;
+    ccHObject* group = qFacets::executeFacetExtraction(pc, params, errorDuringFacetCreation, progress);
 
-			success = ccKdTreeForFacetExtraction::FuseCells(
-				&kdtree,
-				s_errorMaxPerFacet,
-				errorMeasure,
-				s_kdTreeFusionMaxAngle_deg,
-				static_cast<PointCoordinateType>(s_kdTreeFusionMaxRelativeDistance),
-				true,
-				&pDlg);
-		}
-		else
-		{
-			m_app->dispToConsole("Failed to build Kd-tree! (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			success = false;
-		}
-	}
-	else if (algo == CellsFusionDlg::ALGO_FAST_MARCHING)
-	{
-		int result = FastMarchingForFacetExtraction::ExtractPlanarFacets(
-			pc,
-			static_cast<unsigned char>(s_octreeLevel),
-			static_cast<ScalarType>(s_errorMaxPerFacet),
-			errorMeasure,
-			s_fmUseRetroProjectionError,
-			&pDlg,
-			pc->getOctree().data());
+    qint64 elapsedTime_ms = eTimer.elapsed();
+    m_app->dispToConsole(QString("[qFacets] Total computation time: %1 s").arg(static_cast<double>(elapsedTime_ms) / 1.0e3, 0, 'f', 3), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
-		success = (result >= 0);
-	}
+    if (group)
+    {
+        switch (params.ALGO)
+        {
+        case CellsFusionDlg::ALGO_KD_TREE:
+            group->setName(group->getName() + QString(" [Kd-tree][error < %1][angle < %2 deg.]").arg(params.ERROR_MAX_PER_FACET).arg(params.KD_TREE_FUSION_MAX_ANGLE_DEG));
+            break;
+        case CellsFusionDlg::ALGO_FAST_MARCHING:
+            group->setName(group->getName() + QString(" [FM][level %2][error < %1]").arg(params.OCTREE_LEVEL).arg(params.ERROR_MAX_PER_FACET));
+            break;
+        default:
+            break;
+        }
 
-	if (success)
-	{
-		pc->setCurrentScalarField(sfIdx); //for AutoSegmentationTools::extractConnectedComponents
+        unsigned count = group->getChildrenNumber();
+        m_app->dispToConsole(QString("[qFacets] %1 facet(s) where created from cloud '%2'").arg(count).arg(pc->getName()));
 
-		CCCoreLib::ReferenceCloudContainer components;
-		if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(pc, components))
-		{
-			m_app->dispToConsole("Failed to extract fused components! (not enough memory?)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		}
-		else
-		{
-			//we remove the temporary scalar field (otherwise it will be copied to the sub-clouds!)
-			ccScalarField* indexSF = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
-			if (!indexSF)
-			{
-				assert(false);
-				return;
-			}
-			indexSF->link(); //to prevent deletion when calling deleteScalarField below
-			pc->deleteScalarField(sfIdx);
-			sfIdx = -1;
-
-			bool error = false;
-			ccHObject* group = createFacets(pc, components, s_minPointsPerFacet, s_maxEdgeLength, false, error);
-
-			if (group)
-			{
-				switch (algo)
-				{
-				case CellsFusionDlg::ALGO_KD_TREE:
-					group->setName(group->getName() + QString(" [Kd-tree][error < %1][angle < %2 deg.]").arg(s_errorMaxPerFacet).arg(s_kdTreeFusionMaxAngle_deg));
-					break;
-				case CellsFusionDlg::ALGO_FAST_MARCHING:
-					group->setName(group->getName() + QString(" [FM][level %2][error < %1]").arg(s_octreeLevel).arg(s_errorMaxPerFacet));
-					break;
-				default:
-					break;
-				}
-
-				unsigned count = group->getChildrenNumber();
-				m_app->dispToConsole(QString("[qFacets] %1 facet(s) where created from cloud '%2'").arg(count).arg(pc->getName()));
-
-				if (error)
-				{
-					m_app->dispToConsole("Error(s) occurred during the generation of facets! Result may be incomplete", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				}
-				else
-				{
-					//we put the scalar field back
-					sfIdx = pc->addScalarField(indexSF);
-				}
-
-				//pc->setEnabled(false);
-				m_app->addToDB(group);
-				group->prepareDisplayForRefresh();
-			}
-			else if (error)
-			{
-				m_app->dispToConsole("An error occurred during the generation of facets!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			}
-			else
-			{
-				m_app->dispToConsole("No facet remains! Check the parameters (min size, etc.)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			}
-		}
-	}
-	else
-	{
-		m_app->dispToConsole("An error occurred during the fusion process!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-	}
-
-	if (sfIdx >= 0)
-	{
-		pc->getScalarField(sfIdx)->computeMinAndMax();
-#ifdef _DEBUG
-		pc->setCurrentDisplayedScalarField(sfIdx);
-		pc->showSF(true);
-#endif
-	}
+        if (errorDuringFacetCreation)
+        {
+            m_app->dispToConsole("Error(s) occurred during the generation of facets! Result may be incomplete", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        }
+        
+        m_app->addToDB(group);
+        group->prepareDisplayForRefresh();
+    }
+    else if (errorDuringFacetCreation)
+    {
+        m_app->dispToConsole("An error occurred during the generation of facets!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+    }
+    else
+    {
+        m_app->dispToConsole("No facet remains! Check the parameters (min size, etc.)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+    }
+	
 
 	//currently selected entities appearance may have changed!
 	m_app->redrawAll();
 }
 
+//##########################################################################
+//
+// 1.B. FACET EXTRACTION (CORE ENGINE - STATIC)
+//
+//##########################################################################
+
+ccHObject* qFacets::executeFacetExtraction(ccPointCloud* pc, 
+                                           const qFacets::FacetsParams& params, 
+                                           bool& errorDuringFacetCreation,
+                                           CCCoreLib::GenericProgressCallback* progress)
+{
+    errorDuringFacetCreation = false; 
+	
+    const char c_defaultSFName[] = "facet indexes";
+    int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
+    if (sfIdx < 0)
+        sfIdx = pc->addScalarField(c_defaultSFName);
+    if (sfIdx < 0)
+    {
+        ccLog::Error("Couldn't allocate a new scalar field for computing fusion labels!");
+        errorDuringFacetCreation = true;
+        return nullptr;
+    }
+    pc->setCurrentScalarField(sfIdx);
+
+    bool success = false;
+    if (params.ALGO == CellsFusionDlg::ALGO_KD_TREE)
+    {
+        QElapsedTimer eTimer;
+        if(progress) progress->setMethodTitle("Building Kd-tree...");
+        eTimer.start();
+        ccKdTree kdtree(pc);
+        if (kdtree.build(params.ERROR_MAX_PER_FACET / 2, params.ERROR_MEASURE, params.MIN_POINTS_PER_FACET, 1000, progress))
+        {
+            if (progress) // Log timing if not silent
+            {
+                qint64 elapsedTime_ms = eTimer.elapsed();
+                ccLog::Print(QString("[qFacets] Kd-tree construction timing: %1 s").arg(static_cast<double>(elapsedTime_ms) / 1.0e3, 0, 'f', 3));
+            }
+
+            success = ccKdTreeForFacetExtraction::FuseCells(
+                &kdtree,
+                params.ERROR_MAX_PER_FACET,
+                params.ERROR_MEASURE,
+                params.KD_TREE_FUSION_MAX_ANGLE_DEG,
+                static_cast<PointCoordinateType>(params.KD_TREE_FUSION_MAX_RELATIVE_DISTANCE),
+                true,
+                progress);
+        }
+        else
+        {
+            ccLog::Error("Failed to build Kd-tree! (not enough memory?)");
+            success = false;
+        }
+    }
+    else if (params.ALGO == CellsFusionDlg::ALGO_FAST_MARCHING)
+    {
+        int result = FastMarchingForFacetExtraction::ExtractPlanarFacets(
+            pc,
+            static_cast<unsigned char>(params.OCTREE_LEVEL),
+            static_cast<ScalarType>(params.ERROR_MAX_PER_FACET),
+            params.ERROR_MEASURE,
+            params.USE_RETRO_PROJECTION_ERROR,
+            progress,
+            pc->getOctree().data());
+
+        success = (result >= 0);
+    }
+	
+    ccHObject* group = nullptr;
+    if (success)
+    {
+        pc->setCurrentScalarField(sfIdx); 
+
+        CCCoreLib::ReferenceCloudContainer components;
+        if (!CCCoreLib::AutoSegmentationTools::extractConnectedComponents(pc, components))
+        {
+            ccLog::Error("Failed to extract fused components! (not enough memory?)");
+        }
+        else
+        {
+            ccScalarField* indexSF = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
+            if (!indexSF)
+            {
+                assert(false);
+                return nullptr;
+            }
+            
+            indexSF->link();
+            pc->deleteScalarField(sfIdx);
+            sfIdx = -1;
+
+            // Call the refactored static helper            			
+			group = qFacets::createFacets(pc, components, params.MIN_POINTS_PER_FACET,params.MAX_EDGE_LENGTH, false, errorDuringFacetCreation, progress);
+			
+			
+            if (!errorDuringFacetCreation)
+            {
+                sfIdx = pc->addScalarField(indexSF);
+            }
+            indexSF->release();
+        }
+    }
+    else
+    {
+        ccLog::Error("An error occurred during the fusion process!");
+    }
+
+    if (sfIdx >= 0)
+    {
+        pc->getScalarField(sfIdx)->computeMinAndMax();
+#ifdef _DEBUG
+		// These lines are GUI-dependent, but harmless in debug builds
+		pc->setCurrentDisplayedScalarField(sfIdx);
+		pc->showSF(true);
+#endif
+    }
+    
+    return group;
+}
+
+
+
+//##########################################################################
+//
+// 1.C. FACET CREATION (CORE HELPER - STATIC)
+//
+//##########################################################################
 ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 									CCCoreLib::ReferenceCloudContainer& components,
 									unsigned minPointsPerComponent,
 									double maxEdgeLength,
 									bool randomColors,
-									bool& error )
+									bool& error,
+									CCCoreLib::GenericProgressCallback* progress)
 {
 	if (!cloud)
 	{
+		error = true;
 		return nullptr;
 	}
-
+	
 	//we create a new group to store all input CCs as 'facets'
 	ccHObject* ccGroup = new ccHObject(cloud->getName() + QString(" [facets]"));
 	ccGroup->setDisplay(cloud->getDisplay());
@@ -428,22 +493,25 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 
 	//number of input components
 	size_t componentCount = components.size();
-
-	//progress notification
-	ccProgressDialog pDlg(true, m_app->getMainWindow());
-	pDlg.setMethodTitle(QObject::tr("Facets creation"));
-	pDlg.setInfo(QObject::tr("Components: %1").arg(componentCount));
-	pDlg.setMaximum(static_cast<int>(componentCount));
-	pDlg.show();
-	QApplication::processEvents();
+	
+	CCCoreLib::NormalizedProgress nProgress(progress, static_cast<unsigned>(componentCount));
+	if (progress)
+		
+    {
+        progress->setMethodTitle(QObject::tr("Facets creation").toUtf8().constData());
+        progress->setInfo(QObject::tr("Components: %1").arg(componentCount).toUtf8().constData());
+    }
+	
 
 	//for each component
 	error = false;
+	size_t processedCount = 0;
 	while (!components.empty())
 	{
 		CCCoreLib::ReferenceCloud* compIndexes = components.back();
 		components.pop_back();
 
+		processedCount++;
 		//if it has enough points
 		if (compIndexes && compIndexes->size() >= minPointsPerComponent)
 		{
@@ -505,6 +573,7 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 						ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
 						FacetsClassifier::GenerateSubfamilyColor(col, dip, dipDir, 0, 1, &darkCol);
 					}
+					
 					facet->setColor(col);
 					if (facet->getContour())
 					{
@@ -518,9 +587,17 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 			delete compIndexes;
 			compIndexes = nullptr;
 		}
-
-		pDlg.setValue(static_cast<int>(componentCount - components.size()));
-		//QApplication::processEvents();
+		
+		
+		if (progress)
+        {            
+			nProgress.oneStep();
+            if (progress->isCancelRequested())
+            {
+                 error = true;
+                 break; 
+            }
+        }
 	}
 
 	if (ccGroup->getChildrenNumber() == 0)
@@ -532,6 +609,11 @@ ccHObject* qFacets::createFacets(	ccPointCloud* cloud,
 	return ccGroup;
 }
 
+//##########################################################################
+//
+// 2.A. GET FACETS FROM SELECTION (HELPER - Non-Static)
+//
+//##########################################################################
 void qFacets::getFacetsInCurrentSelection(FacetSet& facets) const
 {
 	facets.clear();
@@ -680,6 +762,11 @@ void ComputeFacetExtensions(CCVector3& N, ccPolyline* facetContour, double& hori
 	}
 }
 
+//##########################################################################
+//
+// 3.A. SHP EXPORT (GUI WRAPPER)
+//
+//##########################################################################
 void qFacets::exportFacets()
 {
 	assert(m_app);
@@ -724,6 +811,64 @@ void qFacets::exportFacets()
 			return;
 	}
 
+	
+	bool useNativeOrientation = fDlg.nativeOriRadioButton->isChecked();
+	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
+	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
+	
+	double nX = 0.0f;
+	double nY = 0.0f;
+	double nZ = 1.0f;
+	
+	if (!useNativeOrientation)
+	{
+		if (useCustomOrientation)
+		{
+			nX = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			
+		}		
+	}
+	
+	bool success = executeExportFacets(facets, filename, nX, nY, nZ,false);
+	if (!success)
+	{
+		m_app->dispToConsole(QString("ExportFacets failed for some reason"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);		
+	}
+
+	
+}
+
+//##########################################################################
+//
+// 3.B. SHP EXPORT (CORE ENGINE - STATIC)
+//
+//##########################################################################
+bool qFacets::executeExportFacets(const qFacets::FacetSet& facets, 
+								  const QString filename, 
+								  bool useNativeOrientation,
+								  bool useGlobalOrientation,
+								  bool useCustomOrientation,
+								  double nX, double nY, double nZ, 
+								  bool silent)
+{
+
+	
+	
+	if (facets.empty())
+	{
+		ccLog::Error(QString("No facets to export info to shape file"));
+        return false;
+	}
+
+    QFile outFile(filename);
+    if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        ccLog::Error(QString("Failed to open file for writing: %1").arg(filename));
+        return false;
+    }
+	
 	//fields (shapefile) - WARNING names must not have more than 10 chars!
 	IntegerDBFField  facetIndex("index");
 	DoubleDBFField   facetSurface("surface");
@@ -759,17 +904,16 @@ void qFacets::exportFacets()
 	}
 	catch (const std::bad_alloc&)
 	{
-		m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		//m_app->dispToConsole("Not enough memory!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		ccLog::Error("Not enough memory!");
+		return false;
 	}
 
 	ccHObject toSave("facets");
-
+	
 	//depending on the 'main orientation', the job is more or less easy ;)
-	bool useNativeOrientation = fDlg.nativeOriRadioButton->isChecked();
-	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
-	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
-
+	
+	
 	//Default base
 	CCVector3 X(1, 0, 0);
 	CCVector3 Y(0, 1, 0);
@@ -780,9 +924,7 @@ void qFacets::exportFacets()
 	{
 		if (useCustomOrientation)
 		{
-			Z = CCVector3(	static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble()),
-							static_cast<PointCoordinateType>(fDlg.nYLineEdit->text().toDouble()),
-							static_cast<PointCoordinateType>(fDlg.nZLineEdit->text().toDouble()));
+			Z = CCVector3(nX,nY,nZ);
 			Z.normalize();
 		}
 		else if (useGlobalOrientation)
@@ -873,7 +1015,8 @@ void qFacets::exportFacets()
 			}
 			else
 			{
-				m_app->dispToConsole(QString("Failed to change the orientation of polyline '%1'! (not enough memory)").arg(poly->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				//m_app->dispToConsole(QString("Failed to change the orientation of polyline '%1'! (not enough memory)").arg(poly->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				ccLog::Warning(QString("Failed to change the orientation of polyline '%1'! (not enough memory)").arg(poly->getName()));
 				continue;
 			}
 
@@ -932,119 +1075,29 @@ void qFacets::exportFacets()
 		params.alwaysDisplaySaveDialog = false;
 		if (filter.saveToFile(&toSave, fields, filename, params) == CC_FERR_NO_ERROR)
 		{
-			m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			//m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+			ccLog::Print(QString("[qFacets] File '%1' successfully saved").arg(filename));
 		}
 		else
 		{
-			m_app->dispToConsole(QString("[qFacets] Failed to save file '%1'!").arg(filename), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			//m_app->dispToConsole(QString("[qFacets] Failed to save file '%1'!").arg(filename), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			ccLog::Warning(QString("[qFacets] Failed to save file '%1'!").arg(filename));
+			return false;
 		}
-	}
-}
-
-void qFacets::showStereogram()
-{
-	assert(m_app);
-	if (!m_app)
-		return;
-
-	//disclaimer accepted?
-	if (!ShowDisclaimer(m_app))
-		return;
-
-	//we expect a facet group or a cloud
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	if (!m_app->haveOneSelection()
-		|| (!selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT)
-		&& !selectedEntities.back()->isA(CC_TYPES::POINT_CLOUD))
-		)
-	{
-		m_app->dispToConsole("Select a group of facets or a point cloud!");
-		return;
-	}
-
-	StereogramParamsDlg stereogramParamsDlg(m_app->getMainWindow());
-	stereogramParamsDlg.angleStepDoubleSpinBox->setValue(s_stereogramAngleStep);
-	stereogramParamsDlg.resolutionDoubleSpinBox->setValue(s_stereogramResolution_deg);
-	if (!stereogramParamsDlg.exec())
-		return;
-
-	s_stereogramAngleStep = stereogramParamsDlg.angleStepDoubleSpinBox->value();
-	s_stereogramResolution_deg = stereogramParamsDlg.resolutionDoubleSpinBox->value();
-
-	if ( m_stereogramDialog == nullptr )
-	{
-		m_stereogramDialog = new StereogramDialog( m_app );
 	}
 	
-	if (m_stereogramDialog->init(s_stereogramAngleStep, selectedEntities.back(), s_stereogramResolution_deg))
-	{
-		m_stereogramDialog->show();
-		m_stereogramDialog->raise();
-	}
+	
+	
+	
+	return true;
 }
 
-void qFacets::classifyFacetsByAngle()
-{
-	assert(m_app);
-	if (!m_app)
-		return;
 
-	//disclaimer accepted?
-	if (!ShowDisclaimer(m_app))
-		return;
-
-	//we expect a facet group
-	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	if (!m_app->haveOneSelection() || !selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
-	{
-		m_app->dispToConsole("Select a group of facets!");
-		return;
-	}
-
-	ClassificationParamsDlg classifParamsDlg(m_app->getMainWindow());
-	classifParamsDlg.angleStepDoubleSpinBox->setValue(s_classifAngleStep);
-	classifParamsDlg.maxDistDoubleSpinBox->setValue(s_classifMaxDist);
-	if (!classifParamsDlg.exec())
-		return;
-
-	s_classifAngleStep = classifParamsDlg.angleStepDoubleSpinBox->value();
-	s_stereogramAngleStep = s_classifAngleStep; //we automatically copy it to the stereogram's equivalent parameter
-	s_classifMaxDist = classifParamsDlg.maxDistDoubleSpinBox->value();
-
-	ccHObject* group = selectedEntities.back();
-	classifyFacetsByAngle(group, s_classifAngleStep, s_classifMaxDist);
-}
-
-void qFacets::classifyFacetsByAngle(ccHObject* group,
-	double angleStep_deg,
-	double maxDist)
-{
-	assert(m_app);
-	if (!m_app)
-		return;
-
-	assert(group);
-
-	if (group->isA(CC_TYPES::HIERARCHY_OBJECT))
-	{
-		if (group->getParent())
-		{
-			m_app->removeFromDB(group, false);
-		}
-
-		bool success = FacetsClassifier::ByOrientation(group, angleStep_deg, maxDist);
-		m_app->addToDB(group);
-
-		if (!success)
-		{
-			m_app->dispToConsole("An error occurred while classifying the facets! (not enough memory?)",
-				ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-			return;
-		}
-	}
-
-	m_app->redrawAll();
-}
+//##########################################################################
+//
+// 4.A. CSV EXPORT (GUI WRAPPER)
+//
+//##########################################################################
 
 void qFacets::exportFacetsInfo()
 {
@@ -1084,24 +1137,46 @@ void qFacets::exportFacetsInfo()
 	//save current export path to persistent settings
 	settings.setValue("exportPath", QFileInfo(filename).absolutePath());
 
-	QFile outFile(filename);
-	if (outFile.exists())
+	if (QFile(filename).exists())
 	{
 		//if the file already exists, ask for confirmation!
-		if (QMessageBox::warning(m_app->getMainWindow(),
-			"Overwrite",
-			"File already exists! Are you sure you want to overwrite it?",
-			QMessageBox::Yes,
-			QMessageBox::No) == QMessageBox::No)
+		if (QMessageBox::warning(m_app->getMainWindow(), "File already exists!", "File already exists! Are you sure you want to overwrite it?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return;
 	}
-
-	//open CSV file
-	if (!outFile.open(QFile::WriteOnly | QFile::Text))
+		
+	bool success = executeExportFacetsInfo(facets, filename, false);
+	if (!success)
 	{
-		m_app->dispToConsole(QString("Failed to open file for writing! Check available space and access rights"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
+		m_app->dispToConsole(QString("ExportFacetsInfo failed for some reason"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);		
 	}
+	
+	
+}
+
+//##########################################################################
+//
+// 4.B. CSV EXPORT (CORE ENGINE - STATIC)
+//
+//##########################################################################
+bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, const QString filename, bool silent)
+{
+	
+
+	
+	
+	if (facets.empty())
+	{
+		ccLog::Error(QString("No facets to export info to csv"));
+        return false;
+	}
+
+    QFile outFile(filename);
+    if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        ccLog::Error(QString("Failed to open file for writing: %1").arg(filename));
+        return false;
+    }
+	
 
 	//write header
 	QTextStream outStream(&outFile);
@@ -1154,6 +1229,146 @@ void qFacets::exportFacetsInfo()
 	}
 
 	outFile.close();
-
-	m_app->dispToConsole(QString("[qFacets] File '%1' successfully saved").arg(filename), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	
+	
+	ccLog::Print(QString("[qFacets] File '%1' successfully saved").arg(filename));
+	return true;
 }
+
+//##########################################################################
+//
+// 5.A. CLASSIFICATION (GUI WRAPPER)
+//
+//##########################################################################
+
+void qFacets::classifyFacetsByAngle()
+{
+	assert(m_app);
+	if (!m_app)
+		return;
+
+	//disclaimer accepted?
+	if (!ShowDisclaimer(m_app))
+		return;
+
+	//we expect a facet group
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	if (!m_app->haveOneSelection() || !selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		m_app->dispToConsole("Select a group of facets!");
+		return;
+	}
+
+	ClassificationParamsDlg classifParamsDlg(m_app->getMainWindow());
+	classifParamsDlg.angleStepDoubleSpinBox->setValue(s_classifAngleStep);
+	classifParamsDlg.maxDistDoubleSpinBox->setValue(s_classifMaxDist);
+	if (!classifParamsDlg.exec())
+		return;
+
+	s_classifAngleStep = classifParamsDlg.angleStepDoubleSpinBox->value();
+	s_stereogramAngleStep = s_classifAngleStep; //we automatically copy it to the stereogram's equivalent parameter
+	s_classifMaxDist = classifParamsDlg.maxDistDoubleSpinBox->value();
+
+	ccHObject* group = selectedEntities.back();
+	classifyFacetsByAngle(group, s_classifAngleStep, s_classifMaxDist);
+}
+
+//##########################################################################
+//
+// 5.B. CLASSIFICATION (CORE ENGINE - STATIC)
+//
+//##########################################################################
+
+void qFacets::classifyFacetsByAngle(ccHObject* group,
+	double angleStep_deg,
+	double maxDist)
+{
+	assert(m_app);
+	if (!m_app)
+		return;
+
+	assert(group);
+
+	if (group->isA(CC_TYPES::HIERARCHY_OBJECT))
+	{
+		if (group->getParent())
+		{
+			m_app->removeFromDB(group, false);
+		}
+
+		bool success = FacetsClassifier::ByOrientation(group, angleStep_deg, maxDist);
+		m_app->addToDB(group);
+
+		if (!success)
+		{
+			m_app->dispToConsole("An error occurred while classifying the facets! (not enough memory?)",
+				ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
+	}
+
+	m_app->redrawAll();
+}
+
+
+//##########################################################################
+//
+// 6.A. STEREOGRAM (GUI WRAPPER - INHERENTLY UI)
+//
+//##########################################################################
+
+void qFacets::showStereogram()
+{
+	assert(m_app);
+	if (!m_app)
+		return;
+
+	//disclaimer accepted?
+	if (!ShowDisclaimer(m_app))
+		return;
+
+	//we expect a facet group or a cloud
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	if (!m_app->haveOneSelection()
+		|| (!selectedEntities.back()->isA(CC_TYPES::HIERARCHY_OBJECT)
+		&& !selectedEntities.back()->isA(CC_TYPES::POINT_CLOUD))
+		)
+	{
+		m_app->dispToConsole("Select a group of facets or a point cloud!");
+		return;
+	}
+
+	StereogramParamsDlg stereogramParamsDlg(m_app->getMainWindow());
+	stereogramParamsDlg.angleStepDoubleSpinBox->setValue(s_stereogramAngleStep);
+	stereogramParamsDlg.resolutionDoubleSpinBox->setValue(s_stereogramResolution_deg);
+	if (!stereogramParamsDlg.exec())
+		return;
+
+	s_stereogramAngleStep = stereogramParamsDlg.angleStepDoubleSpinBox->value();
+	s_stereogramResolution_deg = stereogramParamsDlg.resolutionDoubleSpinBox->value();
+
+	if ( m_stereogramDialog == nullptr )
+	{
+		m_stereogramDialog = new StereogramDialog( m_app );
+	}
+	
+	if (m_stereogramDialog->init(s_stereogramAngleStep, selectedEntities.back(), s_stereogramResolution_deg))
+	{
+		m_stereogramDialog->show();
+		m_stereogramDialog->raise();
+	}
+}
+
+
+// 
+void qFacets::registerCommands(ccCommandLineInterface* cmd)
+{
+	if (!cmd)
+	{
+		assert(false);
+		return;
+	}
+	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandFacets));
+}
+
+

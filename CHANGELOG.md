@@ -53,7 +53,30 @@ New features:
 				where {SFnIndex} can be a numerical index, a name or 'LAST', or -1 if the
 				dimension should not be initialized from a SF (in which case it will be
 				left at its previous value, or 0 if no normal was previously set)
-
+		- New command -FACETS -EXTRACT_FACETS -ALGO {ALGO_KD_TREE|ALGO_FAST_MARCHING} -KD_TREE_FUSION_MAX_ANGLE_DEG {kd_tree_fusion_max_angle_deg} -KD_TREE_FUSION_MAX_RELATIVE_DISTANCE {kd_tree_fusion_max_relative_distance} -OCTREE_LEVEL {octree_level} -USE_RETRO_PROJECTION_ERROR -ERROR_MEASURE {RMS|MAX_DIST_68_PERCENT|MAX_DIST_95_PERCENT|MAX_DIST_99_PERCENT|MAX_DIST} -ERROR_MAX_PER_FACET {error_max_per_facet} -MIN_POINTS_PER_FACET {min_points_per_facet} -MAX_EDGE_LENGTH {max_edge_length} -CLASSIFY_FACETS_BY_ANGLE -CLASSIF_ANGLE_STEP {classif_angle_step} -CLASSIF_MAX_DIST {classif_max_dist} -EXPORT_FACETS -SHAPE_FILENAME {shape_filename} -USE_NATIVE_ORIENTATION -USE_GLOBAL_ORIENTATION -USE_CUSTOM_ORIENTATION {nX nY nZ} -EXPORT_FACETS_INFO -CSV_FILENAME {csv_filename}
+			- Runs the qFacets plugin from command line.  Note the stereogram option has not been implemented on command line.			
+			- -EXTRACT_FACETS extracts the facets.  Need this parameter for others to work
+				- -ALGO {ALGO_KD_TREE|ALGO_FAST_MARCHING} specifies which algorithm to use. default=ALGO_KD_TREE
+					- {ALGO_KD_TREE} uses kd tree
+						- -KD_TREE_FUSION_MAX_ANGLE_DEG {kd_tree_fusion_max_angle_deg} default=20
+						- -KD_TREE_FUSION_MAX_RELATIVE_DISTANCE {kd_tree_fusion_max_relative_distance} default=1.0
+					- {ALGO_FAST_MARCHING} uses fast marching
+						- -OCTREE_LEVEL {octree_level} default=8
+						- -USE_RETRO_PROJECTION_ERROR default=false			                     
+			    - -ERROR_MEASURE {RMS|MAX_DIST_68_PERCENT|MAX_DIST_95_PERCENT|MAX_DIST_99_PERCENT|MAX_DIST} default=MAX_DIST_99_PERCENT
+			    - -ERROR_MAX_PER_FACET {error_max_per_facet} default=0.2
+			    - -MIN_POINTS_PER_FACET {min_points_per_facet} default=10
+			    - -MAX_EDGE_LENGTH {max_edge_length} default=1.0
+			- -CLASSIFY_FACETS_BY_ANGLE groups the facets into angular groups. default=false
+				- -CLASSIF_ANGLE_STEP {classif_angle_step} default=30
+                - -CLASSIF_MAX_DIST {classif_max_dist} default=1.0
+			- -EXPORT_FACETS saves facet info including geometry to a shape file file.  default=false
+                - -SHAPE_FILENAME {shape_filename} default='[name of cloud]_facets.shp'
+				- -USE_NATIVE_ORIENTATION default=true 
+				- -USE_GLOBAL_ORIENTATION default=false
+                - -USE_CUSTOM_ORIENTATION {nX nY nZ} default=false, default nx nY nZ = 0.0 0.0 1.0
+			- -EXPORT_FACETS_INFO saves facet info to a csv file (no geometry saved). default=false
+              - -CSV_FILENAME {csv_filename} default = '[name of cloud]_facets.csv'
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry

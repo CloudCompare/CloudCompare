@@ -25,7 +25,7 @@
 #include "ccviewer.h"
 
 ccViewerApplication::ccViewerApplication(int& argc, char** argv, bool isCommandLine)
-    : ccApplicationBase(argc, argv, isCommandLine, QString("1.42.alpha (%1)").arg(__DATE__))
+    : ccApplicationBase(argc, argv, isCommandLine, QString("1.42.beta (%1)").arg(__DATE__))
 {
 	setApplicationName("CloudCompareViewer");
 }

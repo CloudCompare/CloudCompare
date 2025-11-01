@@ -2,17 +2,16 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.14.alpha (06-18-2025)"
+#define MyAppVersion "2.14.beta (11-01-2025)"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\These\C++\CloudCompare\vc_redist"
 #define MyFaroRedistPath "E:\These\C++\Faro\redist"
 #define MyFaroRedistExe "FARO LS 2020.0.7.6378 Setup.exe"
-#define MyCCPath "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017\CloudCompare"
-#define MyOutputDir "E:\These\C++\CloudCompare\new_bin_x64_msvc_2017"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2022\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2022"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
-#define CertificateSubject "Open Source Developer, Daniel Girardeau-Montaut"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -26,7 +25,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\{#MyAppName}
+DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 AllowNoIcons=true
@@ -37,20 +36,21 @@ OutputDir={#MyOutputDir}
 InternalCompressLevel=Ultra64
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
-ArchitecturesAllowed=x64
+ArchitecturesAllowed=x64os
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be
 ; done in "64-bit mode" on x64, meaning it should use the native
 ; 64-bit Program Files directory and the 64-bit view of the registry.
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64os
 ; Installer signing
-SignTool=signtool Sign /n "{#CertificateSubject}" /fd sha256 /t http://timestamp.digicert.com $f
+; SignToolWindows=signtool.exe sign /debug /n "Open Source Developer, Daniel Girardeau-Montaut" /t http://timestamp.digicert.com /fd sha256 /v $f
+SignTool=SignToolWindows
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
+Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked;
 ; Warning: update the 'Faro support' checkbox index in the NextButtonClick method if you insert another checkbox above this one!!!
 Name: "faro_support" ; Description: "Install Faro I/O plugin (to load FWS/FLS files). The will install Faro LS redistributable package as well." ; GroupDescription: "Faro LS support";  Flags: unchecked
 ; Warning: update the 'Python plugin support' checkbox index in the NextButtonClick method if you insert another checkbox above this one!!!

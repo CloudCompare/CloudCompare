@@ -18,7 +18,7 @@
 	url = https://github.com/CyberbuildLab/masonry-cc
 [submodule "plugins/core/Standard/qJSonRPCPlugin"]
 	path = plugins/core/Standard/qJSonRPCPlugin
-	url = https://gitlab.com/theadib/JSonRPCPlugin.git
+	url = https://github.com/CloudCompare/qJSonRPCPlugin.git
 [submodule "plugins/core/Standard/qCanupo/contrib/dlib"]
 	path = plugins/core/Standard/qCanupo/contrib/dlib
 	url = https://github.com/davisking/dlib.git

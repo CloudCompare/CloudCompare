@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.14.alpha (???) - (??/??/202?)
+v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
 	- Edit > Color > Gaussian filter
@@ -233,6 +233,7 @@ Improvements:
 		- Ukrainian translation is now available
 		- CSV matrix files can now be loaded with empty cells
 		- the 'Escape' key should now allow to close any currently opened 'overlay' dialog in the top right corner of the 3D views (point picking, rotate/translate, etc.)
+		- CloudCompare for Windows is now built upon Qt 6
 
 Bug fixes:
 	- editing the Global Shift & Scale information of a polyline would make CC crash

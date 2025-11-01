@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns='urn:schemas-microsoft-com:asm.v1' manifestVersion='1.0'>
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity type='win32' name='FARO.LS' version='1.1.800.7' processorArchitecture='amd64' publicKeyToken="1d23f5635ba800ab"/>
+    </dependentAssembly>
+  </dependency>
+</assembly>
+

@@ -236,6 +236,7 @@ Improvements:
 		- CloudCompare for Windows is now built upon Qt 6
 
 Bug fixes:
+	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
 		to a crash (warning: now, the polylines will be emptied to prevent a crash)

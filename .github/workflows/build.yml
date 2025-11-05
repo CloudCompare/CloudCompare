@@ -40,6 +40,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
+          auto-activate: false
           activate-environment: CloudCompareDev
           environment-file: ${{ matrix.config.conda_dep_file }}
           channels: conda-forge

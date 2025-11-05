@@ -1,6 +1,4 @@
 name: CloudCompareDev
-channels:
-  - conda-forge
 dependencies:
   - ninja
   - qt6-main>=6.4.*

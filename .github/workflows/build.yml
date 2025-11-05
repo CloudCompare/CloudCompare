@@ -1,6 +1,6 @@
 name: Build
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -13,21 +13,21 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows MSVC",
-            os: windows-latest,
-            generator: "Ninja",
-            conda_library_dir: "Library",
-            compile_riegl: "ON",
-            conda_dep_file: ".ci/conda-win.yml"
-          }
+              name: "Windows MSVC",
+              os: windows-latest,
+              generator: "Ninja",
+              conda_library_dir: "Library",
+              compile_riegl: "ON",
+              conda_dep_file: ".ci/conda-win.yml",
+            }
           - {
-            name: "macOS Clang",
-            os: macos-latest,
-            generator: "Ninja",
-            conda_library_dir: ".",
-            compile_riegl: "OFF",
-            conda_dep_file: ".ci/conda-macos.yml"
-          }
+              name: "macOS Clang",
+              os: macos-latest,
+              generator: "Ninja",
+              conda_library_dir: ".",
+              compile_riegl: "OFF",
+              conda_dep_file: ".ci/conda-macos.yml",
+            }
 
     steps:
       - name: Checkout
@@ -41,8 +41,9 @@ jobs:
         with:
           architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
           activate-environment: CloudCompareDev
-          auto-activate-base: false
           environment-file: ${{ matrix.config.conda_dep_file }}
+          channels: conda-forge
+          conda-remove-defaults: "true"
 
       - name: Configure MSVC console (Windows)
         if: matrix.config.os == 'windows-latest'
@@ -140,17 +141,17 @@ jobs:
 
           sudo apt-get install -qy cmake ninja-build
           qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-tools-dev-tools
-          libtbb-dev 
+          libtbb-dev
           libavcodec-dev libavformat-dev
           libdraco-dev
           libeigen3-dev
           libcgal-dev libgdal-dev
-          liblaszip-dev 
+          liblaszip-dev
           libxerces-c-dev
           zlib1g-dev qt6-5compat-dev
           libopencv-dev
           libboost-dev libboost-iostreams-dev libboost-system-dev libpcap-dev libflann-dev
-          xvfb  
+          xvfb
 
       - name: Setup GCC
         if: matrix.compiler == 'GCC'
@@ -168,13 +169,13 @@ jobs:
         run: |
           git clone https://github.com/PointCloudLibrary/pcl.git
           cd pcl && git checkout pcl-1.15.0 && mkdir build
-          cmake -S . -B build -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF
+          cmake -S . -G Ninja -B build -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF
           sudo cmake --build build --target install -- -j 2
 
       - name: Configure cmake
         run: >
           mkdir build
-  
+
           cmake
           -B build
           -S .

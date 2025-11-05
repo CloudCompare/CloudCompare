@@ -1,6 +1,6 @@
 name: Build
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -13,21 +13,21 @@ jobs:
       matrix:
         config:
           - {
-            name: "Windows MSVC",
-            os: windows-latest,
-            generator: "Ninja",
-            conda_library_dir: "Library",
-            compile_riegl: "ON",
-            conda_dep_file: ".ci/conda-win.yml"
-          }
+              name: "Windows MSVC",
+              os: windows-latest,
+              generator: "Ninja",
+              conda_library_dir: "Library",
+              compile_riegl: "ON",
+              conda_dep_file: ".ci/conda-win.yml",
+            }
           - {
-            name: "macOS Clang",
-            os: macos-latest,
-            generator: "Ninja",
-            conda_library_dir: ".",
-            compile_riegl: "OFF",
-            conda_dep_file: ".ci/conda-macos.yml"
-          }
+              name: "macOS Clang",
+              os: macos-latest,
+              generator: "Ninja",
+              conda_library_dir: ".",
+              compile_riegl: "OFF",
+              conda_dep_file: ".ci/conda-macos.yml",
+            }
 
     steps:
       - name: Checkout
@@ -41,7 +41,6 @@ jobs:
         with:
           architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
           activate-environment: CloudCompareDev
-          auto-activate: false
           environment-file: ${{ matrix.config.conda_dep_file }}
           channels: conda-forge
           conda-remove-defaults: "true"

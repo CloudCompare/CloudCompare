@@ -3,7 +3,6 @@
 # and should thus be suitable to be used to build CloudCompare.
 name: Create Source Bundle
 
-
 on:
   push:
     tags:

@@ -112,7 +112,7 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
-      - name: Install (macOs)
+      - name: Install (macOS)
         if: matrix.config.os == 'macos-latest'
         run: sudo cmake --install build
 
@@ -122,7 +122,7 @@ jobs:
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
@@ -171,8 +171,8 @@ jobs:
         uses: actions/cache@v4
         id: cache-pcl
         with:
-          path: /usr/local/pcl-cached
-          key: pcl-${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('**/pcl-version.txt') }}
+          path: pcl-cached
+          key: pcl-${{ runner.os }}-${{ matrix.compiler }}-v1.15.1-${{ hashFiles('.github/workflows/build.yml') }} #change pcl version to invalidate cache
 
       - name: Build PCL Without VTK
         if: steps.cache-pcl.outputs.cache-hit != 'true'
@@ -184,8 +184,8 @@ jobs:
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF \
-            -DCMAKE_INSTALL_PREFIX=/usr/local/pcl-cached
-          sudo cmake --build build --target install --parallel
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/pcl-cached
+          cmake --build build --target install --parallel
 
       - name: Configure cmake
         run: >
@@ -197,7 +197,7 @@ jobs:
           -G Ninja
           -DEIGEN_ROOT_DIR=/usr/include/eigen3
           -DJSON_ROOT_DIR=/usr/include/jsoncpp
-          -DPCL_DIR=/usr/local/pcl-cached/share/pcl-1.15
+          -DPCL_DIR=${{ github.workspace }}/pcl-cached/share/pcl-1.15
           -DDLIB_ROOT=/usr/include
           -DCCCORELIB_USE_TBB=ON
           -DPLUGIN_EXAMPLE_GL=ON

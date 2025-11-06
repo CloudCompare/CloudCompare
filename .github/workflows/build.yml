@@ -167,12 +167,25 @@ jobs:
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
 
+      - name: Cache PCL Build
+        uses: actions/cache@v4
+        id: cache-pcl
+        with:
+          path: /usr/local/pcl-cached
+          key: pcl-${{ runner.os }}-${{ matrix.compiler }}-${{ hashFiles('**/pcl-version.txt') }}
+
       - name: Build PCL Without VTK
+        if: steps.cache-pcl.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/PointCloudLibrary/pcl.git
-          cd pcl && git checkout pcl-1.15.0 && mkdir build
-          cmake -S . -G Ninja -B build -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF
-          sudo cmake --build build --target install -- -j 2
+          cd pcl
+          git checkout pcl-1.15.1
+          mkdir build
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/pcl-cached
+          sudo cmake --build build --target install --parallel
 
       - name: Configure cmake
         run: >
@@ -184,6 +197,7 @@ jobs:
           -G Ninja
           -DEIGEN_ROOT_DIR=/usr/include/eigen3
           -DJSON_ROOT_DIR=/usr/include/jsoncpp
+          -DPCL_DIR=/usr/local/pcl-cached/share/pcl-1.15
           -DDLIB_ROOT=/usr/include
           -DCCCORELIB_USE_TBB=ON
           -DPLUGIN_EXAMPLE_GL=ON

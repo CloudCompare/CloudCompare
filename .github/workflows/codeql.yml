@@ -29,7 +29,6 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     env:
-      SCALAR_DOUBLE: ON
       COMPILER: GCC
       CC: gcc
       CXX: g++
@@ -41,9 +40,23 @@ jobs:
           submodules: recursive
 
       - name: Install Dependencies
-        run: |
+        run: >
           sudo apt-get update -qq
-          sudo apt-get install -qy cmake ninja-build libqt5svg5-dev libqt5opengl5-dev qttools5-dev qttools5-dev-tools libqt5websockets5-dev libtbb-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libboost-program-options-dev libboost-thread-dev libeigen3-dev libcgal-dev libcgal-qt5-dev libgdal-dev libpcl-dev libdlib-dev libproj-dev libxerces-c-dev xvfb libjsoncpp-dev liblaszip-dev
+
+          sudo apt-get install -qy cmake ninja-build
+          qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-tools-dev-tools
+          libtbb-dev
+          libavcodec-dev libavformat-dev
+          libdraco-dev
+          libeigen3-dev
+          libcgal-dev libgdal-dev
+          liblaszip-dev
+          libxerces-c-dev
+          zlib1g-dev qt6-5compat-dev
+          libopencv-dev
+          libboost-dev libboost-iostreams-dev libboost-system-dev libpcap-dev libflann-dev
+          libglu1-mesa-dev
+          xvfb
 
       - name: Configure cmake
         run: |
@@ -56,7 +69,6 @@ jobs:
             -DEIGEN_ROOT_DIR=/usr/include/eigen3 \
             -DJSON_ROOT_DIR=/usr/include/jsoncpp \
             -DDLIB_ROOT=/usr/include \
-            -DCCCORELIB_SCALAR_DOUBLE=${{ matrix.scalar_double }} \
             -DCCCORELIB_USE_TBB=ON \
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
@@ -85,13 +97,11 @@ jobs:
             -DPLUGIN_STANDARD_QPOISSON_RECON=ON \
             -DPLUGIN_STANDARD_QSRA=ON \
             -DPLUGIN_STANDARD_QRANSAC_SD=ON \
-            -DPLUGIN_STANDARD_QPCL=ON \
             -DPLUGIN_STANDARD_QCLOUDLAYERS=ON \
-            -DBUILD_TESTING=ON
-
+      # -DPLUGIN_STANDARD_QPCL=ON remove PCL for now, the one in Ubuntu does not meets our qt6 requirements
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # If you wish to specify custom queries, you can do so here or in a config file.
@@ -105,6 +115,6 @@ jobs:
         run: cmake --build build --parallel
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{matrix.language}}"

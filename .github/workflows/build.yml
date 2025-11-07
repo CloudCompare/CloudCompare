@@ -40,6 +40,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
+          auto-activate: false
           activate-environment: CloudCompareDev
           environment-file: ${{ matrix.config.conda_dep_file }}
           channels: conda-forge
@@ -111,7 +112,7 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
-      - name: Install (macOs)
+      - name: Install (macOS)
         if: matrix.config.os == 'macos-latest'
         run: sudo cmake --install build
 
@@ -121,7 +122,7 @@ jobs:
 
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
@@ -151,6 +152,7 @@ jobs:
           zlib1g-dev qt6-5compat-dev
           libopencv-dev
           libboost-dev libboost-iostreams-dev libboost-system-dev libpcap-dev libflann-dev
+          libglu1-mesa-dev
           xvfb
 
       - name: Setup GCC
@@ -165,12 +167,25 @@ jobs:
           echo "CC=clang" >> $GITHUB_ENV
           echo "CXX=clang++" >> $GITHUB_ENV
 
+      - name: Cache PCL Build
+        uses: actions/cache@v4
+        id: cache-pcl
+        with:
+          path: pcl-cached
+          key: pcl-${{ runner.os }}-${{ matrix.compiler }}-v1.15.1-${{ hashFiles('.github/workflows/build.yml') }} #change pcl version to invalidate cache
+
       - name: Build PCL Without VTK
+        if: steps.cache-pcl.outputs.cache-hit != 'true'
         run: |
           git clone https://github.com/PointCloudLibrary/pcl.git
-          cd pcl && git checkout pcl-1.15.0 && mkdir build
-          cmake -S . -G Ninja -B build -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF
-          sudo cmake --build build --target install -- -j 2
+          cd pcl
+          git checkout pcl-1.15.1
+          mkdir build
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF \
+            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/pcl-cached
+          cmake --build build --target install --parallel
 
       - name: Configure cmake
         run: >
@@ -182,6 +197,7 @@ jobs:
           -G Ninja
           -DEIGEN_ROOT_DIR=/usr/include/eigen3
           -DJSON_ROOT_DIR=/usr/include/jsoncpp
+          -DPCL_DIR=${{ github.workspace }}/pcl-cached/share/pcl-1.15
           -DDLIB_ROOT=/usr/include
           -DCCCORELIB_USE_TBB=ON
           -DPLUGIN_EXAMPLE_GL=ON
@@ -210,7 +226,7 @@ jobs:
           -DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=OFF
           -DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=OFF
           -DPLUGIN_STANDARD_QM3C2=ON
-          -DPLUGIN_STANDARD_QPCV=OFF
+          -DPLUGIN_STANDARD_QPCV=ON
           -DPLUGIN_STANDARD_QPOISSON_RECON=ON
           -DPLUGIN_STANDARD_QSRA=ON
           -DPLUGIN_STANDARD_QRANSAC_SD=ON

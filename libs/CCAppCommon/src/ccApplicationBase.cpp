@@ -50,8 +50,8 @@
 // Qt
 #include <QOpenGLWidget>
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 5, 0))
-#error CloudCompare does not support versions of Qt prior to 5.5
+#if (QT_VERSION < QT_VERSION_CHECK(6, 4, 0))
+#error CloudCompare does not support versions of Qt prior to 6.4
 #endif
 
 void ccApplicationBase::InitOpenGL()

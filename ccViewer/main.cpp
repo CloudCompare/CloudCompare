@@ -63,14 +63,6 @@ int main(int argc, char* argv[])
 
 	ccViewerApplication a(argc, argv, false);
 
-#ifdef CC_GAMEPAD_SUPPORT
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
-#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
-	QGamepadManager::instance(); // potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
-#endif
-#endif
-#endif
-
 #ifdef USE_VLD
 	VLDEnable();
 #endif

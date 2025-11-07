@@ -41,7 +41,6 @@ class ccClippingBoxTool;
 class ccComparisonDlg;
 class ccDBRoot;
 class ccDrawableObject;
-class ccGamepadManager;
 class ccGLWindowInterface;
 class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
@@ -609,9 +608,6 @@ class MainWindow : public QMainWindow
 
 	//! 3D mouse
 	cc3DMouseManager* m_3DMouseManager;
-
-	//! Gamepad handler
-	ccGamepadManager* m_gamepadManager;
 
 	//! View mode pop-up menu button
 	QToolButton* m_viewModePopupButton;

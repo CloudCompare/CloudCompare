@@ -142,11 +142,6 @@
 #include "cc3DMouseManager.h"
 #endif
 
-// Gamepads
-#ifdef CC_GAMEPAD_SUPPORT
-#include "ccGamepadManager.h"
-#endif
-
 // Qt
 #include <QClipboard>
 
@@ -200,7 +195,6 @@ MainWindow::MainWindow()
     , m_uiFrozen(false)
     , m_recentFiles(new ccRecentFiles(this))
     , m_3DMouseManager(nullptr)
-    , m_gamepadManager(nullptr)
     , m_viewModePopupButton(nullptr)
     , m_pivotVisibilityPopupButton(nullptr)
     , m_firstShow(true)
@@ -454,23 +448,13 @@ void MainWindow::setupInputDevices()
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_3DMouseManager->menu());
 #endif
 
-#ifdef CC_GAMEPAD_SUPPORT
-	m_gamepadManager = new ccGamepadManager(this, this);
-	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_gamepadManager->menu());
-#endif
-
-#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPAD_SUPPORT)
+#if defined(CC_3DXWARE_SUPPORT)
 	m_UI->menuFile->insertSeparator(m_UI->actionCloseAll);
 #endif
 }
 
 void MainWindow::destroyInputDevices()
 {
-#ifdef CC_GAMEPAD_SUPPORT
-	delete m_gamepadManager;
-	m_gamepadManager = nullptr;
-#endif
-
 #ifdef CC_3DXWARE_SUPPORT
 	delete m_3DMouseManager;
 	m_3DMouseManager = nullptr;

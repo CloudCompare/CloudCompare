@@ -26,9 +26,6 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-#ifdef CC_GAMEPAD_SUPPORT
-#include <QGamepadManager>
-#endif
 
 // qCC_db
 #include <ccColorScalesManager.h>
@@ -174,13 +171,6 @@ int main(int argc, char** argv)
 		ccLog::SetVerbosityLevel(ccGui::Parameters().logVerbosityLevel);
 	}
 
-#ifdef CC_GAMEPAD_SUPPORT
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
-#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
-	QGamepadManager::instance(); // potential workaround to bug https://bugreports.qt.io/browse/QTBUG-61553
-#endif
-#endif
-#endif
 	// store the log message until a valid logging instance is registered
 	ccLog::EnableMessageBackup(true);
 

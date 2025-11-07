@@ -27,16 +27,6 @@ target_sources(${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle/light/lightstyle.qrc
 )
 
-if( OPTION_SUPPORT_GAMEPADS )
-	find_package( Qt6
-		COMPONENTS
-			Gamepad
-		REQUIRED
-	)
-
-	target_link_libraries( ${PROJECT_NAME} Qt6::Gamepad )
-endif()
-
 if( OPTION_SUPPORT_3DCONNEXION_DEVICES )
 	target_link_3DXWARE( ${PROJECT_NAME} )
 endif()

@@ -40,11 +40,11 @@ function( DeployQt )
 
 	# For readability
 	set( deploy_path "${DEPLOY_QT_DEPLOY_PATH}" )
-	
+
 	message( STATUS "Installing ${DEPLOY_QT_TARGET} to ${deploy_path}" )
-	
+
 	get_target_property( name ${DEPLOY_QT_TARGET} NAME )
-		
+
 	if ( APPLE )
 		set( app_name "${name}.app" )
 		if (CMAKE_CONFIGURATION_TYPES)
@@ -73,7 +73,7 @@ function( DeployQt )
 			DESTINATION "${deploy_path}"
 			USE_SOURCE_PERMISSIONS
 		)
-	elseif( WIN32 )	
+	elseif( WIN32 )
 		set( app_name "${name}.exe" )
 		if( CMAKE_CONFIGURATION_TYPES )
 			set( app_path "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${app_name}" )
@@ -93,10 +93,6 @@ function( DeployQt )
 			--verbose=1
 		)
 
-		if (OPTION_SUPPORT_GAMEPADS)
-			list(APPEND deploy_qt_options --gamepad)
-		endif ()
-
 		add_custom_command(
 			TARGET ${DEPLOY_QT_TARGET}
 			POST_BUILD
@@ -108,7 +104,7 @@ function( DeployQt )
 				${deploy_qt_options}
 			VERBATIM
 		)
-	
+
 		if( NOT CMAKE_CONFIGURATION_TYPES )
 			install(
 				DIRECTORY ${temp_dir}/
@@ -120,13 +116,13 @@ function( DeployQt )
 				CONFIGURATIONS Debug
 				DESTINATION ${deploy_path}_debug
 			)
-		
+
 			install(
 				DIRECTORY ${temp_dir}/
 				CONFIGURATIONS Release
 				DESTINATION ${deploy_path}
 			)
-		
+
 			install(
 				DIRECTORY ${temp_dir}/
 				CONFIGURATIONS RelWithDebInfo

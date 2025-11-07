@@ -35,7 +35,6 @@
 class ccGLWindowInterface;
 class ccHObject;
 class Mouse3DInput;
-class ccGamepadManager;
 
 //! Application main window
 class ccViewer : public QMainWindow
@@ -214,9 +213,6 @@ class ccViewer : public QMainWindow
 
 	//! 3D mouse handler
 	Mouse3DInput* m_3dMouseInput;
-
-	//! Gamepad handler
-	ccGamepadManager* m_gamepadManager;
 
   private:
 	//! Associated GUI

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.14.beta (11-01-2025)"
+#define MyAppVersion "2.14.beta (11-09-2025)"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
@@ -48,28 +48,29 @@ SignTool=SignToolWindows
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Components]
+Name: main; Description: "Main program"
+Name: faro_ls; Description: "Faro plugin"
+Name: python_plugin; Description: "Python plugin"
+
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
-Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked;
-; Warning: update the 'Faro support' checkbox index in the NextButtonClick method if you insert another checkbox above this one!!!
-Name: "faro_support" ; Description: "Install Faro I/O plugin (to load FWS/FLS files). The will install Faro LS redistributable package as well." ; GroupDescription: "Faro LS support";  Flags: unchecked
-; Warning: update the 'Python plugin support' checkbox index in the NextButtonClick method if you insert another checkbox above this one!!!
-Name: "python_plugin_support" ; Description: "Install the Python and 3DFin plugins" ; GroupDescription: "Python plugin support";  Flags: unchecked
+Name: desktopicon; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Components: main
+Name: quicklaunchicon; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Components: main; Flags: unchecked
 
 [Files]
-Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QBRGM*.dll,QFARO*.dll,PythonRuntime.dll,plugins-python,Python"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Components: main; Flags: ignoreversion
+Source: "{#MyCCPath}\*"; Excludes: "*.manifest,QFARO*.dll,PythonRuntime.dll,plugins-python,Python"; DestDir: "{app}"; Components: main; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Unknown dependency support:)
-Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
+Source: "{#MyVCRedistPath}\vcredist_2013_x64.exe"; DestDir: {tmp};  Components: main; Flags: deleteafterinstall 64bit;
 ; All other Visual Studio dependencies at once: 2015, 2017, 2019 and 2022
-Source: "{#MyVCRedistPath}\VC_redist.x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit;
+Source: "{#MyVCRedistPath}\VC_redist.x64.exe"; DestDir: {tmp};  Components: main; Flags: deleteafterinstall 64bit;
 ; FARO LS support
-Source: "{#MyFaroRedistPath}\x64\{#MyFaroRedistExe}"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; Check: WithFaro
-Source: "{#MyFaroRedistPath}\x64\{#MyAppExeName}.manifest"; DestDir: "{app}"; Flags: ignoreversion; Check: WithFaro
-Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithFaro
-Source: "{#MyCCPath}\plugins\PythonRuntime.dll"; DestDir: "{app}\plugins"; Flags: ignoreversion; Check: WithPythonPlugin
-Source: "{#MyCCPath}\plugins\Python\*"; DestDir: "{app}\plugins\Python"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: WithPythonPlugin
-Source: "{#MyCCPath}\plugins-python\*"; DestDir: "{app}\plugins-python"; Flags: ignoreversion recursesubdirs createallsubdirs; Check: WithPythonPlugin
+Source: "{#MyFaroRedistPath}\x64\{#MyFaroRedistExe}"; DestDir: {tmp};  Components: faro_ls; Flags: deleteafterinstall 64bit;
+Source: "{#MyFaroRedistPath}\x64\{#MyAppExeName}.manifest"; DestDir: "{app}"; Components: faro_ls; Flags: ignoreversion;
+Source: "{#MyCCPath}\plugins\QFARO*.dll"; DestDir: "{app}\plugins"; Components: faro_ls; Flags: ignoreversion;
+Source: "{#MyCCPath}\plugins\PythonRuntime.dll"; DestDir: "{app}\plugins"; Components: python_plugin; Flags: ignoreversion;
+Source: "{#MyCCPath}\plugins\Python\*"; DestDir: "{app}\plugins\Python"; Components: python_plugin; Flags: ignoreversion recursesubdirs createallsubdirs;
+Source: "{#MyCCPath}\plugins-python\*"; DestDir: "{app}\plugins-python"; Components: python_plugin; Flags: ignoreversion recursesubdirs createallsubdirs;
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -80,7 +81,7 @@ Name: "{userappdata}\Microsoft\Internet Explorer\Quick Launch\{#MyAppName}"; Fil
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 Filename: "{tmp}\vcredist_2013_x64.exe"; Parameters: "/install /quiet /norestart"
 Filename: "{tmp}\VC_redist.x64.exe"; Parameters: "/install /quiet /norestart"
-Filename: "{tmp}\{#MyFaroRedistExe}"; Check: WithFaro
+Filename: "{tmp}\{#MyFaroRedistExe}"; Components: faro_ls
 
 [Code]
 function InitializeUninstall(): Boolean;
@@ -89,20 +90,6 @@ begin
   ShellExec('open','taskkill.exe','/f /im {#MyAppExeName}','',SW_HIDE,ewNoWait,ErrorCode);
   ShellExec('open','tskill.exe',' {#MyAppName}','',SW_HIDE,ewNoWait,ErrorCode);
   result := True;
-end;
-
-var
-  WithFaroSupport: Boolean;
-  WithPythonPluginSupport: Boolean;
-
-function WithFaro: Boolean;
-begin
-  Result := WithFaroSupport;
-end;
-
-function WithPythonPlugin: Boolean;
-begin
-  Result := WithPythonPluginSupport;
 end;
 
 /////////////////////////////////////////////////////////////////////
@@ -161,20 +148,5 @@ begin
     begin
       UnInstallOldVersion();
     end;
-  end;
-end;
-
-/////////////////////////////////////////////////////////////////////
-function NextButtonClick(CurPageID: Integer): Boolean;
-begin
-  Result := True;
-  if (CurPageID = wpSelectTasks) then
-  begin
-    //'Faro support' checkbox is the 2nd one but each checkbox is nested
-    //inside a group, and each group conuts as 1!
-    WithFaroSupport := WizardForm.TasksList.Checked[3];
-    //'Python plugin support' checkbox is the 3rd one but each checkbox is nested
-    //inside a group, and each group conuts as 1!
-    WithPythonPluginSupport := WizardForm.TasksList.Checked[5];
   end;
 end;

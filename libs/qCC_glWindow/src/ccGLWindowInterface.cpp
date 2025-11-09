@@ -925,8 +925,11 @@ void ccGLWindowInterface::redraw(bool only2D /*=false*/, bool resetLOD /*=true*/
 void ccGLWindowInterface::setGLViewport(const QRect& rect)
 {
 	// correction for HD screens
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
-	m_glViewport               = QRect(rect.left() * devicePixelRatio, rect.top() * devicePixelRatio, rect.width() * devicePixelRatio, rect.height() * devicePixelRatio);
+	const auto devicePixelRatio = getDevicePixelRatio();
+	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio),
+                         static_cast<int>(rect.top() * devicePixelRatio),
+                         static_cast<int>(rect.width() * devicePixelRatio),
+                         static_cast<int>(rect.height() * devicePixelRatio));
 	invalidateViewport();
 
 	if (getOpenGLContext() && getOpenGLContext()->isValid())
@@ -2830,7 +2833,7 @@ int FontSizeModifier(int fontSize, float zoomFactor)
 
 int ccGLWindowInterface::getFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio());
 }
 
 void ccGLWindowInterface::setFontPointSize(int pointSize)
@@ -2847,7 +2850,7 @@ QFont ccGLWindowInterface::getTextDisplayFont() const
 
 int ccGLWindowInterface::getLabelFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio());
 }
 
 QFont ccGLWindowInterface::getLabelDisplayFont() const
@@ -6272,10 +6275,10 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent* event)
 	m_deferredPickingTimer.stop(); // prevent the picking process from starting
 	m_ignoreMouseReleaseEvent = true;
 
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
+	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = event->x() * devicePixelRatio;
-	const int y = event->y() * devicePixelRatio;
+	const int x = static_cast<int>(event->x() * devicePixelRatio);
+	const int y = static_cast<int>(event->y() * devicePixelRatio);
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))

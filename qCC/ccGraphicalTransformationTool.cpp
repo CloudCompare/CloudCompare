@@ -129,26 +129,13 @@ void ccGraphicalTransformationTool::pause(bool state)
 
 void ccGraphicalTransformationTool::advModeToggle(bool state)
 {
-	advRotateComboBox->setVisible(state);
-	advTranslateComboBox->setVisible(state);
-	translateLabel->setVisible(state);
-	rotateLabel->setVisible(state);
-	rotAxisLabel->setVisible(state);
-	objCenterRadio->setVisible(state);
-	refAxisRadio->setVisible(state);
-	incrementalRotLabel->setVisible(state);
-	incrementalRotSpin->setVisible(state);
-	incrementalTransLabel->setVisible(state);
-	incrementalTransSpin->setVisible(state);
-	incrementalForwardButton->setVisible(state);
-	incrementalBackwardButton->setVisible(state);
-	IncrementalTransformLabel->setVisible(state);
+	int rigthMostPos = this->x() + this->width();
 
 	m_advMode = state;
-	int wPrev = this->width();
+	advFrame->setVisible(state);
+	this->adjustSize(); // adjust size will minimize the display height with the dropdowns not visible
 	if (state)
 	{
-		this->setGeometry(this->x() + (-wPrev + 250), this->y(), 250, 235);
 		if (advTranslateComboBox->currentIndex() != 0)
 		{
 			TxCheckBox->setEnabled(false);
@@ -161,17 +148,16 @@ void ccGraphicalTransformationTool::advModeToggle(bool state)
 	{
 		TxCheckBox->setEnabled(true);
 		TyCheckBox->setEnabled(true);
-		this->setGeometry(this->x(), this->y(), 0, 0);
-		this->adjustSize(); // adjust size will minimize the display height with the dropdowns not visible
-		this->setGeometry(this->x() + (wPrev - 250), this->y(), 250, this->height());
 		advRotateComboBox->setCurrentIndex(0);    // index 0 is always the origin
 		advTranslateComboBox->setCurrentIndex(0); // index 0 is always the origin
 	}
+	this->setGeometry(rigthMostPos - this->width(), this->y(), this->width(), this->height());
 	// update mini-GUI
 	advPushButton->blockSignals(true);
 	advPushButton->setChecked(state);
 	advPushButton->blockSignals(false);
 	updateDisplayMessage();
+	incrementalTranslationToggle();
 }
 
 void ccGraphicalTransformationTool::populateAdvModeItems()
@@ -917,7 +903,6 @@ void ccGraphicalTransformationTool::glRotate(const ccGLMatrixd& rotMat)
 
 void ccGraphicalTransformationTool::incrementalTransform()
 {
-
 	// We check the sender to handle forward or backward transformation
 	QObject*   senderButton       = sender();
 	const bool isForwardTransform = senderButton == incrementalForwardButton;

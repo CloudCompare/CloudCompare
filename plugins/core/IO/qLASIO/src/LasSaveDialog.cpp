@@ -832,6 +832,22 @@ void LasSaveDialog::setOffsets(const QMap<Offset, CCVector3d>& availableOffsets,
 		useMinBBCornerOffsetRadioButton->setEnabled(false);
 	}
 
+	// BB center
+	if (outputOffsets.contains(BB_CENTER))
+	{
+		bbCenterLineEdit->setText(ToString(outputOffsets[BB_CENTER]));
+		useBBCenterOffsetRadioButton->setEnabled(true);
+		if (selectedOffsetType == BB_CENTER)
+		{
+			useBBCenterOffsetRadioButton->setChecked(true);
+		}
+	}
+	else
+	{
+		bbCenterLineEdit->setText("N/A");
+		useBBCenterOffsetRadioButton->setEnabled(false);
+	}
+
 	// Custom LAS offset
 	{
 		if (!outputOffsets.contains(CUSTOM_LAS_OFFSET))
@@ -872,6 +888,11 @@ CCVector3d LasSaveDialog::chosenOffset(Offset& offsetType) const
 	{
 		offsetType = MIN_BB_CORNER;
 		return outputOffsets[MIN_BB_CORNER];
+	}
+	else if (useBBCenterOffsetRadioButton->isChecked())
+	{
+		offsetType = BB_CENTER;
+		return outputOffsets[BB_CENTER];
 	}
 	else
 	{

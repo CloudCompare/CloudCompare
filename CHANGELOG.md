@@ -154,6 +154,7 @@ Improvements:
 				4) the original LAS offset, if any
 				5) the cloud minimum bounding-box corner (if applicable)
 			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
+		- Option to set the LAS Offset to the bounding-box center (X, Y)
 
 	- E57 files
 		- when loading E57 files, CC will now store more information about sensors

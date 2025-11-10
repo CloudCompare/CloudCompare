@@ -14,23 +14,21 @@ file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
-qt6_add_resources( generated_qrc_list ${qrc_list} )
-qt6_wrap_ui( generated_ui_list ${ui_list})
+qt_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
 	set( rc_list images/icon/cc_viewer_icon.rc )
 
 	#to get rid of the (system) console
-	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${generated_ui_list} ${source_list}  ${generated_qrc_list} ${rc_list} )
+	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list}  ${generated_qrc_list} ${rc_list} )
 else()
-	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
+	qt_add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_qrc_list} ${rc_list} )
 endif()
 
-
-#qt6_add_ui(${PROJECT_NAME} SOURCES ${ui_list} ) # Qt >= 6.8
+qt_add_ui(${PROJECT_NAME} SOURCES ${ui_list})
 
 target_link_libraries( ${PROJECT_NAME}
 	PUBLIC
@@ -114,7 +112,7 @@ if( WIN32 ) # For Linux it's already installed in by qCC
 endif()
 
 # Install plugins & shaders in the correct folder for each platform
-if( APPLE )	
+if( APPLE )
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CCVIEWER_MAC_PLUGIN_DIR}"

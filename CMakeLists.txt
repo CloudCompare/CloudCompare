@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.10 )
+cmake_minimum_required( VERSION 3.22 )
 
 project( CloudCompareProjects )
 
@@ -48,7 +48,7 @@ if( WIN32 )
 elseif( UNIX AND NOT APPLE )
 	# RPATH Linux/Unix: (dynamic) libs are put in $prefix/$lib/cloudcompare,
 	# since they are only used by qCC/ccViewer
-	include( GNUInstallDirs )
+	# GNUInstallDirs is already setup by the call to qt_standard_project_setup
 	set( LINUX_INSTALL_SHARED_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
 	set( CMAKE_INSTALL_RPATH ${LINUX_INSTALL_SHARED_DESTINATION} )
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})

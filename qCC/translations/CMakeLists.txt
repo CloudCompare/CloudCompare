@@ -14,27 +14,27 @@ set( QT_LCONVERT_EXE Qt6::lconvert )
 # Now handle our own .ts files
 file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
-qt6_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
+qt_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
 add_custom_target( translations ALL DEPENDS ${TRANSLATION_QM} )
 
 # For each language we have .ts files for, process Qt's qm files
 # (they need to be concatenated into one file)
 foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 	get_filename_component( FILENAME ${TRANSLATION_FILE} NAME )
-	
+
 	# Our files are named like this: CloudCompare_fr.qm
 	# We want just the language part - "fr" so we can find the right files from the Qt install
 	string( REGEX REPLACE "[^_]+_([^._]+).+" "\\1" LANG_CODE ${FILENAME} )
-	
+
 	unset( QT_LANG_FILES )
 	unset( TRANSLATION_FILES_QT_EXIST )
-	
+
 	# These are the Qt files we want to add if they exist
-	set( QT_LANG_FILES 
+	set( QT_LANG_FILES
 		${QT_PATH}/translations/qtbase_${LANG_CODE}.qm
 		)
-	
-	# Now check that they exist	
+
+	# Now check that they exist
 	foreach ( QT_LANG_FILE IN ITEMS ${QT_LANG_FILES} )
 		if ( EXISTS ${QT_LANG_FILE} )
 			list( APPEND TRANSLATION_FILES_QT_EXIST ${QT_LANG_FILE} )
@@ -45,7 +45,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 		# Finally, add a command to generate the qt language file for this language
 		set( QT_LANG_FILE qt_${LANG_CODE}.qm )
 		set( TRANSLATION_QM ${TRANSLATION_QM} ${CMAKE_CURRENT_BINARY_DIR}/${QT_LANG_FILE} )
-		
+
 		add_custom_command(
 			OUTPUT
 				${QT_LANG_FILE}
@@ -57,7 +57,7 @@ foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 				"Generating Qt language file for ${LANG_CODE}"
 			VERBATIM
 			)
-		
+
 		add_custom_target( translations_${LANG_CODE} ALL DEPENDS qt_${LANG_CODE}.qm )
 	endif()
 endforeach()

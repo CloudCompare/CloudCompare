@@ -33,20 +33,21 @@ add_subdirectory( pluginManager )
 
 add_subdirectory( extern/QCustomPlot EXCLUDE_FROM_ALL )
 
-qt6_wrap_ui( generated_ui_list ${ui_list} )
-qt6_add_resources( generated_qrc_list ${qrc_list} )
+qt_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
 	set( rc_list images/icon/cc_icon.rc )
 
 	#to get rid of the (system) console
-	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list}  ${generated_qrc_list} ${rc_list} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${txt_list} )
+	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${txt_list} )
 else()
-	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
+	qt_add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
 endif()
+
+qt_add_ui( ${PROJECT_NAME} SOURCES ${ui_list} )
 
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
@@ -127,7 +128,7 @@ else( UNIX )
 endif()
 
 # Put together our Application bundle on macOS
-if( APPLE )    
+if( APPLE )
     add_subdirectory( Mac )
 endif()
 
@@ -140,7 +141,7 @@ file( COPY ${CC_FBO_LIB_SOURCE_DIR}/shaders DESTINATION "${CMAKE_BINARY_DIR}" )
 file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders DESTINATION "${CMAKE_BINARY_DIR}" )
 
 # Export common shader files to all install destinations
-if( APPLE )	
+if( APPLE )
 	install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Bilateral )
 	install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/Bilateral )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
@@ -165,7 +166,7 @@ else()
 endif()
 
 # Install plugins and shaders in the correct folder for each platform
-if( APPLE )	
+if( APPLE )
 	InstallPlugins(
 		DEST_PATH "${CLOUDCOMPARE_MAC_PLUGIN_DIR}"
 		SHADER_DEST_PATH "${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders"

@@ -6798,7 +6798,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->angleDelta().y() < 0 ? -1.0f : 1.0f);
+		float sizeModifier = (event->angleDelta().x() < 0 ? -1.0f : 1.0f);
 		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
 
 		doRedraw = true;
@@ -6854,7 +6854,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		int padDelta = event->angleDelta().y();
 		if (padDelta != 0)
 		{
-			float wheelDelta_deg = event->angleDelta().y() / 8.0f;
+			float wheelDelta_deg = padDelta / 8.0f;
 
 			onWheelEvent(wheelDelta_deg);
 

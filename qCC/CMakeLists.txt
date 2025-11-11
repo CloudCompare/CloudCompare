@@ -40,7 +40,7 @@ if( MSVC )
 	set( rc_list images/icon/cc_icon.rc )
 
 	#to get rid of the (system) console
-	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list}  ${generated_qrc_list} ${rc_list} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_qrc_list} ${rc_list} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
 	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${txt_list} )
 else()
@@ -185,21 +185,27 @@ else()
 	)
 endif()
 
-if( WIN32 )
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${CLOUDCOMPARE_DEST_FOLDER}
-	)
-else()
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${PROJECT_NAME}
-	)
+
+install(TARGETS ${PROJECT_NAME}
+    BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+    RUNTIME DESTINATION ${PROJECT_NAME} # TODO check on Windows
+)
+
+if( APPLE )
+    # We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)
+    # Code signature is needed at this point
+    qt_generate_deploy_script(
+        TARGET ${PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_cc
+        CONTENT "
+        qt_deploy_runtime_dependencies(
+            EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
+        )")
 endif()
+
+#TODO: Windows equivalent of DeployQT
+
+install(SCRIPT ${deploy_cc})
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to
 # always get an up-to-date version number (based on the current date)

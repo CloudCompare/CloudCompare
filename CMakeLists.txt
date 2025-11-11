@@ -15,7 +15,6 @@ list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/" )
 
 include( CMakePolicies )
 include( CMakeSetCompilerOptions )
-include( DeployQt )
 
 # CCViewer
 option( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )
@@ -52,6 +51,12 @@ elseif( UNIX AND NOT APPLE )
 	set( LINUX_INSTALL_SHARED_DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cloudcompare" )
 	set( CMAKE_INSTALL_RPATH ${LINUX_INSTALL_SHARED_DESTINATION} )
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
+elseif( APPLE )
+    set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app/Contents/Frameworks )
+
+    if( ${OPTION_BUILD_CCVIEWER} )
+        list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER}/ccViewer.app/Contents/Frameworks )
+	endif()
 endif()
 
 # Load advanced scripts

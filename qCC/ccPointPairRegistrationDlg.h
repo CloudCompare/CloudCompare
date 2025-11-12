@@ -36,7 +36,6 @@ class ccGenericGLDisplay;
 class ccGLWindowInterface;
 class cc2DLabel;
 class ccPickingHub;
-class QStringList;
 
 // Dialog for the point-pair registration algorithm (Horn)
 class ccPointPairRegistrationDlg : public ccOverlayDialog

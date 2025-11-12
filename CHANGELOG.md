@@ -1,7 +1,7 @@
 CloudCompare Version History
 ============================
 
-v2.14.alpha (???) - (??/??/202?)
+v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
 	- Edit > Color > Gaussian filter
@@ -80,7 +80,7 @@ New features:
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry
-		
+
 	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
 	- New tool: 'Display > Current 3D view Information'
@@ -134,7 +134,7 @@ Improvements:
 	- Point pair-based alignment tool:
 		- CC will now use the Umeyama algorithm instead of Horn's method (supposed to be more robust to mirroring)
 		- required CC to be compiled with the CC_USE_EIGEN CMake option on
-		
+
 	- Global Shift:
 		- CC will now understand that when clicking on 'Apply all' while the shift is not sufficient to make the point coordinates small enough,
 			this means the user really wants to apply the input Global shift to all the entities (instead of showing the dialog again and again)
@@ -143,7 +143,7 @@ Improvements:
 		- new options
 			- -DISTANCES_FROM_SENSOR [-SQUARED]
 			- -SCATTERING_ANGLES [-DEGREES]
-			- -OCTREE_NORMALS {radius} [-WITH_GRIDS {angle}] [-ORIENT WITH_GRIDS] [-ORIENT WITH_SENSOR] 
+			- -OCTREE_NORMALS {radius} [-WITH_GRIDS {angle}] [-ORIENT WITH_GRIDS] [-ORIENT WITH_SENSOR]
 		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'
@@ -177,6 +177,7 @@ Improvements:
 				4) the original LAS offset, if any
 				5) the cloud minimum bounding-box corner (if applicable)
 			- note that the command line option will never use (option 3) so as to not lose the original LAS offset inadvertently
+		- Option to set the LAS Offset to the bounding-box center (X, Y)
 
 	- E57 files
 		- when loading E57 files, CC will now store more information about sensors
@@ -256,8 +257,11 @@ Improvements:
 		- Ukrainian translation is now available
 		- CSV matrix files can now be loaded with empty cells
 		- the 'Escape' key should now allow to close any currently opened 'overlay' dialog in the top right corner of the 3D views (point picking, rotate/translate, etc.)
+		- CloudCompare is now built upon Qt 6.
+		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
 
 Bug fixes:
+	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
 		to a crash (warning: now, the polylines will be emptied to prevent a crash)
@@ -295,6 +299,7 @@ Bug fixes:
 	- the list of shortcuts displayed in ccViewer was outdated/wrong. It has been updated, and some shortcuts restored (+/=).
 	- some SHP files could not be opened due to longer records than specified
 	- DXF files: the 'elevation' of LWPOLYLINE entities was ignored
+	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
 
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
@@ -406,7 +411,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 
 	- Edit > Normals > Shift points along normals
 		- to shift the points of a given quantity along their associated normal
-	
+
 	- New display feature: near and far clipping planes in 3D views
 		- extension of the previously existing feature to set a near clipping plane
 		- can be enabled and modified in the Camera Parameters dialog or via
@@ -493,7 +498,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- handle quoted arguments
 		- commands after this one will run after all commands in the file have been processed
 		- whole line comments with # my comment here or // here
-		- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces 
+		- comment out single arguments '/* my comment here */', must be quoted with either single or double quote, if it contains spaces
 	- SET_GLOBAL_SHIFT {x} {y} {z} -KEEP_ORIG_FIXED
 		- set global shift on all entities
 		- sub-option -KEEP_ORIG_FIXED: if set, global origin will be preserved (a warning might be issued if the resulting coordinate transformation is too big)
@@ -520,7 +525,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 
 - Improvements:
 
-	- Edit > Translate/Rotate: 
+	- Edit > Translate/Rotate:
 		- In the 'advanced' section, added an option to rotate/translate entities by a small increment, with buttons or using left/right arrows
 		- Thanks to [Lighpoint Scientific](https://lightpointdata.com)
 
@@ -546,7 +551,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 		- ability to paste the axis and the axis point from the clipboard (3 numerical values separated by whitespaces, commas or semicolons)
 		- option to choose an existing cylinder or cone entity in the DB tree, and use it to set the unrolling parameters
 		- option to output the unrolled cloud in an arbitrary coordinate system (X: unroll angle / Y = distance to primitive / Z = longitude)
-		
+
 	- Edit > Apply Transformation
 		- new shortcut buttons to set the rotation axis to I(1,0,0), J(0,1,0) or K(0,0,1)
 		- new option (checkbox): 'Apply to global coordinates'
@@ -608,7 +613,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 
 	- Edit > Cloud > Paste from clipboard
 		- the shortcut has been changed to ALT+P (so as to not conflict with the already existing CTRL+P shortcut for the 'Trace polyline' tool)
-		
+
 	- Color scales / Color scale editor
 		- it is now possible to override a custom label value by a text
 			(in the custom labels definition field, add a text between double quotes, after the numerical value)
@@ -707,7 +712,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 			- -KRIGING_KNN {value}
 				- to set the number of neighbors for the Kriging algorithm
 			- to be used after -PROJ or -SF_PROJ
-				- MED 
+				- MED
 				- INV_VAR (+ std. dev. SF index or name)
 
 	- New entity picking mechanism (to not rely on the deprecated OpenGL 'names' pushing mechanism)
@@ -815,7 +820,7 @@ v2.13.0 (Kharkiv) - (02/14/2024)
 	- Allow OBJ files with symlinks to properly load material files
 	- The bottom left scale was not always correctly displayed when rendering the screen with a zoom > 1 (both in terms of width and position)
 	- The Primitive Factory 'precision' field was not used
-	- The command line -FEATURE now changes the cloud name so that if it is saved with -SAVE_CLOUDS later it will not overwrite the original cloud 
+	- The command line -FEATURE now changes the cloud name so that if it is saved with -SAVE_CLOUDS later it will not overwrite the original cloud
 	- The Point Pair registration ('Align') or ICP tools could generate a sub-optimal translation if the rotation was constrained
 	- The C2M distance could crash if forcing the octree level above 11 or 12 (which would likely require a grid of more than 2 billion cells)
 	- Translating or rotating the cloud while the LoD structure was being built could lead to a hang or a crash of CC
@@ -935,7 +940,7 @@ v2.12.0 (Kyiv) - (30/03/2022)
 - Improvements
 	- New Display options:
 		- option to select the application style (Windows Vista, Windows, Fusion, etc.)
-		- single click picking can be disabled (can be very slow for very large point clouds) 
+		- single click picking can be disabled (can be very slow for very large point clouds)
 	- Graphical Segmentation Tool (scissors):
 		- the tool can now segment polylines (it will only keep segments with both vertices visible)
 		- various improvements (visibility of segmented entities is forced for more clarity, etc.)

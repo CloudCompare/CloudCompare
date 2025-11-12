@@ -544,7 +544,7 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 				double  val   = slider->getRelativePos();
 				QString label = QString("%1 %").arg(val * 100.0, 0, 'f', std::max(m_precision - 2, 0)); // display as a percentage
 
-				int labelWidth = fm.width(label);
+				int labelWidth = fm.horizontalAdvance(label);
 				if (pos + labelWidth > width())
 					pos -= (labelWidth - slider->width());
 
@@ -557,7 +557,7 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 			{
 				QString firstLabel = QString::number(m_sliders->elements().first()->getRelativePos(), 'f', m_precision);
 				QString lastLabel  = QString::number(m_sliders->elements().last()->getRelativePos(), 'f', m_precision);
-				int     labelWidth = std::max(fm.width(firstLabel), fm.width(lastLabel)) + 2 * DEFAULT_TEXT_MARGIN;
+				int     labelWidth = std::max(fm.horizontalAdvance(firstLabel), fm.horizontalAdvance(lastLabel)) + 2 * DEFAULT_TEXT_MARGIN;
 				setMinimumSize(labelWidth, 0);
 			}
 			// draw the text for vertical orientation
@@ -591,7 +591,6 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent /*=nullptr*/,
 
 	// layout
 	setLayout(m_orientation == Qt::Horizontal ? static_cast<QLayout*>(new QVBoxLayout()) : static_cast<QLayout*>(new QHBoxLayout()));
-	layout()->setMargin(0);
 	layout()->setSpacing(0);
 	layout()->setContentsMargins(0, 0, 0, 0);
 

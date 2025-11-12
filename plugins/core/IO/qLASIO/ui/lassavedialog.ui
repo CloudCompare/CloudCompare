@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
-    <height>580</height>
+    <width>680</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <item>
     <widget class="QFrame" name="buttonFrame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
@@ -54,10 +54,10 @@
              </sizepolicy>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::Shape::StyledPanel</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+             <enum>QFrame::Shadow::Raised</enum>
             </property>
             <layout class="QFormLayout" name="formLayout">
              <item row="0" column="0">
@@ -108,7 +108,7 @@
                <item>
                 <spacer name="horizontalSpacer_10">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -122,6 +122,12 @@
              </item>
              <item>
               <widget class="QLabel" name="labelOptimal">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="toolTip">
                 <string>Ensures optimal accuracy (up to 10^-7
                                                         absolute)
@@ -161,7 +167,7 @@ font: italic;</string>
                <item>
                 <spacer name="horizontalSpacer_8">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -175,12 +181,18 @@ font: italic;</string>
              </item>
              <item>
               <widget class="QLabel" name="labelOriginal">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="styleSheet">
                 <string notr="true">color:darkgrey;
 font: italic;</string>
                </property>
                <property name="text">
-                <string>        might not preserve data accuracy (especially if you have transformed the original cloud)                                                    </string>
+                <string>        might not preserve data accuracy (especially if you have transformed the original cloud)</string>
                </property>
               </widget>
              </item>
@@ -228,7 +240,7 @@ font: italic;</string>
                <item>
                 <spacer name="horizontalSpacer_9">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -242,6 +254,12 @@ font: italic;</string>
              </item>
              <item>
               <widget class="QLabel" name="labelCustom">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="styleSheet">
                 <string notr="true">color:darkgrey;
 font: italic;</string>
@@ -253,6 +271,12 @@ font: italic;</string>
              </item>
              <item>
               <widget class="QLabel" name="label_5">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="styleSheet">
                 <string notr="true">color:darkred;
 font: italic;</string>
@@ -316,7 +340,7 @@ font: italic;</string>
                <item row="2" column="0">
                 <widget class="QRadioButton" name="useMinBBCornerOffsetRadioButton">
                  <property name="text">
-                  <string>Use minimum bounding-box corner</string>
+                  <string>Use bounding-box minimum (X, Y)</string>
                  </property>
                 </widget>
                </item>
@@ -333,23 +357,23 @@ font: italic;</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
+               <item row="4" column="0">
                 <widget class="QRadioButton" name="useCustomLASOffsetRadioButton">
                  <property name="text">
                   <string>Use custom LAS offset</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="1">
+               <item row="4" column="1">
                 <widget class="QFrame" name="customLASOffsetFrame">
                  <property name="enabled">
                   <bool>false</bool>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::StyledPanel</enum>
+                  <enum>QFrame::Shape::StyledPanel</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout">
                   <property name="leftMargin">
@@ -406,6 +430,26 @@ font: italic;</string>
                  </layout>
                 </widget>
                </item>
+               <item row="3" column="0">
+                <widget class="QRadioButton" name="useBBCenterOffsetRadioButton">
+                 <property name="text">
+                  <string>Use bounding-box center (X, Y)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="1">
+                <widget class="QLineEdit" name="bbCenterLineEdit">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>(0 ; 0 ; 0)</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
              <item>
@@ -425,7 +469,7 @@ font: italic;</string>
           <item>
            <spacer name="verticalSpacer">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -457,20 +501,14 @@ font: italic;</string>
              </sizepolicy>
             </property>
             <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+             <enum>QFrame::Shape::StyledPanel</enum>
             </property>
             <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
+             <enum>QFrame::Shadow::Raised</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QCheckBox" name="rgbCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Save RGB information (a point format that supports RGB must be selected)</string>
                </property>
@@ -481,12 +519,6 @@ font: italic;</string>
              </item>
              <item>
               <widget class="QCheckBox" name="waveformCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Save Waveforms (a point format that supports WF must be selected)</string>
                </property>
@@ -497,12 +529,6 @@ font: italic;</string>
              </item>
              <item>
               <widget class="QCheckBox" name="normalsCheckBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
                <property name="toolTip">
                 <string>Saves normals as Extra bytes (EB-VLRs) using the names &quot;NormalX&quot;, &quot;NormalY&quot; and &quot;NormalZ&quot;.
 Version 1.4 is recommended for compatibility with all software packages.</string>
@@ -526,26 +552,13 @@ Version 1.4 is recommended for compatibility with all software packages.</string
                </property>
               </widget>
              </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
             </layout>
            </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Vertical</enum>
+             <enum>Qt::Orientation::Vertical</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -572,8 +585,8 @@ Version 1.4 is recommended for compatibility with all software packages.</string
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>654</width>
-               <height>456</height>
+               <width>98</width>
+               <height>28</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -583,7 +596,7 @@ Version 1.4 is recommended for compatibility with all software packages.</string
               <item>
                <spacer name="verticalSpacer_3">
                 <property name="orientation">
-                 <enum>Qt::Vertical</enum>
+                 <enum>Qt::Orientation::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -614,10 +627,10 @@ Version 1.4 is recommended for compatibility with all software packages.</string
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Orientation::Horizontal</enum>
      </property>
      <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Ok</set>
      </property>
     </widget>
    </item>

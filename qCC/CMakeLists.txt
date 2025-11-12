@@ -33,8 +33,8 @@ add_subdirectory( pluginManager )
 
 add_subdirectory( extern/QCustomPlot EXCLUDE_FROM_ALL )
 
-qt5_wrap_ui( generated_ui_list ${ui_list} )
-qt5_add_resources( generated_qrc_list ${qrc_list} )
+qt6_wrap_ui( generated_ui_list ${ui_list} )
+qt6_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
@@ -46,20 +46,24 @@ elseif( APPLE )
 	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${txt_list} )
 else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
-	target_compile_definitions( ${PROJECT_NAME} PRIVATE QT_NO_KEYWORDS )
 endif()
 
 target_link_libraries( ${PROJECT_NAME}
-    CCAppCommon
-    QCustomPlot
-    Qt5::PrintSupport
+	PRIVATE
+		CCAppCommon
+		QCustomPlot
+		Qt6::PrintSupport
+		Qt6::Widgets
+		Qt6::OpenGLWidgets
+		Qt6::OpenGL
 )
 
 if( CCCORELIB_USE_QT_CONCURRENT )
 	# We want *deployqt to handle this dependency, so instead of just copying the file
 	# link to the target.
 	target_link_libraries( ${PROJECT_NAME}
-		Qt5::Concurrent
+		PRIVATE
+			Qt6::Concurrent
 	)
 endif()
 

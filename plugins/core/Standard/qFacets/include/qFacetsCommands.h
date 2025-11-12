@@ -25,6 +25,10 @@
 //Local
 #include "qFacets.h"
 
+//Q
+#include <QFileInfo>
+#include <QDir>
+
 static const char COMMAND_FACETS[] = "FACETS";
 
 constexpr char EXTRACT_FACETS[] = "-EXTRACT_FACETS";
@@ -158,7 +162,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 						return cmd.error(QObject::tr("Missing parameter: Algorithm type after \"-%1 %2\"").arg(COMMAND_FACETS, ALGO));
 					}
 					
-					QString val = cmd.arguments().takeFirst().toUpper();=					
+					QString val = cmd.arguments().takeFirst().toUpper();					
 					cmd.print(QObject::tr("\t-ALGO : %1").arg(val));
 					if (algoNames.contains(val))					
 					{
@@ -554,7 +558,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 		if (params.EXPORT_FACETS_INFO)
 		{
 			cmd.print(QObject::tr("\t-EXPORT_FACETS_INFO"));
-			cmd.print(QObject::tr("\t\t-CSV_FILENAME : \"%1\"").arg(params.SHAPE_FILENAME));										
+			cmd.print(QObject::tr("\t\t-CSV_FILENAME : \"%1\"").arg(params.CSV_FILENAME));										
 		}
 		
 		
@@ -562,6 +566,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 		
 		for (CLCloudDesc clCloud : cmd.clouds())
 		{
+			
 			qFacets::FacetSet facets;
 			ccHObject* group=nullptr;
 			
@@ -584,10 +589,10 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				getFacetsFromGroup(group, facets); //probably a better way that going between ccHObject group and facetSet
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("Did not extract any facets."));
+					cmd.error(QObject::tr("[FACETS] Did not extract any facets."));
 					return false;
 				}				
-				cmd.print(QObject::tr("Extracted %1 facets").arg(facets.size()));
+				cmd.print(QObject::tr("[FACETS] Extracted %1 facets").arg(facets.size()));
 			}
 
 			//execute CLASSIFY_FACETS_BY_ANGLE						
@@ -596,7 +601,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				cmd.print(QObject::tr("[FACETS] Classifying facets by angles."));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("Need facets.  Must use -EXTRACT_FACETS."));					
+					cmd.error(QObject::tr("[FACETS] Need facets.  Must use -EXTRACT_FACETS."));					
 					return false;
 				}
 				
@@ -618,11 +623,22 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				cmd.print(QObject::tr("[FACETS] Exporting Facets info to shape file"));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("Need facets.  Must use -EXTRACT_FACETS."));					
+					cmd.error(QObject::tr("[FACETS] Need facets.  Must use -EXTRACT_FACETS."));					
 					return false;
 				}
 				
-				QString outputName = clCloud.pc->getName() + QString("_") + params.SHAPE_FILENAME;
+							
+				QFileInfo fileInfo(params.SHAPE_FILENAME);			
+				QString directoryPath = fileInfo.path();
+				
+				QString newFileName = clCloud.pc->getName() + QString("_") + fileInfo.fileName();   
+				QString outputName = QDir(directoryPath).filePath(newFileName);	
+				QDir dir;
+				if (!dir.mkpath(directoryPath)) 
+				{
+					cmd.error(QObject::tr("[FACETS] Failed to create directories %1").arg(outputName));
+					return false;
+				}
 				bool success = qFacets::executeExportFacets(facets, 
 				                                            outputName,
 															params.USE_NATIVE_ORIENTATION, 
@@ -645,11 +661,20 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				cmd.print(QObject::tr("[FACETS] Exporting Facets info to csv."));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("Need facets.  Must have -EXTRACT_FACETS."));					
+					cmd.error(QObject::tr("[FACETS] Need facets.  Must have -EXTRACT_FACETS."));					
 					return false;
 				}
 				
-				QString outputName = clCloud.pc->getName() + QString("_") + params.CSV_FILENAME;
+				QFileInfo fileInfo(params.CSV_FILENAME);			
+				QString directoryPath = fileInfo.path();        				
+				QString newFileName = clCloud.pc->getName() + QString("_") + fileInfo.fileName();   
+				QString outputName = QDir(directoryPath).filePath(newFileName);	
+				QDir dir;
+				if (!dir.mkpath(directoryPath)) 
+				{
+					cmd.error(QObject::tr("[FACETS] Failed to create directories %1").arg(outputName));
+					return false;
+				}
 				bool success = qFacets::executeExportFacetsInfo(facets, outputName, cmd.silentMode());
 				if (!success)
 				{

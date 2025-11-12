@@ -592,9 +592,15 @@ bool ccGLWindowInterface::initialize()
 		invalidateVisualization();
 		deprecate3DLayer();
 
-		// FBO support (TODO: catch error?)
-		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
-
+		// FBO support
+		// We test if FBOs are supported.
+		// Starting from QT6 QOpenGLExtensions are not available anymore we use QOpenGLExtraFunctions instead.
+		m_glExtFuncSupported = glContext->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object"));
+		if (m_glExtFuncSupported)
+		{
+			// returns void
+			m_glExtFunc.initializeOpenGLFunctions();
+		}
 		// OpenGL version
 		const char*   vendorName    = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		const QString vendorNameStr = QString(vendorName).toUpper();
@@ -604,6 +610,8 @@ bool ccGLWindowInterface::initialize()
 			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
 			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
 			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (m_glExtFuncSupported)
+				ccLog::Print("[3D View %i] FBO available", m_uniqueID);
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();
@@ -917,8 +925,11 @@ void ccGLWindowInterface::redraw(bool only2D /*=false*/, bool resetLOD /*=true*/
 void ccGLWindowInterface::setGLViewport(const QRect& rect)
 {
 	// correction for HD screens
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
-	m_glViewport               = QRect(rect.left() * devicePixelRatio, rect.top() * devicePixelRatio, rect.width() * devicePixelRatio, rect.height() * devicePixelRatio);
+	const auto devicePixelRatio = getDevicePixelRatio();
+	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio),
+                         static_cast<int>(rect.top() * devicePixelRatio),
+                         static_cast<int>(rect.width() * devicePixelRatio),
+                         static_cast<int>(rect.height() * devicePixelRatio));
 	invalidateViewport();
 
 	if (getOpenGLContext() && getOpenGLContext()->isValid())
@@ -2822,7 +2833,7 @@ int FontSizeModifier(int fontSize, float zoomFactor)
 
 int ccGLWindowInterface::getFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio());
 }
 
 void ccGLWindowInterface::setFontPointSize(int pointSize)
@@ -2839,7 +2850,7 @@ QFont ccGLWindowInterface::getTextDisplayFont() const
 
 int ccGLWindowInterface::getLabelFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio());
 }
 
 QFont ccGLWindowInterface::getLabelDisplayFont() const
@@ -4212,7 +4223,7 @@ void ccGLWindowInterface::drawCross()
 
 float ccGLWindowInterface::computeTrihedronLength() const
 {
-	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).width('X')) * m_captureMode.zoomFactor;
+	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).horizontalAdvance('X')) * m_captureMode.zoomFactor;
 }
 
 void ccGLWindowInterface::drawTrihedron()
@@ -4380,7 +4391,7 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	double  textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text                = QString::number(textEquivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
-	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.horizontalAdvance(text) / 2,
 	           glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 	           text,
 	           static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),
@@ -6264,10 +6275,10 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent* event)
 	m_deferredPickingTimer.stop(); // prevent the picking process from starting
 	m_ignoreMouseReleaseEvent = true;
 
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
+	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = event->x() * devicePixelRatio;
-	const int y = event->y() * devicePixelRatio;
+	const int x = static_cast<int>(event->x() * devicePixelRatio);
+	const int y = static_cast<int>(event->y() * devicePixelRatio);
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))
@@ -6787,7 +6798,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->delta() < 0 ? -1.0f : 1.0f);
+		float sizeModifier = (event->angleDelta().x() < 0 ? -1.0f : 1.0f);
 		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
 
 		doRedraw = true;
@@ -6797,7 +6808,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the zNear or zFar clipping planes
-		double increment    = (event->delta() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		double increment    = (event->angleDelta().y() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
 		bool   shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
 		if (shiftPressed)
 		{
@@ -6827,7 +6838,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the fov value
-		float newFOV = (getFov() + (event->delta() < 0 ? -1.0f : 1.0f));
+		float newFOV = (getFov() + (event->angleDelta().y() < 0 ? -1.0f : 1.0f));
 		newFOV       = std::min(std::max(1.0f, newFOV), 180.0f);
 		if (newFOV != getFov())
 		{
@@ -6840,10 +6851,10 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		int padDelta = event->delta();
+		int padDelta = event->angleDelta().y();
 		if (padDelta != 0)
 		{
-			float wheelDelta_deg = event->delta() / 8.0f;
+			float wheelDelta_deg = padDelta / 8.0f;
 
 			onWheelEvent(wheelDelta_deg);
 
@@ -6866,7 +6877,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
 	assert(context);
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	if (!glFunc)
 	{
 		return;
@@ -7179,7 +7190,7 @@ bool ccGLWindowInterface::TestStereoSupport(bool forceRetest /*=false*/)
 	// context->makeCurrent(testWindow);
 	context->makeCurrent(&offSurface);
 
-	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<ccQOpenGLFunctions>(context.get());
 	if (!glFunc)
 	{
 		ccLog::Warning("Failed to retrieve the OpengGL functions");

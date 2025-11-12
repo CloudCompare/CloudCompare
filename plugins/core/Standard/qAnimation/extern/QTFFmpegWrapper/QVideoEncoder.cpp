@@ -531,7 +531,7 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 	}
 
 	int num_bytes = av_image_get_buffer_size(AV_PIX_FMT_BGRA, m_width, m_height, 1);
-	if (num_bytes != image.byteCount())
+	if (num_bytes != image.sizeInBytes())
 	{
 		if (errorString)
 		{
@@ -541,7 +541,7 @@ bool QVideoEncoder::convertImage_sws(const QImage &image, QString* errorString/*
 	}
 
 	const uint8_t* srcSlice[3] { static_cast<const uint8_t*>(image.constBits()), nullptr, nullptr };
-	int srcStride[3] { image.bytesPerLine(), 0, 0 };
+	int srcStride[3] { static_cast<int>(image.bytesPerLine()), 0, 0 };
 
 	sws_scale(	m_ff->swsContext,
 				srcSlice,

@@ -23,17 +23,21 @@
 #include <GenericTriangle.h>
 
 //Qt
-#include <QGLPixelBuffer>
+#include <QOpenGLBuffer>
 
 //OpenGL
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
 #else
+#if defined(_WIN32)
+#include <Windows.h>
+#endif
 #include <GL/glu.h>
 #endif
 
 //system
 #include <cassert>
+#include <cstring>
 
 //type-less glVertex3Xv call (X=f,d)
 static inline void glVertex3v(const float* v) { glVertex3fv(v); }
@@ -80,14 +84,16 @@ bool PCVContext::init(unsigned W,
 					  CCCoreLib::GenericMesh* mesh/*=nullptr*/,
 					  bool closedMesh/*=true*/)
 {
-	if (!QGLPixelBuffer::hasOpenGLPbuffers())
-		return false;
-
 	assert(!m_pixBuffer);
 
-	m_pixBuffer = new QGLPixelBuffer(W, H);
-	if (!m_pixBuffer || !m_pixBuffer->isValid())
+	m_pixBuffer = new QOpenGLBuffer(QOpenGLBuffer::PixelPackBuffer);
+	if (!m_pixBuffer->create())
+	{
+		delete m_pixBuffer;
+		m_pixBuffer = nullptr;
 		return false;
+	}
+	m_pixBuffer->allocate(W * H);
 
 	unsigned size = W*H;
 	m_snapZ = new float[size];
@@ -149,10 +155,10 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 
 void PCVContext::glInit()
 {
-	if (!m_pixBuffer || !m_pixBuffer->isValid())
+	if (!m_pixBuffer || !m_pixBuffer->isCreated())
 		return;
 
-	m_pixBuffer->makeCurrent();
+	m_pixBuffer->bind();
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glEnable(GL_DEPTH_TEST);
@@ -181,10 +187,10 @@ void PCVContext::glInit()
 
 void PCVContext::setViewDirection(const CCVector3& V)
 {
-	if (!m_pixBuffer || !m_pixBuffer->isValid())
+	if (!m_pixBuffer || !m_pixBuffer->isCreated())
 		return;
 
-	m_pixBuffer->makeCurrent();
+	m_pixBuffer->bind();
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
@@ -261,7 +267,7 @@ void openGLSnapshot(GLenum format, GLenum type, void* buffer)
 *****************************************************************************/
 int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 {
-	if (!m_pixBuffer || !m_pixBuffer->isValid())
+	if (!m_pixBuffer || !m_pixBuffer->isCreated())
 		return -1;
 	if (!m_vertices)
 		return -1;
@@ -270,7 +276,7 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 
 	assert(m_snapZ);
 
-	m_pixBuffer->makeCurrent();
+	m_pixBuffer->bind();
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glDepthRange(2.0f*ZTWIST, 1.0f);

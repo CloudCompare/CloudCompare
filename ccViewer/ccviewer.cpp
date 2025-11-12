@@ -48,11 +48,6 @@
 #include "Mouse3DInput.h"
 #endif
 
-// Gamepads
-#ifdef CC_GAMEPAD_SUPPORT
-#include "ccGamepadManager.h"
-#endif
-
 // Camera parameters dialog
 static ccCameraParamEditDlg* s_cpeDlg = nullptr;
 
@@ -61,7 +56,6 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
     , m_glWindow(nullptr)
     , m_selectedObject(nullptr)
     , m_3dMouseInput(nullptr)
-    , m_gamepadManager(nullptr)
 {
 	ui.setupUi(this);
 
@@ -104,11 +98,6 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	enable3DMouse(true);
 #else
 	ui.actionEnable3DMouse->setEnabled(false);
-#endif
-
-#ifdef CC_GAMEPAD_SUPPORT
-	m_gamepadManager = new ccGamepadManager(this, this);
-	ui.menuOptions->insertMenu(ui.menu3DMouse->menuAction(), m_gamepadManager->menu());
 #endif
 
 	// Signals & slots connection
@@ -189,11 +178,6 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 ccViewer::~ccViewer()
 {
 	release3DMouse();
-
-#ifdef CC_GAMEPAD_SUPPORT
-	delete m_gamepadManager;
-	m_gamepadManager = nullptr;
-#endif
 
 	if (s_cpeDlg)
 	{

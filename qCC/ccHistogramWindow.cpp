@@ -970,7 +970,7 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 		return;
 	}
 
-	if (e->delta() < 0)
+	if (e->angleDelta().y() < 0)
 	{
 		if (m_histoValues.size() > 4)
 		{
@@ -1033,7 +1033,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
 
 	// header
-	stream << "Class; Value; Class start; Class end;" << endl;
+	stream << "Class; Value; Class start; Class end;" << Qt::endl;
 
 	// data
 	{
@@ -1051,7 +1051,7 @@ bool ccHistogramWindowDlg::exportToCSV(QString filename) const
 			stream << s_csvSep;
 			stream << minVal + step; // max value
 			stream << s_csvSep;
-			stream << endl;
+			stream << Qt::endl;
 		}
 	}
 

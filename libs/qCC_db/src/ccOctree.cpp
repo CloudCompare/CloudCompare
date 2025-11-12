@@ -87,7 +87,7 @@ void ccOctree::clear()
 	if (context)
 	{
 		// get the set of OpenGL functions (version 2.1)
-		QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+		auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 		assert(glFunc != nullptr);
 
 		if (glFunc && glFunc->glIsList(m_glListID))

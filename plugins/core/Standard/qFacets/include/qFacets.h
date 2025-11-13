@@ -106,6 +106,7 @@ public:
 
 		bool EXPORT_FACETS_INFO; //exportFacetsInfo
 		QString CSV_FILENAME;
+		bool COORDS_IN_CSV;
 
 
 		FacetsParams() : EXTRACT_FACETS(false)
@@ -130,7 +131,8 @@ public:
 			, NY(0.0f)
 			, NZ(1.0f)
 			, EXPORT_FACETS_INFO(false)
-			, CSV_FILENAME("facets.csv"){
+			, CSV_FILENAME("facets.csv")
+			, COORDS_IN_CSV(false){
 				
 			};				
 
@@ -141,7 +143,14 @@ public:
 	typedef std::unordered_set<ccFacet*> FacetSet;
 	
 	static bool executeExportFacetsInfo(const FacetSet& facets,
-								 const QString filename, 
+								 const QString filename,
+								 bool coordsInCSV=false,
+								 bool useNativeOrientation=true,
+								 bool useGlobalOrientation=false,
+								 bool useCustomOrientation=false,
+								 double nX=0.0f,
+								 double nY=0.0f,
+								 double nZ=1.0f, 
 								 bool silent=false);
 								 
     static bool executeExportFacets(const FacetSet& facets,
@@ -152,7 +161,19 @@ public:
 								 double nX=0.0f,
 								 double nY=0.0f,
 								 double nZ=1.0f,
-								 bool silent=false);								 
+								 bool silent=false);	
+								 
+	static QString polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, 
+											    int precision = 3);
+												
+	static ccGLMatrix calcOriRotMat(const FacetSet& facets,
+									bool useNativeOrientation=true,
+									bool useGlobalOrientation=false,
+									bool useCustomOrientation=false,
+									double nX=0.0f, 
+									double nY=0.0f, 
+									double nZ=1.0f);
+
 								 
 protected:
 

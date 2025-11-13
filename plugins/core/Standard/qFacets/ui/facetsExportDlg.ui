@@ -33,12 +33,29 @@
      </layout>
     </widget>
    </item>
+   
+   <item>
+    <widget class="QGroupBox" name="coordsInCSVBox">
+     <property name="title">
+      <string>WKT POLYGONZ</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_1">	  
+      <item>
+       <widget class="QCheckBox" name="coordsInCSVCheckBox">
+        <property name="text">
+	   <string>Add WKT POLYGONZ to csv</string>
+	  </property>
+	    </widget>
+	  </item>                
+     </layout>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="orientationGroupBox">
      <property name="title">
       <string>Vertical orientation (only for polygons)</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout">	  
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
@@ -167,6 +184,8 @@
     </hint>
    </hints>
   </connection>
+  
+  
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
@@ -198,6 +217,24 @@
      <y>134</y>
     </hint>
    </hints>
+  </connection>
+  <connection>
+   
+   <sender>coordsInCSVCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>orientationGroupBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>200</x>
+     <y>150</y>
+    </hint>
+   </hints>
+  
   </connection>
  </connections>
 </ui>

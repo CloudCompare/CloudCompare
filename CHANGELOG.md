@@ -77,6 +77,8 @@ New features:
                 - -USE_CUSTOM_ORIENTATION {nX nY nZ} default=false, default nx nY nZ = 0.0 0.0 1.0
 			- -EXPORT_FACETS_INFO saves facet info to a csv file (no geometry saved). default=false
               - -CSV_FILENAME {csv_filename} default = '[name of cloud]_facets.csv'
+			  - -COORDS_IN_CSV will add facet polyline coordinates to the csv file in wkt format "POLYGONZ(x1 y1 z1,x2 y2 z2,...,x1 y1 z1)". default=false
+					If present then -USE_NATIVE_ORIENTATION etc will apply.
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry

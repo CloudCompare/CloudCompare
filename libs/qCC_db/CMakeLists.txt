@@ -17,6 +17,10 @@ target_link_libraries( ${PROJECT_NAME}
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_DB_LIBRARY_BUILD QT_NO_KEYWORDS )
 
+if(OpenMP_CXX_FOUND)
+    target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
+endif()
+
 set_target_properties( ${PROJECT_NAME} PROPERTIES
 	CXX_VISIBILITY_PRESET hidden
 )

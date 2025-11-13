@@ -68,6 +68,11 @@ if( CCCORELIB_USE_QT_CONCURRENT )
 	)
 endif()
 
+# OpenMP
+if(OpenMP_CXX_FOUND)
+    target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
+endif()
+
 # Eigen
 if ( CC_USE_EIGEN )
 

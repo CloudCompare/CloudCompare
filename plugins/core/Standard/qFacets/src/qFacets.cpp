@@ -1376,8 +1376,8 @@ QString qFacets::polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, int pr
 	//ccPointCloud& vertices_cloud = myPolyline.getAssociatedCloud()
     const int pointCount = polyline->size();//->getChildrenNumber();
 
-    // A POLYGON Z requires at least 4 points (including the closure point).
-    if (pointCount < 4)
+    // A POLYGON Z requires at least 4 points (including the closure point). ccPolyline does have closing point.
+    if (pointCount < 3)
     {
         return QString("Invalid WKT input: POLYGON Z requires min 4 points. Found %1.").arg(pointCount);
     }
@@ -1409,7 +1409,14 @@ QString qFacets::polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, int pr
         wkt.append(" ");
         wkt.append(locale.toString(p.z, 'f', precision));
     }
-
+	// close the PolygonZ
+	CCVector3d p = polyline->getPoint(0)->toDouble();
+	wkt.append(", "); // Separator between points
+	wkt.append(locale.toString(p.x, 'f', precision));
+	wkt.append(" ");
+	wkt.append(locale.toString(p.y, 'f', precision));
+	wkt.append(" ");
+	wkt.append(locale.toString(p.z, 'f', precision));
     // Close the WKT string
     wkt.append("))");
 

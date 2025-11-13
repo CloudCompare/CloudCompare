@@ -28,11 +28,6 @@
 //Qt
 #include <QApplication>
 
-//static bool AscendingLeafErrorComparison(const ccKdTree::Leaf* a, const ccKdTree::Leaf* b)
-//{
-//	return a->error < b->error;
-//}
-
 static bool DescendingLeafSizeComparison(const ccKdTree::Leaf* a, const ccKdTree::Leaf* b)
 {
 	return a->points->size() > b->points->size();

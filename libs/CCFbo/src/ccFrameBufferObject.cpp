@@ -65,10 +65,16 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 			return false;
 		}
 
-		if (!m_glExtFunc.initializeOpenGLFunctions())
+		const auto context = QOpenGLContext::currentContext();
+		// We test if FBOs are supported.
+		// It's unlikely that the context is null since previous GL functions initialization
+		// does not fail but we check it anyway
+		if (!context || !context->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object")))
 		{
 			return false;
 		}
+		// unlike other versioned GL functions, this init return void
+		m_glExtFunc.initializeOpenGLFunctions();
 	}
 	else
 	{

@@ -14,20 +14,9 @@ if( PLUGIN_IO_QDRACO )
 
 	elseif( UNIX )
 
-		target_include_directories( ${PROJECT_NAME} PRIVATE ${DRACO_INCLUDE_DIR} )
-		set ( DRACO_INCLUDE_DIR "" CACHE PATH "Draco include dir" )
-		set ( DRACO_LIB_DIR "" CACHE PATH "Draco library dir" )
-		
-		if( NOT DRACO_INCLUDE_DIR )
-			message( FATAL_ERROR "Draco include dir not specified (DRACO_INCLUDE_DIR)" )
-		endif()
-		if( NOT DRACO_LIB_DIR )
-			message( FATAL_ERROR "Draco library dir not specified (DRACO_LIB_DIR)" )
-		endif()
-		
-		target_link_libraries( ${PROJECT_NAME} ${DRACO_LIBRARIES} )
+		target_link_libraries( ${PROJECT_NAME} draco )
 
-	elseif()
+	else()
 
 		target_link_libraries( ${PROJECT_NAME} ${DRACO_LIBRARIES} )
 

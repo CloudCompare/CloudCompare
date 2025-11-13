@@ -22,7 +22,7 @@ function( target_link_GDAL ) # ARGV0 = project name
 		message( FATAL_ERROR "GDAL package not found" )
 	endif()
 	
-	target_link_libraries( ${ARGV0} ${GDAL_LIBRARY} )
+	target_link_libraries( ${ARGV0} PUBLIC ${GDAL_LIBRARY} )
 	target_compile_definitions( ${ARGV0} PUBLIC CC_GDAL_SUPPORT )
 	
 	if( WIN32 )

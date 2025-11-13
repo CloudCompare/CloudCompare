@@ -62,6 +62,7 @@ class LasSaveDialog : public QDialog
 		GLOBAL_SHIFT,
 		ORIGN_LAS_OFFSET,
 		MIN_BB_CORNER,
+		BB_CENTER,
 		CUSTOM_LAS_OFFSET
 	};
 

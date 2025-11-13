@@ -3256,8 +3256,8 @@ bool CommandComputeMeshVolume::process(ccCommandLineInterface& cmd)
 
 		if (outFile.isOpen())
 		{
-			outStream << titleStr << endl;
-			outStream << volumeStr << endl;
+			outStream << titleStr << Qt::endl;
+			outStream << volumeStr << Qt::endl;
 		}
 	}
 
@@ -3991,8 +3991,8 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 				{
 					QTextStream txtStream(&txtFile);
 
-					txtStream << QObject::tr("Filename: %1").arg(outputFilename) << endl;
-					txtStream << QObject::tr("Fitting RMS: %1").arg(rms) << endl;
+					txtStream << QObject::tr("Filename: %1").arg(outputFilename) << Qt::endl;
+					txtStream << QObject::tr("Fitting RMS: %1").arg(rms) << Qt::endl;
 
 					// We always consider the normal with a positive 'Z' by default!
 					if (N.z < 0.0)
@@ -4001,18 +4001,18 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 					}
 
 					int precision = cmd.numericalPrecision();
-					txtStream << QObject::tr("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << endl;
+					txtStream << QObject::tr("Normal: (%1,%2,%3)").arg(N.x, 0, 'f', precision).arg(N.y, 0, 'f', precision).arg(N.z, 0, 'f', precision) << Qt::endl;
 
 					// we compute strike & dip by the way
 					{
 						PointCoordinateType dip    = 0;
 						PointCoordinateType dipDir = 0;
 						ccNormalVectors::ConvertNormalToDipAndDipDir(N, dip, dipDir);
-						txtStream << ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir) << endl;
+						txtStream << ccNormalVectors::ConvertDipAndDipDirToString(dip, dipDir) << Qt::endl;
 					}
 
-					txtStream << "Orientation matrix:" << endl;
-					txtStream << makeZPosMatrix.toString(precision, ' ') << endl;
+					txtStream << "Orientation matrix:" << Qt::endl;
+					txtStream << makeZPosMatrix.toString(precision, ' ') << Qt::endl;
 
 					// close the text file
 					txtFile.close();
@@ -6775,9 +6775,9 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 
 	QString newBaseName = cmd.arguments().takeFirst();
 	// Validate if the given name contains any breaking characters for NTFS filesystem at least
-	QRegExp          rx("[^:/\\\\*?\"|<>]*");
-	QRegExpValidator v(rx, 0);
-	int              pos = 0;
+	QRegularExpression          rx("[^:/\\\\*?\"|<>]*");
+	QRegularExpressionValidator v(rx, 0);
+	int                         pos = 0;
 	if (!v.validate(newBaseName, pos))
 	{
 		assert(false);
@@ -7417,7 +7417,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text))
 			{
 				QTextStream txtStream(&txtFile);
-				txtStream << transMat.toString(cmd.numericalPrecision(), ' ') << endl;
+				txtStream << transMat.toString(cmd.numericalPrecision(), ' ') << Qt::endl;
 				txtFile.close();
 			}
 			else

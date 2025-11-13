@@ -1,7 +1,9 @@
 # Require C++14
-set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS NO )
+
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
 
 # ccache
 # https://crascit.com/2016/04/09/using-ccache-with-cmake/
@@ -11,9 +13,6 @@ if ( CCACHE_PROGRAM )
     set( CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PROGRAM} )
     set( CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM} )
 endif()
-
-#silence all the Qt 5 deprecation warnings
-set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
 
 if ( UNIX )
     set( CMAKE_POSITION_INDEPENDENT_CODE ON )

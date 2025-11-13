@@ -20,6 +20,9 @@
 #include "ccColorBasedEntityPicking.h"
 #include "ccIncludeGL.h"
 
+// Qt
+#include <QOpenGLVersionFunctionsFactory>
+
 // Local
 #include "ccMaterial.h"
 
@@ -80,7 +83,7 @@ struct ccGLDrawContext
 	int glW;
 	//! GL screen height
 	int glH;
-	//! Device pixel ratio (general 1, 2 on HD displays)
+	//! Device pixel ratio (generally 1, can be 1.5 or 2 on HD displays)
 	float devicePixelRatio;
 	//! Corresponding GL window
 	ccGenericGLDisplay* display;
@@ -201,7 +204,7 @@ struct ccGLDrawContext
 	template <class TYPE>
 	TYPE* glFunctions() const
 	{
-		return qGLContext ? qGLContext->versionFunctions<TYPE>() : 0;
+		return qGLContext ? QOpenGLVersionFunctionsFactory::get<TYPE>(qGLContext) : 0;
 	}
 };
 

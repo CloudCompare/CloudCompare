@@ -209,19 +209,18 @@ bool Reference::execute(PdmsObjects::GenericItem*& item) const
 	{
 		if (s_elementsStack.size() < 2)
 			return false;
-		ElementsStack::iterator it = s_elementsStack.end();
-		--it;
+		ElementsStack::iterator it = s_elementsStack.begin();
 		if (isSet() == 1)
 		{
 			while (true)
 			{
+				if (it == s_elementsStack.end())
+					return false;
 				if (isNameReference() && strcmp(refname, (*it)->name) == 0)
 					break;
 				if (isTokenReference() && (*it)->getType() == token)
 					break;
-				if (it == s_elementsStack.begin())
-					return false;
-				--it;
+				++it;
 			}
 		}
 		item = *it;

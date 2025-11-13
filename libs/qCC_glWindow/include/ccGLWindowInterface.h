@@ -30,7 +30,7 @@
 
 // Qt
 #include <QElapsedTimer>
-#include <QOpenGLExtensions>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
 #include <QTimer>
 
@@ -707,8 +707,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 			RED_CYAN               = 3,
 			CYAN_RED               = 4,
 			NVIDIA_VISION          = 5,
-			OCULUS                 = 6,
-			GENERIC_STEREO_DISPLAY = 7
+			GENERIC_STEREO_DISPLAY = 6
 		};
 
 		//! Whether stereo-mode is 'analgyph' or real stereo mode
@@ -1490,8 +1489,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	//! Picking radius (pixels)
 	int m_pickRadius;
 
-	//! FBO support
-	QOpenGLExtension_ARB_framebuffer_object m_glExtFunc;
+	QOpenGLExtraFunctions m_glExtFunc;
 
 	//! Whether FBO support is on
 	bool m_glExtFuncSupported;

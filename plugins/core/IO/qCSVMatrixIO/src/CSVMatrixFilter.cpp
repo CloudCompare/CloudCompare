@@ -113,7 +113,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 		}
 
 		// we split the current line
-		QStringList parts = line.split(s_separator, QString::KeepEmptyParts);
+		QStringList parts = line.split(s_separator, Qt::KeepEmptyParts);
 
 		// if we have reached the max. number of points per cloud
 		if (width < 0)

@@ -18,7 +18,7 @@
 	url = https://github.com/CyberbuildLab/masonry-cc
 [submodule "plugins/core/Standard/qJSonRPCPlugin"]
 	path = plugins/core/Standard/qJSonRPCPlugin
-	url = https://gitlab.com/theadib/JSonRPCPlugin.git
+	url = https://github.com/CloudCompare/qJSonRPCPlugin.git
 [submodule "plugins/core/Standard/qCanupo/contrib/dlib"]
 	path = plugins/core/Standard/qCanupo/contrib/dlib
 	url = https://github.com/davisking/dlib.git
@@ -35,7 +35,10 @@
 	url = https://github.com/ColinDuquesnoy/QDarkStyleSheet
 [submodule "plugins/core/Standard/qVoxFall"]
 	path = plugins/core/Standard/qVoxFall
-	url = ../../farmakis/qVoxFall.git
+	url = https://github.com/farmakis/qVoxFall
 [submodule "plugins/core/Standard/qG3Point"]
 	path = plugins/core/Standard/qG3Point
 	url = https://github.com/p-leroy/qG3Point
+[submodule "plugins/core/IO/qPhotoscanIO/extern/quazip"]
+	path = plugins/core/IO/qPhotoscanIO/extern/quazip
+	url = https://github.com/stachenov/quazip.git

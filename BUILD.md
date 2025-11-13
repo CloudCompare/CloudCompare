@@ -89,7 +89,6 @@ The following options are **Windows-only**:
 |-------------------------------------|---------------|-------------
 | OPTION_MP_BUILD                     | OFF           | Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
 | OPTION_SUPPORT_3D_CONNEXION_DEVICES | OFF           | 3D mouses handling
-| OPTION_USE_OCULUS_SDK               | OFF           | Build with Oculus SDK (LibOVR) support.
 | OPTION_USE_VISUAL_LEAK_DETECTOR     | OFF           | To use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
 
 The available plugins are

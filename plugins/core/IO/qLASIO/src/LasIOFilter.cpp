@@ -661,6 +661,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	bool noShiftCanBeUsed     = !ccGlobalShiftManager::NeedShift(bbMax);
 	bool minBBCornerCanBeUsed = !ccGlobalShiftManager::NeedShift(bbMax - bbMin);
+	bool bbCenterCanBeUsed    = !ccGlobalShiftManager::NeedShift(0.5 * (bbMax - bbMin));
 
 	bool globalShiftAndLASOffsetXYAreDifferent = (hasLASOffset != hasGlobalShift
 	                                              || std::abs(originalLASOffset.x + globalShift.x) > 0.01 //'global shift' is the opposite of LAS offset ;)
@@ -677,9 +678,14 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		availableOffsets[LasSaveDialog::GLOBAL_SHIFT] = -globalShift; //'global shift' is the opposite of LAS offset ;)
 	}
 	CCVector3d minBBCornerOffset(bbMin.x, bbMin.y, 0.0);
+	CCVector3d bbCenterOffset((bbMin.x + bbMax.x) / 2, (bbMin.y + bbMax.y) / 2, 0.0);
 	// if (minBBCornerCanBeUsed) // we can still display it, even if it's not optimal
 	{
 		availableOffsets[LasSaveDialog::MIN_BB_CORNER] = minBBCornerOffset;
+	}
+	// if (bbCenterCanBeUsed) // we can still display it, even if it's not optimal
+	{
+		availableOffsets[LasSaveDialog::BB_CENTER] = bbCenterOffset;
 	}
 	static CCVector3d s_customLASOffset(0, 0, 0);
 	static bool       s_customLASOffsetWasUsedPreviously = false;
@@ -744,6 +750,11 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		{
 			ccLog::Warning("[LAS] The minimum bounding-box corner (X, Y) will be used as LAS offset by default");
 			defaultSelectedOffset = LasSaveDialog::MIN_BB_CORNER;
+		}
+		else if (bbCenterCanBeUsed)
+		{
+			ccLog::Warning("[LAS] The bounding-box center (X, Y) will be used as LAS offset by default");
+			defaultSelectedOffset = LasSaveDialog::BB_CENTER;
 		}
 		else
 		{

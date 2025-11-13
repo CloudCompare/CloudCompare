@@ -2,7 +2,7 @@ project( CCPluginAPI )
 
 add_library( ${PROJECT_NAME} SHARED )
 
-find_package( Qt5
+find_package( Qt6
 	COMPONENTS
 		Gui
 	REQUIRED
@@ -18,8 +18,9 @@ get_target_property( STUB_INCLUDES CCPluginStub INCLUDE_DIRECTORIES )
 target_include_directories( ${PROJECT_NAME} PUBLIC "${STUB_INCLUDES}" )
 
 target_link_libraries( ${PROJECT_NAME}
-	QCC_GL_LIB
-	QCC_IO_LIB
+	PUBLIC
+		QCC_GL_LIB
+		QCC_IO_LIB
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCPLUGIN_API_LIBRARY_BUILD )

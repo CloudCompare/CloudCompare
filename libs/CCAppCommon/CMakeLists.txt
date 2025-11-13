@@ -8,7 +8,10 @@ add_subdirectory( src )
 add_subdirectory( ui )
 
 target_link_libraries( ${PROJECT_NAME}
-	CCPluginAPI
+	PUBLIC
+		CCPluginAPI
+	PRIVATE
+		CC_FBO_LIB
 )
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCAPPCOMMON_LIBRARY_BUILD )
@@ -23,16 +26,6 @@ target_sources(${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle/dark/darkstyle.qrc
 		${CMAKE_CURRENT_LIST_DIR}/QDarkStyleSheet/qdarkstyle/light/lightstyle.qrc
 )
-
-if( OPTION_SUPPORT_GAMEPADS )
-	find_package( Qt5
-		COMPONENTS
-			Gamepad
-		REQUIRED
-	)
-
-	target_link_libraries( ${PROJECT_NAME} Qt5::Gamepad )
-endif()
 
 if( OPTION_SUPPORT_3DCONNEXION_DEVICES )
 	target_link_3DXWARE( ${PROJECT_NAME} )

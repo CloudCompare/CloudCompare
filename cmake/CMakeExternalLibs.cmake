@@ -25,15 +25,13 @@ add_definitions( -DQT_USE_QSTRINGBUILDER )
 # OpenGL
 # ------------------------------------------------------------------------------
 
-if ( UNIX )
-	set(OpenGL_GL_PREFERENCE GLVND)
-endif()
+# We could need this for raw openGL calls
+# but we access OpenGL functions through Qt's function pointers...
+#if ( UNIX and NOT APPLE)
+	#set(OpenGL_GL_PREFERENCE GLVND)
+#endif()
+#find_package(OpenGL REQUIRED)
 
-if ( MSVC )
-	# Where to find OpenGL libraries
-	set(WINDOWS_OPENGL_LIBS "C:\\Program Files (x86)\\Windows Kits\\8.0\\Lib\\win8\\um\\x64" CACHE PATH "WindowsSDK libraries" )
-	list( APPEND CMAKE_PREFIX_PATH ${WINDOWS_OPENGL_LIBS} )
-endif()
 
 # ------------------------------------------------------------------------------
 # OpenMP

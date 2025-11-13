@@ -2,8 +2,7 @@
 # Qt
 # ------------------------------------------------------------------------------
 
-# FIXME Eventually turn this on when we've completed the move to targets
-find_package( Qt6
+find_package( Qt6 REQUIRED
     COMPONENTS
         Concurrent
         Core
@@ -13,7 +12,6 @@ find_package( Qt6
         PrintSupport
         Svg
         Widgets
-    REQUIRED
 )
 
 qt_standard_project_setup()

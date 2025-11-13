@@ -35,16 +35,6 @@ target_link_libraries( ${PROJECT_NAME}
 		CCPluginStub
 )
 
-if( CCCORELIB_USE_QT_CONCURRENT )
-	# We want deployqt to handle this dependency, so instead of just copying the file
-	# link to the target.
-	target_link_libraries( ${PROJECT_NAME}
-		PRIVATE
-			Qt6::Concurrent
-	)
-endif()
-
-
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
     	CCAppCommon
@@ -122,7 +112,7 @@ endif()
 
 install(TARGETS ${PROJECT_NAME}
     BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-    RUNTIME DESTINATION ${PROJECT_NAME} # TODO check on Windows
+    RUNTIME DESTINATION ${PROJECT_NAME}/
 )
 
 if( APPLE )
@@ -134,11 +124,25 @@ if( APPLE )
         qt_deploy_runtime_dependencies(
             EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
         )")
+
+        install(SCRIPT ${deploy_ccViewer})
+elseif( WIN32 )
+    qt_generate_deploy_script(
+        TARGET ${PROJECT_NAME}
+        OUTPUT_SCRIPT deploy_ccViewer
+        CONTENT "
+        qt_deploy_runtime_dependencies(
+            EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
+            ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/CCCoreLib.dll\" \"${PROJECT_NAME}/CCAppCommon.dll\" \"${PROJECT_NAME}/QCC_GL_LIB.dll\"
+            BIN_DIR \"${PROJECT_NAME}/\"
+            LIB_DIR \"${PROJECT_NAME}/\"
+            PLUGINS_DIR \"${PROJECT_NAME}/\"
+            NO_COMPILER_RUNTIME
+            DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-d3d-compiler --verbose=1
+        )")
+
+        install(SCRIPT ${deploy_ccViewer})
 endif()
-
-#TODO: Windows equivalent of DeployQT
-
-install(SCRIPT ${deploy_ccViewer})
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to
 # always get an up-to-date version number (based on the current date)

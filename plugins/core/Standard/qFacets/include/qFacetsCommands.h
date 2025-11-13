@@ -67,6 +67,8 @@ constexpr char USE_CUSTOM_ORIENTATION[] = "-USE_CUSTOM_ORIENTATION";
 
 constexpr char EXPORT_FACETS_INFO[] = "-EXPORT_FACETS_INFO";
 constexpr char CSV_FILENAME[] = "-CSV_FILENAME";
+constexpr char COORDS_IN_CSV[] = "-COORDS_IN_CSV";
+
 
 
 
@@ -134,7 +136,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 			ERROR_MAX_PER_FACET << MIN_POINTS_PER_FACET << MAX_EDGE_LENGTH << ERROR_MEASURE << 			
 			CLASSIFY_FACETS_BY_ANGLE << CLASSIF_ANGLE_STEP << CLASSIF_MAX_DIST << 
 			EXPORT_FACETS << SHAPE_FILENAME << USE_NATIVE_ORIENTATION << USE_GLOBAL_ORIENTATION << USE_CUSTOM_ORIENTATION << 
-			EXPORT_FACETS_INFO << CSV_FILENAME;
+			EXPORT_FACETS_INFO << CSV_FILENAME << COORDS_IN_CSV;
 		QStringList algoNames = QStringList() << ALGO_FAST_MARCHING << ALGO_KD_TREE;
 		QStringList errorMeasureNames = QStringList() << RMS << MAX_DIST_68_PERCENT << MAX_DIST_95_PERCENT << MAX_DIST_99_PERCENT << MAX_DIST;
 		
@@ -144,7 +146,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 
 			QString param = cmd.arguments().takeFirst().toUpper();
 			
-			cmd.print(QObject::tr("raw \t%1 : %2").arg(COMMAND_FACETS, param));
+			//cmd.print(QObject::tr("raw \t%1 : %2").arg(COMMAND_FACETS, param));
 			while (paramNames.contains(param))
 			{
 				cmd.print(QObject::tr("\t%1 : %2").arg(COMMAND_FACETS, param));
@@ -465,8 +467,14 @@ struct CommandFacets : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\t-CSV_FILENAME : %1").arg(val));
 					params.CSV_FILENAME = val;					
 					
+				}				
+				//COORDS_IN_CSV
+				else if (param == COORDS_IN_CSV)
+				{
+					params.COORDS_IN_CSV = true;				
 				}
-
+				
+				
 				if (cmd.arguments().empty())
 				{
 					break;
@@ -558,7 +566,23 @@ struct CommandFacets : public ccCommandLineInterface::Command
 		if (params.EXPORT_FACETS_INFO)
 		{
 			cmd.print(QObject::tr("\t-EXPORT_FACETS_INFO"));
-			cmd.print(QObject::tr("\t\t-CSV_FILENAME : \"%1\"").arg(params.CSV_FILENAME));										
+			cmd.print(QObject::tr("\t\t-CSV_FILENAME : \"%1\"").arg(params.CSV_FILENAME));
+			if (params.COORDS_IN_CSV)
+			{
+				cmd.print(QObject::tr("\t\t-COORDS_IN_CSV"));
+				if (params.USE_NATIVE_ORIENTATION)
+					{
+						cmd.print(QObject::tr("\t\t\t-USE_NATIVE_ORIENTATION"));
+					}
+					else if (params.USE_GLOBAL_ORIENTATION)
+					{
+						cmd.print(QObject::tr("\t\t\t-USE_GLOBAL_ORIENTATION"));
+					}
+					else if (params.USE_CUSTOM_ORIENTATION)
+					{
+						cmd.print(QObject::tr("\t\t\t-USE_CUSTOM_ORIENTATION : %1 %2 %3").arg(params.NX).arg(params.NY).arg(params.NZ));
+					}				
+			}
 		}
 		
 		
@@ -643,7 +667,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				                                            outputName,
 															params.USE_NATIVE_ORIENTATION, 
 															params.USE_GLOBAL_ORIENTATION,
-															USE_CUSTOM_ORIENTATION,
+															params.USE_CUSTOM_ORIENTATION,
 															params.NX,
 															params.NY,
 															params.NZ,
@@ -675,7 +699,16 @@ struct CommandFacets : public ccCommandLineInterface::Command
 					cmd.error(QObject::tr("[FACETS] Failed to create directories %1").arg(outputName));
 					return false;
 				}
-				bool success = qFacets::executeExportFacetsInfo(facets, outputName, cmd.silentMode());
+				bool success = qFacets::executeExportFacetsInfo(facets, 
+															    outputName, 
+																params.COORDS_IN_CSV,
+																params.USE_NATIVE_ORIENTATION, 
+																params.USE_GLOBAL_ORIENTATION,
+																params.USE_CUSTOM_ORIENTATION,
+																params.NX,
+																params.NY,
+																params.NZ,
+																cmd.silentMode());
 				if (!success)
 				{
 					cmd.error(QObject::tr("[FACETS] Failed to Export Facets Info to csv"));

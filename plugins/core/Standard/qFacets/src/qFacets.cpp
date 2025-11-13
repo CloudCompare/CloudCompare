@@ -791,6 +791,8 @@ void qFacets::exportFacets()
 	assert(!facets.empty());
 
 	FacetsExportDlg fDlg(FacetsExportDlg::SHAPE_FILE_IO, m_app->getMainWindow());
+	
+	fDlg.coordsInCSVBox->setVisible(false);
 
 	//persistent settings (default export path)
 	QSettings settings;
@@ -914,87 +916,13 @@ bool qFacets::executeExportFacets(const qFacets::FacetSet& facets,
 	ccHObject toSave("facets");
 	
 	//depending on the 'main orientation', the job is more or less easy ;)
+	ccGLMatrix oriRotMat = calcOriRotMat(facets,
+										 useNativeOrientation,
+										 useGlobalOrientation,
+										 useCustomOrientation,
+										 nX, nY,nZ);
 	
 	
-	//Default base
-	CCVector3 X(1, 0, 0);
-	CCVector3 Y(0, 1, 0);
-	CCVector3 Z(0, 0, 1);
-
-	//'vertical' orientation (potentially specified by the user)
-	if (!useNativeOrientation)
-	{
-		if (useCustomOrientation)
-		{
-			Z = CCVector3(nX,nY,nZ);
-			Z.normalize();
-		}
-		else if (useGlobalOrientation)
-		{
-			//we compute the mean orientation (weighted by each facet's surface)
-			CCVector3d Nsum(0, 0, 0);
-			for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
-			{
-				double surf = (*it)->getSurface();
-				CCVector3 N = (*it)->getNormal();
-				Nsum.x += static_cast<double>(N.x) * surf;
-				Nsum.y += static_cast<double>(N.y) * surf;
-				Nsum.z += static_cast<double>(N.z) * surf;
-			}
-			Nsum.normalize();
-
-			Z = CCVector3(static_cast<PointCoordinateType>(Nsum.x),
-				static_cast<PointCoordinateType>(Nsum.y),
-				static_cast<PointCoordinateType>(Nsum.z));
-		}
-
-		//update X & Y
-		CCVector3 D = Z.cross(CCVector3(0, 0, 1));
-		if ( CCCoreLib::GreaterThanSquareEpsilon( D.norm2() ) ) //otherwise the vertical dir hasn't changed!
-		{
-			X = -D;
-			X.normalize();
-			Y = Z.cross(X);
-		}
-	}
-
-	//we compute the mean center (weighted by each facet's surface)
-	CCVector3 C(0, 0, 0);
-	{
-		double weightSum = 0;
-		for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
-		{
-			double surf = (*it)->getSurface();
-			CCVector3 Ci = (*it)->getCenter();
-			C += Ci * static_cast<PointCoordinateType>(surf);
-			weightSum += surf;
-		}
-		if (weightSum)
-			C /= static_cast<PointCoordinateType>(weightSum);
-	}
-
-	//determine the 'global' orientation matrix
-	ccGLMatrix oriRotMat;
-	oriRotMat.toIdentity();
-	if (!useNativeOrientation)
-	{
-		oriRotMat.getColumn(0)[0] = static_cast<float>(X.x);
-		oriRotMat.getColumn(0)[1] = static_cast<float>(X.y);
-		oriRotMat.getColumn(0)[2] = static_cast<float>(X.z);
-		oriRotMat.getColumn(1)[0] = static_cast<float>(Y.x);
-		oriRotMat.getColumn(1)[1] = static_cast<float>(Y.y);
-		oriRotMat.getColumn(1)[2] = static_cast<float>(Y.z);
-		oriRotMat.getColumn(2)[0] = static_cast<float>(Z.x);
-		oriRotMat.getColumn(2)[1] = static_cast<float>(Z.y);
-		oriRotMat.getColumn(2)[2] = static_cast<float>(Z.z);
-		oriRotMat.invert();
-
-		ccGLMatrix transMat;
-		transMat.setTranslation(-C);
-		oriRotMat = oriRotMat * transMat;
-		oriRotMat.setTranslation(oriRotMat.getTranslationAsVec3D() + C);
-	}
-
 	//for each facet
 	for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
 	{
@@ -1095,6 +1023,103 @@ bool qFacets::executeExportFacets(const qFacets::FacetSet& facets,
 }
 
 
+
+//##########################################################################
+//
+// 3.C. Helper to calc orientation matrix for non NativeOrientation output
+//
+//##########################################################################
+ccGLMatrix qFacets::calcOriRotMat(const FacetSet& facets,
+				  bool useNativeOrientation,
+				  bool useGlobalOrientation,
+				  bool useCustomOrientation,
+				  double nX, double nY, double nZ)
+{
+	//Default base
+	CCVector3 X(1, 0, 0);
+	CCVector3 Y(0, 1, 0);
+	CCVector3 Z(0, 0, 1);
+
+	//'vertical' orientation (potentially specified by the user)
+	if (!useNativeOrientation)
+	{
+		if (useCustomOrientation)
+		{
+			Z = CCVector3(nX,nY,nZ);
+			Z.normalize();
+		}
+		else if (useGlobalOrientation)
+		{
+			//we compute the mean orientation (weighted by each facet's surface)
+			CCVector3d Nsum(0, 0, 0);
+			for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+			{
+				double surf = (*it)->getSurface();
+				CCVector3 N = (*it)->getNormal();
+				Nsum.x += static_cast<double>(N.x) * surf;
+				Nsum.y += static_cast<double>(N.y) * surf;
+				Nsum.z += static_cast<double>(N.z) * surf;
+			}
+			Nsum.normalize();
+
+			Z = CCVector3(static_cast<PointCoordinateType>(Nsum.x),
+				static_cast<PointCoordinateType>(Nsum.y),
+				static_cast<PointCoordinateType>(Nsum.z));
+		}
+
+		//update X & Y
+		CCVector3 D = Z.cross(CCVector3(0, 0, 1));
+		if ( CCCoreLib::GreaterThanSquareEpsilon( D.norm2() ) ) //otherwise the vertical dir hasn't changed!
+		{
+			X = -D;
+			X.normalize();
+			Y = Z.cross(X);
+		}
+	}
+
+	//we compute the mean center (weighted by each facet's surface)
+	CCVector3 C(0, 0, 0);
+	{
+		double weightSum = 0;
+		for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+		{
+			double surf = (*it)->getSurface();
+			CCVector3 Ci = (*it)->getCenter();
+			C += Ci * static_cast<PointCoordinateType>(surf);
+			weightSum += surf;
+		}
+		if (weightSum)
+			C /= static_cast<PointCoordinateType>(weightSum);
+	}
+
+	//determine the 'global' orientation matrix
+	ccGLMatrix oriRotMat;
+	oriRotMat.toIdentity();
+	if (!useNativeOrientation)
+	{
+		oriRotMat.getColumn(0)[0] = static_cast<float>(X.x);
+		oriRotMat.getColumn(0)[1] = static_cast<float>(X.y);
+		oriRotMat.getColumn(0)[2] = static_cast<float>(X.z);
+		oriRotMat.getColumn(1)[0] = static_cast<float>(Y.x);
+		oriRotMat.getColumn(1)[1] = static_cast<float>(Y.y);
+		oriRotMat.getColumn(1)[2] = static_cast<float>(Y.z);
+		oriRotMat.getColumn(2)[0] = static_cast<float>(Z.x);
+		oriRotMat.getColumn(2)[1] = static_cast<float>(Z.y);
+		oriRotMat.getColumn(2)[2] = static_cast<float>(Z.z);
+		oriRotMat.invert();
+
+		ccGLMatrix transMat;
+		transMat.setTranslation(-C);
+		oriRotMat = oriRotMat * transMat;
+		oriRotMat.setTranslation(oriRotMat.getTranslationAsVec3D() + C);
+	}
+	
+	return oriRotMat;
+	
+	
+}
+					  
+
 //##########################################################################
 //
 // 4.A. CSV EXPORT (GUI WRAPPER)
@@ -1123,21 +1148,55 @@ void qFacets::exportFacetsInfo()
 	assert(!facets.empty());
 
 	FacetsExportDlg fDlg(FacetsExportDlg::ASCII_FILE_IO, m_app->getMainWindow());
+	
 	fDlg.orientationGroupBox->setEnabled(false);
+	
+	
+	
+	
+	
+	
+	
+	
 
 	//persistent settings (default export path)
 	QSettings settings;
 	settings.beginGroup("qFacets");
 	QString facetsSavePath = settings.value("exportPath", ccFileUtils::defaultDocPath()).toString();
+	
 	fDlg.destinationPathLineEdit->setText(facetsSavePath + QString("/facets.csv"));
 
 	if (!fDlg.exec())
 		return;
 
-	QString filename = fDlg.destinationPathLineEdit->text();
+	
 
+	QString filename = fDlg.destinationPathLineEdit->text();
 	//save current export path to persistent settings
 	settings.setValue("exportPath", QFileInfo(filename).absolutePath());
+	
+	bool coordsInCSV = fDlg.coordsInCSVCheckBox->isChecked();
+	
+	bool useNativeOrientation = fDlg.nativeOriRadioButton->isChecked();
+	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
+	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
+	
+	double nX = 0.0f;
+	double nY = 0.0f;
+	double nZ = 1.0f;
+	
+	if (!useNativeOrientation)
+	{
+		if (useCustomOrientation)
+		{
+			nX = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			
+		}		
+	}
+
+	
 
 	if (QFile(filename).exists())
 	{
@@ -1146,7 +1205,18 @@ void qFacets::exportFacetsInfo()
 			return;
 	}
 		
-	bool success = executeExportFacetsInfo(facets, filename, false);
+	//bool success = executeExportFacetsInfo(facets, filename, false);
+	bool success = executeExportFacetsInfo(facets, 
+										   filename,
+										   coordsInCSV,//bool coordsInCSV,
+										   useNativeOrientation,//bool useNativeOrientation,
+										   useGlobalOrientation,//bool useGlobalOrientation,
+										   useCustomOrientation,//bool useCustomOrientation,
+										   nX,
+										   nY,
+										   nZ,	
+										   false);
+										  
 	if (!success)
 	{
 		m_app->dispToConsole(QString("ExportFacetsInfo failed for some reason"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);		
@@ -1160,7 +1230,16 @@ void qFacets::exportFacetsInfo()
 // 4.B. CSV EXPORT (CORE ENGINE - STATIC)
 //
 //##########################################################################
-bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, const QString filename, bool silent)
+bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, 
+									  const QString filename, 
+									  bool coordsInCSV,
+									  bool useNativeOrientation,
+									  bool useGlobalOrientation,
+									  bool useCustomOrientation,
+									  double nX,
+									  double nY,
+									  double nZ,
+									  bool silent)
 {
 	
 
@@ -1201,8 +1280,20 @@ bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, const QSt
 	outStream << " Dip;";
 	outStream << " Family ind.;";
 	outStream << " Subfamily ind.;";
+	if (coordsInCSV)
+		{
+			outStream << " PolygonZ;";
+		}
 	outStream << " \n";
 
+
+	ccGLMatrix oriRotMat = calcOriRotMat(facets,
+										 useNativeOrientation,
+										 useGlobalOrientation,
+										 useCustomOrientation,
+										 nX, nY,nZ);
+										 
+										 
 	//write data (one line per facet)
 	for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
 	{
@@ -1226,7 +1317,38 @@ bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, const QSt
 		outStream << data.dipDir_deg << ";";
 		outStream << data.dip_deg << ";";
 		outStream << data.familyIndex << ";";
-		outStream << data.subfamilyIndex << ";";
+		outStream << data.subfamilyIndex << ";";	
+		if (coordsInCSV)
+		{
+			
+			ccPolyline* poly = facet->getContour();
+			//if necessary, we create a (temporary) new facet
+			if (!useNativeOrientation)
+			{
+				CCCoreLib::GenericIndexedCloudPersist* vertices = poly->getAssociatedCloud();
+				if (!vertices || vertices->size() < 3)
+					continue;
+
+				//create (temporary) new polyline
+				ccPolyline* newPoly = new ccPolyline(*poly);
+				ccPointCloud* pc = (newPoly ? dynamic_cast<ccPointCloud*>(newPoly->getAssociatedCloud()) : nullptr);
+				if (pc)
+				{
+					pc->applyGLTransformation_recursive(&oriRotMat);
+				}
+				else
+				{
+					//m_app->dispToConsole(QString("Failed to change the orientation of polyline '%1'! (not enough memory)").arg(poly->getName()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					ccLog::Warning(QString("Failed to change the orientation of polyline '%1'! (not enough memory)").arg(poly->getName()));
+					continue;
+				}
+
+				newPoly->set2DMode(true);
+				poly = newPoly;
+			}
+			QString polygonz = polylineCoordsToWKT_POLYGONZ(poly, 3);
+			outStream << "\"" << polygonz << "\"" << ";";
+		}
 		outStream << "\n";
 	}
 
@@ -1235,6 +1357,63 @@ bool qFacets::executeExportFacetsInfo(const qFacets::FacetSet& facets, const QSt
 	
 	ccLog::Print(QString("[qFacets] File '%1' successfully saved").arg(filename));
 	return true;
+}
+//##########################################################################
+//
+// 4.C. Convert ccPolyline to WKT polygonz
+//
+//##########################################################################
+
+QString qFacets::polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, int precision)
+{
+    if (!polyline)
+    {
+        return QString("Error: Polyline object is null.");
+    }
+
+	// Get the associated point cloud (vertices)
+	
+	//ccPointCloud& vertices_cloud = myPolyline.getAssociatedCloud()
+    const int pointCount = polyline->size();//->getChildrenNumber();
+
+    // A POLYGON Z requires at least 4 points (including the closure point).
+    if (pointCount < 4)
+    {
+        return QString("Invalid WKT input: POLYGON Z requires min 4 points. Found %1.").arg(pointCount);
+    }
+
+    // WKT structure: POLYGON Z ((X1 Y1 Z1, X2 Y2 Z2, ..., X1 Y1 Z1))
+    QString wkt = "POLYGON Z ((";
+
+    // Use the C locale to guarantee the decimal separator is always '.'
+    // (a requirement for standard WKT formats)
+    QLocale locale(QLocale::C);
+
+    for (int i = 0; i < pointCount; ++i)
+    {
+        // Access the point using the standard ccPolyline interface
+		//x, y, z = cccorelib.CCVector3(), cccorelib.CCVector3(), cccorelib.CCVector3()
+		//vertices_cloud.getPoint(i, x, y, z)
+		CCVector3d p = polyline->getPoint(i)->toDouble();
+        //const ccHPoint& p = polyline->getPoint(i);
+
+        if (i > 0)
+        {
+            wkt.append(", "); // Separator between points
+        }
+
+        // Append X, Y, Z coordinates separated by spaces
+        wkt.append(locale.toString(p.x, 'f', precision));
+        wkt.append(" ");
+        wkt.append(locale.toString(p.y, 'f', precision));
+        wkt.append(" ");
+        wkt.append(locale.toString(p.z, 'f', precision));
+    }
+
+    // Close the WKT string
+    wkt.append("))");
+
+    return wkt;
 }
 
 //##########################################################################

@@ -1612,9 +1612,55 @@ packages:
   purls: []
   size: 30173
   timestamp: 1749993648288
+<<<<<<< HEAD
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarchive-3.8.2-gpl_h46575ef_100.conda
   sha256: db847a255f9c61893f5ee364c194410fcdac57bf819bf1ed6e72c429c1aee055
   md5: 5ab60a0e4c99d6fa08605e0ea91e4fda
+=======
+- conda: https://conda.anaconda.org/conda-forge/osx-64/libarchive-3.8.2-gpl_h889603c_100.conda
+  sha256: b3ebced2a683cf4c4f1529676f60a80d6dcea11bc50cee137aadfe09a75f551a
+  md5: 7520a1a2a186da7ade597f8fdf72a168
+  depends:
+  - __osx >=10.13
+  - bzip2 >=1.0.8,<2.0a0
+  - libiconv >=1.18,<2.0a0
+  - liblzma >=5.8.1,<6.0a0
+  - libxml2
+  - libxml2-16 >=2.14.6
+  - libzlib >=1.3.1,<2.0a0
+  - lz4-c >=1.10.0,<1.11.0a0
+  - lzo >=2.10,<3.0a0
+  - openssl >=3.5.4,<4.0a0
+  - zstd >=1.5.7,<1.6.0a0
+  license: BSD-2-Clause
+  license_family: BSD
+  purls: []
+  size: 760450
+  timestamp: 1760611183190
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libarchive-3.8.2-gpl_h46575ef_100.conda
+  sha256: db847a255f9c61893f5ee364c194410fcdac57bf819bf1ed6e72c429c1aee055
+  md5: 5ab60a0e4c99d6fa08605e0ea91e4fda
+  depends:
+  - __osx >=11.0
+  - bzip2 >=1.0.8,<2.0a0
+  - libiconv >=1.18,<2.0a0
+  - liblzma >=5.8.1,<6.0a0
+  - libxml2
+  - libxml2-16 >=2.14.6
+  - libzlib >=1.3.1,<2.0a0
+  - lz4-c >=1.10.0,<1.11.0a0
+  - lzo >=2.10,<3.0a0
+  - openssl >=3.5.4,<4.0a0
+  - zstd >=1.5.7,<1.6.0a0
+  license: BSD-2-Clause
+  license_family: BSD
+  purls: []
+  size: 790591
+  timestamp: 1760611525393
+- conda: https://conda.anaconda.org/conda-forge/osx-64/libasprintf-0.25.1-h3184127_1.conda
+  sha256: 44e703d8fe739a71e9f7b89d04b56ccfaf488989f7712256bc0fcaf101e796a4
+  md5: 37398594a1ede86a90c0afac95e1ffea
+>>>>>>> 26f6ce44 (Update macOS build with GDAL support)
   depends:
   - __osx >=11.0
   - bzip2 >=1.0.8,<2.0a0
@@ -1922,9 +1968,97 @@ packages:
   purls: []
   size: 346703
   timestamp: 1757947166116
+<<<<<<< HEAD
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgdal-core-3.12.0-h403d5f8_0.conda
   sha256: 329debbc42b3f78a1bfc88e50e602507bdf8785b491b7afd8152e766f61cbe6d
   md5: 0a8a1099b42999f8996e4db33ca8d241
+=======
+- conda: https://conda.anaconda.org/conda-forge/osx-64/libgdal-core-3.11.4-hdfd46fd_8.conda
+  sha256: 858adfb7b5b33f55d86281c2492eef4c669dce054ca646d242d14243b0d2f5e2
+  md5: 7b11251aaed43980752a7cce19fa71e7
+  depends:
+  - __osx >=10.13
+  - blosc >=1.21.6,<2.0a0
+  - geos >=3.14.1,<3.14.2.0a0
+  - giflib >=5.2.2,<5.3.0a0
+  - json-c >=0.18,<0.19.0a0
+  - lerc >=4.0.0,<5.0a0
+  - libarchive >=3.8.2,<3.9.0a0
+  - libcurl >=8.16.0,<9.0a0
+  - libcxx >=19
+  - libdeflate >=1.24,<1.25.0a0
+  - libexpat >=2.7.1,<3.0a0
+  - libiconv >=1.18,<2.0a0
+  - libjpeg-turbo >=3.1.0,<4.0a0
+  - libjxl >=0.11,<0.12.0a0
+  - libkml >=1.3.0,<1.4.0a0
+  - liblzma >=5.8.1,<6.0a0
+  - libpng >=1.6.50,<1.7.0a0
+  - libspatialite >=5.1.0,<5.2.0a0
+  - libsqlite >=3.50.4,<4.0a0
+  - libwebp-base >=1.6.0,<2.0a0
+  - libxml2
+  - libxml2-16 >=2.14.6
+  - libzlib >=1.3.1,<2.0a0
+  - lz4-c >=1.10.0,<1.11.0a0
+  - muparser >=2.3.5,<2.4.0a0
+  - openssl >=3.5.4,<4.0a0
+  - pcre2 >=10.46,<10.47.0a0
+  - proj >=9.7.0,<9.8.0a0
+  - xerces-c >=3.3.0,<3.4.0a0
+  - zstd >=1.5.7,<1.6.0a0
+  constrains:
+  - libgdal 3.11.4.*
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 10047756
+  timestamp: 1761756179546
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/libgdal-core-3.11.4-h01333aa_8.conda
+  sha256: 99a83a94f6eb05faedf79fef2343946538e841d5a9fb3164b3e4de77637cf5be
+  md5: dac386de7b1e3aeaca4a613c8a8028c7
+  depends:
+  - __osx >=11.0
+  - blosc >=1.21.6,<2.0a0
+  - geos >=3.14.1,<3.14.2.0a0
+  - giflib >=5.2.2,<5.3.0a0
+  - json-c >=0.18,<0.19.0a0
+  - lerc >=4.0.0,<5.0a0
+  - libarchive >=3.8.2,<3.9.0a0
+  - libcurl >=8.16.0,<9.0a0
+  - libcxx >=19
+  - libdeflate >=1.24,<1.25.0a0
+  - libexpat >=2.7.1,<3.0a0
+  - libiconv >=1.18,<2.0a0
+  - libjpeg-turbo >=3.1.0,<4.0a0
+  - libjxl >=0.11,<0.12.0a0
+  - libkml >=1.3.0,<1.4.0a0
+  - liblzma >=5.8.1,<6.0a0
+  - libpng >=1.6.50,<1.7.0a0
+  - libspatialite >=5.1.0,<5.2.0a0
+  - libsqlite >=3.50.4,<4.0a0
+  - libwebp-base >=1.6.0,<2.0a0
+  - libxml2
+  - libxml2-16 >=2.14.6
+  - libzlib >=1.3.1,<2.0a0
+  - lz4-c >=1.10.0,<1.11.0a0
+  - muparser >=2.3.5,<2.4.0a0
+  - openssl >=3.5.4,<4.0a0
+  - pcre2 >=10.46,<10.47.0a0
+  - proj >=9.7.0,<9.8.0a0
+  - xerces-c >=3.3.0,<3.4.0a0
+  - zstd >=1.5.7,<1.6.0a0
+  constrains:
+  - libgdal 3.11.4.*
+  license: MIT
+  license_family: MIT
+  purls: []
+  size: 9242506
+  timestamp: 1761753573193
+- conda: https://conda.anaconda.org/conda-forge/osx-64/libgettextpo-0.25.1-h3184127_1.conda
+  sha256: 0509a41da5179727d24092020bc3d4addcb24a421c2e889d32a4035652fab2cf
+  md5: 711bff88af3b00283f7d8f32aff82e6a
+>>>>>>> 26f6ce44 (Update macOS build with GDAL support)
   depends:
   - __osx >=11.0
   - blosc >=1.21.6,<2.0a0
@@ -3963,6 +4097,55 @@ packages:
   - nlohmann_json
   - numpy
   - proj >=9.7.0,<9.8.0a0
+<<<<<<< HEAD
+=======
+  - pugixml >=1.15,<1.16.0a0
+  - python >=3.12,<3.13.0a0
+  - python_abi 3.12.* *_cp312
+  - qt6-main >=6.9.3,<6.10.0a0
+  - tbb >=2021.13.0
+  - utfcpp
+  - wslink
+  constrains:
+  - libboost-headers >=1.88.0,<1.89.0a0
+  license: BSD-3-Clause
+  license_family: BSD
+  purls:
+  - pkg:pypi/vtk?source=hash-mapping
+  size: 47970719
+  timestamp: 1760149652227
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/vtk-base-9.5.1-py312he37cbfc_7.conda
+  sha256: 4d10f95cdcca5fe3ca9444dfdcbdc5ad75ef084e2df584f6551431700ad04dca
+  md5: 388ed636b669522ec212f419b96f6a6f
+  depends:
+  - __osx >=11.0
+  - cli11
+  - double-conversion >=3.3.1,<3.4.0a0
+  - fmt >=11.2.0,<11.3.0a0
+  - hdf5 >=1.14.6,<1.14.7.0a0
+  - jsoncpp >=1.9.6,<1.9.7.0a0
+  - libcxx >=18
+  - libexpat >=2.7.1,<3.0a0
+  - libfreetype >=2.14.1
+  - libfreetype6 >=2.14.1
+  - libjpeg-turbo >=3.1.0,<4.0a0
+  - liblzma >=5.8.1,<6.0a0
+  - libnetcdf >=4.9.3,<4.9.4.0a0
+  - libogg >=1.3.5,<1.4.0a0
+  - libpng >=1.6.50,<1.7.0a0
+  - libsqlite >=3.50.4,<4.0a0
+  - libtheora >=1.1.1,<1.2.0a0
+  - libtiff >=4.7.1,<4.8.0a0
+  - libxml2
+  - libxml2-16 >=2.14.6
+  - libzlib >=1.3.1,<2.0a0
+  - loguru
+  - lz4-c >=1.10.0,<1.11.0a0
+  - matplotlib-base >=2.0.0
+  - nlohmann_json
+  - numpy
+  - proj >=9.7.0,<9.8.0a0
+>>>>>>> 26f6ce44 (Update macOS build with GDAL support)
   - pugixml >=1.15,<1.16.0a0
   - python >=3.12,<3.13.0a0
   - python >=3.12,<3.13.0a0 *_cpython

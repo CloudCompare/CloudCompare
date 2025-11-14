@@ -39,16 +39,19 @@ else()
 endif()
 
 if( WIN32 )
+    # list that track shared lib installed via InstallShared function (see Install.cmake)
+    # It allows to have a "robust" QT deployement
+    set( CC_SHARED_LIB_FILENAMES "" CACHE INTERNAL "Shared lib tracking for Qt Deployement" FORCE)
     set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER} )
 
     if( ${OPTION_BUILD_CCVIEWER} )
         list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER} )
     endif()
 elseif( APPLE )
-    set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app/Contents/Frameworks )
+    set( INSTALL_DESTINATIONS ${CLOUDCOMPARE_DEST_FOLDER}/${CLOUDCOMPARE_DEST_FOLDER}.app/Contents/Frameworks )
 
     if( ${OPTION_BUILD_CCVIEWER} )
-        list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER}/ccViewer.app/Contents/Frameworks )
+        list( APPEND INSTALL_DESTINATIONS ${CCVIEWER_DEST_FOLDER}/${CCVIEWER_DEST_FOLDER}.app/Contents/Frameworks )
     endif()
 elseif( UNIX )
     # RPATH Linux/Unix: (dynamic) libs are put in $prefix/$lib/cloudcompare,

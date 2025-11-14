@@ -23,6 +23,12 @@ function(InstallSharedLibrary)
 	set(shared_lib_target "${INSTALL_SHARED_LIB_TARGET}")
 	message(STATUS "Install shared library: ${shared_lib_target}")
 
+    if( WIN32 )
+        # collect filenames for QT deployement
+        list(APPEND CC_SHARED_LIB_FILENAMES "$<TARGET_FILE_NAME:${shared_lib_target}>" )
+        set(CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE)
+    endif()
+
 	foreach (destination ${INSTALL_DESTINATIONS})
 		if(UNIX AND NOT APPLE)
 			set(destination ${LINUX_INSTALL_SHARED_DESTINATION})

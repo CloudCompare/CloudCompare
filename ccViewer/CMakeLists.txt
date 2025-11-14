@@ -127,21 +127,25 @@ if( APPLE )
 
         install(SCRIPT ${deploy_ccViewer})
 elseif( WIN32 )
+set(ADDITIONAL_LIB_LINES "")
+    foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
+        string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/${lib}\"\n")
+    endforeach()
+
     qt_generate_deploy_script(
         TARGET ${PROJECT_NAME}
         OUTPUT_SCRIPT deploy_ccViewer
         CONTENT "
         qt_deploy_runtime_dependencies(
             EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
-            ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/CCCoreLib.dll\" \"${PROJECT_NAME}/CCAppCommon.dll\" \"${PROJECT_NAME}/QCC_GL_LIB.dll\"
+            ${ADDITIONAL_LIB_LINES}
             BIN_DIR \"${PROJECT_NAME}/\"
             LIB_DIR \"${PROJECT_NAME}/\"
             PLUGINS_DIR \"${PROJECT_NAME}/\"
             NO_COMPILER_RUNTIME
-            DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-d3d-compiler --verbose=1
+            DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
         )")
-
-        install(SCRIPT ${deploy_ccViewer})
+    install(SCRIPT ${deploy_ccViewer})
 endif()
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to

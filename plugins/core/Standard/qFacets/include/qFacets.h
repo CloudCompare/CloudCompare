@@ -142,7 +142,7 @@ public:
 	//! Set of facets (pointers)
 	typedef std::unordered_set<ccFacet*> FacetSet;
 	
-	static bool executeExportFacetsInfo(const FacetSet& facets,
+	static bool ExecuteExportFacetsInfo(const FacetSet& facets,
 								 const QString filename,
 								 bool coordsInCSV=false,
 								 bool useNativeOrientation=true,
@@ -153,7 +153,7 @@ public:
 								 double nZ=1.0f, 
 								 bool silent=false);
 								 
-    static bool executeExportFacets(const FacetSet& facets,
+    static bool ExecuteExportFacets(const FacetSet& facets,
 								 const QString filename,
 								 bool useNativeOrientation=true,
 								 bool useGlobalOrientation=false,
@@ -163,10 +163,10 @@ public:
 								 double nZ=1.0f,
 								 bool silent=false);	
 								 
-	static QString polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, 
+	static QString PolylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, 
 											    int precision = 3);
 												
-	static ccGLMatrix calcOriRotMat(const FacetSet& facets,
+	static ccGLMatrix CalcOriRotMat(const FacetSet& facets,
 									bool useNativeOrientation=true,
 									bool useGlobalOrientation=false,
 									bool useCustomOrientation=false,
@@ -205,7 +205,7 @@ protected:
 
 //protected:	
 	//! Creates facets from components
-	static ccHObject* createFacets(ccPointCloud* cloud,
+	static ccHObject* CreateFacets(ccPointCloud* cloud,
 	                        CCCoreLib::ReferenceCloudContainer& components,
 	                        unsigned minPointsPerComponent,
 	                        double maxEdgeLength,
@@ -215,7 +215,7 @@ protected:
 //protected:							
 public:
 	//! Core logic for facet extraction from a point cloud
-    static ccHObject* executeFacetExtraction(ccPointCloud* pc,
+    static ccHObject* ExecuteFacetExtraction(ccPointCloud* pc,
                                              const FacetsParams& params,
                                              bool& errorDuringFacetCreation,
                                              CCCoreLib::GenericProgressCallback* progress = nullptr);

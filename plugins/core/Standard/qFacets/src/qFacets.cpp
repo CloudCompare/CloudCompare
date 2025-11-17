@@ -1056,7 +1056,7 @@ ccGLMatrix qFacets::calcOriRotMat(const FacetSet& facets,
 			{
 				double surf = (*it)->getSurface();
 				CCVector3 N = (*it)->getNormal();
-				Nsum.x += static_cast<double>(N.x) * surf;
+				Nsum.x += N.x * surf;
 				Nsum.y += static_cast<double>(N.y) * surf;
 				Nsum.z += static_cast<double>(N.z) * surf;
 			}
@@ -1181,7 +1181,7 @@ void qFacets::exportFacetsInfo()
 	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
 	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
 	
-	double nX = 0.0f;
+	double nX = 0.0;
 	double nY = 0.0f;
 	double nZ = 1.0f;
 	
@@ -1189,7 +1189,7 @@ void qFacets::exportFacetsInfo()
 	{
 		if (useCustomOrientation)
 		{
-			nX = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nX = fDlg.nXLineEdit->text().toDouble();
 			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
 			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
 			
@@ -1379,7 +1379,7 @@ QString qFacets::polylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, int pr
     // A POLYGON Z requires at least 4 points (including the closure point). ccPolyline does have closing point.
     if (pointCount < 3)
     {
-        return QString("Invalid WKT input: POLYGON Z requires min 4 points. Found %1.").arg(pointCount);
+        return QString("Invalid WKT input: POLYGON Z requires min 3 points. Found %1.").arg(pointCount);
     }
 
     // WKT structure: POLYGON Z ((X1 Y1 Z1, X2 Y2 Z2, ..., X1 Y1 Z1))

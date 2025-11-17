@@ -1,6 +1,6 @@
 project( QCC_IO_LIB )
 
-add_library( ${PROJECT_NAME} SHARED )
+qt_add_library( ${PROJECT_NAME} SHARED )
 
 include( cmake/GDALSupport.cmake )
 
@@ -36,10 +36,7 @@ endif()
 # Add custom preprocessor definitions
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
-	CXX_VISIBILITY_PRESET hidden
-)
+set_target_properties( ${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden )
 
 if ( BUILD_TESTING )
 	add_subdirectory( test )

@@ -1,12 +1,6 @@
 project( CCPluginStub )
 
-add_library( ${PROJECT_NAME} STATIC )
-
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-    AUTOMOC OFF
-    AUTORCC OFF
-    AUTOUIC OFF
-)
+qt_add_library( ${PROJECT_NAME} STATIC )
 
 add_subdirectory( include )
 add_subdirectory( src )

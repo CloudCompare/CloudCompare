@@ -1,6 +1,6 @@
 project( CCAppCommon )
 
-add_library( ${PROJECT_NAME} SHARED )
+qt_add_library( ${PROJECT_NAME} SHARED )
 
 add_subdirectory( devices )
 add_subdirectory( include )

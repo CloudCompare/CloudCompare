@@ -1,6 +1,6 @@
 project( QCC_DB_LIB )
 
-add_library( ${PROJECT_NAME} SHARED )
+qt_add_library( ${PROJECT_NAME} SHARED )
 
 add_subdirectory( include )
 add_subdirectory( src )
@@ -21,9 +21,7 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
 endif()
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	CXX_VISIBILITY_PRESET hidden
-)
+set_target_properties( ${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden )
 
 InstallSharedLibrary( TARGET CCCoreLib )
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )

@@ -1,12 +1,12 @@
 project( CCPluginAPI )
 
-add_library( ${PROJECT_NAME} SHARED )
-
 find_package( Qt6
 	COMPONENTS
 		Gui
 	REQUIRED
 )
+
+qt_add_library( ${PROJECT_NAME} SHARED )
 
 add_subdirectory( include )
 add_subdirectory( src )
@@ -25,9 +25,6 @@ target_link_libraries( ${PROJECT_NAME}
 
 target_compile_definitions( ${PROJECT_NAME} PRIVATE CCPLUGIN_API_LIBRARY_BUILD )
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
-	CXX_VISIBILITY_PRESET hidden
-)
+set_target_properties( ${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden )
 
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )

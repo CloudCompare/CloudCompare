@@ -1056,11 +1056,11 @@ ccGLMatrix qFacets::CalcOriRotMat(const FacetSet& facets,
 			CCVector3d Nsum(0, 0, 0);
 			for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
 			{
-				double    surf = (*it)->getSurface();
-				CCVector3 N    = (*it)->getNormal();
-				Nsum.x += static_cast<double>(N.x) * surf;
-				Nsum.y += static_cast<double>(N.y) * surf;
-				Nsum.z += static_cast<double>(N.z) * surf;
+				double surf = (*it)->getSurface();
+				CCVector3 N = (*it)->getNormal();
+				Nsum.x += N.x * surf;
+				Nsum.y += N.y * surf;
+				Nsum.z += N.z * surf;
 			}
 			Nsum.normalize();
 
@@ -1168,17 +1168,16 @@ void qFacets::exportFacetsInfo()
 
 	bool useNativeOrientation = fDlg.nativeOriRadioButton->isChecked();
 	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
-	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
-
-	double nX = 0.0f;
-	double nY = 0.0f;
-	double nZ = 1.0f;
+	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();	
+	double nX = 0.0;
+	double nY = 0.0;
+	double nZ = 1.0;
 
 	if (!useNativeOrientation)
 	{
 		if (useCustomOrientation)
 		{
-			nX = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nX = fDlg.nXLineEdit->text().toDouble();
 			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
 			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
 		}
@@ -1348,17 +1347,13 @@ QString qFacets::PolylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline, unsign
 	{
 		return QString("Error: Polyline object is null.");
 	}
-
-	// Get the associated point cloud (vertices)
-
-	// ccPointCloud& vertices_cloud = myPolyline.getAssociatedCloud()
-	const unsigned int pointCount = polyline->size(); //->getChildrenNumber();
-
-	// A POLYGON Z requires at least 4 points (including the closure point). ccPolyline does have closing point.
-	if (pointCount < 3)
-	{
-		return QString("Invalid WKT input: POLYGON Z requires min 4 points. Found %1.").arg(pointCount);
-	}
+	
+	const unsigned int pointCount = polyline->size();
+    // A POLYGON Z requires at least 4 points (including the closure point). ccPolyline does have closing point.
+    if (pointCount < 3)
+    {
+        return QString("Invalid WKT input: POLYGON Z requires min 3 points. Found %1.").arg(pointCount);
+    }
 
 	// WKT structure: POLYGON Z ((X1 Y1 Z1, X2 Y2 Z2, ..., X1 Y1 Z1))
 	QString wkt = "POLYGON Z ((";

@@ -105,7 +105,7 @@ LasOpenDialog::LasOpenDialog(QWidget* parent)
 	const auto extentSpinBoxes = copcExtentGroupBox->findChildren<QDoubleSpinBox*>();
 	for (auto extentSpinBox : extentSpinBoxes)
 	{
-		connect(extentSpinBox, (void(QDoubleSpinBox::*)(double))(&QDoubleSpinBox::valueChanged), this, &LasOpenDialog::checkExtentConsistency);
+		connect(extentSpinBox, (void (QDoubleSpinBox::*)(double))(&QDoubleSpinBox::valueChanged), this, &LasOpenDialog::checkExtentConsistency);
 	}
 	// reload the last tiling output path
 	{

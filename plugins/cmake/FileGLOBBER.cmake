@@ -35,10 +35,10 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 target_sources( ${PROJECT_NAME}
-   PRIVATE
-	  ${PLUGIN_HEADERS}
-	  ${PLUGIN_SOURCES}
-	  ${PLUGIN_UI_FILES}
+	PRIVATE
+		${PLUGIN_HEADERS}
+		${PLUGIN_SOURCES}
+		${PLUGIN_UI_FILES}
 )
 
 unset( PLUGIN_HEADERS )

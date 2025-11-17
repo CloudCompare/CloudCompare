@@ -61,7 +61,7 @@ target_link_libraries( ${PROJECT_NAME}
 
 # OpenMP
 if(OpenMP_CXX_FOUND)
-    target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
+	target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
 endif()
 
 # Eigen
@@ -125,7 +125,7 @@ endif()
 
 # Put together our Application bundle on macOS
 if( APPLE )
-    add_subdirectory( Mac )
+	add_subdirectory( Mac )
 endif()
 
 # Translation
@@ -183,47 +183,47 @@ endif()
 
 
 install(TARGETS ${PROJECT_NAME}
-    BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-    RUNTIME DESTINATION ${PROJECT_NAME}/
+				BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+				RUNTIME DESTINATION ${PROJECT_NAME}/
 )
 
 if( APPLE )
-    # We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)
-    # Code signature is needed at this point
-    qt_generate_deploy_script(
-        TARGET ${PROJECT_NAME}
-        OUTPUT_SCRIPT deploy_cc
-        CONTENT "
-        qt_deploy_runtime_dependencies(
-            EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
-        )")
+	# We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)
+	# Code signature is needed at this point
+	qt_generate_deploy_script(
+								TARGET ${PROJECT_NAME}
+								OUTPUT_SCRIPT deploy_cc
+								CONTENT "
+								qt_deploy_runtime_dependencies(
+												EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
+								)")
 
-    install(SCRIPT ${deploy_cc})
+	install(SCRIPT ${deploy_cc})
 elseif( WIN32 )
 
-    # We are looking for QT dependencies inside additional libraries
-    # it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
-    # we could do the same for plugin
-    set(ADDITIONAL_LIB_LINES "")
-    foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
-        string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/${lib}\"\n")
-    endforeach()
+	# We are looking for QT dependencies inside additional libraries
+	# it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
+	# we could do the same for plugin
+	set(ADDITIONAL_LIB_LINES "")
+	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
+		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/${lib}\"\n")
+	endforeach()
 
-    qt_generate_deploy_script(
-        TARGET ${PROJECT_NAME}
-        OUTPUT_SCRIPT deploy_cc
-        CONTENT "
-        qt_deploy_runtime_dependencies(
-            EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
-            ${ADDITIONAL_LIB_LINES}
-            BIN_DIR \"${PROJECT_NAME}/\"
-            LIB_DIR \"${PROJECT_NAME}/\"
-            PLUGINS_DIR \"${PROJECT_NAME}/\"
-            NO_COMPILER_RUNTIME
-            DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
-        )")
+	qt_generate_deploy_script(
+								TARGET ${PROJECT_NAME}
+								OUTPUT_SCRIPT deploy_cc
+								CONTENT "
+								qt_deploy_runtime_dependencies(
+												EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
+												${ADDITIONAL_LIB_LINES}
+												BIN_DIR \"${PROJECT_NAME}/\"
+												LIB_DIR \"${PROJECT_NAME}/\"
+												PLUGINS_DIR \"${PROJECT_NAME}/\"
+												NO_COMPILER_RUNTIME
+												DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
+								)")
 
-    install(SCRIPT ${deploy_cc})
+	install(SCRIPT ${deploy_cc})
 endif()
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to

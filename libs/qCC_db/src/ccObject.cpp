@@ -67,7 +67,7 @@
     v5.4 - 01/29/2023 - ccColorScale custom labels can be overridden by a string
     v5.5 - 11/10/2024 - Scalar fields with 'double' offset and names as std::string
     v5.6 - 02/18/2025 - Circle entity
-    v5.7 - 10/01/2025 - Dist entity
+    v5.7 - 10/01/2025 - Disc entity
 **/
 const unsigned c_currentDBVersion = 57; // 5.7
 

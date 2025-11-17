@@ -26,7 +26,7 @@
  **/
 class QCC_DB_LIB_API ccDisc : public ccGenericPrimitive
 {
-public:
+  public:
 	//! Default drawing precision
 	/** \warning Never pass a 'constant initializer' by reference
 	 **/
@@ -34,51 +34,51 @@ public:
 
 	//! Default constructor
 	/** Simple disc constructor
-		\param radius disc radius
-		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
-		\param name name
-		\param precision drawing precision (angular step = 360/precision)
-		\param uniqueID unique ID (handle with care)
+	    \param radius disc radius
+	    \param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
+	    \param name name
+	    \param precision drawing precision (angular step = 360/precision)
+	    \param uniqueID unique ID (handle with care)
 	**/
 	ccDisc(PointCoordinateType radius,
-		   const ccGLMatrix*   transMat  = nullptr,
-		   QString             name      = QString("Disc"),
-		   unsigned            precision = DEFAULT_DRAWING_PRECISION,
-		   unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
+	       const ccGLMatrix*   transMat  = nullptr,
+	       QString             name      = QString("Disc"),
+	       unsigned            precision = DEFAULT_DRAWING_PRECISION,
+	       unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
-	**/
+	 **/
 	ccDisc(QString name = QString("Disc"));
 
-	//! Returns top radius
+	//! Returns radius
 	inline PointCoordinateType getRadius() const
 	{
 		return m_radius;
 	}
-	//! Sets top radius
+	//! Sets radius
 	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
 	 **/
 	void setRadius(PointCoordinateType radius);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::DISC;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Disc";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
-protected:
+  protected:
 	// inherited from ccGenericPrimitive
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
 	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;

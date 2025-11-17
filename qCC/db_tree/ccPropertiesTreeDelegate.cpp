@@ -38,6 +38,7 @@
 #include <ccColorScalesManager.h>
 #include <ccCone.h>
 #include <ccCoordinateSystem.h>
+#include <ccDisc.h>
 #include <ccFacet.h>
 #include <ccGBLSensor.h>
 #include <ccGenericPrimitive.h>
@@ -56,7 +57,6 @@
 #include <ccSensor.h>
 #include <ccSphere.h>
 #include <ccSubMesh.h>
-#include <ccDisc.h>
 
 // Qt
 #include <QAbstractItemView>
@@ -2694,9 +2694,7 @@ void ccPropertiesTreeDelegate::discRadiusChanged(double val)
 
 	if (disc->getRadius() != val)
 	{
-		bool wasVisible = disc->isVisible();
 		disc->setRadius(val);
-		disc->setVisible(wasVisible);
 
 		updateDisplay();
 

@@ -1,22 +1,22 @@
 // qCC_db
-#include<ccPointCloud.h>
-
 #include "ccDisc.h"
 
+#include <ccPointCloud.h>
+
 ccDisc::ccDisc(PointCoordinateType radius,
-			   const ccGLMatrix* transMat  /*= nullptr*/,
-			   QString name /*= QString("Disc")*/,
-			   unsigned precision /*= DEFAULT_DRAWING_PRECISION*/,
-			   unsigned uniqueID  /*= ccUniqueIDGenerator::InvalidUniqueID*/)
-	: ccGenericPrimitive(name, transMat, uniqueID)
-	, m_radius(std::abs(radius))
+               const ccGLMatrix*   transMat /*= nullptr*/,
+               QString             name /*= QString("Disc")*/,
+               unsigned            precision /*= DEFAULT_DRAWING_PRECISION*/,
+               unsigned            uniqueID /*= ccUniqueIDGenerator::InvalidUniqueID*/)
+    : ccGenericPrimitive(name, transMat, uniqueID)
+    , m_radius(std::abs(radius))
 {
 	setDrawingPrecision(std::max<unsigned>(precision, MIN_DRAWING_PRECISION)); // automatically calls buildUp & applyTransformationToVertices
 }
 
 ccDisc::ccDisc(QString name /*="Cylinder"*/)
-	: ccGenericPrimitive(name)
-	, m_radius(0)
+    : ccGenericPrimitive(name)
+    , m_radius(0)
 {
 }
 
@@ -57,7 +57,7 @@ bool ccDisc::buildUp()
 	assert(verts);
 	assert(m_triNormals);
 
-	// first point: center of the  surface
+	// first point: center of the disc
 	CCVector3 center = CCVector3(0, 0, 0);
 	// add center to the vertices
 	verts->addPoint(center);
@@ -66,12 +66,12 @@ bool ccDisc::buildUp()
 
 	// then, angular sweep for the surface
 	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0 * M_PI) / steps;
-		// bottom surface
+	// bottom surface
 	for (unsigned i = 0; i < steps; ++i)
 	{
 		CCVector3 P(center.x + cos(angle_rad_step * i) * m_radius,
-					center.y + sin(angle_rad_step * i) * m_radius,
-					center.z);
+		            center.y + sin(angle_rad_step * i) * m_radius,
+		            center.z);
 		verts->addPoint(P);
 	}
 
@@ -140,5 +140,5 @@ bool ccDisc::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 short ccDisc::minimumFileVersion_MeOnly() const
 {
-	return std::max(static_cast<short>(45), ccGenericPrimitive::minimumFileVersion_MeOnly());
+	return std::max(static_cast<short>(57), ccGenericPrimitive::minimumFileVersion_MeOnly());
 }

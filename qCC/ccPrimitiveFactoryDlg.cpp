@@ -26,12 +26,12 @@
 #include <ccCone.h>
 #include <ccCoordinateSystem.h>
 #include <ccCylinder.h>
+#include <ccDisc.h>
 #include <ccDish.h>
 #include <ccGenericPrimitive.h>
 #include <ccPlane.h>
 #include <ccSphere.h>
 #include <ccTorus.h>
-#include <ccDisc.h>
 
 // system
 #include <assert.h>

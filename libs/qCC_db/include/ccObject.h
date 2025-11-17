@@ -71,7 +71,7 @@ enum CC_OBJECT_FLAG
 #define CC_COORDINATESYSTEM_BIT 0x00000800000000  // CoordinateSystem (primitive)
 #define CC_CLIP_BOX_PART_BIT 0x00001000000000     // Cliping-box component
 #define CC_CIRCLE_BIT 0x00002000000000            //'3D' circle (polyline)
-#define CC_DISC_BIT 0x00004000000000			  // Disc (primitive)
+#define CC_DISC_BIT 0x00004000000000              // Disc (primitive)
 // #define CC_FREE_BIT					0x00004000000000
 // #define CC_FREE_BIT					0x00008000000000
 // #define CC_FREE_BIT					0x00010000000000

@@ -4894,7 +4894,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	// LOD
 	if (isLODEnabled()
 	    && !isFrameRateTestInProgress()
-	    && (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS))
+	    && !m_stereoModeEnabled)
 	{
 		CONTEXT.drawingFlags |= CC_LOD_ACTIVATED;
 
@@ -5260,7 +5260,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		int x = glWidth() / 2 - 100;
 		int y = 0;
 
-		if (m_stereoModeEnabled && m_stereoParams.glassType != StereoParams::OCULUS)
+		if (m_stereoModeEnabled)
 		{
 			if (renderingParams.pass == RIGHT_RENDERING_PASS)
 				x += glWidth() / 2;
@@ -5304,7 +5304,6 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	glFunc->glFlush();
 
 	// process and/or display the FBO (if any)
-	bool oculusMode = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS);
 	if (currentFBO && renderingParams.useFBO)
 	{
 		// we disable the FBO (if any)
@@ -5315,76 +5314,73 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 			m_updateFBO = false;
 		}
 
-		if (!oculusMode)
+		GLuint screenTex = 0;
+		if (m_activeGLFilter && !m_stereoModeEnabled)
 		{
-			GLuint screenTex = 0;
-			if (m_activeGLFilter && (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS)) // not supported with Oculus right now!
+			// we apply the GL filter
+			GLuint depthTex = currentFBO->getDepthTexture();
+			GLuint colorTex = currentFBO->getColorTexture();
+			// minimal set of viewport parameters necessary for GL filters
+			ccGlFilter::ViewportParameters parameters;
 			{
-				// we apply the GL filter
-				GLuint depthTex = currentFBO->getDepthTexture();
-				GLuint colorTex = currentFBO->getColorTexture();
-				// minimal set of viewport parameters necessary for GL filters
-				ccGlFilter::ViewportParameters parameters;
-				{
-					parameters.perspectiveMode = m_viewportParams.perspectiveView;
-					parameters.zFar            = m_viewportParams.zFar;
-					parameters.zNear           = m_viewportParams.zNear;
-				}
-				// apply shader
-				m_activeGLFilter->shade(depthTex, colorTex, parameters);
-				logGLError("ccGLWindow::paintGL/glFilter shade");
-				bindFBO(nullptr); // in case the active filter has used a FBO!
+				parameters.perspectiveMode = m_viewportParams.perspectiveView;
+				parameters.zFar            = m_viewportParams.zFar;
+				parameters.zNear           = m_viewportParams.zNear;
+			}
+			// apply shader
+			m_activeGLFilter->shade(depthTex, colorTex, parameters);
+			logGLError("ccGLWindow::paintGL/glFilter shade");
+			bindFBO(nullptr); // in case the active filter has used a FBO!
 
-				// if capture mode is ON: we only want to capture it, not to display it
-				if (!m_captureMode.enabled)
+			// if capture mode is ON: we only want to capture it, not to display it
+			if (!m_captureMode.enabled)
+			{
+				screenTex = m_activeGLFilter->getTexture();
+				// ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+			}
+		}
+		else if (!m_captureMode.enabled)
+		{
+			// screenTex = currentFBO->getDepthTexture();
+			screenTex = currentFBO->getColorTexture();
+			// ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
+		}
+
+		// we display the FBO texture fullscreen (if any)
+		if (glFunc->glIsTexture(screenTex))
+		{
+			setStandardOrthoCorner();
+
+			glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+			glFunc->glDisable(GL_DEPTH_TEST);
+
+			// select back left or back right buffer
+			// DGM: as we couldn't call it before (because of the FBO) we have to do it now!
+			GLboolean isStereoEnabled = GL_FALSE;
+			glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
+			// ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.pass).arg(isStereoEnabled));
+			if (isStereoEnabled)
+			{
+				if (m_stereoModeEnabled
+				    && (m_stereoParams.glassType == StereoParams::NVIDIA_VISION || m_stereoParams.glassType == StereoParams::GENERIC_STEREO_DISPLAY))
 				{
-					screenTex = m_activeGLFilter->getTexture();
-					// ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+					glFunc->glDrawBuffer(renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? GL_BACK_LEFT : GL_BACK_RIGHT);
+				}
+				else
+				{
+					glFunc->glDrawBuffer(GL_BACK);
 				}
 			}
-			else if (!m_captureMode.enabled)
-			{
-				// screenTex = currentFBO->getDepthTexture();
-				screenTex = currentFBO->getColorTexture();
-				// ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
-			}
 
-			// we display the FBO texture fullscreen (if any)
-			if (glFunc->glIsTexture(screenTex))
-			{
-				setStandardOrthoCorner();
+			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
 
-				glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
-				glFunc->glDisable(GL_DEPTH_TEST);
+			// warning: we must set the original FBO texture as default
+			glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
 
-				// select back left or back right buffer
-				// DGM: as we couldn't call it before (because of the FBO) we have to do it now!
-				GLboolean isStereoEnabled = GL_FALSE;
-				glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
-				// ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.pass).arg(isStereoEnabled));
-				if (isStereoEnabled)
-				{
-					if (m_stereoModeEnabled
-					    && (m_stereoParams.glassType == StereoParams::NVIDIA_VISION || m_stereoParams.glassType == StereoParams::GENERIC_STEREO_DISPLAY))
-					{
-						glFunc->glDrawBuffer(renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? GL_BACK_LEFT : GL_BACK_RIGHT);
-					}
-					else
-					{
-						glFunc->glDrawBuffer(GL_BACK);
-					}
-				}
+			glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
 
-				ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
-
-				// warning: we must set the original FBO texture as default
-				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
-
-				glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
-
-				// we don't need the depth info anymore!
-				// glFunc->glClear(GL_DEPTH_BUFFER_BIT);
-			}
+			// we don't need the depth info anymore!
+			// glFunc->glClear(GL_DEPTH_BUFFER_BIT);
 		}
 	}
 
@@ -5393,7 +5389,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	/******************/
 	/*** FOREGROUND ***/
 	/******************/
-	if (renderingParams.drawForeground && !oculusMode)
+	if (renderingParams.drawForeground)
 	{
 		drawForeground(CONTEXT, renderingParams);
 	}

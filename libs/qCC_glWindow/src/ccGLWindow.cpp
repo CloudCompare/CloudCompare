@@ -130,15 +130,7 @@ void ccGLWindow::requestUpdate()
 
 bool ccGLWindow::enableStereoMode(const StereoParams& params)
 {
-	if (params.glassType == StereoParams::OCULUS)
-	{
-		QMessageBox::critical(asWidget(), "Oculus", "The Oculus device is not supported by this type of 3D view");
-		return false;
-	}
-	else
-	{
-		return ccGLWindowInterface::enableStereoMode(params);
-	}
+	return ccGLWindowInterface::enableStereoMode(params);
 }
 
 void ccGLWindow::Create(ccGLWindow*& window, QWidget*& widget, bool silentInitialization /*=false*/)

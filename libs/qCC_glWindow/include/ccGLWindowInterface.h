@@ -707,8 +707,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 			RED_CYAN               = 3,
 			CYAN_RED               = 4,
 			NVIDIA_VISION          = 5,
-			OCULUS                 = 6,
-			GENERIC_STEREO_DISPLAY = 7
+			GENERIC_STEREO_DISPLAY = 6
 		};
 
 		//! Whether stereo-mode is 'analgyph' or real stereo mode

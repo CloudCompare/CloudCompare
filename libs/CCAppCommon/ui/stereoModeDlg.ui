@@ -75,15 +75,6 @@
        </item>
        <item>
         <property name="text">
-         <string>Oculus</string>
-        </property>
-        <property name="icon">
-         <iconset resource="../../qCC/icons.qrc">
-          <normaloff>:/CC/images/oculus.png</normaloff>:/CC/images/oculus.png</iconset>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string extracomment="Generic stereo display (e.g. PluraView)">Generic stereo display</string>
         </property>
         <property name="icon">

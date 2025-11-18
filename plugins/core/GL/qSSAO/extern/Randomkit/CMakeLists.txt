@@ -1,7 +1,5 @@
 project( RandomKitLib VERSION 1.6 )
 
-set( CMAKE_AUTOMOC OFF )
-
 add_library( ${PROJECT_NAME} STATIC )
 
 target_sources( ${PROJECT_NAME}

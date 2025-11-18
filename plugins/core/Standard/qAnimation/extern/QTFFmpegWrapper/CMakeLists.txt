@@ -2,13 +2,7 @@ project( QTFFMPEG_LIB )
 
 include( cmake/FFmpegSupport.cmake )
 
-add_library( ${PROJECT_NAME} STATIC )
-
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	AUTOMOC OFF
-	AUTORCC OFF
-	AUTOUIC OFF
-)
+qt_add_library( ${PROJECT_NAME} STATIC )
 
 target_sources( ${PROJECT_NAME}
 	PUBLIC

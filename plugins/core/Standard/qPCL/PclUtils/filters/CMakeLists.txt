@@ -27,6 +27,5 @@ add_subdirectory( dialogs )
 
 set_target_properties( ${PROJECT_NAME}
 	PROPERTIES
-	    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
 		AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_LIST_DIR}/dialogs
 )

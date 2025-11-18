@@ -101,8 +101,8 @@ if (NOT APPLE)
 	install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
 else()
 	install(TARGETS ${PROJECT_NAME}
-    	BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-     )
+		BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+	)
 endif()
 
 # Auxiliary files
@@ -153,7 +153,6 @@ elseif( UNIX )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.vs DESTINATION share/cloudcompare/shaders/DrawNormals )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.gs DESTINATION share/cloudcompare/shaders/DrawNormals )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.fs DESTINATION share/cloudcompare/shaders/DrawNormals )
-
 else()
 	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
 	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
@@ -187,12 +186,12 @@ if( APPLE )
 	# We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)
 	# Code signature is needed at this point
 	qt_generate_deploy_script(
-								TARGET ${PROJECT_NAME}
-								OUTPUT_SCRIPT deploy_cc
-								CONTENT "
-								qt_deploy_runtime_dependencies(
-												EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
-								)")
+		TARGET ${PROJECT_NAME}
+		OUTPUT_SCRIPT deploy_cc
+		CONTENT "
+			qt_deploy_runtime_dependencies(
+				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
+		)")
 
 	install(SCRIPT ${deploy_cc})
 elseif( WIN32 )
@@ -206,18 +205,18 @@ elseif( WIN32 )
 	endforeach()
 
 	qt_generate_deploy_script(
-								TARGET ${PROJECT_NAME}
-								OUTPUT_SCRIPT deploy_cc
-								CONTENT "
-								qt_deploy_runtime_dependencies(
-												EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
-												${ADDITIONAL_LIB_LINES}
-												BIN_DIR \"${PROJECT_NAME}/\"
-												LIB_DIR \"${PROJECT_NAME}/\"
-												PLUGINS_DIR \"${PROJECT_NAME}/\"
-												NO_COMPILER_RUNTIME
-												DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
-								)")
+		TARGET ${PROJECT_NAME}
+		OUTPUT_SCRIPT deploy_cc
+		CONTENT "
+			qt_deploy_runtime_dependencies(
+				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
+				${ADDITIONAL_LIB_LINES}
+				BIN_DIR \"${PROJECT_NAME}/\"
+				LIB_DIR \"${PROJECT_NAME}/\"
+				PLUGINS_DIR \"${PROJECT_NAME}/\"
+				NO_COMPILER_RUNTIME
+				DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
+			)")
 
 	install(SCRIPT ${deploy_cc})
 endif()

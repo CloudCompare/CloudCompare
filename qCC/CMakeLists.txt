@@ -37,14 +37,13 @@ qt_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
-	set( rc_list images/icon/cc_icon.rc )
+	set( msvc_icon images/icon/cc_icon.rc )
 
-	#to get rid of the (system) console
-	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_qrc_list} ${rc_list} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_qrc_list} ${msvc_icon} ${txt_list} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${txt_list} )
+	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_qrc_list} ${txt_list} )
 else()
-	qt_add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_qrc_list} ${rc_list} ${txt_list} )
+	qt_add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_qrc_list} ${txt_list} )
 endif()
 
 qt_add_ui( ${PROJECT_NAME} SOURCES ${ui_list} )

@@ -15,11 +15,4 @@ target_link_libraries( ${PROJECT_NAME}
 		CC_FBO_LIB
 )
 
-# Oculus support
-include( cmake/OculusSupport.cmake )
-
-if ( OPTION_USE_OCULUS_SDK )
-	target_link_OCULUS_SDK( ${PROJECT_NAME} )
-endif()
-
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )

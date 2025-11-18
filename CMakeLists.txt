@@ -38,6 +38,13 @@ else()
 	set( CCVIEWER_DEST_FOLDER bin )
 endif()
 
+# Load advanced scripts
+include( CMakeInclude )
+include( Install )
+
+# Add external libraries
+include( CMakeExternalLibs )
+
 if( WIN32 )
 	# list that track shared lib installed via InstallShared function (see Install.cmake)
 	# It allows to have a "robust" QT deployement
@@ -62,12 +69,6 @@ elseif( UNIX )
 	set( INSTALL_DESTINATIONS ${CMAKE_INSTALL_PREFIX})
 endif()
 
-# Load advanced scripts
-include( CMakeInclude )
-include( Install )
-
-# Add external libraries
-include( CMakeExternalLibs )
 
 # Internal libs used by both CloudCompare & ccViewer
 add_subdirectory( libs )

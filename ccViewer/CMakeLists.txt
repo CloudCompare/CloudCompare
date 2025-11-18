@@ -58,7 +58,11 @@ endif()
 
 if (NOT APPLE)
 	# install program
-	install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
+	install_ext( TARGETS ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} "" )
+else()
+	install(TARGETS ${PROJECT_NAME}
+    	BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+     )
 endif()
 
 # Auxiliary files
@@ -108,12 +112,6 @@ else()
 		SHADER_DEST_FOLDER "shaders"
 )
 endif()
-
-
-install(TARGETS ${PROJECT_NAME}
-    BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-    RUNTIME DESTINATION ${PROJECT_NAME}/
-)
 
 if( APPLE )
     # Code signature is needed at this point

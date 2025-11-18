@@ -97,10 +97,12 @@ if( WIN32 )
 endif()
 
 if (NOT APPLE)
-	# Install program.
-	# On macOs, the DeployQt step will install the bundle that contains the executable with
-	# library paths properly set, reinstalling the executable here would break the bundle.
+	# install program
 	install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
+else()
+	install(TARGETS ${PROJECT_NAME}
+    	BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+     )
 endif()
 
 # Auxiliary files
@@ -180,12 +182,6 @@ else()
 		SHADER_DEST_FOLDER "shaders"
 	)
 endif()
-
-
-install(TARGETS ${PROJECT_NAME}
-				BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-				RUNTIME DESTINATION ${PROJECT_NAME}/
-)
 
 if( APPLE )
 	# We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)

@@ -3,8 +3,8 @@ option( PLUGIN_STANDARD_QPCV "Install qPCV plugin" OFF )
 if( PLUGIN_STANDARD_QPCV )
 	project( QPCV_PLUGIN )
 
-	find_package( OpenGL REQUIRED )
-	if( NOT OPENGL_FOUND )
+	find_package( OpenGL MODULE REQUIRED )
+	if( NOT OPENGL_GLU_FOUND )
 		message( FATAL_ERROR "OpenGL required by PCV plugin" )
 	endif()
 
@@ -14,5 +14,5 @@ if( PLUGIN_STANDARD_QPCV )
 	add_subdirectory( src )
 	add_subdirectory( ui )
 
-	target_link_libraries( ${PROJECT_NAME} OpenGL::GL )
+	target_link_libraries( ${PROJECT_NAME} OpenGL::GLU )
 endif()

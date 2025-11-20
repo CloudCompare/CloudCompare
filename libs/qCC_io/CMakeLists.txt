@@ -17,7 +17,7 @@ endif()
 
 option( OPTION_USE_SHAPE_LIB "Build with ShapeLib (SHP files support)" ON )
 if( ${OPTION_USE_SHAPE_LIB} )
-    set( SHAPELIB_LIB_DIR "extern/shapelib" CACHE PATH "shapelib lib path" )
+	set( SHAPELIB_LIB_DIR "extern/shapelib" CACHE PATH "shapelib lib path" )
 	add_subdirectory( "${SHAPELIB_LIB_DIR}" )
 	target_link_libraries( ${PROJECT_NAME} PUBLIC shapelib )
 	target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_SHP_SUPPORT )
@@ -26,6 +26,7 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
 	PUBLIC
 		QCC_DB_LIB
+		Qt::Concurrent
 )
 
 if( OPTION_USE_GDAL )
@@ -36,13 +37,12 @@ endif()
 target_compile_definitions( ${PROJECT_NAME} PRIVATE QCC_IO_LIBRARY_BUILD )
 
 set_target_properties( ${PROJECT_NAME} PROPERTIES
-    AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
+	AUTOUIC ON # FIXME Remove after everything has moved to targets and we can set it globally
 	CXX_VISIBILITY_PRESET hidden
 )
 
 if ( BUILD_TESTING )
-	add_subdirectory( test ) 
+	add_subdirectory( test )
 endif()
 
 InstallSharedLibrary( TARGET ${PROJECT_NAME} )
-

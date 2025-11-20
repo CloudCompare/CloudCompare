@@ -16,7 +16,8 @@
 // ##########################################################################
 
 #ifdef CC_CORE_LIB_USES_TBB
-#include <tbb/parallel_for.h>
+#include <oneapi/tbb/parallel_for.h>
+using namespace oneapi;
 #endif
 
 #include "ccGenericPointCloud.h"

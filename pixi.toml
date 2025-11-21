@@ -31,6 +31,7 @@ draco = ">=1.5.7,<1.6"
 xerces-c = ">=3.3.0,<3.4"
 occt = ">=7.7.1,<7.8"       # Opencascade, >=7.8 needs cmake adjustements
 tbb = ">=2022.2.0,<2023"
+cgal-cpp = ">=6.1,<7"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -45,6 +46,7 @@ cmd = [
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCCCORELIB_USE_TBB=ON",
+	"-DCCCORELIB_USE_CGAL=ON",
 	"-DCC_USE_EIGEN=ON",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DPLUGIN_IO_QLAS=ON",

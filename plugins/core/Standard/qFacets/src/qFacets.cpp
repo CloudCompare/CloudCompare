@@ -47,10 +47,10 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-//qCC_io
+// qCC_io
 #include <FileIOFilter.h>
-#include <ShpFilter.h>
 #include <ShpDBFFields.h>
+#include <ShpFilter.h>
 
 // semi-persistent dialog values
 static unsigned s_octreeLevel               = 8;
@@ -214,7 +214,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	// first time: we compute the max edge length automatically
 	if (s_lastCloud != pc)
 	{
-		s_maxEdgeLength     = static_cast<double>(pc->getOwnBB().getMinBoxDim()) / 50;
+		s_maxEdgeLength     = pc->getOwnBB().getMinBoxDim() / 50.0;
 		s_minPointsPerFacet = std::max<unsigned>(pc->size() / 100000, 10);
 		s_lastCloud         = pc;
 	}
@@ -317,7 +317,7 @@ void qFacets::extractFacets(CellsFusionDlg::Algorithm algo)
 	ccHObject* group                    = qFacets::ExecuteFacetExtraction(pc, params, errorDuringFacetCreation, progress);
 
 	qint64 elapsedTime_ms = eTimer.elapsed();
-	m_app->dispToConsole(QString("[qFacets] Total computation time: %1 s").arg(static_cast<double>(elapsedTime_ms) / 1.0e3, 0, 'f', 3), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	m_app->dispToConsole(QString("[qFacets] Total computation time: %1 s").arg(elapsedTime_ms / 1.0e3, 0, 'f', 3), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	if (group)
 	{
@@ -395,7 +395,7 @@ ccHObject* qFacets::ExecuteFacetExtraction(ccPointCloud*                       p
 			if (progress) // Log timing if not silent
 			{
 				qint64 elapsedTime_ms = eTimer.elapsed();
-				ccLog::Print(QString("[qFacets] Kd-tree construction timing: %1 s").arg(static_cast<double>(elapsedTime_ms) / 1.0e3, 0, 'f', 3));
+				ccLog::Print(QString("[qFacets] Kd-tree construction timing: %1 s").arg(elapsedTime_ms / 1.0e3, 0, 'f', 3));
 			}
 
 			success = ccKdTreeForFacetExtraction::FuseCells(
@@ -572,9 +572,9 @@ ccHObject* qFacets::CreateFacets(ccPointCloud*                       cloud,
 					{
 						col = ccColor::Generator::Random();
 						assert(c_darkColorRatio <= 1.0);
-						darkCol.r = static_cast<ColorCompType>(static_cast<double>(col.r) * c_darkColorRatio);
-						darkCol.g = static_cast<ColorCompType>(static_cast<double>(col.g) * c_darkColorRatio);
-						darkCol.b = static_cast<ColorCompType>(static_cast<double>(col.b) * c_darkColorRatio);
+						darkCol.r = static_cast<ColorCompType>(col.r * c_darkColorRatio);
+						darkCol.g = static_cast<ColorCompType>(col.g * c_darkColorRatio);
+						darkCol.b = static_cast<ColorCompType>(col.b * c_darkColorRatio);
 					}
 					else
 					{
@@ -686,7 +686,7 @@ struct FacetMetaData
 };
 
 // helper: extract all meta-data information form a facet
-void GetFacetMetaData(ccFacet* facet, FacetMetaData& data)
+void GetFacetMetaData(const ccFacet* facet, FacetMetaData& data)
 {
 	// try to get the facet index from the facet name!
 	{
@@ -829,17 +829,17 @@ void qFacets::exportFacets()
 	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
 	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
 
-	double nX = 0.0f;
-	double nY = 0.0f;
-	double nZ = 1.0f;
+	double nX = 0.0;
+	double nY = 0.0;
+	double nZ = 1.0;
 
 	if (!useNativeOrientation)
 	{
 		if (useCustomOrientation)
 		{
-			nX = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
-			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
-			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nX = fDlg.nXLineEdit->text().toDouble();
+			nY = fDlg.nXLineEdit->text().toDouble();
+			nZ = fDlg.nXLineEdit->text().toDouble();
 		}
 	}
 
@@ -930,7 +930,7 @@ bool qFacets::ExecuteExportFacets(const qFacets::FacetSet& facets,
 	                                     nZ);
 
 	// for each facet
-	for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+	for (auto it = facets.begin(); it != facets.end(); ++it)
 	{
 		ccFacet*    facet = *it;
 		ccPolyline* poly  = facet->getContour();
@@ -1052,19 +1052,17 @@ ccGLMatrix qFacets::CalcOriRotMat(const FacetSet& facets,
 		{
 			// we compute the mean orientation (weighted by each facet's surface)
 			CCVector3d Nsum(0, 0, 0);
-			for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+			for (auto it = facets.begin(); it != facets.end(); ++it)
 			{
 				double    surf = (*it)->getSurface();
 				CCVector3 N    = (*it)->getNormal();
-				Nsum.x += static_cast<double>(N.x) * surf;
-				Nsum.y += static_cast<double>(N.y) * surf;
-				Nsum.z += static_cast<double>(N.z) * surf;
+				Nsum.x += N.x * surf;
+				Nsum.y += N.y * surf;
+				Nsum.z += N.z * surf;
 			}
 			Nsum.normalize();
 
-			Z = CCVector3(static_cast<PointCoordinateType>(Nsum.x),
-			              static_cast<PointCoordinateType>(Nsum.y),
-			              static_cast<PointCoordinateType>(Nsum.z));
+			Z = CCVector3::fromArray(Nsum.u);
 		}
 
 		// update X & Y
@@ -1081,7 +1079,7 @@ ccGLMatrix qFacets::CalcOriRotMat(const FacetSet& facets,
 	CCVector3 C(0, 0, 0);
 	{
 		double weightSum = 0;
-		for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+		for (auto it = facets.begin(); it != facets.end(); ++it)
 		{
 			double    surf = (*it)->getSurface();
 			CCVector3 Ci   = (*it)->getCenter();
@@ -1168,17 +1166,17 @@ void qFacets::exportFacetsInfo()
 	bool useGlobalOrientation = fDlg.verticalOriRadioButton->isChecked();
 	bool useCustomOrientation = fDlg.customOriRadioButton->isChecked();
 
-	double nX = 0.0f;
-	double nY = 0.0f;
-	double nZ = 1.0f;
+	double nX = 0.0;
+	double nY = 0.0;
+	double nZ = 1.0;
 
 	if (!useNativeOrientation)
 	{
 		if (useCustomOrientation)
 		{
 			nX = fDlg.nXLineEdit->text().toDouble();
-			nY = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
-			nZ = static_cast<PointCoordinateType>(fDlg.nXLineEdit->text().toDouble());
+			nY = fDlg.nXLineEdit->text().toDouble();
+			nZ = fDlg.nXLineEdit->text().toDouble();
 		}
 	}
 
@@ -1273,7 +1271,7 @@ bool qFacets::ExecuteExportFacetsInfo(const qFacets::FacetSet& facets,
 	                                     nZ);
 
 	// write data (one line per facet)
-	for (FacetSet::iterator it = facets.begin(); it != facets.end(); ++it)
+	for (auto it = facets.begin(); it != facets.end(); ++it)
 	{
 		ccFacet*      facet = *it;
 		FacetMetaData data;

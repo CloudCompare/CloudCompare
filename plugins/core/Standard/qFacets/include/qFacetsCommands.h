@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                     CLOUDCOMPARE PLUGIN: qFacets                       #
@@ -15,16 +17,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef FACETS_PLUGIN_COMMANDS_HEADER
-#define FACETS_PLUGIN_COMMANDS_HEADER
-
 // CloudCompare
 #include "ccCommandLineInterface.h"
 
 // Local
 #include "qFacets.h"
 
-// Q
+// Qt
 #include <QDir>
 #include <QFileInfo>
 
@@ -450,7 +449,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 			}
 		}
 
-		if (!params.extractFacets && !params.classifyFacetsByAngle && !params.exportFacets && EXPORT_FACETS_INFO)
+		if (!params.extractFacets && !params.classifyFacetsByAngle && !params.exportFacets && params.exportFacetsInfo)
 		{
 			return cmd.error(QObject::tr("No valid parameter: Need one of -%2, -%3, -%4, or -%5 after Algorithm type after \"-%1\"").arg(COMMAND_FACETS, EXTRACT_FACETS, CLASSIFY_FACETS_BY_ANGLE, EXPORT_FACETS, EXPORT_FACETS_INFO));
 		}
@@ -554,7 +553,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 			// execute EXTRACT_FACETS
 			if (params.extractFacets)
 			{
-				cmd.print(QObject::tr("[FACETS] Extracting Facets:  \"%1\"").arg(clCloud.pc->getName()));
+				cmd.print(QObject::tr("[FACETS] Extracting Facets: \"%1\"").arg(clCloud.pc->getName()));
 				bool       errorDuringFacetCreation = false;
 				ccHObject* group                    = qFacets::ExecuteFacetExtraction(clCloud.pc,
                                                                    params,
@@ -582,7 +581,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				cmd.print(QObject::tr("[FACETS] Classifying facets by angles."));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("[FACETS] Need facets.  Must use -EXTRACT_FACETS."));
+					cmd.error(QObject::tr("[FACETS] Need facets. Must use -EXTRACT_FACETS."));
 					return false;
 				}
 
@@ -603,7 +602,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				cmd.print(QObject::tr("[FACETS] Exporting Facets info to shape file"));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("[FACETS] Need facets.  Must use -EXTRACT_FACETS."));
+					cmd.error(QObject::tr("[FACETS] Need facets. Must use -EXTRACT_FACETS."));
 					return false;
 				}
 
@@ -633,13 +632,14 @@ struct CommandFacets : public ccCommandLineInterface::Command
 					return false;
 				}
 			}
+
 			// execute EXPORT_FACETS_INFO
 			if (params.exportFacetsInfo)
 			{
 				cmd.print(QObject::tr("[FACETS] Exporting Facets info to csv."));
 				if (facets.empty())
 				{
-					cmd.error(QObject::tr("[FACETS] Need facets.  Must have -EXTRACT_FACETS."));
+					cmd.error(QObject::tr("[FACETS] Need facets. Must have -EXTRACT_FACETS."));
 					return false;
 				}
 
@@ -673,5 +673,3 @@ struct CommandFacets : public ccCommandLineInterface::Command
 		return true;
 	}
 };
-
-#endif // FACETS_PLUGIN_COMMANDS_HEADER

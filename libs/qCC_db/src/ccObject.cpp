@@ -326,8 +326,33 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 			QString     key;
 			QVariant    value;
 			inStream >> key;
-			inStream >> value;
-			setMetaData(key, value);
+#if 1 // patch to overcome the issue with LAS vlrs not being readable anymore as QVariant object with Qt 6
+			if (key == "LAS.vlrs")
+			{
+				inStream.skipRawData(16); // size of a partial QVariant object on Windows
+				quint64 vlrSize = 0;
+				inStream >> vlrSize;
+				for (quint64 i = 0; i < vlrSize; ++i)
+				{
+					inStream.skipRawData(sizeof(uint16_t));
+					inStream.skipRawData(16 * sizeof(char));
+					inStream.skipRawData(sizeof(uint16_t));
+					uint16_t record_length_after_header;
+					inStream >> record_length_after_header;
+					inStream.skipRawData(32 * sizeof(char));
+					inStream.skipRawData(record_length_after_header);
+				}
+
+				quint64 extraScalarFieldCount = 0;
+				inStream >> extraScalarFieldCount;
+				inStream.skipRawData(272 * extraScalarFieldCount);
+			}
+			else
+#endif
+			{
+				inStream >> value;
+				setMetaData(key, value);
+			}
 		}
 	}
 

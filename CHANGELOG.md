@@ -278,6 +278,10 @@ Bug fixes:
 	- DXF files: the 'elevation' of LWPOLYLINE entities was ignored
 	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
 
+Unresolved anomalies:
+	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6
+		being unable to recognize the QVariant blob as being of the custom LasVlr meta-type.
+
 v2.13.2 (Kharkiv) - (06/30/2024)
 ----------------------
 Improvements:

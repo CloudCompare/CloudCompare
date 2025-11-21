@@ -32,6 +32,7 @@ xerces-c = ">=3.3.0,<3.4"
 occt = ">=7.8,<7.9" # Opencascade
 tbb = ">=2022.2.0,<2023"
 cgal-cpp = ">=6.1,<7"
+libgdal-core = ">=3.12.0,<4"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -49,6 +50,7 @@ cmd = [
 	"-DCCCORELIB_USE_CGAL=ON",
 	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCC_USE_EIGEN=ON",
+	"-DOPTION_USE_GDAL=ON",
 	"-DPLUGIN_IO_QLAS=ON",
 	"-DPLUGIN_STANDARD_3DMASC=ON",
 	"-DPLUGIN_PYTHON=ON",

@@ -16,10 +16,7 @@ target_include_directories( ${PROJECT_NAME}
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-set_target_properties( ${PROJECT_NAME}
-	PROPERTIES POSITION_INDEPENDENT_CODE ON
-	CXX_VISIBILITY_PRESET hidden
-)
+set_target_properties( ${PROJECT_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden )
 
 target_link_libraries( ${PROJECT_NAME}
 	PUBLIC

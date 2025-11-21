@@ -1,4 +1,4 @@
-[project]
+[workspace]
 name = "cloudcompare"
 version = "2.14.0"
 description = "CloudCompare is a 3D point cloud processing software."
@@ -18,7 +18,7 @@ cxx-compiler = ">=1.9.0,<1.10"
 ninja = "1.13.*"
 
 [dependencies]
-qt6-main= ">=6.9.1,<6.10.0" #at least 6.9.1 for PCL 1.15.1
+qt6-main= ">=6.9.1,<6.10.0" # at least 6.9.1 for PCL 1.15.1
 laszip = ">=3.4.3,<3.5"
 opencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
@@ -29,7 +29,7 @@ pyside6 = ">=6.8.1"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
 xerces-c = ">=3.3.0,<3.4"
-occt = ">=7.7.1,<7.8"       # Opencascade, >=7.8 needs cmake adjustements
+occt = ">=7.8,<7.9" # Opencascade
 tbb = ">=2022.2.0,<2023"
 cgal-cpp = ">=6.1,<7"
 
@@ -42,18 +42,16 @@ cmd = [
 	# We want build in the .build directory
 	"-B.build",
 	"-DCMAKE_BUILD_TYPE=Release",
+	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DBUILD_SHARED_LIBS=OFF",
 	"-DCMAKE_PREFIX_PATH=$CONDA_PREFIX/lib",
-	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCCCORELIB_USE_TBB=ON",
 	"-DCCCORELIB_USE_CGAL=ON",
+	"-DEIGEN_ROOT_DIR=$CONDA_PREFIX/include/eigen3",
 	"-DCC_USE_EIGEN=ON",
-	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DPLUGIN_IO_QLAS=ON",
-	"-DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=OFF", # Deprecated NO QT6
-	"-DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=OFF", # Deprecated NO QT6
 	"-DPLUGIN_STANDARD_3DMASC=ON",
-	"-DPLUGIN_PYTHON=OFF",
+	"-DPLUGIN_PYTHON=ON",
 	"-DPLUGIN_STANDARD_QM3C2=ON",
 	"-DPLUGIN_STANDARD_QANIMATION=ON",
 	"-DQANIMATION_WITH_FFMPEG_SUPPORT=ON",
@@ -68,27 +66,28 @@ cmd = [
 	"-DPLUGIN_STANDARD_QHOUGH_NORMALS=ON",
 	"-DPLUGIN_STANDARD_QM3C2=ON",
 	"-DPLUGIN_STANDARD_QMPLANE=ON",
-	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF",           # TODO: need libigl for osx-arm64
+	"-DPLUGIN_STANDARD_QMESH_BOOLEAN=OFF", # TODO: need libigl for osx-arm64
 	"-DPLUGIN_STANDARD_QPCL=ON",
 	"-DPLUGIN_STANDARD_QPCV=ON",
 	"-DPLUGIN_STANDARD_QPOISSON_RECON=ON",
 	"-DPLUGIN_STANDARD_QRANSAC_SD=ON",
 	"-DPLUGIN_STANDARD_QSRA=ON",
-	"-DPLUGIN_STANDARD_QTREEISO=OFF",                # TODO: improve compatibility.
+	"-DPLUGIN_STANDARD_QTREEISO=OFF", # TODO: improve compatibility.
 	"-DPLUGIN_STANDARD_QVOXFALL=ON",
 	#--IO PLUGINS--
 	"-DPLUGIN_IO_QADDITIONAL=ON",
 	"-DPLUGIN_IO_QCORE=ON",
-	"-DPLUGIN_IO_QDRACO=OFF",     # TODO
+	"-DPLUGIN_IO_QDRACO=OFF", # TODO: improve compatibility
 	"-DPLUGIN_IO_QE57=ON",
-	"-DE57_RELEASE_LTO=OFF",      # TODO: Needed else it won't find the AR/Ranlib binary
-	"-DPLUGIN_IO_QFBX=OFF",       # Possible, but it needs a proprietary SDK
+	"-DE57_RELEASE_LTO=OFF", # TODO: Needed else it won't find the AR/Ranlib binary
+	"-DPLUGIN_IO_QFBX=OFF", # Possible, but it needs a proprietary SDK
 	"-DPLUGIN_IO_QPHOTOSCAN=ON",
 	"-DQUAZIP_INSTALL=OFF",
 	"-DPLUGIN_IO_QRDB=OFF", # Needs a proprietary lib. The lib is not available for osx-arm64
 	"-DPLUGIN_IO_QSTEP=ON",
 	"-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
 	"-DOPENCASCADE_LIB_DIR=$CONDA_PREFIX/lib",
+	"-DOPENCASCADE_78_OR_NEWER=ON",
 	#--GL PLUGINS--
 	"-DPLUGIN_GL_QEDL=ON",
 	"-DPLUGIN_GL_QSSAO=ON",

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                     CLOUDCOMPARE PLUGIN: qFacets                       #
@@ -14,9 +16,6 @@
 //#                      COPYRIGHT: Thomas Dewez, BRGM                     #
 //#                                                                        #
 //##########################################################################
-
-#ifndef QFACET_FACETS_EXPORT_DLG_HEADER
-#define QFACET_FACETS_EXPORT_DLG_HEADER
 
 #include <QDialog>
 
@@ -45,5 +44,3 @@ protected:
 	//! Current I/O mode
 	IOMode m_mode;
 };
-
-#endif //QFACET_FACETS_EXPORT_DLG_HEADER

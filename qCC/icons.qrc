@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/dbCircle.png</file>
+    <file>images/dbCoordinateSystem.png</file>
     <file>images/lockedAxis.png</file>
     <file>images/ccSaveProject.png</file>
     <file>images/clipboard.png</file>

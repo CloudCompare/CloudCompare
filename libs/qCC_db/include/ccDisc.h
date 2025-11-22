@@ -13,63 +13,77 @@
 // #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 // #  GNU General Public License for more details.                          #
 // #                                                                        #
-// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #          COPYRIGHT: CNRS / OSERen / University of Rennes, France       #
 // #                                                                        #
 // ##########################################################################
 
 // Local
-#include "ccCone.h"
+#include <ccGenericPrimitive.h>
 
-//! Cylinder (primitive)
-/** 3D cylinder primitive
+//! Disc (primitive)
+/** 3D disc primitive
  **/
-class QCC_DB_LIB_API ccCylinder : public ccCone
+class QCC_DB_LIB_API ccDisc : public ccGenericPrimitive
 {
   public:
 	//! Default drawing precision
 	/** \warning Never pass a 'constant initializer' by reference
 	 **/
-	static const unsigned DEFAULT_DRAWING_PRECISION = 48;
+	static const unsigned DEFAULT_DRAWING_PRECISION = 72;
 
 	//! Default constructor
-	/** Cylinder axis corresponds to the 'Z' dimension.
-	    Internally represented by a cone with the same top and bottom radius.
-	    \param radius cylinder radius
-	    \param height cylinder height (transformation should point to the axis center)
+	/** Simple disc constructor
+	    \param radius disc radius
 	    \param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 	    \param name name
 	    \param precision drawing precision (angular step = 360/precision)
 	    \param uniqueID unique ID (handle with care)
 	**/
-	ccCylinder(PointCoordinateType radius,
-	           PointCoordinateType height,
-	           const ccGLMatrix*   transMat  = nullptr,
-	           QString             name      = QString("Cylinder"),
-	           unsigned            precision = DEFAULT_DRAWING_PRECISION,
-	           unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
+	ccDisc(PointCoordinateType radius,
+	       const ccGLMatrix*   transMat  = nullptr,
+	       QString             name      = QString("Disc"),
+	       unsigned            precision = DEFAULT_DRAWING_PRECISION,
+	       unsigned            uniqueID  = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	 **/
-	ccCylinder(QString name = QString("Cylinder"));
+	ccDisc(QString name = QString("Disc"));
+
+	//! Returns radius
+	inline PointCoordinateType getRadius() const
+	{
+		return m_radius;
+	}
+	//! Sets radius
+	/** \warning changes primitive content (calls ccGenericPrimitive::updateRepresentation)
+	 **/
+	void setRadius(PointCoordinateType radius);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
-		return CC_TYPES::CYLINDER;
+		return CC_TYPES::DISC;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
-		return "Cylinder";
+		return "Disc";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	bool hasDrawingPrecision() const override
+	{
+		return true;
+	}
+	ccGenericPrimitive* clone() const override;
 
-	// inherited from ccCone
-	virtual void        setBottomRadius(PointCoordinateType radius) override;
-	inline virtual void setTopRadius(PointCoordinateType radius) override
-	{
-		return setBottomRadius(radius);
-	}
+  protected:
+	// inherited from ccGenericPrimitive
+	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
+	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	short minimumFileVersion_MeOnly() const override;
+	bool  buildUp() override;
+
+	//! Radius
+	PointCoordinateType m_radius;
 };

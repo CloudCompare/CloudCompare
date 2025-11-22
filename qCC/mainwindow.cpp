@@ -41,6 +41,7 @@
 #include <ccCircle.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
+#include <ccDisc.h>
 #include <ccFacet.h>
 #include <ccFileUtils.h>
 #include <ccGBLSensor.h>
@@ -9580,7 +9581,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE) || entity->isA(CC_TYPES::POLY_LINE))
 		{
-			if (entity->isA(CC_TYPES::PLANE) || entity->isA(CC_TYPES::SPHERE) || entity->isA(CC_TYPES::CYLINDER) || entity->isA(CC_TYPES::CONE) || entity->isA(CC_TYPES::BOX) || entity->isA(CC_TYPES::POLY_LINE))
+			if (entity->isA(CC_TYPES::PLANE) || entity->isA(CC_TYPES::SPHERE) || entity->isA(CC_TYPES::CYLINDER) || entity->isA(CC_TYPES::CONE) || entity->isA(CC_TYPES::BOX) || entity->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::DISC))
 			{
 				if (!refEntity)
 				{
@@ -9602,7 +9603,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!refEntity)
 	{
-		ccConsole::Error(tr("Select one prmitive (Plane/Box/Sphere/Cylinder/Cone) or a polyline"));
+		ccConsole::Error(tr("Select one primitive (Plane/Box/Sphere/Cylinder/Cone) or a polyline"));
 		return;
 	}
 
@@ -9744,6 +9745,21 @@ void MainWindow::doActionCloudPrimitiveDist()
 			{
 				ccConsole::Warning(errString.arg(tr("Polyline")).arg(returnCode));
 				++errorCount;
+			}
+			break;
+		}
+
+		case CC_TYPES::DISC:
+		{
+			ccDisc*                 disc = static_cast<ccDisc*>(refEntity);
+			CCCoreLib::SquareMatrix rotationTransform(disc->getTransformation().data(), true);
+			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2DiscEquation(compEnt,
+			                                                                                  refEntity->getOwnBB().getCenter(),
+			                                                                                  static_cast<ccDisc*>(refEntity)->getRadius(),
+			                                                                                  rotationTransform,
+			                                                                                  s_signedDist)))
+			{
+				ccConsole::Error(errString.arg(tr("Disc")).arg(returnCode));
 			}
 			break;
 		}

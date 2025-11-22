@@ -24,6 +24,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccCustomObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccCylinder.h
 		${CMAKE_CURRENT_LIST_DIR}/ccDepthBuffer.h
+		${CMAKE_CURRENT_LIST_DIR}/ccDisc.h
 		${CMAKE_CURRENT_LIST_DIR}/ccDish.h
 		${CMAKE_CURRENT_LIST_DIR}/ccDrawableObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccExternalFactory.h

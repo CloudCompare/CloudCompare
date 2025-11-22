@@ -69,7 +69,7 @@ constexpr char COORDS_IN_CSV[]      = "-COORDS_IN_CSV";
 //  ADD FACETS FROM A FacetSet TO A ccHObject* group
 //
 // ##########################################################################
-void addFacetsToGroup(ccHObject* group, const qFacets::FacetSet& facets)
+static void AddFacetsToGroup(ccHObject* group, const qFacets::FacetSet& facets)
 {
 	for (ccFacet* facet : facets)
 	{
@@ -87,7 +87,7 @@ void addFacetsToGroup(ccHObject* group, const qFacets::FacetSet& facets)
 //  ADD FACETS IN A ccHObject* group TO A FacetSet
 //
 // ##########################################################################
-void getFacetsFromGroup(ccHObject* group, qFacets::FacetSet& facets)
+static void GetFacetsFromGroup(ccHObject* group, qFacets::FacetSet& facets)
 {
 	facets.clear();
 	ccHObject::Container childFacets;
@@ -110,7 +110,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 	{
 	}
 
-	virtual bool process(ccCommandLineInterface& cmd) override
+	bool process(ccCommandLineInterface& cmd) override
 	{
 		cmd.print("[FACETS]");
 		if (cmd.clouds().empty())
@@ -566,7 +566,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 					return false;
 				}
 
-				getFacetsFromGroup(group, facets); // probably a better way than going between ccHObject group and facetSet
+				GetFacetsFromGroup(group, facets); // probably a better way than going between ccHObject group and facetSet
 				if (facets.empty())
 				{
 					cmd.error(QObject::tr("[FACETS] Did not extract any facets."));
@@ -586,7 +586,7 @@ struct CommandFacets : public ccCommandLineInterface::Command
 				}
 
 				ccHObject* group = new ccHObject(QString("FACETS group"));
-				addFacetsToGroup(group, facets); // probably a better way than going between ccHObject group and facetSet
+				AddFacetsToGroup(group, facets); // probably a better way than going between ccHObject group and facetSet
 
 				bool success = FacetsClassifier::ByOrientation(group, params.classifAngleStep, params.classifMaxDist);
 				if (!success)

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                     CLOUDCOMPARE PLUGIN: qFacets                       #
@@ -14,9 +16,6 @@
 // #                      COPYRIGHT: Thomas Dewez, BRGM                     #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef QFACET_PLUGIN_HEADER
-#define QFACET_PLUGIN_HEADER
 
 // Local
 #include "cellsFusionDlg.h"
@@ -47,8 +46,7 @@ class StereogramDialog;
 //! Facet detection plugin (BRGM)
 /** BRGM: BUREAU DE RECHERCHES GEOLOGIQUES ET MINIERES - http://www.brgm.fr/
  **/
-class qFacets : public QObject
-    , public ccStdPluginInterface
+class qFacets : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccPluginInterface ccStdPluginInterface)
@@ -60,12 +58,12 @@ class qFacets : public QObject
 	qFacets(QObject* parent = nullptr);
 
 	//! Destructor
-	virtual ~qFacets() = default;
+	~qFacets() override = default;
 
 	// inherited from ccStdPluginInterface
-	virtual void            onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction*> getActions() override;
-	virtual void            registerCommands(ccCommandLineInterface* cmd) override;
+	void            onNewSelection(const ccHObject::Container& selectedEntities) override;
+	QList<QAction*> getActions() override;
+	void            registerCommands(ccCommandLineInterface* cmd) override;
 
 	struct FacetsParams
 	{
@@ -124,9 +122,9 @@ class qFacets : public QObject
 		    , nZ(1.0f)
 		    , exportFacetsInfo(false)
 		    , csvFilename("facets.csv")
-		    , coordsInCsv(false) {
-
-		    };
+		    , coordsInCsv(false)
+		{
+		}
 	};
 
 	//! Set of facets (pointers)
@@ -225,7 +223,6 @@ class qFacets : public QObject
 	//! Associated action
 	QAction* m_doShowStereogram;
 
+	//! Sterogram dialog
 	StereogramDialog* m_stereogramDialog;
 };
-
-#endif // QFACET_PLUGIN_HEADER

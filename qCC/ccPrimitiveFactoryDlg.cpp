@@ -26,6 +26,7 @@
 #include <ccCone.h>
 #include <ccCoordinateSystem.h>
 #include <ccCylinder.h>
+#include <ccDisc.h>
 #include <ccDish.h>
 #include <ccGenericPrimitive.h>
 #include <ccPlane.h>
@@ -130,6 +131,11 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 			mat.toIdentity();
 		}
 		primitive = new ccCoordinateSystem(&mat);
+	}
+	break;
+	case 8:
+	{
+		primitive = new ccDisc(static_cast<PointCoordinateType>(discRadiusDoubleSpinBox->value()));
 	}
 	break;
 	}

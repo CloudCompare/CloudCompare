@@ -233,7 +233,8 @@ class DBRootIcons
 		    {CC_TYPES::LABEL_2D, labelIndex},
 		    {CC_TYPES::VIEWPORT_2D_OBJECT, viewportObjIndex},
 		    {CC_TYPES::VIEWPORT_2D_LABEL, viewportLabelIndex},
-		    {CC_TYPES::COORDINATESYSTEM, geomIndex}
+		    {CC_TYPES::COORDINATESYSTEM, geomIndex},
+		    {CC_TYPES::DISC, geomIndex}
 
 		};
 	}
@@ -1912,6 +1913,7 @@ void ccDBRoot::selectByTypeAndName()
 	scDlg.addType("    Cone", CC_TYPES::CONE);
 	scDlg.addType("    Box", CC_TYPES::BOX);
 	scDlg.addType("    Dish", CC_TYPES::DISH);
+	scDlg.addType("    Disc", CC_TYPES::DISC);
 	scDlg.addType("    Extrusion", CC_TYPES::EXTRU);
 	scDlg.addType("Sensor", CC_TYPES::SENSOR);
 	scDlg.addType("  GBL/TLS sensor", CC_TYPES::GBL_SENSOR);

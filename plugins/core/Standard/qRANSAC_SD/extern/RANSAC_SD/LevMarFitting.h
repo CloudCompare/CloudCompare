@@ -10,7 +10,7 @@
 template< class ScalarT >
 bool Cholesky(ScalarT *a, size_t n, ScalarT p[])
 /*Given a positive-definite symmetric matrix a[1..n][1..n], this routine constructs its Cholesky
-decomposition, A = L · LT . On input, only the upper triangle of a need be given; it is not
+decomposition, A = L . LT . On input, only the upper triangle of a need be given; it is not
 modified. The Cholesky factor L is returned in the lower triangle of a, except for its diagonal
 elements which are returned in p[1..n].*/
 {
@@ -39,7 +39,7 @@ elements which are returned in p[1..n].*/
 template< class ScalarT, unsigned int N >
 bool Cholesky(ScalarT *a, ScalarT p[])
 /*Given a positive-definite symmetric matrix a[1..n][1..n], this routine constructs its Cholesky
-decomposition, A = L · LT . On input, only the upper triangle of a need be given; it is not
+decomposition, A = L . LT . On input, only the upper triangle of a need be given; it is not
 modified. The Cholesky factor L is returned in the lower triangle of a, except for its diagonal
 elements which are returned in p[1..n].*/
 {
@@ -67,7 +67,7 @@ elements which are returned in p[1..n].*/
 
 template< class ScalarT >
 void CholeskySolve(ScalarT *a, size_t n, ScalarT p[], ScalarT b[], ScalarT x[])
-/*Solves the set of n linear equations A · x = b, where a is a positive-definite symmetric matrix.
+/*Solves the set of n linear equations A . x = b, where a is a positive-definite symmetric matrix.
 a[1..n][1..n] and p[1..n] are input as the output of the routine choldc. Only the lower
 subdiagonal portion of a is accessed. b[1..n] is input as the right-hand side vector. The
 solution vector is returned in x[1..n]. a, n, and p are not modified and can be left in place
@@ -77,13 +77,13 @@ x in the calling sequence, which is allowed.*/
 	size_t i, k;
 	ScalarT sum;
 	for(i = 0; i < n; i++)
-	{ // Solve L · y = b, storing y in x.
+	{ // Solve L . y = b, storing y in x.
 		for(sum = b[i], k = i-1; k != -1; --k)
 			sum -= a[i * n + k] * x[k];
 		x[i] = sum / p[i];
 	}
 	for(i = n - 1; i != -1; --i)
-	{ // Solve LT · x = y.
+	{ // Solve LT . x = y.
 		for(sum = x[i], k = i + 1; k < n; ++k)
 			sum -= a[k * n + i] * x[k];
 		x[i]= sum / p[i];
@@ -92,7 +92,7 @@ x in the calling sequence, which is allowed.*/
 
 template< class ScalarT, unsigned int N >
 void CholeskySolve(ScalarT *a, ScalarT p[], ScalarT b[], ScalarT x[])
-/*Solves the set of n linear equations A · x = b, where a is a positive-definite symmetric matrix.
+/*Solves the set of n linear equations A . x = b, where a is a positive-definite symmetric matrix.
 a[1..n][1..n] and p[1..n] are input as the output of the routine choldc. Only the lower
 subdiagonal portion of a is accessed. b[1..n] is input as the right-hand side vector. The
 solution vector is returned in x[1..n]. a, n, and p are not modified and can be left in place
@@ -102,13 +102,13 @@ x in the calling sequence, which is allowed.*/
 	size_t i, k;
 	ScalarT sum;
 	for(i = 0; i < N; i++)
-	{ // Solve L · y = b, storing y in x.
+	{ // Solve L . y = b, storing y in x.
 		for(sum = b[i], k = i-1; k != -1; --k)
 			sum -= a[i * N + k] * x[k];
 		x[i] = sum / p[i];
 	}
 	for(i = N - 1; i != -1; --i)
-	{ // Solve LT · x = y.
+	{ // Solve LT . x = y.
 		for(sum = x[i], k = i + 1; k < N; ++k)
 			sum -= a[k * N + i] * x[k];
 		x[i]= sum / p[i];

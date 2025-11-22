@@ -16,6 +16,10 @@ New features:
 		- New method: 'Edit > Circle > Promote to Cylinder'
 			-can be used on a Circle entity to derive a cylinder from it (CC will simply ask for the cylinder height)
 
+	- New entity: Disc
+		- the user can control the radius and the display resolution
+		- distances between a point cloud and a disc can be computed with 'Tools > Distances > Cloud/primitive dist'
+
 	- New Command line options
 		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -SIGMA {sigma} -SIGMA_SF {sigma_sf} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
 			- command arguments with a dash can be in any order

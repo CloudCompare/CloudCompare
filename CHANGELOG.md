@@ -250,6 +250,14 @@ Improvements:
 			- The 'ASPRS classes' scale will now be used by default when loading the LAS classification field
 		- Improvement of the color scale preview (better accuracy)
 
+	- Point picking dialog
+		- New shortcuts:
+			- I: pick 1 point and display its (i)nformation
+			- D: pick 2 points and display the (d)istance
+			- A: pick 3 points and display the (a)ngles
+			- R: draw a (r)ectangle with a subtitle
+			- S: (s)ave the current label
+
 	- ccViewer:
 		- new shortcuts to change the active scalar field: SHIFT + Up or Down arrows
 		- updated shortcuts list (F1)

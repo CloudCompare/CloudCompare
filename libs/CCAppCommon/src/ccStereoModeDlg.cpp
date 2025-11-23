@@ -160,5 +160,5 @@ void ccStereoModeDlg::setParameters(const ccGLWindowInterface::StereoParams& par
 
 bool ccStereoModeDlg::updateFOV() const
 {
-	return m_ui->glassTypeComboBox->currentIndex() != m_ui->autoFocalCheckBox->isChecked();
+	return m_ui->autoFocalCheckBox->isChecked();
 }

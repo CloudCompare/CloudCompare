@@ -18,9 +18,6 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QCheckBox" name="showAlignedCheckBox">
-       <property name="styleSheet">
-        <string notr="true">background-color: red; color: white;</string>
-       </property>
        <property name="text">
         <string>show 'to be aligned' entities</string>
        </property>
@@ -210,9 +207,6 @@
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QCheckBox" name="showReferenceCheckBox">
-       <property name="styleSheet">
-        <string notr="true">background-color: yellow;</string>
-       </property>
        <property name="text">
         <string>show 'reference' entities</string>
        </property>

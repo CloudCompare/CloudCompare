@@ -222,9 +222,6 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="styleSheet">
-      <string notr="true">color: red;</string>
-     </property>
      <property name="text">
       <string>Warning, this box doesn't include the cloud bounding-box!</string>
      </property>

@@ -106,9 +106,6 @@
    </item>
    <item>
     <widget class="QLabel" name="headerLabel">
-     <property name="styleSheet">
-      <string notr="true">color: grey;</string>
-     </property>
      <property name="text">
       <string>Header:</string>
      </property>

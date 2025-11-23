@@ -500,9 +500,6 @@
            <property name="toolTip">
             <string>Update the grid / display / measurements</string>
            </property>
-           <property name="styleSheet">
-            <string notr="true">color: white; background-color:red;</string>
-           </property>
            <property name="text">
             <string>Update</string>
            </property>
@@ -519,9 +516,6 @@
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
           <widget class="QLabel" name="spareseWarningLabel">
-           <property name="styleSheet">
-            <string notr="true">color:red;</string>
-           </property>
            <property name="text">
             <string>At least one of the cloud is sparse!
 You should fill the empty cells...</string>

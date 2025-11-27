@@ -1,0 +1,30 @@
+{
+	"type" : "I/O",
+	"name" : "3D PDF Export",
+	"icon" : ":/CC/plugin/qPDF3DIO/images/icon.png",
+	"description": "Export point clouds and meshes as interactive 3D PDF files that can be viewed in standard PDF readers.",
+	"authors" : [
+		{
+			"name" : "CloudCompare Community",
+			"email" : ""
+		}
+	],
+	"maintainers" : [
+		{
+			"name" : "CloudCompare Community"
+		}
+	],
+	"references" : [
+		{
+			"text" : "PDF 1.7 specification (ISO 32000-1)",
+			"url" : "https://www.iso.org/standard/51502.html"
+		},
+		{
+			"text" : "U3D format specification"
+		},
+		{
+			"text" : "3D PDF format documentation"
+		}
+	]
+}
+

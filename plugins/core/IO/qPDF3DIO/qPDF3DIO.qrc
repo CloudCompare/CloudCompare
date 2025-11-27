@@ -1,0 +1,9 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+	<qresource prefix="/CC/plugin/qPDF3DIO">
+		<file>info.json</file>
+		<!-- Future: Add icon and other resources here -->
+		<!-- <file>images/icon.png</file> -->
+	</qresource>
+</RCC>
+

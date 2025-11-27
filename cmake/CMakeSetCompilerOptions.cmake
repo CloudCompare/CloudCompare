@@ -20,7 +20,6 @@ if ( UNIX )
 	add_compile_options(-Wno-deprecated-declarations)
 
 elseif( MSVC )
-
 	# Enable MP build by default
 	option( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" ON )
 	if( OPTION_MP_BUILD )

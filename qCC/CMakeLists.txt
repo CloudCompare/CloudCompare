@@ -214,8 +214,9 @@ elseif( WIN32 )
 				LIB_DIR \"${PROJECT_NAME}/\"
 				PLUGINS_DIR \"${PROJECT_NAME}/\"
 				NO_COMPILER_RUNTIME
-				DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
-			)")
+				NO_TRANSLATIONS
+				DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1
+			)") # We inibit translation deployment because we already copy all needed files in via the scrit in the translation subdirectory.
 
 	install(SCRIPT ${deploy_cc})
 endif()

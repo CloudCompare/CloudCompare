@@ -5,19 +5,36 @@ find_package(Qt6 COMPONENTS LinguistTools REQUIRED )
 # Now handle our own .ts files
 file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
-# TODO: qt_add_translations
-qt_add_translation( TRANSLATION_QM ${TRANSLATION_FILES} )
-add_custom_target( translations ALL DEPENDS ${TRANSLATION_QM} )
+
+# Collect plugin files for available for translations.
+# They are not part of the main CloudCompare target and may be built optionally.
+file(GLOB_RECURSE PLUGIN_TRANSLATION_SOURCES
+		${CMAKE_SOURCE_DIR}/plugins/core/*.cpp
+		${CMAKE_SOURCE_DIR}/plugins/core/*.h
+		${CMAKE_SOURCE_DIR}/plugins/core/*.ui
+)
+
+# Qt 6.2 qt_add_translations command.
+# The release_translations target is built by default.
+# The update_translations target can be invoked manually via CMake, e.g.:
+#   cmake --build <build_dir> --target update_translations
+qt_add_translations( ${PROJECT_NAME}
+	TS_FILES ${TRANSLATION_FILES}
+	SOURCES ${PLUGIN_TRANSLATION_SOURCES}
+	LUPDATE_OPTIONS -no-obsolete -extensions h,cpp
+)
 
 get_target_property( QTPATHS_EXEC Qt6::qtpaths IMPORTED_LOCATION )
 if( QTPATHS_EXEC )
 	execute_process( COMMAND "${QTPATHS_EXEC}" --qt-query QT_INSTALL_TRANSLATIONS OUTPUT_VARIABLE QT_TRANSLATIONS_PATH OUTPUT_STRIP_TRAILING_WHITESPACE )
 endif()
 
-# For each language we have .ts files for, process Qt's qm files
+# For each language we have .ts files for, process QT's qm files
 # (they need to be concatenated into one file, it's the best way to make this portable)
-# TODO: starting from Qt 6.9 we could use built-in keyword for that
+# Starting from Qt 6.9, we could use a built-in keyword for that :
 # https://doc.qt.io/qt-6/qtlinguist-cmake-qt-add-translations.html#merging-qt-provided-translations
+# starting from 6.5, another option is too use :
+# or we could use https://doc.qt.io/qt-6/qt-deploy-translations.html
 foreach( TRANSLATION_FILE ${TRANSLATION_FILES} )
 	get_filename_component( FILENAME ${TRANSLATION_FILE} NAME )
 

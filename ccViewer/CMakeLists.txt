@@ -129,7 +129,7 @@ if( APPLE )
 elseif( WIN32 )
 	set(ADDITIONAL_LIB_LINES "")
 	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
-		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/${lib}\"\n")
+		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CCVIEWER_DEST_FOLDER}/${lib}\"\n")
 	endforeach()
 
 	qt_generate_deploy_script(
@@ -137,13 +137,13 @@ elseif( WIN32 )
 		OUTPUT_SCRIPT deploy_ccViewer
 		CONTENT "
 		qt_deploy_runtime_dependencies(
-			EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
+			EXECUTABLE \"${CCVIEWER_DEST_FOLDER}/${PROJECT_NAME}.exe\"
 			${ADDITIONAL_LIB_LINES}
-			BIN_DIR \"${PROJECT_NAME}/\"
-			LIB_DIR \"${PROJECT_NAME}/\"
-			PLUGINS_DIR \"${PROJECT_NAME}/\"
+			BIN_DIR \"${CCVIEWER_DEST_FOLDER}/\"
+			LIB_DIR \"${CCVIEWER_DEST_FOLDER}/\"
+			PLUGINS_DIR \"${CCVIEWER_DEST_FOLDER}/\"
 			NO_COMPILER_RUNTIME
-			DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${PROJECT_NAME}/translations
+			DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${CCVIEWER_DEST_FOLDER}/translations
 		)"
 	)
 	install(SCRIPT ${deploy_ccViewer})

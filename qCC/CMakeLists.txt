@@ -197,10 +197,10 @@ elseif( WIN32 )
 
 	# We are looking for QT dependencies inside additional libraries
 	# it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
-	# we could do the same for plugin
+	# we could do the same for plugins
 	set(ADDITIONAL_LIB_LINES "")
 	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
-		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${PROJECT_NAME}/${lib}\"\n")
+		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CLOUDCOMPARE_DEST_FOLDER}/${lib}\"\n")
 	endforeach()
 
 	qt_generate_deploy_script(
@@ -208,17 +208,17 @@ elseif( WIN32 )
 		OUTPUT_SCRIPT deploy_cc
 		CONTENT "
 			qt_deploy_runtime_dependencies(
-				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.exe\"
+				EXECUTABLE \"${CLOUDCOMPARE_DEST_FOLDER}/${PROJECT_NAME}.exe\"
 				${ADDITIONAL_LIB_LINES}
-				BIN_DIR \"${PROJECT_NAME}/\"
-				LIB_DIR \"${PROJECT_NAME}/\"
-				PLUGINS_DIR \"${PROJECT_NAME}/\"
+				BIN_DIR \"${CLOUDCOMPARE_DEST_FOLDER}/\"
+				LIB_DIR \"${CLOUDCOMPARE_DEST_FOLDER}/\"
+				PLUGINS_DIR \"${CLOUDCOMPARE_DEST_FOLDER}/\"
 				NO_COMPILER_RUNTIME
 				NO_TRANSLATIONS
 				DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1
-			)") # We inibit translation deployment because we already copy all needed files in via the scrit in the translation subdirectory.
+			)") # We inibit translation deployment because we already copy all needed files via the script in the translation subdirectory.
 
-	install(SCRIPT ${deploy_cc})
+	install( SCRIPT ${deploy_cc} )
 endif()
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to

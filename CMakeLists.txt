@@ -30,10 +30,13 @@ set( CMAKE_DEBUG_POSTFIX "d" )
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!
-if(WIN32 OR APPLE)
+if(WIN32 )
+	set( CLOUDCOMPARE_DEST_FOLDER $<IF:$<CONFIG:Release>,CloudCompare,Cloudcompare_$<CONFIG>> )
+	set( CCVIEWER_DEST_FOLDER $<IF:$<CONFIG:Release>,ccViewer,ccViewer_$<CONFIG>> )
+elseif( APPLE )
 	set( CLOUDCOMPARE_DEST_FOLDER CloudCompare )
 	set( CCVIEWER_DEST_FOLDER ccViewer )
-else()
+elseif( UNIX )
 	set( CLOUDCOMPARE_DEST_FOLDER bin )
 	set( CCVIEWER_DEST_FOLDER bin )
 endif()

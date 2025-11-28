@@ -20,18 +20,18 @@ function(InstallSharedLibrary)
 	)
 
 	# For readability
-	set(shared_lib_target "${INSTALL_SHARED_LIB_TARGET}")
-	message(STATUS "Install shared library: ${shared_lib_target}")
+	set( shared_lib_target "${INSTALL_SHARED_LIB_TARGET}" )
+	message( STATUS "Install shared library: ${shared_lib_target}" )
 
     if( WIN32 )
-        # collect filenames for QT deployement
+        # collect filenames for Qt deployment
         list(APPEND CC_SHARED_LIB_FILENAMES "$<TARGET_FILE_NAME:${shared_lib_target}>" )
-        set(CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE)
+        set( CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE )
     endif()
 
-	foreach (destination ${INSTALL_DESTINATIONS})
-		if(UNIX AND NOT APPLE)
-			set(destination ${LINUX_INSTALL_SHARED_DESTINATION})
+	foreach( destination ${INSTALL_DESTINATIONS} )
+		if( UNIX AND NOT APPLE )
+			set( destination ${LINUX_INSTALL_SHARED_DESTINATION} )
 		endif()
 
 		_InstallSharedTarget(
@@ -108,10 +108,7 @@ function( InstallPlugins )
 	else()
 		foreach( type ${INSTALL_PLUGINS_TYPES} )
 			if( NOT "${type}" IN_LIST VALID_TYPES )
-				# In cmake 3.12:
-				# list( JOIN VALID_TYPES ", " VALID_TYPES_STR )
-				string( REPLACE ";" ", " VALID_TYPES_STR "${VALID_TYPES}" )
-
+				list( JOIN VALID_TYPES ", " VALID_TYPES_STR )
 				message( FATAL_ERROR "InstallPlugins: Did not find proper TYPES. Valid values are: ${VALID_TYPES_STR}" )
 			endif()
 		endforeach()
@@ -197,30 +194,10 @@ function( _InstallSharedTarget )
 	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
 	set( full_path "${INSTALL_SHARED_TARGET_DEST_PATH}/${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
 	if( WIN32 )
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install(
-				TARGETS ${shared_target}
-				RUNTIME DESTINATION ${full_path}
-			)
-		else()
-			install(
-				TARGETS ${shared_target}
-				CONFIGURATIONS Debug
-				RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_debug/${INSTALL_SHARED_TARGET_DEST_FOLDER}
-			)
-
-			install(
-				TARGETS ${shared_target}
-				CONFIGURATIONS Release
-				RUNTIME DESTINATION ${full_path}
-			)
-
-			install(
-				TARGETS ${shared_target}
-				CONFIGURATIONS RelWithDebInfo
-				RUNTIME DESTINATION ${INSTALL_SHARED_TARGET_DEST_PATH}_withDebInfo/${INSTALL_SHARED_TARGET_DEST_FOLDER}
-			)
-		endif()
+		install(
+			TARGETS ${shared_target}
+			RUNTIME DESTINATION ${full_path}
+		)
 	else()
 		install( TARGETS ${shared_target}
 			LIBRARY DESTINATION ${full_path}
@@ -250,30 +227,10 @@ function( _InstallFiles )
 	cmake_path(SET full_path NORMALIZE "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
 
 	if( WIN32 )
-		if( NOT CMAKE_CONFIGURATION_TYPES )
-			install(
-				FILES ${files}
-				DESTINATION "${full_path}"
-			)
-		else()
-			install(
-				FILES ${files}
-				CONFIGURATIONS Debug
-				DESTINATION "${INSTALL_FILES_DEST_PATH}_debug/${INSTALL_FILES_DEST_FOLDER}"
-			)
-
-			install(
-				FILES ${files}
-				CONFIGURATIONS Release
-				RUNTIME DESTINATION ${full_path}
-			)
-
-			install(
-				FILES ${files}
-				CONFIGURATIONS RelWithDebInfo
-				RUNTIME DESTINATION "${INSTALL_FILES_DEST_PATH}_withDebInfo/${INSTALL_FILES_DEST_FOLDER}"
-			)
-		endif()
+		install(
+			FILES ${files}
+			DESTINATION "${full_path}"
+		) #TODO runtime only for optimized
 	else()
 		install(
 			FILES ${files}

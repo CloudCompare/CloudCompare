@@ -8,10 +8,10 @@ file( GLOB TRANSLATION_FILES ${CMAKE_CURRENT_LIST_DIR}/*.ts )
 
 # Collect plugin files for available for translations.
 # They are not part of the main CloudCompare target and may be built optionally.
-file(GLOB_RECURSE PLUGIN_TRANSLATION_SOURCES
-		${CMAKE_SOURCE_DIR}/plugins/core/*.cpp
-		${CMAKE_SOURCE_DIR}/plugins/core/*.h
-		${CMAKE_SOURCE_DIR}/plugins/core/*.ui
+file( GLOB_RECURSE PLUGIN_TRANSLATION_SOURCES
+	${CMAKE_SOURCE_DIR}/plugins/core/*.cpp
+	${CMAKE_SOURCE_DIR}/plugins/core/*.h
+	${CMAKE_SOURCE_DIR}/plugins/core/*.ui
 )
 
 # Qt 6.2 qt_add_translations command.

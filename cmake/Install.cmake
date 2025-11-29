@@ -6,8 +6,8 @@
 #
 # Arguments:
 #	TARGET The name of the library target
-function(InstallSharedLibrary)
-	if(NOT INSTALL_DESTINATIONS)
+function( InstallSharedLibrary )
+	if( NOT INSTALL_DESTINATIONS )
 		return()
 	endif()
 
@@ -23,11 +23,11 @@ function(InstallSharedLibrary)
 	set( shared_lib_target "${INSTALL_SHARED_LIB_TARGET}" )
 	message( STATUS "Install shared library: ${shared_lib_target}" )
 
-    if( WIN32 )
-        # collect filenames for Qt deployment
-        list(APPEND CC_SHARED_LIB_FILENAMES "$<TARGET_FILE_NAME:${shared_lib_target}>" )
-        set( CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE )
-    endif()
+	if( WIN32 )
+		# collect filenames for Qt deployment
+		list(APPEND CC_SHARED_LIB_FILENAMES "$<TARGET_FILE_NAME:${shared_lib_target}>" )
+		set( CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE )
+	endif()
 
 	foreach( destination ${INSTALL_DESTINATIONS} )
 		if( UNIX AND NOT APPLE )
@@ -193,17 +193,12 @@ function( _InstallSharedTarget )
 	# For readability
 	set( shared_target "${INSTALL_SHARED_TARGET_TARGET}" )
 	set( full_path "${INSTALL_SHARED_TARGET_DEST_PATH}/${INSTALL_SHARED_TARGET_DEST_FOLDER}" )
-	if( WIN32 )
-		install(
-			TARGETS ${shared_target}
-			RUNTIME DESTINATION ${full_path}
-		)
-	else()
-		install( TARGETS ${shared_target}
-			LIBRARY DESTINATION ${full_path}
-			COMPONENT Runtime
-		)
-	endif()
+	install(
+		TARGETS ${shared_target}
+		RUNTIME DESTINATION ${full_path}
+		LIBRARY DESTINATION ${full_path}
+		COMPONENT Runtime
+	)
 endfunction()
 
 # _InstallFiles should only be called by one of the functions above.
@@ -226,15 +221,8 @@ function( _InstallFiles )
 	set( full_path "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
 	cmake_path(SET full_path NORMALIZE "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
 
-	if( WIN32 )
-		install(
-			FILES ${files}
-			DESTINATION "${full_path}"
-		) #TODO runtime only for optimized
-	else()
-		install(
-			FILES ${files}
-			DESTINATION "${full_path}"
-		)
-	endif()
+	install(
+		FILES ${files}
+		DESTINATION "${full_path}"
+	)
 endfunction()

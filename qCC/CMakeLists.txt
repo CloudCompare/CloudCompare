@@ -97,7 +97,7 @@ endif()
 
 if (NOT APPLE)
 	# install program
-	install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} "" )
+	install( TARGETS ${PROJECT_NAME} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
 else()
 	install(TARGETS ${PROJECT_NAME}
 		BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
@@ -116,11 +116,11 @@ endif()
 # Install auxiliary files
 if( WIN32 OR APPLE )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} "" )
+		install( FILES ${filename} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
 	endforeach()
 else( UNIX )
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} share/cloudcompare "" )
+		install( FILES ${filename} DESTINATION share/cloudcompare  )
 	endforeach()
 endif()
 
@@ -153,12 +153,12 @@ elseif( UNIX )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.gs DESTINATION share/cloudcompare/shaders/DrawNormals )
 	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.fs DESTINATION share/cloudcompare/shaders/DrawNormals )
 else()
-	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
-	install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER} /shaders/Bilateral )
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER} /shaders/ColorRamp )
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.vs ${CLOUDCOMPARE_DEST_FOLDER} /shaders/DrawNormals )
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.gs ${CLOUDCOMPARE_DEST_FOLDER} /shaders/DrawNormals )
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.fs ${CLOUDCOMPARE_DEST_FOLDER} /shaders/DrawNormals )
+	install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/Bilateral )
+	install( FILES ${CC_FBO_LIB_SOURCE_DIR}/shaders/Bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/Bilateral )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/ColorRamp )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.vs DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/DrawNormals )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.gs DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/DrawNormals )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/DrawNormals/DrawNormals.fs DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/shaders/DrawNormals )
 endif()
 
 # Install plugins and shaders in the correct folder for each platform
@@ -182,8 +182,8 @@ else()
 endif()
 
 if( APPLE )
-	# We use macdeployqt to deploy runtime dependencies. (OK for all but Python Plugin)
-	# Code signature is needed at this point
+	# We use macdeployqt to deploy runtime dependencies. (OK for all but not CCPythonRuntime)
+	# Code signature is could be needed at this point
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_cc
@@ -194,7 +194,6 @@ if( APPLE )
 
 	install(SCRIPT ${deploy_cc})
 elseif( WIN32 )
-
 	# We are looking for QT dependencies inside additional libraries
 	# it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
 	# we could do the same for plugins

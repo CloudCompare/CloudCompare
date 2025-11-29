@@ -57,7 +57,7 @@ endif()
 
 if (NOT APPLE)
 	# install program
-	install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
+	install( TARGETS ${PROJECT_NAME} DESTINATION ${CCVIEWER_DEST_FOLDER} )
 endif()
 
 # Auxiliary files
@@ -71,7 +71,7 @@ endif()
 # Install auxiliary files
 if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} "" )
+		install( FILES ${filename} DESTINATION ${CCVIEWER_DEST_FOLDER} )
 	endforeach()
 endif()
 
@@ -82,7 +82,7 @@ endif( APPLE )
 
 # Export common shader files to all install destinations
 if( WIN32 ) # For Linux it's already installed in by qCC
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_DEST_FOLDER}/shaders/ColorRamp )
 endif()
 
 # Install plugins & shaders in the correct folder for each platform

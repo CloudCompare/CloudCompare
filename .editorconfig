@@ -5,7 +5,7 @@
 root = true
 
 # Configuration for all files
-[*.{hpp,cpp,h,txt}]
+[{CMakeLists.txt,*.{hpp,h,cpp,cmake}}]
 # Always end files with a blank line
 insert_final_newline = true
 # Force 4-column tabs for indentation

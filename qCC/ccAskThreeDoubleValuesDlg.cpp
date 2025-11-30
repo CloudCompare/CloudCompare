@@ -17,6 +17,9 @@
 
 #include "ccAskThreeDoubleValuesDlg.h"
 
+// Qt
+#include <QPushButton>
+
 ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(const QString& vName1,
                                                      const QString& vName2,
                                                      const QString& vName3,
@@ -47,6 +50,12 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(const QString& vName1,
 	doubleSpinBox1->setDecimals(precision);
 	doubleSpinBox2->setDecimals(precision);
 	doubleSpinBox3->setDecimals(precision);
+
+	// automatically give the focus to the OK button
+	if (buttonBox->button(QDialogButtonBox::Ok))
+	{
+		buttonBox->button(QDialogButtonBox::Ok)->setFocus();
+	}
 
 	if (!windowTitle.isEmpty())
 	{

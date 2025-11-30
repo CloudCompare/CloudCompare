@@ -244,6 +244,7 @@ class MainWindow : public QMainWindow
 	void increasePointSize() override;
 	void decreasePointSize() override;
 
+	void setCustomLightPosition();
 	void toggleLockRotationAxis();
 	void doActionEnableBubbleViewMode();
 	void setPivotAlwaysOn();

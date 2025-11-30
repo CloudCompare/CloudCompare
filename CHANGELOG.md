@@ -105,6 +105,10 @@ New features:
 		- to export as PNG files all images highlighted or children of highlighted entities (recursive)
 		- thanks to https://github.com/stolariks for the initial contribution
 
+	- New method: Display > Lights > Set Custom Light position
+		- to manually set (or read) the custom light 3D position
+		- shortcut: ALT + F7
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

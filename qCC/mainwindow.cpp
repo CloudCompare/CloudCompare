@@ -729,6 +729,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionDisplaySettings, &QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight, &QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight, &QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
+	connect(m_UI->actionSetCustomLightPosition, &QAction::triggered, this, &MainWindow::setCustomLightPosition);
+
 	//"Display > Shaders & filters" menu
 	connect(m_UI->actionLoadShader, &QAction::triggered, this, &MainWindow::doActionLoadShader);
 	connect(m_UI->actionDeleteShader, &QAction::triggered, this, &MainWindow::doActionDeleteShader);
@@ -9868,6 +9870,31 @@ void MainWindow::toggleActiveWindowCustomLight()
 	}
 }
 
+void MainWindow::setCustomLightPosition()
+{
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+	{
+		ccLog::Error("No active 3D view");
+		return;
+	}
+
+	CCVector3d pos = win->getCustomLightPosition().toDouble();
+
+	ccAskThreeDoubleValuesDlg customLightPosDlg("x", "y", "z", -1.0e7, 1.0e7, pos.x, pos.y, pos.z, 4, tr("Custom light position"), this);
+	if (!customLightPosDlg.exec())
+	{
+		return;
+	}
+
+	pos = CCVector3d(customLightPosDlg.doubleSpinBox1->value(),
+	                 customLightPosDlg.doubleSpinBox2->value(),
+	                 customLightPosDlg.doubleSpinBox3->value());
+
+	win->setCustomLightPosition(pos.toPC());
+	win->redraw();
+}
+
 void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -10069,10 +10096,10 @@ void MainWindow::createSinglePointCloud()
 	static CCVector3d         s_lastPoint(0, 0, 0);
 	static size_t             s_lastPointIndex = 0;
 	ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastPoint.x, s_lastPoint.y, s_lastPoint.z, 4, tr("Point coordinates"), this);
-	if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
-		axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
 	if (!axisDlg.exec())
+	{
 		return;
+	}
 	s_lastPoint.x = axisDlg.doubleSpinBox1->value();
 	s_lastPoint.y = axisDlg.doubleSpinBox2->value();
 	s_lastPoint.z = axisDlg.doubleSpinBox3->value();
@@ -10221,10 +10248,6 @@ void MainWindow::toggleLockRotationAxis()
 		if (isLocked)
 		{
 			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lockedRotationAxis.x, s_lockedRotationAxis.y, s_lockedRotationAxis.z, 4, tr("Lock rotation axis"), this);
-			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
-			{
-				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
-			}
 			if (!axisDlg.exec())
 			{
 				return;

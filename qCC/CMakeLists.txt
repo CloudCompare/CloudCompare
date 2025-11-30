@@ -95,14 +95,11 @@ if( WIN32 )
 	endif()
 endif()
 
-if (NOT APPLE)
-	# install program
-	install( TARGETS ${PROJECT_NAME} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
-else()
-	install(TARGETS ${PROJECT_NAME}
-		BUNDLE DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-	)
-endif()
+install(TARGETS
+	${PROJECT_NAME}
+		BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+		RUNTIME DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/
+)
 
 # Auxiliary files
 set( auxFiles  ${CloudCompareProjects_SOURCE_DIR}/CHANGELOG.md bin_other/license.txt bin_other/global_shift_list_template.txt )

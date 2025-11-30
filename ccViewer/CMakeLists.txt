@@ -55,10 +55,11 @@ if( WIN32 )
 	endif()
 endif()
 
-if (NOT APPLE)
-	# install program
-	install( TARGETS ${PROJECT_NAME} DESTINATION ${CCVIEWER_DEST_FOLDER} )
-endif()
+install(TARGETS
+	${PROJECT_NAME}
+		BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+		RUNTIME DESTINATION ${CCVIEWER_DEST_FOLDER}/
+)
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
@@ -108,14 +109,9 @@ else()
 )
 endif()
 
-
-install(TARGETS ${PROJECT_NAME}
-				BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
-				RUNTIME DESTINATION ${PROJECT_NAME}/
-)
-
+# deploy scripts
 if( APPLE )
-	# Code signature is needed at this point
+	# Code signature could be needed at this point
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_ccViewer

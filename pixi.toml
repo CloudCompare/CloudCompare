@@ -8,9 +8,7 @@ platforms = ["osx-arm64"]
 
 [tasks.CloudCompare]
 # Start the built executable
-cmd = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-#input = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-depends-on = ["install"]
+cmd = "CC_SHADER_PATH=.build/shaders CC_PLUGIN_PATH=.build/plugins CC_TRANSLATION_PATH=.build/qCC/translations .build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
 
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
@@ -108,18 +106,7 @@ outputs = [".build/qCC/CloudCompare"]
 cmd = ["cmake", "--install", ".build", "--config", "Release"]
 depends-on = ["configure"]
 
-#TODO: macos only
-# This will embed dependencies and fix rpath accordingly
-[feature.build.tasks.bundle]
-cmd = [
-	"python",
-	"scripts/mac/bundle/libBundleCloudCompare.py",
-	".build/install",
-	"--embed_python",
-]
-depends-on = ["install"]
-
-# Bundel signature
+# macOS only: Bundle signature
 [feature.build.tasks.sign_bundle]
 cmd = [
 	"python",

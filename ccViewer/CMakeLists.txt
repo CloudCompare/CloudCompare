@@ -118,6 +118,7 @@ if( APPLE )
 		CONTENT "
 			qt_deploy_runtime_dependencies(
 				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
+				NO_APP_STORE_COMPLIANCE
 			)"
 	)
 

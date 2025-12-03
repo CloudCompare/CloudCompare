@@ -29,11 +29,10 @@ function( InstallSharedLibrary )
 		set( CC_SHARED_LIB_FILENAMES ${CC_SHARED_LIB_FILENAMES} CACHE INTERNAL "" FORCE )
 	endif()
 
-	if( UNIX AND NOT APPLE )
-		set( destination ${LINUX_INSTALL_SHARED_DESTINATION} )
-	endif()
-
 	foreach( destination ${INSTALL_DESTINATIONS} )
+		if( UNIX AND NOT APPLE )
+			set( destination ${LINUX_INSTALL_SHARED_DESTINATION} )
+		endif()
 		_InstallSharedTarget(
 				TARGET ${shared_lib_target}
 				DEST_PATH ${destination}

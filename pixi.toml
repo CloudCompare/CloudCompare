@@ -18,7 +18,7 @@ ninja = "1.13.*"
 [dependencies]
 qt6-main= ">=6.9.1,<6.10.0" # at least 6.9.1 for PCL 1.15.1
 laszip = ">=3.4.3,<3.5"
-opencv = ">=4.12.0,<4.13"
+libopencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
 python = ">3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
@@ -38,7 +38,7 @@ cmd = [
 	"cmake",
 	"-GNinja",
 	"-S.",
-	# We want build in the .build directory
+	# We want to build in the .build directory
 	"-B.build",
 	"-DCMAKE_BUILD_TYPE=Release",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",

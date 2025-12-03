@@ -262,6 +262,10 @@ Improvements:
 			- R: draw a (r)ectangle with a subtitle
 			- S: (s)ave the current label
 
+	- Cross section tool
+		- the default bounding-box is now very slightly larger than the entities bounding-box so as
+			to avoid display display artefacts and small accuracy issue when segmenting the entities
+
 	- ccViewer:
 		- new shortcuts to change the active scalar field: SHIFT + Up or Down arrows
 		- updated shortcuts list (F1)

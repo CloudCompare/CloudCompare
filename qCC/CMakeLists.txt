@@ -179,8 +179,8 @@ else()
 endif()
 
 if( APPLE )
-	# We use macdeployqt to deploy runtime dependencies. (OK for all but not CCPythonRuntime)
-	# Code signature is could be needed at this point
+	# We use macdeployqt to deploy runtime dependencies.
+	# Code signature could be needed at this point
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_cc
@@ -190,11 +190,11 @@ if( APPLE )
 				NO_APP_STORE_COMPLIANCE
 		)")
 
-	install(SCRIPT ${deploy_cc})
+	install( SCRIPT ${deploy_cc} )
 elseif( WIN32 )
 	# We are looking for QT dependencies inside additional libraries
 	# it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
-	# we could do the same for plugins
+	# we could do the same for Plugins
 	set(ADDITIONAL_LIB_LINES "")
 	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
 		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CLOUDCOMPARE_DEST_FOLDER}/${lib}\"\n")

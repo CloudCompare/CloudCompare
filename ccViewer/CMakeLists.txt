@@ -122,7 +122,7 @@ if( APPLE )
 			)"
 	)
 
-	install(SCRIPT ${deploy_ccViewer})
+	install( SCRIPT ${deploy_ccViewer} )
 elseif( WIN32 )
 	set(ADDITIONAL_LIB_LINES "")
 	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
@@ -143,7 +143,8 @@ elseif( WIN32 )
 			DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${CCVIEWER_DEST_FOLDER}/translations
 		)"
 	)
-	install(SCRIPT ${deploy_ccViewer})
+
+	install( SCRIPT ${deploy_ccViewer} )
 endif()
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to

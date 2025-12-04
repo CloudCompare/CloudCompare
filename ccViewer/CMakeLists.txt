@@ -111,7 +111,6 @@ endif()
 
 # deploy scripts
 if( APPLE )
-	# Code signature could be needed at this point
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_ccViewer
@@ -119,6 +118,8 @@ if( APPLE )
 			qt_deploy_runtime_dependencies(
 				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
 				NO_APP_STORE_COMPLIANCE
+				# Apply a dummy code signature to clear any existing signatures and allow the bundle to run locally.
+				DEPLOY_TOOL_OPTIONS -codesign=-
 			)"
 	)
 

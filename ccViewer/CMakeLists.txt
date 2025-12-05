@@ -30,11 +30,6 @@ endif()
 qt_add_ui(${PROJECT_NAME} SOURCES ${ui_list})
 
 target_link_libraries( ${PROJECT_NAME}
-	PUBLIC
-		CCPluginStub
-)
-
-target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		CCAppCommon
 )
@@ -44,7 +39,7 @@ target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_VIEWER )
 
 if (WIN32)
 	if (MSVC)
-		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )
+		target_link_options( ${PROJECT_NAME} PRIVATE "/MANIFEST:NO" )
 	endif()
 endif()
 
@@ -57,7 +52,7 @@ endif()
 
 install(TARGETS
 	${PROJECT_NAME}
-		BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+		BUNDLE  DESTINATION ${CCVIEWER_DEST_FOLDER}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
 		RUNTIME DESTINATION ${CCVIEWER_DEST_FOLDER}/
 )
 
@@ -109,7 +104,7 @@ else()
 )
 endif()
 
-# deploy scripts
+# Deploy scripts
 if( APPLE )
 	# We use macdeployqt to deploy runtime dependencies.
 	# Signature could be needed

@@ -53,9 +53,6 @@ target_link_libraries( ${PROJECT_NAME}
 		CCAppCommon
 		QCustomPlot
 		Qt6::PrintSupport
-		Qt6::Widgets
-		Qt6::OpenGLWidgets
-		Qt6::OpenGL
 )
 
 # OpenMP
@@ -65,7 +62,6 @@ endif()
 
 # Eigen
 if ( CC_USE_EIGEN )
-
 	target_include_directories( ${PROJECT_NAME}
 		PUBLIC
 			${EIGEN_ROOT_DIR}
@@ -75,13 +71,12 @@ if ( CC_USE_EIGEN )
 		PUBLIC
 			CC_USES_EIGEN
 	)
-
 endif()
 
 # Add custom preprocessor definitions
 if( WIN32 )
 	if (MSVC)
-		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )
+		target_link_options( ${PROJECT_NAME} PRIVATE "/MANIFEST:NO" )
 	endif()
 endif()
 
@@ -95,9 +90,9 @@ if( WIN32 )
 	endif()
 endif()
 
-install(TARGETS
+install( TARGETS
 	${PROJECT_NAME}
-		BUNDLE  DESTINATION ${PROJECT_NAME}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+		BUNDLE  DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
 		RUNTIME DESTINATION ${CLOUDCOMPARE_DEST_FOLDER}/
 )
 

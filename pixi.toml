@@ -8,7 +8,7 @@ platforms = ["osx-arm64"]
 
 [tasks.CloudCompare]
 # Start the built executable
-cmd = "CC_SHADER_PATH=.build/shaders CC_PLUGIN_PATH=.build/plugins CC_TRANSLATION_PATH=.build/qCC/translations .build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
+cmd = "CC_SHADER_PATH=.build/shaders CC_PLUGIN_PATH=.build/ccPlugins CC_TRANSLATION_PATH=.build/qCC/translations .build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
 
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
@@ -94,7 +94,7 @@ cmd = [
 ]
 
 inputs = ["CMakeLists.txt"]
-outputs = [".build/CMakeFiles/"]
+#outputs = [".build/CMakeFiles/"]
 
 [feature.build.tasks.build]
 cmd = ["cmake", "--build", ".build"]
@@ -120,4 +120,4 @@ depends-on = ["install"]
 build = ["build"]
 
 [pypi-dependencies]
-3dfin = { version = "==0.6.0a4" }
+3dfin = { version = "==0.6.0" }

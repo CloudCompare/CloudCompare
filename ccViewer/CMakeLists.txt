@@ -111,15 +111,15 @@ endif()
 
 # deploy scripts
 if( APPLE )
+	# We use macdeployqt to deploy runtime dependencies.
+	# Signature could be needed
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_ccViewer
 		CONTENT "
 			qt_deploy_runtime_dependencies(
-				EXECUTABLE \"${PROJECT_NAME}/${PROJECT_NAME}.app\"
+				EXECUTABLE \"${CCVIEWER_DEST_FOLDER}/${PROJECT_NAME}.app\"
 				NO_APP_STORE_COMPLIANCE
-				# Apply a dummy code signature to clear any existing signatures and allow the bundle to run locally.
-				DEPLOY_TOOL_OPTIONS -codesign=-
 			)"
 	)
 

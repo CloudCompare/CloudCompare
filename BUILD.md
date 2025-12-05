@@ -1,19 +1,14 @@
-# Compilation of CloudCompare 2.13+
+# Compilation of CloudCompare 2.14+
 
 ## 1. Base dependencies
 
 CloudCompare requires [CMake](http://www.cmake.org) to be built.
 
-The main dependency of CloudCompare is Qt. CloudCompare 2.13+ requires 5.12 <= Qt < 6.0.
+The main dependency of CloudCompare is Qt. CloudCompare 2.14+ requires 6.4+.
 
 - On Windows it is recommended to use the installer from the [Qt website](https://www.qt.io/).
 - On macOs you can also use the installer from Qt's website, or use homebrew.
 - On Linux it is recommended to use your distribution's package manager:
-
-Debian/ubuntu package names:
-``` console
-libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
-```
 
 ## 2. Cloning
 
@@ -37,14 +32,15 @@ You can also use the `CMAKE_INSTALL_PREFIX` to customize the path where CloudCom
 If you use CMake-GUI the options are the same, you just enter the values in the GUI.
 
 Example:
+
 ```shell
 # Windows
 mkdir build & cd build
-cmake -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64 ..
+cmake -DCMAKE_PREFIX_PATH=C:\Qt\6.8.3\msvc2022_64 ..
 
 # macOs
 mkdir build && cd build
-cmake -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5 ..
+cmake -DCMAKE_PREFIX_PATH=$(brew --prefix qt@6) ..
 
 # Linux
 mkdir build && cd build
@@ -57,14 +53,14 @@ You can always take a look at how CloudCompare is being build on [GitHub's CI](.
 
 ```
 # Still in the build folder
-cmake --build .
+cmake --build . --parallel --config Release
 ```
 
 ## 5. Install
 
 ```console
 # Still in the build folder
-cmake --install .
+cmake --install . --config Release
 ```
 
 ## Optional features and plugins
@@ -222,6 +218,7 @@ If you want to compile CloudCompare (and ccViewer) with GDAL (raster) files supp
 the [GDAL library](http://www.gdal.org/) (last tested version: 2.2.1 on Windows, 2.0.2 on Mac OS X)
 
 Then, the CloudCompare CMake project will request that you set the following variables:
+
 1. `GDAL_INCLUDE_DIR`: GDAL include directory (pretty straightforward ;)
 2. `GDAL_LIBRARY`: the static library (e.g. `gdal_i.lib`)
 3. `GDAL_BIN_DIR`: on Windows, the folder with DLL files
@@ -250,23 +247,19 @@ Then, the CloudCompare CMake project will request that you set the following var
 
 5.  Last but not least, the `CMAKE` group contains a `CMAKE_INSTALL_PREFIX` variable which is where CloudCompare and ccViewer will be installed (when you compile the `INSTALL` project)
   - On Linux, default install dir is `/usr/local` (be sure to have administrative rights if you want to install CloudCompare there: once configured, you can call `# make install` from the sources directory)
-  - On Windows 7/8/10 CMake doesn't have the rights to 'install' files in the `Program Files` folder (even though it's CMake's default installation destination!)
+  - On Windows 10/11 CMake doesn't have the rights to 'install' files in the `Program Files` folder (even though it's CMake's default installation destination!)
 
 
 # Other things
 
-## linux
+## macOS
 
-With versions of CMake prior to 3.13, the compiled application might not work for all users (due to some libraries being linked from the /usr/local directory). See https://github.com/CloudCompare/CloudCompare/issues/1680.
-
-## macOs
-
-If you are compiling and running locally, add `-DCC_MAC_DEV_PATHS` to the `CMAKE_CXX_FLAGS` in the `CMAKE` group. This
+If you are compiling and running locally from the build tree, add `-DCC_MAC_DEV_PATHS` to the `CMAKE_CXX_FLAGS` in the `CMAKE` group. This
 will look for the plugins in your build directory rather than the application bundle. If you need the shaders as well,
-you will have to create a `shaders` folder in the build directory and copy the shaders you need into it.
+you will have to create a `shaders` folder in the build directory and copy the shaders you need into it. Alternatively, you could use the env variables described in the [Debugging plugins](#debugging-plugins) section.
 
 For convenience, we provide a 100% self contained build system based on `pixi`. Simply install `pixi` from the [official website](https://pixi.sh) and in the root directory of CC code repository simply launch `pixi run build` and then `pixi run CloudCompare`.
-You can also create a portable (relocatable) `.app` by using `pixi run bundle`. You could find the bundle in `.build/install/CloudCompare` directory.
+You can also create a portable (relocatable) `.app` by using `pixi run install`. You could find the bundle in `.build/install/CloudCompare` directory.
 
 ## Working with Visual Studio on Windows
 

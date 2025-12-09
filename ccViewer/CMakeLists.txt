@@ -125,6 +125,11 @@ elseif( WIN32 )
 		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CCVIEWER_DEST_FOLDER}/${lib}\"\n")
 	endforeach()
 
+	# We do the same for plugins
+	foreach( plugin IN LISTS installed_plugin_targets )
+		string( APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CCVIEWER_DEST_FOLDER}/plugins/$<TARGET_FILE_NAME:${plugin}>\"\n" )
+	endforeach()
+
 	qt_generate_deploy_script(
 		TARGET ${PROJECT_NAME}
 		OUTPUT_SCRIPT deploy_ccViewer

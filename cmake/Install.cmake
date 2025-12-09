@@ -124,7 +124,7 @@ function( InstallPlugins )
 	message( STATUS " Destination: ${INSTALL_PLUGINS_DEST_PATH}/${INSTALL_PLUGINS_DEST_FOLDER}" )
 
 	# If we have gl plugins, check that our shader destination folder is valid
-	if( "gl" IN_LIST VALID_TYPES )
+	if( "gl" IN_LIST INSTALL_PLUGINS_TYPES )
 		if( NOT INSTALL_PLUGINS_SHADER_DEST_PATH )
 			message( FATAL_ERROR "InstallPlugins: SHADER_DEST_PATH not specified" )
 		endif()
@@ -135,17 +135,18 @@ function( InstallPlugins )
 	# Make CloudCompare/ccViewer depend on the plugins
 	# so that when building CloudCompare/ccViewer the plugins also get built
 	# instead of waiting for the `install` target to be ran for the plugins to get built
-	if (CC_PLUGIN_TARGET_LIST)
-		add_dependencies(${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST})
+	if ( CC_PLUGIN_TARGET_LIST )
+		add_dependencies( ${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST} )
 	endif()
 
 	# Install the requested plugins in the DEST_FOLDER
+ 	set( installed_plugins "" )
 	foreach( plugin_target ${CC_PLUGIN_TARGET_LIST} )
 		get_target_property( plugin_type ${plugin_target} PLUGIN_TYPE )
 
 		if( "${plugin_type}" IN_LIST INSTALL_PLUGINS_TYPES )
 			message( STATUS " Install ${plugin_target} (${plugin_type})" )
-
+			list( APPEND installed_plugins ${plugin_target} )
 			_InstallSharedTarget(
 				TARGET ${plugin_target}
 				DEST_PATH ${INSTALL_PLUGINS_DEST_PATH}
@@ -171,11 +172,10 @@ function( InstallPlugins )
 			endif()
 		endif()
 	endforeach()
+	set( installed_plugin_targets "${installed_plugins}" PARENT_SCOPE)
 endfunction()
 
 # _InstallSharedTarget should only be called by one of the functions above.
-# It was factored out to provide cmake < 3.13 a way to install shared libs.
-#
 # Arguments:
 #	DEST_FOLDER The name of the directory to install the shared lib in.
 #	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS

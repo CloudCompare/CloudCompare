@@ -56,7 +56,7 @@ target_link_libraries( ${PROJECT_NAME}
 )
 
 # OpenMP
-if(OpenMP_CXX_FOUND)
+if( OpenMP_CXX_FOUND )
 	target_link_libraries( ${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX )
 endif()
 
@@ -122,7 +122,7 @@ if( APPLE )
 endif()
 
 # Translation
-add_subdirectory(translations)
+add_subdirectory( translations )
 
 ## Shaders
 # Copy shader dirs into our shadow build directory
@@ -187,12 +187,16 @@ if( APPLE )
 
 	install( SCRIPT ${deploy_cc} )
 elseif( WIN32 )
-	# We are looking for QT dependencies inside additional libraries
-	# it notably find QTConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
-	# we could do the same for Plugins
-	set(ADDITIONAL_LIB_LINES "")
-	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
-		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CLOUDCOMPARE_DEST_FOLDER}/${lib}\"\n")
+	# We are looking for Qt dependencies inside additional libraries
+	# it notably find QtConcurrent (if needed by CCCoreLib) and QOpenGLWidgets
+	set( ADDITIONAL_LIB_LINES "" )
+	foreach( lib IN LISTS CC_SHARED_LIB_FILENAMES )
+		string( APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CLOUDCOMPARE_DEST_FOLDER}/${lib}\"\n" )
+	endforeach()
+
+	# We do the same for plugins
+	foreach( plugin IN LISTS installed_plugin_targets )
+		string( APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CLOUDCOMPARE_DEST_FOLDER}/plugins/$<TARGET_FILE_NAME:${plugin}>\"\n" )
 	endforeach()
 
 	qt_generate_deploy_script(
@@ -208,7 +212,7 @@ elseif( WIN32 )
 				NO_COMPILER_RUNTIME
 				NO_TRANSLATIONS
 				DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1
-			)") # We inibit translation deployment because we already copy all needed files via the script in the translation subdirectory.
+			)") # We inibit translation deployment because we already copy all needed files via the cmake script in the translation subdirectory.
 
 	install( SCRIPT ${deploy_cc} )
 endif()

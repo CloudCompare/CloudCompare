@@ -14,7 +14,7 @@ function( AddPlugin )
 			""
 			"NAME;TYPE;SHADER_FOLDER"
 			""
-			${ARGN}
+			${ARGV}
 	)
 
 	# For readability

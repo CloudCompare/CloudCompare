@@ -266,6 +266,9 @@ Improvements:
 		- the default bounding-box is now very slightly larger than the entities bounding-box so as
 			to avoid display display artefacts and small accuracy issue when segmenting the entities
 
+	- Edit > Sensors > Edit and Edit > Sensors > TLS/GBL > Create
+		- the user can now see and edit the angular ranges
+
 	- ccViewer:
 		- new shortcuts to change the active scalar field: SHIFT + Up or Down arrows
 		- updated shortcuts list (F1)

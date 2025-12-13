@@ -109,7 +109,10 @@ void ccGBLSensor::setPitchRange(PointCoordinateType minPhi, PointCoordinateType 
 	m_phiMax = maxPhi;
 
 	if (m_phiMax > static_cast<PointCoordinateType>(M_PI))
+	{
 		m_pitchAnglesAreShifted = true;
+		m_phiMin                = std::max(m_phiMin, static_cast<PointCoordinateType>(0));
+	}
 
 	clearDepthBuffer();
 }
@@ -123,13 +126,16 @@ void ccGBLSensor::setPitchStep(PointCoordinateType dPhi)
 	}
 }
 
-void ccGBLSensor::setYawRange(PointCoordinateType minTehta, PointCoordinateType maxTheta)
+void ccGBLSensor::setYawRange(PointCoordinateType minTheta, PointCoordinateType maxTheta)
 {
-	m_thetaMin = minTehta;
+	m_thetaMin = minTheta;
 	m_thetaMax = maxTheta;
 
 	if (m_thetaMax > static_cast<PointCoordinateType>(M_PI))
+	{
 		m_yawAnglesAreShifted = true;
+		m_thetaMin            = std::max(m_thetaMin, static_cast<PointCoordinateType>(0));
+	}
 
 	clearDepthBuffer();
 }
@@ -182,16 +188,39 @@ void ccGBLSensor::projectPoint(const CCVector3&     sourcePoint,
 	}
 	default:
 		assert(false);
+		break;
 	}
 
 	// if the yaw angles are shifted
 	if (m_yawAnglesAreShifted && destPoint.x < 0)
+	{
 		destPoint.x += static_cast<PointCoordinateType>(2.0 * M_PI);
+	}
 	// if the pitch angles are shifted
 	if (m_pitchAnglesAreShifted && destPoint.y < 0)
+	{
 		destPoint.y += static_cast<PointCoordinateType>(2.0 * M_PI);
+	}
 
 	depth = P.norm();
+}
+
+PointCoordinateType ccGBLSensor::computeDistanceToPoint(const CCVector3& sourcePoint,
+                                                        double           posIndex /*=0*/) const
+{
+	// project point in sensor world
+	CCVector3 P = sourcePoint;
+
+	// sensor to world global transformation = sensor position * rigid transformation
+	ccIndexedTransformation sensorPos; // identity by default
+	if (m_posBuffer)
+		m_posBuffer->getInterpolatedTransformation(posIndex, sensorPos);
+	sensorPos *= m_rigidTransformation;
+
+	// apply (inverse) global transformation (i.e world to sensor)
+	sensorPos.inverse().apply(P);
+
+	return P.norm();
 }
 
 bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const
@@ -524,122 +553,147 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 		// invalid input parameter
 		return false;
 	}
-
-	std::vector<bool> nonEmptyAnglesYaw;
-	std::vector<bool> nonEmptyAnglesPitch;
-	try
-	{
-		nonEmptyAnglesYaw.resize(360, false);
-		nonEmptyAnglesPitch.resize(360, false);
-	}
-	catch (const std::bad_alloc&)
-	{
-		// not enough memory
-		return false;
-	}
-	// force no shift for auto search (we'll fix this later if necessary)
-	m_yawAnglesAreShifted   = false;
-	m_pitchAnglesAreShifted = false;
-
 	unsigned pointCount = theCloud->size();
 
-	PointCoordinateType minPitch = 0;
-	PointCoordinateType maxPitch = 0;
-	PointCoordinateType minYaw   = 0;
-	PointCoordinateType maxYaw   = 0;
-	PointCoordinateType maxDepth = 0;
+	bool hasValidThetaRange = (m_thetaMin != m_thetaMax);
+	bool hasValidPhiRange   = (m_phiMin != m_phiMax);
+
+	if (!hasValidThetaRange || !hasValidPhiRange)
 	{
+		std::vector<bool> nonEmptyAnglesYaw;
+		std::vector<bool> nonEmptyAnglesPitch;
+		try
+		{
+			nonEmptyAnglesYaw.resize(360, false);
+			nonEmptyAnglesPitch.resize(360, false);
+		}
+		catch (const std::bad_alloc&)
+		{
+			// not enough memory
+			return false;
+		}
+		// force no shift for auto search (we'll fix this later if necessary)
+		m_yawAnglesAreShifted   = false;
+		m_pitchAnglesAreShifted = false;
+
+		PointCoordinateType minPitch = 0;
+		PointCoordinateType maxPitch = 0;
+		PointCoordinateType minYaw   = 0;
+		PointCoordinateType maxYaw   = 0;
+		PointCoordinateType maxDepth = 0;
+		{
+			// first project all points to compute the (yaw,pitch) ranges
+			theCloud->placeIteratorAtBeginning();
+			for (unsigned i = 0; i < pointCount; ++i)
+			{
+				const CCVector3*    P = theCloud->getNextPoint();
+				CCVector2           Q;
+				PointCoordinateType depth;
+				// Q.x and Q.y are inside [-pi;pi] by default (result of atan2)
+				projectPoint(*P, Q, depth, m_activeIndex);
+
+				// yaw
+				int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.x));
+				assert(angleYaw >= -180 && angleYaw <= 180);
+				if (angleYaw == 180) // 360 degrees warp
+					angleYaw = -180;
+				nonEmptyAnglesYaw[180 + angleYaw] = true;
+				if (i != 0)
+				{
+					if (minYaw > Q.x)
+						minYaw = Q.x;
+					else if (maxYaw < Q.x)
+						maxYaw = Q.x;
+				}
+				else
+				{
+					minYaw = maxYaw = Q.x;
+				}
+
+				// pitch
+				int anglePitch = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.y));
+				assert(anglePitch >= -180 && anglePitch <= 180);
+				if (anglePitch == 180)
+					anglePitch = -180;
+				nonEmptyAnglesPitch[180 + anglePitch] = true;
+				if (i != 0)
+				{
+					if (minPitch > Q.y)
+						minPitch = Q.y;
+					else if (maxPitch < Q.y)
+						maxPitch = Q.y;
+				}
+				else
+				{
+					minPitch = maxPitch = Q.y;
+				}
+
+				if (depth > maxDepth)
+					maxDepth = depth;
+			}
+		}
+
+		Interval bestEmptyPartYaw   = Interval::FindBiggest<bool>(nonEmptyAnglesYaw, false, true);
+		Interval bestEmptyPartPitch = Interval::FindBiggest<bool>(nonEmptyAnglesPitch, false, true);
+
+		m_yawAnglesAreShifted   = (bestEmptyPartYaw.start != 0 && bestEmptyPartYaw.span > 1 && bestEmptyPartYaw.start + bestEmptyPartYaw.span < 360);
+		m_pitchAnglesAreShifted = (bestEmptyPartPitch.start != 0 && bestEmptyPartPitch.span > 1 && bestEmptyPartPitch.start + bestEmptyPartPitch.span < 360);
+
+		if (m_yawAnglesAreShifted || m_pitchAnglesAreShifted)
+		{
+			// we re-project all the points in order to update the boundaries!
+			theCloud->placeIteratorAtBeginning();
+			for (unsigned i = 0; i < pointCount; ++i)
+			{
+				const CCVector3*    P = theCloud->getNextPoint();
+				CCVector2           Q;
+				PointCoordinateType depth;
+				projectPoint(*P, Q, depth, m_activeIndex);
+
+				if (i != 0)
+				{
+					if (minYaw > Q.x)
+						minYaw = Q.x;
+					else if (maxYaw < Q.x)
+						maxYaw = Q.x;
+
+					if (minPitch > Q.y)
+						minPitch = Q.y;
+					else if (maxPitch < Q.y)
+						maxPitch = Q.y;
+				}
+				else
+				{
+					minYaw = maxYaw = Q.x;
+					minPitch = maxPitch = Q.y;
+				}
+			}
+		}
+
+		setYawRange(minYaw, maxYaw);
+		setPitchRange(minPitch, maxPitch);
+		if (m_sensorRange == 0)
+		{
+			setSensorRange(maxDepth);
+		}
+	}
+	else if (m_sensorRange == 0)
+	{
+		PointCoordinateType maxDepth = 0;
 		// first project all points to compute the (yaw,pitch) ranges
 		theCloud->placeIteratorAtBeginning();
 		for (unsigned i = 0; i < pointCount; ++i)
 		{
-			const CCVector3*    P = theCloud->getNextPoint();
-			CCVector2           Q;
-			PointCoordinateType depth;
-			// Q.x and Q.y are inside [-pi;pi] by default (result of atan2)
-			projectPoint(*P, Q, depth, m_activeIndex);
-
-			// yaw
-			int angleYaw = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.x));
-			assert(angleYaw >= -180 && angleYaw <= 180);
-			if (angleYaw == 180) // 360 degrees warp
-				angleYaw = -180;
-			nonEmptyAnglesYaw[180 + angleYaw] = true;
-			if (i != 0)
-			{
-				if (minYaw > Q.x)
-					minYaw = Q.x;
-				else if (maxYaw < Q.x)
-					maxYaw = Q.x;
-			}
-			else
-			{
-				minYaw = maxYaw = Q.x;
-			}
-
-			// pitch
-			int anglePitch = static_cast<int>(CCCoreLib::RadiansToDegrees(Q.y));
-			assert(anglePitch >= -180 && anglePitch <= 180);
-			if (anglePitch == 180)
-				anglePitch = -180;
-			nonEmptyAnglesPitch[180 + anglePitch] = true;
-			if (i != 0)
-			{
-				if (minPitch > Q.y)
-					minPitch = Q.y;
-				else if (maxPitch < Q.y)
-					maxPitch = Q.y;
-			}
-			else
-			{
-				minPitch = maxPitch = Q.y;
-			}
+			const CCVector3*    P     = theCloud->getNextPoint();
+			PointCoordinateType depth = computeDistanceToPoint(*P, m_activeIndex);
 
 			if (depth > maxDepth)
+			{
 				maxDepth = depth;
-		}
-	}
-
-	Interval bestEmptyPartYaw   = Interval::FindBiggest<bool>(nonEmptyAnglesYaw, false, true);
-	Interval bestEmptyPartPitch = Interval::FindBiggest<bool>(nonEmptyAnglesPitch, false, true);
-
-	m_yawAnglesAreShifted   = (bestEmptyPartYaw.start != 0 && bestEmptyPartYaw.span > 1 && bestEmptyPartYaw.start + bestEmptyPartYaw.span < 360);
-	m_pitchAnglesAreShifted = (bestEmptyPartPitch.start != 0 && bestEmptyPartPitch.span > 1 && bestEmptyPartPitch.start + bestEmptyPartPitch.span < 360);
-
-	if (m_yawAnglesAreShifted || m_pitchAnglesAreShifted)
-	{
-		// we re-project all the points in order to update the boundaries!
-		theCloud->placeIteratorAtBeginning();
-		for (unsigned i = 0; i < pointCount; ++i)
-		{
-			const CCVector3*    P = theCloud->getNextPoint();
-			CCVector2           Q;
-			PointCoordinateType depth;
-			projectPoint(*P, Q, depth, m_activeIndex);
-
-			if (i != 0)
-			{
-				if (minYaw > Q.x)
-					minYaw = Q.x;
-				else if (maxYaw < Q.x)
-					maxYaw = Q.x;
-
-				if (minPitch > Q.y)
-					minPitch = Q.y;
-				else if (maxPitch < Q.y)
-					maxPitch = Q.y;
-			}
-			else
-			{
-				minYaw = maxYaw = Q.x;
-				minPitch = maxPitch = Q.y;
 			}
 		}
+		setSensorRange(maxDepth);
 	}
-
-	setYawRange(minYaw, maxYaw);
-	setPitchRange(minPitch, maxPitch);
-	setSensorRange(maxDepth);
 
 	return true;
 }
@@ -795,7 +849,10 @@ unsigned char ccGBLSensor::checkVisibility(const CCVector3& P) const
 	}
 
 	// hidden?
-	if (depth > m_depthBuffer.zBuff[y * m_depthBuffer.width + x] * (1.0f + m_uncertainty))
+	PointCoordinateType bufferDepth     = m_depthBuffer.zBuff[y * m_depthBuffer.width + x];
+	PointCoordinateType safeBufferDepth = bufferDepth * (CCCoreLib::PC_ONE + m_uncertainty);
+
+	if (depth > safeBufferDepth)
 	{
 		return CCCoreLib::POINT_HIDDEN;
 	}

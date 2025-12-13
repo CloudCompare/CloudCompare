@@ -2618,7 +2618,7 @@ void MainWindow::doActionExportDepthBuffer()
 
 void MainWindow::doActionComputePointsVisibility()
 {
-	// there should be only one camera sensor in the current selection!
+	// there should be only one TLS/GBL sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities.front()->isKindOf(CC_TYPES::GBL_SENSOR))
 	{
 		ccConsole::Error(tr("Select one and only one GBL/TLS sensor!"));

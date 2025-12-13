@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>431</width>
     <height>287</height>
    </rect>
   </property>
@@ -286,7 +286,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <spacer>
          <property name="orientation">
           <enum>Qt::Orientation::Vertical</enum>
@@ -336,13 +336,13 @@
              <number>3</number>
             </property>
             <property name="minimum">
-             <double>-360.000000000000000</double>
+             <double>-180.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>360.000000000000000</double>
+             <double>180.000000000000000</double>
             </property>
             <property name="value">
-             <double>-180.000000000000000</double>
+             <double>0.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -355,13 +355,13 @@
              <number>3</number>
             </property>
             <property name="minimum">
-             <double>-360.000000000000000</double>
+             <double>-180.000000000000000</double>
             </property>
             <property name="maximum">
              <double>360.000000000000000</double>
             </property>
             <property name="value">
-             <double>180.000000000000000</double>
+             <double>0.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -405,13 +405,13 @@
              <number>3</number>
             </property>
             <property name="minimum">
-             <double>-360.000000000000000</double>
+             <double>-180.000000000000000</double>
             </property>
             <property name="maximum">
-             <double>360.000000000000000</double>
+             <double>180.000000000000000</double>
             </property>
             <property name="value">
-             <double>-90.000000000000000</double>
+             <double>0.000000000000000</double>
             </property>
            </widget>
           </item>
@@ -424,17 +424,30 @@
              <number>3</number>
             </property>
             <property name="minimum">
-             <double>-360.000000000000000</double>
+             <double>-180.000000000000000</double>
             </property>
             <property name="maximum">
              <double>360.000000000000000</double>
             </property>
             <property name="value">
-             <double>90.000000000000000</double>
+             <double>0.000000000000000</double>
             </property>
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="rangeWarningLabel">
+         <property name="styleSheet">
+          <string notr="true">color: red;</string>
+         </property>
+         <property name="text">
+          <string>Ranges should be either in [-180;180] or [0;360]</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignmentFlag::AlignCenter</set>
+         </property>
         </widget>
        </item>
       </layout>
@@ -458,14 +471,20 @@
          </item>
          <item>
           <widget class="QDoubleSpinBox" name="uncertaintyDoubleSpinBox">
+           <property name="suffix">
+            <string>%</string>
+           </property>
            <property name="decimals">
             <number>4</number>
+           </property>
+           <property name="maximum">
+            <double>99.999899999999997</double>
            </property>
            <property name="singleStep">
             <double>0.010000000000000</double>
            </property>
            <property name="value">
-            <double>0.010000000000000</double>
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -489,7 +508,7 @@
             <double>1000000000000.000000000000000</double>
            </property>
            <property name="value">
-            <double>1000000000000.000000000000000</double>
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>

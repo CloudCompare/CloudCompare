@@ -124,8 +124,8 @@ void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	{
 		// max range
 		maxRangeDoubleSpinBox->setValue(sensor->getSensorRange());
-		// uncertainty
-		uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
+		// uncertainty (as a percentage)
+		uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty() * 100.0);
 	}
 }
 
@@ -187,7 +187,7 @@ void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 		// max. range
 		sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
 
-		// uncertainty
-		sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));
+		// uncertainty (as a percentage)
+		sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value() / 100.0));
 	}
 }

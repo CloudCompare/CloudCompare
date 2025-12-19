@@ -4587,7 +4587,7 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 
 		if (!cloud)
 		{
-			return cmd.error(QObject::tr("Cloud sampling failed!"));
+			continue;
 		}
 
 		// add the resulting cloud to the main set

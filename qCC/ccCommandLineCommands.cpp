@@ -4581,12 +4581,15 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 		progressDialog->setAutoClose(false);
 	}
 
+	bool errors = false;
+
 	for (CLMeshDesc& desc : cmd.meshes())
 	{
 		ccPointCloud* cloud = desc.mesh->samplePoints(useDensity, parameter, true, true, true, progressDialog.data());
 
 		if (!cloud)
 		{
+			errors = true;
 			continue;
 		}
 
@@ -4610,6 +4613,9 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 		progressDialog->close();
 		QCoreApplication::processEvents();
 	}
+
+	if (errors)
+		ccLog::Error(QObject::tr("Errors occurred during the process! Result may be incomplete!"));
 
 	return true;
 }

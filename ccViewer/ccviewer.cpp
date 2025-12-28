@@ -1365,7 +1365,7 @@ const ccHObject::Container& ccViewer::getSelectedEntities() const
 
 void ccViewer::dispToConsole(QString message, ConsoleMessageLevel level)
 {
-	printf("%s\n", qPrintable(message));
+	printf("%s\n", qUtf8Printable(message));
 }
 
 ccHObject* ccViewer::dbRootObject()

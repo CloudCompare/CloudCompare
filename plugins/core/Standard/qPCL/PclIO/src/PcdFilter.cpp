@@ -452,7 +452,7 @@ CC_FILE_ERROR PcdFilter::loadFile(const QString& filename, ccHObject& container,
 			catch (const std::bad_alloc&)
 			{
 				// try to read the file 'normally' in this case
-				if (pcdReader.read(qPrintable(filename), *inputCloud) < 0)
+				if (pcdReader.read(qUtf8Printable(filename), *inputCloud) < 0)
 				{
 					return CC_FERR_NOT_ENOUGH_MEMORY;
 				}

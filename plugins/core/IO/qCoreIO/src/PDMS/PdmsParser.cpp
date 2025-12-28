@@ -514,9 +514,9 @@ void PdmsFileSession::skipHandleCommand()
 void PdmsFileSession::printWarning(const char* str)
 {
 	if (currentToken == PDMS_EOS)
-		std::cerr << "[" << qPrintable(m_filename) << "]@postprocessing : " << str << std::endl;
+		std::cerr << "[" << qUtf8Printable(m_filename) << "]@postprocessing : " << str << std::endl;
 	else
-		std::cerr << "[" << qPrintable(m_filename) << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
+		std::cerr << "[" << qUtf8Printable(m_filename) << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
 }
 
 ///////////////////////////

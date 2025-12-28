@@ -93,12 +93,6 @@ New features:
 		- display some pieces of information on the current 3D view (resolution, pixel size, image size, camera orientation, etc.)
 		- also available via the new 'info' button of the 'Display > Render to file' option (taking into account a potential scaling)
 
-	- Display > Lock rotation about an axis
-		- now a proper 'turntable' rotation mode
-		- dedicated icon in the left 'View' toolbar
-		- choice is now persistent, and will be reactivated when running CC again, or creating a new 3D view
-		- currently ignored by 3D mice and controllers
-
 	- New setting dialog to customize keyboard shortcuts for common CC actions
 
 	- DB tree: new context menu option 'Export images'
@@ -121,6 +115,12 @@ New plugins
 		- option to generate CSV report
 
 Improvements:
+
+	- Display > Lock rotation about an axis
+		- now a proper 'turntable' rotation mode
+		- dedicated icon in the left 'View' toolbar
+		- choice is now persistent, and will be reactivated when running CC again, or creating a new 3D view
+		- currently ignored by 3D mice and controllers
 
 	- Rasterize tool
 		- New 'X-ray' field calculation tool (same tab as 'hillshade')
@@ -167,6 +167,10 @@ Improvements:
 			- Option -GLOBAL_SHIFT (must be placed just after the orthogonal dimension setting)
 				- this allows to apply a Global Shift to the polyline vertices. Similar syntax to the -GLOBAL_SHIFT option of the -O command.
 			- The orthogonal dimension can now be Xflip, Yflip or Zflip to reverse the order in whcih CC expects the coordinates
+		- the -SF_INTERP option now has more sub-options
+			- '-SF_INTERP INTERP_NN k' to use nearest neighbors interpolation (k = number of neighbors)
+			- '-SF_INTERP INTERP_RADIUS r' to use interpolation inside a sphere (r = sphere radius)
+			- (these new options must always be placed after 'DEST_IS_FIRST')
 
 	- LAS file loading dialog
 		- Option to decompose the classification fields into Classification, Synthetic, Key Point and Withheld sub-fields

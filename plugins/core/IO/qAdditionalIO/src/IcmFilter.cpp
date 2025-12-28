@@ -55,7 +55,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
 #else
-	FILE* fp = fopen(qPrintable(filename), "rt");
+	FILE* fp = fopen(qUtf8Printable(filename), "rt");
 #endif
 	if (!fp)
 	{
@@ -166,7 +166,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(completeImageDescFilename.toStdWString().c_str(), L"rt");
 #else
-	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
+	FILE* fp = fopen(qUtf8Printable(completeImageDescFilename), "rt");
 #endif
 	if (fp == nullptr)
 	{

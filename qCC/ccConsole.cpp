@@ -346,7 +346,7 @@ void ccConsole::logMessage(const QString& message, int level)
 	QString formatedMessage = QStringLiteral("[") + QTime::currentTime().toString() + QStringLiteral("] ") + message;
 	if (s_redirectToStdOut)
 	{
-		printf("%s\n", qPrintable(formatedMessage));
+		printf("%s\n", qUtf8Printable(formatedMessage));
 	}
 	if (m_textDisplay || m_logStream)
 	{
@@ -381,7 +381,7 @@ void ccConsole::logMessage(const QString& message, int level)
 			else
 				printf("MSG: ");
 		}
-		printf(" %s\n", qPrintable(formatedMessage));
+		printf(" %s\n", qUtf8Printable(formatedMessage));
 	}
 #endif
 

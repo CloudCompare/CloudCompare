@@ -114,7 +114,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
-	if (laszip_open_reader(laszipReader, qPrintable(fileName), &isCompressed))
+	if (laszip_open_reader(laszipReader, qUtf8Printable(fileName), &isCompressed))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
 		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);

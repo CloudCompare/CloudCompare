@@ -183,7 +183,7 @@ CC_FILE_ERROR LasSaver::open(const QString filePath)
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
-	if (laszip_open_writer(m_laszipWriter, qPrintable(filePath), filePath.endsWith("laz")))
+	if (laszip_open_writer(m_laszipWriter, qUtf8Printable(filePath), filePath.endsWith("laz")))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
 		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);

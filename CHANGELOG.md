@@ -168,8 +168,8 @@ Improvements:
 				- this allows to apply a Global Shift to the polyline vertices. Similar syntax to the -GLOBAL_SHIFT option of the -O command.
 			- The orthogonal dimension can now be Xflip, Yflip or Zflip to reverse the order in whcih CC expects the coordinates
 		- the -SF_INTERP option now has more sub-options
-			- '-SF_INTERP INTERP_NN k' to use nearest neighbors interpolation (k = number of neighbors)
-			- '-SF_INTERP INTERP_RADIUS r' to use interpolation inside a sphere (r = sphere radius)
+			- '-SF_INTERP {SF index} -INTERP_NN k' to use nearest neighbors interpolation (k = number of neighbors)
+			- '-SF_INTERP {SF index} -INTERP_RADIUS r' to use interpolation inside a sphere (r = sphere radius)
 			- (these new options must always be placed after 'DEST_IS_FIRST')
 
 	- LAS file loading dialog

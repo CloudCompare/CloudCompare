@@ -3356,16 +3356,32 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 	// merge clouds
 	if (!cmd.clouds().empty())
 	{
+		ccPointCloud* firstCloud = nullptr;
+
+		unsigned totalSize = 0;
+		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		{
+			totalSize += cmd.clouds()[i].pc->size();
+		}
+
+		firstCloud = cmd.clouds().front().pc;
+
+		// reserve the final required number of points
+		if (!firstCloud->reserve(totalSize))
+		{
+			return cmd.error(QObject::tr("Not enough memory!"));
+		}
+
 		for (size_t i = 1; i < cmd.clouds().size(); ++i)
 		{
-			unsigned beforePts = cmd.clouds().front().pc->size();
+			unsigned countBefore = firstCloud->size();
 
-			CLCloudDesc& desc   = cmd.clouds()[i];
-			unsigned     newPts = desc.pc->size();
-			*cmd.clouds().front().pc += desc.pc;
+			CLCloudDesc& desc       = cmd.clouds()[i];
+			unsigned     countAdded = desc.pc->size();
+			firstCloud->append(desc.pc, countBefore, false, false);
 
 			// success?
-			if (cmd.clouds().front().pc->size() == beforePts + newPts)
+			if (firstCloud->size() == countBefore + countAdded)
 			{
 				delete desc.pc;
 				desc.pc = nullptr;

@@ -3358,18 +3358,21 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 	// merge clouds
 	if (!cmd.clouds().empty())
 	{
-		ccPointCloud* firstCloud = nullptr;
-
-		unsigned totalSize = 0;
+		size_t totalSize = 0;
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			totalSize += cmd.clouds()[i].pc->size();
 		}
 
-		firstCloud = cmd.clouds().front().pc;
+		if (totalSize > std::numeric_limits<unsigned>::max())
+		{
+			return cmd.error(QObject::tr("Merged cloud is too big!"));
+		}
+
+		ccPointCloud* firstCloud = cmd.clouds().front().pc;
 
 		// reserve the final required number of points
-		if (!firstCloud->reserve(totalSize))
+		if (!firstCloud->reserve(static_cast<unsigned>(totalSize)))
 		{
 			return cmd.error(QObject::tr("Not enough memory!"));
 		}

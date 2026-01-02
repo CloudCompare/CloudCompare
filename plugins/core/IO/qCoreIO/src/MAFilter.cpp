@@ -140,7 +140,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"wt");
 #else
-	FILE* fp = fopen(qPrintable(filename), "wt");
+	FILE* fp = fopen(qUtf8Printable(filename), "wt");
 #endif
 
 	if (!fp)
@@ -170,12 +170,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		fclose(fp);
 		return CC_FERR_WRITING;
 	}
-	if (fprintf(fp, "//Name: %s\n", qPrintable(baseFilename)) < 0)
+	if (fprintf(fp, "//Name: %s\n", qUtf8Printable(baseFilename)) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;
 	}
-	if (fprintf(fp, "//Last modified: %s\n", qPrintable(QDateTime::currentDateTime().toString(Qt::ISODateWithMs))) < 0)
+	if (fprintf(fp, "//Last modified: %s\n", qUtf8Printable(QDateTime::currentDateTime().toString(Qt::ISODateWithMs))) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;
@@ -192,19 +192,19 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	}
 
 	// fileInfo
-	if (fprintf(fp, "fileInfo \"application\" \"%s\"\n", qPrintable(FileIO::applicationName())) < 0)
+	if (fprintf(fp, "fileInfo \"application\" \"%s\"\n", qUtf8Printable(FileIO::applicationName())) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;
 	}
 
-	if (fprintf(fp, "fileInfo \"product\" \"%s\"\n", qPrintable(FileIO::writerInfo())) < 0)
+	if (fprintf(fp, "fileInfo \"product\" \"%s\"\n", qUtf8Printable(FileIO::writerInfo())) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;
 	}
 
-	if (fprintf(fp, "fileInfo \"version\" \"%s\"\n", qPrintable(FileIO::version())) < 0)
+	if (fprintf(fp, "fileInfo \"version\" \"%s\"\n", qUtf8Printable(FileIO::version())) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;
@@ -676,7 +676,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	}
 
 	// end of file
-	if (fprintf(fp, "//End of %s\n", qPrintable(baseFilename)) < 0)
+	if (fprintf(fp, "//End of %s\n", qUtf8Printable(baseFilename)) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_WRITING;

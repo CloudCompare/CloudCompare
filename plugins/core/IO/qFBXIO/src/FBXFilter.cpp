@@ -67,8 +67,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 	if (!mesh)
 		return 0;
 
-	FbxNode* lNode = FbxNode::Create(pScene, qPrintable(mesh->getName()));
-	FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
+	FbxNode* lNode = FbxNode::Create(pScene, qUtf8Printable(mesh->getName()));
+	FbxMesh* lMesh = FbxMesh::Create(pScene, qUtf8Printable(mesh->getName()));
 	lNode->SetNodeAttribute(lMesh);
 
 	ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
@@ -242,7 +242,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		for (size_t i = 0; i < matCount; ++i)
 		{
 			ccMaterial::CShared mat       = matSet->at(i);
-			FbxSurfacePhong*    lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat->getName()));
+			FbxSurfacePhong*    lMaterial = FbxSurfacePhong::Create(pScene, qUtf8Printable(mat->getName()));
 
 			const ccColor::Rgbaf& emission = mat->getEmission();
 			const ccColor::Rgbaf& ambient  = mat->getAmbient();
@@ -294,7 +294,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				// Set texture properties.
 				FbxFileTexture* lTexture = FbxFileTexture::Create(pScene, "DiffuseTexture");
 				assert(!texFilenames[texFilename].isEmpty());
-				lTexture->SetFileName(qPrintable(texFilenames[texFilename]));
+				lTexture->SetFileName(qUtf8Printable(texFilenames[texFilename]));
 				lTexture->SetTextureUse(FbxTexture::eStandard);
 				lTexture->SetMappingType(FbxTexture::eUV);
 				lTexture->SetMaterialUse(FbxFileTexture::eModelMaterial);
@@ -550,7 +550,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		// create scene info
 		{
 			FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager, "SceneInfo");
-			sceneInfo->mTitle          = qPrintable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
+			sceneInfo->mTitle          = qUtf8Printable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
 			sceneInfo->mAuthor         = "CloudCompare";
 			sceneInfo->mRevision       = "rev. 1.0";
 			sceneInfo->mKeywords       = "cloudcompare mesh";
@@ -667,7 +667,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		}
 
 		// Save the scene.
-		bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename), fileFormat);
+		bool lResult = SaveScene(lSdkManager, lScene, qUtf8Printable(filename), fileFormat);
 
 		// Destroy all objects created by the FBX SDK.
 		if (lSdkManager)
@@ -1336,7 +1336,7 @@ CC_FILE_ERROR FBXFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 
 		// Use the first argument as the filename for the importer.
-		if (!lImporter->Initialize(qPrintable(filename), -1, lSdkManager->GetIOSettings()))
+		if (!lImporter->Initialize(qUtf8Printable(filename), -1, lSdkManager->GetIOSettings()))
 		{
 			ccLog::Warning(QString("[FBX] Error: %1").arg(lImporter->GetStatus().GetErrorString()));
 			result = CC_FERR_CONSOLE_ERROR;

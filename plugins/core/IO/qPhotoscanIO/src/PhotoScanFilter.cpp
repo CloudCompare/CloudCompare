@@ -732,7 +732,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString&  filename,
 
 		QImage  qImage;
 		QString absoluteImageFilename = dir.absoluteFilePath(camera.imageFilename);
-		// if (!qImage.load(&zipImage, qPrintable(QFileInfo(camera.imageFilename).suffix())))
+		// if (!qImage.load(&zipImage, qUtf8Printable(QFileInfo(camera.imageFilename).suffix())))
 		if (!qImage.load(absoluteImageFilename))
 		{
 			ccLog::Warning(QString("[Photoscan] Failed to load image '%1'").arg(camera.imageFilename));

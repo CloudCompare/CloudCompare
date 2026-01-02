@@ -3568,11 +3568,11 @@ void MainWindow::doActionMerge()
 	}
 	if (!clouds.empty() && !meshes.empty())
 	{
-		ccLog::Error(tr("Can't mix point clouds and meshes!"));
+		ccLog::Error(tr("Can't mix point clouds with meshes. Each group will be merged separately."));
 	}
 
 	// merge clouds?
-	if (!clouds.empty())
+	if (clouds.size() >= 2)
 	{
 		// we deselect all selected entities (as most of them are going to disappear)
 		if (m_ccRoot)
@@ -3593,10 +3593,16 @@ void MainWindow::doActionMerge()
 		size_t                  cloudIndex = 0;
 
 		// compute total size of the final cloud
-		unsigned totalSize = 0;
+		size_t totalSize = 0;
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			totalSize += clouds[i]->size();
+		}
+
+		if (totalSize > std::numeric_limits<unsigned>::max())
+		{
+			ccLog::Error(QObject::tr("Merged cloud is too big!"));
+			return;
 		}
 
 		for (size_t i = 0; i < clouds.size(); ++i)
@@ -3615,6 +3621,7 @@ void MainWindow::doActionMerge()
 						ccConsole::Error(tr("Not enough memory!"));
 						return;
 					}
+					firstCloud->setName(tr("Merged clouds"));
 				}
 				else
 				{
@@ -3626,12 +3633,16 @@ void MainWindow::doActionMerge()
 				}
 
 				// reserve the final required number of points
-				if (!firstCloud->reserve(totalSize))
+				if (!firstCloud->reserve(static_cast<unsigned>(totalSize)))
 				{
 					if (firstCloud != pc)
 					{
 						delete firstCloud;
 						firstCloud = nullptr;
+					}
+					else
+					{
+						putObjectBackIntoDBTree(firstCloud, firstCloudContext);
 					}
 					ccConsole::Error(tr("Not enough memory!"));
 					return;
@@ -3650,6 +3661,10 @@ void MainWindow::doActionMerge()
 						{
 							delete firstCloud;
 							firstCloud = nullptr;
+						}
+						else
+						{
+							putObjectBackIntoDBTree(firstCloud, firstCloudContext);
 						}
 						ccConsole::Error(tr("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ..."));
 						return;
@@ -3723,7 +3738,7 @@ void MainWindow::doActionMerge()
 		// something to remove?
 		for (ccHObject* toRemove : toBeRemoved)
 		{
-			if (firstCloud->isAncestorOf(toRemove))
+			if (firstCloud && firstCloud->isAncestorOf(toRemove))
 			{
 				// we cannot call 'removeElement' on a child of the first cloud, as it's temporarily detached from the DB tree!
 				if (toRemove->getParent())
@@ -3753,22 +3768,21 @@ void MainWindow::doActionMerge()
 				}
 				addToDB(firstCloud, false, true, false, false);
 			}
+
 			if (m_ccRoot)
 			{
 				m_ccRoot->selectEntity(firstCloud);
 			}
 		}
 	}
-	// merge meshes?
-	else if (!meshes.empty())
-	{
-		bool createSubMeshes = true;
-		// createSubMeshes = (QMessageBox::question(this, tr("Create sub-meshes"), tr("Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes);
 
+	// merge meshes?
+	if (meshes.size() >= 2)
+	{
 		// meshes are merged
 		ccPointCloud* baseVertices = new ccPointCloud("vertices");
 		ccMesh*       baseMesh     = new ccMesh(baseVertices);
-		baseMesh->setName("Merged mesh");
+		baseMesh->setName(tr("Merged mesh"));
 		baseMesh->addChild(baseVertices);
 		baseVertices->setEnabled(false);
 
@@ -3777,11 +3791,11 @@ void MainWindow::doActionMerge()
 			// if (mesh->isA(CC_TYPES::PRIMITIVE))
 			//{
 			//	mesh = mesh->ccMesh::cloneMesh(); //we want a clone of the mesh part, not the primitive!
-			// }
+			//}
 
-			if (!baseMesh->merge(mesh, createSubMeshes))
+			if (!baseMesh->merge(mesh, false))
 			{
-				ccConsole::Error(tr("Fusion failed! (not enough memory?)"));
+				ccConsole::Error(tr("Merging operation failed! (not enough memory?)"));
 				break;
 			}
 		}

@@ -1072,7 +1072,7 @@ CC_FILE_ERROR DxfFilter::loadFile(const QString& filename, ccHObject& container,
 		{
 			ccLog::Warning("[DXF] Input file contains special characters. It might be rejected by the third party library...");
 		}
-		if (DL_Dxf().in(qPrintable(filename), &importer)) // DGM: warning, toStdString doesn't preserve "local" characters
+		if (DL_Dxf().in(qUtf8Printable(filename), &importer)) // DGM: warning, toStdString doesn't preserve "local" characters
 #endif
 		{
 			importer.applyGlobalShift(); // apply the (potential) global shift to shared clouds

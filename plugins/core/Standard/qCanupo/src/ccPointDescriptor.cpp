@@ -639,7 +639,7 @@ bool CorePointDescSet::loadFromMSC(QString filename, QString& error, ccPointClou
 {
 	error.clear();
 
-	std::ifstream mscfile(qPrintable(filename), std::ifstream::binary); //DGM: warning, toStdString doesn't preserve "local" characters
+	std::ifstream mscfile(qUtf8Printable(filename), std::ifstream::binary); //DGM: warning, toStdString doesn't preserve "local" characters
 
 	if (!mscfile.is_open())
 	{

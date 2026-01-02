@@ -126,8 +126,10 @@ constexpr char COMMAND_SF_OP[]                            = "SF_OP";
 constexpr char COMMAND_SF_OP_NOT_IN_PLACE[]               = "NOT_IN_PLACE";
 constexpr char COMMAND_SF_OP_SF[]                         = "SF_OP_SF";
 constexpr char COMMAND_SF_INTERP[]                        = "SF_INTERP";
-constexpr char COMMAND_COLOR_INTERP[]                     = "COLOR_INTERP";
 constexpr char COMMAND_SF_INTERP_DEST_IS_FIRST[]          = "DEST_IS_FIRST";
+constexpr char COMMAND_SF_INTERP_NN[]                     = "INTERP_NN";
+constexpr char COMMAND_SF_INTERP_RADIUS[]                 = "INTERP_RADIUS";
+constexpr char COMMAND_COLOR_INTERP[]                     = "COLOR_INTERP";
 constexpr char COMMAND_SF_ADD_CONST[]                     = "SF_ADD_CONST";
 constexpr char COMMAND_SF_ADD_ID[]                        = "SF_ADD_ID";
 constexpr char COMMAND_SF_ADD_ID_AS_INT[]                 = "AS_INT";
@@ -3356,18 +3358,21 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 	// merge clouds
 	if (!cmd.clouds().empty())
 	{
-		ccPointCloud* firstCloud = nullptr;
-
-		unsigned totalSize = 0;
+		size_t totalSize = 0;
 		for (size_t i = 0; i < cmd.clouds().size(); ++i)
 		{
 			totalSize += cmd.clouds()[i].pc->size();
 		}
 
-		firstCloud = cmd.clouds().front().pc;
+		if (totalSize > std::numeric_limits<unsigned>::max())
+		{
+			return cmd.error(QObject::tr("Merged cloud is too big!"));
+		}
+
+		ccPointCloud* firstCloud = cmd.clouds().front().pc;
 
 		// reserve the final required number of points
-		if (!firstCloud->reserve(totalSize))
+		if (!firstCloud->reserve(static_cast<unsigned>(totalSize)))
 		{
 			return cmd.error(QObject::tr("Not enough memory!"));
 		}
@@ -6549,7 +6554,7 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 	}
 
 	bool destIsFirst = false;
-	while (!cmd.arguments().empty())
+	if (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_INTERP_DEST_IS_FIRST))
@@ -6558,10 +6563,6 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 			destIsFirst = true;
-		}
-		else
-		{
-			break; // as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
 		}
 	}
 
@@ -6578,10 +6579,8 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 	{
 		return false;
 	}
-
 	cmd.print("SF to interpolate: index " + QString::number(sfIndex) + ", name " + QString::fromStdString(source->getScalarField(sfIndex)->getName()));
 
-	// semi-persistent parameters
 	ccPointCloudInterpolator::Parameters params;
 	{
 		params.method = ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR; // nearest neighbor
@@ -6589,6 +6588,48 @@ bool CommandSFInterpolation::process(ccCommandLineInterface& cmd)
 		params.knn    = 6;
 		params.radius = static_cast<float>(dest->getOwnBB().getDiagNormd() / 100);
 		params.sigma  = params.radius / 2.5; // see ccInterpolationDlg::onRadiusUpdated
+	}
+
+	if (!cmd.arguments().empty())
+	{
+		QString argument = cmd.arguments().front();
+		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_INTERP_NN))
+		{
+			cmd.print(QObject::tr("[Nearest Neighbor interpolation]"));
+			params.method = ccPointCloudInterpolator::Parameters::K_NEAREST_NEIGHBORS;
+			// local option confirmed
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing argument after '%1': number of nearest neighbors").arg(COMMAND_SF_INTERP_NN));
+			}
+
+			bool ok;
+			params.knn = cmd.arguments().takeFirst().toInt(&ok);
+			if (!ok || params.knn < 1)
+			{
+				return cmd.error(QObject::tr("Invalid number of nearest neighbors! (after %1)").arg(COMMAND_SF_INTERP_NN));
+			}
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_INTERP_RADIUS))
+		{
+			cmd.print(QObject::tr("[Sphere interpolation]"));
+			params.method = ccPointCloudInterpolator::Parameters::RADIUS;
+			// local option confirmed
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QObject::tr("Missing argument after '%1': radius of the sphere").arg(COMMAND_SF_INTERP_RADIUS));
+			}
+			bool ok;
+			params.radius = cmd.arguments().takeFirst().toFloat(&ok);
+			if (!ok || params.radius <= 0)
+			{
+				return cmd.error(QObject::tr("Invalid sphere radius! (after %1)").arg(COMMAND_SF_INTERP_RADIUS));
+			}
+		}
 	}
 
 	return ccEntityAction::interpolateSFs(source, dest, sfIndex, params, cmd.widgetParent());

@@ -190,7 +190,7 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 	const AVOutputFormat* outputFormat = nullptr;
 	if (!formatShortName.isEmpty())
 	{
-		outputFormat = av_guess_format(qPrintable(formatShortName), nullptr, nullptr);
+		outputFormat = av_guess_format(qUtf8Printable(formatShortName), nullptr, nullptr);
 		if (!outputFormat)
 		{
 			errors << "Could not find output format from short name: " + formatShortName;
@@ -198,14 +198,14 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 	}
 
 	// find the output format
-	avformat_alloc_output_context2(&m_ff->formatContext, outputFormat, nullptr, outputFormat ? qPrintable(m_filename) : nullptr);
+	avformat_alloc_output_context2(&m_ff->formatContext, outputFormat, nullptr, outputFormat ? qUtf8Printable(m_filename) : nullptr);
 	if (!m_ff->formatContext)
 	{
 		if (!outputFormat)
 		{
 			errors << "Could not deduce output format from file extension: using MPEG";
 
-			avformat_alloc_output_context2(&m_ff->formatContext, nullptr, "mpeg", qPrintable(m_filename));
+			avformat_alloc_output_context2(&m_ff->formatContext, nullptr, "mpeg", qUtf8Printable(m_filename));
 			if (!m_ff->formatContext)
 			{
 				errors << "Codec not found";
@@ -319,10 +319,10 @@ bool QVideoEncoder::open(QString formatShortName, QStringList& errors)
 		return false;
 	}
 
-	av_dump_format(m_ff->formatContext, 0, qPrintable(m_filename), 1);
+	av_dump_format(m_ff->formatContext, 0, qUtf8Printable(m_filename), 1);
 
 	// open the output file
-	int ret = avio_open(&m_ff->formatContext->pb, qPrintable(m_filename), AVIO_FLAG_WRITE);
+	int ret = avio_open(&m_ff->formatContext->pb, qUtf8Printable(m_filename), AVIO_FLAG_WRITE);
 	if (ret < 0)
 	{
 		errors << QString("Could not open file '%1': %2").arg(m_filename).arg(GetAVError(ret));

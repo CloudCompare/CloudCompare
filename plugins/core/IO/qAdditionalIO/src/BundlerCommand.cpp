@@ -100,7 +100,7 @@ bool BundlerCommand::process(ccCommandLineInterface& cmd)
 	ccHObject                    tempContainer;
 	FileIOFilter::LoadParameters parameters;
 	parameters.alwaysDisplayLoadDialog = false;
-	BundlerFilter().loadFileExtended(qPrintable(bundlerFilename),
+	BundlerFilter().loadFileExtended(qUtf8Printable(bundlerFilename),
 	                                 tempContainer,
 	                                 parameters,
 	                                 altKeypointsFilename,

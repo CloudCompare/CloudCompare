@@ -1865,7 +1865,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 
 	// eventually, we create the DB file (suffix should be ".dbf")
 	QString   dbfFilename = baseFileName + QString(".dbf");
-	DBFHandle dbfHandle   = DBFCreate(qPrintable(dbfFilename));
+	DBFHandle dbfHandle   = DBFCreate(qUtf8Printable(dbfFilename));
 	if (dbfHandle)
 	{
 		while (true) // trick: we use 'while' to be able to break anytime
@@ -1918,9 +1918,9 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 			{
 				if (field->is3D()) // 3D case
 				{
-					int xFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_x")), field->type(), field->width(), field->decimal());
-					int yFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_y")), field->type(), field->width(), field->decimal());
-					int zFieldIdx = DBFAddField(dbfHandle, qPrintable(field->name() + QString("_z")), field->type(), field->width(), field->decimal());
+					int xFieldIdx = DBFAddField(dbfHandle, qUtf8Printable(field->name() + QString("_x")), field->type(), field->width(), field->decimal());
+					int yFieldIdx = DBFAddField(dbfHandle, qUtf8Printable(field->name() + QString("_y")), field->type(), field->width(), field->decimal());
+					int zFieldIdx = DBFAddField(dbfHandle, qUtf8Printable(field->name() + QString("_z")), field->type(), field->width(), field->decimal());
 					if (xFieldIdx >= 0 && yFieldIdx >= 0 && zFieldIdx >= 0)
 					{
 						if (!field->save(dbfHandle, xFieldIdx, yFieldIdx, zFieldIdx))
@@ -1936,7 +1936,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 				}
 				else // 1D case
 				{
-					int fieldIdx = DBFAddField(dbfHandle, qPrintable(field->name()), field->type(), field->width(), field->decimal());
+					int fieldIdx = DBFAddField(dbfHandle, qUtf8Printable(field->name()), field->type(), field->width(), field->decimal());
 					if (fieldIdx >= 0)
 					{
 						if (!field->save(dbfHandle, fieldIdx))
@@ -2142,7 +2142,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		QString   baseFileName = fi.path() + QString("/") + fi.completeBaseName();
 		// try to load the DB file (suffix should be ".dbf")
 		QString   dbfFilename = baseFileName + QString(".dbf");
-		DBFHandle dbfHandle   = DBFOpen(qPrintable(dbfFilename), "rb");
+		DBFHandle dbfHandle   = DBFOpen(qUtf8Printable(dbfFilename), "rb");
 		if (dbfHandle)
 		{
 			int fieldCount  = DBFGetFieldCount(dbfHandle);

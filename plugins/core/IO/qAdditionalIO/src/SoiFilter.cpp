@@ -43,7 +43,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
 #else
-	FILE* fp = fopen(qPrintable(filename), "rt");
+	FILE* fp = fopen(qUtf8Printable(filename), "rt");
 #endif
 	if (!fp)
 		return CC_FERR_READING;

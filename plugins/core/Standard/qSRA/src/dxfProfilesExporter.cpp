@@ -151,7 +151,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	}
 
 	//Writing the Layers
-	dw->tableLayers(angularStepCount+3);
+	dw->tableLayers(angularStepCount + 3);
 	QStringList profileNames;
 	{
 		//default layer
@@ -186,10 +186,10 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 			1.0));
 
 		//vert. profile layers
-		for (unsigned i=0; i<angularStepCount; ++i)
+		for (unsigned i = 0; i < angularStepCount; ++i)
 		{
 			//default layer name
-			QString layerName = QString(VERT_PROFILE_LAYER).arg(i+1,3,10,QChar('0'));
+			QString layerName = QString(VERT_PROFILE_LAYER).arg(i + 1, 3, 10, QChar('0'));
 			//but we use the profile title if we have one!
 			//DGM: nope, as it may be longer than 31 characters (R14 limit)
 			//if (params.profileTitles.size() >= static_cast<int>(angularStepCount))

@@ -119,7 +119,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 #ifdef _MSC_VER
 	FILE* mainFile = _wfopen(filename.toStdWString().c_str(), L"wt");
 #else
-	FILE* mainFile = fopen(qPrintable(filename), "wt");
+	FILE* mainFile = fopen(qUtf8Printable(filename), "wt");
 #endif
 	if (!mainFile)
 		return CC_FERR_WRITING;
@@ -152,7 +152,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 
 			// il faut ecrire le nom du fichier relatif et non absolu !
-			int result = fprintf(mainFile, "\n#POV %u\nF %s\nT ASC\n", i, qPrintable(QFileInfo(thisFilename).fileName()));
+			int result = fprintf(mainFile, "\n#POV %u\nF %s\nT ASC\n", i, qUtf8Printable(QFileInfo(thisFilename).fileName()));
 
 			if (result > 0)
 			{
@@ -203,7 +203,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"rt");
 #else
-	FILE* fp = fopen(qPrintable(filename), "rt");
+	FILE* fp = fopen(qUtf8Printable(filename), "rt");
 #endif
 	if (!fp)
 		return CC_FERR_READING;

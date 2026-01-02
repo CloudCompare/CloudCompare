@@ -129,7 +129,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 #ifdef _MSC_VER
 	FILE* fp = _wfopen(filename.toStdWString().c_str(), L"wt");
 #else
-	FILE* fp = fopen(qPrintable(filename), "wt");
+	FILE* fp = fopen(qUtf8Printable(filename), "wt");
 #endif
 	if (!fp)
 	{
@@ -140,7 +140,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(const QString& filename, ccGBLSenso
 	fprintf(fp, "// SENSOR DEPTH MAP\n");
 	fprintf(fp, "// %s\n", qPrintable(FileIO::createdBy()));
 	fprintf(fp, "// %s\n", qPrintable(FileIO::createdDateTime()));
-	fprintf(fp, "// Associated cloud: %s\n", qPrintable(cloud ? cloud->getName() : "none"));
+	fprintf(fp, "// Associated cloud: %s\n", qUtf8Printable(cloud ? cloud->getName() : "none"));
 	fprintf(fp, "// Pitch  = %f [ %f : %f ]\n", sensor->getPitchStep(), sensor->getMinPitch(), sensor->getMaxPitch());
 	fprintf(fp, "// Yaw   = %f [ %f : %f ]\n", sensor->getYawStep(), sensor->getMinYaw(), sensor->getMaxYaw());
 	fprintf(fp, "// Range  = %f\n", sensor->getSensorRange());

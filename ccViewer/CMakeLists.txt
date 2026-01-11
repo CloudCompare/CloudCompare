@@ -12,59 +12,26 @@ file( GLOB source_list *.cpp )
 
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list ../qCC/*.qrc )
-file( GLOB rc_list ../qCC/*.rc )
 
-qt6_add_resources( generated_qrc_list ${qrc_list} )
-qt6_wrap_ui( generated_ui_list ${ui_list})
+qt_add_resources( generated_qrc_list ${qrc_list} )
 
 if( MSVC )
 	# App icon with MSVC
-	set( rc_list images/icon/cc_viewer_icon.rc )
+	set( msvc_icon images/icon/cc_viewer_icon.rc )
 
-	#to get rid of the (system) console
-	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list}  ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
+	# to get rid of the (system) console
+	qt_add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${generated_qrc_list} ${msvc_icon} ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/windows/qt5.natvis )
 elseif( APPLE )
-	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${generated_ui_list} ${source_list}  ${generated_qrc_list} ${rc_list} )
+	qt_add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${generated_qrc_list} )
 else()
-	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} )
+	qt_add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${generated_qrc_list} )
 endif()
 
-
-#qt6_add_ui(${PROJECT_NAME} SOURCES ${ui_list} ) # Qt >= 6.8
-
-target_link_libraries( ${PROJECT_NAME}
-	PUBLIC
-		CCPluginStub
-)
-
-if( CCCORELIB_USE_QT_CONCURRENT )
-	# We want deployqt to handle this dependency, so instead of just copying the file
-	# link to the target.
-	target_link_libraries( ${PROJECT_NAME}
-		PRIVATE
-			Qt6::Concurrent
-	)
-endif()
-
-if( WIN32 )
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${CCVIEWER_DEST_FOLDER}
-	)
-else()
-	DeployQt(
-		TARGET
-			${PROJECT_NAME}
-		DEPLOY_PATH
-			${PROJECT_NAME}
-	)
-endif()
+qt_add_ui(${PROJECT_NAME} SOURCES ${ui_list})
 
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
-    	CCAppCommon
+		CCAppCommon
 )
 
 # Add custom preprocessor definitions
@@ -72,7 +39,7 @@ target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_VIEWER )
 
 if (WIN32)
 	if (MSVC)
-		set_target_properties( ${PROJECT_NAME} PROPERTIES LINK_FLAGS " /MANIFEST:NO" )
+		target_link_options( ${PROJECT_NAME} PRIVATE "/MANIFEST:NO" )
 	endif()
 endif()
 
@@ -83,10 +50,11 @@ if( WIN32 )
 	endif()
 endif()
 
-if (NOT APPLE)
-	# install program
-	install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} "" )
-endif()
+install(TARGETS
+	${PROJECT_NAME}
+		BUNDLE  DESTINATION ${CCVIEWER_DEST_FOLDER}/ # On macOS the bundle will be in $install_dir/$app_name/$app_name.app (the name of the bundle is defined by the qt_add_executable command)
+		RUNTIME DESTINATION ${CCVIEWER_DEST_FOLDER}/
+)
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
@@ -99,7 +67,7 @@ endif()
 # Install auxiliary files
 if(APPLE OR WIN32) # For Linux it's already installed in by qCC
 	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} "" )
+		install( FILES ${filename} DESTINATION ${CCVIEWER_DEST_FOLDER} )
 	endforeach()
 endif()
 
@@ -110,11 +78,11 @@ endif( APPLE )
 
 # Export common shader files to all install destinations
 if( WIN32 ) # For Linux it's already installed in by qCC
-	install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
+	install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_DEST_FOLDER}/shaders/ColorRamp )
 endif()
 
 # Install plugins & shaders in the correct folder for each platform
-if( APPLE )	
+if( APPLE )
 	InstallPlugins(
 		TYPES "gl;io"
 		DEST_PATH "${CCVIEWER_MAC_PLUGIN_DIR}"
@@ -134,6 +102,50 @@ else()
 		SHADER_DEST_PATH "${CCVIEWER_DEST_FOLDER}"
 		SHADER_DEST_FOLDER "shaders"
 )
+endif()
+
+# Deploy scripts
+if( APPLE )
+	# We use macdeployqt to deploy runtime dependencies.
+	# Signature could be needed
+	qt_generate_deploy_script(
+		TARGET ${PROJECT_NAME}
+		OUTPUT_SCRIPT deploy_ccViewer
+		CONTENT "
+			qt_deploy_runtime_dependencies(
+				EXECUTABLE \"${CCVIEWER_DEST_FOLDER}/${PROJECT_NAME}.app\"
+				NO_APP_STORE_COMPLIANCE
+			)"
+	)
+
+	install( SCRIPT ${deploy_ccViewer} )
+elseif( WIN32 )
+	set(ADDITIONAL_LIB_LINES "")
+	foreach(lib IN LISTS CC_SHARED_LIB_FILENAMES)
+		string(APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CCVIEWER_DEST_FOLDER}/${lib}\"\n")
+	endforeach()
+
+	# We do the same for plugins
+	foreach( plugin IN LISTS installed_plugin_targets )
+		string( APPEND ADDITIONAL_LIB_LINES "ADDITIONAL_LIBRARIES \"${CCVIEWER_DEST_FOLDER}/plugins/$<TARGET_FILE_NAME:${plugin}>\"\n" )
+	endforeach()
+
+	qt_generate_deploy_script(
+		TARGET ${PROJECT_NAME}
+		OUTPUT_SCRIPT deploy_ccViewer
+		CONTENT "
+		qt_deploy_runtime_dependencies(
+			EXECUTABLE \"${CCVIEWER_DEST_FOLDER}/${PROJECT_NAME}.exe\"
+			${ADDITIONAL_LIB_LINES}
+			BIN_DIR \"${CCVIEWER_DEST_FOLDER}/\"
+			LIB_DIR \"${CCVIEWER_DEST_FOLDER}/\"
+			PLUGINS_DIR \"${CCVIEWER_DEST_FOLDER}/\"
+			NO_COMPILER_RUNTIME
+			DEPLOY_TOOL_OPTIONS --no-quick-import --no-system-dxc-compiler --no-system-d3d-compiler --verbose=1 --translationdir ${CCVIEWER_DEST_FOLDER}/translations
+		)"
+	)
+
+	install( SCRIPT ${deploy_ccViewer} )
 endif()
 
 # Add a 'fake' custom target to force the recompilation of ccApplication.ccp in order to

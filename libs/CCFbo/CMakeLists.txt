@@ -1,6 +1,6 @@
 project( CC_FBO_LIB )
 
-add_library( ${PROJECT_NAME} SHARED )
+qt_add_library( ${PROJECT_NAME} SHARED )
 
 add_subdirectory( include )
 add_subdirectory( src )

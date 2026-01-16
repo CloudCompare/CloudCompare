@@ -27,7 +27,7 @@ function( copy_files )	# 2 (or 3) arguments:
 				install( FILES ${ARGV0} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
 			endif()
 		
-		elseif() # macOS or Linux
+		else() # macOS or Linux
 			
 			install( FILES ${ARGV0} DESTINATION ${ARGV1} )
 			return()

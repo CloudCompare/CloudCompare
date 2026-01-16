@@ -26,11 +26,15 @@
 #include <ccCone.h>
 #include <ccCoordinateSystem.h>
 #include <ccCylinder.h>
+#include <ccDisc.h>
 #include <ccDish.h>
 #include <ccGenericPrimitive.h>
 #include <ccPlane.h>
 #include <ccSphere.h>
 #include <ccTorus.h>
+
+// Qt
+#include <QSettings>
 
 // system
 #include <assert.h>
@@ -44,6 +48,16 @@ ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
 
 	setupUi(this);
 
+	// Restore default settings
+	{
+		QSettings settings;
+		settings.beginGroup("PrimitiveFactory");
+		int precision = settings.value("DefaultPrecision", precisionSpinBox->value()).toInt();
+		settings.endGroup();
+
+		precisionSpinBox->setValue(std::max(4, precision));
+	}
+
 	connect(createPushButton, &QAbstractButton::clicked, this, &ccPrimitiveFactoryDlg::createPrimitive);
 	connect(closePushButton, &QAbstractButton::clicked, this, &QDialog::accept);
 	connect(spherePosFromClipboardButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setSpherePositionFromClipboard);
@@ -51,6 +65,7 @@ ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
 	connect(csSetMatrixBasedOnSelectedObjectButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject);
 	connect(csMatrixTextEdit, &QPlainTextEdit::textChanged, this, &ccPrimitiveFactoryDlg::onMatrixTextChange);
 	connect(csClearMatrixButton, &QPushButton::clicked, this, &ccPrimitiveFactoryDlg::setCSMatrixToIdentity);
+
 	setCSMatrixToIdentity();
 }
 
@@ -132,13 +147,25 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		primitive = new ccCoordinateSystem(&mat);
 	}
 	break;
+	case 8:
+	{
+		primitive = new ccDisc(static_cast<PointCoordinateType>(discRadiusDoubleSpinBox->value()));
+	}
+	break;
 	}
 
 	if (primitive)
 	{
-		primitive->setDrawingPrecision(precisionSpinBox->value());
+		int precision = precisionSpinBox->value();
+		primitive->setDrawingPrecision(precision);
 
 		m_win->addToDB(primitive, true, true, true);
+
+		// Save default precision ot persistent settings
+		QSettings settings;
+		settings.beginGroup("PrimitiveFactory");
+		settings.setValue("DefaultPrecision", precision);
+		settings.endGroup();
 	}
 }
 
@@ -192,7 +219,7 @@ ccGLMatrix ccPrimitiveFactoryDlg::getCSMatrix(bool& valid)
 	if (text.contains("["))
 	{
 		// automatically remove anything between square brackets
-		static const QRegExp squareBracketsFilter("\\[([^]]+)\\]");
+		static const QRegularExpression squareBracketsFilter("\\[([^]]+)\\]");
 		text.replace(squareBracketsFilter, "");
 		csMatrixTextEdit->blockSignals(true);
 		csMatrixTextEdit->setPlainText(text);

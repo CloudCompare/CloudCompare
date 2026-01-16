@@ -35,7 +35,6 @@
 class ccGLWindowInterface;
 class ccHObject;
 class Mouse3DInput;
-class ccGamepadManager;
 
 //! Application main window
 class ccViewer : public QMainWindow
@@ -45,7 +44,7 @@ class ccViewer : public QMainWindow
 
   public:
 	//! Default constructor
-	ccViewer(QWidget* parent = 0, Qt::WindowFlags flags = 0);
+	ccViewer(QWidget* parent = 0, Qt::WindowFlags flags = QFlags<Qt::WindowType>());
 
 	//! Default destructor
 	~ccViewer() override;
@@ -214,9 +213,6 @@ class ccViewer : public QMainWindow
 
 	//! 3D mouse handler
 	Mouse3DInput* m_3dMouseInput;
-
-	//! Gamepad handler
-	ccGamepadManager* m_gamepadManager;
 
   private:
 	//! Associated GUI

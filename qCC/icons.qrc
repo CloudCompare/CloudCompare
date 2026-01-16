@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/dbCircle.png</file>
+    <file>images/dbCoordinateSystem.png</file>
     <file>images/lockedAxis.png</file>
     <file>images/ccSaveProject.png</file>
     <file>images/clipboard.png</file>
@@ -18,7 +20,6 @@
     <file>images/restore.png</file>
     <file>images/square.png</file>
     <file>images/interactors.png</file>
-    <file>images/oculus.png</file>
     <file>images/nvidia.png</file>
     <file>images/ccSwapUpDown.png</file>
     <file>images/unfoldSmall.png</file>

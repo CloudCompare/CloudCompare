@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                     CLOUDCOMPARE PLUGIN: qFacets                       #
@@ -15,9 +17,6 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef QFACET_FACETS_CLASSIFIER_HEADER
-#define QFACET_FACETS_CLASSIFIER_HEADER
-
 //Qt
 #include <QProgressDialog>
 #include <QApplication>
@@ -32,7 +31,7 @@ static const QString s_OriFamilyNameKey = "orientation.family.name";
 static const QString s_OriSubFamilyKey = "orientation.subfamily.index";
 
 // default ratio for the 'dark' version of a color
-const double c_darkColorRatio = 0.25;
+static const double c_darkColorRatio = 0.25;
 
 class FacetsClassifier
 {
@@ -49,12 +48,12 @@ public:
 	}
 
 	//! Generates a given sub-family color
-	static void GenerateSubfamilyColor(ccColor::Rgb& col,
-		double dip,
-		double dipDir,
-		unsigned subFamilyIndex,
-		unsigned subFamilyCount,
-		ccColor::Rgb* darkCol = 0)
+	static void GenerateSubfamilyColor(	ccColor::Rgb& col,
+										double dip,
+										double dipDir,
+										unsigned subFamilyIndex,
+										unsigned subFamilyCount,
+										ccColor::Rgb* darkCol = 0)
 	{
 		//convert dip & dip dir. to HSV
 		double H = dipDir;
@@ -77,12 +76,12 @@ public:
 		}
 	}
 
-	static void GetFamilyIndexes(ccFacet* facet,
-		unsigned dSteps,
-		unsigned ddSteps,
-		double angularStep_deg,
-		unsigned& iDip,
-		unsigned& iDipDir)
+	static void GetFamilyIndexes(	ccFacet* facet,
+									unsigned dSteps,
+									unsigned ddSteps,
+									double angularStep_deg,
+									unsigned& iDip,
+									unsigned& iDipDir)
 	{
 		assert(facet);
 		CCVector3 N = facet->getNormal();
@@ -110,13 +109,13 @@ public:
 	}
 
 	//! Subdivides a set of facets with similar orientation
-	static bool ProcessFamiliy(ccHObject* parent,
-		FacetSet& family,
-		unsigned familyIndex,
-		unsigned iDip,
-		unsigned iDipDir,
-		double angularStep_deg,
-		double maxDist)
+	static bool ProcessFamiliy(	ccHObject* parent,
+								FacetSet& family,
+								unsigned familyIndex,
+								unsigned iDip,
+								unsigned iDipDir,
+								double angularStep_deg,
+								double maxDist)
 	{
 		size_t count = family.size();
 		if (count == 0)
@@ -503,5 +502,3 @@ public:
 		return !error;
 	}
 };
-
-#endif //QFACET_FACETS_CLASSIFIER_HEADER

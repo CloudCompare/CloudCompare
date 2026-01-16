@@ -26,6 +26,7 @@
 #include <FileIOFilter.h>
 
 // Qt
+#include <QRegularExpression>
 #include <QSharedPointer>
 #include <QString>
 
@@ -36,7 +37,6 @@ class ccGenericMesh;
 class ccProgressDialog;
 
 class QDialog;
-class QStringList;
 
 enum class CL_ENTITY_TYPE
 {
@@ -138,14 +138,14 @@ class CCPLUGIN_LIB_API ccCommandLineInterface
 	//! Select Entities options
 	struct SelectEntitiesOptions
 	{
-		bool     reverse     = false;
-		bool     selectRegex = false;
-		bool     selectFirst = false;
-		bool     selectLast  = false;
-		bool     selectAll   = false;
-		unsigned firstNr     = 0;
-		unsigned lastNr      = 0;
-		QRegExp  regex;
+		bool               reverse     = false;
+		bool               selectRegex = false;
+		bool               selectFirst = false;
+		bool               selectLast  = false;
+		bool               selectAll   = false;
+		unsigned           firstNr     = 0;
+		unsigned           lastNr      = 0;
+		QRegularExpression regex;
 	};
 
 	//! Export options

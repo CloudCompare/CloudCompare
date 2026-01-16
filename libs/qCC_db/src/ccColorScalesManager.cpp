@@ -1124,6 +1124,7 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(CIVIDIS));
 		addScale(Create(ASPRS_CLASSES));
 		addScale(Create(ASPRS_WITH_LABELS));
+		addScale(Create(GREY_INV));
 	}
 }
 
@@ -1338,6 +1339,8 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 			return QStringLiteral("ASPRS classes");
 		case ASPRS_WITH_LABELS:
 			return QStringLiteral("ASPRS classes (with labels)");
+		case GREY_INV:
+			return QStringLiteral("Grey (inverted)");
 		default:
 			assert(false);
 			break;
@@ -1364,6 +1367,10 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	case GREY:
 		scale->insert(ccColorScaleElement(0.0, Qt::black), false);
 		scale->insert(ccColorScaleElement(1.0, Qt::white), false);
+		break;
+	case GREY_INV:
+		scale->insert(ccColorScaleElement(0.0, Qt::white), false);
+		scale->insert(ccColorScaleElement(1.0, Qt::black), false);
 		break;
 	case BWR:
 		scale->insert(ccColorScaleElement(0.0, Qt::blue), false);

@@ -41,6 +41,7 @@
 #include <ccCircle.h>
 #include <ccColorScalesManager.h>
 #include <ccCylinder.h>
+#include <ccDisc.h>
 #include <ccFacet.h>
 #include <ccFileUtils.h>
 #include <ccGBLSensor.h>
@@ -142,14 +143,8 @@
 #include "cc3DMouseManager.h"
 #endif
 
-// Gamepads
-#ifdef CC_GAMEPAD_SUPPORT
-#include "ccGamepadManager.h"
-#endif
-
 // Qt
 #include <QClipboard>
-#include <QGLShader>
 
 // Qt UI files
 #include <ui_distanceMapDlg.h>
@@ -201,7 +196,6 @@ MainWindow::MainWindow()
     , m_uiFrozen(false)
     , m_recentFiles(new ccRecentFiles(this))
     , m_3DMouseManager(nullptr)
-    , m_gamepadManager(nullptr)
     , m_viewModePopupButton(nullptr)
     , m_pivotVisibilityPopupButton(nullptr)
     , m_firstShow(true)
@@ -233,7 +227,7 @@ MainWindow::MainWindow()
 	m_UI->actionAboutPlugins->setMenuRole(QAction::ApplicationSpecificRole);
 
 	m_UI->actionFullScreen->setText(tr("Enter Full Screen"));
-	m_UI->actionFullScreen->setShortcut(QKeySequence(Qt::CTRL + Qt::META + Qt::Key_F));
+	m_UI->actionFullScreen->setShortcut(QKeySequence(Qt::CTRL | Qt::META | Qt::Key_F));
 #endif
 
 	// Set up dynamic menus
@@ -394,12 +388,6 @@ MainWindow::~MainWindow()
 	// m_mdiDialogs.clear();
 	m_mdiArea->closeAllSubWindows();
 
-	if (ccRoot)
-	{
-		delete ccRoot;
-		ccRoot = nullptr;
-	}
-
 	delete m_UI;
 	m_UI = nullptr;
 
@@ -461,23 +449,13 @@ void MainWindow::setupInputDevices()
 	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_3DMouseManager->menu());
 #endif
 
-#ifdef CC_GAMEPAD_SUPPORT
-	m_gamepadManager = new ccGamepadManager(this, this);
-	m_UI->menuFile->insertMenu(m_UI->actionCloseAll, m_gamepadManager->menu());
-#endif
-
-#if defined(CC_3DXWARE_SUPPORT) || defined(CC_GAMEPAD_SUPPORT)
+#if defined(CC_3DXWARE_SUPPORT)
 	m_UI->menuFile->insertSeparator(m_UI->actionCloseAll);
 #endif
 }
 
 void MainWindow::destroyInputDevices()
 {
-#ifdef CC_GAMEPAD_SUPPORT
-	delete m_gamepadManager;
-	m_gamepadManager = nullptr;
-#endif
-
 #ifdef CC_3DXWARE_SUPPORT
 	delete m_3DMouseManager;
 	m_3DMouseManager = nullptr;
@@ -751,6 +729,8 @@ void MainWindow::connectActions()
 	connect(m_UI->actionDisplaySettings, &QAction::triggered, this, &MainWindow::showDisplaySettings);
 	connect(m_UI->actionToggleSunLight, &QAction::triggered, this, &MainWindow::toggleActiveWindowSunLight);
 	connect(m_UI->actionToggleCustomLight, &QAction::triggered, this, &MainWindow::toggleActiveWindowCustomLight);
+	connect(m_UI->actionSetCustomLightPosition, &QAction::triggered, this, &MainWindow::setCustomLightPosition);
+
 	//"Display > Shaders & filters" menu
 	connect(m_UI->actionLoadShader, &QAction::triggered, this, &MainWindow::doActionLoadShader);
 	connect(m_UI->actionDeleteShader, &QAction::triggered, this, &MainWindow::doActionDeleteShader);
@@ -784,8 +764,8 @@ void MainWindow::connectActions()
 
 	connect(m_UI->actionAbout, &QAction::triggered, this, [this]()
 	        {
-		ccAboutDialog* aboutDialog = new ccAboutDialog(this);
-		aboutDialog->exec(); });
+			ccAboutDialog* aboutDialog = new ccAboutDialog(this);
+			aboutDialog->exec(); });
 
 	/*** Toolbars ***/
 
@@ -2638,7 +2618,7 @@ void MainWindow::doActionExportDepthBuffer()
 
 void MainWindow::doActionComputePointsVisibility()
 {
-	// there should be only one camera sensor in the current selection!
+	// there should be only one TLS/GBL sensor in the current selection!
 	if (!haveOneSelection() || !m_selectedEntities.front()->isKindOf(CC_TYPES::GBL_SENSOR))
 	{
 		ccConsole::Error(tr("Select one and only one GBL/TLS sensor!"));
@@ -5186,11 +5166,11 @@ void MainWindow::doActionFitQuadric()
 
 						const ccGLMatrix& trans = quadric->getTransformation();
 						ccGLMatrix invTrans = trans.inverse();
-						for (unsigned i=0; i<newCloud->size(); ++i)
+						for (unsigned i = 0; i < newCloud->size(); ++i)
 						{
 							CCVector3* P = const_cast<CCVector3*>(newCloud->getPoint(i));
 							CCVector3 Q = invTrans * (*P);
-							Q.u[dZ] = eq[0] + eq[1]*Q.u[dX] + eq[2]*Q.u[dY] + eq[3]*Q.u[dX]*Q.u[dX] + eq[4]*Q.u[dX]*Q.u[dY] + eq[5]*Q.u[dY]*Q.u[dY];
+							Q.u[dZ] = eq[0] + eq[1] * Q.u[dX] + eq[2] * Q.u[dY] + eq[3] * Q.u[dX] * Q.u[dX] + eq[4] * Q.u[dX] * Q.u[dY] + eq[5] * Q.u[dY] * Q.u[dY];
 							*P = trans * Q;
 						}
 						newCloud->invalidateBoundingBox();
@@ -6492,15 +6472,15 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	// automatically update the dialog placement when its shown
 	connect(dlg, &ccOverlayDialog::shown, this, [=]()
 	        {
-		//check for existence
-		for (ccMDIDialogs& mdi : m_mdiDialogs)
-		{
-			if (mdi.dialog == dlg)
+			//check for existence
+			for (ccMDIDialogs& mdi : m_mdiDialogs)
 			{
-				repositionOverlayDialog(mdi);
-				break;
-			}
-		} });
+				if (mdi.dialog == dlg)
+				{
+					repositionOverlayDialog(mdi);
+					break;
+				}
+			} });
 
 	repositionOverlayDialog(m_mdiDialogs.back());
 }
@@ -9029,7 +9009,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		pDlg.start();
 		QApplication::processEvents();
 
-// #define TEST_GENERATION
+		// #define TEST_GENERATION
 #ifdef TEST_GENERATION
 		ccPointCloud* testSphere = new ccPointCloud();
 		testSphere->reserve(matrices.size());
@@ -9175,7 +9155,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << ';';
 					stream << cloud->getName();
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			// rows
@@ -9188,7 +9168,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					stream << rmsMatrix[j * cloudCount + i];
 					stream << ';';
 				}
-				stream << endl;
+				stream << Qt::endl;
 			}
 
 			ccLog::Print(tr("[DoActionComputeBestICPRmsMatrix] Job done"));
@@ -9276,7 +9256,7 @@ void MainWindow::doActionExportPlaneInfo()
 	csvStream << "Nz;";
 	csvStream << "Dip;";
 	csvStream << "Dip dir;";
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	QChar separator(';');
 
@@ -9306,7 +9286,7 @@ void MainWindow::doActionExportPlaneInfo()
 		csvStream << N.z << separator;                // Nz
 		csvStream << dip_deg << separator;            // Dip
 		csvStream << dipDir_deg << separator;         // Dip direction
-		csvStream << endl;
+		csvStream << Qt::endl;
 	}
 
 	ccConsole::Print(tr("[I/O] File '%1' successfully saved (%2 plane(s))").arg(outputFilename).arg(planes.size()));
@@ -9401,7 +9381,7 @@ void MainWindow::doActionExportCloudInfo()
 			csvStream << sfIndex << " sum;";
 		}
 	}
-	csvStream << endl;
+	csvStream << Qt::endl;
 
 	// write one line per cloud
 	{
@@ -9451,7 +9431,7 @@ void MainWindow::doActionExportCloudInfo()
 				}
 				csvStream << sfSum << ';' /*"SF sum;"*/;
 			}
-			csvStream << endl;
+			csvStream << Qt::endl;
 		}
 	}
 
@@ -9603,7 +9583,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE) || entity->isA(CC_TYPES::POLY_LINE))
 		{
-			if (entity->isA(CC_TYPES::PLANE) || entity->isA(CC_TYPES::SPHERE) || entity->isA(CC_TYPES::CYLINDER) || entity->isA(CC_TYPES::CONE) || entity->isA(CC_TYPES::BOX) || entity->isA(CC_TYPES::POLY_LINE))
+			if (entity->isA(CC_TYPES::PLANE) || entity->isA(CC_TYPES::SPHERE) || entity->isA(CC_TYPES::CYLINDER) || entity->isA(CC_TYPES::CONE) || entity->isA(CC_TYPES::BOX) || entity->isA(CC_TYPES::POLY_LINE) || entity->isA(CC_TYPES::DISC))
 			{
 				if (!refEntity)
 				{
@@ -9625,7 +9605,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 	if (!refEntity)
 	{
-		ccConsole::Error(tr("Select one prmitive (Plane/Box/Sphere/Cylinder/Cone) or a polyline"));
+		ccConsole::Error(tr("Select one primitive (Plane/Box/Sphere/Cylinder/Cone) or a polyline"));
 		return;
 	}
 
@@ -9771,6 +9751,21 @@ void MainWindow::doActionCloudPrimitiveDist()
 			break;
 		}
 
+		case CC_TYPES::DISC:
+		{
+			ccDisc*                 disc = static_cast<ccDisc*>(refEntity);
+			CCCoreLib::SquareMatrix rotationTransform(disc->getTransformation().data(), true);
+			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2DiscEquation(compEnt,
+			                                                                                  refEntity->getOwnBB().getCenter(),
+			                                                                                  static_cast<ccDisc*>(refEntity)->getRadius(),
+			                                                                                  rotationTransform,
+			                                                                                  s_signedDist)))
+			{
+				ccConsole::Error(errString.arg(tr("Disc")).arg(returnCode));
+			}
+			break;
+		}
+
 		default:
 		{
 			ccConsole::Error(tr("Unsupported primitive type")); // Shouldn't ever reach here...
@@ -9873,6 +9868,31 @@ void MainWindow::toggleActiveWindowCustomLight()
 		win->toggleCustomLight();
 		win->redraw(false);
 	}
+}
+
+void MainWindow::setCustomLightPosition()
+{
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+	{
+		ccLog::Error("No active 3D view");
+		return;
+	}
+
+	CCVector3d pos = win->getCustomLightPosition().toDouble();
+
+	ccAskThreeDoubleValuesDlg customLightPosDlg("x", "y", "z", -1.0e7, 1.0e7, pos.x, pos.y, pos.z, 4, tr("Custom light position"), this);
+	if (!customLightPosDlg.exec())
+	{
+		return;
+	}
+
+	pos = CCVector3d(customLightPosDlg.doubleSpinBox1->value(),
+	                 customLightPosDlg.doubleSpinBox2->value(),
+	                 customLightPosDlg.doubleSpinBox3->value());
+
+	win->setCustomLightPosition(pos.toPC());
+	win->redraw();
 }
 
 void MainWindow::toggleActiveWindowAutoPickRotCenter(bool state)
@@ -10076,10 +10096,10 @@ void MainWindow::createSinglePointCloud()
 	static CCVector3d         s_lastPoint(0, 0, 0);
 	static size_t             s_lastPointIndex = 0;
 	ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lastPoint.x, s_lastPoint.y, s_lastPoint.z, 4, tr("Point coordinates"), this);
-	if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
-		axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
 	if (!axisDlg.exec())
+	{
 		return;
+	}
 	s_lastPoint.x = axisDlg.doubleSpinBox1->value();
 	s_lastPoint.y = axisDlg.doubleSpinBox2->value();
 	s_lastPoint.z = axisDlg.doubleSpinBox3->value();
@@ -10228,10 +10248,6 @@ void MainWindow::toggleLockRotationAxis()
 		if (isLocked)
 		{
 			ccAskThreeDoubleValuesDlg axisDlg("x", "y", "z", -1.0e12, 1.0e12, s_lockedRotationAxis.x, s_lockedRotationAxis.y, s_lockedRotationAxis.z, 4, tr("Lock rotation axis"), this);
-			if (axisDlg.buttonBox->button(QDialogButtonBox::Ok))
-			{
-				axisDlg.buttonBox->button(QDialogButtonBox::Ok)->setFocus();
-			}
 			if (!axisDlg.exec())
 			{
 				return;
@@ -10681,7 +10697,7 @@ static bool IsValidFileName(QString filename)
 	                 "\\|<>\\. ]))?$");
 #endif
 
-	return QRegExp(sPattern).exactMatch(filename);
+	return QRegularExpression(sPattern).match(filename).hasMatch();
 }
 
 void MainWindow::doActionSaveFile()
@@ -10878,7 +10894,7 @@ void MainWindow::doActionSaveFile()
 		QString defaultFileName(m_selectedEntities.front()->getName());
 		if (m_selectedEntities.front()->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];
@@ -11033,7 +11049,7 @@ void MainWindow::doActionSaveProject()
 			// Hierarchy objects have generally as name: 'filename.ext (fullpath)'
 			// so we must only take the first part! (otherwise this type of name
 			// with a path inside disturbs the QFileDialog a lot ;))
-			QStringList parts = defaultFileName.split(' ', QString::SkipEmptyParts);
+			QStringList parts = defaultFileName.split(' ', Qt::SkipEmptyParts);
 			if (!parts.empty())
 			{
 				defaultFileName = parts[0];

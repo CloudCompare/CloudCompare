@@ -58,6 +58,7 @@ class QCC_DB_LIB_API ccColorScalesManager
 		CIVIDIS           = 15, /**< matplotlib library colorscale - see https://arxiv.org/ftp/arxiv/papers/1712/1712.01662.pdf */
 		ASPRS_CLASSES     = 16, /**< ASPRS classes */
 		ASPRS_WITH_LABELS = 17, /**< ASPRS classes with labels */
+		GREY_INV          = 18, /**< Inverted grey ramp */
 	};
 
 	//! Returns a pre-defined color scale UUID

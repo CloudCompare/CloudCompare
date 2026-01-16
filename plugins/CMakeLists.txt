@@ -14,9 +14,9 @@ add_subdirectory( example )
 # Check for any private plugins and add them
 get_filename_component( PRIVATE_DIR private ABSOLUTE )
 
-if( EXISTS "${PRIVATE_DIR}" )	
+if( EXISTS "${PRIVATE_DIR}" )
 	file( GLOB subdirectories "${PRIVATE_DIR}/*" )
-	
+
 	foreach( dir ${subdirectories} )
 	    if( IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt )
 			# In case the developer generated the BUILD project in the same folder as the sources

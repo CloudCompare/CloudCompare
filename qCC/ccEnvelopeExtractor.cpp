@@ -34,18 +34,18 @@
 #ifndef Q_MOC_RUN
 #if defined(emit)
 #undef emit
-#include <tbb/parallel_for.h>
+#include <oneapi/tbb/parallel_for.h>
 #define emit // restore the macro definition of "emit", as it was defined in gtmetamacros.h
 #else
-#include <tbb/parallel_for.h>
+#include <oneapi/tbb/parallel_for.h>
 #endif // defined(emit)
 #endif // Q_MOC_RUN
+using namespace oneapi;
 #endif
 
 // System
 #include <cassert>
 #include <cmath>
-#include <set>
 
 // list of already used point to avoid hull's inner loops
 enum HullPointFlags

@@ -261,16 +261,16 @@ QString cc2DLabel::getName() const
 
 void cc2DLabel::setPosition(float x, float y)
 {
-	m_screenPos[0] = x;
-	m_screenPos[1] = y;
+	m_screenPos[0] = std::clamp(x, -0.05f, 0.95f);
+	m_screenPos[1] = std::clamp(y, -0.05f, 0.95f);
 }
 
 bool cc2DLabel::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
 {
 	assert(screenHeight > 0 && screenWidth > 0);
 
-	m_screenPos[0] += static_cast<float>(dx) / screenWidth;
-	m_screenPos[1] += static_cast<float>(dy) / screenHeight;
+	setPosition(m_screenPos[0] + static_cast<float>(dx) / screenWidth,
+	            m_screenPos[1] + static_cast<float>(dy) / screenHeight);
 
 	return true;
 }
@@ -595,8 +595,11 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	// Relative screen position (dataVersion >= 20)
-	if (in.read((char*)m_screenPos.data(), sizeof(float) * 2) < 0)
+	RelativePos screenPos;
+	if (in.read((char*)screenPos.data(), sizeof(float) * 2) < 0)
 		return ReadError();
+	// Make sure the old values are within an acceptable range
+	setPosition(screenPos[0], screenPos[1]);
 
 	// Collapsed state (dataVersion >= 20)
 	if (in.read((char*)&m_showFullBody, sizeof(bool)) < 0)
@@ -1218,7 +1221,7 @@ struct Tab
 		{
 			int maxWidth = 0;
 			for (int j = 0; j < colContent[i].size(); ++j)
-				maxWidth = std::max(maxWidth, fm.width(colContent[i][j]));
+				maxWidth = std::max(maxWidth, fm.horizontalAdvance(colContent[i][j]));
 			colWidth[i] = maxWidth;
 			totalWidth += maxWidth;
 		}
@@ -1317,7 +1320,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				QFont font(context.display->getTextDisplayFont()); // takes rendering zoom into account!
 				// font.setPointSize(font.pointSize() + 2);
 				font.setBold(true);
-				static const QChar ABC[3] = {'A', 'B', 'C'};
+				static const QChar ABC[3]{'A', 'B', 'C'};
 
 				// draw the label 'legend(s)'
 				for (size_t j = 0; j < count; j++)
@@ -1395,7 +1398,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		// int buttonSize    = static_cast<int>(c_buttonSize * context.renderZoom);
 		{
 			// base box dimension
-			dx = std::max(dx, titleFontMetrics.width(title));
+			dx = std::max(dx, titleFontMetrics.horizontalAdvance(title));
 			dy += margin;      // top vertical margin
 			dy += titleHeight; // title
 
@@ -1762,11 +1765,10 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 				int width  = tab.colWidth[c] + 2 * tabMarginX;
 				int height = rowHeight + 2 * tabMarginY;
 
-				int yRow           = yStartRel;
-				int actualRowCount = std::min(tab.rowCount, tab.colContent[c].size());
-
-				bool                 labelCol  = ((c & 1) == 0);
-				const ccColor::Rgba* textColor = labelCol ? &ccColor::white : &defaultTextColor;
+				int                  yRow           = yStartRel;
+				int                  actualRowCount = std::min(tab.rowCount, static_cast<int>(tab.colContent[c].size()));
+				bool                 labelCol       = ((c & 1) == 0);
+				const ccColor::Rgba* textColor      = labelCol ? &ccColor::white : &defaultTextColor;
 
 				for (int r = 0; r < actualRowCount; ++r)
 				{
@@ -1798,12 +1800,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 					if (labelCol)
 					{
 						// align characters in the middle
-						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).width(str)) / 2;
+						xShift = (tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str)) / 2;
 					}
 					else
 					{
 						// align digits on the right
-						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).width(str);
+						xShift = tab.colWidth[c] - QFontMetrics(bodyFont).horizontalAdvance(str);
 					}
 
 					context.display->displayText(str,

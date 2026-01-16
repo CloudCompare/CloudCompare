@@ -55,6 +55,14 @@ ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* pa
 	connect(saveLabelButton, &QToolButton::clicked, this, &ccPointPropertiesDlg::exportCurrentLabel);
 	connect(razButton, &QToolButton::clicked, this, &ccPointPropertiesDlg::initializeState);
 
+	// add shortcuts
+	addOverriddenShortcut(Qt::Key_I); // 'I' for one-point label
+	addOverriddenShortcut(Qt::Key_D); // 'D' for two-points label
+	addOverriddenShortcut(Qt::Key_A); // 'A' for three-points label
+	addOverriddenShortcut(Qt::Key_R); // 'R' for rectangular area
+	addOverriddenShortcut(Qt::Key_S); // 'S' to save the current label
+	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccPointPropertiesDlg::onShortcutTriggered);
+
 	// for points picking
 	m_label = new cc2DLabel();
 	m_label->setSelected(true);
@@ -395,20 +403,19 @@ void ccPointPropertiesDlg::update2DZone(int x, int y, Qt::MouseButtons buttons)
 	m_associatedWin->redraw(true, false);
 }
 
-static QString s_last2DLabelComment;
-
 void ccPointPropertiesDlg::close2DZone()
 {
 	if (m_pickingMode != RECT_ZONE)
 		return;
 
-	if (m_rect2DLabel->isSelected() || !m_rect2DLabel->isVisible())
+	if (!m_rect2DLabel->isSelected() || !m_rect2DLabel->isVisible())
 		return;
 
 	m_rect2DLabel->setSelected(true);
 
-	bool    ok;
-	QString title = QInputDialog::getText(this, "Set area label title", "Title:", QLineEdit::Normal, s_last2DLabelComment, &ok);
+	bool           ok;
+	static QString s_last2DLabelComment;
+	QString        title = QInputDialog::getText(this, "Set area label title", "Title:", QLineEdit::Normal, s_last2DLabelComment, &ok);
 	if (!ok)
 	{
 		m_rect2DLabel->setVisible(false);
@@ -421,4 +428,34 @@ void ccPointPropertiesDlg::close2DZone()
 
 	if (m_associatedWin)
 		m_associatedWin->redraw(true, false);
+}
+
+void ccPointPropertiesDlg::onShortcutTriggered(int key)
+{
+	switch (key)
+	{
+	case Qt::Key_I:
+		activatePointPropertiesDisplay();
+		return;
+
+	case Qt::Key_D:
+		activateDistanceDisplay();
+		return;
+
+	case Qt::Key_A:
+		activateAngleDisplay();
+		return;
+
+	case Qt::Key_R:
+		activate2DZonePicking();
+		return;
+
+	case Qt::Key_S:
+		exportCurrentLabel();
+		return;
+
+	default:
+		// nothing to do
+		break;
+	}
 }

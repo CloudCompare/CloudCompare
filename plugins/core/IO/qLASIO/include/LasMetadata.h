@@ -43,7 +43,7 @@ namespace LasMetadata
 	constexpr const char GLOBAL_ENCODING[]   = "LAS.global_encoding";
 	constexpr const char PROJECT_UUID[]      = "LAS.project_uuid";
 	constexpr const char SYSTEM_IDENTIFIER[] = "LAS.system_identifier";
-	constexpr const char VLRS[]              = "LAS.vlrs";
+	constexpr const char VLRS[]              = "LAS.variableLenghtRecords";
 	constexpr const char EXTRA_FIELDS[]      = "LAS.extra_fields";
 
 	void SaveMetadataInto(const laszip_header& header, ccPointCloud& pointCloud, const std::vector<LasExtraScalarField>& extraScalarFields);

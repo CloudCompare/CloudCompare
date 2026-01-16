@@ -1,37 +1,38 @@
-//##########################################################################
-//#                                                                        #
-//#                     CLOUDCOMPARE PLUGIN: qFacets                       #
-//#                                                                        #
-//#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU General Public License as published by  #
-//#  the Free Software Foundation; version 2 or later of the License.      #
-//#                                                                        #
-//#  This program is distributed in the hope that it will be useful,       #
-//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
-//#  GNU General Public License for more details.                          #
-//#                                                                        #
-//#                      COPYRIGHT: Thomas Dewez, BRGM                     #
-//#                                                                        #
-//##########################################################################
+#pragma once
 
-#ifndef QFACET_PLUGIN_HEADER
-#define QFACET_PLUGIN_HEADER
+// ##########################################################################
+// #                                                                        #
+// #                     CLOUDCOMPARE PLUGIN: qFacets                       #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                      COPYRIGHT: Thomas Dewez, BRGM                     #
+// #                                                                        #
+// ##########################################################################
 
-//Local
+// Local
 #include "cellsFusionDlg.h"
 
-//Qt
+// Qt
 #include <QObject>
 
-//qCC
+// qCC
 #include "ccStdPluginInterface.h"
 
-//CCCoreLib
+// CCCoreLib
 #include <AutoSegmentationTools.h>
+#include <DistanceComputationTools.h>
 #include <ReferenceCloud.h>
+#include <ccPointCloud.h>
 
-//System
+// System
 #include <unordered_set>
 
 class QAction;
@@ -44,28 +45,124 @@ class StereogramDialog;
 
 //! Facet detection plugin (BRGM)
 /** BRGM: BUREAU DE RECHERCHES GEOLOGIQUES ET MINIERES - http://www.brgm.fr/
-**/
+ **/
 class qFacets : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
-	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
+	Q_INTERFACES(ccPluginInterface ccStdPluginInterface)
 
-	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qFacets" FILE "../info.json" )
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qFacets" FILE "../info.json")
 
-public:
-
+  public:
 	//! Default constructor
 	qFacets(QObject* parent = nullptr);
 
 	//! Destructor
-	virtual ~qFacets() = default;
+	~qFacets() override = default;
 
-	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction *> getActions() override;
+	// inherited from ccStdPluginInterface
+	void            onNewSelection(const ccHObject::Container& selectedEntities) override;
+	QList<QAction*> getActions() override;
+	void            registerCommands(ccCommandLineInterface* cmd) override;
 
-protected:
+	struct FacetsParams
+	{
+		bool                      extractFacets;
+		CellsFusionDlg::Algorithm algo;
+		// ALGO_KD_TREE only
+		double kdTreeFusionMaxAngleDeg;
+		double kdTreeFusionMaxRelativeDistance;
+		// ALGO_FAST_MARCHING only
+		unsigned octreeLevel;
+		bool     useRetroProjectionError;
+		// both ALGO_KD_TREE and ALGO_FAST_MARCHING
+		double                                              errorMaxPerFacet;
+		double                                              maxEdgeLength;
+		unsigned                                            minPointsPerFacet;
+		CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure;
 
+		bool   classifyFacetsByAngle;
+		double classifAngleStep;
+		double classifMaxDist;
+
+		bool    exportFacets; // Export to shape file
+		QString shapeFilename;
+		bool    useNativeOrientation; // also used for csv if coordsInCsv=ture
+		bool    useGlobalOrientation; // also used for csv if coordsInCsv=ture
+		bool    useCustomOrientation; // also used for csv if coordsInCsv=ture
+		float   nX;                   // also used for csv if coordsInCsv=ture
+		float   nY;                   // also used for csv if coordsInCsv=ture
+		float   nZ;                   // also used for csv if coordsInCsv=ture
+
+		bool    exportFacetsInfo; // Export to csv
+		QString csvFilename;
+		bool    coordsInCsv;
+
+		FacetsParams()
+		    : extractFacets(false)
+		    , algo(CellsFusionDlg::Algorithm::ALGO_KD_TREE)
+		    , kdTreeFusionMaxAngleDeg(20.0f)
+		    , kdTreeFusionMaxRelativeDistance(1.0f)
+		    , octreeLevel(8)
+		    , useRetroProjectionError(false)
+		    , errorMaxPerFacet(0.2f)
+		    , minPointsPerFacet(10)
+		    , maxEdgeLength(1.0f)
+		    , errorMeasure(CCCoreLib::DistanceComputationTools::MAX_DIST_99_PERCENT)
+		    , classifyFacetsByAngle(false)
+		    , classifAngleStep(30.0f)
+		    , classifMaxDist(1.0f)
+		    , exportFacets(false)
+		    , shapeFilename("facets.shp")
+		    , useNativeOrientation(true)
+		    , useGlobalOrientation(false)
+		    , useCustomOrientation(false)
+		    , nX(0.0f)
+		    , nY(0.0f)
+		    , nZ(1.0f)
+		    , exportFacetsInfo(false)
+		    , csvFilename("facets.csv")
+		    , coordsInCsv(false)
+		{
+		}
+	};
+
+	//! Set of facets (pointers)
+	typedef std::unordered_set<ccFacet*> FacetSet;
+
+	static bool ExecuteExportFacetsInfo(const FacetSet& facets,
+	                                    const QString   filename,
+	                                    bool            coordsInCSV          = false,
+	                                    bool            useNativeOrientation = true,
+	                                    bool            useGlobalOrientation = false,
+	                                    bool            useCustomOrientation = false,
+	                                    double          nX                   = 0.0f,
+	                                    double          nY                   = 0.0f,
+	                                    double          nZ                   = 1.0f,
+	                                    bool            silent               = false);
+
+	static bool ExecuteExportFacets(const FacetSet& facets,
+	                                const QString   filename,
+	                                bool            useNativeOrientation = true,
+	                                bool            useGlobalOrientation = false,
+	                                bool            useCustomOrientation = false,
+	                                double          nX                   = 0.0f,
+	                                double          nY                   = 0.0f,
+	                                double          nZ                   = 1.0f,
+	                                bool            silent               = false);
+
+	static QString PolylineCoordsToWKT_POLYGONZ(const ccPolyline* polyline,
+	                                            unsigned int      precision = 3);
+
+	static ccGLMatrix CalcOriRotMat(const FacetSet& facets,
+	                                bool            useNativeOrientation = true,
+	                                bool            useGlobalOrientation = false,
+	                                bool            useCustomOrientation = false,
+	                                double          nX                   = 0.0f,
+	                                double          nY                   = 0.0f,
+	                                double          nZ                   = 1.0f);
+
+  protected:
 	//! Fuses the cells of a kd-tree to produces planar facets
 	void fuseKdTreeCells();
 
@@ -84,29 +181,34 @@ protected:
 	//! Displays the selected entity stereogram
 	void showStereogram();
 
-protected:
-
+  protected:
 	//! Uses the given algorithm to detect planar facets
 	void extractFacets(CellsFusionDlg::Algorithm algo);
 
 	//! Creates facets from components
-	ccHObject* createFacets(ccPointCloud* cloud,
-	                        CCCoreLib::ReferenceCloudContainer& components,
-	                        unsigned minPointsPerComponent,
-	                        double maxEdgeLength,
-	                        bool randomColors,
-	                        bool& error);
+	static ccHObject* CreateFacets(ccPointCloud*                       cloud,
+	                               CCCoreLib::ReferenceCloudContainer& components,
+	                               unsigned                            minPointsPerComponent,
+	                               double                              maxEdgeLength,
+	                               bool                                randomColors,
+	                               bool&                               error,
+	                               CCCoreLib::GenericProgressCallback* progress = nullptr);
 
-	//! Set of facets (pointers)
-	typedef std::unordered_set<ccFacet*> FacetSet;
+  public:
+	//! Core logic for facet extraction from a point cloud
+	static ccHObject* ExecuteFacetExtraction(ccPointCloud*                       pc,
+	                                         const FacetsParams&                 params,
+	                                         bool&                               errorDuringFacetCreation,
+	                                         CCCoreLib::GenericProgressCallback* progress = nullptr);
 
+  protected:
 	//! Returns all the facets in the current selection
 	void getFacetsInCurrentSelection(FacetSet& facets) const;
 
 	//! Classifies facets by orientation
-	void classifyFacetsByAngle(	ccHObject* group,
-	                            double angleStep_deg,
-	                            double maxDist);
+	void classifyFacetsByAngle(ccHObject* group,
+	                           double     angleStep_deg,
+	                           double     maxDist);
 
 	//! Associated action
 	QAction* m_doFuseKdTreeCells;
@@ -121,7 +223,6 @@ protected:
 	//! Associated action
 	QAction* m_doShowStereogram;
 
+	//! Sterogram dialog
 	StereogramDialog* m_stereogramDialog;
 };
-
-#endif //QFACET_PLUGIN_HEADER

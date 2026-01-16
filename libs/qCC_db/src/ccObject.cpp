@@ -67,8 +67,9 @@
     v5.4 - 01/29/2023 - ccColorScale custom labels can be overridden by a string
     v5.5 - 11/10/2024 - Scalar fields with 'double' offset and names as std::string
     v5.6 - 02/18/2025 - Circle entity
+    v5.7 - 10/01/2025 - Disc entity
 **/
-const unsigned c_currentDBVersion = 56; // 5.6
+const unsigned c_currentDBVersion = 57; // 5.7
 
 //! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
 static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);
@@ -326,8 +327,33 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 			QString     key;
 			QVariant    value;
 			inStream >> key;
-			inStream >> value;
-			setMetaData(key, value);
+#if 1 // patch to overcome the issue with LAS vlrs not being readable anymore as QVariant object with Qt 6
+			if (key == "LAS.vlrs")
+			{
+				inStream.skipRawData(16); // size of a partial QVariant object on Windows
+				quint64 vlrSize = 0;
+				inStream >> vlrSize;
+				for (quint64 i = 0; i < vlrSize; ++i)
+				{
+					inStream.skipRawData(sizeof(uint16_t));
+					inStream.skipRawData(16 * sizeof(char));
+					inStream.skipRawData(sizeof(uint16_t));
+					uint16_t record_length_after_header;
+					inStream >> record_length_after_header;
+					inStream.skipRawData(32 * sizeof(char));
+					inStream.skipRawData(record_length_after_header);
+				}
+
+				quint64 extraScalarFieldCount = 0;
+				inStream >> extraScalarFieldCount;
+				inStream.skipRawData(272 * extraScalarFieldCount);
+			}
+			else
+#endif
+			{
+				inStream >> value;
+				setMetaData(key, value);
+			}
 		}
 	}
 

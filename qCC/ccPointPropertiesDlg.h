@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_POINT_PROPERTIES_DIALOG_HEADER
-#define CC_POINT_PROPERTIES_DIALOG_HEADER
 
 #include "ccPointPickingGenericInterface.h"
 
@@ -56,6 +55,9 @@ class ccPointPropertiesDlg : public ccPointPickingGenericInterface
 	void processClickedPoint(int x, int y);
 	void close2DZone();
 
+	//! To capture overridden shortcuts (pause button, etc.)
+	void onShortcutTriggered(int);
+
   Q_SIGNALS:
 
 	//! Signal emitted when a new label is created
@@ -83,5 +85,3 @@ class ccPointPropertiesDlg : public ccPointPickingGenericInterface
 	//! Associated 2D label
 	cc2DViewportLabel* m_rect2DLabel;
 };
-
-#endif

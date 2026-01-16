@@ -26,6 +26,9 @@
 #include "ccPersistentSettings.h"
 #include "mainwindow.h"
 
+// CCCoreLib
+#include <NormalDistribution.h>
+
 // qCC_db
 #include <ccColorScalesManager.h>
 #include <ccFileUtils.h>
@@ -65,6 +68,7 @@
 #include <cassert>
 
 constexpr char HILLSHADE_FIELD_NAME[] = "Hillshade";
+constexpr char XRAY_FIELD_NAME[]      = "X-ray";
 
 static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 {
@@ -80,7 +84,7 @@ static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 	{
 		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
 		// visually disable by greying out - works only if combobox has been painted already and palette returns the wanted color
-		item->setData(comboBox->palette().color(QPalette::Disabled, QPalette::Text), Qt::TextColorRole); // clear item data in order to use default color
+		item->setData(comboBox->palette().color(QPalette::Disabled, QPalette::Text), Qt::ForegroundRole); // clear item data in order to use default color
 	}
 }
 
@@ -143,6 +147,7 @@ ccRasterizeTool::ccRasterizeTool(ccGenericPointCloud* cloud, QWidget* parent)
 	connect(m_UI->exportContoursPushButton, &QAbstractButton::clicked, this, &ccRasterizeTool::exportContourLines);
 	connect(m_UI->clearContoursPushButton, &QAbstractButton::clicked, this, &ccRasterizeTool::removeContourLines);
 	connect(m_UI->generateHillshadePushButton, &QAbstractButton::clicked, this, &ccRasterizeTool::generateHillshade);
+	connect(m_UI->xrayPushButton, &QAbstractButton::clicked, this, &ccRasterizeTool::generateXRaySF);
 	connect(m_UI->interpParamsToolButton, &QAbstractButton::clicked, this, &ccRasterizeTool::showInterpolationParamsDialog);
 
 	connect(m_UI->exportHeightStatsCheckBox, &QCheckBox::toggled, this, &ccRasterizeTool::onStatExportTargetChanged);
@@ -350,7 +355,8 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw /*=true
 {
 	if (m_UI->activeLayerComboBox->itemData(layerIndex).toInt() == LAYER_SF)
 	{
-		if (m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
+		if ((m_UI->activeLayerComboBox->itemText(layerIndex) != HILLSHADE_FIELD_NAME)
+		    && (m_UI->activeLayerComboBox->itemText(layerIndex) != XRAY_FIELD_NAME))
 		{
 			m_UI->projectSFCheckBox->setChecked(true); // force the choice of a SF projection strategy
 			m_UI->projectSFCheckBox->setEnabled(false);
@@ -528,6 +534,7 @@ void ccRasterizeTool::loadSettings()
 	int    minVertexCount                = settings.value("MinVertexCount", m_UI->minVertexCountSpinBox->value()).toInt();
 	bool   ignoreBorders                 = settings.value("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked()).toBool();
 	bool   projectContoursOnAlt          = settings.value("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked()).toBool();
+	bool   xRayAutoSaturation            = settings.value("xRayAutoSaturation", m_UI->xRayAutoSaturationCheckBox->isChecked()).toBool();
 
 	// Statistics checkboxes
 	bool   generateHeightStatistics          = settings.value("GenerateHeightStatistics", m_UI->exportHeightStatsCheckBox->isChecked()).toBool();
@@ -556,6 +563,7 @@ void ccRasterizeTool::loadSettings()
 	m_UI->minVertexCountSpinBox->setValue(minVertexCount);
 	m_UI->ignoreContourBordersCheckBox->setChecked(ignoreBorders);
 	m_UI->projectContoursOnAltCheckBox->setChecked(projectContoursOnAlt);
+	m_UI->xRayAutoSaturationCheckBox->setChecked(xRayAutoSaturation);
 
 	// SF Statistics checkboxes
 	m_UI->exportHeightStatsCheckBox->setChecked(generateHeightStatistics);
@@ -622,6 +630,7 @@ void ccRasterizeTool::saveSettings()
 	settings.setValue("MinVertexCount", m_UI->minVertexCountSpinBox->value());
 	settings.setValue("IgnoreBorders", m_UI->ignoreContourBordersCheckBox->isChecked());
 	settings.setValue("projectContoursOnAlt", m_UI->projectContoursOnAltCheckBox->isChecked());
+	settings.setValue("xRayAutoSaturation", m_UI->xRayAutoSaturationCheckBox->isChecked());
 
 	// SF Statistics checkboxes
 	settings.setValue("generateStatisticsPopulation", m_UI->generateStatisticsPopulationCheckBox->isChecked());
@@ -664,6 +673,7 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
                                                   bool                                               projectSFs,
                                                   bool                                               projectColors,
                                                   bool                                               copyHillshadeSF,
+                                                  bool                                               copyXRaySF,
                                                   const QString&                                     activeSFName,
                                                   double                                             percentileValue,
                                                   bool                                               exportToOriginalCS,
@@ -712,6 +722,28 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
 			}
 		}
 
+		// add the x-ray SF
+		if (copyXRaySF)
+		{
+			int xraySFIdx = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
+			if (xraySFIdx >= 0)
+			{
+				CCCoreLib::ScalarField* xraySF = m_rasterCloud->getScalarField(xraySFIdx);
+				if (xraySF->currentSize() == cloudGrid->size())
+				{
+					try
+					{
+						ccScalarField* xraySFClone = new ccScalarField(*static_cast<ccScalarField*>(xraySF));
+						cloudGrid->addScalarField(xraySFClone);
+					}
+					catch (const std::bad_alloc&)
+					{
+						ccLog::Warning("[Rasterize] Not enough memory to export the x-ray field");
+					}
+				}
+			}
+		}
+
 		// currently displayed SF
 		int activeSFIndex = cloudGrid->getScalarFieldIndexByName(activeSFName.toStdString());
 		if (activeSFIndex < 0 && cloudGrid->getNumberOfScalarFields() != 0)
@@ -734,14 +766,29 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
 void ccRasterizeTool::updateGridAndDisplay()
 {
 	// special case: remove the (temporary) hillshade field entry
-	int hillshadeIndex = m_UI->activeLayerComboBox->findText(HILLSHADE_FIELD_NAME);
-	if (hillshadeIndex >= 0)
 	{
-		if (m_UI->activeLayerComboBox->currentIndex() == hillshadeIndex && m_UI->activeLayerComboBox->count() > 1)
+		int hillshadeIndex = m_UI->activeLayerComboBox->findText(HILLSHADE_FIELD_NAME);
+		if (hillshadeIndex >= 0)
 		{
-			m_UI->activeLayerComboBox->setCurrentIndex(0);
+			if (m_UI->activeLayerComboBox->currentIndex() == hillshadeIndex && m_UI->activeLayerComboBox->count() > 1)
+			{
+				m_UI->activeLayerComboBox->setCurrentIndex(0);
+			}
+			m_UI->activeLayerComboBox->removeItem(hillshadeIndex);
 		}
-		m_UI->activeLayerComboBox->removeItem(hillshadeIndex);
+	}
+
+	// special case: remove the (temporary) X-ray field entry
+	{
+		int xRayIndex = m_UI->activeLayerComboBox->findText(XRAY_FIELD_NAME);
+		if (xRayIndex >= 0)
+		{
+			if (m_UI->activeLayerComboBox->currentIndex() == xRayIndex && m_UI->activeLayerComboBox->count() > 1)
+			{
+				m_UI->activeLayerComboBox->setCurrentIndex(0);
+			}
+			m_UI->activeLayerComboBox->removeItem(xRayIndex);
+		}
 	}
 
 	// remove the previous cloud
@@ -757,10 +804,14 @@ void ccRasterizeTool::updateGridAndDisplay()
 		m_rasterCloud = nullptr;
 	}
 
+	setEnabled(false);
+
 	bool activeLayerIsSF = (m_UI->activeLayerComboBox->currentData().toInt() == LAYER_SF);
 	bool projectSFs      = (getTypeOfSFProjection() != ccRasterGrid::INVALID_PROJECTION_TYPE) || activeLayerIsSF;
 	bool projectColors   = m_cloud && m_cloud->hasColors();
 	bool success         = updateGrid(projectSFs);
+
+	setEnabled(true);
 
 	if (success && m_glWindow)
 	{
@@ -778,6 +829,7 @@ void ccRasterizeTool::updateGridAndDisplay()
                                                projectSFs,
                                                projectColors,
                                                /*copyHillshadeSF=*/false,
+                                               /*copyXRaySF=*/false,
                                                activeLayerName,
                                                getStatisticsPercentileValue(),
                                                false,
@@ -997,6 +1049,7 @@ ccPointCloud* ccRasterizeTool::generateCloud(bool autoExport /*=true*/)
                                                    projectSFs,
                                                    projectColors,
                                                    /*copyHillshadeSF=*/true,
+                                                   /*copyXRaySF=*/true,
                                                    activeLayerName,
                                                    getStatisticsPercentileValue(),
                                                    true,
@@ -1625,6 +1678,194 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 	ccLog::Error("[Rasterize] GDAL not supported by this version! Can't generate a raster...");
 	return false;
 #endif
+}
+
+void ccRasterizeTool::generateXRaySF()
+{
+	if (!m_grid.isValid() || !m_rasterCloud)
+	{
+		ccLog::Error("Need a valid raster/cloud to generate hillshade!");
+		return;
+	}
+	if (m_grid.height < 3 || m_grid.width < 3)
+	{
+		ccLog::Error("Grid is too small");
+		return;
+	}
+	if (m_grid.gridStep < std::numeric_limits<double>::epsilon())
+	{
+		return;
+	}
+
+	// get/create layer
+	ccScalarField* xraySF = nullptr;
+	int            sfIdx  = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
+	if (sfIdx >= 0)
+	{
+		xraySF = static_cast<ccScalarField*>(m_rasterCloud->getScalarField(sfIdx));
+	}
+	else
+	{
+		xraySF = new ccScalarField(XRAY_FIELD_NAME);
+		if (!xraySF->reserveSafe(m_rasterCloud->size()))
+		{
+			ccLog::Error("Not enough memory!");
+			xraySF->release();
+			xraySF = nullptr;
+			return;
+		}
+
+		sfIdx = m_rasterCloud->addScalarField(xraySF);
+		m_UI->activeLayerComboBox->addItem(XRAY_FIELD_NAME, QVariant(LAYER_SF));
+		m_UI->activeLayerComboBox->setEnabled(true);
+	}
+	assert(xraySF && xraySF->currentSize() == m_rasterCloud->size());
+	xraySF->fill(CCCoreLib::NAN_VALUE);
+
+	bool sparseSF             = (xraySF->currentSize() != m_grid.height * m_grid.width);
+	bool resampleInputCloudXY = resampleOriginalCloud();
+
+	// vertical dimension
+	const unsigned char Z = getProjectionDimension();
+	assert(Z <= 2);
+
+	// number of vertical steps
+	CCVector3 bbMin, bbMax;
+	m_cloud->getBoundingBox(bbMin, bbMax);
+	double   delaH      = bbMax.u[Z] - bbMin.u[Z];
+	unsigned layerCount = std::max(1u, static_cast<unsigned>(ceil(delaH / m_grid.gridStep)));
+	ccLog::Print("[Rasterize][X-ray] Number of vertical steps: " + QString::number(layerCount));
+
+	std::vector<bool> layerFilled;
+	try
+	{
+		layerFilled.resize(layerCount);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Error("Not enough memory");
+		return;
+	}
+
+	ccProgressDialog progressDialog(true, this);
+	progressDialog.setMethodTitle(QObject::tr("X-ray"));
+	progressDialog.setInfo(QObject::tr("Grid size: %1 x %2").arg(m_grid.width).arg(m_grid.height));
+	progressDialog.start();
+	progressDialog.show();
+	QCoreApplication::processEvents();
+	CCCoreLib::NormalizedProgress nProgress(&progressDialog, static_cast<unsigned>(m_grid.width * m_grid.height));
+
+	// for all cells
+	unsigned nonEmptyCellIndex      = 0;
+	unsigned validButEmptyCellIndex = 0;
+	for (unsigned j = 0; j < m_grid.height - 1; ++j)
+	{
+		const ccRasterGrid::Row& row = m_grid.rows[j];
+
+		for (unsigned i = 0; i < m_grid.width; ++i)
+		{
+			// valid height value
+			const ccRasterCell& cell = row[i];
+			if (std::isfinite(cell.h))
+			{
+				std::vector<unsigned> indexes;
+				cell.getPointIndexes(indexes, m_grid.pointRefList);
+
+				if (indexes.empty())
+				{
+					continue;
+				}
+
+				std::fill(layerFilled.begin(), layerFilled.end(), false);
+
+				for (unsigned index : indexes)
+				{
+					const CCVector3* P = m_cloud->getPoint(index);
+
+					unsigned heightIndex     = static_cast<unsigned>((P->u[Z] - bbMin.u[Z]) / m_grid.gridStep);
+					layerFilled[heightIndex] = true;
+				}
+
+				ScalarType accum = 0;
+
+				for (bool filled : layerFilled)
+				{
+					if (filled)
+					{
+						accum += 1.0;
+					}
+				}
+
+				if (!resampleInputCloudXY)
+				{
+					xraySF->setValue(sparseSF ? nonEmptyCellIndex : i + j * m_grid.width, accum);
+				}
+				else // resampling mode
+				{
+					if (cell.nbPoints != 0)
+					{
+						// non-empty cells are at the beginning
+						xraySF->setValue(nonEmptyCellIndex, accum);
+					}
+					else
+					{
+						// filled or interpolated cells are appended at the end
+						xraySF->setValue(m_grid.nonEmptyCellCount + validButEmptyCellIndex, accum);
+					}
+				}
+
+				if (!resampleInputCloudXY || cell.nbPoints != 0)
+				{
+					++nonEmptyCellIndex;
+				}
+				else
+				{
+					++validButEmptyCellIndex;
+				}
+			}
+			else
+			{
+				if (cell.nbPoints)
+				{
+					// with inv. var. projection mode, it's possible to have a non empty cell with NaN height!
+					++nonEmptyCellIndex;
+				}
+			}
+
+			if (!nProgress.oneStep())
+			{
+				m_rasterCloud->deleteScalarField(sfIdx);
+				m_UI->activeLayerComboBox->removeItem(m_UI->activeLayerComboBox->findText(XRAY_FIELD_NAME));
+				m_UI->activeLayerComboBox->setCurrentIndex(0);
+				return;
+			}
+		}
+	}
+
+	bool autoSaturation = m_UI->xRayAutoSaturationCheckBox->isChecked();
+	if (autoSaturation)
+	{
+		// automatically set the saturation value
+		CCCoreLib::NormalDistribution distrib;
+		distrib.computeParameters(CCCoreLib::GenericDistribution::SFAsScalarContainer(*xraySF));
+		ScalarType saturation = distrib.getMu() + 2.5 * sqrt(distrib.getSigma2());
+		ccLog::Print("[Rasterize][X-ray] Accumulation values automatically capped to " + QString::number(saturation) + " / " + QString::number(xraySF->getMax()));
+
+		for (unsigned i = 0; i < xraySF->size(); ++i)
+		{
+			xraySF->setValue(i, std::min(xraySF->getValue(i), saturation));
+		}
+	}
+	xraySF->computeMinAndMax();
+	xraySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY_INV));
+	m_rasterCloud->setCurrentDisplayedScalarField(sfIdx);
+	m_rasterCloud->showSF(true);
+	m_UI->activeLayerComboBox->setCurrentIndex(m_UI->activeLayerComboBox->findText(XRAY_FIELD_NAME));
+
+	if (m_glWindow)
+	{
+		m_glWindow->redraw();
+	}
 }
 
 // See http://edndoc.esri.com/arcobjects/9.2/net/shared/geoprocessing/spatial_analyst_tools/how_hillshade_works.htm
@@ -2268,7 +2509,7 @@ void ccRasterizeTool::generateASCIIMatrix() const
 		{
 			stream << (std::isfinite(row[i].h) ? row[i].h : emptyCellsHeight) << ' ';
 		}
-		stream << endl;
+		stream << Qt::endl;
 	}
 
 	// save current export path to persistent settings

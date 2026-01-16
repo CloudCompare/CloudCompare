@@ -76,14 +76,14 @@ public:
 	double minMaxDensity[2];
 };
 
-StereogramWidget::StereogramWidget(QWidget *parent)
+StereogramWidget::StereogramWidget(QWidget* parent/*=nullptr*/)
 	: QLabel(QString(), parent)
 	, m_angularStep_deg(0)
 	, m_densityGrid(nullptr)
 	, m_meanDipDir_deg(-1.0)
 	, m_meanDip_deg(-1.0)
 	, m_densityColorScale(nullptr)
-	, m_densityColorScaleSteps(ccColorScale::MAX_STEPS < 256 ? ccColorScale::MAX_STEPS : 256) //DGM: we can't pass a constant initializer (MAX_STEPS) by reference
+	, m_densityColorScaleSteps(std::max(ccColorScale::MAX_STEPS, 256u))
 	, m_ticksFreq(3)
 	, m_showHSVRing(false)
 	, m_trackMouseClick(false)
@@ -258,23 +258,11 @@ bool StereogramWidget::init(double angularStep_deg,
 
 		//compute min and max density
 		{
-			//DGM: only supported on C++x11!
-			//std::pair<double*, double*> minmax = std::minmax_element(densityGrid->grid, densityGrid->grid + cellCount);
-			//densityGrid->minMaxDensity[0] = *minmax.first;
-			//densityGrid->minMaxDensity[1] = *minmax.second;
-
-			densityGrid->minMaxDensity[0] = densityGrid->grid[0];
-			densityGrid->minMaxDensity[1] = densityGrid->grid[0];
-			for (unsigned j = 1; j < cellCount; ++j)
-			{
-				if (densityGrid->grid[j] < densityGrid->minMaxDensity[0])
-					densityGrid->minMaxDensity[0] = densityGrid->grid[j];
-				else if (densityGrid->grid[j] > densityGrid->minMaxDensity[1])
-					densityGrid->minMaxDensity[1] = densityGrid->grid[j];
-			}
+			std::pair<double*, double*> minmax = std::minmax_element(densityGrid->grid, densityGrid->grid + cellCount);
+			densityGrid->minMaxDensity[0] = *minmax.first;
+			densityGrid->minMaxDensity[1] = *minmax.second;
 		}
 
-		//pDlg.hide();
 		pDlg.stop();
 		QApplication::processEvents();
 	}

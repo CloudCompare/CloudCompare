@@ -26,6 +26,7 @@
 #include "ccCone.h"
 #include "ccCoordinateSystem.h"
 #include "ccCylinder.h"
+#include "ccDisc.h"
 #include "ccDish.h"
 #include "ccExtru.h"
 #include "ccFacet.h"
@@ -201,6 +202,11 @@ ccCone* ccHObjectCaster::ToCone(ccHObject* obj)
 ccPlane* ccHObjectCaster::ToPlane(ccHObject* obj)
 {
 	return obj && obj->isA(CC_TYPES::PLANE) ? static_cast<ccPlane*>(obj) : nullptr;
+}
+
+ccDisc* ccHObjectCaster::ToDisc(ccHObject* obj)
+{
+	return obj && obj->isA(CC_TYPES::DISC) ? static_cast<ccDisc*>(obj) : nullptr;
 }
 
 ccDish* ccHObjectCaster::ToDish(ccHObject* obj)

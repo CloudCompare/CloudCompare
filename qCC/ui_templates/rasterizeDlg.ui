@@ -981,7 +981,7 @@ applied to all existing scalar fields</string>
           </widget>
           <widget class="QWidget" name="hillshadeTab">
            <attribute name="title">
-            <string>Hillshade</string>
+            <string>Hillshade / X-ray</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_5">
             <property name="bottomMargin">
@@ -998,7 +998,7 @@ applied to all existing scalar fields</string>
                <string notr="true">color: blue;</string>
               </property>
               <property name="text">
-               <string>Hillshade is computed on the height layer</string>
+               <string>Hillshade is computed based on the height layer</string>
               </property>
              </widget>
             </item>
@@ -1059,7 +1059,14 @@ applied to all existing scalar fields</string>
              </layout>
             </item>
             <item>
-             <spacer name="verticalSpacer_3">
+             <widget class="QPushButton" name="generateHillshadePushButton">
+              <property name="text">
+               <string>Generate hillshade</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
@@ -1072,9 +1079,29 @@ applied to all existing scalar fields</string>
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="generateHillshadePushButton">
+             <widget class="Line" name="line_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="xRayAutoSaturationCheckBox">
+              <property name="toolTip">
+               <string>Automatically cap the max value to enhance contrast</string>
+              </property>
               <property name="text">
-               <string>Generate</string>
+               <string>auto-saturation</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="xrayPushButton">
+              <property name="text">
+               <string>Generate X-ray scalar field</string>
               </property>
              </widget>
             </item>

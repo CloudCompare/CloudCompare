@@ -592,9 +592,15 @@ bool ccGLWindowInterface::initialize()
 		invalidateVisualization();
 		deprecate3DLayer();
 
-		// FBO support (TODO: catch error?)
-		m_glExtFuncSupported = m_glExtFunc.initializeOpenGLFunctions();
-
+		// FBO support
+		// We test if FBOs are supported.
+		// Starting from QT6 QOpenGLExtensions are not available anymore we use QOpenGLExtraFunctions instead.
+		m_glExtFuncSupported = glContext->hasExtension(QByteArrayLiteral("GL_ARB_framebuffer_object"));
+		if (m_glExtFuncSupported)
+		{
+			// returns void
+			m_glExtFunc.initializeOpenGLFunctions();
+		}
 		// OpenGL version
 		const char*   vendorName    = reinterpret_cast<const char*>(glFunc->glGetString(GL_VENDOR));
 		const QString vendorNameStr = QString(vendorName).toUpper();
@@ -604,6 +610,8 @@ bool ccGLWindowInterface::initialize()
 			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
 			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
 			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
+			if (m_glExtFuncSupported)
+				ccLog::Print("[3D View %i] FBO available", m_uniqueID);
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();
@@ -917,8 +925,11 @@ void ccGLWindowInterface::redraw(bool only2D /*=false*/, bool resetLOD /*=true*/
 void ccGLWindowInterface::setGLViewport(const QRect& rect)
 {
 	// correction for HD screens
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
-	m_glViewport               = QRect(rect.left() * devicePixelRatio, rect.top() * devicePixelRatio, rect.width() * devicePixelRatio, rect.height() * devicePixelRatio);
+	const auto devicePixelRatio = getDevicePixelRatio();
+	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio),
+                         static_cast<int>(rect.top() * devicePixelRatio),
+                         static_cast<int>(rect.width() * devicePixelRatio),
+                         static_cast<int>(rect.height() * devicePixelRatio));
 	invalidateViewport();
 
 	if (getOpenGLContext() && getOpenGLContext()->isValid())
@@ -2822,7 +2833,7 @@ int FontSizeModifier(int fontSize, float zoomFactor)
 
 int ccGLWindowInterface::getFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().defaultFontSize, m_captureMode.zoomFactor) : getDisplayParameters().defaultFontSize) * getDevicePixelRatio());
 }
 
 void ccGLWindowInterface::setFontPointSize(int pointSize)
@@ -2839,7 +2850,7 @@ QFont ccGLWindowInterface::getTextDisplayFont() const
 
 int ccGLWindowInterface::getLabelFontPointSize() const
 {
-	return (m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio();
+	return static_cast<int>((m_captureMode.enabled ? FontSizeModifier(getDisplayParameters().labelFontSize, m_captureMode.zoomFactor) : getDisplayParameters().labelFontSize) * getDevicePixelRatio());
 }
 
 QFont ccGLWindowInterface::getLabelDisplayFont() const
@@ -4212,7 +4223,7 @@ void ccGLWindowInterface::drawCross()
 
 float ccGLWindowInterface::computeTrihedronLength() const
 {
-	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).width('X')) * m_captureMode.zoomFactor;
+	return (CC_DISPLAYED_TRIHEDRON_AXES_LENGTH + CC_TRIHEDRON_TEXT_MARGIN + QFontMetrics(m_font).horizontalAdvance('X')) * m_captureMode.zoomFactor;
 }
 
 void ccGLWindowInterface::drawTrihedron()
@@ -4380,7 +4391,7 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	double  textEquivalentWidth = RoundScale(scaleMaxW * pixelSize);
 	QString text                = QString::number(textEquivalentWidth);
 	glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, color);
-	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.width(text) / 2,
+	renderText(glWidth() - static_cast<int>(scaleW_pix / 2 + dW) - fm.horizontalAdvance(text) / 2,
 	           glHeight() - static_cast<int>(dH / 2) + fm.height() / 3,
 	           text,
 	           static_cast<uint16_t>(RenderTextReservedIDs::ScaleLabel),
@@ -4883,7 +4894,7 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	// LOD
 	if (isLODEnabled()
 	    && !isFrameRateTestInProgress()
-	    && (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS))
+	    && !m_stereoModeEnabled)
 	{
 		CONTEXT.drawingFlags |= CC_LOD_ACTIVATED;
 
@@ -5249,7 +5260,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		int x = glWidth() / 2 - 100;
 		int y = 0;
 
-		if (m_stereoModeEnabled && m_stereoParams.glassType != StereoParams::OCULUS)
+		if (m_stereoModeEnabled)
 		{
 			if (renderingParams.pass == RIGHT_RENDERING_PASS)
 				x += glWidth() / 2;
@@ -5293,7 +5304,6 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	glFunc->glFlush();
 
 	// process and/or display the FBO (if any)
-	bool oculusMode = (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::OCULUS);
 	if (currentFBO && renderingParams.useFBO)
 	{
 		// we disable the FBO (if any)
@@ -5304,76 +5314,73 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 			m_updateFBO = false;
 		}
 
-		if (!oculusMode)
+		GLuint screenTex = 0;
+		if (m_activeGLFilter && !m_stereoModeEnabled)
 		{
-			GLuint screenTex = 0;
-			if (m_activeGLFilter && (!m_stereoModeEnabled || m_stereoParams.glassType != StereoParams::OCULUS)) // not supported with Oculus right now!
+			// we apply the GL filter
+			GLuint depthTex = currentFBO->getDepthTexture();
+			GLuint colorTex = currentFBO->getColorTexture();
+			// minimal set of viewport parameters necessary for GL filters
+			ccGlFilter::ViewportParameters parameters;
 			{
-				// we apply the GL filter
-				GLuint depthTex = currentFBO->getDepthTexture();
-				GLuint colorTex = currentFBO->getColorTexture();
-				// minimal set of viewport parameters necessary for GL filters
-				ccGlFilter::ViewportParameters parameters;
-				{
-					parameters.perspectiveMode = m_viewportParams.perspectiveView;
-					parameters.zFar            = m_viewportParams.zFar;
-					parameters.zNear           = m_viewportParams.zNear;
-				}
-				// apply shader
-				m_activeGLFilter->shade(depthTex, colorTex, parameters);
-				logGLError("ccGLWindow::paintGL/glFilter shade");
-				bindFBO(nullptr); // in case the active filter has used a FBO!
+				parameters.perspectiveMode = m_viewportParams.perspectiveView;
+				parameters.zFar            = m_viewportParams.zFar;
+				parameters.zNear           = m_viewportParams.zNear;
+			}
+			// apply shader
+			m_activeGLFilter->shade(depthTex, colorTex, parameters);
+			logGLError("ccGLWindow::paintGL/glFilter shade");
+			bindFBO(nullptr); // in case the active filter has used a FBO!
 
-				// if capture mode is ON: we only want to capture it, not to display it
-				if (!m_captureMode.enabled)
+			// if capture mode is ON: we only want to capture it, not to display it
+			if (!m_captureMode.enabled)
+			{
+				screenTex = m_activeGLFilter->getTexture();
+				// ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+			}
+		}
+		else if (!m_captureMode.enabled)
+		{
+			// screenTex = currentFBO->getDepthTexture();
+			screenTex = currentFBO->getColorTexture();
+			// ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
+		}
+
+		// we display the FBO texture fullscreen (if any)
+		if (glFunc->glIsTexture(screenTex))
+		{
+			setStandardOrthoCorner();
+
+			glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
+			glFunc->glDisable(GL_DEPTH_TEST);
+
+			// select back left or back right buffer
+			// DGM: as we couldn't call it before (because of the FBO) we have to do it now!
+			GLboolean isStereoEnabled = GL_FALSE;
+			glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
+			// ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.pass).arg(isStereoEnabled));
+			if (isStereoEnabled)
+			{
+				if (m_stereoModeEnabled
+				    && (m_stereoParams.glassType == StereoParams::NVIDIA_VISION || m_stereoParams.glassType == StereoParams::GENERIC_STEREO_DISPLAY))
 				{
-					screenTex = m_activeGLFilter->getTexture();
-					// ccLog::PrintDebug(QString("[QPaintGL] Will use the shader output texture (tex ID = %1)").arg(screenTex));
+					glFunc->glDrawBuffer(renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? GL_BACK_LEFT : GL_BACK_RIGHT);
+				}
+				else
+				{
+					glFunc->glDrawBuffer(GL_BACK);
 				}
 			}
-			else if (!m_captureMode.enabled)
-			{
-				// screenTex = currentFBO->getDepthTexture();
-				screenTex = currentFBO->getColorTexture();
-				// ccLog::PrintDebug(QString("[QPaintGL] Will use the standard FBO (tex ID = %1)").arg(screenTex));
-			}
 
-			// we display the FBO texture fullscreen (if any)
-			if (glFunc->glIsTexture(screenTex))
-			{
-				setStandardOrthoCorner();
+			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
 
-				glFunc->glPushAttrib(GL_DEPTH_BUFFER_BIT);
-				glFunc->glDisable(GL_DEPTH_TEST);
+			// warning: we must set the original FBO texture as default
+			glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
 
-				// select back left or back right buffer
-				// DGM: as we couldn't call it before (because of the FBO) we have to do it now!
-				GLboolean isStereoEnabled = GL_FALSE;
-				glFunc->glGetBooleanv(GL_STEREO, &isStereoEnabled);
-				// ccLog::Warning(QString("[fullRenderingPass:%0][FBO] Stereo test: %1").arg(renderingParams.pass).arg(isStereoEnabled));
-				if (isStereoEnabled)
-				{
-					if (m_stereoModeEnabled
-					    && (m_stereoParams.glassType == StereoParams::NVIDIA_VISION || m_stereoParams.glassType == StereoParams::GENERIC_STEREO_DISPLAY))
-					{
-						glFunc->glDrawBuffer(renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? GL_BACK_LEFT : GL_BACK_RIGHT);
-					}
-					else
-					{
-						glFunc->glDrawBuffer(GL_BACK);
-					}
-				}
+			glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
 
-				ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
-
-				// warning: we must set the original FBO texture as default
-				glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
-
-				glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
-
-				// we don't need the depth info anymore!
-				// glFunc->glClear(GL_DEPTH_BUFFER_BIT);
-			}
+			// we don't need the depth info anymore!
+			// glFunc->glClear(GL_DEPTH_BUFFER_BIT);
 		}
 	}
 
@@ -5382,7 +5389,7 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	/******************/
 	/*** FOREGROUND ***/
 	/******************/
-	if (renderingParams.drawForeground && !oculusMode)
+	if (renderingParams.drawForeground)
 	{
 		drawForeground(CONTEXT, renderingParams);
 	}
@@ -6264,10 +6271,10 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent* event)
 	m_deferredPickingTimer.stop(); // prevent the picking process from starting
 	m_ignoreMouseReleaseEvent = true;
 
-	const int devicePixelRatio = static_cast<int>(getDevicePixelRatio());
+	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = event->x() * devicePixelRatio;
-	const int y = event->y() * devicePixelRatio;
+	const int x = static_cast<int>(event->x() * devicePixelRatio);
+	const int y = static_cast<int>(event->y() * devicePixelRatio);
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))
@@ -6787,7 +6794,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the point size
-		float sizeModifier = (event->delta() < 0 ? -1.0f : 1.0f);
+		float sizeModifier = (event->angleDelta().x() < 0 ? -1.0f : 1.0f);
 		setPointSize(m_viewportParams.defaultPointSize + sizeModifier);
 
 		doRedraw = true;
@@ -6797,7 +6804,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the zNear or zFar clipping planes
-		double increment    = (event->delta() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
+		double increment    = (event->angleDelta().y() < 0 ? -1.0 : 1.0) * computeDefaultIncrement();
 		bool   shiftPressed = (keyboardModifiers & Qt::ShiftModifier);
 		if (shiftPressed)
 		{
@@ -6827,7 +6834,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// same shortcut as Meshlab: change the fov value
-		float newFOV = (getFov() + (event->delta() < 0 ? -1.0f : 1.0f));
+		float newFOV = (getFov() + (event->angleDelta().y() < 0 ? -1.0f : 1.0f));
 		newFOV       = std::min(std::max(1.0f, newFOV), 180.0f);
 		if (newFOV != getFov())
 		{
@@ -6840,10 +6847,10 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 		event->accept();
 
 		// see QWheelEvent documentation ("distance that the wheel is rotated, in eighths of a degree")
-		int padDelta = event->delta();
+		int padDelta = event->angleDelta().y();
 		if (padDelta != 0)
 		{
-			float wheelDelta_deg = event->delta() / 8.0f;
+			float wheelDelta_deg = padDelta / 8.0f;
 
 			onWheelEvent(wheelDelta_deg);
 
@@ -6866,7 +6873,7 @@ void ccGLWindowInterface::processWheelEvent(QWheelEvent* event)
 static void glDrawUnitCircle(QOpenGLContext* context, unsigned char dim, unsigned steps = 64)
 {
 	assert(context);
-	QOpenGLFunctions_2_1* glFunc = context->versionFunctions<QOpenGLFunctions_2_1>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
 	if (!glFunc)
 	{
 		return;
@@ -7179,7 +7186,7 @@ bool ccGLWindowInterface::TestStereoSupport(bool forceRetest /*=false*/)
 	// context->makeCurrent(testWindow);
 	context->makeCurrent(&offSurface);
 
-	ccQOpenGLFunctions* glFunc = context->versionFunctions<ccQOpenGLFunctions>();
+	auto* glFunc = QOpenGLVersionFunctionsFactory::get<ccQOpenGLFunctions>(context.get());
 	if (!glFunc)
 	{
 		ccLog::Warning("Failed to retrieve the OpengGL functions");

@@ -268,16 +268,6 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	// filling the grid
 	unsigned pointCount = cloud->size();
 
-	if (progressDialog)
-	{
-		progressDialog->setMethodTitle(QObject::tr("Grid generation"));
-		progressDialog->setInfo(QObject::tr("Points: %L1\nCells: %L2 x %L3").arg(pointCount).arg(width).arg(height));
-		progressDialog->start();
-		progressDialog->show();
-		QCoreApplication::processEvents();
-	}
-	CCCoreLib::NormalizedProgress nProgress(progressDialog, pointCount);
-
 	// vertical dimension
 	assert(Z <= 2);
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
@@ -296,50 +286,64 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 		return false;
 	}
 
-	for (unsigned n = 0; n < pointCount; ++n)
+	// first, project the points inside the grid
 	{
-		// for each point
-		const CCVector3* P = cloud->getPoint(n);
-
-		// project it inside the grid
-		CCVector2i cellPos = computeCellPos(*P, X, Y);
-
-		// we skip points that fall outside of the grid!
-		if (cellPos.x < 0 || cellPos.x >= static_cast<int>(width)
-		    || cellPos.y < 0 || cellPos.y >= static_cast<int>(height))
+		if (progressDialog)
 		{
+			progressDialog->setMethodTitle(QObject::tr("Points projection"));
+			progressDialog->setInfo(QObject::tr("Points: %L1\nCells: %L2 x %L3").arg(pointCount).arg(width).arg(height));
+			progressDialog->start();
+			progressDialog->show();
+			progressDialog->setAutoClose(false);
+			QCoreApplication::processEvents();
+		}
+
+		CCCoreLib::NormalizedProgress nProgress(progressDialog, pointCount);
+		for (unsigned n = 0; n < pointCount; ++n)
+		{
+			// for each point
+			const CCVector3* P = cloud->getPoint(n);
+
+			// project it inside the grid
+			CCVector2i cellPos = computeCellPos(*P, X, Y);
+
+			// we skip points that fall outside of the grid!
+			if (cellPos.x < 0 || cellPos.x >= static_cast<int>(width)
+			    || cellPos.y < 0 || cellPos.y >= static_cast<int>(height))
+			{
+				if (!nProgress.oneStep())
+				{
+					// process cancelled by the user
+					return false;
+				}
+				continue;
+			}
+
+			// update the cell statistics
+			ccRasterCell& aCell = rows[cellPos.y][cellPos.x];
+
+			// update linked list of point references
+			if (aCell.nbPoints == 0)
+			{
+				// if first point in cell, set head and tail to this reference
+				aCell.pointRefHead = pointRefList.data() + n;
+				aCell.pointRefTail = pointRefList.data() + n;
+			}
+			else
+			{
+				// else point previous tail ref to this point, and reset tail
+				*(aCell.pointRefTail) = pointRefList.data() + n;
+				aCell.pointRefTail    = pointRefList.data() + n;
+			}
+
+			// update the number of points in the cell
+			++aCell.nbPoints;
+
 			if (!nProgress.oneStep())
 			{
-				// process cancelled by the user
+				// process cancelled by user
 				return false;
 			}
-			continue;
-		}
-
-		// update the cell statistics
-		ccRasterCell& aCell = rows[cellPos.y][cellPos.x];
-
-		// update linked list of point references
-		if (aCell.nbPoints == 0)
-		{
-			// if first point in cell, set head and tail to this reference
-			aCell.pointRefHead = pointRefList.data() + n;
-			aCell.pointRefTail = pointRefList.data() + n;
-		}
-		else
-		{
-			// else point previous tail ref to this point, and reset tail
-			*(aCell.pointRefTail) = pointRefList.data() + n;
-			aCell.pointRefTail    = pointRefList.data() + n;
-		}
-
-		// update the number of points in the cell
-		++aCell.nbPoints;
-
-		if (!nProgress.oneStep())
-		{
-			// process cancelled by user
-			return false;
 		}
 	}
 
@@ -392,321 +396,334 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	std::vector<ScalarType> sfValues; // common vector used to sort SF values in each cell
 
 	// now we can browse through all points belonging to each cell
-	for (unsigned j = 0; j < height; ++j)
 	{
-		Row& row = rows[j];
-		for (unsigned i = 0; i < width; ++i)
+		if (progressDialog)
 		{
-			ccRasterCell& aCell                 = row[i];
-			double        cellAvgHeight         = 0.0;
-			double        cellStdDevHeight      = 0.0;
-			double        cellModelStdDevHeight = std::numeric_limits<double>::quiet_NaN(); // for inv. var. projection mode only
+			progressDialog->setMethodTitle(QObject::tr("Grid generation"));
+			progressDialog->setValue(0);
+			progressDialog->setCancelButton(nullptr);
+			QCoreApplication::processEvents();
+		}
+		CCCoreLib::NormalizedProgress nProgress(progressDialog, height * width);
 
-			if (aCell.nbPoints)
+		for (unsigned j = 0; j < height; ++j)
+		{
+			Row& row = rows[j];
+			for (unsigned i = 0; i < width; ++i)
 			{
-				// Assemble a list of all points in this cell.
-				// Start with first point in cell, and browse through the other points using the linked ref list, and collect point indexes
-				void** pRef = aCell.pointRefHead;
-				for (unsigned n = 0; n < aCell.nbPoints; ++n)
+				ccRasterCell& aCell                 = row[i];
+				double        cellAvgHeight         = 0.0;
+				double        cellStdDevHeight      = 0.0;
+				double        cellModelStdDevHeight = std::numeric_limits<double>::quiet_NaN(); // for inv. var. projection mode only
+
+				if (aCell.nbPoints)
 				{
-					unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
-					const CCVector3* P              = cloud->getPoint(pointIndex);
-					cellPointIndexedHeight[n].index = pointIndex;
-					cellPointIndexedHeight[n].val   = P->u[Z];
-					pRef                            = reinterpret_cast<void**>(*pRef);
-				}
-
-				auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
-				// sorting indexed points in cell based on height in ascending order
-				ParallelSort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](const IndexAndValue& a, const IndexAndValue& b)
-				             { return a.val < b.val; });
-
-				// compute standard statistics on height values
-
-				// extract min/max value
-				aCell.minHeight = cellPointIndexedHeight.front().val;
-				aCell.maxHeight = cellPointIndexedHeight[aCell.nbPoints - 1].val;
-
-				if (projectionType != PROJ_INVERSE_VAR_VALUE)
-				{
-					// calculate average value and std dev
-					cellAvgHeight        = 0.0;
-					double cellSquareSum = 0.0;
-					for (unsigned n = 0; n < aCell.nbPoints; n++)
-					{
-						double h = cellPointIndexedHeight[n].val;
-						cellAvgHeight += h;
-						cellSquareSum += h * h;
-					}
-					cellAvgHeight /= aCell.nbPoints;
-					cellStdDevHeight = sqrt(std::max(0.0, cellSquareSum / aCell.nbPoints - cellAvgHeight * cellAvgHeight));
-				}
-				else // inverse variance projection mode
-				{
-					assert(zStdDevSF);
-					// Calculate weighted average
-					double sumInverseVariance = 0.0;
-					double weightedSum        = 0.0;
-					double weightedSquareSum  = 0.0;
+					// Assemble a list of all points in this cell.
+					// Start with first point in cell, and browse through the other points using the linked ref list, and collect point indexes
+					void** pRef = aCell.pointRefHead;
 					for (unsigned n = 0; n < aCell.nbPoints; ++n)
 					{
-						// Compute inverse variance for all points in the current cell
-						ScalarType stdDev = zStdDevSF->getValue(cellPointIndexedHeight[n].index);
-						if (ccScalarField::ValidValue(stdDev) && CCCoreLib::GreaterThanEpsilon(stdDev))
-						{
-							double invVar = 1.0 / (static_cast<double>(stdDev) * stdDev);
-							weightedSum += invVar * cellPointIndexedHeight[n].val;
-							weightedSquareSum += invVar * cellPointIndexedHeight[n].val * cellPointIndexedHeight[n].val;
-							sumInverseVariance += invVar;
+						unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
+						const CCVector3* P              = cloud->getPoint(pointIndex);
+						cellPointIndexedHeight[n].index = pointIndex;
+						cellPointIndexedHeight[n].val   = P->u[Z];
+						pRef                            = reinterpret_cast<void**>(*pRef);
+					}
 
-							cellInvVarianceValues[n] = static_cast<ScalarType>(invVar);
+					auto cellPointIndexedHeightEnd = std::next(cellPointIndexedHeight.begin(), aCell.nbPoints);
+					// sorting indexed points in cell based on height in ascending order
+					ParallelSort(cellPointIndexedHeight.begin(), cellPointIndexedHeightEnd, [](const IndexAndValue& a, const IndexAndValue& b)
+					             { return a.val < b.val; });
+
+					// compute standard statistics on height values
+
+					// extract min/max value
+					aCell.minHeight = cellPointIndexedHeight.front().val;
+					aCell.maxHeight = cellPointIndexedHeight[aCell.nbPoints - 1].val;
+
+					if (projectionType != PROJ_INVERSE_VAR_VALUE)
+					{
+						// calculate average value and std dev
+						cellAvgHeight        = 0.0;
+						double cellSquareSum = 0.0;
+						for (unsigned n = 0; n < aCell.nbPoints; n++)
+						{
+							double h = cellPointIndexedHeight[n].val;
+							cellAvgHeight += h;
+							cellSquareSum += h * h;
+						}
+						cellAvgHeight /= aCell.nbPoints;
+						cellStdDevHeight = sqrt(std::max(0.0, cellSquareSum / aCell.nbPoints - cellAvgHeight * cellAvgHeight));
+					}
+					else // inverse variance projection mode
+					{
+						assert(zStdDevSF);
+						// Calculate weighted average
+						double sumInverseVariance = 0.0;
+						double weightedSum        = 0.0;
+						double weightedSquareSum  = 0.0;
+						for (unsigned n = 0; n < aCell.nbPoints; ++n)
+						{
+							// Compute inverse variance for all points in the current cell
+							ScalarType stdDev = zStdDevSF->getValue(cellPointIndexedHeight[n].index);
+							if (ccScalarField::ValidValue(stdDev) && CCCoreLib::GreaterThanEpsilon(stdDev))
+							{
+								double invVar = 1.0 / (static_cast<double>(stdDev) * stdDev);
+								weightedSum += invVar * cellPointIndexedHeight[n].val;
+								weightedSquareSum += invVar * cellPointIndexedHeight[n].val * cellPointIndexedHeight[n].val;
+								sumInverseVariance += invVar;
+
+								cellInvVarianceValues[n] = static_cast<ScalarType>(invVar);
+							}
+							else
+							{
+								cellInvVarianceValues[n] = CCCoreLib::NAN_VALUE;
+							}
+						}
+
+						if (CCCoreLib::GreaterThanEpsilon(sumInverseVariance))
+						{
+							cellAvgHeight         = weightedSum / sumInverseVariance;
+							cellStdDevHeight      = std::sqrt(std::abs(weightedSquareSum / sumInverseVariance - cellAvgHeight * cellAvgHeight));
+							cellModelStdDevHeight = std::sqrt(1.0 / sumInverseVariance);
 						}
 						else
 						{
-							cellInvVarianceValues[n] = CCCoreLib::NAN_VALUE;
+							// we can't compute these values if the weight is null (= no valid SF value)
+							cellAvgHeight = cellStdDevHeight = cellModelStdDevHeight = std::numeric_limits<double>::quiet_NaN();
 						}
 					}
 
-					if (CCCoreLib::GreaterThanEpsilon(sumInverseVariance))
+					// pick a point (index) that correspond to the selected 'height' value
+					switch (projectionType)
 					{
-						cellAvgHeight         = weightedSum / sumInverseVariance;
-						cellStdDevHeight      = std::sqrt(std::abs(weightedSquareSum / sumInverseVariance - cellAvgHeight * cellAvgHeight));
-						cellModelStdDevHeight = std::sqrt(1.0 / sumInverseVariance);
-					}
-					else
-					{
-						// we can't compute these values if the weight is null (= no valid SF value)
-						cellAvgHeight = cellStdDevHeight = cellModelStdDevHeight = std::numeric_limits<double>::quiet_NaN();
-					}
-				}
-
-				// pick a point (index) that correspond to the selected 'height' value
-				switch (projectionType)
-				{
-				case PROJ_MINIMUM_VALUE:
-					aCell.h                 = aCell.minHeight;
-					aCell.nearestPointIndex = cellPointIndexedHeight.front().index;
-					break;
-				case PROJ_AVERAGE_VALUE:
-				case PROJ_INVERSE_VAR_VALUE:
-					aCell.h = cellAvgHeight;
-					if (std::isfinite(aCell.h))
-					{
-						// we choose the point which is the closest to the cell center (in 2D)
-						CCVector2d C                    = computeCellCenter(i, j, X, Y);
-						double     minimumSquareDistToP = 0.0;
-						for (unsigned n = 0; n < aCell.nbPoints; n++)
-						{
-							unsigned         pointIndex = cellPointIndexedHeight[n].index;
-							const CCVector3* P          = cloud->getPoint(pointIndex);
-							CCVector2d       P2D(P->u[X], P->u[Y]);
-							double           squareDistToP = (C - P2D).norm2();
-							if ((squareDistToP < minimumSquareDistToP) || (n == 0))
-							{
-								minimumSquareDistToP    = squareDistToP;
-								aCell.nearestPointIndex = pointIndex;
-							}
-						}
-					}
-					break;
-				case PROJ_MEDIAN_VALUE:
-				{
-					// extract median value
-					unsigned indexMid = aCell.nbPoints / 2;
-					if (aCell.nbPoints % 2) // odd value
-					{
-						aCell.h = cellPointIndexedHeight[indexMid].val;
-					}
-					else
-					{
-						aCell.h = (cellPointIndexedHeight[indexMid - 1].val + cellPointIndexedHeight[indexMid].val) / 2;
-					}
-					aCell.nearestPointIndex = cellPointIndexedHeight[indexMid].index;
-				}
-				break;
-				case PROJ_MAXIMUM_VALUE:
-					aCell.h                 = aCell.maxHeight;
-					aCell.nearestPointIndex = cellPointIndexedHeight[aCell.nbPoints - 1].index;
-					break;
-				default:
-					assert(false);
-					break;
-				}
-
-				// if the cloud has RGB-colors
-				if (hasColors)
-				{
-					assert(cloud->hasColors());
-					if (projectionType == PROJ_AVERAGE_VALUE)
-					{
-						// compute the average color
-						aCell.color = CCVector3d(0, 0, 0);
-						for (unsigned n = 0; n < aCell.nbPoints; n++)
-						{
-							unsigned            pointIndex = cellPointIndexedHeight[n].index;
-							const ccColor::Rgb& col        = cloud->getPointColor(pointIndex);
-							aCell.color += CCVector3d(col.r, col.g, col.b);
-						}
-						aCell.color /= aCell.nbPoints;
-					}
-					else
-					{
-						// pick color from selected index
-						const ccColor::Rgb& col = cloud->getPointColor(aCell.nearestPointIndex);
-						aCell.color             = CCVector3d(col.r, col.g, col.b);
-					}
-				}
-
-				// if we should project the scalar fields
-				if (projectSFs)
-				{
-					assert(pc);
-					// absolute position of the cell (e.g. in the 2D SF grid(s))
-					int pos = j * static_cast<int>(width) + i;
-					assert(pos < static_cast<int>(gridTotalSize));
-
-					for (size_t k = 0; k < scalarFields.size(); ++k)
-					{
-						assert(!scalarFields[k].empty());
-						CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
-
-						assert(sf && pos < scalarFields[k].size());
-
-						switch (sfProjectionType)
-						{
-						case PROJ_MINIMUM_VALUE:
-						{
-							ScalarType minValue = CCCoreLib::NAN_VALUE;
-							for (unsigned n = 0; n < aCell.nbPoints; n++)
-							{
-								unsigned   pointIndex = cellPointIndexedHeight[n].index;
-								ScalarType value      = sf->getValue(pointIndex);
-								if (CCCoreLib::ScalarField::ValidValue(value))
-								{
-									if (std::isnan(minValue) || minValue > value)
-									{
-										minValue = value;
-									}
-								}
-							}
-							scalarFields[k][pos] = minValue;
-						}
+					case PROJ_MINIMUM_VALUE:
+						aCell.h                 = aCell.minHeight;
+						aCell.nearestPointIndex = cellPointIndexedHeight.front().index;
 						break;
-
-						case PROJ_MEDIAN_VALUE:
+					case PROJ_AVERAGE_VALUE:
+					case PROJ_INVERSE_VAR_VALUE:
+						aCell.h = cellAvgHeight;
+						if (std::isfinite(aCell.h))
 						{
-							sfValues.clear();
-							sfValues.reserve(aCell.nbPoints);
+							// we choose the point which is the closest to the cell center (in 2D)
+							CCVector2d C                    = computeCellCenter(i, j, X, Y);
+							double     minimumSquareDistToP = 0.0;
 							for (unsigned n = 0; n < aCell.nbPoints; n++)
 							{
-								unsigned   pointIndex = cellPointIndexedHeight[n].index;
-								ScalarType value      = sf->getValue(pointIndex);
-								if (CCCoreLib::ScalarField::ValidValue(value))
+								unsigned         pointIndex = cellPointIndexedHeight[n].index;
+								const CCVector3* P          = cloud->getPoint(pointIndex);
+								CCVector2d       P2D(P->u[X], P->u[Y]);
+								double           squareDistToP = (C - P2D).norm2();
+								if ((squareDistToP < minimumSquareDistToP) || (n == 0))
 								{
-									sfValues.push_back(value);
+									minimumSquareDistToP    = squareDistToP;
+									aCell.nearestPointIndex = pointIndex;
 								}
-							}
-							if (sfValues.size() > 1)
-							{
-								ParallelSort(sfValues.begin(), sfValues.end());
-								size_t midIndex = sfValues.size() / 2;
-								if (sfValues.size() % 2) // odd number
-								{
-									scalarFields[k][pos] = sfValues[midIndex];
-								}
-								else
-								{
-									scalarFields[k][pos] = static_cast<ScalarType>((static_cast<double>(sfValues[midIndex - 1]) + sfValues[midIndex]) / 2);
-								}
-							}
-							else if (sfValues.size() == 1)
-							{
-								scalarFields[k][pos] = sfValues[0];
-							}
-							else
-							{
-								scalarFields[k][pos] = CCCoreLib::NAN_VALUE;
 							}
 						}
 						break;
-
-						case PROJ_MAXIMUM_VALUE:
+					case PROJ_MEDIAN_VALUE:
+					{
+						// extract median value
+						unsigned indexMid = aCell.nbPoints / 2;
+						if (aCell.nbPoints % 2) // odd value
 						{
-							ScalarType maxValue = CCCoreLib::NAN_VALUE;
+							aCell.h = cellPointIndexedHeight[indexMid].val;
+						}
+						else
+						{
+							aCell.h = (cellPointIndexedHeight[indexMid - 1].val + cellPointIndexedHeight[indexMid].val) / 2;
+						}
+						aCell.nearestPointIndex = cellPointIndexedHeight[indexMid].index;
+					}
+					break;
+					case PROJ_MAXIMUM_VALUE:
+						aCell.h                 = aCell.maxHeight;
+						aCell.nearestPointIndex = cellPointIndexedHeight[aCell.nbPoints - 1].index;
+						break;
+					default:
+						assert(false);
+						break;
+					}
+
+					// if the cloud has RGB-colors
+					if (hasColors)
+					{
+						assert(cloud->hasColors());
+						if (projectionType == PROJ_AVERAGE_VALUE)
+						{
+							// compute the average color
+							aCell.color = CCVector3d(0, 0, 0);
 							for (unsigned n = 0; n < aCell.nbPoints; n++)
 							{
-								unsigned   pointIndex = cellPointIndexedHeight[n].index;
-								ScalarType value      = sf->getValue(pointIndex);
-								if (CCCoreLib::ScalarField::ValidValue(value))
-								{
-									if (std::isnan(maxValue) || maxValue < value)
-									{
-										maxValue = value;
-									}
-								}
+								unsigned            pointIndex = cellPointIndexedHeight[n].index;
+								const ccColor::Rgb& col        = cloud->getPointColor(pointIndex);
+								aCell.color += CCVector3d(col.r, col.g, col.b);
 							}
-							scalarFields[k][pos] = maxValue;
+							aCell.color /= aCell.nbPoints;
 						}
-						break;
-
-						case PROJ_AVERAGE_VALUE:
+						else
 						{
-							// for average, we do a simple average of unsorted SF-values in cell
-							double   scalarFieldWeightedSum = 0.0;
-							unsigned validPointCount        = 0;
-							for (unsigned n = 0; n < aCell.nbPoints; n++)
-							{
-								unsigned   pointIndex = cellPointIndexedHeight[n].index;
-								ScalarType value      = sf->getValue(pointIndex);
-								if (CCCoreLib::ScalarField::ValidValue(value))
-								{
-									scalarFieldWeightedSum += value;
-									++validPointCount;
-								}
-							}
-							scalarFields[k][pos] = validPointCount != 0 ? scalarFieldWeightedSum / validPointCount : std::numeric_limits<double>::quiet_NaN();
+							// pick color from selected index
+							const ccColor::Rgb& col = cloud->getPointColor(aCell.nearestPointIndex);
+							aCell.color             = CCVector3d(col.r, col.g, col.b);
 						}
-						break;
+					}
 
-						case PROJ_INVERSE_VAR_VALUE:
-							// inverse variance projection mode: weighted average with weights of 1/var
-							if (projectionType == PROJ_INVERSE_VAR_VALUE && k == zStdDevSfIndex)
+					// if we should project the scalar fields
+					if (projectSFs)
+					{
+						assert(pc);
+						// absolute position of the cell (e.g. in the 2D SF grid(s))
+						int pos = j * static_cast<int>(width) + i;
+						assert(pos < static_cast<int>(gridTotalSize));
+
+						for (size_t k = 0; k < scalarFields.size(); ++k)
+						{
+							assert(!scalarFields[k].empty());
+							CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
+
+							assert(sf && pos < scalarFields[k].size());
+
+							switch (sfProjectionType)
 							{
-								// Special case for the 'std deviation' scalar field, output layer should
-								// just be filled with the updated model standard deviation.
-								scalarFields[k][pos] = cellModelStdDevHeight;
-							}
-							else
+							case PROJ_MINIMUM_VALUE:
 							{
-								assert(zStdDevSF);
-								double scalarFieldWeightedSum = 0.0;
-								double scalarFieldWeightSum   = 0.0;
+								ScalarType minValue = CCCoreLib::NAN_VALUE;
 								for (unsigned n = 0; n < aCell.nbPoints; n++)
 								{
 									unsigned   pointIndex = cellPointIndexedHeight[n].index;
-									ScalarType stdDev     = zStdDevSF->getValue(pointIndex);
-									if (ccScalarField::ValidValue(stdDev) && CCCoreLib::GreaterThanEpsilon(stdDev))
+									ScalarType value      = sf->getValue(pointIndex);
+									if (CCCoreLib::ScalarField::ValidValue(value))
 									{
-										ScalarType value = sf->getValue(pointIndex);
-										if (ccScalarField::ValidValue(value))
+										if (std::isnan(minValue) || minValue > value)
 										{
-											ScalarType weight = 1.0 / (stdDev * stdDev);
-											scalarFieldWeightedSum += static_cast<double>(weight) * value;
-											scalarFieldWeightSum += weight;
+											minValue = value;
 										}
 									}
 								}
-
-								scalarFields[k][pos] = CCCoreLib::GreaterThanEpsilon(scalarFieldWeightSum) ? scalarFieldWeightedSum / scalarFieldWeightSum : std::numeric_limits<double>::quiet_NaN();
+								scalarFields[k][pos] = minValue;
 							}
 							break;
 
-						default:
-							assert(false);
+							case PROJ_MEDIAN_VALUE:
+							{
+								sfValues.clear();
+								sfValues.reserve(aCell.nbPoints);
+								for (unsigned n = 0; n < aCell.nbPoints; n++)
+								{
+									unsigned   pointIndex = cellPointIndexedHeight[n].index;
+									ScalarType value      = sf->getValue(pointIndex);
+									if (CCCoreLib::ScalarField::ValidValue(value))
+									{
+										sfValues.push_back(value);
+									}
+								}
+								if (sfValues.size() > 1)
+								{
+									ParallelSort(sfValues.begin(), sfValues.end());
+									size_t midIndex = sfValues.size() / 2;
+									if (sfValues.size() % 2) // odd number
+									{
+										scalarFields[k][pos] = sfValues[midIndex];
+									}
+									else
+									{
+										scalarFields[k][pos] = static_cast<ScalarType>((static_cast<double>(sfValues[midIndex - 1]) + sfValues[midIndex]) / 2);
+									}
+								}
+								else if (sfValues.size() == 1)
+								{
+									scalarFields[k][pos] = sfValues[0];
+								}
+								else
+								{
+									scalarFields[k][pos] = CCCoreLib::NAN_VALUE;
+								}
+							}
 							break;
+
+							case PROJ_MAXIMUM_VALUE:
+							{
+								ScalarType maxValue = CCCoreLib::NAN_VALUE;
+								for (unsigned n = 0; n < aCell.nbPoints; n++)
+								{
+									unsigned   pointIndex = cellPointIndexedHeight[n].index;
+									ScalarType value      = sf->getValue(pointIndex);
+									if (CCCoreLib::ScalarField::ValidValue(value))
+									{
+										if (std::isnan(maxValue) || maxValue < value)
+										{
+											maxValue = value;
+										}
+									}
+								}
+								scalarFields[k][pos] = maxValue;
+							}
+							break;
+
+							case PROJ_AVERAGE_VALUE:
+							{
+								// for average, we do a simple average of unsorted SF-values in cell
+								double   scalarFieldWeightedSum = 0.0;
+								unsigned validPointCount        = 0;
+								for (unsigned n = 0; n < aCell.nbPoints; n++)
+								{
+									unsigned   pointIndex = cellPointIndexedHeight[n].index;
+									ScalarType value      = sf->getValue(pointIndex);
+									if (CCCoreLib::ScalarField::ValidValue(value))
+									{
+										scalarFieldWeightedSum += value;
+										++validPointCount;
+									}
+								}
+								scalarFields[k][pos] = validPointCount != 0 ? scalarFieldWeightedSum / validPointCount : std::numeric_limits<double>::quiet_NaN();
+							}
+							break;
+
+							case PROJ_INVERSE_VAR_VALUE:
+								// inverse variance projection mode: weighted average with weights of 1/var
+								if (projectionType == PROJ_INVERSE_VAR_VALUE && k == zStdDevSfIndex)
+								{
+									// Special case for the 'std deviation' scalar field, output layer should
+									// just be filled with the updated model standard deviation.
+									scalarFields[k][pos] = cellModelStdDevHeight;
+								}
+								else
+								{
+									assert(zStdDevSF);
+									double scalarFieldWeightedSum = 0.0;
+									double scalarFieldWeightSum   = 0.0;
+									for (unsigned n = 0; n < aCell.nbPoints; n++)
+									{
+										unsigned   pointIndex = cellPointIndexedHeight[n].index;
+										ScalarType stdDev     = zStdDevSF->getValue(pointIndex);
+										if (ccScalarField::ValidValue(stdDev) && CCCoreLib::GreaterThanEpsilon(stdDev))
+										{
+											ScalarType value = sf->getValue(pointIndex);
+											if (ccScalarField::ValidValue(value))
+											{
+												ScalarType weight = 1.0 / (stdDev * stdDev);
+												scalarFieldWeightedSum += static_cast<double>(weight) * value;
+												scalarFieldWeightSum += weight;
+											}
+										}
+									}
+
+									scalarFields[k][pos] = CCCoreLib::GreaterThanEpsilon(scalarFieldWeightSum) ? scalarFieldWeightedSum / scalarFieldWeightSum : std::numeric_limits<double>::quiet_NaN();
+								}
+								break;
+
+							default:
+								assert(false);
+								break;
+							}
 						}
 					}
 				}
+
+				nProgress.oneStep();
 			}
 		}
 	}

@@ -28,35 +28,6 @@
 //Qt
 #include <QApplication>
 
-
-//! 26-connexity neighbouring cells positions (common edges)
-const int c_3dNeighboursPosShift[] {-1,-1,-1,
-									-1,-1, 0,
-									-1,-1, 1,
-									-1, 0,-1,
-									-1, 0, 0,
-									-1, 0, 1,
-									-1, 1,-1,
-									-1, 1, 0,
-									-1, 1, 1,
-									 0,-1,-1,
-									 0,-1, 0,
-									 0,-1, 1,
-									 0, 0,-1,
-									 0, 0, 1,
-									 0, 1,-1,
-									 0, 1, 0,
-									 0, 1, 1,
-									 1,-1,-1,
-									 1,-1, 0,
-									 1,-1, 1,
-									 1, 0,-1,
-									 1, 0, 0,
-									 1, 0, 1,
-									 1, 1,-1,
-									 1, 1, 0,
-									 1, 1, 1 };
-
 FastMarchingForFacetExtraction::FastMarchingForFacetExtraction()
 	: CCCoreLib::FastMarching()
 	, m_currentFacetPoints(nullptr)

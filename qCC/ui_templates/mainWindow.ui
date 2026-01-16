@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::ClickFocus</enum>
+   <enum>Qt::FocusPolicy::ClickFocus</enum>
   </property>
   <property name="acceptDrops">
    <bool>false</bool>
@@ -39,7 +39,7 @@
      <x>0</x>
      <y>0</y>
      <width>1028</width>
-     <height>22</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -80,6 +80,7 @@
      </property>
      <addaction name="actionToggleSunLight"/>
      <addaction name="actionToggleCustomLight"/>
+     <addaction name="actionSetCustomLightPosition"/>
     </widget>
     <widget class="QMenu" name="menuActiveScalarField">
      <property name="title">
@@ -551,7 +552,7 @@
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::DockWidgetFeature::DockWidgetFloatable|QDockWidget::DockWidgetFeature::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
     <string>DB Tree</string>
@@ -592,10 +593,10 @@ QTreeView::branch:open:has-children:has-siblings  {
         <bool>true</bool>
        </property>
        <property name="dragDropMode">
-        <enum>QAbstractItemView::InternalMove</enum>
+        <enum>QAbstractItemView::DragDropMode::InternalMove</enum>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
+        <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
        </property>
        <property name="uniformRowHeights">
         <bool>true</bool>
@@ -656,10 +657,10 @@ QTreeView::branch:open:has-children:has-siblings  {
     </size>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetFloatable</set>
+    <set>QDockWidget::DockWidgetFeature::DockWidgetClosable|QDockWidget::DockWidgetFeature::DockWidgetFloatable</set>
    </property>
    <property name="allowedAreas">
-    <set>Qt::BottomDockWidgetArea</set>
+    <set>Qt::DockWidgetArea::BottomDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Console</string>
@@ -684,7 +685,7 @@ QTreeView::branch:open:has-children:has-siblings  {
         </size>
        </property>
        <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
@@ -693,7 +694,7 @@ QTreeView::branch:open:has-children:has-siblings  {
         <bool>true</bool>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
+        <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
        </property>
       </widget>
      </item>
@@ -773,7 +774,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <bool>false</bool>
    </property>
    <property name="features">
-    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+    <set>QDockWidget::DockWidgetFeature::DockWidgetFloatable|QDockWidget::DockWidgetFeature::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
     <string>Properties</string>
@@ -786,7 +787,7 @@ QTreeView::branch:open:has-children:has-siblings  {
      <item>
       <widget class="QTreeView" name="propertiesTreeView">
        <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
+        <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
        </property>
        <property name="showDropIndicator" stdset="0">
         <bool>false</bool>
@@ -795,7 +796,7 @@ QTreeView::branch:open:has-children:has-siblings  {
         <bool>true</bool>
        </property>
        <property name="selectionMode">
-        <enum>QAbstractItemView::NoSelection</enum>
+        <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
        </property>
        <property name="rootIsDecorated">
         <bool>false</bool>
@@ -853,7 +854,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Ctrl+S</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionQuit">
@@ -885,7 +886,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F9</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionDisplaySettings">
@@ -1004,7 +1005,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F8</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionClose3DView">
@@ -1084,7 +1085,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Del</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionRegister">
@@ -1592,7 +1593,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">8</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewFront">
@@ -1613,7 +1614,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">5</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewBack">
@@ -1634,7 +1635,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">0</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewLeft">
@@ -1655,7 +1656,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">4</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewRight">
@@ -1676,7 +1677,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">6</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewBottom">
@@ -1697,7 +1698,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">2</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionDisplayMainTools">
@@ -1765,7 +1766,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F6</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionToggleCustomLight">
@@ -1782,7 +1783,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F7</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionGlobalZoom">
@@ -1812,7 +1813,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F3</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionToggleViewerBasedPerspective">
@@ -1833,7 +1834,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F4</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionRefresh">
@@ -1848,7 +1849,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F5</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionTestFrameRate">
@@ -2047,7 +2048,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>V</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionToggleNormals">
@@ -2061,7 +2062,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>N</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionToggleColors">
@@ -2075,7 +2076,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>C</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionToggleSF">
@@ -2089,7 +2090,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>S</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionApplyTransformation">
@@ -2125,7 +2126,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Ctrl+V</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionPickRotationCenter">
@@ -2140,7 +2141,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>P</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionComputeDistancesFromSensor">
@@ -2185,7 +2186,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Shift+C</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionShowActiveSFPrevious">
@@ -2202,7 +2203,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Shift+Up</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionShowActiveSFNext">
@@ -2267,7 +2268,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>D</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionPrimitiveFactory">
@@ -2290,7 +2291,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>M</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetOrthoView">
@@ -2401,7 +2402,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">7</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionSetViewIso2">
@@ -2422,7 +2423,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string notr="true">9</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionConvertTextureToColor">
@@ -2446,7 +2447,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Open Color Scales Manager dialog</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionCrossSection">
@@ -2703,7 +2704,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>A</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionLockRotationAxis">
@@ -2724,7 +2725,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>L</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionCreateCloudFromEntCenters">
@@ -2850,7 +2851,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F10</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionComputePointsVisibility">
@@ -2881,7 +2882,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>F11</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionEnableVisualDebugTraces">
@@ -3019,7 +3020,7 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Shift+P</string>
    </property>
    <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
+    <enum>Qt::ShortcutContext::ApplicationShortcut</enum>
    </property>
   </action>
   <action name="actionShowCursor3DCoordinates">
@@ -3314,6 +3315,14 @@ The active scalar field should have integer values.</string>
   <action name="actionShortcutSettings">
    <property name="text">
     <string>Shortcut settings</string>
+   </property>
+  </action>
+  <action name="actionSetCustomLightPosition">
+   <property name="text">
+    <string>Set Custom Light position</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F7</string>
    </property>
   </action>
  </widget>

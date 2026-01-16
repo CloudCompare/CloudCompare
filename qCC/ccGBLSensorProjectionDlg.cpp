@@ -112,14 +112,20 @@ void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 		pitchStepSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getPitchStep()));
 		// yaw step
 		yawStepSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getYawStep()));
+		// pitch range
+		minPhiDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getMinPitch()));
+		maxPhiDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getMaxPitch()));
+		// yaw range
+		minThetaDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getMinYaw()));
+		maxThetaDoubleSpinBox->setValue(CCCoreLib::RadiansToDegrees(sensor->getMaxYaw()));
 	}
 
 	/*** Other ***/
 	{
 		// max range
 		maxRangeDoubleSpinBox->setValue(sensor->getSensorRange());
-		// uncertainty
-		uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
+		// uncertainty (as a percentage)
+		uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty() * 100.0);
 	}
 }
 
@@ -168,6 +174,12 @@ void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 		sensor->setPitchStep(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(pitchStepSpinBox->value())));
 		// yax step
 		sensor->setYawStep(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(yawStepSpinBox->value())));
+		// pitch range
+		sensor->setPitchRange(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(minPhiDoubleSpinBox->value())),
+		                      static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(maxPhiDoubleSpinBox->value())));
+		// yaw range
+		sensor->setYawRange(static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(minThetaDoubleSpinBox->value())),
+		                    static_cast<PointCoordinateType>(CCCoreLib::DegreesToRadians(maxThetaDoubleSpinBox->value())));
 	}
 
 	/*** Other ***/
@@ -175,7 +187,7 @@ void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 		// max. range
 		sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
 
-		// uncertainty
-		sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));
+		// uncertainty (as a percentage)
+		sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value() / 100.0));
 	}
 }

@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                     CLOUDCOMPARE PLUGIN: qFacets                       #
@@ -15,18 +17,12 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef QFACET_KD_TREE_BASED_FACET_EXTRACTION_HEADER
-#define QFACET_KD_TREE_BASED_FACET_EXTRACTION_HEADER
-
 //qCC_db
 #include <ccKdTree.h>
 
 class ccKdTreeForFacetExtraction
 {
 public:
-
-	//! Default constructor
-	ccKdTreeForFacetExtraction();
 
 	//! Fuses cells
 	/** Creates a new scalar fields with the groups indexes.
@@ -47,5 +43,3 @@ public:
 							CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
 };
-
-#endif //QFACET_KD_TREE_BASED_FACET_EXTRACTION_HEADER

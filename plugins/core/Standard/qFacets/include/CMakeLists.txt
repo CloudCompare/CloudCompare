@@ -9,6 +9,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/fastMarchingForFacetExtraction.h
 		${CMAKE_CURRENT_LIST_DIR}/kdTreeForFacetExtraction.h
 		${CMAKE_CURRENT_LIST_DIR}/qFacets.h
+		${CMAKE_CURRENT_LIST_DIR}/qFacetsCommands.h
 		${CMAKE_CURRENT_LIST_DIR}/stereogramDlg.h
 )
 

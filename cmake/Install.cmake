@@ -133,7 +133,9 @@ function( InstallPlugins )
 	# Make CloudCompare/ccViewer depend on the plugins
 	# so that when building CloudCompare/ccViewer the plugins also get built
 	# instead of waiting for the `install` target to be ran for the plugins to get built
-	add_dependencies(${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST})
+	if (CC_PLUGIN_TARGET_LIST)
+		add_dependencies(${PROJECT_NAME} ${CC_PLUGIN_TARGET_LIST})
+	endif()
 
 	# Install the requested plugins in the DEST_FOLDER
 	foreach( plugin_target ${CC_PLUGIN_TARGET_LIST} )
@@ -264,7 +266,8 @@ function( _InstallFiles )
 	# For readability
 	set( files "${INSTALL_FILES_FILES}" )
 	set( full_path "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
-	
+	cmake_path(SET full_path NORMALIZE "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
+
 	if( WIN32 )
 		if( NOT CMAKE_CONFIGURATION_TYPES )
 			install(

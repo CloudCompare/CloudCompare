@@ -262,7 +262,11 @@ void ccClipBox::reset()
 
 	if (m_entityContainer.getChildrenNumber())
 	{
-		m_box = m_entityContainer.getBB_recursive();
+		m_box                       = m_entityContainer.getBB_recursive();
+		PointCoordinateType epsilon = m_box.getDiagNorm() / 500;
+		CCVector3           epsilonVec(epsilon, epsilon, epsilon);
+		m_box.add(m_box.minCorner() - epsilonVec);
+		m_box.add(m_box.maxCorner() + epsilonVec);
 	}
 
 	update();

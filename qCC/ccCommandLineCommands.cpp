@@ -8359,37 +8359,18 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	// Call MainWindow generic method
-	ccHObject::Container entities;
-	entities.resize(cmd.clouds().size());
-	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	for (const auto& cl : cmd.clouds())
 	{
-		entities[i] = cmd.clouds()[i].pc;
-	}
-
-	for (ccHObject* entity : entities)
-	{
-		unsigned  childrenNumber = entity->getChildrenNumber();
 		ccSensor* sensor{nullptr};
-		for (unsigned childPos = 0; childPos < childrenNumber; childPos++)
+		for (unsigned childPos = 0; childPos < cl.pc->getChildrenNumber(); childPos++)
 		{
-			sensor = ccHObjectCaster::ToSensor(entity->getChild(childPos));
+			sensor = ccHObjectCaster::ToSensor(cl.pc->getChild(childPos));
 			if (sensor)
 				break; // once a sensor is found, break the loop
 		}
 
 		if (!sensor)
 			continue;
-
-		assert(sensor); // at this step we should have a sensor associated to the cloud
-
-		// get associated cloud
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-		if (!cloud)
-		{
-			cmd.error(QObject::tr("Do not manage to associate the sensor with a cloud"));
-			return false;
-		}
 
 		// sensor center
 		CCVector3 sensorCenter;
@@ -8401,22 +8382,22 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 
 		// set up a new scalar field
 		const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
-		int         sfIdx               = cloud->getScalarFieldIndexByName(defaultRangesSFname);
+		int         sfIdx               = cl.pc->getScalarFieldIndexByName(defaultRangesSFname);
 		if (sfIdx < 0)
 		{
-			sfIdx = cloud->addScalarField(defaultRangesSFname);
+			sfIdx = cl.pc->addScalarField(defaultRangesSFname);
 			if (sfIdx < 0)
 			{
 				cmd.error(QObject::tr("Not enough memory!"));
 				return false;
 			}
 		}
-		CCCoreLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+		CCCoreLib::ScalarField* distances = cl.pc->getScalarField(sfIdx);
 
 		// perform computation
-		for (unsigned i = 0; i < cloud->size(); ++i)
+		for (unsigned i = 0; i < cl.pc->size(); ++i)
 		{
-			const CCVector3* P = cloud->getPoint(i);
+			const CCVector3* P = cl.pc->getPoint(i);
 			ScalarType       s = static_cast<ScalarType>(squared ? (*P - sensorCenter).norm2() : (*P - sensorCenter).norm());
 			distances->setValue(i, s);
 		}
@@ -8455,21 +8436,13 @@ bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	// Call MainWindow generic method
-	ccHObject::Container entities;
-	entities.resize(cmd.clouds().size());
-	for (size_t i = 0; i < cmd.clouds().size(); ++i)
+	for (const auto& cl : cmd.clouds())
 	{
-		entities[i] = cmd.clouds()[i].pc;
-	}
-
-	for (ccHObject* entity : entities)
-	{
-		unsigned  childrenNumber = entity->getChildrenNumber();
+		unsigned  childrenNumber = cl.pc->getChildrenNumber();
 		ccSensor* sensor{nullptr};
 		for (unsigned childPos = 0; childPos < childrenNumber; childPos++)
 		{
-			sensor = ccHObjectCaster::ToSensor(entity->getChild(childPos));
+			sensor = ccHObjectCaster::ToSensor(cl.pc->getChild(childPos));
 			if (sensor)
 				break; // once a sensor is found, break the loop
 		}
@@ -8479,17 +8452,9 @@ bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
 
 		assert(sensor); // at this step we should have a sensor associated to the cloud
 
-		// get associated cloud
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-		if (!cloud)
+		if (!cl.pc->hasNormals())
 		{
-			cmd.error(QObject::tr("Do not manage to associate the sensor with a cloud"));
-			return false;
-		}
-
-		if (!cloud->hasNormals())
-		{
-			cmd.print(QObject::tr(("The cloud must have normals for scattering angles calculations, skip calculation for cloud " + cloud->getName()).toLatin1()));
+			cmd.print(QObject::tr(("The cloud must have normals for scattering angles calculations, skip calculation for cloud " + cl.pc->getName()).toLatin1()));
 			continue;
 		}
 
@@ -8503,30 +8468,30 @@ bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
 
 		// set up a new scalar field
 		const char* defaultScatAnglesSFname = toDegreeFlag ? CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME : CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME;
-		int         sfIdx                   = cloud->getScalarFieldIndexByName(defaultScatAnglesSFname);
+		int         sfIdx                   = cl.pc->getScalarFieldIndexByName(defaultScatAnglesSFname);
 		if (sfIdx < 0)
 		{
-			sfIdx = cloud->addScalarField(defaultScatAnglesSFname);
+			sfIdx = cl.pc->addScalarField(defaultScatAnglesSFname);
 			if (sfIdx < 0)
 			{
 				cmd.error(QObject::tr("Not enough memory!"));
 				return false;
 			}
 		}
-		CCCoreLib::ScalarField* angles = cloud->getScalarField(sfIdx);
+		CCCoreLib::ScalarField* angles = cl.pc->getScalarField(sfIdx);
 
 		// perform computation
-		for (unsigned i = 0; i < cloud->size(); ++i)
+		for (unsigned i = 0; i < cl.pc->size(); ++i)
 		{
 			// the point position
-			const CCVector3* P = cloud->getPoint(i);
+			const CCVector3* P = cl.pc->getPoint(i);
 
 			// build the ray
 			CCVector3 ray = *P - sensorCenter;
 			ray.normalize();
 
 			// get the current normal
-			CCVector3 normal(cloud->getPointNormal(i));
+			CCVector3 normal(cl.pc->getPointNormal(i));
 			// normal.normalize(); //should already be the case!
 
 			// compute the angle

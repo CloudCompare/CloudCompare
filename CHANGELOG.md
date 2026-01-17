@@ -21,6 +21,11 @@ New features:
 		- distances between a point cloud and a disc can be computed with 'Tools > Distances > Cloud/primitive dist'
 
 	- New Command line options
+		- New command -DISTANCES_FROM_SENSOR [-SQUARED]
+			- to compute the distances from every point of the cloud to the associated sensor origin (if any)
+		- New command -SCATTERING_ANGLES [-DEGREES]
+			- to compute the scattering angle from every point of the cloud (and its associated normal) w.r.t. to the associated sensor (if any)
+			- the cloud must have normals
 		- New command -FILTER -RGB -SF {-MEAN|-MEDIAN|GAUSSIAN|BILATERAL} -SIGMA {sigma} -SIGMA_SF {sigma_sf} -BURNT_COLOR_THRESHOLD {burnt_color_threshold} -BLEND_GRAYSCALE {grayscale_threshold} {grayscale_percent}
 			- command arguments with a dash can be in any order
 			- -RGB runs the filter on color
@@ -83,6 +88,7 @@ New features:
               - -CSV_FILENAME {csv_filename} default = '[name of cloud]_facets.csv'
 			  - -COORDS_IN_CSV will add facet polyline coordinates to the csv file in wkt format "POLYGONZ(x1 y1 z1,x2 y2 z2,...,x1 y1 z1)". default=false
 					If present then -USE_NATIVE_ORIENTATION etc will apply.
+
 	- New option to discard the confirmation popup dialog when exiting CloudCompare
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry
@@ -150,10 +156,8 @@ Improvements:
 			this means the user really wants to apply the input Global shift to all the entities (instead of showing the dialog again and again)
 
 	- Command line:
-		- new options
-			- -DISTANCES_FROM_SENSOR [-SQUARED]
-			- -SCATTERING_ANGLES [-DEGREES]
-			- -OCTREE_NORMALS {radius} [-WITH_GRIDS {angle}] [-ORIENT WITH_GRIDS] [-ORIENT WITH_SENSOR]
+		- new sub-options for -OCTREE_NORMALS:
+			- -OCTREE_NORMALS {radius} [-WITH_GRIDS {angle}] [-ORIENT WITH_GRIDS/WITH_SENSOR]
 		- the -SF_OP command now supports MIN/DISP_MIN/SAT_MIN/N_SIGMA_MIN/MAX/DISP_MAX/SAT_MAX/N_SIGMA_MAX as input values
 		- Rename -CSF command's resulting clouds to be able to select them later:
 			- {original cloud name} + '_ground_points'

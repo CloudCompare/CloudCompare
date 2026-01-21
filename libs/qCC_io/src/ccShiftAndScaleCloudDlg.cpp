@@ -58,7 +58,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 	showWarning(false);
 	showKeepGlobalPosCheckbox(false);
 	showPreserveShiftOnSave(true);
-	showScaleItems(m_originalDiagonal > 0.0);
+	showScaleItems(m_originalDiagonal > 0.0, false);
 	showCancelButton(false);
 }
 
@@ -84,7 +84,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pl,
 	showTitle(false);
 	showKeepGlobalPosCheckbox(true);
 	showPreserveShiftOnSave(false);
-	showScaleItems(m_originalDiagonal > 0.0 && m_localDiagonal > 0.0);
+	showScaleItems(m_originalDiagonal > 0.0 && m_localDiagonal > 0.0, false);
 	showCancelButton(true);
 
 	// to update the GUI accordingly
@@ -229,11 +229,15 @@ double ccShiftAndScaleCloudDlg::getScale() const
 	return m_ui->scaleSpinBox->value();
 }
 
-void ccShiftAndScaleCloudDlg::showScaleItems(bool state)
+void ccShiftAndScaleCloudDlg::showScaleItems(bool state, bool autoSetScaleToOneIfDisabled)
 {
 	m_ui->diagOriginLabel->setVisible(state);
 	m_ui->diagDestLabel->setVisible(state);
-	// m_ui->scaleFrame->setVisible(state);
+	m_ui->scaleSpinBox->setEnabled(state);
+	if (!state && autoSetScaleToOneIfDisabled)
+	{
+		m_ui->scaleSpinBox->setValue(1.0);
+	}
 }
 
 void ccShiftAndScaleCloudDlg::showApplyAllButton(bool state)

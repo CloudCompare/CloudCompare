@@ -61,7 +61,7 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	}
 
 	//! Whether to show dialog items related to scale
-	void showScaleItems(bool state);
+	void showScaleItems(bool state, bool autoSetScaleToOneIfDisabled);
 
 	//! Whether to show the 'Apply all' button or not
 	void showApplyAllButton(bool state);

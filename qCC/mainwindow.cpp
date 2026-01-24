@@ -6028,24 +6028,28 @@ void MainWindow::doActionUnroll()
 		ccConsole::Error(tr("Method can't be applied on locked vertices or virtual point clouds!"));
 		return;
 	}
-	ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+	ccPointCloud* inputAsCloud = static_cast<ccPointCloud*>(cloud);
+
+	// wether the input entity is a mesh
+	ccMesh* inputMesh = ccHObjectCaster::ToMesh(m_selectedEntities.front());
 
 	ccUnrollDlg unrollDlg(m_ccRoot ? m_ccRoot->getRootEntity() : nullptr, this);
 	unrollDlg.fromPersistentSettings();
+	unrollDlg.setConfiguration(nullptr == inputMesh);
+
 	if (!unrollDlg.exec())
 		return;
 	unrollDlg.toPersistentSettings();
 
-	ccPointCloud::UnrollMode mode              = unrollDlg.getType();
-	PointCoordinateType      radius            = static_cast<PointCoordinateType>(unrollDlg.getRadius());
-	CCVector3d               axisDir           = unrollDlg.getAxis();
-	bool                     exportDeviationSF = unrollDlg.exportDeviationSF();
-	bool                     arbitraryOutputCS = unrollDlg.useArbitraryOutputCS();
-	CCVector3                center            = unrollDlg.getAxisPosition();
+	ccPointCloud::UnrollMode mode                     = unrollDlg.getType();
+	PointCoordinateType      radius                   = static_cast<PointCoordinateType>(unrollDlg.getRadius());
+	CCVector3d               axisDir                  = unrollDlg.getAxis();
+	bool                     exportDeviationSF        = unrollDlg.exportDeviationSF();
+	bool                     arbitraryOutputCS        = unrollDlg.useArbitraryOutputCS();
+	bool                     removeStretchedTriangles = unrollDlg.removeStretchedTriangles();
+	CCVector3                center                   = unrollDlg.getAxisPosition();
 
 	// let's rock unroll ;)
-	ccProgressDialog pDlg(true, this);
-
 	double startAngle_deg = 0.0;
 	double stopAngle_deg  = 360.0;
 	unrollDlg.getAngleRange(startAngle_deg, stopAngle_deg);
@@ -6055,7 +6059,10 @@ void MainWindow::doActionUnroll()
 		return;
 	}
 
-	ccPointCloud* output = nullptr;
+	ccPointCloud*    outputCloud = nullptr;
+	ccMesh*          outputMesh  = nullptr;
+	ccProgressDialog pDlg(true, this);
+
 	switch (mode)
 	{
 	case ccPointCloud::CYLINDER:
@@ -6065,10 +6072,17 @@ void MainWindow::doActionUnroll()
 		params.axisDir = CCVector3::fromArray(axisDir.u);
 		if (unrollDlg.isAxisPositionAuto())
 		{
-			center = pc->getOwnBB().getCenter();
+			center = inputAsCloud->getOwnBB().getCenter();
 		}
 		params.center = center;
-		output        = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		if (inputMesh)
+		{
+			outputMesh = inputMesh->unroll(mode, &params, removeStretchedTriangles, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		}
+		else
+		{
+			outputCloud = inputAsCloud->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		}
 	}
 	break;
 
@@ -6082,7 +6096,14 @@ void MainWindow::doActionUnroll()
 		params.coneAngle_deg = unrollDlg.getConeHalfAngle();
 		params.axisDir       = CCVector3::fromArray(axisDir.u);
 		params.spanRatio     = unrollDlg.getConicalProjSpanRatio();
-		output               = pc->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		if (inputMesh)
+		{
+			outputMesh = inputMesh->unroll(mode, &params, removeStretchedTriangles, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		}
+		else
+		{
+			outputCloud = inputAsCloud->unroll(mode, &params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, &pDlg);
+		}
 	}
 	break;
 
@@ -6091,31 +6112,35 @@ void MainWindow::doActionUnroll()
 		break;
 	}
 
-	if (output)
+	if (nullptr != inputMesh)
 	{
-		if (m_selectedEntities.front()->isA(CC_TYPES::MESH))
+		// input was a mesh
+		if (outputMesh)
 		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities.front());
-			mesh->setEnabled(false);
-			ccConsole::Warning(tr("[Unroll] Original mesh has been automatically hidden"));
-			ccMesh* outputMesh = mesh->cloneMesh(output);
-			outputMesh->addChild(output);
-			addToDB(outputMesh, true, true, false, true);
+			inputMesh->setEnabled(false);
 			outputMesh->setEnabled(true);
 			outputMesh->setVisible(true);
-		}
-		else
-		{
-			pc->setEnabled(false);
-			ccConsole::Warning(tr("[Unroll] Original cloud has been automatically hidden"));
-			if (pc->getParent())
+			ccConsole::Warning(tr("[Unroll] Original mesh has been automatically hidden"));
+			if (inputMesh->getParent())
 			{
-				pc->getParent()->addChild(output);
+				inputMesh->getParent()->addChild(outputMesh);
 			}
-			addToDB(output, true, true, false, true);
+			addToDB(outputMesh, true, true, false, true);
 		}
-		updateUI();
 	}
+	else if (outputCloud)
+	{
+		// input was a cloud
+		inputAsCloud->setEnabled(false);
+		ccConsole::Warning(tr("[Unroll] Original cloud has been automatically hidden"));
+		if (inputAsCloud->getParent())
+		{
+			inputAsCloud->getParent()->addChild(outputCloud);
+		}
+		addToDB(outputCloud, true, true, false, true);
+	}
+
+	updateUI();
 }
 
 ccGLWindowInterface* MainWindow::getActiveGLWindow()

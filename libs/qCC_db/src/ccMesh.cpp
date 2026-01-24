@@ -4247,3 +4247,121 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 
 	return true;
 }
+
+ccMesh* ccMesh::unroll(ccPointCloud::UnrollMode            mode,
+                       ccPointCloud::UnrollBaseParams*     params,
+                       bool                                removeStretchedTriangles,
+                       bool                                exportDeviationSF /*= false*/,
+                       double                              startAngle_deg /*= 0.0*/,
+                       double                              stopAngle_deg /*= 360.0*/,
+                       bool                                arbitraryOutputCS /*= false*/,
+                       CCCoreLib::GenericProgressCallback* progressCb /*= nullptr*/) const
+{
+	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccLog::Error("[Unroll] This method can't be applied on this mesh (non standard vertices)");
+		return nullptr;
+	}
+	const ccPointCloud* vertices = static_cast<ccPointCloud*>(m_associatedCloud);
+
+	ccPointCloud* unrolledVertices = vertices->unroll(mode, params, exportDeviationSF, startAngle_deg, stopAngle_deg, arbitraryOutputCS, progressCb);
+	if (!unrolledVertices)
+	{
+		// something went wrong
+		return nullptr;
+	}
+
+	ccMesh* outputMesh = const_cast<ccMesh*>(this)->cloneMesh(unrolledVertices);
+	if (!outputMesh)
+	{
+		// not enough memory
+		delete unrolledVertices;
+		return nullptr;
+	}
+	outputMesh->addChild(unrolledVertices);
+
+	if (removeStretchedTriangles)
+	{
+		if (unrolledVertices->size() == vertices->size())
+		{
+			unsigned triCount = outputMesh->size();
+
+			std::vector<bool> keepTriangle;
+			try
+			{
+				keepTriangle.resize(triCount, true);
+			}
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Error("Not enough memory to remove stretched triangles");
+				delete outputMesh;
+				return nullptr;
+			}
+
+			unsigned stretchedTriangleCount = 0;
+			for (unsigned i = 0; i < triCount; ++i)
+			{
+				const auto vertIndexes = outputMesh->getTriangleVertIndexes(i);
+				// check every edge until one fails the test
+				for (unsigned j = 0; j < 3; ++j)
+				{
+					int v1 = vertIndexes->i[j];
+					int v2 = vertIndexes->i[(j + 1) % 3];
+					if (v1 >= 0 && v2 >= 0)
+					{
+						// compare the length of the triangle edges before and after unrolling
+						double before = (*(vertices->getPoint(v2)) - *(vertices->getPoint(v1))).normd();
+						double after  = (*(unrolledVertices->getPoint(v2)) - *(unrolledVertices->getPoint(v1))).normd();
+						if (after >= M_PI * before)
+						{
+							// edge is too long, probably stretched
+							keepTriangle[i] = false;
+							++stretchedTriangleCount;
+							break;
+						}
+					}
+				}
+			}
+
+			if (triCount == stretchedTriangleCount)
+			{
+				ccLog::Warning("[Unroll] All triangles are stretched! Unrolled mesh won't be created");
+				delete outputMesh;
+				return nullptr;
+			}
+
+			if (0 != stretchedTriangleCount)
+			{
+				// we can now remove the stretched triangles
+				ccLog::Print(QString("[Unroll] Removing %1 stretched triangles...").arg(stretchedTriangleCount));
+				unsigned lastValidTriIndex = 0;
+
+				for (unsigned i = 0; i < triCount; ++i)
+				{
+					if (keepTriangle[i])
+					{
+						if (i != lastValidTriIndex)
+						{
+							outputMesh->swapTriangles(i, lastValidTriIndex);
+						}
+						++lastValidTriIndex;
+					}
+				}
+				outputMesh->resize(triCount - stretchedTriangleCount);
+			}
+		}
+		else
+		{
+			assert(false);
+			ccLog::Warning("Internal error: cannot remove stretched triangles as the number of unrolled vertices is different from the number of vertices");
+		}
+	}
+
+	// ideally we should unroll the mesh per-triangle normals as well, but we'll just recompute them for now...
+	if (outputMesh->arePerTriangleNormalsEnabled())
+	{
+		outputMesh->computePerTriangleNormals();
+	}
+
+	return outputMesh;
+}

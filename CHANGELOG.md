@@ -281,6 +281,10 @@ Improvements:
 		- new shortcuts to change the active scalar field: SHIFT + Up or Down arrows
 		- updated shortcuts list (F1)
 
+	- Tools > Projection > Unroll
+		- new option when unrolling a mesh: 'remove stretched triangles'
+		- automatically discards triangles which are stretched from one end to the other of the unrolled entity
+
 	- Others:
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the

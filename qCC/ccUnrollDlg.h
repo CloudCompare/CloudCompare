@@ -41,6 +41,7 @@ class ccUnrollDlg : public QDialog
 	CCVector3d               getAxis() const;
 	bool                     isAxisPositionAuto() const;
 	bool                     useArbitraryOutputCS() const;
+	bool                     removeStretchedTriangles() const;
 	CCVector3                getAxisPosition() const;
 	void                     getAngleRange(double& start_deg, double& stop_deg) const;
 	double                   getRadius() const;
@@ -50,6 +51,7 @@ class ccUnrollDlg : public QDialog
 
 	void toPersistentSettings() const;
 	void fromPersistentSettings();
+	void setConfiguration(bool cloudsOnly);
 
   protected:
 	void shapeTypeChanged(int index);

@@ -23,6 +23,7 @@
 
 // Local
 #include "ccGenericMesh.h"
+#include "ccPointCloud.h"
 
 class ccProgressDialog;
 class ccPolyline;
@@ -448,6 +449,27 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 
 	//! Merges duplicated vertices
 	bool mergeDuplicatedVertices(unsigned char octreeLevel = DefaultMergeDuplicateVerticesLevel, QWidget* parentWidget = nullptr);
+
+	//! Unrolls the mesh on a cylinder or a cone
+	/** This method relies heavily on the ccPointCloud::unroll method.
+	    \param mode unrolling mode
+	    \param params unrolling parameters (must match the unrolling mode)
+	    \param removeStretchedTriangles whether to remove the triangles stretched over by the unroll process
+	    \param exportDeviationSF to export the deviations from the ideal shape as a scalar field
+	    \param startAngle_deg start angle (in degrees) - 0 corresponds to +X (east)
+	    \param stopAngle_deg stop angle (in degrees)
+	    \param arbitraryOutputCS whether the output cloud should be exported in an arbitrary coordinate system or not
+	    \param progressCb for progress notification
+	    \return the unrolled point cloud
+	**/
+	ccMesh* unroll(ccPointCloud::UnrollMode            mode,
+	               ccPointCloud::UnrollBaseParams*     params,
+	               bool                                removeStretchedTriangles,
+	               bool                                exportDeviationSF = false,
+	               double                              startAngle_deg    = 0.0,
+	               double                              stopAngle_deg     = 360.0,
+	               bool                                arbitraryOutputCS = false,
+	               CCCoreLib::GenericProgressCallback* progressCb        = nullptr) const;
 
   protected: // methods
 	// inherited from ccHObject

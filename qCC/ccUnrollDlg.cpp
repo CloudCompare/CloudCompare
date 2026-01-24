@@ -28,9 +28,10 @@
 #include <QSettings>
 
 // semi-persistent settings
-static double s_startAngle_deg    = 0.0;
-static double s_stopAngle_deg     = 360.0;
-static bool   s_arbitraryOutputCS = false;
+static double s_startAngle_deg           = 0.0;
+static double s_stopAngle_deg            = 360.0;
+static bool   s_arbitraryOutputCS        = false;
+static bool   s_removeStretchedTriangles = true;
 
 ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent /*=nullptr*/)
     : QDialog(parent)
@@ -128,6 +129,11 @@ bool ccUnrollDlg::isAxisPositionAuto() const
 bool ccUnrollDlg::useArbitraryOutputCS() const
 {
 	return m_ui->arbitraryCSCheckBox->isChecked();
+}
+
+bool ccUnrollDlg::removeStretchedTriangles() const
+{
+	return (m_ui->removeStretchedTrianglesCheckBox->isEnabled() && m_ui->removeStretchedTrianglesCheckBox->isChecked());
 }
 
 void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
@@ -281,7 +287,8 @@ void ccUnrollDlg::toPersistentSettings() const
 
 		getAngleRange(s_startAngle_deg, s_stopAngle_deg);
 
-		s_arbitraryOutputCS = useArbitraryOutputCS();
+		s_arbitraryOutputCS        = useArbitraryOutputCS();
+		s_removeStretchedTriangles = removeStretchedTriangles();
 	}
 	settings.endGroup();
 }
@@ -350,8 +357,14 @@ void ccUnrollDlg::fromPersistentSettings()
 		m_ui->stopAngleDoubleSpinBox->setValue(s_stopAngle_deg);
 
 		m_ui->arbitraryCSCheckBox->setChecked(s_arbitraryOutputCS);
+		m_ui->removeStretchedTrianglesCheckBox->setChecked(s_removeStretchedTriangles);
 	}
 	settings.endGroup();
+}
+
+void ccUnrollDlg::setConfiguration(bool cloudsOnly)
+{
+	m_ui->removeStretchedTrianglesCheckBox->setEnabled(false == cloudsOnly);
 }
 
 void ccUnrollDlg::loadParametersFromEntity()

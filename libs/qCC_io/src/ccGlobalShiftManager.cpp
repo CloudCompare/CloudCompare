@@ -264,7 +264,7 @@ bool ccGlobalShiftManager::Handle(const CCVector3d& P,
 	{
 		ccShiftAndScaleCloudDlg sasDlg(P, diagonal);
 		sasDlg.showApplyAllButton(_applyAll != nullptr);
-		sasDlg.showScaleItems(_coordinatesScale != nullptr, true);
+		sasDlg.showScaleItems(_coordinatesScale != nullptr);
 		sasDlg.showWarning(needShift || needRescale);
 		sasDlg.setPreserveShiftOnSave(preserveCoordinateShift);
 		sasDlg.showPreserveShiftOnSave(_preserveCoordinateShift != nullptr);

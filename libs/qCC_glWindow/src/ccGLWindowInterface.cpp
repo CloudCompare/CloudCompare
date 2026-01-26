@@ -5413,7 +5413,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
-	setStandardOrthoCenter();
+	setStandardOrthoCorner();
 
 	// clear background
 	{
@@ -5429,8 +5429,8 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			if (displayParams.drawBackgroundGradient)
 			{
 				// draw the default gradient color background
-				int w = glWidth() / 2 + 1;
-				int h = glHeight() / 2 + 1;
+				int w = glWidth();
+				int h = glHeight();
 
 				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
 				const ccColor::Rgbub& frgCol = getDisplayParameters().textDefaultCol;
@@ -5440,12 +5440,31 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 				{
 					// we use the default background color for gradient start
 					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
-					glFunc->glVertex2i(-w, h);
+					glFunc->glVertex2i(0, h);
 					glFunc->glVertex2i(w, h);
 					// and the inverse of the text color for gradient stop
 					glFunc->glColor3ub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
-					glFunc->glVertex2i(w, -h);
-					glFunc->glVertex2i(-w, -h);
+					glFunc->glVertex2i(w, 0);
+					glFunc->glVertex2i(0, 0);
+				}
+				glFunc->glEnd();
+			}
+			else if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
+			{
+				// Draw a plain quad so as to not clear the other half of the 3D view!
+				int w = glWidth();
+				int h = glHeight();
+
+				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+
+				glFunc->glBegin(GL_QUADS);
+				{
+					// we use the default background color for gradient start
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
+					glFunc->glVertex2i(0, h);
+					glFunc->glVertex2i(w, h);
+					glFunc->glVertex2i(w, 0);
+					glFunc->glVertex2i(0, 0);
 				}
 				glFunc->glEnd();
 			}

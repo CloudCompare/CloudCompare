@@ -29,6 +29,7 @@ constexpr int COMBO_INDEX_RED_CYAN  = 2;
 constexpr int COMBO_INDEX_CYAN_RED  = 3;
 constexpr int COMBO_INDEX_NV_VISION = 4;
 constexpr int COMBO_INDEX_GENERIC   = 5;
+constexpr int COMBO_INDEX_SBS       = 6;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
     : QDialog(parent, Qt::Tool)
@@ -55,6 +56,7 @@ void ccStereoModeDlg::glassTypeChanged(int index)
 	case COMBO_INDEX_RED_CYAN:
 	case COMBO_INDEX_BLUE_RED:
 	case COMBO_INDEX_CYAN_RED:
+	case COMBO_INDEX_SBS:
 		m_ui->paramsGroupBox->setEnabled(true);
 		m_ui->warningTextEdit->setVisible(false);
 		break;
@@ -112,6 +114,9 @@ ccGLWindowInterface::StereoParams ccStereoModeDlg::getParameters() const
 	case COMBO_INDEX_GENERIC:
 		params.glassType = ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY;
 		break;
+	case COMBO_INDEX_SBS:
+		params.glassType = ccGLWindowInterface::StereoParams::SIDE_BY_SIDE;
+		break;
 	}
 
 	// viewport
@@ -145,6 +150,9 @@ void ccStereoModeDlg::setParameters(const ccGLWindowInterface::StereoParams& par
 		break;
 	case ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY:
 		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_GENERIC);
+		break;
+	case ccGLWindowInterface::StereoParams::SIDE_BY_SIDE:
+		m_ui->glassTypeComboBox->setCurrentIndex(COMBO_INDEX_SBS);
 		break;
 	default:
 		assert(false);

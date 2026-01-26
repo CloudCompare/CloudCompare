@@ -248,23 +248,6 @@ void ccGLWindowStereo::swapGLBuffers()
 	}
 }
 
-bool ccGLWindowStereo::prepareOtherStereoGlassType(CC_DRAW_CONTEXT&      CONTEXT,
-                                                   RenderingParams&      renderingParams,
-                                                   ccFrameBufferObject*& currentFBO)
-{
-	return false; // placeholder in case of other Stereo glass type
-}
-
-void ccGLWindowStereo::processOtherStereoGlassType(RenderingParams& renderingParams)
-{
-	return; // placeholder in case of other Stereo glass type
-}
-
-bool ccGLWindowStereo::setCustomCameraProjection(RenderingParams& renderingParams, ccGLMatrixd& modelViewMat, ccGLMatrixd& projectionMat)
-{
-	return false; // paceholder in case we need to set a custom camera projection (for stereo glasses)
-}
-
 bool ccGLWindowStereo::enableStereoMode(const StereoParams& params)
 {
 	return ccGLWindowInterface::enableStereoMode(params);

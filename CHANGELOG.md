@@ -109,6 +109,11 @@ New features:
 		- to manually set (or read) the custom light 3D position
 		- shortcut: ALT + F7
 
+	- New stereo rendering mode: 'Side-by-side'
+		- can be used with any stereo glasses / headset that support this mode
+		- simply splits the screen into two 3D views (left / right)
+	- (the Oculus support has been dropped)
+
 New plugins
 
 	- G3 Point: granulometry made simple in CloudCompare

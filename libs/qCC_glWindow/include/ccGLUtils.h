@@ -44,13 +44,20 @@ class CCGLWINDOW_LIB_API ccGLUtils
 	                OpenGL Textures
 	***************************************************/
 
-	static void        DisplayTexture2DPosition(QImage image, int x, int y, int w, int h, unsigned char alpha = 255);
+	enum TextureArea
+	{
+		Full,
+		HalfLeft,
+		HalfRight
+	};
+
+	static void        DisplayTexture2DPosition(QImage image, int x, int y, int w, int h, unsigned char alpha = 255, TextureArea area = Full);
 	inline static void DisplayTexture2D(QImage image, int w, int h, unsigned char alpha = 255)
 	{
 		DisplayTexture2DPosition(image, -w / 2, -h / 2, w, h, alpha);
 	}
 
-	static void        DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255);
+	static void        DisplayTexture2DPosition(GLuint texID, int x, int y, int w, int h, unsigned char alpha = 255, TextureArea area = Full);
 	inline static void DisplayTexture2D(GLuint texID, int w, int h, unsigned char alpha = 255)
 	{
 		DisplayTexture2DPosition(texID, -w / 2, -h / 2, w, h, alpha);

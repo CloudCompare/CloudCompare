@@ -707,19 +707,43 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 			RED_CYAN               = 3,
 			CYAN_RED               = 4,
 			NVIDIA_VISION          = 5,
-			GENERIC_STEREO_DISPLAY = 6
+			GENERIC_STEREO_DISPLAY = 6,
+			SIDE_BY_SIDE           = 7
 		};
 
-		//! Whether stereo-mode is 'analgyph' or real stereo mode
+		//! Whether stereo-mode is of type 'anaglyph'
 		inline bool isAnaglyph() const
 		{
 			return glassType <= 4;
 		}
 
-		int       screenWidth_mm;
-		int       screenDistance_mm;
-		int       eyeSeparation_mm;
-		int       stereoStrength;
+		//! Whether the stereo-mode required quad-buffering or not
+		inline bool quadBufferingRequired() const
+		{
+			switch (glassType)
+			{
+			case RED_BLUE:
+			case BLUE_RED:
+			case RED_CYAN:
+			case CYAN_RED:
+			case SIDE_BY_SIDE:
+				return false;
+			case NVIDIA_VISION:
+			case GENERIC_STEREO_DISPLAY:
+				return true;
+			default:
+				// unhandled type
+				break;
+			}
+
+			assert(false);
+			return false;
+		}
+
+		int       screenWidth_mm    = 0;
+		int       screenDistance_mm = 0;
+		int       eyeSeparation_mm  = 0;
+		int       stereoStrength    = 0;
 		GlassType glassType;
 	};
 
@@ -980,25 +1004,6 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 
 	//! Draws pivot point symbol in 3D
 	void drawPivot();
-
-	//! To be overriden
-	/** \return whether the viewport is modified **/
-	virtual bool prepareOtherStereoGlassType(CC_DRAW_CONTEXT& context, RenderingParams& params, ccFrameBufferObject*& currentFBO)
-	{
-		return false;
-	}
-
-	//! To be overriden
-	virtual void processOtherStereoGlassType(RenderingParams& params)
-	{
-	}
-
-	//! To be overriden
-	/** \return whether a custom camera projection was set **/
-	virtual bool setCustomCameraProjection(RenderingParams& params, ccGLMatrixd& modelViewMat, ccGLMatrixd& projectionMat)
-	{
-		return false;
-	}
 
   protected: // other methods
 	// Qt-equivalent shortcuts

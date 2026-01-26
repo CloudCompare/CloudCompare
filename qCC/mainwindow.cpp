@@ -9975,7 +9975,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			win->disableStereoMode();
 
 			if (win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			    || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+			    || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY
+			    || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::SIDE_BY_SIDE)
 			{
 				// disable (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -9998,7 +9999,7 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			ccGLWindowInterface::StereoParams params = smDlg.getParameters();
 			ccLog::WarningDebug("Stereo strength: " + QString::number(params.stereoStrength));
 
-			if (!ccGLWindowInterface::StereoSupported() && !params.isAnaglyph())
+			if (params.quadBufferingRequired() && !ccGLWindowInterface::StereoSupported())
 			{
 				ccLog::Error(tr("It seems your graphic card doesn't support Quad Buffered Stereo rendering"));
 				// activation of the stereo mode failed: cancel selection
@@ -10015,7 +10016,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			}
 
 			if (params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-			    || params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+			    || params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY
+			    || params.glassType == ccGLWindowInterface::StereoParams::SIDE_BY_SIDE)
 			{
 				// force (exclusive) full screen
 				m_UI->actionExclusiveFullScreen->setChecked(true);
@@ -10032,7 +10034,8 @@ void MainWindow::toggleActiveWindowStereoVision(bool state)
 			if (!win->enableStereoMode(params))
 			{
 				if (params.glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-				    || params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY)
+				    || params.glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY
+				    || params.glassType == ccGLWindowInterface::StereoParams::SIDE_BY_SIDE)
 				{
 					// disable (exclusive) full screen
 					m_UI->actionExclusiveFullScreen->setChecked(false);
@@ -10529,7 +10532,8 @@ void MainWindow::onExclusiveFullScreenToggled(bool state)
 	if (!state
 	    && win->stereoModeIsEnabled()
 	    && (win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::NVIDIA_VISION
-	        || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY))
+	        || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::GENERIC_STEREO_DISPLAY
+	        || win->getStereoParams().glassType == ccGLWindowInterface::StereoParams::SIDE_BY_SIDE))
 	{
 		// auto disable stereo mode as NVidia Vision only works in full screen mode!
 		m_UI->actionEnableStereo->setChecked(false);

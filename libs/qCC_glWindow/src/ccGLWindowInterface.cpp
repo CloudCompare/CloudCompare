@@ -5104,8 +5104,8 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	assert(glFunc);
 
 	// backup the current viewport
-	QRect originViewport   = m_glViewport;
-	bool  modifiedViewport = false;
+	QRect originViewport          = m_glViewport;
+	bool  viewportHasBeenModified = false;
 
 	ccFrameBufferObject* currentFBO = renderingParams.useFBO ? m_fbo : nullptr;
 	if (m_stereoModeEnabled)
@@ -5120,10 +5120,10 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		}
 		else if (m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
 		{
-			int   halfWidth = m_glViewport.width() / 2;
-			QRect halfViewport((renderingParams.pass == RIGHT_RENDERING_PASS ? halfWidth : 0), 0, halfWidth, m_glViewport.height());
+			CONTEXT.glW = m_glViewport.width() / 2;
+			QRect halfViewport((renderingParams.pass == RIGHT_RENDERING_PASS ? CONTEXT.glW : 0), 0, CONTEXT.glW, m_glViewport.height());
 			setGLViewport(halfViewport);
-			modifiedViewport = true;
+			viewportHasBeenModified = true;
 		}
 	}
 
@@ -5292,15 +5292,6 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
 	}
 
-	// restore viewport if necessary
-	if (modifiedViewport)
-	{
-		setGLViewport(originViewport);
-		CONTEXT.glW      = originViewport.width();
-		CONTEXT.glH      = originViewport.height();
-		modifiedViewport = false;
-	}
-
 	glFunc->glFlush();
 
 	// process and/or display the FBO (if any)
@@ -5372,7 +5363,12 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 				}
 			}
 
-			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
+			ccGLUtils::TextureArea area = ccGLUtils::TextureArea::Full;
+			if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
+			{
+				area = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? ccGLUtils::TextureArea::HalfLeft : ccGLUtils::TextureArea::HalfRight);
+			}
+			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight(), 255, area);
 
 			// warning: we must set the original FBO texture as default
 			glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
@@ -5390,6 +5386,15 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	if (renderingParams.drawForeground)
 	{
 		drawForeground(CONTEXT, renderingParams);
+	}
+
+	// restore viewport if necessary (for good this time)
+	if (viewportHasBeenModified)
+	{
+		setGLViewport(originViewport);
+		CONTEXT.glW             = originViewport.width();
+		CONTEXT.glH             = originViewport.height();
+		viewportHasBeenModified = false;
 	}
 
 	glFunc->glFlush();
@@ -5535,7 +5540,10 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 	// current displayed scalar field color ramp (if any)
 	ccRenderingTools::DrawColorRamp(CONTEXT);
 
-	m_clickableItems.clear();
+	if (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS)
+	{
+		m_clickableItems.clear();
+	}
 
 	/*** overlay entities ***/
 	{
@@ -5654,6 +5662,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			}
 
 			// hot-zone
+			if (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS)
 			{
 				drawClickableItems(0, yStart);
 			}

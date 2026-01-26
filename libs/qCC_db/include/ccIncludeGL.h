@@ -299,8 +299,8 @@ class ccGL
 
 		// Window coordinates
 		// Map x, y to range 0-1
-		output2D.x = (1.0 + Pp.x) / 2 * viewport[2] + viewport[0];
-		output2D.y = (1.0 + Pp.y) / 2 * viewport[3] + viewport[1];
+		output2D.x = (1.0 + Pp.x) / 2 * viewport[2] /* + viewport[0]*/;
+		output2D.y = (1.0 + Pp.y) / 2 * viewport[3] /* + viewport[1]*/;
 		// This is only correct when glDepthRange(0.0, 1.0)
 		output2D.z = (1.0 + Pp.z) / 2; // Between 0 and 1
 

@@ -18,7 +18,7 @@ if( EXISTS "${PRIVATE_DIR}" )
 	file( GLOB subdirectories "${PRIVATE_DIR}/*" )
 
 	foreach( dir ${subdirectories} )
-	    if( IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt )
+		if( IS_DIRECTORY ${dir} AND EXISTS ${dir}/CMakeLists.txt )
 			# In case the developer generated the BUILD project in the same folder as the sources
 			if( NOT ${dir} STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles" )
 				message( STATUS "Found private plugin: " ${dir} )

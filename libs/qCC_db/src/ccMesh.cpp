@@ -1995,17 +1995,12 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			const TexCoords2D* Tx2 = nullptr;
 			const TexCoords2D* Tx3 = nullptr;
 
-			if (showTextures)
-			{
-				glFunc->glEnable(GL_TEXTURE_2D);
-			}
+			int    lasMtlIndex  = -1;
+			GLuint currentTexID = 0;
 
 			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP
 			                                                                : GL_TRIANGLES;
 			glFunc->glBegin(triangleDisplayType);
-
-			GLuint currentTexID = 0;
-			int    lasMtlIndex  = -1;
 
 			// loop on all triangles
 			for (size_t n = 0; n < triNum; ++n)
@@ -2089,19 +2084,36 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glFunc->glEnd();
 						if (showTextures)
 						{
-							if (currentTexID)
+							if (newMatlIndex >= 0) // valid material index
 							{
-								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-								currentTexID = 0;
-							}
-
-							if (newMatlIndex >= 0)
-							{
-								currentTexID = m_materials->at(newMatlIndex)->getTextureID();
-								if (currentTexID)
+								GLuint newTexID = m_materials->at(newMatlIndex)->getTextureID();
+								if (newTexID != currentTexID)
 								{
-									glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
+									// the texture ID changes
+									if (0 != newTexID)
+									{
+										// new and valid texture ID --> we bind it
+										currentTexID = newTexID;
+										glFunc->glEnable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still try
+										                                 // to display an (invalid) texture. So we have to enable texture mode only when necessary.
+										glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
+									}
+									else if (0 != currentTexID)
+									{
+										// the previous texture ID was valid --> we unbind it
+										currentTexID = 0;
+										glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+										glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+										                                  // try to display an (invalid) texture. So we disable the whole texture mode.
+									}
 								}
+							}
+							else if (0 != currentTexID)
+							{
+								currentTexID = 0;
+								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+								glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+								                                  // try to display an (invalid) texture. So we disable the whole texture mode.
 							}
 						}
 
@@ -2172,10 +2184,12 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				if (currentTexID)
+				if (0 != currentTexID)
 				{
-					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 					currentTexID = 0;
+					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+					                                  // try to display an (invalid) texture. So we disable the whole texture mode.
 				}
 			}
 		}

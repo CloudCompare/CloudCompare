@@ -246,6 +246,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 
 				if (mesh->trianglePicking(vj,
 				                          m_segmentParams[i2].params,
+				                          mesh->isShownAsWire(),
 				                          nearestTriIndex,
 				                          nearestSquareDist,
 				                          _nearestPoint))

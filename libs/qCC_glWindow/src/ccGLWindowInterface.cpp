@@ -2624,30 +2624,27 @@ void ccGLWindowInterface::startCPUBasedPointPicking(const PickingParameters& par
 					ignoreSubmeshes = true;
 
 					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-					if (mesh->isShownAsWire())
+					if (!mesh->isShownAsWire()) // skip meshes that are displayed in wireframe mode (but we need to test their children)
 					{
-						// skip meshes that are displayed in wireframe mode
-						continue;
-					}
-
-					int        nearestTriIndex   = -1;
-					double     nearestSquareDist = 0.0;
-					CCVector3d P;
-					CCVector3d barycentricCoords;
-					if (mesh->trianglePicking(clickedPos,
-					                          camera,
-					                          nearestTriIndex,
-					                          nearestSquareDist,
-					                          P,
-					                          &barycentricCoords))
-					{
-						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+						int        nearestTriIndex   = -1;
+						double     nearestSquareDist = 0.0;
+						CCVector3d P;
+						CCVector3d barycentricCoords;
+						if (mesh->trianglePicking(clickedPos,
+						                          camera,
+						                          nearestTriIndex,
+						                          nearestSquareDist,
+						                          P,
+						                          &barycentricCoords))
 						{
-							nearestElementSquareDist = nearestSquareDist;
-							nearestElementIndex      = nearestTriIndex;
-							nearestPoint             = P.toPC();
-							nearestEntity            = mesh;
-							nearestPointBC           = barycentricCoords;
+							if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+							{
+								nearestElementSquareDist = nearestSquareDist;
+								nearestElementIndex      = nearestTriIndex;
+								nearestPoint             = P.toPC();
+								nearestEntity            = mesh;
+								nearestPointBC           = barycentricCoords;
+							}
 						}
 					}
 				}

@@ -2624,7 +2624,6 @@ void ccGLWindowInterface::startCPUBasedPointPicking(const PickingParameters& par
 					ignoreSubmeshes = true;
 
 					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-					if (!mesh->isShownAsWire()) // skip meshes that are displayed in wireframe mode (but we need to test their children)
 					{
 						int        nearestTriIndex   = -1;
 						double     nearestSquareDist = 0.0;
@@ -2632,6 +2631,7 @@ void ccGLWindowInterface::startCPUBasedPointPicking(const PickingParameters& par
 						CCVector3d barycentricCoords;
 						if (mesh->trianglePicking(clickedPos,
 						                          camera,
+						                          mesh->isShownAsWire(), // only check the edges in this case
 						                          nearestTriIndex,
 						                          nearestSquareDist,
 						                          P,

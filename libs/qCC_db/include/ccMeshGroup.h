@@ -128,16 +128,17 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return 0;
 	}
-	virtual unsigned capacity() const override
+	unsigned capacity() const override
 	{
 		return 0;
 	}
-	virtual bool trianglePicking(const CCVector2d&           clickPos,
-	                             const ccGLCameraParameters& camera,
-	                             int&                        nearestTriIndex,
-	                             double&                     nearestSquareDist,
-	                             CCVector3d&                 nearestPoint,
-	                             CCVector3d*                 barycentricCoords = nullptr) const override
+	bool trianglePicking(const CCVector2d&           clickPos,
+	                     const ccGLCameraParameters& camera,
+	                     bool                        edgeOnly,
+	                     int&                        nearestTriIndex,
+	                     double&                     nearestSquareDist,
+	                     CCVector3d&                 nearestPoint,
+	                     CCVector3d*                 barycentricCoords = nullptr) const override
 	{
 		return false;
 	}
@@ -195,7 +196,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 
   protected:
 	// inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 };
 
 #endif // CC_MESH_GROUP_HEADER

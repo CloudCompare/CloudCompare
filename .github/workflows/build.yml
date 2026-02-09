@@ -96,14 +96,9 @@ jobs:
       - name: Deploy Qt Dependencies (Windows)
         shell: bash -l {0}
         run: |
-          # Get the Qt bin directory from conda
-          QT_BIN_DIR="$CONDA_PREFIX/Library/bin"
-          
-          # Run windeployqt for CloudCompare
-          "$QT_BIN_DIR/windeployqt.exe" --release "${{ github.workspace }}/install/CloudCompare/CloudCompare.exe"
-          
-          # Run windeployqt for ccViewer
-          "$QT_BIN_DIR/windeployqt.exe" --release "${{ github.workspace }}/install/ccViewer/ccViewer.exe"
+          # windeployqt should be in PATH from conda environment
+          windeployqt.exe --release "${{ github.workspace }}/install/CloudCompare/CloudCompare.exe"
+          windeployqt.exe --release "${{ github.workspace }}/install/ccViewer/ccViewer.exe"
 
       - name: Upload Artifact (Windows)
         uses: actions/upload-artifact@v4

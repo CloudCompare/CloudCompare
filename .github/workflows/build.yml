@@ -26,6 +26,15 @@ jobs:
           channels: conda-forge
           conda-remove-defaults: "true"
 
+      - name: Install Qt
+        id: install-qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2022_64"
+
       - name: Configure MSVC console (Windows)
         uses: ilammy/msvc-dev-cmd@v1
 
@@ -48,7 +57,7 @@ jobs:
             -B build \
             -G "Ninja" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$CONDA_LIB_DIR" \
             -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
             -DPLUGIN_EXAMPLE_GL=ON \
@@ -96,14 +105,11 @@ jobs:
       - name: Deploy Qt Dependencies (Windows)
         shell: pwsh
         run: |
-          # Get conda environment path
-          $condaEnv = "$env:CONDA\envs\CloudCompareDev\Library\bin"
-          
-          # Run windeployqt for CloudCompare
-          & "$condaEnv\windeployqt.exe" --release "${{ github.workspace }}\install\CloudCompare\CloudCompare.exe"
-          
-          # Run windeployqt for ccViewer
-          & "$condaEnv\windeployqt.exe" --release "${{ github.workspace }}\install\ccViewer\ccViewer.exe"
+          # Run windeployqt from the Qt install
+          $qtBin = "$env:QT_ROOT_DIR\bin"
+
+          & "$qtBin\windeployqt.exe" --release "${{ github.workspace }}\install\CloudCompare\CloudCompare.exe"
+          & "$qtBin\windeployqt.exe" --release "${{ github.workspace }}\install\ccViewer\ccViewer.exe"
 
       - name: Upload Artifact (Windows)
         uses: actions/upload-artifact@v4

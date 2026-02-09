@@ -78,6 +78,9 @@ public:
 	//! Get all control points
 	const std::vector<CCVector3d> &getAllControlPoints() const { return m_controlPoints; }
 
+	//! Set all control points (for undo/redo)
+	void setAllControlPoints(const std::vector<CCVector3d> &controlPoints);
+
 private:
 	//! Trilinear interpolation weight function
 	/*!

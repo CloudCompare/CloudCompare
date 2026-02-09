@@ -4,6 +4,7 @@
 #include <ccHObject.h>
 #include <ccGLWindowInterface.h>
 #include <CCGeom.h>
+#include <deque>
 
 class ccPointCloud;
 class ccMainAppInterface;
@@ -38,6 +39,8 @@ private:
     void selectPointsInRectangle(int x1, int y1, int x2, int y2);
     bool projectPointToScreen(const CCVector3d& point3D, int& screenX, int& screenY) const;
     void updateCloudDeformation();
+    void pushLatticeHistory();           // Save current lattice state to history
+    void undoLastTransformation();       // Restore previous lattice state
 
     ccPointCloud* m_originalCloud = nullptr;            // Original full-resolution point cloud
     ccPointCloud* m_previewCloud = nullptr;             // Subsampled preview point cloud
@@ -69,6 +72,10 @@ private:
     bool m_axisConstraintLocked = false;               // Axis constraint lock (Ctrl+Shift+X/Y/Z)
 
     bool m_isDragging = false;                          // Is user currently dragging
+
+    // Undo history
+    std::deque<std::vector<CCVector3d>> m_latticeHistory;   // Stack of previous lattice states
+    static constexpr size_t MAX_HISTORY_SIZE = 50;          // Maximum undo levels
 
     ccGLWindowInterface::INTERACTION_FLAGS m_oldInteractionMode;
     ccGLWindowInterface::PICKING_MODE m_oldPickingMode = ccGLWindowInterface::DEFAULT_PICKING;

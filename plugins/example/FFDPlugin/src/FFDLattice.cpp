@@ -82,6 +82,14 @@ void FFDLattice::reset()
 	m_controlPoints = m_originalControlPoints;
 }
 
+void FFDLattice::setAllControlPoints(const std::vector<CCVector3d> &controlPoints)
+{
+	if (controlPoints.size() == m_controlPoints.size())
+	{
+		m_controlPoints = controlPoints;
+	}
+}
+
 double FFDLattice::cubicBSplineWeight( double t )
 {
 	// Normalize t to [0, 1]

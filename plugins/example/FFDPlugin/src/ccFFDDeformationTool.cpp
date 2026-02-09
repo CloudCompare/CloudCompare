@@ -29,6 +29,7 @@ ccFFDDeformationTool::ccFFDDeformationTool(ccPointCloud* originalCloud, ccPointC
     addOverriddenShortcut(Qt::Key_Return);
     addOverriddenShortcut(Qt::Key_R);
     addOverriddenShortcut(Qt::Key_C);
+    addOverriddenShortcut(Qt::Key_F);
 
     connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccFFDDeformationTool::onShortcutTriggered);
 }
@@ -195,6 +196,9 @@ void ccFFDDeformationTool::onLeftButtonClicked(int x, int y)
         // If points are already selected, start dragging them
         if (!m_selectedPointIndices.empty())
         {
+            // Save current state to history before making changes
+            pushLatticeHistory();
+            
             m_isDragging = true;
             m_lastMouseX = x;
             m_lastMouseY = y;
@@ -363,9 +367,9 @@ void ccFFDDeformationTool::onButtonReleased()
     
     if (m_isDragging)
     {
-        // Stop dragging but keep points selected - press Escape to deselect
+        // Stop dragging but keep points selected - press Ctrl+C to deselect
         m_isDragging = false;
-        m_appInterface->dispToConsole("[FFD] Released control point(s) - Press Escape to deselect or click to drag again", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+        m_appInterface->dispToConsole("[FFD] Released control point(s) - Press Ctrl+C to deselect or click to drag again", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
         ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
         if (win)
@@ -380,25 +384,40 @@ void ccFFDDeformationTool::onShortcutTriggered(int key)
 {
     if (key == Qt::Key_C)
     {
-        // Clear selection and re-enable camera controls
-        m_isDragging = false;
-        m_selectedPointIndex = -1;
-        m_selectedPointIndices.clear();
-        
-        if (m_latticeDisplay)
+        const Qt::KeyboardModifiers mods = QApplication::keyboardModifiers();
+        if (mods & Qt::ControlModifier)
         {
-            m_latticeDisplay->setSelectedIndices({});
+            // Ctrl+C: Clear selection and re-enable camera controls
+            m_isDragging = false;
+            m_selectedPointIndex = -1;
+            m_selectedPointIndices.clear();
+            
+            if (m_latticeDisplay)
+            {
+                m_latticeDisplay->setSelectedIndices({});
+            }
+            
+            ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
+            if (win)
+            {
+                win->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+                win->redraw(false, false);
+            }
+            
+            m_appInterface->dispToConsole("[FFD] Selection cleared", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+            return;
         }
-        
-        ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
-        if (win)
+    }
+    
+    if (key == Qt::Key_F)
+    {
+        const Qt::KeyboardModifiers mods = QApplication::keyboardModifiers();
+        if (mods & Qt::ControlModifier)
         {
-            win->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
-            win->redraw(false, false);
+            // Ctrl+F: Undo last transformation
+            undoLastTransformation();
+            return;
         }
-        
-        m_appInterface->dispToConsole("[FFD] Selection cleared (press C again to clear)", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-        return;
     }
     
     if (key == Qt::Key_Return || key == Qt::Key_Enter)
@@ -532,6 +551,9 @@ void ccFFDDeformationTool::onItemPicked(ccHObject* entity, unsigned subEntityID,
     auto points = m_lattice->getAllControlPoints();
     if (subEntityID >= points.size())
         return;
+
+    // Save current state to history before making changes
+    pushLatticeHistory();
 
     m_selectedPointIndex = static_cast<int>(subEntityID);
     m_isDragging = true;
@@ -668,4 +690,54 @@ void ccFFDDeformationTool::updateCloudDeformation()
         return;
 
     m_previewApplier->updateDeformedCloud();
+}
+
+void ccFFDDeformationTool::pushLatticeHistory()
+{
+    if (!m_lattice)
+        return;
+    
+    // Save current lattice state
+    m_latticeHistory.push_back(m_lattice->getAllControlPoints());
+    
+    // Limit history size
+    if (m_latticeHistory.size() > MAX_HISTORY_SIZE)
+    {
+        m_latticeHistory.pop_front();
+    }
+}
+
+void ccFFDDeformationTool::undoLastTransformation()
+{
+    if (!m_lattice || m_latticeHistory.empty())
+    {
+        m_appInterface->dispToConsole("[FFD] No history to undo", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+        return;
+    }
+    
+    // Restore previous lattice state
+    m_lattice->setAllControlPoints(m_latticeHistory.back());
+    m_latticeHistory.pop_back();
+    
+    // Update visual display
+    if (m_latticeDisplay)
+    {
+        m_latticeDisplay->setControlPoints(m_lattice->getAllControlPoints());
+    }
+    
+    // Update control point cloud
+    updateControlPointCloud();
+    
+    // Update deformed point clouds
+    if (m_previewApplier)
+    {
+        m_previewApplier->updateDeformedCloud();
+    }
+    
+    if (m_associatedWin)
+    {
+        m_associatedWin->redraw(false, false);
+    }
+    
+    m_appInterface->dispToConsole("[FFD] Undo successful", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }

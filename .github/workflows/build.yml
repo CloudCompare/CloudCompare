@@ -94,11 +94,16 @@ jobs:
         run: cmake --install build
 
       - name: Deploy Qt Dependencies (Windows)
-        shell: bash -l {0}
+        shell: pwsh
         run: |
-          # windeployqt should be in PATH from conda environment
-          windeployqt.exe --release "${{ github.workspace }}/install/CloudCompare/CloudCompare.exe"
-          windeployqt.exe --release "${{ github.workspace }}/install/ccViewer/ccViewer.exe"
+          # Get conda environment path
+          $condaEnv = "$env:CONDA\envs\CloudCompareDev\Library\bin"
+          
+          # Run windeployqt for CloudCompare
+          & "$condaEnv\windeployqt.exe" --release "${{ github.workspace }}\install\CloudCompare\CloudCompare.exe"
+          
+          # Run windeployqt for ccViewer
+          & "$condaEnv\windeployqt.exe" --release "${{ github.workspace }}\install\ccViewer\ccViewer.exe"
 
       - name: Upload Artifact (Windows)
         uses: actions/upload-artifact@v4

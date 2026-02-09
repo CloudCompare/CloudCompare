@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       # DGM: without caching, using conda on Windows takes a long time...
       - name: Install Dependencies
@@ -40,7 +41,7 @@ jobs:
         run: |
           mkdir build
 
-          export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
+          export CONDA_LIB_DIR="$CONDA_PREFIX/Library"
           export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
 
           cmake \

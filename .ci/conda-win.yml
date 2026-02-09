@@ -1,7 +1,7 @@
 name: CloudCompareDev
 dependencies:
   - ninja
-  - qt5-base=5.15.*
+  - qt=5.15.*
   - eigen=3.4.*
   - ffmpeg=6.1.*
   - xerces-c=3.2.*

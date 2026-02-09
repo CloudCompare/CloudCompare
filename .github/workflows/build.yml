@@ -6,7 +6,7 @@ jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: "matrix.config.enabled && !contains(github.event.head_commit.message, '[skip ci]')"
 
     strategy:
       fail-fast: false
@@ -19,6 +19,7 @@ jobs:
               conda_library_dir: "Library",
               compile_riegl: "ON",
               conda_dep_file: ".ci/conda-win.yml",
+              enabled: true,
             }
           - {
               name: "macOS Clang",
@@ -27,6 +28,7 @@ jobs:
               conda_library_dir: ".",
               compile_riegl: "OFF",
               conda_dep_file: ".ci/conda-macos.yml",
+              enabled: false,
             }
 
     steps:
@@ -71,6 +73,7 @@ jobs:
             -G "${{ matrix.config.generator }}" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
@@ -120,10 +123,17 @@ jobs:
         if: matrix.config.os == 'windows-latest'
         run: cmake --install build
 
+      - name: Upload Artifacts
+        if: matrix.config.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: CloudCompare-${{ matrix.config.name }}
+          path: ${{ github.workspace }}/install
+
   ubuntu-build:
     name: Ubuntu ${{ matrix.compiler }}
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: "false"
 
     strategy:
       fail-fast: false

@@ -13,12 +13,16 @@
 #include <Qt>
 #include <QApplication>
 
+#include "FFDDebug.h"
+
 ccFFDDeformationTool::ccFFDDeformationTool(ccPointCloud* originalCloud, ccPointCloud* previewCloud, ccMainAppInterface* appInterface)
     : ccOverlayDialog()
     , m_originalCloud(originalCloud)
     , m_previewCloud(previewCloud)
     , m_appInterface(appInterface)
 {
+    FFD_DEBUG("CONSTRUCTOR: ccFFDDeformationTool created, this=" << this);
+    FFD_DEBUG("  originalCloud=" << originalCloud << ", previewCloud=" << previewCloud);
     setWindowTitle("FFD Deformation Tool");
     setVisible(true);
     setAttribute(Qt::WA_DeleteOnClose, true);
@@ -36,35 +40,47 @@ ccFFDDeformationTool::ccFFDDeformationTool(ccPointCloud* originalCloud, ccPointC
 
 ccFFDDeformationTool::~ccFFDDeformationTool()
 {
+    FFD_DEBUG("DESTRUCTOR: ccFFDDeformationTool being destroyed, this=" << this);
+    FFD_DEBUG("  m_selectionRect=" << m_selectionRect << ", m_lattice=" << m_lattice);
+    FFD_DEBUG("  m_latticeDisplay=" << m_latticeDisplay << ", m_controlPointCloud=" << m_controlPointCloud);
+    
     if (m_selectionRect)
     {
+        FFD_DEBUG("  Deleting m_selectionRect...");
         delete m_selectionRect;
         m_selectionRect = nullptr;
+        FFD_DEBUG("  m_selectionRect deleted");
     }
     if (m_previewApplier)
     {
+        FFD_DEBUG("  Deleting m_previewApplier...");
         delete m_previewApplier;
         m_previewApplier = nullptr;
     }
     if (m_fullApplier)
     {
+        FFD_DEBUG("  Deleting m_fullApplier...");
         delete m_fullApplier;
         m_fullApplier = nullptr;
     }
     if (m_controlPointCloud)
     {
+        FFD_DEBUG("  Deleting m_controlPointCloud...");
         delete m_controlPointCloud;
         m_controlPointCloud = nullptr;
     }
     if (m_lattice)
     {
+        FFD_DEBUG("  Deleting m_lattice...");
         delete m_lattice;
         m_lattice = nullptr;
     }
+    FFD_DEBUG("DESTRUCTOR: ccFFDDeformationTool destroyed");
 }
 
 void ccFFDDeformationTool::setLattice(FFDLattice* lattice, ccFFDLatticeDisplay* display)
 {
+    FFD_DEBUG("setLattice: lattice=" << lattice << ", display=" << display);
     m_lattice = lattice;
     m_latticeDisplay = display;
 
@@ -104,12 +120,20 @@ void ccFFDDeformationTool::setLattice(FFDLattice* lattice, ccFFDLatticeDisplay* 
 
 bool ccFFDDeformationTool::start()
 {
+    FFD_DEBUG("start: entering, this=" << this);
     if (!m_appInterface)
+    {
+        FFD_DEBUG("start: m_appInterface is null, returning false");
         return false;
+    }
 
     ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : m_appInterface->getActiveGLWindow();
     if (!win)
+    {
+        FFD_DEBUG("start: win is null, returning false");
         return false;
+    }
+    FFD_DEBUG("start: win=" << win);
 
     if (m_previewCloud)
     {
@@ -123,6 +147,7 @@ bool ccFFDDeformationTool::start()
     win->setPickingMode(ccGLWindowInterface::POINT_PICKING, Qt::CrossCursor);
     win->setPickingRadius(14);
 
+    FFD_DEBUG("start: connecting signals...");
     connect(win->signalEmitter(), &ccGLWindowSignalEmitter::leftButtonClicked, this, &ccFFDDeformationTool::onLeftButtonClicked);
     connect(win->signalEmitter(), &ccGLWindowSignalEmitter::mouseMoved, this, &ccFFDDeformationTool::onMouseMoved);
     connect(win->signalEmitter(), &ccGLWindowSignalEmitter::buttonReleased, this, &ccFFDDeformationTool::onButtonReleased);
@@ -132,47 +157,74 @@ bool ccFFDDeformationTool::start()
     // It is only used internally for point picking; the lattice display provides visual feedback
 
     // Create and add selection rectangle for visualization
+    FFD_DEBUG("start: m_selectionRect before creation: " << m_selectionRect);
     if (!m_selectionRect)
     {
         m_selectionRect = new ccSelectionRectangle();
         m_selectionRect->setDrawing(false);
+        FFD_DEBUG("start: created new m_selectionRect=" << m_selectionRect);
     }
+    FFD_DEBUG("start: adding m_selectionRect to win->ownDB");
     win->addToOwnDB(m_selectionRect, false);
+    FFD_DEBUG("start: m_selectionRect added to ownDB");
 
     const bool started = ccOverlayDialog::start();
+    FFD_DEBUG("start: ccOverlayDialog::start() returned " << started);
     hide();
     return started;
 }
 
 void ccFFDDeformationTool::stop(bool accepted)
 {
+    FFD_DEBUG("stop: entering, accepted=" << accepted << ", this=" << this);
     ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
     if (win)
     {
+        FFD_DEBUG("stop: win=" << win << ", removing selection rect from ownDB...");
+        // Remove selection rectangle from window before stop
+        if (m_selectionRect)
+        {
+            FFD_DEBUG("stop: removing m_selectionRect=" << m_selectionRect << " from ownDB");
+            win->removeFromOwnDB(m_selectionRect);
+            // removeFromOwnDB deletes the object, so null out the pointer
+            // to prevent double-free in the destructor
+            m_selectionRect = nullptr;
+            FFD_DEBUG("stop: m_selectionRect removed from ownDB and nulled");
+        }
         win->setInteractionMode(m_oldInteractionMode);
         win->setPickingMode(m_oldPickingMode);
         win->signalEmitter()->disconnect(this);
         // Note: m_controlPointCloud is not in the scene database, so no need to remove it
         win->redraw(false, false);
     }
-
+    FFD_DEBUG("stop: calling ccOverlayDialog::stop");
     ccOverlayDialog::stop(accepted);
+    FFD_DEBUG("stop: done");
 }
 
 void ccFFDDeformationTool::onLeftButtonClicked(int x, int y)
 {
+    FFD_DEBUG("onLeftButtonClicked: x=" << x << ", y=" << y << ", this=" << this);
+    FFD_DEBUG("  m_lattice=" << m_lattice << ", m_latticeDisplay=" << m_latticeDisplay);
+    
     if (!m_lattice || !m_latticeDisplay)
+    {
+        FFD_DEBUG("  early return: lattice or display is null");
         return;
+    }
 
     m_lastMouseX = x;
     m_lastMouseY = y;
 
     const bool ctrlPressed = (QApplication::keyboardModifiers() & Qt::ControlModifier);
+    FFD_DEBUG("  ctrlPressed=" << ctrlPressed);
 
     if (ctrlPressed)
     {
+        FFD_DEBUG("  starting rectangle selection");
         // Start rectangle selection with Ctrl - disable camera controls
         ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
+        FFD_DEBUG("  win=" << win);
         if (win)
         {
             win->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
@@ -185,10 +237,17 @@ void ccFFDDeformationTool::onLeftButtonClicked(int x, int y)
         m_rectEndY = y;
         m_selectedPointIndices.clear();
         
+        FFD_DEBUG("  m_selectionRect=" << m_selectionRect);
         if (m_selectionRect)
         {
+            FFD_DEBUG("  setting m_selectionRect to drawing mode");
             m_selectionRect->setDrawing(true);
             m_selectionRect->setRectangle(x, y, x, y);
+            FFD_DEBUG("  setRectangle done");
+        }
+        else
+        {
+            FFD_DEBUG("  WARNING: m_selectionRect is NULL!");
         }
     }
     else
@@ -215,18 +274,29 @@ void ccFFDDeformationTool::onMouseMoved(int x, int y, Qt::MouseButtons buttons)
     // Handle rectangle drawing (with Ctrl pressed)
     if (m_isDrawingRectangle)
     {
+        FFD_DEBUG("onMouseMoved: drawing rect, x=" << x << ", y=" << y);
+        FFD_DEBUG("  m_selectionRect=" << m_selectionRect << ", this=" << this);
         m_rectEndX = x;
         m_rectEndY = y;
         
         if (m_selectionRect)
         {
+            FFD_DEBUG("  calling m_selectionRect->setRectangle");
             m_selectionRect->setRectangle(m_rectStartX, m_rectStartY, m_rectEndX, m_rectEndY);
+            FFD_DEBUG("  setRectangle done");
+        }
+        else
+        {
+            FFD_DEBUG("  WARNING: m_selectionRect is NULL during drawing!");
         }
         
         ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
+        FFD_DEBUG("  win=" << win);
         if (win)
         {
+            FFD_DEBUG("  calling win->redraw");
             win->redraw(false, false);
+            FFD_DEBUG("  redraw done");
         }
         return;
     }
@@ -307,50 +377,94 @@ void ccFFDDeformationTool::onMouseMoved(int x, int y, Qt::MouseButtons buttons)
 
 void ccFFDDeformationTool::onButtonReleased()
 {
+    FFD_DEBUG("onButtonReleased: entering, this=" << this);
+    FFD_DEBUG("  m_isDrawingRectangle=" << m_isDrawingRectangle << ", m_isDragging=" << m_isDragging);
+    
     if (m_isDrawingRectangle)
     {
+        FFD_DEBUG("  finishing rectangle selection");
         // Finish rectangle selection
         m_isDrawingRectangle = false;
         
+        FFD_DEBUG("  m_selectionRect=" << m_selectionRect);
         if (m_selectionRect)
         {
+            FFD_DEBUG("  setting m_selectionRect drawing=false");
             m_selectionRect->setDrawing(false);
         }
+        else
+        {
+            FFD_DEBUG("  WARNING: m_selectionRect is NULL in onButtonReleased!");
+        }
         
+        FFD_DEBUG("  calling selectPointsInRectangle(" << m_rectStartX << "," << m_rectStartY << "," << m_rectEndX << "," << m_rectEndY << ")");
         selectPointsInRectangle(m_rectStartX, m_rectStartY, m_rectEndX, m_rectEndY);
+        FFD_DEBUG("  selectPointsInRectangle done, selected " << m_selectedPointIndices.size() << " points");
         
         ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
+        FFD_DEBUG("  win=" << win);
         
         if (!m_selectedPointIndices.empty())
         {
+            FFD_DEBUG("  selected points not empty, count=" << m_selectedPointIndices.size());
+            FFD_DEBUG("  m_appInterface=" << m_appInterface);
+            if (!m_appInterface)
+            {
+                FFD_DEBUG("  ERROR: m_appInterface is NULL!");
+                return;
+            }
             m_appInterface->dispToConsole(QString("[FFD] Selected %1 control points").arg(m_selectedPointIndices.size()), 
                                          ccMainAppInterface::STD_CONSOLE_MESSAGE);
+            FFD_DEBUG("  dispToConsole done");
             // Prepare for dragging - camera controls remain disabled until selection is cleared
             m_isDragging = false; // Will be set to true on next click
             m_dragStartPointPositions.clear();
+            FFD_DEBUG("  m_lattice=" << m_lattice);
+            if (!m_lattice)
+            {
+                FFD_DEBUG("  ERROR: m_lattice is NULL!");
+                return;
+            }
             const auto& points = m_lattice->getAllControlPoints();
+            FFD_DEBUG("  getAllControlPoints done, points.size()=" << points.size());
             for (int idx : m_selectedPointIndices)
             {
-                if (idx < static_cast<int>(points.size()))
+                FFD_DEBUG("    checking idx=" << idx << " against points.size()=" << points.size());
+                if (idx >= 0 && idx < static_cast<int>(points.size()))
                 {
                     m_dragStartPointPositions.push_back(points[idx]);
                 }
+                else
+                {
+                    FFD_DEBUG("    ERROR: idx out of range!");
+                }
             }
+            FFD_DEBUG("  dragStartPointPositions populated");
             
             // Update lattice display to show selected points
+            FFD_DEBUG("  m_latticeDisplay=" << m_latticeDisplay);
             if (m_latticeDisplay)
             {
+                FFD_DEBUG("  calling setSelectedIndices");
                 m_latticeDisplay->setSelectedIndices(m_selectedPointIndices);
+                FFD_DEBUG("  setSelectedIndices done");
+            }
+            else
+            {
+                FFD_DEBUG("  WARNING: m_latticeDisplay is NULL, skipping setSelectedIndices");
             }
             
             // Keep camera controls disabled while points are selected
             if (win)
             {
+                FFD_DEBUG("  setting interaction mode (send all signals)");
                 win->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+                FFD_DEBUG("  interaction mode set");
             }
         }
         else
         {
+            FFD_DEBUG("  no points selected, re-enabling camera controls");
             // No points selected, re-enable camera controls
             if (win)
             {
@@ -358,10 +472,14 @@ void ccFFDDeformationTool::onButtonReleased()
             }
         }
         
+        FFD_DEBUG("  about to redraw, win=" << win);
         if (win)
         {
+            FFD_DEBUG("  calling win->redraw");
             win->redraw(false, false);
+            FFD_DEBUG("  redraw done");
         }
+        FFD_DEBUG("  onButtonReleased (rectangle path) returning");
         return;
     }
     
@@ -648,15 +766,27 @@ bool ccFFDDeformationTool::projectPointToScreen(const CCVector3d& point3D, int& 
 
 void ccFFDDeformationTool::selectPointsInRectangle(int x1, int y1, int x2, int y2)
 {
+    FFD_DEBUG("selectPointsInRectangle: entering, this=" << this);
+    FFD_DEBUG("  x1=" << x1 << ", y1=" << y1 << ", x2=" << x2 << ", y2=" << y2);
+    FFD_DEBUG("  m_lattice=" << m_lattice);
+    
     if (!m_lattice)
+    {
+        FFD_DEBUG("  early return: m_lattice is null");
         return;
+    }
 
     ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : (m_appInterface ? m_appInterface->getActiveGLWindow() : nullptr);
+    FFD_DEBUG("  win=" << win);
     if (!win)
+    {
+        FFD_DEBUG("  early return: win is null");
         return;
+    }
 
     // Scale mouse coords to device pixels to match projection results
     const double devicePixelRatio = win->getDevicePixelRatio();
+    FFD_DEBUG("  devicePixelRatio=" << devicePixelRatio);
     const int sx1 = static_cast<int>(x1 * devicePixelRatio);
     const int sx2 = static_cast<int>(x2 * devicePixelRatio);
     const int sy1 = static_cast<int>(y1 * devicePixelRatio);
@@ -670,7 +800,10 @@ void ccFFDDeformationTool::selectPointsInRectangle(int x1, int y1, int x2, int y
 
     m_selectedPointIndices.clear();
     
+    FFD_DEBUG("  getting control points from lattice");
     const auto& points = m_lattice->getAllControlPoints();
+    FFD_DEBUG("  points.size()=" << points.size());
+    
     for (size_t i = 0; i < points.size(); ++i)
     {
         int screenX, screenY;
@@ -682,6 +815,7 @@ void ccFFDDeformationTool::selectPointsInRectangle(int x1, int y1, int x2, int y
             }
         }
     }
+    FFD_DEBUG("  selected " << m_selectedPointIndices.size() << " points");
 }
 
 void ccFFDDeformationTool::updateCloudDeformation()

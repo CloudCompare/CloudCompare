@@ -30,14 +30,29 @@
 #include <QObject>
 #include <algorithm>
 
+#include "FFDDebug.h"
+
 namespace FFDAction
 {
+	// Track the currently active FFD tool to prevent duplicates
+	static ccFFDDeformationTool* s_activeTool = nullptr;
+
 	void performDeformation( ccMainAppInterface *appInterface )
 	{
 		if ( appInterface == nullptr )
 		{
 			Q_ASSERT( false );
 			return;
+		}
+
+		// Stop any existing FFD tool before creating a new one
+		if (s_activeTool)
+		{
+			FFD_DEBUG("performDeformation: Stopping existing tool=" << s_activeTool);
+			s_activeTool->stop(false);
+			s_activeTool->deleteLater();
+			s_activeTool = nullptr;
+			FFD_DEBUG("performDeformation: Old tool stopped and scheduled for deletion");
 		}
 
 		/*** HERE STARTS THE ACTION ***/
@@ -138,8 +153,12 @@ namespace FFDAction
 		);
 
 		// Create and setup the interactive deformation tool
+		FFD_DEBUG("performDeformation: Creating new ccFFDDeformationTool...");
 		ccFFDDeformationTool* tool = new ccFFDDeformationTool(cloud, previewCloud, appInterface);
+		FFD_DEBUG("performDeformation: tool created=" << tool);
+		s_activeTool = tool;
 		tool->setLattice(lattice, latticeDisplay);
+		FFD_DEBUG("performDeformation: lattice set");
 
 		ccGLWindowInterface* win = appInterface->getActiveGLWindow();
 		if (!win)
@@ -150,10 +169,15 @@ namespace FFDAction
 		}
 
 		tool->linkWith(win);
+		FFD_DEBUG("performDeformation: tool linked with win=" << win);
 		tool->start();
+		FFD_DEBUG("performDeformation: tool started");
 
 		QObject::connect(tool, &ccOverlayDialog::processFinished, [tool](bool)
 		{
+			FFD_DEBUG("processFinished: tool=" << tool << " being scheduled for deletion");
+			if (s_activeTool == tool)
+				s_activeTool = nullptr;
 			tool->deleteLater();
 		});
 

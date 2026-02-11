@@ -6,7 +6,7 @@ class ccSelectionRectangle : public cc2DViewportObject
 {
 public:
     ccSelectionRectangle();
-    ~ccSelectionRectangle() override = default;
+    ~ccSelectionRectangle() override;
 
     void setRectangle(int x1, int y1, int x2, int y2);
     void setDrawing(bool drawing) { m_isDrawing = drawing; }

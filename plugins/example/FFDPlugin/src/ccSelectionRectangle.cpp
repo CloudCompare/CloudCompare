@@ -2,16 +2,25 @@
 #include <QOpenGLFunctions_2_1>
 #include <algorithm>
 
+#include "FFDDebug.h"
+
 ccSelectionRectangle::ccSelectionRectangle()
     : cc2DViewportObject("Selection Rectangle")
 {
+    FFD_DEBUG("ccSelectionRectangle CONSTRUCTOR: this=" << this);
     setEnabled(true);
     setVisible(true);
     showNameIn3D(false);
 }
 
+ccSelectionRectangle::~ccSelectionRectangle()
+{
+    FFD_DEBUG("ccSelectionRectangle DESTRUCTOR: this=" << this);
+}
+
 void ccSelectionRectangle::setRectangle(int x1, int y1, int x2, int y2)
 {
+    FFD_DEBUG("ccSelectionRectangle::setRectangle: this=" << this << ", x1=" << x1 << ", y1=" << y1 << ", x2=" << x2 << ", y2=" << y2);
     m_x1 = x1;
     m_y1 = y1;
     m_x2 = x2;
@@ -20,6 +29,7 @@ void ccSelectionRectangle::setRectangle(int x1, int y1, int x2, int y2)
 
 void ccSelectionRectangle::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+    FFD_DEBUG("ccSelectionRectangle::drawMeOnly: this=" << this << ", m_isDrawing=" << m_isDrawing);
     if (!m_isDrawing)
         return;
 

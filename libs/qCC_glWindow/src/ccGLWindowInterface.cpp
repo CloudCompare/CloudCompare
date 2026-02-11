@@ -989,7 +989,7 @@ void ccGLWindowInterface::setDisplayParameters(const ccGui::ParamStruct& params,
 
 bool ccGLWindowInterface::setLODEnabled(bool state)
 {
-	if (state && (!m_fbo || (m_stereoModeEnabled && !m_stereoParams.isAnaglyph() && !m_fbo2)))
+	if (state && (!m_fbo || (m_stereoModeEnabled && m_stereoParams.quadBufferingRequired() && !m_fbo2)))
 	{
 		// we need a valid FBO (or two ;) for LOD!!!
 		return false;
@@ -4918,25 +4918,22 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	{
 		CONTEXT.stereoPassIndex = renderingParams.pass;
 
-		if (!setCustomCameraProjection(renderingParams, modelViewMat, projectionMat))
-		{
-			// we use the standard modelview matrix
-			modelViewMat = getModelViewMatrix();
+		// we use the standard modelview matrix
+		modelViewMat = getModelViewMatrix();
 
-			// change eye position
-			double eyeOffset = renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? -1.0 : 1.0;
+		// change eye position
+		double eyeOffset = renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? -1.0 : 1.0;
 
-			// update the projection matrix
-			projectionMat = computeProjectionMatrix(
-			    false,
-			    nullptr,
-			    &eyeOffset); // eyeOffset will be scaled
+		// update the projection matrix
+		projectionMat = computeProjectionMatrix(
+		    false,
+		    nullptr,
+		    &eyeOffset); // eyeOffset will be scaled
 
-			// apply the eye shift
-			ccGLMatrixd eyeShiftMatrix; // identity by default
-			eyeShiftMatrix.setTranslation(CCVector3d(-eyeOffset, 0.0, 0.0));
-			projectionMat = projectionMat * eyeShiftMatrix;
-		}
+		// apply the eye shift
+		ccGLMatrixd eyeShiftMatrix; // identity by default
+		eyeShiftMatrix.setTranslation(CCVector3d(-eyeOffset, 0.0, 0.0));
+		projectionMat = projectionMat * eyeShiftMatrix;
 	}
 	else // mono vision mode
 	{
@@ -4950,14 +4947,14 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	{
 		if (!std::isnan(m_viewportParams.nearClippingDepth))
 		{
-			double equation[4] = {0.0, 0.0, -1.0, -m_viewportParams.nearClippingDepth};
+			double equation[4]{0.0, 0.0, -1.0, -m_viewportParams.nearClippingDepth};
 			glFunc->glClipPlane(GL_CLIP_PLANE0, equation);
 			glFunc->glEnable(GL_CLIP_PLANE0);
 		}
 
 		if (!std::isnan(m_viewportParams.farClippingDepth))
 		{
-			double equation[4] = {0.0, 0.0, 1.0, m_viewportParams.farClippingDepth};
+			double equation[4]{0.0, 0.0, 1.0, m_viewportParams.farClippingDepth};
 			glFunc->glClipPlane(GL_CLIP_PLANE1, equation);
 			glFunc->glEnable(GL_CLIP_PLANE1);
 		}
@@ -4977,12 +4974,12 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	// we enable relative custom light (if activated)
 	if (m_customLightEnabled)
 	{
-		// DGM: warning, must be enabled/displayed AFTER the 3D MV and MP matrices have been set!)
+		// DGM: warning, must be enabled/displayed AFTER the 'model view' and projection matrices have been set!
 		glEnableCustomLight();
 
 		if (!m_captureMode.enabled
 		    && m_currentLODState.level == 0
-		    && (!m_stereoModeEnabled || !m_stereoParams.isAnaglyph()))
+		    && (!m_stereoModeEnabled || m_stereoParams.quadBufferingRequired()))
 		{
 			// we display it as a litle 3D star
 			drawCustomLight();
@@ -5107,8 +5104,8 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	assert(glFunc);
 
 	// backup the current viewport
-	QRect originViewport   = m_glViewport;
-	bool  modifiedViewport = false;
+	QRect originViewport          = m_glViewport;
+	bool  viewportHasBeenModified = false;
 
 	ccFrameBufferObject* currentFBO = renderingParams.useFBO ? m_fbo : nullptr;
 	if (m_stereoModeEnabled)
@@ -5121,9 +5118,12 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 				currentFBO = m_fbo2;
 			}
 		}
-		else
+		else if (m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
 		{
-			modifiedViewport = prepareOtherStereoGlassType(CONTEXT, renderingParams, currentFBO);
+			CONTEXT.glW = m_glViewport.width() / 2;
+			QRect halfViewport((renderingParams.pass == RIGHT_RENDERING_PASS ? CONTEXT.glW : 0), 0, CONTEXT.glW, m_glViewport.height());
+			setGLViewport(halfViewport);
+			viewportHasBeenModified = true;
 		}
 	}
 
@@ -5292,15 +5292,6 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		glFunc->glPopAttrib(); // GL_DEPTH_BUFFER_BIT
 	}
 
-	// restore viewport if necessary
-	if (modifiedViewport)
-	{
-		setGLViewport(originViewport);
-		CONTEXT.glW      = originViewport.width();
-		CONTEXT.glH      = originViewport.height();
-		modifiedViewport = false;
-	}
-
 	glFunc->glFlush();
 
 	// process and/or display the FBO (if any)
@@ -5372,7 +5363,12 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 				}
 			}
 
-			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight());
+			ccGLUtils::TextureArea area = ccGLUtils::TextureArea::Full;
+			if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
+			{
+				area = (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS ? ccGLUtils::TextureArea::HalfLeft : ccGLUtils::TextureArea::HalfRight);
+			}
+			ccGLUtils::DisplayTexture2DPosition(screenTex, 0, 0, glWidth(), glHeight(), 255, area);
 
 			// warning: we must set the original FBO texture as default
 			glFunc->glBindTexture(GL_TEXTURE_2D, this->defaultQtFBO());
@@ -5384,14 +5380,21 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 		}
 	}
 
-	processOtherStereoGlassType(renderingParams);
-
 	/******************/
 	/*** FOREGROUND ***/
 	/******************/
 	if (renderingParams.drawForeground)
 	{
 		drawForeground(CONTEXT, renderingParams);
+	}
+
+	// restore viewport if necessary (for good this time)
+	if (viewportHasBeenModified)
+	{
+		setGLViewport(originViewport);
+		CONTEXT.glW             = originViewport.width();
+		CONTEXT.glH             = originViewport.height();
+		viewportHasBeenModified = false;
 	}
 
 	glFunc->glFlush();
@@ -5415,7 +5418,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		CONTEXT.drawingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 	}
 
-	setStandardOrthoCenter();
+	setStandardOrthoCorner();
 
 	// clear background
 	{
@@ -5431,8 +5434,8 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			if (displayParams.drawBackgroundGradient)
 			{
 				// draw the default gradient color background
-				int w = glWidth() / 2 + 1;
-				int h = glHeight() / 2 + 1;
+				int w = glWidth();
+				int h = glHeight();
 
 				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
 				const ccColor::Rgbub& frgCol = getDisplayParameters().textDefaultCol;
@@ -5442,12 +5445,31 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 				{
 					// we use the default background color for gradient start
 					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
-					glFunc->glVertex2i(-w, h);
+					glFunc->glVertex2i(0, h);
 					glFunc->glVertex2i(w, h);
 					// and the inverse of the text color for gradient stop
 					glFunc->glColor3ub(255 - frgCol.r, 255 - frgCol.g, 255 - frgCol.b);
-					glFunc->glVertex2i(w, -h);
-					glFunc->glVertex2i(-w, -h);
+					glFunc->glVertex2i(w, 0);
+					glFunc->glVertex2i(0, 0);
+				}
+				glFunc->glEnd();
+			}
+			else if (m_stereoModeEnabled && m_stereoParams.glassType == StereoParams::SIDE_BY_SIDE)
+			{
+				// Draw a plain quad so as to not clear the other half of the 3D view!
+				int w = glWidth();
+				int h = glHeight();
+
+				const ccColor::Rgbub& bkgCol = getDisplayParameters().backgroundCol;
+
+				glFunc->glBegin(GL_QUADS);
+				{
+					// we use the default background color for gradient start
+					glColor3ubv_safe<ccQOpenGLFunctions>(glFunc, bkgCol);
+					glFunc->glVertex2i(0, h);
+					glFunc->glVertex2i(w, h);
+					glFunc->glVertex2i(w, 0);
+					glFunc->glVertex2i(0, 0);
 				}
 				glFunc->glEnd();
 			}
@@ -5518,7 +5540,10 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 	// current displayed scalar field color ramp (if any)
 	ccRenderingTools::DrawColorRamp(CONTEXT);
 
-	m_clickableItems.clear();
+	if (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS)
+	{
+		m_clickableItems.clear();
+	}
 
 	/*** overlay entities ***/
 	{
@@ -5637,6 +5662,7 @@ void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			}
 
 			// hot-zone
+			if (renderingParams.pass == MONO_OR_LEFT_RENDERING_PASS)
 			{
 				drawClickableItems(0, yStart);
 			}
@@ -5866,7 +5892,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 	renderingParams.drawForeground = false;
 	renderingParams.useFBO         = false; // DGM: make sure that no FBO is used internally!
 	bool stereoModeWasEnabled      = m_stereoModeEnabled;
-	if (m_stereoModeEnabled && !m_stereoParams.isAnaglyph())
+	if (m_stereoModeEnabled && m_stereoParams.quadBufferingRequired())
 	{
 		// Screen capture doesn't work with real stereo rendering
 		m_stereoModeEnabled = false;
@@ -7023,8 +7049,15 @@ bool ccGLWindowInterface::enableStereoMode(const StereoParams& params)
 			return false;
 		}
 
-		needSecondFBO   = true;
-		needAutoRefresh = false;
+		needSecondFBO = true;
+	}
+	else if (params.glassType == StereoParams::SIDE_BY_SIDE)
+	{
+		if (!exclusiveFullScreen())
+		{
+			ccLog::Warning("3D window should be in exclusive full screen mode!");
+			return false;
+		}
 	}
 
 	return enableStereoMode(params, needSecondFBO, needAutoRefresh);

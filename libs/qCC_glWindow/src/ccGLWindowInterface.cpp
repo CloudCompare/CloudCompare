@@ -2220,7 +2220,7 @@ void ccGLWindowInterface::startOpenGLPicking(const PickingParameters& params)
 	bindFBO(m_pickingFbo);
 
 	// we have to clear the display to be sure there's no color
-	glFunc->glClearColor(0, 0, 0, 255);
+	glFunc->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glFunc->glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// get context

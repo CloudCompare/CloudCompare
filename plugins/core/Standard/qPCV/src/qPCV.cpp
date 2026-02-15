@@ -180,7 +180,7 @@ void qPCV::doAction()
 	bool mode360 = !dlg.mode180CheckBox->isChecked();
 
 	//PCV type ShadeVis
-	std::vector<CCVector3> rays;
+	std::vector<CCVector3d> rays;
 	if (!cloudsWithNormals.empty() && dlg.useCloudRadioButton->isChecked())
 	{
 		//Version with cloud normals as light rays
@@ -198,7 +198,7 @@ void qPCV::doAction()
 		}
 		for (unsigned i = 0; i < count; ++i)
 		{
-			rays[i] = CCVector3(pc->getPointNormal(i));
+			rays[i] = CCVector3d(pc->getPointNormal(i));
 		}
 	}
 	else
@@ -221,7 +221,10 @@ void qPCV::doAction()
 	ccProgressDialog pcvProgressCb(true, m_app->getMainWindow());
 	pcvProgressCb.setAutoClose(false);
 
+	QElapsedTimer timer;
+	timer.start();
 	PCVCommand::Process(candidates, rays, meshIsClosed, resolution, &pcvProgressCb, m_app);
+	ccLog::Print(QString("[PCV] Timing: %1 sec").arg(timer.elapsed() / 1000.0));
 
 	pcvProgressCb.close();
 

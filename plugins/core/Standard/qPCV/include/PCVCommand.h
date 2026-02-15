@@ -1,5 +1,4 @@
-#ifndef PCVCOMMAND_H
-#define PCVCOMMAND_H
+#pragma once
 
 //##########################################################################
 //#                                                                        #
@@ -14,7 +13,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#          COPYRIGHT: CloudCompare project                               #
+//#                  COPYRIGHT: CloudCompare project                       #
 //#                                                                        #
 //##########################################################################
 
@@ -34,7 +33,7 @@ public:
 	~PCVCommand() override = default;
 
 	static bool Process(	const ccHObject::Container& candidates,
-							const std::vector<CCVector3>& rays,
+							const std::vector<CCVector3d>& rays,
 							bool meshIsClosed,
 							unsigned resolution,
 							ccProgressDialog* progressDlg = nullptr,
@@ -42,5 +41,3 @@ public:
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
-
-#endif

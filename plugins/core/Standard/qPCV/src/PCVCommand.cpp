@@ -24,7 +24,7 @@ PCVCommand::PCVCommand()
 }
 
 bool PCVCommand::Process(	const ccHObject::Container& candidates,
-							const std::vector<CCVector3>& rays,
+							const std::vector<CCVector3d>& rays,
 							bool meshIsClosed,
 							unsigned resolution,
 							ccProgressDialog* progressDlg/*=nullptr*/,
@@ -197,7 +197,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	}
 
 	//generates light directions
-	std::vector<CCVector3> rays;
+	std::vector<CCVector3d> rays;
 	if (!PCV::GenerateRays(rayCount, rays, mode360))
 	{
 		return cmd.error(QObject::tr("Failed to generate the set of rays"));

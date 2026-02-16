@@ -843,7 +843,7 @@ void qFacets::exportFacets()
 		}
 	}
 
-	bool success = ExecuteExportFacets(facets, filename, nX, nY, nZ, false);
+	bool success = ExecuteExportFacets(facets, filename, true, false, false, nX, nY, nZ, false);
 	if (!success)
 	{
 		m_app->dispToConsole(QString("ExportFacets failed for some reason"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);

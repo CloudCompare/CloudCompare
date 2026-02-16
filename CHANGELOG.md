@@ -345,7 +345,7 @@ Bug fixes:
 	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
 	- When loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion for the time being.
 	- Point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
-	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool cool apply the wrong rotation matrix when closing the tool
+	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing the tool
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

@@ -3446,7 +3446,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 			cmd.arguments().pop_front();
 
 			keepOrigFixed = true;
-			cmd.print(QObject::tr("[%1]").arg(COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIG_FIXED));
+			cmd.print(QObject::tr("[%1] Option detected").arg(COMMAND_SET_GLOBAL_SHIFT_KEEP_ORIG_FIXED));
 		}
 		else
 		{
@@ -7061,7 +7061,7 @@ bool CommandSFAddId::process(ccCommandLineInterface& cmd)
 		QString argument = cmd.arguments().front();
 		if (ccCommandLineInterface::IsCommand(argument, COMMAND_SF_ADD_ID_AS_INT))
 		{
-			cmd.print(QObject::tr("[AS_INT]"));
+			cmd.print(QObject::tr("[%1] Option detected").arg(COMMAND_SF_ADD_ID_AS_INT));
 			// local option confirmed, we can move on
 			cmd.arguments().pop_front();
 			addIdAsInt = true;

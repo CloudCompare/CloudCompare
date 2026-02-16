@@ -141,7 +141,7 @@ bool PCVCommand::Process(	const ccHObject::Container& candidates,
 
 bool PCVCommand::process(ccCommandLineInterface& cmd)
 {
-	cmd.print("[PCV]");
+	cmd.print("[PCV] Starting process");
 
 	if (cmd.meshes().empty() && cmd.clouds().empty())
 	{
@@ -203,8 +203,13 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Failed to generate the set of rays"));
 	}
 
-	ccProgressDialog pcvProgressCb(true);
-	pcvProgressCb.setAutoClose(false);
+	QScopedPointer<ccProgressDialog> pcvProgressCb;
+
+	if (!cmd.silentMode())
+	{
+		pcvProgressCb.reset(new ccProgressDialog(true));
+		pcvProgressCb->setAutoClose(false);
+	}
 
 	ccHObject::Container candidates;
 	try
@@ -221,7 +226,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	for (CLMeshDesc& desc : cmd.meshes())
 		candidates.push_back(desc.mesh);
 
-	if (!Process(candidates, rays, meshIsClosed, resolution, &pcvProgressCb, nullptr))
+	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.data(), nullptr))
 	{
 		return cmd.error(QObject::tr("Process failed"));
 	}

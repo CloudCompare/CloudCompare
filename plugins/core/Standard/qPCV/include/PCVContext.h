@@ -22,7 +22,6 @@
 #include <GenericMesh.h>
 
 //system
-#include <array>
 #include <stdint.h>
 #include <vector>
 
@@ -30,7 +29,7 @@ class QSurface;
 class QOpenGLBuffer;
 class QOpenGLContext;
 
-//! PCV (Portion de Ciel Visible / Ambiant Illumination) OpenGL context
+//! PCV (Portion de Ciel Visible / Ambient occlusion) OpenGL context
 /** Similar to Cignoni's ShadeVis
 **/
 class PCVContext
@@ -94,11 +93,6 @@ class PCVContext
 		unsigned m_width;
 		//! Pixel buffer height (pixels)
 		unsigned m_height;
-
-		//! Model view matrix size (OpenGL)
-		/** \warning Never pass a 'constant initializer' by reference
-		**/
-		static const unsigned OPENGL_MATRIX_SIZE = 16;
 
 		//! Depth buffer
 		std::vector<float> m_snapZ;

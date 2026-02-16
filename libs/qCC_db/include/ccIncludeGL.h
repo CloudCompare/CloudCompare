@@ -307,6 +307,38 @@ class ccGL
 		return true;
 	}
 
+	// Inspired from http://www.mesa3d.org
+	static ccGLMatrixd LookAt(const CCVector3d& eye, const CCVector3d& center, const CCVector3d& up)
+	{
+		CCVector3d forward = eye - center;
+		forward.normalize();
+
+		// Side = forward x up
+		CCVector3d left = up.cross(forward);
+		left.normalize();
+
+		// Recompute up as: up = side x forward
+		CCVector3d upFixed = forward.cross(left);
+
+		ccGLMatrixd m;
+		m.data()[0]  = left.x;
+		m.data()[4]  = left.y;
+		m.data()[8]  = left.z;
+		m.data()[1]  = upFixed.x;
+		m.data()[5]  = upFixed.y;
+		m.data()[9]  = upFixed.z;
+		m.data()[2]  = forward.x;
+		m.data()[6]  = forward.y;
+		m.data()[10] = forward.z;
+		m.data()[15] = 1.0f;
+
+		ccGLMatrixd t;
+		t.toIdentity();
+		t.setTranslation(-center.toDouble());
+
+		return m * t;
+	}
+
 	inline static double MAT(const double* m, int r, int c)
 	{
 		return m[c * 4 + r];

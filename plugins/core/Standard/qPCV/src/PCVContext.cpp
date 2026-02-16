@@ -23,6 +23,9 @@
 #include <CCMiscTools.h>
 #include <GenericTriangle.h>
 
+//qCC_db
+#include <ccIncludeGL.h>
+
 //Qt
 #include <QWindow>
 #include <QOpenGLBuffer>
@@ -30,16 +33,6 @@
 #include <QOpenGLVersionFunctionsFactory>
 #include <QOpenGLFunctions_2_1>
 #include <QCoreApplication>
-
-//OpenGL
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
-#else
-#if defined(_WIN32)
-#include <Windows.h>
-#endif
-#include <GL/glu.h>
-#endif
 
 //system
 #include <cassert>
@@ -316,6 +309,7 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 	functions->glDisable(GL_LIGHTING);
 
 	//projection matrix initialization
+	double projectionMat[OPENGL_MATRIX_SIZE];
 	{
 		functions->glMatrixMode(GL_PROJECTION);
 		functions->glLoadIdentity();
@@ -323,15 +317,14 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 		double xMax = m_diagonal/2;
 		double yMax = xMax * ar;
 		functions->glOrtho(-xMax, xMax, -yMax, yMax, -xMax, xMax);
+
+		functions->glGetDoublev(GL_PROJECTION_MATRIX, projectionMat);
 	}
-	double projectionMat[OPENGL_MATRIX_SIZE];
-	functions->glGetDoublev(GL_PROJECTION_MATRIX, projectionMat);
 
 	//model view matrix initialization
+	ccGLMatrixd viewMat;
+	viewMat.toIdentity();
 	{
-		functions->glMatrixMode(GL_MODELVIEW);
-		functions->glLoadIdentity();
-
 		CCVector3d U(0.0, 0.0, 1.0);
 		if (1.0 - std::abs(viewDir.dot(U)) < 1.0e-4)
 		{
@@ -340,12 +333,12 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 			U.z = 0.0;
 		}
 
-		gluLookAt(	m_viewCenter.x+-viewDir.x, m_viewCenter.y-viewDir.y, m_viewCenter.z-viewDir.z,
-					m_viewCenter.x, m_viewCenter.y, m_viewCenter.z,
-					U.x, U.y, U.z );
+		viewMat = ccGL::LookAt(m_viewCenter.toDouble() - viewDir, m_viewCenter.toDouble(), U);
+
+		functions->glMatrixMode(GL_MODELVIEW);
+		functions->glLoadIdentity();
+		functions->glMultMatrixd(viewMat.data());
 	}
-	double viewMat[OPENGL_MATRIX_SIZE];
-	functions->glGetDoublev(GL_MODELVIEW_MATRIX, viewMat);
 
 	functions->glColor3ub(255, 255, 0); //yellow by default
 
@@ -416,13 +409,15 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 	{
 		const CCVector3* P = m_vertices->getNextPoint();
 
-		double tx = 0.0;
-		double ty = 0.0;
-		double tz = 0.0;
-		gluProject(P->x, P->y, P->z, viewMat, projectionMat, viewPort, &tx, &ty, &tz);
+		CCVector3d P2D;
+		ccGL::Project<double, double>(P->toDouble(),
+		                              viewMat.data(),
+		                              projectionMat,
+		                              viewPort,
+		                              P2D);
 
-		int txi = static_cast<int>(floor(tx));
-		int tyi = static_cast<int>(floor(ty));
+		int txi = static_cast<int>(floor(P2D.x));
+		int tyi = static_cast<int>(floor(P2D.y));
 		if (txi >= 0 && txi < static_cast<int>(m_width)
 			&& tyi >= 0 && tyi < static_cast<int>(m_height))
 		{
@@ -442,7 +437,7 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 
 			if (col != 0)
 			{
-				if (tz < static_cast<double>(m_snapZ[dec]))
+				if (P2D.z < static_cast<double>(m_snapZ[dec]))
 				{
 					assert(i < visibilityCount.size());
 					++visibilityCount[i];

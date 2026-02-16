@@ -76,9 +76,9 @@ class PCVContext
 		CCCoreLib::GenericMesh* m_mesh;
 
 		//! Entity bounding-box diagonal
-		PointCoordinateType m_diagonal;
-		//! Translation to the entity center
-		CCVector3 m_viewCenter;
+		PointCoordinateType m_entityDiagonal;
+		//! Entity center
+		CCVector3 m_entityCenter;
 
 		//! OpenGL (offline) surface
 		QSurface* m_glSurface;

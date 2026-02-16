@@ -256,8 +256,6 @@ bool PCV::Launch(const std::vector<CCVector3d>& rays,
 		return false;
 	}
 
-	/*** Main illumination loop ***/
-
 	CCCoreLib::NormalizedProgress nProgress(progressCb, numberOfRays);
 	if (progressCb)
 	{
@@ -278,15 +276,15 @@ bool PCV::Launch(const std::vector<CCVector3d>& rays,
 		progressCb->start();
 	}
 
-	bool success = true;
-
+	/*** Main illumination loop ***/
 	//must be done after progress dialog display!
 	PCVContext win;
+	bool success = true;
 	if (win.init(width, height, vertices, mesh, meshIsClosed))
 	{
 		for (unsigned i = 0; i < numberOfRays; ++i)
 		{
-			//flag viewed vertices when viewed along the current 'ray' direction
+			//flag vertices which are in front of the others when viewed along the current 'ray' direction
 			int result = win.glAccumPixel(visibilityCount, rays[i]);
 			if (result < 0)
 			{

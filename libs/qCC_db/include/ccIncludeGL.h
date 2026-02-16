@@ -307,36 +307,40 @@ class ccGL
 		return true;
 	}
 
-	// Inspired from http://www.mesa3d.org
+	// Inspired by https://www.songho.ca/opengl/gl_lookattoaxes.html
 	static ccGLMatrixd LookAt(const CCVector3d& eye, const CCVector3d& center, const CCVector3d& up)
 	{
+		// compute left/up/forward axis vectors
 		CCVector3d forward = eye - center;
 		forward.normalize();
 
-		// Side = forward x up
+		// left = up x forward
 		CCVector3d left = up.cross(forward);
 		left.normalize();
 
-		// Recompute up as: up = side x forward
+		// Recompute up as: up = forward x left
 		CCVector3d upFixed = forward.cross(left);
 
-		ccGLMatrixd m;
-		m.data()[0]  = left.x;
-		m.data()[4]  = left.y;
-		m.data()[8]  = left.z;
-		m.data()[1]  = upFixed.x;
-		m.data()[5]  = upFixed.y;
-		m.data()[9]  = upFixed.z;
-		m.data()[2]  = forward.x;
-		m.data()[6]  = forward.y;
-		m.data()[10] = forward.z;
-		m.data()[15] = 1.0f;
+		// set inverse of rotation matrix: Mr
+		ccGLMatrixd mr;
+		mr.data()[0]  = left.x;
+		mr.data()[4]  = left.y;
+		mr.data()[8]  = left.z;
+		mr.data()[1]  = upFixed.x;
+		mr.data()[5]  = upFixed.y;
+		mr.data()[9]  = upFixed.z;
+		mr.data()[2]  = forward.x;
+		mr.data()[6]  = forward.y;
+		mr.data()[10] = forward.z;
+		mr.data()[15] = 1.0f;
 
-		ccGLMatrixd t;
-		t.toIdentity();
-		t.setTranslation(-center.toDouble());
+		// set inverse translation matrix: Mt
+		ccGLMatrixd mt;
+		mt.toIdentity();
+		mt.setTranslation(-center.toDouble());
 
-		return m * t;
+		// M = Mr * Mt
+		return mr * mt;
 	}
 
 	inline static double MAT(const double* m, int r, int c)

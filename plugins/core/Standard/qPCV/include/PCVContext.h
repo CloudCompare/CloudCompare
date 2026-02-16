@@ -23,6 +23,7 @@
 
 //system
 #include <array>
+#include <stdint.h>
 #include <vector>
 
 class QSurface;

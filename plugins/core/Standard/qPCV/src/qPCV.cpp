@@ -32,6 +32,7 @@
 #include <ccScalarField.h>
 
 //Qt
+#include <QElapsedTimer>
 #include <QMainWindow>
 #include <QProgressBar>
 

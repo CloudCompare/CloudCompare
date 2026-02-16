@@ -427,16 +427,16 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 			&& tyi >= 0 && tyi < static_cast<int>(m_height))
 		{
 			int dec = txi + tyi*static_cast<int>(m_width);
-			int col = 1;
+			uint8_t col = 1;
 
 			if (!m_meshIsClosed)
 			{
-				//int c1 = std::max(m_snapC[dec],m_snapC[dec<<2+4]);
-				//int c2 = std::max(m_snapC[dec<<2+sx4],m_snapC[dec<<2+sx4+4]);
-				const auto* pix = m_snapC.data() + (static_cast<size_t>(dec) << 2);
-				int c1 = std::max(pix[0], pix[4]);
+				// uint8_t c1 = std::max(m_snapC[dec], m_snapC[dec<<2+4]);
+				// uint8_t c2 = std::max(m_snapC[dec<<2+sx4], m_snapC[dec<<2+sx4+4]);
+				const uint8_t* pix = m_snapC.data() + (static_cast<size_t>(dec) << 2);
+				uint8_t c1 = std::max(pix[0], pix[4]);
 				pix += sx4;
-				int c2 = std::max(pix[0], pix[4]);
+				uint8_t c2 = std::max(pix[0], pix[4]);
 				col = std::max(c1, c2);
 			}
 

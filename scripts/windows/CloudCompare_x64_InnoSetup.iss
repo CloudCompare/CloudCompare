@@ -36,7 +36,7 @@ OutputDir={#MyOutputDir}
 InternalCompressLevel=Ultra64
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
-ArchitecturesAllowed=x64os
+ArchitecturesAllowed=x64compatible
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be
 ; done in "64-bit mode" on x64, meaning it should use the native
 ; 64-bit Program Files directory and the 64-bit view of the registry.

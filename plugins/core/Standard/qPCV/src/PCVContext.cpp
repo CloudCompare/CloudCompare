@@ -54,7 +54,7 @@ using namespace CCCoreLib;
 PCVContext::PCVContext()
 	: m_vertices(nullptr)
 	, m_mesh(nullptr)
-	, m_diagonal(0)
+	, m_entityDiagonal(0)
 	, m_glSurface(nullptr)
 	, m_glContext(nullptr)
 	, m_pixBuffer(nullptr)
@@ -161,8 +161,8 @@ bool PCVContext::init(unsigned W,
 void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 {
 	m_vertices = nullptr;
-	m_diagonal = static_cast<PointCoordinateType>(std::max(m_width, m_height));
-	m_viewCenter = CCVector3(0, 0, 0);
+	m_entityDiagonal = 0.0;
+	m_entityCenter = CCVector3(0, 0, 0);
 
 	if (!cloud)
 	{
@@ -179,10 +179,9 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	m_vertices->getBoundingBox(bbMin, bbMax);
 
 	//we compute the bbox diagonal
-	m_diagonal = (bbMax - bbMin).norm();
-
-	//as well as the display center
-	m_viewCenter = (bbMax + bbMin) / 2;
+	m_entityDiagonal = (bbMax - bbMin).norm();
+	//as well as the bbox center
+	m_entityCenter = (bbMax + bbMin) / 2;
 }
 
 bool PCVContext::makeCurrent()
@@ -300,7 +299,7 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 
 	functions->glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	functions->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//functions->glDepthRange(2.0*ZTWIST, 1.0);
+	functions->glDepthRange(2.0*ZTWIST, 1.0);
 
 	functions->glPointSize(1.0f);
 	functions->glDisable(GL_BLEND);
@@ -314,7 +313,7 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 		functions->glMatrixMode(GL_PROJECTION);
 		functions->glLoadIdentity();
 		double ar = static_cast<double>(m_height) / m_width;
-		double xMax = m_diagonal/2;
+		double xMax = m_entityDiagonal / 2;
 		double yMax = xMax * ar;
 		functions->glOrtho(-xMax, xMax, -yMax, yMax, -xMax, xMax);
 
@@ -333,7 +332,7 @@ int PCVContext::glAccumPixel(std::vector<int>& visibilityCount, const CCVector3d
 			U.z = 0.0;
 		}
 
-		viewMat = ccGL::LookAt(m_viewCenter.toDouble() - viewDir, m_viewCenter.toDouble(), U);
+		viewMat = ccGL::LookAt(m_entityCenter.toDouble() - viewDir, m_entityCenter.toDouble(), U);
 
 		functions->glMatrixMode(GL_MODELVIEW);
 		functions->glLoadIdentity();

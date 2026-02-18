@@ -197,6 +197,19 @@ void ccFFDDeformationTool::stop(bool accepted)
         // Note: m_controlPointCloud is not in the scene database, so no need to remove it
         win->redraw(false, false);
     }
+    // Clear any in-progress interaction state so we don't leave the
+    // camera locked in INTERACT_SEND_ALL_SIGNALS mode.
+    m_isDrawingRectangle = false;
+    m_isDragging = false;
+    m_selectedPointIndex = -1;
+    m_selectedPointIndices.clear();
+
+    // Unfreeze the UI so the user can interact with the DB tree again.
+    if (m_appInterface)
+    {
+        m_appInterface->freezeUI(false);
+    }
+
     FFD_DEBUG("stop: calling ccOverlayDialog::stop");
     ccOverlayDialog::stop(accepted);
     FFD_DEBUG("stop: done");
@@ -209,7 +222,8 @@ void ccFFDDeformationTool::onLeftButtonClicked(int x, int y)
     
     if (!m_lattice || !m_latticeDisplay)
     {
-        FFD_DEBUG("  early return: lattice or display is null");
+        FFD_DEBUG("  early return: lattice or display is null – stopping tool");
+        stop(false);
         return;
     }
 
@@ -304,7 +318,14 @@ void ccFFDDeformationTool::onMouseMoved(int x, int y, Qt::MouseButtons buttons)
     // Handle point dragging (no Ctrl required)
     if (!m_isDragging || !m_lattice)
         return;
-    
+
+    if (!m_latticeDisplay)
+    {
+        // Lattice entities were removed while the tool was running.
+        stop(false);
+        return;
+    }
+
     // Must have either single point or multiple points selected
     if (m_selectedPointIndices.empty() && m_selectedPointIndex < 0)
         return;
@@ -461,6 +482,13 @@ void ccFFDDeformationTool::onButtonReleased()
                 win->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
                 FFD_DEBUG("  interaction mode set");
             }
+
+            // Freeze the UI to prevent the user from deleting the lattice
+            // entities while control points are selected.
+            if (m_appInterface)
+            {
+                m_appInterface->freezeUI(true);
+            }
         }
         else
         {
@@ -469,6 +497,10 @@ void ccFFDDeformationTool::onButtonReleased()
             if (win)
             {
                 win->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+            }
+            if (m_appInterface)
+            {
+                m_appInterface->freezeUI(false);
             }
         }
         
@@ -520,6 +552,11 @@ void ccFFDDeformationTool::onShortcutTriggered(int key)
             {
                 win->setInteractionMode(ccGLWindowInterface::MODE_TRANSFORM_CAMERA | ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
                 win->redraw(false, false);
+            }
+
+            if (m_appInterface)
+            {
+                m_appInterface->freezeUI(false);
             }
             
             m_appInterface->dispToConsole("[FFD] Selection cleared", ccMainAppInterface::STD_CONSOLE_MESSAGE);
@@ -584,6 +621,11 @@ void ccFFDDeformationTool::onShortcutTriggered(int key)
         m_isDragging = false;
         m_selectedPointIndex = -1;
         m_selectedPointIndices.clear();
+
+        if (m_appInterface)
+        {
+            m_appInterface->freezeUI(false);
+        }
         
         // Update the control point cloud visualization
         updateControlPointCloud();
@@ -685,6 +727,13 @@ void ccFFDDeformationTool::onItemPicked(ccHObject* entity, unsigned subEntityID,
     if (win)
     {
         win->setInteractionMode(ccGLWindowInterface::INTERACT_SEND_ALL_SIGNALS);
+    }
+
+    // Freeze the UI to prevent the user from deleting the lattice
+    // entities while a control point is selected.
+    if (m_appInterface)
+    {
+        m_appInterface->freezeUI(true);
     }
 
     // Highlight the selected point

@@ -55,7 +55,7 @@ CCVector3d ccFFDDeformationApplier::transformPointByLatticeDeformation(const CCV
     if (!m_lattice)
         return originalPos;
 
-    // Use FFD lattice's deform function for proper trilinear interpolation
+    // Use FFD lattice's deform function for cubic B-spline interpolation
     // This smoothly deforms ALL points based on lattice control point positions
     return m_lattice->deformPoint(originalPos);
 }
@@ -73,7 +73,7 @@ bool ccFFDDeformationApplier::updateDeformedCloud()
 
         const CCVector3d& origPos = m_originalPositions[idx];
 
-        // Apply FFD transformation - smooth trilinear interpolation
+        // Apply FFD transformation - smooth B-spline interpolation
         CCVector3d deformedPos = transformPointByLatticeDeformation(origPos);
 
         // Update the cloud point

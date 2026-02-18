@@ -1,4 +1,5 @@
 #include "FFDLatticeParamsDlg.h"
+#include "FFDLattice.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -43,6 +44,34 @@ FFDLatticeParamsDlg::FFDLatticeParamsDlg(QWidget* parent)
 	zLayout->addWidget(m_spinZ);
 	mainLayout->addLayout(zLayout);
 	
+	// Deformation type
+	auto* deformLayout = new QHBoxLayout();
+	deformLayout->addWidget(new QLabel("Interpolation:", this));
+	m_deformTypeCombo = new QComboBox(this);
+	m_deformTypeCombo->addItem("Linear (trilinear)", static_cast<int>(DeformationType::Linear));
+	m_deformTypeCombo->addItem("B-Spline (cubic)", static_cast<int>(DeformationType::BSpline));
+	m_deformTypeCombo->setCurrentIndex(1); // B-Spline by default
+	m_deformTypeCombo->setToolTip("Linear: C0-continuous, fast.\nB-Spline: C2-continuous, smoother.");
+	deformLayout->addWidget(m_deformTypeCombo);
+	mainLayout->addLayout(deformLayout);
+	
+	// Preview point count
+	auto* previewLayout = new QHBoxLayout();
+	previewLayout->addWidget(new QLabel("Preview points:", this));
+	m_spinPreviewPoints = new QSpinBox(this);
+	m_spinPreviewPoints->setRange(1000, 500000);
+	m_spinPreviewPoints->setSingleStep(5000);
+	m_spinPreviewPoints->setValue(15000); // B-Spline default (matches initial combo selection)
+	m_spinPreviewPoints->setToolTip("Number of points used for interactive preview.\nFewer points = faster interaction.");
+	previewLayout->addWidget(m_spinPreviewPoints);
+	mainLayout->addLayout(previewLayout);
+	
+	// Update preview default when interpolation type changes
+	connect(m_deformTypeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int) {
+		DeformationType type = static_cast<DeformationType>(m_deformTypeCombo->currentData().toInt());
+		m_spinPreviewPoints->setValue(type == DeformationType::BSpline ? 15000 : 50000);
+	});
+	
 	// Info label
 	auto* infoLabel = new QLabel("Total control points will be X × Y × Z", this);
 	infoLabel->setStyleSheet("color: gray; font-size: 10pt;");
@@ -78,4 +107,14 @@ std::array<unsigned int, 3> FFDLatticeParamsDlg::getLatticeSize() const
 		static_cast<unsigned int>(m_spinY->value()),
 		static_cast<unsigned int>(m_spinZ->value())
 	};
+}
+
+DeformationType FFDLatticeParamsDlg::getDeformationType() const
+{
+	return static_cast<DeformationType>(m_deformTypeCombo->currentData().toInt());
+}
+
+size_t FFDLatticeParamsDlg::getPreviewPointCount() const
+{
+	return static_cast<size_t>(m_spinPreviewPoints->value());
 }

@@ -22,12 +22,19 @@
 #include <vector>
 #include <array>
 
+//! Deformation interpolation type
+enum class DeformationType
+{
+	Linear = 0,  //!< Trilinear interpolation (C0 continuous)
+	BSpline = 1  //!< Cubic B-spline interpolation (C2 continuous)
+};
+
 //! Free Form Deformation Lattice Structure
 /*!
  * Represents a control lattice grid for FFD transformation.
  * The lattice is composed of control points (nodes) that can be moved.
- * Points in the cloud are transformed based on their trilinear interpolation
- * within the lattice cells, ensuring smooth, continuous deformation.
+ * Points in the cloud are transformed based on cubic B-spline interpolation
+ * over the lattice, ensuring C2-continuous smooth deformation.
  */
 class FFDLattice
 {
@@ -56,12 +63,18 @@ public:
 
 	//! Apply deformation to a single point
 	/*!
-	 * Uses trilinear interpolation to compute the deformed position.
-	 * This ensures smooth, continuous transformation without discontinuities.
+	 * Uses either trilinear or cubic B-spline interpolation depending
+	 * on the current deformation type.
 	 * \param originalPoint the original point coordinates
 	 * \return the deformed point coordinates
 	 */
 	CCVector3d deformPoint( const CCVector3d &originalPoint ) const;
+
+	//! Set deformation interpolation type
+	void setDeformationType( DeformationType type ) { m_deformationType = type; }
+
+	//! Get deformation interpolation type
+	DeformationType getDeformationType() const { return m_deformationType; }
 
 	//! Get lattice size
 	const std::array<unsigned int, 3> &getLatticeSize() const { return m_latticeSize; }
@@ -82,20 +95,22 @@ public:
 	void setAllControlPoints(const std::vector<CCVector3d> &controlPoints);
 
 private:
-	//! Trilinear interpolation weight function
+	//! Cubic uniform B-spline basis functions
 	/*!
-	 * Computes the smooth interpolation weight for continuous deformation.
+	 * Evaluates the four cubic B-spline basis functions B0..B3
+	 * at parameter t in [0, 1]. These provide C2 continuity.
 	 * \param t normalized parameter [0, 1]
-	 * \return the interpolation weight
+	 * \param basis output array of 4 basis function values
 	 */
-	static double cubicBSplineWeight( double t );
+	static void cubicBSplineBasis( double t, double basis[4] );
 
-	//! Compute the weight for a control point in the deformation
-	double computeControlPointWeight( const CCVector3d &point, 
-									   unsigned int cpIndexX, 
-									   unsigned int cpIndexY, 
-									   unsigned int cpIndexZ ) const;
+	//! Trilinear deformation (linear interpolation over 2x2x2 cell)
+	CCVector3d deformPointLinear( const CCVector3d &originalPoint ) const;
 
+	//! Cubic B-spline deformation (interpolation over 4x4x4 neighbourhood)
+	CCVector3d deformPointBSpline( const CCVector3d &originalPoint ) const;
+
+	DeformationType m_deformationType = DeformationType::BSpline; //!< Current interpolation type
 	std::array<unsigned int, 3> m_latticeSize;      //!< Number of control points in each dimension
 	ccBBox m_boundingBox;                            //!< Bounding box of the affected region
 	std::vector<CCVector3d> m_controlPoints;         //!< Current positions of control points

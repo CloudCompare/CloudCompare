@@ -93,11 +93,13 @@ namespace FFDAction
 
 		// Create the FFD lattice with user-specified dimensions
 		std::array<unsigned int, 3> latticeSize = paramsDlg.getLatticeSize();
+		DeformationType deformType = paramsDlg.getDeformationType();
 		FFDLattice* lattice = new FFDLattice(latticeSize, cloud->getOwnBB());
+		lattice->setDeformationType(deformType);
 
 		// Create a subsampled preview cloud for smooth interactive updates
 		size_t fullSize = cloud->size();
-		size_t targetPreviewSize = 50000; // stricter preview size for responsiveness
+		size_t targetPreviewSize = paramsDlg.getPreviewPointCount();
 		size_t step = (fullSize > targetPreviewSize && targetPreviewSize > 0) ? (fullSize / targetPreviewSize) : 1;
 		step = std::max<size_t>(step, 1);
 

@@ -110,11 +110,16 @@ private:
 	//! Cubic B-spline deformation (interpolation over 4x4x4 neighbourhood)
 	CCVector3d deformPointBSpline( const CCVector3d &originalPoint ) const;
 
+	//! Recompute the displacement cache from current and original control points
+	void updateDisplacementCache();
+
 	DeformationType m_deformationType = DeformationType::BSpline; //!< Current interpolation type
 	std::array<unsigned int, 3> m_latticeSize;      //!< Number of control points in each dimension
 	ccBBox m_boundingBox;                            //!< Bounding box of the affected region
 	std::vector<CCVector3d> m_controlPoints;         //!< Current positions of control points
 	std::vector<CCVector3d> m_originalControlPoints; //!< Original positions (for reset)
+	std::vector<CCVector3d> m_displacements;         //!< Cached displacements (current - original)
+	bool m_dirty = false;                            //!< True if any control point has been moved
 	CCVector3d m_cellSize;                           //!< Size of each lattice cell
 };
 

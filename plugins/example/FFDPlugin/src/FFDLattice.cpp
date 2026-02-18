@@ -53,6 +53,9 @@ FFDLattice::FFDLattice( const std::array<unsigned int, 3> &latticeSize, const cc
 			}
 		}
 	}
+
+	// Initialize displacement cache to zero
+	m_displacements.resize( totalPoints, CCVector3d(0, 0, 0) );
 }
 
 void FFDLattice::moveControlPoint( unsigned int indexX, unsigned int indexY, unsigned int indexZ, const CCVector3d &displacement )
@@ -64,6 +67,8 @@ void FFDLattice::moveControlPoint( unsigned int indexX, unsigned int indexY, uns
 
 	size_t index = indexZ * m_latticeSize[1] * m_latticeSize[0] + indexY * m_latticeSize[0] + indexX;
 	m_controlPoints[index] += displacement;
+	m_displacements[index] = m_controlPoints[index] - m_originalControlPoints[index];
+	m_dirty = true;
 }
 
 CCVector3d FFDLattice::getControlPoint( unsigned int indexX, unsigned int indexY, unsigned int indexZ ) const
@@ -80,6 +85,8 @@ CCVector3d FFDLattice::getControlPoint( unsigned int indexX, unsigned int indexY
 void FFDLattice::reset()
 {
 	m_controlPoints = m_originalControlPoints;
+	std::fill(m_displacements.begin(), m_displacements.end(), CCVector3d(0, 0, 0));
+	m_dirty = false;
 }
 
 void FFDLattice::setAllControlPoints(const std::vector<CCVector3d> &controlPoints)
@@ -87,6 +94,18 @@ void FFDLattice::setAllControlPoints(const std::vector<CCVector3d> &controlPoint
 	if (controlPoints.size() == m_controlPoints.size())
 	{
 		m_controlPoints = controlPoints;
+		updateDisplacementCache();
+	}
+}
+
+void FFDLattice::updateDisplacementCache()
+{
+	m_dirty = false;
+	for (size_t i = 0; i < m_controlPoints.size(); ++i)
+	{
+		m_displacements[i] = m_controlPoints[i] - m_originalControlPoints[i];
+		if (m_displacements[i].x != 0.0 || m_displacements[i].y != 0.0 || m_displacements[i].z != 0.0)
+			m_dirty = true;
 	}
 }
 
@@ -113,6 +132,10 @@ void FFDLattice::cubicBSplineBasis( double t, double basis[4] )
 
 CCVector3d FFDLattice::deformPoint( const CCVector3d &originalPoint ) const
 {
+	// Fast path: no control points have moved
+	if (!m_dirty)
+		return originalPoint;
+
 	switch (m_deformationType)
 	{
 	case DeformationType::Linear:
@@ -155,12 +178,12 @@ CCVector3d FFDLattice::deformPointLinear( const CCVector3d &originalPoint ) cons
 	double fv = gridY - yi;
 	double fw = gridZ - zi;
 
-	// Helper to get displacement at a control point
-	auto getDisp = [this](int x, int y, int z) -> CCVector3d {
+	// Helper to get cached displacement at a control point
+	auto getDisp = [this](int x, int y, int z) -> const CCVector3d& {
 		size_t idx = static_cast<size_t>(z) * m_latticeSize[1] * m_latticeSize[0]
 		           + static_cast<size_t>(y) * m_latticeSize[0]
 		           + static_cast<size_t>(x);
-		return m_controlPoints[idx] - m_originalControlPoints[idx];
+		return m_displacements[idx];
 	};
 
 	// Trilinear interpolation of displacement over the 2x2x2 cell
@@ -227,39 +250,49 @@ CCVector3d FFDLattice::deformPointBSpline( const CCVector3d &originalPoint ) con
 	cubicBSplineBasis(fv, basisV);
 	cubicBSplineBasis(fw, basisW);
 
-	// Accumulate B-spline interpolated displacement over the 4x4x4 neighbourhood.
-	// We interpolate the *displacement* (current CP - original CP) rather than
-	// absolute positions, which guarantees an identity mapping when no control
-	// points have been moved.
-	int maxX = static_cast<int>(m_latticeSize[0]) - 1;
-	int maxY = static_cast<int>(m_latticeSize[1]) - 1;
-	int maxZ = static_cast<int>(m_latticeSize[2]) - 1;
+	// Separable evaluation using cached displacements.
+	// Phase 1: contract along X for each (y,z) pair → 4x4 = 16 intermediates
+	// Phase 2: contract along Y for each z → 4 intermediates
+	// Phase 3: contract along Z → final result
+	// This reduces vector multiply-accumulates from 64 to 16+4+4 = 24.
 
-	CCVector3d displacement(0, 0, 0);
+	const int maxX = static_cast<int>(m_latticeSize[0]) - 1;
+	const int maxY = static_cast<int>(m_latticeSize[1]) - 1;
+	const int maxZ = static_cast<int>(m_latticeSize[2]) - 1;
+	const size_t strideY = m_latticeSize[0];
+	const size_t strideZ = m_latticeSize[1] * strideY;
+	const CCVector3d* disps = m_displacements.data();
+
+	CCVector3d resultZ(0, 0, 0);
 
 	for (int dz = -1; dz <= 2; ++dz)
 	{
-		int cz = std::clamp(zi + dz, 0, maxZ);
-		double wW = basisW[dz + 1];
+		const int cz = std::clamp(zi + dz, 0, maxZ);
+		const size_t baseZ = static_cast<size_t>(cz) * strideZ;
+
+		CCVector3d resultY(0, 0, 0);
 
 		for (int dy = -1; dy <= 2; ++dy)
 		{
-			int cy = std::clamp(yi + dy, 0, maxY);
-			double wV = basisV[dy + 1];
+			const int cy = std::clamp(yi + dy, 0, maxY);
+			const size_t baseYZ = baseZ + static_cast<size_t>(cy) * strideY;
 
-			for (int dx = -1; dx <= 2; ++dx)
-			{
-				int cx = std::clamp(xi + dx, 0, maxX);
-				double weight = basisU[dx + 1] * wV * wW;
+			// Contract along X: accumulate 4 displacements weighted by basisU
+			const int cx0 = std::clamp(xi - 1, 0, maxX);
+			const int cx1 = std::clamp(xi,     0, maxX);
+			const int cx2 = std::clamp(xi + 1, 0, maxX);
+			const int cx3 = std::clamp(xi + 2, 0, maxX);
 
-				size_t idx = static_cast<size_t>(cz) * m_latticeSize[1] * m_latticeSize[0]
-				           + static_cast<size_t>(cy) * m_latticeSize[0]
-				           + static_cast<size_t>(cx);
+			CCVector3d resultX = disps[baseYZ + cx0] * basisU[0]
+			                   + disps[baseYZ + cx1] * basisU[1]
+			                   + disps[baseYZ + cx2] * basisU[2]
+			                   + disps[baseYZ + cx3] * basisU[3];
 
-				displacement += (m_controlPoints[idx] - m_originalControlPoints[idx]) * weight;
-			}
+			resultY += resultX * basisV[dy + 1];
 		}
+
+		resultZ += resultY * basisW[dz + 1];
 	}
 
-	return originalPoint + displacement;
+	return originalPoint + resultZ;
 }

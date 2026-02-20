@@ -12,9 +12,6 @@ if( APPLE )
 	set( CCVIEWER_MAC_FRAMEWORK_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CCViewer framework dir" )
 	set( CCVIEWER_MAC_PLUGIN_DIR ${CCVIEWER_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CCViewer plugin dir" )
 
-	# this will install all the Qt libs and the necessary plugins
-	install( CODE "execute_process( COMMAND \"${MACDEPLOYQT}\" \"${CCVIEWER_MAC_BASE_DIR}\" -verbose=1 )" COMPONENT Runtime )
-	
 	# install icons
 	install( FILES cc_viewer_icon.icns DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )
 

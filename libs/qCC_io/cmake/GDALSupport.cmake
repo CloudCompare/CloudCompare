@@ -5,11 +5,10 @@
 option( OPTION_USE_GDAL "Build with GDAL support" OFF )
 if( ${OPTION_USE_GDAL} )
 	find_package( GDAL REQUIRED )
-	
+
 	if ( NOT GDAL_FOUND )
 		message( SEND_ERROR "GDAL package not found" )
 	else()
-		target_include_directories( ${PROJECT_NAME} PUBLIC ${GDAL_INCLUDE_DIR} )
 		if( WIN32 )
 			set( GDAL_BIN_DIR ${GDAL_INCLUDE_DIR}/../bin CACHE PATH "GDAL DLLs folder" )
 		endif()
@@ -21,10 +20,10 @@ function( target_link_GDAL ) # ARGV0 = project name
 	if( NOT GDAL_FOUND )
 		message( FATAL_ERROR "GDAL package not found" )
 	endif()
-	
-	target_link_libraries( ${ARGV0} PUBLIC ${GDAL_LIBRARY} )
+
+	target_link_libraries( ${ARGV0} PUBLIC GDAL::GDAL )
 	target_compile_definitions( ${ARGV0} PUBLIC CC_GDAL_SUPPORT )
-	
+
 	if( WIN32 )
 		#install DLLs
 		message( STATUS "Looking for GDAL DLLs in: " ${GDAL_BIN_DIR} )
@@ -215,12 +214,12 @@ function( target_link_GDAL ) # ARGV0 = project name
 				${GDAL_BIN_DIR}/libeay32.dll
 			)
 		endif()
-		
+
 		#message( STATUS ${GDAL_DLL_FILES} )
 		#message( STATUS ${GDAL_DEP_DLL_FILES} )
 		copy_files("${GDAL_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 ) #mind the quotes!
 		copy_files("${GDAL_DEP_DLL_FILES}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 ) #mind the quotes!
-		
+
 		if (${OPTION_BUILD_CCVIEWER})
 			copy_files("${GDAL_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" 1 ) #mind the quotes!
 			copy_files("${GDAL_DEP_DLL_FILES}" "${CCVIEWER_DEST_FOLDER}" 1 ) #mind the quotes!

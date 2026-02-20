@@ -12,7 +12,7 @@ if( APPLE )
 	set( CLOUDCOMPARE_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CLOUDCOMPARE_DEST_FOLDER}/CloudCompare.app  CACHE INTERNAL "CloudCompare bundle dir")
 	set( CLOUDCOMPARE_MAC_FRAMEWORK_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Frameworks CACHE INTERNAL "CC framework dir" )
 	set( CLOUDCOMPARE_MAC_PLUGIN_DIR ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/PlugIns/ccPlugins CACHE INTERNAL "CC plugin dir" )
-	
+
 	# install icons
-	install( FILES cc_icon.icns DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )   
+	install( FILES cc_icon.icns DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )
 endif( APPLE )

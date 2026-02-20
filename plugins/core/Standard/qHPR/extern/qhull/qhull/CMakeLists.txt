@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
-
 project( qhull VERSION 2015.2 )
-
-set( CMAKE_AUTOMOC OFF )
 
 #define global variables for use by other projects
 set ( QHULL_LIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )

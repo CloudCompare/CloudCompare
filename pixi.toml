@@ -8,9 +8,7 @@ platforms = ["osx-arm64"]
 
 [tasks.CloudCompare]
 # Start the built executable
-cmd = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-#input = ".build/install/CloudCompare/CloudCompare.app/Contents/MacOS/CloudCompare"
-depends-on = ["install"]
+cmd = "CC_SHADER_PATH=.build/shaders CC_PLUGIN_PATH=.build/ccPlugins CC_TRANSLATION_PATH=.build/qCC/translations .build/qCC/CloudCompare.app/Contents/MacOS/CloudCompare"
 
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
@@ -20,7 +18,7 @@ ninja = "1.13.*"
 [dependencies]
 qt6-main= ">=6.9.1,<6.10.0" # at least 6.9.1 for PCL 1.15.1
 laszip = ">=3.4.3,<3.5"
-opencv = ">=4.12.0,<4.13"
+libopencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
 python = ">3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
@@ -40,7 +38,7 @@ cmd = [
 	"cmake",
 	"-GNinja",
 	"-S.",
-	# We want build in the .build directory
+	# We want to build in the .build directory
 	"-B.build",
 	"-DCMAKE_BUILD_TYPE=Release",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
@@ -96,7 +94,7 @@ cmd = [
 ]
 
 inputs = ["CMakeLists.txt"]
-outputs = [".build/CMakeFiles/"]
+#outputs = [".build/CMakeFiles/"]
 
 [feature.build.tasks.build]
 cmd = ["cmake", "--build", ".build"]
@@ -108,18 +106,7 @@ outputs = [".build/qCC/CloudCompare"]
 cmd = ["cmake", "--install", ".build", "--config", "Release"]
 depends-on = ["configure"]
 
-#TODO: macos only
-# This will embed dependencies and fix rpath accordingly
-[feature.build.tasks.bundle]
-cmd = [
-	"python",
-	"scripts/mac/bundle/libBundleCloudCompare.py",
-	".build/install",
-	"--embed_python",
-]
-depends-on = ["install"]
-
-# Bundel signature
+# macOS only: Bundle signature
 [feature.build.tasks.sign_bundle]
 cmd = [
 	"python",
@@ -133,4 +120,4 @@ depends-on = ["install"]
 build = ["build"]
 
 [pypi-dependencies]
-3dfin = { version = "==0.6.0a4" }
+3dfin = { version = "==0.6.0" }

@@ -59,7 +59,7 @@ class CCFBO_LIB_API ccBilateralFilter : public ccGlFilter
 
 	// inherited from ccGlFilter
 	virtual ccGlFilter*   clone() const override;
-	virtual bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
+	virtual bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
 	virtual void          shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
 	inline virtual GLuint getTexture() override
 	{

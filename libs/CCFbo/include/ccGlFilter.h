@@ -56,12 +56,14 @@ class CCFBO_LIB_API ccGlFilter
 	    \param height texture/screen height
 	    \param shadersPath path where shader files are stored
 	    \param error error string (if an error occurred)
+	    \param silence whether initialization of the filter is silent (= no dialog, etc.)
 	    \return success
 	    **/
 	virtual bool init(unsigned       width,
 	                  unsigned       height,
 	                  const QString& shadersPath,
-	                  QString&       error) = 0;
+	                  QString&       error,
+	                  bool           silent) = 0;
 
 	//! Minimal set of 3D viewport parameters that can be used by shaders
 	struct CCFBO_LIB_API ViewportParameters

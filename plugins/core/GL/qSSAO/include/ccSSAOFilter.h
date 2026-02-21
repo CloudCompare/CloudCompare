@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                       CLOUDCOMPARE PLUGIN: qSSAO                       #
@@ -32,9 +34,6 @@
 //
 /*****************************************************************/
 
-#ifndef CC_FILTER_SSAO_H
-#define CC_FILTER_SSAO_H
-
 // CC_FBO
 #include <ccGlFilter.h>
 
@@ -57,19 +56,12 @@ class ccSSAOFilter : public ccGlFilter
 	void reset();
 
 	// inherited from ccGlFilter
-	virtual ccGlFilter* clone() const override;
-	virtual bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error) override;
-	virtual void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
-	virtual GLuint      getTexture() override;
+	ccGlFilter* clone() const override;
+	bool        init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	void        shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	GLuint      getTexture() override;
 
-	bool init(unsigned       width,
-	          unsigned       height,
-	          bool           enableBilateralFilter,
-	          bool           useReflectTexture,
-	          const QString& shadersPath,
-	          QString&       error);
-
-	void setParameters(int N, float Kz, float R, float F);
+	void setParameters(float Kz, float R, float F);
 
   protected:
 	void initReflectTexture();
@@ -82,16 +74,15 @@ class ccSSAOFilter : public ccGlFilter
 	ccShader*            m_shader;
 	GLuint               m_texReflect;
 
-	int   m_N;  // nb of neighbours
 	float m_Kz; // attenuation with distance
 	float m_R;  // radius in image of neighbour sphere
 	float m_F;  // amplification
 
-	//! Maximum number of sampling directions
-	static const int MAX_N = 256;
-
 	//!	Full sphere sampling
-	float m_ssao_neighbours[3 * MAX_N];
+	std::vector<float> m_ssaoNeighbours;
+
+	//!	Random sampling seed
+	unsigned m_randSeed;
 
 	ccBilateralFilter* m_bilateralFilter;
 	bool               m_bilateralFilterEnabled;
@@ -104,5 +95,3 @@ class ccSSAOFilter : public ccGlFilter
 	//! Associated OpenGL functions set validity
 	bool m_glFuncIsValid;
 };
-
-#endif

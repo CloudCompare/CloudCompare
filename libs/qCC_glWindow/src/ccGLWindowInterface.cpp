@@ -3495,7 +3495,7 @@ bool ccGLWindowInterface::initGLFilter(int w, int h, bool silent /*=false*/)
 	std::swap(_filter, m_activeGLFilter);
 
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error, silent))
 	{
 		if (!silent)
 		{
@@ -5860,7 +5860,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		if (m_activeGLFilter)
 		{
 			QString error;
-			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error))
+			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true))
 			{
 				if (!silent)
 				{
@@ -6014,7 +6014,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 	if (glFilter && zoomFactor != 1.0f)
 	{
 		QString error;
-		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error);
+		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true);
 	}
 
 	// we restore viewport parameters

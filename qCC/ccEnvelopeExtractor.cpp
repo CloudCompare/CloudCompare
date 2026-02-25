@@ -233,7 +233,7 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(std::vector<Vertex2D>& points,
 		return false;
 
 	// do we really need to compute the concave hull?
-	if (hullPoints.size() < 2 || maxSquareEdgeLength < 0)
+	if (hullPoints.size() < 2 || maxSquareEdgeLength <= 0) // if maxSquareEdgeLength == 0, we just extract the convex hull
 		return true;
 
 	unsigned pointCount = static_cast<unsigned>(points.size());

@@ -242,15 +242,17 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Brute force triangle picking
 	virtual bool trianglePicking(const CCVector2d&           clickPos,
 	                             const ccGLCameraParameters& camera,
+	                             bool                        edgeOnly,
 	                             int&                        nearestTriIndex,
 	                             double&                     nearestSquareDist,
 	                             CCVector3d&                 nearestPoint,
 	                             CCVector3d*                 barycentricCoords = nullptr) const;
 
-	//! Triangle picking (single triangle)
+	//! Triangle picking (specific triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,
 	                             const CCVector2d&           clickPos,
 	                             const ccGLCameraParameters& camera,
+	                             bool                        edgeOnly,
 	                             CCVector3d&                 point,
 	                             CCVector3d*                 barycentricCoords = nullptr) const;
 
@@ -290,9 +292,9 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	                             bool                        noGLTrans,
 	                             const ccGenericPointCloud&  vertices,
 	                             const ccGLCameraParameters& camera,
+	                             bool                        edgeOnly,
 	                             CCVector3d&                 point,
-	                             CCVector3d*                 barycentricCoords = nullptr,
-	                             QPainter*                   painter           = nullptr) const;
+	                             CCVector3d*                 barycentricCoords = nullptr) const;
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
 	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default

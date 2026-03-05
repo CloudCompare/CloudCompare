@@ -1,7 +1,6 @@
 
 target_sources( ${PROJECT_NAME}
 	PRIVATE
-		${CMAKE_CURRENT_LIST_DIR}/ccPcvDlg.cpp
 		${CMAKE_CURRENT_LIST_DIR}/PCV.cpp
 		${CMAKE_CURRENT_LIST_DIR}/PCVCommand.cpp
 		${CMAKE_CURRENT_LIST_DIR}/PCVContext.cpp

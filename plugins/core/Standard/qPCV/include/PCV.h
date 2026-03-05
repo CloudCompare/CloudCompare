@@ -1,22 +1,21 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
-//#                                PCV                                     #
+//#                      CLOUDCOMPARE PLUGIN                               #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
-//#  it under the terms of the GNU Library General Public License as       #
-//#  published by the Free Software Foundation; version 2 or later of the License.  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
 //#                                                                        #
 //#  This program is distributed in the hope that it will be useful,       #
 //#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
-//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-
-#ifndef MESH_ILLUMINATION_HEADER
-#define MESH_ILLUMINATION_HEADER
 
 //CCCoreLib
 #include <GenericCloud.h>
@@ -70,7 +69,7 @@ public:
 		\param entityName entity name (optional)
 		\return success
 	**/
-	static bool Launch(	const std::vector<CCVector3>& rays,
+	static bool Launch(	const std::vector<CCVector3d>& rays,
 						CCCoreLib::GenericCloud* vertices,
 						CCCoreLib::GenericMesh* mesh = nullptr,
 						bool meshIsClosed = false,
@@ -81,8 +80,6 @@ public:
 
 	//! Generates a given number of rays
 	static bool GenerateRays(	unsigned numberOfRays,
-								std::vector<CCVector3>& rays,
+								std::vector<CCVector3d>& rays,
 								bool mode360 = true);
 };
-
-#endif

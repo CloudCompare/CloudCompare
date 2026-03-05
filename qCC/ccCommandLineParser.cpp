@@ -311,7 +311,7 @@ QString ccCommandLineParser::exportEntity(CLEntityDesc&                         
 		return "[ExportEntity] Internal error: invalid input entity!";
 	}
 
-	bool anyForced = options.testFlag(ExportOption::ForceCloud) | options.testFlag(ExportOption::ForceHierarchy) | options.testFlag(ExportOption::ForceMesh);
+	bool anyForced = options.testFlag(ExportOption::ForceCloud) || options.testFlag(ExportOption::ForceHierarchy) || options.testFlag(ExportOption::ForceMesh);
 	// specific case: clouds
 	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD) || entityDesc.getCLEntityType() == CL_ENTITY_TYPE::CLOUD;
 
@@ -998,7 +998,7 @@ int ccCommandLineParser::start(QDialog* parent /*=nullptr*/)
 			QElapsedTimer eTimerSubProcess;
 			eTimerSubProcess.start();
 			QString processName = m_commands[keyword]->m_name.toUpper();
-			printHigh(QString("[%1]").arg(processName));
+			printHigh(QString("[%1] Command detected").arg(processName));
 			success = m_commands[keyword]->process(*this);
 			printHigh(QString("[%2] finished in %1 s.").arg(eTimerSubProcess.elapsed() / 1.0e3, 0, 'f', 2).arg(processName));
 		}

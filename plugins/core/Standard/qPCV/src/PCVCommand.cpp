@@ -24,7 +24,7 @@ PCVCommand::PCVCommand()
 }
 
 bool PCVCommand::Process(	const ccHObject::Container& candidates,
-							const std::vector<CCVector3>& rays,
+							const std::vector<CCVector3d>& rays,
 							bool meshIsClosed,
 							unsigned resolution,
 							ccProgressDialog* progressDlg/*=nullptr*/,
@@ -141,7 +141,7 @@ bool PCVCommand::Process(	const ccHObject::Container& candidates,
 
 bool PCVCommand::process(ccCommandLineInterface& cmd)
 {
-	cmd.print("[PCV]");
+	cmd.print("[PCV] Starting process");
 
 	if (cmd.meshes().empty() && cmd.clouds().empty())
 	{
@@ -197,14 +197,19 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	}
 
 	//generates light directions
-	std::vector<CCVector3> rays;
+	std::vector<CCVector3d> rays;
 	if (!PCV::GenerateRays(rayCount, rays, mode360))
 	{
 		return cmd.error(QObject::tr("Failed to generate the set of rays"));
 	}
 
-	ccProgressDialog pcvProgressCb(true);
-	pcvProgressCb.setAutoClose(false);
+	QScopedPointer<ccProgressDialog> pcvProgressCb;
+
+	if (!cmd.silentMode())
+	{
+		pcvProgressCb.reset(new ccProgressDialog(true));
+		pcvProgressCb->setAutoClose(false);
+	}
 
 	ccHObject::Container candidates;
 	try
@@ -221,7 +226,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	for (CLMeshDesc& desc : cmd.meshes())
 		candidates.push_back(desc.mesh);
 
-	if (!Process(candidates, rays, meshIsClosed, resolution, &pcvProgressCb, nullptr))
+	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.data(), nullptr))
 	{
 		return cmd.error(QObject::tr("Process failed"));
 	}

@@ -42,3 +42,7 @@
 [submodule "plugins/core/IO/qPhotoscanIO/extern/quazip"]
 	path = plugins/core/IO/qPhotoscanIO/extern/quazip
 	url = https://github.com/stachenov/quazip.git
+[submodule "plugins/core/IO/MeshIO"]
+	path = plugins/core/IO/MeshIO
+	url = https://github.com/CloudCompare/MeshIO.git
+	branch = master

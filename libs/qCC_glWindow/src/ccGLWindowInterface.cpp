@@ -2220,7 +2220,7 @@ void ccGLWindowInterface::startOpenGLPicking(const PickingParameters& params)
 	bindFBO(m_pickingFbo);
 
 	// we have to clear the display to be sure there's no color
-	glFunc->glClearColor(0, 0, 0, 255);
+	glFunc->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glFunc->glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// get context
@@ -2624,30 +2624,27 @@ void ccGLWindowInterface::startCPUBasedPointPicking(const PickingParameters& par
 					ignoreSubmeshes = true;
 
 					ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-					if (mesh->isShownAsWire())
 					{
-						// skip meshes that are displayed in wireframe mode
-						continue;
-					}
-
-					int        nearestTriIndex   = -1;
-					double     nearestSquareDist = 0.0;
-					CCVector3d P;
-					CCVector3d barycentricCoords;
-					if (mesh->trianglePicking(clickedPos,
-					                          camera,
-					                          nearestTriIndex,
-					                          nearestSquareDist,
-					                          P,
-					                          &barycentricCoords))
-					{
-						if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+						int        nearestTriIndex   = -1;
+						double     nearestSquareDist = 0.0;
+						CCVector3d P;
+						CCVector3d barycentricCoords;
+						if (mesh->trianglePicking(clickedPos,
+						                          camera,
+						                          mesh->isShownAsWire(), // only check the edges in this case
+						                          nearestTriIndex,
+						                          nearestSquareDist,
+						                          P,
+						                          &barycentricCoords))
 						{
-							nearestElementSquareDist = nearestSquareDist;
-							nearestElementIndex      = nearestTriIndex;
-							nearestPoint             = P.toPC();
-							nearestEntity            = mesh;
-							nearestPointBC           = barycentricCoords;
+							if (nearestElementIndex < 0 || (nearestTriIndex >= 0 && nearestSquareDist < nearestElementSquareDist))
+							{
+								nearestElementSquareDist = nearestSquareDist;
+								nearestElementIndex      = nearestTriIndex;
+								nearestPoint             = P.toPC();
+								nearestEntity            = mesh;
+								nearestPointBC           = barycentricCoords;
+							}
 						}
 					}
 				}
@@ -3498,7 +3495,7 @@ bool ccGLWindowInterface::initGLFilter(int w, int h, bool silent /*=false*/)
 	std::swap(_filter, m_activeGLFilter);
 
 	QString error;
-	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error))
+	if (!_filter->init(static_cast<unsigned>(w), static_cast<unsigned>(h), s_shaderPath, error, silent))
 	{
 		if (!silent)
 		{
@@ -5863,7 +5860,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		if (m_activeGLFilter)
 		{
 			QString error;
-			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error))
+			if (!m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true))
 			{
 				if (!silent)
 				{
@@ -6017,7 +6014,7 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 	if (glFilter && zoomFactor != 1.0f)
 	{
 		QString error;
-		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error);
+		m_activeGLFilter->init(glWidth(), glHeight(), GetShaderPath(), error, /*silent=*/true);
 	}
 
 	// we restore viewport parameters

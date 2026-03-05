@@ -47,7 +47,7 @@ static const char c_csm_customLabels[]     = "labels";
 static const char c_csm_customLabelValue[] = "value";
 static const char c_csm_customLabelText[]  = "text";
 
-// matplotlib library colorscale created by Stéfan van der Walt and Nathaniel Smith
+// matplotlib library colorscale created by Stefan van der Walt and Nathaniel Smith
 static const double s_viridis[] =
     {
         0.26700401,

@@ -307,6 +307,42 @@ class ccGL
 		return true;
 	}
 
+	// Inspired by https://www.songho.ca/opengl/gl_lookattoaxes.html
+	static ccGLMatrixd LookAt(const CCVector3d& eye, const CCVector3d& center, const CCVector3d& up)
+	{
+		// compute left/up/forward axis vectors
+		CCVector3d forward = eye - center;
+		forward.normalize();
+
+		// left = up x forward
+		CCVector3d left = up.cross(forward);
+		left.normalize();
+
+		// Recompute up as: up = forward x left
+		CCVector3d upFixed = forward.cross(left);
+
+		// set inverse of rotation matrix: Mr
+		ccGLMatrixd mr;
+		mr.data()[0]  = left.x;
+		mr.data()[4]  = left.y;
+		mr.data()[8]  = left.z;
+		mr.data()[1]  = upFixed.x;
+		mr.data()[5]  = upFixed.y;
+		mr.data()[9]  = upFixed.z;
+		mr.data()[2]  = forward.x;
+		mr.data()[6]  = forward.y;
+		mr.data()[10] = forward.z;
+		mr.data()[15] = 1.0f;
+
+		// set inverse translation matrix: Mt
+		ccGLMatrixd mt;
+		mt.toIdentity();
+		mt.setTranslation(-center.toDouble());
+
+		// M = Mr * Mt
+		return mr * mt;
+	}
+
 	inline static double MAT(const double* m, int r, int c)
 	{
 		return m[c * 4 + r];

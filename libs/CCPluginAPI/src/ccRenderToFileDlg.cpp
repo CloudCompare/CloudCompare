@@ -61,10 +61,12 @@ ccRenderToFileDlg::ccRenderToFileDlg(ccGLWindowInterface* win, QWidget* parent /
 	QString firstFilter;
 	for (int i = 0; i < list.size(); ++i)
 	{
-		m_filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
+		QString filter = QString("%1 image (*.%2)").arg(QString(list[i].data()).toUpper()).arg(list[i].data());
+		m_filters.append(filter + "\n");
 		if (i == 0 || QString(list[i].data()) == "jpg")
 		{
-			firstFilter = m_filters;
+			firstExtension = list[i].data();
+			firstFilter    = filter;
 		}
 	}
 

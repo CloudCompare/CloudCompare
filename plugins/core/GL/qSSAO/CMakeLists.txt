@@ -12,9 +12,7 @@ if( PLUGIN_GL_QSSAO )
 	
 	add_subdirectory( include )
 	add_subdirectory( src )
+	add_subdirectory( ui )
 	add_subdirectory( shaders )
 
-	add_subdirectory( extern/Randomkit )
-   
-	target_link_libraries( ${PROJECT_NAME} RandomKitLib )
 endif()

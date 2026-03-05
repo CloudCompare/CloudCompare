@@ -209,8 +209,6 @@ Improvements:
 		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
 		- Empty scans will not trigger an error anymore (just a warning message)
 
-	- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
-
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
 		- at saving time, CC will not change the internal name of scalar fields that were already present in the input PLY file
@@ -290,7 +288,12 @@ Improvements:
 		- new option when unrolling a mesh: 'remove stretched triangles'
 		- automatically discards triangles which are stretched from one end to the other of the unrolled entity
 
+	- Improved SSAO filter
+		- enhanced default parameters
+		- when activated, the user will now see a dialog that will give full control over the parameters
+
 	- Others:
+		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
 			the Level tool can change the cloud coordinates, and not only the camera position. This could lead to strange issues when the
 			GUI is frozen, but not the View toolbar.
@@ -301,6 +304,7 @@ Improvements:
 		- the 'Escape' key should now allow to close any currently opened 'overlay' dialog in the top right corner of the 3D views (point picking, rotate/translate, etc.)
 		- CloudCompare is now built upon Qt 6.
 		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
+		- point picking now works on mesh displayed with wireframe
 
 Bug fixes:
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
@@ -343,6 +347,10 @@ Bug fixes:
 	- DXF files: the 'elevation' of LWPOLYLINE entities was ignored
 	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
 	- When loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion for the time being.
+	- Point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
+	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing the tool
+	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not lead to the
+		extraction of the convex hull.
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

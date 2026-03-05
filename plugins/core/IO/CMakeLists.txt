@@ -1,3 +1,4 @@
+add_subdirectory( MeshIO )
 add_subdirectory( qAdditionalIO )
 add_subdirectory( qCoreIO )
 add_subdirectory( qCSVMatrixIO )

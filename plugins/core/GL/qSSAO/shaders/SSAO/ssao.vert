@@ -1,17 +1,16 @@
 //////////////////////////////////////////////////////////////////////////////////////
 //
-//
 //	Screen Space Ambient Occlusion
 //
 //		C.B. - 5 march 2008
 //		Adapted from notes by Crytek and Inigo Quilez
 //
-//	OUT:	gl_TexCoord[0]	-	viewport coordinates
+//	OUT: gl_TexCoord[0] - viewport coordinates
 //
 ////////////////////////////////////////////////////////////////////////////////////////
 
-void	main ()
+void main()
 {
-	gl_TexCoord[0]	=	gl_MultiTexCoord0;	
-	gl_Position     =	ftransform ();
+	gl_TexCoord[0] = gl_MultiTexCoord0;
+	gl_Position    = ftransform();
 }

@@ -126,13 +126,13 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
 	// focal distance change compensation
-	double relativeZoom = m_params.getFocalDistance() / params.getFocalDistance();
+	double relativeZoom = (m_params.getFocalDistance() / params.getFocalDistance()) * context.renderZoom;
 
 	// camera center shift compensation
 	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist(context.glW, context.glH);
 
 	// thick dotted line
-	glFunc->glLineWidth(2);
+	glFunc->glLineWidth(2 * context.renderZoom);
 	glFunc->glLineStipple(1, 0xAAAA);
 	glFunc->glEnable(GL_LINE_STIPPLE);
 

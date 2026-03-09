@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_RASTER_FILTER_HEADER
-#define CC_RASTER_FILTER_HEADER
-
+// Local
 #include "FileIOFilter.h"
 
 #ifdef CC_GDAL_SUPPORT
@@ -35,5 +35,3 @@ class QCC_IO_LIB_API RasterGridFilter : public FileIOFilter
 };
 
 #endif // CC_GDAL_SUPPORT
-
-#endif // CC_RASTER_FILTER_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SCALE_DLG_HEADER
-#define CC_SCALE_DLG_HEADER
-
-// CC_Lib
+// CCCoreLib
 #include <CCGeom.h>
 
 // Qt
@@ -38,7 +37,7 @@ class ccScaleDlg : public QDialog
 	//! Default constructor
 	explicit ccScaleDlg(QWidget* parent = nullptr);
 
-	~ccScaleDlg();
+	~ccScaleDlg() override;
 
 	//! Returns scales
 	CCVector3d getScales() const;
@@ -56,7 +55,5 @@ class ccScaleDlg : public QDialog
 	void allDimsAtOnceToggled(bool);
 	void fxUpdated(double);
 
-	Ui::ScaleDialog* m_ui;
+	std::unique_ptr<Ui::ScaleDialog> m_ui;
 };
-
-#endif // CC_SCALE_DLG_HEADER

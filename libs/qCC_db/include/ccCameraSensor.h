@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CAMERA_SENSOR_HEADER
-#define CC_CAMERA_SENSOR_HEADER
-
-// local
+// Local
 #include "ccOctree.h"
 #include "ccSensor.h"
 
-// system
+// System
 #include <unordered_set>
 
 class ccImage;
@@ -446,9 +445,9 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \return true if successful
 	**/
 	static bool OrthoRectifyAsImages(std::vector<ccImage*>                   images,
-	                                 double                                  a[],
-	                                 double                                  b[],
-	                                 double                                  c[],
+	                                 const double                            a[],
+	                                 const double                            b[],
+	                                 const double                            c[],
 	                                 unsigned                                maxSize,
 	                                 QDir*                                   outputDir            = nullptr,
 	                                 std::vector<ccImage*>*                  orthoRectifiedImages = nullptr,
@@ -482,7 +481,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param sigma uncertainty vector (along X, Y and Z)
 	    \return operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
 	**/
-	bool computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
+	bool computeUncertainty(const CCVector2& pixel, float depth, Vector3Tpl<ScalarType>& sigma) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).
@@ -517,12 +516,12 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 
 	//! Compute the coefficients of the 6 planes frustum in the global coordinates system (normal vector are headed the frustum inside), the edges direction vectors and the frustum center
 	/** \param planeCoefficients coefficients of the six planes
-	    \param edges direction vectors of the frustum edges (there are 12 edges but some of them are collinear)
 	    \param ptsFrustum the 8 frustum corners in the global coordinates system
+	    \param edges direction vectors of the frustum edges (there are 12 edges but some of them are collinear)
 	    \param center center of the the frustum circumscribed sphere
 	    \return success
 	**/
-	bool computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 ptsFrustum[8], CCVector3 edges[6], CCVector3& center);
+	bool computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustumCorners[8], CCVector3 edges[6], CCVector3& center);
 
   public: // helpers
 	//! Helper: converts camera focal from pixels to mm
@@ -551,7 +550,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 
 	// Inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
@@ -672,5 +671,3 @@ class ccOctreeFrustumIntersector
 	// contains the truncated code of the cells INTERSECTING the frustum
 	std::unordered_set<CCCoreLib::DgmOctree::CellCode> m_cellsIntersectFrustum[CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL + 1];
 };
-
-#endif // CC_CAMERA_SENSOR_HEADER

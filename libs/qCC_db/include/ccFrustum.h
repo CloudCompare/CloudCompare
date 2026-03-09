@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_FRUSTUM_HEADER
-#define CC_FRUSTUM_HEADER
+// Local
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <RayAndBox.h>
-
-// Local
-#include "ccGLMatrix.h"
 
 class Plane
 {
@@ -170,7 +169,7 @@ class Frustum
 
 			if (distance < -r)
 				return OUTSIDE;
-			else if (distance < r)
+			if (distance < r)
 				result = INTERSECT;
 		}
 
@@ -185,7 +184,7 @@ class Frustum
 		{
 			if (plane.distance(box.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (plane.distance(box.getVertexN(plane.normal)) < 0)
+			if (plane.distance(box.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 
@@ -200,7 +199,7 @@ class Frustum
 		{
 			if (plane.distance(cube.getVertexP(plane.normal)) < 0)
 				return OUTSIDE;
-			else if (plane.distance(cube.getVertexN(plane.normal)) < 0)
+			if (plane.distance(cube.getVertexN(plane.normal)) < 0)
 				result = INTERSECT;
 		}
 
@@ -262,5 +261,3 @@ class Frustum
   protected: // members
 	Plane pl[6];
 };
-
-#endif // CC_FRUSTUM_HEADER

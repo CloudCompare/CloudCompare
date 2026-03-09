@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,19 +17,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MAIN_WINDOW_HEADER
-#define CC_MAIN_WINDOW_HEADER
-
-// Qt
-#include <QMainWindow>
-
 // Local
 #include "ccEntityAction.h"
-#include "ccMainAppInterface.h"
-#include "ccPickingListener.h"
 
 // CCCoreLib
 #include <AutoSegmentationTools.h>
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+#include <ccPickingListener.h>
+
+// Qt
+#include <QMainWindow>
 
 class QAction;
 class QMdiArea;
@@ -184,7 +185,7 @@ class MainWindow : public QMainWindow
 	void initPlugins();
 
 	//! Updates the 'Properties' view
-	void updatePropertiesView();
+	void updatePropertiesView() override;
 
   private:
 	//! Creates a new 3D GL sub-window
@@ -215,6 +216,9 @@ class MainWindow : public QMainWindow
 
 	//! Clones currently selected entities
 	void doActionClone();
+
+	//! Selects all the entities displayed in the active 3D view
+	void doActionSelectDisplayedEntities();
 
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
@@ -296,6 +300,7 @@ class MainWindow : public QMainWindow
 	void doActionSFConvertToRGB();
 	void doActionSFConvertToRandomRGB();
 	void doActionRenameSF();
+	void doActionOpenSelectedEntitiesSFManager();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
 	void doActionSplitCloudUsingSF();
@@ -328,6 +333,7 @@ class MainWindow : public QMainWindow
 	void doActionStatisticalTest();
 	void doActionSamplePointsOnMesh();
 	void doActionSamplePointsOnPolyline();
+	void doActionExtrudePolyline();
 	void doActionSmoohPolyline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();
@@ -462,6 +468,9 @@ class MainWindow : public QMainWindow
 	void doActionShowActiveSFPrevious();
 	void doActionShowActiveSFNext();
 
+	//! Toggles the clipping planes
+	void toggleClippingPlanes();
+
 	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
 
@@ -525,7 +534,7 @@ class MainWindow : public QMainWindow
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud*                cloud,
 	                            CCCoreLib::ReferenceCloudContainer& components,
-	                            unsigned                            minPointPerComponent,
+	                            unsigned                            minPointsPerComponent,
 	                            bool                                randomColors,
 	                            bool                                selectComponents,
 	                            bool                                sortBysize = true);
@@ -593,7 +602,7 @@ class MainWindow : public QMainWindow
 
   private: // members
 	//! Main UI
-	Ui::MainWindow* m_UI;
+	std::unique_ptr<Ui::MainWindow> m_ui;
 
 	//! DB tree
 	ccDBRoot* m_ccRoot;
@@ -680,5 +689,3 @@ class MainWindow : public QMainWindow
 
 	QList<QAction*> m_actions;
 };
-
-#endif

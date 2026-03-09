@@ -25,6 +25,7 @@
 #include <CCPlatform.h>
 
 //qCC
+#include <ccBackgroundTask.h>
 #include <ccMainAppInterface.h>
 
 //Qt
@@ -148,20 +149,8 @@ int BaseFilter::start()
 	s_filter = this;
 	s_computing = true;
 
-	QFuture<void> future = QtConcurrent::run(DoCompute);
-	int progress = 0;
-	while (!future.isFinished())
-	{
-#if defined(CC_WINDOWS)
-		::Sleep(500);
-#else
-		usleep(500 * 1000);
-#endif
-		if (m_showProgress)
-		{
-			pDlg.setValue(++progress);
-		}
-	}
+	//run in a worker thread, so that the progress dialog keeps refreshing
+	ccBackgroundTask::Run(DoCompute);
 	
 	int result = s_computeStatus;
 	s_filter = nullptr;

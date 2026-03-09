@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_2_5D_EDITOR_HEADER
-#define CC_2_5D_EDITOR_HEADER
 
 // qCC_db
 #include <ccRasterGrid.h>
@@ -106,5 +105,3 @@ class cc2Point5DimEditor
 	//! 'Raster' cloud
 	ccPointCloud* m_rasterCloud;
 };
-
-#endif // CC_2_5D_EDITOR_HEADER

@@ -17,16 +17,18 @@
 
 #pragma once
 
-// Qt
-#include <QActionGroup>
-#include <QWidget>
+// Local
+#include "ccDefaultPluginInterface.h"
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
 
 // qCC_db
 #include <ccHObject.h>
 
-// qCC
-#include "ccDefaultPluginInterface.h"
-#include "ccMainAppInterface.h"
+// Qt
+#include <QActionGroup>
+#include <QWidget>
 
 // UI Modification flags
 #define CC_PLUGIN_REFRESH_GL_WINDOWS 0x00000001

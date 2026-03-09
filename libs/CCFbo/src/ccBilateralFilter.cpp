@@ -16,11 +16,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccBilateralFilter.h"
+#include "../include/ccBilateralFilter.h"
 
-// system
+// System
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 //! Max kernel size
@@ -86,7 +86,7 @@ bool ccBilateralFilter::init(unsigned width, unsigned height, const QString& sha
 
 	setValid(false);
 
-	if (!m_fbo.init(static_cast<unsigned>(width), static_cast<unsigned>(height)))
+	if (!m_fbo.init(width, height))
 	{
 		error = "[Bilateral] Can't initialize FBO";
 		reset();

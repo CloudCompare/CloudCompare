@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_NORMAL_COMPUTATION_DLG_HEADER
-#define CC_NORMAL_COMPUTATION_DLG_HEADER
-
+// Ui
 #include <ui_normalComputationDlg.h>
 
 // qCC_db
@@ -104,5 +104,3 @@ class ccNormalComputationDlg : public QDialog
 	//! Selected cloud
 	ccPointCloud* m_cloud;
 };
-
-#endif // CC_NORMAL_COMPUTATION_DLG_HEADER

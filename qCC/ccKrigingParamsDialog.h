@@ -17,13 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
-
 // qCC_db
 #include <ccRasterGrid.h>
 
-class Ui_KrigingParamsDialog;
+// Qt
+#include <QDialog>
+
+namespace Ui
+{
+	class KrigingParamsDialog;
+} // namespace Ui
 
 //! Dialog to set the Kriging parameters
 class ccKrigingParamsDialog : public QDialog
@@ -35,7 +38,7 @@ class ccKrigingParamsDialog : public QDialog
 	ccKrigingParamsDialog(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccKrigingParamsDialog();
+	~ccKrigingParamsDialog() override;
 
 	//! Sets the parameters
 	void setParameters(const ccRasterGrid::KrigingParams& krigingParams);
@@ -45,5 +48,5 @@ class ccKrigingParamsDialog : public QDialog
 
   protected:
 	//! Associated ui
-	Ui_KrigingParamsDialog* m_ui;
+	std::unique_ptr<Ui::KrigingParamsDialog> m_ui;
 };

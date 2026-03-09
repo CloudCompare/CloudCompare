@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SF_DISTANCES_DLG_HEADER
-#define CC_SF_DISTANCES_DLG_HEADER
-
+// Qt
 #include <QDialog>
 
 namespace Ui
@@ -34,13 +34,11 @@ class ccSensorComputeDistancesDlg : public QDialog
 	//! Default constructor
 	explicit ccSensorComputeDistancesDlg(QWidget* parent = nullptr);
 
-	~ccSensorComputeDistancesDlg();
+	~ccSensorComputeDistancesDlg() override;
 
 	//! Returns whether computed distances should be squared or not
 	bool computeSquaredDistances() const;
 
   private:
-	Ui::sensorComputeDistancesDlg* m_ui;
+	std::unique_ptr<Ui::sensorComputeDistancesDlg> m_ui;
 };
-
-#endif // CC_SF_DISTANCES_DLG_HEADER

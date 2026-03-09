@@ -55,7 +55,7 @@ bool ccCloudLayersHelper::setCloud(ccPointCloud* cloud)
 	if (m_originalCloudState.hadColors)
 	{
 		// store the original colors
-		m_originalCloudState.colors.reset(m_cloud->rgbaColors()->clone());
+		m_originalCloudState.colors = m_cloud->rgbaColors()->clone();
 		if (!m_originalCloudState.colors)
 		{
 			ccLog::Error(QObject::tr("Not enough memory to backup previous colors"));
@@ -209,7 +209,7 @@ void ccCloudLayersHelper::applyClassColors(QList<ccAsprsModel::AsprsItem>& items
 
 int ccCloudLayersHelper::applyClassColor(ccAsprsModel::AsprsItem& item, bool redrawDisplay/*=false*/)
 {
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
+	auto sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
 	{
 		return 0;
@@ -239,7 +239,7 @@ int ccCloudLayersHelper::applyClassColor(ccAsprsModel::AsprsItem& item, bool red
 
 void ccCloudLayersHelper::changeCode(const ccAsprsModel::AsprsItem& item, ScalarType oldCode)
 {
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
+	auto sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
 	{
 		return;
@@ -257,7 +257,7 @@ void ccCloudLayersHelper::changeCode(const ccAsprsModel::AsprsItem& item, Scalar
 
 int ccCloudLayersHelper::moveItem(const ccAsprsModel::AsprsItem& from, const ccAsprsModel::AsprsItem* to, bool redrawDisplay)
 {
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
+	auto sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
 	{
 		return 0;
@@ -294,7 +294,7 @@ bool ccCloudLayersHelper::saveCurrentSFValues(int sfIndex)
 		return true;
 	}
 
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(sfIndex);
+	auto sf = m_cloud->getScalarField(sfIndex);
 	if (!sf)
 	{
 		return false;
@@ -327,7 +327,7 @@ void ccCloudLayersHelper::restoreCurrentSFValues()
 		return;
 	}
 
-	CCCoreLib::ScalarField* sf = (nullptr != m_cloud ? m_cloud->getScalarField(m_scalarFieldIndex) : nullptr);
+	auto sf = (m_cloud ? m_cloud->getScalarField(m_scalarFieldIndex) : nullptr);
 	if (!sf)
 	{
 		assert(false);
@@ -371,7 +371,7 @@ void ccCloudLayersHelper::mouseMove(const CCVector2& center2D, PointCoordinateTy
 		return;
 	}
 
-	CCCoreLib::ScalarField* sf = m_cloud->getScalarField(m_scalarFieldIndex);
+	auto sf = m_cloud->getScalarField(m_scalarFieldIndex);
 	if (!sf)
 	{
 		return;

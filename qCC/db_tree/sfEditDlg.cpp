@@ -17,28 +17,28 @@
 
 #include "sfEditDlg.h"
 
-#include "ui_sfEditDlg.h"
-
 // Local
 #include "ccHistogramWindow.h"
 
-// qCC_db
-#include <ccScalarField.h>
+// Ui
+#include <ui_sfEditDlg.h>
 
 // CCCoreLib
 #include <CCConst.h>
 
-// system
+// qCC_db
+#include <ccScalarField.h>
+
+// System
 #include <cassert>
 
-//! Default number of steps for spin-boxes
 const int SPIN_BOX_STEPS = 1000;
 
 sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
     , m_associatedSF(nullptr)
     , m_associatedSFHisto(nullptr)
-    , m_ui(new Ui::SFEditDlg)
+    , m_ui(std::make_unique<Ui::SFEditDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -74,12 +74,9 @@ sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)
 	show();
 }
 
-sfEditDlg::~sfEditDlg()
-{
-	delete m_ui;
-}
+sfEditDlg::~sfEditDlg() = default;
 
-void sfEditDlg::fillDialogWith(ccScalarField* sf)
+void sfEditDlg::fillDialogWith(ccScalarField::Shared sf)
 {
 	m_associatedSF = sf;
 	if (!sf)

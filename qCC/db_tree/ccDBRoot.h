@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DB_ROOT_HEADER
-#define CC_DB_ROOT_HEADER
 
 // Qt
 #include <QAbstractItemModel>
@@ -198,8 +197,8 @@ class ccDBRoot : public QAbstractItemModel
 
 	void showContextMenu(const QPoint&);
 
-	void expandBranch();
-	void collapseBranch();
+	void expandBranches();
+	void collapseBranches();
 	void gatherRecursiveInformation();
 	void sortChildrenAZ();
 	void sortChildrenZA();
@@ -273,8 +272,8 @@ class ccDBRoot : public QAbstractItemModel
 	//! Sorts selected entities children
 	void sortSelectedEntitiesChildren(SortRules rule);
 
-	//! Expands or collapses hovered item
-	void expandOrCollapseHoveredBranch(bool expand);
+	//! Expands or collapses selected items
+	void expandOrCollapseSelectedItems(bool expand);
 
 	//! Selects objects by type and/or name
 	void selectChildrenByTypeAndName(CC_CLASS_ENUM type,
@@ -296,10 +295,10 @@ class ccDBRoot : public QAbstractItemModel
 	//! Selected entity's properties delegate
 	ccPropertiesTreeDelegate* m_ccPropDelegate;
 
-	//! Context menu action: expand tree branch
-	QAction* m_expandBranch;
-	//! Context menu action: collapse tree branch
-	QAction* m_collapseBranch;
+	//! Context menu action: expand selected tree items
+	QAction* m_expandSelectedItems;
+	//! Context menu action: collapse selected tree items
+	QAction* m_collapseSelectedItems;
 	//! Context menu action: gather (recursive) information on selected entities
 	QAction* m_gatherInformation;
 	//! Context menu action: sort children in alphabetical order
@@ -342,5 +341,3 @@ class ccDBRoot : public QAbstractItemModel
 	//! Last context menu pos
 	QPoint m_contextMenuPos;
 };
-
-#endif

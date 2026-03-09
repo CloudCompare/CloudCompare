@@ -15,7 +15,33 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccApplication.h"
+#include "ccCommandLineParser.h"
+#include "mainwindow.h"
+
+// CCAppCommon
+#include <ccPluginManager.h>
+#include <ccTranslationManager.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
+// CCPluginStub
+#include <ccPluginInterface.h>
+
+// qCC_db
+#include <ccColorScalesManager.h>
 #include <ccIncludeGL.h>
+#include <ccLog.h>
+#include <ccNormalVectors.h>
+
+// qCC_glWindow
+#include <ccGuiParameters.h>
+
+// qCC_io
+#include <FileIOFilter.h>
+#include <ccGlobalShiftManager.h>
 
 // Qt
 #include <QDir>
@@ -26,28 +52,6 @@
 #include <QTime>
 #include <QTimer>
 #include <QTranslator>
-
-// qCC_db
-#include <ccColorScalesManager.h>
-#include <ccLog.h>
-#include <ccNormalVectors.h>
-#include <ccPointCloud.h>
-
-// qCC_io
-#include <FileIOFilter.h>
-#include <ccGlobalShiftManager.h>
-
-// local
-#include "ccApplication.h"
-#include "ccCommandLineParser.h"
-#include "ccGuiParameters.h"
-#include "ccPersistentSettings.h"
-#include "ccTranslationManager.h"
-#include "mainwindow.h"
-
-// plugins
-#include "ccPluginInterface.h"
-#include "ccPluginManager.h"
 
 #ifdef USE_VLD
 #include <vld.h>
@@ -156,10 +160,8 @@ int main(int argc, char** argv)
 		}
 	}
 
-#ifdef Q_OS_WIN
-	// enables automatic scaling based on the monitor's pixel density
-	ccApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
+	// store the log message until a valid logging instance is registered
+	ccLog::EnableMessageBackup(true);
 
 	ccApplication::InitOpenGL();
 
@@ -171,11 +173,8 @@ int main(int argc, char** argv)
 		ccLog::SetVerbosityLevel(ccGui::Parameters().logVerbosityLevel);
 	}
 
-	// store the log message until a valid logging instance is registered
-	ccLog::EnableMessageBackup(true);
-
 	// splash screen
-	QScopedPointer<QSplashScreen> splash(nullptr);
+	std::unique_ptr<QSplashScreen> splash(nullptr);
 
 	// standard mode
 	if (!commandLine)
@@ -197,7 +196,7 @@ int main(int argc, char** argv)
 
 		// init splash screen
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
+		splash = std::make_unique<QSplashScreen>(pixmap, Qt::WindowStaysOnTopHint);
 		splash->show();
 	}
 
@@ -263,7 +262,7 @@ int main(int argc, char** argv)
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
 			{
-				QString arg = argumentsLocal8Bit[i];
+				const QString& arg = argumentsLocal8Bit[i];
 
 				// special command: auto start a plugin
 				if (arg.startsWith(":start-plugin:"))
@@ -299,6 +298,10 @@ int main(int argc, char** argv)
 
 			mainWindow->addToDB(filenames);
 		}
+
+		// open the files the system asked to open during startup
+		// (a FileOpen event, e.g. double-clicked in the macOS Finder)
+		app.setMainWindowReady();
 
 		// change the default path to the application one (do this AFTER processing the command line)
 		QDir workingDir = QCoreApplication::applicationDirPath();
@@ -337,19 +340,8 @@ int main(int argc, char** argv)
 	}
 
 	// release global structures
-	ccPointCloud::ReleaseShaders(); // must be done before the OpenGL context is released (i.e. before the windows is destroyed)
 	MainWindow::DestroyInstance();
 	FileIOFilter::UnregisterAll();
-
-#ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
-	// for debug purposes
-	unsigned alive = CCShareable::GetAliveCount();
-	if (alive > 1)
-	{
-		printf("Error: some shared objects (%u) have not been released on program end!", alive);
-		system("PAUSE");
-	}
-#endif
 
 	return result;
 }

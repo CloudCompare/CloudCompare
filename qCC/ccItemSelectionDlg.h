@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ITEM_SELECTION_DIALOG_HEADER
-#define CC_ITEM_SELECTION_DIALOG_HEADER
-
+// Ui
 #include <ui_itemSelectionDlg.h>
 
 // qCC_db
@@ -58,5 +58,3 @@ class ccItemSelectionDlg : public QDialog
 	//! Returns selected indexes (multi-selection mode)
 	void getSelectedIndexes(std::vector<int>& indexes) const;
 };
-
-#endif // CC_ITEM_SELECTION_DIALOG_HEADER

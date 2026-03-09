@@ -153,7 +153,7 @@ struct LasField
 			// we are going to check now the existing cloud SFs
 			for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 			{
-				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(i));
+				auto sf = cloud->getCCScalarField(i);
 				// find an equivalent in official LAS fields
 				QString sfName    = QString::fromStdString(sf->getName()).toUpper();
 				bool    outBounds = false;
@@ -344,13 +344,13 @@ struct LasField
 		return defaultValue;
 	}
 
-	LAS_FIELDS     type;
-	ccScalarField* sf;
-	double         firstValue;
-	double         minValue;
-	double         maxValue;
-	double         defaultValue;
-	uint8_t        minPointFormat;
+	LAS_FIELDS            type;
+	ccScalarField::Shared sf;
+	double                firstValue;
+	double                minValue;
+	double                maxValue;
+	double                defaultValue;
+	uint8_t               minPointFormat;
 };
 
 #endif // CC_LAS_FIELDS_HEADER

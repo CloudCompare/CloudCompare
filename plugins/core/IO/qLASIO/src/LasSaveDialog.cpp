@@ -361,7 +361,7 @@ void LasSaveDialog::handleComboBoxChange(int index)
 		assert(false);
 		return;
 	}
-	const CCCoreLib::ScalarField* scalarField = m_cloud->getScalarField(sfIdx);
+	auto scalarField = m_cloud->getScalarField(sfIdx);
 	if (!scalarField)
 	{
 		assert(false);
@@ -625,7 +625,7 @@ std::vector<LasScalarField> LasSaveDialog::fieldsToSave() const
 				continue;
 			}
 
-			auto* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(sfIdx));
+			auto sf = m_cloud->getCCScalarField(sfIdx);
 
 			const std::string name = item.first->name().toStdString();
 			fields.emplace_back(LasScalarField::IdFromName(name.c_str(), pointFormat), sf);
@@ -733,7 +733,7 @@ void LasSaveDialog::assignLeftoverScalarFieldsAsExtra()
 
 	for (uint index = 0; index < sfCount; index++)
 	{
-		auto*              sf              = static_cast<ccScalarField*>(m_cloud->getScalarField(index));
+		auto               sf              = m_cloud->getCCScalarField(index);
 		const std::string& sfName          = sf->getName();
 		const bool         alreadyAssigned = isAssignedToStandardField(sfName) || isAssignedAsExtraField(sfName);
 		if (!alreadyAssigned)

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_PRIMITIVE_HEADER
-#define CC_GENERIC_PRIMITIVE_HEADER
 
 // Local
 #include "ccMesh.h"
@@ -102,13 +101,19 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	// inherited methods (ccHObject)
 	const ccGLMatrix& getGLTransformationHistory() const override;
 
+	//! Updates internal representation (as a mesh)
+	/** Calls buildUp then applyTransformationToVertices.
+	    \return success of buildUp
+	**/
+	virtual bool updateRepresentation();
+
   protected:
 	//! Inherited from ccGenericMesh
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 
 	// inherited from ccMesh
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	//! Builds primitive
@@ -116,12 +121,6 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	    \return success
 	**/
 	virtual bool buildUp() = 0;
-
-	//! Updates internal representation (as a mesh)
-	/** Calls buildUp then applyTransformationToVertices.
-	    \return success of buildUp
-	**/
-	virtual bool updateRepresentation();
 
 	//! Inits internal structures
 	/** Warning: resets all!
@@ -150,5 +149,3 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	//! Drawing precision (for primitives that support this feature)
 	unsigned m_drawPrecision;
 };
-
-#endif // CC_GENERIC_PRIMITIVE_HEADER

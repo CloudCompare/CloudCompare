@@ -15,29 +15,26 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOptions.h"
+#include "../include/ccOptions.h"
 
-// ccPluginAPI
+// CCPluginAPI
 #include <ccPersistentSettings.h>
 
 // Qt
 #include <QSettings>
 
-// qCC_db
-#include <ccSingleton.h>
-
 //! Unique instance of ccOptions
-static ccSingleton<ccOptions> s_options;
+static std::unique_ptr<ccOptions> s_options;
 
 ccOptions& ccOptions::InstanceNonConst()
 {
-	if (!s_options.instance)
+	if (!s_options)
 	{
-		s_options.instance = new ccOptions();
-		s_options.instance->fromPersistentSettings();
+		s_options = std::make_unique<ccOptions>();
+		s_options->fromPersistentSettings();
 	}
 
-	return *s_options.instance;
+	return *s_options;
 }
 
 void ccOptions::ReleaseInstance()
@@ -45,9 +42,15 @@ void ccOptions::ReleaseInstance()
 	s_options.release();
 }
 
-void ccOptions::Set(const ccOptions& params)
+void ccOptions::Set(const ccOptions& params, bool saveToPersistentSettings /*=false*/)
 {
-	InstanceNonConst() = params;
+	ccOptions& options = InstanceNonConst();
+	options            = params;
+
+	if (saveToPersistentSettings)
+	{
+		options.toPersistentSettings();
+	}
 }
 
 ccOptions::ccOptions()
@@ -60,6 +63,7 @@ void ccOptions::reset()
 	normalsDisplayedByDefault = false;
 	useNativeDialogs          = true;
 	confirmQuit               = true;
+	confirmDelete             = true;
 }
 
 void ccOptions::fromPersistentSettings()
@@ -70,6 +74,7 @@ void ccOptions::fromPersistentSettings()
 		normalsDisplayedByDefault = settings.value("normalsDisplayedByDefault", false).toBool();
 		useNativeDialogs          = settings.value("useNativeDialogs", true).toBool();
 		confirmQuit               = settings.value("confirmQuit", true).toBool();
+		confirmDelete             = settings.value("confirmDelete", true).toBool();
 	}
 	settings.endGroup();
 }
@@ -82,6 +87,7 @@ void ccOptions::toPersistentSettings() const
 		settings.setValue("normalsDisplayedByDefault", normalsDisplayedByDefault);
 		settings.setValue("useNativeDialogs", useNativeDialogs);
 		settings.setValue("confirmQuit", confirmQuit);
+		settings.setValue("confirmDelete", confirmDelete);
 	}
 	settings.endGroup();
 }

@@ -17,14 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
 
 // qCC_db
 #include <ccGenericGLDisplay.h>
 
-// system
+// System
 #include <vector>
 
 class ccPolyline;
@@ -47,12 +47,12 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent);
 	//! Destructor
-	virtual ~ccTracePolylineTool();
+	~ccTracePolylineTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool accepted) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool accepted) override;
 
   protected:
 	void        apply();
@@ -76,7 +76,7 @@ class ccTracePolylineTool : public ccOverlayDialog
 	void onShortcutTriggered(int);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi) override;
+	void onItemPicked(const PickedItem& pi) override;
 
   protected:
 	//! Restarts the edition mode
@@ -85,9 +85,7 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Viewport parameters (used for picking)
 	struct SegmentGLParams
 	{
-		SegmentGLParams()
-		{
-		}
+		SegmentGLParams() = default;
 		SegmentGLParams(ccGenericGLDisplay* display, int x, int y);
 		ccGLCameraParameters params;
 		CCVector2d           clickPos;
@@ -115,5 +113,5 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 
-	Ui::TracePolyLineDlg* m_ui;
+	std::unique_ptr<Ui::TracePolyLineDlg> m_ui;
 };

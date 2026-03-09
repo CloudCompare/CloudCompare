@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ITEM_DELEGATE_HEADER
-#define CC_ITEM_DELEGATE_HEADER
 
 // qCC_db
 #include <ccArray.h>
@@ -42,7 +41,6 @@ class ccOctree;
 class ccPlanarEntityInterface;
 class ccPolyline;
 class ccSensor;
-class CCShareable;
 class ccShiftedObject;
 class ccCoordinateSystem;
 
@@ -208,7 +206,6 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 	void fillWithGBLSensor(const ccGBLSensor*);
 	void fillWithCameraSensor(const ccCameraSensor*);
 	void fillWithMaterialSet(const ccMaterialSet*);
-	void fillWithShareable(const CCShareable*);
 	void fillWithMetaData(const ccObject*);
 	void fillWithShifted(const ccShiftedObject*);
 	void fillWithCoordinateSystem(const ccCoordinateSystem*);
@@ -227,5 +224,3 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 	QAbstractItemView*  m_view;
 	CC_PROPERTY_ROLE    m_lastFocusItemRole;
 };
-
-#endif

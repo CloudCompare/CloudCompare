@@ -484,7 +484,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 		return;
 
 	//get the scalar field to map
-	ccScalarField* sf = nullptr;
+	ccScalarField::Shared sf;
 	{
 		int sfIdx = cloud->getScalarFieldIndexByName(RADIAL_DIST_SF_NAME);
 		if (sfIdx < 0)
@@ -517,12 +517,12 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline) 
 		}
 		else
 		{
-			sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+			sf = cloud->getCCScalarField(sfIdx);
 		}
 	}
 	assert(sf);
 
-	DistanceMapGenerationDlg dmgDlg(cloud, sf, polyline, m_app);
+	DistanceMapGenerationDlg dmgDlg(cloud, sf.get(), polyline, m_app);
 
 	dmgDlg.exec();
 }

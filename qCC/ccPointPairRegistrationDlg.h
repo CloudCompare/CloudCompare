@@ -17,19 +17,19 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccMainAppInterface.h"
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
+// Ui
+#include <ui_pointPairRegistrationDlg.h>
 
 // CCCoreLib
 #include <PointProjectionTools.h>
 
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
+
 // qCC_db
 #include <ccPointCloud.h>
-
-// Qt generated dialog
-#include <ui_pointPairRegistrationDlg.h>
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;

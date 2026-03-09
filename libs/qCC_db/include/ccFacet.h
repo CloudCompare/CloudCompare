@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FACET_HEADER
-#define CC_FACET_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -208,11 +207,9 @@ class QCC_DB_LIB_API ccFacet : public ccHObject
 
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	// ccHObject interface
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 };
-
-#endif // CC_FACET_PRIMITIVE_HEADER

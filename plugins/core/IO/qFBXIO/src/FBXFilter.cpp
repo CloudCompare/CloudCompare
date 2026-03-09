@@ -110,7 +110,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 
 			if (asCCMesh)
 			{
-				NormsIndexesTableType* triNorms = asCCMesh->getTriNormsTable();
+				auto triNorms = asCCMesh->getTriNormsTable();
 				assert(triNorms);
 				for (unsigned i = 0; i < triNorms->currentSize(); ++i)
 				{
@@ -132,12 +132,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				for (unsigned j = 0; j < faceCount; ++j)
 				{
 					// we can't use the 'NormsIndexesTable' so we save all the normals of all the vertices
-					CCVector3 Na, Nb, Nc;
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na.x, Na.y, Na.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb.x, Nb.y, Nb.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc.x, Nc.y, Nc.z));
-
+					const CCVector3 *Na = nullptr, *Nb = nullptr, *Nc = nullptr;
 					mesh->getTriangleNormals(j, Na, Nb, Nc);
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na->x, Na->y, Na->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb->x, Nb->y, Nb->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc->x, Nc->y, Nc->z));
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 0, static_cast<int>(j) * 3 + 0);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 1, static_cast<int>(j) * 3 + 1);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 2, static_cast<int>(j) * 3 + 2);
@@ -169,8 +168,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 	bool hasMaterial = false;
 	if (asCCMesh && asCCMesh->hasMaterials())
 	{
-		const ccMaterialSet* matSet   = asCCMesh->getMaterialSet();
-		size_t               matCount = matSet->size();
+		auto   matSet   = asCCMesh->getMaterialSet();
+		size_t matCount = matSet->size();
 
 		// check if we have textures
 		bool hasTextures = asCCMesh->hasTextures();
@@ -200,7 +199,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			lUVDiffuseElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
 			// fill Direct Array
-			const TextureCoordsContainer* texCoords = asCCMesh->getTexCoordinatesTable();
+			auto texCoords = asCCMesh->getTexCoordinatesTable();
 			assert(texCoords);
 			if (texCoords)
 			{
@@ -429,7 +428,7 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 	if (lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
 	{
 		ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
-		ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
+		ccLog::Warningf("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
 		return false;
 	}
 
@@ -526,7 +525,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
+		ccLog::Printf("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
 	}
 
 	try
@@ -929,15 +928,14 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	}
 
 	// per-triangle normals
-	NormsIndexesTableType* normsTable = 0;
+	NormsIndexesTableType::Shared normsTable;
 	if (perVertexNormals >= 0 || perPolygonNormals >= 0)
 	{
-		normsTable = new NormsIndexesTableType();
+		normsTable.reset(new NormsIndexesTableType);
 		if (!normsTable->reserveSafe(polyVertCount) || !mesh->reservePerTriangleNormalIndexes())
 		{
 			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' normals!").arg(fbxMesh->GetName()));
-			normsTable->release();
-			normsTable = 0;
+			normsTable.reset();
 		}
 		else
 		{
@@ -948,7 +946,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	}
 
 	// materials
-	ccMaterialSet* materials = nullptr;
+	ccMaterialSet::Shared materials;
 	{
 		FbxNode* lNode          = fbxMesh->GetNode();
 		int      lMaterialCount = lNode ? lNode->GetMaterialCount() : 0;
@@ -1055,8 +1053,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 
 				if (!materials)
 				{
-					materials = new ccMaterialSet("materials");
-					mesh->addChild(materials);
+					materials.reset(new ccMaterialSet("materials"));
+					mesh->addChild(materials.get()); // FIXME TODO: entities should also be stored as shared pointers!
 				}
 				materials->addMaterial(mat);
 			}
@@ -1068,8 +1066,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 	}
 
 	// import textures UV
-	TextureCoordsContainer* vertTexUVTable  = 0;
-	bool                    hasTexUVIndexes = false;
+	TextureCoordsContainer::Shared vertTexUVTable;
+	bool                           hasTexUVIndexes = false;
 	{
 		for (int l = 0; l < fbxMesh->GetElementUVCount(); ++l)
 		{
@@ -1077,13 +1075,12 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			// per-point UV coordinates
 			if (leUV->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
-				vertTexUVTable = new TextureCoordsContainer();
-				int uvCount    = leUV->GetDirectArray().GetCount();
+				vertTexUVTable.reset(new TextureCoordsContainer);
+				int uvCount = leUV->GetDirectArray().GetCount();
 
 				if (!vertTexUVTable->reserveSafe(uvCount) || !mesh->reservePerTriangleTexCoordIndexes())
 				{
-					vertTexUVTable->release();
-					vertTexUVTable = 0;
+					vertTexUVTable.reset();
 					ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' UV coordinates!").arg(fbxMesh->GetName()));
 				}
 				else
@@ -1115,13 +1112,14 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					else
 					{
 						ccLog::Warning(QString("[FBX] UV coordinates for mesh '%1' are encoded in an unhandled mode!").arg(fbxMesh->GetName()));
-						vertTexUVTable->release();
-						vertTexUVTable = 0;
+						vertTexUVTable.reset();
 					}
 				}
 
 				if (vertTexUVTable)
+				{
 					break; // no need to look to the other UV fields (can't handle them!)
+				}
 			}
 		}
 	}
@@ -1194,8 +1192,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				if (uvIndex >= static_cast<int>(vertTexUVTable->currentSize()))
 				{
 					ccLog::Warning(QString("[FBX] Mesh '%1': UV coordinates indexes mismatch!").arg(fbxMesh->GetName()));
-					vertTexUVTable->release();
-					vertTexUVTable = 0;
+					vertTexUVTable.reset();
 				}
 			}
 
@@ -1251,7 +1248,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					{
 						vertices->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -1300,9 +1297,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		else
 		{
 			// we failed to load material mapping! No need to kepp the materials...
-			mesh->removeChild(materials);
-			// materials->release();
-			materials = 0;
+			mesh->removeChild(materials.get());
+			materials.reset();
 		}
 	}
 

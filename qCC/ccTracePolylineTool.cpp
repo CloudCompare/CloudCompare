@@ -17,13 +17,14 @@
 
 #include "ccTracePolylineTool.h"
 
-#include "ui_tracePolylineDlg.h"
-
 // Local
 #include "ccReservedIDs.h"
 #include "mainwindow.h"
 
-// common
+// Ui
+#include <ui_tracePolylineDlg.h>
+
+// CCPluginAPI
 #include <ccPickingHub.h>
 
 // qCC_db
@@ -52,7 +53,7 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
     , m_poly3DVertices(nullptr)
     , m_done(false)
     , m_pickingHub(pickingHub)
-    , m_ui(new Ui::TracePolyLineDlg)
+    , m_ui(std::make_unique<Ui::TracePolyLineDlg>())
 {
 	assert(pickingHub);
 
@@ -92,17 +93,12 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 ccTracePolylineTool::~ccTracePolylineTool()
 {
 	// m_polyTipVertices is already a child of m_polyTip
-	if (m_polyTip)
-		delete m_polyTip;
+	delete m_polyTip;
 	m_polyTip = nullptr;
 
 	// m_poly3DVertices is already a child of m_poly3D
-	if (m_poly3D)
-		delete m_poly3D;
+	delete m_poly3D;
 	m_poly3D = nullptr;
-
-	delete m_ui;
-	m_ui = nullptr;
 }
 
 void ccTracePolylineTool::onShortcutTriggered(int key)
@@ -167,7 +163,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		delete newPoly;
 		return nullptr;
 	}
-	newVertices->importParametersFrom(m_poly3DVertices);
+	newVertices->importParametersFrom(*m_poly3DVertices);
 	newVertices->setName(m_poly3DVertices->getName());
 	newVertices->setEnabled(m_poly3DVertices->isEnabled());
 	newPoly->importParametersFrom(*m_poly3D);
@@ -205,9 +201,9 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 			double    nearestElementSquareDist = -1.0;
 
 			// for each cloud
-			for (size_t c = 0; c < clouds.size(); ++c)
+			for (auto* entity : clouds)
 			{
-				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[c]);
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 				if (!cloud->isDisplayedIn(m_associatedWin))
 				{
 					continue;
@@ -232,9 +228,9 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 			}
 
 			// for each mesh
-			for (size_t m = 0; m < meshes.size(); ++m)
+			for (auto* entity : meshes)
 			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[m]);
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
 				if (!mesh->isDisplayedIn(m_associatedWin))
 				{
 					continue;

@@ -21,7 +21,7 @@
 ccFitPlane::ccFitPlane(ccPlane* p)
 	: ccPlane(p->getXWidth(), p->getYWidth(), &p->getTransformation(), p->getName()) //create an identical plane
 {
-	importParametersFrom(p);
+	importParametersFrom(*p);
 
 	//add metadata tag defining the ccCompass class type
 	setMetaData("ccCompassType", "FitPlane");

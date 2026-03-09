@@ -1,3 +1,5 @@
+#pragma once
+
 //##########################################################################
 //#                                                                        #
 //#                    CLOUDCOMPARE PLUGIN: qRANSAC_SD                     #
@@ -15,11 +17,7 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_RANSAC_SD_PLUGIN_HEADER
-#define Q_RANSAC_SD_PLUGIN_HEADER
-
 #include "ccStdPluginInterface.h"
-
 
 //! Wrapper to Schnabel et al. library for automatic shape detection in point cloud
 /** "Efficient RANSAC for Point-Cloud Shape Detection", Ruwen Schnabel, Roland Wahl, 
@@ -135,7 +133,7 @@ public:
 	virtual QList<QAction *> getActions() override;
 	virtual void registerCommands(ccCommandLineInterface* cmd) override;
 
-	static ccHObject* executeRANSAC(ccPointCloud* ccPC, const RansacParams& params, bool silent = false);
+	static ccHObject* ExecuteRANSAC(ccPointCloud* ccPC, const RansacParams& params, ccMainAppInterface* app = nullptr, bool silent = false);
 protected:
 
 	//! Slot called when associated ation is triggered
@@ -146,5 +144,3 @@ protected:
 	//! Associated action
 	QAction* m_action;
 };
-
-#endif

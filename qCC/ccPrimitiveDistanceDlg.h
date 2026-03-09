@@ -17,9 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
+#include <ui_primitiveDistanceDlg.h>
+
 // Qt
 #include <QDialog>
-#include <ui_primitiveDistanceDlg.h>
 
 //! Dialog for cloud-to-primitive distances setting
 class ccPrimitiveDistanceDlg : public QDialog

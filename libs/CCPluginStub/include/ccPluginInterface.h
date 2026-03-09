@@ -23,9 +23,7 @@
 #include <QObject>
 #include <QPair>
 #include <QString>
-
-// Qt version
-#include <qglobal.h>
+#include <QtGlobal>
 
 class ccExternalFactory;
 class ccCommandLineInterface;

@@ -80,6 +80,8 @@ class CCGLWINDOW_LIB_API ccGui
 		unsigned minLoDCloudSize;
 		//! Display cross in the middle of the screen
 		bool displayCross;
+		//! Display the cross in the middle of the screen on top of the entities
+		bool displayCrossOnTop;
 		//! Whether to use VBOs for faster display
 		bool useVBOs;
 
@@ -154,9 +156,6 @@ class CCGLWINDOW_LIB_API ccGui
 
 	//! Sets GUI parameters
 	static void Set(const ParamStruct& params);
-
-	//! Release unique instance (if any)
-	static void ReleaseInstance();
 
   protected:
 	//! Parameters set

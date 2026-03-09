@@ -59,7 +59,7 @@ static bool CandidateDistAscendingComparison(const Candidate& a, const Candidate
 
 bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 											double maxError,
-											CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+											CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 											double maxAngle_deg,
 											PointCoordinateType overlapCoef/*=1*/,
 											bool closestFirst/*=true*/,
@@ -264,9 +264,11 @@ bool ccKdTreeForFacetExtraction::FuseCells(	ccKdTree* kdTree,
 						double error = -1.0;
 						const PointCoordinateType* planeEquation = CCCoreLib::Neighbourhood(fused).getLSPlane();
 						if (planeEquation)
-							error = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistance(fused, planeEquation, errorMeasure);
+						{
+							error = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistanceMeasure(fused, planeEquation, errorMeasure);
+						}
 
-						if (error < 0.0 || error > maxError)
+						if (std::isnan(error) || error > maxError)
 						{
 							//candidate is rejected
 							it = candidates.erase(it);

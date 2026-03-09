@@ -18,17 +18,16 @@
 #include "ccPointPickingGenericInterface.h"
 
 // Local
-#include "db_tree/ccDBRoot.h"
 #include "mainwindow.h"
 
-// common
+// CCPluginAPI
 #include <ccPickingHub.h>
 
 // qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-// qCCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 ccPointPickingGenericInterface::ccPointPickingGenericInterface(ccPickingHub* pickingHub, QWidget* parent /*=nullptr*/)

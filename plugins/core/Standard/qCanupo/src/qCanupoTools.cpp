@@ -32,6 +32,7 @@
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+#include <ccBackgroundTask.h>
 #include <ccQtHelpers.h>
 
 //Qt
@@ -40,26 +41,32 @@
 #include <QMainWindow>
 #include <QtConcurrentMap>
 
+#if defined(CC_WINDOWS)
+#include <windows.h>
+#else
+#include <ctime>
+#include <unistd.h>
+#endif
+
 //ComputeCorePointsDescriptors parameters
-static struct
+struct ComputeCorePointsDescParams
 {
-	CCCoreLib::GenericIndexedCloud* corePoints;
-	ccGenericPointCloud* sourceCloud;
-	CCCoreLib::DgmOctree* octree;
-	unsigned char octreeLevel;
-	CorePointDescSet* descriptors;
-	bool invalidDescriptors;
+	CCCoreLib::GenericIndexedCloud* corePoints = nullptr;
+	ccGenericPointCloud* sourceCloud = nullptr;
+	CCCoreLib::DgmOctree* octree = nullptr;
+	unsigned char octreeLevel = 0;
+	CorePointDescSet* descriptors = nullptr;
+	bool invalidDescriptors = false;
 
-	CCCoreLib::NormalizedProgress* nProgress;
-	bool processCanceled;
-	bool errorOccurred;
+	CCCoreLib::NormalizedProgress* nProgress = nullptr;
+	bool processCanceled = false;
+	bool errorOccurred = false;
 
-	ScaleParamsComputer* computer; //the per-scale parameters computer 
+	ScaleParamsComputer* computer = nullptr; //the per-scale parameters computer 
 
-	std::vector<ccScalarField*>* roughnessSFs; //for test
-
-
-} s_computeCorePointsDescParams;
+	std::vector<ccScalarField*>* roughnessSFs = nullptr; //for test
+};
+static ComputeCorePointsDescParams s_computeCorePointsDescParams;
 
 //! Per-point descriptor computer (all the parameters are stored in s_computeCorePointsDescParams)
 void ComputeCorePointDescriptor(unsigned index)
@@ -264,6 +271,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 			progressCb->setInfo(qPrintable(QString("Core points: %1\nSource points: %2").arg(corePtsCount).arg(sourceCloud->size())));
 			progressCb->setMethodTitle("Computing descriptors");
 		}
+		progressCb->update(0);
 		progressCb->start();
 		QApplication::processEvents();
 	}
@@ -336,7 +344,10 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 		}
 		assert(maxThreadCount <= QThread::idealThreadCount());
 		QThreadPool::globalInstance()->setMaxThreadCount(maxThreadCount);
-		QtConcurrent::blockingMap(corePointsIndexes, ComputeCorePointDescriptor);
+
+		// Do not use a blocking map, as it's blocking the UI as well
+		auto future = QtConcurrent::map(corePointsIndexes, ComputeCorePointDescriptor);
+		ccBackgroundTask::Wait(future);
 	}
 	else
 	{
@@ -357,16 +368,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 	invalidDescriptors = s_computeCorePointsDescParams.invalidDescriptors;
 
 	//reset static parameters (just to be clean ;)
-	s_computeCorePointsDescParams.corePoints = nullptr;
-	s_computeCorePointsDescParams.descriptors = nullptr;
-	s_computeCorePointsDescParams.sourceCloud = nullptr;
-	s_computeCorePointsDescParams.octree = nullptr;
-	s_computeCorePointsDescParams.octreeLevel = 0;
-	s_computeCorePointsDescParams.nProgress = nullptr;
-	s_computeCorePointsDescParams.processCanceled = false;
-	s_computeCorePointsDescParams.errorOccurred = false;
-	s_computeCorePointsDescParams.invalidDescriptors = false;
-	s_computeCorePointsDescParams.computer = nullptr;
+	s_computeCorePointsDescParams = {};
 
 	if (progressCb)
 	{

@@ -22,39 +22,30 @@
 
 // qCC_db
 #include <ccBasicTypes.h>
-#include <ccSingleton.h>
 
-// System
-#include <string.h>
-
-//! Unique instance of ccGui
-static ccSingleton<ccGui> s_gui;
+// Unique instance of ccGui
+static std::unique_ptr<ccGui> s_gui;
 
 const ccGui::ParamStruct& ccGui::Parameters()
 {
-	if (!s_gui.instance)
+	if (!s_gui)
 	{
-		s_gui.instance = new ccGui();
-		s_gui.instance->params.fromPersistentSettings();
+		s_gui = std::make_unique<ccGui>();
+		s_gui->params.fromPersistentSettings();
 	}
 
-	return s_gui.instance->params;
-}
-
-void ccGui::ReleaseInstance()
-{
-	s_gui.release();
+	return s_gui->params;
 }
 
 void ccGui::Set(const ParamStruct& params)
 {
-	if (!s_gui.instance)
+	if (!s_gui)
 	{
-		s_gui.instance = new ccGui();
-		s_gui.instance->params.fromPersistentSettings();
+		s_gui = std::make_unique<ccGui>();
+		s_gui->params.fromPersistentSettings();
 	}
 
-	s_gui.instance->params = params;
+	s_gui->params = params;
 }
 
 ccGui::ParamStruct::ParamStruct()
@@ -86,6 +77,7 @@ void ccGui::ParamStruct::reset()
 	minLoDCloudSize        = 50000000;
 	useVBOs                = true;
 	displayCross           = true;
+	displayCrossOnTop      = false;
 	pickingCursorShape     = Qt::CrossCursor;
 	logVerbosityLevel      = ccLog::LOG_STANDARD;
 
@@ -144,6 +136,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	minLoDCloudSize         = settings.value("minLoDCloudSize", 50000000).toUInt();
 	useVBOs                 = settings.value("useVBOs", true).toBool();
 	displayCross            = settings.value("crossDisplayed", true).toBool();
+	displayCrossOnTop       = settings.value("crossOnTop", false).toBool();
 	labelMarkerSize         = static_cast<unsigned>(std::max(0, settings.value("labelMarkerSize", 5).toInt()));
 	colorScaleShowHistogram = settings.value("colorScaleShowHistogram", true).toBool();
 	colorScaleUseShader     = settings.value("colorScaleUseShader", false).toBool();
@@ -187,6 +180,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("minLoDCloudSize", minLoDCloudSize);
 	settings.setValue("useVBOs", useVBOs);
 	settings.setValue("crossDisplayed", displayCross);
+	settings.setValue("crossOnTop", displayCrossOnTop);
 	settings.setValue("labelMarkerSize", labelMarkerSize);
 	settings.setValue("colorScaleShowHistogram", colorScaleShowHistogram);
 	settings.setValue("colorScaleUseShader", colorScaleUseShader);

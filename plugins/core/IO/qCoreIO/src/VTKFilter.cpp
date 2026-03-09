@@ -180,7 +180,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		unsigned      sfCount    = pointCloud->getNumberOfScalarFields();
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
+			auto sf = pointCloud->getCCScalarField(i);
 			outFile << "POINT_DATA " << ptsCount << Qt::endl;
 			outFile << "SCALARS " << QString::fromStdString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << Qt::endl;
 			outFile << "LOOKUP_TABLE default" << Qt::endl;
@@ -348,7 +348,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					Pd.u[coordIndex] = parts[i].toDouble(&ok);
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
+						ccLog::Warningf("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
 						error = CC_FERR_MALFORMED_FILE;
 						iPt   = ptsCount;
 						break;
@@ -366,7 +366,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 								{
 									vertices->setGlobalShift(Pshift);
 								}
-								ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+								ccLog::Warningf("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 							}
 						}
 
@@ -540,7 +540,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					N.u[coordIndex] = static_cast<PointCoordinateType>(parts[i].toDouble(&ok));
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
+						ccLog::Warningf("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
 						error = CC_FERR_MALFORMED_FILE;
 						iNorm = lastDataSize;
 						break;
@@ -592,7 +592,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					rgb.rgb[coordIndex] = static_cast<ColorCompType>(parts[i].toDouble(&ok) * ccColor::MAX);
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
+						ccLog::Warningf("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
 						error = CC_FERR_MALFORMED_FILE;
 						iCol  = lastDataSize;
 						break;
@@ -665,15 +665,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			// create scalar field?
-			ccScalarField* sf = nullptr;
+			ccScalarField::Shared sf;
 			if (createSF)
 			{
-				sf = new ccScalarField(lastSfName.toStdString());
+				sf = std::make_shared<ccScalarField>(lastSfName.toStdString());
 				if (!sf->reserveSafe(lastDataSize))
 				{
 					ccLog::Warning(QString("[VTK] Not enough memory to load scalar field' %1' (will be ignored)").arg(lastSfName));
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 			}
 
@@ -694,12 +693,11 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 						ScalarType d = static_cast<ScalarType>(parts[i].toDouble(&ok));
 						if (!ok)
 						{
-							ccLog::Warning("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);
+							ccLog::Warningf("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);
 							error = CC_FERR_MALFORMED_FILE;
 							if (sf)
 							{
-								sf->release();
-								sf = nullptr;
+								sf.reset();
 							}
 							iScal = lastDataSize;
 							break;
@@ -842,7 +840,6 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 		mesh->addChild(vertices);
 		vertices->setEnabled(false);
 		vertices->setName("Vertices");
-		// vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
 
 		// DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 		// Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)

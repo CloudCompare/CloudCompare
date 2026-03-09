@@ -279,7 +279,7 @@ CC_FILE_ERROR RDBFilter::loadFile(const QString& filename, ccHObject& container,
 		// name of the attribute
 		std::string att;
 		// pointer to scalar field
-		ccScalarField* sf;
+		ccScalarField::Shared sf;
 		// buffer for rdb select
 		std::vector<float> buffer;
 	};
@@ -320,8 +320,7 @@ CC_FILE_ERROR RDBFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		Conversion conv;
 		conv.att = att;
-		conv.sf  = new ccScalarField(att.c_str());
-		conv.sf->link();
+		conv.sf.reset(new ccScalarField(att.c_str()));
 		conv.buffer.resize(BUFFER_SIZE);
 		cloud->addScalarField(conv.sf);
 		conversions.push_back(conv);
@@ -536,7 +535,6 @@ CC_FILE_ERROR RDBFilter::loadFile(const QString& filename, ccHObject& container,
 	for (Conversion& conv : conversions)
 	{
 		conv.sf->computeMinAndMax();
-		conv.sf->release();
 	}
 	cloud->setVisible(true);
 	container.addChild(static_cast<ccHObject*>(cloud));

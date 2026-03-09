@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INNER_RECT_2D_FINDER_HEADER
-#define CC_INNER_RECT_2D_FINDER_HEADER
 
 // qCC_db
 #include <ccBox.h>
@@ -90,5 +89,3 @@ class ccInnerRect2DFinder
 	//! Y dimension
 	unsigned char m_Y;
 };
-
-#endif // CC_INNER_RECT_2D_FINDER_HEADER

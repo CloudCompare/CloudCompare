@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_2D_VIEWPORT_OBJECT_HEADER
-#define CC_2D_VIEWPORT_OBJECT_HEADER
-
 // Local
-#include "ccGenericGLDisplay.h"
 #include "ccHObject.h"
+#include "ccViewportParameters.h"
 
 //! 2D viewport object
 class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
@@ -33,11 +32,11 @@ class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
 	cc2DViewportObject(const cc2DViewportObject& viewport);
 
 	// inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::VIEWPORT_2D_OBJECT;
 	}
-	virtual bool isSerializable() const override
+	bool isSerializable() const override
 	{
 		return true;
 	}
@@ -57,11 +56,9 @@ class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
   protected:
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	//! Viewport parameters
 	ccViewportParameters m_params;
 };
-
-#endif // CC_2D_VIEWPORT_OBJECT_HEADER

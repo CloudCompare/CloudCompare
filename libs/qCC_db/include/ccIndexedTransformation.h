@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INDEXED_TRANSFORMATION_HEADER
-#define CC_INDEXED_TRANSFORMATION_HEADER
 
 // Local
 #include "ccGLMatrix.h"
@@ -111,12 +110,10 @@ class QCC_DB_LIB_API ccIndexedTransformation : public ccGLMatrix
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
   protected:
 	//! Associated index (e.g. timestamp)
 	double m_index;
 };
-
-#endif // CC_INDEXED_TRANSFORMATION_HEADER

@@ -1,5 +1,5 @@
-#ifndef CCPLUGININFODLG_H
-#define CCPLUGININFODLG_H
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -56,10 +56,8 @@ class ccPluginInfoDlg : public QDialog
 
 	void updatePluginInfo(const ccPluginInterface* plugin);
 
-	Ui::ccPluginInfoDlg* m_UI;
+	std::unique_ptr<Ui::ccPluginInfoDlg> m_ui;
 
 	QSortFilterProxyModel* m_ProxyModel;
 	QStandardItemModel*    m_ItemModel;
 };
-
-#endif

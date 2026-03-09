@@ -17,11 +17,12 @@
 
 #include "ccGBLSensorProjectionDlg.h"
 
-// local
+// Local
 #include "ccCustomDoubleValidator.h"
 
 // qCC_db
 #include <ccGBLSensor.h>
+
 // Qt
 #include <QSharedPointer>
 

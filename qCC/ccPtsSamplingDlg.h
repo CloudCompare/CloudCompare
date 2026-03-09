@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_POINTS_SAMPLING_DLG_HEADER
-#define CC_POINTS_SAMPLING_DLG_HEADER
-
+// Ui
 #include <ui_ptsSamplingDlg.h>
 
-//! Dialog: points sampling on a mesh
 class ccPtsSamplingDlg : public QDialog
     , public Ui::PointsSamplingDialog
 {
@@ -43,5 +42,3 @@ class ccPtsSamplingDlg : public QDialog
 	void setGenerateNormals(bool state);
 	void setUseDensity(bool state);
 };
-
-#endif // CC_POINTS_SAMPLING_DLG_HEADER

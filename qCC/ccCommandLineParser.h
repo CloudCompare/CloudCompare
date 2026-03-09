@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// interface
-#include "ccCommandLineInterface.h"
+// CCAppCommon
+#include <ccPluginManager.h>
 
-// Local
-#include "ccPluginManager.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
 class ccProgressDialog;
 class QDialog;

@@ -144,7 +144,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const QString& filename, ccHObject& container,
 		sscanf(line, "IMAGES_DESCRIPTOR=%s", imagesDescriptorFileName);
 
 		int n = LoadCalibratedImages(entities, path, imagesDescriptorFileName, entities->getBB_recursive());
-		ccLog::Print("[ICM] %i image(s) loaded ...", n);
+		ccLog::Printf("[ICM] %i image(s) loaded ...", n);
 	}
 
 	fclose(fp);
@@ -200,7 +200,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 				return loadedImages;
 			}
 
-			ccLog::Print("[IcmFilter] Image '%s' loaded", imageFileName);
+			ccLog::Printf("[IcmFilter] Image '%s' loaded", imageFileName);
 			CI->setEnabled(false);
 			CI->setName(imageFileName);
 #ifdef INCLUDE_PHOTOS
@@ -220,7 +220,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			sscanf(line, "\t fieldOfView %f\n", &fov_rad);
 
 			float fov_deg = CCCoreLib::RadiansToDegrees(fov_rad);
-			ccLog::Print("\t FOV=%f (degrees)", fov_deg);
+			ccLog::Printf("\t FOV=%f (degrees)", fov_deg);
 
 			// Position
 			float t[3];
@@ -233,7 +233,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			}
 			sscanf(line, "\t position %f %f %f\n", t, t + 1, t + 2);
 
-			ccLog::Print("\t Camera pos=(%f,%f,%f)", t[0], t[1], t[2]);
+			ccLog::Printf("\t Camera pos=(%f,%f,%f)", t[0], t[1], t[2]);
 
 			// Description
 			char desc[MAX_ASCII_FILE_LINE_LENGTH];
@@ -247,7 +247,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			sscanf(line, "\t description \"%s\"\n", desc);
 
 			// CI->setDescription(desc);
-			ccLog::Print("\t Description: '%s'", desc);
+			ccLog::Printf("\t Description: '%s'", desc);
 
 			// Orientation
 			float axis[3]{0.0f, 0.0f, 0.0f};
@@ -260,7 +260,7 @@ int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, co
 			}
 			sscanf(line, "\t orientation %f %f %f %f\n", axis, axis + 1, axis + 2, &angle_rad);
 
-			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]", axis[0], axis[1], axis[2], angle_rad);
+			ccLog::Printf("\t Camera orientation=(%f,%f,%f)+[%f]", axis[0], axis[1], axis[2], angle_rad);
 
 			ccCameraSensor::IntrinsicParameters params;
 			params.vFOV_rad           = fov_rad;

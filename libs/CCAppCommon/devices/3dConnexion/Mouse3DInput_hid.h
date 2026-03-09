@@ -1,0 +1,89 @@
+#pragma once
+
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: CloudCompare project                               #
+// #                                                                        #
+// ##########################################################################
+
+// Internal header - defines the HIDWorker thread used on macOS.
+// Guarded by CC_3DMOUSE_HID (defined by CMake on APPLE so that AUTOMOC can see it).
+
+#ifdef CC_3DMOUSE_HID
+
+// Local
+#include "Mouse3DInput.h"
+
+// Qt
+#include <QMetaType>
+#include <QThread>
+
+// hidapi
+// The in-tree hidapi submodule (extern/hidapi) puts its header directory on the
+// include path via the hidapi_include INTERFACE target, so the header is
+// available as <hidapi.h>. The <hidapi/hidapi.h> form only works when hidapi
+// is installed system-wide (e.g. Homebrew) which we don't want to require.
+#include <hidapi.h>
+
+// System
+#include <atomic>
+#include <vector>
+
+//! Thread that reads HID reports from the 3DConnexion device and emits signals
+class HIDWorker : public QThread
+{
+	Q_OBJECT
+
+  public:
+	//! Constructor
+	explicit HIDWorker(Mouse3DInput* parent);
+
+	//! Destructor
+	~HIDWorker() override;
+
+	//! Opens the first available 3DConnexion HID device.
+	bool openDevice();
+
+	//! Closes the HID device (idempotent).
+	void closeDevice();
+
+	//! Stops the worker thread (idempotent).
+	void stop();
+
+  Q_SIGNALS:
+	void sigMove3d(std::vector<float> motionData);
+	void sigReleased();
+	void sigOn3DMouseKeyDown(int virtualKeyCode);
+	void sigOn3DMouseKeyUp(int virtualKeyCode);
+
+  protected:
+	void run() override;
+
+  private:
+	void processMotion(const unsigned char* buf, int n);
+	void processButtons(const unsigned char* buf, int n, unsigned int& prevButtonMask);
+
+	hid_device*      m_handle;
+	std::atomic_bool m_running;
+	Mouse3DInput*    m_parent;
+
+	//! Last known raw axis values (tx, ty, tz, rx, ry, rz).
+	//! Used to merge separate translation and rotation reports (SpaceMouse
+	//! Compact) into a single 6-axis motion event, so that movement stays
+	//! smooth. Combined reports (SpaceMouse Wireless) overwrite all 6 at
+	//! once and are not affected by this buffer.
+	int m_lastAxes[6];
+};
+
+#endif // CC_3DMOUSE_HID

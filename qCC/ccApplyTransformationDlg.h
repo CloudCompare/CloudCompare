@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_APPLY_TRANSFORMATION_DLG_HEADER
-#define CC_APPLY_TRANSFORMATION_DLG_HEADER
-
+// Ui
 #include <ui_applyTransformationDlg.h>
 
 // qCC_db
@@ -72,5 +72,3 @@ class ccApplyTransformationDlg : public QDialog
 	//! Updates all forms with a given matrix
 	void updateAll(const ccGLMatrixd& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true, bool fromToForm = true);
 };
-
-#endif // CC_APPLY_TRANSFORMATION_DLG_HEADER

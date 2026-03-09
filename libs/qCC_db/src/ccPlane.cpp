@@ -15,18 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always on top!
-#include "ccPlane.h"
+#include "../include/ccPlane.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccMaterialSet.h"
+#include "../include/ccPointCloud.h"
 
-// qCC_db
-#include "ccMaterialSet.h"
-#include "ccPointCloud.h"
-
-// CCLIB
-#include "DistanceComputationTools.h"
-#include "Neighbourhood.h"
+// CCCoreLib
+#include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 
 ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*=nullptr*/, QString name /*=QString("Plane")*/)
     : ccGenericPrimitive(name, transMat)
@@ -179,6 +176,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms 
 	if (rms)
 	{
 		*rms = CCCoreLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSPlane);
+		assert(std::isfinite(*rms));
 		plane->setMetaData("RMS", *rms);
 	}
 
@@ -207,15 +205,15 @@ bool ccPlane::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccPlane::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xWidth, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yWidth, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_xWidth, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_yWidth, 1);
 
 	return true;
 }
@@ -228,7 +226,7 @@ short ccPlane::minimumFileVersion_MeOnly() const
 ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true);
+	return {CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true};
 }
 
 ccMaterial::Shared ccPlane::setAsTexture(QImage image, QString imageFilename /*=QString()*/)
@@ -250,20 +248,19 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid texture image!");
-		return ccMaterial::Shared(nullptr);
+		return nullptr;
 	}
 
 	// texture coordinates
-	TextureCoordsContainer* texCoords = quadMesh->getTexCoordinatesTable();
+	auto texCoords = quadMesh->getTexCoordinatesTable();
 	if (!texCoords)
 	{
-		texCoords = new TextureCoordsContainer();
+		texCoords = std::make_shared<TextureCoordsContainer>();
 		if (!texCoords->reserveSafe(4))
 		{
 			// not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			delete texCoords;
-			return ccMaterial::Shared(nullptr);
+			return nullptr;
 		}
 
 		// create default texture coordinates
@@ -287,7 +284,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleMtlIndexes();
-			return ccMaterial::Shared(nullptr);
+			return {nullptr};
 		}
 
 		// set default texture indexes
@@ -303,7 +300,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleTexCoordIndexes();
-			return ccMaterial::Shared(nullptr);
+			return {nullptr};
 		}
 
 		// set default material indexes
@@ -314,14 +311,14 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	// set material
 	if (!quadMesh->getMaterialSet())
 	{
-		quadMesh->setMaterialSet(new ccMaterialSet());
+		quadMesh->setMaterialSet(std::make_shared<ccMaterialSet>());
 	}
-	ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(quadMesh->getMaterialSet());
+	auto materialSet = quadMesh->getMaterialSet();
 	assert(materialSet);
 	// remove old materials (if any)
 	materialSet->clear();
 	// add new material
-	ccMaterial::Shared material(new ccMaterial("texture"));
+	auto material = std::make_shared<ccMaterial>("texture");
 	material->setTexture(image, imageFilename, false);
 	materialSet->addMaterial(material);
 

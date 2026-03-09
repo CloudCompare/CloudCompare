@@ -36,7 +36,7 @@ public:
 	**/
 	static bool FuseCells(	ccKdTree* kdTree,
 							double maxError,
-							CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+							CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 							double maxAngle_deg,
 							PointCoordinateType overlapCoef = 1,
 							bool closestFirst = true,

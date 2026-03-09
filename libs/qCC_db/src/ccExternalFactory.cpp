@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccExternalFactory.h"
+#include "../include/ccExternalFactory.h"
 
 //! Container singleton
 static QSharedPointer<ccExternalFactory::Container> s_externalFactoryContainer(nullptr);
@@ -29,8 +29,7 @@ ccExternalFactory* ccExternalFactory::Container::getFactoryByName(const QString&
 {
 	if (m_factories.contains(factoryName))
 		return m_factories.value(factoryName);
-	else
-		return nullptr;
+	return nullptr;
 }
 
 void ccExternalFactory::Container::addFactory(ccExternalFactory* factory)

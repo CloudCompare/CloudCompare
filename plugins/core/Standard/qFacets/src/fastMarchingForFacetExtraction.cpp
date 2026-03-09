@@ -52,12 +52,14 @@ static bool ComputeCellStats(	CCCoreLib::ReferenceCloud* subset,
 								CCVector3& N,
 								CCVector3& C,
 								ScalarType& error,
-								CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure)
+								CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure)
 {
 	error = 0;
 
 	if (!subset || subset->size() == 0)
+	{
 		return false;
+	}
 
 	//we compute the gravity center
 	CCCoreLib::Neighbourhood Yk(subset);
@@ -68,12 +70,13 @@ static bool ComputeCellStats(	CCCoreLib::ReferenceCloud* subset,
 	if (planeEquation)
 	{
 		N = CCVector3(planeEquation); //normal = first 3 components
-		error = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, errorMeasure);
+		error = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistanceMeasure(subset, planeEquation, errorMeasure);
+		assert(isfinite(error));
 	}
 	else
 	{
 		//not enough points?
-		N = CCVector3(0,0,0);
+		N = CCVector3(0, 0, 0);
 	}
 
 	return true;
@@ -82,7 +85,7 @@ static bool ComputeCellStats(	CCCoreLib::ReferenceCloud* subset,
 int FastMarchingForFacetExtraction::init(	CCCoreLib::DgmOctree* theOctree,
 											unsigned char level,
 											ScalarType maxError,
-											CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+											CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 											bool useRetroProjectionError,
 											CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/)
 {
@@ -162,7 +165,7 @@ int FastMarchingForFacetExtraction::init(	CCCoreLib::DgmOctree* theOctree,
 	{
 		progressCb->stop();
 	}
-		
+
 	m_initialized = true;
 
 	return 0;
@@ -285,8 +288,8 @@ float FastMarchingForFacetExtraction::computeTCoefApprox(CCCoreLib::FastMarching
 		CCCoreLib::ReferenceCloud Yk(m_octree->associatedCloud());
 		if (m_octree->getPointsInCell(oCell->cellCode, m_gridLevel, &Yk, true))
 		{
-			ScalarType reprojError = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistance(&Yk, theLSQPlaneEquation, m_errorMeasure);
-			if (reprojError >= 0)
+			ScalarType reprojError = CCCoreLib::DistanceComputationTools::ComputeCloud2PlaneDistanceMeasure(&Yk, theLSQPlaneEquation, m_errorMeasure);
+			if (std::isfinite(reprojError) && (reprojError >= 0))
 				return (1.0f - orientationConfidence) * static_cast<float>(reprojError);
 		}
 	}
@@ -342,7 +345,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 	//	if (cell)
 	//		delete cell;
 	//}
-	
+
 	//unsigned pointCount = 0;
 	CCCoreLib::ReferenceCloud Yk(m_octree->associatedCloud());
 	for (size_t i = 0; i < m_activeCells.size(); ++i)
@@ -355,7 +358,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 		{
 			unsigned index = Yk.getPointGlobalIndex(k);
 			assert(flags[index] == 1);
-			//flags.setValue(index,1);			
+			//flags.setValue(index,1);
 			//++pointCount;
 		}
 
@@ -455,7 +458,7 @@ void FastMarchingForFacetExtraction::initTrialCells()
 int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 															unsigned char octreeLevel,
 															ScalarType maxError,
-															CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+															CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 															bool useRetroProjectionError/*=true*/,
 															CCCoreLib::GenericProgressCallback* progressCb/*=nullptr*/,
 															CCCoreLib::DgmOctree* _theOctree/*=nullptr*/)
@@ -480,7 +483,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 	//we compute the octree if none is provided
 	CCCoreLib::DgmOctree* theOctree = _theOctree;
-	QScopedPointer<CCCoreLib::DgmOctree> tempOctree;
+	std::unique_ptr<CCCoreLib::DgmOctree> tempOctree;
 	if (!theOctree)
 	{
 		theOctree = new CCCoreLib::DgmOctree(theCloud);

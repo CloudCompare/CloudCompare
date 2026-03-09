@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_TORUS_PRIMITIVE_HEADER
-#define CC_TORUS_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -79,7 +78,7 @@ class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
   protected:
 	// inherited from ccGenericPrimitive
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	bool  buildUp() override;
 
@@ -98,5 +97,3 @@ class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
 	//! Subtended angle (in radians)
 	double m_angle_rad;
 };
-
-#endif // CC_TORUS_PRIMITIVE_HEADER

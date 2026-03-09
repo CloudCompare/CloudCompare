@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,18 +17,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_WAVEFORM_DIALOG_HEADER
-#define CC_WAVEFORM_DIALOG_HEADER
-
 // Local
-#include "cc2DLabel.h"
-#include "ccPickingListener.h"
+#include "ccQCustomPlot.h"
+
+// CCPluginAPI
+#include <ccPickingListener.h>
+
+// qCC_db
+#include <cc2DLabel.h>
 
 // Qt
 #include <QDialog>
-
-// QCustomPlot
-#include "ccQCustomPlot.h"
 
 class QCPArrow;
 class QCPBarsWithText;
@@ -34,7 +35,10 @@ class QCPColoredBars;
 class QCPHiddenArea;
 class QCPTextElement;
 
-class Ui_WaveDialog;
+namespace Ui
+{
+	class WaveDialog;
+} // namespace Ui
 class ccPointCloud;
 class ccPickingHub;
 
@@ -97,9 +101,6 @@ class ccWaveWidget : public QCustomPlot
 
 	//! Rendering font
 	QFont m_renderingFont;
-
-	//! Last mouse click
-	QPoint m_lastMouseClick;
 };
 
 //! Waveform dialog
@@ -121,7 +122,7 @@ class ccWaveDialog : public QDialog
 	}
 
 	// inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi) override;
+	void onItemPicked(const PickedItem& pi) override;
 
   protected:
 	void onPointIndexChanged(int);
@@ -141,7 +142,7 @@ class ccWaveDialog : public QDialog
 	ccPickingHub* m_pickingHub;
 
 	//! GUI
-	Ui_WaveDialog* m_gui;
+	std::unique_ptr<Ui::WaveDialog> m_ui;
 
 	//! Maximum wave amplitude (for all points)
 	double m_waveMax;
@@ -152,5 +153,3 @@ class ccWaveDialog : public QDialog
 	//! The display associated with the cloud whose waveforms are displayed
 	ccGenericGLDisplay* m_display;
 };
-
-#endif // CC_WAVEFORM_DIALOG_HEADER

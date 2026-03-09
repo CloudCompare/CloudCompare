@@ -15,10 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIncludeGL.h"
+#include "../include/cc2DViewportLabel.h"
 
 // Local
-#include "cc2DViewportLabel.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccIncludeGL.h"
 
 // CCCoreLib
 #include <CCConst.h>
@@ -27,9 +28,6 @@
 #include <QDataStream>
 #include <QFontMetrics>
 
-// system
-#include <string.h>
-
 cc2DViewportLabel::cc2DViewportLabel(QString name /*=QString()*/)
     : cc2DViewportObject(name)
     , m_roi{0, 0, 0, 0}
@@ -37,11 +35,7 @@ cc2DViewportLabel::cc2DViewportLabel(QString name /*=QString()*/)
 	setVisible(false);
 }
 
-cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel)
-    : cc2DViewportObject(viewportLabel)
-    , m_roi(viewportLabel.m_roi)
-{
-}
+cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel) = default;
 
 bool cc2DViewportLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 {
@@ -57,24 +51,24 @@ bool cc2DViewportLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 
 	// ROI (dataVersion>=21)
 	QDataStream outStream(&out);
-	for (size_t i = 0; i < m_roi.size(); ++i)
-		outStream << m_roi[i];
+	for (float roiValue : m_roi)
+		outStream << roiValue;
 
 	return true;
 }
 
-bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!cc2DViewportObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!cc2DViewportObject::fromFile_MeOnly(in, context))
 		return false;
 
-	if (dataVersion < 21)
+	if (context.dataVersion < 21)
 		return false;
 
 	// ROI (dataVersion>=21)
 	QDataStream inStream(&in);
-	for (size_t i = 0; i < m_roi.size(); ++i)
-		inStream >> m_roi[i];
+	for (float& roiValue : m_roi)
+		inStream >> roiValue;
 
 	return true;
 }
@@ -126,13 +120,13 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glFunc->glPushAttrib(GL_LINE_BIT);
 
 	// focal distance change compensation
-	double relativeZoom = m_params.getFocalDistance() / params.getFocalDistance();
+	double relativeZoom = (m_params.getFocalDistance() / params.getFocalDistance()) * context.renderZoom;
 
 	// camera center shift compensation
 	CCVector3d dC = relativeZoom * context.glW * (m_params.getCameraCenter() - params.getCameraCenter()) / m_params.computeWidthAtFocalDist(context.glW, context.glH);
 
 	// thick dotted line
-	glFunc->glLineWidth(2);
+	glFunc->glLineWidth(2 * context.renderZoom);
 	glFunc->glLineStipple(1, 0xAAAA);
 	glFunc->glEnable(GL_LINE_STIPPLE);
 

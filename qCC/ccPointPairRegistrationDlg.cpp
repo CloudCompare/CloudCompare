@@ -15,17 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <ccPointPairRegistrationDlg.h>
+#include "ccPointPairRegistrationDlg.h"
 
 // Local
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "mainwindow.h"
 
-// common
-#include <ccPickingHub.h>
+// CCCoreLib
+#include <GeometricalAnalysisTools.h>
+#include <RegistrationTools.h>
 
-// qCC_gl
-#include <ccGLWindowInterface.h>
+// CCFbo
+#include <ccGlFilter.h>
+
+// CCPluginAPI
+#include <ccPickingHub.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -34,15 +38,11 @@
 #include <ccProgressDialog.h>
 #include <ccSphere.h>
 
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
 // qCC_io
 #include <ccGlobalShiftManager.h>
-
-// CC_FBO
-#include <ccGlFilter.h>
-
-// CCCoreLib
-#include <GeometricalAnalysisTools.h>
-#include <RegistrationTools.h>
 
 // Qt
 #include <QMdiSubWindow>
@@ -528,10 +528,11 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 					box.clear();
 					box.add(C - CCVector3(1, 1, 1) * radius * static_cast<PointCoordinateType>(1.05)); // add 5%
 					box.add(C + CCVector3(1, 1, 1) * radius * static_cast<PointCoordinateType>(1.05)); // add 5%
+
+					delete part;
 					part = cloud->crop(box, true);
 
 					// replace the old subset by a slightly larger one
-					delete part;
 					if (part && part->size() > 16)
 					{
 						CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, false, &pDlg, 0.99);
@@ -697,7 +698,7 @@ void ccPointPairRegistrationDlg::onDelButtonPushed()
 void ccPointPairRegistrationDlg::addPointToTable(QTableWidget*     tableWidget,
                                                  int               rowIndex,
                                                  const CCVector3d& P,
-                                                 QString           pointName)
+                                                 QString           pointLabel)
 {
 	assert(tableWidget);
 	if (!tableWidget)
@@ -705,7 +706,7 @@ void ccPointPairRegistrationDlg::addPointToTable(QTableWidget*     tableWidget,
 
 	// add corresponding row in table
 	tableWidget->setRowCount(std::max<int>(rowIndex + 1, tableWidget->rowCount()));
-	tableWidget->setVerticalHeaderItem(rowIndex, new QTableWidgetItem(pointName));
+	tableWidget->setVerticalHeaderItem(rowIndex, new QTableWidgetItem(pointLabel));
 
 	// add point coordinates
 	for (int d = 0; d < 3; ++d)
@@ -1646,6 +1647,7 @@ void ccPointPairRegistrationDlg::align()
 			{
 				m_associatedWin->zoomGlobal();
 			}
+			m_associatedWin->toBeRefreshed();
 			m_associatedWin->redraw();
 		}
 

@@ -120,7 +120,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	// progress (start with vertices)
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -137,7 +137,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		pDlg->setAutoClose(false); // don't close dialogue when progress bar is full
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), nbPoints);
 
 	QTextStream stream(&file);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
@@ -173,7 +173,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			assert(mesh);
 
-			NormsIndexesTableType* normsTable = mesh->getTriNormsTable();
+			auto normsTable = mesh->getTriNormsTable();
 
 			// reset save dialog
 			unsigned numTriangleNormals = normsTable->currentSize();
@@ -239,8 +239,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	// materials
 	if (mesh)
 	{
-		const ccMaterialSet* materials     = mesh->getMaterialSet();
-		bool                 withMaterials = (materials && mesh->hasMaterials());
+		auto materials     = mesh->getMaterialSet();
+		bool withMaterials = (materials && mesh->hasMaterials());
 		if (withMaterials)
 		{
 			// reset save dialog
@@ -264,7 +264,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 			else
 			{
-				materials     = nullptr;
+				materials.reset();
 				withMaterials = false;
 			}
 
@@ -283,7 +283,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
 		if (withTexCoordinates)
 		{
-			TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
+			auto texCoords = mesh->getTexCoordinatesTable();
 			if (texCoords)
 			{
 				// reset save dialog
@@ -576,26 +576,26 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	std::vector<std::pair<unsigned, QString>> groups;
 
 	// materials
-	ccMaterialSet* materials              = nullptr;
-	bool           hasMaterial            = false;
-	int            currentMaterial        = -1;
-	bool           currentMaterialDefined = false;
-	bool           materialsLoadFailed    = true;
+	ccMaterialSet::Shared materials;
+	bool                  hasMaterial            = false;
+	int                   currentMaterial        = -1;
+	bool                  currentMaterialDefined = false;
+	bool                  materialsLoadFailed    = true;
 
 	// texture coordinates
-	TextureCoordsContainer* texCoords        = nullptr;
-	bool                    hasTexCoords     = false;
-	int                     texCoordsRead    = 0;
-	int                     maxTexCoordIndex = -1;
+	TextureCoordsContainer::Shared texCoords;
+	bool                           hasTexCoords     = false;
+	int                            texCoordsRead    = 0;
+	int                            maxTexCoordIndex = -1;
 
 	// normals
-	NormsIndexesTableType* normals         = nullptr;
-	int                    normsRead       = 0;
-	bool                   normalsPerFacet = false;
-	int                    maxTriNormIndex = -1;
+	NormsIndexesTableType::Shared normals;
+	int                           normsRead       = 0;
+	bool                          normalsPerFacet = false;
+	int                           maxTriNormIndex = -1;
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -701,7 +701,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						{
 							vertices->setGlobalShift(Pshift);
 						}
-						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+						ccLog::Warningf("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 
@@ -716,8 +716,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for tex. coords container if necessary
 				if (!texCoords)
 				{
-					texCoords = new TextureCoordsContainer();
-					texCoords->link();
+					texCoords.reset(new TextureCoordsContainer());
 				}
 				if (texCoords->currentSize() == texCoords->capacity())
 				{
@@ -753,8 +752,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for normals container if necessary
 				if (!normals)
 				{
-					normals = new NormsIndexesTableType;
-					normals->link();
+					normals.reset(new NormsIndexesTableType);
 				}
 				if (normals->currentSize() == normals->capacity())
 				{
@@ -854,7 +852,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 				if (currentFace.size() < 3)
 				{
-					ccLog::Warning("[OBJ] Malformed file: polygon on line %1 has less than 3 vertices!", lineCount);
+					ccLog::Warningf("[OBJ] Malformed file: polygon on line %i has less than 3 vertices!", lineCount);
 					error = true;
 					break;
 				}
@@ -1198,8 +1196,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					// we try to load it
 					if (!materials)
 					{
-						materials = new ccMaterialSet("materials");
-						materials->link();
+						materials.reset(new ccMaterialSet("materials"));
 					}
 					size_t oldSize = materials->size();
 
@@ -1207,7 +1204,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					QString     mtlPath = QFileInfo(filename).absolutePath();
 					if (ccMaterialSet::ParseMTL(mtlPath, mtlFilename, *materials, errors))
 					{
-						ccLog::Print("[OBJ] %zu materials loaded", materials->size() - oldSize);
+						ccLog::Printf("[OBJ] %zu materials loaded", materials->size() - oldSize);
 						materialsLoadFailed = false;
 					}
 					else
@@ -1223,8 +1220,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 					if (materials->empty())
 					{
-						materials->release();
-						materials           = nullptr;
+						materials.reset();
 						materialsLoadFailed = true;
 					}
 				}
@@ -1260,9 +1256,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 	if (!error)
 	{
-		ccLog::Print("[OBJ] %i points, %u faces", pointsRead, totalFacesRead);
+		ccLog::Printf("[OBJ] %i points, %u faces", pointsRead, totalFacesRead);
 		if (texCoordsRead > 0 || normsRead > 0)
-			ccLog::Print("[OBJ] %i tex. coords, %i normals", texCoordsRead, normsRead);
+		{
+			ccLog::Printf("[OBJ] %i tex. coords, %i normals", texCoordsRead, normsRead);
+		}
 
 		// do some cleaning
 		vertices->shrinkToFit();
@@ -1289,7 +1287,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		    || maxTriNormIndex >= normsRead)
 		{
 			// hum, we've got a problem here
-			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)", maxVertexIndex, maxTexCoordIndex, maxTriNormIndex);
+			ccLog::Warningf("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)", maxVertexIndex, maxTexCoordIndex, maxTriNormIndex);
 			if (maxVertexIndex >= pointsRead)
 			{
 				error = true;
@@ -1301,21 +1299,18 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					if (texCoords)
 					{
-						texCoords->release();
-						texCoords = nullptr;
+						texCoords.reset();
 					}
 					if (materials)
 					{
-						materials->release();
-						materials = nullptr;
+						materials.reset();
 					}
 				}
 				if (maxTriNormIndex >= normsRead)
 				{
 					if (normals)
 					{
-						normals->release();
-						normals = nullptr;
+						normals.reset();
 					}
 				}
 			}
@@ -1352,7 +1347,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			// create sub-meshes if necessary
-			ccLog::Print("[OBJ] 1 mesh loaded - %zu group(s)", groups.size());
+			ccLog::Printf("[OBJ] 1 mesh loaded - %zu group(s)", groups.size());
 			if (groups.size() > 1)
 			{
 				for (size_t i = 0; i < groups.size(); ++i)
@@ -1435,18 +1430,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	// release shared structures
 	if (normals)
 	{
-		normals->release();
-		normals = nullptr;
+		normals.reset();
 	}
 	if (texCoords)
 	{
-		texCoords->release();
-		texCoords = nullptr;
+		texCoords.reset();
 	}
 	if (materials)
 	{
-		materials->release();
-		materials = nullptr;
+		materials.reset();
 	}
 
 	if (pDlg)

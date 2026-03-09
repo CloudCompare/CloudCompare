@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
-#define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
+// Ui
+#include <ui_graphicalSegmentationDlg.h>
 
-// Local
+// CCPluginAPI
 #include <ccOverlayDialog.h>
 
 // qCC_db
@@ -27,9 +29,8 @@
 // Qt
 #include <QSet>
 
-// GUI
+// System
 #include <set>
-#include <ui_graphicalSegmentationDlg.h>
 
 class ccPolyline;
 class ccPointCloud;
@@ -46,14 +47,14 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccGraphicalSegmentationTool(QWidget* parent);
 	//! Destructor
-	virtual ~ccGraphicalSegmentationTool();
+	~ccGraphicalSegmentationTool() override;
 
 	//! Adds an entity (and/or its children) to the 'to be segmented' pool
 	/** Warning: some entities may be rejected if they are
 	    locked, or can't be segmented this way.
 	    \return whether entity has been added to the pool or not
 	**/
-	bool addEntity(ccHObject* anObject, bool silent = false);
+	bool addEntity(ccHObject* entity, bool silent = false);
 
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities() const;
@@ -76,9 +77,9 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	}
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool accepted) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool accepted) override;
 
 	//! Returns whether hidden parts should be delete after segmentation
 	bool deleteHiddenParts() const
@@ -95,6 +96,9 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! Apply segmentation and update the database (helper)
 	bool applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities);
 
+  signals:
+	void currentScalarFieldUpdated();
+
   protected:
 	void        segmentIn();
 	void        segmentOut();
@@ -107,7 +111,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	void        cancel();
 	inline void addPointToPolyline(int x, int y)
 	{
-		return addPointToPolylineExt(x, y, false);
+		addPointToPolylineExt(x, y, false);
 	}
 	void addPointToPolylineExt(int x, int y, bool allowClicksOutside);
 	void closePolyLine(int x = 0, int y = 0); // arguments for compatibility with ccGlWindow::rightButtonClicked signal
@@ -121,6 +125,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();
 	void doExportSegmentationPolyline();
+	void onToggleRGBAndSFColors();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
@@ -171,5 +176,3 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! In export mode, entities in this set will be disabled/invisible
 	std::set<ccHObject*> m_disableOnClose;
 };
-
-#endif // CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

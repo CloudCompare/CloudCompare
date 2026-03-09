@@ -1,5 +1,22 @@
-#ifndef CC_WAVEFORM_HEADER
-#define CC_WAVEFORM_HEADER
+
+#pragma once
+
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 // Local
 #include "ccGLMatrix.h"
@@ -9,7 +26,7 @@
 // CCCoreLib
 #include <CCGeom.h>
 
-// system
+// System
 #include <cstdint>
 #include <cstdlib>
 
@@ -35,7 +52,7 @@ class QCC_DB_LIB_API WaveformDescriptor : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	uint32_t numberOfSamples; //!< Number of samples
@@ -163,7 +180,7 @@ class QCC_DB_LIB_API ccWaveform : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
   protected: // members
@@ -311,5 +328,3 @@ class QCC_DB_LIB_API ccWaveformProxy
 	//! Associated storage data
 	const uint8_t* m_storage;
 };
-
-#endif // CC_WAVEFORM_HEADER

@@ -29,6 +29,7 @@ target_sources( ${PROJECT_NAME}
 	    ${CMAKE_CURRENT_LIST_DIR}/ccGenericMesh.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccGenericPointCloud.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccGenericPrimitive.cpp
+		${CMAKE_CURRENT_LIST_DIR}/ccGLSLHelper.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccGriddedTools.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccHObject.cpp
 	    ${CMAKE_CURRENT_LIST_DIR}/ccHObjectCaster.cpp

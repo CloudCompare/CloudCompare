@@ -17,23 +17,24 @@
 
 #include "ccStatisticalTestDlg.h"
 
-#include "ui_statisticalTestDlg.h"
+// Ui
+#include <ui_statisticalTestDlg.h>
 
-ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
-                                           QString  p2Label,
-                                           QString  p3Label /*=QString()*/,
+ccStatisticalTestDlg::ccStatisticalTestDlg(QString  param1Label,
+                                           QString  param2Label,
+                                           QString  param3Label /*=QString()*/,
                                            QString  windowTitle /*=QString()*/,
                                            QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::StatisticalTestDialog)
+    , m_ui(std::make_unique<Ui::StatisticalTestDialog>())
 {
 	m_ui->setupUi(this);
 
-	m_ui->param1Label->setText(p1Label);
-	m_ui->param2Label->setText(p2Label);
-	if (!p3Label.isNull())
+	m_ui->param1Label->setText(param1Label);
+	m_ui->param2Label->setText(param2Label);
+	if (!param3Label.isNull())
 	{
-		m_ui->param3Label->setText(p3Label);
+		m_ui->param3Label->setText(param3Label);
 	}
 	else
 	{
@@ -49,10 +50,7 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
 	}
 }
 
-ccStatisticalTestDlg::~ccStatisticalTestDlg()
-{
-	delete m_ui;
-}
+ccStatisticalTestDlg::~ccStatisticalTestDlg() = default;
 
 double ccStatisticalTestDlg::getParam1() const
 {

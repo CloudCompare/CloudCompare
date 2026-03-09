@@ -165,6 +165,17 @@ bool ccGLWindowStereo::event(QEvent* evt)
 	}
 		return true;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+	case QEvent::DevicePixelRatioChange:
+	{
+		// The surface scale has changed. handle pixel ratio.
+		// See the corresponding case in ccGLWindow::event.
+		resizeGL(width(), height());
+		evt->accept();
+	}
+		return true;
+#endif
+
 	case QEvent::Expose:
 	{
 		if (isExposed())

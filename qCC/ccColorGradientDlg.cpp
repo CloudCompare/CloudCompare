@@ -17,14 +17,14 @@
 
 #include "ccColorGradientDlg.h"
 
-// common
+// CCPluginAPI
 #include <ccQtHelpers.h>
 
 // Qt
 #include <QColorDialog>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 // persistent parameters
 static QColor                           s_firstColor(Qt::black);

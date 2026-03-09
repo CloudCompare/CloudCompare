@@ -27,7 +27,6 @@
 #include <cc2DLabel.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
-#include <ccAdvancedTypes.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>
 
@@ -134,6 +133,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=nullptr*/)
 	{
 		m_broomBox->setEnabled(true);
 		m_broomBox->setDisplay(m_glWindow);
+		m_broomBox->forceSunLightOn(true);
 
 		m_selectionBox->setEnabled(true);
 		m_selectionBox->setDisplay(m_glWindow);
@@ -291,11 +291,10 @@ bool qBroomDlg::CloudBackup::backupColors()
 	//we backup the colors (as we are going to change them)
 	if (ref->hasColors())
 	{
-		colors = new RGBAColorsTableType;
+		colors = std::make_shared<RGBAColorsTableType>();
 		if (!colors->resizeSafe(ref->size()))
 		{
 			//not enough memory
-			colors->release();
 			colors = nullptr;
 			return false;
 		}
@@ -357,8 +356,7 @@ void qBroomDlg::CloudBackup::clear()
 {
 	if (colors)
 	{
-		colors->release();
-		colors = nullptr;
+		colors.reset();
 	}
 
 	if (ref)

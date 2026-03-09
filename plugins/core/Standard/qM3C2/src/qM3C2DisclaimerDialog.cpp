@@ -29,15 +29,12 @@ bool DisclaimerDialog::s_disclaimerAccepted = false;
 
 DisclaimerDialog::DisclaimerDialog(QWidget *parent)
     : QDialog(parent)
-    , m_ui( new Ui::DisclaimerDialog )
+    , m_ui(std::make_unique<Ui::DisclaimerDialog>())
 {
     m_ui->setupUi( this );
 }
 
-DisclaimerDialog::~DisclaimerDialog()
-{
-    delete m_ui;
-}
+DisclaimerDialog::~DisclaimerDialog() = default;
 
 bool DisclaimerDialog::show(ccMainAppInterface *app)
 {

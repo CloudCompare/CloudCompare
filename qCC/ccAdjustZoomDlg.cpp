@@ -17,8 +17,8 @@
 
 #include "ccAdjustZoomDlg.h"
 
-// local
-#include "ccGLWindowInterface.h"
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

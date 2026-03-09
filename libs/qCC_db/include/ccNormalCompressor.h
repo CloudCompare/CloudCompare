@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_NORMAL_COMPRESSOR_HEADER
-#define CC_NORMAL_COMPRESSOR_HEADER
 
 // Local
 #include "ccBasicTypes.h"
@@ -45,5 +44,3 @@ class QCC_DB_LIB_API ccNormalCompressor
 	//! Inverts a (compressed) normal
 	static void InvertNormal(CompressedNormType& code);
 };
-
-#endif // CC_NORMAL_COMPRESSOR_HEADER

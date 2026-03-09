@@ -20,9 +20,11 @@
 // Local
 #include "ccEnvelopeExtractor.h"
 
+// Ui
+#include <ui_sectionExtractionSubDlg.h>
+
 // Qt
 #include <QDialog>
-#include <ui_sectionExtractionSubDlg.h>
 
 //! Dialog for generating sections along one or several 2D polylines (Section Extraction Tool)
 class ccSectionExtractionSubDlg : public QDialog

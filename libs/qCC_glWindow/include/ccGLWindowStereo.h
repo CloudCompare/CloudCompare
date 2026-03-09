@@ -292,7 +292,7 @@ class CCGLWINDOW_LIB_API ccGLStereoWidget : public QWidget
 		}
 	}
 
-	virtual ~ccGLStereoWidget()
+	~ccGLStereoWidget() override
 	{
 		if (m_associatedWindow)
 		{

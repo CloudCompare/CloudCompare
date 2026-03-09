@@ -1940,13 +1940,21 @@ void ccCompass::estimateStructureNormals()
 			points[r]->setName("SNE");
 
 			//build scalar fields
-			CCCoreLib::ScalarField* startSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("StartPoint")));
-			CCCoreLib::ScalarField* endSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("EndPoint")));
-			CCCoreLib::ScalarField* idSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("SegmentID")));
-			CCCoreLib::ScalarField* weightSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Weight")));
-			CCCoreLib::ScalarField* trend = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Trend")));
-			CCCoreLib::ScalarField* plunge = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Plunge")));
-			CCCoreLib::ScalarField* pointID = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("PointID"))); //used for linking samples representing the same point
+			auto startSF  = std::make_shared<ccScalarField>("StartPoint");
+			auto endSF    = std::make_shared<ccScalarField>("EndPoint");
+			auto idSF     = std::make_shared<ccScalarField>("SegmentID");
+			auto weightSF = std::make_shared<ccScalarField>("Weight");
+			auto trend    = std::make_shared<ccScalarField>("Trend");
+			auto plunge   = std::make_shared<ccScalarField>("Plunge");
+			auto pointID  = std::make_shared<ccScalarField>("PointID"); // used for linking samples representing the same point
+
+			points[r]->addScalarField(startSF);
+			points[r]->addScalarField(endSF);
+			points[r]->addScalarField(idSF);
+			points[r]->addScalarField(weightSF);
+			points[r]->addScalarField(trend);
+			points[r]->addScalarField(plunge);
+			points[r]->addScalarField(pointID);
 
 			weightSF->reserve(px.size());
 			startSF->reserve(px.size());
@@ -1992,26 +2000,34 @@ void ccCompass::estimateStructureNormals()
 			//*************************************************************************************
 			if (oversample > 1)
 			{
-				//build point cloud to store MCMC samples in and associated scalar fields
+				// build point cloud to store MCMC samples in and associated scalar fields
 				samples[r] = new ccSNECloud();
 				samples[r]->setName("SNE_Samples");
-				samples[r]->copyGlobalShiftAndScale(*points[r]); //copy global shift & scale onto new point cloud
-				samples[r]->reserve(static_cast<unsigned>(px.size())*oversample);
+				samples[r]->copyGlobalShiftAndScale(*points[r]); // copy global shift & scale onto new point cloud
+				samples[r]->reserve(static_cast<unsigned>(px.size()) * oversample);
 				samples[r]->reserveTheNormsTable();
-				CCCoreLib::ScalarField* startSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("StartPoint")));
-				CCCoreLib::ScalarField* endSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("EndPoint")));
-				CCCoreLib::ScalarField* idSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("SegmentID")));
-				CCCoreLib::ScalarField* weightSF = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Weight")));
-				CCCoreLib::ScalarField* trend = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Trend")));
-				CCCoreLib::ScalarField* plunge = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Plunge")));
-				CCCoreLib::ScalarField* pointID = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("PointID")));
-				weightSF->reserve(px.size()*oversample);
-				startSF->reserve(px.size()*oversample);
-				endSF->reserve(px.size()*oversample);
-				idSF->reserve(px.size()*oversample);
-				trend->reserve(px.size()*oversample);
-				plunge->reserve(px.size()*oversample);
-				pointID->reserve(px.size()*oversample);
+				auto startSF  = std::make_shared<ccScalarField>("StartPoint");
+				auto endSF    = std::make_shared<ccScalarField>("EndPoint");
+				auto idSF     = std::make_shared<ccScalarField>("SegmentID");
+				auto weightSF = std::make_shared<ccScalarField>("Weight");
+				auto trend    = std::make_shared<ccScalarField>("Trend");
+				auto plunge   = std::make_shared<ccScalarField>("Plunge");
+				auto pointID  = std::make_shared<ccScalarField>("PointID");
+
+				samples[r]->addScalarField(startSF);
+				samples[r]->addScalarField(endSF);
+				samples[r]->addScalarField(idSF);
+				samples[r]->addScalarField(weightSF);
+				samples[r]->addScalarField(trend);
+				samples[r]->addScalarField(plunge);
+				samples[r]->addScalarField(pointID);
+				weightSF->reserve(px.size() * oversample);
+				startSF->reserve(px.size() * oversample);
+				endSF->reserve(px.size() * oversample);
+				idSF->reserve(px.size() * oversample);
+				trend->reserve(px.size() * oversample);
+				plunge->reserve(px.size() * oversample);
+				pointID->reserve(px.size() * oversample);
 
 				//init random number generators 
 				std::random_device rd;
@@ -2160,7 +2176,8 @@ void ccCompass::estimateStructureNormals()
 				for (int r = 0; r < 2; r++)
 				{
 					//make scalar field
-					CCCoreLib::ScalarField* thickSF = points[r]->getScalarField(points[r]->addScalarField(new ccScalarField("Thickness")));
+					auto thickSF = std::make_shared<ccScalarField>("Thickness");
+					points[r]->addScalarField(thickSF);
 					thickSF->reserve(points[r]->size());
 					
 					//set thickness to visible scalar field
@@ -2168,15 +2185,17 @@ void ccCompass::estimateStructureNormals()
 					points[r]->showSF(true);
 
 					//create scalar field in samples point cloud
-					CCCoreLib::ScalarField* thickSF_sample = nullptr;
-					CCCoreLib::ScalarField* idSF_sample = nullptr;
+					ccScalarField::Shared thickSF_sample;
+					ccScalarField::Shared idSF_sample;
 					if (samples[r] != nullptr)
 					{
-						thickSF_sample = samples[r]->getScalarField(samples[r]->addScalarField(new ccScalarField("Thickness")));
+						thickSF_sample = std::make_shared<ccScalarField>("Thickness");
 						thickSF_sample->reserve(samples[r]->size());
-						idSF_sample = samples[r]->getScalarField(samples[r]->getScalarFieldIndexByName("PointID"));
-						samples[r]->setCurrentDisplayedScalarField(samples[r]->getScalarFieldIndexByName("Thickness"));
+						int thickSF_sample_idx = samples[r]->addScalarField(thickSF_sample);
+						samples[r]->setCurrentDisplayedScalarField(thickSF_sample_idx);
 						samples[r]->showSF(true);
+
+						idSF_sample = samples[r]->getCCScalarField(samples[r]->getScalarFieldIndexByName("PointID"));
 					}
 
 					//figure out id of the compared surface (opposite to the current one)
@@ -2221,7 +2240,7 @@ void ccCompass::estimateStructureNormals()
 						{
 							thickSF->setValue(p, -1.0);
 
-							if (samples[r] != nullptr)
+							if (samples[r] != nullptr && idSF_sample && thickSF_sample)
 							{
 								for (unsigned s = 0; s < samples[r]->size(); s++)
 								{
@@ -2252,7 +2271,7 @@ void ccCompass::estimateStructureNormals()
 						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / std::abs(d)));
 
 						//if samples have been generated, also calculate thicknesses for matching sets of points
-						if (samples[r] != nullptr)
+						if (samples[r] != nullptr && idSF_sample && thickSF_sample)
 						{
 							for (unsigned s = 0; s < samples[r]->size(); s++)
 							{
@@ -2508,7 +2527,7 @@ void ccCompass::estimateStrain()
 				//build graphics objects. These are deleted later if no graphics were built.
 				dataInCell[idx] = new ccSNECloud();
 				dataInCell[idx]->setName("DataInCell");
-				ccScalarField* thickness = new ccScalarField("Thickness");
+				auto thickness = std::make_shared<ccScalarField>("Thickness");
 				dataInCell[idx]->addScalarField(thickness);
 
 				for (ccGeoObject* g : geoObjectBins[idx])
@@ -2531,10 +2550,10 @@ void ccCompass::estimateStrain()
 							if (s != nullptr)
 							{
 								//check that a thickness scalar field exists
-								int thickSF = s->getScalarFieldIndexByName("Thickness");
-								if (thickSF != -1)
+								int thickSFIdx = s->getScalarFieldIndexByName("Thickness");
+								if (thickSFIdx != -1)
 								{
-									s->setCurrentOutScalarField(thickSF);
+									s->setCurrentOutScalarField(thickSFIdx);
 									int region = ccGeoObject::getGeoObjectRegion(s);
 									if (!(region == ccGeoObject::LOWER_BOUNDARY || region == ccGeoObject::UPPER_BOUNDARY))
 									{
@@ -2669,21 +2688,21 @@ void ccCompass::estimateStrain()
 	points->copyGlobalShiftAndScale(*lines[0]); //copy global shift & scale from one of the polylines (N.B. we assume here that all features have the same shift/scale)
 
 	points->reserve(static_cast<unsigned>(validCells));
-	ccScalarField* nValidSF = new ccScalarField("nValid");
-	ccScalarField* nIgnoredSF = new ccScalarField("nIgnored");
-	ccScalarField* JSF = new ccScalarField("J");
+	auto nValidSF = std::make_shared<ccScalarField>("nValid");
+	auto nIgnoredSF = std::make_shared<ccScalarField>("nIgnored");
+	auto JSF = std::make_shared<ccScalarField>("J");
 	points->addScalarField(nValidSF);
 	points->addScalarField(nIgnoredSF);
 	points->addScalarField(JSF);
 	nValidSF->reserve(validCells);
 	nIgnoredSF->reserve(validCells);
 	JSF->reserve(validCells);
-	ccScalarField* eSF[3][3];
+	ccScalarField::Shared eSF[3][3];
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 3; j++)
 		{
-			eSF[i][j] = new ccScalarField(QString::asprintf("E%d%d", i + 1, j + 1).toStdString().c_str());
+			eSF[i][j] = std::make_shared<ccScalarField>(QString::asprintf("E%d%d", i + 1, j + 1).toStdString().c_str());
 			eSF[i][j]->reserve(validCells);
 			points->addScalarField(eSF[i][j]);
 		}
@@ -2821,7 +2840,7 @@ void ccCompass::estimateP21()
 {
 	//setup point cloud to store data in
 	ccPointCloud* cloud = new ccPointCloud();
-	ccScalarField* weight = new ccScalarField("weight");
+	auto weight = std::make_shared<ccScalarField>("weight");
 	cloud->addScalarField(weight);
 	cloud->setCurrentScalarField(0);
 
@@ -2969,7 +2988,7 @@ void ccCompass::estimateP21()
 	outputCloud->copyGlobalShiftAndScale(*outcrop); //copy global shift & scale
 	
 	//setup scalar fields etc
-	ccScalarField* P21 = new ccScalarField("P21");
+	auto P21 = std::make_shared<ccScalarField>("P21");
 	outputCloud->addScalarField(P21);
 	P21->reserve(outputCloud->size());
 
@@ -3104,14 +3123,14 @@ void ccCompass::convertToPointCloud()
 	for (ccGeoObject* o : objs)
 	{
 		//get regions
-		ccHObject* regions[3] = { o->getRegion(ccGeoObject::INTERIOR), 
-								  o->getRegion(ccGeoObject::LOWER_BOUNDARY), 
-								  o->getRegion(ccGeoObject::UPPER_BOUNDARY)};
+		ccHObject* regions[3] { o->getRegion(ccGeoObject::INTERIOR), 
+								o->getRegion(ccGeoObject::LOWER_BOUNDARY), 
+								o->getRegion(ccGeoObject::UPPER_BOUNDARY)};
 		
 		//make point cloud
 		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
-		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
-		CCCoreLib::ScalarField* sf = points->getScalarField(sfid);
+		auto sf = std::make_shared<ccScalarField>("Region");
+		int sfid = points->addScalarField(sf); //add scalar field containing region info
 
 		//convert traces in each region
 		int nRegions = 3;
@@ -3163,8 +3182,8 @@ void ccCompass::convertToPointCloud()
 	{
 		//make point cloud
 		ccPointCloud* points = new ccPointCloud("ConvertedLines"); //create point cloud for storing points
-		int sfid = points->addScalarField(new ccScalarField("Region")); //add scalar field containing region info
-		CCCoreLib::ScalarField* sf = points->getScalarField(sfid);
+		auto sf = std::make_shared<ccScalarField>("Region");
+		int sfid = points->addScalarField(sf); //add scalar field containing region info
 		int number = 0;
 		for (ccPolyline* t : lines)
 		{
@@ -3266,7 +3285,7 @@ void ccCompass::distributeSelection()
 		}
 		else //a best match was not found...
 		{
-			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches %s.",obj->getName().toLatin1().data()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches '%s'.",obj->getName().toLatin1().data()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		}
 	}
 	

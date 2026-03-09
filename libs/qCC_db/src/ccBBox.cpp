@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccBBox.h"
+#include "../include/ccBBox.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccIncludeGL.h"
 
 void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 {
@@ -60,7 +60,7 @@ void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 	glFunc->glEnd();
 }
 
-const ccBBox ccBBox::operator*(const ccGLMatrix& mat)
+ccBBox ccBBox::operator*(const ccGLMatrix& mat)
 {
 	ccBBox rotatedBox;
 
@@ -79,7 +79,7 @@ const ccBBox ccBBox::operator*(const ccGLMatrix& mat)
 	return rotatedBox;
 }
 
-const ccBBox ccBBox::operator*(const ccGLMatrixd& mat)
+ccBBox ccBBox::operator*(const ccGLMatrixd& mat)
 {
 	ccBBox rotatedBox;
 

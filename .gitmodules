@@ -12,7 +12,8 @@
 	url = https://github.com/hvs-ait/mplane-plugin
 [submodule "plugins/core/Standard/qColorimetricSegmenter"]
 	path = plugins/core/Standard/qColorimetricSegmenter
-	url = https://gitlab.univ-nantes.fr/E164955Z/ptrans
+	url = https://github.com/CloudCompare/qColorimetricSegmenter.git
+	branch = master
 [submodule "plugins/core/Standard/qMasonry"]
 	path = plugins/core/Standard/qMasonry
 	url = https://github.com/CyberbuildLab/masonry-cc
@@ -46,3 +47,9 @@
 	path = plugins/core/IO/MeshIO
 	url = https://github.com/CloudCompare/MeshIO.git
 	branch = master
+[submodule "plugins/core/Standard/cc3DFin"]
+	path = plugins/core/Standard/cc3DFin
+	url = https://github.com/3DFin/cc3DFin.git
+[submodule "libs/CCAppCommon/devices/3dConnexion/extern/hidapi"]
+	path = libs/CCAppCommon/devices/3dConnexion/extern/hidapi
+	url = https://github.com/libusb/hidapi.git

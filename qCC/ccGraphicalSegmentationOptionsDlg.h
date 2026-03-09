@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
-#define CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
+// Ui
+#include <ui_graphicalSegmentationOptionsDlg.h>
 
 // Qt
 #include <QString>
-
-// GUI
-#include <ui_graphicalSegmentationOptionsDlg.h>
 
 class ccGraphicalSegmentationOptionsDlg : public QDialog
     , public Ui::GraphicalSegmentationOptionsDlg
@@ -31,9 +30,9 @@ class ccGraphicalSegmentationOptionsDlg : public QDialog
 
   public:
 	//! Default constructor
-	ccGraphicalSegmentationOptionsDlg(const QString windowTitle = QString(), QWidget* parent = nullptr);
+	ccGraphicalSegmentationOptionsDlg(QString windowTitle = QString(), QWidget* parent = nullptr);
 
-	void accept();
+	void accept() override;
 
 	//! Returns the QSettings key to store the segmentation tool options
 	static QString SegmentationToolOptionsKey()
@@ -51,5 +50,3 @@ class ccGraphicalSegmentationOptionsDlg : public QDialog
 		return "Segmented";
 	}
 };
-
-#endif // CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER

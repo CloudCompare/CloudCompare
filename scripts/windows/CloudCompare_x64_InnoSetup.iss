@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.14.beta (11-09-2025)"
+#define MyAppVersion "2.14.beta (06-29-2026)"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
@@ -48,10 +48,15 @@ SignTool=SignToolWindows
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Types]
+Name: "compact"; Description: "Compact installation";
+Name: "full"; Description: "Full installation";
+Name: "custom"; Description: "Custom installation"; Flags: iscustom;
+
 [Components]
-Name: main; Description: "Main program"
-Name: faro_ls; Description: "Faro plugin"
-Name: python_plugin; Description: "Python plugin"
+Name: main; Description: "Main program"; Types: compact full custom;
+Name: faro_ls; Description: "Faro plugin"; Types: full;
+Name: python_plugin; Description: "Python plugin"; Types: full;
 
 [Tasks]
 Name: desktopicon; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Components: main

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,15 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MATCH_SCALES_DIALOG_HEADER
-#define CC_MATCH_SCALES_DIALOG_HEADER
-
-#include <ui_matchScalesDlg.h>
-
 // Local
 #include "ccLibAlgorithms.h"
 
-//! Scales matching tool dialog
+// Ui
+#include <ui_matchScalesDlg.h>
+
 class ccMatchScalesDlg : public QDialog
     , public Ui::MatchScalesDialog
 {
@@ -44,5 +43,3 @@ class ccMatchScalesDlg : public QDialog
 	//! Returns the selected matching algorithm
 	ccLibAlgorithms::ScaleMatchingAlgorithm getSelectedAlgorithm() const;
 };
-
-#endif // CC_ENTITY_PICKER_DIALOG_HEADER

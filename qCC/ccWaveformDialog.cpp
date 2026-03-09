@@ -18,14 +18,17 @@
 #include "ccWaveformDialog.h"
 
 // Local
-#include "ccFileUtils.h"
-#include "ccPersistentSettings.h"
 #include "ccQCustomPlot.h"
 
-// common
+// Ui
+#include <ui_waveDlg.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 #include <ccPickingHub.h>
 
 // qCC_db
+#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -36,9 +39,6 @@
 // System
 #include <cassert>
 #include <cmath>
-
-// Gui
-#include "ui_waveDlg.h"
 
 ccWaveWidget::ccWaveWidget(QWidget* parent /*=nullptr*/)
     : QCustomPlot(parent)
@@ -52,7 +52,6 @@ ccWaveWidget::ccWaveWidget(QWidget* parent /*=nullptr*/)
     , m_drawVerticalIndicator(false)
     , m_verticalIndicatorPositionPercent(0.0)
     , m_peakBar(nullptr)
-    , m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -332,8 +331,6 @@ void ccWaveWidget::resizeEvent(QResizeEvent* event)
 
 void ccWaveWidget::mousePressEvent(QMouseEvent* event)
 {
-	m_lastMouseClick = event->pos();
-
 	mouseMoveEvent(event);
 }
 
@@ -344,10 +341,10 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent* event)
 		if (m_curve && !m_curveValues.empty())
 		{
 			QRect roi = /*m_curve->*/ rect();
-			if (roi.contains(event->pos(), false))
+			if (roi.contains(event->position().toPoint(), false))
 			{
 				m_drawVerticalIndicator            = true;
-				m_verticalIndicatorPositionPercent = static_cast<double>(event->x() - roi.x()) / roi.width();
+				m_verticalIndicatorPositionPercent = static_cast<double>(event->position().x() - roi.x()) / roi.width();
 				refresh();
 			}
 		}
@@ -365,22 +362,22 @@ ccWaveDialog::ccWaveDialog(ccPointCloud* cloud,
     , m_cloud(cloud)
     , m_widget(new ccWaveWidget(this))
     , m_pickingHub(pickingHub)
-    , m_gui(new Ui_WaveDialog)
+    , m_ui(std::make_unique<Ui::WaveDialog>())
     , m_waveMax(0)
-    , m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
+    , m_label(std::make_shared<cc2DLabel>())
     , m_display(cloud ? cloud->getDisplay() : nullptr)
 {
-	m_gui->setupUi(this);
+	m_ui->setupUi(this);
 
-	QHBoxLayout* hboxLayout = new QHBoxLayout(m_gui->waveFrame);
+	QHBoxLayout* hboxLayout = new QHBoxLayout(m_ui->waveFrame);
 	hboxLayout->addWidget(m_widget);
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
-	m_gui->waveFrame->setLayout(hboxLayout);
+	m_ui->waveFrame->setLayout(hboxLayout);
 
 	if (cloud && cloud->size())
 	{
-		m_gui->pointIndexSpinBox->setMaximum(static_cast<int>(cloud->size()));
-		m_gui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size() - 1));
+		m_ui->pointIndexSpinBox->setMaximum(static_cast<int>(cloud->size()));
+		m_ui->pointIndexSpinBox->setSuffix(QString(" / %1").arg(cloud->size() - 1));
 
 		// init m_waveMax
 		double           waveMin = 0;
@@ -395,13 +392,13 @@ ccWaveDialog::ccWaveDialog(ccPointCloud* cloud,
 		}
 	}
 
-	connect(m_gui->pointIndexSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
-	connect(m_gui->logScaleCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
-	connect(m_gui->fixedAmplitudeCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
-	connect(m_gui->pointPickingToolButton, &QToolButton::toggled, this, &ccWaveDialog::onPointPickingButtonToggled);
-	connect(m_gui->saveWaveToolButton, &QToolButton::clicked, this, &ccWaveDialog::onExportWaveAsCSV);
+	connect(m_ui->pointIndexSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccWaveDialog::onPointIndexChanged);
+	connect(m_ui->logScaleCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
+	connect(m_ui->fixedAmplitudeCheckBox, &QCheckBox::toggled, this, &ccWaveDialog::updateCurrentWaveform);
+	connect(m_ui->pointPickingToolButton, &QToolButton::toggled, this, &ccWaveDialog::onPointPickingButtonToggled);
+	connect(m_ui->saveWaveToolButton, &QToolButton::clicked, this, &ccWaveDialog::onExportWaveAsCSV);
 	connect(this, &QDialog::finished, [&]()
-	        { m_gui->pointPickingToolButton->setChecked(false); }); // auto disable picking mode when the dialog is closed
+	        { m_ui->pointPickingToolButton->setChecked(false); }); // auto disable picking mode when the dialog is closed
 
 	// force update
 	onPointIndexChanged(0);
@@ -409,7 +406,6 @@ ccWaveDialog::ccWaveDialog(ccPointCloud* cloud,
 
 ccWaveDialog::~ccWaveDialog()
 {
-	delete m_gui;
 	if (m_display)
 		m_display->redraw();
 }
@@ -427,7 +423,7 @@ void ccWaveDialog::onPointIndexChanged(int index)
 		return;
 	}
 
-	m_widget->init(m_cloud, static_cast<unsigned>(index), m_gui->logScaleCheckBox->isChecked(), m_gui->fixedAmplitudeCheckBox->isChecked() ? m_waveMax : 0.0);
+	m_widget->init(m_cloud, static_cast<unsigned>(index), m_ui->logScaleCheckBox->isChecked(), m_ui->fixedAmplitudeCheckBox->isChecked() ? m_waveMax : 0.0);
 
 	add2DLabel(m_cloud, index);
 
@@ -461,8 +457,6 @@ void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 	}
 
 	m_display->redraw();
-
-	return;
 }
 
 void ccWaveDialog::onItemPicked(const PickedItem& pi)
@@ -470,13 +464,13 @@ void ccWaveDialog::onItemPicked(const PickedItem& pi)
 	if (pi.entity == m_cloud)
 	{
 		assert(!pi.entityCenter);
-		m_gui->pointIndexSpinBox->setValue(static_cast<int>(pi.itemIndex));
+		m_ui->pointIndexSpinBox->setValue(static_cast<int>(pi.itemIndex));
 	}
 }
 
 void ccWaveDialog::updateCurrentWaveform()
 {
-	onPointIndexChanged(m_gui->pointIndexSpinBox->value());
+	onPointIndexChanged(m_ui->pointIndexSpinBox->value());
 }
 
 void ccWaveDialog::onPointPickingButtonToggled(bool state)
@@ -492,9 +486,9 @@ void ccWaveDialog::onPointPickingButtonToggled(bool state)
 		if (!m_pickingHub->addListener(this))
 		{
 			ccLog::Error("Another tool is currently using the point picking mechanism.\nYou'll have to close it first.");
-			m_gui->pointPickingToolButton->blockSignals(true);
-			m_gui->pointPickingToolButton->setChecked(false);
-			m_gui->pointPickingToolButton->blockSignals(false);
+			m_ui->pointPickingToolButton->blockSignals(true);
+			m_ui->pointPickingToolButton->setChecked(false);
+			m_ui->pointPickingToolButton->blockSignals(false);
 			return;
 		}
 	}
@@ -512,7 +506,7 @@ void ccWaveDialog::onExportWaveAsCSV()
 		return;
 	}
 
-	int pointIndex = m_gui->pointIndexSpinBox->value();
+	int pointIndex = m_ui->pointIndexSpinBox->value();
 	if (pointIndex >= static_cast<int>(m_cloud->waveforms().size()))
 	{
 		assert(false);

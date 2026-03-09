@@ -58,7 +58,7 @@ ccSetSFsAsVec3Dialog::ccSetSFsAsVec3Dialog(const ccPointCloud* cloud,
 
 		for (unsigned i = 0; i < cloud->getNumberOfScalarFields(); ++i)
 		{
-			CCCoreLib::ScalarField* sf = cloud->getScalarField(i);
+			CCCoreLib::ScalarField::Shared sf = cloud->getScalarField(i);
 			if (sf)
 			{
 				QString sfName = QString::fromStdString(sf->getName());
@@ -103,40 +103,31 @@ int ccSetSFsAsVec3Dialog::toComboBoxIndex(int index) const
 			// we probably have less SFs as before
 			return 0;
 		}
-		else
-		{
-			return index;
-		}
+		return index;
 	}
-	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_NO)
+	if (index == ccSetSFsAsVec3Dialog::SF_INDEX_NO)
 	{
 		return -1;
 	}
-	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ZERO)
+	if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ZERO)
 	{
 		return 0;
 	}
-	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ONE)
+	if (index == ccSetSFsAsVec3Dialog::SF_INDEX_ONE)
 	{
 		return 1;
 	}
-	else if (index == ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED)
+	if (index == ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED)
 	{
 		if (m_constFields == 3)
 		{
 			return 2;
 		}
-		else
-		{
-			// we don't have a 'Unchanged' field anymore, let's switch to Zero by default
-			return 0;
-		}
+		// we don't have a 'Unchanged' field anymore, let's switch to Zero by default
+		return 0;
 	}
-	else
-	{
-		ccLog::Warning("[ccSetSFsAsVec3Dialog] Invalid SF index " + QString::number(index));
-		return -1;
-	}
+	ccLog::Warning("[ccSetSFsAsVec3Dialog] Invalid SF index " + QString::number(index));
+	return -1;
 }
 
 int ccSetSFsAsVec3Dialog::fromComboBoxIndex(int index) const
@@ -145,23 +136,20 @@ int ccSetSFsAsVec3Dialog::fromComboBoxIndex(int index) const
 	{
 		return ccSetSFsAsVec3Dialog::SF_INDEX_ZERO;
 	}
-	else if (index == 1)
+	if (index == 1)
 	{
 		return ccSetSFsAsVec3Dialog::SF_INDEX_ONE;
 	}
-	else if (index == 2 && m_constFields == 3)
+	if (index == 2 && m_constFields == 3)
 	{
 		return ccSetSFsAsVec3Dialog::SF_INDEX_UNCHANGED;
 	}
-	else if (index >= m_constFields)
+	if (index >= m_constFields)
 	{
 		// valid SF index
 		return index - m_constFields;
 	}
-	else
-	{
-		return -1;
-	}
+	return -1;
 }
 
 void ccSetSFsAsVec3Dialog::setSFIndexes(int sf1Index, int sf2Index, int sf3Index)

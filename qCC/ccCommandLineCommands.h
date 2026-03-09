@@ -1,8 +1,25 @@
-#ifndef COMMAND_LINE_COMMANDS_HEADER
-#define COMMAND_LINE_COMMANDS_HEADER
+#pragma once
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
-#include "ccCommandLineInterface.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
+// Qt
 #include <QStringList>
 
 struct CommandChangeOutputFormat : public ccCommandLineInterface::Command
@@ -266,6 +283,13 @@ struct CommandMatchBBCenters : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandMatchScales : public ccCommandLineInterface::Command
+{
+	CommandMatchScales();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 {
 	CommandMatchBestFitPlane();
@@ -418,6 +442,13 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandStatFit : public ccCommandLineInterface::Command
+{
+	CommandStatFit();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandDelaunayTri : public ccCommandLineInterface::Command
 {
 	CommandDelaunayTri();
@@ -505,6 +536,13 @@ struct CommandICP : public ccCommandLineInterface::Command
 struct CommandChangePLYExportFormat : public ccCommandLineInterface::Command
 {
 	CommandChangePLYExportFormat();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
+struct CommandPLYNoSFPrefix : public ccCommandLineInterface::Command
+{
+	CommandPLYNoSFPrefix();
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
@@ -643,5 +681,3 @@ struct CommandComputeScatteringAngles : public ccCommandLineInterface::Command
 
 	bool process(ccCommandLineInterface& cmd) override;
 };
-
-#endif // COMMAND_LINE_COMMANDS_HEADER

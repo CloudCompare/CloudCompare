@@ -102,7 +102,7 @@ bool PCVCommand::Process(	const ccHObject::Container& candidates,
 		}
 		else
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+			auto sf = cloud->getCCScalarField(sfIdx);
 			if (sf)
 			{
 				sf->computeMinAndMax();
@@ -203,7 +203,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Failed to generate the set of rays"));
 	}
 
-	QScopedPointer<ccProgressDialog> pcvProgressCb;
+	std::unique_ptr<ccProgressDialog> pcvProgressCb;
 
 	if (!cmd.silentMode())
 	{
@@ -216,7 +216,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	{
 		candidates.reserve(cmd.clouds().size() + cmd.meshes().size());
 	}
-	catch (const std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return cmd.error(QObject::tr("Not enough memory"));
 	}
@@ -226,7 +226,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	for (CLMeshDesc& desc : cmd.meshes())
 		candidates.push_back(desc.mesh);
 
-	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.data(), nullptr))
+	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.get(), nullptr))
 	{
 		return cmd.error(QObject::tr("Process failed"));
 	}

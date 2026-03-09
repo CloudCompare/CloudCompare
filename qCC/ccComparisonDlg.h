@@ -15,8 +15,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COMPARISON_DIALOG_HEADER
-#define CC_COMPARISON_DIALOG_HEADER
+// Ui
+#include <ui_comparisonDlg.h>
 
 // qCC_db
 #include <ccOctree.h>
@@ -24,7 +24,6 @@
 // Qt
 #include <QDialog>
 #include <QString>
-#include <ui_comparisonDlg.h>
 
 class ccHObject;
 class ccPointCloud;
@@ -53,7 +52,7 @@ class ccComparisonDlg : public QDialog
 	                bool               noDisplay = false);
 
 	//! Default destructor
-	~ccComparisonDlg();
+	~ccComparisonDlg() override;
 
 	//! Should be called once after the dialog is created
 	inline bool initDialog()
@@ -89,7 +88,7 @@ class ccComparisonDlg : public QDialog
 	bool computeApproxDistances();
 	int  getBestOctreeLevel();
 	int  determineBestOctreeLevel(double);
-	void updateDisplay(bool showSF, bool hideRef);
+	void updateDisplay(bool showSF, bool showRef);
 	void releaseOctrees();
 
 	//! Compared entity
@@ -131,5 +130,3 @@ class ccComparisonDlg : public QDialog
 	//! Best octree level (or 0 if none has been guessed already)
 	int m_bestOctreeLevel;
 };
-
-#endif

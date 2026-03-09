@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SF_FROM_COLOR_DLG_HEADER
-#define CC_SF_FROM_COLOR_DLG_HEADER
-
+// Ui
 #include <ui_scalarFieldFromColorDlg.h>
 
 class ccPointCloud;
@@ -47,5 +47,3 @@ class ccScalarFieldFromColorDlg : public QDialog
 	//! Returns if to export Composite channel as SF
 	bool getCompositeStatus() const;
 };
-
-#endif // CC_SF_FROM_COLOR_DLG_HEADER

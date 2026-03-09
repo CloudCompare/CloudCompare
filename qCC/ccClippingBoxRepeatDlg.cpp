@@ -20,8 +20,8 @@
 // Qt
 #include <QPushButton>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(bool singleSliceMode /*=false*/, QWidget* parent /*=nullptr*/)
     : QDialog(parent)

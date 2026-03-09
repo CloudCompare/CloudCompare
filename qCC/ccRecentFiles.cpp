@@ -17,8 +17,13 @@
 
 #include "ccRecentFiles.h"
 
+// Local
 #include "mainwindow.h"
 
+// qCC_db
+#include <ccLog.h>
+
+// Qt
 #include <QAction>
 #include <QDir>
 #include <QFile>
@@ -104,6 +109,13 @@ void ccRecentFiles::openFileFromAction()
 
 	if (!QFile::exists(fileName))
 	{
+		ccLog::Warning(tr("File '%1' not found, it has been removed from the recent files").arg(fileName));
+
+		QStringList list = m_settings.value(s_settingKey).toStringList();
+		list.removeAll(fileName);
+		m_settings.setValue(s_settingKey, list);
+
+		updateMenu();
 		return;
 	}
 
@@ -114,24 +126,9 @@ void ccRecentFiles::openFileFromAction()
 
 QStringList ccRecentFiles::listRecent()
 {
-	QStringList list = m_settings.value(s_settingKey).toStringList();
-
-	QStringList::iterator iter = list.begin();
-
-	while (iter != list.end())
-	{
-		const QString filePath = *iter;
-
-		if (!QFile::exists(filePath))
-		{
-			iter = list.erase(iter);
-			continue;
-		}
-
-		++iter;
-	}
-
-	return list;
+	// the files are not checked here, as checking a path on an unreachable
+	// network drive can take several seconds (see openFileFromAction)
+	return m_settings.value(s_settingKey).toStringList();
 }
 
 QString ccRecentFiles::contractFilePath(const QString& filePath)

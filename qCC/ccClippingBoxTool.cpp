@@ -22,7 +22,6 @@
 #include "ccClippingBoxRepeatDlg.h"
 #include "ccContourLinesGenerator.h"
 #include "ccCropTool.h"
-#include "ccGLWindowInterface.h"
 #include "ccReservedIDs.h"
 #include "db_tree/ccDBRoot.h"
 #include "mainwindow.h"
@@ -32,6 +31,9 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccRasterGrid.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QMessageBox>
@@ -103,8 +105,7 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 
 ccClippingBoxTool::~ccClippingBoxTool()
 {
-	if (m_clipBox)
-		delete m_clipBox;
+	delete m_clipBox;
 	m_clipBox = nullptr;
 }
 
@@ -399,7 +400,7 @@ void ccClippingBoxTool::removeLastContour()
 	removeLastContourToolButton->setEnabled(false);
 }
 
-ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
+ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent, bool extractOustide)
 {
 	assert(clipBox);
 	if (!obj)
@@ -425,7 +426,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 			}
 			return nullptr;
 		}
-		clipBox->flagPointsInside(inputCloud, &selectionTable);
+		clipBox->flagPoints(inputCloud, &selectionTable, false, /*inside=*/!extractOustide);
 
 		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, nullptr, true);
 
@@ -448,7 +449,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 		return sliceCloud;
 	}
-	else if (obj->isKindOf(CC_TYPES::MESH))
+	if (obj->isKindOf(CC_TYPES::MESH))
 	{
 		const ccGLMatrix* _transformation = nullptr;
 		ccGLMatrix        transformation;
@@ -459,7 +460,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 
 		const ccBBox& cropBox = clipBox->getBox();
-		ccHObject*    mesh    = ccCropTool::Crop(obj, cropBox, true, _transformation);
+		ccHObject*    mesh    = ccCropTool::Crop(obj, cropBox, /*inside=*/!extractOustide, _transformation);
 		if (!mesh)
 		{
 			if (!silent)
@@ -486,7 +487,8 @@ void ccClippingBoxTool::exportSlice()
 			continue;
 		}
 
-		ccHObject* result = GetSlice(obj, m_clipBox, false);
+		bool       extractOustide = invertSelectionButton->isChecked();
+		ccHObject* result         = GetSlice(obj, m_clipBox, false, extractOustide);
 
 		if (result)
 		{
@@ -576,6 +578,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
     bool                projectOnBestFitPlane /*=false*/,
     bool                visualDebugMode /*=false*/,
     bool                generateRandomColors /*=false*/,
+    bool                extratOustide /*=false*/,
     ccProgressDialog*   progressDialog /*=nullptr*/)
 {
 	// check input
@@ -628,15 +631,15 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 		{
 			// single slice: easy
 			outputSlices.reserve(clouds.size());
-			for (size_t ci = 0; ci != clouds.size(); ++ci)
+			for (auto* cloud : clouds)
 			{
-				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false);
+				ccHObject* slice = GetSlice(cloud, &clipBox, false, extratOustide);
 				if (slice)
 				{
-					slice->setName(clouds[ci]->getName() + QString(".slice"));
+					slice->setName(cloud->getName() + QString(".slice"));
 
 					// set meta-data
-					slice->setMetaData(s_originEntityUUID, clouds[ci]->getUniqueID());
+					slice->setMetaData(s_originEntityUUID, cloud->getUniqueID());
 					slice->setMetaData(s_sliceID, "slice");
 					if (slice->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
@@ -726,7 +729,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 
 						if (gap == 0 || ((P.x - static_cast<PointCoordinateType>(xi)) * cellSizePlusGap.x <= cellSize.x && (P.y - static_cast<PointCoordinateType>(yi)) * cellSizePlusGap.y <= cellSize.y && (P.z - static_cast<PointCoordinateType>(zi)) * cellSizePlusGap.z <= cellSize.z))
 						{
-							int cloudIndex = ((zi - indexMins[2]) * static_cast<int>(gridDim[1]) + (yi - indexMins[1])) * static_cast<int>(gridDim[0]) + (xi - indexMins[0]);
+							int cloudIndex = ((zi - indexMins[2]) * gridDim[1] + (yi - indexMins[1])) * gridDim[0] + (xi - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) * clouds.size() + ci < refClouds.size());
 
 							CCCoreLib::ReferenceCloud*& destCloud = refClouds[cloudIndex * clouds.size() + ci];
@@ -770,7 +773,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 					{
 						for (int k = indexMins[2]; k <= indexMaxs[2]; ++k)
 						{
-							int cloudIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
+							int cloudIndex = ((k - indexMins[2]) * gridDim[1] + (j - indexMins[1])) * gridDim[0] + (i - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) * clouds.size() < refClouds.size());
 
 							for (size_t ci = 0; ci != clouds.size(); ++ci)
@@ -845,9 +848,8 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 
 				// release memory
 				{
-					for (size_t i = 0; i < refClouds.size(); ++i)
-						if (refClouds[i])
-							delete refClouds[i];
+					for (auto* cloud : refClouds)
+						delete cloud;
 					refClouds.clear();
 				}
 
@@ -899,7 +901,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 					{
 						for (int k = indexMins[2]; k <= indexMaxs[2]; ++k)
 						{
-							int sliceIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
+							int sliceIndex = ((k - indexMins[2]) * gridDim[1] + (j - indexMins[1])) * gridDim[0] + (i - indexMins[0]);
 
 							CCVector3 C = gridOrigin + CCVector3(i * cellSizePlusGap.x, j * cellSizePlusGap.y, k * cellSizePlusGap.z);
 							ccBBox    cropBox(C, C + cellSize, true);
@@ -1250,7 +1252,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 			}
 			return false;
 		}
-		else if (warningsIssued)
+		if (warningsIssued)
 		{
 			ccLog::Warning(tr("[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)"));
 		}
@@ -1418,6 +1420,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	s_defaultGap   = repeatDlg.gapDoubleSpinBox->value();
 	s_groupByIndex = repeatDlg.groupByTypeComboBox->currentIndex();
 
+	bool extractOustide = invertSelectionButton->isChecked();
+
 	ccEnvelopeExtractor::EnvelopeType envelopeType = ccEnvelopeExtractor::EnvelopeType::FULL;
 	switch (s_envelopeTypeIndex)
 	{
@@ -1467,13 +1471,14 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	                              s_envProjectPointsOnBestFitPlane,
 	                              s_envelopeDebugMode,
 	                              s_generateRandomColors,
+	                              extractOustide,
 	                              &pDlg))
 	{
 		// process failed (error message has already been issued)
 		return;
 	}
 
-	ccLog::Print("[ccClippingBoxTool] Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
+	ccLog::Printf("[ccClippingBoxTool] Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
 
 	// possible outputs
 	ccHObject*                 sliceGroup    = nullptr;

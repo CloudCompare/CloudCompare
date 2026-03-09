@@ -64,7 +64,7 @@ ccComputeOctreeDlg::ComputationMode ccComputeOctreeDlg::getMode() const
 	// defaultRadioButton
 	if (cellSizeRadioButton->isChecked())
 		return MIN_CELL_SIZE;
-	else if (customBBRadioButton->isChecked())
+	if (customBBRadioButton->isChecked())
 		return CUSTOM_BBOX;
 
 	assert(defaultRadioButton->isChecked());

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_POINT_PICKING_LIST_DIALOG_HEADER
-#define CC_POINT_PICKING_LIST_DIALOG_HEADER
-
-// GUI
-#include <ui_pointListPickingDlg.h>
-
 // Local
 #include "ccPointPickingGenericInterface.h"
+
+// Ui
+#include <ui_pointListPickingDlg.h>
 
 // qCC_db
 #include <ccHObject.h>
@@ -58,22 +57,22 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	//! Exports list to an 'xyz' ASCII file
 	inline void exportToASCII_xyz()
 	{
-		return exportToASCII(PLP_ASCII_EXPORT_XYZ);
+		exportToASCII(PLP_ASCII_EXPORT_XYZ);
 	}
 	//! Exports list to an 'ixyz' ASCII file
 	inline void exportToASCII_ixyz()
 	{
-		return exportToASCII(PLP_ASCII_EXPORT_IXYZ);
+		exportToASCII(PLP_ASCII_EXPORT_IXYZ);
 	}
 	//! Exports list to an 'gxyz' ASCII file
 	inline void exportToASCII_gxyz()
 	{
-		return exportToASCII(PLP_ASCII_EXPORT_GXYZ);
+		exportToASCII(PLP_ASCII_EXPORT_GXYZ);
 	}
 	//! Exports list to an 'lxyz' ASCII file
 	inline void exportToASCII_lxyz()
 	{
-		return exportToASCII(PLP_ASCII_EXPORT_LXYZ);
+		exportToASCII(PLP_ASCII_EXPORT_LXYZ);
 	}
 
 	//! Redraw window when marker size changes
@@ -116,5 +115,3 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	//! New picked points that the user has selected (for proper "cancel" mechanism)
 	ccHObject::Container m_toBeAdded;
 };
-
-#endif

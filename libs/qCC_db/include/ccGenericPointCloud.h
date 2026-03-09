@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GENERIC_POINT_CLOUD_HEADER
-#define CC_GENERIC_POINT_CLOUD_HEADER
-
 // Local
-#include "ccAdvancedTypes.h"
+#include "ccBasicTypes.h"
 #include "ccOctree.h"
 #include "ccShiftedObject.h"
 
@@ -278,7 +277,7 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
 	//! Imports the parameters from another cloud
 	/** Only the specific parameters are imported.
 	 **/
-	void importParametersFrom(const ccGenericPointCloud* cloud);
+	void importParametersFrom(const ccGenericPointCloud& cloud);
 
 	//! Point picking (brute force or octree-driven)
 	/** \warning the octree-driven method only works if pickWidth == pickHeight
@@ -294,7 +293,7 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
   protected:
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	//! Per-point visibility table
@@ -306,5 +305,3 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;
 };
-
-#endif // CC_GENERIC_POINT_CLOUD_HEADER

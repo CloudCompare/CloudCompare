@@ -246,7 +246,7 @@ PrimitiveShape *SpherePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new SpherePrimitiveShape(fit);
+		return new SpherePrimitiveShape(fit, m_minRadius, m_maxRadius);
 	}
 	score->first = 0;
 	return NULL;

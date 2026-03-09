@@ -17,18 +17,20 @@
 
 #include "ccGraphicalTransformationTool.h"
 
+// Local
+#include "ccDBRoot.h"
 #include "mainwindow.h"
-
-#include <ccGLUtils.h>
-#include <ccGLWindowInterface.h>
 
 // qCC_db
 #include <ccCoordinateSystem.h>
-#include <ccDBRoot.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>
+
+// qCC_glWindow
+#include <ccGLUtils.h>
+#include <ccGLWindowInterface.h>
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
     : ccOverlayDialog(parent)
@@ -183,20 +185,20 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 		}
 		if (!polylines.empty())
 		{
-			for (size_t i = 0; i < polylines.size(); i++)
+			for (auto* polyline : polylines)
 			{
-				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
+				ccPolyline* poly = static_cast<ccPolyline*>(polyline);
 				if (poly->size() == 2) // only single segment polylines allowed
 				{
-					m_advancedModeObjectList.push_back(polylines[i]);
+					m_advancedModeObjectList.push_back(polyline);
 				}
 			}
 		}
 		if (!coordinateSystems.empty())
 		{
-			for (size_t i = 0; i < coordinateSystems.size(); i++)
+			for (auto* coordinateSystem : coordinateSystems)
 			{
-				m_advancedModeObjectList.push_back(coordinateSystems[i]);
+				m_advancedModeObjectList.push_back(coordinateSystem);
 			}
 		}
 		if (!m_advancedModeObjectList.empty())
@@ -333,7 +335,7 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(false);
 		return true;
 	}
-	else if (translateRef->isA(CC_TYPES::PLANE))
+	if (translateRef->isA(CC_TYPES::PLANE))
 	{
 		ccPlane* plane            = static_cast<ccPlane*>(translateRef);
 		m_advTranslationTransform = ccGLMatrixd(plane->getTransformation().data());
@@ -341,7 +343,7 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(true);
 		return true;
 	}
-	else if (translateRef->isA(CC_TYPES::COORDINATESYSTEM))
+	if (translateRef->isA(CC_TYPES::COORDINATESYSTEM))
 	{
 		ccCoordinateSystem* cs    = static_cast<ccCoordinateSystem*>(translateRef);
 		m_advTranslationTransform = ccGLMatrixd(cs->getTransformation().data());
@@ -349,13 +351,10 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(true);
 		return true;
 	}
-	else
-	{
-		advTranslateComboBox->setCurrentIndex(0);
-		TxCheckBox->setEnabled(true);
-		TyCheckBox->setEnabled(true);
-		return false;
-	}
+	advTranslateComboBox->setCurrentIndex(0);
+	TxCheckBox->setEnabled(true);
+	TyCheckBox->setEnabled(true);
+	return false;
 }
 
 bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rotComboBoxItems selectedAxis)
@@ -498,9 +497,9 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 		return;
 	}
 	int id = advTranslateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
+	for (auto* entity : m_advancedModeObjectList)
 	{
-		if (id == m_advancedModeObjectList[i]->getUniqueID())
+		if (id == entity->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -509,7 +508,7 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advTranslateRef);
 				}
-				m_advTranslateRef        = m_advancedModeObjectList[i];
+				m_advTranslateRef        = entity;
 				m_advTranslateRefIsChild = entityInTransformList(m_advTranslateRef);
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
@@ -581,9 +580,9 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 		return;
 	}
 	int id = advRotateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
+	for (auto* entity : m_advancedModeObjectList)
 	{
-		if (id == m_advancedModeObjectList[i]->getUniqueID())
+		if (id == entity->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -592,7 +591,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advRotateRef);
 				}
-				m_advRotateRef = m_advancedModeObjectList[i];
+				m_advRotateRef = entity;
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
 					mainWindow->db()->selectEntity(m_advRotateRef, true);
@@ -679,9 +678,11 @@ void ccGraphicalTransformationTool::clearAdvModeEntities()
 
 bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 {
-	assert(entity);
 	if (!entity)
+	{
+		assert(false);
 		return false;
+	}
 
 	// we don't handle entities associated to another context
 	if (entity->getDisplay() != m_associatedWin)
@@ -690,15 +691,8 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		return false;
 	}
 
-	// we can't transform locked entities
-	if (entity->isLocked())
-	{
-		ccLog::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
-		return false;
-	}
-
 	// we can't transform child meshes
-	if (entity->isA(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isA(CC_TYPES::MESH))
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
 		return false;
@@ -716,7 +710,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 			return false;
 		}
 		// if the inverse is true, then we get rid of the current element!
-		else if (entity->isAncestorOf(previous))
+		if (entity->isAncestorOf(previous))
 		{
 			m_toTransform.detachChild(previous);
 			--n;

@@ -15,12 +15,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifdef CC_CORE_LIB_USES_TBB
-#include <oneapi/tbb/parallel_for.h>
-using namespace oneapi;
-#endif
+#include "../include/ccGenericPointCloud.h"
 
-#include "ccGenericPointCloud.h"
+// Local
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccOctreeProxy.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <DistanceComputationTools.h>
@@ -28,13 +30,10 @@ using namespace oneapi;
 #include <Neighbourhood.h>
 #include <ReferenceCloud.h>
 
-// Local
-#include "ccGenericGLDisplay.h"
-#include "ccOctreeProxy.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
-#include "ccSensor.h"
+#ifdef CC_CORE_LIB_USES_TBB
+#include <oneapi/tbb/parallel_for.h>
+using namespace oneapi;
+#endif
 
 #if defined(_OPENMP)
 // OpenMP
@@ -120,7 +119,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isA(CC_TYPES::POINT_OCTREE))
 		{
@@ -138,10 +137,8 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	{
 		return proxy->getOctree();
 	}
-	else
-	{
-		return {};
-	}
+
+	return {};
 }
 
 void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild /*=true*/)
@@ -228,19 +225,19 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 20)
+	if (context.dataVersion < 20)
 	{
 		return CorruptError();
 	}
 
-	if (dataVersion < 33)
+	if (context.dataVersion < 33)
 	{
 		//'coordinates shift' (dataVersion>=20)
 		if (in.read((char*)m_globalShift.u, sizeof(double) * 3) < 0)
@@ -268,7 +265,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 		}
 		if (hasVisibilityArray)
 		{
-			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion, "visibility array"))
+			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, context.dataVersion, "visibility array"))
 			{
 				unallocateVisibilityArray();
 				return false;
@@ -278,7 +275,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 
 	//'point size' (dataVersion>=24)
 	m_pointSize = 0;
-	if (dataVersion >= 24)
+	if (context.dataVersion >= 24)
 	{
 		if (in.read((char*)&m_pointSize, 1) < 0)
 		{
@@ -294,22 +291,16 @@ short ccGenericPointCloud::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(33), ccHObject::minimumFileVersion_MeOnly());
 }
 
-void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
+void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud& cloud)
 {
-	if (!cloud)
-	{
-		assert(false);
-		return;
-	}
-
 	// original center
-	copyGlobalShiftAndScale(*cloud);
+	copyGlobalShiftAndScale(cloud);
 	// keep the transformation history!
-	setGLTransformationHistory(cloud->getGLTransformationHistory());
+	setGLTransformationHistory(cloud.getGLTransformationHistory());
 	// custom point size
-	setPointSize(cloud->getPointSize());
+	setPointSize(cloud.getPointSize());
 	// meta-data
-	setMetaData(cloud->metaData());
+	setMetaData(cloud.metaData());
 }
 
 #ifdef QT_DEBUG
@@ -376,16 +367,12 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 					nearestSquareDist = point.squareDistd;
 					return true;
 				}
-				else
-				{
-					// nothing found
-					return false;
-				}
+
+				// nothing found
+				return false;
 			}
-			else
-			{
-				ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
-			}
+
+			ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
 		}
 	}
 
@@ -409,14 +396,14 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? &getTheVisibilityArray() : nullptr;
 
 		// scalar field with hidden values (if any)
-		ccScalarField* activeSF = nullptr;
+		ccScalarField::Shared activeSF;
 		if (sfShown()
 		    && isA(CC_TYPES::POINT_CLOUD)
 		    && !visTable // if the visibility table is instantiated, we always display ALL points
 		)
 		{
-			ccPointCloud*  pc = static_cast<ccPointCloud*>(this);
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
+			auto          sf = pc->getCurrentDisplayedScalarField();
 			if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 			{
 				// we must take this SF display parameters into account as some points may be hidden!

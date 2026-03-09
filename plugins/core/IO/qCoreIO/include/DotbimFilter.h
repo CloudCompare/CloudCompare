@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -11,39 +13,20 @@
 // #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 // #  GNU General Public License for more details.                          #
 // #                                                                        #
-// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #          COPYRIGHT: CloudCompare project                               #
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SINGLETON_HEADER
-#define CC_SINGLETON_HEADER
+#include "FileIOFilter.h"
 
-//! Generic singleton encapsulation structure
-template <class T>
-struct ccSingleton
+//! dotBIM file I/O filter (import only)
+/** See https://dotbim.net/
+ **/
+class DotbimFilter : public FileIOFilter
 {
-	//! Default constructor
-	ccSingleton()
-	    : instance(nullptr)
-	{
-	}
-	//! Destructor
-	~ccSingleton()
-	{
-		release();
-	}
-	//! Releases the current instance
-	inline void release()
-	{
-		if (instance)
-		{
-			delete instance;
-			instance = nullptr;
-		}
-	}
+  public:
+	DotbimFilter();
 
-	//! Current instance
-	T* instance;
+	// inherited from FileIOFilter
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
 };
-
-#endif // CC_SINGLETON_HEADER

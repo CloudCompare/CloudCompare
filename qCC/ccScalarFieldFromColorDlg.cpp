@@ -17,15 +17,14 @@
 
 #include "ccScalarFieldFromColorDlg.h"
 
+// qCC_db
+#include <ccPointCloud.h>
+
 // Qt
 #include <QPushButton>
 
-// qCC_db
-#include <assert.h>
-#include <ccPointCloud.h>
-#ifdef _MSC_VER
-#include <windows.h>
-#endif
+// System
+#include <cassert>
 
 ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

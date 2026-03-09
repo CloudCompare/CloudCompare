@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_MESH_GROUP_HEADER
-#define CC_MESH_GROUP_HEADER
 
 // Local
 #include "ccGenericMesh.h"
@@ -43,7 +42,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	// inherited methods (ccGenericMesh)
 	ccGenericPointCloud* getAssociatedCloud() const override
 	{
-		return 0;
+		return nullptr;
 	}
 	void refreshBB() override
 	{
@@ -84,9 +83,9 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	const ccMaterialSet* getMaterialSet() const override
+	ccMaterialSet::Shared getMaterialSet() const override
 	{
-		return 0;
+		return nullptr;
 	}
 	int getTriangleMtlIndex(unsigned triangleIndex) const override
 	{
@@ -96,11 +95,11 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	TextureCoordsContainer* getTexCoordinatesTable() const override
+	TextureCoordsContainer::Shared getTexCoordinatesTable() const override
 	{
-		return 0;
+		return nullptr;
 	}
-	void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override
+	void getTriangleTexCoordinates(unsigned triIndex, const TexCoords2D*& tx1, const TexCoords2D*& tx2, const TexCoords2D*& tx3) const override
 	{
 		tx1 = tx2 = tx3 = nullptr;
 	}
@@ -120,13 +119,18 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		i1 = i2 = i3 = -1;
 	}
-	bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override
+	void getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const override
 	{
-		return false;
+		Na = Nb = Nc = 0;
 	}
-	NormsIndexesTableType* getTriNormsTable() const override
+	void getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const override
 	{
-		return 0;
+		static CCVector3 zeroVector(0, 0, 0);
+		Na = Nb = Nc = &zeroVector;
+	}
+	NormsIndexesTableType::Shared getTriNormsTable() const override
+	{
+		return nullptr;
 	}
 	unsigned capacity() const override
 	{
@@ -157,7 +161,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 		return true;
 	}
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	// inherited methods (GenericIndexedMesh)
@@ -165,27 +169,24 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return 0;
 	}
-	void forEach(genericTriangleAction action) override
-	{
-	}
 	void placeIteratorAtBeginning() override
 	{
 	}
 	CCCoreLib::GenericTriangle* _getNextTriangle() override
 	{
-		return 0;
+		return nullptr;
 	}
 	CCCoreLib::GenericTriangle* _getTriangle(unsigned index) override
 	{
-		return 0;
+		return nullptr;
 	}
 	CCCoreLib::VerticesIndexes* getNextTriangleVertIndexes() override
 	{
-		return 0;
+		return nullptr;
 	}
 	CCCoreLib::VerticesIndexes* getTriangleVertIndexes(unsigned triangleIndex) override
 	{
-		return 0;
+		return nullptr;
 	}
 	void getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const override
 	{
@@ -198,5 +199,3 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	// inherited from ccHObject
 	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 };
-
-#endif // CC_MESH_GROUP_HEADER

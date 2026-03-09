@@ -15,10 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccFrameBufferObject.h"
+#include "../include/ccFrameBufferObject.h"
 
-// system
-#include <assert.h>
+// Qt
+#include <QDebug>
+
+// System
+#include <cassert>
 
 ccFrameBufferObject::ccFrameBufferObject()
     : m_isValid(false)
@@ -65,7 +68,7 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 			return false;
 		}
 
-		const auto context = QOpenGLContext::currentContext();
+		const auto* context = QOpenGLContext::currentContext();
 		// We test if FBOs are supported.
 		// It's unlikely that the context is null since previous GL functions initialization
 		// does not fail but we check it anyway
@@ -100,10 +103,7 @@ bool ccFrameBufferObject::start()
 		m_glExtFunc.glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_fboId);
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void ccFrameBufferObject::stop()
@@ -166,11 +166,8 @@ bool ccFrameBufferObject::initColor(GLint  internalformat /*=GL_RGBA*/,
 	{
 		return true;
 	}
-	else
-	{
-		m_glFunc.glDeleteTextures(1, &texID);
-		return false;
-	}
+	m_glFunc.glDeleteTextures(1, &texID);
+	return false;
 }
 
 bool ccFrameBufferObject::attachColor(GLuint texID,
@@ -258,11 +255,8 @@ bool ccFrameBufferObject::initDepth(GLint  wrapParam /*=GL_CLAMP_TO_BORDER*/,
 	{
 		return true;
 	}
-	else
-	{
-		m_glFunc.glDeleteTextures(1, &texID);
-		return false;
-	}
+	m_glFunc.glDeleteTextures(1, &texID);
+	return false;
 }
 
 bool ccFrameBufferObject::attachDepth(GLuint texID,

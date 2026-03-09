@@ -244,7 +244,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 	else
 	{
-		ccLog::Warning("[PovFilter::loadFile] Unhandled rotation order description! (%s)", sensorType);
+		ccLog::Warningf("[PovFilter::loadFile] Unhandled rotation order description! (%s)", sensorType);
 		fclose(fp);
 		return CC_FERR_READING;
 	}
@@ -260,7 +260,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 		return CC_FERR_READING;
 	}
 
-	ccLog::Print("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s]", sensorType, base, unitsType);
+	ccLog::Printf("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s]", sensorType, base, unitsType);
 
 	// on extrait le chemin relatif
 	QString path = QFileInfo(filename).absolutePath();
@@ -386,7 +386,7 @@ CC_FILE_ERROR PovFilter::loadFile(const QString& filename, ccHObject& container,
 				}
 				else
 				{
-					ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!", subFileName);
+					ccLog::Printf("[PovFilter::loadFile] File '%s' not found or empty!", subFileName);
 				}
 			}
 		}

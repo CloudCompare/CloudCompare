@@ -36,6 +36,14 @@ constexpr char BITMAP_EPSILON_ABSOLUTE[] = "BITMAP_EPSILON_ABSOLUTE";
 constexpr char SUPPORT_POINTS[] = "SUPPORT_POINTS";
 constexpr char MAX_NORMAL_DEV[] = "MAX_NORMAL_DEV";
 constexpr char PROBABILITY[] = "PROBABILITY";
+constexpr char MIN_SPHERE_RADIUS[] = "MIN_SPHERE_RADIUS";
+constexpr char MAX_SPHERE_RADIUS[] = "MAX_SPHERE_RADIUS";
+constexpr char MIN_CYLINDER_RADIUS[] = "MIN_CYLINDER_RADIUS";
+constexpr char MAX_CYLINDER_RADIUS[] = "MAX_CYLINDER_RADIUS";
+constexpr char MIN_TORUS_MINOR_RADIUS[] = "MIN_TORUS_MINOR_RADIUS";
+constexpr char MAX_TORUS_MINOR_RADIUS[] = "MAX_TORUS_MINOR_RADIUS";
+constexpr char MIN_TORUS_MAJOR_RADIUS[] = "MIN_TORUS_MAJOR_RADIUS";
+constexpr char MAX_TORUS_MAJOR_RADIUS[] = "MAX_TORUS_MAJOR_RADIUS";
 constexpr char ENABLE_PRIMITIVE[] = "ENABLE_PRIMITIVE";
 constexpr char OUT_CLOUD_DIR[] = "OUT_CLOUD_DIR";
 constexpr char OUT_MESH_DIR[] = "OUT_MESH_DIR";
@@ -68,6 +76,8 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 		QStringList paramNames = QStringList() << EPSILON_ABSOLUTE << EPSILON_PERCENTAGE_OF_SCALE <<
 			BITMAP_EPSILON_PERCENTAGE_OF_SCALE << BITMAP_EPSILON_ABSOLUTE <<
 			SUPPORT_POINTS << MAX_NORMAL_DEV << PROBABILITY << ENABLE_PRIMITIVE <<
+			MIN_SPHERE_RADIUS << MAX_SPHERE_RADIUS << MIN_CYLINDER_RADIUS << MAX_CYLINDER_RADIUS <<
+			MIN_TORUS_MINOR_RADIUS << MAX_TORUS_MINOR_RADIUS << MIN_TORUS_MAJOR_RADIUS << MAX_TORUS_MAJOR_RADIUS <<
 			OUT_CLOUD_DIR << OUT_MESH_DIR << OUT_GROUP_DIR << OUT_PAIR_DIR << OUT_RANDOM_COLOR << OUTPUT_INDIVIDUAL_PRIMITIVES <<
 			OUTPUT_INDIVIDUAL_SUBCLOUDS << OUTPUT_GROUPED << OUTPUT_INDIVIDUAL_PAIRED_CLOUD_PRIMITIVE;
 		QStringList primitiveNames = QStringList() << PRIM_PLANE << PRIM_SPHERE << PRIM_CYLINDER << PRIM_CONE << PRIM_TORUS;
@@ -205,6 +215,126 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 					cmd.print(QObject::tr("\tProbability : %1").arg(val));
 					params.probability = val;
 				}
+				else if (param == MIN_SPHERE_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MIN_SPHERE_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Min Sphere Radius!");
+					}
+					cmd.print(QObject::tr("\tMin Sphere Radius : %1").arg(val));
+					params.minSphereRadius = val;
+				}
+				else if (param == MAX_SPHERE_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MAX_SPHERE_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Max Sphere Radius!");
+					}
+					cmd.print(QObject::tr("\tMax Sphere Radius : %1").arg(val));
+					params.maxSphereRadius = val;
+				}
+				else if (param == MIN_CYLINDER_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MIN_CYLINDER_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Min Cylinder Radius!");
+					}
+					cmd.print(QObject::tr("\tMin Cylinder Radius : %1").arg(val));
+					params.minCylinderRadius = val;
+				}
+				else if (param == MAX_CYLINDER_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MAX_CYLINDER_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Max Cylinder Radius!");
+					}
+					cmd.print(QObject::tr("\tMax Cylinder Radius : %1").arg(val));
+					params.maxCylinderRadius = val;
+				}
+				else if (param == MIN_TORUS_MINOR_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MIN_TORUS_MINOR_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Min Torus Minor Radius!");
+					}
+					cmd.print(QObject::tr("\tMin Torus Minor Radius : %1").arg(val));
+					params.minTorusMinorRadius = val;
+				}
+				else if (param == MAX_TORUS_MINOR_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MAX_TORUS_MINOR_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Max Torus Minor Radius!");
+					}
+					cmd.print(QObject::tr("\tMax Torus Minor Radius : %1").arg(val));
+					params.maxTorusMinorRadius = val;
+				}
+				else if (param == MIN_TORUS_MAJOR_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MIN_TORUS_MAJOR_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Min Torus Major Radius!");
+					}
+					cmd.print(QObject::tr("\tMin Torus Major Radius : %1").arg(val));
+					params.minTorusMajorRadius = val;
+				}
+				else if (param == MAX_TORUS_MAJOR_RADIUS)
+				{
+					if (cmd.arguments().empty())
+					{
+						return cmd.error(QObject::tr("Missing parameter: number after \"-%1 %2\"").arg(COMMAND_RANSAC, MAX_TORUS_MAJOR_RADIUS));
+					}
+					bool ok;
+					float val = cmd.arguments().takeFirst().toFloat(&ok);
+					if (!ok)
+					{
+						return cmd.error("Invalid number for Max Torus Major Radius!");
+					}
+					cmd.print(QObject::tr("\tMax Torus Major Radius : %1").arg(val));
+					params.maxTorusMajorRadius = val;
+				}
 				else if (param == OUT_RANDOM_COLOR)
 				{
 					params.randomColor = true;
@@ -335,7 +465,6 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 
 		for (CLCloudDesc clCloud : cmd.clouds())
 		{
-
 			CCVector3 bbMin, bbMax;
 			clCloud.pc->getBoundingBox(bbMin, bbMax);
 			CCVector3 diff = bbMax - bbMin;
@@ -365,7 +494,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 				params.bitmapEpsilon = (0.01f * scale);
 			}
 
-			ccHObject* group = qRansacSD::executeRANSAC(clCloud.pc, params, cmd.silentMode());
+			ccHObject* group = qRansacSD::ExecuteRANSAC(clCloud.pc, params, nullptr, cmd.silentMode());
 			
 			if (group)
 			{

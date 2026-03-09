@@ -17,8 +17,8 @@
 
 #include "ccSectionExtractionSubDlg.h"
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

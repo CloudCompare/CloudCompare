@@ -15,15 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccKdTree.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccKdTree.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccPointCloud.h"
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
     : CCCoreLib::TrueKdTree(aCloud)
@@ -63,7 +59,7 @@ class MultiplyBoundingBoxVisitor
 	PointCoordinateType m_multFactor;
 };
 
-void ccKdTree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccKdTree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	if (m_root)
 		MultiplyBoundingBoxVisitor(multFactor).visit(m_root);
@@ -228,10 +224,10 @@ bool ccKdTree::convertCellIndexToRandomColor()
 		return false;
 
 	// for each cell
-	for (size_t i = 0; i < leaves.size(); ++i)
+	for (const auto& leaf : leaves)
 	{
 		ccColor::Rgba              col(ccColor::Generator::Random(), ccColor::MAX);
-		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
+		CCCoreLib::ReferenceCloud* subset = leaf->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)
@@ -280,7 +276,7 @@ class GetCellBBoxVisitor
 ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 {
 	if (!node || !m_associatedCloud)
-		return ccBBox();
+		return {};
 
 	GetCellBBoxVisitor helper;
 	helper.visit(node);

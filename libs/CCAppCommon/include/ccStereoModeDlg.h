@@ -16,9 +16,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt
@@ -53,5 +54,5 @@ class CCAPPCOMMON_LIB_API ccStereoModeDlg : public QDialog
 	void glassTypeChanged(int);
 
   private:
-	Ui::StereoModeDialog* m_ui;
+	std::unique_ptr<Ui::StereoModeDialog> m_ui;
 };

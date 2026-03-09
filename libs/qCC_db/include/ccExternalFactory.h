@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_EXTERNAL_FACTORY_HEADER
-#define CC_EXTERNAL_FACTORY_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -37,9 +36,7 @@ class QCC_DB_LIB_API ccExternalFactory
 	{
 	  public:
 		//! Default constructor
-		Container()
-		{
-		}
+		Container() = default;
 
 		//! Returns factory using its (unique) name as key
 		/** \param factoryName unique name
@@ -53,7 +50,7 @@ class QCC_DB_LIB_API ccExternalFactory
 		void addFactory(ccExternalFactory* factory);
 
 		//! Shared pointer type
-		typedef QSharedPointer<Container> Shared;
+		using Shared = QSharedPointer<Container>;
 
 		//! Returns the unique static instance of the external factories container
 		static Container::Shared GetUniqueInstance();
@@ -91,5 +88,3 @@ class QCC_DB_LIB_API ccExternalFactory
 	//! Name
 	QString m_factoryName;
 };
-
-#endif // CC_EXTERNAL_FACTORY_HEADER

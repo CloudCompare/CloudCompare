@@ -17,9 +17,8 @@
 
 #include "ccGraphicalSegmentationTool.h"
 
-#include "ccGraphicalSegmentationOptionsDlg.h"
-
 // Local
+#include "ccGraphicalSegmentationOptionsDlg.h"
 #include "ccItemSelectionDlg.h"
 #include "ccReservedIDs.h"
 #include "mainwindow.h"
@@ -29,21 +28,19 @@
 #include <SquareMatrix.h>
 
 // qCC_db
+#include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
+#include <ccCameraSensor.h>
+#include <ccGBLSensor.h>
 #include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
-
-// for the helper (apply)
-#include <cc2DLabel.h>
-#include <ccCameraSensor.h>
-#include <ccGBLSensor.h>
 #include <ccSubMesh.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt
@@ -54,7 +51,7 @@
 #include <QSettings>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 #if defined(_OPENMP)
 // OpenMP
@@ -72,13 +69,14 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
     , m_deleteHiddenParts(false)
 {
 	// Set QDialog background as transparent (DGM: doesn't work over an OpenGL context)
-	// setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_NoSystemBackground);
 
 	setupUi(this);
 
 	connect(inButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
 	connect(exportSelectionButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
+	connect(swapColorsButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::onToggleRGBAndSFColors);
 	connect(razButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
 	connect(optionsButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);
@@ -104,6 +102,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverriddenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
 	addOverriddenShortcut(Qt::Key_C);      //'C' key for the "classify" button
 	addOverriddenShortcut(Qt::Key_E);      //'E' key for the "export" button
+	addOverriddenShortcut(Qt::Key_S);      //'S' key to switch between RGB and Scalar field colors
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu* selectionModeMenu = new QMenu(this);
@@ -141,13 +140,36 @@ void ccGraphicalSegmentationTool::allowPolylineExport(bool state)
 
 ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
-	if (m_segmentationPoly)
-		delete m_segmentationPoly;
+	delete m_segmentationPoly;
 	m_segmentationPoly = nullptr;
 
-	if (m_polyVertices)
-		delete m_polyVertices;
+	delete m_polyVertices;
 	m_polyVertices = nullptr;
+}
+
+void ccGraphicalSegmentationTool::onToggleRGBAndSFColors()
+{
+	if (!m_associatedWin)
+	{
+		ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
+		return;
+	}
+
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+	{
+		ccHObject* entity = (*p);
+
+		if (entity->hasColors()
+		    && entity->hasScalarFields()
+		    && entity->getDisplay() == m_associatedWin)
+		{
+			bool sfShown = entity->sfShown();
+			entity->showColors(sfShown);
+			entity->showSF(!sfShown);
+		}
+	}
+
+	m_associatedWin->redraw(false);
 }
 
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
@@ -174,6 +196,10 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 
 	case Qt::Key_E:
 		exportSelection();
+		return;
+
+	case Qt::Key_S:
+		onToggleRGBAndSFColors();
 		return;
 
 	case Qt::Key_Return:
@@ -342,7 +368,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 
 	ccOverlayDialog::stop(accepted);
 
-	for (auto item : m_enableOnClose) // in export mode, all parts are enabled at the close
+	for (auto* item : m_enableOnClose) // in export mode, all parts are enabled at the close
 	{
 		if (item != nullptr)
 		{
@@ -351,7 +377,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	}
 	m_enableOnClose.clear();
 
-	for (auto item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
+	for (auto* item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
 	{
 		if (item != nullptr)
 		{
@@ -459,7 +485,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
@@ -527,7 +553,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+	if (entity->isKindOf(CC_TYPES::POLY_LINE))
 	{
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
 		assert(poly);
@@ -555,7 +581,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		// automatically add the entities contained in the group
 		bool result = false;
@@ -564,14 +590,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return result;
 	}
-	else
+	if (!silent)
 	{
-		if (!silent)
-		{
-			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
-		}
-		return false;
+		ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
 	}
+	return false;
 }
 
 unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities() const
@@ -937,7 +960,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 		// if a classification value is set as input, this means that we want to label the
 		// set of points, and we don't want to segment it
-		CCCoreLib::ScalarField* classifSF = nullptr;
+		CCCoreLib::ScalarField::Shared classifSF;
 		if (classificationMode)
 		{
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(*p);
@@ -948,7 +971,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			}
 
 			// check that the 'Classification' scalar field exists
-			int sfIdx = pc->getScalarFieldIndexByName("Classification");
+			const int previousDisplaySFIndex = pc->getCurrentDisplayedScalarFieldIndex();
+			int       sfIdx                  = pc->getScalarFieldIndexByName("Classification");
 			if (sfIdx < 0)
 			{
 				// create the scalar field Classification if needed
@@ -961,7 +985,14 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			}
 			classifSF = pc->getScalarField(sfIdx);
 			pc->showSF(true);
-			pc->setCurrentDisplayedScalarField(sfIdx);
+			if (previousDisplaySFIndex != sfIdx)
+			{
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				if (m_toSegment.size() == 1)
+				{
+					emit currentScalarFieldUpdated();
+				}
+			}
 		}
 
 		// we project each point and we check if it falls inside the segmentation polyline
@@ -1101,11 +1132,11 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	else
 	{
 		m_somethingHasChanged = true;
-		validButton->setEnabled(true);
 		validAndDeleteButton->setEnabled(true);
 		razButton->setEnabled(true);
 		pauseSegmentationMode(true);
 	}
+	validButton->setEnabled(true);
 }
 
 void ccGraphicalSegmentationTool::run()
@@ -1583,8 +1614,8 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		bool canModify = true;
 		if (entity->isLocked())
 		{
-			// we can't delete this entity
-			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it");
+			// we can't delete or reduce the number of elements of this entity
+			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it.");
 			canModify = false;
 		}
 

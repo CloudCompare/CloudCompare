@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,21 +17,19 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CLIPPING_BOX_TOOL_HEADER
-#define CC_CLIPPING_BOX_TOOL_HEADER
-
-// common
-#include <ccOverlayDialog.h>
-
-// local
+// Local
 #include "ccEnvelopeExtractor.h"
 
+// Ui
 #include <ui_clippingBoxDlg.h>
 
-// qCC_db
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+
+// qCC_glWindow
 #include <ccGLUtils.h>
 
-// system
+// System
 #include <vector>
 
 class ccGenericPointCloud;
@@ -51,12 +51,12 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccClippingBoxTool(QWidget* parent);
 	//! Default destructor
-	virtual ~ccClippingBoxTool();
+	~ccClippingBoxTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool state) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! Returns box
 	const ccClipBox* box() const
@@ -67,7 +67,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Adds an entity
 	/** \return success, if the entity is eligible for clipping
 	 **/
-	bool addAssociatedEntity(ccHObject* anObject);
+	bool addAssociatedEntity(ccHObject* entity);
 
 	//! Returns the current number of associated entities
 	unsigned getNumberOfAssociatedEntity() const;
@@ -93,6 +93,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    \param projectOnBestFitPlane to project the points on the slice best fitting plane (otherwise the plane normal to the
 	    \param visualDebugMode displays a 'debugging' window during the envelope extraction process
 	    \param generateRandomColors randomly colors the extracted slices
+	    \param extratOustide whether to extract the outside of the box (otherwise the inside)
 	    \param progressDialog optional progress dialog
 	**/
 	static bool ExtractSlicesAndContours(
@@ -119,7 +120,8 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    bool                projectOnBestFitPlane = false,
 	    bool                visualDebugMode       = false,
 	    bool                generateRandomColors  = false,
-	    ccProgressDialog*   progressDialog        = 0);
+	    bool                extratOustide         = false,
+	    ccProgressDialog*   progressDialog        = nullptr);
 
   protected:
 	void toggleInteractors(bool);
@@ -183,5 +185,3 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Clipping box
 	ccClipBox* m_clipBox;
 };
-
-#endif // CC_CLIPPING_BOX_TOOL_HEADER

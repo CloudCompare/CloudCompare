@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_EXPORT_COORD_TO_SF_DLG_HEADER
-#define CC_EXPORT_COORD_TO_SF_DLG_HEADER
-
+// Ui
 #include <ui_exportCoordToSFDlg.h>
 
 //! Dialog to choose which dimension(s) (X, Y or Z) should be exported as SF(s)
@@ -37,5 +37,3 @@ class ccExportCoordToSFDlg : public QDialog
 	//! Returns whether Z dimension should be exported
 	bool exportZ() const;
 };
-
-#endif // CC_EXPORT_COORD_TO_SF_DLG_HEADER

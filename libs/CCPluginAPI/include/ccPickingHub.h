@@ -16,18 +16,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "CCPluginAPI.h"
-
 // Local
+#include "CCPluginAPI.h"
 #include "ccPickingListener.h"
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt
 #include <QObject>
 
-// system
+// System
 #include <set>
 
 class QMdiSubWindow;

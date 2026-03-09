@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COMMON_HEADER
-#define CC_COMMON_HEADER
-
 // STANDARD SCALAR FIELD NAMES
 #define CC_DEFAULT_SF_NAME "Unknown"
 #define CC_CLOUD2CLOUD_DISTANCES_DEFAULT_SF_NAME "C2C absolute distances"
@@ -32,6 +31,7 @@
 #define CC_CHI2_DISTANCES_DEFAULT_SF_NAME "Chi2 distances"
 #define CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME "CC labels"
 #define CC_LOCAL_KNN_DENSITY_FIELD_NAME "Number of neighbors"
+#define CC_LOCAL_NN_DISTANCE_FIELD_NAME "Inverse of the nearest neighbor distance"
 #define CC_LOCAL_SURF_DENSITY_FIELD_NAME "Surface density"
 #define CC_LOCAL_VOL_DENSITY_FIELD_NAME "Volume density"
 #define CC_ROUGHNESS_FIELD_NAME "Roughness"
@@ -50,5 +50,3 @@
 #define CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME "Vertex type"
 #define CC_DEFAULT_ID_SF_NAME "Id"
 #define CC_ORIGINAL_CLOUD_INDEX_SF_NAME "Original cloud index"
-
-#endif

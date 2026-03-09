@@ -15,10 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDefaultPluginInterface.h"
+#include "../include/ccDefaultPluginInterface.h"
 
-#include "ccLog.h"
+// qCC_db
+#include <ccLog.h>
 
+// Qt
 #include <QDebug>
 #include <QFile>
 #include <QJsonArray>
@@ -29,18 +31,18 @@
 class ccDefaultPluginData
 {
   public:
-	inline QString field(const QString& fieldName)
+	inline QString field(const QString& fieldName) const
 	{
 		return doc.object().value(fieldName).toString();
 	}
 
-	ccPluginInterface::ReferenceList references(const QString& fieldName)
+	ccPluginInterface::ReferenceList references(const QString& fieldName) const
 	{
 		ccPluginInterface::ReferenceList list;
 
 		const QJsonArray array = doc.object().value(fieldName).toArray();
 
-		for (const QJsonValue& value : array)
+		for (const auto& value : array)
 		{
 			const QJsonObject object = value.toObject();
 
@@ -52,13 +54,13 @@ class ccDefaultPluginData
 		return list;
 	}
 
-	ccPluginInterface::ContactList contacts(const QString& fieldName)
+	ccPluginInterface::ContactList contacts(const QString& fieldName) const
 	{
 		ccPluginInterface::ContactList list;
 
 		const QJsonArray array = doc.object().value(fieldName).toArray();
 
-		for (const QJsonValue& value : array)
+		for (const auto& value : array)
 		{
 			const QJsonObject object = value.toObject();
 

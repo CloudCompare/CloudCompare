@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_LEVELS_DLG_HEADER
-#define CC_COLOR_LEVELS_DLG_HEADER
+// Ui
+#include <ui_colorLevelsDlg.h>
 
 // Qt
 #include <QColor>
-#include <ui_colorLevelsDlg.h>
 
 class ccHistogramWindow;
 class ccGenericPointCloud;
@@ -61,5 +62,3 @@ class ccColorLevelsDlg : public QDialog
 	//! Associated point cloud (color source)
 	ccGenericPointCloud* m_cloud;
 };
-
-#endif // CC_COLOR_LEVELS_DLG_HEADER

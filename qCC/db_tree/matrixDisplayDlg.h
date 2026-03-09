@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_MATRIX_DISPLAY_DIALOG_HEADER
-#define CC_MATRIX_DISPLAY_DIALOG_HEADER
 
 // Qt
 #include <QWidget>
@@ -38,7 +37,7 @@ class MatrixDisplayDlg : public QWidget
 	//! Default constructor
 	explicit MatrixDisplayDlg(QWidget* parent = nullptr);
 
-	~MatrixDisplayDlg();
+	~MatrixDisplayDlg() override;
 
 	//! Clears widget
 	void clear();
@@ -63,7 +62,5 @@ class MatrixDisplayDlg : public QWidget
 	//! Matrix
 	ccGLMatrixd m_mat;
 
-	Ui::MatrixDisplayDlg* m_ui;
+	std::unique_ptr<Ui::MatrixDisplayDlg> m_ui;
 };
-
-#endif // CC_MATRIX_DISPLAY_DIALOG_HEADER

@@ -20,8 +20,8 @@
 // qCC_db
 #include <ccLog.h>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 ccInnerRect2DFinder::ccInnerRect2DFinder()
     : m_maxArea(0)

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_OBJECT_HEADER
-#define CC_OBJECT_HEADER
 
 // Local
 #include "ccSerializableObject.h"
@@ -183,8 +182,7 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 	//! Updates the value of the last generated unique ID with the current one
 	void update(unsigned ID)
 	{
-		if (ID > m_lastUniqueID)
-			m_lastUniqueID = ID;
+		m_lastUniqueID = std::max(ID, m_lastUniqueID);
 	}
 
   protected:
@@ -260,16 +258,16 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 		setEnabled(!isEnabled());
 	}
 
-	//! Returns whether the object is locked  or not
-	/** Shortcut to access flag CC_LOCKED
+	//! Returns whether the object is locked or not
+	/** Locked entities should not be deleted or modified (number of elements, etc.).
 	 **/
 	virtual inline bool isLocked() const
 	{
 		return getFlagState(CC_LOCKED);
 	}
 
-	//! Sets the "enabled" property
-	/** Shortcut to modify flag CC_LOCKED
+	//! Sets the "locked" property
+	/** Locked entities should not be deleted or modified (number of elements, etc.).
 	 **/
 	virtual inline void setLocked(bool state)
 	{
@@ -376,7 +374,7 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 	    before calling this method, as the classID is voluntarily
 	    skipped (in order to let the user instantiate the object first)
 	**/
-	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool fromFile(QFile& in, LoadingContext& context) override;
 
 	//! Object name
 	QString m_name;
@@ -391,5 +389,3 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 	//! Object unique ID
 	unsigned m_uniqueID;
 };
-
-#endif // CC_OBJECT_HEADER

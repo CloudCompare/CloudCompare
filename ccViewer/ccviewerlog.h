@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                   CLOUDCOMPARE LIGHT VIEWER                            #
@@ -16,9 +18,6 @@
 // #      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CCVIEWER_LOG_HEADER
-#define CCVIEWER_LOG_HEADER
 
 // Qt
 #include <QMainWindow>
@@ -40,16 +39,14 @@ class ccViewerLog : public ccLog
 
   protected:
 	// inherited from ccLog
-	virtual void logMessage(const QString& message, int level)
+	void logMessage(const Message& message)
 	{
-		if (level & LOG_ERROR)
+		if (message.level & LOG_ERROR)
 		{
-			QMessageBox::warning(m_parentWindow, "Error", message);
+			QMessageBox::warning(m_parentWindow, "Error", message.text);
 		}
 	}
 
 	//! Associated window
 	QMainWindow* m_parentWindow;
 };
-
-#endif // CCVIEWER_LOG_HEADER

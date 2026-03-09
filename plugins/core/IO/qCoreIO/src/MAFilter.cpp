@@ -147,8 +147,8 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		return CC_FERR_WRITING;
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-	const int                        coloursAdjustment = (hasColors ? 1 : 0);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	const int                         coloursAdjustment = (hasColors ? 1 : 0);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -156,7 +156,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Triangles = %1").arg(numberOfTriangles));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), ((2 + coloursAdjustment) * numberOfTriangles + (3 + coloursAdjustment) * numberOfVertexes));
 
 	// we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();

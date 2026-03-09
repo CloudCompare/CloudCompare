@@ -15,16 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPointCloudInterpolator.h"
+#include "../include/ccPointCloudInterpolator.h"
 
-// qCC_db
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPointCloud.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
 #include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
-#include <ccScalarField.h>
 
 struct SFPair
 {
@@ -138,9 +137,11 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 
 				if (sumW > 0)
 				{
+					double normalization = params->noNormalization ? 1.0 : (1.0 / sumW);
+
 					for (unsigned j = 0; j < sfCount; ++j)
 					{
-						ScalarType s = static_cast<ScalarType>(sumValues[j] / sumW);
+						ScalarType s = static_cast<ScalarType>(sumValues[j] * normalization);
 						scalarFields->at(j).out->setValue(outPointIndex, s);
 					}
 				}
@@ -203,9 +204,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 		ccLog::Error("Not enough memory");
 		return false;
 	}
-	for (size_t i = 0; i < inSFIndexes.size(); ++i)
+	for (int inSFIndex : inSFIndexes)
 	{
-		int inSFIndex = inSFIndexes[i];
 		if (inSFIndex < 0 || inSFIndex >= static_cast<int>(srcCloud->getNumberOfScalarFields()))
 		{
 			// invalid index
@@ -230,9 +230,9 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 			overwrite = true;
 		}
 
-		CCCoreLib::ScalarField* inSF  = srcCloud->getScalarField(inSFIndex);
-		CCCoreLib::ScalarField* outSF = destCloud->getScalarField(outSFIndex);
-		scalarFields.push_back(SFPair(inSF, outSF));
+		auto inSF  = srcCloud->getScalarField(inSFIndex);
+		auto outSF = destCloud->getScalarField(outSFIndex);
+		scalarFields.emplace_back(inSF.get(), outSF.get());
 
 		outSF->fill(CCCoreLib::NAN_VALUE);
 	}
@@ -283,8 +283,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
             /*maxSearchDist*/ 0,
             progressCb);
 
-		QScopedPointer<CCCoreLib::DgmOctree> srcOctree(_srcOctree);
-		QScopedPointer<CCCoreLib::DgmOctree> destOctree(_destOctree);
+		std::unique_ptr<CCCoreLib::DgmOctree> srcOctree(_srcOctree);
+		std::unique_ptr<CCCoreLib::DgmOctree> destOctree(_destOctree);
 
 		if (soCode != CCCoreLib::DistanceComputationTools::SYNCHRONIZED)
 		{
@@ -309,7 +309,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 		{
 			// additional parameters
 			void* additionalParameters[] = {reinterpret_cast<void*>(srcCloud),
-			                                reinterpret_cast<void*>(srcOctree.data()),
+			                                reinterpret_cast<void*>(srcOctree.get()),
 			                                reinterpret_cast<void*>(&scalarFields),
 			                                (void*)(&params)};
 

@@ -108,7 +108,7 @@ file(REMOVE "${SOURCES_LIST_FILE}")
 
 append_sources_to_file(source_list qCC EXCLUDE_DIRS extern)
 append_sources_to_file(source_list ccViewer EXCLUDE_DIRS extern)
-append_sources_to_file(source_list libs EXCLUDE_DIRS CCAppCommon/QDarkStyleSheet qCC_db/extern qCC_io/extern)
+append_sources_to_file(source_list libs EXCLUDE_DIRS CCAppCommon/QDarkStyleSheet qCC_db/extern qCC_io/extern CCAppCommon/devices/3dConnexion/extern/hidapi)
 append_sources_to_file(source_list plugins/core/GL EXCLUDE_DIRS qSSAO/extern)
 append_sources_to_file(source_list plugins/core/IO EXCLUDE_DIRS qE57IO/extern qPhotoscanIO/extern MeshIO/extern)
 

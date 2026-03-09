@@ -16,6 +16,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
 // Qt
@@ -33,6 +34,9 @@ class CCAPPCOMMON_LIB_API ccOptions
 
 	//! Should we ask for confirmation when user clicked to quit the app ?
 	bool confirmQuit;
+
+	//! Should we ask for confirmation when user clicked to delete selected entities ?
+	bool confirmDelete;
 
   public: // methods
 	//! Default constructor
@@ -58,7 +62,7 @@ class CCAPPCOMMON_LIB_API ccOptions
 	static void ReleaseInstance();
 
 	//! Sets parameters
-	static void Set(const ccOptions& options);
+	static void Set(const ccOptions& params, bool saveToPersistentSettings = false);
 
   protected: // methods
 	//! Returns the stored values of each parameter.

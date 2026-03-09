@@ -17,10 +17,10 @@
 
 #include "ccPlaneEditDlg.h"
 
-// local
+// Local
 #include "mainwindow.h"
 
-// common
+// CCPluginAPI
 #include <ccPickingHub.h>
 
 // qCC_db
@@ -30,7 +30,6 @@
 // Qt
 #include <QDoubleValidator>
 
-// semi-persistent parameters
 static double     s_dip    = 0;
 static double     s_dipDir = 0;
 static double     s_width  = 10.0;

@@ -23,7 +23,10 @@
 // Qt
 #include <QDialog>
 
-class Ui_SmoothPolylineDialog;
+namespace Ui
+{
+	class SmoothPolylineDialog;
+} // namespace Ui
 
 //! Dialog to smooth a polyline (Chaikin algorithm)
 class ccSmoothPolylineDialog : public QDialog
@@ -33,7 +36,7 @@ class ccSmoothPolylineDialog : public QDialog
 	ccSmoothPolylineDialog(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccSmoothPolylineDialog();
+	~ccSmoothPolylineDialog() override;
 
 	//! Sets the number of iterations
 	void setIerationCount(int count);
@@ -49,5 +52,5 @@ class ccSmoothPolylineDialog : public QDialog
 
   protected:
 	//! Associated ui
-	Ui_SmoothPolylineDialog* m_ui;
+	std::unique_ptr<Ui::SmoothPolylineDialog> m_ui;
 };

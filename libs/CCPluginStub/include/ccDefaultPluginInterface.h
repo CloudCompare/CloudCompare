@@ -17,8 +17,10 @@
 
 #pragma once
 
+// Local
 #include "ccPluginInterface.h"
 
+// Qt
 #include <QString>
 
 class ccDefaultPluginData;

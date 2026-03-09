@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ADJUST_ZOOM_DIALOG_HEADER
-#define CC_ADJUST_ZOOM_DIALOG_HEADER
-
-#include <QDialog>
+// Ui
 #include <ui_adjustZoomDlg.h>
+
+// Qt
+#include <QDialog>
 
 class ccGLWindowInterface;
 
@@ -33,7 +35,7 @@ class ccAdjustZoomDlg : public QDialog
 
   public:
 	ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent = nullptr);
-	virtual ~ccAdjustZoomDlg() = default;
+	~ccAdjustZoomDlg() override = default;
 
 	//! Returns requested focal distance
 	double getFocalDistance() const;
@@ -47,5 +49,3 @@ class ccAdjustZoomDlg : public QDialog
 	int    m_windowWidth_pix;
 	double m_distanceToWidthRatio;
 };
-
-#endif // CC_ADJUST_ZOOM_DIALOG_HEADER

@@ -17,6 +17,7 @@
 
 #include "ccLabelingDlg.h"
 
+// CCCoreLib
 #include <DgmOctree.h>
 
 ccLabelingDlg::ccLabelingDlg(QWidget* parent /*=nullptr*/)

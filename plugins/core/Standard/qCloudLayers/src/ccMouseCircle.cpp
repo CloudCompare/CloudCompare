@@ -158,8 +158,7 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 			m_owner->redraw(true, false); //redraw 2D graphics
 		}
 	}
-
-	if (event->type() == QEvent::Wheel && m_allowScroll)
+	else if (event->type() == QEvent::Wheel && m_allowScroll)
 	{
 		QWheelEvent* wheelEvent = static_cast<QWheelEvent *>(event);
 	
@@ -169,5 +168,6 @@ bool ccMouseCircle::eventFilter(QObject* obj, QEvent* event)
 		//repaint
 		m_owner->redraw(true, false);
 	}
+
 	return false; //pass event to other listeners
 }

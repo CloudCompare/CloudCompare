@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SUB_MESH_HEADER
-#define CC_SUB_MESH_HEADER
 
 // Local
 #include "ccBBox.h"
@@ -49,29 +48,30 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	}
 
 	// inherited methods (ccGenericMesh)
-	ccGenericPointCloud*    getAssociatedCloud() const override;
-	void                    refreshBB() override;
-	bool                    interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
-	bool                    interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
-	bool                    interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
-	bool                    interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
-	bool                    interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
-	bool                    getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
-	bool                    getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
-	bool                    hasMaterials() const override;
-	const ccMaterialSet*    getMaterialSet() const override;
-	int                     getTriangleMtlIndex(unsigned triangleIndex) const override;
-	bool                    hasTextures() const override;
-	TextureCoordsContainer* getTexCoordinatesTable() const override;
-	void                    getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override;
-	bool                    hasPerTriangleTexCoordIndexes() const override;
-	void                    getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	bool                    hasTriNormals() const override;
-	void                    getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	bool                    getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
-	NormsIndexesTableType*  getTriNormsTable() const override;
-	unsigned                capacity() const override;
-	void                    setGlobalShift(const CCVector3d& shift) override
+	ccGenericPointCloud*           getAssociatedCloud() const override;
+	void                           refreshBB() override;
+	bool                           interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
+	bool                           interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
+	bool                           interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
+	bool                           interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
+	bool                           interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
+	bool                           getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
+	bool                           getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
+	bool                           hasMaterials() const override;
+	ccMaterialSet::Shared          getMaterialSet() const override;
+	int                            getTriangleMtlIndex(unsigned triangleIndex) const override;
+	bool                           hasTextures() const override;
+	TextureCoordsContainer::Shared getTexCoordinatesTable() const override;
+	void                           getTriangleTexCoordinates(unsigned triIndex, const TexCoords2D*& tx1, const TexCoords2D*& tx2, const TexCoords2D*& tx3) const override;
+	bool                           hasPerTriangleTexCoordIndexes() const override;
+	void                           getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	bool                           hasTriNormals() const override;
+	void                           getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	void                           getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const override;
+	void                           getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const override;
+	NormsIndexesTableType::Shared  getTriNormsTable() const override;
+	unsigned                       capacity() const override;
+	void                           setGlobalShift(const CCVector3d& shift) override
 	{ /* this method shouldn't be called on ccSubMesh instances */
 		assert(false);
 	}
@@ -86,13 +86,13 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	bool hasScalarFields() const override;
 	bool hasDisplayedScalarField() const override;
 	bool normalsShown() const override;
+	bool hasUniqueMaterial() override;
 
 	// inherited methods (GenericIndexedMesh)
 	inline unsigned size() const override
 	{
 		return static_cast<unsigned>(m_triIndexes.size());
 	}
-	void        forEach(genericTriangleAction action) override;
 	inline void placeIteratorAtBeginning() override
 	{
 		m_globalIterator = 0;
@@ -201,7 +201,7 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
   protected:
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  onUpdateOf(ccHObject* obj) override;
 
@@ -220,5 +220,3 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	//! Bounding-box
 	ccBBox m_bBox;
 };
-
-#endif // CC_SUB_MESH_HEADER

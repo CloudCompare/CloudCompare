@@ -131,6 +131,11 @@ if( APPLE )
     add_subdirectory( Mac )
 endif()
 
+# Testing
+if ( BUILD_TESTING )
+	add_subdirectory( test )
+endif()
+
 # Translation
 add_subdirectory(translations)
 

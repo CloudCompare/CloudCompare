@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,19 +17,19 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_SCALE_HEADER
-#define CC_COLOR_SCALE_HEADER
-
 // Local
 #include "ccColorTypes.h"
 #include "ccSerializableObject.h"
 
 // Qt
 #include <QList>
+#include <QOpenGLTexture>
 #include <QSharedPointer>
 
 // System
 #include <set>
+
+class QOpenGLFunctions_2_1;
 
 //! Color scale element: one value + one color
 class ccColorScaleElement
@@ -180,16 +182,16 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	 **/
 	void getAbsoluteBoundaries(double& minVal, double& maxVal) const;
 
-	//! Returns whether scale is locked or not
-	inline bool isLocked() const
+	//! Returns whether scale is read-only or not
+	inline bool isReadOnly() const
 	{
-		return m_locked;
+		return m_readOnly;
 	}
 
-	//! Sets whether scale is locked or not
-	inline void setLocked(bool state)
+	//! Sets whether scale is read-only or not
+	inline void setReadOnly(bool state)
 	{
-		m_locked = state;
+		m_readOnly = state;
 	}
 
 	//! Color scale label (value + optional text)
@@ -258,19 +260,19 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	}
 
 	//! Adds a step
-	/** Scale must not be locked.
+	/** Scale must not be read-only.
 	 **/
 	void insert(const ccColorScaleElement& step, bool autoUpdate = true);
 
 	//! Deletes a given step
 	/** The first and last index shouldn't be deleted!
-	    Scale must not be locked.
+	    Scale must not be read-only.
 	**/
 	void remove(int index, bool autoUpdate = true);
 
 	//! Clears all steps
 	/** There should be at least 2 steps for the scale to be valid!
-	    Scale must not be locked.
+	    Scale must not be read-only.
 	**/
 	void clear();
 
@@ -312,8 +314,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
 			return &getColorByIndex(static_cast<unsigned>(relativePos * (MAX_STEPS - 1)));
-		else
-			return outOfRangeColor;
+		return outOfRangeColor;
 	}
 
 	//! Returns color by relative position in scale with a given 'resolution'
@@ -331,10 +332,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 			unsigned index = (static_cast<unsigned>((relativePos * steps) * 65535.0)) >> 16;
 			return &getColorByIndex((index * (MAX_STEPS - 1)) / steps);
 		}
-		else
-		{
-			return outOfRangeColor;
-		}
+		return outOfRangeColor;
 	}
 
 	//! Returns color by index
@@ -358,8 +356,22 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
+
+	//! Returns the OpenGL texture corresponding to this color scale
+	QSharedPointer<QOpenGLTexture> getTexture(QOpenGLFunctions_2_1* glFunc) const
+	{
+		if (m_texture.isNull())
+		{
+			buildTexture(glFunc);
+		}
+		return m_texture;
+	}
+
+  protected:
+	//! Builds the OpenGL texture corresponding to this color scale
+	bool buildTexture(QOpenGLFunctions_2_1* glFunc) const;
 
   protected:
 	//! Sort elements
@@ -383,8 +395,8 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	//! Whether scale is relative or not
 	bool m_relative;
 
-	//! Whether scale is locked or not
-	bool m_locked;
+	//! Whether scale is read-only or not
+	bool m_readOnly;
 
 	//! 'Absolute' minimum value
 	/** Only used if scale is 'absolute' (i.e. not relative).
@@ -400,6 +412,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 
 	//! List of custom labels
 	LabelSet m_customLabels;
-};
 
-#endif // CC_COLOR_SCALE_HEADER
+	//! OpenGL texture corresponding to this color scale
+	mutable QSharedPointer<QOpenGLTexture> m_texture;
+};

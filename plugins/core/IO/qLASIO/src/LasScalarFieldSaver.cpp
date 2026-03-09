@@ -18,6 +18,8 @@
 #include "LasScalarFieldSaver.h"
 
 #include <ccScalarField.h>
+#include <cmath>
+#include <cstring>
 #include <laszip/laszip_api.h>
 
 LasScalarFieldSaver::LasScalarFieldSaver(std::vector<LasScalarField>&&      standardFields,
@@ -213,6 +215,23 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& poi
 
 		for (unsigned i = 0; i < extraField.numElements(); i++)
 		{
+			if (extraField.noDataIsRelevant() && std::isnan(values[i]))
+			{
+				// no_data is upcast to 8 bytes: a double for floating point types,
+				// and a 64-bit integer (whose first bytes hold the value) otherwise
+				if (extraField.type == LasExtraScalarField::f32)
+				{
+					const double& noDataValue = *reinterpret_cast<const double*>(extraField.noData[i]);
+					WriteScalarValueAs<float>(static_cast<ScalarType>(noDataValue), dataStart);
+				}
+				else
+				{
+					std::memcpy(dataStart, extraField.noData[i], extraField.elementSize());
+				}
+				dataStart += extraField.elementSize();
+				continue;
+			}
+
 			switch (extraField.type)
 			{
 			case LasExtraScalarField::u8:

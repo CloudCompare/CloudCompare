@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,22 +17,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_QCUSTOMPLOT_HEADER
-#define CC_QCUSTOMPLOT_HEADER
+// Third-party
+#include <qcustomplot.h>
 
-// QCustomPlot
+// System
+#include <cassert>
+
 #ifdef _MSC_VER
 // To get rid of the really annoying warnings about unsafe methods
 #pragma warning(push)
 #pragma warning(disable : 4996)
 #endif
-#include <qcustomplot.h>
+
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-// System
-#include <assert.h>
 
 /*********************************/
 /*** Custom QCustomPlot wigets ***/
@@ -66,7 +67,7 @@ class QCPBarsWithText : public QCPBars
 	bool        m_textOnTheLeft;
 
 	// reimplemented virtual draw method
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!mKeyAxis || !mValueAxis)
 		{
@@ -92,12 +93,12 @@ class QCPBarsWithText : public QCPBars
 			// we draw at the 'base' line
 			P.setY(P.y() + fontHeight);
 
-			for (int i = 0; i < m_text.size(); ++i)
+			for (const auto& text : m_text)
 			{
 				QPointF Pstart = P;
 				if (m_textOnTheLeft)
-					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(m_text[i]));
-				painter->drawText(Pstart, m_text[i]);
+					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(text));
+				painter->drawText(Pstart, text);
 				P.setY(P.y() + fontHeight);
 			}
 		}
@@ -120,7 +121,7 @@ class QCPColoredBars : public QCPBars
 
 		QColor color;
 	};
-	typedef QMultiMap<double, QCPColoredBarData> QCPColoredBarDataMap;
+	using QCPColoredBarDataMap = QMultiMap<double, QCPColoredBarData>;
 
 	QCPColoredBars(QCPAxis* keyAxis, QCPAxis* valueAxis)
 	    : QCPBars(keyAxis, valueAxis)
@@ -149,7 +150,7 @@ class QCPColoredBars : public QCPBars
 			newData.value = value[i];
 			if (colors.size() > i)
 				newData.color = colors[i];
-			m_coloredData.insertMulti(newData.key, newData);
+			m_coloredData.insert(newData.key, newData);
 			QCPBars::addData(newData.key, newData.value);
 		}
 	}
@@ -168,7 +169,7 @@ class QCPColoredBars : public QCPBars
 
   protected:
 	// reimplemented virtual draw method
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		// no colors?
 		if (m_coloredData.empty())
@@ -290,7 +291,7 @@ class QCPSelectableCursor : public QCPAbstractPlottable
 	virtual void clearData()
 	{
 	}
-	double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = 0) const override
+	double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = nullptr) const override
 	{
 		return -1;
 	} // we don't use the QCP internal selection mechanism!
@@ -303,12 +304,12 @@ class QCPSelectableCursor : public QCPAbstractPlottable
 	QCPRange getKeyRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const override
 	{
 		foundRange = false;
-		return QCPRange();
+		return {};
 	}
 	QCPRange getValueRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth, const QCPRange& inKeyRange = QCPRange()) const override
 	{
 		foundRange = false;
-		return QCPRange();
+		return {};
 	}
 
 	// property members:
@@ -338,7 +339,7 @@ class QCPHiddenArea : public QCPSelectableCursor
 
   protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!keyAxis())
 			return;
@@ -433,7 +434,7 @@ class QCPArrow : public QCPSelectableCursor
 
   protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!keyAxis())
 			return;
@@ -477,5 +478,3 @@ class QCPArrow : public QCPSelectableCursor
 		}
 	}
 };
-
-#endif // CC_QCUSTOMPLOT_HEADER

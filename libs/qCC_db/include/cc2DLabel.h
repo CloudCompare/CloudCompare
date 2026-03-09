@@ -24,6 +24,7 @@
 
 // Qt
 #include <QRect>
+
 // System
 #include <array>
 
@@ -42,13 +43,13 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	cc2DLabel(const cc2DLabel& label, bool copyPoints = true);
 
 	// inherited from ccObject
-	virtual QString getName() const override;
+	QString getName() const override;
 	// inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override
+	inline CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::LABEL_2D;
 	}
-	inline virtual bool isSerializable() const override
+	inline bool isSerializable() const override
 	{
 		return true;
 	}
@@ -72,11 +73,11 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	QString getTitle(int precision) const;
 
 	// inherited from ccInteractor
-	virtual bool acceptClick(int x, int y, Qt::MouseButton button) override;
-	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
+	bool acceptClick(int x, int y, Qt::MouseButton button) override;
+	bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight) override;
 
 	//! Relative position (percentage)
-	typedef std::array<float, 2> RelativePos;
+	using RelativePos = std::array<float, 2>;
 
 	//! Sets relative position
 	void setPosition(float x, float y);
@@ -252,6 +253,13 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	                  double&                     nearestSquareDist) const;
 
   protected:
+	//! Value of a single scalar field at the picked point
+	struct SFValue
+	{
+		QString    name;
+		ScalarType value = 0;
+	};
+
 	//! One-point label info
 	struct LabelInfo1
 	{
@@ -262,6 +270,8 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 		bool          hasSF;
 		ScalarType    sfValue;
 		QString       sfName;
+		//! Values of all scalar fields at the picked point (not just the displayed one)
+		std::vector<SFValue> sfValues;
 		//! Default constructor
 		LabelInfo1()
 		    : hasNormal(false)
@@ -318,7 +328,7 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	void  onDeletionOf(const ccHObject* obj) override;
@@ -351,7 +361,7 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	RelativePos m_screenPos;
 
 	//! Absolute position (pixels)
-	typedef std::array<int, 2> AbsolutePos;
+	using AbsolutePos = std::array<int, 2>;
 
 	//! Label position at last display (absolute)
 	AbsolutePos m_lastScreenPos;

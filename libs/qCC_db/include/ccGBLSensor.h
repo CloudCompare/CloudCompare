@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GROUND_LIDAR_SENSOR_HEADER
-#define CC_GROUND_LIDAR_SENSOR_HEADER
 
 // Local
 #include "ccDepthBuffer.h"
@@ -282,7 +281,7 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
   protected:
 	// Inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
@@ -322,5 +321,3 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	//! Associated Z-buffer
 	ccDepthBuffer m_depthBuffer;
 };
-
-#endif // CC_GROUND_LIDAR_SENSOR_HEADER

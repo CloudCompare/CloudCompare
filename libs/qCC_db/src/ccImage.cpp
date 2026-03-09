@@ -15,13 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccImage.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccImage.h"
 
 // Local
-#include "ccCameraSensor.h"
+#include "../include/ccCameraSensor.h"
 
 // Qt
 #include <QFileInfo>
@@ -230,9 +227,9 @@ bool ccImage::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccImage::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// as the associated sensor can't be saved directly (as it may be shared by multiple images)
@@ -241,8 +238,10 @@ bool ccImage::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDM
 	uint32_t sensorUniqueID = 0;
 	if (in.read((char*)&sensorUniqueID, 4) < 0)
 		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-	*(uint32_t*)(&m_associatedSensor) = sensorUniqueID;
+	if (sensorUniqueID != 0)
+	{
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{sensorUniqueID, LoadingContext::Dependency::IMAGE_SENSOR}});
+	}
 
 	float texU = 1.0f;
 	float texV = 1.0f;

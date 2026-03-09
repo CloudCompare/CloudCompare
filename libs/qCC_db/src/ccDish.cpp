@@ -15,11 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDish.h"
+#include "../include/ccDish.h"
 
 // Local
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+#include "../include/ccPointCloud.h"
 
 ccDish::ccDish(PointCoordinateType radius,
                PointCoordinateType height,
@@ -187,16 +186,16 @@ bool ccDish::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccDish::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_baseRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_secondRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_height);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_baseRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_secondRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_height);
 
 	return true;
 }

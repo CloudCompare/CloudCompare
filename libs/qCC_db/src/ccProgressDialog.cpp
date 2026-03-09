@@ -15,12 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccProgressDialog.h"
+#include "../include/ccProgressDialog.h"
 
 // Qt
 #include <QCoreApplication>
-#include <QProgressBar>
 #include <QPushButton>
+#include <QThread>
 
 ccProgressDialog::ccProgressDialog(bool     showCancelButton,
                                    QWidget* parent /*=nullptr*/)
@@ -46,8 +46,6 @@ ccProgressDialog::ccProgressDialog(bool     showCancelButton,
 		cancelButton->setFocusPolicy(Qt::NoFocus);
 	}
 	setCancelButton(cancelButton);
-
-	connect(this, &ccProgressDialog::scheduleRefresh, this, &ccProgressDialog::refresh, Qt::QueuedConnection); // can't use DirectConnection here!
 }
 
 void ccProgressDialog::refresh()
@@ -67,35 +65,82 @@ void ccProgressDialog::update(float percent)
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
-		Q_EMIT scheduleRefresh();
-		QCoreApplication::processEvents();
+		if (QThread::currentThread() == thread())
+		{
+			// called from the GUI thread: refresh directly, and let the event loop
+			// breathe so that the dialog is actually repainted
+			refresh();
+			QCoreApplication::processEvents();
+		}
+		else
+		{
+			// called from a worker thread: the refresh has to happen in the GUI thread
+			QTimer::singleShot(0, this, [this]()
+			                   { refresh(); });
+		}
 	}
 }
 
 void ccProgressDialog::setMethodTitle(QString methodTitle)
 {
-	setWindowTitle(methodTitle);
+	if (QThread::currentThread() == thread())
+	{
+		setWindowTitle(methodTitle);
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this, methodTitle]()
+		                   { setWindowTitle(methodTitle); });
+	}
 }
 
 void ccProgressDialog::setInfo(QString infoStr)
 {
-	setLabelText(infoStr);
-	if (isVisible())
+	if (QThread::currentThread() == thread())
 	{
-		QProgressDialog::update();
-		QCoreApplication::processEvents();
+		setLabelText(infoStr);
+		if (isVisible())
+		{
+			QProgressDialog::update();
+			QCoreApplication::processEvents();
+		}
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this, infoStr]()
+		                   { setLabelText(infoStr); });
 	}
 }
 
 void ccProgressDialog::start()
 {
+	// thread-safe: algorithms may call this from a worker thread, and a widget can
+	// only be shown from the thread it lives in
 	m_lastRefreshValue = -1;
-	show();
-	QCoreApplication::processEvents();
+	if (QThread::currentThread() == thread())
+	{
+		show();
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this]()
+		                   { show(); });
+	}
 }
 
 void ccProgressDialog::stop()
 {
-	hide();
-	QCoreApplication::processEvents();
+	// thread-safe, see start()
+	if (QThread::currentThread() == thread())
+	{
+		hide();
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this]()
+		                   { hide(); });
+	}
 }

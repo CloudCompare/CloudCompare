@@ -39,7 +39,7 @@ private:
 	//whether disclaimer has already been displayed (and accepted) or not	
 	static bool s_disclaimerAccepted;
 	
-	Ui::DisclaimerDialog* m_ui;
+	std::unique_ptr<Ui::DisclaimerDialog> m_ui;
 };
 
 #endif //M3C2_DISCLAIMER_DIALOG_HEADER

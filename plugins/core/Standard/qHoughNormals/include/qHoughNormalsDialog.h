@@ -49,7 +49,7 @@ public:
 	void getParameters( Parameters& params );
 	
 private:
-	Ui::HoughNormalsDialog* m_ui;
+	std::unique_ptr<Ui::HoughNormalsDialog> m_ui;
 };
 
 #endif //QHOUGH_NORMALS_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_FILTER_BY_VALUE_DIALOG_HEADER
-#define CC_FILTER_BY_VALUE_DIALOG_HEADER
-
+// Ui
 #include <ui_filterByValueDlg.h>
 
 // Qt
@@ -66,5 +66,3 @@ class ccFilterByValueDlg : public QDialog
   protected:
 	Mode m_mode;
 };
-
-#endif // CC_FILTER_BY_VALUE_DIALOG_HEADER

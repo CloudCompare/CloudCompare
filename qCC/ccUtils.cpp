@@ -17,6 +17,7 @@
 
 #include "ccUtils.h"
 
+// Local
 #include "ccConsole.h"
 
 // Qt
@@ -61,7 +62,7 @@ namespace ccUtils
 			return false;
 		}
 
-		QStringList tokens = text.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+		QStringList tokens = text.split(QRegularExpression(R"(\s+)"), Qt::SkipEmptyParts);
 		if (tokens.size() != 3)
 		{
 			tokens = text.split(';', Qt::SkipEmptyParts);

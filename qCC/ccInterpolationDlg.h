@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_INTERPOLATION_DLG_HEADER
-#define CC_INTERPOLATION_DLG_HEADER
-
+// Ui
 #include <ui_interpolationDlg.h>
 
 // qCC_db
@@ -39,8 +39,9 @@ class ccInterpolationDlg : public QDialog
 	ccPointCloudInterpolator::Parameters::Algo getInterpolationAlgorithm() const;
 	void                                       setInterpolationAlgorithm(ccPointCloudInterpolator::Parameters::Algo algo);
 
+	void setNoNormalization(bool state);
+	bool noNormalization() const;
+
   protected:
 	void onRadiusUpdated(double);
 };
-
-#endif // CC_INTERPOLATION_DLG_HEADER

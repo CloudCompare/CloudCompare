@@ -18,13 +18,14 @@
 
 // Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
 
+// Local
 #include "CCPluginAPI.h"
-
-// Qt
-#include <QWidget>
 
 // qCC_db
 #include <ccColorScale.h>
+
+// Qt
+#include <QWidget>
 
 //! Color scale element as a widget
 class CCPLUGIN_LIB_API ColorScaleElementSlider : public QWidget
@@ -140,10 +141,10 @@ class CCPLUGIN_LIB_API ColorScaleEditorBaseWidget : public QWidget
 
   public:
 	//! Defautl constructor
-	ColorScaleEditorBaseWidget(SharedColorScaleElementSliders sliders,
-	                           Qt::Orientation                orientation,
-	                           int                            margin,
-	                           QWidget*                       parent = nullptr)
+	ColorScaleEditorBaseWidget(const SharedColorScaleElementSliders& sliders,
+	                           Qt::Orientation                       orientation,
+	                           int                                   margin,
+	                           QWidget*                              parent = nullptr)
 	    : QWidget(parent)
 	    , m_sliders(sliders)
 	    , m_orientation(orientation)
@@ -158,7 +159,7 @@ class CCPLUGIN_LIB_API ColorScaleEditorBaseWidget : public QWidget
 	}
 
 	//! Sets associated sliders set
-	virtual void setSliders(SharedColorScaleElementSliders sliders)
+	virtual void setSliders(const SharedColorScaleElementSliders& sliders)
 	{
 		m_sliders = sliders;
 		update();
@@ -342,7 +343,7 @@ class CCPLUGIN_LIB_API ccColorScaleEditorWidget : public ColorScaleEditorBaseWid
 	void setLabelPrecision(int precision);
 
 	// inherited from ColorScaleEditorBaseWidget
-	void setSliders(SharedColorScaleElementSliders sliders) override;
+	void setSliders(const SharedColorScaleElementSliders& sliders) override;
 
   Q_SIGNALS:
 

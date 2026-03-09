@@ -74,7 +74,7 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct& laszipHeader,
     : isPointFormatExtended(laszipHeader.point_data_format >= 6)
 {
 	descriptors = ParseWaveformDescriptorVlrs(laszipHeader.vlrs, laszipHeader.number_of_variable_length_records);
-	ccLog::Print("[LAS] %d Waveform Packet Descriptor VLRs found", descriptors.size());
+	ccLog::Printf("[LAS] %lld Waveform Packet Descriptor VLRs found", descriptors.size());
 
 	QFile fwfDataSource;
 	if (laszipHeader.start_of_waveform_data_packet_record != 0)
@@ -210,7 +210,7 @@ void LasWaveformLoader::loadWaveform(ccPointCloud& pointCloud, const laszip_poin
 	{
 		if (byteCount != 0) // otherwise it's just a blank/missing waveform
 		{
-			ccLog::Warning("[LAS] No valid descriptor vlr for index %d", descriptorIndex);
+			ccLog::Warningf("[LAS] No valid descriptor vlr for index %d", descriptorIndex);
 		}
 		return;
 	}
@@ -225,8 +225,8 @@ void LasWaveformLoader::loadWaveform(ccPointCloud& pointCloud, const laszip_poin
 
 	if (byteOffset + byteCount > fwfDataCount)
 	{
-		ccLog::Warning("[LAS] Waveform byte count for point %u is bigger than actual fwf data",
-		               pointCloud.size() - 1);
+		ccLog::Warningf("[LAS] Waveform byte count for point %u is bigger than actual fwf data",
+		                pointCloud.size() - 1);
 		byteCount = (fwfDataCount - byteOffset);
 	}
 

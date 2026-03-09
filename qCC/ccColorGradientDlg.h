@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_GRADIENT_DLG_HEADER
-#define CC_COLOR_GRADIENT_DLG_HEADER
+// Ui
+#include <ui_colorGradientDlg.h>
 
 // Qt
 #include <QColor>
-#include <ui_colorGradientDlg.h>
 
 //! Dialog to define a color gradient (default, with 2 colors, banding, etc.)
 class ccColorGradientDlg : public QDialog
@@ -58,5 +59,3 @@ class ccColorGradientDlg : public QDialog
 	void changeFirstColor();
 	void changeSecondColor();
 };
-
-#endif // CC_COLOR_GRADIENT_DLG_HEADER

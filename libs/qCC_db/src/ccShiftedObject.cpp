@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccShiftedObject.h"
+#include "../include/ccShiftedObject.h"
 
-// local
-#include "ccLog.h"
-#include "ccSerializableObject.h"
+// Local
+#include "../include/ccLog.h"
+#include "../include/ccSerializableObject.h"
 
 ccShiftedObject::ccShiftedObject(QString name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccHObject(name, uniqueID)
@@ -89,5 +89,5 @@ ccHObject::GlobalBoundingBox ccShiftedObject::getOwnGlobalBB(bool withGLFeatures
 	ccBBox     box       = getOwnBB(false);
 	CCVector3d minCorner = toGlobal3d(box.minCorner());
 	CCVector3d maxCorner = toGlobal3d(box.maxCorner());
-	return GlobalBoundingBox(minCorner, maxCorner, box.isValid());
+	return {minCorner, maxCorner, box.isValid()};
 }

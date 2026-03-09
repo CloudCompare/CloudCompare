@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,16 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_PLANE_EDIT_DLG_HEADER
-#define CC_PLANE_EDIT_DLG_HEADER
-
-// Local
-#include "ccPickingListener.h"
-
+// Ui
 #include <ui_planeEditDlg.h>
 
 // CCCoreLib
 #include <CCGeom.h>
+
+// CCPluginAPI
+#include <ccPickingListener.h>
 
 // Qt
 #include <QDialog>
@@ -46,7 +46,7 @@ class ccPlaneEditDlg : public QDialog
 	explicit ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent);
 
 	//! Destructor
-	virtual ~ccPlaneEditDlg();
+	~ccPlaneEditDlg() override;
 
 	//! Links this dialog with an existing plane
 	void initWithPlane(ccPlane* plane);
@@ -55,7 +55,7 @@ class ccPlaneEditDlg : public QDialog
 	void updatePlane(ccPlane* plane);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	void onItemPicked(const PickedItem& pi) override;
 
   public:
 	void pickPointAsCenter(bool);
@@ -76,5 +76,3 @@ class ccPlaneEditDlg : public QDialog
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 };
-
-#endif

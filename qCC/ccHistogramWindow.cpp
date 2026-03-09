@@ -17,15 +17,21 @@
 
 #include "ccHistogramWindow.h"
 
-#include "ccGuiParameters.h"
-
 // Local
-#include "ccPersistentSettings.h"
 #include "ccQCustomPlot.h"
+
+// Ui
+#include <ui_histogramDlg.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <ccColorScalesManager.h>
 #include <ccFileUtils.h>
+
+// qCC_glWindow
+#include <ccGuiParameters.h>
 
 // qCC_io
 #include <ImageFileFilter.h>
@@ -38,11 +44,8 @@
 #include <QTextStream>
 
 // System
-#include <assert.h>
+#include <cassert>
 #include <cmath>
-
-// Gui
-#include "ui_histogramDlg.h"
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent /*=nullptr*/)
     : QCustomPlot(parent)
@@ -110,8 +113,7 @@ void ccHistogramWindow::clearInternal()
 {
 	if (m_associatedSF)
 	{
-		m_associatedSF->release();
-		m_associatedSF = nullptr;
+		m_associatedSF.reset();
 	}
 
 	m_histoValues.resize(0);
@@ -152,18 +154,14 @@ void ccHistogramWindow::setAxisLabels(const QString& xLabel, const QString& yLab
 	}
 }
 
-void ccHistogramWindow::fromSF(ccScalarField* sf,
-                               unsigned       initialNumberOfClasses /*=0*/,
-                               bool           numberOfClassesCanBeChanged /*=true*/,
-                               bool           showNaNValuesInGrey /*=true*/)
+void ccHistogramWindow::fromSF(ccScalarField::Shared sf,
+                               unsigned              initialNumberOfClasses /*=0*/,
+                               bool                  numberOfClassesCanBeChanged /*=true*/,
+                               bool                  showNaNValuesInGrey /*=true*/)
 {
 	if (sf && m_associatedSF != sf)
 	{
-		if (m_associatedSF)
-			m_associatedSF->release();
 		m_associatedSF = sf;
-		if (m_associatedSF)
-			m_associatedSF->link();
 	}
 
 	if (m_associatedSF)
@@ -184,7 +182,7 @@ void ccHistogramWindow::fromSF(ccScalarField* sf,
 };
 
 void ccHistogramWindow::fromBinArray(const std::vector<unsigned>& histoValues,
-                                     ccScalarField*               sf)
+                                     ccScalarField::Shared        sf)
 {
 	try
 	{
@@ -198,11 +196,7 @@ void ccHistogramWindow::fromBinArray(const std::vector<unsigned>& histoValues,
 
 	if (sf && m_associatedSF != sf)
 	{
-		if (m_associatedSF)
-			m_associatedSF->release();
 		m_associatedSF = sf;
-		if (m_associatedSF)
-			m_associatedSF->link();
 	}
 
 	m_minVal                      = m_associatedSF ? m_associatedSF->getMin() : 0;
@@ -322,9 +316,9 @@ unsigned ccHistogramWindow::getMaxHistoVal()
 {
 	unsigned m_maxHistoVal = 0;
 
-	for (size_t i = 0; i < m_histoValues.size(); ++i)
+	for (unsigned int histoValue : m_histoValues)
 	{
-		m_maxHistoVal = std::max(m_maxHistoVal, m_histoValues[i]);
+		m_maxHistoVal = std::max(m_maxHistoVal, histoValue);
 	}
 
 	return m_maxHistoVal;
@@ -796,7 +790,7 @@ void ccHistogramWindow::resizeEvent(QResizeEvent* event)
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent* event)
 {
-	m_lastMouseClick = event->pos();
+	m_lastMouseClick = event->position().toPoint();
 
 	if (m_sfInteractionModes)
 	{
@@ -842,7 +836,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_sfInteractionModes)
 		{
-			QPoint mousePos = event->pos();
+			QPoint mousePos = event->position().toPoint();
 			if (m_histogram)
 			{
 				QRect rect = m_histogram->rect();
@@ -883,7 +877,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_AREA;
@@ -923,7 +917,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_ARROW;
@@ -944,11 +938,11 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 			if (m_histogram && !m_histoValues.empty())
 			{
 				QRect roi = m_histogram->rect();
-				if (roi.contains(event->pos(), false))
+				if (roi.contains(event->position().toPoint(), false))
 				{
 					m_drawVerticalIndicator = true;
 
-					int verticalIndicatorPosition      = (static_cast<int>(m_histoValues.size()) * (event->x() - roi.x())) / roi.width();
+					int verticalIndicatorPosition      = (static_cast<int>(m_histoValues.size()) * (event->position().toPoint().x() - roi.x())) / roi.width();
 					m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
 
 					refresh();
@@ -990,25 +984,22 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
     , m_win(new ccHistogramWindow(this))
-    , m_gui(new Ui_HistogramDialog)
+    , m_ui(std::make_unique<Ui::HistogramDialog>())
 {
-	m_gui->setupUi(this);
+	m_ui->setupUi(this);
 
-	auto hboxLayout = new QHBoxLayout;
+	auto* hboxLayout = new QHBoxLayout;
 
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	hboxLayout->addWidget(m_win);
 
-	m_gui->histoFrame->setLayout(hboxLayout);
+	m_ui->histoFrame->setLayout(hboxLayout);
 
-	connect(m_gui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
-	connect(m_gui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
+	connect(m_ui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
+	connect(m_ui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
 }
 
-ccHistogramWindowDlg::~ccHistogramWindowDlg()
-{
-	delete m_gui;
-}
+ccHistogramWindowDlg::~ccHistogramWindowDlg() = default;
 
 // CSV file default separator
 static const QChar s_csvSep(';');

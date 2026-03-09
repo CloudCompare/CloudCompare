@@ -19,7 +19,8 @@
      <item>
       <widget class="QCheckBox" name="showAlignedCheckBox">
        <property name="styleSheet">
-        <string notr="true">background-color: red; color: white;</string>
+        <string notr="true">background-color: red;
+color: white;</string>
        </property>
        <property name="text">
         <string>show 'to be aligned' entities</string>
@@ -48,7 +49,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -130,19 +131,19 @@
    <item>
     <widget class="QTableWidget" name="alignedPointsTableWidget">
      <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
      <property name="showDropIndicator" stdset="0">
       <bool>false</bool>
      </property>
      <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
+      <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
       <number>70</number>
      </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
+      <number>24</number>
      </attribute>
      <row>
       <property name="text">
@@ -184,12 +185,12 @@
        <string>Delta X</string>
       </property>
      </column>
-       <column>
+     <column>
       <property name="text">
        <string>Delta Y</string>
       </property>
      </column>
-       <column>
+     <column>
       <property name="text">
        <string>Delta Z</string>
       </property>
@@ -211,7 +212,8 @@
      <item>
       <widget class="QCheckBox" name="showReferenceCheckBox">
        <property name="styleSheet">
-        <string notr="true">background-color: yellow;</string>
+        <string notr="true">background-color: yellow;
+color:black;</string>
        </property>
        <property name="text">
         <string>show 'reference' entities</string>
@@ -240,7 +242,7 @@
      <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -255,19 +257,19 @@
    <item>
     <widget class="QTableWidget" name="refPointsTableWidget">
      <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
+      <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
      </property>
      <property name="showDropIndicator" stdset="0">
       <bool>false</bool>
      </property>
      <property name="selectionMode">
-      <enum>QAbstractItemView::NoSelection</enum>
+      <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
      </property>
      <attribute name="horizontalHeaderDefaultSectionSize">
       <number>70</number>
      </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
-      <number>18</number>
+      <number>24</number>
      </attribute>
      <row>
       <property name="text">
@@ -343,7 +345,7 @@
      <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -365,7 +367,7 @@
         <string>Rotation</string>
        </property>
        <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
        </property>
       </widget>
      </item>
@@ -381,7 +383,7 @@
         <string>Constrains the rotation around a single axis (warning: experimental)</string>
        </property>
        <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
+        <enum>Qt::LayoutDirection::RightToLeft</enum>
        </property>
        <item>
         <property name="text">
@@ -413,10 +415,10 @@
      <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
+        <enum>QSizePolicy::Policy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -500,7 +502,7 @@
      <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>

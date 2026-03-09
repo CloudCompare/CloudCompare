@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_DEPTH_BUFFER_HEADER
-#define CC_DEPTH_BUFFER_HEADER
-
-// local
+// Local
 #include "qCC_db.h"
 
+// CCCoreLib
 #include <CCGeom.h>
 
 // System
@@ -59,5 +59,3 @@ class QCC_DB_LIB_API ccDepthBuffer
 	**/
 	int fillHoles();
 };
-
-#endif // CC_DEPTH_BUFFER_HEADER

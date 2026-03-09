@@ -142,8 +142,10 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		//we apply the cloud current color scale ONLY if it is not a default one
 		//(otherwise we keep the default dialog's one)
 		const ccColorScale::Shared& scale = m_sf->getColorScale();
-		if (scale && !scale->isLocked())
+		if (scale && !scale->isReadOnly())
+		{
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());
+		}
 	}
 
 	//profile meta-data
@@ -720,7 +722,7 @@ void DistanceMapGenerationDlg::update()
 			updateMapTexture();
 
 			//add a virtual scalar field for color ramp display
-			ccScalarField* sf = new ccScalarField();
+			auto sf = std::make_shared<ccScalarField>();
 			{
 				sf->reserve(2);
 				ScalarType smin = static_cast<ScalarType>(m_map->minVal);
@@ -832,13 +834,13 @@ void DistanceMapGenerationDlg::updateMapTexture()
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(texturedEntity);
 			//set material
-			ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(mesh->getMaterialSet());
+			auto materialSet = mesh->getMaterialSet();
 			assert(materialSet);
 			//remove old material (if any)
 			materialSet->clear();
 			//add new material
 			{
-				ccMaterial::Shared material(new ccMaterial("texture"));
+				auto material = std::make_shared<ccMaterial>("texture");
 				material->setTexture(mapImage, QString(), false);
 				materialSet->addMaterial(material);
 			}
@@ -853,7 +855,7 @@ void DistanceMapGenerationDlg::colorScaleChanged(int)
 	if (!m_window || !m_colorScaleSelector)
 		return;
 
-	ccScalarField* sf = m_window->getAssociatedScalarField();
+	auto sf = m_window->getAssociatedScalarField();
 	if (sf)
 	{
 		ccColorScale::Shared colorScale = m_colorScaleSelector->getSelectedScale();

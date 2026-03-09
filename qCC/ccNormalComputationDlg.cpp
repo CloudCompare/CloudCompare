@@ -25,8 +25,8 @@
 // Qt
 #include <QComboBox>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 ccNormalComputationDlg::ccNormalComputationDlg(bool withScanGrid, bool withSensor, QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

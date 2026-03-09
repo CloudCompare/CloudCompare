@@ -17,9 +17,6 @@
 
 #include "ccOrthoSectionGenerationDlg.h"
 
-// system
-#include <cmath>
-
 ccOrthoSectionGenerationDlg::ccOrthoSectionGenerationDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
     , Ui::OrthoSectionGenerationDlg()

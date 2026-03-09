@@ -19,6 +19,7 @@
 
 // Local
 #include "ccBBox.h"
+#include "ccDrawableObject.h"
 #include "ccObject.h"
 
 class QIcon;
@@ -374,7 +375,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 			setDisplay(newDisplay);
 		}
 
-		for (auto child : m_children)
+		for (auto* child : m_children)
 		{
 			child->transferDisplay(oldDisplay, newDisplay);
 		}
@@ -396,27 +397,16 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	// inherited from ccSerializableObject
 	bool  isSerializable() const override;
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	//! Custom version of ccSerializableObject::fromFile
 	/** This is used to load only the object's part of a stream (and not its children)
 	    \param in input file (already opened)
-	    \param dataVersion file version
-	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-	    \param oldToNewIDMap map to convert old IDs to new ones
+	    \param context loading context (see ccSerializableObject::LoadingContext)
 	    \return success
 	**/
-	bool fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
-
-	//! Returns whether object is shareable or not
-	/** If object is father dependent and 'shared', it won't
-	    be deleted but 'released' instead.
-	**/
-	virtual inline bool isShareable() const
-	{
-		return false;
-	}
+	bool fromFileNoChildren(QFile& in, LoadingContext& context);
 
 	//! Behavior when selected
 	enum SelectionBehavior
@@ -495,11 +485,9 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	/** Called by 'fromFile' (recursive scheme)
 	    To be overloaded (but still called ;) by subclass.
 	    \param in input file
-	    \param dataVersion file version
-	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-	    \param oldToNewIDMap map to link old IDs with new IDs
+	    \param context loading context (see ccSerializableObject::LoadingContext)
 	**/
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
+	virtual bool fromFile_MeOnly(QFile& in, LoadingContext& context);
 
 	//! Returns the minimum file version required to save this instance
 	/** To be overloaded (but still called ;) by subclass.

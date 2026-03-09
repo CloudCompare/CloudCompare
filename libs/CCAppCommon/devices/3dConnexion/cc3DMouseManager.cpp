@@ -17,10 +17,16 @@
 
 #include "cc3DMouseManager.h"
 
+// Local
 #include "Mouse3DInput.h"
-#include "ccGLWindowInterface.h"
-#include "ccMainAppInterface.h"
 
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
+// Qt
 #include <QAction>
 #include <QMainWindow>
 #include <QMenu>
@@ -38,11 +44,7 @@ cc3DMouseManager::cc3DMouseManager(ccMainAppInterface* appInterface, QObject* pa
 cc3DMouseManager::~cc3DMouseManager()
 {
 	releaseDevice();
-
-	if (m_menu)
-	{
-		delete m_menu;
-	}
+	delete m_menu;
 }
 
 void cc3DMouseManager::enableDevice(bool state, bool silent)
@@ -59,10 +61,10 @@ void cc3DMouseManager::enableDevice(bool state, bool silent)
 		{
 			connect(m3dMouseInput, &Mouse3DInput::sigMove3d, this, &cc3DMouseManager::on3DMouseMove);
 			connect(m3dMouseInput, &Mouse3DInput::sigReleased, this, &cc3DMouseManager::on3DMouseReleased);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &cc3DMouseManager::on3DMouseKeyDown);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &cc3DMouseManager::on3DMouseKeyUp);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &cc3DMouseManager::on3DMouseCMDKeyDown);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &cc3DMouseManager::on3DMouseCMDKeyUp);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyDown, this, &cc3DMouseManager::on3DMouseKeyDown);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyUp, this, &cc3DMouseManager::on3DMouseKeyUp);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyDown, this, &cc3DMouseManager::on3DMouseCMDKeyDown);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyUp, this, &cc3DMouseManager::on3DMouseCMDKeyUp);
 		}
 		else
 		{
@@ -319,6 +321,11 @@ void cc3DMouseManager::on3DMouseReleased()
 	ccGLWindowInterface* win = m_appInterface->getActiveGLWindow();
 	if (win == nullptr)
 		return;
+
+	// The 3D mouse is no longer driving the view: clear the 'mouse moved'
+	// flag so that the LOD refinement cycle can resume and restore full
+	// rendering quality.
+	win->set3DMouseActive(false);
 
 	if (win->getPivotVisibility() == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE)
 	{

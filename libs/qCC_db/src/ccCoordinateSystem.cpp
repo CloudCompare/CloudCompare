@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCoordinateSystem.h"
+#include "../include/ccCoordinateSystem.h"
 
-// qCC_db
-#include "ccPlane.h"
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPlane.h"
+#include "../include/ccPointCloud.h"
 
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
                                        PointCoordinateType axisWidth,
@@ -193,15 +193,15 @@ bool ccCoordinateSystem::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCoordinateSystem::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCoordinateSystem::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=52)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_DisplayScale, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_DisplayScale, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_width, 1);
 	return true;
 }
 

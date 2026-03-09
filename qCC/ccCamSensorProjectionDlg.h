@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
-
+// Ui
 #include <ui_camSensorProjectDlg.h>
 
 class ccCameraSensor;
@@ -35,5 +35,3 @@ class ccCamSensorProjectionDlg : public QDialog
 	void initWithCamSensor(const ccCameraSensor* sensor);
 	void updateCamSensor(ccCameraSensor* sensor);
 };
-
-#endif // CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER

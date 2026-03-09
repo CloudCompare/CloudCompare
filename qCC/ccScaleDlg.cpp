@@ -17,7 +17,8 @@
 
 #include "ccScaleDlg.h"
 
-#include "ui_scaleDlg.h"
+// Ui
+#include <ui_scaleDlg.h>
 
 // semi persistent parameters
 static CCVector3d s_lastScales(1.0, 1.0, 1.0);
@@ -27,7 +28,7 @@ static bool       s_rescaleGlobalShift = true;
 
 ccScaleDlg::ccScaleDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent)
-    , m_ui(new Ui::ScaleDialog)
+    , m_ui(std::make_unique<Ui::ScaleDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -43,10 +44,7 @@ ccScaleDlg::ccScaleDlg(QWidget* parent /*=nullptr*/)
 	m_ui->fxSpinBox->setValue(s_lastScales.x); // always last in case 'same for all' is checked!
 }
 
-ccScaleDlg::~ccScaleDlg()
-{
-	delete m_ui;
-}
+ccScaleDlg::~ccScaleDlg() = default;
 
 void ccScaleDlg::saveState()
 {
@@ -67,10 +65,10 @@ void ccScaleDlg::fxUpdated(double val)
 
 CCVector3d ccScaleDlg::getScales() const
 {
-	return CCVector3d(
+	return {
 	    m_ui->fxSpinBox->value(),
 	    m_ui->fySpinBox->value(),
-	    m_ui->fzSpinBox->value());
+	    m_ui->fzSpinBox->value()};
 }
 
 bool ccScaleDlg::keepInPlace() const

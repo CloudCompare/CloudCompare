@@ -15,13 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccNormalCompressor.h"
+#include "../include/ccNormalCompressor.h"
 
 // CCCoreLib
 #include <CCConst.h>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 void ccNormalCompressor::InvertNormal(CompressedNormType& code)
 {

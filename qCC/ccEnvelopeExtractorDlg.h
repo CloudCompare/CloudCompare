@@ -17,15 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
-#include <QEventLoop>
+// Ui
+#include <ui_envelopeExtractorDlg.h>
 
 // qCC_db
 #include <ccBBox.h>
 
-// GUI
-#include <ui_envelopeExtractorDlg.h>
+// Qt
+#include <QDialog>
+#include <QEventLoop>
 
 class ccGLWindowInterface;
 class ccHObject;

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CHUNK_HEADER
-#define CC_CHUNK_HEADER
-
 // System
 #include <vector>
 
@@ -25,8 +24,8 @@
 class ccChunk
 {
   public:
-	static const size_t SIZE_POWER = 16;
-	static const size_t SIZE       = (1 << SIZE_POWER); //~ 64K
+	static constexpr size_t SIZE_POWER = 16;
+	static constexpr size_t SIZE       = (1 << SIZE_POWER); //~ 64K
 
 	inline static size_t Count(size_t elementCount)
 	{
@@ -65,5 +64,3 @@ class ccChunk
 		return Size(chunkIndex, buffer.size());
 	}
 };
-
-#endif // CC_CHUNK_HEADER

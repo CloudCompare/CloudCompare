@@ -17,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
 #include <ui_askThreeDoubleValuesDlg.h>
 
 // Qt
@@ -39,7 +40,7 @@ class ccAskThreeDoubleValuesDlg : public QDialog
 	                          double         defaultVal2,
 	                          double         defaultVal3,
 	                          int            precision   = 6,
-	                          const QString  windowTitle = QString(),
+	                          QString        windowTitle = QString(),
 	                          QWidget*       parent      = nullptr);
 
 	//! Enable the checkbox (bottom-left)

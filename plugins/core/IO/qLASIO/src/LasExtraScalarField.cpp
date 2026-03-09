@@ -10,7 +10,9 @@
 #include <laszip/laszip_api.h>
 // Qt
 #include <QDataStream>
+#include <QFile>
 // System
+#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 
@@ -168,16 +170,86 @@ unsigned LasExtraScalarField::numElements() const
 }
 
 std::vector<LasExtraScalarField>
-LasExtraScalarField::ParseExtraScalarFields(const laszip_header& laszipHeader)
+LasExtraScalarField::ParseExtraScalarFields(const laszip_header& laszipHeader, const QString& fileName)
 {
-	auto* extraBytesVlr = std::find_if(laszipHeader.vlrs,
-	                                   laszipHeader.vlrs + laszipHeader.number_of_variable_length_records,
-	                                   LasDetails::IsExtraBytesVlr);
-	if (extraBytesVlr < laszipHeader.vlrs + laszipHeader.number_of_variable_length_records)
+	std::vector<LasExtraScalarField> info;
+
+	auto*      extraBytesVlr    = std::find_if(laszipHeader.vlrs,
+                                       laszipHeader.vlrs + laszipHeader.number_of_variable_length_records,
+                                       LasDetails::IsExtraBytesVlr);
+	const bool hasExtraBytesVlr = (extraBytesVlr < laszipHeader.vlrs + laszipHeader.number_of_variable_length_records);
+	if (hasExtraBytesVlr)
 	{
-		return LasExtraScalarField::ParseExtraScalarFields(*extraBytesVlr);
+		info = LasExtraScalarField::ParseExtraScalarFields(*extraBytesVlr);
 	}
-	return {};
+
+	if (laszipHeader.version_minor < 4 || laszipHeader.number_of_extended_variable_length_records == 0)
+	{
+		return info;
+	}
+
+	// LASzip does not read the EVLRs, so we look for an "Extra Bytes" EVLR in the file itself
+	QFile file(fileName);
+	if (!file.open(QFile::ReadOnly))
+	{
+		ccLog::Warning(QString("[LAS] Failed to re open the las file to read its EVLRs: %1").arg(file.errorString()));
+		return info;
+	}
+
+	const quint64 fileSize = static_cast<quint64>(file.size());
+	quint64       position = laszipHeader.start_of_first_extended_variable_length_record;
+	QDataStream   stream(&file);
+	for (laszip_U32 i = 0; i < laszipHeader.number_of_extended_variable_length_records; ++i)
+	{
+		if (position > fileSize || fileSize - position < LasDetails::EvlrHeader::SIZE || !file.seek(static_cast<qint64>(position)))
+		{
+			ccLog::Warning("[LAS] Invalid EVLR position, the remaining EVLRs are ignored");
+			break;
+		}
+
+		LasDetails::EvlrHeader evlrHeader;
+		stream >> evlrHeader;
+		if (stream.status() != QDataStream::Status::Ok)
+		{
+			ccLog::Warning("[LAS] Failed to read an EVLR header, the remaining EVLRs are ignored");
+			break;
+		}
+		position += LasDetails::EvlrHeader::SIZE;
+
+		if (evlrHeader.recordLength > fileSize - position)
+		{
+			ccLog::Warning(QString("[LAS] Truncated EVLR (%1 bytes declared, %2 left in the file), the remaining EVLRs are ignored").arg(evlrHeader.recordLength).arg(fileSize - position));
+			break;
+		}
+
+		if (evlrHeader.isExtraBytes())
+		{
+			// a point record is at most 65535 bytes long, and each extra field takes at least 1 byte
+			constexpr quint64 maxRecordLength = 65535 * VLR_FIELD_SIZE_BYTES;
+			if (hasExtraBytesVlr)
+			{
+				ccLog::Warning("[LAS] The file has both an Extra Bytes VLR and an Extra Bytes EVLR: the Extra Bytes EVLR is ignored");
+			}
+			else if (evlrHeader.recordLength > maxRecordLength)
+			{
+				ccLog::Warning(QString("[LAS] The Extra Bytes EVLR is too large (%1 bytes) and is ignored").arg(evlrHeader.recordLength));
+			}
+			else
+			{
+				if (evlrHeader.recordLength % VLR_FIELD_SIZE_BYTES != 0)
+				{
+					ccLog::Warning("[LAS] The Extra Bytes EVLR length is not a multiple of 192 bytes, the last bytes are ignored");
+				}
+				const QByteArray data = file.read(static_cast<qint64>(evlrHeader.recordLength));
+				info                  = LasExtraScalarField::ParseExtraScalarFields(data.constData(), static_cast<size_t>(data.size()));
+			}
+			break;
+		}
+
+		position += evlrHeader.recordLength;
+	}
+
+	return info;
 }
 
 std::vector<LasExtraScalarField>
@@ -188,14 +260,20 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 		return {};
 	}
 
-	std::vector<LasExtraScalarField> info;
-	QByteArray                       data(reinterpret_cast<char*>(extraBytesVlr.data), extraBytesVlr.record_length_after_header);
-	QDataStream                      dataStream(data);
+	return LasExtraScalarField::ParseExtraScalarFields(reinterpret_cast<const char*>(extraBytesVlr.data), extraBytesVlr.record_length_after_header);
+}
 
-	uint16_t numExtraFields = extraBytesVlr.record_length_after_header / 192;
+std::vector<LasExtraScalarField>
+LasExtraScalarField::ParseExtraScalarFields(const char* data, size_t size)
+{
+	std::vector<LasExtraScalarField> info;
+	QByteArray                       byteArray(data, static_cast<qsizetype>(size));
+	QDataStream                      dataStream(byteArray);
+
+	size_t numExtraFields = size / VLR_FIELD_SIZE_BYTES;
 
 	unsigned byteOffset{0};
-	for (uint16_t j = 0; j < numExtraFields; ++j)
+	for (size_t j = 0; j < numExtraFields; ++j)
 	{
 		LasExtraScalarField ebInfo;
 		dataStream >> ebInfo;
@@ -211,11 +289,11 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 		}
 
 		byteOffset += ebInfo.byteSize();
-		ccLog::Print("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
-		             ebInfo.name,
-		             ebInfo.typeName().c_str(),
-		             ebInfo.byteSize(),
-		             ebInfo.byteOffset);
+		ccLog::Printf("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
+		              ebInfo.name,
+		              ebInfo.typeName().c_str(),
+		              ebInfo.byteSize(),
+		              ebInfo.byteOffset);
 	}
 	return info;
 }
@@ -295,17 +373,26 @@ LasExtraScalarField::Kind LasExtraScalarField::kind() const
 void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct& vlr, const std::vector<LasExtraScalarField>& extraFields)
 {
 	strcpy(vlr.user_id, "LASF_Spec");
-	vlr.record_id                  = 4;
-	vlr.record_length_after_header = 192 * static_cast<laszip_U16>(extraFields.size());
+	vlr.record_id = 4;
+
+	// the length of a VLR payload is stored on 16 bits, so the descriptor cannot
+	// describe more fields than that. The caller is expected to have checked this
+	// already, we only make sure we never write past the end of the buffer.
+	const size_t fieldCount = std::min(extraFields.size(), MAX_EXTRA_FIELDS_IN_VLR);
+	if (fieldCount != extraFields.size())
+	{
+		ccLog::Warning(QString("[LAS] Only the first %1 extra scalar fields can be described (out of %2)").arg(fieldCount).arg(extraFields.size()));
+	}
+	vlr.record_length_after_header = static_cast<laszip_U16>(VLR_FIELD_SIZE_BYTES * fieldCount);
 	std::fill(vlr.description, vlr.description + 32, 0);
 	vlr.data = new laszip_U8[vlr.record_length_after_header];
 
 	QByteArray byteArray;
 	byteArray.resize(vlr.record_length_after_header);
 	QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
-	for (const LasExtraScalarField& extraScalarField : extraFields)
+	for (size_t i = 0; i < fieldCount; ++i)
 	{
-		dataStream << extraScalarField;
+		dataStream << extraFields[i];
 	}
 	Q_ASSERT(byteArray.size() == vlr.record_length_after_header);
 	std::copy(byteArray.begin(), byteArray.end(), vlr.data);
@@ -400,13 +487,13 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 				int pos = pointCloud.getScalarFieldIndexByName(name);
 				if (pos >= 0)
 				{
-					extraScalarField.scalarFields[i] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+					extraScalarField.scalarFields[i] = pointCloud.getCCScalarField(pos);
 					found++;
-					ccLog::Warning("[LAS] field %s found", name);
+					ccLog::Warningf("[LAS] field '%s' found", name);
 				}
 				else
 				{
-					ccLog::Warning("[LAS] field %s not found", name);
+					ccLog::Warningf("[LAS] field '%s' not found", name);
 					extraScalarField.scalarFields[i] = nullptr;
 				}
 			}
@@ -426,11 +513,11 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 			int pos = pointCloud.getScalarFieldIndexByName(nameToSearch);
 			if (pos >= 0)
 			{
-				extraScalarField.scalarFields[0] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+				extraScalarField.scalarFields[0] = pointCloud.getCCScalarField(pos);
 			}
 			else
 			{
-				ccLog::Warning("[LAS] field %s not found", nameToSearch);
+				ccLog::Warningf("[LAS] field '%s' not found", nameToSearch);
 			}
 		}
 	}
@@ -438,7 +525,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 	// ccScalarField
 	const auto notAllScalarFieldWereFound = [](const LasExtraScalarField& extraScalarField)
 	{
-		const auto ptrIsNull = [](const ccScalarField* ptr)
+		const auto ptrIsNull = [](const ccScalarField::Shared& ptr)
 		{
 			return ptr == nullptr;
 		};

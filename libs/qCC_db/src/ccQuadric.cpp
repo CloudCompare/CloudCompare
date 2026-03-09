@@ -15,22 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always on top!
-#include "ccQuadric.h"
+#include "../include/ccQuadric.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccPointCloud.h"
 
-// qCC_db
-#include "ccMaterialSet.h"
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+// CCCoreLib
+#include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 
-// CCLIB
-#include "DistanceComputationTools.h"
-#include "Neighbourhood.h"
-
-// system
-#include <string.h>
+// System
+#include <cstring>
 
 ccQuadric::ccQuadric(CCVector2                      minCorner,
                      CCVector2                      maxCorner,
@@ -289,29 +284,29 @@ bool ccQuadric::toFile_MeOnly(QFile& out, short dataVersion) const
 	outStream << m_maxCorner.x;
 	outStream << m_maxCorner.y;
 
-	for (unsigned i = 0; i < 6; ++i)
+	for (float coeff : m_eq)
 	{
-		outStream << m_eq[i];
+		outStream << coeff;
 	}
 
 	return true;
 }
 
-bool ccQuadric::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccQuadric::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=35)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.x, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_minCorner.y, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.x, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_maxCorner.y, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_minCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_minCorner.y, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_maxCorner.x, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_maxCorner.y, 1);
 
 	for (unsigned i = 0; i < 6; ++i)
 	{
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_eq + i, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, m_eq + i, 1);
 	}
 
 	return true;
@@ -325,5 +320,5 @@ short ccQuadric::minimumFileVersion_MeOnly() const
 ccBBox ccQuadric::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true);
+	return {CCVector3(m_minCorner.x, m_minCorner.y, m_minZ), CCVector3(m_maxCorner.x, m_maxCorner.y, m_maxZ), true};
 }

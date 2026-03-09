@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SELECT_CHILDREN_DLG_HEADER
-#define CC_SELECT_CHILDREN_DLG_HEADER
+// qCC_db
+#include <ccObject.h>
 
 // Qt
 #include <QDialog>
-
-// qCC_db
-#include <ccObject.h>
 
 namespace Ui
 {
@@ -64,7 +63,5 @@ class ccSelectChildrenDlg : public QDialog
 	void onAccept();
 
   private:
-	Ui::SelectChildrenDialog* mUI;
+	std::unique_ptr<Ui::SelectChildrenDialog> m_ui;
 };
-
-#endif // CC_SELECT_CHILDREN_DLG_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_BASIC_TYPES_HEADER
-#define CC_BASIC_TYPES_HEADER
-
 // CCCoreLib
 #include <CCTypes.h>
 
@@ -25,5 +24,3 @@
 /** Should be set accordingly to ccNormalCompressor::QUANTIZE_LEVEL
  **/
 using CompressedNormType = unsigned int;
-
-#endif // CC_BASIC_TYPES_HEADER

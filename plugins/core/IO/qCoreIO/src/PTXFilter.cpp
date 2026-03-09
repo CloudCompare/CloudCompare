@@ -109,7 +109,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	ScalarType    maxIntensity = 0;
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -118,7 +118,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	}
 
 	// progress dialog (for normals computation)
-	QScopedPointer<ccProgressDialog> normalsProgressDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> normalsProgressDlg(nullptr);
 	if (parameters.parentWidget && parameters.autoComputeNormals)
 	{
 		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -207,7 +207,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			{
 				if (HandleGlobalShift(cloudTransD.getTranslationAsVec3D(), PshiftTrans, preserveCoordinateShift, parameters))
 				{
-					ccLog::Warning("[PTXFilter::loadFile] Cloud has be recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftTrans.x, PshiftTrans.y, PshiftTrans.z);
+					ccLog::Warningf("[PTXFilter::loadFile] Cloud has be recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftTrans.x, PshiftTrans.y, PshiftTrans.z);
 				}
 			}
 
@@ -247,12 +247,11 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		}
 
 		// intensities
-		ccScalarField* intensitySF = new ccScalarField(CC_PTX_INTENSITY_FIELD_NAME);
+		auto intensitySF = std::make_shared<ccScalarField>(CC_PTX_INTENSITY_FIELD_NAME);
 		if (!intensitySF->reserveSafe(static_cast<unsigned>(gridSize)))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
-			intensitySF->release();
-			intensitySF = nullptr;
+			intensitySF.reset();
 		}
 
 		// grid structure
@@ -272,7 +271,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 		// read points
 		{
-			CCCoreLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
+			CCCoreLib::NormalizedProgress nprogress(pDlg.get(), gridSize);
 			if (pDlg)
 			{
 				pDlg->setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
@@ -282,6 +281,8 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			bool   firstPoint     = true;
 			bool   hasColors      = false;
 			bool   loadColors     = false;
+			bool   hasNormals     = false;
+			bool   loadNormals    = false;
 			bool   loadGridColors = false;
 			size_t gridIndex      = 0;
 
@@ -294,7 +295,8 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 					if (firstPoint)
 					{
-						hasColors = (tokens.size() == 7);
+						hasNormals = (tokens.size() == 10);
+						hasColors  = (hasNormals || (tokens.size() == 7));
 						if (hasColors)
 						{
 							loadColors = cloud->reserveTheRGBTable();
@@ -316,8 +318,18 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 								}
 							}
 						}
+						if (hasNormals)
+						{
+							loadNormals = cloud->reserveTheNormsTable();
+							if (!loadNormals)
+							{
+								ccLog::Warning("[PTX] Not enough memory to load normals!");
+							}
+						}
 					}
-					if ((hasColors && tokens.size() != 7) || (!hasColors && tokens.size() != 4))
+					if ((hasNormals && (tokens.size() != 10))
+					    || ((!hasNormals && hasColors) && (tokens.size() != 7))
+					    || ((!hasNormals && !hasColors) && (tokens.size() != 4)))
 					{
 						result = CC_FERR_MALFORMED_FILE;
 						// early stop
@@ -356,7 +368,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 									{
 										cloud->setGlobalShift(PshiftCloud);
 									}
-									ccLog::Warning("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftCloud.x, PshiftCloud.y, PshiftCloud.z);
+									ccLog::Warningf("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftCloud.x, PshiftCloud.y, PshiftCloud.z);
 								}
 							}
 							firstPoint = false;
@@ -413,6 +425,26 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 						}
 					}
 
+					// normal
+					if (loadNormals && pointIsValid)
+					{
+						CCVector3d normal;
+						for (int d = 0; d < 3; ++d)
+						{
+							bool ok     = false;
+							normal.u[d] = tokens[7 + d].toDouble(&ok);
+							if (!ok)
+							{
+								result = CC_FERR_MALFORMED_FILE;
+								// early stop
+								j = height;
+								break;
+							}
+						}
+
+						cloud->addNorm(normal.toPC());
+					}
+
 					if (parameters.parentWidget && !nprogress.oneStep())
 					{
 						result = CC_FERR_CANCELED_BY_USER;
@@ -427,11 +459,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		{
 			delete cloud;
 			cloud = nullptr;
-			if (intensitySF)
-			{
-				intensitySF->release();
-				intensitySF = nullptr;
-			}
+			intensitySF.reset();
 
 			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex + 1));
 		}
@@ -497,9 +525,9 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 				cloud->addGrid(grid);
 
 				// by default we don't compute normals without asking the user
-				if (parameters.autoComputeNormals)
+				if (!cloud->hasNormals() && parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.data());
+					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.get());
 				}
 			}
 
@@ -528,10 +556,9 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		{
 			ccHObject* obj = container.getChild(i);
 			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));
-			CCCoreLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
-			if (sf)
+			auto ccSF = static_cast<ccPointCloud*>(obj)->getCCScalarField(0);
+			if (ccSF)
 			{
-				ccScalarField* ccSF = static_cast<ccScalarField*>(sf);
 				ccSF->setColorScale(ccColorScalesManager::GetDefaultScale(validIntensityRange ? ccColorScalesManager::ABS_NORM_GREY : ccColorScalesManager::GREY));
 				ccSF->setSaturationStart(0 /*minIntensity*/);
 				ccSF->setSaturationStop(maxIntensity);

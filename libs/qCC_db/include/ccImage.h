@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_IMAGE_HEADER
-#define CC_IMAGE_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -40,13 +39,13 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	ccImage(const ccImage& image, bool keepSensorLink = true);
 
 	// inherited methods (ccHObject)
-	virtual bool isSerializable() const override
+	bool isSerializable() const override
 	{
 		return true;
 	}
 
 	//! Returns unique class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::IMAGE;
 	}
@@ -121,7 +120,7 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	}
 
 	// inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//! Compute the displayed image size
 	QSizeF computeDisplayedSize(int glWidth, int glHeight) const;
@@ -131,7 +130,7 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	void  onDeletionOf(const ccHObject* obj) override;
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 
 	//! Updates aspect ratio
@@ -158,5 +157,3 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	//! Associated sensor
 	ccCameraSensor* m_associatedSensor;
 };
-
-#endif // CC_IMAGE_HEADER

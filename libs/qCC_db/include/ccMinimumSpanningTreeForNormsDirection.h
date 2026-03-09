@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MST_FOR_NORMS_DIRECTION_HEADER
-#define CC_MST_FOR_NORMS_DIRECTION_HEADER
-
 class ccPointCloud;
 class ccProgressDialog;
 
@@ -32,5 +31,3 @@ class ccMinimumSpanningTreeForNormsDirection
 	                          unsigned          kNN         = 6,
 	                          ccProgressDialog* progressDlg = nullptr);
 };
-
-#endif // CC_MST_FOR_NORMS_DIRECTION_HEADER

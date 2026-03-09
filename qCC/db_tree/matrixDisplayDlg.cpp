@@ -17,17 +17,20 @@
 
 #include "matrixDisplayDlg.h"
 
-#include "CCMath.h"
-#include "ui_matrixDisplayDlg.h"
+// Ui
+#include <ui_matrixDisplayDlg.h>
 
-// local
-#include "ccPersistentSettings.h"
+// CCCoreLib
+#include <CCMath.h>
 
-// qCC_gl
-#include <ccGuiParameters.h>
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
-#include "ccFileUtils.h"
+#include <ccFileUtils.h>
+
+// qCC_glWindow
+#include <ccGuiParameters.h>
 
 // Qt
 #include <QClipboard>
@@ -36,7 +39,7 @@
 
 MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
-    , m_ui(new Ui::MatrixDisplayDlg)
+    , m_ui(std::make_unique<Ui::MatrixDisplayDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -46,10 +49,7 @@ MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent /*=nullptr*/)
 	show();
 }
 
-MatrixDisplayDlg::~MatrixDisplayDlg()
-{
-	delete m_ui;
-}
+MatrixDisplayDlg::~MatrixDisplayDlg() = default;
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 {

@@ -522,7 +522,7 @@ void ccCloudLayersDlg::outputClassIndexChanged(int index)
 		return;
 	}
 	ccCloudLayersHelper::Parameters& params = m_helper->getParameters();
-	if (cbInput->currentIndex() < 0)
+	if (cbOutput->currentIndex() < 0)
 	{
 		params.output = nullptr;
 		return;

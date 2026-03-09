@@ -20,18 +20,19 @@
 // CCCoreLib
 #include <CCPlatform.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt
 #include <QCoreApplication>
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
+
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
 

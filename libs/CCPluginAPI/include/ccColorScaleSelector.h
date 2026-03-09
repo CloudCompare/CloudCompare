@@ -16,13 +16,14 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
-
-// Qt
-#include <QFrame>
 
 // qCC_db
 #include <ccColorScale.h>
+
+// Qt
+#include <QFrame>
 
 class QComboBox;
 class QToolButton;

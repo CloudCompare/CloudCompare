@@ -2,6 +2,7 @@
 if( APPLE )
 	set_target_properties( ${PROJECT_NAME} PROPERTIES
 		INSTALL_RPATH "@executable_path/../Frameworks"
+		MACOSX_BUNDLE_GUI_IDENTIFIER "org.cloudcompare.ccViewer"
 		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ccViewer.plist
 		MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns
 		MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"

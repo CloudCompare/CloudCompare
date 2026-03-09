@@ -282,7 +282,7 @@ bool ccTrace::optimizePath(int maxIterations)
 	}
 
 	#ifdef DEBUG_PATH
-	CCCoreLib::ScalarField * f = m_cloud->getScalarField(idx);
+	auto f = m_cloud->getScalarField(idx);
 	f->computeMinAndMax();
 	#endif
 
@@ -726,7 +726,7 @@ int ccTrace::getSegmentCostScalar(int p1, int p2)
 	}
 
 	//m_cloud->getCurrentDisplayedScalarFieldIndex();
-	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	auto sf = m_cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);
@@ -742,7 +742,7 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 		return 0;
 	}
 
-	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	auto sf = m_cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);
@@ -1250,9 +1250,9 @@ void ccTrace::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
 	init(cld);
 }
 
-bool ccTrace::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccTrace::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccPolyline::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}

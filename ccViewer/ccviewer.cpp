@@ -44,7 +44,7 @@
 #include "ccPluginManager.h"
 
 // 3D mouse handler
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 #include "Mouse3DInput.h"
 #endif
 
@@ -94,7 +94,7 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	reflectPerspectiveState();
 	reflectPivotVisibilityState();
 
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 	enable3DMouse(true);
 #else
 	ui.actionEnable3DMouse->setEnabled(false);
@@ -157,11 +157,11 @@ ccViewer::ccViewer(QWidget* parent, Qt::WindowFlags flags)
 	{
 		QShortcut* plusKey = new QShortcut(QKeySequence(tr("+", "Zoom in")), this);
 		connect(plusKey, &QShortcut::activated, [this]()
-		        { m_glWindow->onWheelEvent(8.0); });
+		        { m_glWindow->onWheelEvent(15.0); });
 
 		QShortcut* minusKey = new QShortcut(QKeySequence(tr("=", "Zoom out")), this);
 		connect(minusKey, &QShortcut::activated, [this]()
-		        { m_glWindow->onWheelEvent(-8.0); });
+		        { m_glWindow->onWheelEvent(-15.0); });
 
 		QShortcut* shiftUpKey = new QShortcut(QKeySequence(Qt::SHIFT | Qt::Key_Up), this);
 		connect(shiftUpKey, &QShortcut::activated, [this]()
@@ -1098,7 +1098,7 @@ void ccViewer::doActionAbout()
 
 void ccViewer::release3DMouse()
 {
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 	if (m_3dMouseInput)
 	{
 		m_3dMouseInput->disconnect(); // disconnect from the driver
@@ -1112,7 +1112,7 @@ void ccViewer::release3DMouse()
 
 void ccViewer::enable3DMouse(bool state)
 {
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 	if (m_3dMouseInput)
 		release3DMouse();
 
@@ -1123,10 +1123,10 @@ void ccViewer::enable3DMouse(bool state)
 		{
 			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigMove3d, this, &ccViewer::on3DMouseMove);
 			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigReleased, this, &ccViewer::on3DMouseReleased);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &ccViewer::on3DMouseKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &ccViewer::on3DMouseKeyUp);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &ccViewer::on3DMouseCMDKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &ccViewer::on3DMouseCMDKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyDown, this, &ccViewer::on3DMouseKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyUp, this, &ccViewer::on3DMouseKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyDown, this, &ccViewer::on3DMouseCMDKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyUp, this, &ccViewer::on3DMouseCMDKeyUp);
 		}
 		else
 		{
@@ -1158,7 +1158,7 @@ void ccViewer::on3DMouseKeyUp(int)
 // ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
 void ccViewer::on3DMouseKeyDown(int key)
 {
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 
 	switch (key)
 	{
@@ -1248,7 +1248,7 @@ void ccViewer::on3DMouseCMDKeyUp(int cmd)
 
 void ccViewer::on3DMouseCMDKeyDown(int cmd)
 {
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 	switch (cmd)
 	{
 		// ccLog::Print(QString("on3DMouseCMDKeyDown Cmd = %1").arg(cmd));
@@ -1344,7 +1344,7 @@ void ccViewer::on3DMouseCMDKeyDown(int cmd)
 
 void ccViewer::on3DMouseMove(std::vector<float>& vec)
 {
-#ifdef CC_3DXWARE_SUPPORT
+#ifdef CC_3DMOUSE_SUPPORT
 	if (m_glWindow)
 		Mouse3DInput::Apply(vec, m_glWindow);
 #endif

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                       CLOUDCOMPARE PLUGIN: qEDL                        #
@@ -15,10 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef Q_EDL_PLUGIN_HEADER
-#define Q_EDL_PLUGIN_HEADER
-
-#include "ccGLPluginInterface.h"
+#include <ccGLPluginInterface.h>
 
 //! EDL shader (Eye Dome Lighting)
 class qEDL : public QObject
@@ -37,5 +36,3 @@ class qEDL : public QObject
 	// inherited from ccGLFilterPluginInterface
 	ccGlFilter* getFilter() override;
 };
-
-#endif

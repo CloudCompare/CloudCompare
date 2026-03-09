@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
-
 // CCCoreLib
 #include <CCTypes.h>
+
+// Qt
+#include <QDialog>
 
 // System
 #include <array>
@@ -101,5 +101,5 @@ class ccSubsamplingDlg : public QDialog
 	std::array<double, CC_SUBSAMPLING_METHOD::COUNT> m_lastUsedValues;
 
 	//! Associated UI
-	Ui::SubsamplingDialog* m_ui;
+	std::unique_ptr<Ui::SubsamplingDialog> m_ui;
 };

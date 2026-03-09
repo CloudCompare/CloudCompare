@@ -16,8 +16,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
+// Qt
 #include <QObject>
 #include <QVector>
 

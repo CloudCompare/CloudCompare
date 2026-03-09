@@ -15,15 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOctreeSpinBox.h"
+#include "../include/ccOctreeSpinBox.h"
+
+// Local
+#include "../include/ccBBox.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccOctree.h"
 
 // CCCoreLib
 #include <CCMiscTools.h>
-
-// qCC_db
-#include <ccBBox.h>
-#include <ccGenericPointCloud.h>
-#include <ccOctree.h>
 
 ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent /*=nullptr*/)
     : QSpinBox(parent)

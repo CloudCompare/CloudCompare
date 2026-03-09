@@ -17,10 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QDialog>
-
 // qCC_db
 #include <ccPointCloud.h>
+
+// Qt
+#include <QDialog>
 
 namespace Ui
 {
@@ -63,6 +64,6 @@ class ccUnrollDlg : public QDialog
 	void centerFromClipboard();
 
   protected:
-	Ui::UnrollDialog* m_ui;
-	ccHObject*        m_dbRootEntity;
+	std::unique_ptr<Ui::UnrollDialog> m_ui;
+	ccHObject*                        m_dbRootEntity;
 };

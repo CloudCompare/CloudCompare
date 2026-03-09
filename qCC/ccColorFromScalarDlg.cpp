@@ -17,9 +17,11 @@
 
 #include "ccColorFromScalarDlg.h"
 
-// local
-#include "ccConsole.h"
+// Local
 #include "ccHistogramWindow.h"
+
+// Ui
+#include <ui_colorFromScalarDlg.h>
 
 // qCC_db
 #include <ccColorScale.h>
@@ -30,10 +32,7 @@
 // Qt
 #include <QPushButton>
 
-// ui
-#include <ui_colorFromScalarDlg.h>
-
-// system
+// System
 #include <cassert>
 #include <cstring>
 
@@ -41,7 +40,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
     : QDialog(parent, Qt::Tool)
     , m_cloud(pointCloud)
     , m_systemInvalid(false)
-    , m_ui(new Ui::ColorFromScalarDialog)
+    , m_ui(std::make_unique<Ui::ColorFromScalarDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -83,7 +82,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
 		m_histograms[i]->setRefreshAfterResize(false);
-		auto layout = new QHBoxLayout;
+		auto* layout = new QHBoxLayout;
 
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_histograms[i]);
@@ -102,7 +101,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 		{
 			m_cloud->setCurrentDisplayedScalarField(0);
 		}
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+		auto sf = m_cloud->getCCScalarField(m_cloud->getCurrentDisplayedScalarFieldIndex());
 		if (!sf) // I had this happen 1 time during testing but could never replicate
 		{
 			assert(false);
@@ -200,7 +199,7 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 {
 	if (!m_systemInvalid)
 	{
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+		auto sf = m_cloud->getCCScalarField(m_cloud->getCurrentDisplayedScalarFieldIndex());
 		if (sf)
 		{
 			sf->setColorScale(m_storedOrigColorScale);
@@ -211,7 +210,6 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 			m_cloud->redrawDisplay();
 		}
 	}
-	delete m_ui;
 }
 
 void ccColorFromScalarDlg::updateColormaps()
@@ -309,7 +307,7 @@ void ccColorFromScalarDlg::updateColormaps()
 	}
 }
 
-void ccColorFromScalarDlg::toggleColors(int state)
+void ccColorFromScalarDlg::toggleColors(int val)
 {
 	if (!m_systemInvalid)
 	{
@@ -424,16 +422,13 @@ void ccColorFromScalarDlg::updateSpinBoxLimits(int n)
 		{
 			return;
 		}
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
+		auto sf = m_cloud->getCCScalarField(m_combos[n]->currentIndex());
 		if (sf)
 		{
 			m_minSat[n]           = sf->getMin();
 			m_maxSat[n]           = sf->getMax();
 			double singleStepSize = (m_maxSat[n] - m_minSat[n]) / 100.0;
-			if (singleStepSize < 0.01)
-			{
-				singleStepSize = 0.01;
-			}
+			singleStepSize        = std::max(singleStepSize, 0.01);
 			m_boxes_min[n]->setMinimum(m_minSat[n]);
 			m_boxes_min[n]->setMaximum(m_maxSat[n]);
 			m_boxes_min[n]->setSingleStep(singleStepSize);
@@ -455,7 +450,7 @@ void ccColorFromScalarDlg::updateChannel(int n)
 			return;
 		}
 
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
+		auto sf = m_cloud->getCCScalarField(m_combos[n]->currentIndex());
 		if (sf)
 		{
 			m_scalars[n] = sf;

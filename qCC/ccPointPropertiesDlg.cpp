@@ -17,12 +17,8 @@
 
 #include "ccPointPropertiesDlg.h"
 
-// Local
-#include "ccCommon.h"
-
-// qCC_gl
-#include <ccGLWindowInterface.h>
-#include <ccGuiParameters.h>
+// CCCoreLib
+#include <ScalarField.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -31,14 +27,15 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 
-// CCCoreLib
-#include <ScalarField.h>
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+#include <ccGuiParameters.h>
 
 // Qt
 #include <QInputDialog>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* parent)
     : ccPointPickingGenericInterface(pickingHub, parent)
@@ -75,12 +72,10 @@ ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* pa
 
 ccPointPropertiesDlg::~ccPointPropertiesDlg()
 {
-	if (m_label)
-		delete m_label;
+	delete m_label;
 	m_label = nullptr;
 
-	if (m_rect2DLabel)
-		delete m_rect2DLabel;
+	delete m_rect2DLabel;
 	m_rect2DLabel = nullptr;
 }
 

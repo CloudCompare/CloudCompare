@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCone.h"
+#include "../include/ccCone.h"
 
 // Local
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
 
 ccCone::ccCone(PointCoordinateType bottomRadius,
                PointCoordinateType topRadius,
@@ -334,19 +334,18 @@ bool ccCone::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCone::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_bottomRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_topRadius);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xOff);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yOff);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_height);
-
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_bottomRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_topRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_xOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_yOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_height);
 	return true;
 }
 

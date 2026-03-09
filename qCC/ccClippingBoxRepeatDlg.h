@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER
-#define CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER
-
+// Ui
 #include <ui_clippingBoxRepeatDlg.h>
 
 // Qt
@@ -47,5 +47,3 @@ class ccClippingBoxRepeatDlg : public QDialog
 	void onDimYChecked(bool);
 	void onDimZChecked(bool);
 };
-
-#endif // CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER

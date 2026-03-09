@@ -2,6 +2,7 @@
 #ifndef CC_TEST_SHAPEFILE_HEADER
 #define CC_TEST_SHAPEFILE_HEADER
 
+// Qt
 #include <QObject>
 #include <QtTest/QtTest>
 

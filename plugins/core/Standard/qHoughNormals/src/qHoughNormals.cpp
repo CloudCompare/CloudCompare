@@ -172,7 +172,7 @@ void qHoughNormals::doAction()
 	}
 
 	//currently selected entities parameters may have changed!
-	m_app->updateUI();
+	m_app->updatePropertiesView();
 	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
 }

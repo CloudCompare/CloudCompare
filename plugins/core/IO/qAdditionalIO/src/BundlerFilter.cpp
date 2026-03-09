@@ -223,7 +223,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 	// Read Bundler '.out' file
 	{
 		// progress dialog
-		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -231,7 +231,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 			pDlg->setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
 			pDlg->start();
 		}
-		CCCoreLib::NormalizedProgress nprogress(pDlg.data(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
+		CCCoreLib::NormalizedProgress nprogress(pDlg.get(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
 
 		// read cameras info (whatever the case!)
 		cameras.resize(camCount);
@@ -278,7 +278,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 			}
 			if (importImages && CCCoreLib::LessThanEpsilon(sum))
 			{
-				ccLog::Warning("[Bundler] Camera #%i is invalid!", camIndex + 1);
+				ccLog::Warningf("[Bundler] Camera #%i is invalid!", camIndex + 1);
 				it->isValid = false;
 			}
 
@@ -392,7 +392,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 							trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
 							trans.invert();
 						}
-						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+						ccLog::Warningf("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 				keypointsCloud->addPoint((Pd + Pshift).toPC());
@@ -431,7 +431,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 				{
 					// sometimes, it appears that keypoints have no associated color!
 					// so we skip the line and assume it's in fact the keypoint description...
-					ccLog::Warning("[Bundler] Keypoint #%i has no associated color!", i);
+					ccLog::Warningf("[Bundler] Keypoint #%i has no associated color!", i);
 					if (hasColors)
 						keypointsCloud->addColor(ccColor::black); // black by default
 				}
@@ -457,7 +457,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 						unsigned nviews = parts[0].toInt(&ok);
 						if (!ok || nviews * 4 + 1 > static_cast<unsigned>(parts.size()))
 						{
-							ccLog::Warning("[Bundler] View list for point #%i is invalid!", i);
+							ccLog::Warningf("[Bundler] View list for point #%i is invalid!", i);
 						}
 						else
 						{
@@ -623,7 +623,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 	}
 
 	// let's try to open the image corresponding to each camera
-	QScopedPointer<ccProgressDialog> ipDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> ipDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		ipDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -632,18 +632,18 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 		ipDlg->start();
 		QApplication::processEvents();
 	}
-	CCCoreLib::NormalizedProgress inprogress(ipDlg.data(), camCount);
+	CCCoreLib::NormalizedProgress inprogress(ipDlg.get(), camCount);
 
 	assert(imageFilenames.size() >= static_cast<int>(camCount));
 
 	/*** pre-processing steps (colored MNT computation, etc.) ***/
 
 	// for colored DTM generation
-	std::vector<int>                      mntColors;
-	QScopedPointer<CCCoreLib::PointCloud> mntSamples;
+	std::vector<int>                       mntColors;
+	std::unique_ptr<CCCoreLib::PointCloud> mntSamples;
 	if (generateColoredDTM)
 	{
-		QScopedPointer<ccProgressDialog> toDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> toDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			toDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -916,10 +916,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 						rectMesh->addChild(rectVertices);
 
 						// materials (=textures)
-						ccMaterialSet* matSet = new ccMaterialSet("Texture");
+						auto matSet = std::make_shared<ccMaterialSet>("Texture");
 
 						// texture coordinates table
-						TextureCoordsContainer* texCoords = new TextureCoordsContainer();
+						auto texCoords = std::make_shared<TextureCoordsContainer>();
 						// texCoords->reserve(verts);
 						texCoords->reserve(4);
 						{

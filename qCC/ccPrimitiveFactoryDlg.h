@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_PRIMITIVE_FACTORY_DLG_HEADER
-#define CC_PRIMITIVE_FACTORY_DLG_HEADER
-
+// Ui
 #include <ui_primitiveFactoryDlg.h>
 
 // Qt
@@ -59,5 +59,3 @@ class ccPrimitiveFactoryDlg : public QDialog
 	//! Associated main window
 	MainWindow* m_win;
 };
-
-#endif // CC_PRIMITIVE_FACTORY_DLG_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_OCTREE_SPIN_BOX_HEADER
-#define CC_OCTREE_SPIN_BOX_HEADER
 
 // Local
 #include "qCC_db.h"
@@ -56,5 +55,3 @@ class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
 	//! Corresponding octree base size
 	double m_octreeBoxWidth;
 };
-
-#endif // CC_OCTREE_SPIN_BOX_HEADER

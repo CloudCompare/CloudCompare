@@ -16,6 +16,10 @@ if (PLUGIN_IO_QLAS)
     add_subdirectory(src)
     add_subdirectory(ui)
 
+    if (BUILD_TESTING)
+        add_subdirectory(test)
+    endif ()
+
     if (WIN32)
         copy_files( "${LASZIP_DLL}" "${CLOUDCOMPARE_DEST_FOLDER}" 1 )
         if (${OPTION_BUILD_CCVIEWER})

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
-#define CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
-
 // Local
 #include "ccHObject.h"
 #include "ccIndexedTransformation.h"
 
-// system
+// System
 #include <cfloat>
 
 //! Indexed Transformation buffer
@@ -124,7 +123,7 @@ class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject
   protected:
 	// inherited from ccHObject
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
@@ -140,5 +139,3 @@ class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject
 	//! Trihedrons display scale
 	float m_trihedronsScale;
 };
-
-#endif

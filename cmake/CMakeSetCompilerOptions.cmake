@@ -3,7 +3,9 @@ set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS NO )
 
-add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
+
+add_compile_definitions(QT_WARN_DEPRECATED_UP_TO=0x060800)
+add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x060400)
 
 # ccache
 # https://crascit.com/2016/04/09/using-ccache-with-cmake/
@@ -16,7 +18,6 @@ endif()
 
 if ( UNIX )
     set( CMAKE_POSITION_INDEPENDENT_CODE ON )
-	add_definitions(-Wno-deprecated-declarations)
 elseif( MSVC )
     add_definitions(-DNOMINMAX -D_CRT_SECURE_NO_WARNINGS -D__STDC_LIMIT_MACROS)
 

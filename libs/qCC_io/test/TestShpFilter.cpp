@@ -1,13 +1,16 @@
 #include "TestShpFilter.h"
 
-#include "FileIOFilter.h"
-#include "ShpFilter.h"
-#include "ccHObject.h"
-#include "ccMesh.h"
-#include "ccPointCloud.h"
-#include "ccPolyline.h"
-#include "cctype"
+// qCC_db
+#include <ccHObject.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+#include <ccPolyline.h>
 
+// qCC_io
+#include <FileIOFilter.h>
+#include <ShpFilter.h>
+
+// System
 #include <array>
 
 static void SetDefaultLoadParameters(FileIOFilter::LoadParameters& params, CCVector3d& shift, bool& shiftEnabled)

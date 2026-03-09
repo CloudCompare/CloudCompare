@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER
-#define CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER
-
+// Ui
 #include <ui_askTwoDoubleValuesDlg.h>
 
 //! Dialog to input 2 values with custom labels
@@ -38,5 +38,3 @@ class ccAskTwoDoubleValuesDlg : public QDialog
 	                        QString        windowTitle = QString(),
 	                        QWidget*       parent      = nullptr);
 };
-
-#endif // CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER

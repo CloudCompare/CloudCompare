@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,15 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_REGISTRATION_DLG_HEADER
-#define CC_REGISTRATION_DLG_HEADER
-
-#include <QDialog>
+// Ui
+#include <ui_registrationDlg.h>
 
 // CCCoreLib
 #include <ReferenceCloud.h>
 #include <RegistrationTools.h>
-#include <ui_registrationDlg.h>
+
+// Qt
+#include <QDialog>
 
 class ccHObject;
 
@@ -38,10 +40,10 @@ class ccRegistrationDlg : public QDialog
 	ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent = nullptr);
 
 	//! Default destructor
-	virtual ~ccRegistrationDlg();
+	~ccRegistrationDlg() override;
 
 	// shortcuts
-	typedef CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
+	using ConvergenceMethod = CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE;
 
 	//! Returns convergence method
 	ConvergenceMethod getConvergenceMethod() const;
@@ -99,6 +101,9 @@ class ccRegistrationDlg : public QDialog
 	**/
 	bool adjustScale() const;
 
+	//! Returns the scale range (if any, or a pair of NaN values if not)
+	std::pair<double, double> constrainedScaleRange() const;
+
 	//! Returns active transformation filters
 	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	 **/
@@ -123,5 +128,3 @@ class ccRegistrationDlg : public QDialog
 	//! 'Data' entity
 	ccHObject* dataEntity;
 };
-
-#endif // CC_REGISTRATION_DLG_HEADER

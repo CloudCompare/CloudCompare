@@ -17,19 +17,17 @@
 
 #include "ccSensorComputeScatteringAnglesDlg.h"
 
-#include "ui_sensorComputeScatteringAnglesDlg.h"
+// Ui
+#include <ui_sensorComputeScatteringAnglesDlg.h>
 
 ccSensorComputeScatteringAnglesDlg::ccSensorComputeScatteringAnglesDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::sensorComputeScatteringAnglesDlg)
+    , m_ui(std::make_unique<Ui::sensorComputeScatteringAnglesDlg>())
 {
 	m_ui->setupUi(this);
 }
 
-ccSensorComputeScatteringAnglesDlg::~ccSensorComputeScatteringAnglesDlg()
-{
-	delete m_ui;
-}
+ccSensorComputeScatteringAnglesDlg::~ccSensorComputeScatteringAnglesDlg() = default;
 
 bool ccSensorComputeScatteringAnglesDlg::anglesInDegrees() const
 {

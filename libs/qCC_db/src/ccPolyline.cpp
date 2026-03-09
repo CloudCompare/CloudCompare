@@ -15,14 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccPolyline.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccPolyline.h"
 
 // Local
-#include "ccCone.h"
-#include "ccPointCloud.h"
+#include "../include/ccCone.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccPointCloud.h"
 
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : Polyline(associatedCloud)
@@ -163,8 +161,10 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 	ccHObject::applyGLTransformation(trans);
 
 	// invalidate the bounding-box
-	//(and we hope the vertices will be updated as well!)
+	// (let's hope the vertices will be updated as well!)
 	invalidateBoundingBox();
+
+	notifyGeometryUpdate();
 }
 
 // unit arrow
@@ -392,19 +392,25 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 
 	uint32_t vertUniqueID = (vertices ? static_cast<uint32_t>(vertices->getUniqueID()) : 0);
 	if (out.write((const char*)&vertUniqueID, 4) < 0)
+	{
 		return WriteError();
+	}
 
 	// number of points (references to) (dataVersion>=28)
 	uint32_t pointCount = vertices ? size() : 0;
 	if (out.write((const char*)&pointCount, 4) < 0)
+	{
 		return WriteError();
+	}
 
 	// points (references to) (dataVersion>=28)
 	for (uint32_t i = 0; i < pointCount; ++i)
 	{
 		uint32_t pointIndex = getPointGlobalIndex(i);
 		if (out.write((const char*)&pointIndex, 4) < 0)
+		{
 			return WriteError();
+		}
 	}
 
 	if (dataVersion >= 39)
@@ -435,16 +441,16 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccPolyline::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
 
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 28)
+	if (context.dataVersion < 28)
 	{
 		return false;
 	}
@@ -458,8 +464,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::POLYLINE_VERTICES_CLOUD}});
 	}
 
 	// number of points (references to) (dataVersion>=28)
@@ -489,7 +494,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 	//'global shift & scale' (dataVersion>=39)
 	m_globalScale = 1.0;
 	m_globalShift = CCVector3d(0, 0, 0);
-	if (dataVersion >= 39)
+	if (context.dataVersion >= 39)
 	{
 		if (!loadShiftInfoFromFile(in))
 		{
@@ -520,9 +525,9 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 
 	// Width of the line (dataVersion>=31)
 	m_width = 0;
-	if (dataVersion >= 31)
+	if (context.dataVersion >= 31)
 	{
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_width, 1);
 	}
 
 	return true;
@@ -582,7 +587,7 @@ bool ccPolyline::split(PointCoordinateType       maxEdgeLength,
 					parts.push_back(new ccPolyline(*this));
 					return true;
 				}
-				else if (realStartIndex < vertCount)
+				if (realStartIndex < vertCount)
 				{
 					partSize += (vertCount - realStartIndex);
 					assert(realStartIndex != 0);
@@ -694,10 +699,7 @@ const CCVector3d& ccPolyline::getGlobalShift() const
 		// by default we use the vertices global shift info
 		return pc->getGlobalShift();
 	}
-	else
-	{
-		return ccShiftedObject::getGlobalShift();
-	}
+	return ccShiftedObject::getGlobalShift();
 }
 
 double ccPolyline::getGlobalScale() const
@@ -708,10 +710,7 @@ double ccPolyline::getGlobalScale() const
 		// by default we use the vertices global scale info
 		return pc->getGlobalScale();
 	}
-	else
-	{
-		return ccShiftedObject::getGlobalScale();
-	}
+	return ccShiftedObject::getGlobalScale();
 }
 
 ccPointCloud* ccPolyline::samplePoints(bool   densityBased,
@@ -1093,6 +1092,18 @@ void ccPolyline::onDeletionOf(const ccHObject* obj)
 	ccShiftedObject::onDeletionOf(obj); // remove dependencies, etc.
 }
 
+void ccPolyline::onUpdateOf(ccHObject* obj)
+{
+	ccHObject* associatedObj = dynamic_cast<ccHObject*>(getAssociatedCloud());
+	if (obj == associatedObj)
+	{
+		invalidateBoundingBox();
+		notifyGeometryUpdate();
+	}
+
+	ccShiftedObject::onUpdateOf(obj);
+}
+
 void ccPolyline::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
 {
 	if (nullptr != m_theAssociatedCloud && getAssociatedCloud() != cloud)
@@ -1110,7 +1121,7 @@ void ccPolyline::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
 	ccHObject* associatedObj = dynamic_cast<ccHObject*>(getAssociatedCloud());
 	if (associatedObj)
 	{
-		associatedObj->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE);
+		associatedObj->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE | DP_NOTIFY_OTHER_ON_UPDATE);
 	}
 
 	// invalidate the bounding-box

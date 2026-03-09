@@ -73,11 +73,11 @@ class LasScalarFieldSaver
 	template <typename T>
 	static void WriteScalarValueAs(ScalarType value, uint8_t* dest)
 	{
-		if (value > std::numeric_limits<T>::max())
+		if (value > static_cast<ScalarType>(std::numeric_limits<T>::max()))
 		{
 			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::max();
 		}
-		else if (value < std::numeric_limits<T>::lowest())
+		else if (value < static_cast<ScalarType>(std::numeric_limits<T>::lowest()))
 		{
 			*reinterpret_cast<T*>(dest) = std::numeric_limits<T>::lowest();
 		}

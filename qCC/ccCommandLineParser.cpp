@@ -1,10 +1,33 @@
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
+
 #include "ccCommandLineParser.h"
 
 // Local
 #include "ccCommandCrossSection.h"
 #include "ccCommandLineCommands.h"
 #include "ccCommandRaster.h"
-#include "ccPluginInterface.h"
+#include "ccConsole.h"
+
+// Ui
+#include <ui_commandLineDlg.h>
+
+// CCPluginStub
+#include <ccPluginInterface.h>
 
 // qCC_db
 #include <ccGenericMesh.h>
@@ -15,17 +38,12 @@
 #include <AsciiFilter.h>
 #include <BinFilter.h>
 
-// qCC
-#include "ccConsole.h"
-
-#include <ui_commandLineDlg.h>
-
 // Qt
 #include <QDateTime>
 #include <QElapsedTimer>
 #include <QMessageBox>
 
-// system
+// System
 #include <unordered_set>
 
 // commands
@@ -89,7 +107,7 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 	}
 
 	// load arguments
-	QScopedPointer<ccCommandLineParser> parser(new ccCommandLineParser);
+	std::unique_ptr<ccCommandLineParser> parser(new ccCommandLineParser);
 
 	parser->registerBuiltInCommands();
 
@@ -149,16 +167,16 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		parser->toggleSilentMode(true);
 	}
 
-	QScopedPointer<QDialog> consoleDlg(nullptr);
+	std::unique_ptr<QDialog> consoleDlg;
 	if (!parser->silentMode())
 	{
 		// show console
-		consoleDlg.reset(new QDialog);
+		consoleDlg = std::make_unique<QDialog>();
 		Ui_commandLineDlg commandLineDlg;
-		commandLineDlg.setupUi(consoleDlg.data());
+		commandLineDlg.setupUi(consoleDlg.get());
 		consoleDlg->show();
-		ccConsole::Init(commandLineDlg.consoleWidget, consoleDlg.data());
-		parser->fileLoadingParams().parentWidget = consoleDlg.data();
+		ccConsole::Init(commandLineDlg.consoleWidget, consoleDlg.get());
+		parser->fileLoadingParams().parentWidget = consoleDlg.get();
 		QApplication::processEvents(); // Get rid of the spinner
 	}
 	else
@@ -176,18 +194,18 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 			continue;
 		}
 
-		plugin->registerCommands(parser.data());
+		plugin->registerCommands(parser.get());
 	}
 
 	// parse input
-	int result = parser->start(consoleDlg.data());
+	int result = parser->start(consoleDlg.get());
 
 	if (!parser->silentMode())
 	{
 		if (result == EXIT_SUCCESS)
-			QMessageBox::information(consoleDlg.data(), "Processed finished", "Job done");
+			QMessageBox::information(consoleDlg.get(), "Processed finished", "Job done");
 		else
-			QMessageBox::warning(consoleDlg.data(), "Processed finished", "An error occurred! Check console");
+			QMessageBox::warning(consoleDlg.get(), "Processed finished", "An error occurred! Check console");
 	}
 
 	// release the parser before the console (as its dialogs may be chidren of the console)
@@ -254,7 +272,7 @@ QString ccCommandLineParser::getExportFilename(const CLEntityDesc& entityDesc,
 	{
 		assert(false);
 		warning("[getExportFilename] Internal error: invalid input entity!");
-		return QString();
+		return {};
 	}
 
 	// sub-item?
@@ -348,7 +366,7 @@ QString ccCommandLineParser::exportEntity(CLEntityDesc&                         
 	                                           options.testFlag(ExportOption::ForceNoTimestamp));
 	if (outputFilename.isEmpty())
 	{
-		return QString();
+		return {};
 	}
 
 	// update the entity name as well
@@ -778,14 +796,10 @@ bool ccCommandLineParser::saveClouds(QString suffix /*=QString()*/, bool allAtOn
 			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceCloud);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
-			else
-				return true;
+			return true;
 		}
-		else
-		{
-			error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
-			// will proceed with the standard way
-		}
+		error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
+		// will proceed with the standard way
 	}
 
 	// standard way: one file per cloud
@@ -835,14 +849,10 @@ bool ccCommandLineParser::saveMeshes(QString suffix /*=QString()*/, bool allAtOn
 			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceMesh);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
-			else
-				return true;
+			return true;
 		}
-		else
-		{
-			error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
-			// will proceed with the standard way
-		}
+		error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
+		// will proceed with the standard way
 	}
 
 	// standard way: one file per mesh
@@ -883,6 +893,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandRemoveScanGrids));
 	registerCommand(Command::Shared(new CommandRemoveSensors));
 	registerCommand(Command::Shared(new CommandMatchBBCenters));
+	registerCommand(Command::Shared(new CommandMatchScales));
 	registerCommand(Command::Shared(new CommandMatchBestFitPlane));
 	registerCommand(Command::Shared(new CommandOrientNormalsMST));
 	registerCommand(Command::Shared(new CommandSORFilter));
@@ -904,6 +915,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandC2CDist));
 	registerCommand(Command::Shared(new CommandCPS));
 	registerCommand(Command::Shared(new CommandStatTest));
+	registerCommand(Command::Shared(new CommandStatFit));
 	registerCommand(Command::Shared(new CommandDelaunayTri));
 	registerCommand(Command::Shared(new CommandSFArithmetic));
 	registerCommand(Command::Shared(new CommandSFOperation));
@@ -920,6 +932,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeHierarchyOutputFormat));
 	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
+	registerCommand(Command::Shared(new CommandPLYNoSFPrefix));
 	registerCommand(Command::Shared(new CommandForceNormalsComputation));
 	registerCommand(Command::Shared(new CommandSaveClouds));
 	registerCommand(Command::Shared(new CommandSaveMeshes));

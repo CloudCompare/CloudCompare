@@ -1,5 +1,4 @@
-#ifndef CCABOUTDIALOG_H
-#define CCABOUTDIALOG_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Qt
 #include <QDialog>
 
 namespace Ui
@@ -31,10 +31,8 @@ class ccAboutDialog : public QDialog
 
   public:
 	ccAboutDialog(QWidget* parent = nullptr);
-	~ccAboutDialog();
+	~ccAboutDialog() override;
 
   private:
-	Ui::AboutDialog* mUI;
+	std::unique_ptr<Ui::AboutDialog> m_ui;
 };
-
-#endif // CCABOUTDIALOG_H

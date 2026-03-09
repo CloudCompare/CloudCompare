@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DISH_PRIMITIVE_HEADER
-#define CC_DISH_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -54,26 +53,26 @@ class QCC_DB_LIB_API ccDish : public ccGenericPrimitive
 	ccDish(QString name = QString("Dish"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::DISH;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Dish";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
   protected:
 	// inherited from ccGenericPrimitive
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	bool  buildUp() override;
 
@@ -84,5 +83,3 @@ class QCC_DB_LIB_API ccDish : public ccGenericPrimitive
 	//! Height
 	PointCoordinateType m_height;
 };
-
-#endif // CC_DISH_PRIMITIVE_HEADER

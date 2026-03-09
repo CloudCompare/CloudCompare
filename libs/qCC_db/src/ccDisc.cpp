@@ -1,7 +1,7 @@
-// qCC_db
-#include "ccDisc.h"
+#include "../include/ccDisc.h"
 
-#include <ccPointCloud.h>
+// Local
+#include "../include/ccPointCloud.h"
 
 ccDisc::ccDisc(PointCoordinateType radius,
                const ccGLMatrix*   transMat /*= nullptr*/,
@@ -126,14 +126,14 @@ bool ccDisc::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccDisc::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccDisc::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=57)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_radius);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_radius);
 
 	return true;
 }

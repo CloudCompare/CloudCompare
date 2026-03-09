@@ -54,22 +54,22 @@ class QCC_DB_LIB_API ccCylinder : public ccCone
 	ccCylinder(QString name = QString("Cylinder"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::CYLINDER;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Cylinder";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	// inherited from ccCone
-	virtual void        setBottomRadius(PointCoordinateType radius) override;
-	inline virtual void setTopRadius(PointCoordinateType radius) override
+	void        setBottomRadius(PointCoordinateType radius) override;
+	inline void setTopRadius(PointCoordinateType radius) override
 	{
-		return setBottomRadius(radius);
+		setBottomRadius(radius);
 	}
 };

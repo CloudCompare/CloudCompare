@@ -20,6 +20,9 @@
 // Local
 #include "cc2.5DimEditor.h"
 
+// qCC_db
+#include <ccColorScale.h>
+
 // Qt
 #include <QDialog>
 #include <QString>
@@ -67,6 +70,17 @@ class ccRasterizeTool : public QDialog
 	                          double                            customHeightForEmptyCells = std::numeric_limits<double>::quiet_NaN(),
 	                          ccGenericPointCloud*              originCloud               = nullptr,
 	                          int                               visibleSfIndex            = -1);
+
+	//! Exports a raster grid layer as an image (height, RGB or scalar field)
+	static bool ExportImage(const QString&                    outputFilename,
+	                        const ccRasterGrid&               grid,
+	                        bool                              exportRGB,
+	                        const ccColorScale::Shared&       colorScale,
+	                        ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
+	                        double                            emptyCellsValue,
+	                        double                            minValue,
+	                        double                            maxValue,
+	                        const ccRasterGrid::SF*           gridSF = nullptr);
 
   private:
 	//! Exports the grid as a cloud
@@ -220,7 +234,7 @@ class ccRasterizeTool : public QDialog
 	};
 
 	//! Associated Qt UI
-	Ui::RasterizeToolDialog* m_UI;
+	std::unique_ptr<Ui::RasterizeToolDialog> m_ui;
 
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;

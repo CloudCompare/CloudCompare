@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_IMAGE_FILE_FILTER_HEADER
-#define CC_IMAGE_FILE_FILTER_HEADER
-
+// Local
 #include "FileIOFilter.h"
 
 //! Filter to load or save an image (all types supported by Qt)
@@ -43,5 +43,3 @@ class QCC_IO_LIB_API ImageFileFilter : public FileIOFilter
 	                               const QString& imageSavePath,
 	                               QWidget*       parentWidget = nullptr);
 };
-
-#endif // CC_IMAGE_FILE_FILTER_HEADER

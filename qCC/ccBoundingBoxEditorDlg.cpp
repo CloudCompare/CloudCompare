@@ -17,9 +17,6 @@
 
 #include "ccBoundingBoxEditorDlg.h"
 
-// systems
-#include <limits>
-
 // Qt
 #include <QClipboard>
 

@@ -17,22 +17,24 @@
 
 #include "ccScalarFieldArithmeticsDlg.h"
 
-#include "ui_sfArithmeticsDlg.h"
-
-// Qt
-#include <QMessageBox>
-#include <QPushButton>
+// Ui
+#include <ui_sfArithmeticsDlg.h>
 
 // qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-// system
+// Qt
+#include <QMessageBox>
+#include <QPushButton>
+
+// System
 #include <cassert>
+#include <cmath>
+
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
-#include <cmath>
 
 // number of valid operations
 constexpr unsigned s_opCount = 22;
@@ -47,7 +49,7 @@ static double s_previousConstValue               = 1.0;
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(ccPointCloud* cloud,
                                                          QWidget*      parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::SFArithmeticsDlg)
+    , m_ui(std::make_unique<Ui::SFArithmeticsDlg>())
 {
 	assert(cloud);
 
@@ -85,11 +87,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(ccPointCloud* cloud,
 	m_ui->updateSF1CheckBox->setChecked(s_applyInPlace);
 }
 
-ccScalarFieldArithmeticsDlg::~ccScalarFieldArithmeticsDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccScalarFieldArithmeticsDlg::~ccScalarFieldArithmeticsDlg() = default;
 
 void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 {
@@ -131,11 +129,8 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 	{
 		return static_cast<ccScalarFieldArithmeticsDlg::Operation>(opIndex);
 	}
-	else
-	{
-		assert(false);
-		return INVALID;
-	}
+	assert(false);
+	return INVALID;
 }
 
 ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperationByName(const QString& name)
@@ -180,7 +175,7 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QStrin
 		break;
 	}
 
-	return QString();
+	return {};
 }
 
 bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
@@ -225,8 +220,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		return false;
 	}
 
-	unsigned                sfCount = cloud->getNumberOfScalarFields();
-	CCCoreLib::ScalarField* sf1     = nullptr;
+	unsigned                       sfCount = cloud->getNumberOfScalarFields();
+	CCCoreLib::ScalarField::Shared sf1;
 	{
 		if (sf1Idx >= static_cast<int>(sfCount))
 		{
@@ -239,7 +234,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	}
 	double sf1PreviousOffset = sf1->getOffset(); // remember the offset, as we may have to change it BEFORE reading the values
 
-	CCCoreLib::ScalarField* sf2 = nullptr;
+	CCCoreLib::ScalarField::Shared sf2;
 	if (op <= MAX)
 	{
 		if (!sf2Desc || (!sf2Desc->isConstantValue && sf2Desc->sfIndex >= static_cast<int>(sfCount)))
@@ -329,10 +324,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				                        .arg(sf1->getOffset()));
 				return true;
 			}
-			else
-			{
-				sf1->setOffset(sf1->getOffset() + sf2->getOffset());
-			}
+
+			sf1->setOffset(sf1->getOffset() + sf2->getOffset());
 			break;
 		}
 		case MINUS:
@@ -350,10 +343,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				                        .arg(sf1->getOffset()));
 				return true;
 			}
-			else
-			{
-				sf1->setOffset(sf1->getOffset() - sf2->getOffset());
-			}
+			sf1->setOffset(sf1->getOffset() - sf2->getOffset());
 			break;
 		}
 		case MULTIPLY:
@@ -483,7 +473,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 		sfIdx = sf1Idx;
 	}
-	CCCoreLib::ScalarField* sfDest = cloud->getScalarField(sfIdx);
+	CCCoreLib::ScalarField::Shared sfDest = cloud->getScalarField(sfIdx);
 	assert(sfDest);
 
 	unsigned valCount = sf1->currentSize();

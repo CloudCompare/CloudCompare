@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccGlobalShiftManager.h"
+#include "../include/ccGlobalShiftManager.h"
 
-#include "ccShiftAndScaleCloudDlg.h"
+// Local
+#include "../include/ccShiftAndScaleCloudDlg.h"
 
 // Qt
 #include <QCoreApplication>
@@ -28,8 +28,8 @@
 #include <ccHObject.h>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
 double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH      = 1.0e6;
@@ -167,13 +167,11 @@ bool ccGlobalShiftManager::Handle(const CCVector3d& P,
 			// canUseInputCoordinatesShift = true;
 			return true;
 		}
-		else
-		{
-			needShift   = NeedShift(P * scale + coordinatesShift);
-			needRescale = NeedRescale(diagonal * scale);
 
-			canUseInputCoordinatesShift = (!needShift && !needRescale);
-		}
+		needShift   = NeedShift(P * scale + coordinatesShift);
+		needRescale = NeedRescale(diagonal * scale);
+
+		canUseInputCoordinatesShift = (!needShift && !needRescale);
 	}
 	else
 	{
@@ -363,7 +361,7 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 {
 	if (!NeedShift(P))
 	{
-		return CCVector3d(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	CCVector3d shift(std::abs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
@@ -375,13 +373,13 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 		// make sure the round off scale is not larger than the max coordinate value ;)
 		int roundOffScalePower = 3;
 		assert(MAX_COORDINATE_ABS_VALUE >= 1.0);
-		while (pow(10.0, roundOffScalePower) > MAX_COORDINATE_ABS_VALUE)
+		while (std::pow(10.0, roundOffScalePower) > MAX_COORDINATE_ABS_VALUE)
 		{
 			if (--roundOffScalePower == 0)
 				break;
 		}
 
-		double roundOffScale = pow(10.0, 1.0 * roundOffScalePower);
+		double roundOffScale = std::pow(10.0, 1.0 * roundOffScalePower);
 		shift.x              = static_cast<int>(shift.x / roundOffScale) * roundOffScale;
 		shift.y              = static_cast<int>(shift.y / roundOffScale) * roundOffScale;
 		shift.z              = static_cast<int>(shift.z / roundOffScale) * roundOffScale;
@@ -392,7 +390,7 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 
 double ccGlobalShiftManager::BestScale(double d)
 {
-	return d < MAX_DIAGONAL_LENGTH ? 1.0 : pow(10.0, -static_cast<double>(ceil(log(d / MAX_DIAGONAL_LENGTH))));
+	return d < MAX_DIAGONAL_LENGTH ? 1.0 : std::pow(10.0, -std::ceil(log(d / MAX_DIAGONAL_LENGTH)));
 }
 
 bool ccGlobalShiftManager::LoadInfoFromFile(QString filename, std::vector<ShiftInfo>& infos)

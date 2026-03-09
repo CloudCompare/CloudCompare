@@ -15,25 +15,26 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCameraParamEditDlg.h"
+#include "../include/ccCameraParamEditDlg.h"
 
-#include "ui_cameraParamDlg.h"
-
-// Local
-#include "ccPickingHub.h"
-
-// qCC_db
-#include <ccGLUtils.h>
-#include <ccGenericMesh.h>
-#include <ccHObjectCaster.h>
-#include <ccPointCloud.h>
-
-// qCC_gl
-#include <ccGLWindowInterface.h>
+// Ui
+#include <ui_cameraParamDlg.h>
 
 // CCCoreLib
 #include <CCMath.h>
 #include <GenericTriangle.h>
+
+// CCPluginAPI
+#include <ccPickingHub.h>
+
+// qCC_db
+#include <ccGenericMesh.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
+
+// qCC_glWindow
+#include <ccGLUtils.h>
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QMdiSubWindow>
@@ -42,7 +43,7 @@
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub)
     : ccOverlayDialog(parent, pickingHub ? Qt::FramelessWindowHint | Qt::Tool : Qt::Tool) // pickingHub = CloudCompare / otherwise = ccViewer
     , m_pickingHub(pickingHub)
-    , m_ui(new Ui::CameraParamDlg)
+    , m_ui(std::make_unique<Ui::CameraParamDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -73,6 +74,8 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	        { if (d != 0) nearClippingDepthChanged(d); });
 	connect(m_ui->farClippingDepthDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double d)
 	        { if (d != 0) farClippingDepthChanged(d); });
+
+	connect(m_ui->clippingPlanesGroupBox, &QGroupBox::toggled, this, &ccCameraParamEditDlg::clippingPlanesToggled);
 	connect(m_ui->nearClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::nearClippingCheckBoxToggled);
 	connect(m_ui->farClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
@@ -91,11 +94,7 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(m_ui->pivotPickingToolButton, &QAbstractButton::toggled, this, &ccCameraParamEditDlg::pickPointAsPivot);
 }
 
-ccCameraParamEditDlg::~ccCameraParamEditDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccCameraParamEditDlg::~ccCameraParamEditDlg() = default;
 
 void ccCameraParamEditDlg::makeFrameless()
 {
@@ -189,6 +188,19 @@ void ccCameraParamEditDlg::fovChanged(double value)
 
 	m_associatedWin->setFov(static_cast<float>(value));
 	m_associatedWin->redraw();
+}
+
+void ccCameraParamEditDlg::clippingPlanesToggled(bool state)
+{
+	if (m_associatedWin)
+	{
+		m_associatedWin->setClippingPlanesEnabled(state);
+		m_associatedWin->redraw();
+	}
+
+	m_ui->clippingPlanesGroupBox->blockSignals(true);
+	m_ui->clippingPlanesGroupBox->setChecked(state);
+	m_ui->clippingPlanesGroupBox->blockSignals(false);
 }
 
 void ccCameraParamEditDlg::nearClippingDepthChanged(double depth)
@@ -486,6 +498,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::fovChanged, this, &ccCameraParamEditDlg::updateWinFov);
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::nearClippingDepthChanged, this, &ccCameraParamEditDlg::updateNearClippingDepth);
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::farClippingDepthChanged, this, &ccCameraParamEditDlg::updateFarClippingDepth);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::clippingPlanesToggled, this, &ccCameraParamEditDlg::clippingPlanesToggled);
 
 		double increment = m_associatedWin->computeActualPixelSize();
 		m_ui->nearClippingDepthDoubleSpinBox->setSingleStep(increment);

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_SCALES_MANAGER_HEADER
-#define CC_COLOR_SCALES_MANAGER_HEADER
-
 // Local
 #include "ccColorScale.h"
 
@@ -30,9 +29,6 @@ class QCC_DB_LIB_API ccColorScalesManager
   public:
 	//! Returns unique instance
 	static ccColorScalesManager* GetUniqueInstance();
-
-	//! Releases unique instance
-	static void ReleaseUniqueInstance();
 
 	//! Destructor
 	virtual ~ccColorScalesManager();
@@ -92,7 +88,7 @@ class QCC_DB_LIB_API ccColorScalesManager
 	void removeScale(QString UUID);
 
 	//! Color scales map type
-	typedef QMap<QString, ccColorScale::Shared> ScalesMap;
+	using ScalesMap = QMap<QString, ccColorScale::Shared>;
 
 	//! Access to the internal map
 	ScalesMap& map()
@@ -122,5 +118,3 @@ class QCC_DB_LIB_API ccColorScalesManager
 	//! Color scales
 	ScalesMap m_scales;
 };
-
-#endif // CC_COLOR_SCALES_MANAGER_HEADER

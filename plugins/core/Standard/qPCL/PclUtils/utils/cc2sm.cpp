@@ -193,7 +193,7 @@ PCLCloud::Ptr cc2smReader::getFloatScalarField(const QString& fieldName) const
 		return {};
 	}
 
-	CCCoreLib::ScalarField* sf = m_ccCloud->getScalarField(sfIdx);
+	auto sf = m_ccCloud->getScalarField(sfIdx);
 	assert(sf);
 
 	PCLCloud::Ptr outputCloud;

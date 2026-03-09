@@ -15,21 +15,27 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDisplaySettingsDlg.h"
+#include "../include/ccDisplaySettingsDlg.h"
 
-#include "ccApplicationBase.h"
-#include "ui_displaySettingsDlg.h"
+// Local
+#include "../include/ccApplicationBase.h"
 
-// local
-#include "ccPersistentSettings.h"
-#include "ccQtHelpers.h"
+// Ui
+#include <ui_displaySettingsDlg.h>
 
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+#include <ccQtHelpers.h>
+
+// qCC_db
 #include <ccLog.h>
 
 // Qt
 #include <QColorDialog>
 #include <QSettings>
 #include <QStyleFactory>
+
+// System
 #include <cassert>
 
 // Default 'min cloud size' for LoD  when VBOs are activated
@@ -37,7 +43,7 @@ constexpr double s_defaultMaxVBOCloudSizeM = 50.0;
 
 ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::DisplaySettingsDlg)
+    , m_ui(std::make_unique<Ui::DisplaySettingsDlg>())
     , m_defaultAppStyleIndex(-1)
 {
 	m_ui->setupUi(this);
@@ -61,6 +67,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	        { m_parameters.drawBackgroundGradient = state; });
 	connect(m_ui->showCrossCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_parameters.displayCross = state; });
+	connect(m_ui->crossOnTopCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.displayCrossOnTop = state; });
 	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_parameters.colorScaleShowHistogram = state; });
 	connect(m_ui->useColorScaleShaderCheckBox, &QCheckBox::toggled, this, [&](bool state)
@@ -79,6 +87,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	        { m_options.useNativeDialogs = state; });
 	connect(m_ui->confirmQuitCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_options.confirmQuit = state; });
+	connect(m_ui->confirmDeleteCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_options.confirmDelete = state; });
 
 	connect(m_ui->useVBOCheckBox, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeVBOUsage);
 
@@ -144,11 +154,7 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	setUpdatesEnabled(true);
 }
 
-ccDisplaySettingsDlg::~ccDisplaySettingsDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccDisplaySettingsDlg::~ccDisplaySettingsDlg() = default;
 
 void ccDisplaySettingsDlg::refresh()
 {
@@ -211,6 +217,7 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
 		m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
 		m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
+		m_ui->crossOnTopCheckBox->setChecked(m_parameters.displayCrossOnTop);
 		m_ui->singleClickPickingCheckBox->setChecked(m_parameters.singleClickPicking);
 
 		m_ui->colorScaleShowHistogramCheckBox->setChecked(m_parameters.colorScaleShowHistogram);
@@ -248,6 +255,7 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
 		m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
 		m_ui->confirmQuitCheckBox->setChecked(m_options.confirmQuit);
+		m_ui->confirmDeleteCheckBox->setChecked(m_options.confirmDelete);
 	}
 
 	update();

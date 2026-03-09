@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_BBOX_HEADER
-#define CC_BBOX_HEADER
-
 // Local
-#include "ccDrawableObject.h"
+#include "ccGLDrawContext.h"
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <BoundingBox.h>
@@ -48,9 +48,10 @@ class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
 	}
 
 	//! Applies transformation to the bounding box
-	const ccBBox operator*(const ccGLMatrix& mat);
+	ccBBox operator*(const ccGLMatrix& mat);
+
 	//! Applies transformation to the bounding box
-	const ccBBox operator*(const ccGLMatrixd& mat);
+	ccBBox operator*(const ccGLMatrixd& mat);
 
 	//! Draws bounding box (OpenGL)
 	/** \param context OpenGL context
@@ -58,5 +59,3 @@ class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
 	 **/
 	void draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const;
 };
-
-#endif // CC_BBOX_HEADER

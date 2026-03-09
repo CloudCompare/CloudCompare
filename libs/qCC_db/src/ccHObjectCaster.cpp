@@ -15,42 +15,42 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccHObjectCaster.h"
+#include "../include/ccHObjectCaster.h"
 
-// types
-#include "cc2DLabel.h"
-#include "cc2DViewportLabel.h"
-#include "cc2DViewportObject.h"
-#include "ccCameraSensor.h"
-#include "ccCircle.h"
-#include "ccCone.h"
-#include "ccCoordinateSystem.h"
-#include "ccCylinder.h"
-#include "ccDisc.h"
-#include "ccDish.h"
-#include "ccExtru.h"
-#include "ccFacet.h"
-#include "ccGBLSensor.h"
-#include "ccGenericMesh.h"
-#include "ccGenericPointCloud.h"
-#include "ccGenericPrimitive.h"
-#include "ccHObject.h"
-#include "ccImage.h"
-#include "ccKdTree.h"
-#include "ccMesh.h"
-#include "ccOctree.h"
-#include "ccOctreeProxy.h"
-#include "ccPlane.h"
-#include "ccPointCloud.h"
-#include "ccPolyline.h"
-#include "ccShiftedObject.h"
-#include "ccSphere.h"
-#include "ccSubMesh.h"
-#include "ccTorus.h"
+// Local
+#include "../include/cc2DLabel.h"
+#include "../include/cc2DViewportLabel.h"
+#include "../include/cc2DViewportObject.h"
+#include "../include/ccCameraSensor.h"
+#include "../include/ccCircle.h"
+#include "../include/ccCone.h"
+#include "../include/ccCoordinateSystem.h"
+#include "../include/ccCylinder.h"
+#include "../include/ccDisc.h"
+#include "../include/ccDish.h"
+#include "../include/ccExtru.h"
+#include "../include/ccFacet.h"
+#include "../include/ccGBLSensor.h"
+#include "../include/ccGenericMesh.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccGenericPrimitive.h"
+#include "../include/ccHObject.h"
+#include "../include/ccImage.h"
+#include "../include/ccKdTree.h"
+#include "../include/ccMesh.h"
+#include "../include/ccOctree.h"
+#include "../include/ccOctreeProxy.h"
+#include "../include/ccPlane.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccPolyline.h"
+#include "../include/ccShiftedObject.h"
+#include "../include/ccSphere.h"
+#include "../include/ccSubMesh.h"
+#include "../include/ccTorus.h"
 
 /*** helpers ***/
 
-ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= nullptr*/)
+ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= nullptr*/, bool contextualLock /*= true*/)
 {
 	if (lockedVertices)
 	{
@@ -63,24 +63,41 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		{
 			return static_cast<ccPointCloud*>(obj);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		if (obj->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices)
 			{
-				if (!obj->isA(CC_TYPES::MESH) && lockedVertices) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (lockedVertices)
 				{
+					if (!contextualLock || !obj->isAncestorOf(vertices))
+					{
+						// no need to 'lock' the vertices if the user works on the parent mesh
+						*lockedVertices = vertices->isLocked();
+					}
+				}
+				return ToPointCloud(vertices);
+			}
+		}
+		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(static_cast<ccPolyline*>(obj)->getAssociatedCloud());
+			if (vertices && lockedVertices)
+			{
+				if (!contextualLock || !obj->isAncestorOf(vertices))
+				{
+					// no need to 'lock' the vertices if the user works on the parent poyline
 					*lockedVertices = vertices->isLocked();
 				}
-				return ccHObjectCaster::ToPointCloud(vertices);
 			}
+			return vertices;
 		}
 	}
 
 	return nullptr;
 }
 
-ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*=nullptr*/)
+ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*=nullptr*/, bool contextualLock /*= true*/)
 {
 	if (lockedVertices)
 	{
@@ -93,25 +110,29 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 		{
 			return static_cast<ccGenericPointCloud*>(obj);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		if (obj->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
-			if (vertices)
+			if (vertices && lockedVertices)
 			{
-				if (!obj->isA(CC_TYPES::MESH) && lockedVertices) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (!contextualLock || !obj->isAncestorOf(vertices))
 				{
+					// no need to 'lock' the vertices if the user works on the parent mesh
 					*lockedVertices = vertices->isLocked();
 				}
-				return vertices;
 			}
+			return vertices;
 		}
-		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+		if (obj->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline*          poly     = static_cast<ccPolyline*>(obj);
-			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(poly->getAssociatedCloud());
-			if (lockedVertices)
+			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(obj)->getAssociatedCloud());
+			if (vertices && lockedVertices)
 			{
-				*lockedVertices = true;
+				if (!contextualLock || !obj->isAncestorOf(vertices))
+				{
+					// no need to 'lock' the vertices if the user works on the parent poyline
+					*lockedVertices = vertices->isLocked();
+				}
 			}
 			return vertices;
 		}
@@ -120,13 +141,15 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	return nullptr;
 }
 
-ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*=nullptr*/)
+ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*=nullptr*/, bool contextualLock /*= true*/)
 {
-	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices);
+	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices, contextualLock);
 	if (cloud)
+	{
 		return cloud;
+	}
 
-	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE))
+	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE)) // can theoretically happen if the vertices of the polyline are not deriving from ccGenericPointCloud
 	{
 		if (lockedVertices)
 		{
@@ -171,7 +194,7 @@ ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
 		{
 			return static_cast<ccFacet*>(obj);
 		}
-		else if (obj->isA(CC_TYPES::PLANE))
+		if (obj->isA(CC_TYPES::PLANE))
 		{
 			return static_cast<ccPlane*>(obj);
 		}

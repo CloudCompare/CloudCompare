@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
-#define CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
+// Ui
+#include <ui_orthoSectionGenerationDlg.h>
 
 // Qt
 #include <QDialog>
-#include <ui_orthoSectionGenerationDlg.h>
 
 //! Dialog for generating orthogonal sections along a path (Section Extraction Tool)
 class ccOrthoSectionGenerationDlg : public QDialog
@@ -57,5 +58,3 @@ class ccOrthoSectionGenerationDlg : public QDialog
 	//! Path length
 	double m_pathLength;
 };
-
-#endif // CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER

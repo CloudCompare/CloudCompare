@@ -17,19 +17,24 @@
 
 #include "ccEnvelopeExtractor.h"
 
-// local
+// Local
 #include "ccEnvelopeExtractorDlg.h"
-
-// qCC_db
-#include <cc2DLabel.h>
-#include <ccLog.h>
-#include <ccPointCloud.h>
 
 // CCCoreLib
 #include <DistanceComputationTools.h>
 #include <Neighbourhood.h>
 #include <PointProjectionTools.h>
 
+// qCC_db
+#include <cc2DLabel.h>
+#include <ccLog.h>
+#include <ccPointCloud.h>
+
+// System
+#include <cassert>
+#include <cmath>
+
+// TBB
 #ifdef CC_CORE_LIB_USES_TBB
 #ifndef Q_MOC_RUN
 #if defined(emit)
@@ -42,10 +47,6 @@
 #endif // Q_MOC_RUN
 using namespace oneapi;
 #endif
-
-// System
-#include <cassert>
-#include <cmath>
 
 // list of already used point to avoid hull's inner loops
 enum HullPointFlags
@@ -633,9 +634,8 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(std::vector<Vertex2D>& points,
 						}
 
 						// update the removed edges info and put them back in the main list
-						for (size_t i = 0; i < removed.size(); ++i)
+						for (auto itC : removed)
 						{
-							VertexIterator itC = removed[i];
 							VertexIterator itD = itC;
 							++itD;
 							if (itD == hullPoints.end())
@@ -911,7 +911,7 @@ bool ccEnvelopeExtractor::ExtractFlatEnvelope(CCCoreLib::GenericIndexedCloudPers
 	{
 		return false;
 	}
-	else if (!allowSplitting)
+	if (!allowSplitting)
 	{
 		parts.push_back(basePoly);
 		return true;

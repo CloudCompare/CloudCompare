@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SOR_FILTER_DLG_HEADER
-#define CC_SOR_FILTER_DLG_HEADER
-
+// Qt
 #include <QDialog>
 
 namespace Ui
@@ -34,7 +34,7 @@ class ccSORFilterDlg : public QDialog
 	//! Default constructor
 	explicit ccSORFilterDlg(QWidget* parent = nullptr);
 
-	~ccSORFilterDlg();
+	~ccSORFilterDlg() override;
 
 	int  KNN() const;
 	void setKNN(int knn);
@@ -42,8 +42,9 @@ class ccSORFilterDlg : public QDialog
 	double nSigma() const;
 	void   setNSigma(double nSigma);
 
-  private:
-	Ui::SorFilterDialog* m_ui;
-};
+	void setMaxThreadCount(int count);
+	int  maxThreadCount() const;
 
-#endif // CC_SOR_FILTER_DLG_HEADER
+  private:
+	std::unique_ptr<Ui::SorFilterDialog> m_ui;
+};

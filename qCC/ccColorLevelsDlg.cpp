@@ -17,21 +17,20 @@
 
 #include "ccColorLevelsDlg.h"
 
-// local
-#include "ccGenericPointCloud.h"
+// Local
 #include "ccHistogramWindow.h"
 
 // qCC_db
 #include <ccGenericGLDisplay.h>
+#include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 
 // Qt
 #include <QPushButton>
 
-// system
-#include <assert.h>
-#include <string.h>
+// System
+#include <cassert>
 
 // persistent parameters
 static int  s_inputLevels[2]      = {0, 255};

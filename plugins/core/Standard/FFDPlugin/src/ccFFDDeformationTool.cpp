@@ -1,5 +1,6 @@
 #include "ccFFDDeformationTool.h"
 #include "FFDLattice.h"
+#include "FFDLatticeParamsDlg.h"
 #include "ccFFDLatticeDisplay.h"
 #include "ccSelectionRectangle.h"
 #include "ccFFDDeformationApplier.h"
@@ -12,6 +13,9 @@
 
 #include <Qt>
 #include <QApplication>
+#include <QMainWindow>
+
+#include <cmath>
 
 #include "FFDDebug.h"
 
@@ -34,6 +38,7 @@ ccFFDDeformationTool::ccFFDDeformationTool(ccPointCloud* originalCloud, ccPointC
     addOverriddenShortcut(Qt::Key_R);
     addOverriddenShortcut(Qt::Key_C);
     addOverriddenShortcut(Qt::Key_F);
+    addOverriddenShortcut(Qt::Key_K);
 
     connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccFFDDeformationTool::onShortcutTriggered);
 }
@@ -556,6 +561,84 @@ void ccFFDDeformationTool::onButtonReleased()
 
 void ccFFDDeformationTool::onShortcutTriggered(int key)
 {
+    if (key == Qt::Key_K)
+    {
+        // Edit lattice structure with live preview
+        if (!m_lattice || !m_latticeDisplay || !m_originalCloud || !m_appInterface)
+            return;
+
+        ccBBox cloudBB = m_originalCloud->getOwnBB();
+        const auto& curSize = m_lattice->getLatticeSize();
+
+        FFDLatticeParamsDlg paramsDlg(m_appInterface->getMainWindow());
+        paramsDlg.setInitialValues(curSize, m_lattice->getDeformationType(), m_lattice->getZRotationDeg());
+
+        // Live-update the existing lattice display as the user tweaks params
+        auto buildPreviewPoints = [&cloudBB](const std::array<unsigned int, 3>& dims, double rotDeg) -> std::vector<CCVector3d>
+        {
+            FFDLattice tmp(dims, cloudBB);
+            if (std::abs(rotDeg) > 1.0e-6)
+                tmp.setZRotation(rotDeg);
+            return tmp.getAllControlPoints();
+        };
+
+        connect(&paramsDlg, &FFDLatticeParamsDlg::parametersChanged, [&]()
+        {
+            auto sz = paramsDlg.getLatticeSize();
+            double rot = paramsDlg.getRotationAngleDeg();
+            m_latticeDisplay->setDimsAndControlPoints(sz, buildPreviewPoints(sz, rot));
+            ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : m_appInterface->getActiveGLWindow();
+            if (win)
+                win->redraw();
+        });
+
+        if (paramsDlg.exec() != QDialog::Accepted)
+        {
+            // Cancelled — restore old lattice display
+            m_latticeDisplay->setDimsAndControlPoints(curSize, m_lattice->getAllControlPoints());
+            ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : m_appInterface->getActiveGLWindow();
+            if (win)
+                win->redraw();
+            m_appInterface->dispToConsole("[FFD] Lattice edit cancelled", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+            return;
+        }
+
+        // Accepted — rebuild lattice with new parameters
+        auto newSize = paramsDlg.getLatticeSize();
+        double newRot = paramsDlg.getRotationAngleDeg();
+        DeformationType deformType = paramsDlg.getDeformationType();
+
+        FFDLattice* newLattice = new FFDLattice(newSize, cloudBB);
+        newLattice->setDeformationType(deformType);
+        if (std::abs(newRot) > 1.0e-6)
+            newLattice->setZRotation(newRot);
+
+        // Clear selection & undo history (lattice topology changed)
+        m_selectedPointIndex = -1;
+        m_selectedPointIndices.clear();
+        m_isDragging = false;
+        m_latticeHistory.clear();
+
+        // Replace lattice via setLattice (re-creates appliers etc.)
+        FFDLattice* oldLattice = m_lattice;
+        setLattice(newLattice, m_latticeDisplay);
+        delete oldLattice;
+
+        // Update display with the new control points
+        m_latticeDisplay->setDimsAndControlPoints(newSize, newLattice->getAllControlPoints());
+        m_latticeDisplay->setSelectedIndices({});
+
+        ccGLWindowInterface* win = m_associatedWin ? m_associatedWin : m_appInterface->getActiveGLWindow();
+        if (win)
+            win->redraw();
+
+        m_appInterface->dispToConsole(
+            QString("[FFD] Lattice rebuilt: %1x%2x%3")
+                .arg(newSize[0]).arg(newSize[1]).arg(newSize[2]),
+            ccMainAppInterface::STD_CONSOLE_MESSAGE);
+        return;
+    }
+
     if (key == Qt::Key_C)
     {
         const Qt::KeyboardModifiers mods = QApplication::keyboardModifiers();

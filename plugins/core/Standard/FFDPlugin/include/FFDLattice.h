@@ -94,6 +94,18 @@ public:
 	//! Set all control points (for undo/redo)
 	void setAllControlPoints(const std::vector<CCVector3d> &controlPoints);
 
+	//! Apply a Z-axis rotation to the lattice
+	/*!
+	 * Rotates all control points around the bounding box center and
+	 * stores the rotation so deformPoint can map query points to the
+	 * rotated lattice frame.
+	 * \param angleDeg rotation angle in degrees
+	 */
+	void setZRotation(double angleDeg);
+
+	//! Get Z-axis rotation angle in degrees
+	double getZRotationDeg() const { return m_zRotationDeg; }
+
 private:
 	//! Cubic uniform B-spline basis functions
 	/*!
@@ -121,6 +133,12 @@ private:
 	std::vector<CCVector3d> m_displacements;         //!< Cached displacements (current - original)
 	bool m_dirty = false;                            //!< True if any control point has been moved
 	CCVector3d m_cellSize;                           //!< Size of each lattice cell
+
+	// Z-axis rotation (applied at creation time)
+	double m_zRotationDeg = 0.0;  //!< Rotation angle in degrees
+	double m_cosR = 1.0;    //!< cos(rotation angle)
+	double m_sinR = 0.0;    //!< sin(rotation angle)
+	CCVector3d m_center{0, 0, 0}; //!< Rotation center (bounding box center)
 };
 
 #endif // FFD_LATTICE_HEADER

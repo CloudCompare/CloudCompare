@@ -18,6 +18,10 @@
 #include <cmath>
 #include <algorithm>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 FFDLattice::FFDLattice( const std::array<unsigned int, 3> &latticeSize, const ccBBox &boundingBox )
 	: m_latticeSize( latticeSize )
 	, m_boundingBox( boundingBox )
@@ -56,6 +60,10 @@ FFDLattice::FFDLattice( const std::array<unsigned int, 3> &latticeSize, const cc
 
 	// Initialize displacement cache to zero
 	m_displacements.resize( totalPoints, CCVector3d(0, 0, 0) );
+
+	// Store bounding box center for potential rotation
+	CCVector3 c = boundingBox.getCenter();
+	m_center = CCVector3d(c.x, c.y, c.z);
 }
 
 void FFDLattice::moveControlPoint( unsigned int indexX, unsigned int indexY, unsigned int indexZ, const CCVector3d &displacement )
@@ -96,6 +104,30 @@ void FFDLattice::setAllControlPoints(const std::vector<CCVector3d> &controlPoint
 		m_controlPoints = controlPoints;
 		updateDisplacementCache();
 	}
+}
+
+void FFDLattice::setZRotation(double angleDeg)
+{
+	m_zRotationDeg = angleDeg;
+	double angleRad = angleDeg * M_PI / 180.0;
+	m_cosR = std::cos(angleRad);
+	m_sinR = std::sin(angleRad);
+
+	// Rotate all control points (both current and original) around the center
+	auto rotatePoint = [&](CCVector3d& pt)
+	{
+		double dx = pt.x - m_center.x;
+		double dy = pt.y - m_center.y;
+		pt.x = m_center.x + dx * m_cosR - dy * m_sinR;
+		pt.y = m_center.y + dx * m_sinR + dy * m_cosR;
+	};
+
+	for (CCVector3d& pt : m_controlPoints)
+		rotatePoint(pt);
+	for (CCVector3d& pt : m_originalControlPoints)
+		rotatePoint(pt);
+
+	// Displacements remain the same (both sides rotated identically)
 }
 
 void FFDLattice::updateDisplacementCache()
@@ -148,11 +180,20 @@ CCVector3d FFDLattice::deformPoint( const CCVector3d &originalPoint ) const
 
 CCVector3d FFDLattice::deformPointLinear( const CCVector3d &originalPoint ) const
 {
+	// Inverse-rotate the query point into the axis-aligned lattice frame
+	double dx = originalPoint.x - m_center.x;
+	double dy = originalPoint.y - m_center.y;
+	CCVector3d localPoint(
+		m_center.x + dx * m_cosR + dy * m_sinR,
+		m_center.y - dx * m_sinR + dy * m_cosR,
+		originalPoint.z
+	);
+
 	// Compute normalized coordinates within the bounding box [0, 1]
 	CCVector3 bbMin = m_boundingBox.minCorner();
 	CCVector3 bbMax = m_boundingBox.maxCorner();
 
-	CCVector3d pointRelative = originalPoint - CCVector3d(bbMin.x, bbMin.y, bbMin.z);
+	CCVector3d pointRelative = localPoint - CCVector3d(bbMin.x, bbMin.y, bbMin.z);
 	CCVector3d bbSize = CCVector3d(bbMax.x - bbMin.x, bbMax.y - bbMin.y, bbMax.z - bbMin.z);
 
 	double u = std::clamp(pointRelative.x / bbSize.x, 0.0, 1.0);
@@ -214,11 +255,20 @@ CCVector3d FFDLattice::deformPointLinear( const CCVector3d &originalPoint ) cons
 
 CCVector3d FFDLattice::deformPointBSpline( const CCVector3d &originalPoint ) const
 {
+	// Inverse-rotate the query point into the axis-aligned lattice frame
+	double dx = originalPoint.x - m_center.x;
+	double dy = originalPoint.y - m_center.y;
+	CCVector3d localPoint(
+		m_center.x + dx * m_cosR + dy * m_sinR,
+		m_center.y - dx * m_sinR + dy * m_cosR,
+		originalPoint.z
+	);
+
 	// Compute normalized coordinates within the bounding box [0, 1]
 	CCVector3 bbMin = m_boundingBox.minCorner();
 	CCVector3 bbMax = m_boundingBox.maxCorner();
 	
-	CCVector3d pointRelative = originalPoint - CCVector3d(bbMin.x, bbMin.y, bbMin.z);
+	CCVector3d pointRelative = localPoint - CCVector3d(bbMin.x, bbMin.y, bbMin.z);
 	CCVector3d bbSize = CCVector3d(bbMax.x - bbMin.x, bbMax.y - bbMin.y, bbMax.z - bbMin.z);
 
 	double u = std::clamp(pointRelative.x / bbSize.x, 0.0, 1.0);

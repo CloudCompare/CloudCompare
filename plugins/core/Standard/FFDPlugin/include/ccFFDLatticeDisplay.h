@@ -17,6 +17,7 @@ public:
 	ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	void setControlPoints(const std::vector<CCVector3d>& controlPoints);
+	void setDimsAndControlPoints(const std::array<unsigned int, 3>& dims, const std::vector<CCVector3d>& controlPoints);
 	void setSelectedIndices(const std::vector<int>& indices);
 
 protected:

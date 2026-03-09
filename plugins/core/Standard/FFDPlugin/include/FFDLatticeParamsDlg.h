@@ -2,6 +2,7 @@
 
 #include <QDialog>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QComboBox>
 #include <array>
 #include <vector>
@@ -25,6 +26,15 @@ public:
 	size_t getPreviewPointCount() const;
 	//! Returns the selected trajectory cloud (nullptr if "None" is selected)
 	ccPointCloud* getSelectedTrajectory() const;
+	//! Returns the Z-axis rotation angle in degrees
+	double getRotationAngleDeg() const;
+
+	//! Pre-populate dialog with existing lattice parameters
+	void setInitialValues(const std::array<unsigned int, 3>& dims, DeformationType deformType, double rotationDeg);
+
+signals:
+	//! Emitted when any lattice geometry parameter changes (dims or rotation)
+	void parametersChanged();
 
 private:
 	QSpinBox* m_spinX;
@@ -32,6 +42,7 @@ private:
 	QSpinBox* m_spinZ;
 	QComboBox* m_deformTypeCombo;
 	QSpinBox* m_spinPreviewPoints;
+	QDoubleSpinBox* m_spinRotation;
 	QComboBox* m_trajectoryCombo;
 	std::vector<ccPointCloud*> m_trajectories;
 };

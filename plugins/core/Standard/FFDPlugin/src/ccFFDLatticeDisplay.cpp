@@ -28,6 +28,13 @@ void ccFFDLatticeDisplay::setControlPoints(const std::vector<CCVector3d>& contro
 	updateBoundingBox();
 }
 
+void ccFFDLatticeDisplay::setDimsAndControlPoints(const std::array<unsigned int, 3>& dims, const std::vector<CCVector3d>& controlPoints)
+{
+	m_dims = dims;
+	m_controlPoints = controlPoints;
+	updateBoundingBox();
+}
+
 void ccFFDLatticeDisplay::setSelectedIndices(const std::vector<int>& indices)
 {
 	m_selectedIndices = indices;

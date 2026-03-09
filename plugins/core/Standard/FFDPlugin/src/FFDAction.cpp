@@ -27,9 +27,11 @@
 #include <ccHObject.h>
 #include <ReferenceCloud.h>
 
+#include <QMainWindow>
 #include <QObject>
 #include <algorithm>
 #include <vector>
+#include <cmath>
 
 #include "FFDDebug.h"
 
@@ -85,7 +87,7 @@ namespace FFDAction
 		}
 
 		// Show dialog to get lattice parameters
-		FFDLatticeParamsDlg paramsDlg(nullptr);
+		FFDLatticeParamsDlg paramsDlg(appInterface->getMainWindow());
 
 		// Collect available point clouds from DB tree for trajectory selection
 		{
@@ -105,18 +107,62 @@ namespace FFDAction
 			}
 		}
 
+		// Create a lattice preview that updates live as dialog params change
+		ccBBox cloudBB = cloud->getOwnBB();
+		auto buildPreviewPoints = [&cloudBB](const std::array<unsigned int, 3>& dims, double rotDeg) -> std::vector<CCVector3d>
+		{
+			FFDLattice tmpLattice(dims, cloudBB);
+			if (std::abs(rotDeg) > 1.0e-6)
+				tmpLattice.setZRotation(rotDeg);
+			return tmpLattice.getAllControlPoints();
+		};
+
+		std::array<unsigned int, 3> initSize = paramsDlg.getLatticeSize();
+		double initRot = paramsDlg.getRotationAngleDeg();
+
+		ccFFDLatticeDisplay* previewDisplay = new ccFFDLatticeDisplay(cloudBB, initSize, buildPreviewPoints(initSize, initRot));
+		previewDisplay->setName("FFD Lattice Preview");
+
+		appInterface->addToDB(previewDisplay, false, true, false, true);
+		appInterface->redrawAll();
+
+		ccGLWindowInterface* glWin = appInterface->getActiveGLWindow();
+
+		// Live-update the preview whenever the user tweaks params
+		QObject::connect(&paramsDlg, &FFDLatticeParamsDlg::parametersChanged, [&]()
+		{
+			std::array<unsigned int, 3> sz = paramsDlg.getLatticeSize();
+			double rot = paramsDlg.getRotationAngleDeg();
+			previewDisplay->setDimsAndControlPoints(sz, buildPreviewPoints(sz, rot));
+			if (glWin)
+				glWin->redraw();
+		});
+
 		if (paramsDlg.exec() != QDialog::Accepted)
 		{
+			appInterface->removeFromDB(previewDisplay); // also deletes it
+			appInterface->redrawAll();
 			appInterface->dispToConsole( "[FFD] Cancelled by user", ccMainAppInterface::WRN_CONSOLE_MESSAGE );
 			return;
 		}
+
+		// Remove the standalone preview — it will be re-created inside the FFD group
+		appInterface->removeFromDB(previewDisplay);
+		previewDisplay = nullptr;
 
 		// Create the FFD lattice with user-specified dimensions
 		std::array<unsigned int, 3> latticeSize = paramsDlg.getLatticeSize();
 		DeformationType deformType = paramsDlg.getDeformationType();
 		ccPointCloud* trajectoryCloud = paramsDlg.getSelectedTrajectory();
+		double rotationDeg = paramsDlg.getRotationAngleDeg();
 		FFDLattice* lattice = new FFDLattice(latticeSize, cloud->getOwnBB());
 		lattice->setDeformationType(deformType);
+
+		// Apply Z-axis rotation to lattice
+		if (std::abs(rotationDeg) > 1.0e-6)
+		{
+			lattice->setZRotation(rotationDeg);
+		}
 
 		// Create a subsampled preview cloud for smooth interactive updates
 		size_t fullSize = cloud->size();
@@ -217,7 +263,7 @@ namespace FFDAction
 
 		appInterface->dispToConsole( "[FFD] Interactive tool activated. Press X/Y/Z to constrain movement to an axis.",
 									  ccMainAppInterface::STD_CONSOLE_MESSAGE );
-		appInterface->dispToConsole( "[FFD] Press Enter to apply deformation, R to reset.",
+		appInterface->dispToConsole( "[FFD] Press Enter to apply deformation, R to reset, K to edit lattice.",
 									  ccMainAppInterface::STD_CONSOLE_MESSAGE );
 
 		/*** HERE ENDS THE ACTION ***/

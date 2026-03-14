@@ -36,6 +36,8 @@
 // qCC_db
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
+#include <ccHObjectCaster.h>
+#include <ccLog.h>
 #include <cc2DViewportObject.h>
 #include <ccCameraSensor.h>
 #include <ccCircle.h>
@@ -689,6 +691,7 @@ void MainWindow::connectActions()
 	//"Tools > Batch export" menu
 	connect(m_UI->actionExportCloudInfo, &QAction::triggered, this, &MainWindow::doActionExportCloudInfo);
 	connect(m_UI->actionExportPlaneInfo, &QAction::triggered, this, &MainWindow::doActionExportPlaneInfo);
+	connect(m_UI->actionExportAllPointLabels, &QAction::triggered, this, &MainWindow::doActionExportAllPointLabels);
 	//"Tools > Other" menu
 	connect(m_UI->actionComputeGeometricFeature, &QAction::triggered, this, &MainWindow::doComputeGeometricFeature);
 	connect(m_UI->actionRemoveDuplicatePoints, &QAction::triggered, this, &MainWindow::doRemoveDuplicatePoints);
@@ -9332,6 +9335,97 @@ void MainWindow::doActionExportPlaneInfo()
 	csvFile.close();
 }
 
+void MainWindow::doActionExportAllPointLabels()
+{
+	ccHObject* root = dbRootObject();
+	if (!root)
+	{
+		ccLog::Error(tr("No project loaded"));
+		return;
+	}
+
+	ccHObject::Container allLabels;
+	root->filterChildren(allLabels, true, CC_TYPES::LABEL_2D);
+
+	// Keep only single-point 2D labels (exclude viewport labels and multi-point labels)
+	std::vector<cc2DLabel*> pointLabels;
+	for (ccHObject* obj : allLabels)
+	{
+		if (obj->isA(CC_TYPES::LABEL_2D))
+		{
+			cc2DLabel* label = static_cast<cc2DLabel*>(obj);
+			if (label->size() == 1)
+			{
+				pointLabels.push_back(label);
+			}
+		}
+	}
+
+	if (pointLabels.empty())
+	{
+		ccLog::Error(tr("No point labels in the project. Use 'Point list picking' to create labels first."));
+		return;
+	}
+
+	QSettings settings;
+	settings.beginGroup(ccPS::SaveFile());
+	QString currentPath = settings.value(ccPS::CurrentPath(), ccFileUtils::defaultDocPath()).toString();
+	settings.endGroup();
+
+	QString outputFilename = QFileDialog::getSaveFileName(this,
+	                                                      tr("Export all point labels"),
+	                                                      currentPath,
+	                                                      AsciiFilter::GetFileFilter(),
+	                                                      nullptr,
+	                                                      CCFileDialogOptions());
+	if (outputFilename.isEmpty())
+		return;
+
+	settings.beginGroup(ccPS::SaveFile());
+	settings.setValue(ccPS::CurrentPath(), QFileInfo(outputFilename).absolutePath());
+	settings.endGroup();
+
+	QFile fp(outputFilename);
+	if (!fp.open(QFile::WriteOnly | QFile::Text))
+	{
+		ccLog::Error(tr("Failed to open file '%1' for writing").arg(outputFilename));
+		return;
+	}
+
+	QTextStream stream(&fp);
+	stream.setRealNumberPrecision(12);
+
+	// Header: label,x,y,z (global coordinates)
+	stream << "label,x,y,z" << Qt::endl;
+
+	for (cc2DLabel* label : pointLabels)
+	{
+		const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+		CCVector3 P = pp.getPointPosition();
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(pp.entity());
+		CCVector3d Pglobal;
+		if (shifted)
+		{
+			Pglobal = shifted->toGlobal3d(P);
+		}
+		else
+		{
+			Pglobal = CCVector3d(P.x, P.y, P.z);
+		}
+
+		QString name = label->getName();
+		// Escape commas in label name for CSV
+		if (name.contains(','))
+		{
+			name = QStringLiteral("\"") + name + QStringLiteral("\"");
+		}
+		stream << name << ',' << Pglobal.x << ',' << Pglobal.y << ',' << Pglobal.z << Qt::endl;
+	}
+
+	fp.close();
+	ccLog::Print(tr("[I/O] File '%1' saved successfully (%2 point label(s))").arg(outputFilename).arg(pointLabels.size()));
+}
+
 void MainWindow::doActionExportCloudInfo()
 {
 	// look for clouds
@@ -11501,6 +11595,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSNETest->setEnabled(atLeastOneCloud);
 	m_UI->actionExportCloudInfo->setEnabled(atLeastOneEntity);
 	m_UI->actionExportPlaneInfo->setEnabled(atLeastOneEntity);
+	m_UI->actionExportAllPointLabels->setEnabled(atLeastOneEntity);
 
 	m_UI->actionFilterByValue->setEnabled(atLeastOneSF);
 	m_UI->actionConvertToRGB->setEnabled(atLeastOneSF);
@@ -12333,6 +12428,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionCompressFWFData);
 	m_actions.push_back(m_UI->actionInterpolateSFs);
 	m_actions.push_back(m_UI->actionExportPlaneInfo);
+	m_actions.push_back(m_UI->actionExportAllPointLabels);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);

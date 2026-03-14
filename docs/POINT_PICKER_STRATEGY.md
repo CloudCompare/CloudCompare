@@ -8,6 +8,8 @@ This document outlines how to extend this CloudCompare fork so that:
 
 2. **Project-wide label export**: You can **export all point labels** from the current project in one go (one file), instead of exporting per cloud/segment.
 
+3. **Unified picking across all clouds (Phase 1.5)**: You can run Point List Picking without selecting a single cloud first. You click anywhere on the scene; the pick is resolved to the cloud under the cursor (CloudCompare’s existing pick gives you the entity). Each new label is stored in a **single project-level list** and shown in one main table. Export all then exports that full list in one go.
+
 The design reuses the existing Point List Picking and label infrastructure where possible, and adds a small number of new entry points and data flows.
 
 ---
@@ -45,6 +47,7 @@ The design reuses the existing Point List Picking and label infrastructure where
 | R3 | **Checklist / progress** over the code list so the user can see which codes are already assigned and ensure none are missed or misspelled. | e.g. list view with “used”/“unused” or checkmarks. |
 | R4 | **Export all point labels** in the project **in one go** to a single file. | Not per cloud/segment; one export for the whole scene. |
 | R5 | Export format compatible with downstream script (e.g. label + lat, long, depth in metres). | Same or similar to current lxyz-style export, with global coordinates where needed. |
+| R6 | **Single picking list across all clouds**: Pick on any visible cloud; label is attached to the correct cloud in the background; one main list shows all picks; export all in one file. | No need to select “one entity” before starting; no per-cloud export. |
 
 Non-goals for this roadmap: changing how graph software works, or implementing distance/direction/slope (those stay in the user’s existing script).
 
@@ -75,11 +78,19 @@ Non-goals for this roadmap: changing how graph software works, or implementing d
   5. Write one file (e.g. CSV or tab-separated): at least `label_name, x, y, z` (or `label_name, lat, long, depth`); format chosen to match the user’s downstream script.
 - **File format**: Prefer configurable (e.g. dropdown: “label,x,y,z” vs “label,lat,long,depth”) and consistent with existing ASCII export (e.g. `AsciiFilter`-style or same columns as lxyz). Reuse existing “apply global shift/scale?” behaviour where applicable.
 
-### 4.3 Optional: multi-entity picking
+### 4.3 Unified picking across all clouds (Phase 1.5)
 
-- **Current**: Picking is tied to one entity; labels are stored under that entity.
-- **Possible extension**: Allow “pick on any visible cloud” and still store labels in a **single project-level container** (e.g. a dedicated “Project point labels” group under the root). That would make “export all” naturally include every pick from every cloud. This is a larger change (selection model, which entity to attach to, how to handle shift/scale per label).
-- **Recommendation**: Phase 1 can keep **single-entity** picking and only add **project-wide export** (so the user can still have multiple clouds, each with its own “Picked points list”, but export all of them in one go). If needed, Phase 2 can introduce a “unified label container” and/or multi-entity picking.
+- **Goal**: One Point List Picking session where the user does **not** have to select a single cloud first. They click a point; the system uses the **entity under the cursor** (CloudCompare’s pick already returns the hit entity). A label is created and stored in a **single project-level container**; the dialog shows **one main list** of all picks (from any cloud). “Export all point labels” then exports that full list in one file.
+- **Behaviour**:
+  - **Pick anywhere**: Picking is enabled on **any visible, pickable** point cloud or mesh in the scene. No “exactly one entity selected” requirement to enter the tool.
+  - **Best guess = hit entity**: The picking hub / `PickedItem` already identifies which entity was clicked; no extra heuristics. The label’s `PickedPoint` references that entity and index, so coordinates (and later global coords for export) stay correct per source cloud.
+  - **Single container**: Create one root-level container (e.g. `"Project picked points"`) under `dbRootObject()`. All new labels from this mode are added there. The dialog’s “main list” reads from this container only (or aggregates it with existing per-entity lists for backward compatibility—see below).
+  - **One list in the UI**: The Point List Picking table shows all labels from the project-level container (and optionally a “Source” column: which cloud the point belongs to). Export all continues to walk the whole DB for labels, so the single file includes everything.
+- **Backward compatibility**: Existing “Picked points list” children under individual clouds can remain. “Export all point labels” already collects every 2D point label in the tree, so old per-cloud lists and the new project-level list are all exported together. Optionally, the dialog can offer a “mode”: “Single cloud (current)” vs “All clouds (project list)” and create the project-level container only when in “All clouds” mode.
+- **Implementation touchpoints**:
+  - **MainWindow::activatePointListPickingMode()**: When in “unified” mode, do not require one selection; allow zero or N selected; pass “all clouds” or root to the dialog (e.g. `linkWithEntity(nullptr)` and a flag, or `linkWithRoot()`).
+  - **ccPointListPickingDlg**: Support a second mode where `m_orderedLabelsContainer` is the **project-level** container (create once under root, reuse). In `processPickedPoint()`, accept any cloud/mesh (not only `m_associatedEntity`); create the label from `picked.entity` and add it to the project-level container.
+  - **Picking**: Ensure the picking hub can deliver picks from any visible entity when no single entity is “linked”; this may already work if the dialog simply does not filter by entity in the listener.
 
 ---
 
@@ -95,16 +106,23 @@ Non-goals for this roadmap: changing how graph software works, or implementing d
   - Or CSV: first column = code, optional columns = lat, long, depth (for future validation/display only).
 - **Storage**: Member of `ccPointListPickingDlg` (or of a derived class if we split “basic” vs “code list” mode).
 
-### 5.2 UI changes (Point List Picking dialog)
+### 5.2 Unified picking (Phase 1.5): project-level container and dialog mode
+
+- **Project-level container**: A single `ccHObject` (e.g. name `"Project picked points"`) stored under `dbRootObject()`. Created when the user first uses “Point list picking (all clouds)” or when the dialog is in unified mode; reused for the session. All new labels in that mode are `addChild()` here; display is set so labels appear in the 3D view.
+- **Dialog mode**: Dialog has two logical modes: (1) **Single entity** (current): `linkWithEntity(entity)`; container = that entity’s “Picked points list”. (2) **Unified**: no single entity; container = root-level “Project picked points”. The main table always shows the labels from the *current* container; in unified mode that is the project list.
+- **processPickedPoint()**: In unified mode, accept any cloud/mesh in `picked.entity`; create label from `picked.entity` and `picked.itemIndex` (and mesh UV if needed); append to project-level container; refresh table. Optionally add a “Source” column (e.g. `picked.entity->getName()`) so the user sees which cloud each row came from.
+- **Picking hub**: Confirm that when no single entity is linked, the hub still delivers picks from whatever is under the cursor (or explicitly enable picking on all visible clouds when in unified mode).
+
+### 5.3 UI changes (Point List Picking dialog) – code list (Phase 2+)
 
 - **New widgets** (in `pointListPickingDlg.ui` or a separate small dialog):
   - “Load code list” button → file dialog → load and parse.
   - Optional: “Clear code list”.
   - A list/table showing codes and “Used”/“Unused” (and optionally which label name they have). This can be a second panel or a collapsible section.
   - When a point is picked: if code list is loaded, show a **code selector** (e.g. `QComboBox` with the list, or a `QListWidget` with search); on “OK” create the label with the selected code as name and mark that code as used. If no code list is loaded, keep current behaviour (default “Point #N”).
-- **Table**: The existing table (Index, X, Y, Z) can stay; optionally add a “Label name” column that shows the code (already reflected by `labels[i]->getName()` in export). The “start index” and “marker size” behaviour can remain.
+- **Table**: The existing table (Index, X, Y, Z) can stay; in unified mode add optional “Source” column; optionally add a “Label name” column that shows the code (already reflected by `labels[i]->getName()` in export). The “start index” and “marker size” behaviour can remain.
 
-### 5.3 Export all labels
+### 5.4 Export all labels
 
 - **New function**: e.g. `MainWindow::exportAllPointLabels()`.
   - Collect all `cc2DLabel` with `size() == 1` from `dbRootObject()`.
@@ -113,18 +131,16 @@ Non-goals for this roadmap: changing how graph software works, or implementing d
   - Write one file.
 - **Menu**: Register in `mainwindow.cpp` and in the UI (e.g. `mainWindow.ui` or a menu bar action). Enable when the DB is not empty (or always); disable when there are no point labels if desired.
 
-### 5.4 Data flow (code list + export)
+### 5.5 Data flow (unified picking + code list + export)
 
 ```
-[Graph software] → export list of codes (e.g. CSV or TXT)
+[Phase 1.5] User starts "Point list picking (all clouds)" → no single-cloud selection
        ↓
-[CloudCompare]  → File or dialog: "Load code list" → parse → store in dialog
+User clicks on any visible cloud → pick resolves to that entity → label created and added to "Project picked points" → one main list updated
        ↓
-User picks point → dialog shows code selector → user picks code → create cc2DLabel with setName(code)
+[Phase 2+] Load code list → pick point → choose code from list → label name = code; checklist updated
        ↓
-Checklist shows code as "used"; user can continue until list is done
-       ↓
-File → Export all point labels → collect all cc2DLabel (size==1) from root → write one file (label, x, y, z or lat, long, depth)
+File → Export all point labels → collect all cc2DLabel (size==1) from root (incl. project container + any per-cloud lists) → one file (label, x, y, z or lat, long, depth)
        ↓
 [Downstream script] → reads export, computes distance/direction/slope for pairs that have a connecting line
 ```
@@ -133,7 +149,9 @@ File → Export all point labels → collect all cc2DLabel (size==1) from root �
 
 ## 6. Roadmap (phased)
 
-### Phase 1 – Foundation (minimal slice)
+**Order**: Phase 1 (export all) → Phase 1.5 (unified picking across all clouds) → Phase 2 (code list load) → Phase 3 (pick from list + checklist) → Phase 4 (polish). Phase 1 delivers immediate value; Phase 1.5 delivers the single-list, pick-anywhere workflow; later phases add the code list and checklist.
+
+### Phase 1 – Export all point labels (foundation)
 
 - **1.1** Add **Export all point labels**:
   - Implement `MainWindow::exportAllPointLabels()` (or equivalent) that:
@@ -144,6 +162,19 @@ File → Export all point labels → collect all cc2DLabel (size==1) from root �
 - **1.2** Tests: Load a project with labels under two different clouds; run “Export all point labels”; confirm one file with all of them and correct coordinates.
 
 **Deliverable**: One menu action to export every point label in the project to a single file.
+
+### Phase 1.5 – Unified picking across all clouds
+
+- **1.5.1** Introduce a **project-level label container** (e.g. name `"Project picked points"`) under the DB root. Create it on first use in “unified” mode; reuse for the session. All labels created in this mode are children of this container (not of individual clouds).
+- **1.5.2** **MainWindow**: Add a way to start Point List Picking in “unified” mode (e.g. a second menu action “Point list picking (all clouds)” or a checkbox in the dialog). In this mode, do **not** require exactly one selected entity; allow starting with no selection or multiple. Optionally auto-enable picking on all visible point clouds/meshes.
+- **1.5.3** **ccPointListPickingDlg**:
+  - When in unified mode, set or create `m_orderedLabelsContainer` as the root-level container (e.g. from a new `linkWithRoot()` or `setUnifiedMode(true)` plus root pointer). Do not require `m_associatedEntity`.
+  - In `processPickedPoint()`: accept any `picked.entity` that is a point cloud or mesh (not only `m_associatedEntity`). Create the `cc2DLabel` from the picked entity/index, add it to the project-level container, and refresh the single main list.
+  - Ensure the main table lists all labels from the project container; optionally add a “Source” column (entity name) so the user can see which cloud each point came from.
+- **1.5.4** **Picking**: Verify that the picking hub delivers clicks on any visible entity when no single entity is linked (e.g. by not filtering in the listener, or by registering for “all” entities). Adjust if the current implementation only forwards picks for a single entity.
+- **1.5.5** “Export all point labels” (Phase 1) already iterates over all labels under the root, so the new project-level container is included automatically. No export changes required for Phase 1.5.
+
+**Deliverable**: User can open Point List Picking without selecting one cloud; click on any cloud to add a point; see one combined list; export all labels (from this list and any existing per-cloud lists) in one file.
 
 ### Phase 2 – Code list load and display
 
@@ -176,9 +207,11 @@ File → Export all point labels → collect all cc2DLabel (size==1) from root �
 
 | Area | File(s) | Change |
 |------|--------|--------|
-| Export all | `qCC/mainwindow.{h,cpp}` | New method `exportAllPointLabels()`; new menu action. |
+| Export all (Phase 1) | `qCC/mainwindow.{h,cpp}` | New method `exportAllPointLabels()`; new menu action. |
 | Export all | `qCC/ui_templates/mainWindow.ui` (or menu bar) | Add “Export all point labels” action. |
-| Code list | `qCC/ccPointListPickingDlg.{h,cpp}` | Members for code list + “used” set; “Load code list” and code selector on pick. |
+| Unified picking (Phase 1.5) | `qCC/mainwindow.{h,cpp}` | Second entry for “Point list picking (all clouds)” or flag; do not require one selection when in unified mode; pass root or “all” to dialog. |
+| Unified picking | `qCC/ccPointListPickingDlg.{h,cpp}` | Support unified mode: project-level container under root; `processPickedPoint()` accept any cloud/mesh and add to that container; optional “Source” column in table. |
+| Code list (Phase 2+) | `qCC/ccPointListPickingDlg.{h,cpp}` | Members for code list + “used” set; “Load code list” and code selector on pick. |
 | Code list | `qCC/ui_templates/pointListPickingDlg.ui` | Widgets: Load list button, code list widget, optional “used” column. |
 | Shared | `libs/qCC_io/` or `qCC/` | Reuse existing ASCII/export helpers for global coords and file writing where possible. |
 

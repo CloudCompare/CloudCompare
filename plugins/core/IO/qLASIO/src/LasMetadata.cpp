@@ -133,17 +133,30 @@ namespace LasMetadata
 
 	bool LoadVlrs(const ccPointCloud& pointCloud, LasVlr& vlr)
 	{
+		QVariant value;
 		if (pointCloud.hasMetaData(LasMetadata::VLRS))
 		{
-			QVariant value = pointCloud.getMetaData(LasMetadata::VLRS);
-			if (value.canConvert<LasVlr>())
-			{
-				vlr = value.value<LasVlr>();
-				return true;
-			}
+			value = pointCloud.getMetaData(LasMetadata::VLRS);
+		}
+		// specific case to manage a typo in the code in 2.14.beta
+		else if (pointCloud.hasMetaData("LAS.variableLenghtRecords"))
+		{
+			value = pointCloud.getMetaData("LAS.variableLenghtRecords");
+		}
+		else
+		{
+			return false;
 		}
 
-		return false;
+		if (value.canConvert<LasVlr>())
+		{
+			vlr = value.value<LasVlr>();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	bool LoadScaleFrom(const ccPointCloud& pointCloud, CCVector3d& scale)

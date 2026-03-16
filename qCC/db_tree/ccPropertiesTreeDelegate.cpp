@@ -428,6 +428,11 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 		{
 			var.convert(QVariant::String);
 			value = var.toString();
+			if (value.length() > 1024)
+			{
+				// prefer the name over a very long description!
+				value = QString(QVariant::typeToName(var.type()));
+			}
 		}
 		else
 		{

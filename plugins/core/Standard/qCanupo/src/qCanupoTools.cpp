@@ -44,6 +44,7 @@
 #include <windows.h>
 #else
 #include <ctime>
+#include <unistd.h>
 #endif
 
 //ComputeCorePointsDescriptors parameters

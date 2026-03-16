@@ -300,6 +300,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 
 	//progress dialog
 	ccProgressDialog pDlg(true, parentWidget);
+	pDlg.setAutoClose(false);
 
 	//does the core point cloud has associated meta-data?
 	QVariant mscMetaData;
@@ -319,7 +320,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 			else
 			{
 				if (app)
-					app->dispToConsole("[qCanupo] Failed to read core point cloud associated MSC meta data?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					app->dispToConsole("[Canupo] Failed to read core point cloud associated MSC meta data?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				mscMetaData.clear();
 			}
 		}
@@ -446,7 +447,9 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				}
 #endif
 				if (app)
+				{
 					app->dispToConsole(QString("[Canupo] Will use %1 threads").arg(params.maxThreadCount == 0 ? "the max number of" : QString::number(params.maxThreadCount)), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+				}
 
 				//computes the 'descriptors'
 				bool invalidDescriptors = false;
@@ -473,7 +476,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				else if (invalidDescriptors)
 				{
 					if (app)
-						app->dispToConsole("[qCanupo] Some descriptors couldn't be computed (min scale may be too small)!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+						app->dispToConsole("[Canupo] Some descriptors couldn't be computed (min scale may be too small)!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				}
 			}
 
@@ -530,16 +533,16 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
 				assert(!params.useActiveSFForConfidence || sf);
 
+				// progress notification
+				pDlg.reset();
+				pDlg.setInfo(QObject::tr("Remaining points to classify: %1\nSource points: %2").arg(pendingPoints.size()).arg(cloud->size()));
+				pDlg.setMethodTitle(QObject::tr("Classification"));
+				CCCoreLib::NormalizedProgress nProgress(&pDlg, corePoints->size());
+				pDlg.start();
+
 				//while unreliable points remain
 				while (!pendingPoints.empty())
 				{
-					//progress notification
-					pDlg.reset();
-					pDlg.setInfo(QObject::tr("Remaining points to classify: %1\nSource points: %2").arg(pendingPoints.size()).arg(cloud->size()));
-					pDlg.setMethodTitle(QObject::tr("Classification"));
-					CCCoreLib::NormalizedProgress nProgress(&pDlg, corePoints->size());
-					pDlg.start();
-
 					for (size_t i = 0; i < pendingPoints.size(); ++i)
 					{
 						unsigned coreIndex = pendingPoints[i];
@@ -632,18 +635,18 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 									if (params.useActiveSFForConfidence)
 									{
 										//use the scalar field to refine the classification
-										float newConfidence = RefinePointClassif(classifier,
-											confidence,
-											distToBoundary,
-											cloud,
-											octree.data(),
-											octreeLevel,
-											corePoints,
-											corePointsOctree,
-											coreOctreeLevel,
-											coreIndex,
-											largestRadius,
-											corePointClasses);
+										float newConfidence = RefinePointClassif(	classifier,
+																					confidence,
+																					distToBoundary,
+																					cloud,
+																					octree.data(),
+																					octreeLevel,
+																					corePoints,
+																					corePointsOctree,
+																					coreOctreeLevel,
+																					coreIndex,
+																					largestRadius,
+																					corePointClasses);
 
 										if (newConfidence < 0)
 										{
@@ -742,7 +745,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				if (processCanceled)
 				{
 					if (app)
-						app->dispToConsole("[qCanupo] Process cancelled by user!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+						app->dispToConsole("[Canupo] Process cancelled by user!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 					break;
 				}
 
@@ -781,7 +784,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 						else if (app)
 						{
-							app->dispToConsole("[qCanupo] Not enough memory to store the confidence values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+							app->dispToConsole("[Canupo] Not enough memory to store the confidence values!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 						}
 					}
 
@@ -792,7 +795,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					{
 						if (app)
 						{
-							app->dispToConsole("[qCanupo] Per-level 'x-y' values can only be extracted from descriptor with 2 dimensions per scale!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+							app->dispToConsole("[Canupo] Per-level 'x-y' values can only be extracted from descriptor with 2 dimensions per scale!", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 						}
 						generateAdditionalSF = false;
 					}
@@ -1076,12 +1079,12 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						{
 							realCorePoints->setMetaData(s_canupoMSCMetaData, mscMetaData);
 							if (app)
-								app->dispToConsole(QString("[qCanupo] MSC descriptors have been saved as meta-data (cloud '%1')").arg(realCorePoints->getName()));
+								app->dispToConsole(QString("[Canupo] MSC descriptors have been saved as meta-data (cloud '%1')").arg(realCorePoints->getName()));
 						}
 						else
 						{
 							if (app)
-								app->dispToConsole("[qCanupo] Failed to save MSC meta-data (not enough memory?)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+								app->dispToConsole("[Canupo] Failed to save MSC meta-data (not enough memory?)", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 						}
 					}
 				}

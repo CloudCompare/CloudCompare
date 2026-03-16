@@ -38,9 +38,6 @@
 class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog
     , public CCCoreLib::GenericProgressCallback
 {
-
-	Q_OBJECT
-
   public:
 	//! Default constructor
 	/** By default, a cancel button is always displayed on the
@@ -84,14 +81,9 @@ class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog
   protected:
 	//! Refreshes the progress
 	/** Should only be called in the main Qt thread!
-	    This slot is automatically called by 'update' (in Qt::QueuedConnection mode).
+	    This method is automatically called by 'update' when necessary.
 	**/
 	void refresh();
-
-  Q_SIGNALS:
-
-	//! Schedules a call to refresh
-	void scheduleRefresh();
 
   protected:
 	//! Current progress value (percent)

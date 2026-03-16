@@ -22,11 +22,9 @@
 #include <QCoreApplication>
 #include <QProgressBar>
 #include <QPushButton>
-#include <QThread>
 #if defined(CC_WINDOWS)
+#include <QThread>
 #include <windows.h>
-#else
-#include <ctime>
 #endif
 
 ccProgressDialog::ccProgressDialog(bool     showCancelButton,
@@ -72,16 +70,14 @@ void ccProgressDialog::update(float percent)
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
+#if defined(CC_WINDOWS)
 		if (QThread::currentThread() && QThread::currentThread()->isMainThread())
 		{
 			refresh();
-#if defined(CC_WINDOWS)
 			::Sleep(1);
-#else
-			usleep(1000);
-#endif
 		}
 		else
+#endif
 		{
 			QTimer::singleShot(0, this, [this]() { refresh(); });
 			QCoreApplication::processEvents();

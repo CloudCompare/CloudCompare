@@ -79,7 +79,8 @@ void ccProgressDialog::update(float percent)
 		else
 #endif
 		{
-			QTimer::singleShot(0, this, [this]() { refresh(); });
+			QTimer::singleShot(0, this, [this]()
+			                   { refresh(); });
 			QCoreApplication::processEvents();
 		}
 	}

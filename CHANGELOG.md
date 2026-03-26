@@ -351,6 +351,7 @@ Bug fixes:
 	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing the tool
 	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not lead to the
 		extraction of the convex hull.
+	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

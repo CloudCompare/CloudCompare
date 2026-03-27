@@ -22,6 +22,7 @@
 
 // Qt
 #include <QApplication>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -32,7 +33,6 @@
 #include <QSettings>
 #include <QStandardItemModel>
 #include <QTreeView>
-#include <QCheckBox>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -56,8 +56,8 @@
 #include <CCMiscTools.h>
 
 // common
-#include <ccPickOneElementDlg.h>
 #include <ccOptions.h>
+#include <ccPickOneElementDlg.h>
 
 // local
 #include "ccPersistentSettings.h"

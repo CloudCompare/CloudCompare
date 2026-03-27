@@ -60,7 +60,7 @@ void ccOptions::reset()
 	normalsDisplayedByDefault = false;
 	useNativeDialogs          = true;
 	confirmQuit               = true;
-	confirmDelete			  = true;
+	confirmDelete             = true;
 }
 
 void ccOptions::fromPersistentSettings()

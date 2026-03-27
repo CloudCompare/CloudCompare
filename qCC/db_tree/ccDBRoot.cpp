@@ -569,11 +569,6 @@ void ccDBRoot::deleteSelectedEntities()
 			options.confirmDelete = false;
 			ccOptions::Set(options);
 		}
-
-		if (conf != QMessageBox::Yes)
-		{
-			return;
-		}
 	}
 
 	// we remove all objects that are children of other deleted ones!

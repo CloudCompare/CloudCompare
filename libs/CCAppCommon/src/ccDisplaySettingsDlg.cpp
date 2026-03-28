@@ -79,6 +79,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	        { m_options.useNativeDialogs = state; });
 	connect(m_ui->confirmQuitCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_options.confirmQuit = state; });
+	connect(m_ui->confirmDeleteCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_options.confirmDelete = state; });
 
 	connect(m_ui->useVBOCheckBox, &QAbstractButton::clicked, this, &ccDisplaySettingsDlg::changeVBOUsage);
 
@@ -248,6 +250,7 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->autoDisplayNormalsCheckBox->setChecked(m_options.normalsDisplayedByDefault);
 		m_ui->useNativeDialogsCheckBox->setChecked(m_options.useNativeDialogs);
 		m_ui->confirmQuitCheckBox->setChecked(m_options.confirmQuit);
+		m_ui->confirmDeleteCheckBox->setChecked(m_options.confirmDelete);
 	}
 
 	update();

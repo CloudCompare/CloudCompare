@@ -224,6 +224,7 @@ Improvements:
 
 	- Display > Display settings
 		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
+		- new option to choose whether a confirmation dialog (Are you sure?) should appear when deleting entities
 
 	- Quadric model/fitting
 		- improved fitting of quadric functions on points:

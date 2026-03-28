@@ -22,6 +22,7 @@
 
 // Qt
 #include <QApplication>
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -55,6 +56,7 @@
 #include <CCMiscTools.h>
 
 // common
+#include <ccOptions.h>
 #include <ccPickOneElementDlg.h>
 
 // local
@@ -544,6 +546,35 @@ void ccDBRoot::deleteSelectedEntities()
 
 	hidePropertiesView();
 	bool verticesWarningIssued = false;
+
+	// confirmation
+	ccOptions options = ccOptions::Instance();
+
+	if (options.confirmDelete)
+	{
+		QMessageBox confDial(MainWindow::TheInstance());
+		confDial.setIcon(QMessageBox::Question);
+		confDial.setWindowTitle(tr("Delete selected entities"));
+		confDial.setText(tr("Are you sure?"));
+		confDial.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		confDial.setDefaultButton(QMessageBox::No);
+
+		// add "Don't ask again" checkbox
+		QCheckBox* dontAskAgain = new QCheckBox(tr("Don't ask again"), &confDial);
+		confDial.setCheckBox(dontAskAgain);
+		int conf = confDial.exec();
+
+		if (dontAskAgain->isChecked())
+		{
+			options.confirmDelete = false;
+			ccOptions::Set(options);
+		}
+
+		if (conf != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
 
 	// we remove all objects that are children of other deleted ones!
 	//(otherwise we may delete the parent before the child!)

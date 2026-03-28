@@ -1,57 +1,44 @@
 name: Build
 
-on: [push, pull_request]
+on: workflow_dispatch
 
 jobs:
   build:
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    name: Windows MSVC
+    runs-on: windows-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {
-              name: "Windows MSVC",
-              os: windows-latest,
-              generator: "Ninja",
-              conda_library_dir: "Library",
-              compile_riegl: "ON",
-              conda_dep_file: ".ci/conda-win.yml",
-            }
-          - {
-              name: "macOS Clang",
-              os: macos-latest,
-              generator: "Ninja",
-              conda_library_dir: ".",
-              compile_riegl: "OFF",
-              conda_dep_file: ".ci/conda-macos.yml",
-            }
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       # DGM: without caching, using conda on Windows takes a long time...
       - name: Install Dependencies
         uses: conda-incubator/setup-miniconda@v3
         with:
-          architecture: ${{ matrix.config.os == 'macos-latest' && 'arm64' || 'x64' }}
+          architecture: x64
           auto-activate: false
           activate-environment: CloudCompareDev
-          environment-file: ${{ matrix.config.conda_dep_file }}
+          environment-file: .ci/conda-win.yml
           channels: conda-forge
           conda-remove-defaults: "true"
 
+      - name: Install Qt
+        id: install-qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: "windows"
+          target: "desktop"
+          arch: "win64_msvc2022_64"
+
       - name: Configure MSVC console (Windows)
-        if: matrix.config.os == 'windows-latest'
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: Set environment for MSVC (Windows)
-        if: matrix.config.os == 'windows-latest'
         run: |
           # Set these env vars so cmake picks the correct compiler
           # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions#environment-files
@@ -63,18 +50,21 @@ jobs:
         run: |
           mkdir build
 
-          export CONDA_LIB_DIR="$CONDA_PREFIX/${{ matrix.config.conda_library_dir }}"
+          export CONDA_LIB_DIR="$CONDA_PREFIX/Library"
           export EIGEN_ROOT_DIR="$CONDA_LIB_DIR/include/eigen3"
 
           cmake \
             -B build \
-            -G "${{ matrix.config.generator }}" \
+            -G "Ninja" \
             -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$CONDA_LIB_DIR" \
+            -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR;$CONDA_LIB_DIR" \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
             -DEIGEN_ROOT_DIR="$EIGEN_ROOT_DIR" \
             -DPLUGIN_EXAMPLE_GL=ON \
             -DPLUGIN_EXAMPLE_IO=ON \
             -DPLUGIN_EXAMPLE_STANDARD=ON \
+            -DPLUGIN_FFD_STANDARD=ON \
+            -DFFD_DEBUG_LOGGING=OFF \
             -DPLUGIN_GL_QEDL=ON \
             -DPLUGIN_GL_QSSAO=ON \
             -DPLUGIN_IO_QADDITIONAL=ON \
@@ -82,9 +72,9 @@ jobs:
             -DPLUGIN_IO_QE57=ON \
             -DPLUGIN_IO_QPHOTOSCAN=ON \
             -DPLUGIN_IO_QLAS=ON \
-            -DPLUGIN_IO_QRDB=${{ matrix.config.compile_riegl }}  \
-            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
-            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=${{ matrix.config.compile_riegl }}  \
+            -DPLUGIN_IO_QRDB=ON  \
+            -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON  \
+            -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON  \
             -DPLUGIN_STANDARD_QANIMATION=ON \
             -DQANIMATION_WITH_FFMPEG_SUPPORT=ON \
             -DPLUGIN_STANDARD_QBROOM=ON \
@@ -105,140 +95,25 @@ jobs:
             .
 
       - name: Check Format
-        if: matrix.config.os == 'windows-latest'
         run: cmake --build build --target check-format
 
       - name: Build
         run: cmake --build build --parallel
 
-      - name: Install (macOS)
-        if: matrix.config.os == 'macos-latest'
-        run: sudo cmake --install build
-
       - name: Install (Windows)
-        if: matrix.config.os == 'windows-latest'
         run: cmake --install build
 
-  ubuntu-build:
-    name: Ubuntu ${{ matrix.compiler }}
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+      - name: Deploy Qt Dependencies (Windows)
+        shell: pwsh
+        run: |
+          # Run windeployqt from the Qt install
+          $qtBin = "$env:QT_ROOT_DIR\bin"
 
-    strategy:
-      fail-fast: false
-      matrix:
-        compiler: ["GCC", "Clang"]
+          & "$qtBin\windeployqt.exe" --release "${{ github.workspace }}\install\CloudCompare\CloudCompare.exe"
+          & "$qtBin\windeployqt.exe" --release "${{ github.workspace }}\install\ccViewer\ccViewer.exe"
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Upload Artifact (Windows)
+        uses: actions/upload-artifact@v4
         with:
-          submodules: recursive
-
-      - name: Install Dependencies
-        run: >
-          sudo apt-get update -qq
-
-          sudo apt-get install -qy cmake ninja-build
-          qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-tools-dev-tools
-          libtbb-dev
-          libavcodec-dev libavformat-dev
-          libdraco-dev
-          libeigen3-dev
-          libcgal-dev libgdal-dev
-          liblaszip-dev
-          libxerces-c-dev
-          zlib1g-dev qt6-5compat-dev
-          libopencv-dev
-          libboost-dev libboost-iostreams-dev libboost-system-dev libpcap-dev libflann-dev
-          libglu1-mesa-dev
-          xvfb
-
-      - name: Setup GCC
-        if: matrix.compiler == 'GCC'
-        run: |
-          echo "CC=gcc" >> $GITHUB_ENV
-          echo "CXX=g++" >> $GITHUB_ENV
-
-      - name: Setup Clang
-        if: matrix.compiler == 'Clang'
-        run: |
-          echo "CC=clang" >> $GITHUB_ENV
-          echo "CXX=clang++" >> $GITHUB_ENV
-
-      - name: Cache PCL Build
-        uses: actions/cache@v4
-        id: cache-pcl
-        with:
-          path: pcl-cached
-          key: pcl-${{ runner.os }}-${{ matrix.compiler }}-v1.15.1-${{ hashFiles('.github/workflows/build.yml') }} #change pcl version to invalidate cache
-
-      - name: Build PCL Without VTK
-        if: steps.cache-pcl.outputs.cache-hit != 'true'
-        run: |
-          git clone https://github.com/PointCloudLibrary/pcl.git
-          cd pcl
-          git checkout pcl-1.15.1
-          mkdir build
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_tools=OFF -DBUILD_kdtree=ON -DBUILD_filters=ON -DBUILD_keypoints=ON -DWITH_VTK=OFF \
-            -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/pcl-cached
-          cmake --build build --target install --parallel
-
-      - name: Configure cmake
-        run: >
-          mkdir build
-
-          cmake
-          -B build
-          -S .
-          -G Ninja
-          -DEIGEN_ROOT_DIR=/usr/include/eigen3
-          -DJSON_ROOT_DIR=/usr/include/jsoncpp
-          -DPCL_DIR=${{ github.workspace }}/pcl-cached/share/pcl-1.15
-          -DDLIB_ROOT=/usr/include
-          -DCCCORELIB_USE_TBB=ON
-          -DPLUGIN_EXAMPLE_GL=ON
-          -DPLUGIN_EXAMPLE_IO=ON
-          -DPLUGIN_EXAMPLE_STANDARD=ON
-          -DPLUGIN_GL_QEDL=ON
-          -DPLUGIN_GL_QSSAO=ON
-          -DPLUGIN_IO_QADDITIONAL=ON
-          -DPLUGIN_IO_QCORE=ON
-          -DPLUGIN_IO_QE57=ON
-          -DE57_RELEASE_LTO=OFF
-          -DPLUGIN_IO_QPHOTOSCAN=ON
-          -DPLUGIN_IO_QLAS=ON
-          -DPLUGIN_IO_QRDB=ON
-          -DPLUGIN_IO_QRDB_FETCH_DEPENDENCY=ON
-          -DPLUGIN_IO_QRDB_INSTALL_DEPENDENCY=ON
-          -DPLUGIN_STANDARD_QANIMATION=ON
-          -DQANIMATION_WITH_FFMPEG_SUPPORT=OFF
-          -DPLUGIN_STANDARD_QBROOM=ON
-          -DPLUGIN_STANDARD_QCANUPO=ON
-          -DPLUGIN_STANDARD_QCOMPASS=ON
-          -DPLUGIN_STANDARD_QCSF=ON
-          -DPLUGIN_STANDARD_QFACETS=ON
-          -DPLUGIN_STANDARD_QHOUGH_NORMALS=ON
-          -DPLUGIN_STANDARD_QHPR=ON
-          -DPLUGIN_STANDARD_MASONRY_QMANUAL_SEG=OFF
-          -DPLUGIN_STANDARD_MASONRY_QAUTO_SEG=OFF
-          -DPLUGIN_STANDARD_QM3C2=ON
-          -DPLUGIN_STANDARD_QPCV=ON
-          -DPLUGIN_STANDARD_QPOISSON_RECON=ON
-          -DPLUGIN_STANDARD_QSRA=ON
-          -DPLUGIN_STANDARD_QRANSAC_SD=ON
-          -DPLUGIN_STANDARD_QPCL=ON
-          -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
-          -DPLUGIN_STANDARD_QVOXFALL=ON
-          -DBUILD_TESTING=ON
-
-      - name: Build
-        run: cmake --build build --parallel
-
-      - name: Test
-        run: xvfb-run ctest --test-dir build
-
-      - name: Install
-        run: sudo cmake --install build
+          name: CloudCompare-Windows
+          path: ${{ github.workspace }}/install

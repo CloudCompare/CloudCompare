@@ -4,6 +4,8 @@ CloudCompare Version History
 v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
+	- Confirmation dial (Are you sure?) when deleting selected entities
+
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter

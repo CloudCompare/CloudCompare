@@ -47,7 +47,7 @@ protected:
 	void draw(CC_DRAW_CONTEXT& context) override;
 
 private:
-	//! Event filter to get mouse move and repaint eventss
+	//! Event filter to get mouse move and repaint events
 	bool eventFilter(QObject* obj, QEvent* event) override;
 
 private:

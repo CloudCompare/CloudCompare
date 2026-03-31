@@ -1,0 +1,6 @@
+<!DOCTYPE RCC>
+<RCC>
+	<qresource prefix="/CC/plugin/FFDPlugin">
+		<file>info.json</file>
+	</qresource>
+</RCC>

@@ -4,7 +4,7 @@ version = "2.14.0"
 description = "CloudCompare is a 3D point cloud processing software."
 authors = ["Daniel Girardeau-Montaut <admin@cloudcompare.org>"]
 channels = ["conda-forge"]
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "linux-64"]
 
 [tasks.CloudCompare]
 # Start the built executable

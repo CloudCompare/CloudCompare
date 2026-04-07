@@ -38,10 +38,14 @@
 #include "ccCommandLineCommands.h"
 
 // Local
+#include "ccArgumentParser.h"
 #include "ccEntityAction.h"
 
 #include <QDateTime>
 #include <QFileInfo>
+#include <limits>
+#include <optional>
+#include <utility>
 
 // commands
 constexpr char COMMAND_CLOUD_EXPORT_FORMAT[]              = "C_EXPORT_FMT";
@@ -990,24 +994,24 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("No point cloud to compute normals (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
+	ccArgumentParser parser(cmd.arguments());
 
-	if (cmd.arguments().empty())
+	const std::optional<QString> radiusArg = parser.takeNext();
+	if (!radiusArg)
 	{
 		return cmd.error(QObject::tr("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 
-	float   radius    = std::numeric_limits<float>::quiet_NaN(); // if this stays
-	QString radiusArg = cmd.arguments().takeFirst();
-	if (radiusArg.toUpper() != "AUTO")
+	float radius = std::numeric_limits<float>::quiet_NaN();
+	if (radiusArg->toUpper() != "AUTO")
 	{
-		bool ok = false;
-		radius  = radiusArg.toFloat(&ok);
-		if (!ok)
-		{
-			return cmd.error(QObject::tr("Invalid radius"));
-		}
+		auto maybeRadius = ccArgumentParser::ParseFloat(*radiusArg, QObject::tr("radius"));
+		if (!maybeRadius)
+			return false;
+		radius = *maybeRadius;
 	}
-	cmd.print(QObject::tr("\tRadius: %1").arg(radiusArg));
+
+	cmd.print(QObject::tr("\tRadius: %1").arg(*radiusArg));
 
 	CCCoreLib::LOCAL_MODEL_TYPES model       = CCCoreLib::QUADRIC;
 	ccNormalVectors::Orientation orientation = ccNormalVectors::Orientation::UNDEFINED;
@@ -1016,134 +1020,77 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	bool  orientNormalsWithGrids   = false;
 	bool  orientNormalsWithSensors = false;
 	float angle                    = std::numeric_limits<float>::quiet_NaN(); // if this stays
-	while (!cmd.arguments().isEmpty())
+	while (!parser.isEmpty())
 	{
-		QString argument = cmd.arguments().front().toUpper();
-		if (ccCommandLineInterface::IsCommand(argument, OPTION_ORIENT))
+		if (parser.tryConsumeOption(OPTION_ORIENT))
 		{
-			cmd.arguments().takeFirst();
-			if (!cmd.arguments().isEmpty())
-			{
-				QString orient_argument = cmd.arguments().takeFirst().toUpper();
-				if (orient_argument == "PLUS_ZERO" || orient_argument == "PLUS_ORIGIN")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_ORIGIN;
-				}
-				else if (orient_argument == "MINUS_ZERO" || orient_argument == "MINUS_ORIGIN")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_ORIGIN;
-				}
-				else if (orient_argument == "PLUS_BARYCENTER")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_BARYCENTER;
-				}
-				else if (orient_argument == "MINUS_BARYCENTER")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_BARYCENTER;
-				}
-				else if (orient_argument == "PLUS_X")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_X;
-				}
-				else if (orient_argument == "MINUS_X")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_X;
-				}
-				else if (orient_argument == "PLUS_Y")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_Y;
-				}
-				else if (orient_argument == "MINUS_Y")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_Y;
-				}
-				else if (orient_argument == "PLUS_Z")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_Z;
-				}
-				else if (orient_argument == "MINUS_Z")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_Z;
-				}
-				else if (orient_argument == "PREVIOUS")
-				{
-					orientation = ccNormalVectors::Orientation::PREVIOUS;
-				}
-				else if (orient_argument == "PLUS_SENSOR_ORIGIN")
-				{
-					orientation = ccNormalVectors::Orientation::PLUS_SENSOR_ORIGIN;
-				}
-				else if (orient_argument == "MINUS_SENSOR_ORIGIN")
-				{
-					orientation = ccNormalVectors::Orientation::MINUS_SENSOR_ORIGIN;
-				}
-				else if (orient_argument == OPTION_WITH_GRIDS)
-				{
-					orientation            = ccNormalVectors::Orientation::UNDEFINED;
-					orientNormalsWithGrids = true;
-				}
-				else if (orient_argument == OPTION_WITH_SENSOR)
-				{
-					orientation              = ccNormalVectors::Orientation::UNDEFINED;
-					orientNormalsWithSensors = true;
-				}
-				else
-				{
-					return cmd.error(QObject::tr("Invalid parameter: unknown orientation '%1'").arg(orient_argument));
-				}
-			}
-			else
+			const QString orientArg = parser.peek();
+			if (orientArg.isNull())
 			{
 				return cmd.error(QObject::tr("Missing orientation"));
 			}
-		}
-		else if (ccCommandLineInterface::IsCommand(argument, OPTION_MODEL))
-		{
-			cmd.arguments().takeFirst();
-			if (!cmd.arguments().isEmpty())
+
+			QString upper = orientArg.toUpper();
+			if (upper == OPTION_WITH_GRIDS)
 			{
-				QString model_arg = cmd.arguments().takeFirst().toUpper();
-				if (model_arg == "LS")
-				{
-					model = CCCoreLib::LOCAL_MODEL_TYPES::LS;
-				}
-				else if (model_arg == "TRI")
-				{
-					model = CCCoreLib::LOCAL_MODEL_TYPES::TRI;
-				}
-				else if (model_arg == "QUADRIC")
-				{
-					model = CCCoreLib::LOCAL_MODEL_TYPES::QUADRIC;
-				}
-				else
-				{
-					return cmd.error(QObject::tr("Invalid parameter: unknown model '%1'").arg(model_arg));
-				}
+				parser.skip();
+				orientation            = ccNormalVectors::Orientation::UNDEFINED;
+				orientNormalsWithGrids = true;
+			}
+			else if (upper == OPTION_WITH_SENSOR)
+			{
+				parser.skip();
+				orientation              = ccNormalVectors::Orientation::UNDEFINED;
+				orientNormalsWithSensors = true;
 			}
 			else
 			{
-				return cmd.error(QObject::tr("Missing model"));
+				auto maybeOrientation = parser.takeEnum<ccNormalVectors::Orientation>({
+				                                                                          {"PLUS_ORIGIN", ccNormalVectors::Orientation::PLUS_ORIGIN},
+				                                                                          {"PLUS_ZERO", ccNormalVectors::Orientation::PLUS_ORIGIN},
+				                                                                          {"MINUS_ORIGIN", ccNormalVectors::Orientation::MINUS_ORIGIN},
+				                                                                          {"MINUS_ZERO", ccNormalVectors::Orientation::MINUS_ORIGIN},
+				                                                                          {"PLUS_BARYCENTER", ccNormalVectors::Orientation::PLUS_BARYCENTER},
+				                                                                          {"MINUS_BARYCENTER", ccNormalVectors::Orientation::MINUS_BARYCENTER},
+				                                                                          {"PLUS_X", ccNormalVectors::Orientation::PLUS_X},
+				                                                                          {"MINUS_X", ccNormalVectors::Orientation::MINUS_X},
+				                                                                          {"PLUS_Y", ccNormalVectors::Orientation::PLUS_Y},
+				                                                                          {"MINUS_Y", ccNormalVectors::Orientation::MINUS_Y},
+				                                                                          {"PLUS_Z", ccNormalVectors::Orientation::PLUS_Z},
+				                                                                          {"MINUS_Z", ccNormalVectors::Orientation::MINUS_Z},
+				                                                                          {"PREVIOUS", ccNormalVectors::Orientation::PREVIOUS},
+				                                                                          {"PLUS_SENSOR_ORIGIN", ccNormalVectors::Orientation::PLUS_SENSOR_ORIGIN},
+				                                                                          {"MINUS_SENSOR_ORIGIN", ccNormalVectors::Orientation::MINUS_SENSOR_ORIGIN},
+				                                                                      },
+				                                                                      QObject::tr("orientation"));
+				if (!maybeOrientation)
+					return false;
+				orientation = *maybeOrientation;
 			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, OPTION_WITH_GRIDS))
+		else if (parser.tryConsumeOption(OPTION_MODEL))
 		{
-			cmd.arguments().takeFirst();
-			if (!cmd.arguments().isEmpty())
-			{
-				bool    ok       = false;
-				QString angleArg = cmd.arguments().takeFirst();
-				angle            = angleArg.toFloat(&ok);
-				if (!ok)
-				{
-					return cmd.error(QObject::tr("Invalid angle for scan grids"));
-				}
-				cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(angleArg));
-				useGridStructure = true;
-			}
-			else
-			{
+			auto maybeModel = parser.takeEnum<CCCoreLib::LOCAL_MODEL_TYPES>({
+			                                                                    {"LS", CCCoreLib::LOCAL_MODEL_TYPES::LS},
+			                                                                    {"TRI", CCCoreLib::LOCAL_MODEL_TYPES::TRI},
+			                                                                    {"QUADRIC", CCCoreLib::LOCAL_MODEL_TYPES::QUADRIC},
+			                                                                },
+			                                                                QObject::tr("model"));
+			if (!maybeModel)
+				return false;
+			model = *maybeModel;
+		}
+		else if (parser.tryConsumeOption(OPTION_WITH_GRIDS))
+		{
+			auto angleArg = parser.takeNext();
+			if (!angleArg)
 				return cmd.error(QObject::tr("Missing min angle for scan grids"));
-			}
+			auto maybeAngle = ccArgumentParser::ParseFloat(*angleArg, QObject::tr("angle for scan grids"));
+			if (!maybeAngle)
+				return false;
+			angle = *maybeAngle;
+			cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(*angleArg));
+			useGridStructure = true;
 		}
 		else
 		{

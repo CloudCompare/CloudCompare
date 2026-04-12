@@ -72,7 +72,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
     , m_deleteHiddenParts(false)
 {
 	// Set QDialog background as transparent (DGM: doesn't work over an OpenGL context)
-	// setAttribute(Qt::WA_NoSystemBackground);
+	setAttribute(Qt::WA_NoSystemBackground);
 
 	setupUi(this);
 
@@ -948,7 +948,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			}
 
 			// check that the 'Classification' scalar field exists
-			int sfIdx = pc->getScalarFieldIndexByName("Classification");
+			const int previousDisplaySFIndex = pc->getCurrentDisplayedScalarFieldIndex();
+			int       sfIdx                  = pc->getScalarFieldIndexByName("Classification");
 			if (sfIdx < 0)
 			{
 				// create the scalar field Classification if needed
@@ -961,7 +962,14 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 			}
 			classifSF = pc->getScalarField(sfIdx);
 			pc->showSF(true);
-			pc->setCurrentDisplayedScalarField(sfIdx);
+			if (previousDisplaySFIndex != sfIdx)
+			{
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				if (m_toSegment.size() == 1)
+				{
+					emit currentScalarFieldUpdated();
+				}
+			}
 		}
 
 		// we project each point and we check if it falls inside the segmentation polyline

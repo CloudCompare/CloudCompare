@@ -28,7 +28,7 @@ const QString ccArgumentParser::peek() const
 {
 	if (m_arguments.isEmpty())
 	{
-		return QString();
+		return {};
 	}
 	return m_arguments.first();
 }
@@ -47,11 +47,11 @@ bool ccArgumentParser::isEmpty() const
 	return m_arguments.isEmpty();
 }
 
-std::optional<QString> ccArgumentParser::takeNext()
+QString ccArgumentParser::takeNext()
 {
 	if (m_arguments.isEmpty())
 	{
-		return std::nullopt;
+		return {};
 	}
 	return m_arguments.takeFirst();
 }

@@ -996,22 +996,22 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	}
 	ccArgumentParser parser(cmd.arguments());
 
-	const std::optional<QString> radiusArg = parser.takeNext();
-	if (!radiusArg)
+	QString radiusArg = parser.takeNext();
+	if (radiusArg.isEmpty())
 	{
 		return cmd.error(QObject::tr("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 
 	float radius = std::numeric_limits<float>::quiet_NaN();
-	if (radiusArg->toUpper() != "AUTO")
+	if (radiusArg.toUpper() != "AUTO")
 	{
-		auto maybeRadius = ccArgumentParser::ParseFloat(*radiusArg, QObject::tr("radius"));
+		auto maybeRadius = ccArgumentParser::ParseFloat(radiusArg, QObject::tr("radius"));
 		if (!maybeRadius)
 			return false;
 		radius = *maybeRadius;
 	}
 
-	cmd.print(QObject::tr("\tRadius: %1").arg(*radiusArg));
+	cmd.print(QObject::tr("\tRadius: %1").arg(radiusArg));
 
 	CCCoreLib::LOCAL_MODEL_TYPES model       = CCCoreLib::QUADRIC;
 	ccNormalVectors::Orientation orientation = ccNormalVectors::Orientation::UNDEFINED;
@@ -1082,14 +1082,18 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		}
 		else if (parser.tryConsumeOption(OPTION_WITH_GRIDS))
 		{
-			auto angleArg = parser.takeNext();
-			if (!angleArg)
+			QString angleArg = parser.takeNext();
+			if (angleArg.isNull())
+			{
 				return cmd.error(QObject::tr("Missing min angle for scan grids"));
-			auto maybeAngle = ccArgumentParser::ParseFloat(*angleArg, QObject::tr("angle for scan grids"));
+			}
+			auto maybeAngle = ccArgumentParser::ParseFloat(angleArg, QObject::tr("angle for scan grids"));
 			if (!maybeAngle)
+			{
 				return false;
+			}
 			angle = *maybeAngle;
-			cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(*angleArg));
+			cmd.print(QObject::tr("\tAngle for scan grids: %1").arg(angleArg));
 			useGridStructure = true;
 		}
 		else

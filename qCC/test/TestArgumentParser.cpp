@@ -75,7 +75,7 @@ class TestArgumentParser : public QObject
 		ccArgumentParser parser(args);
 
 		auto result = parser.takeNext();
-		QVERIFY(!result.has_value());
+		QVERIFY(result.isNull());
 	}
 
 	void takeNextReturnsAndConsumes()
@@ -84,8 +84,8 @@ class TestArgumentParser : public QObject
 		ccArgumentParser parser(args);
 
 		auto result = parser.takeNext();
-		QVERIFY(result.has_value());
-		QCOMPARE(*result, "first");
+		QVERIFY(!result.isNull());
+		QCOMPARE(result, "first");
 		QCOMPARE(args.size(), 1);
 	}
 
@@ -94,10 +94,10 @@ class TestArgumentParser : public QObject
 		QStringList      args{"a", "b", "c"};
 		ccArgumentParser parser(args);
 
-		QCOMPARE(*parser.takeNext(), "a");
-		QCOMPARE(*parser.takeNext(), "b");
-		QCOMPARE(*parser.takeNext(), "c");
-		QVERIFY(!parser.takeNext().has_value());
+		QCOMPARE(parser.takeNext(), "a");
+		QCOMPARE(parser.takeNext(), "b");
+		QCOMPARE(parser.takeNext(), "c");
+		QVERIFY(parser.takeNext().isNull());
 	}
 
 	// takeFloat()

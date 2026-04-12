@@ -6979,6 +6979,10 @@ void MainWindow::activateSegmentationMode()
 		m_gsTool = new ccGraphicalSegmentationTool(this);
 		connect(m_gsTool, &ccOverlayDialog::processFinished, this, &MainWindow::deactivateSegmentationMode);
 
+		// automatically update the properties view if the currently displayed scalar field changes
+		connect(m_gsTool, &ccGraphicalSegmentationTool::currentScalarFieldUpdated, this, [&]()
+		        { updatePropertiesView(); });
+
 		registerOverlayDialog(m_gsTool, Qt::TopRightCorner);
 	}
 

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
-#define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
 
 // Local
 #include <ccOverlayDialog.h>
@@ -95,6 +94,9 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! Apply segmentation and update the database (helper)
 	bool applySegmentation(ccMainAppInterface* app, ccHObject::Container& newEntities);
 
+  signals:
+	void currentScalarFieldUpdated();
+
   protected:
 	void        segmentIn();
 	void        segmentOut();
@@ -171,5 +173,3 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! In export mode, entities in this set will be disabled/invisible
 	std::set<ccHObject*> m_disableOnClose;
 };
-
-#endif // CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER

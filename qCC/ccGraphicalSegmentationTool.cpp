@@ -1109,11 +1109,11 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 	else
 	{
 		m_somethingHasChanged = true;
-		validButton->setEnabled(true);
 		validAndDeleteButton->setEnabled(true);
 		razButton->setEnabled(true);
 		pauseSegmentationMode(true);
 	}
+	validButton->setEnabled(true);
 }
 
 void ccGraphicalSegmentationTool::run()

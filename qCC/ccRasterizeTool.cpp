@@ -1732,8 +1732,8 @@ void ccRasterizeTool::generateXRaySF()
 	// number of vertical steps
 	CCVector3 bbMin, bbMax;
 	m_cloud->getBoundingBox(bbMin, bbMax);
-	double   delaH      = bbMax.u[Z] - bbMin.u[Z];
-	unsigned layerCount = std::max(1u, static_cast<unsigned>(ceil(delaH / m_grid.gridStep)));
+	double   deltaH     = bbMax.u[Z] - bbMin.u[Z];
+	unsigned layerCount = std::max(1u, static_cast<unsigned>(ceil(deltaH / m_grid.gridStep)));
 	ccLog::Print("[Rasterize][X-ray] Number of vertical steps: " + QString::number(layerCount));
 
 	std::vector<bool> layerFilled;

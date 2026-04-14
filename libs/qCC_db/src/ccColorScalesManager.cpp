@@ -1526,7 +1526,7 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 			classes.push_back({"Wire - Guard (Shield)", 13, qRgb(191, 231, 205)});
 			classes.push_back({"Wire - Conductor (Phase)", 14, qRgb(193, 230, 125)});
 			classes.push_back({"Transmission Tower", 15, Qt::darkBlue});
-			classes.push_back({"Wire-strucutre Connector", 16, Qt::darkYellow});
+			classes.push_back({"Wire-structure Connector", 16, Qt::darkYellow});
 			classes.push_back({"Bridge Deck", 17, Qt::darkCyan});
 			classes.push_back({"High Noise", 18, Qt::darkRed});
 			classes.push_back({"Overhead structure", 19, qRgb(270, 170, 255)});

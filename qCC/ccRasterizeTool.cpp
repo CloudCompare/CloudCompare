@@ -1372,7 +1372,11 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 		return false;
 	}
 
+#if GDAL_VERSION_NUM >= GDAL_COMPUTE_VERSION(3, 13, 0)
+	CSLConstList papszMetadata = poDriver->GetMetadata();
+#else
 	char** papszMetadata = poDriver->GetMetadata();
+#endif
 	if (!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
 	{
 		ccLog::Error("[GDAL] Driver %s doesn't support Create() method", pszFormat);

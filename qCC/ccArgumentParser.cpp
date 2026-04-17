@@ -68,6 +68,30 @@ std::optional<float> ccArgumentParser::takeFloat(const QString& context)
 	return ParseFloat(arg, context);
 }
 
+std::optional<double> ccArgumentParser::takeDouble(const QString& context, double min, double max)
+{
+	if (m_arguments.isEmpty())
+	{
+		ccLog::Error(QObject::tr("Missing parameter: %1").arg(context));
+		return std::nullopt;
+	}
+
+	const QString arg = m_arguments.takeFirst();
+	return ParseDouble(arg, context, min, max);
+}
+
+std::optional<int> ccArgumentParser::takeInt(const QString& context, int min, int max)
+{
+	if (m_arguments.isEmpty())
+	{
+		ccLog::Error(QObject::tr("Missing parameter: %1").arg(context));
+		return std::nullopt;
+	}
+
+	const QString arg = m_arguments.takeFirst();
+	return ParseInt(arg, context, min, max);
+}
+
 bool ccArgumentParser::tryConsumeOption(const QString& option)
 {
 	if (isEmpty())
@@ -93,6 +117,56 @@ std::optional<float> ccArgumentParser::ParseFloat(const QString& arg, const QStr
 	if (!ok)
 	{
 		ccLog::Error(QObject::tr("Invalid float value '%1' for %2").arg(arg, name));
+		return std::nullopt;
+	}
+
+	return value;
+}
+
+std::optional<double> ccArgumentParser::ParseDouble(const QString& arg, const QString& name, double min, double max)
+{
+	bool         ok;
+	const double value = arg.toDouble(&ok);
+	if (!ok)
+	{
+		ccLog::Error(QObject::tr("Invalid double value '%1' for %2").arg(arg, name));
+		return std::nullopt;
+	}
+
+	if (value < min)
+	{
+		ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
+		return std::nullopt;
+	}
+
+	if (value > max)
+	{
+		ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
+		return std::nullopt;
+	}
+
+	return value;
+}
+
+std::optional<int> ccArgumentParser::ParseInt(const QString& arg, const QString& name, int min, int max)
+{
+	bool      ok;
+	const int value = arg.toInt(&ok);
+	if (!ok)
+	{
+		ccLog::Error(QObject::tr("Invalid int value '%1' for %2").arg(arg, name));
+		return std::nullopt;
+	}
+
+	if (value < min)
+	{
+		ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
+		return std::nullopt;
+	}
+
+	if (value > max)
+	{
+		ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
 		return std::nullopt;
 	}
 

@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -131,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -167,7 +167,7 @@ jobs:
           echo "CXX=clang++" >> $GITHUB_ENV
 
       - name: Cache PCL Build
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-pcl
         with:
           path: pcl-cached

@@ -12,7 +12,8 @@
 	url = https://github.com/hvs-ait/mplane-plugin
 [submodule "plugins/core/Standard/qColorimetricSegmenter"]
 	path = plugins/core/Standard/qColorimetricSegmenter
-	url = https://gitlab.univ-nantes.fr/E164955Z/ptrans
+	url = https://github.com/CloudCompare/qColorimetricSegmenter.git
+	branch = master
 [submodule "plugins/core/Standard/qMasonry"]
 	path = plugins/core/Standard/qMasonry
 	url = https://github.com/CyberbuildLab/masonry-cc

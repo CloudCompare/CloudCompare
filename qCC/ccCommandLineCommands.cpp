@@ -2201,7 +2201,7 @@ bool CommandRoughness::process(ccCommandLineInterface& cmd)
 	{
 		if (parser.tryConsumeOption(COMMAND_ROUGHNESS_UP_DIR))
 		{
-			for (size_t i = 0; i < 3; ++i)
+			for (unsigned i = 0; i < 3; ++i)
 			{
 				const auto maybeValue = parser.takeDouble(QObject::tr("up direction vector coordinate"));
 				if (!maybeValue)

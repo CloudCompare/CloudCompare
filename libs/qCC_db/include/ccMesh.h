@@ -114,7 +114,6 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	unsigned capacity() const override;
 
 	// inherited methods (GenericIndexedMesh)
-	void                        forEach(genericTriangleAction action) override;
 	void                        placeIteratorAtBeginning() override;
 	CCCoreLib::GenericTriangle* _getNextTriangle() override;                   // temporary
 	CCCoreLib::GenericTriangle* _getTriangle(unsigned triangleIndex) override; // temporary

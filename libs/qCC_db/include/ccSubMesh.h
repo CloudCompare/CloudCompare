@@ -92,7 +92,6 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	{
 		return static_cast<unsigned>(m_triIndexes.size());
 	}
-	void        forEach(genericTriangleAction action) override;
 	inline void placeIteratorAtBeginning() override
 	{
 		m_globalIterator = 0;

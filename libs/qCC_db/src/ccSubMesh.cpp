@@ -64,18 +64,6 @@ void ccSubMesh::onUpdateOf(ccHObject* obj)
 		m_bBox.setValidity(false);
 }
 
-void ccSubMesh::forEach(genericTriangleAction action)
-{
-	if (!m_associatedMesh)
-		return;
-
-	for (unsigned int index : m_triIndexes)
-	{
-		CCCoreLib::GenericTriangle* tri = m_associatedMesh->_getTriangle(index);
-		action(*tri);
-	}
-}
-
 ccGenericPointCloud* ccSubMesh::getAssociatedCloud() const
 {
 	return m_associatedMesh ? m_associatedMesh->getAssociatedCloud() : nullptr;

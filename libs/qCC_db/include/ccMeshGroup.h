@@ -165,9 +165,6 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return 0;
 	}
-	void forEach(genericTriangleAction action) override
-	{
-	}
 	void placeIteratorAtBeginning() override
 	{
 	}

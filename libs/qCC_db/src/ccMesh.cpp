@@ -1491,21 +1491,6 @@ unsigned ccMesh::capacity() const
 	return static_cast<unsigned>(m_triVertIndexes->capacity());
 }
 
-void ccMesh::forEach(genericTriangleAction action)
-{
-	if (!m_associatedCloud)
-		return;
-
-	for (unsigned i = 0; i < m_triVertIndexes->size(); ++i)
-	{
-		const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->at(i);
-		m_currentTriangle.A                   = m_associatedCloud->getPoint(tri.i1);
-		m_currentTriangle.B                   = m_associatedCloud->getPoint(tri.i2);
-		m_currentTriangle.C                   = m_associatedCloud->getPoint(tri.i3);
-		action(m_currentTriangle);
-	}
-}
-
 void ccMesh::placeIteratorAtBeginning()
 {
 	m_globalIterator = 0;

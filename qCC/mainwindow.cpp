@@ -740,6 +740,9 @@ void MainWindow::connectActions()
 	connect(m_UI->actionShowActiveSFPrevious, &QAction::triggered, this, &MainWindow::doActionShowActiveSFPrevious);
 	connect(m_UI->actionShowActiveSFNext, &QAction::triggered, this, &MainWindow::doActionShowActiveSFNext);
 
+	//"Display > Clipping planes" menu
+	connect(m_UI->actionToggleClippingPlanes, &QAction::triggered, this, &MainWindow::toggleClippingPlanes);
+
 	//"Display" menu
 	connect(m_UI->actionResetGUIElementsPos, &QAction::triggered, this, &MainWindow::doActionResetGUIElementsPos);
 	connect(m_UI->actionRestoreWindowOnStartup, &QAction::toggled, this, &MainWindow::doActionToggleRestoreWindowOnStartup);
@@ -10353,6 +10356,22 @@ void MainWindow::createPointCloudFromClipboard()
 	QMainWindow::statusBar()->showMessage(tr("%1 cloud(s) loaded from the clipboard").arg(clouds.size()), 2000);
 }
 
+void MainWindow::toggleClippingPlanes()
+{
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+	{
+		return;
+	}
+
+	win->setClippingPlanesEnabled(!win->clippingPlanesEnabled());
+	win->redraw();
+
+	m_UI->actionToggleClippingPlanes->blockSignals(true);
+	m_UI->actionToggleClippingPlanes->setChecked(win->clippingPlanesEnabled());
+	m_UI->actionToggleClippingPlanes->blockSignals(false);
+}
+
 void MainWindow::toggleLockRotationAxis()
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -11268,12 +11287,17 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 		m_UI->actionAutoPickRotationCenter->blockSignals(true);
 		m_UI->actionAutoPickRotationCenter->setChecked(win->autoPickPivotAtCenter());
 		m_UI->actionAutoPickRotationCenter->blockSignals(false);
+
+		m_UI->actionToggleClippingPlanes->blockSignals(true);
+		m_UI->actionToggleClippingPlanes->setChecked(win->clippingPlanesEnabled());
+		m_UI->actionToggleClippingPlanes->blockSignals(false);
 	}
 
 	m_UI->actionLockRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionLockView3DRotationAxis->setEnabled(win != nullptr);
 	m_UI->actionEnableStereo->setEnabled(win != nullptr);
 	m_UI->actionExclusiveFullScreen->setEnabled(win != nullptr);
+	m_UI->actionToggleClippingPlanes->setEnabled(win != nullptr);
 }
 
 void MainWindow::updateViewModePopUpMenu(ccGLWindowInterface* win)
@@ -12444,6 +12468,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionPromoteCircleToCylinder);
 	m_actions.push_back(m_UI->actionViewInformation);
 	m_actions.push_back(m_UI->actionLockView3DRotationAxis);
+	m_actions.push_back(m_UI->actionToggleClippingPlanes);
 }
 
 void MainWindow::showShortcutDialog()

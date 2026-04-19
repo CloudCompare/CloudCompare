@@ -462,6 +462,9 @@ class MainWindow : public QMainWindow
 	void doActionShowActiveSFPrevious();
 	void doActionShowActiveSFNext();
 
+	//! Toggles the clipping planes
+	void toggleClippingPlanes();
+
 	//! Removes all entities currently loaded in the DB tree
 	void closeAll();
 

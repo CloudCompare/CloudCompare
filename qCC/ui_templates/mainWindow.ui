@@ -108,6 +108,7 @@
     <addaction name="actionRenderToFile"/>
     <addaction name="actionDisplaySettings"/>
     <addaction name="actionEditCamera"/>
+    <addaction name="actionToggleClippingPlanes"/>
     <addaction name="actionSaveViewportAsObject"/>
     <addaction name="actionAdjustZoom"/>
     <addaction name="actionViewInformation"/>
@@ -3323,6 +3324,17 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="shortcut">
     <string>Alt+F7</string>
+   </property>
+  </action>
+  <action name="actionToggleClippingPlanes">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Toggle clipping planes</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
  </widget>

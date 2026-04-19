@@ -73,6 +73,8 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	        { if (d != 0) nearClippingDepthChanged(d); });
 	connect(m_ui->farClippingDepthDoubleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double d)
 	        { if (d != 0) farClippingDepthChanged(d); });
+
+	connect(m_ui->clippingPlanesGroupBox, &QGroupBox::toggled, this, &ccCameraParamEditDlg::clippingPlanesToggled);
 	connect(m_ui->nearClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::nearClippingCheckBoxToggled);
 	connect(m_ui->farClippingCheckBox, &QCheckBox::toggled, this, &ccCameraParamEditDlg::farClippingCheckBoxToggled);
 
@@ -189,6 +191,19 @@ void ccCameraParamEditDlg::fovChanged(double value)
 
 	m_associatedWin->setFov(static_cast<float>(value));
 	m_associatedWin->redraw();
+}
+
+void ccCameraParamEditDlg::clippingPlanesToggled(bool state)
+{
+	if (m_associatedWin)
+	{
+		m_associatedWin->setClippingPlanesEnabled(state);
+		m_associatedWin->redraw();
+	}
+
+	m_ui->clippingPlanesGroupBox->blockSignals(true);
+	m_ui->clippingPlanesGroupBox->setChecked(state);
+	m_ui->clippingPlanesGroupBox->blockSignals(false);
 }
 
 void ccCameraParamEditDlg::nearClippingDepthChanged(double depth)
@@ -486,6 +501,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindowInterface* win)
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::fovChanged, this, &ccCameraParamEditDlg::updateWinFov);
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::nearClippingDepthChanged, this, &ccCameraParamEditDlg::updateNearClippingDepth);
 		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::farClippingDepthChanged, this, &ccCameraParamEditDlg::updateFarClippingDepth);
+		connect(m_associatedWin->signalEmitter(), &ccGLWindowSignalEmitter::clippingPlanesToggled, this, &ccCameraParamEditDlg::clippingPlanesToggled);
 
 		double increment = m_associatedWin->computeActualPixelSize();
 		m_ui->nearClippingDepthDoubleSpinBox->setSingleStep(increment);

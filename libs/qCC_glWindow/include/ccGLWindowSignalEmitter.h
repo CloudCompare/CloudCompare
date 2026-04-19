@@ -97,6 +97,9 @@ class CCGLWINDOW_LIB_API ccGLWindowSignalEmitter : public QObject
 	//! Signal emitted when the far clipping depth has been changed
 	void farClippingDepthChanged(double depth);
 
+	//! Signal emitted when the clipping planes enability has been changed
+	void clippingPlanesToggled(bool state);
+
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3d&);
 

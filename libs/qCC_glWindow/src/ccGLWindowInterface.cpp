@@ -5734,6 +5734,16 @@ void ccGLWindowInterface::onItemPickedFast(ccHObject* pickedEntity, int pickedIt
 	Q_EMIT m_signalEmitter->fastPickingFinished();
 }
 
+void ccGLWindowInterface::setClippingPlanesEnabled(bool enabled)
+{
+	if (m_clippingPlanesEnabled != enabled)
+	{
+		m_clippingPlanesEnabled = enabled;
+
+		Q_EMIT m_signalEmitter->clippingPlanesToggled(enabled);
+	}
+}
+
 QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
                                           bool  dontScaleFeatures /*=false*/,
                                           bool  renderOverlayItems /*=false*/,

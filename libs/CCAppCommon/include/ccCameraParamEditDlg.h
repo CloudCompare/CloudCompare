@@ -105,6 +105,7 @@ class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog
 
 	void nearClippingDepthChanged(double);
 	void nearClippingCheckBoxToggled(bool);
+	void clippingPlanesToggled(bool);
 	void farClippingDepthChanged(double);
 	void farClippingCheckBoxToggled(bool);
 	void pivotChanged();

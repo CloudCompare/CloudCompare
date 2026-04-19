@@ -473,10 +473,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	float getFov() const;
 
 	//! Whether to allow near and far clipping planes or not
-	inline void setClippingPlanesEnabled(bool enabled)
-	{
-		m_clippingPlanesEnabled = enabled;
-	}
+	void setClippingPlanesEnabled(bool enabled);
 
 	//! Whether to near and far clipping planes are enabled or not
 	inline bool clippingPlanesEnabled() const

@@ -133,6 +133,12 @@ Improvements:
 		- choice is now persistent, and will be reactivated when running CC again, or creating a new 3D view
 		- currently ignored by 3D mice and controllers
 
+	- Display > Toggle clipping planes
+		- to quickly toggle any already defined clipping planes on and off
+		- default shortcut: F12
+		- warning: clipping planes must have already been defined (with the Camera Settings dialog
+			or the CTRL+mouse wheel and CTRL+SHIFT+mouse wheel shortcuts). Both clipping planes are toggled at the same time.
+
 	- Rasterize tool
 		- New 'X-ray' field calculation tool (same tab as 'hillshade')
 			- computes a scalar field based on how many 'layers' are filled above each raster grid cell

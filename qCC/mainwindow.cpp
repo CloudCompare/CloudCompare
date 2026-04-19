@@ -5545,7 +5545,8 @@ void MainWindow::doActionComputeCPS()
 		ccConsole::Error(tr("Not enough memory!"));
 		return;
 	}
-	// cmpPC->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN); //now done by default by computeCloud2CloudDistances
+
+	// cmpPC->setPointScalarValues(CCCoreLib::NAN_VALUE); //now done by default by computeCloud2CloudDistances
 
 	CCCoreLib::ReferenceCloud                                                  CPSet(srcCloud);
 	ccProgressDialog                                                           pDlg(true, this);
@@ -9780,7 +9781,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			++errorCount;
 			continue;
 		}
-		compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueToNaN);
+		compEnt->setPointScalarValues(CCCoreLib::NAN_VALUE);
 
 		int     returnCode = 0;
 		QString errString  = tr("[Compute Primitive Distances] Cloud to %1 distance computation failed (error code = %2)");
@@ -9893,7 +9894,14 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 			if (s_flipNormals)
 			{
-				compEnt->forEach(CCCoreLib::ScalarFieldTools::SetScalarValueInverted);
+				if (compEnt->getCurrentOutScalarField())
+				{
+					compEnt->getCurrentOutScalarField()->invert();
+				}
+				else
+				{
+					assert(false);
+				}
 				sfName += "[-]";
 			}
 		}

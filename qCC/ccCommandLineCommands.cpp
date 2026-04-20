@@ -6860,99 +6860,53 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	bool                                              robustC2MDistances    = true;
 	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatching       = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 
-	while (!cmd.arguments().empty())
-	{
-		QString argument = cmd.arguments().front();
-		if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_REFERENCE_IS_FIRST))
-		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
+	ccArgumentParser parser(cmd.arguments());
 
+	while (!parser.isEmpty())
+	{
+		if (parser.tryConsumeOption(COMMAND_ICP_REFERENCE_IS_FIRST))
+		{
 			referenceIsFirst = true;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ADJUST_SCALE))
+		else if (parser.tryConsumeOption(COMMAND_ICP_ADJUST_SCALE))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
 			adjustScale = true;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
+		else if (parser.tryConsumeOption(COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
 			enableFarthestPointRemoval = true;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_MIN_ERROR_DIIF))
+		else if (parser.tryConsumeOption(COMMAND_ICP_MIN_ERROR_DIIF))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
-			{
-				return cmd.error(QObject::tr("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF));
-			}
-			bool ok;
-			minErrorDiff = cmd.arguments().takeFirst().toDouble(&ok);
-			if (!ok || minErrorDiff <= 0)
-			{
-				return cmd.error(QObject::tr("Invalid value for min. error difference! (after %1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
-			}
+			// Note that min is actually the minimum positive value a double can represent
+			const auto maybeErrorDiff = parser.takeDouble(QObject::tr("min error difference"), std::numeric_limits<double>::min());
+			if (!maybeErrorDiff)
+				return false;
+			minErrorDiff = *maybeErrorDiff;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ITERATION_COUNT))
+		else if (parser.tryConsumeOption(COMMAND_ICP_ITERATION_COUNT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
-			{
-				return cmd.error(QObject::tr("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT));
-			}
-			bool    ok;
-			QString arg    = cmd.arguments().takeFirst();
-			iterationCount = arg.toUInt(&ok);
-			if (!ok || iterationCount == 0)
-				return cmd.error(QObject::tr("Invalid number of iterations! (%1)").arg(arg));
+			const auto maybeIterCount = parser.takeUInt(QObject::tr("number of iterations"), 1);
+			if (!maybeIterCount)
+				return false;
+			iterationCount = *maybeIterCount;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_OVERLAP))
+		else if (parser.tryConsumeOption(COMMAND_ICP_OVERLAP))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
-			{
-				return cmd.error(QObject::tr("Missing parameter: overlap percentage after '%1'").arg(COMMAND_ICP_OVERLAP));
-			}
-			bool    ok;
-			QString arg = cmd.arguments().takeFirst();
-			overlap     = arg.toUInt(&ok);
-			if (!ok || overlap < 10 || overlap > 100)
-			{
-				return cmd.error(QObject::tr("Invalid overlap value! (%1 --> should be between 10 and 100)").arg(arg));
-			}
+			const auto maybeOverlap = parser.takeUInt(QObject::tr("overlap"), 10, 100);
+			if (!maybeOverlap)
+				return false;
+			overlap = *maybeOverlap;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
+		else if (parser.tryConsumeOption(COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
-			{
-				return cmd.error(QObject::tr("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
-			}
-			bool ok;
-			randomSamplingLimit = cmd.arguments().takeFirst().toUInt(&ok);
-			if (!ok || randomSamplingLimit < 3)
-			{
-				return cmd.error(QObject::tr("Invalid random sampling limit! (after %1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
-			}
+			const auto maybeRandomSamplingLimit = parser.takeUInt(QObject::tr("random sampling limit"), 3);
+			if (!maybeRandomSamplingLimit)
+				return false;
+			randomSamplingLimit = *maybeRandomSamplingLimit;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
+		else if (parser.tryConsumeOption(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_MODEL_SF_AS_WEIGHT));
@@ -6964,11 +6918,8 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				return false;
 			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
+		else if (parser.tryConsumeOption(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
 			if (cmd.arguments().empty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: SF index after '%1'").arg(COMMAND_ICP_USE_DATA_SF_AS_WEIGHT));
@@ -6980,116 +6931,87 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 				return false;
 			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_MAX_THREAD_COUNT))
+		else if (parser.tryConsumeOption(COMMAND_MAX_THREAD_COUNT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
-			{
-				return cmd.error(QObject::tr("Missing parameter: max thread count after '%1'").arg(COMMAND_MAX_THREAD_COUNT));
-			}
-
-			bool ok;
-			maxThreadCount = cmd.arguments().takeFirst().toInt(&ok);
-			if (!ok || maxThreadCount < 0)
-			{
-				return cmd.error(QObject::tr("Invalid thread count! (after %1)").arg(COMMAND_MAX_THREAD_COUNT));
-			}
+			const auto maybemaxThreadCount = parser.takeUInt(QObject::tr("max thread count"), 1);
+			if (!maybemaxThreadCount)
+				return false;
+			maxThreadCount = *maybemaxThreadCount;
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_ROT))
+		else if (parser.tryConsumeOption(COMMAND_ICP_ROT))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (!cmd.arguments().empty())
-			{
-				QString rotation = cmd.arguments().takeFirst().toUpper();
-
-				// invalidate all previous rotations in case -ROT used twice
-				cmd.print(QObject::tr("[ICP] Reset rotation constraints if any. Only one -%1 argument allowed").arg(COMMAND_ICP_ROT));
-				transformationFilters &= (~CCCoreLib::RegistrationTools::SKIP_ROTATION);
-
-				if (rotation == "XYZ")
-				{
-					cmd.print(QObject::tr("[ICP] Use all rotations"));
-				}
-				else if (rotation == "X")
-				{
-					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
-					cmd.print(QObject::tr("[ICP] Skip RYZ"));
-				}
-				else if (rotation == "Y")
-				{
-					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
-					cmd.print(QObject::tr("[ICP] Skip RXZ"));
-				}
-				else if (rotation == "Z")
-				{
-					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXY;
-					cmd.print(QObject::tr("[ICP] Skip RXY"));
-				}
-				else if (rotation == "NONE")
-				{
-					transformationFilters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
-					cmd.print(QObject::tr("[ICP] Skip rotation"));
-				}
-				else
-				{
-					return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
-				}
-			}
-			else
+			if (parser.isEmpty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: rotation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_ROT));
 			}
+
+			// invalidate all previous rotations in case -ROT used twice
+			cmd.print(QObject::tr("[ICP] Reset rotation constraints if any. Only one -%1 argument allowed").arg(COMMAND_ICP_ROT));
+			transformationFilters &= (~CCCoreLib::RegistrationTools::SKIP_ROTATION);
+
+			QString rotation = parser.takeNext().toUpper();
+			if (rotation == "XYZ")
+			{
+				cmd.print(QObject::tr("[ICP] Use all rotations"));
+			}
+			else if (rotation == "X")
+			{
+				transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RYZ;
+				cmd.print(QObject::tr("[ICP] Skip RYZ"));
+			}
+			else if (rotation == "Y")
+			{
+				transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXZ;
+				cmd.print(QObject::tr("[ICP] Skip RXZ"));
+			}
+			else if (rotation == "Z")
+			{
+				transformationFilters |= CCCoreLib::RegistrationTools::SKIP_RXY;
+				cmd.print(QObject::tr("[ICP] Skip RXY"));
+			}
+			else if (rotation == "NONE")
+			{
+				transformationFilters |= CCCoreLib::RegistrationTools::SKIP_ROTATION;
+				cmd.print(QObject::tr("[ICP] Skip rotation"));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
+			}
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TX))
+		else if (parser.tryConsumeOption(COMMAND_ICP_SKIP_TX))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TX;
 			cmd.print(QObject::tr("[ICP] Skip TX"));
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TY))
+		else if (parser.tryConsumeOption(COMMAND_ICP_SKIP_TY))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TY;
 			cmd.print(QObject::tr("[ICP] Skip TY"));
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_SKIP_TZ))
+		else if (parser.tryConsumeOption(COMMAND_ICP_SKIP_TZ))
 		{
 			transformationFilters |= CCCoreLib::RegistrationTools::SKIP_TZ;
 			cmd.print(QObject::tr("[ICP] Skip TZ"));
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_ICP_C2M_DIST))
+		else if (parser.tryConsumeOption(COMMAND_ICP_C2M_DIST))
 		{
 			useC2MDistances = true;
 			cmd.print(QObject::tr("[ICP] Use C2M distances"));
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_NON_ROBUST))
+		else if (parser.tryConsumeOption(COMMAND_C2M_DIST_NON_ROBUST))
 		{
 			robustC2MDistances = false;
 			cmd.warning(QObject::tr("[ICP] Use non-robust C2M distances"));
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
-		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_NORMAL_MATCHING))
+		else if (parser.tryConsumeOption(COMMAND_C2M_NORMAL_MATCHING))
 		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-
-			if (cmd.arguments().empty())
+			if (parser.isEmpty())
 			{
 				return cmd.error(QObject::tr("Missing parameter: normals matching mode after '%1'").arg(COMMAND_C2M_NORMAL_MATCHING));
 			}
 
-			QString normalsMatchingOption = cmd.arguments().takeFirst().toUpper();
+			QString normalsMatchingOption = parser.takeNext().toUpper();
 
 			if (normalsMatchingOption == "OPPOSITE")
 			{
@@ -7110,9 +7032,6 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			{
 				return cmd.error(QObject::tr("Unknown normal matching mode: ") + normalsMatchingOption);
 			}
-
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
 		}
 		else
 		{

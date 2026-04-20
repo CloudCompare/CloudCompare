@@ -60,6 +60,8 @@ class ccArgumentParser
 
 	std::optional<int> takeInt(const QString& context, int min = std::numeric_limits<int>::min(), int max = std::numeric_limits<int>::max());
 
+	std::optional<unsigned> takeUInt(const QString& context, unsigned min = 0, unsigned max = std::numeric_limits<unsigned>::max());
+
 	//! Checks if the next argument is `-OPTION` (case insensitive)
 	/** option string should not contain the `-`
 	    - if yes: consumes it and returns true
@@ -128,6 +130,14 @@ class ccArgumentParser
 	 * - if arg is > max
 	 **/
 	static std::optional<int> ParseInt(const QString& arg, const QString& name, int min = std::numeric_limits<int>::min(), int max = std::numeric_limits<int>::max());
+
+	//! Parses an unsigned int from a string
+	/** Logs an error on failure:
+	 * - if arg is not a number
+	 * - if arg is < min
+	 * - if arg is > max
+	 **/
+	static std::optional<unsigned> ParseUInt(const QString& arg, const QString& name, unsigned min = 0, unsigned max = std::numeric_limits<unsigned>::max());
 
   private:
 	QStringList& m_arguments; //!< Command line arguments (reference to)

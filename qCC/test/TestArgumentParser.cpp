@@ -166,6 +166,84 @@ class TestArgumentParser : public QObject
 		QCOMPARE(*result, 1500.0f);
 	}
 
+	// takeUInt()
+	void takeUIntParsesValid()
+	{
+		QStringList      args{"42"};
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test");
+		QVERIFY(result.has_value());
+		QCOMPARE(*result, 42u);
+		QVERIFY(args.isEmpty());
+	}
+
+	void takeUIntOnEmptyReturnsNullopt()
+	{
+		QStringList      args;
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test");
+		QVERIFY(!result.has_value());
+	}
+
+	void takeUIntOnInvalidReturnsNullopt()
+	{
+		QStringList      args{"abc"};
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test");
+		QVERIFY(!result.has_value());
+	}
+
+	void takeUIntRejectsNegative()
+	{
+		QStringList      args{"-1"};
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test");
+		QVERIFY(!result.has_value());
+	}
+
+	void takeUIntBelowMin()
+	{
+		QStringList      args{"5"};
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test", 10);
+		QVERIFY(!result.has_value());
+	}
+
+	void takeUIntAboveMax()
+	{
+		QStringList      args{"200"};
+		ccArgumentParser parser(args);
+
+		auto result = parser.takeUInt("test", 0, 100);
+		QVERIFY(!result.has_value());
+	}
+
+	// ParseUInt() static
+	void ParseUIntValid()
+	{
+		auto result = ccArgumentParser::ParseUInt("42", "test");
+		QVERIFY(result.has_value());
+		QCOMPARE(*result, 42u);
+	}
+
+	void ParseUIntInvalid()
+	{
+		auto result = ccArgumentParser::ParseUInt("abc", "test");
+		QVERIFY(!result.has_value());
+	}
+
+	void ParseUIntZero()
+	{
+		auto result = ccArgumentParser::ParseUInt("0", "test");
+		QVERIFY(result.has_value());
+		QCOMPARE(*result, 0u);
+	}
+
 	// tryConsumeOption()
 	void tryConsumeOptionMatchesCaseInsensitive()
 	{

@@ -2,6 +2,7 @@
 target_sources( ${PROJECT_NAME}
 	PRIVATE
 		${CMAKE_CURRENT_LIST_DIR}/CCPluginAPI.h
+		${CMAKE_CURRENT_LIST_DIR}/ccArgumentParser.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScaleSelector.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScaleEditorDlg.h
 		${CMAKE_CURRENT_LIST_DIR}/ccColorScaleEditorWidget.h

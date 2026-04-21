@@ -31,8 +31,10 @@
 #include <QString>
 
 // System
+#include <optional>
 #include <vector>
 
+class ccArgumentParser;
 class ccGenericMesh;
 class ccProgressDialog;
 
@@ -354,6 +356,12 @@ class CCPLUGIN_LIB_API ccCommandLineInterface
 	/** \warning This method assumes the 'COMMAND_OPEN_SHIFT_ON_LOAD' argument has already been removed from the argument stack
 	 **/
 	bool processGlobalShiftCommand(GlobalShiftOptions& options);
+
+	//! Parses global shift options from an argument parser.
+	/** Reads either AUTO, FIRST, or three coordinates (X Y Z) from the parser.
+	    \return parsed options, or std::nullopt on parse/validation error (error logged)
+	**/
+	static std::optional<GlobalShiftOptions> ParseGlobalShiftOptions(ccArgumentParser& parser);
 
   protected: // members
 	//! Currently opened AND SELECTED point clouds and their respective filename

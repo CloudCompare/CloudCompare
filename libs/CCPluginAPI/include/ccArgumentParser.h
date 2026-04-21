@@ -16,6 +16,8 @@
 // #                                                                        #
 // ##########################################################################
 
+#include "CCPluginAPI.h"
+
 #include <ccLog.h>
 
 // Qt
@@ -31,7 +33,7 @@
 /** Meant to simplify parsing.
     Functions will log errors when necessary
 **/
-class ccArgumentParser
+class CCPLUGIN_LIB_API ccArgumentParser
 {
   public:
 	explicit ccArgumentParser(QStringList& arguments);
@@ -111,9 +113,12 @@ class ccArgumentParser
 	}
 
 	//! Parses a float from a string
-	/** Logs an error on failure
+	/** Logs an error on failure:
+	 * - if arg is not a number
+	 * - if arg is < min
+	 * - if arg is > max
 	 **/
-	static std::optional<float> ParseFloat(const QString& arg, const QString& name);
+	static std::optional<float> ParseFloat(const QString& arg, const QString& name, float min = std::numeric_limits<float>::lowest(), float max = std::numeric_limits<float>::max());
 
 	//! Parses a double from a string
 	/** Logs an error on failure:

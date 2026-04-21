@@ -19,6 +19,83 @@
 #include <cassert>
 #include <ccLog.h>
 
+namespace
+{
+	//! Helper trait to allow some code factorization
+	template <typename T>
+	struct QStringParseTraits
+	{
+		static T Parse(const QString& arg, bool* ok)
+		{
+			static_assert(sizeof(T) == 0, "QStringParseTraits not specialized for this type");
+		}
+	};
+
+	template <>
+	struct QStringParseTraits<double>
+	{
+		static double Parse(const QString& arg, bool* ok)
+		{
+			return arg.toDouble(ok);
+		}
+	};
+
+	template <>
+	struct QStringParseTraits<float>
+	{
+		static float Parse(const QString& arg, bool* ok)
+		{
+			return arg.toFloat(ok);
+		}
+	};
+
+	template <>
+	struct QStringParseTraits<int>
+	{
+		static int Parse(const QString& arg, bool* ok)
+		{
+			return arg.toInt(ok);
+		}
+	};
+
+	template <>
+	struct QStringParseTraits<unsigned int>
+	{
+		static unsigned int Parse(const QString& arg, bool* ok)
+		{
+			return arg.toUInt(ok);
+		}
+	};
+
+	//! Parses the arg to the type `T` and check its within [min, max]
+	template <typename T>
+	std::optional<T> ParseString(const QString& arg, const QString& name, const T min, const T max)
+	{
+		bool    ok    = false;
+		const T value = QStringParseTraits<T>::Parse(arg, &ok);
+
+		if (!ok)
+		{
+			ccLog::Error(QObject::tr("Invalid number '%1' for %2").arg(arg, name));
+			return std::nullopt;
+		}
+
+		if (value < min)
+		{
+			ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
+			return std::nullopt;
+		}
+
+		if (value > max)
+		{
+			ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
+			return std::nullopt;
+		}
+
+		return value;
+	}
+} // namespace
+
 ccArgumentParser::ccArgumentParser(QStringList& arguments)
     : m_arguments(arguments)
 {
@@ -122,90 +199,22 @@ bool ccArgumentParser::tryConsumeOption(const QString& option)
 	return false;
 }
 
-std::optional<float> ccArgumentParser::ParseFloat(const QString& arg, const QString& name)
+std::optional<float> ccArgumentParser::ParseFloat(const QString& arg, const QString& name, float min, float max)
 {
-	bool        ok;
-	const float value = arg.toFloat(&ok);
-	if (!ok)
-	{
-		ccLog::Error(QObject::tr("Invalid float value '%1' for %2").arg(arg, name));
-		return std::nullopt;
-	}
-
-	return value;
+	return ParseString<float>(arg, name, min, max);
 }
 
 std::optional<double> ccArgumentParser::ParseDouble(const QString& arg, const QString& name, double min, double max)
 {
-	bool         ok;
-	const double value = arg.toDouble(&ok);
-	if (!ok)
-	{
-		ccLog::Error(QObject::tr("Invalid double value '%1' for %2").arg(arg, name));
-		return std::nullopt;
-	}
-
-	if (value < min)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
-		return std::nullopt;
-	}
-
-	if (value > max)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
-		return std::nullopt;
-	}
-
-	return value;
+	return ParseString<double>(arg, name, min, max);
 }
 
 std::optional<int> ccArgumentParser::ParseInt(const QString& arg, const QString& name, int min, int max)
 {
-	bool      ok;
-	const int value = arg.toInt(&ok);
-	if (!ok)
-	{
-		ccLog::Error(QObject::tr("Invalid int value '%1' for %2").arg(arg, name));
-		return std::nullopt;
-	}
-
-	if (value < min)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
-		return std::nullopt;
-	}
-
-	if (value > max)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
-		return std::nullopt;
-	}
-
-	return value;
+	return ParseString<int>(arg, name, min, max);
 }
 
 std::optional<unsigned> ccArgumentParser::ParseUInt(const QString& arg, const QString& name, unsigned min, unsigned max)
 {
-	bool           ok;
-	const unsigned value = arg.toUInt(&ok);
-	if (!ok)
-	{
-		ccLog::Error(QObject::tr("Invalid unsigned int value '%1' for %2").arg(arg, name));
-		return std::nullopt;
-	}
-
-	if (value < min)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be >= %3").arg(name, arg, QString::number(min)));
-		return std::nullopt;
-	}
-
-	if (value > max)
-	{
-		ccLog::Error(QObject::tr("%1 (=%2) must be <= %3").arg(name, arg, QString::number(max)));
-		return std::nullopt;
-	}
-
-	return value;
+	return ParseString<unsigned>(arg, name, min, max);
 }

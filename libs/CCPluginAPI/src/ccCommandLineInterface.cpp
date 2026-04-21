@@ -17,6 +17,7 @@
 
 #include "ccCommandLineInterface.h"
 
+#include "ccArgumentParser.h"
 #include "ccGenericMesh.h"
 
 #include <QDir>
@@ -253,50 +254,69 @@ bool ccCommandLineInterface::nextCommandIsGlobalShift() const
 	return !arguments().empty() && IsCommand(arguments().front(), COMMAND_OPEN_SHIFT_ON_LOAD);
 }
 
+std::optional<ccCommandLineInterface::GlobalShiftOptions>
+ccCommandLineInterface::ParseGlobalShiftOptions(ccArgumentParser& parser)
+{
+	GlobalShiftOptions options; // defaults: NO_GLOBAL_SHIFT, (0,0,0)
+
+	if (parser.isEmpty())
+	{
+		ccLog::Error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'")
+		                 .arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD_FIRST, COMMAND_OPEN_SHIFT_ON_LOAD));
+		return std::nullopt;
+	}
+
+	const QString firstParam = parser.takeNext();
+	const QString firstUpper = firstParam.toUpper();
+
+	if (firstUpper == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
+	{
+		options.mode = GlobalShiftOptions::AUTO_GLOBAL_SHIFT;
+		return options;
+	}
+	if (firstUpper == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST)
+	{
+		options.mode = GlobalShiftOptions::FIRST_GLOBAL_SHIFT;
+		return options;
+	}
+
+	// firstParam is the X coordinate of a custom shift vector — we need Y and Z too
+	if (parser.size() < 2)
+	{
+		ccLog::Error(QObject::tr("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
+		return std::nullopt;
+	}
+
+	const auto x = ccArgumentParser::ParseDouble(firstParam, QObject::tr("X coordinate of the global shift vector"));
+	if (!x)
+		return std::nullopt;
+
+	const auto y = parser.takeDouble(QObject::tr("Y coordinate of the global shift vector"));
+	if (!y)
+		return std::nullopt;
+
+	const auto z = parser.takeDouble(QObject::tr("Z coordinate of the global shift vector"));
+	if (!z)
+		return std::nullopt;
+
+	options.mode              = GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT;
+	options.customGlobalShift = CCVector3d(*x, *y, *z);
+	return options;
+}
+
 bool ccCommandLineInterface::processGlobalShiftCommand(GlobalShiftOptions& options)
 {
-	// set default parameters in case of an early exit
+	// defaults in case of an early exit (preserved for API compatibility)
 	options.mode              = GlobalShiftOptions::NO_GLOBAL_SHIFT;
 	options.customGlobalShift = CCVector3d(0, 0, 0);
 
-	if (arguments().empty())
+	ccArgumentParser parser(arguments());
+	auto             result = ParseGlobalShiftOptions(parser);
+	if (!result)
 	{
-		return error(QObject::tr("Missing parameter: global shift vector or %1 or %2 after '%3'")
-		                 .arg(COMMAND_OPEN_SHIFT_ON_LOAD_AUTO, COMMAND_OPEN_SHIFT_ON_LOAD_FIRST, COMMAND_OPEN_SHIFT_ON_LOAD));
+		return false; // error already logged
 	}
-
-	QString firstParam = arguments().takeFirst();
-
-	if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_AUTO)
-	{
-		options.mode = GlobalShiftOptions::AUTO_GLOBAL_SHIFT;
-	}
-	else if (firstParam.toUpper() == COMMAND_OPEN_SHIFT_ON_LOAD_FIRST)
-	{
-		options.mode = GlobalShiftOptions::FIRST_GLOBAL_SHIFT;
-	}
-	else if (arguments().size() < 2)
-	{
-		return error(QObject::tr("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
-	}
-	else
-	{
-		bool       ok = true;
-		CCVector3d shiftOnLoadVec;
-		shiftOnLoadVec.x = firstParam.toDouble(&ok);
-		if (!ok)
-			return error(QObject::tr("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
-		shiftOnLoadVec.y = arguments().takeFirst().toDouble(&ok);
-		if (!ok)
-			return error(QObject::tr("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
-		shiftOnLoadVec.z = arguments().takeFirst().toDouble(&ok);
-		if (!ok)
-			return error(QObject::tr("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SHIFT_ON_LOAD));
-
-		options.mode              = GlobalShiftOptions::CUSTOM_GLOBAL_SHIFT;
-		options.customGlobalShift = shiftOnLoadVec;
-	}
-
+	options = *result;
 	return true;
 }
 

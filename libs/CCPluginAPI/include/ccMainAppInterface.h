@@ -149,6 +149,11 @@ class ccMainAppInterface
 	//! Returns currently selected entities ("read only")
 	virtual const ccHObject::Container& getSelectedEntities() const = 0;
 
+	//! Updates the 'properties' view (if any)
+	virtual void updatePropertiesView()
+	{
+	}
+
 	//! Checks if we have any selections
 	bool haveSelection() const
 	{

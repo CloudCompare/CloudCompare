@@ -315,6 +315,7 @@ void qRansacSD::doAction()
 	if (group)
 	{
 		m_app->addToDB(group);
+		m_app->updatePropertiesView();
 		m_app->refreshAll();
 	}
 }

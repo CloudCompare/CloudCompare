@@ -96,6 +96,8 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	connect(startIndexSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ccPointListPickingDlg::startIndexChanged);
 
 	connect(showGlobalCoordsCheckBox, &QAbstractButton::clicked, this, &ccPointListPickingDlg::updateList);
+	connect(loadNameListButton, &QPushButton::clicked, this, &ccPointListPickingDlg::loadNameList);
+	connect(clearNameListButton, &QPushButton::clicked, this, &ccPointListPickingDlg::clearNameList);
 
 	updateList();
 }
@@ -548,6 +550,64 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	}
 
 	ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
+}
+
+void ccPointListPickingDlg::loadNameList()
+{
+	QSettings settings;
+	settings.beginGroup("PointListPickingDlg");
+	QString lastDir = settings.value("nameListDir", QString()).toString();
+	settings.endGroup();
+
+	QString filename = QFileDialog::getOpenFileName(this,
+	                                                tr("Load name list"),
+	                                                lastDir,
+	                                                tr("Text files (*.txt *.csv);;All files (*)"));
+	if (filename.isEmpty())
+		return;
+
+	settings.beginGroup("PointListPickingDlg");
+	settings.setValue("nameListDir", QFileInfo(filename).absolutePath());
+	settings.endGroup();
+
+	QFile f(filename);
+	if (!f.open(QFile::ReadOnly | QFile::Text))
+	{
+		ccLog::Error(tr("Could not open file '%1'").arg(filename));
+		return;
+	}
+
+	m_codeList.clear();
+	m_usedCodes.clear();
+	QTextStream ts(&f);
+	while (!ts.atEnd())
+	{
+		QString line = ts.readLine().trimmed();
+		if (!line.isEmpty() && !line.startsWith('#'))
+			m_codeList.append(line);
+	}
+	f.close();
+
+	// Populate the list widget
+	nameListWidget->clear();
+	for (const QString& code : m_codeList)
+	{
+		QListWidgetItem* item = new QListWidgetItem(code, nameListWidget);
+		item->setForeground(Qt::darkGreen);
+	}
+	nameListWidget->setVisible(!m_codeList.isEmpty());
+	clearNameListButton->setEnabled(!m_codeList.isEmpty());
+	nameListStatusLabel->setText(tr("%1 names loaded").arg(m_codeList.size()));
+}
+
+void ccPointListPickingDlg::clearNameList()
+{
+	m_codeList.clear();
+	m_usedCodes.clear();
+	nameListWidget->clear();
+	nameListWidget->setVisible(false);
+	clearNameListButton->setEnabled(false);
+	nameListStatusLabel->setText(tr("No list loaded"));
 }
 
 void ccPointListPickingDlg::updateList()

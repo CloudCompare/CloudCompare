@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QSettings>
@@ -256,6 +257,7 @@ void ccPointListPickingDlg::cancelAndExit()
 	updateList();
 
 	stop(false);
+	// Note: m_codeList and nameListWidget state are intentionally preserved across sessions
 }
 
 void ccPointListPickingDlg::exportToNewCloud()
@@ -660,9 +662,10 @@ void ccPointListPickingDlg::updateList()
 		// point index in list
 		tableWidget->verticalHeaderItem(i)->setText(QStringLiteral("%1").arg(i + startIndex));
 
-		// update name as well
-		if (label->getUniqueID() > m_lastPreviousID
-		    || label->getName().startsWith(s_defaultLabelBaseName)) // DGM: we don't change the name of old labels that have a non-default name
+		// update name as well — don't overwrite names that came from the code list
+		const QString currentName = label->getName();
+		if ((label->getUniqueID() > m_lastPreviousID || currentName.startsWith(s_defaultLabelBaseName))
+		    && !m_codeList.contains(currentName))
 		{
 			label->setName(s_defaultLabelBaseName + QString::number(i + startIndex));
 		}
@@ -733,6 +736,59 @@ void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 	m_orderedLabelsContainer->addChild(newLabel);
 	MainWindow::TheInstance()->addToDB(newLabel, false, true, false, false);
 	m_toBeAdded.push_back(newLabel);
+
+	// If a name list is loaded, let the user choose a name for this pick
+	if (!m_codeList.isEmpty())
+	{
+		// Build list of names: unused ones first, then used (greyed out via display)
+		QStringList unusedNames;
+		QStringList usedNames;
+		for (const QString& code : m_codeList)
+		{
+			(m_usedCodes.contains(code) ? usedNames : unusedNames).append(code);
+		}
+		QStringList selectorList = unusedNames + usedNames;
+
+		bool ok = false;
+		QString chosen = QInputDialog::getItem(this,
+		                                       tr("Assign node name"),
+		                                       tr("Select name for this pick:"),
+		                                       selectorList,
+		                                       0,
+		                                       false,
+		                                       &ok);
+		if (!ok || chosen.isEmpty())
+		{
+			// User cancelled — remove the label that was just added
+			m_toBeAdded.pop_back();
+			MainWindow::TheInstance()->db()->removeElement(newLabel);
+			updateList();
+			if (m_associatedWin)
+				m_associatedWin->redraw();
+			return;
+		}
+
+		newLabel->setName(chosen);
+		m_usedCodes.insert(chosen);
+
+		// Mark the name as used in the list widget
+		for (int i = 0; i < nameListWidget->count(); ++i)
+		{
+			QListWidgetItem* item = nameListWidget->item(i);
+			if (item && item->text() == chosen)
+			{
+				item->setForeground(Qt::gray);
+				QFont f = item->font();
+				f.setStrikeOut(true);
+				item->setFont(f);
+				break;
+			}
+		}
+
+		int usedCount  = m_usedCodes.size();
+		int totalCount = m_codeList.size();
+		nameListStatusLabel->setText(tr("%1 names loaded, %2 used").arg(totalCount).arg(usedCount));
+	}
 
 	// automatically send the new point coordinates to the clipboard
 	QClipboard* clipboard = QApplication::clipboard();

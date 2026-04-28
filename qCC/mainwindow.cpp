@@ -9395,14 +9395,23 @@ void MainWindow::doActionExportAllPointLabels()
 	QTextStream stream(&fp);
 	stream.setRealNumberPrecision(12);
 
-	// Header: label,x,y,z (global coordinates)
-	stream << "label,x,y,z" << Qt::endl;
+	// Header: label,source_cloud_id,x,y,z (global coordinates)
+	stream << "label,source_cloud_id,x,y,z" << Qt::endl;
+
+	// Track id -> name for companion cloud table
+	QMap<unsigned, QString> cloudIdToName;
 
 	for (cc2DLabel* label : pointLabels)
 	{
 		const cc2DLabel::PickedPoint& pp = label->getPickedPoint(0);
+		ccHObject* sourceEntity = pp.entity();
+		unsigned sourceId = sourceEntity ? sourceEntity->getUniqueID() : 0;
+
+		if (sourceEntity && !cloudIdToName.contains(sourceId))
+			cloudIdToName[sourceId] = sourceEntity->getName();
+
 		CCVector3 P = pp.getPointPosition();
-		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(pp.entity());
+		ccShiftedObject* shifted = ccHObjectCaster::ToShifted(sourceEntity);
 		CCVector3d Pglobal;
 		if (shifted)
 		{
@@ -9419,11 +9428,35 @@ void MainWindow::doActionExportAllPointLabels()
 		{
 			name = QStringLiteral("\"") + name + QStringLiteral("\"");
 		}
-		stream << name << ',' << Pglobal.x << ',' << Pglobal.y << ',' << Pglobal.z << Qt::endl;
+		stream << name << ',' << sourceId << ',' << Pglobal.x << ',' << Pglobal.y << ',' << Pglobal.z << Qt::endl;
 	}
 
 	fp.close();
 	ccLog::Print(tr("[I/O] File '%1' saved successfully (%2 point label(s))").arg(outputFilename).arg(pointLabels.size()));
+
+	// Write companion cloud name table so source IDs can be looked up
+	// File is written next to the main export with a _clouds suffix
+	QFileInfo fi(outputFilename);
+	QString cloudsFilename = fi.dir().filePath(fi.completeBaseName() + QStringLiteral("_clouds.") + fi.suffix());
+	QFile cfp(cloudsFilename);
+	if (cfp.open(QFile::WriteOnly | QFile::Text))
+	{
+		QTextStream cs(&cfp);
+		cs << "cloud_id,cloud_name" << Qt::endl;
+		for (auto it = cloudIdToName.constBegin(); it != cloudIdToName.constEnd(); ++it)
+		{
+			QString cname = it.value();
+			if (cname.contains(','))
+				cname = QStringLiteral("\"") + cname + QStringLiteral("\"");
+			cs << it.key() << ',' << cname << Qt::endl;
+		}
+		cfp.close();
+		ccLog::Print(tr("[I/O] Cloud name table saved to '%1'").arg(cloudsFilename));
+	}
+	else
+	{
+		ccLog::Warning(tr("[I/O] Could not write cloud name table to '%1'").arg(cloudsFilename));
+	}
 }
 
 void MainWindow::doActionExportCloudInfo()

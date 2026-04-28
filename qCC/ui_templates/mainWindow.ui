@@ -530,6 +530,7 @@
     <addaction name="actionLevel"/>
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
+    <addaction name="actionPointListPickingAllClouds"/>
     <addaction name="actionTracePolyline"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
@@ -1994,6 +1995,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Pick several points (and export them to ASCII file, a new cloud, etc.)</string>
+   </property>
+  </action>
+  <action name="actionPointListPickingAllClouds">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccPointListPicking.png</normaloff>:/CC/images/ccPointListPicking.png</iconset>
+   </property>
+   <property name="text">
+    <string>Point list picking (all clouds)</string>
+   </property>
+   <property name="statusTip">
+    <string>Pick points on any visible cloud — all picks land in one project-wide list</string>
    </property>
   </action>
   <action name="actionCurvature">

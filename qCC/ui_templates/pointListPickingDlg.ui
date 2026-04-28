@@ -183,6 +183,11 @@
        <string notr="true">Z</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>Source ID</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item>

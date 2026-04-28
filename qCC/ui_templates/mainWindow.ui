@@ -514,6 +514,7 @@
      </property>
      <addaction name="actionExportCloudInfo"/>
      <addaction name="actionExportPlaneInfo"/>
+     <addaction name="actionExportAllPointLabels"/>
     </widget>
     <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
@@ -3064,6 +3065,14 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Export plane info to a CSV file (name, width, height, center, normal, dip and dip direction, etc.)</string>
+   </property>
+  </action>
+  <action name="actionExportAllPointLabels">
+   <property name="text">
+    <string>Export all point labels</string>
+   </property>
+   <property name="toolTip">
+    <string>Export all single-point 2D labels in the project to one file (label name, X, Y, Z in global coordinates)</string>
    </property>
   </action>
   <action name="actionLock_rotation_about_arbitrary_axis">

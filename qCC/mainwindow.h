@@ -469,6 +469,8 @@ class MainWindow : public QMainWindow
 	void doActionExportCloudInfo();
 	//! Batch export some info from a set of selected planes
 	void doActionExportPlaneInfo();
+	//! Export all point labels (single-point 2D labels) in the project to one ASCII file
+	void doActionExportAllPointLabels();
 
 	//! Generates a matrix with the best (registration) RMS for all possible couple among the selected entities
 	void doActionComputeBestICPRmsMatrix();

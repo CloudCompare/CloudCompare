@@ -191,6 +191,70 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="nameListLayout">
+     <item>
+      <widget class="QLabel" name="nameListLabel">
+       <property name="text">
+        <string>Name list:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="loadNameListButton">
+       <property name="text">
+        <string>Load...</string>
+       </property>
+       <property name="toolTip">
+        <string>Load a text file of node names (one per line)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="clearNameListButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="nameListStatusLabel">
+       <property name="text">
+        <string>No list loaded</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="nameListSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QListWidget" name="nameListWidget">
+     <property name="visible">
+      <bool>false</bool>
+     </property>
+     <property name="maximumHeight">
+      <number>120</number>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="label">

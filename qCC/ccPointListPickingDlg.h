@@ -27,6 +27,10 @@
 // qCC_db
 #include <ccHObject.h>
 
+// Qt
+#include <QSet>
+#include <QStringList>
+
 class cc2DLabel;
 
 //! Dialog/interactor to graphically pick a list of points
@@ -85,6 +89,10 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	void startIndexChanged(int);
 	//! Updates point list widget
 	void updateList();
+	//! Opens a file dialog to load a name list
+	void loadNameList();
+	//! Clears the loaded name list
+	void clearNameList();
 
   protected:
 	// inherited from ccPointPickingGenericInterface
@@ -112,6 +120,11 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 
 	//! True when operating in project-wide unified mode
 	bool m_unifiedMode;
+
+	//! Loaded node name list (one entry per line from file)
+	QStringList m_codeList;
+	//! Names already assigned to a picked point
+	QSet<QString> m_usedCodes;
 
 	//! Last existing label unique ID on load
 	unsigned m_lastPreviousID;

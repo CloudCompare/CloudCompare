@@ -41,8 +41,11 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	//! Default constructor
 	explicit ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent);
 
-	//! Associates dialog with a cloud or a mesh
+	//! Associates dialog with a cloud or a mesh (single-entity mode)
 	void linkWithEntity(ccHObject* entity);
+
+	//! Associates dialog with the DB root — picks accepted from any visible cloud (unified mode)
+	void linkWithRoot(ccHObject* root);
 
   protected:
 	//! Applies changes and exit
@@ -104,8 +107,11 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	//! Exports list to an ASCII file
 	void exportToASCII(ExportFormat format);
 
-	//! Associated cloud or mesh
+	//! Associated cloud or mesh (single-entity mode); nullptr in unified mode
 	ccHObject* m_associatedEntity;
+
+	//! True when operating in project-wide unified mode
+	bool m_unifiedMode;
 
 	//! Last existing label unique ID on load
 	unsigned m_lastPreviousID;

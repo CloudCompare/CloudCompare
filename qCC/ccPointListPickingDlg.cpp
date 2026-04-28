@@ -53,10 +53,13 @@ static bool       s_showGlobalCoordsCheckBoxChecked = false;
 static const char s_pickedPointContainerName[]      = "Picked points list";
 static const char s_defaultLabelBaseName[]          = "Point #";
 
+static const char s_projectPickedPointContainerName[] = "Project picked points";
+
 ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* parent)
     : ccPointPickingGenericInterface(pickingHub, parent)
     , Ui::PointListPickingDlg()
     , m_associatedEntity(nullptr)
+    , m_unifiedMode(false)
     , m_lastPreviousID(0)
     , m_orderedLabelsContainer(nullptr)
 {
@@ -73,6 +76,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(ccPickingHub* pickingHub, QWidget* 
 	exportToolButton->setMenu(menu);
 
 	tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+	tableWidget->setColumnHidden(4, true); // Source ID — shown only in unified mode
 
 	startIndexSpinBox->setValue(s_pickedPointsStartIndex);
 	showGlobalCoordsCheckBox->setChecked(s_showGlobalCoordsCheckBoxChecked);
@@ -163,6 +167,47 @@ void ccPointListPickingDlg::linkWithEntity(ccHObject* entity)
 
 	ccShiftedObject* shifted = ccHObjectCaster::ToShifted(entity);
 	showGlobalCoordsCheckBox->setEnabled(shifted ? shifted->isShifted() : false);
+	tableWidget->setColumnHidden(4, true);
+	updateList();
+}
+
+void ccPointListPickingDlg::linkWithRoot(ccHObject* root)
+{
+	m_associatedEntity       = nullptr;
+	m_unifiedMode            = true;
+	m_lastPreviousID         = 0;
+	m_orderedLabelsContainer = nullptr;
+
+	if (root)
+	{
+		// find or create the project-level container
+		ccHObject::Container groups;
+		root->filterChildren(groups, false, CC_TYPES::HIERARCHY_OBJECT);
+		for (ccHObject* g : groups)
+		{
+			if (g->getName() == s_projectPickedPointContainerName)
+			{
+				m_orderedLabelsContainer = g;
+				break;
+			}
+		}
+
+		if (!m_orderedLabelsContainer)
+		{
+			m_orderedLabelsContainer = new ccHObject(s_projectPickedPointContainerName);
+			root->addChild(m_orderedLabelsContainer);
+			MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer, false, true, false, false);
+		}
+
+		// track highest existing label ID so "remove" can distinguish old vs new
+		std::vector<cc2DLabel*> existingLabels;
+		getPickedPoints(existingLabels);
+		for (cc2DLabel* lbl : existingLabels)
+			m_lastPreviousID = std::max(m_lastPreviousID, lbl->getUniqueID());
+	}
+
+	showGlobalCoordsCheckBox->setEnabled(false);
+	tableWidget->setColumnHidden(4, false);
 	updateList();
 }
 
@@ -200,10 +245,12 @@ void ccPointListPickingDlg::cancelAndExit()
 	m_toBeDeleted.resize(0);
 	m_toBeAdded.resize(0);
 	m_associatedEntity       = nullptr;
+	m_unifiedMode            = false;
 	m_orderedLabelsContainer = nullptr;
 
 	MainWindow::RefreshAllGLWindow();
 
+	tableWidget->setColumnHidden(4, true);
 	updateList();
 
 	stop(false);
@@ -315,17 +362,18 @@ void ccPointListPickingDlg::exportToNewPolyline()
 
 void ccPointListPickingDlg::applyAndExit()
 {
-	if (m_associatedEntity && !m_toBeDeleted.empty())
+	if (!m_toBeDeleted.empty())
 	{
-		// apply modifications
-		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted); // no need to redraw as they should already be invisible
-		m_associatedEntity = nullptr;
+		MainWindow::TheInstance()->db()->removeElements(m_toBeDeleted);
 	}
 
+	m_associatedEntity       = nullptr;
+	m_unifiedMode            = false;
 	m_toBeDeleted.resize(0);
 	m_toBeAdded.resize(0);
 	m_orderedLabelsContainer = nullptr;
 
+	tableWidget->setColumnHidden(4, true);
 	updateList();
 
 	stop(true);
@@ -333,7 +381,7 @@ void ccPointListPickingDlg::applyAndExit()
 
 void ccPointListPickingDlg::removeLastEntry()
 {
-	if (!m_associatedEntity)
+	if (!m_associatedEntity && !m_orderedLabelsContainer)
 		return;
 
 	// get all labels
@@ -528,7 +576,7 @@ void ccPointListPickingDlg::updateList()
 		{
 			tableWidget->setVerticalHeaderItem(i, new QTableWidgetItem);
 
-			for (int j = 0; j < 4; ++j)
+			for (int j = 0; j < 5; ++j)
 			{
 				tableWidget->setItem(i, j, new QTableWidgetItem);
 			}
@@ -566,6 +614,10 @@ void ccPointListPickingDlg::updateList()
 		{
 			tableWidget->item(i, j + 1)->setText(QStringLiteral("%1").arg(Pd.u[j], 0, 'f', precision));
 		}
+
+		// source cloud ID (only meaningful/visible in unified mode)
+		ccHObject* srcEntity = PP.entity();
+		tableWidget->item(i, 4)->setText(srcEntity ? QStringLiteral("%1").arg(srcEntity->getUniqueID()) : QString());
 	}
 
 	tableWidget->scrollToBottom();
@@ -573,7 +625,10 @@ void ccPointListPickingDlg::updateList()
 
 void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 {
-	if (!picked.entity || picked.entity != m_associatedEntity || !MainWindow::TheInstance())
+	if (!picked.entity || !MainWindow::TheInstance())
+		return;
+	// In single-entity mode only accept picks on the linked entity
+	if (!m_unifiedMode && picked.entity != m_associatedEntity)
 		return;
 
 	cc2DLabel* newLabel = new cc2DLabel();
@@ -588,14 +643,16 @@ void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 	else
 	{
 		delete newLabel;
-		assert(false);
 		return;
 	}
 	newLabel->setVisible(true);
 	newLabel->setDisplayedIn2D(false);
 	newLabel->displayPointLegend(true);
 	newLabel->setCollapsed(true);
-	ccGenericGLDisplay* display = m_associatedEntity->getDisplay();
+
+	// Resolve display from the picked entity (works in both modes)
+	ccHObject* displaySource = m_unifiedMode ? picked.entity : m_associatedEntity;
+	ccGenericGLDisplay* display = displaySource ? displaySource->getDisplay() : nullptr;
 	if (display)
 	{
 		newLabel->setDisplay(display);
@@ -604,8 +661,8 @@ void ccPointListPickingDlg::processPickedPoint(const PickedItem& picked)
 		                      static_cast<float>(picked.clickPoint.y() + 20) / size.height());
 	}
 
-	// add default container if necessary
-	if (!m_orderedLabelsContainer)
+	// In single-entity mode, create per-entity container on first pick if missing
+	if (!m_unifiedMode && !m_orderedLabelsContainer)
 	{
 		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
 		m_associatedEntity->addChild(m_orderedLabelsContainer);

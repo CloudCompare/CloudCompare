@@ -452,6 +452,7 @@ class MainWindow : public QMainWindow
 	// Point list picking mechanism
 	void activatePointListPickingMode();
 	void deactivatePointListPickingMode(bool);
+	void activatePointListPickingModeAllClouds();
 
 	// Point-pair registration mechanism
 	void activateRegisterPointPairTool();

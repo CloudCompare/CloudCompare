@@ -698,6 +698,7 @@ void MainWindow::connectActions()
 	//"Tools"
 	connect(m_UI->actionLevel, &QAction::triggered, this, &MainWindow::doLevel);
 	connect(m_UI->actionPointListPicking, &QAction::triggered, this, &MainWindow::activatePointListPickingMode);
+	connect(m_UI->actionPointListPickingAllClouds, &QAction::triggered, this, &MainWindow::activatePointListPickingModeAllClouds);
 	connect(m_UI->actionPointPicking, &QAction::triggered, this, &MainWindow::activatePointPickingMode);
 
 	//"Tools > Sand box (research)" menu
@@ -7108,6 +7109,42 @@ void MainWindow::deactivatePointListPickingMode(bool state)
 	updateUI();
 }
 
+void MainWindow::activatePointListPickingModeAllClouds()
+{
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win)
+		return;
+
+	ccHObject* root = dbRootObject();
+	if (!root || root->getChildrenNumber() == 0)
+	{
+		ccConsole::Error(tr("No entities in the project!"));
+		return;
+	}
+
+	if (!m_plpDlg)
+	{
+		m_plpDlg = new ccPointListPickingDlg(m_pickingHub, this);
+		connect(m_plpDlg, &ccOverlayDialog::processFinished, this, &MainWindow::deactivatePointListPickingMode);
+
+		registerOverlayDialog(m_plpDlg, Qt::TopRightCorner);
+	}
+
+	m_plpDlg->markerSizeSpinBox->setValue(win->getDisplayParameters().labelMarkerSize);
+
+	m_plpDlg->linkWith(win);
+	m_plpDlg->linkWithRoot(root);
+
+	freezeUI(true);
+
+	disableAllBut(win);
+
+	if (!m_plpDlg->start())
+		deactivatePointListPickingMode(false);
+	else
+		updateOverlayDialogsPlacement();
+}
+
 void MainWindow::activatePointPickingMode()
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -11733,6 +11770,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionCompute2HalfDimVolume->setEnabled(selInfo.cloudCount == selInfo.selCount && selInfo.cloudCount >= 1 && selInfo.cloudCount <= 2); // one or two clouds!
 
 	m_UI->actionPointListPicking->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	m_UI->actionPointListPickingAllClouds->setEnabled(atLeastOneEntity);
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);
@@ -12462,6 +12500,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionInterpolateSFs);
 	m_actions.push_back(m_UI->actionExportPlaneInfo);
 	m_actions.push_back(m_UI->actionExportAllPointLabels);
+	m_actions.push_back(m_UI->actionPointListPickingAllClouds);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);

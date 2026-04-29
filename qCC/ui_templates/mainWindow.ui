@@ -533,6 +533,7 @@
     <addaction name="actionPointListPicking"/>
     <addaction name="actionPointListPickingAllClouds"/>
     <addaction name="actionNodeStepper"/>
+    <addaction name="actionComputeEdgeMetrics"/>
     <addaction name="actionTracePolyline"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
@@ -725,6 +726,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
    <addaction name="actionNodeStepper"/>
+   <addaction name="actionComputeEdgeMetrics"/>
    <addaction name="actionTracePolyline"/>
    <addaction name="actionClone"/>
    <addaction name="actionMerge"/>
@@ -2035,6 +2037,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>BatGraph F5 — step through graph nodes and assign names from a list</string>
+   </property>
+  </action>
+  <action name="actionComputeEdgeMetrics">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccPointListPicking.png</normaloff>:/CC/images/ccPointListPicking.png</iconset>
+   </property>
+   <property name="text">
+    <string>Compute Edge Metrics (F6)</string>
+   </property>
+   <property name="statusTip">
+    <string>BatGraph F6 — compute distance, slope, bearing for every edge in a graph CSV</string>
    </property>
   </action>
   <action name="actionCurvature">

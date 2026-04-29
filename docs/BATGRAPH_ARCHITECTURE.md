@@ -98,7 +98,7 @@ Stage 11│ GTFS-Pathways Check      → Validate output against standard
         │ (Python script — to build)  gtfs_compliance_report.txt
 ```
 
-**Current state:** Stages 3 is built. Stages 4–8 are done externally in Graph Commons and Python scripts. The development roadmap (Section 4) describes how each is being brought into BatGraph.
+**Current state:** Stage 3 (F1) is fully built — all four implementation phases merged to `master`. Stage 2 (F2 Merge All Visible) is in progress. Stages 4–8 are done externally in Graph Commons and Python scripts. The development roadmap (Section 4) describes how each is being brought into BatGraph.
 
 ---
 
@@ -120,13 +120,29 @@ This section describes each new feature to be built into the CloudCompare_PointP
 
 **Key files:** `qCC/ccPointListPickingDlg.cpp`, `qCC/ui_templates/pointListPickingDlg.ui`
 
+**Completed implementation phases (all merged to `master`):**
+
+| Phase | Branch | Description |
+|-------|--------|-------------|
+| ✅ Phase 1b | `feature/phase-1b-source-cloud-id` | Added `source_cloud_id` column and companion `_clouds.csv` to export |
+| ✅ Phase 1.5 | `feature/phase-1.5-unified-picking` | Unified project-wide point picking across all visible clouds simultaneously |
+| ✅ Phase 2 | `feature/phase-2-name-list` | Pre-populated name list: load from file, display in dialog, grey out used entries |
+| ✅ Phase 3 | `feature/phase-3-pick-from-list` | Pick-from-list checklist workflow with strikethrough on used names |
+
 ---
 
-### F2 — Merge All Visible Clouds ✅ Available (CloudCompare core)
+### F2 — Merge All Visible Clouds 🔨 In Progress
 
-**What it does:** `Edit → Merge` already merges all selected clouds in one operation. Selecting all clouds in the DB Tree and merging produces a single "Merged clouds" entity.
+**Status:** `Edit → Merge` (select-then-merge) is already available in CloudCompare core. The new *"Merge all visible"* one-click action is being added in branch `feature/f2-merge-all-visible`.
 
-**Planned addition:** A one-click *"Merge all visible"* toolbar button that auto-selects all visible `ccPointCloud` entities and triggers the existing merge, removing the need to manually Ctrl-click each scan.
+**What it does:** A single toolbar/menu action that:
+1. Collects all visible, enabled `ccPointCloud` entities from the DB tree automatically
+2. Selects them in the DB tree
+3. Delegates to the existing `doActionMerge()` — no new merge logic
+
+**Why:** Operators typically load 10–20 individual scan files per station. Without this, each cloud must be Ctrl-clicked manually before merging. This removes that friction entirely.
+
+**Key files:** `qCC/mainwindow.cpp`, `qCC/mainwindow.h`, `qCC/ui_templates/mainWindow.ui`
 
 ---
 
@@ -196,7 +212,7 @@ When triggered by right-clicking a node:
 
 ---
 
-### F5 — Node Stepper 🔲 Planned
+### F5 — Node Stepper 🔨 In Progress
 
 **Replaces:** Manual labelling workflow when building a graph from scratch (Graph Creator output)
 

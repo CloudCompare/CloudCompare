@@ -103,6 +103,7 @@
 #include "ccLabelingDlg.h"
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
+#include "ccEdgeMetrics.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccPlaneEditDlg.h"
 #include "ccNodeStepperDlg.h"
@@ -702,6 +703,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionPointListPicking, &QAction::triggered, this, &MainWindow::activatePointListPickingMode);
 	connect(m_UI->actionPointListPickingAllClouds, &QAction::triggered, this, &MainWindow::activatePointListPickingModeAllClouds);
 	connect(m_UI->actionNodeStepper, &QAction::triggered, this, &MainWindow::doActionNodeStepper);
+	connect(m_UI->actionComputeEdgeMetrics, &QAction::triggered, this, &MainWindow::doActionComputeEdgeMetrics);
 	connect(m_UI->actionPointPicking, &QAction::triggered, this, &MainWindow::activatePointPickingMode);
 
 	//"Tools > Sand box (research)" menu
@@ -7199,6 +7201,53 @@ void MainWindow::doActionNodeStepper()
 	dlg->show();
 }
 
+void MainWindow::doActionComputeEdgeMetrics()
+{
+	const QString nodesPath = QFileDialog::getOpenFileName(
+	    this,
+	    tr("Select nodes CSV — BatGraph F6"),
+	    QSettings().value("BatGraph/lastNodesDir", ".").toString(),
+	    tr("CSV files (*.csv);;All files (*.*)"));
+	if (nodesPath.isEmpty())
+		return;
+
+	const QString edgesPath = QFileDialog::getOpenFileName(
+	    this,
+	    tr("Select edges CSV — BatGraph F6"),
+	    QFileInfo(nodesPath).absolutePath(),
+	    tr("CSV files (*.csv);;All files (*.*)"));
+	if (edgesPath.isEmpty())
+		return;
+
+	const QString defaultOut = QFileInfo(edgesPath).absolutePath() + "/"
+	                           + QFileInfo(edgesPath).baseName() + "_with_metrics.csv";
+	const QString outputPath = QFileDialog::getSaveFileName(
+	    this,
+	    tr("Save enriched edges CSV — BatGraph F6"),
+	    defaultOut,
+	    tr("CSV files (*.csv);;All files (*.*)"));
+	if (outputPath.isEmpty())
+		return;
+
+	QSettings().setValue("BatGraph/lastNodesDir", QFileInfo(nodesPath).absolutePath());
+
+	int     processed = 0, skipped = 0;
+	QString errorMsg;
+	if (!ccEdgeMetrics::processEdges(nodesPath, edgesPath, outputPath, processed, skipped, errorMsg))
+	{
+		ccConsole::Error(tr("Edge metrics failed: %1").arg(errorMsg));
+		return;
+	}
+
+	ccConsole::Print(tr("[BatGraph F6] Computed metrics for %1 edges (%2 skipped — nodes not found). Saved to: %3")
+	                     .arg(processed).arg(skipped).arg(outputPath));
+	QMessageBox::information(
+	    this,
+	    tr("Edge Metrics"),
+	    tr("Done.\n\n%1 edges processed\n%2 skipped (node name not found in nodes CSV)\n\nSaved to:\n%3")
+	        .arg(processed).arg(skipped).arg(outputPath));
+}
+
 void MainWindow::activatePointPickingMode()
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -11826,6 +11875,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionPointListPicking->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionPointListPickingAllClouds->setEnabled(atLeastOneEntity);
 	m_UI->actionNodeStepper->setEnabled(true); // file picker — always available
+	m_UI->actionComputeEdgeMetrics->setEnabled(true); // file picker — always available
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);
@@ -12561,6 +12611,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionExportAllPointLabels);
 	m_actions.push_back(m_UI->actionPointListPickingAllClouds);
 	m_actions.push_back(m_UI->actionNodeStepper);
+	m_actions.push_back(m_UI->actionComputeEdgeMetrics);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);

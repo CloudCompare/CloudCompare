@@ -1,4 +1,4 @@
-find_package( Qt6
+find_package( Qt6 6.11.0
 	COMPONENTS
 		Core
 	REQUIRED

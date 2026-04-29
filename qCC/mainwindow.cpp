@@ -104,6 +104,7 @@
 #include "ccMatchScalesDlg.h"
 #include "ccNoiseFilterDlg.h"
 #include "ccEdgeMetrics.h"
+#include "ccMetadataStepperDlg.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccPlaneEditDlg.h"
 #include "ccNodeStepperDlg.h"
@@ -704,6 +705,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionPointListPickingAllClouds, &QAction::triggered, this, &MainWindow::activatePointListPickingModeAllClouds);
 	connect(m_UI->actionNodeStepper, &QAction::triggered, this, &MainWindow::doActionNodeStepper);
 	connect(m_UI->actionComputeEdgeMetrics, &QAction::triggered, this, &MainWindow::doActionComputeEdgeMetrics);
+	connect(m_UI->actionMetadataStepper, &QAction::triggered, this, &MainWindow::doActionMetadataStepper);
 	connect(m_UI->actionPointPicking, &QAction::triggered, this, &MainWindow::activatePointPickingMode);
 
 	//"Tools > Sand box (research)" menu
@@ -7248,6 +7250,28 @@ void MainWindow::doActionComputeEdgeMetrics()
 	        .arg(processed).arg(skipped).arg(outputPath));
 }
 
+void MainWindow::doActionMetadataStepper()
+{
+	const QString csvPath = QFileDialog::getOpenFileName(
+	    this,
+	    tr("Load edges CSV — BatGraph F7"),
+	    QSettings().value("BatGraph/lastEdgesDir", ".").toString(),
+	    tr("CSV files (*.csv);;All files (*.*)"));
+	if (csvPath.isEmpty())
+		return;
+
+	QSettings().setValue("BatGraph/lastEdgesDir", QFileInfo(csvPath).absolutePath());
+
+	auto* dlg = new ccMetadataStepperDlg(this);
+	if (!dlg->loadEdges(csvPath))
+	{
+		delete dlg;
+		return;
+	}
+	dlg->setAttribute(Qt::WA_DeleteOnClose);
+	dlg->show();
+}
+
 void MainWindow::activatePointPickingMode()
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -11876,6 +11900,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionPointListPickingAllClouds->setEnabled(atLeastOneEntity);
 	m_UI->actionNodeStepper->setEnabled(true); // file picker — always available
 	m_UI->actionComputeEdgeMetrics->setEnabled(true); // file picker — always available
+	m_UI->actionMetadataStepper->setEnabled(true); // file picker — always available
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);
@@ -12612,6 +12637,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionPointListPickingAllClouds);
 	m_actions.push_back(m_UI->actionNodeStepper);
 	m_actions.push_back(m_UI->actionComputeEdgeMetrics);
+	m_actions.push_back(m_UI->actionMetadataStepper);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);

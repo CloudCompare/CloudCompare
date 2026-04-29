@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MetadataStepperDlg</class>
+ <widget class="QDialog" name="MetadataStepperDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>560</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Metadata Stepper</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- Progress row -->
+   <item>
+    <layout class="QHBoxLayout" name="progressLayout">
+     <item>
+      <widget class="QLabel" name="progressLabel">
+       <property name="text">
+        <string>Edge 0 of 0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="progressSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="skipCompleteCheckBox">
+       <property name="text">
+        <string>Skip complete edges</string>
+       </property>
+       <property name="toolTip">
+        <string>Unchecked: step through all edges.
+Checked: skip edges that already have metadata filled in.</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- Current edge identity -->
+   <item>
+    <widget class="QGroupBox" name="edgeGroup">
+     <property name="title">
+      <string>Current edge</string>
+     </property>
+     <layout class="QFormLayout" name="edgeForm">
+      <item row="0" column="0">
+       <widget class="QLabel" name="fromLabel">
+        <property name="text">
+         <string>From:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="fromLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="toLabel">
+        <property name="text">
+         <string>To:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="toLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="edgeTypeLabel">
+        <property name="text">
+         <string>Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="edgeTypeLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Stairs / vertical metadata — shown for Elev / STAIRS edges -->
+   <item>
+    <widget class="QGroupBox" name="stairsGroup">
+     <property name="title">
+      <string>Stairs / vertical</string>
+     </property>
+     <layout class="QFormLayout" name="stairsForm">
+      <item row="0" column="0">
+       <widget class="QLabel" name="stepsUpLabel">
+        <property name="text">
+         <string>Steps up:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="stepsUpSpinBox">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="specialValueText">
+         <string>—</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="stepsDownLabel">
+        <property name="text">
+         <string>Steps down:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="stepsDownSpinBox">
+        <property name="minimum">
+         <number>0</number>
+        </property>
+        <property name="maximum">
+         <number>999</number>
+        </property>
+        <property name="specialValueText">
+         <string>—</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="handrailLabel">
+        <property name="text">
+         <string>Handrail:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="handrailComboBox">
+        <item>
+         <property name="text">
+          <string>(not set)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Y</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>N</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="elevatorIdLabel">
+        <property name="text">
+         <string>Elevator ID:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="elevatorIdLineEdit">
+        <property name="toolTip">
+         <string>TfL lift ID (leave blank if stairs or escalator)</string>
+        </property>
+        <property name="placeholderText">
+         <string>e.g. TfL_Lift_123</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- General metadata — shown for all edges -->
+   <item>
+    <widget class="QGroupBox" name="generalGroup">
+     <property name="title">
+      <string>General</string>
+     </property>
+     <layout class="QFormLayout" name="generalForm">
+      <item row="0" column="0">
+       <widget class="QLabel" name="gradientLabel">
+        <property name="text">
+         <string>Gradient:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="gradientLineEdit">
+        <property name="toolTip">
+         <string>Slope as decimal (e.g. 0.12 for 12%). Leave blank to auto-compute from node coords.</string>
+        </property>
+        <property name="placeholderText">
+         <string>auto (from coords)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="hoursLabel">
+        <property name="text">
+         <string>Operational hours:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="hoursLineEdit">
+        <property name="toolTip">
+         <string>e.g. 05:30–00:30 Mon–Sat, 07:00–23:30 Sun</string>
+        </property>
+        <property name="placeholderText">
+         <string>e.g. 05:30–00:30</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="statusLabel">
+        <property name="text">
+         <string>Status:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QComboBox" name="statusComboBox">
+        <item>
+         <property name="text">
+          <string>(not set)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>open</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>closed</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>seasonal</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>step-free</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="fixedTimeLabel">
+        <property name="text">
+         <string>Fixed travel time (s):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="fixedTimeSpinBox">
+        <property name="minimum">
+         <double>0.000000</double>
+        </property>
+        <property name="maximum">
+         <double>9999.000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000</double>
+        </property>
+        <property name="specialValueText">
+         <string>—</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="weightLabel">
+        <property name="text">
+         <string>Weight (s):</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QDoubleSpinBox" name="weightSpinBox">
+        <property name="minimum">
+         <double>0.000000</double>
+        </property>
+        <property name="maximum">
+         <double>9999.000000</double>
+        </property>
+        <property name="value">
+         <double>0.000000</double>
+        </property>
+        <property name="specialValueText">
+         <string>—</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="sourceLabel">
+        <property name="text">
+         <string>Source:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QLineEdit" name="sourceLineEdit">
+        <property name="toolTip">
+         <string>Data source (e.g. LiDAR_scan, TfL_LRAD, manual)</string>
+        </property>
+        <property name="placeholderText">
+         <string>e.g. LiDAR_scan</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Navigation -->
+   <item>
+    <layout class="QHBoxLayout" name="navLayout">
+     <item>
+      <widget class="QPushButton" name="prevButton">
+       <property name="text">
+        <string>&#x2039; Previous</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyNextButton">
+       <property name="text">
+        <string>Apply &amp; Next &#x203a;</string>
+       </property>
+       <property name="toolTip">
+        <string>Save the current values and advance to the next edge</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="nextButton">
+       <property name="text">
+        <string>Skip &#x203a;</string>
+       </property>
+       <property name="toolTip">
+        <string>Skip this edge without applying changes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="navSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Save &amp; Close</string>
+       </property>
+       <property name="toolTip">
+        <string>Save all changes and close (CSV is saved after every Apply too)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

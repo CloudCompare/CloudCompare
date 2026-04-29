@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NodeStepperDlg</class>
+ <widget class="QDialog" name="NodeStepperDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>480</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>480</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Node Stepper</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+
+   <!-- Progress row -->
+   <item>
+    <layout class="QHBoxLayout" name="progressLayout">
+     <item>
+      <widget class="QLabel" name="progressLabel">
+       <property name="text">
+        <string>Node 0 of 0</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="progressSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showLabelledCheckBox">
+       <property name="text">
+        <string>Show labelled nodes</string>
+       </property>
+       <property name="toolTip">
+        <string>Unchecked: step through unlabelled nodes only.
+Checked: step through ALL nodes.</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- Current node info -->
+   <item>
+    <widget class="QGroupBox" name="currentNodeGroup">
+     <property name="title">
+      <string>Current node</string>
+     </property>
+     <layout class="QFormLayout" name="currentNodeForm">
+      <item row="0" column="0">
+       <widget class="QLabel" name="currentNameLabel">
+        <property name="text">
+         <string>Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="currentNameLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>(unlabelled)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="coordsLabel">
+        <property name="text">
+         <string>Coords:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="coordsLineEdit">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="placeholderText">
+         <string>x, y, z</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Name assignment -->
+   <item>
+    <widget class="QGroupBox" name="assignGroup">
+     <property name="title">
+      <string>Assign name</string>
+     </property>
+     <layout class="QVBoxLayout" name="assignLayout">
+      <item>
+       <layout class="QHBoxLayout" name="nameEntryLayout">
+        <item>
+         <widget class="QComboBox" name="nameComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>1</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Select a name from the loaded list, or type a custom name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="applyNameButton">
+          <property name="text">
+           <string>Apply</string>
+          </property>
+          <property name="toolTip">
+           <string>Assign the selected name to the current node</string>
+          </property>
+          <property name="default">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="nameListLayout">
+        <item>
+         <widget class="QPushButton" name="loadNameListButton">
+          <property name="text">
+           <string>Load name list...</string>
+          </property>
+          <property name="toolTip">
+           <string>Load a text file of node names (one per line)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearNameListButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Clear list</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="nameListStatusLabel">
+          <property name="text">
+           <string>No list loaded</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="nameListSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- Navigation buttons -->
+   <item>
+    <layout class="QHBoxLayout" name="navLayout">
+     <item>
+      <widget class="QPushButton" name="prevButton">
+       <property name="text">
+        <string>&#x2039; Previous</string>
+       </property>
+       <property name="toolTip">
+        <string>Go to previous node</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="nextButton">
+       <property name="text">
+        <string>Next &#x203a;</string>
+       </property>
+       <property name="toolTip">
+        <string>Go to next node</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="navSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="closeButton">
+       <property name="text">
+        <string>Close</string>
+       </property>
+       <property name="toolTip">
+        <string>Close the Node Stepper (all assigned names are kept)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+ <resources>
+  <include location="../icons.qrc"/>
+ </resources>
+ <connections/>
+</ui>

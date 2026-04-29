@@ -532,6 +532,7 @@
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
     <addaction name="actionPointListPickingAllClouds"/>
+    <addaction name="actionNodeStepper"/>
     <addaction name="actionTracePolyline"/>
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
@@ -723,6 +724,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="separator"/>
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
+   <addaction name="actionNodeStepper"/>
    <addaction name="actionTracePolyline"/>
    <addaction name="actionClone"/>
    <addaction name="actionMerge"/>
@@ -2021,6 +2023,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="statusTip">
     <string>Pick points on any visible cloud — all picks land in one project-wide list</string>
+   </property>
+  </action>
+  <action name="actionNodeStepper">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccPointListPicking.png</normaloff>:/CC/images/ccPointListPicking.png</iconset>
+   </property>
+   <property name="text">
+    <string>Node Stepper (F5)</string>
+   </property>
+   <property name="statusTip">
+    <string>BatGraph F5 — step through graph nodes and assign names from a list</string>
    </property>
   </action>
   <action name="actionCurvature">

@@ -105,6 +105,7 @@
 #include "ccNoiseFilterDlg.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccPlaneEditDlg.h"
+#include "ccNodeStepperDlg.h"
 #include "ccPointListPickingDlg.h"
 #include "ccPointPairRegistrationDlg.h"
 #include "ccPointPropertiesDlg.h"
@@ -700,6 +701,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionLevel, &QAction::triggered, this, &MainWindow::doLevel);
 	connect(m_UI->actionPointListPicking, &QAction::triggered, this, &MainWindow::activatePointListPickingMode);
 	connect(m_UI->actionPointListPickingAllClouds, &QAction::triggered, this, &MainWindow::activatePointListPickingModeAllClouds);
+	connect(m_UI->actionNodeStepper, &QAction::triggered, this, &MainWindow::doActionNodeStepper);
 	connect(m_UI->actionPointPicking, &QAction::triggered, this, &MainWindow::activatePointPickingMode);
 
 	//"Tools > Sand box (research)" menu
@@ -7175,6 +7177,28 @@ void MainWindow::activatePointListPickingModeAllClouds()
 		updateOverlayDialogsPlacement();
 }
 
+void MainWindow::doActionNodeStepper()
+{
+	const QString csvPath = QFileDialog::getOpenFileName(
+	    this,
+	    tr("Load nodes CSV — BatGraph F5"),
+	    QSettings().value("BatGraph/lastNodesDir", ".").toString(),
+	    tr("CSV files (*.csv);;All files (*.*)"));
+	if (csvPath.isEmpty())
+		return;
+
+	QSettings().setValue("BatGraph/lastNodesDir", QFileInfo(csvPath).absolutePath());
+
+	auto* dlg = new ccNodeStepperDlg(this);
+	if (!dlg->loadNodes(csvPath))
+	{
+		delete dlg;
+		return;
+	}
+	dlg->setAttribute(Qt::WA_DeleteOnClose);
+	dlg->show();
+}
+
 void MainWindow::activatePointPickingMode()
 {
 	ccGLWindowInterface* win = getActiveGLWindow();
@@ -11801,6 +11825,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionPointListPicking->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	m_UI->actionPointListPickingAllClouds->setEnabled(atLeastOneEntity);
+	m_UI->actionNodeStepper->setEnabled(true); // file picker — always available
 
 	// == 2
 	bool exactlyTwoEntities = (selInfo.selCount == 2);
@@ -12535,6 +12560,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionExportPlaneInfo);
 	m_actions.push_back(m_UI->actionExportAllPointLabels);
 	m_actions.push_back(m_UI->actionPointListPickingAllClouds);
+	m_actions.push_back(m_UI->actionNodeStepper);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);

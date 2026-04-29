@@ -636,6 +636,7 @@ void MainWindow::connectActions()
 	//"Edit" menu
 	connect(m_UI->actionClone, &QAction::triggered, this, &MainWindow::doActionClone);
 	connect(m_UI->actionMerge, &QAction::triggered, this, &MainWindow::doActionMerge);
+	connect(m_UI->actionMergeAllVisible, &QAction::triggered, this, &MainWindow::doActionMergeAllVisible);
 	connect(m_UI->actionApplyTransformation, &QAction::triggered, this, &MainWindow::doActionApplyTransformation);
 	connect(m_UI->actionApplyScale, &QAction::triggered, this, &MainWindow::doActionApplyScale);
 	connect(m_UI->actionTranslateRotate, &QAction::triggered, this, &MainWindow::activateTranslateRotateMode);
@@ -3826,6 +3827,35 @@ void MainWindow::zoomOn(ccHObject* object)
 		ccBBox box = object->getDisplayBB_recursive(false, win);
 		win->updateConstellationCenterAndZoom(&box);
 	}
+}
+
+void MainWindow::doActionMergeAllVisible()
+{
+	if (!m_ccRoot)
+		return;
+
+	// Collect all visible, enabled point clouds from the DB tree
+	ccHObject::Container allClouds;
+	m_ccRoot->getRootEntity()->filterChildren(allClouds, true, CC_TYPES::POINT_CLOUD, true);
+
+	ccHObject::Container visibleClouds;
+	for (ccHObject* entity : allClouds)
+	{
+		if (entity && entity->isVisible() && entity->isEnabled())
+			visibleClouds.push_back(entity);
+	}
+
+	if (visibleClouds.size() < 2)
+	{
+		ccLog::Warning(tr("[Merge All Visible] At least 2 visible point clouds are required (found %1)").arg(visibleClouds.size()));
+		return;
+	}
+
+	ccLog::Print(tr("[Merge All Visible] Selecting %1 visible cloud(s) for merge").arg(visibleClouds.size()));
+
+	// Select them all in the DB tree, then delegate to the standard merge
+	m_ccRoot->selectEntities(visibleClouds);
+	doActionMerge();
 }
 
 void MainWindow::doActionRegister()
@@ -11795,6 +11825,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool atLeastTwoEntities = (selInfo.selCount > 1);
 
 	m_UI->actionMerge->setEnabled(atLeastTwoEntities);
+	// "Merge all visible" is enabled whenever the DB has any content —
+	// the action itself will warn if fewer than 2 visible clouds are found
+	m_UI->actionMergeAllVisible->setEnabled(selInfo.selCount >= 0 && m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() > 0);
 	m_UI->actionMatchBBCenters->setEnabled(atLeastTwoEntities);
 	m_UI->actionMatchScales->setEnabled(atLeastTwoEntities);
 
@@ -12318,6 +12351,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionNew3DView);
 	m_actions.push_back(m_UI->actionClone);
 	m_actions.push_back(m_UI->actionMerge);
+	m_actions.push_back(m_UI->actionMergeAllVisible);
 	m_actions.push_back(m_UI->actionDelete);
 	m_actions.push_back(m_UI->actionRegister);
 	m_actions.push_back(m_UI->actionCloudCloudDist);

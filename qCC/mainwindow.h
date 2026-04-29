@@ -322,6 +322,7 @@ class MainWindow : public QMainWindow
 	void doActionComputeKdTree();
 	void doActionApplyTransformation();
 	void doActionMerge();
+	void doActionMergeAllVisible();
 	void doActionRegister();
 	void doAction4pcsRegister(); // Aurelien BEY le 13/11/2008
 	void doActionSubsample();    // Aurelien BEY le 4/12/2008

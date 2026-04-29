@@ -369,6 +369,7 @@
     <addaction name="separator"/>
     <addaction name="actionClone"/>
     <addaction name="actionMerge"/>
+    <addaction name="actionMergeAllVisible"/>
     <addaction name="actionSubsample"/>
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionApplyScale"/>
@@ -725,6 +726,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <addaction name="actionTracePolyline"/>
    <addaction name="actionClone"/>
    <addaction name="actionMerge"/>
+   <addaction name="actionMergeAllVisible"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionPointPairsAlign"/>
@@ -1073,6 +1075,18 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="toolTip">
     <string>Merge multiple clouds</string>
+   </property>
+  </action>
+  <action name="actionMergeAllVisible">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccMerge.png</normaloff>:/CC/images/ccMerge.png</iconset>
+   </property>
+   <property name="text">
+    <string>Merge All Visible</string>
+   </property>
+   <property name="toolTip">
+    <string>Merge all visible point clouds into one (no selection required)</string>
    </property>
   </action>
   <action name="actionDelete">

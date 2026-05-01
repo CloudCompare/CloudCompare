@@ -5558,7 +5558,7 @@ void MainWindow::doActionComputeCPS()
 	int result   = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(compCloud, srcCloud, params, &pDlg);
 	cmpPC->deleteScalarField(sfIdx);
 
-	if (result >= 0)
+	if (result >= CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
 		ccPointCloud* newCloud = nullptr;
 		// if the source cloud is a "true" cloud, the extracted CPS

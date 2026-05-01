@@ -4067,7 +4067,7 @@ QSharedPointer<CCCoreLib::ReferenceCloud> ccPointCloud::computeCPSet(ccGenericPo
 	setCurrentOutScalarField(currentOutSFIndex);
 	deleteScalarField(sfIdx);
 
-	if (result < 0)
+	if (result < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
 		ccLog::Warning("[ccPointCloud::ComputeCPSet] Closest-point set computation failed!");
 		CPSet.clear();

@@ -5627,7 +5627,7 @@ bool CommandCPS::process(ccCommandLineInterface& cmd)
 	// COMPUTE CLOUD 2 CLOUD DISTANCE, THIS INCLUDES THE CLOSEST POINT SET GENERATION
 	int result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(compPointCloud, refPointCloud, params, &pDlg);
 
-	if (result >= 0)
+	if (result >= CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
 		// the extracted CPS will get the attributes of the reference cloud
 		ccPointCloud* newCloud = refPointCloud->partialClone(&closestPointSet);

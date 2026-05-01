@@ -887,7 +887,7 @@ bool ccComparisonDlg::computeDistances()
 		progressDlg->stop();
 	}
 
-	if (result >= 0)
+	if (result >= CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
 		ccLog::Print("[ComputeDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 

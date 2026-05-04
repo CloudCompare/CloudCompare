@@ -20,8 +20,8 @@ function( AddPlugin )
 	# For readability
 	set( PLUGIN_TARGET "${ADD_PLUGIN_NAME}" )
 
-	list(APPEND CC_PLUGIN_TARGET_LIST "${PLUGIN_TARGET}")
-	set(CC_PLUGIN_TARGET_LIST "${CC_PLUGIN_TARGET_LIST}" CACHE INTERNAL "Internal plugin list")
+	list( APPEND CC_PLUGIN_TARGET_LIST "${PLUGIN_TARGET}" )
+	set( CC_PLUGIN_TARGET_LIST "${CC_PLUGIN_TARGET_LIST}" CACHE INTERNAL "Internal plugin list" )
 
 	# First check our TYPE
 
@@ -33,7 +33,7 @@ function( AddPlugin )
 	# Check that we were given a valid type
 	set( VALID_TYPES "gl" "io" "standard" )
 	if( NOT "${ADD_PLUGIN_TYPE}" IN_LIST VALID_TYPES )
-		string(JOIN ", " VALID_TYPES_STR ${VALID_TYPES})
+		string( JOIN ", " VALID_TYPES_STR ${VALID_TYPES} )
 		message( FATAL_ERROR "AddPlugin: Did not find proper TYPE. Valid values are: ${VALID_TYPES_STR}" )
 	endif()
 
@@ -44,6 +44,7 @@ function( AddPlugin )
 	set_target_properties( ${PLUGIN_TARGET}
 		PROPERTIES
 			CXX_VISIBILITY_PRESET hidden
+			AUTORCC ON
 			AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui
 			PLUGIN_TYPE "${ADD_PLUGIN_TYPE}"
 	)

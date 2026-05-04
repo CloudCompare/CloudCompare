@@ -49,7 +49,7 @@ if( PLUGIN_IO_QRDB )
 	endif()
 
 	project( QRDB_IO_PLUGIN )
-	
+
 	find_package( rdb REQUIRED )
 
 	AddPlugin( NAME ${PROJECT_NAME} TYPE io )
@@ -89,7 +89,7 @@ if( PLUGIN_IO_QRDB )
 		# resolve possible symlink and install the real library
 		get_filename_component(lib_REAL ${RDB_LIBRARY_FILE} REALPATH)
 		foreach (dest ${_rdb_libdirs})
-			_InstallFiles(FILES ${lib_REAL} DEST_PATH ${dest})
+			install(FILES ${lib_REAL} DESTINATION ${dest})
 		endforeach()
 		if( NOT WIN32 )
 			# find all the symlinks linking to lib_REAL
@@ -110,7 +110,7 @@ if( PLUGIN_IO_QRDB )
 					endif()
 					# actually install the found symlink
 					foreach (dest ${_rdb_libdirs})
-						_InstallFiles(FILES ${lib_sym} DEST_PATH ${dest})
+						install(FILES ${lib_sym} DESTINATION ${dest})
 					endforeach()
 				endforeach()
 			else() # neither linux nor darwin,
@@ -119,7 +119,7 @@ if( PLUGIN_IO_QRDB )
 				if(real_lib_different)
 					# only install if different
 					foreach (dest ${_rdb_libdirs})
-						_InstallFiles(FILES ${RDB_LIBRARY_FILE} DEST_PATH ${dest})
+						Install(FILES ${RDB_LIBRARY_FILE} DESTINATION ${dest})
 					endforeach()
 				endif()
 			endif()

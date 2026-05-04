@@ -72,9 +72,9 @@ function( InstallFiles )
 	message( STATUS "Install files: ${files} to ${INSTALL_DESTINATIONS}")
 
 	foreach( destination ${INSTALL_DESTINATIONS} )
-		_InstallFiles(
+		install(
 			FILES ${files}
-			DEST_PATH ${destination}
+			DESTINATION ${destination}
 		)
 	endforeach()
 endfunction()
@@ -140,7 +140,7 @@ function( InstallPlugins )
 	endif()
 
 	# Install the requested plugins in the DEST_FOLDER
- 	set( installed_plugins "" )
+	set( installed_plugins "" )
 	foreach( plugin_target ${CC_PLUGIN_TARGET_LIST} )
 		get_target_property( plugin_type ${plugin_target} PLUGIN_TYPE )
 
@@ -163,10 +163,9 @@ function( InstallPlugins )
 					get_target_property( shader_files ${plugin_target} SOURCES )
 					list( FILTER shader_files INCLUDE REGEX ".*\.vert|frag" )
 
-					_InstallFiles(
+					install(
 						FILES ${shader_files}
-						DEST_PATH ${INSTALL_PLUGINS_SHADER_DEST_PATH}
-						DEST_FOLDER ${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}
+						DESTINATION ${INSTALL_PLUGINS_SHADER_DEST_PATH}/${INSTALL_PLUGINS_SHADER_DEST_FOLDER}/${SHADER_FOLDER_NAME}
 					)
 				endif()
 			endif()
@@ -197,31 +196,5 @@ function( _InstallSharedTarget )
 		RUNTIME DESTINATION ${full_path}
 		LIBRARY DESTINATION ${full_path}
 		COMPONENT Runtime
-	)
-endfunction()
-
-# _InstallFiles should only be called by one of the functions above.
-#
-# Arguments:
-#	DEST_FOLDER The name of the directory to install the files in.
-#	DEST_PATH Path to DEST_FOLDER - note that on Windows we will modify this depending on CONFIGURATIONS
-#	FILES The name of the files to install
-function( _InstallFiles )
-	cmake_parse_arguments(
-			INSTALL_FILES
-			""
-			"DEST_FOLDER;DEST_PATH"
-			"FILES"
-			${ARGN}
-	)
-
-	# For readability
-	set( files "${INSTALL_FILES_FILES}" )
-	set( full_path "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
-	cmake_path(SET full_path NORMALIZE "${INSTALL_FILES_DEST_PATH}/${INSTALL_FILES_DEST_FOLDER}" )
-
-	install(
-		FILES ${files}
-		DESTINATION "${full_path}"
 	)
 endfunction()

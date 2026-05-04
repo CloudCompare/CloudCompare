@@ -186,7 +186,7 @@ class DxfImporter : public DL_CreationAdapter
 		}
 		m_polyVertices->setEnabled(false);
 		m_poly->setVisible(true);
-		m_poly->setName("Polyline");
+		m_poly->setName(getLayerNameOr("Polyline"));
 
 		// flags
 		m_poly->setClosed(poly.flags & 1);
@@ -482,7 +482,7 @@ class DxfImporter : public DL_CreationAdapter
 		}
 		polyVertices->setEnabled(false);
 		poly->setVisible(true);
-		poly->setName("Arc");
+		poly->setName(getLayerNameOr("Arc"));
 		poly->addPointIndex(0, vertexCount);
 		poly->setClosed(arcLength_deg >= 360.0);
 
@@ -580,7 +580,7 @@ class DxfImporter : public DL_CreationAdapter
 		}
 		polyVertices->setEnabled(false);
 		poly->setVisible(true);
-		poly->setName("Line");
+		poly->setName(getLayerNameOr("Line"));
 		poly->addPointIndex(0, 2);
 
 		// some entities can have small coordinates (drawings, origin, etc.)
@@ -653,6 +653,13 @@ class DxfImporter : public DL_CreationAdapter
 		ccColour.b = static_cast<ColorCompType>(dxfColors[colourIndex][2] * ccColor::MAX);
 
 		return true;
+	}
+
+	//! Returns the name or the current layer or a user defined default value
+	QString getLayerNameOr(const QString& defaultName)
+	{
+		const auto layerName = QString::fromStdString(getAttributes().getLayer());
+		return layerName.isEmpty() ? defaultName : layerName;
 	}
 
 	//! Keep track of the colour of each layer in case the colour attribute is set to BYLAYER

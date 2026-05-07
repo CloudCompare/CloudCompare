@@ -656,7 +656,7 @@ class DxfImporter : public DL_CreationAdapter
 	}
 
 	//! Returns the name or the current layer or a user defined default value
-	QString getLayerNameOr(const QString& defaultName)
+	QString getLayerNameOr(const QString& defaultName) const
 	{
 		const auto layerName = QString::fromStdString(getAttributes().getLayer());
 		return layerName.isEmpty() ? defaultName : layerName;

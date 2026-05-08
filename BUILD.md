@@ -11,8 +11,14 @@ The main dependency of CloudCompare is Qt. CloudCompare 2.14+ requires Qt 6.
 - On Linux it is recommended to use your distribution's package manager:
 
 Debian/ubuntu package names:
-``` console
-libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
+``` bash
+# Pre Ubuntu 24 (Qt5 dependencies)
+sudo apt install libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
+
+# Ubuntu 24 (Qt6 depencendies)
+sudo apt install qt6-base-dev qt6-svg-dev qt6-tools-dev \
+qt6-tools-dev-tools libqt6opengl6-dev \
+libqt6websockets6-dev
 ```
 
 ## 2. Cloning
@@ -55,23 +61,32 @@ You can always take a look at how CloudCompare is being build on [GitHub's CI](.
 
 ## 4. Build
 
-```
+```shell
 # Still in the build folder
 cmake --build .
+# or
+cmake --build . --parallel # use all available cores
 ```
 
 ## 5. Install
 
-```console
+```shell
 # Still in the build folder
 cmake --install .
 ```
 
 ## Optional features and plugins
 
-CloudCompare has a bunch of optional features and plugins not built by default.
-Below you will find a list of these options/plugins. To add an option to CMake use the `-DMY_OPTION=ON` syntax.
-Example, to build the `qEDL` plugin, add `-DPLUGIN_GL_QEDL=ON` argument to CMake at the configuration step.
+CloudCompare has a bunch of optional features and plugins not built by default. Below you will find a list of these options/plugins. To add an option to CMake use the `-DMY_OPTION=ON` syntax.
+
+To exemplify, `.pcd` pointcloud files generated with `PCL` will not be [readable](https://github.com/CloudCompare/CloudCompare/issues/2329#issuecomment-4392085814) by default unless you compile with `qPCL` plugin.  To solve this active `qPCL` plugin using `-DPLUGIN_STANDARD_QPCL=ON`. 
+Similarly to active to enable`qEDL` plugin, add `-DPLUGIN_GL_QEDL=ON` argument to CMake at the configuration step.
+
+Thus, the Cmake command becomes
+
+```shell
+cmake .. -DPLUGIN_STANDARD_QPCL=ON -DPLUGIN_GL_QEDL=ON
+```
 
 The optional features are:
 

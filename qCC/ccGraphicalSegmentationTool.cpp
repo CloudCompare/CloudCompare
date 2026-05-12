@@ -961,7 +961,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 				}
 			}
 			classifSF = pc->getScalarField(sfIdx);
-			pc->showSF(true);
+			// pc->showSF(true);
 			if (previousDisplaySFIndex != sfIdx)
 			{
 				pc->setCurrentDisplayedScalarField(sfIdx);

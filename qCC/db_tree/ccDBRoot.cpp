@@ -1827,7 +1827,7 @@ void ccDBRoot::gatherRecursiveInformation()
 		infoStr << separator;
 		infoStr << QString("Cloud(s):        %L1").arg(info.cloudCount);
 		infoStr << QString("Mesh(es):        %L1").arg(info.meshCount);
-		infoStr << QString(" - Pritmitive(s):   %L1").arg(info.primitiveCount);
+		infoStr << QString(" - Primitive(s):   %L1").arg(info.primitiveCount);
 
 		if (info.octreeCount)
 			infoStr << QString("Octree(s):       %L1").arg(info.octreeCount);

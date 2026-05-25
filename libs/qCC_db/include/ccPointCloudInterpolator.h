@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_POINT_CLOUD_INTERPOLATOR
-#define CC_POINT_CLOUD_INTERPOLATOR
 
 class ccPointCloud;
 
@@ -50,11 +49,12 @@ class QCC_DB_LIB_API ccPointCloudInterpolator
 			NORMAL_DIST
 		};
 
-		Method   method = NEAREST_NEIGHBOR;
-		Algo     algo   = AVERAGE;
-		unsigned knn    = 0;
-		float    radius = 0;
-		double   sigma  = 0;
+		Method   method          = NEAREST_NEIGHBOR;
+		Algo     algo            = AVERAGE;
+		unsigned knn             = 0;
+		float    radius          = 0;
+		double   sigma           = 0;
+		bool     noNormalization = false;
 	};
 
 	//! Interpolate scalar fields from another cloud
@@ -65,5 +65,3 @@ class QCC_DB_LIB_API ccPointCloudInterpolator
 	                                        CCCoreLib::GenericProgressCallback* progressCb  = nullptr,
 	                                        unsigned char                       octreeLevel = 0);
 };
-
-#endif // CC_POINT_CLOUD_INTERPOLATOR

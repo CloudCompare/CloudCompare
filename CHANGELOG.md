@@ -299,6 +299,11 @@ Improvements:
 		- enhanced default parameters
 		- when activated, the user will now see a dialog that will give full control over the parameters
 
+	- Interpolate SF from another entity
+		- new option 'no normalization' to compute the sum of nearest values (potentially with Normal weights)
+			instead of the average or weighted average.
+		- allows 'Kernel Density Estimation'
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

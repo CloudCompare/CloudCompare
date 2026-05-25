@@ -91,6 +91,16 @@ void ccInterpolationDlg::setInterpolationAlgorithm(ccPointCloudInterpolator::Par
 	}
 }
 
+void ccInterpolationDlg::setNoNormalization(bool state)
+{
+	noNormalizationCheckBox->setChecked(state);
+}
+
+bool ccInterpolationDlg::noNormalization() const
+{
+	return noNormalizationCheckBox->isChecked();
+}
+
 void ccInterpolationDlg::onRadiusUpdated(double radius)
 {
 	kernelDoubleSpinBox->setValue(radius / 2.5);

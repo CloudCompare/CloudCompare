@@ -138,9 +138,11 @@ bool cellSFInterpolator(const CCCoreLib::DgmOctree::octreeCell& cell,
 
 				if (sumW > 0)
 				{
+					double normalization = params->noNormalization ? 1.0 : (1.0 / sumW);
+
 					for (unsigned j = 0; j < sfCount; ++j)
 					{
-						ScalarType s = static_cast<ScalarType>(sumValues[j] / sumW);
+						ScalarType s = static_cast<ScalarType>(sumValues[j] * normalization);
 						scalarFields->at(j).out->setValue(outPointIndex, s);
 					}
 				}

@@ -45,9 +45,15 @@ void ccOptions::ReleaseInstance()
 	s_options.release();
 }
 
-void ccOptions::Set(const ccOptions& params)
+void ccOptions::Set(const ccOptions& params, bool saveToPersistentSettings /*=false*/)
 {
-	InstanceNonConst() = params;
+	ccOptions& options = InstanceNonConst();
+	options            = params;
+
+	if (saveToPersistentSettings)
+	{
+		options.toPersistentSettings();
+	}
 }
 
 ccOptions::ccOptions()

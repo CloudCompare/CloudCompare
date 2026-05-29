@@ -61,7 +61,7 @@ class CCAPPCOMMON_LIB_API ccOptions
 	static void ReleaseInstance();
 
 	//! Sets parameters
-	static void Set(const ccOptions& options);
+	static void Set(const ccOptions& options, bool saveToPersistentSettings = false);
 
   protected: // methods
 	//! Returns the stored values of each parameter.

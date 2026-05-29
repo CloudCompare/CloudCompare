@@ -567,7 +567,7 @@ void ccDBRoot::deleteSelectedEntities()
 		if (dontAskAgain->isChecked())
 		{
 			options.confirmDelete = false;
-			ccOptions::Set(options);
+			ccOptions::Set(options, true);
 		}
 
 		if (conf != QMessageBox::Yes)

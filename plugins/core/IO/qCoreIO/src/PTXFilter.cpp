@@ -282,6 +282,8 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			bool   firstPoint     = true;
 			bool   hasColors      = false;
 			bool   loadColors     = false;
+			bool   hasNormals     = false;
+			bool   loadNormals    = false;
 			bool   loadGridColors = false;
 			size_t gridIndex      = 0;
 
@@ -294,7 +296,8 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 					if (firstPoint)
 					{
-						hasColors = (tokens.size() == 7);
+						hasNormals = (tokens.size() == 10);
+						hasColors = hasNormals || (tokens.size() == 7);
 						if (hasColors)
 						{
 							loadColors = cloud->reserveTheRGBTable();
@@ -316,8 +319,18 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 								}
 							}
 						}
+						if (hasNormals)
+						{
+							loadNormals = cloud->reserveTheNormsTable();
+							if (!loadNormals)
+							{
+								ccLog::Warning("[PTX] Not enough memory to load normals!");
+							}
+						}
 					}
-					if ((hasColors && tokens.size() != 7) || (!hasColors && tokens.size() != 4))
+					if ((hasNormals && tokens.size() != 10)
+						|| (hasColors && tokens.size() != 7)
+					    || ((!hasNormals && !hasColors) && tokens.size() != 4))
 					{
 						result = CC_FERR_MALFORMED_FILE;
 						// early stop
@@ -413,6 +426,26 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 						}
 					}
 
+					// normal
+					if (loadNormals && pointIsValid)
+					{
+						CCVector3d normal;
+						for (int d = 0; d < 3; ++d)
+						{
+							bool     ok;
+							normal.u[d] = tokens[7 + d].toDouble(&ok);
+							if (!ok)
+							{
+								result = CC_FERR_MALFORMED_FILE;
+								// early stop
+								j = height;
+								break;
+							}
+						}
+
+						cloud->addNorm(normal.toPC());
+					}
+
 					if (parameters.parentWidget && !nprogress.oneStep())
 					{
 						result = CC_FERR_CANCELED_BY_USER;
@@ -497,7 +530,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 				cloud->addGrid(grid);
 
 				// by default we don't compute normals without asking the user
-				if (parameters.autoComputeNormals)
+				if (!cloud->hasNormals() && parameters.autoComputeNormals)
 				{
 					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.data());
 				}

@@ -304,6 +304,9 @@ Improvements:
 			instead of the average or weighted average.
 		- allows 'Kernel Density Estimation'
 
+	- PTX files
+		- CloudCompare will now handle PTX files with normals
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

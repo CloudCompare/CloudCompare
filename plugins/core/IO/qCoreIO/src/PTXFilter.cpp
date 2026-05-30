@@ -297,7 +297,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 					if (firstPoint)
 					{
 						hasNormals = (tokens.size() == 10);
-						hasColors = hasNormals || (tokens.size() == 7);
+						hasColors  = (hasNormals || (tokens.size() == 7));
 						if (hasColors)
 						{
 							loadColors = cloud->reserveTheRGBTable();
@@ -328,9 +328,9 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 							}
 						}
 					}
-					if ((hasNormals && tokens.size() != 10)
-						|| (hasColors && tokens.size() != 7)
-					    || ((!hasNormals && !hasColors) && tokens.size() != 4))
+					if ((hasNormals && (tokens.size() != 10))
+					    || (hasColors && (tokens.size() != 7))
+					    || ((!hasNormals && !hasColors) && (tokens.size() != 4)))
 					{
 						result = CC_FERR_MALFORMED_FILE;
 						// early stop
@@ -432,7 +432,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 						CCVector3d normal;
 						for (int d = 0; d < 3; ++d)
 						{
-							bool     ok;
+							bool ok     = false;
 							normal.u[d] = tokens[7 + d].toDouble(&ok);
 							if (!ok)
 							{

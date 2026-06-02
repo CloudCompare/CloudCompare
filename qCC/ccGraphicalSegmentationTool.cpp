@@ -79,6 +79,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	connect(inButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentIn);
 	connect(outButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::segmentOut);
 	connect(exportSelectionButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::exportSelection);
+	connect(swapColorsButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::onToggleRGBAndSFColors);
 	connect(razButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::reset);
 	connect(optionsButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::options);
 	connect(validButton, &QToolButton::clicked, this, &ccGraphicalSegmentationTool::apply);

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
+    <width>402</width>
     <height>26</height>
    </rect>
   </property>
@@ -38,12 +38,12 @@
    <item>
     <widget class="QFrame" name="buttonsFrame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::Shape::StyledPanel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Shadow::Raised</enum>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -59,7 +59,7 @@
       <item>
        <widget class="QToolButton" name="pauseButton">
         <property name="toolTip">
-         <string>Pause segmentation (Space)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pause segmentation&lt;/p&gt;&lt;p&gt;(shortcut: space bar)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Pause segmentation  (allow rotation/panning of 3D view)</string>
@@ -92,14 +92,14 @@
           <normaloff>:/CC/images/dbPolylineSymbol.png</normaloff>:/CC/images/dbPolylineSymbol.png</iconset>
         </property>
         <property name="popupMode">
-         <enum>QToolButton::MenuButtonPopup</enum>
+         <enum>QToolButton::ToolButtonPopupMode::MenuButtonPopup</enum>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="selectionModelButton">
         <property name="toolTip">
-         <string>Polyline selection mode (Tab)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Polyline selection mode&lt;/p&gt;&lt;p&gt;(shortcut: tab)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>polyline selection</string>
@@ -109,14 +109,14 @@
           <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
         </property>
         <property name="popupMode">
-         <enum>QToolButton::MenuButtonPopup</enum>
+         <enum>QToolButton::ToolButtonPopupMode::MenuButtonPopup</enum>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QToolButton" name="inButton">
         <property name="toolTip">
-         <string>Segment In (I)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Segment Inside&lt;/p&gt;&lt;p&gt;(shortcut: 'I')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Segment (keep points inside)</string>
@@ -133,7 +133,7 @@
       <item>
        <widget class="QToolButton" name="outButton">
         <property name="toolTip">
-         <string>Segment Out (O)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Segment Outside&lt;/p&gt;&lt;p&gt;(shortcut: 'O')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Segment (keep points outside)</string>
@@ -153,7 +153,7 @@
          <bool>false</bool>
         </property>
         <property name="toolTip">
-         <string>Clear segmentation</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset segmentation&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Clear segmentation</string>
@@ -170,8 +170,7 @@
       <item>
        <widget class="QToolButton" name="addClassToolButton">
         <property name="toolTip">
-         <string>Set the class of points inside the polyline (C).
-The classification SF will be directly updated (and created if needed).</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Set the class of points inside the polyline&lt;br/&gt;(shortcut: 'C')&lt;br/&gt;Warning: the 'Classification' SF will be overwitten if already present&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Set the class of points inside the polyline (C)</string>
@@ -183,16 +182,30 @@ The classification SF will be directly updated (and created if needed).</string>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="exportSelectionButton">
+       <widget class="QToolButton" name="swapColorsButton">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection (E)&lt;/p&gt;&lt;p&gt;Note: the original cloud/mesh is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Toggle between RGB and SF colors&lt;br/&gt;(shortcut: 'S')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string>...</string>
         </property>
         <property name="icon">
          <iconset resource="../icons.qrc">
-          <normaloff>:/CC/images/exportIcon.png</normaloff>:/CC/images/exportIcon.png</iconset>
+          <normaloff>:/CC/images/swapIconSmall.png</normaloff>:/CC/images/swapIconSmall.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="exportSelectionButton">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export selection&lt;br/&gt;(shortcut: 'E')&lt;br/&gt;Note: the original entity is not modified.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="../icons.qrc">
+          <normaloff>:/CC/images/exportIconSmall.png</normaloff>:/CC/images/exportIconSmall.png</iconset>
         </property>
        </widget>
       </item>
@@ -220,7 +233,7 @@ The classification SF will be directly updated (and created if needed).</string>
       <item>
        <widget class="QToolButton" name="validButton">
         <property name="toolTip">
-         <string>Confirm segmentation (Enter)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Confirm segmentation&lt;br/&gt;(shortcut: 'Enter')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Confirm segmentation</string>
@@ -237,7 +250,7 @@ The classification SF will be directly updated (and created if needed).</string>
       <item>
        <widget class="QToolButton" name="validAndDeleteButton">
         <property name="toolTip">
-         <string>Confirm and delete hidden points (Del)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Confirm and delete hidden points&lt;br/&gt;(shortcut: 'Del')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Confirm and delete hidden points</string>
@@ -251,7 +264,7 @@ The classification SF will be directly updated (and created if needed).</string>
       <item>
        <widget class="QToolButton" name="cancelButton">
         <property name="toolTip">
-         <string>Cancel (Esc)</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cancel&lt;br/&gt;(shortcut: 'Esc')&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="statusTip">
          <string>Cancel segentation</string>
@@ -319,7 +332,6 @@ The classification SF will be directly updated (and created if needed).</string>
   </action>
  </widget>
  <resources>
-  <include location="../icons.qrc"/>
   <include location="../icons.qrc"/>
  </resources>
  <connections/>

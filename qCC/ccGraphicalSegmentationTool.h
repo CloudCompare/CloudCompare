@@ -123,6 +123,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	void doSetRectangularSelection();
 	void doActionUseExistingPolyline();
 	void doExportSegmentationPolyline();
+	void onToggleRGBAndSFColors();
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);

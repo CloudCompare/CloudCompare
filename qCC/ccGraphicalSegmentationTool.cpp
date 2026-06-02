@@ -104,6 +104,7 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	addOverriddenShortcut(Qt::Key_O);      //'O' key for the "segment out" button
 	addOverriddenShortcut(Qt::Key_C);      //'C' key for the "classify" button
 	addOverriddenShortcut(Qt::Key_E);      //'E' key for the "export" button
+	addOverriddenShortcut(Qt::Key_S);      //'S' key to switch between RGB and Scalar field colors
 	connect(this, &ccOverlayDialog::shortcutTriggered, this, &ccGraphicalSegmentationTool::onShortcutTriggered);
 
 	QMenu* selectionModeMenu = new QMenu(this);
@@ -150,6 +151,31 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 	m_polyVertices = nullptr;
 }
 
+void ccGraphicalSegmentationTool::onToggleRGBAndSFColors()
+{
+	if (!m_associatedWin)
+	{
+		ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
+		return;
+	}
+
+	for (QSet<ccHObject*>::const_iterator p = m_toSegment.constBegin(); p != m_toSegment.constEnd(); ++p)
+	{
+		ccHObject* entity = (*p);
+
+		if (entity->hasColors()
+		    && entity->hasScalarFields()
+		    && entity->getDisplay() == m_associatedWin)
+		{
+			bool sfShown = entity->sfShown();
+			entity->showColors(sfShown);
+			entity->showSF(!sfShown);
+		}
+	}
+
+	m_associatedWin->redraw(false);
+}
+
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 {
 	switch (key)
@@ -174,6 +200,10 @@ void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
 
 	case Qt::Key_E:
 		exportSelection();
+		return;
+
+	case Qt::Key_S:
+		onToggleRGBAndSFColors();
 		return;
 
 	case Qt::Key_Return:

@@ -284,6 +284,11 @@ Improvements:
 		- the default bounding-box is now very slightly larger than the entities bounding-box so as
 			to avoid display display artefacts and small accuracy issue when segmenting the entities
 
+	- Graphical segmentation tool
+		- new tool button to switch between RGB and SF colors (if present)
+			- shortcut 'C'
+		- new icons for better visibility in Dark mode
+
 	- Edit > Sensors > Edit and Edit > Sensors > TLS/GBL > Create
 		- the user can now see and edit the angular ranges
 

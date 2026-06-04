@@ -50,6 +50,7 @@ namespace
 {
 	constexpr char CC_E57_INTENSITY_FIELD_NAME[]    = "Intensity";
 	constexpr char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+	constexpr char CC_E57_TIME_STAMP_FIELD_NAME[]   = "Timestamp";
 	constexpr char s_e57PoseKey[]                   = "E57_pose";
 	constexpr char s_e57NodeInfoKey[]               = "E57_node_info";
 	constexpr char s_e57CameraInfoKey[]             = "E57_camera_representation";
@@ -83,6 +84,10 @@ namespace
 		// scalar field
 		std::vector<double> intData;
 		std::vector<int8_t> isInvalidIntData;
+
+		// timestamp field
+		std::vector<double> timeData;
+		std::vector<int8_t> isInvalidTimeData;
 
 		// scan index field
 		std::vector<int8_t> scanIndexData;
@@ -2076,6 +2081,30 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 	}
 
+	// timestamp
+	ccScalarField* timeStampSF = nullptr;
+	if (header.pointFields.timeStampField)
+	{
+		timeStampSF = new ccScalarField(CC_E57_TIME_STAMP_FIELD_NAME);
+		if (!timeStampSF->resizeSafe(static_cast<unsigned>(pointCount)))
+		{
+			ccLog::Error("[E57] Not enough memory!");
+			timeStampSF->release();
+			delete cloud;
+			return {};
+		}
+		cloud->addScalarField(timeStampSF);
+
+		arrays.timeData.resize(chunkSize);
+		dbufs.emplace_back(node.destImageFile(), "timeStamp", arrays.timeData.data(), chunkSize, true, (prototype.get("timeStamp").type() == e57::E57_SCALED_INTEGER));
+
+		if (header.pointFields.isTimeStampInvalidField)
+		{
+			arrays.isInvalidTimeData.resize(chunkSize);
+			dbufs.emplace_back(node.destImageFile(), "isTimeStampInvalid", arrays.isInvalidTimeData.data(), chunkSize, true, (prototype.get("isTimeStampInvalid").type() == e57::E57_SCALED_INTEGER));
+		}
+	}
+
 	// color buffers
 	double colorRedRange    = 1;
 	double colorRedOffset   = 0;
@@ -2283,6 +2312,20 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 				}
 			}
 
+			if (!arrays.timeData.empty())
+			{
+				assert(timeStampSF);
+				if (!header.pointFields.isTimeStampInvalidField || arrays.isInvalidTimeData[i] != INVALID_DATA)
+				{
+					const ScalarType timeStamp = static_cast<ScalarType>(arrays.timeData[i]);
+					timeStampSF->setValue(static_cast<unsigned>(realCount), timeStamp);
+				}
+				else
+				{
+					timeStampSF->flagValueAsInvalid(static_cast<unsigned>(realCount));
+				}
+			}
+
 			if (hasColors)
 			{
 				// Normalize color to 0 - 255
@@ -2359,6 +2402,18 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
 		cloud->setCurrentDisplayedScalarField(cloud->getScalarFieldIndexByName(intensitySF->getName()));
 		cloud->showSF(true);
+	}
+
+	if (timeStampSF)
+	{
+		timeStampSF->computeMinAndMax();
+		timeStampSF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+		// Only display the timestamps if no other scalar field is already shown (e.g. intensity).
+		if (cloud->getCurrentDisplayedScalarFieldIndex() < 0)
+		{
+			cloud->setCurrentDisplayedScalarField(cloud->getScalarFieldIndexByName(timeStampSF->getName()));
+			cloud->showSF(true);
+		}
 	}
 
 	if (returnIndexSF)

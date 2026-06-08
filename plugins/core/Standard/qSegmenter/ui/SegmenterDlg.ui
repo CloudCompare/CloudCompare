@@ -4,7 +4,7 @@
  <widget class="QDialog" name="SegmenterDialog">
   <property name="geometry">
    <rect>
-    <x>0</x> <y>0</y> <width>350</width> <height>300</height>
+    <x>0</x> <y>0</y> <width>350</width> <height>360</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -64,6 +64,35 @@
      <item><widget class="QPushButton" name="btnRedo"><property name="text"><string>Redo</string></property></widget></item>
      <item><widget class="QPushButton" name="btnClear"><property name="text"><string>Clear All</string></property></widget></item>
     </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="statusGroup">
+     <property name="title">
+      <string>Status</string>
+     </property>
+     <layout class="QFormLayout" name="statusFormLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelStatusKey">
+        <property name="text"><string>State:</string></property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lblStatus">
+        <property name="text"><string>Idle</string></property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="labelCountKey">
+        <property name="text"><string>Seeds placed:</string></property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="lblCount">
+        <property name="text"><string>0</string></property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

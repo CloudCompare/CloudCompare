@@ -24,6 +24,9 @@ public:
     // Check which radio button is active
     bool isAddingPositiveSeeds() const;
 
+    void setStatusMessage(const QString& msg);
+    void setPointCount(int count);
+
 signals:
     // We emit these when the user clicks the buttons so the main logic can react
     void undoRequested();

@@ -7,13 +7,18 @@
 #include <ccColorTypes.h>
 #include <ccPointCloud.h>
 #include <ccOctree.h>
+
 #include <queue>
 #include <vector>
 #include <cmath>
+#include <limits>
 
 SeedPicker::SeedPicker(ccMainAppInterface* app)
     : m_app(app)
     , m_targetCloud(nullptr)
+    , m_posMarkerCloud(nullptr)
+    , m_negMarkerCloud(nullptr)
+    , m_previewCloud(nullptr)
 {
 }
 
@@ -24,232 +29,209 @@ SeedPicker::~SeedPicker()
 
 void SeedPicker::startListening()
 {
-	if (!m_app || !m_app->pickingHub())
-		return;
+	if (!m_app || !m_app->pickingHub()) return;
 
-	// Register this class to the Hub.
-	// exclusive = false (allows other plugins to listen, usually fine)
-	// autoStartPicking = true (forces the viewport into picking mode)
-	// mode = POINT_PICKING (we only care about points, not triangles)
 	bool success = m_app->pickingHub()->addListener(
-	    this,
-	    false,
-	    true,
-	    ccGLWindowInterface::POINT_PICKING);
+	    this, false, true, ccGLWindowInterface::POINT_PICKING);
 
 	if (success)
 		m_app->dispToConsole("[Segmenter] Picking mode activated. Click points!", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-	else
-		m_app->dispToConsole("[Segmenter] Error: Could not start picking.", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 }
 
 void SeedPicker::stopListening()
 {
-    if (!m_app)
-        return;
+    if (!m_app) return;
+    if (m_app->pickingHub()) m_app->pickingHub()->removeListener(this);
+
+    if (m_posMarkerCloud) { m_app->removeFromDB(m_posMarkerCloud); m_posMarkerCloud = nullptr; }
+    if (m_negMarkerCloud) { m_app->removeFromDB(m_negMarkerCloud); m_negMarkerCloud = nullptr; }
+    if (m_previewCloud)   { m_app->removeFromDB(m_previewCloud);   m_previewCloud = nullptr; }
+
+    // Restore original colors if we are completely stopping
+    if (m_targetCloud && !m_originalColors.empty())
+    {
+        for (unsigned i = 0; i < m_targetCloud->size(); ++i) {
+            m_targetCloud->setPointColor(i, m_originalColors[i]);
+        }
+        m_targetCloud->showColors(true);
+    }
     
-    if (m_app->pickingHub())
-        m_app->pickingHub()->removeListener(this);
-
-    // Remove our markers from the DB tree
-    if (m_posMarkerCloud)
-    {
-        m_app->removeFromDB(m_posMarkerCloud);
-        m_posMarkerCloud = nullptr;
-    }
-    if (m_negMarkerCloud)
-    {
-        m_app->removeFromDB(m_negMarkerCloud);
-        m_negMarkerCloud = nullptr;
-    }
-
     m_app->refreshAll();
-    m_app->dispToConsole("[Segmenter] Picking mode deactivated and markers cleared.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
-
-	// clean the segmented preview
-    if (m_previewCloud)
-    {
-        m_app->removeFromDB(m_previewCloud);
-        m_previewCloud = nullptr;
-    }
-
-    m_app->refreshAll();
-    m_app->dispToConsole("[Segmenter] Picking mode deactivated and markers cleared.", ccMainAppInterface::STD_CONSOLE_MESSAGE);
 }
 
-void SeedPicker::onItemPicked(const PickedItem& pi) //ON ITEM PICKED 
+void SeedPicker::onItemPicked(const PickedItem& pi) 
 {
-	// verify user actually clicked an entity
-	if (!pi.entity)
-	return;
-	
-	// verify it's a PC
-	if (!pi.entity->isA(CC_TYPES::POINT_CLOUD))
-	{
-		m_app->dispToConsole("[Segmenter] Please click on a point cloud.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-		return;
-	}
+	if (!pi.entity || !pi.entity->isA(CC_TYPES::POINT_CLOUD)) return;
 	
 	ccPointCloud* clickedCloud = static_cast<ccPointCloud*>(pi.entity);
 	
-	// ensure we are only clicking on ONE cloud during the session
-	if (!m_targetCloud)
-	{
+	if (!m_targetCloud) {
 		m_targetCloud = clickedCloud;
+        // Backup original colors immediately on first click
+        if (m_targetCloud->hasColors()) {
+            m_originalColors.reserve(m_targetCloud->size());
+            for (unsigned i = 0; i < m_targetCloud->size(); ++i) {
+                m_originalColors.push_back(m_targetCloud->getPointColor(i));
+            }
+        }
 	}
-	else if (m_targetCloud != clickedCloud)
-	{
-		m_app->dispToConsole("[Segmenter] Warning: Clicked a different cloud. Ignored.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-		return;
-	}
+	else if (m_targetCloud != clickedCloud) return;
 	
-	unsigned pointIndex  = pi.itemIndex;
+	unsigned pointIndex = pi.itemIndex;
     const CCVector3& pointCoords = pi.P3D;
-    
- 
 
     if (m_isPositive)
     {
         m_positiveSeeds.push_back(pointIndex);
-        m_app->dispToConsole(QString("[Segmenter] POSITIVE Seed added! Index: %1").arg(pointIndex));
-
-        if (!m_posMarkerCloud)
-        {
+        if (!m_posMarkerCloud) {
             m_posMarkerCloud = new ccPointCloud("Positive Seeds");
-            m_posMarkerCloud->setPointSize(8);
+            m_posMarkerCloud->setPointSize(10);
             m_posMarkerCloud->resizeTheRGBTable();
             m_posMarkerCloud->showColors(true);
-            
-            // --- NEW: Add to the main DB so it shows in the sidebar! ---
             m_targetCloud->addChild(m_posMarkerCloud);
             m_app->addToDB(m_posMarkerCloud, false, true, false, false);
         }
-
         m_posMarkerCloud->addPoint(pointCoords);
-        m_posMarkerCloud->addColor(ccColor::Rgb(190, 242, 58));
+        m_posMarkerCloud->addColor(ccColor::Rgb(190, 242, 58)); // Lime
     }
     else
     {
-        // ... [Do the exact same m_app->addToDB logic for m_negMarkerCloud] ...
         m_negativeSeeds.push_back(pointIndex);
-        m_app->dispToConsole(QString("[Segmenter] NEGATIVE Seed added! Index: %1").arg(pointIndex));
-
-        if (!m_negMarkerCloud)
-        {
+        if (!m_negMarkerCloud) {
             m_negMarkerCloud = new ccPointCloud("Negative Seeds");
-            m_negMarkerCloud->setPointSize(8);
+            m_negMarkerCloud->setPointSize(10);
             m_negMarkerCloud->resizeTheRGBTable();
             m_negMarkerCloud->showColors(true);
-            
             m_targetCloud->addChild(m_negMarkerCloud);
             m_app->addToDB(m_negMarkerCloud, false, true, false, false);
         }
-
         m_negMarkerCloud->addPoint(pointCoords);
-        m_negMarkerCloud->addColor(ccColor::Rgb(242, 19, 135));
-
+        m_negMarkerCloud->addColor(ccColor::Rgb(242, 19, 135)); // Pink
     }
 
     m_app->refreshAll(); 
-
-    // --- NEW: Run the region growing immediately after a click! ---
-    runRegionGrowing(m_searchRadius, m_tauThreshold);
+    
+    // UI will trigger the runRegionGrowing via the StateChanged signal, 
+    // but we emit a dummy change to force it if needed, or rely on ActionA.
+    // For now, let's let ActionA handle the rerunning to get slider values.
+    
 }
 
-void SeedPicker::runRegionGrowing(double searchRadius, double tauThreshold)
-{
-    // 1. Safety Checks
-    if (!m_targetCloud || m_positiveSeeds.empty())
-    {
-        m_app->dispToConsole("[Segmenter] Error: No cloud loaded or no positive seeds selected.", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-        return;
+// Custom Struct for the Priority Queue
+struct QueueItem {
+    double cost;
+    unsigned int index;
+    int label; // 1 = Positive, 2 = Negative
+    
+    // Min-heap comparison
+    bool operator>(const QueueItem& other) const {
+        return cost > other.cost; 
     }
+};
 
-    // 2. Setup/Verify the Octree
+int SeedPicker::runRegionGrowing(double searchRadius, double tauThreshold, double ws, double wc)
+{
+    if (!m_targetCloud || m_positiveSeeds.empty() || m_originalColors.empty()) return 0;
+
     ccOctree::Shared octree = m_targetCloud->getOctree();
-    if (!octree)
-    {
-        m_app->dispToConsole("[Segmenter] Building Octree...", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+    if (!octree) {
         m_targetCloud->computeOctree();
         octree = m_targetCloud->getOctree();
-        if (!octree) return;
+        if (!octree) return 0;
     }
 
-    m_app->dispToConsole("[Segmenter] Starting region growing...", ccMainAppInterface::STD_CONSOLE_MESSAGE);
+    // 1. Reset Cloud to Original Colors (Erase previous pink segment)
+    for (unsigned i = 0; i < m_targetCloud->size(); ++i) {
+        m_targetCloud->setPointColor(i, m_originalColors[i]);
+    }
 
-    // 3. Initialize Tracking Variables
-    m_segmentedIndices.clear();
-    std::vector<bool> visited(m_targetCloud->size(), false);
-    std::queue<unsigned int> pointQueue;
+    // 2. Initialize tracking arrays
+    unsigned cloudSize = m_targetCloud->size();
+    std::vector<double> minCost(cloudSize, std::numeric_limits<double>::infinity());
+    std::vector<int> labels(cloudSize, 0); // 0=Unassigned, 1=Pos, 2=Neg
 
-    // Load initial seeds into the queue
-    for (unsigned int seedIdx : m_positiveSeeds)
-    {
-        if (seedIdx < m_targetCloud->size())
-        {
-            pointQueue.push(seedIdx);
-            visited[seedIdx] = true;
-            m_segmentedIndices.push_back(seedIdx); // Seeds are automatically part of the segment
+    std::priority_queue<QueueItem, std::vector<QueueItem>, std::greater<QueueItem>> pq;
+
+    // Load initial seeds
+    for (unsigned int idx : m_positiveSeeds) {
+        if (idx < cloudSize) {
+            pq.push({0.0, idx, 1});
+            minCost[idx] = 0.0;
+        }
+    }
+    for (unsigned int idx : m_negativeSeeds) {
+        if (idx < cloudSize) {
+            pq.push({0.0, idx, 2});
+            minCost[idx] = 0.0;
         }
     }
 
-   // Determine optimized octree extraction level
     unsigned char searchLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(searchRadius));
+    const double MAX_COLOR_DIST = 441.673; // sqrt(255^2 * 3)
 
-    //Lock the base color to the first positive seed 
-    const ccColor::Rgba baseColor = m_targetCloud->getPointColor(m_positiveSeeds[0]);
-
-    // 4. The Breadth-First Search (BFS) Loop
-    while (!pointQueue.empty())
+    // 3. Dijkstra Growing Loop
+    while (!pq.empty())
     {
-        unsigned int currentIdx = pointQueue.front();
-        pointQueue.pop();
+        QueueItem current = pq.top();
+        pq.pop();
 
-        const CCVector3* p_r = m_targetCloud->getPoint(currentIdx);
+        // If we already found a cheaper path to this point, skip
+        if (current.cost > minCost[current.index]) continue;
+        
+        labels[current.index] = current.label;
 
-        // Extract nearby points
+        const CCVector3* p_curr = m_targetCloud->getPoint(current.index);
+        const ccColor::Rgba c_curr = m_originalColors[current.index];
+
         CCCoreLib::DgmOctree::NeighboursSet neighbors;
-        octree->getPointsInSphericalNeighbourhood(*p_r, static_cast<PointCoordinateType>(searchRadius), neighbors, searchLevel);
+        octree->getPointsInSphericalNeighbourhood(*p_curr, static_cast<PointCoordinateType>(searchRadius), neighbors, searchLevel);
 
-        for (const CCCoreLib::DgmOctree::PointDescriptor& neighbor : neighbors)
+        for (const auto& neighbor : neighbors)
         {
-            unsigned int neighborIdx = neighbor.pointIndex;
+            unsigned int nIdx = neighbor.pointIndex;
 
-            if (visited[neighborIdx])
-                continue;
+            // Calculate Spatial Cost (0 to 1)
+            const CCVector3* p_n = m_targetCloud->getPoint(nIdx);
+            double dist = CCVector3::vdistance(p_curr->u, p_n->u);
+            double normDist = dist / searchRadius;
 
-            // Get the color of the neighbor candidate
-            const ccColor::Rgba color_n = m_targetCloud->getPointColor(neighborIdx);
-            
-            // integer math comparing against the ORIGINAL seed ---
-            int dr = static_cast<int>(baseColor.r) - color_n.r;
-            int dg = static_cast<int>(baseColor.g) - color_n.g;
-            int db = static_cast<int>(baseColor.b) - color_n.b;
-            
-            double colorDist = std::sqrt(dr * dr + dg * dg + db * db);
+            // Calculate Chromatic Cost (0 to 1)
+            const ccColor::Rgba c_n = m_originalColors[nIdx];
+            double dr = static_cast<double>(c_curr.r) - c_n.r;
+            double dg = static_cast<double>(c_curr.g) - c_n.g;
+            double db = static_cast<double>(c_curr.b) - c_n.b;
+            double colorDist = std::sqrt(dr*dr + dg*dg + db*db);
+            double normColor = colorDist / MAX_COLOR_DIST;
 
-            // If it meets the threshold, absorb it into the segment
-            if (colorDist < tauThreshold)
+            // Combined Step Cost (Scaled to 0 - 100 to match tau slider)
+            double step_cost = 100.0 * ((ws * normDist) + (wc * normColor));
+
+            // Stop growing along this path if step exceeds the user threshold
+            if (step_cost > tauThreshold) continue;
+
+            double new_cumulative_cost = current.cost + step_cost;
+
+            // If this is a strictly cheaper path to this neighbor, update it
+            if (new_cumulative_cost < minCost[nIdx])
             {
-                visited[neighborIdx] = true;
-                pointQueue.push(neighborIdx);
-                m_segmentedIndices.push_back(neighborIdx);
+                minCost[nIdx] = new_cumulative_cost;
+                pq.push({new_cumulative_cost, nIdx, current.label});
             }
         }
     }
 
-    // visual feedback temporary for tests
-	//TODO: REmove this and replace with a more efficient way to show the segmented points (e.g. a scalar field or a dedicated color array)
-    //  repaint the segmented points neon pink
-    for (unsigned int idx : m_segmentedIndices)
+    // 4. Colorize the result and count points
+    int positiveCount = 0;
+    for (unsigned i = 0; i < cloudSize; ++i)
     {
-        m_targetCloud->setPointColor(idx, ccColor::magenta);
+        if (labels[i] == 1) {
+            m_targetCloud->setPointColor(i, ccColor::magenta); // Bright pink for visualization
+            positiveCount++;
+        }
     }
 
     m_targetCloud->showColors(true);
-    m_app->refreshAll(); // Force CloudCompare viewport update
+    m_app->refreshAll(); 
 
-    QString successMsg = QString("[Segmenter] Growth finished. Segmented points: %1").arg(m_segmentedIndices.size());
-    m_app->dispToConsole(successMsg, ccMainAppInterface::STD_CONSOLE_MESSAGE);
+    return positiveCount;
 }
-

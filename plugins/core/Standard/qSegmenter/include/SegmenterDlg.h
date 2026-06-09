@@ -1,11 +1,10 @@
-#ifndef SEGMENTER_DLG_H
-#define SEGMENTER_DLG_H
+#ifndef SEGMENTER_DLG_HEADER
+#define SEGMENTER_DLG_HEADER
 
 #include <QDialog>
 
-// Forward declaration of the UI namespace created by Qt's UIC compiler
 namespace Ui {
-class SegmenterDialog;
+    class SegmenterDialog;
 }
 
 class SegmenterDlg : public QDialog
@@ -13,31 +12,29 @@ class SegmenterDlg : public QDialog
     Q_OBJECT
 
 public:
-    explicit SegmenterDlg(QWidget *parent = nullptr);
-    ~SegmenterDlg() override;
+    explicit SegmenterDlg(QWidget* parent = nullptr);
+    virtual ~SegmenterDlg();
 
-    // Getters for the algorithm math
     double getSpatialWeight() const;
     double getChromaticWeight() const;
     double getThreshold() const;
-
-    // Check which radio button is active
     bool isAddingPositiveSeeds() const;
 
     void setStatusMessage(const QString& msg);
     void setPointCount(int count);
 
 signals:
-    // We emit these when the user clicks the buttons so the main logic can react
+    void stateChanged();
+    void applyRequested();
     void undoRequested();
     void redoRequested();
     void clearRequested();
-    
-    // Emitted when the user changes from positive to negative, or tweaks a slider
-    void stateChanged(); 
+
+private slots:
+    void onSliderMoved();
 
 private:
-    Ui::SegmenterDialog *ui;
+    Ui::SegmenterDialog* ui;
 };
 
-#endif // SEGMENTER_DLG_H
+#endif

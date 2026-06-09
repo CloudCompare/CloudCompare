@@ -5,51 +5,42 @@
 #include <ccPointCloud.h>
 #include <vector>
 
+class ccMainAppInterface;
+class ccPointCloud;
+class SegmenterDlg;
+
 class SeedPicker : public ccPickingListener
 {
-  public:
-	SeedPicker(ccMainAppInterface* app);
-	virtual ~SeedPicker();
+public:
+    SeedPicker(ccMainAppInterface* app, SegmenterDlg* dialog);
+    virtual ~SeedPicker();
 
-	void startListening();
-	void stopListening();
+    void startListening();
+    void stopListening();
 
-	// UI Trigger for the algorithm
-	int runRegionGrowing(double searchRadius, double tauThreshold, double ws, double wc);
-	// Getters / Setters
-	void setPositiveMode(bool isPositive)
-	{
-		m_isPositive = isPositive;
-	}
+    void setPositiveMode(bool isPositive) { m_isPositive = isPositive; }
+    int runRegionGrowing();
 
-	void setAlgorithmParameters(double radius, double tau)
-	{
-		m_searchRadius = radius;
-		m_tauThreshold = tau;
-	}
+protected:
+    // Inherited from ccPickingListener
+    void onItemPicked(const PickedItem& pi) override;
 
-  protected:
-	// Only declared ONCE here
-	virtual void onItemPicked(const PickedItem& pi) override;
+private:
+    ccMainAppInterface* m_app;
+    SegmenterDlg* m_dialog;
+    ccPointCloud* m_targetCloud;
 
-  private:
-	ccMainAppInterface* m_app;
-	ccPointCloud*       m_targetCloud  = nullptr;
-	ccPointCloud*       m_previewCloud = nullptr;
+    // Separate tracking layers for visualization markers
+    ccPointCloud* m_posMarkerCloud;
+    ccPointCloud* m_negMarkerCloud;
+    ccPointCloud* m_previewCloud;
 
-	std::vector<unsigned int> m_positiveSeeds;
-	std::vector<unsigned int> m_negativeSeeds;
+    bool m_isPositive = true;
 
-	// The compiler couldn't find this, so we ensure it is here in private:
-	std::vector<unsigned int> m_segmentedIndices;
-
-	double m_searchRadius = 0.1;  // Default radius (adjust based on your sphere's scale)
-	double m_tauThreshold = 30.0; // Default RGB distance (0-255 scale)
-
-	bool m_isPositive = true;
-
-	ccPointCloud* m_posMarkerCloud = nullptr;
-	ccPointCloud* m_negMarkerCloud = nullptr;
-
+    // Indices lists
+    std::vector<unsigned int> m_positiveSeeds;
+    std::vector<unsigned int> m_negativeSeeds;
+    
+    // Backup of original RGB values to ensure rerun ability
     std::vector<ccColor::Rgba> m_originalColors;
 };

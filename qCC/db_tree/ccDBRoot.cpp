@@ -1546,12 +1546,16 @@ void ccDBRoot::expandOrCollapseSelectedItems(bool expand)
 	for (const QModelIndex& clickIndex : selectedIndexes)
 	{
 		if (!clickIndex.isValid())
-			return;
+		{
+			continue;
+		}
 		ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
 		assert(item);
 
 		if (!item || item->getChildrenNumber() == 0)
-			return;
+		{
+			continue;
+		}
 
 		// we recursively expand sub-branches
 		ccHObject::Container toExpand;
@@ -2156,6 +2160,10 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
 
 		for (const QModelIndex& clickIndex : selectedIndexes)
 		{
+			if (!clickIndex.isValid())
+			{
+				continue;
+			}
 			ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
 			assert(item);
 

@@ -217,6 +217,7 @@ bool ccFacet::createInternalRepresentation(CCCoreLib::GenericIndexedCloudPersist
 
 	// compute resulting RMS
 	m_rms = CCCoreLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
+	assert(std::isfinite(m_rms));
 
 	// update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
 	{

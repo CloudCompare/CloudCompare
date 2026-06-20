@@ -79,7 +79,7 @@ class qFacets : public QObject, public ccStdPluginInterface
 		double                                              errorMaxPerFacet;
 		double                                              maxEdgeLength;
 		unsigned                                            minPointsPerFacet;
-		CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure;
+		CCCoreLib::DistanceComputationTools::MEASURE_TYPE  errorMeasure;
 
 		bool   classifyFacetsByAngle;
 		double classifAngleStep;

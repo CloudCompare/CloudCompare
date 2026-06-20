@@ -175,7 +175,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 			                                                                               progressDlg.data());
 		}
 
-		if (result < 0)
+		if (result < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 		{
 			ccLog::Error("Failed to determine the max (overlap) distance (not enough memory?)");
 			return false;

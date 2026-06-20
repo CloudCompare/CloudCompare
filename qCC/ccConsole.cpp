@@ -300,7 +300,7 @@ void ccConsole::refresh()
 					}
 					else if ((messagePair.second & LOG_WARNING) == LOG_WARNING) // Warning
 					{
-						item->setForeground(Qt::darkRed);
+						item->setForeground(Qt::magenta);
 						// we also force the console visibility if a warning message arrives!
 						if (m_parentWindow)
 						{

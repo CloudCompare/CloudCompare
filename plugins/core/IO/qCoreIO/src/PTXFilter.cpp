@@ -329,7 +329,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 						}
 					}
 					if ((hasNormals && (tokens.size() != 10))
-					    || (hasColors && (tokens.size() != 7))
+					    || ((!hasNormals && hasColors) && (tokens.size() != 7))
 					    || ((!hasNormals && !hasColors) && (tokens.size() != 4)))
 					{
 						result = CC_FERR_MALFORMED_FILE;

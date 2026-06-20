@@ -266,8 +266,8 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 	// context menu on DB tree elements
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-	m_expandBranch                     = new QAction(tr("Expand branch"), this);
-	m_collapseBranch                   = new QAction(tr("Collapse branch"), this);
+	m_expandSelectedItems              = new QAction(tr("Expand"), this);
+	m_collapseSelectedItems            = new QAction(tr("Collapse"), this);
 	m_gatherInformation                = new QAction(tr("Information (recursive)"), this);
 	m_sortChildrenType                 = new QAction(tr("Sort children by type"), this);
 	m_sortChildrenAZ                   = new QAction(tr("Sort children by name (A-Z)"), this);
@@ -292,8 +292,8 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 
 	// connect custom context menu actions
 	connect(m_dbTreeWidget, &QWidget::customContextMenuRequested, this, &ccDBRoot::showContextMenu);
-	connect(m_expandBranch, &QAction::triggered, this, &ccDBRoot::expandBranch);
-	connect(m_collapseBranch, &QAction::triggered, this, &ccDBRoot::collapseBranch);
+	connect(m_expandSelectedItems, &QAction::triggered, this, &ccDBRoot::expandBranches);
+	connect(m_collapseSelectedItems, &QAction::triggered, this, &ccDBRoot::collapseBranches);
 	connect(m_gatherInformation, &QAction::triggered, this, &ccDBRoot::gatherRecursiveInformation);
 	connect(m_sortChildrenAZ, &QAction::triggered, this, &ccDBRoot::sortChildrenAZ);
 	connect(m_sortChildrenZA, &QAction::triggered, this, &ccDBRoot::sortChildrenZA);
@@ -1528,61 +1528,62 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 	return true;
 }
 
-void ccDBRoot::expandBranch()
+void ccDBRoot::expandBranches()
 {
-	expandOrCollapseHoveredBranch(true);
+	expandOrCollapseSelectedItems(true);
 }
 
-void ccDBRoot::collapseBranch()
+void ccDBRoot::collapseBranches()
 {
-	expandOrCollapseHoveredBranch(false);
+	expandOrCollapseSelectedItems(false);
 }
 
-void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
+void ccDBRoot::expandOrCollapseSelectedItems(bool expand)
 {
-	// not initialized?
-	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
-		return;
+	QItemSelectionModel* qism            = m_dbTreeWidget->selectionModel();
+	QModelIndexList      selectedIndexes = qism->selectedIndexes();
 
-	QModelIndex clickIndex = m_dbTreeWidget->indexAt(m_contextMenuPos);
-	if (!clickIndex.isValid())
-		return;
-	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
-	assert(item);
-
-	if (!item || item->getChildrenNumber() == 0)
-		return;
-
-	// we recursively expand sub-branches
-	ccHObject::Container toExpand;
-	try
+	for (const QModelIndex& clickIndex : selectedIndexes)
 	{
-		toExpand.push_back(item);
-		while (!toExpand.empty())
+		if (!clickIndex.isValid())
+			return;
+		ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
+		assert(item);
+
+		if (!item || item->getChildrenNumber() == 0)
+			return;
+
+		// we recursively expand sub-branches
+		ccHObject::Container toExpand;
+		try
 		{
-			item = toExpand.back();
-			toExpand.pop_back();
-
-			QModelIndex itemIndex = index(item);
-			if (itemIndex.isValid())
+			toExpand.push_back(item);
+			while (!toExpand.empty())
 			{
-				if (expand)
-					m_dbTreeWidget->expand(itemIndex);
-				else
-					m_dbTreeWidget->collapse(itemIndex);
-			}
+				item = toExpand.back();
+				toExpand.pop_back();
 
-			assert(item->getChildrenNumber() != 0);
-			for (unsigned i = 0; i < item->getChildrenNumber(); ++i)
-			{
-				if (item->getChild(i)->getChildrenNumber() != 0)
-					toExpand.push_back(item->getChild(i));
+				QModelIndex itemIndex = index(item);
+				if (itemIndex.isValid())
+				{
+					if (expand)
+						m_dbTreeWidget->expand(itemIndex);
+					else
+						m_dbTreeWidget->collapse(itemIndex);
+				}
+
+				assert(item->getChildrenNumber() != 0);
+				for (unsigned i = 0; i < item->getChildrenNumber(); ++i)
+				{
+					if (item->getChild(i)->getChildrenNumber() != 0)
+						toExpand.push_back(item->getChild(i));
+				}
 			}
 		}
-	}
-	catch (const std::bad_alloc&)
-	{
-		// not enough memory!
+		catch (const std::bad_alloc&)
+		{
+			// not enough memory!
+		}
 	}
 }
 
@@ -1964,18 +1965,16 @@ void ccDBRoot::selectByTypeAndName()
 	}
 
 	// for type checking
-	CC_CLASS_ENUM type      = CC_TYPES::OBJECT; // all objects are matched by def
+	CC_CLASS_ENUM type      = CC_TYPES::OBJECT; // all objects are matched by default
 	bool          exclusive = false;
 
 	if (scDlg.getTypeIsUsed()) // we are using type checking
 	{
 		type = scDlg.getSelectedType();
 
-		// some types are exclusive, some are generic, and some can be both
-		//(e.g. Meshes)
-		//
-		// For generic-only types the match type gets overridden and forced to
-		// false because exclusive match makes no sense!
+		// Some types are exclusive, some are generic, and some can be both (e.g. Meshes).
+		// For generic-only types the match type gets overridden and forced to false
+		// because exclusive match makes no sense!
 		switch (type)
 		{
 		case CC_TYPES::HIERARCHY_OBJECT: // returned if no type is selected (i.e. all objects are selected!)
@@ -1990,9 +1989,9 @@ void ccDBRoot::selectByTypeAndName()
 		}
 	}
 
-	// for name matching - def values
+	// for name matching - default values
 	bool    regex = false;
-	QString name; // an empty string by default
+	QString name; // empty string
 
 	if (scDlg.getNameMatchIsUsed())
 	{
@@ -2146,57 +2145,50 @@ void ccDBRoot::selectChildrenByTypeAndName(CC_CLASS_ENUM type,
                                            QString       name /*=QString()*/,
                                            bool          nameIsRegex /*= false*/)
 {
-	// not initialized?
-	if (m_contextMenuPos.x() < 0 || m_contextMenuPos.y() < 0)
-	{
-		return;
-	}
-
-	QModelIndex clickIndex = m_dbTreeWidget->indexAt(m_contextMenuPos);
-	if (!clickIndex.isValid())
-	{
-		return;
-	}
-	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
-	assert(item);
-
-	if (!item || item->getChildrenNumber() == 0)
-	{
-		return;
-	}
-
-	ccHObject::Container filteredByType;
-	item->filterChildren(filteredByType, true, type, typeIsExclusive);
-
-	// The case of an empty filteredByType is handled implicitly, to make
-	// the ctrlPushed behavior below more consistent (i.e. when no object
-	// is found and Control was NOT pressed the selection will still be
-	// cleared).
+	// The case of an empty request result is handled implicitly, to make
+	// the CTRL key pressed behavior more consistent (i.e. when no object
+	// is found and CTRL was NOT pressed, the selection will still be cleared).
 	ccHObject::Container toSelect;
 	try
 	{
-		if (name.isEmpty())
+		QItemSelectionModel* qism            = m_dbTreeWidget->selectionModel();
+		QModelIndexList      selectedIndexes = qism->selectedIndexes();
+
+		for (const QModelIndex& clickIndex : selectedIndexes)
 		{
-			toSelect = filteredByType;
-		}
-		else
-		{
-			for (size_t i = 0; i < filteredByType.size(); ++i)
+			ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
+			assert(item);
+
+			if (!item || item->getChildrenNumber() == 0)
 			{
-				ccHObject* child = filteredByType[i];
+				continue;
+			}
 
-				if (nameIsRegex) // regex matching
+			ccHObject::Container filteredByType;
+			item->filterChildren(filteredByType, true, type, typeIsExclusive);
+
+			toSelect.reserve(toSelect.size() + filteredByType.size());
+
+			for (ccHObject* child : filteredByType)
+			{
+				if (name.isEmpty())
 				{
-
+					toSelect.push_back(child);
+				}
+				else if (nameIsRegex) // regex matching
+				{
 					QRegularExpression      re(name);
 					QRegularExpressionMatch match    = re.match(child->getName());
 					bool                    hasMatch = match.hasMatch(); // true
 					if (hasMatch)
+					{
 						toSelect.push_back(child);
+					}
 				}
-
-				else if (child->getName().compare(name) == 0) // simple comparison
+				else if (0 == child->getName().compare(name)) // simple comparison
+				{
 					toSelect.push_back(child);
+				}
 			}
 		}
 	}
@@ -2483,7 +2475,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				menu.addAction(m_sortChildrenType);
 			}
 
-			if (selCount == 1 && !leafObject)
+			if (!leafObject)
 			{
 				menu.addSeparator();
 				menu.addAction(m_selectByTypeAndName);
@@ -2503,8 +2495,8 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			menu.addSeparator();
 		}
 
-		menu.addAction(m_expandBranch);
-		menu.addAction(m_collapseBranch);
+		menu.addAction(m_expandSelectedItems);
+		menu.addAction(m_collapseSelectedItems);
 	}
 	else
 	{

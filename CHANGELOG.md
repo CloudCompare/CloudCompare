@@ -312,6 +312,11 @@ Improvements:
 	- PTX files
 		- CloudCompare will now handle PTX files with normals
 
+	- DB tree context menu:
+		- the 'Expand branch' and 'Collapse branch' options have been renamed 'Expand' and 'Collapse' and will
+			now apply to all selected DB tree item
+		- the 'Search by name and/or type' entry can now be applied with multiple entities selected at once
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

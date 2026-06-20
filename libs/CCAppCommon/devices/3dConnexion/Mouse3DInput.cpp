@@ -104,7 +104,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 
 	if (SiInitialize() == SPW_DLL_LOAD_ERROR)
 	{
-		ccLog::Warning(tr("[3D Mouse] Could not load SiAppDll dll files"));
+		ccLog::Warning(tr("[3D Mouse] Could not initialize 3DxWare driver"));
 		return false;
 	}
 

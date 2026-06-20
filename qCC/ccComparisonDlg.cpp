@@ -393,7 +393,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 
 	// if the approximate distances comptation failed...
-	if (approxResult < 0)
+	if (approxResult < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
 		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)", approxResult);
 		m_compCloud->deleteScalarField(sfIdx);

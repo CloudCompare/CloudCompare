@@ -179,6 +179,7 @@ ccPlane* ccPlane::Fit(CCCoreLib::GenericIndexedCloudPersist* cloud, double* rms 
 	if (rms)
 	{
 		*rms = CCCoreLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSPlane);
+		assert(std::isfinite(*rms));
 		plane->setMetaData("RMS", *rms);
 	}
 

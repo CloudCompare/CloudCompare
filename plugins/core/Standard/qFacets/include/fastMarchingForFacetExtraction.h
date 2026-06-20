@@ -39,7 +39,7 @@ public:
 	static int ExtractPlanarFacets(	ccPointCloud* theCloud,
 									unsigned char octreeLevel,
 									ScalarType maxError,
-									CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+									CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 									bool useRetroProjectionError = true,
 									CCCoreLib::GenericProgressCallback* progressCb = nullptr,
 									CCCoreLib::DgmOctree* _theOctree = nullptr);
@@ -65,7 +65,7 @@ public:
 	int init(	CCCoreLib::DgmOctree* theOctree,
 				unsigned char gridLevel,
 				ScalarType maxError,
-				CCCoreLib::DistanceComputationTools::ERROR_MEASURES errorMeasure,
+				CCCoreLib::DistanceComputationTools::MEASURE_TYPE errorMeasure,
 				bool useRetroProjectionError,
 				CCCoreLib::GenericProgressCallback* progressCb = nullptr);
 
@@ -130,7 +130,7 @@ protected:
 	ScalarType m_maxError;
 
 	//! Error measrue
-	CCCoreLib::DistanceComputationTools::ERROR_MEASURES m_errorMeasure;
+	CCCoreLib::DistanceComputationTools::MEASURE_TYPE m_errorMeasure;
 
 	//! Whether to use retro-projection error in propagation
 	bool m_useRetroProjectionError;

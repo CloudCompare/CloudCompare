@@ -9788,13 +9788,17 @@ void MainWindow::doActionCloudPrimitiveDist()
 
 		int     returnCode = 0;
 		QString errString  = tr("[Compute Primitive Distances] Cloud to %1 distance computation failed (error code = %2)");
+		QString primitiveType;
 
 		switch (refEntity->getClassID())
 		{
 		case CC_TYPES::SPHERE:
 		{
-			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt, refEntity->getOwnBB().getCenter(), static_cast<ccSphere*>(refEntity)->getRadius(), s_signedDist)))
-				ccConsole::Error(errString.arg(tr("Sphere")).arg(returnCode));
+			primitiveType = tr("Sphere");
+			returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2SphereEquation(compEnt,
+                                                                                          refEntity->getOwnBB().getCenter(),
+                                                                                          static_cast<ccSphere*>(refEntity)->getRadius(),
+                                                                                          s_signedDist);
 			break;
 		}
 
@@ -9804,40 +9808,45 @@ void MainWindow::doActionCloudPrimitiveDist()
 			if (s_treatPlanesAsBounded)
 			{
 				CCCoreLib::SquareMatrix rotationTransform(plane->getTransformation().data(), true);
-				if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt, plane->getXWidth(), plane->getYWidth(), rotationTransform, plane->getCenter(), s_signedDist)))
-				{
-					ccConsole::Warning(errString.arg(tr("Bounded Plane")).arg(returnCode));
-					++errorCount;
-				}
+
+				primitiveType = tr("Bounded Plane");
+				returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2RectangleEquation(compEnt,
+                                                                                                 plane->getXWidth(),
+                                                                                                 plane->getYWidth(),
+                                                                                                 rotationTransform,
+                                                                                                 plane->getCenter(),
+                                                                                                 s_signedDist);
 			}
 			else
 			{
-				if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt, static_cast<ccPlane*>(refEntity)->getEquation(), s_signedDist)))
-				{
-					ccConsole::Warning(errString.arg(tr("Infinite Plane")).arg(returnCode));
-					++errorCount;
-				}
+				primitiveType = tr("Infinite Plane");
+				returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2PlaneEquation(compEnt,
+                                                                                             static_cast<ccPlane*>(refEntity)->getEquation(),
+                                                                                             s_signedDist);
 			}
 			break;
 		}
 
 		case CC_TYPES::CYLINDER:
 		{
-			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt, static_cast<ccCylinder*>(refEntity)->getBottomCenter(), static_cast<ccCylinder*>(refEntity)->getTopCenter(), static_cast<ccCylinder*>(refEntity)->getBottomRadius(), s_signedDist)))
-			{
-				ccConsole::Warning(errString.arg(tr("Cylinder")).arg(returnCode));
-				++errorCount;
-			}
+			primitiveType = tr("Cylinder");
+			returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2CylinderEquation(compEnt,
+                                                                                            static_cast<ccCylinder*>(refEntity)->getBottomCenter(),
+                                                                                            static_cast<ccCylinder*>(refEntity)->getTopCenter(),
+                                                                                            static_cast<ccCylinder*>(refEntity)->getBottomRadius(),
+                                                                                            s_signedDist);
 			break;
 		}
 
 		case CC_TYPES::CONE:
 		{
-			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt, static_cast<ccCone*>(refEntity)->getLargeCenter(), static_cast<ccCone*>(refEntity)->getSmallCenter(), static_cast<ccCone*>(refEntity)->getLargeRadius(), static_cast<ccCone*>(refEntity)->getSmallRadius(), s_signedDist)))
-			{
-				ccConsole::Warning(errString.arg(tr("Cone")).arg(returnCode));
-				++errorCount;
-			}
+			primitiveType = tr("Cone");
+			returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2ConeEquation(compEnt,
+                                                                                        static_cast<ccCone*>(refEntity)->getLargeCenter(),
+                                                                                        static_cast<ccCone*>(refEntity)->getSmallCenter(),
+                                                                                        static_cast<ccCone*>(refEntity)->getLargeRadius(),
+                                                                                        static_cast<ccCone*>(refEntity)->getSmallRadius(),
+                                                                                        s_signedDist);
 			break;
 		}
 
@@ -9846,23 +9855,21 @@ void MainWindow::doActionCloudPrimitiveDist()
 			const ccGLMatrix&       glTransform = refEntity->getGLTransformationHistory();
 			CCCoreLib::SquareMatrix rotationTransform(glTransform.data(), true);
 			CCVector3               boxCenter = glTransform.getColumnAsVec3D(3);
-			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt, static_cast<ccBox*>(refEntity)->getDimensions(), rotationTransform, boxCenter, s_signedDist)))
-			{
-				ccConsole::Warning(errString.arg(tr("Box")).arg(returnCode));
-				++errorCount;
-			}
+
+			primitiveType = tr("Box");
+			returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2BoxEquation(compEnt,
+                                                                                       static_cast<ccBox*>(refEntity)->getDimensions(),
+                                                                                       rotationTransform,
+                                                                                       boxCenter,
+                                                                                       s_signedDist);
 			break;
 		}
 
 		case CC_TYPES::POLY_LINE:
 		{
 			ccPolyline* line = static_cast<ccPolyline*>(refEntity);
+			primitiveType    = tr("Polyline");
 			returnCode       = CCCoreLib::DistanceComputationTools::computeCloud2PolylineEquation(compEnt, line);
-			if (!returnCode)
-			{
-				ccConsole::Warning(errString.arg(tr("Polyline")).arg(returnCode));
-				++errorCount;
-			}
 			break;
 		}
 
@@ -9870,14 +9877,12 @@ void MainWindow::doActionCloudPrimitiveDist()
 		{
 			ccDisc*                 disc = static_cast<ccDisc*>(refEntity);
 			CCCoreLib::SquareMatrix rotationTransform(disc->getTransformation().data(), true);
-			if (!(returnCode = CCCoreLib::DistanceComputationTools::computeCloud2DiscEquation(compEnt,
-			                                                                                  refEntity->getOwnBB().getCenter(),
-			                                                                                  static_cast<ccDisc*>(refEntity)->getRadius(),
-			                                                                                  rotationTransform,
-			                                                                                  s_signedDist)))
-			{
-				ccConsole::Error(errString.arg(tr("Disc")).arg(returnCode));
-			}
+			primitiveType = tr("Disc");
+			returnCode    = CCCoreLib::DistanceComputationTools::computeCloud2DiscEquation(compEnt,
+                                                                                        refEntity->getOwnBB().getCenter(),
+                                                                                        static_cast<ccDisc*>(refEntity)->getRadius(),
+                                                                                        rotationTransform,
+                                                                                        s_signedDist);
 			break;
 		}
 
@@ -9888,53 +9893,61 @@ void MainWindow::doActionCloudPrimitiveDist()
 		}
 		}
 
-		QString sfName(CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
-		if (!refEntity->isKindOf(CC_TYPES::POLY_LINE))
+		if (returnCode < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 		{
-			if (s_signedDist)
+			ccConsole::Error(errString.arg(primitiveType).arg(returnCode));
+			++errorCount;
+		}
+		else
+		{
+			QString sfName(CC_CLOUD2PRIMITIVE_DISTANCES_DEFAULT_SF_NAME);
+			if (!refEntity->isKindOf(CC_TYPES::POLY_LINE))
 			{
-				sfName = CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME;
+				if (s_signedDist)
+				{
+					sfName = CC_CLOUD2PRIMITIVE_SIGNED_DISTANCES_DEFAULT_SF_NAME;
+				}
+				if (s_flipNormals)
+				{
+					if (compEnt->getCurrentOutScalarField())
+					{
+						compEnt->getCurrentOutScalarField()->invert();
+					}
+					else
+					{
+						assert(false);
+					}
+					sfName += "[-]";
+				}
 			}
-			if (s_flipNormals)
+
+			int _sfIdx = compEnt->getScalarFieldIndexByName(sfName.toStdString());
+			if (_sfIdx >= 0)
 			{
-				if (compEnt->getCurrentOutScalarField())
-				{
-					compEnt->getCurrentOutScalarField()->invert();
-				}
-				else
-				{
-					assert(false);
-				}
-				sfName += "[-]";
+				compEnt->deleteScalarField(_sfIdx);
+				// we update sfIdx because indexes are all messed up after deletion
+				sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 			}
-		}
+			compEnt->renameScalarField(sfIdx, sfName.toStdString());
 
-		int _sfIdx = compEnt->getScalarFieldIndexByName(sfName.toStdString());
-		if (_sfIdx >= 0)
-		{
-			compEnt->deleteScalarField(_sfIdx);
-			// we update sfIdx because indexes are all messed up after deletion
-			sfIdx = compEnt->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
+			ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
+			if (sf)
+			{
+				ScalarType mean;
+				ScalarType variance;
+				sf->computeMinAndMax();
+				sf->computeMeanAndVariance(mean, &variance);
+				ccLog::Print(tr("[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5")
+				                 .arg(refEntity->getName())
+				                 .arg(compEnt->getName())
+				                 .arg(sfName)
+				                 .arg(mean)
+				                 .arg(sqrt(variance)));
+			}
+			compEnt->setCurrentDisplayedScalarField(sfIdx);
+			compEnt->showSF(sfIdx >= 0);
+			compEnt->prepareDisplayForRefresh_recursive();
 		}
-		compEnt->renameScalarField(sfIdx, sfName.toStdString());
-
-		ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
-		if (sf)
-		{
-			ScalarType mean;
-			ScalarType variance;
-			sf->computeMinAndMax();
-			sf->computeMeanAndVariance(mean, &variance);
-			ccLog::Print(tr("[Compute Primitive Distances] [Primitive: %1] [Cloud: %2] [%3] Mean distance = %4 / std deviation = %5")
-			                 .arg(refEntity->getName())
-			                 .arg(compEnt->getName())
-			                 .arg(sfName)
-			                 .arg(mean)
-			                 .arg(sqrt(variance)));
-		}
-		compEnt->setCurrentDisplayedScalarField(sfIdx);
-		compEnt->showSF(sfIdx >= 0);
-		compEnt->prepareDisplayForRefresh_recursive();
 	}
 
 	if (errorCount != 0)

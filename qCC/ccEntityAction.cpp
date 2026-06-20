@@ -3094,7 +3094,7 @@ namespace ccEntityAction
 	bool computeStatParams(ccHObject::Container selectedEntities, QWidget* parent /*=nullptr*/)
 	{
 		ccPickOneElementDlg pDlg(QObject::tr("Distribution"), QObject::tr("Distribution Fitting"), parent);
-		pDlg.addElement("Gauss");
+		pDlg.addElement("Normal (Gauss)");
 		pDlg.addElement("Weibull");
 		pDlg.setDefaultIndex(0);
 		if (!pDlg.exec())

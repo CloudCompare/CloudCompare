@@ -423,7 +423,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags /*=DP_PARENT_OF_O
 		}
 		if (!child->getDisplay())
 		{
-			child->setDisplay(getDisplay());
+			child->setDisplay_recursive(getDisplay());
 		}
 	}
 

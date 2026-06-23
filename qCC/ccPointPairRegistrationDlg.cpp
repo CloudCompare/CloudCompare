@@ -1646,6 +1646,7 @@ void ccPointPairRegistrationDlg::align()
 			{
 				m_associatedWin->zoomGlobal();
 			}
+			m_associatedWin->toBeRefreshed();
 			m_associatedWin->redraw();
 		}
 

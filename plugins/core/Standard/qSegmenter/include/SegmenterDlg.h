@@ -17,6 +17,7 @@ public:
 
     double getSpatialWeight() const;
     double getChromaticWeight() const;
+    double getNormalWeight() const;
     double getThreshold() const;
     bool isAddingPositiveSeeds() const;
 

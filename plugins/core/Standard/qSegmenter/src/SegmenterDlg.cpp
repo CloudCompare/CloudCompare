@@ -21,6 +21,7 @@ SegmenterDlg::SegmenterDlg(QWidget* parent)
     // Track real-time numeric text changes inside labels without triggering heavy processing
     connect(ui->sliderWs, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
     connect(ui->sliderWc, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
+    connect(ui->sliderWn, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
     connect(ui->sliderTau, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
 
     onSliderMoved(); // Initialize label strings
@@ -34,6 +35,7 @@ SegmenterDlg::~SegmenterDlg()
 
 double SegmenterDlg::getSpatialWeight() const   { return ui->sliderWs->value() / 100.0; }
 double SegmenterDlg::getChromaticWeight() const { return ui->sliderWc->value() / 100.0; }
+double SegmenterDlg::getNormalWeight() const { return ui->sliderWn->value() / 100.0; }
 double SegmenterDlg::getThreshold() const       { return ui->sliderTau->value() / 10.0; }
 bool SegmenterDlg::isAddingPositiveSeeds() const { return ui->radioPositive->isChecked(); }
 
@@ -44,5 +46,6 @@ void SegmenterDlg::onSliderMoved()
 {
     ui->labelWsVal->setText(QString::number(getSpatialWeight(), 'f', 2));
     ui->labelWcVal->setText(QString::number(getChromaticWeight(), 'f', 2));
+    ui->labelWnVal->setText(QString::number(getNormalWeight(), 'f', 2));
     ui->labelTauVal->setText(QString::number(getThreshold(), 'f', 1));
 }

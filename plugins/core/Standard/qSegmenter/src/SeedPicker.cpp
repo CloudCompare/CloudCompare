@@ -96,6 +96,7 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
         {
             m_negMarkerCloud = new ccPointCloud("Negative Seeds");
             m_negMarkerCloud->setPointSize(15);
+            m_negMarkerCloud->resizeTheRGBTable(); //could do a check if it's the first time, then an error would not show at the beginning.
             m_negMarkerCloud->showColors(true);
             m_targetCloud->addChild(m_negMarkerCloud);
             m_app->addToDB(m_negMarkerCloud, false, true, false, false);
@@ -114,14 +115,14 @@ struct QueueItem {
     double cost;
     unsigned int index;
     int label; // 1 = Positive, 2 = Negative
-    bool operator>(const QueueItem& other) const { return cost > other.cost; } //what
+    bool operator>(const QueueItem& other) const { return cost > other.cost; } //forcing the queue to keep the point with the lowest cost at the very top, core of Dijkstra
 };
 
 int SeedPicker::runRegionGrowing()
 {
     if (!m_targetCloud || m_positiveSeeds.empty() || m_originalColors.empty() || !m_dialog) return 0;
 
-    ccOctree::Shared octree = m_targetCloud->getOctree(); //shared??
+    ccOctree::Shared octree = m_targetCloud->getOctree(); // Shared pointer ensures the octree isn't deleted while in use
     if (!octree)
     {
         m_targetCloud->computeOctree();
@@ -132,8 +133,17 @@ int SeedPicker::runRegionGrowing()
     // Pull normalized parameters straight from the UI
     double ws = m_dialog->getSpatialWeight();
     double wc = m_dialog->getChromaticWeight();
+    double wn = m_dialog->getNormalWeight(); 
     double tauThreshold = m_dialog->getThreshold();
     double searchRadius = 0.2; // Fixed 20cm neighborhood search step size 
+
+    // heck if normals actually exist on the cloud
+    bool hasNormals = m_targetCloud->hasNormals();
+    if (wn > 0.0 && !hasNormals)
+    {
+        ccLog::Warning("[SeedPicker] Normal weight > 0, but cloud has no normals! Normal cost will be ignored.");
+        wn = 0.0; // Fallback to 0 so we don't crash trying to read missing data
+    }
 
     unsigned cloudSize = m_targetCloud->size();
     std::vector<double> minCost(cloudSize, std::numeric_limits<double>::infinity());
@@ -183,8 +193,22 @@ int SeedPicker::runRegionGrowing()
             double db = static_cast<double>(c_curr.b) - c_n.b;
             double normColor = std::sqrt(dr*dr + dg*dg + db*db) / MAX_COLOR_DIST;
 
+            // normal cost
+            double normNormal = 0.0;
+            if (wn > 0.0) // Only calculate if normals exist and user wants to use them
+            {
+                const CCVector3& n_curr = m_targetCloud->getPointNormal(current.index);
+                const CCVector3& n_n = m_targetCloud->getPointNormal(nIdx);
+                
+                // Dot product calculation. 
+                // std::abs() because point cloud normals are often unoriented 
+                // (some point inward, some outward), abs value fixes this 
+                double dot = (n_curr.x * n_n.x) + (n_curr.y * n_n.y) + (n_curr.z * n_n.z);
+                normNormal = 1.0 - std::abs(dot); 
+            }
+
             // Total localized step cost scaled to 0-100 range matching the threshold slider
-            double step_cost = 100.0 * ((ws * normDist) + (wc * normColor));
+            double step_cost = 100.0 * ((ws * normDist) + (wc * normColor) + (wn * normNormal));
             if (step_cost > tauThreshold) continue;
 
             double total_path_cost = current.cost + step_cost;
@@ -209,6 +233,7 @@ int SeedPicker::runRegionGrowing()
     }
 
     m_targetCloud->showColors(true);
+    m_targetCloud->prepareDisplayForRefresh();
     m_app->refreshAll();
 
     m_dialog->setPointCount(positiveCount);

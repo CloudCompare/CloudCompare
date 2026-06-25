@@ -113,6 +113,7 @@
 #include "ccRegistrationDlg.h"
 #include "ccRenderToFileDlg.h"
 #include "ccSORFilterDlg.h"
+#include "ccScalarFieldsManagerDlg.h"
 #include "ccScaleDlg.h"
 #include "ccSectionExtractionTool.h"
 #include "ccSensorComputeDistancesDlg.h"
@@ -605,6 +606,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionComputeScatteringAngles, &QAction::triggered, this, &MainWindow::doActionComputeScatteringAngles);
 	connect(m_UI->actionViewFromSensor, &QAction::triggered, this, &MainWindow::doActionSetViewFromSensor);
 	//"Edit > Scalar fields" menu
+	connect(m_UI->actionOpenSFManager, &QAction::triggered, this, &MainWindow::doActionOpenSelectedEntitiesSFManager);
 	connect(m_UI->actionShowHistogram, &QAction::triggered, this, &MainWindow::showSelectedEntitiesHistogram);
 	connect(m_UI->actionComputeStatParams, &QAction::triggered, this, &MainWindow::doActionComputeStatParams);
 	connect(m_UI->actionSFGradient, &QAction::triggered, this, &MainWindow::doActionSFGradient);
@@ -3264,6 +3266,18 @@ void MainWindow::doApplyActiveSFAction(int action)
 void MainWindow::doActionRenameSF()
 {
 	if (!ccEntityAction::sfRename(m_selectedEntities, this))
+	{
+		return;
+	}
+
+	updateUI();
+}
+
+void MainWindow::doActionOpenSelectedEntitiesSFManager()
+{
+	ccScalarFieldsManagerDialog sfmDlg(this, m_selectedEntities, this);
+
+	if (!sfmDlg.exec())
 	{
 		return;
 	}
@@ -11631,6 +11645,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSplitCloudUsingSF->setEnabled(atLeastOneSF);
 	m_UI->actionComputeStatParams->setEnabled(atLeastOneSF);
 	m_UI->actionComputeStatParams2->setEnabled(atLeastOneSF);
+	m_UI->actionOpenSFManager->setEnabled(atLeastOneCloud);
 	m_UI->actionShowHistogram->setEnabled(atLeastOneSF);
 	m_UI->actionGaussianFilter->setEnabled(atLeastOneSF);
 	m_UI->actionBilateralFilter->setEnabled(atLeastOneSF);
@@ -12282,6 +12297,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionLabelConnectedComponents);
 	m_actions.push_back(m_UI->actionSegment);
 	m_actions.push_back(m_UI->actionTranslateRotate);
+	m_actions.push_back(m_UI->actionOpenSFManager);
 	m_actions.push_back(m_UI->actionShowHistogram);
 	m_actions.push_back(m_UI->actionComputeStatParams);
 	m_actions.push_back(m_UI->actionFilterByValue);

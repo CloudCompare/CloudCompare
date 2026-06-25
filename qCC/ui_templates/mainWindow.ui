@@ -142,6 +142,8 @@
      <property name="title">
       <string>Scalar fields</string>
      </property>
+     <addaction name="actionOpenSFManager"/>
+     <addaction name="separator"/>
      <addaction name="actionShowHistogram"/>
      <addaction name="actionComputeStatParams"/>
      <addaction name="separator"/>
@@ -757,6 +759,7 @@ QTreeView::branch:open:has-children:has-siblings  {
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionOpenSFManager"/>
    <addaction name="actionShowHistogram"/>
    <addaction name="actionComputeStatParams"/>
    <addaction name="actionFilterByValue"/>
@@ -1202,6 +1205,15 @@ QTreeView::branch:open:has-children:has-siblings  {
    </property>
    <property name="text">
     <string>Translate/Rotate</string>
+   </property>
+  </action>
+  <action name="actionOpenSFManager">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/CC/images/ccSFManager.png</normaloff>:/CC/images/ccSFManager.png</iconset>
+   </property>
+   <property name="text">
+    <string>Scalar Fields Manager</string>
    </property>
   </action>
   <action name="actionShowHistogram">

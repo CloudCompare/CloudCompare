@@ -707,7 +707,7 @@
    <item>
     <widget class="QGroupBox" name="clippingPlanesGroupBox">
      <property name="title">
-      <string>Cliiping planes</string>
+      <string>Clipping planes</string>
      </property>
      <property name="checkable">
       <bool>true</bool>

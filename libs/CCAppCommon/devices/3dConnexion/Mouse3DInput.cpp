@@ -21,6 +21,10 @@
 
 #include "Mouse3DInput.h"
 
+#ifdef CC_MAC_HID
+#include "Mouse3DInput_mac.h"
+#endif
+
 // qCC_db
 #include <ccLog.h>
 // qCC_gl
@@ -39,11 +43,15 @@
 #include <windows.h>
 #endif
 
+#ifdef CC_MAC_HID
+// hidapi (HID path for macOS) - Mouse3DInput_mac.cpp provides the HIDWorker
+#else
 // 3DxWare
 #include <si.h>
 #include <siapp.h>
 #include <spwmacro.h>
 #include <spwmath.h>
+#endif
 
 //! Object angular velocity per mouse tick (in radians per ms per count)
 static const double c_3dmouseAngularVelocity = 1.0e-6;
@@ -51,6 +59,7 @@ static const double c_3dmouseAngularVelocity = 1.0e-6;
 // Unique instance
 static Mouse3DInput* s_mouseInputInstance = nullptr;
 
+#ifndef CC_MAC_HID
 #include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
@@ -72,10 +81,16 @@ class RawInputEventFilter : public QAbstractNativeEventFilter
 	}
 };
 static RawInputEventFilter s_rawInputEventFilter;
+#endif // CC_MAC_HID
 
 Mouse3DInput::Mouse3DInput(QObject* parent)
     : QObject(parent)
+#ifdef CC_MAC_HID
+    , m_siHandle(nullptr)
+    , m_hidWorker(nullptr)
+#else
     , m_siHandle(SI_NO_HANDLE)
+#endif
 {
 	// Register current instance
 	assert(s_mouseInputInstance == nullptr);
@@ -84,6 +99,9 @@ Mouse3DInput::Mouse3DInput(QObject* parent)
 
 Mouse3DInput::~Mouse3DInput()
 {
+#ifdef CC_MAC_HID
+	disconnectDriver();
+#endif
 	// Unregister current instance
 	if (s_mouseInputInstance == this)
 	{
@@ -99,6 +117,36 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		return false;
 	}
 
+#ifdef CC_MAC_HID
+	Q_UNUSED(mainWidget)
+	Q_UNUSED(appName)
+
+	// Required for Qt::QueuedConnection across thread boundaries.
+	qRegisterMetaType<std::vector<float>>("std::vector<float>");
+
+	// macOS path: drive the device directly via hidapi (HIDWorker thread)
+	m_hidWorker = new HIDWorker(this);
+	if (!m_hidWorker->openDevice())
+	{
+		delete m_hidWorker;
+		m_hidWorker = nullptr;
+		ccLog::Warning(tr("[3D Mouse] Could not open a 3DConnexion device via HID"));
+		return false;
+	}
+
+	QObject::connect(m_hidWorker, &HIDWorker::sigMove3d,
+	                 this, [this](std::vector<float> v)
+	                 { Q_EMIT sigMove3d(v); }, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigReleased,
+	                 this, &Mouse3DInput::sigReleased, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyDown,
+	                 this, &Mouse3DInput::sigOn3dmouseKeyDown, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyUp,
+	                 this, &Mouse3DInput::sigOn3dmouseKeyUp, Qt::QueuedConnection);
+
+	m_hidWorker->start();
+	return true;
+#else
 	// Attempt to connect with the 3DxWare driver
 	assert(m_siHandle == SI_NO_HANDLE);
 
@@ -164,10 +212,20 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	qApp->installNativeEventFilter(&s_rawInputEventFilter);
 
 	return true;
+#endif
 }
 
 void Mouse3DInput::disconnectDriver()
 {
+#ifdef CC_MAC_HID
+	if (m_hidWorker)
+	{
+		m_hidWorker->stop();
+		m_hidWorker->wait();
+		delete m_hidWorker;
+		m_hidWorker = nullptr;
+	}
+#else
 	if (m_siHandle != SI_NO_HANDLE)
 	{
 		SiClose(m_siHandle);
@@ -175,10 +233,16 @@ void Mouse3DInput::disconnectDriver()
 		m_siHandle = SI_NO_HANDLE;
 		qApp->removeNativeEventFilter(&s_rawInputEventFilter);
 	}
+#endif
 }
 
 bool Mouse3DInput::onSiEvent(void* siGetEventData)
 {
+#ifdef CC_MAC_HID
+	// Not used on macOS - the HIDWorker thread drives the signals directly
+	Q_UNUSED(siGetEventData)
+	return false;
+#else
 	if (m_siHandle == SI_NO_HANDLE || !siGetEventData)
 	{
 		return false;
@@ -267,6 +331,7 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 	}
 
 	return true;
+#endif
 }
 
 void Mouse3DInput::move3d(std::vector<float>& motionData)
@@ -298,6 +363,20 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 {
 	assert(vec.size() == 6);
 
+#ifdef CC_MAC_HID
+	// Platform-neutral Rodrigues rotation: the rotation vector (-rx, ry, -rz)
+	// encodes both the axis (direction) and the angle (magnitude).
+	CCVector3d axis(-vec[3], vec[4], -vec[5]);
+	double     angle = axis.norm();
+	if (CCCoreLib::GreaterThanEpsilon(angle))
+	{
+		mat.initFromParameters(angle, axis, CCVector3d(0, 0, 0));
+	}
+	else
+	{
+		mat.toIdentity();
+	}
+#else
 	float axis[3] = {-vec[3], vec[4], -vec[5]};
 
 	Matrix Rd;
@@ -309,6 +388,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 		mat.getColumn(i)[1] = Rd[1][i];
 		mat.getColumn(i)[2] = Rd[2][i];
 	}
+#endif
 }
 
 void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterface* win)

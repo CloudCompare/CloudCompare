@@ -10,6 +10,7 @@
 #include <queue>
 #include <cmath>
 #include <limits>
+#include <chrono>
 
 SeedPicker::SeedPicker(ccMainAppInterface* app, SegmenterDlg* dialog)
     : m_app(app)
@@ -81,7 +82,7 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
         {
             m_posMarkerCloud = new ccPointCloud("Positive Seeds");
             m_posMarkerCloud->setPointSize(15);
-            m_posMarkerCloud->resizeTheRGBTable(); //could do a check if it's the first time, then an error would not show at the beginning.
+            m_posMarkerCloud->resizeTheRGBTable();
             m_posMarkerCloud->showColors(true);
             m_targetCloud->addChild(m_posMarkerCloud);
             m_app->addToDB(m_posMarkerCloud, false, true, false, false);
@@ -96,7 +97,7 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
         {
             m_negMarkerCloud = new ccPointCloud("Negative Seeds");
             m_negMarkerCloud->setPointSize(15);
-            m_negMarkerCloud->resizeTheRGBTable(); //could do a check if it's the first time, then an error would not show at the beginning.
+            m_negMarkerCloud->resizeTheRGBTable();
             m_negMarkerCloud->showColors(true);
             m_targetCloud->addChild(m_negMarkerCloud);
             m_app->addToDB(m_negMarkerCloud, false, true, false, false);
@@ -118,32 +119,106 @@ struct QueueItem {
     bool operator>(const QueueItem& other) const { return cost > other.cost; } //forcing the queue to keep the point with the lowest cost at the very top, core of Dijkstra
 };
 
-int SeedPicker::runRegionGrowing()
+void SeedPicker::buildAdjacency()
 {
-    if (!m_targetCloud || m_positiveSeeds.empty() || m_originalColors.empty() || !m_dialog) return 0;
+    m_dialog->setStatusMessage("Building adjacency graph...");
 
-    ccOctree::Shared octree = m_targetCloud->getOctree(); // Shared pointer ensures the octree isn't deleted while in use
+    ccOctree::Shared octree = m_targetCloud->getOctree();
     if (!octree)
     {
         m_targetCloud->computeOctree();
         octree = m_targetCloud->getOctree();
-        if (!octree) return 0;
+        if (!octree) return;
     }
+
+    unsigned cloudSize = m_targetCloud->size();
+    ccLog::Print(QString("[Segmenter] Building adjacency graph for %1 points...").arg(cloudSize));
+    auto buildStart = std::chrono::high_resolution_clock::now();
+
+    unsigned char searchLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(
+        static_cast<PointCoordinateType>(NEIGHBOURHOOD_RADIUS_M));
+
+    m_normalsAtBuildTime = m_targetCloud->hasNormals();
+    m_adjacency.resize(cloudSize);
+
+    const double MAX_COLOR_DIST = 441.673; // sqrt(255^2 * 3)
+
+    CCCoreLib::DgmOctree::NeighboursSet neighbors;
+    for (unsigned i = 0; i < cloudSize; ++i)
+    {
+        neighbors.clear();
+        octree->getPointsInSphericalNeighbourhood(
+            *m_targetCloud->getPoint(i),
+            static_cast<PointCoordinateType>(NEIGHBOURHOOD_RADIUS_M),
+            neighbors,
+            searchLevel);
+
+        const CCVector3* p_i   = m_targetCloud->getPoint(i);
+        const ccColor::Rgba c_i = m_originalColors[i];
+        const CCVector3 n_i    = m_normalsAtBuildTime ? m_targetCloud->getPointNormal(i) : CCVector3();
+
+        m_adjacency[i].reserve(neighbors.size());
+        for (const auto& nb : neighbors)
+        {
+            unsigned int j = nb.pointIndex;
+
+            const CCVector3* p_j = m_targetCloud->getPoint(j);
+            double dx = p_i->x - p_j->x, dy = p_i->y - p_j->y, dz = p_i->z - p_j->z;
+            float normDist = static_cast<float>(std::sqrt(dx*dx + dy*dy + dz*dz) / NEIGHBOURHOOD_RADIUS_M);
+
+            const ccColor::Rgba c_j = m_originalColors[j];
+            double dr = static_cast<double>(c_i.r) - c_j.r;
+            double dg = static_cast<double>(c_i.g) - c_j.g;
+            double db = static_cast<double>(c_i.b) - c_j.b;
+            float normColor = static_cast<float>(std::sqrt(dr*dr + dg*dg + db*db) / MAX_COLOR_DIST);
+
+            float normNormal = 0.0f;
+            if (m_normalsAtBuildTime)
+            {
+                const CCVector3& n_j = m_targetCloud->getPointNormal(j);
+                double dot = n_i.x*n_j.x + n_i.y*n_j.y + n_i.z*n_j.z;
+                dot = std::max(-1.0, std::min(1.0, dot));
+                normNormal = static_cast<float>(1.0 - std::abs(dot));
+            }
+
+            m_adjacency[i].push_back({j, normDist, normColor, normNormal});
+        }
+    }
+
+    auto buildMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - buildStart).count();
+    ccLog::Print(QString("[Segmenter] Adjacency graph built in %1 ms").arg(buildMs));
+}
+
+int SeedPicker::runRegionGrowing()
+{
+    if (!m_targetCloud || m_positiveSeeds.empty() || m_originalColors.empty() || !m_dialog) return 0;
+
+    if (m_adjacency.empty())
+        buildAdjacency();
+
+    auto segStart = std::chrono::high_resolution_clock::now();
 
     // Pull normalized parameters straight from the UI
     double ws = m_dialog->getSpatialWeight();
     double wc = m_dialog->getChromaticWeight();
-    double wn = m_dialog->getNormalWeight(); 
+    double wn = m_dialog->getNormalWeight();
     double tauThreshold = m_dialog->getThreshold();
-    double searchRadius = 0.2; // Fixed 20cm neighborhood search step size 
 
-    // heck if normals actually exist on the cloud
-    bool hasNormals = m_targetCloud->hasNormals();
-    if (wn > 0.0 && !hasNormals)
+    if (wn > 0.0 && !m_normalsAtBuildTime)
     {
-        ccLog::Warning("[SeedPicker] Normal weight > 0, but cloud has no normals! Normal cost will be ignored.");
-        wn = 0.0; // Fallback to 0 so we don't crash trying to read missing data
+        if (m_targetCloud->hasNormals())
+            ccLog::Warning("[SeedPicker] Normals were added after the adjacency graph was built — normal cost is unavailable. Clear all seeds and re-add one to rebuild the graph.");
+        else
+            ccLog::Warning("[SeedPicker] Normal weight > 0, but cloud has no normals! Normal cost will be ignored. (You can calculate normals via CC's standard menu.)");
+        wn = 0.0;
     }
+
+    // Normalise weights so their sum equals 1, keeping tau scale-invariant.
+    // Without this, large weights push all edge costs above tau and small weights
+    // let the algorithm flood the entire cloud, making tau unintuitive to tune.
+    const double weightSum = ws + wc + wn;
+    if (weightSum > 0.0) { ws /= weightSum; wc /= weightSum; wn /= weightSum; }
 
     unsigned cloudSize = m_targetCloud->size();
     std::vector<double> minCost(cloudSize, std::numeric_limits<double>::infinity());
@@ -159,10 +234,9 @@ int SeedPicker::runRegionGrowing()
         if (idx < cloudSize) { pq.push({0.0, idx, 2}); minCost[idx] = 0.0; }
     }
 
-    unsigned char searchLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(searchRadius));
-    const double MAX_COLOR_DIST = 441.673; // sqrt(255^2 * 3)
-
     // Competitive Dijkstra Territory Expansion
+    // Edge costs are pre-normalised in m_adjacency — inner loop is now just
+    // a weighted sum and a heap push; no sqrts or pointer chasing per neighbour.
     while (!pq.empty())
     {
         QueueItem current = pq.top();
@@ -171,54 +245,23 @@ int SeedPicker::runRegionGrowing()
         if (current.cost > minCost[current.index]) continue;
         labels[current.index] = current.label;
 
-        const CCVector3* p_curr = m_targetCloud->getPoint(current.index);
-        const ccColor::Rgba c_curr = m_originalColors[current.index];
-
-        CCCoreLib::DgmOctree::NeighboursSet neighbors;
-        octree->getPointsInSphericalNeighbourhood(*p_curr, static_cast<PointCoordinateType>(searchRadius), neighbors, searchLevel);
-
-        for (const auto& neighbor : neighbors)
+        for (const AdjEdge& e : m_adjacency[current.index])
         {
-            unsigned int nIdx = neighbor.pointIndex;
-
-            // Geometry cost
-            const CCVector3* p_n = m_targetCloud->getPoint(nIdx);
-            double dist = std::sqrt((p_curr->x - p_n->x)*(p_curr->x - p_n->x) + (p_curr->y - p_n->y)*(p_curr->y - p_n->y) + (p_curr->z - p_n->z)*(p_curr->z - p_n->z));
-            double normDist = dist / searchRadius;
-
-            // Color cost
-            const ccColor::Rgba c_n = m_originalColors[nIdx];
-            double dr = static_cast<double>(c_curr.r) - c_n.r;
-            double dg = static_cast<double>(c_curr.g) - c_n.g;
-            double db = static_cast<double>(c_curr.b) - c_n.b;
-            double normColor = std::sqrt(dr*dr + dg*dg + db*db) / MAX_COLOR_DIST;
-
-            // normal cost
-            double normNormal = 0.0;
-            if (wn > 0.0) // Only calculate if normals exist and user wants to use them
-            {
-                const CCVector3& n_curr = m_targetCloud->getPointNormal(current.index);
-                const CCVector3& n_n = m_targetCloud->getPointNormal(nIdx);
-                
-                // Dot product calculation. 
-                // std::abs() because point cloud normals are often unoriented 
-                // (some point inward, some outward), abs value fixes this 
-                double dot = (n_curr.x * n_n.x) + (n_curr.y * n_n.y) + (n_curr.z * n_n.z);
-                normNormal = 1.0 - std::abs(dot); 
-            }
-
-            // Total localized step cost scaled to 0-100 range matching the threshold slider
-            double step_cost = 100.0 * ((ws * normDist) + (wc * normColor) + (wn * normNormal));
+            double step_cost = 100.0 * (ws * e.normDist + wc * e.normColor + wn * e.normNormal);
             if (step_cost > tauThreshold) continue;
 
             double total_path_cost = current.cost + step_cost;
-            if (total_path_cost < minCost[nIdx])
+            if (total_path_cost < minCost[e.nIdx])
             {
-                minCost[nIdx] = total_path_cost;
-                pq.push({total_path_cost, nIdx, current.label});
+                minCost[e.nIdx] = total_path_cost;
+                pq.push({total_path_cost, e.nIdx, current.label});
             }
         }
     }
+
+    auto segMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::high_resolution_clock::now() - segStart).count();
+    ccLog::Print(QString("[Segmenter] Segmentation completed in %1 ms").arg(segMs));
 
     // Paint positive region magenta and rest back to original colors
     int positiveCount = 0;

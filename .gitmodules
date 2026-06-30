@@ -47,3 +47,6 @@
 	path = plugins/core/IO/MeshIO
 	url = https://github.com/CloudCompare/MeshIO.git
 	branch = master
+[submodule "extern/hidapi"]
+	path = extern/hidapi
+	url = https://github.com/libusb/hidapi.git

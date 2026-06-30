@@ -18,13 +18,19 @@ SegmenterDlg::SegmenterDlg(QWidget* parent)
     connect(ui->radioPositive, &QRadioButton::toggled, this, &SegmenterDlg::stateChanged);
     connect(ui->radioNegative, &QRadioButton::toggled, this, &SegmenterDlg::stateChanged);
 
-    // Track real-time numeric text changes inside labels without triggering heavy processing
-    connect(ui->sliderWs, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
-    connect(ui->sliderWc, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
-    connect(ui->sliderWn, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
+    connect(ui->sliderWs,  &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
+    connect(ui->sliderWc,  &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
+    connect(ui->sliderWn,  &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
     connect(ui->sliderTau, &QSlider::valueChanged, this, &SegmenterDlg::onSliderMoved);
 
-    onSliderMoved(); // Initialize label strings
+    // Collapsible advanced section: toggle visibility and update arrow glyph
+    connect(ui->btnAdvanced, &QPushButton::toggled, ui->advancedWidget, &QWidget::setVisible);
+    connect(ui->btnAdvanced, &QPushButton::toggled, this, [this](bool checked) {
+        ui->btnAdvanced->setText(checked ? "▾ Advanced Settings" : "▸ Advanced Settings");
+        adjustSize();
+    });
+
+    onSliderMoved();
     this->setWindowFlags(this->windowFlags() | Qt::WindowStaysOnTopHint);
 }
 
@@ -33,11 +39,12 @@ SegmenterDlg::~SegmenterDlg()
     delete ui;
 }
 
-double SegmenterDlg::getSpatialWeight() const   { return ui->sliderWs->value() / 100.0; }
-double SegmenterDlg::getChromaticWeight() const { return ui->sliderWc->value() / 100.0; }
-double SegmenterDlg::getNormalWeight() const { return ui->sliderWn->value() / 100.0; }
-double SegmenterDlg::getThreshold() const       { return ui->sliderTau->value() / 10.0; }
-bool SegmenterDlg::isAddingPositiveSeeds() const { return ui->radioPositive->isChecked(); }
+double SegmenterDlg::getSpatialWeight() const   { return ui->sliderWs->value()   / 100.0; }
+double SegmenterDlg::getChromaticWeight() const { return ui->sliderWc->value()   / 100.0; }
+double SegmenterDlg::getNormalWeight() const    { return ui->sliderWn->value()   / 100.0; }
+double SegmenterDlg::getThreshold() const       { return ui->sliderTau->value()  / 10.0;  }
+double SegmenterDlg::getRadius() const          { return ui->spinRadius->value() / 100.0; } // cm -> m
+bool   SegmenterDlg::isAddingPositiveSeeds() const { return ui->radioPositive->isChecked(); }
 
 void SegmenterDlg::setStatusMessage(const QString& msg) { ui->lblStatus->setText(msg); }
 void SegmenterDlg::setPointCount(int count) { ui->lblCount->setText(QString("%1 points").arg(count)); }

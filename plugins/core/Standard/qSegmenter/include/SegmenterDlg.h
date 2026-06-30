@@ -19,6 +19,7 @@ public:
     double getChromaticWeight() const;
     double getNormalWeight() const;
     double getThreshold() const;
+    double getRadius() const; // returns radius in metres
     bool isAddingPositiveSeeds() const;
 
     void setStatusMessage(const QString& msg);

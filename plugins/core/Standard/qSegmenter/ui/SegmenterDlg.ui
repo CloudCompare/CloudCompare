@@ -4,7 +4,7 @@
  <widget class="QDialog" name="SegmenterDialog">
   <property name="geometry">
    <rect>
-    <x>0</x> <y>0</y> <width>380</width> <height>420</height>
+    <x>0</x> <y>0</y> <width>380</width> <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -67,10 +67,10 @@
         </item>
        </layout>
       </item>
-       <item row="2" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="labelWn"><property name="text"><string>Normals Weight (wn):</string></property></widget>
       </item>
-       <item row="2" column="1">
+      <item row="2" column="1">
        <layout class="QHBoxLayout" name="wnLayout">
         <item>
          <widget class="QSlider" name="sliderWn">
@@ -99,6 +99,42 @@
         </item>
         <item>
          <widget class="QLabel" name="labelTauVal"><property name="text"><string>3.5</string></property><property name="minimumSize"><size><width>35</width><height>0</height></size></property></widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btnAdvanced">
+     <property name="text"><string>&#9658; Advanced Settings</string></property>
+     <property name="checkable"><bool>true</bool></property>
+     <property name="flat"><bool>true</bool></property>
+     <property name="styleSheet"><string>text-align: left; padding: 2px; color: gray;</string></property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="advancedWidget" native="true">
+     <property name="visible"><bool>false</bool></property>
+     <layout class="QFormLayout" name="advancedFormLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="labelRadius"><property name="text"><string>Neighbourhood radius:</string></property></widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="radiusLayout">
+        <item>
+         <widget class="QSpinBox" name="spinRadius">
+          <property name="minimum"><number>1</number></property>
+          <property name="maximum"><number>30</number></property>
+          <property name="value"><number>5</number></property>
+          <property name="suffix"><string> cm</string></property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelRadiusNote">
+          <property name="text"><string>Takes effect on next graph build</string></property>
+          <property name="styleSheet"><string>color: gray; font-style: italic;</string></property>
+         </widget>
         </item>
        </layout>
       </item>

@@ -8,6 +8,7 @@
 #include <ccOctree.h>
 
 #include <queue>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <chrono>
@@ -61,16 +62,18 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
     if (!m_targetCloud)
     {
         m_targetCloud = clickedCloud;
-        // Safeguard original colors before modifying anything
         if (m_targetCloud->hasColors())
         {
             m_originalColors.resize(m_targetCloud->size());
-            for (unsigned i = 0; i < m_targetCloud->size(); ++i) {
+            for (unsigned i = 0; i < m_targetCloud->size(); ++i)
                 m_originalColors[i] = m_targetCloud->getPointColor(i);
-            }
         }
     }
     else if (m_targetCloud != clickedCloud) return;
+
+    // Snapshot state for undo before mutating seed lists
+    m_undoStack.push_back({m_positiveSeeds, m_negativeSeeds});
+    m_redoStack.clear();
 
     unsigned pointIndex = pi.itemIndex;
     const CCVector3& pointCoords = pi.P3D;
@@ -88,7 +91,7 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
             m_app->addToDB(m_posMarkerCloud, false, true, false, false);
         }
         m_posMarkerCloud->addPoint(pointCoords);
-        m_posMarkerCloud->addColor(ccColor::Rgb(190, 242, 58)); // neon lime
+        m_posMarkerCloud->addColor(ccColor::Rgb(190, 242, 58));
     }
     else
     {
@@ -103,12 +106,10 @@ void SeedPicker::onItemPicked(const PickedItem& pi)
             m_app->addToDB(m_negMarkerCloud, false, true, false, false);
         }
         m_negMarkerCloud->addPoint(pointCoords);
-        m_negMarkerCloud->addColor(ccColor::Rgb(242, 19, 135)); // hottt pink
+        m_negMarkerCloud->addColor(ccColor::Rgb(242, 19, 135));
     }
 
     m_app->refreshAll();
-
-    // Rerun the competitive segmentation instantly upon a new point placement
     runRegionGrowing();
 }
 
@@ -135,8 +136,11 @@ void SeedPicker::buildAdjacency()
     ccLog::Print(QString("[Segmenter] Building adjacency graph for %1 points...").arg(cloudSize));
     auto buildStart = std::chrono::high_resolution_clock::now();
 
+    const double radius = m_dialog->getRadius();
+    m_builtRadius = radius;
+
     unsigned char searchLevel = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(
-        static_cast<PointCoordinateType>(NEIGHBOURHOOD_RADIUS_M));
+        static_cast<PointCoordinateType>(radius));
 
     m_normalsAtBuildTime = m_targetCloud->hasNormals();
     m_adjacency.resize(cloudSize);
@@ -149,22 +153,33 @@ void SeedPicker::buildAdjacency()
         neighbors.clear();
         octree->getPointsInSphericalNeighbourhood(
             *m_targetCloud->getPoint(i),
-            static_cast<PointCoordinateType>(NEIGHBOURHOOD_RADIUS_M),
+            static_cast<PointCoordinateType>(radius),
             neighbors,
             searchLevel);
+
+        // Cap to MAX_NEIGHBOURS closest points: prevents memory/time explosion on
+        // dense clouds where the fixed radius captures thousands of neighbours.
+        if (neighbors.size() > MAX_NEIGHBOURS)
+        {
+            std::partial_sort(neighbors.begin(), neighbors.begin() + MAX_NEIGHBOURS, neighbors.end(),
+                [](const CCCoreLib::DgmOctree::PointDescriptor& a,
+                   const CCCoreLib::DgmOctree::PointDescriptor& b)
+                { return a.squareDistd < b.squareDistd; });
+            neighbors.resize(MAX_NEIGHBOURS);
+        }
 
         const CCVector3* p_i   = m_targetCloud->getPoint(i);
         const ccColor::Rgba c_i = m_originalColors[i];
         const CCVector3 n_i    = m_normalsAtBuildTime ? m_targetCloud->getPointNormal(i) : CCVector3();
 
-        m_adjacency[i].reserve(neighbors.size());
+        m_adjacency[i].reserve(neighbors.size()); // already capped to MAX_NEIGHBOURS
         for (const auto& nb : neighbors)
         {
             unsigned int j = nb.pointIndex;
 
             const CCVector3* p_j = m_targetCloud->getPoint(j);
             double dx = p_i->x - p_j->x, dy = p_i->y - p_j->y, dz = p_i->z - p_j->z;
-            float normDist = static_cast<float>(std::sqrt(dx*dx + dy*dy + dz*dz) / NEIGHBOURHOOD_RADIUS_M);
+            float normDist = static_cast<float>(std::sqrt(dx*dx + dy*dy + dz*dz) / radius);
 
             const ccColor::Rgba c_j = m_originalColors[j];
             double dr = static_cast<double>(c_i.r) - c_j.r;
@@ -187,12 +202,32 @@ void SeedPicker::buildAdjacency()
 
     auto buildMs = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::high_resolution_clock::now() - buildStart).count();
-    ccLog::Print(QString("[Segmenter] Adjacency graph built in %1 ms").arg(buildMs));
+
+    size_t totalEdges = 0;
+    for (const auto& adj : m_adjacency) totalEdges += adj.size();
+    // Outer vector array + per-edge structs (exact, matches O(NK) space complexity)
+    size_t adjBytes = cloudSize * sizeof(std::vector<AdjEdge>) + totalEdges * sizeof(AdjEdge);
+    double adjMB = adjBytes / (1024.0 * 1024.0);
+
+    double avgK = cloudSize > 0 ? static_cast<double>(totalEdges) / cloudSize : 0.0;
+    bool wasCapped = avgK > MAX_NEIGHBOURS - 1;
+    ccLog::Print(QString("[Segmenter] Adjacency graph built in %1 ms | %2 edges | avg K=%3%4 | %5 MB")
+        .arg(buildMs).arg(totalEdges)
+        .arg(avgK, 0, 'f', 1)
+        .arg(wasCapped ? " (neighbour cap active)" : "")
+        .arg(adjMB, 0, 'f', 2));
 }
 
 int SeedPicker::runRegionGrowing()
 {
     if (!m_targetCloud || m_positiveSeeds.empty() || m_originalColors.empty() || !m_dialog) return 0;
+
+    // Radius change invalidates the graph — clear so buildAdjacency rebuilds it
+    if (!m_adjacency.empty() && std::abs(m_dialog->getRadius() - m_builtRadius) > 1e-9)
+    {
+        m_adjacency.clear();
+        ccLog::Print("[Segmenter] Neighbourhood radius changed — rebuilding adjacency graph.");
+    }
 
     if (m_adjacency.empty())
         buildAdjacency();
@@ -283,4 +318,121 @@ int SeedPicker::runRegionGrowing()
     m_dialog->setStatusMessage("Segmentation completed successfully.");
 
     return positiveCount;
+}
+
+void SeedPicker::restoreOriginalColors()
+{
+    if (!m_targetCloud || m_originalColors.empty()) return;
+    for (unsigned i = 0; i < m_targetCloud->size(); ++i)
+        m_targetCloud->setPointColor(i, m_originalColors[i]);
+    m_targetCloud->showColors(true);
+    m_targetCloud->prepareDisplayForRefresh();
+    m_app->refreshAll();
+}
+
+void SeedPicker::rebuildMarkerClouds()
+{
+    if (m_posMarkerCloud) { m_app->removeFromDB(m_posMarkerCloud); m_posMarkerCloud = nullptr; }
+    if (m_negMarkerCloud) { m_app->removeFromDB(m_negMarkerCloud); m_negMarkerCloud = nullptr; }
+    if (!m_targetCloud) return;
+
+    if (!m_positiveSeeds.empty())
+    {
+        m_posMarkerCloud = new ccPointCloud("Positive Seeds");
+        m_posMarkerCloud->setPointSize(15);
+        m_posMarkerCloud->resizeTheRGBTable();
+        m_posMarkerCloud->showColors(true);
+        m_targetCloud->addChild(m_posMarkerCloud);
+        m_app->addToDB(m_posMarkerCloud, false, true, false, false);
+        for (unsigned idx : m_positiveSeeds)
+        {
+            m_posMarkerCloud->addPoint(*m_targetCloud->getPoint(idx));
+            m_posMarkerCloud->addColor(ccColor::Rgb(190, 242, 58));
+        }
+    }
+
+    if (!m_negativeSeeds.empty())
+    {
+        m_negMarkerCloud = new ccPointCloud("Negative Seeds");
+        m_negMarkerCloud->setPointSize(15);
+        m_negMarkerCloud->resizeTheRGBTable();
+        m_negMarkerCloud->showColors(true);
+        m_targetCloud->addChild(m_negMarkerCloud);
+        m_app->addToDB(m_negMarkerCloud, false, true, false, false);
+        for (unsigned idx : m_negativeSeeds)
+        {
+            m_negMarkerCloud->addPoint(*m_targetCloud->getPoint(idx));
+            m_negMarkerCloud->addColor(ccColor::Rgb(242, 19, 135));
+        }
+    }
+}
+
+void SeedPicker::clearAll()
+{
+    restoreOriginalColors();
+
+    m_positiveSeeds.clear();
+    m_negativeSeeds.clear();
+    m_undoStack.clear();
+    m_redoStack.clear();
+
+    // Full reset so the user can start fresh on any cloud
+    m_originalColors.clear();
+    m_adjacency.clear();
+    m_builtRadius = 0.0;
+    m_targetCloud = nullptr;
+
+    if (m_posMarkerCloud) { m_app->removeFromDB(m_posMarkerCloud); m_posMarkerCloud = nullptr; }
+    if (m_negMarkerCloud) { m_app->removeFromDB(m_negMarkerCloud); m_negMarkerCloud = nullptr; }
+
+    m_dialog->setPointCount(0);
+    m_dialog->setStatusMessage("Cleared. Click a point to start.");
+}
+
+void SeedPicker::undo()
+{
+    if (m_undoStack.empty() || !m_targetCloud) return;
+
+    m_redoStack.push_back({m_positiveSeeds, m_negativeSeeds});
+    SeedState prev = m_undoStack.back();
+    m_undoStack.pop_back();
+    m_positiveSeeds = prev.posSeeds;
+    m_negativeSeeds = prev.negSeeds;
+
+    rebuildMarkerClouds();
+
+    if (!m_positiveSeeds.empty())
+    {
+        runRegionGrowing();
+    }
+    else
+    {
+        restoreOriginalColors();
+        m_dialog->setPointCount(0);
+        m_dialog->setStatusMessage("Undone to initial state.");
+    }
+}
+
+void SeedPicker::redo()
+{
+    if (m_redoStack.empty() || !m_targetCloud) return;
+
+    m_undoStack.push_back({m_positiveSeeds, m_negativeSeeds});
+    SeedState next = m_redoStack.back();
+    m_redoStack.pop_back();
+    m_positiveSeeds = next.posSeeds;
+    m_negativeSeeds = next.negSeeds;
+
+    rebuildMarkerClouds();
+
+    if (!m_positiveSeeds.empty())
+    {
+        runRegionGrowing();
+    }
+    else
+    {
+        restoreOriginalColors();
+        m_dialog->setPointCount(0);
+        m_dialog->setStatusMessage("Redone.");
+    }
 }

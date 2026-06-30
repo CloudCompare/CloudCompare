@@ -8,8 +8,8 @@
 
 namespace Example
 {
-    static SeedPicker* g_seedPicker = nullptr;
-    static SegmenterDlg* g_dialog   = nullptr;
+    static SeedPicker*  g_seedPicker = nullptr;
+    static SegmenterDlg* g_dialog    = nullptr;
 
     void performActionA(ccMainAppInterface* appInterface)
     {
@@ -21,19 +21,22 @@ namespace Example
             if (obj->isA(CC_TYPES::POINT_CLOUD))
             {
                 ccPointCloud* cloud = static_cast<ccPointCloud*>(obj);
-                if (!cloud->getOctree()) {
-                    cloud->computeOctree();
-                }
+                if (!cloud->getOctree()) cloud->computeOctree();
                 break;
             }
         }
 
         if (g_dialog == nullptr)
         {
-            g_dialog = new SegmenterDlg(appInterface->getMainWindow());
-            g_dialog->setAttribute(Qt::WA_DeleteOnClose);
-            g_dialog->setStatusMessage("Select a first point to start segmentation");
+            g_dialog     = new SegmenterDlg(appInterface->getMainWindow());
+            g_seedPicker = new SeedPicker(appInterface, g_dialog);
 
+            g_dialog->setAttribute(Qt::WA_DeleteOnClose);
+            g_dialog->setStatusMessage("Click a point to start segmentation");
+            g_seedPicker->startListening();
+
+            // All connections are set up once here, avoiding duplicate signals
+            // on repeated menu invocations while the dialog is already open.
             QObject::connect(g_dialog, &QObject::destroyed, [appInterface]() {
                 g_dialog = nullptr;
                 if (g_seedPicker) {
@@ -42,29 +45,26 @@ namespace Example
                     g_seedPicker = nullptr;
                 }
             });
-        }
 
-        if (g_seedPicker == nullptr)
-        {
-            g_seedPicker = new SeedPicker(appInterface, g_dialog);
-            g_seedPicker->startListening();
+            QObject::connect(g_dialog, &SegmenterDlg::stateChanged, []() {
+                if (g_seedPicker && g_dialog)
+                    g_seedPicker->setPositiveMode(g_dialog->isAddingPositiveSeeds());
+            });
+            QObject::connect(g_dialog, &SegmenterDlg::applyRequested, []() {
+                if (g_seedPicker) g_seedPicker->runRegionGrowing();
+            });
+            QObject::connect(g_dialog, &SegmenterDlg::clearRequested, []() {
+                if (g_seedPicker) g_seedPicker->clearAll();
+            });
+            QObject::connect(g_dialog, &SegmenterDlg::undoRequested, []() {
+                if (g_seedPicker) g_seedPicker->undo();
+            });
+            QObject::connect(g_dialog, &SegmenterDlg::redoRequested, []() {
+                if (g_seedPicker) g_seedPicker->redo();
+            });
         }
 
         g_seedPicker->setPositiveMode(g_dialog->isAddingPositiveSeeds());
-
-        // Connect changes to radio button mode toggles
-        QObject::connect(g_dialog, &SegmenterDlg::stateChanged, []() {
-            if (g_seedPicker && g_dialog) {
-                g_seedPicker->setPositiveMode(g_dialog->isAddingPositiveSeeds());
-            }
-        });
-
-        // Trigger the region growing execution pipeline whenever the Apply button is pressed
-        QObject::connect(g_dialog, &SegmenterDlg::applyRequested, []() {
-            if (g_seedPicker) {
-                g_seedPicker->runRegionGrowing();
-            }
-        });
 
         g_dialog->show();
         g_dialog->raise();

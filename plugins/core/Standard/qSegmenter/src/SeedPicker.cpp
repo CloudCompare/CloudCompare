@@ -298,11 +298,13 @@ int SeedPicker::runRegionGrowing()
         std::chrono::high_resolution_clock::now() - segStart).count();
     ccLog::Print(QString("[Segmenter] Segmentation completed in %1 ms").arg(segMs));
 
-    // Paint positive region magenta and rest back to original colors
+    // Persist label result for export, then paint positive region magenta
+    m_positiveLabels.assign(cloudSize, false);
     int positiveCount = 0;
     for (unsigned i = 0; i < cloudSize; ++i)
     {
         if (labels[i] == 1) {
+            m_positiveLabels[i] = true;
             m_targetCloud->setPointColor(i, ccColor::magenta);
             positiveCount++;
         } else {
@@ -378,6 +380,7 @@ void SeedPicker::clearAll()
 
     // Full reset so the user can start fresh on any cloud
     m_originalColors.clear();
+    m_positiveLabels.clear();
     m_adjacency.clear();
     m_builtRadius = 0.0;
     m_targetCloud = nullptr;
@@ -435,4 +438,54 @@ void SeedPicker::redo()
         m_dialog->setPointCount(0);
         m_dialog->setStatusMessage("Redone.");
     }
+}
+
+void SeedPicker::exportSegmentation()
+{
+    if (!m_targetCloud || m_positiveLabels.empty())
+    {
+        m_dialog->setStatusMessage("Nothing to export — run segmentation first.");
+        return;
+    }
+
+    unsigned count = 0;
+    for (bool b : m_positiveLabels) if (b) count++;
+    if (count == 0)
+    {
+        m_dialog->setStatusMessage("Positive region is empty — nothing to export.");
+        return;
+    }
+
+    QString exportName = m_targetCloud->getName() + "_segment";
+    ccPointCloud* exportCloud = new ccPointCloud(exportName);
+
+    if (!exportCloud->reserve(count))
+    {
+        delete exportCloud;
+        ccLog::Error("[Segmenter] Not enough memory to allocate export cloud.");
+        return;
+    }
+
+    bool hasColors  = !m_originalColors.empty();
+    bool hasNormals = m_normalsAtBuildTime;
+
+    if (hasColors)  exportCloud->reserveTheRGBTable();
+    if (hasNormals) exportCloud->reserveTheNormsTable();
+
+    for (unsigned i = 0; i < m_targetCloud->size(); ++i)
+    {
+        if (!m_positiveLabels[i]) continue;
+        exportCloud->addPoint(*m_targetCloud->getPoint(i));
+        if (hasColors)  exportCloud->addColor(m_originalColors[i]); // original, not magenta
+        if (hasNormals) exportCloud->addNorm(m_targetCloud->getPointNormal(i));
+    }
+
+    if (hasColors)  exportCloud->showColors(true);
+    if (hasNormals) exportCloud->showNormals(true);
+
+    m_app->addToDB(exportCloud);
+    m_app->refreshAll();
+
+    ccLog::Print(QString("[Segmenter] Exported %1 points as '%2'.").arg(count).arg(exportName));
+    m_dialog->setStatusMessage(QString("Exported %1 pts as \"%2\".").arg(count).arg(exportName));
 }

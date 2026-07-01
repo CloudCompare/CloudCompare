@@ -174,8 +174,14 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="btnExport">
+     <property name="text"><string>Export segment as new cloud</string></property>
+     <property name="styleSheet"><string>font-weight: bold; background-color: #d0e8d0;</string></property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons"><set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set></property>
+     <property name="standardButtons"><set>QDialogButtonBox::Close</set></property>
     </widget>
    </item>
   </layout>

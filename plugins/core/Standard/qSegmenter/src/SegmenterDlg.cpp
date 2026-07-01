@@ -7,12 +7,13 @@ SegmenterDlg::SegmenterDlg(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->btnUndo, &QPushButton::clicked, this, &SegmenterDlg::undoRequested);
-    connect(ui->btnRedo, &QPushButton::clicked, this, &SegmenterDlg::redoRequested);
-    connect(ui->btnClear, &QPushButton::clicked, this, &SegmenterDlg::clearRequested);
-    connect(ui->btnApply, &QPushButton::clicked, this, &SegmenterDlg::applyRequested);
+    connect(ui->btnUndo,   &QPushButton::clicked, this, &SegmenterDlg::undoRequested);
+    connect(ui->btnRedo,   &QPushButton::clicked, this, &SegmenterDlg::redoRequested);
+    connect(ui->btnClear,  &QPushButton::clicked, this, &SegmenterDlg::clearRequested);
+    connect(ui->btnApply,  &QPushButton::clicked, this, &SegmenterDlg::applyRequested);
+    connect(ui->btnExport, &QPushButton::clicked, this, &SegmenterDlg::exportRequested);
 
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    // Close button dismisses the dialog without exporting
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     connect(ui->radioPositive, &QRadioButton::toggled, this, &SegmenterDlg::stateChanged);

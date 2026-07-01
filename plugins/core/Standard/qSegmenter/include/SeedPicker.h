@@ -43,6 +43,7 @@ public:
     void clearAll();
     void undo();
     void redo();
+    void exportSegmentation();
 
 protected:
     void onItemPicked(const PickedItem& pi) override;
@@ -71,6 +72,9 @@ private:
     std::vector<std::vector<AdjEdge>> m_adjacency;
     bool   m_normalsAtBuildTime = false;
     double m_builtRadius        = 0.0; // radius used when m_adjacency was built
+
+    // Result of the last segmentation run — true = positive region
+    std::vector<bool> m_positiveLabels;
 
     // Per-click undo/redo stacks (snapshots of seed index lists)
     std::vector<SeedState> m_undoStack;

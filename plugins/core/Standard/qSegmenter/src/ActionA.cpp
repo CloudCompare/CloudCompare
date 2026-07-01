@@ -62,6 +62,9 @@ namespace Example
             QObject::connect(g_dialog, &SegmenterDlg::redoRequested, []() {
                 if (g_seedPicker) g_seedPicker->redo();
             });
+            QObject::connect(g_dialog, &SegmenterDlg::exportRequested, []() {
+                if (g_seedPicker) g_seedPicker->exportSegmentation();
+            });
         }
 
         g_seedPicker->setPositiveMode(g_dialog->isAddingPositiveSeeds());

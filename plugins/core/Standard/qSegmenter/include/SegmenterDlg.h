@@ -31,6 +31,7 @@ signals:
     void undoRequested();
     void redoRequested();
     void clearRequested();
+    void exportRequested();
 
 private slots:
     void onSliderMoved();

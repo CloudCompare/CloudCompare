@@ -377,13 +377,11 @@ void SeedPicker::clearAll()
     m_negativeSeeds.clear();
     m_undoStack.clear();
     m_redoStack.clear();
-
-    // Full reset so the user can start fresh on any cloud
-    m_originalColors.clear();
     m_positiveLabels.clear();
-    m_adjacency.clear();
-    m_builtRadius = 0.0;
-    m_targetCloud = nullptr;
+
+    // Deliberately keep m_targetCloud, m_originalColors, m_adjacency and m_builtRadius:
+    // the adjacency graph only depends on the cloud + radius, not on the seeds, so
+    // clearing seeds shouldn't force an expensive rebuild on the next click.
 
     if (m_posMarkerCloud) { m_app->removeFromDB(m_posMarkerCloud); m_posMarkerCloud = nullptr; }
     if (m_negMarkerCloud) { m_app->removeFromDB(m_negMarkerCloud); m_negMarkerCloud = nullptr; }

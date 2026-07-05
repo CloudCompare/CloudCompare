@@ -1937,7 +1937,6 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		mesh->addChild(cloud);
 		cloud->setEnabled(false);
 		cloud->setName("Vertices");
-		// cloud->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 
 		// associated texture
 		if (texCoords)

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_MESH_HEADER
-#define CC_GENERIC_MESH_HEADER
 
 // CCCoreLib
 #include <GenericIndexedMesh.h>
@@ -322,5 +321,3 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Polygon stippling state
 	bool m_stippling;
 };
-
-#endif // CC_GENERIC_MESH_HEADER

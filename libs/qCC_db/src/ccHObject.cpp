@@ -129,7 +129,7 @@ void ccHObject::notifyGeometryUpdate()
 	for (std::map<ccHObject*, int>::const_iterator it = m_dependencies.begin(); it != m_dependencies.end(); ++it)
 	{
 		assert(it->first);
-		// notify deletion to other object?
+		// notify update to other object?
 		if ((it->second & DP_NOTIFY_OTHER_ON_UPDATE) == DP_NOTIFY_OTHER_ON_UPDATE)
 		{
 			it->first->onUpdateOf(this);

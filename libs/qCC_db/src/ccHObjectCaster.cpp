@@ -68,7 +68,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices)
 			{
-				if (!obj->isA(CC_TYPES::MESH) && lockedVertices) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (lockedVertices && !obj->isA(CC_TYPES::MESH)) // no need to 'lock' the vertices if the user works on the parent mesh
 				{
 					*lockedVertices = vertices->isLocked();
 				}
@@ -98,7 +98,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices)
 			{
-				if (!obj->isA(CC_TYPES::MESH) && lockedVertices) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (lockedVertices && !obj->isA(CC_TYPES::MESH)) // no need to 'lock' the vertices if the user works on the parent mesh
 				{
 					*lockedVertices = vertices->isLocked();
 				}

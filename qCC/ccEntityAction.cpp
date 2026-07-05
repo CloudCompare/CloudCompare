@@ -136,7 +136,7 @@ namespace ccEntityAction
 					ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 					if (!vertices
 					    || !vertices->isA(CC_TYPES::POINT_CLOUD)
-					    || (vertices->isLocked() && !mesh->isAncestorOf(vertices)))
+					    || (vertices->isLocked() && !mesh->isAncestorOf(vertices))) // sub-mesh?
 					{
 						ccLog::Warning(QObject::tr("[SetColor] Can't set color for mesh '%1' (vertices are not accessible)").arg(ent->getName()));
 						continue;

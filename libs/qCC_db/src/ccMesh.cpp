@@ -660,7 +660,9 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 	m_associatedCloud->notifyGeometryUpdate();
 
 	if (hasNormals())
+	{
 		computeNormals(!hasTriNormals());
+	}
 
 	return true;
 }
@@ -1531,7 +1533,9 @@ void ccMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3
 void ccMesh::refreshBB()
 {
 	if (!m_associatedCloud || m_bBox.isValid())
+	{
 		return;
+	}
 
 	m_bBox.clear();
 
@@ -1602,21 +1606,27 @@ bool ccMesh::resize(size_t n)
 	{
 		static const int s_defaultMtlIndex = -1;
 		if (!m_triMtlIndexes->resizeSafe(n, true, &s_defaultMtlIndex))
+		{
 			return false;
+		}
 	}
 
 	if (m_texCoordIndexes)
 	{
 		static const Tuple3i s_defaultTexCoords(-1, -1, -1);
 		if (!m_texCoordIndexes->resizeSafe(n, true, &s_defaultTexCoords))
+		{
 			return false;
+		}
 	}
 
 	if (m_triNormalIndexes)
 	{
 		static const Tuple3i s_defaultNormIndexes(-1, -1, -1);
 		if (!m_triNormalIndexes->resizeSafe(n, true, &s_defaultNormIndexes))
+		{
 			return false;
+		}
 	}
 
 	return m_triVertIndexes->resizeSafe(n);
@@ -1628,11 +1638,17 @@ void ccMesh::swapTriangles(unsigned index1, unsigned index2)
 
 	m_triVertIndexes->swap(index1, index2);
 	if (m_triMtlIndexes)
+	{
 		m_triMtlIndexes->swap(index1, index2);
+	}
 	if (m_texCoordIndexes)
+	{
 		m_texCoordIndexes->swap(index1, index2);
+	}
 	if (m_triNormalIndexes)
+	{
 		m_triNormalIndexes->swap(index1, index2);
+	}
 }
 
 CCCoreLib::VerticesIndexes* ccMesh::getTriangleVertIndexes(unsigned triangleIndex)

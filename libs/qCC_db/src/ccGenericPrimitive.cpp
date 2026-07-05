@@ -38,7 +38,9 @@ ccGenericPrimitive::ccGenericPrimitive(QString           name /*=QString()*/,
 	vert->setLocked(true);
 
 	if (transMat)
+	{
 		m_transformation = *transMat;
+	}
 }
 
 void ccGenericPrimitive::setColor(const ccColor::Rgb& col)

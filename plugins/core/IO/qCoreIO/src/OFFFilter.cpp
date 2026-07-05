@@ -321,7 +321,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const QString& filename, ccHObject& container,
 		ccLog::Warning("[OFF] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 
 		vertices->setEnabled(false);
-		// vertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
+
 		container.addChild(mesh);
 	}
 

@@ -607,12 +607,12 @@ void ccDBRoot::deleteSelectedEntities()
 
 		if (!isDescendent)
 		{
-			// last check: mesh vertices
+			// last check: vertices
 			if (obj->isKindOf(CC_TYPES::POINT_CLOUD) && !CanDetachCloud(obj))
 			{
 				if (!verticesWarningIssued)
 				{
-					ccLog::Warning("Vertices can't be deleted without their parent mesh");
+					ccLog::Warning("Vertices can't be deleted without their parent entity");
 					verticesWarningIssued = true;
 				}
 				continue;

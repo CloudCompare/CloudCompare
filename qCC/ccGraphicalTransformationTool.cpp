@@ -679,9 +679,11 @@ void ccGraphicalTransformationTool::clearAdvModeEntities()
 
 bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 {
-	assert(entity);
 	if (!entity)
+	{
+		assert(false);
 		return false;
+	}
 
 	// we don't handle entities associated to another context
 	if (entity->getDisplay() != m_associatedWin)
@@ -690,15 +692,8 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		return false;
 	}
 
-	// we can't transform locked entities
-	if (entity->isLocked())
-	{
-		ccLog::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
-		return false;
-	}
-
 	// we can't transform child meshes
-	if (entity->isA(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isA(CC_TYPES::MESH))
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
 		return false;

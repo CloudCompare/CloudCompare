@@ -532,10 +532,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	appendRow(ITEM(tr("Info")), ITEM(tr("Object ID: %1 - Children: %2").arg(_obj->getUniqueID()).arg(_obj->getChildrenNumber())));
 
 	// display window
-	if (!_obj->isLocked())
-	{
-		appendRow(ITEM(tr("Current Display")), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true);
-	}
+	appendRow(ITEM(tr("Current Display")), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true);
 }
 
 void ccPropertiesTreeDelegate::fillWithShifted(const ccShiftedObject* _obj)

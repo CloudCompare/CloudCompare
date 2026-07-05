@@ -50,7 +50,7 @@
 
 /*** helpers ***/
 
-ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= nullptr*/)
+ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= nullptr*/, bool contextualLock /*= true*/)
 {
 	if (lockedVertices)
 	{
@@ -68,19 +68,36 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices)
 			{
-				if (lockedVertices && !obj->isA(CC_TYPES::MESH)) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (lockedVertices)
 				{
+					if (!contextualLock || !obj->isAncestorOf(vertices))
+					{
+						// no need to 'lock' the vertices if the user works on the parent mesh
+						*lockedVertices = vertices->isLocked();
+					}
+				}
+				return ToPointCloud(vertices);
+			}
+		}
+		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(static_cast<ccPolyline*>(obj)->getAssociatedCloud());
+			if (vertices && lockedVertices)
+			{
+				if (!contextualLock || !obj->isAncestorOf(vertices))
+				{
+					// no need to 'lock' the vertices if the user works on the parent poyline
 					*lockedVertices = vertices->isLocked();
 				}
-				return ccHObjectCaster::ToPointCloud(vertices);
 			}
+			return vertices;
 		}
 	}
 
 	return nullptr;
 }
 
-ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*=nullptr*/)
+ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*=nullptr*/, bool contextualLock /*= true*/)
 {
 	if (lockedVertices)
 	{
@@ -96,22 +113,26 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 		else if (obj->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
-			if (vertices)
+			if (vertices && lockedVertices)
 			{
-				if (lockedVertices && !obj->isA(CC_TYPES::MESH)) // no need to 'lock' the vertices if the user works on the parent mesh
+				if (!contextualLock || !obj->isAncestorOf(vertices))
 				{
+					// no need to 'lock' the vertices if the user works on the parent mesh
 					*lockedVertices = vertices->isLocked();
 				}
-				return vertices;
 			}
+			return vertices;
 		}
 		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline*          poly     = static_cast<ccPolyline*>(obj);
-			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(poly->getAssociatedCloud());
-			if (lockedVertices)
+			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(obj)->getAssociatedCloud());
+			if (vertices && lockedVertices)
 			{
-				*lockedVertices = true;
+				if (!contextualLock || !obj->isAncestorOf(vertices))
+				{
+					// no need to 'lock' the vertices if the user works on the parent poyline
+					*lockedVertices = vertices->isLocked();
+				}
 			}
 			return vertices;
 		}
@@ -120,13 +141,15 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	return nullptr;
 }
 
-ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*=nullptr*/)
+ccShiftedObject* ccHObjectCaster::ToShifted(ccHObject* obj, bool* lockedVertices /*=nullptr*/, bool contextualLock /*= true*/)
 {
-	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices);
+	ccGenericPointCloud* cloud = ToGenericPointCloud(obj, lockedVertices, contextualLock);
 	if (cloud)
+	{
 		return cloud;
+	}
 
-	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE))
+	if (obj && obj->isKindOf(CC_TYPES::POLY_LINE)) // can theoretically happen if the vertices of the polyline are not deriving from ccGenericPointCloud
 	{
 		if (lockedVertices)
 		{

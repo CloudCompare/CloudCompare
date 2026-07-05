@@ -2217,7 +2217,7 @@ void ccRasterizeTool::exportContourLines()
 				P->u[Z]      = Q.z;
 			}
 			vertices->invalidateBoundingBox();
-			poly->invalidateBoundingBox();
+			// poly->invalidateBoundingBox(); // should be automatically called by ccPointCloud::invalidateBoundingBox above
 		}
 
 		if (!colorize)

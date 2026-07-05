@@ -252,6 +252,13 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 	                  double&                     nearestSquareDist) const;
 
   protected:
+	//! Value of a single scalar field at the picked point
+	struct SFValue
+	{
+		QString    name;
+		ScalarType value = 0;
+	};
+
 	//! One-point label info
 	struct LabelInfo1
 	{
@@ -262,6 +269,8 @@ class QCC_DB_LIB_API cc2DLabel : public ccHObject
 		bool          hasSF;
 		ScalarType    sfValue;
 		QString       sfName;
+		//! Values of all scalar fields at the picked point (not just the displayed one)
+		std::vector<SFValue> sfValues;
 		//! Default constructor
 		LabelInfo1()
 		    : hasNormal(false)

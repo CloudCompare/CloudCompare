@@ -1519,16 +1519,6 @@ void MainWindow::doActionApplyScale()
 				                                 shift.z * scales.z));
 			}
 
-			// specific case for polyline vertices
-			if (cloud->getParent() && cloud->getParent()->isA(CC_TYPES::POLY_LINE))
-			{
-				ccPolyline* poly = static_cast<ccPolyline*>(cloud->getParent());
-				if (poly->getAssociatedCloud() == cloud)
-				{
-					poly->invalidateBoundingBox();
-				}
-			}
-
 			ent->prepareDisplayForRefresh_recursive();
 		}
 	}
@@ -3657,7 +3647,7 @@ void MainWindow::doActionMerge()
 		for (size_t i = 0; i < clouds.size(); ++i)
 		{
 			ccPointCloud* pc      = clouds[i];
-			bool          isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_DELETE);
+			bool          isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_UPDATE); // vertices of meshes or polylines typically have this flag
 
 			if (!firstCloud)
 			{
@@ -4011,7 +4001,7 @@ void MainWindow::doActionRegister()
 				// we ask the user about cloning the 'data' mesh
 				QMessageBox::StandardButton result = QMessageBox::question(this,
 				                                                           tr("Registration"),
-				                                                           tr("Data mesh vertices are locked (they may be shared with other meshes): Do you wish to clone this mesh to apply transformation?"),
+				                                                           tr("To-be-aligned mesh vertices are locked (they may be shared with other meshes):\ndo you wish to clone this mesh prior to register it?"),
 				                                                           QMessageBox::Ok | QMessageBox::Cancel,
 				                                                           QMessageBox::Ok);
 

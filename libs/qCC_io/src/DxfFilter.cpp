@@ -257,7 +257,7 @@ class DxfImporter : public DL_CreationAdapter
 			m_faces->addChild(vertices);
 			m_faces->setVisible(true);
 			vertices->setEnabled(false);
-			// vertices->setLocked(true);  //DGM: no need to lock it as it is only used by one mesh!
+
 			if (m_preserveCoordinateShift)
 			{
 				vertices->setGlobalShift(m_globalShift);

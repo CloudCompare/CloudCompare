@@ -1622,8 +1622,8 @@ bool ccGraphicalSegmentationTool::applySegmentation(ccMainAppInterface* app, ccH
 		bool canModify = true;
 		if (entity->isLocked())
 		{
-			// we can't delete this entity
-			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it");
+			// we can't delete or reduce the number of elements of this entity
+			ccLog::Warning("Entity " + entity->getName() + " is locked. We won't be able to modify it.");
 			canModify = false;
 		}
 

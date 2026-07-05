@@ -260,16 +260,16 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 		setEnabled(!isEnabled());
 	}
 
-	//! Returns whether the object is locked  or not
-	/** Shortcut to access flag CC_LOCKED
+	//! Returns whether the object is locked or not
+	/** Locked entities should not be deleted or modified (number of elements, etc.).
 	 **/
 	virtual inline bool isLocked() const
 	{
 		return getFlagState(CC_LOCKED);
 	}
 
-	//! Sets the "enabled" property
-	/** Shortcut to modify flag CC_LOCKED
+	//! Sets the "locked" property
+	/** Locked entities should not be deleted or modified (number of elements, etc.).
 	 **/
 	virtual inline void setLocked(bool state)
 	{

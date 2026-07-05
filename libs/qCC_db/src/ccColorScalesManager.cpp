@@ -1215,7 +1215,7 @@ void ccColorScalesManager::toPersistentSettings() const
 	// add each scale
 	for (ScalesMap::const_iterator it = m_scales.begin(); it != m_scales.end(); ++it)
 	{
-		if (!(*it)->isLocked()) // locked scales are pre-defined ones!
+		if (!(*it)->isReadOnly()) // read-only scales are pre-defined ones!
 		{
 			settings.beginGroup((*it)->getUuid());
 
@@ -1286,9 +1286,9 @@ void ccColorScalesManager::removeScale(QString UUID)
 	ScalesMap::const_iterator it = m_scales.constFind(UUID);
 	if (it != m_scales.constEnd())
 	{
-		if ((*it)->isLocked())
+		if ((*it)->isReadOnly())
 		{
-			ccLog::Warning(QString("[ccColorScalesManager::addScale] Can't remove a locked scale (%1)!").arg(UUID));
+			ccLog::Warning(QString("[ccColorScalesManager::addScale] Can't remove a read-only scale (%1)!").arg(UUID));
 		}
 		else
 		{
@@ -1573,7 +1573,7 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 
 	// don't forget to update internal representation!
 	scale->update();
-	scale->setLocked(true);
+	scale->setReadOnly(true);
 
 	return scale;
 }

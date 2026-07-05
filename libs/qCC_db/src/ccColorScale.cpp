@@ -50,7 +50,7 @@ ccColorScale::ccColorScale(const QString& name, const QString& uuid /*=QString()
     , m_uuid(uuid)
     , m_updated(false)
     , m_relative(true)
-    , m_locked(false)
+    , m_readOnly(false)
     , m_absoluteMinValue(0.0)
     , m_absoluteRange(1.0)
 {
@@ -69,7 +69,7 @@ ccColorScale::Shared ccColorScale::copy(const QString& uuid /*=QString()*/) cons
 	try
 	{
 		newCS->m_relative         = m_relative;
-		newCS->m_locked           = m_locked;
+		newCS->m_readOnly         = m_readOnly;
 		newCS->m_absoluteMinValue = m_absoluteMinValue;
 		newCS->m_absoluteRange    = m_absoluteRange;
 		newCS->m_steps            = m_steps;
@@ -87,9 +87,9 @@ ccColorScale::Shared ccColorScale::copy(const QString& uuid /*=QString()*/) cons
 
 void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate /*=true*/)
 {
-	if (m_locked)
+	if (m_readOnly)
 	{
-		ccLog::Warning(QString("[ccColorScale::insert] Scale '%1' is locked!").arg(m_name));
+		ccLog::Warning(QString("[ccColorScale::insert] Scale '%1' is read-only!").arg(m_name));
 		return;
 	}
 
@@ -105,9 +105,9 @@ void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate /*=tr
 
 void ccColorScale::clear()
 {
-	if (m_locked)
+	if (m_readOnly)
 	{
-		ccLog::Warning(QString("[ccColorScale::clear] Scale '%1' is locked!").arg(m_name));
+		ccLog::Warning(QString("[ccColorScale::clear] Scale '%1' is read-only!").arg(m_name));
 		return;
 	}
 
@@ -118,9 +118,9 @@ void ccColorScale::clear()
 
 void ccColorScale::remove(int index, bool autoUpdate /*=true*/)
 {
-	if (m_locked)
+	if (m_readOnly)
 	{
-		ccLog::Warning(QString("[ccColorScale::remove] Scale '%1' is locked!").arg(m_name));
+		ccLog::Warning(QString("[ccColorScale::remove] Scale '%1' is read-only!").arg(m_name));
 		return;
 	}
 
@@ -221,15 +221,15 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 	if (out.write((const char*)&m_relative, sizeof(bool)) < 0)
 		return WriteError();
 
-	// Absolute min value (dataVersion>=27)
+	// absolute min value (dataVersion>=27)
 	if (out.write((const char*)&m_absoluteMinValue, sizeof(double)) < 0)
 		return WriteError();
-	// Absolute range (dataVersion>=27)
+	// absolute range (dataVersion>=27)
 	if (out.write((const char*)&m_absoluteRange, sizeof(double)) < 0)
 		return WriteError();
 
-	// locked state (dataVersion>=27)
-	if (out.write((const char*)&m_locked, sizeof(bool)) < 0)
+	// read-only state (dataVersion>=27)
+	if (out.write((const char*)&m_readOnly, sizeof(bool)) < 0)
 		return WriteError();
 
 	// steps list (dataVersion>=27)
@@ -286,15 +286,15 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 	if (in.read((char*)&m_relative, sizeof(bool)) < 0)
 		return ReadError();
 
-	// Absolute min value (dataVersion>=27)
+	// absolute min value (dataVersion>=27)
 	if (in.read((char*)&m_absoluteMinValue, sizeof(double)) < 0)
 		return ReadError();
-	// Absolute range (dataVersion>=27)
+	// absolute range (dataVersion>=27)
 	if (in.read((char*)&m_absoluteRange, sizeof(double)) < 0)
 		return ReadError();
 
-	// locked state (dataVersion>=27)
-	if (in.read((char*)&m_locked, sizeof(bool)) < 0)
+	// read-only state (dataVersion>=27)
+	if (in.read((char*)&m_readOnly, sizeof(bool)) < 0)
 		return ReadError();
 
 	// steps list (dataVersion>=27)

@@ -183,7 +183,7 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 	if (!m_colorScale || !m_modified)
 		return true;
 
-	if (m_colorScale->isLocked())
+	if (m_colorScale->isReadOnly())
 	{
 		assert(false);
 		return true;
@@ -254,15 +254,15 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 
 	// setup dialog components
 	{
-		// locked state
-		bool isLocked = !m_colorScale || m_colorScale->isLocked();
-		m_ui->colorScaleParametersFrame->setEnabled(!isLocked);
-		m_ui->exportToolButton->setEnabled(!isLocked);
-		m_ui->lockWarningLabel->setVisible(isLocked);
-		m_ui->selectedSliderGroupBox->setEnabled(!isLocked);
-		m_scaleWidget->setEnabled(!isLocked);
+		// read-only state
+		bool isReadOnly = !m_colorScale || m_colorScale->isReadOnly();
+		m_ui->colorScaleParametersFrame->setEnabled(!isReadOnly);
+		m_ui->exportToolButton->setEnabled(!isReadOnly);
+		m_ui->lockWarningLabel->setVisible(isReadOnly);
+		m_ui->selectedSliderGroupBox->setEnabled(!isReadOnly);
+		m_scaleWidget->setEnabled(!isReadOnly);
 		m_ui->customLabelsGroupBox->blockSignals(true);
-		m_ui->customLabelsGroupBox->setEnabled(!isLocked);
+		m_ui->customLabelsGroupBox->setEnabled(!isReadOnly);
 		m_ui->customLabelsGroupBox->blockSignals(false);
 
 		// absolute or relative mode
@@ -279,7 +279,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		else
 		{
 			// shouldn't be accessible anyway....
-			assert(isLocked == true);
+			assert(isReadOnly == true);
 			setScaleModeToRelative(false);
 		}
 	}
@@ -343,7 +343,7 @@ void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
 
 void ccColorScaleEditorDialog::onStepSelected(int index)
 {
-	m_ui->selectedSliderGroupBox->setEnabled(/*m_colorScale && !m_colorScale->isLocked() && */ index >= 0);
+	m_ui->selectedSliderGroupBox->setEnabled(/*m_colorScale && !m_colorScale->isReadOnly() && */ index >= 0);
 
 	m_ui->deleteSliderToolButton->setEnabled(index >= 1 && index + 1 < m_scaleWidget->getStepCount()); // don't delete the first and last steps!
 
@@ -637,7 +637,7 @@ void ccColorScaleEditorDialog::copyCurrentScale()
 
 bool ccColorScaleEditorDialog::saveCurrentScale()
 {
-	if (!m_colorScale || m_colorScale->isLocked())
+	if (!m_colorScale || m_colorScale->isReadOnly())
 	{
 		assert(false);
 		return false;
@@ -713,7 +713,7 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 
 void ccColorScaleEditorDialog::renameCurrentScale()
 {
-	if (!m_colorScale || m_colorScale->isLocked())
+	if (!m_colorScale || m_colorScale->isReadOnly())
 	{
 		assert(false);
 		return;
@@ -733,7 +733,7 @@ void ccColorScaleEditorDialog::renameCurrentScale()
 
 void ccColorScaleEditorDialog::deleteCurrentScale()
 {
-	if (!m_colorScale || m_colorScale->isLocked())
+	if (!m_colorScale || m_colorScale->isReadOnly())
 	{
 		assert(false);
 		return;
@@ -810,7 +810,7 @@ void ccColorScaleEditorDialog::onClose()
 
 void ccColorScaleEditorDialog::exportCurrentScale()
 {
-	if (!m_colorScale || m_colorScale->isLocked())
+	if (!m_colorScale || m_colorScale->isReadOnly())
 	{
 		assert(false);
 		return;

@@ -64,18 +64,25 @@ class QCC_DB_LIB_API ccHObjectCaster
 	/** Warning: if a mesh is passed, this method returns its vertices.
 	    \param obj ccHObject to dynamically cast to a ccPointCloud object
 	    \param isLockedVertices the caller can be warned if the returned cloud corresponds to locked vertices
+	    \param contextualLock whether the concept of 'locked' is contextual (e.g. if 'obj' is the unique parent mesh or the vertices themselves) or strict
 	**/
-	static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr);
+	static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr, bool contextualLock = true);
 
 	//! Converts current object to 'equivalent' ccGenericPointCloud
 	/** Warning: if a mesh is passed, this method returns its vertices.
+	    \param obj ccHObject to dynamically cast to a ccGenericPointCloud object
+	    \param isLockedVertices the caller can be warned if the returned cloud corresponds to locked vertices
+	    \param contextualLock whether the concept of 'locked' is contextual (e.g. if 'obj' is the unique parent mesh or the vertices themselves) or strict
 	 **/
-	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr);
+	static ccGenericPointCloud* ToGenericPointCloud(ccHObject* obj, bool* isLockedVertices = nullptr, bool contextualLock = true);
 
 	//! Converts current object to 'equivalent' ccShiftedObject
 	/** Warning: if a mesh is passed, this method returns its vertices.
+	    \param obj ccHObject to dynamically cast to a ccShiftedObject object
+	    \param isLockedVertices the caller can be warned if the returned object corresponds to locked vertices
+	    \param contextualLock whether the concept of 'locked' is contextual (e.g. if 'obj' is the unique parent mesh or the vertices themselves) or strict
 	 **/
-	static ccShiftedObject* ToShifted(ccHObject* obj, bool* isLockedVertices = nullptr);
+	static ccShiftedObject* ToShifted(ccHObject* obj, bool* isLockedVertices = nullptr, bool contextualLock = true);
 
 	//! Converts current object to ccGenericMesh (if possible)
 	static ccGenericMesh* ToGenericMesh(ccHObject* obj);

@@ -161,7 +161,6 @@ ccPolyline* ProfileLoader::Load(QString filename, CCVector3& origin, ccMainAppIn
 					polyline->setColor(ccColor::green);
 					polyline->showColors(true);
 					polyline->setEnabled(true);
-					polyline->setLocked(true); //as we have applied a purely visual transformation, we can't let the user rotate it!!!
 					vertices->setEnabled(false);
 				}
 				else

@@ -597,8 +597,8 @@ const ccPointCloud& ccPointCloud::operator+=(ccPointCloud* addedCloud)
 {
 	if (isLocked())
 	{
-		ccLog::Error("[ccPointCloud::fusion] Cloud is locked");
-		return *this;
+		ccLog::Warning("[ccPointCloud::merge] Destination cloud is locked");
+		assert(false);
 	}
 
 	return append(addedCloud, size());
@@ -1476,7 +1476,7 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 {
 	if (newNumberOfPoints < size() && isLocked())
 	{
-		// can't reduce the size if the cloud is locked!
+		// can't reduce the size of a locked cloud!
 		return false;
 	}
 

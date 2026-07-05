@@ -142,7 +142,7 @@ void qPCV::doAction()
 		for (auto & pointCloud : clouds)
 		{
 			//we keep only clouds with normals
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud( pointCloud );
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(pointCloud);
 			
 			if (cloud && cloud->hasNormals())
 			{

@@ -6022,9 +6022,11 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 	// and meshes!
 	for (size_t j = 0; j < cmd.meshes().size(); ++j)
 	{
-		bool           isLocked = false;
-		ccGenericMesh* mesh     = cmd.meshes()[j].mesh;
-		ccPointCloud*  cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
+
+		bool          isLocked = false;
+		ccPointCloud* cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+
 		if (cloud && !isLocked)
 		{
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
@@ -6147,9 +6149,11 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	// and meshes!
 	for (size_t j = 0; j < cmd.meshes().size(); ++j)
 	{
-		bool           isLocked = false;
-		ccGenericMesh* mesh     = cmd.meshes()[j].mesh;
-		ccPointCloud*  cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
+
+		bool          isLocked = false;
+		ccPointCloud* cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+
 		if (cloud && !isLocked)
 		{
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);
@@ -6253,9 +6257,11 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 	// and meshes!
 	for (size_t j = 0; j < cmd.meshes().size(); ++j)
 	{
-		bool           isLocked = false;
-		ccGenericMesh* mesh     = cmd.meshes()[j].mesh;
-		ccPointCloud*  cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+		ccGenericMesh* mesh = cmd.meshes()[j].mesh;
+
+		bool          isLocked = false;
+		ccPointCloud* cloud    = ccHObjectCaster::ToPointCloud(mesh, &isLocked);
+
 		if (cloud && !isLocked)
 		{
 			int thisSFFIndex  = GetScalarFieldIndex(cloud, sfIndex, sfName);
@@ -6706,6 +6712,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 	{
 		bool          isLocked = false;
 		ccPointCloud* cloud    = ccHObjectCaster::ToPointCloud(desc.mesh, &isLocked);
+
 		if (cloud && !isLocked)
 		{
 			int thisSFIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, true);

@@ -294,6 +294,7 @@ namespace ccLibAlgorithms
 			if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
+				assert(nullptr != cloud);
 
 				ccPointCloud* pc    = nullptr;
 				int           sfIdx = -1;
@@ -466,9 +467,10 @@ namespace ccLibAlgorithms
 			switch (algo)
 			{
 			case CCLIB_ALGO_SF_GRADIENT:
+			{
 				// for scalar field gradient, we can apply it directly on meshes
-				bool lockedVertices;
-				cloud = ccHObjectCaster::ToGenericPointCloud(entities[i], &lockedVertices);
+				bool lockedVertices = false;
+				cloud               = ccHObjectCaster::ToGenericPointCloud(entities[i], &lockedVertices);
 				if (lockedVertices)
 				{
 					ccUtils::DisplayLockedVerticesWarning(entities[i]->getName(), selNum == 1);
@@ -497,12 +499,15 @@ namespace ccLibAlgorithms
 						cloud = nullptr;
 					}
 				}
-				break;
+			}
+			break;
 
 			// by default, we apply processings on clouds only
 			default:
 				if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
+				{
 					cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
+				}
 				break;
 			}
 
@@ -641,9 +646,20 @@ namespace ccLibAlgorithms
 		{
 			ccHObject* ent = entities[i];
 			// try to get the underlying cloud (or the vertices set for a mesh)
-			bool                 lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-			if (cloud && !lockedVertices)
+			bool                 lockedVertices = false;
+			ccGenericPointCloud* cloud          = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
+
+			if (nullptr == cloud)
+			{
+				// we need a cloud or a mesh
+				ccLog::Warning(QString("[Scale Matching] Entity '%1' can't be rescaled this way!").arg(ent->getName()));
+			}
+			else if (lockedVertices)
+			{
+				// locked entities
+				ccUtils::DisplayLockedVerticesWarning(ent->getName(), false);
+			}
+			else
 			{
 				switch (algo)
 				{
@@ -739,16 +755,6 @@ namespace ccLibAlgorithms
 					break;
 				}
 			}
-			else if (cloud && lockedVertices)
-			{
-				// locked entities
-				ccUtils::DisplayLockedVerticesWarning(ent->getName(), false);
-			}
-			else
-			{
-				// we need a cloud or a mesh
-				ccLog::Warning(QString("[Scale Matching] Entity '%1' can't be rescaled this way!").arg(ent->getName()));
-			}
 
 			// if the reference entity is invalid!
 			if (scales[i] <= 0 && i == refEntityIndex)
@@ -785,16 +791,14 @@ namespace ccLibAlgorithms
 
 				ccHObject* ent = entities[i];
 
-				bool                 lockedVertices;
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-				if (!cloud || lockedVertices)
+				bool                 lockedVertices = false;
+				ccGenericPointCloud* cloud          = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
+				if (nullptr == cloud || lockedVertices)
+				{
 					continue;
+				}
 
-				double scaled = 1.0;
-				if (algo == ICP_SCALE)
-					scaled = scales[i];
-				else
-					scaled = scales[refEntityIndex] / scales[i];
+				double scaled = algo == ICP_SCALE ? scales[i] : scales[refEntityIndex] / scales[i];
 
 				PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
 

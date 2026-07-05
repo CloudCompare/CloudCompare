@@ -941,18 +941,16 @@ void MainWindow::doActionConvertNormalsToHSV()
 	updateUI();
 }
 
-static double s_kdTreeMaxErrorPerCell = 0.1;
-void          MainWindow::doActionComputeKdTree()
+void MainWindow::doActionComputeKdTree()
 {
-	ccGenericPointCloud* cloud = nullptr;
-
 	auto selectedEntities = m_selectedEntities; // we don't want the user to change the set of selected entities while the algorithm is executed!
 
+	ccGenericPointCloud* cloud = nullptr;
 	if (selectedEntities.size() == 1)
 	{
-		ccHObject* ent = selectedEntities.front();
-		bool       lockedVertices;
-		cloud = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
+		ccHObject* ent            = selectedEntities.front();
+		bool       lockedVertices = false;
+		cloud                     = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
 		if (lockedVertices)
 		{
 			ccUtils::DisplayLockedVerticesWarning(ent->getName(), true);
@@ -966,8 +964,9 @@ void          MainWindow::doActionComputeKdTree()
 		return;
 	}
 
-	bool ok;
-	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, tr("Compute Kd-tree"), tr("Max error per leaf cell:"), s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
+	bool          ok                      = false;
+	static double s_kdTreeMaxErrorPerCell = 0.1;
+	s_kdTreeMaxErrorPerCell               = QInputDialog::getDouble(this, tr("Compute Kd-tree"), tr("Max error per leaf cell:"), s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -1185,152 +1184,155 @@ void MainWindow::applyTransformation(const ccGLMatrixd& mat, bool applyToGlobal)
 		if (!entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			// specific test for locked vertices
-			bool                 lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity, &lockedVertices);
-			if (cloud)
+			bool                 lockedVertices = false;
+			ccGenericPointCloud* cloud          = ccHObjectCaster::ToGenericPointCloud(entity, &lockedVertices);
+
+			if (nullptr == cloud)
 			{
-				if (lockedVertices)
+				continue;
+			}
+
+			if (lockedVertices)
+			{
+				ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
+				continue;
+			}
+
+			// test if the translated cloud coordinates were already "too large"
+			//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
+			ccBBox     localBBox = entity->getOwnBB();
+			CCVector3d Pl        = localBBox.minCorner();
+			double     Dl        = localBBox.getDiagNormd();
+
+			// if the cloud is alright
+			if (!ccGlobalShiftManager::NeedShift(Pl)
+			    && !ccGlobalShiftManager::NeedRescale(Dl))
+			{
+				// test if the translated cloud (local) coordinates are too large
+				ccBBox     transformedLocalBox = entity->getOwnBB() * transMat;
+				CCVector3d transformedPl       = transformedLocalBox.minCorner();
+				double     transformedDl       = transformedLocalBox.getDiagNormd();
+
+				bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+				if (needShift)
 				{
-					ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
-					continue;
-				}
+					// existing shift information
+					CCVector3d globalShift = cloud->getGlobalShift();
+					double     globalScale = cloud->getGlobalScale();
 
-				// test if the translated cloud coordinates were already "too large"
-				//(in which case we won't bother the user about the fact that the transformed cloud coordinates will be too large...)
-				ccBBox     localBBox = entity->getOwnBB();
-				CCVector3d Pl        = localBBox.minCorner();
-				double     Dl        = localBBox.getDiagNormd();
+					// we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
+					CCVector3d Pg = cloud->toGlobal3d(transformedPl);
+					double     Dg = transformedDl / globalScale;
 
-				// if the cloud is alright
-				if (!ccGlobalShiftManager::NeedShift(Pl)
-				    && !ccGlobalShiftManager::NeedRescale(Dl))
-				{
-					// test if the translated cloud (local) coordinates are too large
-					ccBBox     transformedLocalBox = entity->getOwnBB() * transMat;
-					CCVector3d transformedPl       = transformedLocalBox.minCorner();
-					double     transformedDl       = transformedLocalBox.getDiagNormd();
+					// let's try to find better Global Shift and Scale values
+					CCVector3d newShift(0.0, 0.0, 0.0);
+					double     newScale            = 1.0;
+					bool       updateShiftAndscale = false;
 
-					bool needShift = ccGlobalShiftManager::NeedShift(transformedPl) || ccGlobalShiftManager::NeedRescale(transformedDl);
+					// should we try to use the previous Global Shift and Scale values?
+					if (autoApplyPreviousGlobalShiftAndScale)
+					{
+						if (!ccGlobalShiftManager::NeedShift(Pg + previousShift)
+						    && !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
+						{
+							newScale            = previousScale;
+							newShift            = previousShift;
+							needShift           = false;
+							updateShiftAndscale = true;
+						}
+					}
+
+					// if we still need to define new Global Shift and Scale
 					if (needShift)
 					{
-						// existing shift information
-						CCVector3d globalShift = cloud->getGlobalShift();
-						double     globalScale = cloud->getGlobalScale();
+						// ask the user the right values!
+						ccShiftAndScaleCloudDlg sasDlg(transformedPl, transformedDl, Pg, Dg, this);
+						sasDlg.showApplyAllButton(selectedEntities.size() > 1);
+						sasDlg.showTitle(true);
+						sasDlg.setKeepGlobalPos(true);
+						sasDlg.showKeepGlobalPosCheckbox(false); // we don't want the user to mess with this!
+						sasDlg.showPreserveShiftOnSave(true);
 
-						// we compute the global coordinates and scale of the reference point (= the min corner of the bounding-box)
-						CCVector3d Pg = cloud->toGlobal3d(transformedPl);
-						double     Dg = transformedDl / globalScale;
-
-						// let's try to find better Global Shift and Scale values
-						CCVector3d newShift(0.0, 0.0, 0.0);
-						double     newScale            = 1.0;
-						bool       updateShiftAndscale = false;
-
-						// should we try to use the previous Global Shift and Scale values?
+						// add "original" entry
+						int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
+						// add "previous" entry (if any)
 						if (autoApplyPreviousGlobalShiftAndScale)
 						{
-							if (!ccGlobalShiftManager::NeedShift(Pg + previousShift)
-							    && !ccGlobalShiftManager::NeedRescale(Dg * previousScale))
-							{
-								newScale            = previousScale;
-								newShift            = previousShift;
-								needShift           = false;
-								updateShiftAndscale = true;
-							}
+							index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Previous"), previousShift, previousScale));
 						}
-
-						// if we still need to define new Global Shift and Scale
-						if (needShift)
+						// add "last" entries (if any)
+						int         matchingIndex   = -1;
+						const auto& previousEntries = ccGlobalShiftManager::GetLast();
+						for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : previousEntries)
 						{
-							// ask the user the right values!
-							ccShiftAndScaleCloudDlg sasDlg(transformedPl, transformedDl, Pg, Dg, this);
-							sasDlg.showApplyAllButton(selectedEntities.size() > 1);
-							sasDlg.showTitle(true);
-							sasDlg.setKeepGlobalPos(true);
-							sasDlg.showKeepGlobalPosCheckbox(false); // we don't want the user to mess with this!
-							sasDlg.showPreserveShiftOnSave(true);
+							index = sasDlg.addShiftInfo(shiftInfo);
 
-							// add "original" entry
-							int index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Original"), globalShift, globalScale));
-							// add "previous" entry (if any)
-							if (autoApplyPreviousGlobalShiftAndScale)
-							{
-								index = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Previous"), previousShift, previousScale));
-							}
-							// add "last" entries (if any)
-							int         matchingIndex   = -1;
-							const auto& previousEntries = ccGlobalShiftManager::GetLast();
-							for (const ccGlobalShiftManager::ShiftInfo& shiftInfo : previousEntries)
-							{
-								index = sasDlg.addShiftInfo(shiftInfo);
-
-								if (matchingIndex < 0)
-								{
-									if (!ccGlobalShiftManager::NeedShift(Pg + shiftInfo.shift)
-									    && !ccGlobalShiftManager::NeedRescale(Dg * shiftInfo.scale))
-									{
-										matchingIndex = index;
-									}
-								}
-							}
-
-							// if no good solution was found...
 							if (matchingIndex < 0)
 							{
-								// add a "suggested" entry
-								CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
-								double     suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-								matchingIndex             = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
-							}
-
-							sasDlg.setCurrentProfile(matchingIndex);
-							if (sasDlg.exec())
-							{
-								newScale            = sasDlg.getScale();
-								newShift            = sasDlg.getShift();
-								needShift           = false;
-								updateShiftAndscale = true;
-
-								// store the shift for next time!
-								ccGlobalShiftManager::StoreShift(newShift, newScale);
-
-								if (sasDlg.applyAll())
+								if (!ccGlobalShiftManager::NeedShift(Pg + shiftInfo.shift)
+								    && !ccGlobalShiftManager::NeedRescale(Dg * shiftInfo.scale))
 								{
-									autoApplyPreviousGlobalShiftAndScale = true;
-									previousScale                        = newScale;
-									previousShift                        = newShift;
+									matchingIndex = index;
 								}
-							}
-							else if (sasDlg.cancelled())
-							{
-								ccLog::Warning(tr("[ApplyTransformation] Process cancelled by user"));
-								return;
-							}
-							else
-							{
-								// the user did not want to change the shift & scale
 							}
 						}
 
-						if (updateShiftAndscale)
+						// if no good solution was found...
+						if (matchingIndex < 0)
 						{
-							assert(!needShift);
+							// add a "suggested" entry
+							CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+							double     suggestedScale = ccGlobalShiftManager::BestScale(Dg);
+							matchingIndex             = sasDlg.addShiftInfo(ccGlobalShiftManager::ShiftInfo(tr("Suggested"), suggestedShift, suggestedScale));
+						}
 
-							// get the relative modification to existing global shift/scale info
-							assert(globalScale != 0);
-							double     scaleChange = newScale / globalScale;
-							CCVector3d shiftChange = newShift - globalShift;
+						sasDlg.setCurrentProfile(matchingIndex);
+						if (sasDlg.exec())
+						{
+							newScale            = sasDlg.getScale();
+							newShift            = sasDlg.getShift();
+							needShift           = false;
+							updateShiftAndscale = true;
 
-							if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+							// store the shift for next time!
+							ccGlobalShiftManager::StoreShift(newShift, newScale);
+
+							if (sasDlg.applyAll())
 							{
-								// apply translation as global shift
-								cloud->setGlobalShift(newShift);
-								cloud->setGlobalScale(newScale);
-								ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
-
-								transMat.scaleRotation(scaleChange);
-								transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
+								autoApplyPreviousGlobalShiftAndScale = true;
+								previousScale                        = newScale;
+								previousShift                        = newShift;
 							}
+						}
+						else if (sasDlg.cancelled())
+						{
+							ccLog::Warning(tr("[ApplyTransformation] Process cancelled by user"));
+							return;
+						}
+						else
+						{
+							// the user did not want to change the shift & scale
+						}
+					}
+
+					if (updateShiftAndscale)
+					{
+						assert(!needShift);
+
+						// get the relative modification to existing global shift/scale info
+						assert(globalScale != 0);
+						double     scaleChange = newScale / globalScale;
+						CCVector3d shiftChange = newShift - globalShift;
+
+						if (scaleChange != 1.0 || shiftChange.norm2() != 0)
+						{
+							// apply translation as global shift
+							cloud->setGlobalShift(newShift);
+							cloud->setGlobalScale(newScale);
+							ccLog::Warning(tr("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(newShift.x).arg(newShift.y).arg(newShift.z).arg(newScale));
+
+							transMat.scaleRotation(scaleChange);
+							transMat.setTranslation(transMat.getTranslationAsVec3D() + newScale * shiftChange);
 						}
 					}
 				}
@@ -1396,23 +1398,16 @@ void MainWindow::doActionApplyScale()
 
 		for (ccHObject* entity : selectedEntities) // warning, getSelectedEntites may change during this loop!
 		{
-			bool lockedVertices;
-			// try to get the underlying cloud (or the vertices set for a mesh)
+			bool lockedVertices = false;
+			// try to get the underlying cloud (or the vertices set for a mesh or a polyline)
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity, &lockedVertices);
-			// otherwise we can look if the selected entity is a polyline
-			if (!cloud && entity->isA(CC_TYPES::POLY_LINE))
-			{
-				cloud = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(entity)->getAssociatedCloud());
-				if (!cloud || cloud->isAncestorOf(entity))
-				{
-					lockedVertices = true;
-				}
-			}
-			if (!cloud || !cloud->isKindOf(CC_TYPES::POINT_CLOUD))
+
+			if (nullptr == cloud)
 			{
 				ccLog::Warning(tr("[Apply scale] Entity '%1' can't be scaled this way").arg(entity->getName()));
 				continue;
 			}
+
 			if (lockedVertices)
 			{
 				ccUtils::DisplayLockedVerticesWarning(entity->getName(), haveOneSelection());
@@ -1723,9 +1718,9 @@ void MainWindow::doComputeBestFitBB()
 
 	for (ccHObject* entity : selectedEntities) // warning, getSelectedEntites may change during this loop!
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
 
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
+		if (nullptr != cloud)
 		{
 			CCCoreLib::Neighbourhood Yk(cloud);
 
@@ -1763,7 +1758,7 @@ void MainWindow::doComputeBestFitBB()
 					// we temporarily detach the entity, as it may undergo
 					//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 					ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
-					static_cast<ccPointCloud*>(cloud)->applyRigidTransformation(trans);
+					cloud->applyRigidTransformation(trans);
 					putObjectBackIntoDBTree(cloud, objContext);
 
 					entity->prepareDisplayForRefresh_recursive();
@@ -2209,9 +2204,13 @@ void MainWindow::doActionCreateCameraSensor()
 		ccBBox               bb    = cloud->getOwnBB();
 		double               diag  = bb.getDiagNorm();
 		if (diag < 1.0)
+		{
 			sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
+		}
 		else if (diag > 10000.0)
+		{
 			sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
+		}
 
 		// set position
 		ccIndexedTransformation trans;
@@ -2543,19 +2542,17 @@ void MainWindow::doActionShowDepthBuffer()
 			{
 				// look for depending cloud
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity->getParent());
-				if (cloud)
-				{
-					// force depth buffer computation
-					int errorCode;
-					if (!sensor->computeDepthBuffer(cloud, errorCode))
-					{
-						ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
-					}
-				}
-				else
+				if (nullptr == cloud)
 				{
 					ccConsole::Error(tr("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
 					return;
+				}
+
+				// force depth buffer computation
+				int errorCode;
+				if (!sensor->computeDepthBuffer(cloud, errorCode))
+				{
+					ccConsole::Error(ccGBLSensor::GetErrorString(errorCode));
 				}
 			}
 
@@ -2987,10 +2984,9 @@ void MainWindow::doActionFilterByValue()
 
 	for (ccHObject* entity : getSelectedEntities())
 	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
-		if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entity);
+		if (nullptr != pc)
 		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 			// la methode est activee sur le champ scalaire affiche
 			CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			if (sf)
@@ -3005,7 +3001,9 @@ void MainWindow::doActionFilterByValue()
 	}
 
 	if (toFilter.empty())
+	{
 		return;
+	}
 
 	double minVald = 0.0;
 	double maxVald = 1.0;
@@ -3205,15 +3203,16 @@ void MainWindow::doApplyActiveSFAction(int action)
 	}
 	ccHObject* ent = m_selectedEntities.front();
 
-	bool          lockedVertices;
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
+	bool          lockedVertices = false;
+	ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 
 	// for "real" point clouds only
-	if (!cloud)
-		return;
-	if (lockedVertices && !ent->isAncestorOf(cloud))
+	if (nullptr == cloud)
 	{
-		// see ccPropertiesTreeDelegate::fillWithMesh
+		return;
+	}
+	if (lockedVertices)
+	{
 		ccUtils::DisplayLockedVerticesWarning(ent->getName(), true);
 		return;
 	}
@@ -4032,7 +4031,7 @@ void MainWindow::doActionRegister()
 			}
 		}
 
-		// if we managed to get a point cloud to move!
+		// if we managed to get a point cloud to register
 		if (pc)
 		{
 			// we temporarily detach cloud, as it may undergo
@@ -4064,7 +4063,7 @@ void MainWindow::doActionRegister()
 
 			// don't forget global shift
 			ccGenericPointCloud* refPC = ccHObjectCaster::ToGenericPointCloud(model);
-			if (refPC)
+			if (nullptr != refPC)
 			{
 				if (refPC->isShifted())
 				{
@@ -4492,13 +4491,17 @@ void MainWindow::doActionLabelConnectedComponents()
 		for (ccHObject* entity : getSelectedEntities())
 		{
 			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+			{
 				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(entity));
+			}
 		}
 	}
 
 	size_t count = clouds.size();
-	if (count == 0)
+	if (0 == count)
+	{
 		return;
+	}
 
 	static int      s_octreeLevel      = 8;
 	static unsigned s_minComponentSize = 10;
@@ -5151,7 +5154,8 @@ void MainWindow::doActionComputeMesh(CCCoreLib::TRIANGULATION_TYPES type)
                                            static_cast<PointCoordinateType>(s_meshMaxEdgeLength),
                                            2 // XY plane by default
         );
-		if (mesh)
+
+		if (nullptr != mesh)
 		{
 			cloud->setVisible(false); // can't disable the cloud as the resulting mesh will be its child!
 			cloud->addChild(mesh);
@@ -5191,7 +5195,7 @@ void MainWindow::doActionFitQuadric()
 
 			double     rms     = 0.0;
 			ccQuadric* quadric = ccQuadric::Fit(cloud, &rms);
-			if (quadric)
+			if (nullptr != quadric)
 			{
 				cloud->addChild(quadric);
 				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
@@ -5513,15 +5517,14 @@ void MainWindow::doActionComputeCPS()
 	if (!dlg.exec())
 		return;
 
-	ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
-	ccGenericPointCloud* srcCloud  = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
+	ccPointCloud*        cmpPC    = ccHObjectCaster::ToPointCloud(dlg.getFirstEntity());
+	ccGenericPointCloud* srcCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
-	if (!compCloud->isA(CC_TYPES::POINT_CLOUD)) // TODO
+	if (nullptr == cmpPC)
 	{
 		ccConsole::Error(tr("Compared cloud must be a real point cloud!"));
 		return;
 	}
-	ccPointCloud* cmpPC = static_cast<ccPointCloud*>(compCloud);
 
 	static const char DEFAULT_CPS_TEMP_SF_NAME[] = "CPS temporary";
 	int               sfIdx                      = cmpPC->getScalarFieldIndexByName(DEFAULT_CPS_TEMP_SF_NAME);
@@ -5545,7 +5548,7 @@ void MainWindow::doActionComputeCPS()
 	ccProgressDialog                                                           pDlg(true, this);
 	CCCoreLib::DistanceComputationTools::Cloud2CloudDistancesComputationParams params;
 	params.CPSet = &CPSet;
-	int result   = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(compCloud, srcCloud, params, &pDlg);
+	int result   = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(cmpPC, srcCloud, params, &pDlg);
 	cmpPC->deleteScalarField(sfIdx);
 
 	if (result >= CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
@@ -5555,8 +5558,8 @@ void MainWindow::doActionComputeCPS()
 		// will also get its attributes
 		newCloud = srcCloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(srcCloud)->partialClone(&CPSet) : ccPointCloud::From(&CPSet, srcCloud);
 
-		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName(), compCloud->getName()));
-		newCloud->setDisplay(compCloud->getDisplay());
+		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName(), cmpPC->getName()));
+		newCloud->setDisplay(cmpPC->getDisplay());
 		newCloud->prepareDisplayForRefresh();
 		addToDB(newCloud);
 
@@ -5870,9 +5873,9 @@ void MainWindow::doActionSORFilter()
 	for (ccHObject* entity : selectedEntities)
 	{
 		// specific test for locked vertices
-		bool          lockedVertices;
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
-		if (!cloud)
+		bool          lockedVertices = false;
+		ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
+		if (nullptr == cloud)
 		{
 			continue;
 		}
@@ -5983,9 +5986,9 @@ void MainWindow::doActionFilterNoise()
 	for (ccHObject* entity : selectedEntities)
 	{
 		// specific test for locked vertices
-		bool          lockedVertices;
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
-		if (!cloud)
+		bool          lockedVertices = false;
+		ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(entity, &lockedVertices);
+		if (nullptr == cloud)
 		{
 			continue;
 		}
@@ -6062,20 +6065,22 @@ void MainWindow::doActionUnroll()
 	}
 
 	// if selected entity is a mesh, the method will be applied to its vertices
-	bool                 lockedVertices;
-	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities.front(), &lockedVertices);
+	bool          lockedVertices = false;
+	ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(m_selectedEntities.front(), &lockedVertices);
+
+	// for "real" point clouds only
+	if (nullptr == cloud)
+	{
+		ccConsole::Error(tr("This tool can't be applied to this entity"));
+		return;
+	}
+
 	if (lockedVertices)
 	{
 		ccUtils::DisplayLockedVerticesWarning(m_selectedEntities.front()->getName(), true);
 		return;
 	}
 
-	// for "real" point clouds only
-	if (!cloud || !cloud->isA(CC_TYPES::POINT_CLOUD))
-	{
-		ccConsole::Error(tr("Method can't be applied on locked vertices or virtual point clouds!"));
-		return;
-	}
 	ccPointCloud* inputAsCloud = static_cast<ccPointCloud*>(cloud);
 
 	// wether the input entity is a mesh
@@ -6086,7 +6091,9 @@ void MainWindow::doActionUnroll()
 	unrollDlg.setConfiguration(nullptr == inputMesh);
 
 	if (!unrollDlg.exec())
+	{
 		return;
+	}
 	unrollDlg.toPersistentSettings();
 
 	ccPointCloud::UnrollMode mode                     = unrollDlg.getType();
@@ -8316,15 +8323,15 @@ void MainWindow::doActionAddConstantSF()
 
 	ccHObject* ent = m_selectedEntities.front();
 
-	bool          lockedVertices;
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
+	bool          lockedVertices = false;
+	ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 
 	// for "real" point clouds only
-	if (!cloud)
+	if (nullptr == cloud)
 	{
 		return;
 	}
-	if (lockedVertices && !ent->isAncestorOf(cloud))
+	if (lockedVertices)
 	{
 		ccUtils::DisplayLockedVerticesWarning(ent->getName(), true);
 		return;
@@ -8361,16 +8368,15 @@ void MainWindow::doActionAddClassificationSF()
 
 	ccHObject* ent = m_selectedEntities.front();
 
-	bool          lockedVertices;
-	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
+	bool          lockedVertices = false;
+	ccPointCloud* cloud          = ccHObjectCaster::ToPointCloud(ent, &lockedVertices);
 
 	// for "real" point clouds only
-	if (!cloud)
+	if (nullptr == cloud)
 	{
 		return;
 	}
-
-	if (lockedVertices && !ent->isAncestorOf(cloud))
+	if (lockedVertices)
 	{
 		ccUtils::DisplayLockedVerticesWarning(ent->getName(), true);
 		return;
@@ -8435,8 +8441,10 @@ void MainWindow::doActionFitSphere()
 	for (ccHObject* entity : getSelectedEntities())
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-		if (!cloud)
+		if (nullptr == cloud)
+		{
 			continue;
+		}
 
 		CCVector3           center;
 		PointCoordinateType radius = (s_autoDetectRadius ? 0 : static_cast<PointCoordinateType>(s_radius));
@@ -8485,8 +8493,10 @@ void MainWindow::doActionFitCircle()
 	for (ccHObject* entity : getSelectedEntities())
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-		if (!cloud)
+		if (nullptr == cloud)
+		{
 			continue;
+		}
 
 		CCVector3           center;
 		CCVector3           normal;
@@ -8581,7 +8591,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 		else
 		{
 			ccGenericPointCloud* gencloud = ccHObjectCaster::ToGenericPointCloud(entity);
-			if (gencloud)
+			if (nullptr != gencloud)
 			{
 				cloud   = static_cast<CCCoreLib::GenericIndexedCloudPersist*>(gencloud);
 				shifted = gencloud;
@@ -8798,6 +8808,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			continue;
 		}
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(selectedEntities[i]);
+		assert(nullptr != cloud);
 
 		int sfIdx = cloud->getScalarFieldIndexByName(sfName.toStdString());
 		if (sfIdx < 0)
@@ -8995,8 +9006,7 @@ void MainWindow::doActionCreateCloudFromEntCenters()
 		for (ccHObject* entity : getSelectedEntities())
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-
-			if (cloud == nullptr)
+			if (nullptr == cloud)
 			{
 				continue;
 			}
@@ -9035,7 +9045,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 		for (ccHObject* entity : getSelectedEntities())
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-			if (cloud)
+			if (nullptr != cloud)
 			{
 				clouds.push_back(cloud);
 			}
@@ -9408,7 +9418,7 @@ void MainWindow::doActionExportCloudInfo()
 		for (ccHObject* entity : selectedEntities)
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity);
-			if (cloud)
+			if (nullptr != cloud)
 			{
 				clouds.push_back(cloud);
 			}
@@ -9561,10 +9571,10 @@ void MainWindow::doActionCloudCloudDist()
 	ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
 	ccGenericPointCloud* refCloud  = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
-	// assert(!m_compDlg);
 	if (m_compDlg)
+	{
 		delete m_compDlg;
-
+	}
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
@@ -11572,7 +11582,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionSaveProject->setEnabled(!dbIsEmpty);
 	m_UI->actionClone->setEnabled(atLeastOneEntity);
 	m_UI->actionDelete->setEnabled(atLeastOneEntity);
-	m_UI->actionExportCoordToSF->setEnabled(atLeastOneEntity);
+	m_UI->actionExportCoordToSF->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	m_UI->actionExportNormalToSF->setEnabled(atLeastOneNormal);
 	m_UI->actionSegment->setEnabled(atLeastOneEntity && activeWindow);
 	m_UI->actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
@@ -11628,7 +11638,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	m_UI->actionDeleteAllSF->setEnabled(atLeastOneSF);
 	m_UI->actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/ false);
 	m_UI->actionSFGradient->setEnabled(atLeastOneSF);
-	m_UI->actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
+	m_UI->actionSetSFAsCoord->setEnabled(atLeastOneSF && (atLeastOneCloud || atLeastOneMesh || atLeastOnePolyline));
 	m_UI->actionInterpolateSFs->setEnabled(atLeastOneCloud || atLeastOneMesh);
 
 	m_UI->actionSamplePointsOnMesh->setEnabled(atLeastOneMesh);

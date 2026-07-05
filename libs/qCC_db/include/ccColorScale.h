@@ -180,16 +180,16 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	 **/
 	void getAbsoluteBoundaries(double& minVal, double& maxVal) const;
 
-	//! Returns whether scale is locked or not
-	inline bool isLocked() const
+	//! Returns whether scale is read-only or not
+	inline bool isReadOnly() const
 	{
-		return m_locked;
+		return m_readOnly;
 	}
 
-	//! Sets whether scale is locked or not
-	inline void setLocked(bool state)
+	//! Sets whether scale is read-only or not
+	inline void setReadOnly(bool state)
 	{
-		m_locked = state;
+		m_readOnly = state;
 	}
 
 	//! Color scale label (value + optional text)
@@ -258,19 +258,19 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	}
 
 	//! Adds a step
-	/** Scale must not be locked.
+	/** Scale must not be read-only.
 	 **/
 	void insert(const ccColorScaleElement& step, bool autoUpdate = true);
 
 	//! Deletes a given step
 	/** The first and last index shouldn't be deleted!
-	    Scale must not be locked.
+	    Scale must not be read-only.
 	**/
 	void remove(int index, bool autoUpdate = true);
 
 	//! Clears all steps
 	/** There should be at least 2 steps for the scale to be valid!
-	    Scale must not be locked.
+	    Scale must not be read-only.
 	**/
 	void clear();
 
@@ -383,8 +383,8 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	//! Whether scale is relative or not
 	bool m_relative;
 
-	//! Whether scale is locked or not
-	bool m_locked;
+	//! Whether scale is read-only or not
+	bool m_readOnly;
 
 	//! 'Absolute' minimum value
 	/** Only used if scale is 'absolute' (i.e. not relative).

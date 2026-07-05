@@ -142,8 +142,10 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		//we apply the cloud current color scale ONLY if it is not a default one
 		//(otherwise we keep the default dialog's one)
 		const ccColorScale::Shared& scale = m_sf->getColorScale();
-		if (scale && !scale->isLocked())
+		if (scale && !scale->isReadOnly())
+		{
 			m_colorScaleSelector->setSelectedScale(scale->getUuid());
+		}
 	}
 
 	//profile meta-data

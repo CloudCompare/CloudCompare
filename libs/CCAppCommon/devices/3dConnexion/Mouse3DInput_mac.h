@@ -33,7 +33,11 @@
 #include <vector>
 
 // hidapi
-#include <hidapi/hidapi.h>
+// The in-tree hidapi submodule (extern/hidapi) puts its header directory on the
+// include path via the hidapi_include INTERFACE target, so the header is
+// available as <hidapi.h>. The <hidapi/hidapi.h> form only works when hidapi
+// is installed system-wide (e.g. Homebrew) which we don't want to require.
+#include <hidapi.h>
 
 class HIDWorker : public QThread
 {

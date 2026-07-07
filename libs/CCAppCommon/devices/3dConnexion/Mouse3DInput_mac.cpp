@@ -27,10 +27,14 @@
 // qCC_db
 #include <ccLog.h>
 
+// Qt
+#include <QProcess>
+
 // system
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <wchar.h>
 
@@ -56,6 +60,32 @@ static float scaleAxis(int raw, double ds)
 	float a            = static_cast<float>(raw);
 	float progressive  = 1.0f + std::min(std::abs(a) / c_3dmouseProgressiveRef, 1.0f);
 	return a * progressive * c_3dmouseGain * static_cast<float>(ds);
+}
+
+#ifdef CC_HID_DEBUG
+//! Logs a raw HID report as a hex string. Only compiled when CC_HID_DEBUG is
+//! defined (CMake option OPTION_HID_DEBUG). Used to diagnose device-specific
+//! report formats (e.g. SpaceMouse Compact vs Wireless).
+static void logHidReport(const char* label, const unsigned char* buf, int n)
+{
+	QString hex;
+	hex.reserve(n * 3);
+	for (int i = 0; i < n; ++i)
+	{
+		hex += QString::asprintf("%02x ", buf[i]);
+	}
+	ccLog::Print(QString("[3D Mouse] %1 (%2 bytes): %3").arg(label).arg(n).arg(hex.trimmed()));
+}
+#endif // CC_HID_DEBUG
+
+//! Returns true if the 3Dconnexion driver daemon (3DConnexionHelper.app) is
+//! currently running. On macOS it holds an exclusive lock on 3DConnexion HID
+//! devices and silently consumes reports, so our hid_read returns 0 forever.
+static bool is3dConnexionHelperRunning()
+{
+	// pgrep -x matches the exact process name. Exit code 0 == found.
+	int exitCode = QProcess::execute(QStringLiteral("pgrep"), {QStringLiteral("-x"), QStringLiteral("3DConnexionHelper")});
+	return exitCode == 0;
 }
 
 //! Maps a button bitmask bit to a Mouse3DInput::VirtualKey value.
@@ -127,6 +157,17 @@ bool HIDWorker::openDevice()
 		return false;
 	}
 
+	// Warn if the 3Dconnexion driver daemon is running: it holds an exclusive
+	// lock on the device and silently consumes reports, so our hid_read would
+	// return 0 forever. The user must quit 3DConnexionHelper.app (System
+	// Settings -> General -> Login Items / Background) for the HID path to work.
+	if (is3dConnexionHelperRunning())
+	{
+		ccLog::Warning("[3D Mouse] 3DConnexionHelper.app is running and will "
+		               "intercept the device. Quit it (System Settings -> "
+		               "General -> Login Items / Background) to use the HID path.");
+	}
+
 	// Blocking reads with a timeout - avoids the spurious -1 returns that
 	// non-blocking hid_read produces on macOS when no data is available.
 	// stop() still terminates the loop because we check m_running each
@@ -154,6 +195,14 @@ void HIDWorker::run()
 	auto         lastMotionTime = std::chrono::steady_clock::now();
 	bool         motionActive    = false;
 
+	// Tracks whether any report has ever arrived. Used to warn the user once
+	// if no reports arrive within the first few seconds of running, which
+	// typically means the 3Dconnexion driver daemon is holding an exclusive
+	// lock on the device and silently consuming reports.
+	auto         threadStartTime = lastMotionTime;
+	bool         warnedNoReports = false;
+	bool         anyReportArrived = false;
+
 	unsigned char buf[80] = {0};
 
 	// Give up only after this many consecutive read errors (e.g. device unplugged).
@@ -163,6 +212,8 @@ void HIDWorker::run()
 	// Read with a timeout so the loop stays responsive to m_running changes
 	// and doesn't busy-poll. hid_read_timeout returns 0 on timeout (not -1).
 	constexpr int kReadTimeoutMs = 100;
+	// If no report arrives within this many ms of startup, warn the user once.
+	constexpr int kNoReportsWarnMs = 2000;
 
 	while (m_running.load())
 	{
@@ -195,22 +246,53 @@ void HIDWorker::run()
 					motionActive = false;
 				}
 			}
+			// Warn once if no report has arrived at all within the first few
+			// seconds - usually means the 3DConnexion driver is holding the
+			// device exclusively.
+			if (!anyReportArrived && !warnedNoReports)
+			{
+				auto elapsedSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(
+				    std::chrono::steady_clock::now() - threadStartTime).count();
+				if (elapsedSinceStart >= kNoReportsWarnMs)
+				{
+					warnedNoReports = true;
+					ccLog::Warning("[3D Mouse] No HID reports received from the "
+					               "device. If the 3DConnexion driver (3DConnexion"
+					               "Helper.app) is running, quit it - it intercepts "
+					               "the device and prevents the HID path from "
+					               "seeing reports.");
+				}
+			}
 			continue; // hid_read_timeout already waited kReadTimeoutMs
 		}
+
+		anyReportArrived = true;
+
+#ifdef CC_HID_DEBUG
+		logHidReport("report", buf, n);
+#endif
 
 		// Identify the report type. The SpaceMouse Wireless sends 13-byte motion
 		// reports (report ID 0x01 + 6 int16 axes). Older devices send 7-byte
 		// reports (report ID 0x01 + 6 int8 axes, or just 6 int8 axes without ID).
 		// Button reports have report ID 0x03.
-		if (n >= 13 && buf[0] == 0x01)
+		//
+		// Some wired devices (e.g. SpaceMouse Compact) may use a different
+		// report ID for motion. To be robust, treat any 13-byte report that is
+		// not a known button report (ID 0x03) as a potential motion report and
+		// attempt to parse it; processMotion() will skip it if all axes are zero.
+		if (n >= 2 && buf[0] == 0x03)
 		{
+			processButtons(buf, n, prevButtonMask);
+		}
+		else if (n >= 13)
+		{
+			// Motion report (report ID 0x01 on SpaceMouse Wireless, possibly
+			// a different ID on other devices). processMotion() reads the
+			// first byte as the report ID and skips it when parsing axes.
 			processMotion(buf, n);
 			lastMotionTime = std::chrono::steady_clock::now();
 			motionActive   = true;
-		}
-		else if (n >= 2 && buf[0] == 0x03)
-		{
-			processButtons(buf, n, prevButtonMask);
 		}
 		else if (n == 7)
 		{
@@ -239,27 +321,34 @@ void HIDWorker::run()
 	}
 }
 
-void HIDWorker::processMotion(const unsigned char* buf, int /*n*/)
+void HIDWorker::processMotion(const unsigned char* buf, int n)
 {
 	// Motion report layout (SpaceMouse Wireless, 13 bytes):
-	//   buf[0]    = 0x01 (report ID)
+	//   buf[0]    = report ID (0x01 on SpaceMouse Wireless; may differ on other
+	//               devices such as the wired SpaceMouse Compact)
 	//   buf[1..2] = tx (int16 little-endian)
 	//   buf[3..4] = ty
 	//   buf[5..6] = tz
 	//   buf[7..8] = rx
 	//   buf[9..10]= ry
 	//   buf[11..12]=rz
-	// Older devices may send a 7-byte report (report ID + 6 int8 axes);
-	// we handle both by branching on n.
+	// Older devices may send a 7-byte report (6 int8 axes, no report ID).
+	//
+	// We treat the first byte as a report ID whenever n >= 13 (i.e. there is
+	// room for 6 int16 axes after it). For 7-byte reports there is no report
+	// ID prefix - all 7 bytes are 6 int8 axes (impossible to have a 13-byte
+	// int8 report from a real device, so this disambiguation is safe).
 	const unsigned char* p = buf;
 	int                  axisBytes = 2; // int16 by default
-	if (buf[0] == 0x01)
+	if (n >= 13)
 	{
+		// Skip the report ID prefix regardless of its value - the caller has
+		// already routed us here knowing this is a motion-sized report.
 		p = buf + 1;
 	}
 	else
 	{
-		// No report ID prefix (older devices) - 6 int8 axes.
+		// No report ID prefix (older 7-byte devices) - 6 int8 axes.
 		axisBytes = 1;
 	}
 

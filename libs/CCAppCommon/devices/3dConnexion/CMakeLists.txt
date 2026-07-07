@@ -52,6 +52,9 @@ elseif( APPLE )
 	cmake_policy( SET CMP0079 NEW )
 
 	option( OPTION_SUPPORT_3DCONNEXION_DEVICES "Build with hidapi (3D mouse support on macOS)" ON )
+	# Optional verbose logging of raw HID reports to the CloudCompare console.
+	# Off by default; turn on to diagnose device-specific report formats.
+	option( OPTION_HID_DEBUG "Enable verbose HID report logging (3D mouse)" OFF )
 
 	if( OPTION_SUPPORT_3DCONNEXION_DEVICES )
 		target_sources( ${PROJECT_NAME}
@@ -67,6 +70,11 @@ elseif( APPLE )
 		target_include_directories( ${PROJECT_NAME}
 			PUBLIC
 				${CMAKE_CURRENT_LIST_DIR}
+			# The hidapi header (hidapi.h) lives in extern/hidapi/hidapi/.
+			# Add the path explicitly so we don't depend solely on transitive
+			# propagation from the hidapi::hidapi target.
+			PRIVATE
+				${CMAKE_SOURCE_DIR}/extern/hidapi/hidapi
 		)
 
 		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_3DXWARE_SUPPORT )
@@ -74,6 +82,10 @@ elseif( APPLE )
 		# the HID-based macOS path. Defined as PUBLIC so that consumers (qCC,
 		# ccViewer) also see it when compiling their mainwindow.cpp files.
 		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_MAC_HID )
+
+		if( OPTION_HID_DEBUG )
+			target_compile_definitions( ${PROJECT_NAME} PRIVATE CC_HID_DEBUG )
+		endif()
 
 		target_link_libraries( ${PROJECT_NAME} PUBLIC hidapi::hidapi )
 	endif()

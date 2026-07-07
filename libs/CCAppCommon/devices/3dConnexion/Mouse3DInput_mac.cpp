@@ -274,7 +274,8 @@ void HIDWorker::run()
 
 		// Identify the report type. The SpaceMouse Wireless sends 13-byte motion
 		// reports (report ID 0x01 + 6 int16 axes). Older devices send 7-byte
-		// reports (report ID 0x01 + 6 int8 axes, or just 6 int8 axes without ID).
+		// reports (report ID 0x01 + 3 int16 axes for translation, or 7-byte
+		// reports (report ID 0x02 + 3 int16 axes for rotation,
 		// Button reports have report ID 0x03.
 		//
 		// Some wired devices (e.g. SpaceMouse Compact) may use a different
@@ -296,7 +297,7 @@ void HIDWorker::run()
 		}
 		else if (n == 7)
 		{
-			// Older devices / setups that omit the report ID prefix (6 int8 axes).
+			// Older devices / setups with separate translation and rotation reports
 			processMotion(buf, n);
 			lastMotionTime = std::chrono::steady_clock::now();
 			motionActive   = true;
@@ -332,24 +333,52 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 	//   buf[7..8] = rx
 	//   buf[9..10]= ry
 	//   buf[11..12]=rz
-	// Older devices may send a 7-byte report (6 int8 axes, no report ID).
+	// Motion report layout (SpaceMouse Compact, 7 bytes):
+	//   buf[0]    = report ID (0x01 for translation on SpaceMouse Compact)
+	//   buf[1..2] = tx (int16 little-endian)
+	//   buf[3..4] = ty
+	//   buf[5..6] = tz
+	//   buf[0]    = report ID (0x02 for rotation on SpaceMouse Compact)
+	//   buf[1..2] = rx (int16 little-endian)
+	//   buf[3..4] = ry
+	//   buf[5..6] = rz
 	//
 	// We treat the first byte as a report ID whenever n >= 13 (i.e. there is
-	// room for 6 int16 axes after it). For 7-byte reports there is no report
-	// ID prefix - all 7 bytes are 6 int8 axes (impossible to have a 13-byte
-	// int8 report from a real device, so this disambiguation is safe).
+	// room for 6 int16 axes after it). For 7-byte reports the report ID is used
+	// to distinguish translation vs rotation.
 	const unsigned char* p = buf;
 	int                  axisBytes = 2; // int16 by default
+	bool isTranslationReport = true; //	assume translation by default (only false for 7-byte rotation reports)	
+	bool isRotationReport = true;    // assume rotation by default (only false for 7-byte translation reports)
 	if (n >= 13)
 	{
 		// Skip the report ID prefix regardless of its value - the caller has
 		// already routed us here knowing this is a motion-sized report.
 		p = buf + 1;
 	}
+	else if (n == 7)
+	{
+		if (buf[0] == 0x01)
+		{
+			// 7-byte translation report (SpaceMouse Compact)
+			isRotationReport = false;
+		}
+		else if (buf[0] == 0x02)
+		{
+			// 7-byte rotation report (SpaceMouse Compact)
+			isTranslationReport = false;
+		}
+		else
+		{
+			ccLog::Warning(QString("[3D Mouse] Unknown 7-byte motion report ID: %1").arg(buf[0]));
+			return; // unknown report ID - ignore
+		}
+		p = buf + 1; // the report ID prefix is already read 
+	}
 	else
 	{
-		// No report ID prefix (older 7-byte devices) - 6 int8 axes.
-		axisBytes = 1;
+		ccLog::Warning(QString("[3D Mouse] Unexpected motion report size: %1").arg(n));
+		return; // unknown report size - ignore
 	}
 
 	auto readAxis = [&](int offset) -> int
@@ -365,12 +394,28 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 		}
 	};
 
-	int tx = readAxis(0);
-	int ty = readAxis(2);
-	int tz = readAxis(4);
-	int rx = readAxis(6);
-	int ry = readAxis(8);
-	int rz = readAxis(10);
+	int tx = 0, ty = 0, tz = 0, rx = 0, ry = 0, rz = 0;
+	if (isTranslationReport and isRotationReport)
+	{
+		tx = readAxis(0);
+		ty = readAxis(2);
+		tz = readAxis(4);
+		rx = readAxis(6);
+		ry = readAxis(8);
+		rz = readAxis(10);
+	}
+	else if (isTranslationReport)
+	{
+		tx = readAxis(0);
+		ty = readAxis(2);
+		tz = readAxis(4);
+	}
+	else if (isRotationReport)
+	{
+		rx = readAxis(0);
+		ry = readAxis(2);
+		rz = readAxis(4);
+	}	
 
 	if (tx == 0 && ty == 0 && tz == 0 && rx == 0 && ry == 0 && rz == 0)
 	{

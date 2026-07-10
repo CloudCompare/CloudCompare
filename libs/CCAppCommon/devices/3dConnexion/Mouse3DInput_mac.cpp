@@ -130,8 +130,10 @@ bool HIDWorker::openDevice()
 		}
 	}
 
-	// Fallback: first openable interface (for older devices that don't expose a
-	// distinct multi-axis usage).
+	// Fallback: first openable interface. This is typically only reached when
+	// 3DConnexionHelper.app is running (it creates virtual HID interfaces that
+	// don't carry the Multi-axis Controller usage), or on devices that simply
+	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
 	if (!m_handle)
 	{
 		cur = devs;
@@ -213,7 +215,9 @@ void HIDWorker::run()
 	// and doesn't busy-poll. hid_read_timeout returns 0 on timeout (not -1).
 	constexpr int kReadTimeoutMs = 100;
 	// If no report arrives within this many ms of startup, warn the user once.
-	constexpr int kNoReportsWarnMs = 2000;
+	// The threshold is deliberately generous: some users take a few seconds
+	// before they interact with the cap, and we don't want a false alarm.
+	constexpr int kNoReportsWarnMs = 5000;
 
 	while (m_running.load())
 	{
@@ -247,8 +251,9 @@ void HIDWorker::run()
 				}
 			}
 			// Warn once if no report has arrived at all within the first few
-			// seconds - usually means the 3DConnexion driver is holding the
-			// device exclusively.
+			// seconds after the worker thread started. This usually means the
+			// 3DConnexion driver is holding the device exclusively, but it can
+			// also happen if the user simply hasn't touched the cap yet.
 			if (!anyReportArrived && !warnedNoReports)
 			{
 				auto elapsedSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -256,11 +261,12 @@ void HIDWorker::run()
 				if (elapsedSinceStart >= kNoReportsWarnMs)
 				{
 					warnedNoReports = true;
-					ccLog::Warning("[3D Mouse] No HID reports received from the "
-					               "device. If the 3DConnexion driver (3DConnexion"
-					               "Helper.app) is running, quit it - it intercepts "
-					               "the device and prevents the HID path from "
-					               "seeing reports.");
+					ccLog::Warning("[3D Mouse] No HID reports received yet. "
+					               "If you have moved the cap and nothing happens, "
+					               "make sure the 3DConnexion driver "
+					               "(3DConnexionHelper.app) is not running - it "
+					               "intercepts the device and prevents the HID "
+					               "path from seeing reports.");
 				}
 			}
 			continue; // hid_read_timeout already waited kReadTimeoutMs
@@ -272,16 +278,14 @@ void HIDWorker::run()
 		logHidReport("report", buf, n);
 #endif
 
-		// Identify the report type. The SpaceMouse Wireless sends 13-byte motion
-		// reports (report ID 0x01 + 6 int16 axes). Older devices send 7-byte
-		// reports (report ID 0x01 + 3 int16 axes for translation, or 7-byte
-		// reports (report ID 0x02 + 3 int16 axes for rotation,
-		// Button reports have report ID 0x03.
-		//
-		// Some wired devices (e.g. SpaceMouse Compact) may use a different
-		// report ID for motion. To be robust, treat any 13-byte report that is
-		// not a known button report (ID 0x03) as a potential motion report and
-		// attempt to parse it; processMotion() will skip it if all axes are zero.
+		// Identify the report type.
+		// - SpaceMouse Wireless: 13-byte combined motion report (report ID 0x01
+		//   + 6 int16 axes).
+		// - SpaceMouse Compact: 7-byte separate reports (report ID 0x01 = 3 int16
+		//   translation axes, report ID 0x02 = 3 int16 rotation axes).
+		// - Button reports: report ID 0x03.
+		// Any 13-byte report that is not a button report is treated as a combined
+		// motion report; processMotion() handles the axis parsing.
 		if (n >= 2 && buf[0] == 0x03)
 		{
 			processButtons(buf, n, prevButtonMask);
@@ -297,7 +301,7 @@ void HIDWorker::run()
 		}
 		else if (n == 7)
 		{
-			// Older devices / setups with separate translation and rotation reports
+			// Separate translation/rotation report (SpaceMouse Compact).
 			processMotion(buf, n);
 			lastMotionTime = std::chrono::steady_clock::now();
 			motionActive   = true;
@@ -324,98 +328,101 @@ void HIDWorker::run()
 
 void HIDWorker::processMotion(const unsigned char* buf, int n)
 {
-	// Motion report layout (SpaceMouse Wireless, 13 bytes):
-	//   buf[0]    = report ID (0x01 on SpaceMouse Wireless; may differ on other
-	//               devices such as the wired SpaceMouse Compact)
-	//   buf[1..2] = tx (int16 little-endian)
-	//   buf[3..4] = ty
-	//   buf[5..6] = tz
-	//   buf[7..8] = rx
-	//   buf[9..10]= ry
-	//   buf[11..12]=rz
-	// Motion report layout (SpaceMouse Compact, 7 bytes):
-	//   buf[0]    = report ID (0x01 for translation on SpaceMouse Compact)
-	//   buf[1..2] = tx (int16 little-endian)
-	//   buf[3..4] = ty
-	//   buf[5..6] = tz
-	//   buf[0]    = report ID (0x02 for rotation on SpaceMouse Compact)
-	//   buf[1..2] = rx (int16 little-endian)
-	//   buf[3..4] = ry
-	//   buf[5..6] = rz
+	// Motion report layouts:
 	//
-	// We treat the first byte as a report ID whenever n >= 13 (i.e. there is
-	// room for 6 int16 axes after it). For 7-byte reports the report ID is used
-	// to distinguish translation vs rotation.
+	// SpaceMouse Wireless (13 bytes, combined):
+	//   buf[0]     = report ID (0x01)
+	//   buf[1..2]  = tx (int16 little-endian)
+	//   buf[3..4]  = ty
+	//   buf[5..6]  = tz
+	//   buf[7..8]  = rx
+	//   buf[9..10] = ry
+	//   buf[11..12]= rz
+	//
+	// SpaceMouse Compact (7 bytes, separate translation/rotation):
+	//   buf[0]     = 0x01 (translation)  |  0x02 (rotation)
+	//   buf[1..2]  = tx / rx
+	//   buf[3..4]  = ty / ry
+	//   buf[5..6]  = tz / rz
+	//
+	// The Compact sends translation and rotation as two separate reports. To
+	// keep movement smooth, we buffer the last known values of all 6 axes in
+	// m_lastAxes: a translation report updates only tx/ty/tz, a rotation report
+	// only rx/ry/rz, and we always emit the full 6-axis vector. Combined reports
+	// (Wireless) overwrite all 6 at once.
+	enum ReportKind
+	{
+		Combined,     // 13-byte, all 6 axes
+		Translation,  // 7-byte, ID 0x01, 3 translation axes
+		Rotation      // 7-byte, ID 0x02, 3 rotation axes
+	};
+
 	const unsigned char* p = buf;
-	int                  axisBytes = 2; // int16 by default
-	bool isTranslationReport = true; //	assume translation by default (only false for 7-byte rotation reports)	
-	bool isRotationReport = true;    // assume rotation by default (only false for 7-byte translation reports)
+	ReportKind            kind = Combined;
+
 	if (n >= 13)
 	{
-		// Skip the report ID prefix regardless of its value - the caller has
-		// already routed us here knowing this is a motion-sized report.
+		// Combined report - skip the report ID prefix.
 		p = buf + 1;
 	}
 	else if (n == 7)
 	{
 		if (buf[0] == 0x01)
 		{
-			// 7-byte translation report (SpaceMouse Compact)
-			isRotationReport = false;
+			kind = Translation;
 		}
 		else if (buf[0] == 0x02)
 		{
-			// 7-byte rotation report (SpaceMouse Compact)
-			isTranslationReport = false;
+			kind = Rotation;
 		}
 		else
 		{
 			ccLog::Warning(QString("[3D Mouse] Unknown 7-byte motion report ID: %1").arg(buf[0]));
-			return; // unknown report ID - ignore
+			return;
 		}
-		p = buf + 1; // the report ID prefix is already read 
+		p = buf + 1;
 	}
 	else
 	{
 		ccLog::Warning(QString("[3D Mouse] Unexpected motion report size: %1").arg(n));
-		return; // unknown report size - ignore
+		return;
 	}
 
 	auto readAxis = [&](int offset) -> int
 	{
-		if (axisBytes == 2)
-		{
-			signed short v = static_cast<signed short>(p[offset] | (p[offset + 1] << 8));
-			return static_cast<int>(v);
-		}
-		else
-		{
-			return static_cast<int>(static_cast<signed char>(p[offset]));
-		}
+		signed short v = static_cast<signed short>(p[offset] | (p[offset + 1] << 8));
+		return static_cast<int>(v);
 	};
 
-	int tx = 0, ty = 0, tz = 0, rx = 0, ry = 0, rz = 0;
-	if (isTranslationReport and isRotationReport)
+	// Update the axis buffer based on the report kind.
+	switch (kind)
 	{
-		tx = readAxis(0);
-		ty = readAxis(2);
-		tz = readAxis(4);
-		rx = readAxis(6);
-		ry = readAxis(8);
-		rz = readAxis(10);
+	case Combined:
+		m_lastAxes[0] = readAxis(0);
+		m_lastAxes[1] = readAxis(2);
+		m_lastAxes[2] = readAxis(4);
+		m_lastAxes[3] = readAxis(6);
+		m_lastAxes[4] = readAxis(8);
+		m_lastAxes[5] = readAxis(10);
+		break;
+	case Translation:
+		m_lastAxes[0] = readAxis(0);
+		m_lastAxes[1] = readAxis(2);
+		m_lastAxes[2] = readAxis(4);
+		break;
+	case Rotation:
+		m_lastAxes[3] = readAxis(0);
+		m_lastAxes[4] = readAxis(2);
+		m_lastAxes[5] = readAxis(4);
+		break;
 	}
-	else if (isTranslationReport)
-	{
-		tx = readAxis(0);
-		ty = readAxis(2);
-		tz = readAxis(4);
-	}
-	else if (isRotationReport)
-	{
-		rx = readAxis(0);
-		ry = readAxis(2);
-		rz = readAxis(4);
-	}	
+
+	int tx = m_lastAxes[0];
+	int ty = m_lastAxes[1];
+	int tz = m_lastAxes[2];
+	int rx = m_lastAxes[3];
+	int ry = m_lastAxes[4];
+	int rz = m_lastAxes[5];
 
 	if (tx == 0 && ty == 0 && tz == 0 && rx == 0 && ry == 0 && rz == 0)
 	{
@@ -428,23 +435,25 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 	double ds = c_hidPollPeriodMs * c_3dmouseAngularVelocity_mac;
 
 	std::vector<float> axes(6);
-	// Blender-default NDOF axis mapping (see Blender manual, Input → NDOF).
-	// Blender swaps the device's physical Y (forward/back) and Z (lift/compress)
-	// relative to the raw HID report, so that pushing the cap forward zooms and
-	// lifting the cap pans vertically. Sign conventions calibrated for
-	// object-centric navigation in CloudCompare:
-	//   tx (cap left/right)    -> pan X      (cap left  -> object left)
-	//   tz (cap lift/compress) -> pan Y      (cap up    -> object up)
-	//   ty (cap forward/back)  -> zoom       (cap fwd   -> zoom in)
-	//   rx (pitch)             -> orbit X    (tilt back -> object up)
-	//   ry (roll)              -> orbit Y
-	//   rz (yaw / twist)       -> orbit Z
+	// NDOF axis mapping with Y/Z swap (matching spacenavd's DF_SWAPYZ flag).
+	// The device HID coordinate system uses Y=forward/back, Z=up/down, but
+	// CloudCompare's world coordinate system uses Y=up/down, Z=forward/back.
+	// We swap Y and Z for both translation and rotation so that the device's
+	// physical axes align with the on-screen world.
+	//
+	// spacenavd also inverts Y and Z values (DF_INVYZ). Combined swap+invert:
+	//   tx (cap left/right)      -> pan X    = -tx
+	//   tz (cap lift/compress)   -> pan Y    = -tz  (device Z -> CC Y, swap+invert)
+	//   ty (cap forward/back)    -> zoom     = -ty  (device Y -> CC Z, swap+invert)
+	//   rx (pitch)               -> orbit X  = +rx  (no swap, no invert)
+	//   rz (yaw / twist)         -> orbit Y  = -rz  (device RZ -> CC RY, swap+invert)
+	//   ry (roll / tilt sideways)-> orbit Z  = -ry  (device RY -> CC RZ, swap+invert)
 	axes[0] = -scaleAxis(tx, ds); // pan X
-	axes[1] = -scaleAxis(tz, ds); // pan Y (Blender swap)
-	axes[2] = -scaleAxis(ty, ds); // zoom   (Blender swap)
-	axes[3] =  scaleAxis(rx, ds); // orbit X (inverted for natural pitch)
-	axes[4] =  scaleAxis(ry, ds); // orbit Y
-	axes[5] =  scaleAxis(rz, ds); // orbit Z
+	axes[1] = -scaleAxis(tz, ds); // pan Y (Y/Z swap)
+	axes[2] = -scaleAxis(ty, ds); // zoom   (Y/Z swap)
+	axes[3] =  scaleAxis(rx, ds); // orbit X
+	axes[4] = -scaleAxis(rz, ds); // orbit Y (Y/Z swap)
+	axes[5] =  scaleAxis(ry, ds); // orbit Z (Y/Z swap)
 
 	Q_EMIT sigMove3d(axes);
 }

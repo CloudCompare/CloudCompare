@@ -381,6 +381,14 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	//! Sets current interaction flags
 	void setInteractionMode(INTERACTION_FLAGS flags);
 
+	//! Notifies the window that a 3D mouse is currently driving the view
+	/** This enables mesh decimation-on-move (the same behaviour as when the
+	    regular mouse is dragged) so that interaction with large meshes stays
+	    smooth. Call with false when the 3D mouse is released so that the
+	    standard LOD refinement cycle can restore full quality.
+	**/
+	void set3DMouseActive(bool state);
+
 	//! Returns the current interaction flags
 	inline virtual INTERACTION_FLAGS getInteractionMode() const
 	{

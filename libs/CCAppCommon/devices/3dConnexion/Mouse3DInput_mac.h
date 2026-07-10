@@ -85,6 +85,13 @@ class HIDWorker : public QThread
 	std::atomic_bool m_running{false};
 	Mouse3DInput*    m_parent;
 	QString          m_devicePath;
+
+	//! Last known raw axis values (tx, ty, tz, rx, ry, rz).
+	//! Used to merge separate translation and rotation reports (SpaceMouse
+	//! Compact) into a single 6-axis motion event, so that movement stays
+	//! smooth. Combined reports (SpaceMouse Wireless) overwrite all 6 at
+	//! once and are not affected by this buffer.
+	int m_lastAxes[6] = {0, 0, 0, 0, 0, 0};
 };
 
 #endif // CC_MAC_HID

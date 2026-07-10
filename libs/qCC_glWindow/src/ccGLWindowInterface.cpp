@@ -4409,6 +4409,16 @@ void ccGLWindowInterface::setInteractionMode(INTERACTION_FLAGS flags)
 	}
 }
 
+void ccGLWindowInterface::set3DMouseActive(bool state)
+{
+	// While a 3D mouse is driving the view we set m_mouseMoved so that
+	// decimateMeshOnMove is active (see display parameter setup). This
+	// mirrors the behaviour of a regular mouse drag, giving smooth
+	// interaction with large meshes. When the 3D mouse is released,
+	// m_mouseMoved is cleared so the LOD refinement cycle can run.
+	m_mouseMoved = state;
+}
+
 void ccGLWindowInterface::doDragEnterEvent(QDragEnterEvent* event)
 {
 	const QMimeData* mimeData = event->mimeData();

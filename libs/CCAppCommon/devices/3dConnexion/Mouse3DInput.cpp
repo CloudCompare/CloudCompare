@@ -364,9 +364,15 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 	assert(vec.size() == 6);
 
 #ifdef CC_MAC_HID
-	// Platform-neutral Rodrigues rotation: the rotation vector (-rx, ry, -rz)
+	// Platform-neutral Rodrigues rotation: the rotation vector (rx, ry, rz)
 	// encodes both the axis (direction) and the angle (magnitude).
-	CCVector3d axis(-vec[3], vec[4], -vec[5]);
+	// The sign conventions are handled in Mouse3DInput_mac.cpp::processMotion.
+	//
+	// The rotation axis stays in camera space. rotateBaseViewMat() does
+	// viewMat = rotMat * viewMat (pre-multiply), which applies the rotation
+	// in camera space - exactly like the regular mouse drag does. This makes
+	// the rotation relative to the current view direction automatically.
+	CCVector3d axis(vec[3], vec[4], vec[5]);
 	double     angle = axis.norm();
 	if (CCCoreLib::GreaterThanEpsilon(angle))
 	{
@@ -486,5 +492,34 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 		win->showPivotSymbol(false);
 	}
 
-	win->redraw();
+	// Enable LOD during 3D mouse interaction so that large clouds/meshes are
+	// decimated while moving - just like normal mouse interaction does.
+	// LOD stays enabled after the movement stops and the standard LOD refresh
+	// cycle progressively restores full quality.
+	bool hasMotion = false;
+	for (size_t i = 0; i < 6; ++i)
+	{
+		if (CCCoreLib::GreaterThanEpsilon(std::abs(vec[i])))
+		{
+			hasMotion = true;
+			break;
+		}
+	}
+	if (hasMotion)
+	{
+		// Enable LOD and signal that the 3D mouse is driving the view. This
+		// sets the internal 'mouse moved' flag so that meshes are decimated
+		// during interaction (just like dragging the regular mouse), and LOD
+		// is activated so that large clouds are rendered at a reduced level
+		// until the movement stops.
+		win->setLODEnabled(true);
+		win->set3DMouseActive(true);
+		win->redraw(false, false);
+	}
+	else
+	{
+		// No motion (e.g. a zero report) - let the LOD refinement cycle run.
+		win->set3DMouseActive(false);
+		win->redraw();
+	}
 }

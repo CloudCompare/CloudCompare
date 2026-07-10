@@ -320,6 +320,11 @@ void cc3DMouseManager::on3DMouseReleased()
 	if (win == nullptr)
 		return;
 
+	// The 3D mouse is no longer driving the view: clear the 'mouse moved'
+	// flag so that the LOD refinement cycle can resume and restore full
+	// rendering quality.
+	win->set3DMouseActive(false);
+
 	if (win->getPivotVisibility() == ccGLWindowInterface::PIVOT_SHOW_ON_MOVE)
 	{
 		// we have to hide the pivot symbol!

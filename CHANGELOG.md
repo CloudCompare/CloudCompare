@@ -93,8 +93,6 @@ New features:
 		- one can choose to discard it the first time it appears
 		- it can then be restored via the 'Display > Display options' menu entry
 
-	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
-
 	- New tool: 'Display > Current 3D view Information'
 		- display some pieces of information on the current 3D view (resolution, pixel size, image size, camera orientation, etc.)
 		- also available via the new 'info' button of the 'Display > Render to file' option (taking into account a potential scaling)
@@ -124,6 +122,9 @@ New plugins
 		- computes volume differences between 2 meshes, with some visual representation
   		- exports detected volumes as individual meshes
 		- option to generate CSV report
+		
+	- 3D Forest Inventory
+		- previously available as a Python plugin, now a standalone C++ one
 
 Improvements:
 
@@ -244,6 +245,8 @@ Improvements:
 		- general improvement, with a better behavior when changing the active scalar field, the name of a class,
 			or the camera FOV and other parameters
 		- option to export the colors as RGB
+
+	- 3DMASC: add verticality (VERT) to the neighborhood features (PCA1, PCA2, PCA3, SPHER, LINEA, etc.)
 
 	- M3C2 plugin
 		- better handling of the normal mode

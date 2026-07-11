@@ -62,6 +62,10 @@ QString FileIOFilter::GetRealFilename(QString filename)
 	{
 		// Resolve the whole symbolic link chain (not just a single level).
 		// canonicalFilePath() returns an empty string on broken links.
+		// It also resolves through Windows shortcut and macOS alias files;
+		// that is undocumented in Qt and will likely change in the future,
+		// given that `isSymlink()` is already documented to likely change, see:
+		//     https://github.com/CloudCompare/CloudCompare/pull/2341#issuecomment-4947138037
 		QString target = fi.canonicalFilePath();
 		if (!target.isEmpty())
 		{
@@ -435,8 +439,8 @@ ccHObject* FileIOFilter::LoadFromFile(const QString&  inputFilename,
 {
 	Shared filter;
 
-	// special case for symbolic link, shortcut or alias files
-	QString filename = GetRealFilename(inputFilename);
+	// special case for symbolic link, Windows shortcut or macOS alias files
+	QString resolvedFilename = GetRealFilename(inputFilename);
 
 	// if the right filter is specified by the caller
 	if (!fileFilter.isEmpty())
@@ -471,7 +475,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString&  inputFilename,
 		}
 	}
 
-	return LoadFromFile(filename, loadParameters, filter, result);
+	return LoadFromFile(resolvedFilename, loadParameters, filter, result);
 }
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject*            entities,
@@ -485,11 +489,11 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject*            entities,
 	}
 
 	// special case for symbolic link, shortcut or alias files
-	QString filename = GetRealFilename(inputFilename);
+	QString resolvedFilename = GetRealFilename(inputFilename);
 
 	// if the file name has no extension, we had a default one!
-	QString completeFileName(filename);
-	if (QFileInfo(filename).suffix().isEmpty())
+	QString completeFileName(resolvedFilename);
+	if (QFileInfo(resolvedFilename).suffix().isEmpty())
 	{
 		completeFileName += QString(".%1").arg(filter->getDefaultExtension());
 	}
@@ -501,17 +505,17 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject*            entities,
 	}
 	catch (...)
 	{
-		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while saving file '%1'").arg(filename));
+		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while saving file '%1'").arg(resolvedFilename));
 		result = CC_FERR_CONSOLE_ERROR;
 	}
 
 	if (result == CC_FERR_NO_ERROR)
 	{
-		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(filename));
+		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(resolvedFilename));
 	}
 	else
 	{
-		DisplayErrorMessage(result, "saving", filename);
+		DisplayErrorMessage(result, "saving", resolvedFilename);
 	}
 
 	return result;

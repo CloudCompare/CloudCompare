@@ -320,7 +320,7 @@ class FileIOFilter
 	Q_DECLARE_FLAGS(FilterFeatures, FilterFeature)
 
   public: // helpers
-	//! Returns the real file/path in case the input filename points to a symbolic link, shortcut or alias
+	//! Returns the real file/path in case the input filename points to a symbolic link, Windows shortcut or macOS alias
 	static QString GetRealFilename(QString filename);
 
 	//! Returns the extension to use to guess the file format for the given (potentially symlinked) filename

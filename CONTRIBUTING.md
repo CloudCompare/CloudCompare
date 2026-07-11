@@ -37,6 +37,14 @@ Example: `ccConsole` saved in `ccConsole.h` and `ccConsole.cpp`
 ### Tabs and indentation
 
 - Indentation is expected to be made in `Tabs` only, each of size `4`.
+- See formatting below
+
+### Formatting
+Formatting is now automatically managed by clang-format and enforce by the CI.
+Before pushing to github, make sure to run the 'format' project.
+
+You can also use the check-format project to make sure everything is correct.
+cmake --target check-format
 
 ### Summary
 Element | Example

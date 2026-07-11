@@ -214,6 +214,7 @@ Improvements:
 			preserving the image sensor definition
 		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
 		- Empty scans will not trigger an error anymore (just a warning message)
+		- E57 timestamps are now loaded as scalar fields
 
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
@@ -279,6 +280,7 @@ Improvements:
 			- A: pick 3 points and display the (a)ngles
 			- R: draw a (r)ectangle with a subtitle
 			- S: (s)ave the current label
+		- All scalar fields of the picked point are now shown in the Console.
 
 	- Cross section tool
 		- the default bounding-box is now very slightly larger than the entities bounding-box so as

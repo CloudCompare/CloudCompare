@@ -18,7 +18,7 @@
 //#  Zhang W, Qi J, Wan P, Wang H, Xie D, Wang X, Yan G. An Easy-to-Use Airborne LiDAR  #
 //#  Data Filtering Method Based on Cloth Simulation. Remote Sensing. 2016; 8(6):501.   #
 //#                                                                                     #
-//#                                     Copyright                                       #
+//#                                     Copyright (c)                                   #
 //#               RAMM laboratory, School of Geography, Beijing Normal University       #
 //#                               (http://ramm.bnu.edu.cn/)                             #
 //#                                                                                     #
@@ -39,7 +39,7 @@ class Particle
 private:
 	bool movable; // can the particle move or not ? used to pin parts of the cloth
 	//double mass; // the mass of the particle (is always 1 in this example)
-	double acceleration; // the current acceleration of the particle (along Y) - DGM: already multiplied by dt^²
+	double acceleration; // the current acceleration of the particle (along Y) - DGM: already multiplied by dt^2
 	//double time_step2; // square time step
 
 	Vec3 pos; // the current position of the particle in 3D space

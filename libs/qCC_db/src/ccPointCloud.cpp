@@ -673,7 +673,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 				else
 				{
-					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate colors!");
+					ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate colors!");
 					showColors(false);
 				}
 			}
@@ -719,7 +719,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 				else
 				{
-					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate normals!");
+					ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate normals!");
 					showNormals(false);
 				}
 			}
@@ -767,7 +767,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				else
 				{
 					success = false;
-					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate waveforms!");
+					ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate waveforms!");
 				}
 			}
 			else if (fwfData() != addedCloud->fwfData())
@@ -788,7 +788,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					success = false;
 					delete mergedContainer;
 					mergedContainer = nullptr;
-					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to merge waveform containers!");
+					ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to merge waveform containers!");
 				}
 			}
 
@@ -830,7 +830,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						{
 							if (freeDescriptorIDs.empty())
 							{
-								ccLog::Warning("[ccPointCloud::fusion] Not enough free FWF descriptor IDs on destination cloud: some waveforms won't be imported!");
+								ccLog::Warning("[ccPointCloud::Merge] Not enough free FWF descriptor IDs on destination cloud: some waveforms won't be imported!");
 								break;
 							}
 							uint8_t newKey = freeDescriptorIDs.front();
@@ -852,7 +852,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					success = false;
 					clearFWFData();
-					ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to copy waveform descriptors!");
+					ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to copy waveform descriptors!");
 				}
 
 				// and now import waveforms
@@ -880,7 +880,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 				if (lostWaveformCount)
 				{
-					ccLog::Warning(QString("[ccPointCloud::fusion] %1 waveform(s) were lost in the fusion process").arg(lostWaveformCount));
+					ccLog::Warning(QString("[ccPointCloud::Merge] %1 waveform(s) were lost in the fusion process").arg(lostWaveformCount));
 				}
 			}
 		}
@@ -929,6 +929,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					// we fill the beginning with NaN (as there is no equivalent in the current cloud)
 					if (newSF->resizeSafe(pointCountBefore + addedPoints, true, CCCoreLib::NAN_VALUE))
 					{
+						if (pointCountBefore != 0)
+						{
+							ccLog::Warning(QString("[Merge] Destination cloud '%1' has no scalar field '%2'. NaN values will be added.").arg(getName()).arg(QString::fromStdString(sf->getName())));
+						}
+
 						// we copy the new values
 						for (unsigned i = 0; i < addedPoints; i++)
 						{
@@ -949,7 +954,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					{
 						newSF->release();
 						newSF = nullptr;
-						ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
+						ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
 					}
 				}
 			}
@@ -965,6 +970,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 				if (sf->currentSize() == pointCountBefore)
 				{
+					if (addedPoints != 0)
+					{
+						ccLog::Warning(QString("[Merge] Source cloud '%1' has no scalar field '%2'. NaN values will be added.").arg(addedCloud->getName()).arg(QString::fromStdString(sf->getName())));
+					}
+
 					// we fill the end with NaN (as there is no equivalent in the added cloud)
 					ScalarType NaN = sf->NaN();
 					for (unsigned i = 0; i < addedPoints; i++)
@@ -1038,7 +1048,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				{
 					// not enough memory
 					m_grids.resize(0);
-					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
+					ccLog::Warning(QString("[ccPointCloud::Merge] Not enough memory: failed to copy the grid structure(s) from '%1'").arg(addedCloud->getName()));
 					break;
 				}
 			}
@@ -1050,7 +1060,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	}
 	else if (gridCount() != 0) // otherwise we'll have to drop the former grid structures!
 	{
-		ccLog::Warning(QString("[ccPointCloud::fusion] Grid structure(s) will be dropped as the merged cloud is unstructured"));
+		ccLog::Warning(QString("[ccPointCloud::Merge] Grid structure(s) will be dropped as the merged cloud is unstructured"));
 		m_grids.resize(0);
 	}
 
@@ -1067,7 +1077,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			         || (getGlobalShift() - addedCloud->getGlobalShift()).norm2d() > 1.0e-6)
 			{
 				// the clouds have different shift & scale information!
-				ccLog::Warning(QString("[ccPointCloud::fusion] Global shift/scale information conflict: shift/scale of cloud '%1' will be ignored!").arg(addedCloud->getName()));
+				ccLog::Warning(QString("[ccPointCloud::Merge] Global shift/scale information conflict: shift/scale of cloud '%1' will be ignored!").arg(addedCloud->getName()));
 			}
 		}
 	}
@@ -1108,7 +1118,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 				else
 				{
-					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
+					ccLog::Warning(QString("[ccPointCloud::Merge] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
 				}
 			}
 		}

@@ -280,7 +280,7 @@ Improvements:
 			- A: pick 3 points and display the (a)ngles
 			- R: draw a (r)ectangle with a subtitle
 			- S: (s)ave the current label
-		- All scalar fields of the picked point are now shown in the Console.
+		- All scalar fields of the picked point are now shown in the resulting Label properties dialog.
 
 	- Cross section tool
 		- the default bounding-box is now very slightly larger than the entities bounding-box so as

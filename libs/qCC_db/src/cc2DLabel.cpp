@@ -207,7 +207,7 @@ QString cc2DLabel::getTitle(int precision) const
 
 		// If available, we display the point's currently selected SF value.
 		// A point cloud may have very many scalar fields (e.g. multi-spectral data),
-		// so we show ALL of them in the Console only, not in this popup.
+		// so we show ALL of them in the Label properties dialog only, not in this popup.
 		LabelInfo1 info;
 		getLabelInfo1(info);
 		if (info.hasSF)

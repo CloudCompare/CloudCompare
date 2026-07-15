@@ -66,7 +66,10 @@ class HIDWorker : public QThread
 	//! Closes the HID device (idempotent).
 	void closeDevice();
 
-	void stop() { m_running.store(false); }
+	void stop()
+	{
+		m_running.store(false);
+	}
 
   Q_SIGNALS:
 	void sigMove3d(std::vector<float> motionData);

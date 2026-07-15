@@ -38,8 +38,12 @@
 #include <cstring>
 #include <wchar.h>
 
-// 3DConnexion vendor id
-static constexpr unsigned short c_3dconnexionVID = 0x256f;
+// 3DConnexion vendor IDs.
+// Newer devices (since ~2016) use 0x256f. Older devices (SpaceNavigator,
+// SpaceExplorer, SpacePilot, etc.) use the Logitech vendor ID 0x046d.
+// See https://3dconnexion.com/uk/support/faq/how-can-i-check-if-my-usb-3d-mouse-is-recognized-by-windows/
+static constexpr unsigned short c_3dconnexionVID    = 0x256f;
+static constexpr unsigned short c_old3dconnexionVID = 0x046d;
 
 //! Object angular velocity per mouse tick (in radians per ms per count)
 //! Mirrors the definition in Mouse3DInput.cpp (Windows path uses eventData.period,
@@ -57,8 +61,8 @@ static constexpr float c_3dmouseProgressiveRef = 250.0f;
 //! deflections get amplified. Curve: out = raw * (1 + |raw|/ref) * gain * ds.
 static float scaleAxis(int raw, double ds)
 {
-	float a            = static_cast<float>(raw);
-	float progressive  = 1.0f + std::min(std::abs(a) / c_3dmouseProgressiveRef, 1.0f);
+	float a           = static_cast<float>(raw);
+	float progressive = 1.0f + std::min(std::abs(a) / c_3dmouseProgressiveRef, 1.0f);
 	return a * progressive * c_3dmouseGain * static_cast<float>(ds);
 }
 
@@ -91,20 +95,26 @@ static bool is3dConnexionHelperRunning()
 //! Maps a button bitmask bit to a Mouse3DInput::VirtualKey value.
 //! Layout documented by the spacenavd / 3DConnexion HID community.
 static const int c_buttonMap[] = {
-	Mouse3DInput::V3DK_FIT,    // bit 0
-	Mouse3DInput::V3DK_MENU,   // bit 1
-	Mouse3DInput::V3DK_TOP,    // bit 2
-	Mouse3DInput::V3DK_LEFT,   // bit 3
-	Mouse3DInput::V3DK_RIGHT,  // bit 4
-	Mouse3DInput::V3DK_FRONT,  // bit 5
-	Mouse3DInput::V3DK_BOTTOM, // bit 6
-	Mouse3DInput::V3DK_BACK,   // bit 7
+    Mouse3DInput::V3DK_FIT,    // bit 0
+    Mouse3DInput::V3DK_MENU,   // bit 1
+    Mouse3DInput::V3DK_TOP,    // bit 2
+    Mouse3DInput::V3DK_LEFT,   // bit 3
+    Mouse3DInput::V3DK_RIGHT,  // bit 4
+    Mouse3DInput::V3DK_FRONT,  // bit 5
+    Mouse3DInput::V3DK_BOTTOM, // bit 6
+    Mouse3DInput::V3DK_BACK,   // bit 7
 };
 static constexpr size_t c_buttonMapSize = sizeof(c_buttonMap) / sizeof(c_buttonMap[0]);
 
 bool HIDWorker::openDevice()
 {
 	hid_device_info* devs = hid_enumerate(c_3dconnexionVID, 0x0);
+	if (!devs)
+	{
+		// Fall back to the legacy Logitech vendor ID for older 3DConnexion
+		// devices (SpaceNavigator, SpaceExplorer, SpacePilot, etc.).
+		devs = hid_enumerate(c_old3dconnexionVID, 0x0);
+	}
 	if (!devs)
 	{
 		ccLog::Warning("[3D Mouse] No 3DConnexion HID device found");
@@ -194,22 +204,22 @@ void HIDWorker::run()
 	// State for button edge detection
 	unsigned int prevButtonMask = 0;
 	// State for "released" emission (analogous to SI_ZERO_EVENT on Windows)
-	auto         lastMotionTime = std::chrono::steady_clock::now();
-	bool         motionActive    = false;
+	auto lastMotionTime = std::chrono::steady_clock::now();
+	bool motionActive   = false;
 
 	// Tracks whether any report has ever arrived. Used to warn the user once
 	// if no reports arrive within the first few seconds of running, which
 	// typically means the 3Dconnexion driver daemon is holding an exclusive
 	// lock on the device and silently consuming reports.
-	auto         threadStartTime = lastMotionTime;
-	bool         warnedNoReports = false;
-	bool         anyReportArrived = false;
+	auto threadStartTime  = lastMotionTime;
+	bool warnedNoReports  = false;
+	bool anyReportArrived = false;
 
 	unsigned char buf[80] = {0};
 
 	// Give up only after this many consecutive read errors (e.g. device unplugged).
 	constexpr int kMaxConsecutiveErrors = 100;
-	int           consecutiveErrors      = 0;
+	int           consecutiveErrors     = 0;
 
 	// Read with a timeout so the loop stays responsive to m_running changes
 	// and doesn't busy-poll. hid_read_timeout returns 0 on timeout (not -1).
@@ -257,7 +267,8 @@ void HIDWorker::run()
 			if (!anyReportArrived && !warnedNoReports)
 			{
 				auto elapsedSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(
-				    std::chrono::steady_clock::now() - threadStartTime).count();
+				                             std::chrono::steady_clock::now() - threadStartTime)
+				                             .count();
 				if (elapsedSinceStart >= kNoReportsWarnMs)
 				{
 					warnedNoReports = true;
@@ -352,13 +363,13 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 	// (Wireless) overwrite all 6 at once.
 	enum ReportKind
 	{
-		Combined,     // 13-byte, all 6 axes
-		Translation,  // 7-byte, ID 0x01, 3 translation axes
-		Rotation      // 7-byte, ID 0x02, 3 rotation axes
+		Combined,    // 13-byte, all 6 axes
+		Translation, // 7-byte, ID 0x01, 3 translation axes
+		Rotation     // 7-byte, ID 0x02, 3 rotation axes
 	};
 
-	const unsigned char* p = buf;
-	ReportKind            kind = Combined;
+	const unsigned char* p    = buf;
+	ReportKind           kind = Combined;
 
 	if (n >= 13)
 	{
@@ -451,9 +462,9 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 	axes[0] = -scaleAxis(tx, ds); // pan X
 	axes[1] = -scaleAxis(tz, ds); // pan Y (Y/Z swap)
 	axes[2] = -scaleAxis(ty, ds); // zoom   (Y/Z swap)
-	axes[3] =  scaleAxis(rx, ds); // orbit X
+	axes[3] = scaleAxis(rx, ds);  // orbit X
 	axes[4] = -scaleAxis(rz, ds); // orbit Y (Y/Z swap)
-	axes[5] =  scaleAxis(ry, ds); // orbit Z (Y/Z swap)
+	axes[5] = scaleAxis(ry, ds);  // orbit Z (Y/Z swap)
 
 	Q_EMIT sigMove3d(axes);
 }

@@ -134,15 +134,12 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		return false;
 	}
 
-	QObject::connect(m_hidWorker, &HIDWorker::sigMove3d,
-	                 this, [this](std::vector<float> v)
-	                 { Q_EMIT sigMove3d(v); }, Qt::QueuedConnection);
-	QObject::connect(m_hidWorker, &HIDWorker::sigReleased,
-	                 this, &Mouse3DInput::sigReleased, Qt::QueuedConnection);
-	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyDown,
-	                 this, &Mouse3DInput::sigOn3dmouseKeyDown, Qt::QueuedConnection);
-	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyUp,
-	                 this, &Mouse3DInput::sigOn3dmouseKeyUp, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigMove3d, this, [this](std::vector<float> v)
+	                 { Q_EMIT sigMove3d(v); },
+	                 Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigReleased, this, &Mouse3DInput::sigReleased, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyDown, this, &Mouse3DInput::sigOn3dmouseKeyDown, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyUp, this, &Mouse3DInput::sigOn3dmouseKeyUp, Qt::QueuedConnection);
 
 	m_hidWorker->start();
 	return true;

@@ -50,6 +50,6 @@
 [submodule "plugins/core/Standard/cc3DFin"]
 	path = plugins/core/Standard/cc3DFin
 	url = https://github.com/3DFin/cc3DFin.git
-[submodule "extern/hidapi"]
-	path = extern/hidapi
+[submodule "libs/CCAppCommon/devices/3dConnexion/extern/hidapi"]
+	path = libs/CCAppCommon/devices/3dConnexion/extern/hidapi
 	url = https://github.com/libusb/hidapi.git

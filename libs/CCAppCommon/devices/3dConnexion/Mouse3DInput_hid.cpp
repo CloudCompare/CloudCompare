@@ -15,12 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-// macOS-only HID-based implementation of the 3DConnexion 3D mouse support.
+// HID-based implementation of the 3DConnexion 3D mouse support.
 // Drives the device directly via hidapi, without the proprietary 3DxWare SDK.
 
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 
-#include "Mouse3DInput_mac.h"
+#include "Mouse3DInput_hid.h"
 
 #include "Mouse3DInput.h"
 
@@ -48,7 +48,7 @@ static constexpr unsigned short c_old3dconnexionVID = 0x046d;
 //! Object angular velocity per mouse tick (in radians per ms per count)
 //! Mirrors the definition in Mouse3DInput.cpp (Windows path uses eventData.period,
 //! which is roughly the report period in ms - we use the polling period instead).
-static const double c_3dmouseAngularVelocity_mac = 1.0e-6;
+static const double c_3dmouseAngularVelocity_hid = 1.0e-6;
 //! Polling period (ms) - approximately 60 Hz
 static constexpr int c_hidPollPeriodMs = 16;
 
@@ -181,7 +181,7 @@ bool HIDWorker::openDevice()
 	}
 
 	// Blocking reads with a timeout - avoids the spurious -1 returns that
-	// non-blocking hid_read produces on macOS when no data is available.
+	// non-blocking hid_read produces when no data is available.
 	// stop() still terminates the loop because we check m_running each
 	// iteration and the timeout bounds how long we wait.
 	hid_set_nonblocking(m_handle, 0);
@@ -443,7 +443,7 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 
 	// Scaling: progressive (non-linear) curve so small deflections stay fine
 	// while large deflections are amplified for fast navigation.
-	double ds = c_hidPollPeriodMs * c_3dmouseAngularVelocity_mac;
+	double ds = c_hidPollPeriodMs * c_3dmouseAngularVelocity_hid;
 
 	std::vector<float> axes(6);
 	// NDOF axis mapping with Y/Z swap (matching spacenavd's DF_SWAPYZ flag).
@@ -512,4 +512,4 @@ void HIDWorker::processButtons(const unsigned char* buf, int n, unsigned int& pr
 	prevButtonMask = curButtonMask;
 }
 
-#endif // CC_MAC_HID
+#endif // CC_3DMOUSE_HID

@@ -21,8 +21,8 @@
 
 #include "Mouse3DInput.h"
 
-#ifdef CC_MAC_HID
-#include "Mouse3DInput_mac.h"
+#ifdef CC_3DMOUSE_HID
+#include "Mouse3DInput_hid.h"
 #endif
 
 // qCC_db
@@ -43,8 +43,8 @@
 #include <windows.h>
 #endif
 
-#ifdef CC_MAC_HID
-// hidapi (HID path for macOS) - Mouse3DInput_mac.cpp provides the HIDWorker
+#ifdef CC_3DMOUSE_HID
+// hidapi - Mouse3DInput_hid.cpp provides the HIDWorker
 #else
 // 3DxWare
 #include <si.h>
@@ -59,7 +59,7 @@ static const double c_3dmouseAngularVelocity = 1.0e-6;
 // Unique instance
 static Mouse3DInput* s_mouseInputInstance = nullptr;
 
-#ifndef CC_MAC_HID
+#ifndef CC_3DMOUSE_HID
 #include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
@@ -81,11 +81,11 @@ class RawInputEventFilter : public QAbstractNativeEventFilter
 	}
 };
 static RawInputEventFilter s_rawInputEventFilter;
-#endif // CC_MAC_HID
+#endif // CC_3DMOUSE_HID
 
 Mouse3DInput::Mouse3DInput(QObject* parent)
     : QObject(parent)
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
     , m_siHandle(nullptr)
     , m_hidWorker(nullptr)
 #else
@@ -99,7 +99,7 @@ Mouse3DInput::Mouse3DInput(QObject* parent)
 
 Mouse3DInput::~Mouse3DInput()
 {
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 	disconnectDriver();
 #endif
 	// Unregister current instance
@@ -117,14 +117,14 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 		return false;
 	}
 
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 	Q_UNUSED(mainWidget)
 	Q_UNUSED(appName)
 
 	// Required for Qt::QueuedConnection across thread boundaries.
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 
-	// macOS path: drive the device directly via hidapi (HIDWorker thread)
+	// drive the device directly via hidapi (HIDWorker thread)
 	m_hidWorker = new HIDWorker(this);
 	if (!m_hidWorker->openDevice())
 	{
@@ -214,7 +214,7 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 
 void Mouse3DInput::disconnectDriver()
 {
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 	if (m_hidWorker)
 	{
 		m_hidWorker->stop();
@@ -235,8 +235,8 @@ void Mouse3DInput::disconnectDriver()
 
 bool Mouse3DInput::onSiEvent(void* siGetEventData)
 {
-#ifdef CC_MAC_HID
-	// Not used on macOS - the HIDWorker thread drives the signals directly
+#ifdef CC_3DMOUSE_HID
+	// Not used with hidapi - the HIDWorker thread drives the signals directly
 	Q_UNUSED(siGetEventData)
 	return false;
 #else
@@ -360,10 +360,10 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 {
 	assert(vec.size() == 6);
 
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 	// Platform-neutral Rodrigues rotation: the rotation vector (rx, ry, rz)
 	// encodes both the axis (direction) and the angle (magnitude).
-	// The sign conventions are handled in Mouse3DInput_mac.cpp::processMotion.
+	// The sign conventions are handled in Mouse3DInput_hid.cpp::processMotion.
 	//
 	// The rotation axis stays in camera space. rotateBaseViewMat() does
 	// viewMat = rotMat * viewMat (pre-multiply), which applies the rotation

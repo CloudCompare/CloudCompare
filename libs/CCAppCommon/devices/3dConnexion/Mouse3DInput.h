@@ -32,8 +32,8 @@
 
 class ccGLWindowInterface;
 
-#ifdef CC_MAC_HID
-// Forward declaration - the HIDWorker thread is defined in Mouse3DInput_mac.h
+#ifdef CC_3DMOUSE_HID
+// Forward declaration - the HIDWorker thread is defined in Mouse3DInput_hid.h
 class HIDWorker;
 #endif
 
@@ -310,8 +310,8 @@ class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 	//! 3DxWare handle
 	void* m_siHandle;
 
-#ifdef CC_MAC_HID
-	//! HID-based worker thread (macOS path via hidapi)
+#ifdef CC_3DMOUSE_HID
+	//! HID-based worker thread (via hidapi)
 	HIDWorker* m_hidWorker = nullptr;
 #endif
 };

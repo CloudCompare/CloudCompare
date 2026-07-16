@@ -18,9 +18,9 @@
 // ##########################################################################
 
 // Internal header - defines the HIDWorker thread used on macOS.
-// Guarded by CC_MAC_HID (defined by CMake on APPLE so that AUTOMOC can see it).
+// Guarded by CC_3DMOUSE_HID (defined by CMake on APPLE so that AUTOMOC can see it).
 
-#ifdef CC_MAC_HID
+#ifdef CC_3DMOUSE_HID
 
 #include "Mouse3DInput.h"
 
@@ -97,4 +97,4 @@ class HIDWorker : public QThread
 	int m_lastAxes[6] = {0, 0, 0, 0, 0, 0};
 };
 
-#endif // CC_MAC_HID
+#endif // CC_3DMOUSE_HID

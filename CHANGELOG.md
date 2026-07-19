@@ -386,6 +386,7 @@ Bug fixes:
 	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not lead to the
 		extraction of the convex hull.
 	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
+	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

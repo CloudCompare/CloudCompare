@@ -528,10 +528,11 @@ bool ccPointPairRegistrationDlg::convertToSphereCenter(CCVector3d& P, ccHObject*
 					box.clear();
 					box.add(C - CCVector3(1, 1, 1) * radius * static_cast<PointCoordinateType>(1.05)); // add 5%
 					box.add(C + CCVector3(1, 1, 1) * radius * static_cast<PointCoordinateType>(1.05)); // add 5%
+
+					delete part;
 					part = cloud->crop(box, true);
 
 					// replace the old subset by a slightly larger one
-					delete part;
 					if (part && part->size() > 16)
 					{
 						CCCoreLib::GeometricalAnalysisTools::DetectSphereRobust(part, 0.5, C, radius, rms, false, &pDlg, 0.99);

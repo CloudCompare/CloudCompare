@@ -88,6 +88,10 @@ constexpr char COMMAND_REMOVE_SENSORS[]                   = "REMOVE_SENSORS";
 constexpr char COMMAND_REMOVE_RGB[]                       = "REMOVE_RGB";
 constexpr char COMMAND_REMOVE_NORMALS[]                   = "REMOVE_NORMALS";
 constexpr char COMMAND_MATCH_BB_CENTERS[]                 = "MATCH_CENTERS";
+constexpr char COMMAND_MATCH_SCALES[]                     = "MATCH_SCALES";
+constexpr char COMMAND_MATCH_SCALES_REFERENCE[]           = "REFERENCE";
+constexpr char COMMAND_MATCH_SCALES_RMS_DIFF[]            = "RMS_DIFF";
+constexpr char COMMAND_MATCH_SCALES_OVERLAP[]             = "OVERLAP";
 constexpr char COMMAND_BEST_FIT_PLANE[]                   = "BEST_FIT_PLANE";
 constexpr char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]        = "MAKE_HORIZ";
 constexpr char COMMAND_BEST_FIT_PLANE_KEEP_LOADED[]       = "KEEP_LOADED";
@@ -3744,6 +3748,119 @@ bool CommandMatchBBCenters::process(ccCommandLineInterface& cmd)
 		cmd.print(QObject::tr("Entity '%1' has been translated: (%2,%3,%4)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
 		if (cmd.autoSaveMode())
 		{
+			QString errorStr = cmd.exportEntity(*entities[i]);
+			if (!errorStr.isEmpty())
+			{
+				return cmd.error(errorStr);
+			}
+		}
+	}
+
+	return true;
+}
+
+CommandMatchScales::CommandMatchScales()
+    : ccCommandLineInterface::Command(QObject::tr("Match scales"), COMMAND_MATCH_SCALES)
+{
+}
+
+bool CommandMatchScales::process(ccCommandLineInterface& cmd)
+{
+	cmd.print(QObject::tr("[MATCH SCALES]"));
+
+	ccArgumentParser parser(cmd.arguments());
+
+	// the scale matching algorithm is a mandatory first parameter
+	const auto maybeAlgo = parser.takeEnum<ccLibAlgorithms::ScaleMatchingAlgorithm>({{"BB_MAX_DIM", ccLibAlgorithms::BB_MAX_DIM},
+	                                                                                 {"BB_VOLUME", ccLibAlgorithms::BB_VOLUME},
+	                                                                                 {"PCA_MAX_DIM", ccLibAlgorithms::PCA_MAX_DIM},
+	                                                                                 {"ICP", ccLibAlgorithms::ICP_SCALE}},
+	                                                                                QObject::tr("scale matching algorithm"));
+	if (!maybeAlgo)
+	{
+		return false;
+	}
+	const ccLibAlgorithms::ScaleMatchingAlgorithm algo = *maybeAlgo;
+
+	// optional parameters (defaults match the GUI dialog, see MainWindow::doActionMatchScales)
+	unsigned referenceIndex  = 0;
+	double   icpRmsDiff      = 1.0e-5;
+	int      icpFinalOverlap = 100;
+
+	while (!parser.isEmpty())
+	{
+		if (parser.tryConsumeOption(COMMAND_MATCH_SCALES_REFERENCE))
+		{
+			const auto maybeIndex = parser.takeUInt(QObject::tr("reference index"));
+			if (!maybeIndex)
+				return false;
+			referenceIndex = *maybeIndex;
+		}
+		else if (parser.tryConsumeOption(COMMAND_MATCH_SCALES_RMS_DIFF))
+		{
+			const auto maybeRmsDiff = parser.takeDouble(QObject::tr("RMS difference"), std::numeric_limits<double>::min());
+			if (!maybeRmsDiff)
+				return false;
+			icpRmsDiff = *maybeRmsDiff;
+		}
+		else if (parser.tryConsumeOption(COMMAND_MATCH_SCALES_OVERLAP))
+		{
+			const auto maybeOverlap = parser.takeUInt(QObject::tr("overlap"), 10, 100);
+			if (!maybeOverlap)
+				return false;
+			icpFinalOverlap = static_cast<int>(*maybeOverlap);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	// gather the loaded entities (clouds and meshes)
+	std::vector<CLEntityDesc*> entities;
+	for (auto& cloud : cmd.clouds())
+	{
+		entities.push_back(&cloud);
+	}
+	for (auto& mesh : cmd.meshes())
+	{
+		entities.push_back(&mesh);
+	}
+
+	if (entities.size() < 2)
+	{
+		return cmd.error(QObject::tr("Not enough loaded entities (2 or more clouds/meshes are expected)"));
+	}
+	if (referenceIndex >= entities.size())
+	{
+		return cmd.error(QObject::tr("Invalid reference index (%1): only %2 entities are loaded").arg(referenceIndex).arg(entities.size()));
+	}
+
+	// build the container expected by the algorithm
+	ccHObject::Container entityContainer;
+	entityContainer.reserve(entities.size());
+	for (CLEntityDesc* desc : entities)
+	{
+		entityContainer.push_back(desc->getEntity());
+	}
+
+	if (!ccLibAlgorithms::ApplyScaleMatchingAlgorithm(algo,
+	                                                  entityContainer,
+	                                                  icpRmsDiff,
+	                                                  icpFinalOverlap,
+	                                                  referenceIndex,
+	                                                  cmd.widgetParent()))
+	{
+		return cmd.error(QObject::tr("Failed to match scales"));
+	}
+
+	// save output if needed (the reference entity is left unchanged)
+	if (cmd.autoSaveMode())
+	{
+		for (size_t i = 0; i < entities.size(); ++i)
+		{
+			if (i == referenceIndex)
+				continue;
 			QString errorStr = cmd.exportEntity(*entities[i]);
 			if (!errorStr.isEmpty())
 			{

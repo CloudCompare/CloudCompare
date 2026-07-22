@@ -322,6 +322,10 @@ Improvements:
 			now apply to all selected DB tree item
 		- the 'Search by name and/or type' entry can now be applied with multiple entities selected at once
 
+	- 3D mouse support
+		- 3D mouse support on macOS, Linux and Windows (thanks to https://github.com/braunsi23 and Paul Rascle!)
+		- on Windows, option to compile with the 3DxWare SDK or the generic hidapi library
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

@@ -266,6 +266,13 @@ struct CommandMatchBBCenters : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandMatchScales : public ccCommandLineInterface::Command
+{
+	CommandMatchScales();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandMatchBestFitPlane : public ccCommandLineInterface::Command
 {
 	CommandMatchBestFitPlane();

@@ -15,10 +15,10 @@ add_subdirectory( qPoissonRecon )
 add_subdirectory( qRANSAC_SD )
 add_subdirectory( qSRA )
 add_subdirectory( qMeshBoolean )
-add_subdirectory( cc3DFin )
 
 #plugins integrated as submodules
 set( submod_plugins
+		${CMAKE_CURRENT_SOURCE_DIR}/cc3DFin
 		${CMAKE_CURRENT_SOURCE_DIR}/q3DMASC
 		${CMAKE_CURRENT_SOURCE_DIR}/qColorimetricSegmenter
 		${CMAKE_CURRENT_SOURCE_DIR}/qG3Point

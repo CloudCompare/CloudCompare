@@ -238,7 +238,7 @@ jobs:
           -DPLUGIN_STANDARD_QCLOUDLAYERS=ON
           -DPLUGIN_STANDARD_QVOXFALL=ON
           -DBUILD_TESTING=ON
-          -DOPTION_SUPPORT_3DCONNEXION_DEVICES=ON
+          -DOPTION_SUPPORT_3DMOUSE_WITH_HIDAPI=ON
 
       - name: Build
         run: cmake --build build --parallel

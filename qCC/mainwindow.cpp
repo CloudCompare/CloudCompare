@@ -7281,7 +7281,7 @@ void MainWindow::activateTranslateRotateMode()
 
 	if (!m_transTool)
 		m_transTool = new ccGraphicalTransformationTool(this);
-	assert(m_transTool->getNumberOfValidEntities() == 0);
+
 	m_transTool->linkWith(win);
 
 	bool rejectedEntities = false;

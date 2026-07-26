@@ -653,7 +653,6 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 
 	while (!parser.isEmpty())
 	{
-		QString argument = cmd.arguments().front();
 		if (parser.tryConsumeOption(COMMAND_OPEN_NO_LABEL))
 		{
 			cmd.print(QObject::tr("Will not load labels"));
@@ -689,7 +688,11 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 	AsciiFilter::SetNoLabelCreated(doNotCreateLabels);
 
 	// open specified file
-	QString filename(cmd.arguments().takeFirst());
+	if (parser.isEmpty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
+	}
+	QString filename(parser.takeNext());
 	if (!cmd.importFile(filename, globalShiftOptions))
 	{
 		return false;
@@ -4759,7 +4762,11 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 	}
 
 	// dimension
-	QString dimStr = cmd.arguments().takeFirst().toUpper();
+	if (parser.isEmpty())
+	{
+		return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
+	}
+	QString dimStr = parser.takeNext().toUpper();
 	bool    exportDims[3]{dimStr == "X", dimStr == "Y", dimStr == "Z"};
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
@@ -4913,7 +4920,9 @@ CommandCrop2D::CommandCrop2D()
 
 bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 {
-	if (cmd.arguments().size() < 6)
+	ccArgumentParser parser(cmd.arguments());
+
+	if (parser.size() < 6)
 	{
 		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
 	}
@@ -4927,9 +4936,8 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 	ccPolyline   poly(&vertices);
 
 	// orthogonal dimension
-	unsigned char    orthoDim     = 2;
-	bool             orderFlipped = false;
-	ccArgumentParser parser(cmd.arguments());
+	unsigned char orthoDim     = 2;
+	bool          orderFlipped = false;
 	{
 		QString orthoDimStr = parser.takeNext().toUpper();
 		if (orthoDimStr.endsWith("FLIP"))
@@ -4985,7 +4993,7 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 		CCVector3d PShift(0, 0, 0);
 		for (unsigned i = 0; i < N; ++i)
 		{
-			if (cmd.arguments().size() < 2)
+			if (parser.size() < 2)
 			{
 				return cmd.error(QObject::tr("Missing parameter(s): vertex #%1 data and following").arg(i + 1));
 			}
@@ -5029,19 +5037,9 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 
 	// optional parameters
 	bool inside = true;
-	while (!cmd.arguments().empty())
+	if (parser.tryConsumeOption(COMMAND_CROP_OUTSIDE))
 	{
-		QString argument = cmd.arguments().front();
-		if (ccCommandLineInterface::IsCommand(argument, COMMAND_CROP_OUTSIDE))
-		{
-			// local option confirmed, we can move on
-			cmd.arguments().pop_front();
-			inside = false;
-		}
-		else
-		{
-			break;
-		}
+		inside = false;
 	}
 
 	// now we can crop the loaded cloud(s)

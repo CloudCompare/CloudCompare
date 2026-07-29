@@ -35,6 +35,8 @@
 #include <ccScalarField.h>
 
 // Qt
+#include <QBrush>
+#include <QColor>
 #include <QColorDialog>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -180,30 +182,33 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	sf->computeMeanAndVariance(mean, &var);
 	double stdDev = std::sqrt(static_cast<double>(var));
 
+	// light grey backrgound for read-only cells
+    QBrush readOnlyBackground(QColor(240, 240, 240));
+
+	//! Helper lambda to create read-only items with background
+    auto createReadOnlyItem = [&readOnlyBackground](const QString& text) {
+        QTableWidgetItem* item = new QTableWidgetItem(text);
+        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        item->setBackground(readOnlyBackground);
+        return item;
+    };
+
 	//! SF Name (editable)
 	QTableWidgetItem* nameItem = new QTableWidgetItem(name);
 	nameItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::NAME, nameItem);
 
 	//! MinValue (read-only)
-	QTableWidgetItem* minItem = new QTableWidgetItem(QString::number(minVal, 'f', 6));
-	minItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MINVAL, minItem);
+	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MINVAL, createReadOnlyItem(QString::number(minVal, 'f', 6)));
 
 	//! MaxValue (read-only)
-	QTableWidgetItem* maxItem = new QTableWidgetItem(QString::number(maxVal, 'f', 6));
-	maxItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MAXVAL, maxItem);
+	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MAXVAL, createReadOnlyItem(QString::number(maxVal, 'f', 6)));
 
 	//! Mean (read-only)
-	QTableWidgetItem* meanItem = new QTableWidgetItem(QString::number(mean, 'f', 6));
-	meanItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MEAN, meanItem);
+	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MEAN, createReadOnlyItem(QString::number(mean, 'f', 6)));
 
 	//! Std (read-only)
-	QTableWidgetItem* stdItem = new QTableWidgetItem(QString::number(stdDev, 'f', 6));
-	stdItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::STD, stdItem);
+	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::STD, createReadOnlyItem(QString::number(stdDev, 'f', 6)));
 }
 
 void ccScalarFieldsManagerDialog::addConstantSF()

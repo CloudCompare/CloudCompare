@@ -19,8 +19,8 @@
 #include "CCPluginAPI.h"
 
 // qCC_db
-#include <ccScalarField.h>
 #include <ccHObject.h>
+#include <ccScalarField.h>
 
 // Qt
 #include <QDialog>
@@ -51,9 +51,9 @@ class ccScalarFieldsManagerDialog : public QDialog
 
   public:
 	//! Default constructor
-	ccScalarFieldsManagerDialog(ccMainAppInterface*   mainApp,
-                                const ccHObject::Container& selectedEntities,
-                                QWidget*              parent       = nullptr);
+	ccScalarFieldsManagerDialog(ccMainAppInterface*         mainApp,
+	                            const ccHObject::Container& selectedEntities,
+	                            QWidget*                    parent = nullptr);
 
 	//! Destructor
 	~ccScalarFieldsManagerDialog() override;
@@ -63,10 +63,10 @@ class ccScalarFieldsManagerDialog : public QDialog
 	void setSelectedEntities(const ccHObject::Container& entities);
 
   protected:
-  	bool atLeastOneSF() const;
-  	void onEntityChanged(int index);
+	bool atLeastOneSF() const;
+	void onEntityChanged(int index);
 
-  	void buildTable();
+	void buildTable();
 	void updateDisplay();
 
 	void deleteSF();
@@ -81,9 +81,9 @@ class ccScalarFieldsManagerDialog : public QDialog
 	//! Associated application (interface)
 	ccMainAppInterface* m_mainApp;
 
-    //! Active point cloud
-    ccPointCloud* m_pointCloud;
-    unsigned m_sfCount;
+	//! Active point cloud
+	ccPointCloud*              m_pointCloud;
+	unsigned                   m_sfCount;
 	std::vector<ccPointCloud*> m_availableClouds;
 
 	Ui::ScalarFieldsManagerDlg* m_ui;

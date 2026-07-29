@@ -254,10 +254,10 @@ void ccScalarFieldsManagerDialog::deleteSF()
 
 		//! Get the SF name from the selected row
 		QTableWidgetItem* nameItem = m_ui->sfTableWidget->item(row, SFAttributes::NAME);
-		auto              sfName   = nameItem->text().toStdString();
+		QString           sfName   = nameItem->text();
 
 		//! delete scalar field
-		int sfIdx = m_pointCloud->getScalarFieldIndexByName(sfName);
+		int sfIdx = m_pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		m_pointCloud->deleteScalarField(sfIdx);
 		m_sfCount -= 1;
 

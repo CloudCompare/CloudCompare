@@ -63,7 +63,6 @@ class ccScalarFieldsManagerDialog : public QDialog
 	void setSelectedEntities(const ccHObject::Container& entities);
 
   protected:
-	bool atLeastOneSF() const;
 	void onEntityChanged(int index);
 
 	void buildTable();

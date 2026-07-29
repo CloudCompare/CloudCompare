@@ -183,15 +183,16 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	double stdDev = std::sqrt(static_cast<double>(var));
 
 	// light grey backrgound for read-only cells
-    QBrush readOnlyBackground(QColor(240, 240, 240));
+	QBrush readOnlyBackground(QColor(240, 240, 240));
 
 	//! Helper lambda to create read-only items with background
-    auto createReadOnlyItem = [&readOnlyBackground](const QString& text) {
-        QTableWidgetItem* item = new QTableWidgetItem(text);
-        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-        item->setBackground(readOnlyBackground);
-        return item;
-    };
+	auto createReadOnlyItem = [&readOnlyBackground](const QString& text)
+	{
+		QTableWidgetItem* item = new QTableWidgetItem(text);
+		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		item->setBackground(readOnlyBackground);
+		return item;
+	};
 
 	//! SF Name (editable)
 	QTableWidgetItem* nameItem = new QTableWidgetItem(name);

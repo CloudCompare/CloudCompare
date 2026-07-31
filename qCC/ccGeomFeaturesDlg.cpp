@@ -54,6 +54,8 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
 		m_options.push_back(Option(eigenvalue1CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue1));
 		m_options.push_back(Option(eigenvalue2CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue2));
 		m_options.push_back(Option(eigenvalue3CheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValue3));
+		m_options.push_back(Option(degreeOfPlanarityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfPlanarity));
+		m_options.push_back(Option(degreeOfLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfLinearity));
 	}
 	catch (std::bad_alloc)
 	{

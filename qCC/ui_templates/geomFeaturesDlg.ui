@@ -427,6 +427,26 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="degreeOfPlanarityCheckBox">
+            <property name="text">
+             <string>Degree of planarity (M)</string>
+            </property>
+            <property name="toolTip">
+             <string>ln(L1 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="degreeOfLinearityCheckBox">
+            <property name="text">
+             <string>Degree of linearity (K)</string>
+            </property>
+            <property name="toolTip">
+             <string>ln(L1 / L2) / ln(L2 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

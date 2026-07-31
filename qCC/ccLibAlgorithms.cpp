@@ -228,6 +228,12 @@ namespace ccLibAlgorithms
 			case CCCoreLib::Neighbourhood::EigenValue3:
 				sfName = "3rd eigenvalue";
 				break;
+			case CCCoreLib::Neighbourhood::DegreeOfPlanarity:
+				sfName = "Degree of planarity (M)";
+				break;
+			case CCCoreLib::Neighbourhood::DegreeOfLinearity:
+				sfName = "Degree of linearity (K)";
+				break;
 			default:
 				assert(false);
 				ccLog::Error("Internal error: invalid sub option for Feature computation");

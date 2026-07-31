@@ -7,6 +7,10 @@ New features:
 	- Edit > Polyline > Extrude
 		- vertical extrusion within specified ownward (-Z) and upward (+Z) offsets
 
+	- New geometric features: from Fernandez, 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data
+			- Degree of planarity (M): ln(L1 / L3)
+			- Degree of linearity (K): ln(L1 / L2) / ln(L2 / L3)
+
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter

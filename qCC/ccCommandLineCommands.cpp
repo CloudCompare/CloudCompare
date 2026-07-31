@@ -7995,6 +7995,14 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 	{
 		featureType = CCCoreLib::Neighbourhood::EigenValue3;
 	}
+	else if (featureTypeStr == "DEGREE_OF_PLANARITY")
+	{
+		featureType = CCCoreLib::Neighbourhood::DegreeOfPlanarity;
+	}
+	else if (featureTypeStr == "DEGREE_OF_LINEARITY")
+	{
+		featureType = CCCoreLib::Neighbourhood::DegreeOfLinearity;
+	}
 	else
 	{
 		return cmd.error(QObject::tr("Invalid feature type after \"-%1\". Got '%2' instead of:\n\
@@ -8011,7 +8019,9 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 - VERTICALITY\n\
 - EIGENVALUE1\n\
 - EIGENVALUE2\n\
-- EIGENVALUE3")
+- EIGENVALUE3\n\
+- DEGREE_OF_PLANARITY\n\
+- DEGREE_OF_LINEARITY")
 		                     .arg(COMMAND_FEATURE, featureTypeStr));
 	}
 

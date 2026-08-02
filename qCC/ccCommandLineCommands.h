@@ -516,6 +516,13 @@ struct CommandChangePLYExportFormat : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandPLYNoSFPrefix : public ccCommandLineInterface::Command
+{
+	CommandPLYNoSFPrefix();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandForceNormalsComputation : public ccCommandLineInterface::Command
 {
 	CommandForceNormalsComputation();

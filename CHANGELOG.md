@@ -28,6 +28,9 @@ New features:
 			- ports the 'Tools > Registration > Match scales' tool to the command line
 			- rescales all loaded clouds/meshes to match the scale of the reference entity (0-based index, 0 by default)
 			- -RMS_DIFF and -OVERLAP only apply to the ICP algorithm (defaults: 1e-5 and 100 respectively)
+		- New command -PLY_NO_SF_PREFIX
+			- tells the PLY filter not to add the 'scalar_' prefix to the scalar field names when saving
+			- scalar fields coming from an input PLY file already keep their original name
 		- New command -DISTANCES_FROM_SENSOR [-SQUARED]
 			- to compute the distances from every point of the cloud to the associated sensor origin (if any)
 		- New command -SCATTERING_ANGLES [-DEGREES]

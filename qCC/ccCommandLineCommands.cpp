@@ -164,6 +164,7 @@ constexpr char COMMAND_ICP_SKIP_TY[]                      = "SKIP_TY";
 constexpr char COMMAND_ICP_SKIP_TZ[]                      = "SKIP_TZ";
 constexpr char COMMAND_ICP_C2M_DIST[]                     = "USE_C2M_DIST";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]                = "PLY_EXPORT_FMT";
+constexpr char COMMAND_PLY_NO_SF_PREFIX[]                 = "PLY_NO_SF_PREFIX";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]          = "COMPUTE_NORMALS";
 constexpr char COMMAND_INVERT_NORMALS[]                   = "INVERT_NORMALS";
 constexpr char COMMAND_COMPUTE_OCTREE_NORMALS[]           = "OCTREE_NORMALS";
@@ -7339,6 +7340,19 @@ bool CommandChangePLYExportFormat::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("Invalid PLY format! ('%1')").arg(plyFormat));
 	}
+
+	return true;
+}
+
+CommandPLYNoSFPrefix::CommandPLYNoSFPrefix()
+    : ccCommandLineInterface::Command(QObject::tr("Don't add the 'scalar_' prefix to PLY scalar fields"), COMMAND_PLY_NO_SF_PREFIX)
+{
+}
+
+bool CommandPLYNoSFPrefix::process(ccCommandLineInterface& cmd)
+{
+	PlyFilter::SetAddSFPrefix(false);
+	cmd.print(QObject::tr("[PLY] Scalar field names will be saved without the 'scalar_' prefix"));
 
 	return true;
 }

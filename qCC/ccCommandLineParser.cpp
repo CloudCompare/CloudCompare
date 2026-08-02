@@ -921,6 +921,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandChangeMeshOutputFormat));
 	registerCommand(Command::Shared(new CommandChangeHierarchyOutputFormat));
 	registerCommand(Command::Shared(new CommandChangePLYExportFormat));
+	registerCommand(Command::Shared(new CommandPLYNoSFPrefix));
 	registerCommand(Command::Shared(new CommandForceNormalsComputation));
 	registerCommand(Command::Shared(new CommandSaveClouds));
 	registerCommand(Command::Shared(new CommandSaveMeshes));

@@ -80,6 +80,7 @@ bool PlyFilter::canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) con
 }
 
 static e_ply_storage_mode s_defaultOutputFormat = PLY_DEFAULT;
+static bool               s_addSFPrefix         = true;
 
 static void errorCallback(p_ply _ply, const char* message)
 {
@@ -89,6 +90,11 @@ static void errorCallback(p_ply _ply, const char* message)
 void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
 {
 	s_defaultOutputFormat = format;
+}
+
+void PlyFilter::SetAddSFPrefix(bool state)
+{
+	s_addSFPrefix = state;
 }
 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
@@ -367,7 +373,8 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 					else
 					{
 						// append the SF name with 'scalar' for easier detection at loading time
-						propName = QString("scalar_%1").arg(sfName);
+						// (unless the user explicitly asked to keep the original name)
+						propName = s_addSFPrefix ? QString("scalar_%1").arg(sfName) : sfName;
 						propName.replace(' ', '_');
 					}
 				}

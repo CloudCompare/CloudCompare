@@ -17,9 +17,15 @@
 
 #include "ccNoiseFilterDlg.h"
 
+#include <QThread>
+
 ccNoiseFilterDlg::ccNoiseFilterDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
     , Ui::NoiseFilterDialog()
 {
 	setupUi(this);
+
+	static const int MaxThreadCount = QThread::idealThreadCount();
+	maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 }

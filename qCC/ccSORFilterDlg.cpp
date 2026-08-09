@@ -19,11 +19,17 @@
 
 #include "ui_sorFilterDlg.h"
 
+#include <QThread>
+
 ccSORFilterDlg::ccSORFilterDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
     , m_ui(new Ui::SorFilterDialog)
 {
 	m_ui->setupUi(this);
+
+	static const int MaxThreadCount = QThread::idealThreadCount();
+	m_ui->maxThreadCountSpinBox->setRange(1, MaxThreadCount);
+	m_ui->maxThreadCountSpinBox->setSuffix(QString(" / %1").arg(MaxThreadCount));
 }
 
 ccSORFilterDlg::~ccSORFilterDlg()
@@ -49,4 +55,14 @@ double ccSORFilterDlg::nSigma() const
 void ccSORFilterDlg::setNSigma(double nSigma)
 {
 	m_ui->nSigmaDoubleSpinBox->setValue(nSigma);
+}
+
+void ccSORFilterDlg::setMaxThreadCount(int count)
+{
+	m_ui->maxThreadCountSpinBox->setValue(count);
+}
+
+int ccSORFilterDlg::maxThreadCount() const
+{
+	return m_ui->maxThreadCountSpinBox->value();
 }

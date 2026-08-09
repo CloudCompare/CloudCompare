@@ -63,6 +63,9 @@
 #include <ccGLWindowInterface.h>
 #include <ccRenderingTools.h>
 
+// CCPluginAPI
+#include <ccQtHelpers.h>
+
 // local includes
 #include "ccConsole.h"
 #include "ccEntityAction.h"
@@ -5971,8 +5974,11 @@ void MainWindow::doActionSORFilter()
 	// set semi-persistent/dynamic parameters
 	static int    s_sorFilterKnn    = 6;
 	static double s_sorFilterNSigma = 1.0;
+	static int    s_maxThreadCount  = ccQtHelpers::GetMaxThreadCount();
+
 	sorDlg.setKNN(s_sorFilterKnn);
 	sorDlg.setNSigma(s_sorFilterNSigma);
+	sorDlg.setMaxThreadCount(s_maxThreadCount);
 	if (!sorDlg.exec())
 	{
 		return;
@@ -5981,6 +5987,7 @@ void MainWindow::doActionSORFilter()
 	// update semi-persistent/dynamic parameters
 	s_sorFilterKnn    = sorDlg.KNN();
 	s_sorFilterNSigma = sorDlg.nSigma();
+	s_maxThreadCount  = sorDlg.maxThreadCount();
 
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
@@ -6004,12 +6011,19 @@ void MainWindow::doActionSORFilter()
 			continue;
 		}
 
+		if (static_cast<int>(cloud->size()) <= s_sorFilterKnn)
+		{
+			ccLog::Warning(tr("Cloud %1 has not enough points").arg(cloud->getName()));
+			continue;
+		}
+
 		// computation
 		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::sorFilter(cloud,
 		                                                                                s_sorFilterKnn,
 		                                                                                s_sorFilterNSigma,
 		                                                                                cloud->getOctree().data(),
-		                                                                                &pDlg);
+		                                                                                &pDlg,
+																						s_maxThreadCount);
 
 		if (selection)
 		{
@@ -6069,22 +6083,36 @@ void MainWindow::doActionFilterNoise()
 	static double s_noiseFilterAbsError             = 1.0;
 	static double s_noiseFilterNSigma               = 1.0;
 	static bool   s_noiseFilterRemoveIsolatedPoints = false;
+	static int    s_maxThreadCount                  = ccQtHelpers::GetMaxThreadCount();
 	noiseDlg.radiusDoubleSpinBox->setValue(kernelRadius);
 	noiseDlg.knnSpinBox->setValue(s_noiseFilterKnn);
 	noiseDlg.nSigmaDoubleSpinBox->setValue(s_noiseFilterNSigma);
 	noiseDlg.absErrorDoubleSpinBox->setValue(s_noiseFilterAbsError);
 	noiseDlg.removeIsolatedPointsCheckBox->setChecked(s_noiseFilterRemoveIsolatedPoints);
+	noiseDlg.maxThreadCountSpinBox->setValue(s_maxThreadCount);
+
 	if (s_noiseFilterUseAbsError)
+	{
 		noiseDlg.absErrorRadioButton->setChecked(true);
+	}
 	else
+	{
 		noiseDlg.relativeRadioButton->setChecked(true);
+	}
+
 	if (s_noiseFilterUseKnn)
+	{
 		noiseDlg.knnRadioButton->setChecked(true);
+	}
 	else
+	{
 		noiseDlg.radiusRadioButton->setChecked(true);
+	}
 
 	if (!noiseDlg.exec())
+	{
 		return;
+	}
 
 	// update semi-persistent/dynamic parameters
 	kernelRadius                      = noiseDlg.radiusDoubleSpinBox->value();
@@ -6094,6 +6122,7 @@ void MainWindow::doActionFilterNoise()
 	s_noiseFilterNSigma               = noiseDlg.nSigmaDoubleSpinBox->value();
 	s_noiseFilterAbsError             = noiseDlg.absErrorDoubleSpinBox->value();
 	s_noiseFilterRemoveIsolatedPoints = noiseDlg.removeIsolatedPointsCheckBox->isChecked();
+	s_maxThreadCount                  = noiseDlg.maxThreadCountSpinBox->value();
 
 	ccProgressDialog pDlg(true, this);
 	pDlg.setAutoClose(false);
@@ -6127,7 +6156,8 @@ void MainWindow::doActionFilterNoise()
 		                                                                                  s_noiseFilterUseAbsError,
 		                                                                                  s_noiseFilterAbsError,
 		                                                                                  cloud->getOctree().data(),
-		                                                                                  &pDlg);
+		                                                                                  &pDlg,
+		                                                                                  s_maxThreadCount);
 
 		if (selection)
 		{

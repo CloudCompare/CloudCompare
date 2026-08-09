@@ -42,6 +42,9 @@ class ccSORFilterDlg : public QDialog
 	double nSigma() const;
 	void   setNSigma(double nSigma);
 
+	void setMaxThreadCount(int count);
+	int  maxThreadCount() const;
+
   private:
 	Ui::SorFilterDialog* m_ui;
 };

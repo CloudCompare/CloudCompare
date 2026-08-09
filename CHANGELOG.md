@@ -348,6 +348,9 @@ Improvements:
 			- Degree of planarity (M): ln(L1 / L3)
 			- Degree of linearity (K): ln(L1 / L2) / ln(L2 / L3)
 
+	- SOR/Cleaning filters
+		- the user can now choose the number of threads to use
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

@@ -327,6 +327,7 @@ class MainWindow : public QMainWindow
 	void doActionStatisticalTest();
 	void doActionSamplePointsOnMesh();
 	void doActionSamplePointsOnPolyline();
+	void doActionExtrudePolyline();
 	void doActionSmoohPolyline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();

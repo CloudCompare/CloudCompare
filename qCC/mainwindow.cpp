@@ -577,6 +577,7 @@ void MainWindow::connectActions()
 	connect(m_UI->actionEnhanceMeshSF, &QAction::triggered, this, &MainWindow::doActionEnhanceMeshSF);
 	//"Edit > Polyline" menu
 	connect(m_UI->actionSamplePointsOnPolyline, &QAction::triggered, this, &MainWindow::doActionSamplePointsOnPolyline);
+	connect(m_UI->actionExtrudePolyline, &QAction::triggered, this, &MainWindow::doActionExtrudePolyline);
 	connect(m_UI->actionSmoothPolyline, &QAction::triggered, this, &MainWindow::doActionSmoohPolyline);
 
 	//"Edit > Plane" menu
@@ -2855,6 +2856,105 @@ void MainWindow::doActionSamplePointsOnPolyline()
 	if (errors)
 	{
 		ccLog::Error(tr("[DoActionSamplePointsOnPolyline] Errors occurred during the process! Result may be incomplete!"));
+	}
+
+	refreshAll();
+}
+
+void MainWindow::doActionExtrudePolyline()
+{
+	static double s_extrudeHeight = 1.0;
+
+	bool ok         = false;
+	s_extrudeHeight = QInputDialog::getDouble(this,
+	                                          tr("Extrude polyline"),
+	                                          tr("Extrusion height (along Z):"),
+	                                          s_extrudeHeight,
+	                                          -1.0e6,
+	                                          1.0e6,
+	                                          6,
+	                                          &ok);
+	if (!ok)
+		return;
+
+	bool errors = false;
+
+	for (ccHObject* entity : getSelectedEntities())
+	{
+		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
+			continue;
+
+		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
+		assert(poly);
+
+		const unsigned vertCount  = poly->size();
+		const bool     isClosed   = poly->isClosed();
+		const unsigned segCount   = isClosed ? vertCount : vertCount - 1;
+		const unsigned totalVerts = vertCount * 2;
+		const unsigned triCount   = segCount * 2;
+
+		ccPointCloud* vertices = new ccPointCloud("vertices");
+		if (!vertices->reserve(totalVerts))
+		{
+			ccLog::Error(tr("Not enough memory!"));
+			delete vertices;
+			errors = true;
+			continue;
+		}
+
+		// bottom ring (original), then top ring (elevated)
+		for (unsigned i = 0; i < vertCount; ++i)
+		{
+			vertices->addPoint(*poly->getPoint(i));
+		}
+		for (unsigned i = 0; i < vertCount; ++i)
+		{
+			CCVector3 p = *poly->getPoint(i);
+			p.z += static_cast<PointCoordinateType>(s_extrudeHeight);
+			vertices->addPoint(p);
+		}
+
+		ccMesh* mesh = new ccMesh(vertices);
+		mesh->addChild(vertices);
+		vertices->setEnabled(false);
+
+		if (!mesh->reserve(triCount))
+		{
+			ccLog::Error(tr("Not enough memory!"));
+			delete mesh;
+			errors = true;
+			continue;
+		}
+
+		// for each side segment, build a quad as two triangles
+		for (unsigned i = 0; i < segCount; ++i)
+		{
+			const unsigned b0 = i;
+			const unsigned b1 = (i + 1) % vertCount;
+			const unsigned t0 = vertCount + b0;
+			const unsigned t1 = vertCount + b1;
+
+			mesh->addTriangle(b0, b1, t0);
+			mesh->addTriangle(b1, t1, t0);
+		}
+
+		mesh->setName(poly->getName() + "_extruded");
+		mesh->copyGlobalShiftAndScale(*poly);
+		mesh->setDisplay(poly->getDisplay());
+		mesh->computePerVertexNormals();
+		mesh->showNormals(true);
+
+		if (poly->getParent())
+		{
+			poly->getParent()->addChild(mesh);
+		}
+
+		addToDB(mesh);
+	}
+
+	if (errors)
+	{
+		ccLog::Error(tr("[ExtrudePolyline] Errors occurred during the process! Result may be incomplete!"));
 	}
 
 	refreshAll();
@@ -11679,6 +11779,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	m_UI->actionConvertPolylinesToMesh->setEnabled(atLeastOnePolyline || exactlyOneGroup);
 	m_UI->actionSamplePointsOnPolyline->setEnabled(atLeastOnePolyline);
+	m_UI->actionExtrudePolyline->setEnabled(atLeastOnePolyline);
 	m_UI->actionSmoothPolyline->setEnabled(atLeastOnePolyline);
 
 	m_UI->actionMeshTwoPolylines->setEnabled(selInfo.selCount == 2 && selInfo.polylineCount == 2);
@@ -12453,6 +12554,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_UI->actionExportPlaneInfo);
 	m_actions.push_back(m_UI->actionLock_rotation_about_arbitrary_axis);
 	m_actions.push_back(m_UI->actionSamplePointsOnPolyline);
+	m_actions.push_back(m_UI->actionExtrudePolyline);
 	m_actions.push_back(m_UI->actionNoTranslation);
 	m_actions.push_back(m_UI->actionComputeGeometricFeature);
 	m_actions.push_back(m_UI->actionBBMinCornerToOrigin);

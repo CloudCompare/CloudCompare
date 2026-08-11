@@ -1,0 +1,19 @@
+{
+  "configuration": {
+    "mandatory_pytorch_tests": [
+      "test_standard_equivalence",
+      "test_geodesic_distance_effect",
+      "test_translator_bound",
+      "test_point_attention_normalization",
+      "test_multihead_shape",
+      "test_multihead_diversity",
+      "test_gradient_stability",
+      "test_attention_entropy",
+      "test_nan_inf",
+      "test_pressure_response"
+    ]
+  },
+  "status": "VALIDATION_BLOCKED",
+  "blocked_reason": "PyTorch is unavailable; mandatory Step 3 PyTorch tests were not executed.",
+  "results": []
+}

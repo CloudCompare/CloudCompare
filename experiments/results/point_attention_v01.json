@@ -1,0 +1,14 @@
+{
+  "component": "PointAttentionAssistant",
+  "requirements": {
+    "preserve_tensor_shape": "implemented",
+    "numerically_stable": "implemented_with_finite_checks_and_softmax",
+    "expose_attention_weights": "implemented",
+    "weights_normalized": "validated_when_torch_available",
+    "weights_non_negative": "validated_when_torch_available",
+    "reject_nan_inf": "implemented",
+    "batch_processing": "implemented"
+  },
+  "test_status": "IMPLEMENTED_VALIDATION_BLOCKED",
+  "blocked_reason": "PyTorch is unavailable in the current Python environment."
+}

@@ -1,0 +1,16 @@
+{
+  "python_version": "3.14.4 (main, May  1 2026, 05:51:55) [GCC 13.3.0]",
+  "python_executable": "/root/.pyenv/versions/3.14.4/bin/python",
+  "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+  "pytorch_version": null,
+  "torch_available": false,
+  "cuda_available": false,
+  "gpu_info": [],
+  "pytest_version": "9.0.3",
+  "dependency_status": {
+    "torch": "missing",
+    "pytest": "available"
+  },
+  "machine_status": "VALIDATION_BLOCKED",
+  "blocked_reason": "Mandatory PyTorch validation dependency is unavailable."
+}

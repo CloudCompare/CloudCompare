@@ -1,0 +1,69 @@
+{
+  "status": "VALIDATION_BLOCKED",
+  "strict_policy": {
+    "pass_requires_pytorch": true,
+    "skipped_pytorch_tests_count_as_pass": false,
+    "blocked_if_pytorch_unavailable": true,
+    "fail_if_pytorch_available_and_tests_fail_or_skip": true
+  },
+  "environment": {
+    "python_version": "3.14.4 (main, May  1 2026, 05:51:55) [GCC 13.3.0]",
+    "python_executable": "/root/.pyenv/versions/3.14.4/bin/python",
+    "os": "Linux-6.18.35-x86_64-with-glibc2.39",
+    "pytorch_version": null,
+    "torch_available": false,
+    "cuda_available": false,
+    "gpu_info": [],
+    "pytest_version": "9.0.3",
+    "dependency_status": {
+      "torch": "missing",
+      "pytest": "available"
+    },
+    "machine_status": "VALIDATION_BLOCKED",
+    "blocked_reason": "Mandatory PyTorch validation dependency is unavailable."
+  },
+  "mandatory_pytorch_tests": [
+    "test_standard_equivalence",
+    "test_geodesic_distance_effect",
+    "test_translator_bound",
+    "test_point_attention_normalization",
+    "test_multihead_shape",
+    "test_multihead_diversity",
+    "test_gradient_stability",
+    "test_attention_entropy",
+    "test_nan_inf",
+    "test_pressure_response"
+  ],
+  "commands": [
+    {
+      "name": "compileall",
+      "command": [
+        "/root/.pyenv/versions/3.14.4/bin/python",
+        "-m",
+        "compileall",
+        "geodesic",
+        "experiments",
+        "tests"
+      ],
+      "returncode": 0,
+      "stdout": "Listing 'geodesic'...\nCompiling 'geodesic/attention.py'...\nListing 'geodesic/core'...\nCompiling 'geodesic/core/measurements.py'...\nListing 'geodesic/tools'...\nListing 'geodesic/translator'...\nListing 'experiments'...\nCompiling 'experiments/baseline.py'...\nCompiling 'experiments/environment_report.py'...\nCompiling 'experiments/geodesic_transformer_v01.py'...\nCompiling 'experiments/geodesic_v01.py'...\nListing 'experiments/results'...\nCompiling 'experiments/translator_v01.py'...\nListing 'tests'...\nCompiling 'tests/test_anchor.py'...\nCompiling 'tests/test_attention_stability.py'...\nCompiling 'tests/test_chess_projection.py'...\nCompiling 'tests/test_environment.py'...\nCompiling 'tests/test_geodesic_attention.py'...\nCompiling 'tests/test_geodesic_transformer.py'...\nCompiling 'tests/test_manifold.py'...\nCompiling 'tests/test_metric.py'...\nCompiling 'tests/test_point_attention.py'...\nCompiling 'tests/test_translator.py'...\n",
+      "stderr": ""
+    },
+    {
+      "name": "non_pytorch_static_tests",
+      "command": [
+        "/root/.pyenv/versions/3.14.4/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_anchor.py",
+        "tests/test_metric.py",
+        "tests/test_manifold.py",
+        "tests/test_point_attention.py::test_attention_equation_reference_weights_are_normalized_and_non_negative",
+        "tests/test_geodesic_transformer.py::test_standard_attention_reference_equation_environment_independent"
+      ],
+      "returncode": 0,
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.14.4, pytest-9.0.3, pluggy-1.6.0\nrootdir: /workspace/CloudCompare\ncollected 10 items\n\ntests/test_anchor.py ..                                                  [ 20%]\ntests/test_metric.py ...                                                 [ 50%]\ntests/test_manifold.py ...                                               [ 80%]\ntests/test_point_attention.py .                                          [ 90%]\ntests/test_geodesic_transformer.py .                                     [100%]\n\n============================== 10 passed in 0.08s ==============================\n",
+      "stderr": ""
+    }
+  ]
+}

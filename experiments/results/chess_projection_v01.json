@@ -1,0 +1,79 @@
+{
+  "status": "VALIDATION_BLOCKED",
+  "blocked_reason": "PyTorch is unavailable; Step 4 Transformer-backed ablation cannot fully execute.",
+  "ablations": [
+    {
+      "name": "A_transformer",
+      "candidate_validity": true,
+      "hypothesis_diversity": 3,
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.056684180846364805,
+      "stability": 0.5,
+      "inference_latency_seconds": 0.005999283999699401,
+      "parameter_count": null
+    },
+    {
+      "name": "B_transformer_chess",
+      "candidate_validity": true,
+      "hypothesis_diversity": 3,
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.056684180846364805,
+      "stability": 0.5,
+      "inference_latency_seconds": 0.005999283999699401,
+      "parameter_count": null
+    },
+    {
+      "name": "C_transformer_geodesic_chess",
+      "candidate_validity": true,
+      "hypothesis_diversity": 3,
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.056684180846364805,
+      "stability": 0.5,
+      "inference_latency_seconds": 0.005999283999699401,
+      "parameter_count": null
+    },
+    {
+      "name": "D_transformer_geodesic_translator_chess",
+      "candidate_validity": true,
+      "hypothesis_diversity": 3,
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.056684180846364805,
+      "stability": 0.5,
+      "inference_latency_seconds": 0.005999283999699401,
+      "parameter_count": null
+    }
+  ],
+  "top_k": [
+    {
+      "move": "h2h3",
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.0566841808463648,
+      "control": 0.3125,
+      "threat": 0.0,
+      "mobility": 0.25,
+      "stability": 0.5,
+      "overall_score": 0.8629586762964924
+    },
+    {
+      "move": "g2g3",
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.0566841808463648,
+      "control": 0.3125,
+      "threat": 0.0,
+      "mobility": 0.25,
+      "stability": 0.5,
+      "overall_score": 0.8629586762964924
+    },
+    {
+      "move": "f2f3",
+      "geodesic_error": 0.14285714285714285,
+      "pressure": 0.0566841808463648,
+      "control": 0.3125,
+      "threat": 0.0,
+      "mobility": 0.25,
+      "stability": 0.5,
+      "overall_score": 0.8629586762964924
+    }
+  ],
+  "translator_state": "NORMAL"
+}

@@ -84,6 +84,7 @@
 #include "ccApplication.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
+#include "ccExtrudePolylineDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccCamSensorProjectionDlg.h"
 #include "ccClippingBoxTool.h"
@@ -2863,19 +2864,23 @@ void MainWindow::doActionSamplePointsOnPolyline()
 
 void MainWindow::doActionExtrudePolyline()
 {
-	static double s_extrudeHeight = 1.0;
+	static double s_extrudeUp   = 10.0;
+	static double s_extrudeDown = 0.0;
 
-	bool ok         = false;
-	s_extrudeHeight = QInputDialog::getDouble(this,
-	                                          tr("Extrude polyline"),
-	                                          tr("Extrusion height (along Z):"),
-	                                          s_extrudeHeight,
-	                                          -1.0e6,
-	                                          1.0e6,
-	                                          6,
-	                                          &ok);
-	if (!ok)
+	ccExtrudePolylineDlg dlg(this);
+	dlg.setHeightAbove(s_extrudeUp);
+	dlg.setDepthBelow(s_extrudeDown);
+	if (!dlg.exec())
 		return;
+
+	s_extrudeUp   = dlg.heightAbove();
+	s_extrudeDown = dlg.depthBelow();
+
+	if (s_extrudeUp == 0.0 && s_extrudeDown == 0.0)
+	{
+		ccLog::Warning(tr("[ExtrudePolyline] Both height and depth are zero, nothing to do"));
+		return;
+	}
 
 	bool errors = false;
 
@@ -2884,11 +2889,11 @@ void MainWindow::doActionExtrudePolyline()
 		if (!entity->isKindOf(CC_TYPES::POLY_LINE))
 			continue;
 
-		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
-		assert(poly);
+		ccPolyline* polyline = ccHObjectCaster::ToPolyline(entity);
+		assert(polyline);
 
-		const unsigned vertCount  = poly->size();
-		const bool     isClosed   = poly->isClosed();
+		const unsigned vertCount  = polyline->size();
+		const bool     isClosed   = polyline->isClosed();
 		const unsigned segCount   = isClosed ? vertCount : vertCount - 1;
 		const unsigned totalVerts = vertCount * 2;
 		const unsigned triCount   = segCount * 2;
@@ -2902,15 +2907,18 @@ void MainWindow::doActionExtrudePolyline()
 			continue;
 		}
 
-		// bottom ring (original), then top ring (elevated)
+		// bottom line (lowered by 's_extrudeDown')
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
-			vertices->addPoint(*poly->getPoint(i));
+			CCVector3 p = *polyline->getPoint(i);
+			p.z -= static_cast<PointCoordinateType>(s_extrudeDown);
+			vertices->addPoint(p);
 		}
+		// top line (raised by 's_extrudeUp')
 		for (unsigned i = 0; i < vertCount; ++i)
 		{
-			CCVector3 p = *poly->getPoint(i);
-			p.z += static_cast<PointCoordinateType>(s_extrudeHeight);
+			CCVector3 p = *polyline->getPoint(i);
+			p.z += static_cast<PointCoordinateType>(s_extrudeUp);
 			vertices->addPoint(p);
 		}
 
@@ -2938,15 +2946,15 @@ void MainWindow::doActionExtrudePolyline()
 			mesh->addTriangle(b1, t1, t0);
 		}
 
-		mesh->setName(poly->getName() + "_extruded");
-		mesh->copyGlobalShiftAndScale(*poly);
-		mesh->setDisplay(poly->getDisplay());
+		mesh->setName(polyline->getName() + "_extruded");
+		mesh->copyGlobalShiftAndScale(*polyline);
+		mesh->setDisplay(polyline->getDisplay());
 		mesh->computePerVertexNormals();
 		mesh->showNormals(true);
 
-		if (poly->getParent())
+		if (polyline->getParent())
 		{
-			poly->getParent()->addChild(mesh);
+			polyline->getParent()->addChild(mesh);
 		}
 
 		addToDB(mesh);

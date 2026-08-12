@@ -54,8 +54,6 @@ else()
 		# The hidapi sources are pulled in as a Git submodule under extern/hidapi.
 		if( NOT TARGET hidapi::hidapi )
 			set( HIDAPI_WITH_TESTS OFF CACHE BOOL "" FORCE )
-			# Force static build so no DLL needs to be deployed alongside the application.
-			set( BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE )
 			# Build the hidapi submodule. The path to the source and binary directories is relative to the current CMakeLists.txt file
 			# (useful when CloudCompare is a git submodule in another project).
 			set( HIDAPI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/hidapi )

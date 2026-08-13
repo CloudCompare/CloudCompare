@@ -4,6 +4,9 @@ CloudCompare Version History
 v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
+	- Edit > Polyline > Extrude
+		- vertical extrusion within specified ownward (-Z) and upward (+Z) offsets
+
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter

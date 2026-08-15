@@ -31,6 +31,13 @@ New features:
 		- New command -PLY_NO_SF_PREFIX
 			- tells the PLY filter not to add the 'scalar_' prefix to the scalar field names when saving
 			- scalar fields coming from an input PLY file already keep their original name
+		- New option -OUTPUT_MATRIX_FILE {filename} for the -ICP command
+			- saves the registration matrix to this file instead of the automatically generated '{cloud path}/{cloud name}_REGISTRATION_MATRIX.txt'
+			- the filename is used as is: no timestamp and no '.txt' extension are appended
+		- New option -OUTPUT_INFO_FILE {filename} for the -BEST_FIT_PLANE command
+			- saves the plane information file to this file instead of the automatically generated '{cloud path}/{cloud name}_BEST_FIT_PLANE_INFO.txt'
+			- the filename is used as is: no timestamp and no '.txt' extension are appended
+			- as this command writes one information file per loaded cloud, this option requires that a single cloud is loaded
 		- New command -DISTANCES_FROM_SENSOR [-SQUARED]
 			- to compute the distances from every point of the cloud to the associated sensor origin (if any)
 		- New command -SCATTERING_ANGLES [-DEGREES]

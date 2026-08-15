@@ -425,6 +425,13 @@ struct CommandStatTest : public ccCommandLineInterface::Command
 	bool process(ccCommandLineInterface& cmd) override;
 };
 
+struct CommandStatFit : public ccCommandLineInterface::Command
+{
+	CommandStatFit();
+
+	bool process(ccCommandLineInterface& cmd) override;
+};
+
 struct CommandDelaunayTri : public ccCommandLineInterface::Command
 {
 	CommandDelaunayTri();

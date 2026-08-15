@@ -905,6 +905,7 @@ void ccCommandLineParser::registerBuiltInCommands()
 	registerCommand(Command::Shared(new CommandC2CDist));
 	registerCommand(Command::Shared(new CommandCPS));
 	registerCommand(Command::Shared(new CommandStatTest));
+	registerCommand(Command::Shared(new CommandStatFit));
 	registerCommand(Command::Shared(new CommandDelaunayTri));
 	registerCommand(Command::Shared(new CommandSFArithmetic));
 	registerCommand(Command::Shared(new CommandSFOperation));

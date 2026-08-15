@@ -24,10 +24,11 @@ New features:
 		- distances between a point cloud and a disc can be computed with 'Tools > Distances > Cloud/primitive dist'
 
 	- New Command line options
-		- New command -MATCH_SCALES {BB_MAX_DIM|BB_VOLUME|PCA_MAX_DIM|ICP} [-REFERENCE {index}] [-RMS_DIFF {value}] [-OVERLAP {percent}]
+		- New command -MATCH_SCALES {BB_MAX_DIM|BB_VOLUME|PCA_MAX_DIM|ICP} [-REFERENCE {index}] [-RMS_DIFF {value}] [-OVERLAP {percent}] [-MIN_SCALE {value}] [-MAX_SCALE {value}]
 			- ports the 'Tools > Registration > Match scales' tool to the command line
 			- rescales all loaded clouds/meshes to match the scale of the reference entity (0-based index, 0 by default)
 			- -RMS_DIFF and -OVERLAP only apply to the ICP algorithm (defaults: 1e-5 and 100 respectively)
+			- -MIN_SCALE and -MAX_SCALE constrain the scale factor: a factor falling outside the range is clamped to the nearest bound and a warning is issued (both are optional, and no limit is applied by default)
 		- New command -PLY_NO_SF_PREFIX
 			- tells the PLY filter not to add the 'scalar_' prefix to the scalar field names when saving
 			- scalar fields coming from an input PLY file already keep their original name

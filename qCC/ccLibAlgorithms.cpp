@@ -609,7 +609,9 @@ namespace ccLibAlgorithms
 	                                 double                 icpRmsDiff,
 	                                 int                    icpFinalOverlap,
 	                                 unsigned               refEntityIndex /*=0*/,
-	                                 QWidget*               parent /*=nullptr*/)
+	                                 QWidget*               parent /*=nullptr*/,
+	                                 double                 minScale /*=-1.0*/,
+	                                 double                 maxScale /*=-1.0*/)
 	{
 		if (entities.size() < 2
 		    || refEntityIndex >= entities.size())
@@ -813,6 +815,18 @@ namespace ccLibAlgorithms
 				}
 
 				double scaled = algo == ICP_SCALE ? scales[i] : scales[refEntityIndex] / scales[i];
+
+				// the caller can restrict the scale factor that may be applied (a negative bound means 'no limit')
+				if (minScale > 0 && scaled < minScale)
+				{
+					ccLog::Warning(QString("[Scale Matching] Entity '%1' scale factor (%2) was clamped to the minimum allowed value (%3)").arg(entities[i]->getName()).arg(scaled).arg(minScale));
+					scaled = minScale;
+				}
+				else if (maxScale > 0 && scaled > maxScale)
+				{
+					ccLog::Warning(QString("[Scale Matching] Entity '%1' scale factor (%2) was clamped to the maximum allowed value (%3)").arg(entities[i]->getName()).arg(scaled).arg(maxScale));
+					scaled = maxScale;
+				}
 
 				PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
 

@@ -54,14 +54,15 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(const ccHObject::Contai
 
 	connect(m_ui->entityComboBox, &QComboBox::currentIndexChanged, this, &ccScalarFieldsManagerDialog::onEntityChanged);
 
-	// monitor table selections to enable delete button
+	// monitor table selections to enable buttons
 	connect(m_ui->sfTableWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]()
 	        {
             bool hasSelection = m_ui->sfTableWidget->selectionModel()->hasSelection();
             m_ui->deleteSFButton->setEnabled(hasSelection);
-            m_ui->showHistogramButton->setEnabled(hasSelection); });
+            m_ui->showHistogramButton->setEnabled(hasSelection);
+			m_ui->arithmeticButton->setEnabled(hasSelection); });
 
-	// save edits when the user changes renames a scalar field in the table
+	// save edits when the user renames a scalar field in the table
 	connect(m_ui->sfTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item)
 	        {
 			// since the first column is the only editable one, 
@@ -104,19 +105,26 @@ void ccScalarFieldsManagerDialog::setSelectedEntities(const ccHObject::Container
 
 	// initialize on the first cloud found
 	m_ui->entityComboBox->setCurrentIndex(0);
-	setActivePointCloud(m_availableClouds[0]);
+
+	setActivePointCloud(!m_availableClouds.empty() ? m_availableClouds.front() : nullptr);
 }
 
 void ccScalarFieldsManagerDialog::onEntityChanged(int index)
 {
-	// swap the pointer and rebuild the table
-	setActivePointCloud(m_availableClouds[index]);
+	if (index >= 0 && static_cast<size_t>(index) < m_availableClouds.size())
+	{
+		setActivePointCloud(m_availableClouds[index]);
+	}
+	else
+	{
+		setActivePointCloud(nullptr);
+	}
 }
 
 void ccScalarFieldsManagerDialog::setActivePointCloud(ccPointCloud* pc)
 {
 	m_pointCloud = pc;
-	m_sfCount    = (m_pointCloud) ? m_pointCloud->getNumberOfScalarFields() : 0;
+	m_sfCount    = (m_pointCloud ? m_pointCloud->getNumberOfScalarFields() : 0);
 	buildTable();
 }
 
@@ -153,6 +161,8 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 		return;
 	}
 
+	m_ui->sfTableWidget->blockSignals(true); // otherwise the renameSF method will be called
+
 	// add a new row to the table
 	int rowCount = m_ui->sfTableWidget->rowCount();
 	m_ui->sfTableWidget->insertRow(rowCount);
@@ -162,8 +172,8 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	sf->computeMinAndMax();
 	auto       minVal = sf->getMin();
 	auto       maxVal = sf->getMax();
-	ScalarType mean   = 0.0f;
-	ScalarType var    = 0.0f;
+	ScalarType mean   = 0;
+	ScalarType var    = 0;
 	sf->computeMeanAndVariance(mean, &var);
 	double stdDev = std::sqrt(static_cast<double>(var));
 
@@ -194,19 +204,21 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 
 	// Std (read-only)
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::STD, createReadOnlyItem(QString::number(stdDev, 'f', 6)));
+
+	m_ui->sfTableWidget->blockSignals(false);
 }
 
 void ccScalarFieldsManagerDialog::addConstantSF()
 {
-	QString  defaultName = "Constant";
+	QString  defaultName = tr("Constant");
 	unsigned trys        = 1;
 	while (m_pointCloud->getScalarFieldIndexByName(defaultName.toStdString()) >= 0 || trys > 99)
 	{
-		defaultName = tr("Constant #%1").arg(++trys);
+		defaultName = tr("Constant") + QString(" #%1").arg(++trys);
 	}
 
 	// ask for a name
-	bool    ok = false;
+	bool    ok     = false;
 	QString sfName = QInputDialog::getText(this, tr("New SF name"), tr("SF name (must be unique)"), QLineEdit::Normal, defaultName, &ok);
 	if (!ok)
 	{

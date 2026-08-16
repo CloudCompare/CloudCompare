@@ -191,6 +191,7 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 		QTableWidgetItem* item = new QTableWidgetItem(text);
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 		item->setBackground(readOnlyBackground);
+		item->setForeground(Qt::black);
 		return item;
 	};
 

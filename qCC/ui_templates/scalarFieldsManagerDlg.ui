@@ -12,19 +12,19 @@
   </property>
   <property name="windowTitle">
    <string>Scalar Fields Manager</string>
-  </property> 
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="buttonHorizontalLayout">
      <item>
       <widget class="QLabel" name="entityLabel">
-       <property name="text">
-        <string>Selected entity:</string>
-       </property>
        <property name="font">
         <font>
          <bold>true</bold>
         </font>
+       </property>
+       <property name="text">
+        <string>Selected entity:</string>
        </property>
       </widget>
      </item>
@@ -38,7 +38,7 @@
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Orientation::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -63,21 +63,20 @@
         </size>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Show histogram</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
        <property name="default">
         <bool>false</bool>
-       </property>
-       <property name="icon">
-        <iconset resource="../icons.qrc">
-         <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png
-        </iconset>
-       </property>
-       <property name="toolTip">
-        <string>Show histogram</string>
        </property>
       </widget>
      </item>
@@ -96,20 +95,20 @@
         </size>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Delete</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/ccDeleteSF.png</normaloff>:/CC/images/ccDeleteSF.png</iconset>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
        <property name="default">
         <bool>false</bool>
-       </property>
-       <property name="icon">
-        <iconset resource="../icons.qrc">
-        <normaloff>:/CC/images/ccDeleteSF.png</normaloff>:/CC/images/ccDeleteSF.png</iconset>
-       </property>
-       <property name="toolTip">
-        <string>Delete</string>
        </property>
       </widget>
      </item>
@@ -128,21 +127,20 @@
         </size>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Add constant SF</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
        <property name="default">
         <bool>false</bool>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../qCC/icons.qrc">
-         <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png
-        </iconset>
-       </property>
-       <property name="toolTip">
-        <string>Add constant SF</string>
        </property>
       </widget>
      </item>
@@ -161,21 +159,20 @@
         </size>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>Arithmetic</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icons.qrc">
+         <normaloff>:/CC/images/ccSfArithmetic.png</normaloff>:/CC/images/ccSfArithmetic.png</iconset>
        </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
        <property name="default">
         <bool>false</bool>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../qCC/icons.qrc">
-         <normaloff>:/CC/images/ccSfArithmetic.png</normaloff>:/CC/images/ccSfArithmetic.png
-        </iconset>
-       </property>
-       <property name="toolTip">
-        <string>Arithmetic</string>
        </property>
       </widget>
      </item>
@@ -219,7 +216,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../../qCC/icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections/>
 </ui>

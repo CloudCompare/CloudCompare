@@ -20,42 +20,24 @@
 #include "ui_scalarFieldsManagerDlg.h"
 
 // local
-#include "ccColorScaleEditorWidget.h"
 #include "ccHistogramWindow.h"
-#include "ccPersistentSettings.h"
 #include "mainwindow.h"
 
-// common
-#include <ccMainAppInterface.h>
-#include <ccQtHelpers.h>
-
 // qCC_db
-#include <ccFileUtils.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
 // Qt
-#include <QBrush>
-#include <QColor>
-#include <QColorDialog>
-#include <QFileDialog>
-#include <QHBoxLayout>
 #include <QInputDialog>
-#include <QMessageBox>
-#include <QPlainTextEdit>
-#include <QSettings>
-#include <QUuid>
 
 // System
 #include <cassert>
 
-ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(ccMainAppInterface*         mainApp,
-                                                         const ccHObject::Container& selectedEntities,
+ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(const ccHObject::Container& selectedEntities,
                                                          QWidget*                    parent /*=nullptr*/)
     : QDialog(parent)
     , m_pointCloud(nullptr)
     , m_sfCount(0)
-    , m_mainApp(mainApp)
     , m_ui(new Ui::ScalarFieldsManagerDlg)
 {
 	m_ui->setupUi(this);
@@ -96,6 +78,7 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(ccMainAppInterface*    
 ccScalarFieldsManagerDialog::~ccScalarFieldsManagerDialog()
 {
 	delete m_ui;
+	m_ui = nullptr;
 }
 
 void ccScalarFieldsManagerDialog::setSelectedEntities(const ccHObject::Container& entities)
@@ -166,7 +149,9 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_pointCloud->getScalarField(sfIdx));
 	if (!sf)
+	{
 		return;
+	}
 
 	// add a new row to the table
 	int rowCount = m_ui->sfTableWidget->rowCount();
@@ -182,15 +167,13 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	sf->computeMeanAndVariance(mean, &var);
 	double stdDev = std::sqrt(static_cast<double>(var));
 
-	// light grey backrgound for read-only cells
-	QBrush readOnlyBackground(QColor(240, 240, 240));
-
 	// Helper lambda to create read-only items with background
-	auto createReadOnlyItem = [&readOnlyBackground](const QString& text)
+	auto createReadOnlyItem = [](const QString& text)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem(text);
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
-		item->setBackground(readOnlyBackground);
+		// light grey backrgound for read-only cells
+		item->setBackground(Qt::lightGray);
 		item->setForeground(Qt::black);
 		return item;
 	};
@@ -223,10 +206,12 @@ void ccScalarFieldsManagerDialog::addConstantSF()
 	}
 
 	// ask for a name
-	bool    ok;
+	bool    ok = false;
 	QString sfName = QInputDialog::getText(this, tr("New SF name"), tr("SF name (must be unique)"), QLineEdit::Normal, defaultName, &ok);
 	if (!ok)
+	{
 		return;
+	}
 
 	if (ccEntityAction::sfAddConstant(m_pointCloud, sfName, false, this))
 	{
@@ -236,7 +221,7 @@ void ccScalarFieldsManagerDialog::addConstantSF()
 
 	updateDisplay();
 
-	m_mainApp->dispToConsole(QString("[SF Manager] Added constant scalar field '%1' to '%2'").arg(sfName).arg(m_pointCloud->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	ccLog::Print(QString("[SF Manager] Added constant scalar field '%1' to '%2'").arg(sfName).arg(m_pointCloud->getName()));
 }
 
 void ccScalarFieldsManagerDialog::deleteSF()
@@ -252,7 +237,9 @@ void ccScalarFieldsManagerDialog::deleteSF()
 	// handle multi-row selecton
 	QModelIndexList selectedRows = m_ui->sfTableWidget->selectionModel()->selectedRows();
 	if (selectedRows.isEmpty())
+	{
 		return;
+	}
 
 	// iterate backwards to avoid index shifting issues when deleting rows
 	for (int i = selectedRows.count() - 1; i >= 0; --i)
@@ -268,7 +255,7 @@ void ccScalarFieldsManagerDialog::deleteSF()
 		m_pointCloud->deleteScalarField(sfIdx);
 		m_sfCount -= 1;
 
-		m_mainApp->dispToConsole(QString("[SF Manager] Deleted '%1' from '%2'").arg(sfName, m_pointCloud->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+		ccLog::Print(QString("[SF Manager] Deleted '%1' from '%2'").arg(sfName, m_pointCloud->getName()));
 		m_ui->sfTableWidget->removeRow(row);
 	}
 
@@ -291,7 +278,9 @@ void ccScalarFieldsManagerDialog::showHistogram()
 	// handle multi-row selecton
 	QModelIndexList selectedRows = m_ui->sfTableWidget->selectionModel()->selectedRows();
 	if (selectedRows.isEmpty())
+	{
 		return;
+	}
 
 	for (int i = 0; i < selectedRows.count(); ++i)
 	{
@@ -299,7 +288,9 @@ void ccScalarFieldsManagerDialog::showHistogram()
 		int            sfIdx = selectedRows[i].row();
 		ccScalarField* sf    = static_cast<ccScalarField*>(m_pointCloud->getScalarField(sfIdx));
 		if (!sf)
+		{
 			continue;
+		}
 
 		// we display the histogram of the current scalar field
 		if (sf)
@@ -332,14 +323,16 @@ void ccScalarFieldsManagerDialog::renameSF(int row, const QString& newName)
 {
 	ccScalarField* sf = static_cast<ccScalarField*>(m_pointCloud->getScalarField(row));
 	if (!sf)
+	{
 		return;
+	}
 
 	QString oldName = QString::fromStdString(sf->getName());
 	m_pointCloud->renameScalarField(row, newName.toStdString());
 
 	updateDisplay();
 
-	m_mainApp->dispToConsole(QString("[SF Manager] Renamed '%1' to '%2' in '%3'").arg(oldName, newName, m_pointCloud->getName()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
+	ccLog::Print(QString("[SF Manager] Renamed '%1' to '%2' in '%3'").arg(oldName, newName, m_pointCloud->getName()));
 }
 
 void ccScalarFieldsManagerDialog::doArithmetic()

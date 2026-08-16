@@ -3369,7 +3369,7 @@ void MainWindow::doActionRenameSF()
 
 void MainWindow::doActionOpenSelectedEntitiesSFManager()
 {
-	ccScalarFieldsManagerDialog sfmDlg(this, m_selectedEntities, this);
+	ccScalarFieldsManagerDialog sfmDlg(m_selectedEntities, this);
 
 	if (!sfmDlg.exec())
 	{

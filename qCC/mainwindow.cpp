@@ -6023,7 +6023,7 @@ void MainWindow::doActionSORFilter()
 		                                                                                s_sorFilterNSigma,
 		                                                                                cloud->getOctree().data(),
 		                                                                                &pDlg,
-																						s_maxThreadCount);
+		                                                                                s_maxThreadCount);
 
 		if (selection)
 		{

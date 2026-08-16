@@ -72,24 +72,24 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(ccMainAppInterface*    
 
 	connect(m_ui->entityComboBox, &QComboBox::currentIndexChanged, this, &ccScalarFieldsManagerDialog::onEntityChanged);
 
-	//! monitor table selections to enable delete button
+	// monitor table selections to enable delete button
 	connect(m_ui->sfTableWidget->selectionModel(), &QItemSelectionModel::selectionChanged, this, [this]()
 	        {
             bool hasSelection = m_ui->sfTableWidget->selectionModel()->hasSelection();
             m_ui->deleteSFButton->setEnabled(hasSelection);
             m_ui->showHistogramButton->setEnabled(hasSelection); });
 
-	//! save edits when the user changes renames a scalar field in the table
+	// save edits when the user changes renames a scalar field in the table
 	connect(m_ui->sfTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item)
 	        {
-			//! since the first column is the only editable one, 
-			//! save the remaning back to the point cloud
+			// since the first column is the only editable one, 
+			// save the remaning back to the point cloud
 			if (item && item->column() == SFAttributes::NAME) 
 			{
 				this->renameSF(item->row(), item->text().trimmed());
 			} });
 
-	//! filter and populate the active entities dropdown
+	// filter and populate the active entities dropdown
 	setSelectedEntities(selectedEntities);
 }
 
@@ -104,7 +104,7 @@ void ccScalarFieldsManagerDialog::setSelectedEntities(const ccHObject::Container
 	m_ui->entityComboBox->clear();
 	m_availableClouds.clear();
 
-	//! loop through selected items and pull out only the point clouds
+	// loop through selected items and pull out only the point clouds
 	for (ccHObject* entity : entities)
 	{
 		if (entity && entity->isA(CC_TYPES::POINT_CLOUD))
@@ -112,21 +112,21 @@ void ccScalarFieldsManagerDialog::setSelectedEntities(const ccHObject::Container
 			ccPointCloud* pc = static_cast<ccPointCloud*>(entity);
 			m_availableClouds.push_back(pc);
 
-			//! add the cloud's name to the dropdown display
+			// add the cloud's name to the dropdown display
 			m_ui->entityComboBox->addItem(pc->getName());
 		}
 	}
 
 	m_ui->entityComboBox->blockSignals(false);
 
-	//! initialize on the first cloud found
+	// initialize on the first cloud found
 	m_ui->entityComboBox->setCurrentIndex(0);
 	setActivePointCloud(m_availableClouds[0]);
 }
 
 void ccScalarFieldsManagerDialog::onEntityChanged(int index)
 {
-	//! swap the pointer and rebuild the table
+	// swap the pointer and rebuild the table
 	setActivePointCloud(m_availableClouds[index]);
 }
 
@@ -152,7 +152,7 @@ void ccScalarFieldsManagerDialog::buildTable()
 	m_ui->sfTableWidget->clearContents();
 	m_ui->sfTableWidget->setRowCount(0);
 
-	//! iterate over scalar fields and append them to the table
+	// iterate over scalar fields and append them to the table
 	for (unsigned i = 0; i < m_sfCount; ++i)
 	{
 		appendSFToTable(i);
@@ -168,11 +168,11 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	if (!sf)
 		return;
 
-	//! add a new row to the table
+	// add a new row to the table
 	int rowCount = m_ui->sfTableWidget->rowCount();
 	m_ui->sfTableWidget->insertRow(rowCount);
 
-	//! compute statistics
+	// compute statistics
 	auto name = QString::fromStdString(sf->getName());
 	sf->computeMinAndMax();
 	auto       minVal = sf->getMin();
@@ -185,7 +185,7 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 	// light grey backrgound for read-only cells
 	QBrush readOnlyBackground(QColor(240, 240, 240));
 
-	//! Helper lambda to create read-only items with background
+	// Helper lambda to create read-only items with background
 	auto createReadOnlyItem = [&readOnlyBackground](const QString& text)
 	{
 		QTableWidgetItem* item = new QTableWidgetItem(text);
@@ -195,21 +195,21 @@ void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 		return item;
 	};
 
-	//! SF Name (editable)
+	// SF Name (editable)
 	QTableWidgetItem* nameItem = new QTableWidgetItem(name);
 	nameItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable);
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::NAME, nameItem);
 
-	//! MinValue (read-only)
+	// MinValue (read-only)
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MINVAL, createReadOnlyItem(QString::number(minVal, 'f', 6)));
 
-	//! MaxValue (read-only)
+	// MaxValue (read-only)
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MAXVAL, createReadOnlyItem(QString::number(maxVal, 'f', 6)));
 
-	//! Mean (read-only)
+	// Mean (read-only)
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::MEAN, createReadOnlyItem(QString::number(mean, 'f', 6)));
 
-	//! Std (read-only)
+	// Std (read-only)
 	m_ui->sfTableWidget->setItem(sfIdx, SFAttributes::STD, createReadOnlyItem(QString::number(stdDev, 'f', 6)));
 }
 
@@ -241,7 +241,7 @@ void ccScalarFieldsManagerDialog::addConstantSF()
 
 void ccScalarFieldsManagerDialog::deleteSF()
 {
-	//! check which row is currently selected
+	// check which row is currently selected
 	int row = m_ui->sfTableWidget->currentRow();
 	if (row < 0)
 	{
@@ -249,21 +249,21 @@ void ccScalarFieldsManagerDialog::deleteSF()
 		return;
 	}
 
-	//! handle multi-row selecton
+	// handle multi-row selecton
 	QModelIndexList selectedRows = m_ui->sfTableWidget->selectionModel()->selectedRows();
 	if (selectedRows.isEmpty())
 		return;
 
-	//! iterate backwards to avoid index shifting issues when deleting rows
+	// iterate backwards to avoid index shifting issues when deleting rows
 	for (int i = selectedRows.count() - 1; i >= 0; --i)
 	{
 		int row = selectedRows[i].row();
 
-		//! Get the SF name from the selected row
+		// Get the SF name from the selected row
 		QTableWidgetItem* nameItem = m_ui->sfTableWidget->item(row, SFAttributes::NAME);
 		QString           sfName   = nameItem->text();
 
-		//! delete scalar field
+		// delete scalar field
 		int sfIdx = m_pointCloud->getScalarFieldIndexByName(sfName.toStdString());
 		m_pointCloud->deleteScalarField(sfIdx);
 		m_sfCount -= 1;
@@ -274,13 +274,13 @@ void ccScalarFieldsManagerDialog::deleteSF()
 
 	updateDisplay();
 
-	//! re-unable delete button
+	// re-unable delete button
 	m_ui->deleteSFButton->setEnabled(false);
 }
 
 void ccScalarFieldsManagerDialog::showHistogram()
 {
-	//! check which row is currently selected
+	// check which row is currently selected
 	int row = m_ui->sfTableWidget->currentRow();
 	if (row < 0)
 	{
@@ -288,14 +288,14 @@ void ccScalarFieldsManagerDialog::showHistogram()
 		return;
 	}
 
-	//! handle multi-row selecton
+	// handle multi-row selecton
 	QModelIndexList selectedRows = m_ui->sfTableWidget->selectionModel()->selectedRows();
 	if (selectedRows.isEmpty())
 		return;
 
 	for (int i = 0; i < selectedRows.count(); ++i)
 	{
-		//! Get the SF info and data
+		// Get the SF info and data
 		int            sfIdx = selectedRows[i].row();
 		ccScalarField* sf    = static_cast<ccScalarField*>(m_pointCloud->getScalarField(sfIdx));
 		if (!sf)

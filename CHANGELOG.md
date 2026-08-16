@@ -7,10 +7,6 @@ New features:
 	- Edit > Polyline > Extrude
 		- vertical extrusion within specified ownward (-Z) and upward (+Z) offsets
 
-	- New geometric features: from Fernandez, 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data
-			- Degree of planarity (M): ln(L1 / L3)
-			- Degree of linearity (K): ln(L1 / L2) / ln(L2 / L3)
-
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter
@@ -339,6 +335,11 @@ Improvements:
 	- 3D mouse support
 		- 3D mouse support on macOS, Linux and Windows (thanks to https://github.com/braunsi23 and Paul Rascle!)
 		- on Windows, option to compile with the 3DxWare SDK or the generic hidapi library
+
+	- Tools > Other > Compute geometric feature
+		- new geometric features: (from "Obtaining a Best Fitting Plane Through 3D Georeferenced Data", Fernandez, 2005)
+			- Degree of planarity (M): ln(L1 / L3)
+			- Degree of linearity (K): ln(L1 / L2) / ln(L2 / L3)
 
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same

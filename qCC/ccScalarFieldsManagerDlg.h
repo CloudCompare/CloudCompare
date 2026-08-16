@@ -16,8 +16,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "CCPluginAPI.h"
-
 // qCC_db
 #include <ccHObject.h>
 #include <ccScalarField.h>
@@ -27,8 +25,6 @@
 
 class ccScalarField;
 class ccPointCloud;
-class ccScalarFieldsManager;
-class ccMainAppInterface;
 
 namespace Ui
 {
@@ -51,8 +47,7 @@ class ccScalarFieldsManagerDialog : public QDialog
 
   public:
 	//! Default constructor
-	ccScalarFieldsManagerDialog(ccMainAppInterface*         mainApp,
-	                            const ccHObject::Container& selectedEntities,
+	ccScalarFieldsManagerDialog(const ccHObject::Container& selectedEntities,
 	                            QWidget*                    parent = nullptr);
 
 	//! Destructor
@@ -77,9 +72,6 @@ class ccScalarFieldsManagerDialog : public QDialog
 	void appendSFToTable(int sfIdx);
 
   protected:
-	//! Associated application (interface)
-	ccMainAppInterface* m_mainApp;
-
 	//! Active point cloud
 	ccPointCloud*              m_pointCloud;
 	unsigned                   m_sfCount;

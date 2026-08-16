@@ -95,6 +95,7 @@ constexpr char COMMAND_MATCH_SCALES_OVERLAP[]             = "OVERLAP";
 constexpr char COMMAND_BEST_FIT_PLANE[]                   = "BEST_FIT_PLANE";
 constexpr char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]        = "MAKE_HORIZ";
 constexpr char COMMAND_BEST_FIT_PLANE_KEEP_LOADED[]       = "KEEP_LOADED";
+constexpr char COMMAND_BEST_FIT_PLANE_OUTPUT_INFO_FILE[]  = "OUTPUT_INFO_FILE";
 constexpr char COMMAND_ORIENT_NORMALS[]                   = "ORIENT_NORMS_MST";
 constexpr char COMMAND_SOR_FILTER[]                       = "SOR";
 constexpr char COMMAND_NOISE_FILTER[]                     = "NOISE";
@@ -164,6 +165,7 @@ constexpr char COMMAND_ICP_SKIP_TX[]                      = "SKIP_TX";
 constexpr char COMMAND_ICP_SKIP_TY[]                      = "SKIP_TY";
 constexpr char COMMAND_ICP_SKIP_TZ[]                      = "SKIP_TZ";
 constexpr char COMMAND_ICP_C2M_DIST[]                     = "USE_C2M_DIST";
+constexpr char COMMAND_ICP_OUTPUT_MATRIX_FILE[]           = "OUTPUT_MATRIX_FILE";
 constexpr char COMMAND_PLY_EXPORT_FORMAT[]                = "PLY_EXPORT_FMT";
 constexpr char COMMAND_PLY_NO_SF_PREFIX[]                 = "PLY_NO_SF_PREFIX";
 constexpr char COMMAND_COMPUTE_GRIDDED_NORMALS[]          = "COMPUTE_NORMALS";
@@ -3861,8 +3863,9 @@ CommandMatchBestFitPlane::CommandMatchBestFitPlane()
 bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 {
 	// look for local options
-	bool makeCloudsHoriz = false;
-	bool keepLoaded      = false;
+	bool    makeCloudsHoriz = false;
+	bool    keepLoaded      = false;
+	QString outputInfoFile;
 
 	while (!cmd.arguments().empty())
 	{
@@ -3881,6 +3884,22 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 
 			keepLoaded = true;
 		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_BEST_FIT_PLANE_OUTPUT_INFO_FILE))
+		{
+			// local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (!cmd.arguments().empty())
+			{
+				outputInfoFile = cmd.arguments().front();
+				cmd.arguments().pop_front();
+				cmd.print(QObject::tr("Plane info file: %1").arg(outputInfoFile));
+			}
+			else
+			{
+				return cmd.error(QObject::tr("Missing argument: filename after '%1'").arg(COMMAND_BEST_FIT_PLANE_OUTPUT_INFO_FILE));
+			}
+		}
 		else
 		{
 			break; // as soon as we encounter an unrecognized argument, we break the local loop to go back to the main one!
@@ -3890,6 +3909,12 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 	if (cmd.clouds().empty())
 	{
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
+	}
+
+	// one info file is generated per cloud, so a forced output path can only describe a single one
+	if (!outputInfoFile.isEmpty() && cmd.clouds().size() > 1)
+	{
+		return cmd.error(QObject::tr("Option '%1' requires a single loaded cloud (%2 are loaded)").arg(COMMAND_BEST_FIT_PLANE_OUTPUT_INFO_FILE).arg(cmd.clouds().size()));
 	}
 
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -3925,13 +3950,18 @@ bool CommandMatchBestFitPlane::process(ccCommandLineInterface& cmd)
 
 			// open text file to save plane related information
 			{
-				QString txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(desc.path, desc.basename);
-				if (cmd.addTimestamp())
+				// the user can force the output path, in which case it is used as is
+				QString txtFilename = outputInfoFile;
+				if (txtFilename.isEmpty())
 				{
-					QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
-					txtFilename += QObject::tr("_%1").arg(timestamp);
+					txtFilename = QObject::tr("%1/%2_BEST_FIT_PLANE_INFO").arg(desc.path, desc.basename);
+					if (cmd.addTimestamp())
+					{
+						QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
+						txtFilename += QObject::tr("_%1").arg(timestamp);
+					}
+					txtFilename += QObject::tr(".txt");
 				}
-				txtFilename += QObject::tr(".txt");
 				QFile txtFile(txtFilename);
 				if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text))
 				{
@@ -7014,6 +7044,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 	bool                                              useC2MDistances       = false;
 	bool                                              robustC2MDistances    = true;
 	CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING normalsMatching       = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+	QString                                           outputMatrixFile;
 
 	ccArgumentParser parser(cmd.arguments());
 
@@ -7092,6 +7123,16 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			if (!maybemaxThreadCount)
 				return false;
 			maxThreadCount = *maybemaxThreadCount;
+		}
+		else if (parser.tryConsumeOption(COMMAND_ICP_OUTPUT_MATRIX_FILE))
+		{
+			if (parser.isEmpty())
+			{
+				return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_ICP_OUTPUT_MATRIX_FILE));
+			}
+
+			outputMatrixFile = parser.takeNext();
+			cmd.print(QObject::tr("[ICP] Registration matrix file: %1").arg(outputMatrixFile));
 		}
 		else if (parser.tryConsumeOption(COMMAND_ICP_ROT))
 		{
@@ -7298,13 +7339,18 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 
 		// save matrix in a separate text file
 		{
-			QString txtFilename = QObject::tr("%1/%2_REGISTRATION_MATRIX").arg(dataAndModel[0]->path, dataAndModel[0]->basename);
-			if (cmd.addTimestamp())
+			// the user can force the output path, in which case it is used as is
+			QString txtFilename = outputMatrixFile;
+			if (txtFilename.isEmpty())
 			{
-				QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
-				txtFilename += QString("_%1").arg(timestamp);
+				txtFilename = QObject::tr("%1/%2_REGISTRATION_MATRIX").arg(dataAndModel[0]->path, dataAndModel[0]->basename);
+				if (cmd.addTimestamp())
+				{
+					QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss_zzz");
+					txtFilename += QString("_%1").arg(timestamp);
+				}
+				txtFilename += ".txt";
 			}
-			txtFilename += ".txt";
 			QFile txtFile(txtFilename);
 			if (txtFile.open(QIODevice::WriteOnly | QIODevice::Text))
 			{

@@ -31,15 +31,6 @@ namespace Ui
 	class ScalarFieldsManagerDlg;
 }
 
-enum SFAttributes
-{
-	NAME,
-	MINVAL,
-	MAXVAL,
-	MEAN,
-	STD
-};
-
 //! Dialog to edit/create scalar fields
 class ccScalarFieldsManagerDialog : public QDialog
 {
@@ -55,9 +46,10 @@ class ccScalarFieldsManagerDialog : public QDialog
 
 	//! Sets active point cloud
 	void setActivePointCloud(ccPointCloud* pc);
-	void setSelectedEntities(const ccHObject::Container& entities);
 
   protected:
+	void setSelectedEntities(const ccHObject::Container& entities);
+
 	void onEntityChanged(int index);
 
 	void buildTable();
@@ -72,10 +64,18 @@ class ccScalarFieldsManagerDialog : public QDialog
 	void appendSFToTable(int sfIdx);
 
   protected:
-	//! Active point cloud
-	ccPointCloud*              m_pointCloud;
-	unsigned                   m_sfCount;
-	std::vector<ccPointCloud*> m_availableClouds;
+	//! SF attributes
+	enum SFAttributes
+	{
+		NAME = 0,
+		MINVAL,
+		MAXVAL,
+		MEAN,
+		STD
+	};
 
-	Ui::ScalarFieldsManagerDlg* m_ui;
+	ccPointCloud*               m_pointCloud;      //!< Active point cloud
+	unsigned                    m_sfCount;         //!< Number of scalar fields
+	std::vector<ccPointCloud*>  m_availableClouds; //!< Point clouds (derived from the initial selection)
+	Ui::ScalarFieldsManagerDlg* m_ui;              //!< Associated Qt UI
 };

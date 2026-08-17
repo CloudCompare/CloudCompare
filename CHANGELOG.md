@@ -364,6 +364,8 @@ Improvements:
 		- CloudCompare is now built upon Qt 6.
 		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
 		- point picking now works on mesh displayed with wireframe
+		- the ASCII loading dialog now warns the user when a file has more columns than it can handle
+			(only the first 512 columns are loaded, the other ones were previously ignored silently)
 
 Bug fixes:
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)

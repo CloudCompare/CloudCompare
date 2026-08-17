@@ -31,6 +31,10 @@ New features:
 		- New command -PLY_NO_SF_PREFIX
 			- tells the PLY filter not to add the 'scalar_' prefix to the scalar field names when saving
 			- scalar fields coming from an input PLY file already keep their original name
+		- New command -STAT_FIT {GAUSS|WEIBULL}
+			- ports the 'Compute stat. params' tool (distribution fitting) to the command line
+			- fits the distribution on the active scalar field of each loaded cloud (see -SET_ACTIVE_SF)
+			- the fitted parameters are printed to the console, and therefore to the -LOG_FILE file if one is set
 		- New option -OUTPUT_MATRIX_FILE {filename} for the -ICP command
 			- saves the registration matrix to this file instead of the automatically generated '{cloud path}/{cloud name}_REGISTRATION_MATRIX.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended

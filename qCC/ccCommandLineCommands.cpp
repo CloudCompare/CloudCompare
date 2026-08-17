@@ -125,6 +125,7 @@ constexpr char COMMAND_C2C_LOCAL_MODEL[]                  = "MODEL";
 constexpr char COMMAND_C2X_MAX_DISTANCE[]                 = "MAX_DIST";
 constexpr char COMMAND_C2X_OCTREE_LEVEL[]                 = "OCTREE_LEVEL";
 constexpr char COMMAND_STAT_TEST[]                        = "STAT_TEST";
+constexpr char COMMAND_STAT_FIT[]                         = "STAT_FIT";
 constexpr char COMMAND_DELAUNAY[]                         = "DELAUNAY";
 constexpr char COMMAND_DELAUNAY_AA[]                      = "AA";
 constexpr char COMMAND_DELAUNAY_BF[]                      = "BEST_FIT";
@@ -5942,6 +5943,90 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 	{
 		progressDialog->close();
 		QCoreApplication::processEvents();
+	}
+
+	return true;
+}
+
+CommandStatFit::CommandStatFit()
+    : ccCommandLineInterface::Command(QObject::tr("Statistical model fitting"), COMMAND_STAT_FIT)
+{
+}
+
+bool CommandStatFit::process(ccCommandLineInterface& cmd)
+{
+	// distribution
+	if (cmd.arguments().empty())
+	{
+		return cmd.error(QObject::tr("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_FIT));
+	}
+
+	QString distribStr = cmd.arguments().takeFirst().toUpper();
+	if (distribStr != "GAUSS" && distribStr != "WEIBULL")
+	{
+		return cmd.error(QObject::tr("Invalid parameter: unknown distribution '%1' after \"-%2\" (GAUSS/WEIBULL)").arg(distribStr, COMMAND_STAT_FIT));
+	}
+
+	if (cmd.clouds().empty())
+	{
+		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
+	}
+
+	int precision = cmd.numericalPrecision();
+
+	for (CLCloudDesc& desc : cmd.clouds())
+	{
+		// we apply the method on the currently 'output' SF (the one '-SET_ACTIVE_SF' sets)
+		CCCoreLib::ScalarField* sf = desc.pc->getCurrentOutScalarField();
+		if (!sf)
+		{
+			cmd.warning(QObject::tr("Cloud '%1' has no active scalar field. Set one with '-%2'").arg(desc.pc->getName(), COMMAND_SET_ACTIVE_SF));
+			continue;
+		}
+
+		if (sf->countValidValues() == 0)
+		{
+			cmd.warning(QObject::tr("Scalar field '%1' of cloud '%2' has no valid values").arg(QString::fromStdString(sf->getName()), desc.pc->getName()));
+			continue;
+		}
+
+		QScopedPointer<CCCoreLib::GenericDistribution> distrib;
+		if (distribStr == "GAUSS")
+		{
+			distrib.reset(new CCCoreLib::NormalDistribution());
+		}
+		else
+		{
+			distrib.reset(new CCCoreLib::WeibullDistribution());
+		}
+
+		if (!distrib->computeParameters(CCCoreLib::GenericDistribution::SFAsScalarContainer(*sf)))
+		{
+			cmd.warning(QObject::tr("Failed to compute the %1 distribution parameters for cloud '%2'").arg(distrib->getName(), desc.pc->getName()));
+			continue;
+		}
+
+		QString description;
+		if (distribStr == "GAUSS")
+		{
+			const CCCoreLib::NormalDistribution* normal = static_cast<const CCCoreLib::NormalDistribution*>(distrib.data());
+			description                                 = QObject::tr("mean = %1 / std.dev. = %2").arg(normal->getMu(), 0, 'f', precision).arg(sqrt(normal->getSigma2()), 0, 'f', precision);
+		}
+		else
+		{
+			const CCCoreLib::WeibullDistribution* weibull = static_cast<const CCCoreLib::WeibullDistribution*>(distrib.data());
+			ScalarType                            a       = 0;
+			ScalarType                            b       = 0;
+			weibull->getParameters(a, b);
+			description = QString("a = %1 / b = %2 / shift = %3").arg(a, 0, 'f', precision).arg(b, 0, 'f', precision).arg(weibull->getValueShift(), 0, 'f', precision);
+			cmd.print(QObject::tr("[Distribution fitting] Additional Weibull distrib. parameters: mode = %1 / skewness = %2").arg(weibull->computeMode()).arg(weibull->computeSkewness()));
+		}
+
+		cmd.print(QObject::tr("[Distribution fitting] Cloud '%1' (SF '%2') - %3: %4")
+		              .arg(desc.pc->getName())
+		              .arg(QString::fromStdString(sf->getName()))
+		              .arg(distrib->getName())
+		              .arg(description));
 	}
 
 	return true;

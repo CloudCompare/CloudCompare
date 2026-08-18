@@ -337,7 +337,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	assert(separator.size() == 1);
 	if (separator.length() < 1)
 	{
-		m_ui->asciiCodeLabel->setText("Enter a valid character!");
+		m_ui->asciiCodeLabel->setText(tr("Enter a valid character!"));
 		m_ui->buttonWidget->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
@@ -346,7 +346,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 
 	// new separator
 	m_separator = separator[0];
-	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
+	m_ui->asciiCodeLabel->setText(tr("(ASCII code: %1)").arg(m_separator.unicode()));
 
 	m_headerLine.clear(); // to force re-assignation of columns!
 	m_columnType.clear();
@@ -583,14 +583,14 @@ void AsciiOpenDlg::updateTable()
 		{
 			displayHeader = m_headerLine.left(256) + "...";
 		}
-		m_ui->headerLabel->setText(QString("Header: ") + displayHeader);
+		m_ui->headerLabel->setText(tr("Header: %1").arg(displayHeader));
 		m_ui->headerLabel->setVisible(true);
 		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(true);
 	}
 
 	if (commentLines)
 	{
-		m_ui->commentLinesSkippedLabel->setText(QString("+ %1 comment line(s) skipped").arg(commentLines));
+		m_ui->commentLinesSkippedLabel->setText(tr("+ %1 comment line(s) skipped").arg(commentLines));
 		m_ui->commentLinesSkippedLabel->setVisible(true);
 	}
 
@@ -1144,7 +1144,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 		{
 			if (counters[i] > 1)
 			{
-				errorMessage = QString("'%1' defined at least twice!").arg(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+				errorMessage = tr("'%1' defined at least twice!").arg(ASCII_OPEN_DLG_TYPES_NAMES[i]);
 				return false;
 			}
 		}
@@ -1156,7 +1156,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 
 	if (coordIsDefined[0] + coordIsDefined[1] + coordIsDefined[2] < 2)
 	{
-		errorMessage = "At least 2 vertex coordinates must be defined!";
+		errorMessage = tr("At least 2 vertex coordinates must be defined!");
 		return false;
 	}
 
@@ -1167,7 +1167,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 	                           + counters[ASCII_OPEN_DLG_QuatZ];
 	if (quaternionTotal != 0 && quaternionTotal != 4)
 	{
-		errorMessage = "Incomplete quaternion definition! (4 components expected)";
+		errorMessage = tr("Incomplete quaternion definition! (4 components expected)");
 		return false;
 	}
 
@@ -1181,7 +1181,7 @@ bool AsciiOpenDlg::apply()
 
 	if (!CheckOpenSequence(sequence, errorMessage))
 	{
-		QMessageBox::warning(nullptr, "Error", errorMessage);
+		QMessageBox::warning(nullptr, tr("Error"), errorMessage);
 		return false;
 	}
 	else

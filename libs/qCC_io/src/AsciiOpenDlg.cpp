@@ -597,7 +597,7 @@ void AsciiOpenDlg::updateTable()
 	// warn the user if some columns can't be handled (and would be silently ignored otherwise)
 	if (maxPartsCount > MAX_COLUMNS)
 	{
-		QString warning = QString("This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.")
+		QString warning = tr("This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.")
 		                      .arg(maxPartsCount)
 		                      .arg(MAX_COLUMNS)
 		                      .arg(maxPartsCount - MAX_COLUMNS);

@@ -23,6 +23,7 @@
 #include "FileIOFilter.h"
 
 // qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 
 // Qt
@@ -371,6 +372,7 @@ void AsciiOpenDlg::updateTable()
 	bool hadValidHeader = !m_headerLine.isEmpty();
 	m_headerLine.clear();
 	m_ui->headerLabel->setVisible(false);
+	m_ui->columnsTruncatedLabel->setVisible(false);
 
 	if (m_filename.isEmpty() && m_stream == nullptr)
 	{
@@ -428,10 +430,11 @@ void AsciiOpenDlg::updateTable()
 	}
 	m_ui->tableWidget->setRowCount(DISPLAYED_LINES + 1); //+1 for first line shifting
 
-	unsigned lineCount    = 0; // number of lines read
-	unsigned totalChars   = 0; // total read characters (for stats)
-	unsigned columnsCount = 0; // max columns count per line
-	unsigned commentLines = 0; // number of comments line skipped
+	unsigned lineCount     = 0; // number of lines read
+	unsigned totalChars    = 0; // total read characters (for stats)
+	unsigned columnsCount  = 0; // max columns count per line
+	unsigned commentLines  = 0; // number of comments line skipped
+	unsigned maxPartsCount = 0; // max columns count per line, before it's clamped to MAX_COLUMNS
 
 	std::vector<bool> valueIsNumber;   // identifies columns with numbers only [mandatory]
 	std::vector<bool> valueIsBelowOne; // identifies columns with values between -1 and 1 only
@@ -461,7 +464,13 @@ void AsciiOpenDlg::updateTable()
 			QStringList parts = currentLine.simplified().split(m_separator);
 			if (lineCount < DISPLAYED_LINES)
 			{
-				unsigned partsCount              = std::min(MAX_COLUMNS, static_cast<unsigned>(parts.size()));
+				unsigned rawPartsCount = static_cast<unsigned>(parts.size());
+				if (rawPartsCount > maxPartsCount)
+				{
+					maxPartsCount = rawPartsCount;
+				}
+
+				unsigned partsCount              = std::min(MAX_COLUMNS, rawPartsCount);
 				bool     columnCountHasIncreased = (partsCount > columnsCount);
 
 				// do we need to add one or several new columns?
@@ -583,6 +592,20 @@ void AsciiOpenDlg::updateTable()
 	{
 		m_ui->commentLinesSkippedLabel->setText(QString("+ %1 comment line(s) skipped").arg(commentLines));
 		m_ui->commentLinesSkippedLabel->setVisible(true);
+	}
+
+	// warn the user if some columns can't be handled (and would be silently ignored otherwise)
+	if (maxPartsCount > MAX_COLUMNS)
+	{
+		QString warning = tr("This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.")
+		                      .arg(maxPartsCount)
+		                      .arg(MAX_COLUMNS)
+		                      .arg(maxPartsCount - MAX_COLUMNS);
+
+		m_ui->columnsTruncatedLabel->setText(warning);
+		m_ui->columnsTruncatedLabel->setVisible(true);
+
+		ccLog::Warning(QString("[AsciiOpenDlg] ") + warning);
 	}
 
 	if (lineCount == 0 || columnsCount == 0)

@@ -42,6 +42,9 @@
 #include <assert.h>
 
 static bool     s_adjustScale                 = false;
+static bool     s_constrainScale              = false;
+static double   s_minScale                    = 0.5;
+static double   s_maxScale                    = 2.0;
 static unsigned s_randomSamplingLimit         = 50000;
 static double   s_rmsDifference               = 1.0e-5;
 static int      s_maxIterationCount           = 20;
@@ -85,7 +88,10 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget*
 	{
 		// semi-persistent options
 		maxThreadCountSpinBox->setValue(s_maxThreadCount);
-		adjustScaleCheckBox->setChecked(s_adjustScale);
+		adjustScaleGroupBox->setChecked(s_adjustScale);
+		scaleRangeCheckBox->setChecked(s_constrainScale);
+		minScaleDoubleSpinBox->setValue(s_minScale);
+		maxScaleDoubleSpinBox->setValue(s_maxScale);
 		randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
 		setMinRMSDecrease(s_rmsDifference);
 		maxIterationCount->setValue(s_maxIterationCount);
@@ -129,6 +135,9 @@ void ccRegistrationDlg::saveParameters() const
 {
 	s_maxThreadCount              = getMaxThreadCount();
 	s_adjustScale                 = adjustScale();
+	s_constrainScale              = scaleRangeCheckBox->isChecked();
+	s_minScale                    = minScaleDoubleSpinBox->value();
+	s_maxScale                    = maxScaleDoubleSpinBox->value();
 	s_randomSamplingLimit         = randomSamplingLimit();
 	s_rmsDifference               = getMinRMSDecrease();
 	s_maxIterationCount           = getMaxIterationCount();
@@ -187,7 +196,17 @@ CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING ccRegistrationDlg::normalsMatc
 
 bool ccRegistrationDlg::adjustScale() const
 {
-	return adjustScaleCheckBox->isChecked();
+	return adjustScaleGroupBox->isChecked();
+}
+
+std::pair<double, double> ccRegistrationDlg::constrainedScaleRange() const
+{
+	if (scaleRangeCheckBox->isChecked())
+	{
+		return {minScaleDoubleSpinBox->value(), maxScaleDoubleSpinBox->value()};
+	}
+
+	return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()};
 }
 
 bool ccRegistrationDlg::removeFarthestPoints() const

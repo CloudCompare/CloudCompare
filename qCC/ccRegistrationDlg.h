@@ -99,6 +99,9 @@ class ccRegistrationDlg : public QDialog
 	**/
 	bool adjustScale() const;
 
+	//! Returns the scale range (if any, or a pair of NaN values if not)
+	std::pair<double, double> constrainedScaleRange() const;
+
 	//! Returns active transformation filters
 	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	 **/

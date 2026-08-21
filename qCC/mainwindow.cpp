@@ -4038,6 +4038,13 @@ void MainWindow::doActionRegister()
 		parameters.maxThreadCount          = rDlg.getMaxThreadCount();
 		parameters.useC2MSignedDistances   = rDlg.useC2MSignedDistances(parameters.robustC2MSignedDistances);
 		parameters.normalsMatching         = rDlg.normalsMatchingOption();
+
+		if (parameters.adjustScale)
+		{
+			auto scaleRange     = rDlg.constrainedScaleRange();
+			parameters.minScale = scaleRange.first;
+			parameters.maxScale = scaleRange.second;
+		}
 	}
 	bool useDataSFAsWeights  = rDlg.useDataSFAsWeights();
 	bool useModelSFAsWeights = rDlg.useModelSFAsWeights();

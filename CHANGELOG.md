@@ -355,6 +355,9 @@ Improvements:
 	- SOR/Cleaning filters
 		- the user can now choose the number of threads to use
 
+	- ICP
+		- new option to define/restrict the scaling range if 'adjust scale' is enabled
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,

@@ -36,6 +36,7 @@
 #include <ccScalarField.h>
 
 // System
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 
@@ -51,6 +52,91 @@ static bool s_saveSFBeforeColor       = false;
 static bool s_saveColumnsNamesHeader  = false;
 static bool s_savePointCountHeader    = false;
 static bool s_doNotCreateLabels       = false;
+
+//! Number of bytes inspected to guess the line ending style of a file
+static constexpr qint64 LINE_ENDING_SNIFF_SIZE = 64 * 1024;
+
+//! Returns whether some data uses legacy Mac line endings (a lone CR, without any LF)
+static bool UsesLoneCRLineEndings(const char* data, qint64 size)
+{
+	bool crFound = false;
+	for (qint64 i = 0; i < size; ++i)
+	{
+		if (data[i] == '\n')
+		{
+			// LF or CRLF: QTextStream already handles both
+			return false;
+		}
+		if (data[i] == '\r')
+		{
+			crFound = true;
+		}
+	}
+
+	return crFound;
+}
+
+namespace
+{
+	//! Read-only device that turns lone CR line endings into LF ones on the fly
+	/** QTextStream::readLine only breaks on LF, so a file saved with legacy Mac
+	    (CR only) line endings would be read as a single very long line. Such files
+	    contain no LF at all, therefore replacing every CR by a LF is enough, and
+	    leaves the rest of the content untouched.
+	**/
+	class CRToLFDevice : public QIODevice
+	{
+	  public:
+		explicit CRToLFDevice(QIODevice& source)
+		    : m_source(source)
+		{
+		}
+
+		bool isSequential() const override
+		{
+			return m_source.isSequential();
+		}
+
+		qint64 size() const override
+		{
+			return m_source.size();
+		}
+
+		qint64 bytesAvailable() const override
+		{
+			return QIODevice::bytesAvailable() + m_source.bytesAvailable();
+		}
+
+		bool seek(qint64 pos) override
+		{
+			// one input byte always maps to exactly one output byte
+			return QIODevice::seek(pos) && m_source.seek(pos);
+		}
+
+	  protected:
+		qint64 readData(char* data, qint64 maxSize) override
+		{
+			qint64 bytesRead = m_source.read(data, maxSize);
+			for (qint64 i = 0; i < bytesRead; ++i)
+			{
+				if (data[i] == '\r')
+				{
+					data[i] = '\n';
+				}
+			}
+
+			return bytesRead;
+		}
+
+		qint64 writeData(const char*, qint64) override
+		{
+			return -1; // read-only
+		}
+
+	  private:
+		QIODevice& m_source;
+	};
+} // namespace
 
 void AsciiFilter::SetDefaultSkippedLineCount(int count)
 {
@@ -427,7 +513,22 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 		return CC_FERR_READING;
 	}
 
-	QTextStream stream(&file);
+	// files saved with legacy Mac line endings (a lone CR) would otherwise be read as a single line
+	QScopedPointer<CRToLFDevice> crToLFDevice;
+	{
+		const QByteArray head = file.peek(LINE_ENDING_SNIFF_SIZE); // doesn't move the read position
+		if (UsesLoneCRLineEndings(head.constData(), head.size()))
+		{
+			ccLog::Warning(QString("[ASCII] File '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(filename));
+			crToLFDevice.reset(new CRToLFDevice(file));
+			if (!crToLFDevice->open(QIODevice::ReadOnly))
+			{
+				return CC_FERR_READING;
+			}
+		}
+	}
+
+	QTextStream stream(crToLFDevice ? static_cast<QIODevice*>(crToLFDevice.data()) : static_cast<QIODevice*>(&file));
 
 	return loadStream(stream, filename, file.size(), container, parameters);
 }
@@ -437,7 +538,18 @@ CC_FILE_ERROR AsciiFilter::loadAsciiData(const QByteArray& data,
                                          ccHObject&        container,
                                          LoadParameters&   parameters)
 {
-	QTextStream stream(data);
+	// same as above, but the data is already in memory so it can be converted directly
+	QByteArray        convertedData;
+	const QByteArray* inputData = &data;
+	if (UsesLoneCRLineEndings(data.constData(), std::min<qint64>(data.size(), LINE_ENDING_SNIFF_SIZE)))
+	{
+		ccLog::Warning(QString("[ASCII] '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(sourceName));
+		convertedData = data;
+		convertedData.replace('\r', '\n');
+		inputData = &convertedData;
+	}
+
+	QTextStream stream(*inputData);
 
 	return loadStream(stream, sourceName, data.size(), container, parameters);
 }

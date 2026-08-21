@@ -8,6 +8,24 @@ from collections.abc import Callable, Sequence
 Vector = Sequence[float]
 DistanceFunction = Callable[[Vector, Vector], float]
 
+_P_NORMS = {
+    "euclidean": 2.0,
+    "l2": 2.0,
+    "manhattan": 1.0,
+    "l1": 1.0,
+}
+
+
+def named_p_norm(name: str) -> float:
+    """Return the ``torch.cdist`` p-norm that matches a named kernel metric."""
+
+    key = str(name).strip().lower()
+    try:
+        return _P_NORMS[key]
+    except KeyError as exc:
+        supported = ", ".join(sorted(_P_NORMS))
+        raise ValueError(f"unsupported geodesic metric '{name}'; expected one of: {supported}") from exc
+
 
 class Metric:
     """A named distance function with validation helpers."""
@@ -16,6 +34,16 @@ class Metric:
         self.name = name
         self._distance_fn = distance_fn or self.euclidean
 
+    @classmethod
+    def from_name(cls, name: str) -> "Metric":
+        """Build a kernel metric from a documented name."""
+
+        key = str(name).strip().lower()
+        if key in {"euclidean", "l2"}:
+            return cls("euclidean", cls.euclidean)
+        if key in {"manhattan", "l1"}:
+            return cls("manhattan", cls.manhattan)
+        raise ValueError(f"unsupported geodesic metric: {name}")
     def distance(self, a: Vector, b: Vector) -> float:
         """Return the distance between vectors ``a`` and ``b``."""
 

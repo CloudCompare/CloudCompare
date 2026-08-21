@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Geodesic Console — مسار ب</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">CloudCompare / GEODESIC-AGI · Path B</p>
+        <h1>منصة التجربة الجيوديسية</h1>
+        <p class="lede">نواة المسافات → الانتباه → المترجم المحدود → المحوّل → إسقاط الشطرنج. هذا نموذج عددي كلاسيكي قابل للتحقق، وليس ذكاءً عاماً جاهزاً.</p>
+      </div>
+      <dl class="env" id="env-panel">
+        <div><dt>الحالة</dt><dd id="env-status">...</dd></div>
+        <div><dt>PyTorch</dt><dd id="env-torch">...</dd></div>
+        <div><dt>CUDA</dt><dd id="env-cuda">...</dd></div>
+      </dl>
+    </header>
+
+    <section class="grid">
+      <article class="panel board-panel">
+        <div class="panel-head">
+          <h2>الرقعة والفرضيات</h2>
+          <div class="controls">
+            <label>المسافة
+              <select id="metric">
+                <option value="euclidean">Euclidean</option>
+                <option value="manhattan">Manhattan</option>
+              </select>
+            </label>
+            <label>Top-K
+              <input id="topk" type="number" min="1" max="8" value="3">
+            </label>
+            <button id="analyze" type="button">تحليل المسار</button>
+            <button id="reset" class="ghost" type="button">وضع البداية</button>
+          </div>
+        </div>
+        <p class="fen-line"><span>FEN</span><input id="fen" spellcheck="false"></p>
+        <div class="board-wrap">
+          <div id="board" class="board" role="grid" aria-label="رقعة الشطرنج"></div>
+          <aside class="candidates" id="candidates"></aside>
+        </div>
+        <p class="status" id="board-status"></p>
+      </article>
+
+      <article class="panel">
+        <h2>المسار التنفيذي</h2>
+        <ol class="pipeline" id="pipeline">
+          <li>Kernel</li>
+          <li>Attention</li>
+          <li>Translator Γ</li>
+          <li>Transformer</li>
+          <li>Chess Projection</li>
+        </ol>
+        <pre id="pipeline-json" class="code">في انتظار التحليل...</pre>
+      </article>
+
+      <article class="panel">
+        <h2>نواة المسافة</h2>
+        <p>ثلاث نقاط على متعدد شعب صغير. المسار المنحني يُقاس مقابل الخط المباشر.</p>
+        <div class="kernel-form">
+          <input id="p0" value="0,0">
+          <input id="p1" value="1,0">
+          <input id="p2" value="1,1">
+          <button id="kernel" type="button">احسب المسار</button>
+        </div>
+        <dl class="stats" id="kernel-stats">
+          <div><dt>الطول</dt><dd>—</dd></div>
+          <div><dt>التشوه</dt><dd>—</dd></div>
+        </dl>
+      </article>
+
+      <article class="panel equation-panel">
+        <h2>المعادلات المجمّدة</h2>
+        <pre class="code math">S = (QKᵀ)/√d − λ · d_g(Q,K) + Γ
+A = softmax(S)
+Γ = γ_max · tanh(g_θ(state))
+score = control + threat + mobility + stability − d_g − pressure</pre>
+        <p class="note">Γ يبقى محدوداً بالبناء. <code>g_θ</code> يدوي افتراضياً، وقابل للتعلم اختيارياً. الشطرنج هنا مرشح فرضيات لا محرك بطولة.</p>
+      </article>
+    </section>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

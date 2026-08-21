@@ -9,7 +9,10 @@ Step 3.1 provides validation infrastructure for the Geodesic Transformer without
 Runtime dependencies are declared in `requirements.txt`; development and validation dependencies are declared in `requirements-dev.txt`. Installation is an explicit environment setup operation and is not performed by validation commands.
 
 ```bash
-python -m pip install -r requirements-dev.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+make validate
+make board
 ```
 
 The validation tooling does not require internet access at runtime and does not use cloud services or external APIs.

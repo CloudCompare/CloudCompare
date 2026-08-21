@@ -1,0 +1,122 @@
+:root {
+  --ink: #102027;
+  --paper: #f4efe4;
+  --panel: #fffaf1;
+  --line: #d7cbb8;
+  --copper: #b5682a;
+  --teal: #1f6f6a;
+  --danger: #9b2c2c;
+  --muted: #6b6258;
+  --light: #cfd8cb;
+  --dark-sq: #5d7358;
+  --lite-sq: #e6d8b8;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); }
+body {
+  font-family: "Noto Naskh Arabic", "Amiri", "Segoe UI", Tahoma, sans-serif;
+  min-height: 100vh;
+}
+.app { max-width: 1180px; margin: 0 auto; padding: 28px 20px 48px; }
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-end;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 18px;
+  margin-bottom: 22px;
+}
+.eyebrow { margin: 0 0 6px; letter-spacing: 0.08em; font-size: 12px; color: var(--copper); font-family: "IBM Plex Sans", "Segoe UI", sans-serif; }
+h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.2; }
+.lede { margin: 0; max-width: 62ch; color: var(--muted); }
+.env { display: flex; gap: 18px; margin: 0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; }
+.env dt { font-size: 11px; color: var(--muted); }
+.env dd { margin: 2px 0 0; font-weight: 700; }
+.grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px;
+  box-shadow: 6px 6px 0 rgba(16, 32, 39, 0.06);
+}
+.panel h2 { margin: 0 0 12px; font-size: 20px; }
+.panel-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+.controls, .kernel-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+label { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+input, select, button {
+  font: inherit;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  padding: 7px 10px;
+}
+button { background: var(--teal); color: #fff; border-color: var(--teal); cursor: pointer; }
+button.ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.fen-line { display: flex; gap: 8px; align-items: center; }
+.fen-line span { font-size: 12px; color: var(--muted); }
+.fen-line input { flex: 1; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; }
+.board-wrap { display: grid; grid-template-columns: 360px 1fr; gap: 14px; align-items: start; }
+.board {
+  width: 360px;
+  height: 360px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  border: 3px solid var(--ink);
+}
+.sq {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  position: relative;
+}
+.sq.lite { background: var(--lite-sq); }
+.sq.dark { background: var(--dark-sq); color: #f4efe4; }
+.sq.selected { outline: 3px solid var(--copper); outline-offset: -3px; }
+.sq.legal::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--copper);
+  position: absolute;
+  bottom: 6px;
+}
+.candidates { display: grid; gap: 8px; }
+.candidate {
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  background: #fff;
+}
+.candidate strong { display: block; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+.candidate span { color: var(--muted); font-size: 13px; }
+.pipeline { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 12px; list-style: none; }
+.pipeline li {
+  border: 1px solid var(--ink);
+  padding: 6px 10px;
+  font-size: 13px;
+  background: var(--light);
+}
+.code {
+  background: var(--ink);
+  color: #e8f0e8;
+  padding: 12px;
+  overflow: auto;
+  font: 12px/1.5 "IBM Plex Mono", ui-monospace, monospace;
+  white-space: pre-wrap;
+}
+.stats { display: flex; gap: 24px; margin: 12px 0 0; }
+.stats dt { color: var(--muted); font-size: 12px; }
+.stats dd { margin: 0; font-size: 24px; }
+.note { color: var(--muted); font-size: 14px; }
+.status { min-height: 1.4em; color: var(--teal); }
+.status.error { color: var(--danger); }
+@media (max-width: 960px) {
+  .hero, .grid, .board-wrap, .panel-head { display: block; }
+  .board, .board-wrap { width: 100%; }
+  .board { height: min(90vw, 420px); }
+}

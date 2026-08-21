@@ -83,17 +83,36 @@ class Translator:
 
 
 class GeodesicTranslator:
-    """Bounded classical control signal for geodesic attention."""
+    """Bounded classical control signal for geodesic attention.
 
-    def __init__(self, gamma_max: float = 0.1, pressure_thresholds: tuple[float, float, float, float] = (0.25, 0.5, 0.8, 1.2)) -> None:
+    The frozen bound is always ``Γ = γ_max * tanh(g_theta(state))``.
+    ``g_theta`` defaults to the handcrafted Step 2 formula and may optionally be
+    a learned controller. Measurements used for discrete state remain detached.
+    """
+
+    def __init__(
+        self,
+        gamma_max: float = 0.1,
+        pressure_thresholds: tuple[float, float, float, float] = (0.25, 0.5, 0.8, 1.2),
+        controller: Any | None = None,
+    ) -> None:
         if torch is None:
             raise ModuleNotFoundError("GeodesicTranslator requires PyTorch")
         if gamma_max < 0:
             raise ValueError("gamma_max must be non-negative")
         self.gamma_max = float(gamma_max)
         self.pressure_thresholds = pressure_thresholds
+        self.controller = controller
 
-    def measure(self, queries: "torch.Tensor", keys: "torch.Tensor", geodesic_distances: "torch.Tensor", previous_queries: "torch.Tensor | None" = None) -> TranslatorMeasurements:
+    def measure(
+        self,
+        queries: "torch.Tensor",
+        keys: "torch.Tensor",
+        geodesic_distances: "torch.Tensor",
+        previous_queries: "torch.Tensor | None" = None,
+    ) -> TranslatorMeasurements:
+        if not torch.isfinite(queries).all() or not torch.isfinite(keys).all() or not torch.isfinite(geodesic_distances).all():
+            raise ValueError("GeodesicTranslator rejects NaN/Inf inputs")
         geodesic_error = float(geodesic_distances.mean().detach().cpu())
         mirror_error = float((queries.mean(dim=-2) - keys.mean(dim=-2)).norm(dim=-1).mean().detach().cpu())
         centered = geodesic_distances - geodesic_distances.mean(dim=-1, keepdim=True)
@@ -102,14 +121,22 @@ class GeodesicTranslator:
             state_velocity = 0.0
         else:
             state_velocity = float((queries - previous_queries).norm(dim=-1).mean().detach().cpu())
-        probabilities = torch.softmax(-(geodesic_distances + centered.abs()), dim=-1).clamp_min(1e-12)
-        entropy = -(probabilities * probabilities.log()).sum(dim=-1).mean()
-        uncertainty = float((entropy / torch.log(torch.tensor(float(probabilities.shape[-1]), device=probabilities.device))).detach().cpu())
+        key_count = int(geodesic_distances.shape[-1])
+        if key_count <= 1:
+            uncertainty = 0.0
+        else:
+            probabilities = torch.softmax(-(geodesic_distances + centered.abs()), dim=-1).clamp_min(1e-12)
+            entropy = -(probabilities * probabilities.log()).sum(dim=-1).mean()
+            normalizer = torch.log(torch.tensor(float(key_count), device=probabilities.device, dtype=probabilities.dtype))
+            # Distance from the uniform / maximum-entropy field. A calm equal-distance
+            # neighborhood stays NORMAL instead of inheriting pressure from entropy=1.
+            uncertainty = float((1.0 - (entropy / normalizer)).abs().detach().cpu())
         pressure = geodesic_error + mirror_error + curvature_energy + state_velocity + uncertainty
         return TranslatorMeasurements(geodesic_error, mirror_error, curvature_energy, state_velocity, uncertainty, float(pressure))
 
     def state_for_pressure(self, pressure: float, previous_state: TranslatorState | None = None) -> TranslatorState:
         normal, caution, high, reject = self.pressure_thresholds
+        del normal
         if pressure >= reject:
             return TranslatorState.REJECT
         if pressure >= high:
@@ -120,13 +147,69 @@ class GeodesicTranslator:
             return TranslatorState.CAUTION
         return TranslatorState.NORMAL
 
-    def correction(self, scores_shape: tuple[int, ...], measurements: TranslatorMeasurements, device: "torch.device | None" = None, dtype: "torch.dtype | None" = None) -> "torch.Tensor":
-        raw = measurements.pressure + 0.5 * measurements.geodesic_error + 0.25 * measurements.mirror_error
-        value = self.gamma_max * torch.tanh(torch.tensor(raw, device=device, dtype=dtype or torch.float32))
-        return torch.full(scores_shape, value.item(), device=device, dtype=dtype or torch.float32)
+    def _raw_state(
+        self,
+        queries: "torch.Tensor",
+        keys: "torch.Tensor",
+        geodesic_distances: "torch.Tensor",
+        previous_queries: "torch.Tensor | None",
+        measurements: TranslatorMeasurements,
+        device: "torch.device | None",
+        dtype: "torch.dtype | None",
+    ) -> "torch.Tensor":
+        resolved_dtype = dtype or torch.float32
+        if self.controller is None:
+            raw = measurements.pressure + 0.5 * measurements.geodesic_error + 0.25 * measurements.mirror_error
+            return torch.as_tensor(raw, device=device, dtype=resolved_dtype)
 
-    def __call__(self, queries: "torch.Tensor", keys: "torch.Tensor", geodesic_distances: "torch.Tensor", previous_queries: "torch.Tensor | None" = None, previous_state: TranslatorState | None = None) -> TranslatorOutput:
+        geo = geodesic_distances.mean()
+        mirror = (queries.mean(dim=-2) - keys.mean(dim=-2)).norm(dim=-1).mean()
+        centered = geodesic_distances - geodesic_distances.mean(dim=-1, keepdim=True)
+        curvature = centered.square().mean()
+        if previous_queries is None:
+            velocity = torch.zeros((), device=geodesic_distances.device, dtype=geodesic_distances.dtype)
+        else:
+            velocity = (queries - previous_queries).norm(dim=-1).mean()
+        key_count = int(geodesic_distances.shape[-1])
+        if key_count <= 1:
+            uncertainty = torch.zeros((), device=geodesic_distances.device, dtype=geodesic_distances.dtype)
+        else:
+            probabilities = torch.softmax(-(geodesic_distances + centered.abs()), dim=-1).clamp_min(1e-12)
+            entropy = -(probabilities * probabilities.log()).sum(dim=-1).mean()
+            normalized = entropy / torch.log(torch.tensor(float(key_count), device=geodesic_distances.device, dtype=geodesic_distances.dtype))
+            uncertainty = (1.0 - normalized).abs()
+        pressure = geo + mirror + curvature + velocity + uncertainty
+        features = torch.stack([geo.reshape(()), mirror.reshape(()), curvature.reshape(()), velocity.reshape(()), uncertainty.reshape(()), pressure.reshape(())])
+        return self.controller(features.to(dtype=resolved_dtype))
+
+    def correction(
+        self,
+        scores_shape: tuple[int, ...],
+        measurements: TranslatorMeasurements,
+        device: "torch.device | None" = None,
+        dtype: "torch.dtype | None" = None,
+        raw: "torch.Tensor | None" = None,
+    ) -> "torch.Tensor":
+        resolved_dtype = dtype or torch.float32
+        if raw is None:
+            raw = torch.as_tensor(
+                measurements.pressure + 0.5 * measurements.geodesic_error + 0.25 * measurements.mirror_error,
+                device=device,
+                dtype=resolved_dtype,
+            )
+        value = self.gamma_max * torch.tanh(raw)
+        return torch.zeros(scores_shape, device=device, dtype=resolved_dtype) + value
+
+    def __call__(
+        self,
+        queries: "torch.Tensor",
+        keys: "torch.Tensor",
+        geodesic_distances: "torch.Tensor",
+        previous_queries: "torch.Tensor | None" = None,
+        previous_state: TranslatorState | None = None,
+    ) -> TranslatorOutput:
         measurements = self.measure(queries, keys, geodesic_distances, previous_queries)
         state = self.state_for_pressure(measurements.pressure, previous_state)
-        gamma = self.correction(tuple(geodesic_distances.shape), measurements, geodesic_distances.device, geodesic_distances.dtype)
+        raw = self._raw_state(queries, keys, geodesic_distances, previous_queries, measurements, geodesic_distances.device, geodesic_distances.dtype)
+        gamma = self.correction(tuple(geodesic_distances.shape), measurements, geodesic_distances.device, geodesic_distances.dtype, raw=raw)
         return TranslatorOutput(state, gamma, measurements)

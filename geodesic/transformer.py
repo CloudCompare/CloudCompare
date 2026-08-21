@@ -17,8 +17,11 @@ else:
     from torch import nn
     TorchModule = nn.Module
 
+from geodesic.core.metric import named_p_norm
+from geodesic.distances import pairwise_geodesic_distances
 from geodesic.point_attention import PointAttentionAssistant
 from geodesic.translator import GeodesicTranslator, TranslatorOutput
+from geodesic.translator.g_theta import GThetaController
 
 
 @dataclass(frozen=True)
@@ -34,6 +37,8 @@ class GeodesicTransformerConfig:
     geodesic_metric: str = "euclidean"
     use_point_attention: bool = False
     use_translator: bool = False
+    learnable_translator: bool = False
+    g_theta_hidden: int = 8
     ffn_multiplier: int = 4
     radial_dim: int = 1
 
@@ -78,6 +83,7 @@ class GeodesicMultiHeadAttention(TorchModule):
             raise ValueError("d_model must be divisible by num_heads")
         if config.lambda_geodesic < 0:
             raise ValueError("lambda_geodesic must be non-negative")
+        named_p_norm(config.geodesic_metric)
         self.config = config
         self.head_dim = config.d_model // config.num_heads
         self.q_proj = nn.Linear(config.d_model, config.d_model)
@@ -85,7 +91,10 @@ class GeodesicMultiHeadAttention(TorchModule):
         self.v_proj = nn.Linear(config.d_model, config.d_model)
         self.out_proj = nn.Linear(config.d_model, config.d_model)
         self.dropout = nn.Dropout(config.dropout)
-        self.translator = GeodesicTranslator(config.gamma_max) if config.use_translator else None
+        controller = GThetaController(config.g_theta_hidden) if config.use_translator and config.learnable_translator else None
+        if controller is not None:
+            self.translator_controller = controller
+        self.translator = GeodesicTranslator(config.gamma_max, controller=controller) if config.use_translator else None
         self.point_attention = PointAttentionAssistant() if config.use_point_attention else None
 
     def _split_heads(self, tensor: "torch.Tensor") -> "torch.Tensor":

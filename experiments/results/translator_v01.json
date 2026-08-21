@@ -1,0 +1,319 @@
+{
+  "configuration": {
+    "seed": 1729,
+    "lambdas": [
+      0,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "gamma_max": 0.1,
+    "attention": "softmax(S)"
+  },
+  "lambda_sweep": [
+    {
+      "mode": "baseline",
+      "lambda": 0,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 0,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 0,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    },
+    {
+      "mode": "baseline",
+      "lambda": 0.05,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 0.05,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2308253049850464,
+        "gradient_norm": 0.09078292548656464,
+        "score_range": 4.141778945922852,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 0.05,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.2308253049850464,
+        "gradient_norm": 0.09078292548656464,
+        "score_range": 4.141778945922852,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    },
+    {
+      "mode": "baseline",
+      "lambda": 0.1,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 0.1,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2224047183990479,
+        "gradient_norm": 0.09522375464439392,
+        "score_range": 4.245661735534668,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 0.1,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.2224047183990479,
+        "gradient_norm": 0.09522375464439392,
+        "score_range": 4.245661735534668,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    },
+    {
+      "mode": "baseline",
+      "lambda": 0.25,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 0.25,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.1935429573059082,
+        "gradient_norm": 0.10852838307619095,
+        "score_range": 4.696677207946777,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 0.25,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.1935429573059082,
+        "gradient_norm": 0.10852838307619095,
+        "score_range": 4.696677207946777,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    },
+    {
+      "mode": "baseline",
+      "lambda": 0.5,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 0.5,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.135788083076477,
+        "gradient_norm": 0.12814120948314667,
+        "score_range": 5.588438034057617,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 0.5,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.135788083076477,
+        "gradient_norm": 0.12814123928546906,
+        "score_range": 5.588438034057617,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    },
+    {
+      "mode": "baseline",
+      "lambda": 1.0,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.2385878562927246,
+        "gradient_norm": 0.08642909675836563,
+        "score_range": 4.037896156311035,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic",
+      "lambda": 1.0,
+      "gamma_max": 0.0,
+      "metrics": {
+        "attention_entropy": 1.0020889043807983,
+        "gradient_norm": 0.15549078583717346,
+        "score_range": 7.371959209442139,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 0.0,
+        "pressure": 0.0
+      },
+      "translator_state": null,
+      "pass": true
+    },
+    {
+      "mode": "geodesic_translator",
+      "lambda": 1.0,
+      "gamma_max": 0.1,
+      "metrics": {
+        "attention_entropy": 1.0020889043807983,
+        "gradient_norm": 0.15549078583717346,
+        "score_range": 7.3719587326049805,
+        "nan_or_inf": false,
+        "geodesic_error": 3.839019298553467,
+        "mirror_error": 2.0536088943481445,
+        "pressure": 6.629023119807243
+      },
+      "translator_state": "REJECT",
+      "pass": true
+    }
+  ],
+  "summary": {
+    "stable_operating_region": [
+      0,
+      1.0
+    ],
+    "attention_collapse_region": [],
+    "excessive_geodesic_constraint_region": []
+  },
+  "test_results": {
+    "lambda_sweep_completed": true,
+    "ablation_generated": true,
+    "no_nan_or_inf": true
+  },
+  "pass": true
+}

@@ -62,10 +62,13 @@ def test_deterministic_replay():
 
 def test_ablation_comparison(tmp_path):
     payload = run()
-    assert payload["status"] == "VALIDATION_BLOCKED"
     assert len(payload["ablations"]) == 4
     assert all(row["candidate_validity"] for row in payload["ablations"])
     assert payload["top_k"]
+    torch = pytest.importorskip("torch")
+    del torch
+    assert payload["status"] == "PASS"
+    assert all(row["parameter_count"] for row in payload["ablations"])
 
 
 def test_malformed_candidate_state_rejection():

@@ -1,19 +1,433 @@
 {
   "configuration": {
-    "mandatory_pytorch_tests": [
-      "test_standard_equivalence",
-      "test_geodesic_distance_effect",
-      "test_translator_bound",
-      "test_point_attention_normalization",
-      "test_multihead_shape",
-      "test_multihead_diversity",
-      "test_gradient_stability",
-      "test_attention_entropy",
-      "test_nan_inf",
-      "test_pressure_response"
-    ]
+    "seed": 2027,
+    "lambdas": [
+      0,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "d_model": 32,
+    "num_heads": 4,
+    "num_layers": 2,
+    "gamma_max": 0.1
   },
-  "status": "VALIDATION_BLOCKED",
-  "blocked_reason": "PyTorch is unavailable; mandatory Step 3 PyTorch tests were not executed.",
-  "results": []
+  "status": "PASS",
+  "results": [
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.7018404603004456,
+        "accuracy": 0.625,
+        "attention_entropy": 1.7347784042358398,
+        "gradient_norm": 2.785902500152588,
+        "geodesic_error": 1.781928539276123,
+        "curvature_energy": 0.21768708527088165,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.006599972999993042,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 0,
+      "metrics": {
+        "loss": 0.7672353386878967,
+        "accuracy": 0.25,
+        "attention_entropy": 1.7463674545288086,
+        "gradient_norm": 2.851287364959717,
+        "geodesic_error": 1.761756420135498,
+        "curvature_energy": 0.21716022491455078,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.003693365999879461,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 0,
+      "metrics": {
+        "loss": 0.7659833431243896,
+        "accuracy": 0.5,
+        "attention_entropy": 1.7385448217391968,
+        "gradient_norm": 2.164534330368042,
+        "geodesic_error": 1.775824785232544,
+        "curvature_energy": 0.22288089990615845,
+        "translator_pressure": 3.026575418189168,
+        "runtime_seconds": 0.008050281000123505,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 0,
+      "metrics": {
+        "loss": 0.6274815201759338,
+        "accuracy": 0.75,
+        "attention_entropy": 1.7462754249572754,
+        "gradient_norm": 1.9513440132141113,
+        "geodesic_error": 1.7362147569656372,
+        "curvature_energy": 0.21445639431476593,
+        "translator_pressure": 6.2025384698063135,
+        "runtime_seconds": 0.008060233000151129,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.7085486650466919,
+        "accuracy": 0.25,
+        "attention_entropy": 1.739270567893982,
+        "gradient_norm": 2.0056731700897217,
+        "geodesic_error": 1.78258216381073,
+        "curvature_energy": 0.2062661051750183,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0036295050001626805,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 0.05,
+      "metrics": {
+        "loss": 0.7977316975593567,
+        "accuracy": 0.375,
+        "attention_entropy": 1.745751976966858,
+        "gradient_norm": 3.683762311935425,
+        "geodesic_error": 1.7683558464050293,
+        "curvature_energy": 0.20917871594429016,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0035476460000154475,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 0.05,
+      "metrics": {
+        "loss": 0.7325408458709717,
+        "accuracy": 0.375,
+        "attention_entropy": 1.7347898483276367,
+        "gradient_norm": 2.3603367805480957,
+        "geodesic_error": 1.7733582258224487,
+        "curvature_energy": 0.21673591434955597,
+        "translator_pressure": 3.0013699885457754,
+        "runtime_seconds": 0.00723945000004278,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 0.05,
+      "metrics": {
+        "loss": 0.7352679967880249,
+        "accuracy": 0.375,
+        "attention_entropy": 1.7423688173294067,
+        "gradient_norm": 2.414479970932007,
+        "geodesic_error": 1.7640873193740845,
+        "curvature_energy": 0.22517459094524384,
+        "translator_pressure": 6.309515111148357,
+        "runtime_seconds": 0.007632995999983905,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.5822140574455261,
+        "accuracy": 0.875,
+        "attention_entropy": 1.7380590438842773,
+        "gradient_norm": 2.0057120323181152,
+        "geodesic_error": 1.79635751247406,
+        "curvature_energy": 0.2269255369901657,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.003574018999870532,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 0.1,
+      "metrics": {
+        "loss": 0.7869781851768494,
+        "accuracy": 0.125,
+        "attention_entropy": 1.7384237051010132,
+        "gradient_norm": 2.918862819671631,
+        "geodesic_error": 1.7621135711669922,
+        "curvature_energy": 0.21989338099956512,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0036252479999347997,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 0.1,
+      "metrics": {
+        "loss": 0.6032083034515381,
+        "accuracy": 0.875,
+        "attention_entropy": 1.7352765798568726,
+        "gradient_norm": 2.4487996101379395,
+        "geodesic_error": 1.76409912109375,
+        "curvature_energy": 0.2161681354045868,
+        "translator_pressure": 3.044632276520133,
+        "runtime_seconds": 0.007549858999936987,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 0.1,
+      "metrics": {
+        "loss": 0.6032781004905701,
+        "accuracy": 0.625,
+        "attention_entropy": 1.7383354902267456,
+        "gradient_norm": 2.7561964988708496,
+        "geodesic_error": 1.7678003311157227,
+        "curvature_energy": 0.22442613542079926,
+        "translator_pressure": 6.368224849924445,
+        "runtime_seconds": 0.008225194000033298,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.7039939165115356,
+        "accuracy": 0.375,
+        "attention_entropy": 1.7479887008666992,
+        "gradient_norm": 2.5327372550964355,
+        "geodesic_error": 1.7576775550842285,
+        "curvature_energy": 0.22585946321487427,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0034240560000853293,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 0.25,
+      "metrics": {
+        "loss": 0.7828711271286011,
+        "accuracy": 0.25,
+        "attention_entropy": 1.71930992603302,
+        "gradient_norm": 2.860720634460449,
+        "geodesic_error": 1.777854084968567,
+        "curvature_energy": 0.22643405199050903,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0036484689999269904,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 0.25,
+      "metrics": {
+        "loss": 0.7425441741943359,
+        "accuracy": 0.25,
+        "attention_entropy": 1.724115014076233,
+        "gradient_norm": 2.581002712249756,
+        "geodesic_error": 1.7506611347198486,
+        "curvature_energy": 0.235011026263237,
+        "translator_pressure": 3.0481580533087254,
+        "runtime_seconds": 0.007473702000197591,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 0.25,
+      "metrics": {
+        "loss": 0.6512725949287415,
+        "accuracy": 0.625,
+        "attention_entropy": 1.722506046295166,
+        "gradient_norm": 3.2890729904174805,
+        "geodesic_error": 1.7424695491790771,
+        "curvature_energy": 0.22577828168869019,
+        "translator_pressure": 6.363486286252737,
+        "runtime_seconds": 0.00794263900002079,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.7346473932266235,
+        "accuracy": 0.375,
+        "attention_entropy": 1.7486268281936646,
+        "gradient_norm": 2.553356647491455,
+        "geodesic_error": 1.7664495706558228,
+        "curvature_energy": 0.22550742328166962,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0035018609999042383,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 0.5,
+      "metrics": {
+        "loss": 0.6352607011795044,
+        "accuracy": 0.5,
+        "attention_entropy": 1.6860421895980835,
+        "gradient_norm": 2.8364341259002686,
+        "geodesic_error": 1.7805006504058838,
+        "curvature_energy": 0.22744277119636536,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0037080609999975422,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 0.5,
+      "metrics": {
+        "loss": 0.7146314382553101,
+        "accuracy": 0.5,
+        "attention_entropy": 1.700295090675354,
+        "gradient_norm": 2.335076332092285,
+        "geodesic_error": 1.7245160341262817,
+        "curvature_energy": 0.2145170122385025,
+        "translator_pressure": 2.913019046187401,
+        "runtime_seconds": 0.007667265999998563,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 0.5,
+      "metrics": {
+        "loss": 0.7193288207054138,
+        "accuracy": 0.5,
+        "attention_entropy": 1.6901360750198364,
+        "gradient_norm": 1.61404287815094,
+        "geodesic_error": 1.7548322677612305,
+        "curvature_energy": 0.2321459949016571,
+        "translator_pressure": 6.287064667791128,
+        "runtime_seconds": 0.007959479999954056,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "A_standard",
+      "lambda": 0.0,
+      "metrics": {
+        "loss": 0.7588275074958801,
+        "accuracy": 0.25,
+        "attention_entropy": 1.74636709690094,
+        "gradient_norm": 2.8212733268737793,
+        "geodesic_error": 1.7558767795562744,
+        "curvature_energy": 0.2145100235939026,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.003537287000199285,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "B_geodesic",
+      "lambda": 1.0,
+      "metrics": {
+        "loss": 0.8106398582458496,
+        "accuracy": 0.375,
+        "attention_entropy": 1.5987004041671753,
+        "gradient_norm": 2.829529285430908,
+        "geodesic_error": 1.7821301221847534,
+        "curvature_energy": 0.2118426263332367,
+        "translator_pressure": 0.0,
+        "runtime_seconds": 0.0035142490000907856,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "C_geodesic_translator",
+      "lambda": 1.0,
+      "metrics": {
+        "loss": 0.7360669374465942,
+        "accuracy": 0.375,
+        "attention_entropy": 1.603955864906311,
+        "gradient_norm": 2.9537711143493652,
+        "geodesic_error": 1.7448389530181885,
+        "curvature_energy": 0.21317797899246216,
+        "translator_pressure": 2.9636855963617563,
+        "runtime_seconds": 0.007781381999848236,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    },
+    {
+      "ablation": "D_geodesic_translator_point",
+      "lambda": 1.0,
+      "metrics": {
+        "loss": 0.7110491394996643,
+        "accuracy": 0.375,
+        "attention_entropy": 1.602089285850525,
+        "gradient_norm": 2.3487441539764404,
+        "geodesic_error": 1.7893747091293335,
+        "curvature_energy": 0.2203015387058258,
+        "translator_pressure": 6.383963070809841,
+        "runtime_seconds": 0.00821386400002666,
+        "parameter_count": 25474,
+        "nan_or_inf": false
+      },
+      "pass": true
+    }
+  ],
+  "summary": {
+    "all_ablations_execute": true,
+    "lambda_sweep_completed": true,
+    "nan_or_inf": false
+  }
 }

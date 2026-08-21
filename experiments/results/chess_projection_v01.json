@@ -1,16 +1,16 @@
 {
-  "status": "VALIDATION_BLOCKED",
-  "blocked_reason": "PyTorch is unavailable; Step 4 Transformer-backed ablation cannot fully execute.",
+  "status": "PASS",
+  "blocked_reason": null,
   "ablations": [
     {
       "name": "A_transformer",
       "candidate_validity": true,
       "hypothesis_diversity": 3,
-      "geodesic_error": 0.14285714285714285,
-      "pressure": 0.056684180846364805,
+      "geodesic_error": 0.31943828249996997,
+      "pressure": 0.06747640269197397,
       "stability": 0.5,
-      "inference_latency_seconds": 0.005999283999699401,
-      "parameter_count": null
+      "inference_latency_seconds": 0.031108877999940887,
+      "parameter_count": 3314
     },
     {
       "name": "B_transformer_chess",
@@ -19,8 +19,8 @@
       "geodesic_error": 0.14285714285714285,
       "pressure": 0.056684180846364805,
       "stability": 0.5,
-      "inference_latency_seconds": 0.005999283999699401,
-      "parameter_count": null
+      "inference_latency_seconds": 0.027943815999833532,
+      "parameter_count": 3314
     },
     {
       "name": "C_transformer_geodesic_chess",
@@ -29,51 +29,58 @@
       "geodesic_error": 0.14285714285714285,
       "pressure": 0.056684180846364805,
       "stability": 0.5,
-      "inference_latency_seconds": 0.005999283999699401,
-      "parameter_count": null
+      "inference_latency_seconds": 0.028102312000100937,
+      "parameter_count": 3314
     },
     {
       "name": "D_transformer_geodesic_translator_chess",
       "candidate_validity": true,
       "hypothesis_diversity": 3,
       "geodesic_error": 0.14285714285714285,
-      "pressure": 0.056684180846364805,
+      "pressure": 0.05958382785320282,
       "stability": 0.5,
-      "inference_latency_seconds": 0.005999283999699401,
-      "parameter_count": null
+      "inference_latency_seconds": 0.042569188000015856,
+      "parameter_count": 3314
     }
   ],
   "top_k": [
     {
-      "move": "h2h3",
+      "move": "a2a3",
       "geodesic_error": 0.14285714285714285,
-      "pressure": 0.0566841808463648,
+      "pressure": 0.05958274006843567,
       "control": 0.3125,
       "threat": 0.0,
       "mobility": 0.25,
       "stability": 0.5,
-      "overall_score": 0.8629586762964924
+      "overall_score": 0.14286938121576243,
+      "transformer_quality": 0.6760134696960449,
+      "ablation": "D_transformer_geodesic_translator_chess"
     },
     {
-      "move": "g2g3",
+      "move": "b2b3",
       "geodesic_error": 0.14285714285714285,
-      "pressure": 0.0566841808463648,
+      "pressure": 0.05958377197384834,
       "control": 0.3125,
       "threat": 0.0,
       "mobility": 0.25,
       "stability": 0.5,
-      "overall_score": 0.8629586762964924
+      "overall_score": 0.1428425554003232,
+      "transformer_quality": 0.675974428653717,
+      "ablation": "D_transformer_geodesic_translator_chess"
     },
     {
-      "move": "f2f3",
+      "move": "c2c3",
       "geodesic_error": 0.14285714285714285,
-      "pressure": 0.0566841808463648,
+      "pressure": 0.05958497151732445,
       "control": 0.3125,
       "threat": 0.0,
       "mobility": 0.25,
       "stability": 0.5,
-      "overall_score": 0.8629586762964924
+      "overall_score": 0.1428086329068654,
+      "transformer_quality": 0.67591792345047,
+      "ablation": "D_transformer_geodesic_translator_chess"
     }
   ],
-  "translator_state": "NORMAL"
+  "translator_state": "NORMAL",
+  "wired_to_transformer": true
 }

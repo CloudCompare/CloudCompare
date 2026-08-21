@@ -62,6 +62,7 @@ def run_validation() -> dict[str, Any]:
                 run_command("unit_integration_stability_ablation_tests", [sys.executable, "-m", "pytest", "tests"]),
                 run_command("lambda_sweep_benchmark", [sys.executable, "-m", "experiments.geodesic_transformer_v01"]),
                 run_command("translator_benchmark", [sys.executable, "-m", "experiments.translator_v01"]),
+                run_command("chess_projection_benchmark", [sys.executable, "-m", "experiments.chess_projection_v01"]),
             ]
         )
     else:

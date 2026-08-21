@@ -11,6 +11,11 @@ Homepage: https://cloudcompare.org
 Introduction
 ------------
 
+This fork also contains an experimental **GEODESIC** research layer under
+`geodesic/`. It is a classical numerical prototype (Kernel, Attention,
+Translator, Transformer, Chess Projection), not a finished AGI system.
+Use a local virtualenv, then `make validate` and `make board`.
+
 CloudCompare is a 3D point cloud (and triangular mesh) processing software.
 It was originally designed to perform comparison between two 3D points clouds
 (such as the ones obtained with a laser scanner) or between a point cloud and a

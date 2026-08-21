@@ -34,7 +34,7 @@ Input
 
 ## Interfaces
 
-Configuration exposes `d_model`, `num_heads`, `num_layers`, `lambda_geodesic`, `gamma_max`, `dropout`, `geodesic_metric`, `use_point_attention`, and `use_translator`.
+Configuration exposes `d_model`, `num_heads`, `num_layers`, `lambda_geodesic`, `gamma_max`, `dropout`, `geodesic_metric`, `use_point_attention`, `use_translator`, `learnable_translator`, and `g_theta_hidden`. `geodesic_metric` now dispatches Euclidean (`p=2`) and Manhattan (`p=1`) distances in both Attention and Transformer.
 
 ## Point Attention Integration
 

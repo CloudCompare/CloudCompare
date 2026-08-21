@@ -73,7 +73,9 @@ The benchmark writes `experiments/results/translator_v01.json` with configuratio
 ## Limitations
 
 - This is a classical numerical prototype, not quantum computation.
-- The translator uses deterministic handcrafted measurements rather than a learned neural controller.
+- The translator still uses deterministic handcrafted measurements by default. An optional `GThetaController` may replace `g_theta` while the bound `Γ = γ_max * tanh(...)` stays frozen.
+- Uncertainty normalization is defined as `0` when there is only one key, so `log(1)` cannot appear.
+- Uncertainty is the absolute distance from the uniform/maximum-entropy field, so a calm equal-distance neighborhood does not enter PRESSURE by itself.
 - Transformer, SNN, STDP, MCTS, and chess integrations are intentionally out of scope for Step 2.
 - The benchmark is small and should not be interpreted as evidence of model-quality improvement; it only validates behavior and stability for the defined formulation.
 

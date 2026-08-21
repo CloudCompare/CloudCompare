@@ -67,9 +67,17 @@ The benchmark records four ablations:
 
 Measured fields include candidate validity, hypothesis diversity, geodesic error, pressure, stability, inference latency, and parameter count.
 
+## Wiring
+
+`TransformerChessProjection` now consumes real Transformer outputs. Legal candidates are generated first, encoded as `64` tokens, then scored with Transformer quality, geodesic traces, translator pressure, and the frozen logical channels. `GeodesicPipeline` is the executable Kernel → Transformer → Chess graph.
+
+## Chess rules
+
+The board now validates check, pins, castling, en passant, and promotion. It remains a hypothesis filter, not a tournament engine. Draw-by-repetition and the fifty-move rule are still out of scope.
+
 ## Validation Status
 
-The current environment does not provide PyTorch, so the Step 4 status is `VALIDATION_BLOCKED`. The pure logical projection tests execute, but Step 4 must not be reported as `PASS` until the Transformer-backed ablation executes with PyTorch.
+If PyTorch is available, `experiments.chess_projection_v01` runs Transformer-backed ablations and may report `PASS`. If PyTorch is missing, the status remains `VALIDATION_BLOCKED`.
 
 ## Results
 

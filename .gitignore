@@ -141,6 +141,8 @@ plugins/private
 # pixi environments
 .pixi
 .build
+.venv
+venv
 # macOS bundle script subproducts
 macos_bundle_dependencies.json
 macos_bundle_warnings.json

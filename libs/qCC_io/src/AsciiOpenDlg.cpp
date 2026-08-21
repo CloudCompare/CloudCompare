@@ -626,7 +626,7 @@ void AsciiOpenDlg::updateTable()
 		propsText.reserve(ASCII_OPEN_DLG_TYPES_COUNT);
 		for (unsigned i = 0; i < ASCII_OPEN_DLG_TYPES_COUNT; i++)
 		{
-			propsText << QString(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+			propsText << tr(ASCII_OPEN_DLG_TYPES_NAMES[i]);
 		}
 	}
 
@@ -1144,7 +1144,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 		{
 			if (counters[i] > 1)
 			{
-				errorMessage = tr("'%1' defined at least twice!").arg(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+				errorMessage = tr("'%1' defined at least twice!").arg(tr(ASCII_OPEN_DLG_TYPES_NAMES[i]));
 				return false;
 			}
 		}

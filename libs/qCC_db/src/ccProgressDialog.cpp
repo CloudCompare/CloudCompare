@@ -22,8 +22,8 @@
 #include <QCoreApplication>
 #include <QProgressBar>
 #include <QPushButton>
-#if defined(CC_WINDOWS)
 #include <QThread>
+#if defined(CC_WINDOWS)
 #include <windows.h>
 #endif
 
@@ -103,13 +103,32 @@ void ccProgressDialog::setInfo(QString infoStr)
 
 void ccProgressDialog::start()
 {
+	// thread-safe: algorithms may call this from a worker thread, and a widget can
+	// only be shown from the thread it lives in
 	m_lastRefreshValue = -1;
-	show();
-	QCoreApplication::processEvents();
+	if (QThread::currentThread() == thread())
+	{
+		show();
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this]()
+		                   { show(); });
+	}
 }
 
 void ccProgressDialog::stop()
 {
-	hide();
-	QCoreApplication::processEvents();
+	// thread-safe, see start()
+	if (QThread::currentThread() == thread())
+	{
+		hide();
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this]()
+		                   { hide(); });
+	}
 }

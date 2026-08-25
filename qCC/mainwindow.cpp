@@ -64,6 +64,7 @@
 #include <ccRenderingTools.h>
 
 // CCPluginAPI
+#include <ccBackgroundTask.h>
 #include <ccQtHelpers.h>
 
 // local includes
@@ -6024,13 +6025,17 @@ void MainWindow::doActionSORFilter()
 			continue;
 		}
 
-		// computation
-		CCCoreLib::ReferenceCloud* selection = CCCoreLib::CloudSamplingTools::sorFilter(cloud,
-		                                                                                s_sorFilterKnn,
-		                                                                                s_sorFilterNSigma,
-		                                                                                cloud->getOctree().data(),
-		                                                                                &pDlg,
-		                                                                                s_maxThreadCount);
+		// computation (in a worker thread, so that the progress dialog keeps refreshing)
+		CCCoreLib::ReferenceCloud* selection = ccBackgroundTask::Run(
+		    [&]()
+		    {
+			    return CCCoreLib::CloudSamplingTools::sorFilter(cloud,
+			                                                    s_sorFilterKnn,
+			                                                    s_sorFilterNSigma,
+			                                                    cloud->getOctree().data(),
+			                                                    &pDlg,
+			                                                    s_maxThreadCount);
+		    });
 
 		if (selection)
 		{

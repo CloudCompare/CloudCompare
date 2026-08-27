@@ -16,6 +16,9 @@ depends-on = ["install"]
 cmake = ">=4.1.1,<4.2"
 cxx-compiler = ">=1.9.0,<1.10"
 ninja = "1.13.*"
+# CCPythonRuntime plugin dependency
+pybind11 = ">=3.0.0,<3.1.0"
+
 
 [dependencies]
 qt6-main= ">=6.9.1,<6.10.0" # at least 6.9.1 for PCL 1.15.1
@@ -24,8 +27,6 @@ opencv = ">=4.12.0,<4.13"
 pcl = ">=1.15.1,<1.16"
 python = ">3.12,<3.13"
 libboost = ">=1.88.0,<1.89"
-pybind11 = ">=2.13.0,<2.14"
-pyside6 = ">=6.8.1"
 eigen = ">=3.4.0,<3.5"
 draco = ">=1.5.7,<1.6"
 xerces-c = ">=3.3.0,<3.4"
@@ -33,6 +34,9 @@ occt = ">=7.8,<7.9" # Opencascade
 tbb = ">=2022.2.0,<2023"
 cgal-cpp = ">=6.1,<7"
 libgdal-core = ">=3.12.0,<4"
+# CCPythonRuntime plugin dependencies
+numpy = ">=2.5.1,<3"
+pyside6 = ">=6.9.0"
 
 [feature.build.tasks.configure]
 # Configures CMake
@@ -42,6 +46,7 @@ cmd = [
 	"-S.",
 	# We want build in the .build directory
 	"-B.build",
+	"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
 	"-DCMAKE_BUILD_TYPE=Release",
 	"-DCMAKE_INSTALL_PREFIX=.build/install",
 	"-DBUILD_SHARED_LIBS=OFF",
@@ -76,6 +81,10 @@ cmd = [
 	"-DPLUGIN_STANDARD_QSRA=ON",
 	"-DPLUGIN_STANDARD_QTREEISO=OFF", # TODO: improve compatibility.
 	"-DPLUGIN_STANDARD_QVOXFALL=ON",
+	"-DPLUGIN_STANDARD_3DFIN=ON",
+	"-D3DFin_EXPORT_XLSX=1",
+	"-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
+	"-DFORCE_FETCH_ALL=1",
 	#--IO PLUGINS--
 	"-DPLUGIN_IO_QADDITIONAL=ON",
 	"-DPLUGIN_IO_QCORE=ON",
@@ -90,6 +99,7 @@ cmd = [
 	"-DOPENCASCADE_INC_DIR=$CONDA_PREFIX/include/opencascade",
 	"-DOPENCASCADE_LIB_DIR=$CONDA_PREFIX/lib",
 	"-DOPENCASCADE_78_OR_NEWER=ON",
+	"-DPLUGIN-3rdParty_MESH_IO=ON",
 	#--GL PLUGINS--
 	"-DPLUGIN_GL_QEDL=ON",
 	"-DPLUGIN_GL_QSSAO=ON",
@@ -131,6 +141,3 @@ depends-on = ["install"]
 
 [environments]
 build = ["build"]
-
-[pypi-dependencies]
-3dfin = { version = "==0.6.0a4" }

@@ -71,7 +71,7 @@ void ccProgressDialog::update(float percent)
 	{
 		m_currentValue = value;
 #if defined(CC_WINDOWS)
-		if (QThread::currentThread() && QThread::currentThread()->isMainThread())
+		if (QThread::currentThread() == thread())
 		{
 			refresh();
 			::Sleep(1);
@@ -81,23 +81,38 @@ void ccProgressDialog::update(float percent)
 		{
 			QTimer::singleShot(0, this, [this]()
 			                   { refresh(); });
-			QCoreApplication::processEvents();
 		}
 	}
 }
 
 void ccProgressDialog::setMethodTitle(QString methodTitle)
 {
-	setWindowTitle(methodTitle);
+	if (QThread::currentThread() == thread())
+	{
+		setWindowTitle(methodTitle);
+		QCoreApplication::processEvents();
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this, methodTitle]()
+		                   { setWindowTitle(methodTitle); });
+	}
 }
 
 void ccProgressDialog::setInfo(QString infoStr)
 {
-	setLabelText(infoStr);
-	if (isVisible())
+	if (QThread::currentThread() == thread())
 	{
-		QProgressDialog::update();
-		QCoreApplication::processEvents();
+		if (isVisible())
+		{
+			QProgressDialog::update();
+			QCoreApplication::processEvents();
+		}
+	}
+	else
+	{
+		QTimer::singleShot(0, this, [this, infoStr]()
+		                   { setLabelText(infoStr); });
 	}
 }
 

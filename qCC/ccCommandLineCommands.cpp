@@ -6602,7 +6602,6 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 	bool applyToSF  = false;
 	bool gaussian   = false;
 	ccPointCloud::RgbFilterOptions(filterParams);
-	filterParams.commandLine = true;
 	while (!cmd.arguments().empty())
 	{
 		QString argument = cmd.arguments().front();
@@ -6753,11 +6752,11 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 	}
 	if (applyToSF)
 	{
-		return ccEntityAction::sfGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
+		return ccEntityAction::sfGaussianFilter(selectedEntities, filterParams, cmd.widgetParent(), true);
 	}
 	else if (applyToRGB)
 	{
-		return ccEntityAction::rgbGaussianFilter(selectedEntities, filterParams, cmd.widgetParent());
+		return ccEntityAction::rgbGaussianFilter(selectedEntities, filterParams, cmd.widgetParent(), true);
 	}
 
 	return true;

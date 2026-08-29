@@ -70,15 +70,19 @@ void ccProgressDialog::update(float percent)
 	if (value != m_currentValue)
 	{
 		m_currentValue = value;
-#if defined(CC_WINDOWS)
 		if (QThread::currentThread() == thread())
 		{
+			// called from the GUI thread: refresh directly, and let the event loop
+			// breathe so that the dialog is actually repainted
 			refresh();
+			QCoreApplication::processEvents();
+#if defined(CC_WINDOWS)
 			::Sleep(1);
+#endif
 		}
 		else
-#endif
 		{
+			// called from a worker thread: the refresh has to happen in the GUI thread
 			QTimer::singleShot(0, this, [this]()
 			                   { refresh(); });
 		}
@@ -103,6 +107,7 @@ void ccProgressDialog::setInfo(QString infoStr)
 {
 	if (QThread::currentThread() == thread())
 	{
+		setLabelText(infoStr);
 		if (isVisible())
 		{
 			QProgressDialog::update();

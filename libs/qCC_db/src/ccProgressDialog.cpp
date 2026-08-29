@@ -18,14 +18,9 @@
 #include "ccProgressDialog.h"
 
 // Qt
-#include <CCPlatform.h>
 #include <QCoreApplication>
-#include <QProgressBar>
 #include <QPushButton>
 #include <QThread>
-#if defined(CC_WINDOWS)
-#include <windows.h>
-#endif
 
 ccProgressDialog::ccProgressDialog(bool     showCancelButton,
                                    QWidget* parent /*=nullptr*/)
@@ -76,9 +71,6 @@ void ccProgressDialog::update(float percent)
 			// breathe so that the dialog is actually repainted
 			refresh();
 			QCoreApplication::processEvents();
-#if defined(CC_WINDOWS)
-			::Sleep(1);
-#endif
 		}
 		else
 		{

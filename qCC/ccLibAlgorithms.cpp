@@ -610,13 +610,30 @@ namespace ccLibAlgorithms
 	                                 int                    icpFinalOverlap,
 	                                 unsigned               refEntityIndex /*=0*/,
 	                                 QWidget*               parent /*=nullptr*/,
-	                                 double                 minScale /*=-1.0*/,
-	                                 double                 maxScale /*=-1.0*/)
+	                                 double                 minScale /*=std::numeric_limits<double>::quiet_NaN()*/,
+	                                 double                 maxScale /*=std::numeric_limits<double>::quiet_NaN()*/)
 	{
 		if (entities.size() < 2
 		    || refEntityIndex >= entities.size())
 		{
 			ccLog::Error("[ApplyScaleMatchingAlgorithm] Invalid input parameter(s)");
+			return false;
+		}
+
+		if (std::isfinite(minScale) && minScale < 0.0)
+		{
+			ccLog::Warning("Minimum scale should not be negative");
+			minScale = 0.0;
+		}
+		if (std::isfinite(maxScale) && maxScale < 0.0)
+		{
+			ccLog::Warning("Maximum scale should not be negative");
+			maxScale = 0.0;
+		}
+
+		if (std::isfinite(minScale) && std::isfinite(maxScale) && minScale > maxScale)
+		{
+			ccLog::Error("Maximum scale should not be smaller than minimum scale");
 			return false;
 		}
 
@@ -683,9 +700,13 @@ namespace ccLibAlgorithms
 				{
 					ccBBox box = ent->getOwnBB();
 					if (box.isValid())
+					{
 						scales[i] = algo == BB_MAX_DIM ? box.getMaxBoxDim() : box.computeVolume();
+					}
 					else
+					{
 						ccLog::Warning(QString("[Scale Matching] Entity '%1' has an invalid bounding-box!").arg(ent->getName()));
+					}
 				}
 				break;
 
@@ -742,6 +763,8 @@ namespace ccLibAlgorithms
 						parameters.useC2MSignedDistances    = false;
 						parameters.robustC2MSignedDistances = true;
 						parameters.normalsMatching          = CCCoreLib::ICPRegistrationTools::NO_NORMAL;
+						parameters.minScale                 = minScale;
+						parameters.maxScale                 = maxScale;
 					}
 
 					if (ccRegistrationTools::ICP(
@@ -789,78 +812,95 @@ namespace ccLibAlgorithms
 
 		// now we can rescale
 		if (pDlg)
-			pDlg->setMethodTitle(QObject::tr("Rescaling entities"));
 		{
-			for (unsigned i = 0; i < count; ++i)
+			pDlg->setMethodTitle(QObject::tr("Rescaling entities"));
+		}
+
+		for (unsigned i = 0; i < count; ++i)
+		{
+			if (i == refEntityIndex)
 			{
-				if (i == refEntityIndex)
-					continue;
-				if (scales[i] < 0)
-					continue;
+				continue;
+			}
+			if (scales[i] < 0)
+			{
+				continue;
+			}
 
-				ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
-				if (scales[i] <= CCCoreLib::ZERO_TOLERANCE_D)
-				{
-					ccLog::Warning("[Scale Matching] Entity scale is too small!");
-					continue;
-				}
+			ccLog::Print(QString("[Scale Matching] Entity '%1' scale: %2").arg(entities[i]->getName()).arg(scales[i]));
+			if (scales[i] <= CCCoreLib::ZERO_TOLERANCE_D)
+			{
+				ccLog::Warning("[Scale Matching] Entity scale is too small!");
+				continue;
+			}
 
-				ccHObject* ent = entities[i];
+			ccHObject* ent = entities[i];
 
-				bool                 lockedVertices = false;
-				ccGenericPointCloud* cloud          = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
-				if (nullptr == cloud || lockedVertices)
-				{
-					continue;
-				}
+			bool                 lockedVertices = false;
+			ccGenericPointCloud* cloud          = ccHObjectCaster::ToGenericPointCloud(ent, &lockedVertices);
+			if (nullptr == cloud || lockedVertices)
+			{
+				continue;
+			}
 
-				double scaled = algo == ICP_SCALE ? scales[i] : scales[refEntityIndex] / scales[i];
+			double scaled = 1.0;
+			if (algo == ICP_SCALE)
+			{
+				scaled = scales[i]; // already clamped normally
+				assert(!std::isfinite(minScale) || scaled >= minScale);
+				assert(!std::isfinite(maxScale) || scaled <= maxScale);
+			}
+			else
+			{
+				scaled = scales[refEntityIndex] / scales[i];
 
-				// the caller can restrict the scale factor that may be applied (a negative bound means 'no limit')
-				if (minScale > 0 && scaled < minScale)
+				// the caller can restrict the scale factor that may be applied
+				if (std::isfinite(minScale) && scaled < minScale)
 				{
 					ccLog::Warning(QString("[Scale Matching] Entity '%1' scale factor (%2) was clamped to the minimum allowed value (%3)").arg(entities[i]->getName()).arg(scaled).arg(minScale));
 					scaled = minScale;
 				}
-				else if (maxScale > 0 && scaled > maxScale)
+				else if (std::isfinite(maxScale) && scaled > maxScale)
 				{
 					ccLog::Warning(QString("[Scale Matching] Entity '%1' scale factor (%2) was clamped to the maximum allowed value (%3)").arg(entities[i]->getName()).arg(scaled).arg(maxScale));
 					scaled = maxScale;
 				}
-
-				PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
-
-				// we temporarily detach entity, as it may undergo
-				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
-				MainWindow*                  instance = dynamic_cast<MainWindow*>(parent);
-				MainWindow::ccHObjectContext objContext;
-				if (instance)
-				{
-					objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
-				}
-
-				CCVector3 C = cloud->getOwnBB().getCenter();
-
-				cloud->scale(scale_pc,
-				             scale_pc,
-				             scale_pc,
-				             C);
-
-				if (instance)
-					instance->putObjectBackIntoDBTree(cloud, objContext);
-				cloud->prepareDisplayForRefresh_recursive();
-
-				// don't forget the 'global shift'!
-				const CCVector3d& shift = cloud->getGlobalShift();
-				cloud->setGlobalShift(shift * scaled);
-				// DGM: nope! Not the global scale!
 			}
 
-			if (!nProgress.oneStep())
+			PointCoordinateType scale_pc = static_cast<PointCoordinateType>(scaled);
+
+			// we temporarily detach entity, as it may undergo
+			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::scale
+			MainWindow*                  instance = dynamic_cast<MainWindow*>(parent);
+			MainWindow::ccHObjectContext objContext;
+			if (instance)
 			{
-				// process cancelled by user
-				return false;
+				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
 			}
+
+			CCVector3 C = cloud->getOwnBB().getCenter();
+
+			cloud->scale(scale_pc,
+			             scale_pc,
+			             scale_pc,
+			             C);
+
+			if (instance)
+			{
+				instance->putObjectBackIntoDBTree(cloud, objContext);
+			}
+			cloud->prepareDisplayForRefresh_recursive();
+
+			// don't forget the 'global shift'!
+			const CCVector3d& shift = cloud->getGlobalShift();
+			cloud->setGlobalShift(shift * scaled);
+			// DGM: nope! Not the global scale!
+		}
+
+		if (!nProgress.oneStep())
+		{
+			// process cancelled by user
+			return false;
 		}
 
 		return true;

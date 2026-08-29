@@ -3771,9 +3771,9 @@ bool CommandMatchScales::process(ccCommandLineInterface& cmd)
 	unsigned referenceIndex  = 0;
 	double   icpRmsDiff      = 1.0e-5;
 	int      icpFinalOverlap = 100;
-	// a negative bound means 'no limit'
-	double minScale = -1.0;
-	double maxScale = -1.0;
+	// a NaN value means 'no limit'
+	double minScale = std::numeric_limits<double>::quiet_NaN();
+	double maxScale = std::numeric_limits<double>::quiet_NaN();
 
 	while (!parser.isEmpty())
 	{
@@ -3818,7 +3818,7 @@ bool CommandMatchScales::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (minScale > 0 && maxScale > 0 && minScale > maxScale)
+	if (std::isfinite(minScale) && std::isfinite(maxScale) && minScale > maxScale)
 	{
 		return cmd.error(QObject::tr("Invalid parameters: '-%1' value must not exceed '-%2' value").arg(COMMAND_MATCH_SCALES_MIN_SCALE, COMMAND_MATCH_SCALES_MAX_SCALE));
 	}

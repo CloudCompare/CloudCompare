@@ -56,6 +56,7 @@ ccGenericMesh::ccGenericMesh(QString name /*=QString()*/, unsigned uniqueID /*=c
     , m_materialsShown(false)
     , m_showWired(false)
     , m_stippling(false)
+    , m_forceSunLightOn(false)
 {
 	setVisible(true);
 	lockVisibility(false);
@@ -193,10 +194,18 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned decimStep       = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum * 3) / context.minLODTriangleCount)) : 1);
 		unsigned displayedTriNum = triNum / decimStep;
 
+		bool lightIsEnabled = MACRO_LightIsEnabled(context);
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		if (!lightIsEnabled && m_forceSunLightOn)
+		{
+			glFunc->glEnable(GL_LIGHT0);
+			lightIsEnabled = true;
+		}
+
 		// display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		glParams.showNorms &= lightIsEnabled;
 
 		// vertices visibility
 		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = vertices->getTheVisibilityArray();
@@ -660,6 +669,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glDisable(GL_LIGHTING);
 			glFunc->glDisable(GL_RESCALE_NORMAL);
 		}
+
+		glFunc->glPopAttrib(); // GL_LIGHTING_BIT
 	}
 }
 

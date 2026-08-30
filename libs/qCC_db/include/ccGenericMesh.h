@@ -225,6 +225,14 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 		m_stippling = state;
 	}
 
+	//! Forces the (sun) light (GL_LIGHT0) to be always on
+	/** \warning Not saved to BIN files (for internal use only)
+	 **/
+	void forceSunLightOn(bool state)
+	{
+		m_forceSunLightOn = state;
+	}
+
 	//! Samples points on a mesh
 	ccPointCloud* samplePoints(bool                                densityBased,
 	                           double                              samplingParameter,
@@ -320,4 +328,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Polygon stippling state
 	bool m_stippling;
+
+	//! Forces the GL_LIGHT0 on if true
+	bool m_forceSunLightOn;
 };

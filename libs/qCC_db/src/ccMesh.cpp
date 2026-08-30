@@ -1712,12 +1712,20 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// wireframe ? (not compatible with LOD)
 		bool showWired = isShownAsWire() && !lodEnabled;
 
+		bool lightIsEnabled = MACRO_LightIsEnabled(context);
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		if (!lightIsEnabled && m_forceSunLightOn)
+		{
+			glFunc->glEnable(GL_LIGHT0);
+			lightIsEnabled = true;
+		}
+
 		// per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		// fix 'showNorms'
 		glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
 		// no normals shading without light!
-		if (!MACRO_LightIsEnabled(context))
+		if (!lightIsEnabled)
 		{
 			glParams.showNorms = false;
 		}
@@ -1781,7 +1789,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 		}
 
-		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
+		glFunc->glPushAttrib(GL_TRANSFORM_BIT | GL_ENABLE_BIT);
 
 		// materials or color?
 		bool colorMaterial = false;
@@ -2200,7 +2208,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			EnableGLStippleMask(context.qGLContext, false);
 		}
 
-		glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT
+		glFunc->glPopAttrib(); // GL_TRANSFORM_BIT | GL_ENABLE_BIT
+		glFunc->glPopAttrib(); // GL_LIGHTING_BIT
 	}
 }
 

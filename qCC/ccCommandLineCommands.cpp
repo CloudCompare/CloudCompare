@@ -92,6 +92,8 @@ constexpr char COMMAND_MATCH_SCALES[]                     = "MATCH_SCALES";
 constexpr char COMMAND_MATCH_SCALES_REFERENCE[]           = "REFERENCE";
 constexpr char COMMAND_MATCH_SCALES_RMS_DIFF[]            = "RMS_DIFF";
 constexpr char COMMAND_MATCH_SCALES_OVERLAP[]             = "OVERLAP";
+constexpr char COMMAND_MATCH_SCALES_MIN_SCALE[]           = "MIN_SCALE";
+constexpr char COMMAND_MATCH_SCALES_MAX_SCALE[]           = "MAX_SCALE";
 constexpr char COMMAND_BEST_FIT_PLANE[]                   = "BEST_FIT_PLANE";
 constexpr char COMMAND_BEST_FIT_PLANE_MAKE_HORIZ[]        = "MAKE_HORIZ";
 constexpr char COMMAND_BEST_FIT_PLANE_KEEP_LOADED[]       = "KEEP_LOADED";
@@ -3769,6 +3771,9 @@ bool CommandMatchScales::process(ccCommandLineInterface& cmd)
 	unsigned referenceIndex  = 0;
 	double   icpRmsDiff      = 1.0e-5;
 	int      icpFinalOverlap = 100;
+	// a NaN value means 'no limit'
+	double minScale = std::numeric_limits<double>::quiet_NaN();
+	double maxScale = std::numeric_limits<double>::quiet_NaN();
 
 	while (!parser.isEmpty())
 	{
@@ -3793,10 +3798,29 @@ bool CommandMatchScales::process(ccCommandLineInterface& cmd)
 				return false;
 			icpFinalOverlap = static_cast<int>(*maybeOverlap);
 		}
+		else if (parser.tryConsumeOption(COMMAND_MATCH_SCALES_MIN_SCALE))
+		{
+			const auto maybeMinScale = parser.takeDouble(QObject::tr("minimum scale"), std::numeric_limits<double>::min());
+			if (!maybeMinScale)
+				return false;
+			minScale = *maybeMinScale;
+		}
+		else if (parser.tryConsumeOption(COMMAND_MATCH_SCALES_MAX_SCALE))
+		{
+			const auto maybeMaxScale = parser.takeDouble(QObject::tr("maximum scale"), std::numeric_limits<double>::min());
+			if (!maybeMaxScale)
+				return false;
+			maxScale = *maybeMaxScale;
+		}
 		else
 		{
 			break;
 		}
+	}
+
+	if (std::isfinite(minScale) && std::isfinite(maxScale) && minScale > maxScale)
+	{
+		return cmd.error(QObject::tr("Invalid parameters: '-%1' value must not exceed '-%2' value").arg(COMMAND_MATCH_SCALES_MIN_SCALE, COMMAND_MATCH_SCALES_MAX_SCALE));
 	}
 
 	// gather the loaded entities (clouds and meshes)
@@ -3832,7 +3856,9 @@ bool CommandMatchScales::process(ccCommandLineInterface& cmd)
 	                                                  icpRmsDiff,
 	                                                  icpFinalOverlap,
 	                                                  referenceIndex,
-	                                                  cmd.widgetParent()))
+	                                                  cmd.widgetParent(),
+	                                                  minScale,
+	                                                  maxScale))
 	{
 		return cmd.error(QObject::tr("Failed to match scales"));
 	}

@@ -95,7 +95,9 @@ namespace ccLibAlgorithms
 	                                 double                 icpRmsDiff,
 	                                 int                    icpFinalOverlap,
 	                                 unsigned               refEntityIndex = 0,
-	                                 QWidget*               parent         = nullptr);
+	                                 QWidget*               parent         = nullptr,
+	                                 double                 minScale       = std::numeric_limits<double>::quiet_NaN(),
+	                                 double                 maxScale       = std::numeric_limits<double>::quiet_NaN());
 } // namespace ccLibAlgorithms
 
 #endif

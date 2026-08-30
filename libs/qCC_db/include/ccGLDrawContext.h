@@ -53,25 +53,25 @@ enum CC_DRAWING_FLAGS
 	CC_SKIP_SELECTED   = 0x0020,
 	CC_SKIP_ALL        = 0x0030, // = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
 	CC_ENTITY_PICKING  = 0x0040, // formerly named CC_DRAW_ENTITY_NAMES
-	// CC_FREE_FLAG							= 0x0080,		// UNUSED (formerly CC_DRAW_POINT_NAMES)
-	// CC_FREE_FLAG							= 0x0100,		// UNUSED (formerly CC_DRAW_TRI_NAMES)
+	// CC_FREE_FLAG    = 0x0080, // UNUSED (formerly CC_DRAW_POINT_NAMES)
+	// CC_FREE_FLAG    = 0x0100, // UNUSED (formerly CC_DRAW_TRI_NAMES)
 	CC_FAST_ENTITY_PICKING = 0x0200, // formerly named CC_DRAW_FAST_NAMES_ONLY
-	// CC_FREE_FLAG							= 0x03C0,		// UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
+	// CC_FREE_FLAG        = 0x03C0, // UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
 	CC_LOD_ACTIVATED         = 0x0400,
 	CC_VIRTUAL_TRANS_ENABLED = 0x0800
 };
 
 // Drawing flags testing macros (see ccDrawableObject)
-#define MACRO_Draw2D(context) (context.drawingFlags & CC_DRAW_2D)
-#define MACRO_Draw3D(context) (context.drawingFlags & CC_DRAW_3D)
-#define MACRO_EntityPicking(context) (context.drawingFlags & CC_ENTITY_PICKING)
-#define MACRO_FastEntityPicking(context) (context.drawingFlags & CC_FAST_ENTITY_PICKING)
-#define MACRO_SkipUnselected(context) (context.drawingFlags & CC_SKIP_UNSELECTED)
-#define MACRO_SkipSelected(context) (context.drawingFlags & CC_SKIP_SELECTED)
-#define MACRO_LightIsEnabled(context) (context.drawingFlags & CC_LIGHT_ENABLED)
-#define MACRO_Foreground(context) (context.drawingFlags & CC_DRAW_FOREGROUND)
-#define MACRO_LODActivated(context) (context.drawingFlags & CC_LOD_ACTIVATED)
-#define MACRO_VirtualTransEnabled(context) (context.drawingFlags & CC_VIRTUAL_TRANS_ENABLED)
+#define MACRO_Draw2D(context) ((context.drawingFlags & CC_DRAW_2D) != 0)
+#define MACRO_Draw3D(context) ((context.drawingFlags & CC_DRAW_3D) != 0)
+#define MACRO_Foreground(context) ((context.drawingFlags & CC_DRAW_FOREGROUND) != 0)
+#define MACRO_LightIsEnabled(context) ((context.drawingFlags & CC_LIGHT_ENABLED) != 0)
+#define MACRO_SkipUnselected(context) ((context.drawingFlags & CC_SKIP_UNSELECTED) != 0)
+#define MACRO_SkipSelected(context) ((context.drawingFlags & CC_SKIP_SELECTED) != 0)
+#define MACRO_EntityPicking(context) ((context.drawingFlags & CC_ENTITY_PICKING) != 0)
+#define MACRO_FastEntityPicking(context) ((context.drawingFlags & CC_FAST_ENTITY_PICKING) != 0)
+#define MACRO_LODActivated(context) ((context.drawingFlags & CC_LOD_ACTIVATED) != 0)
+#define MACRO_VirtualTransEnabled(context) ((context.drawingFlags & CC_VIRTUAL_TRANS_ENABLED) != 0)
 
 //! Display context
 struct ccGLDrawContext

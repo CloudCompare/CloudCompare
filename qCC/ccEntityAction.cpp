@@ -2878,87 +2878,94 @@ namespace ccEntityAction
 			bbox = coDlg.getCustomBBox();
 		}
 
-		return ccBackgroundTask::Run(
-		    [&]()
-		    {
-			    for (const auto cloud : clouds)
-			    {
-				    // we temporarily detach entity, as it may undergo
-				    //'severe' modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-				    ccMainAppInterface*                  instance = dynamic_cast<ccMainAppInterface*>(parent);
-				    ccMainAppInterface::ccHObjectContext objContext;
-				    if (instance)
-				    {
-					    objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
-				    }
+		// the dialog values are read here, on the GUI thread
+		const ccComputeOctreeDlg::ComputationMode mode           = coDlg.getMode();
+		const double                              chosenCellSize = coDlg.getMinCellSize();
 
-				    // computation
-				    QElapsedTimer eTimer;
-				    eTimer.start();
-				    ccOctree::Shared octree(nullptr);
-				    switch (coDlg.getMode())
+		for (const auto cloud : clouds)
+		{
+			// we temporarily detach entity, as it may undergo
+			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
+			// (the DB tree is a Qt model, so this has to stay on the GUI thread)
+			ccMainAppInterface*                  instance = dynamic_cast<ccMainAppInterface*>(parent);
+			ccMainAppInterface::ccHObjectContext objContext;
+			if (instance)
+			{
+				objContext = instance->removeObjectTemporarilyFromDBTree(cloud);
+			}
+
+			// for a cell-size based custom box, we must update it for each cloud!
+			if (mode == ccComputeOctreeDlg::MIN_CELL_SIZE)
+			{
+				PointCoordinateType halfBoxWidth = static_cast<PointCoordinateType>(chosenCellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
+				ccBBox              bbBox        = cloud->getOwnBB();
+				CCVector3           C            = bbBox.getCenter();
+				bbox                             = ccBBox(C - CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
+                              C + CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
+                              bbBox.isValid());
+			}
+
+			// only the computation itself runs in a worker thread
+			QElapsedTimer eTimer;
+			eTimer.start();
+			ccOctree::Shared octree = ccBackgroundTask::Run(
+			    [&]() -> ccOctree::Shared
+			    {
+				    switch (mode)
 				    {
 				    case ccComputeOctreeDlg::DEFAULT:
-					    octree = cloud->computeOctree(&pDlg);
-					    break;
+					    return cloud->computeOctree(&pDlg);
+
 				    case ccComputeOctreeDlg::MIN_CELL_SIZE:
 				    case ccComputeOctreeDlg::CUSTOM_BBOX:
 				    {
-					    // for a cell-size based custom box, we must update it for each cloud!
-					    if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
-					    {
-						    double              cellSize     = coDlg.getMinCellSize();
-						    PointCoordinateType halfBoxWidth = static_cast<PointCoordinateType>(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
-						    ccBBox              bbBox        = cloud->getOwnBB();
-						    CCVector3           C            = bbBox.getCenter();
-						    bbox                             = ccBBox(C - CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
-                                          C + CCVector3(halfBoxWidth, halfBoxWidth, halfBoxWidth),
-                                          bbBox.isValid());
-					    }
 					    cloud->deleteOctree();
-					    octree = ccOctree::Shared(new ccOctree(cloud));
-					    if (octree->build(bbox.minCorner(), bbox.maxCorner(), nullptr, nullptr, &pDlg) > 0)
+					    ccOctree::Shared newOctree(new ccOctree(cloud));
+					    if (newOctree->build(bbox.minCorner(), bbox.maxCorner(), nullptr, nullptr, &pDlg) > 0)
 					    {
-						    ccOctreeProxy* proxy = new ccOctreeProxy(octree);
-						    proxy->setDisplay(cloud->getDisplay());
-						    cloud->addChild(proxy);
+						    return newOctree;
 					    }
-					    else
-					    {
-						    octree.clear();
-					    }
+					    return ccOctree::Shared(nullptr);
 				    }
-				    break;
+
 				    default:
 					    Q_ASSERT(false);
-					    return false;
+					    return ccOctree::Shared(nullptr);
 				    }
-				    qint64 elapsedTime_ms = eTimer.elapsed();
+			    });
+			qint64 elapsedTime_ms = eTimer.elapsed();
 
-				    // put object back in tree
-				    if (instance)
-				    {
-					    instance->putObjectBackIntoDBTree(cloud, objContext);
-				    }
+			// attaching the proxy touches the scene graph, so it stays on the GUI thread too
+			if (octree && mode != ccComputeOctreeDlg::DEFAULT)
+			{
+				ccOctreeProxy* proxy = new ccOctreeProxy(octree);
+				proxy->setDisplay(cloud->getDisplay());
+				cloud->addChild(proxy);
+			}
 
-				    if (octree)
-				    {
-					    ccLog::Print("[doActionComputeOctree] Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1000.0);
-					    cloud->setEnabled(true); // for vertices!
-					    ccOctreeProxy* proxy = cloud->getOctreeProxy();
-					    assert(proxy);
-					    proxy->setVisible(true);
-					    proxy->setEnabled(true);
-					    proxy->prepareDisplayForRefresh();
-				    }
-				    else
-				    {
-					    ccLog::Warning(QObject::tr("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
-				    }
-			    }
+			// put object back in tree
+			if (instance)
+			{
+				instance->putObjectBackIntoDBTree(cloud, objContext);
+			}
 
-			    return true;
-		    });
+			if (octree)
+			{
+				ccLog::Print("[doActionComputeOctree] Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1000.0);
+				cloud->setEnabled(true); // for vertices!
+				ccOctreeProxy* proxy = cloud->getOctreeProxy();
+				assert(proxy);
+				proxy->setVisible(true);
+				proxy->setEnabled(true);
+				proxy->prepareDisplayForRefresh();
+			}
+			else
+			{
+				ccLog::Warning(QObject::tr("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
+			}
+		}
+
+		return true;
 	}
 
 	//////////

@@ -29,6 +29,7 @@
 #include <ScalarFieldTools.h>
 
 // qCC_db
+#include <ccBackgroundTask.h>
 #include <ccGBLSensor.h>
 #include <ccGenericMesh.h>
 #include <ccHObject.h>
@@ -852,12 +853,17 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.CPSet         = nullptr;
 		}
 
-		result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(m_compCloud,
-		                                                                          m_refCloud,
-		                                                                          c2cParams,
-		                                                                          progressDlg.data(),
-		                                                                          m_compOctree.data(),
-		                                                                          m_refOctree.data());
+		// in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(
+		    [&]()
+		    {
+			    return CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(m_compCloud,
+			                                                                            m_refCloud,
+			                                                                            c2cParams,
+			                                                                            progressDlg.data(),
+			                                                                            m_compOctree.data(),
+			                                                                            m_refOctree.data());
+		    });
 		break;
 
 	case CLOUDMESH_DIST: // cloud-mesh
@@ -873,11 +879,16 @@ bool ccComparisonDlg::computeDistances()
 			c2mParams.robust          = robust;
 		}
 
-		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(m_compCloud,
-		                                                                         m_refMesh,
-		                                                                         c2mParams,
-		                                                                         progressDlg.data(),
-		                                                                         m_compOctree.data());
+		// in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(
+		    [&]()
+		    {
+			    return CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(m_compCloud,
+			                                                                           m_refMesh,
+			                                                                           c2mParams,
+			                                                                           progressDlg.data(),
+			                                                                           m_compOctree.data());
+		    });
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();

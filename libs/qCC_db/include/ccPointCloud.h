@@ -707,7 +707,6 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 		bool             applyToSFduringRGB      = false;
 		RGB_FILTER_TYPES filterType              = RGB_FILTER_TYPES::NONE;
 		unsigned char    burntOutColorThreshold  = 0;
-		bool             commandLine             = false;
 		double           sigmaSF                 = -1;
 		double           spatialSigma            = -1;
 		bool             blendGrayscale          = false;

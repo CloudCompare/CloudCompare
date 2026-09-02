@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SELECT_CHILDREN_DLG_HEADER
-#define CC_SELECT_CHILDREN_DLG_HEADER
 
 // Qt
 #include <QDialog>
@@ -66,5 +65,3 @@ class ccSelectChildrenDlg : public QDialog
   private:
 	Ui::SelectChildrenDialog* mUI;
 };
-
-#endif // CC_SELECT_CHILDREN_DLG_HEADER

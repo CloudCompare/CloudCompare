@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FILTER_BY_VALUE_DIALOG_HEADER
-#define CC_FILTER_BY_VALUE_DIALOG_HEADER
 
 #include <ui_filterByValueDlg.h>
 
@@ -66,5 +65,3 @@ class ccFilterByValueDlg : public QDialog
   protected:
 	Mode m_mode;
 };
-
-#endif // CC_FILTER_BY_VALUE_DIALOG_HEADER

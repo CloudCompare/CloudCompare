@@ -17,7 +17,7 @@
 
 #include "ccAboutDialog.h"
 
-#include "ccApplication.h"
+#include "ccApplicationBase.h"
 #include "ui_aboutDlg.h"
 
 ccAboutDialog::ccAboutDialog(QWidget* parent)

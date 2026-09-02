@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_EXPORT_COORD_TO_SF_DLG_HEADER
-#define CC_EXPORT_COORD_TO_SF_DLG_HEADER
 
 #include <ui_exportCoordToSFDlg.h>
 
@@ -37,5 +36,3 @@ class ccExportCoordToSFDlg : public QDialog
 	//! Returns whether Z dimension should be exported
 	bool exportZ() const;
 };
-
-#endif // CC_EXPORT_COORD_TO_SF_DLG_HEADER

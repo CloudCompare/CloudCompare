@@ -1,5 +1,4 @@
-#ifndef ISOLINES_HEADER
-#define ISOLINES_HEADER
+#pragma once
 
 /**
  *  Transcription of FindIsolines.java for C++
@@ -39,7 +38,7 @@
 #include <ccLog.h>
 
 // system
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 #include <vector>
 
@@ -1114,5 +1113,3 @@ class Isolines
 		return (getBBMinY(k) + getBBMaxY(k)) / 2.0;
 	}
 };
-
-#endif // ISOLINES_HEADER

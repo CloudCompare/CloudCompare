@@ -1,5 +1,4 @@
-#ifndef CCRECENTFILES_H
-#define CCRECENTFILES_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -64,5 +63,3 @@ class ccRecentFiles : public QObject
 
 	QAction* m_actionClearMenu;
 };
-
-#endif

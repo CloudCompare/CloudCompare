@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: CloudCompare project                               #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FROM_SCALAR_DLG_HEADER
-#define CC_FROM_SCALAR_DLG_HEADER
 
 // Qt
 #include <QColor>
@@ -191,5 +190,3 @@ class ccColorFromScalarDlg : public QDialog
   private:
 	Ui::ColorFromScalarDialog* m_ui;
 };
-
-#endif // CC_COLOR_LEVELS_DLG_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_PRIMITIVE_FACTORY_DLG_HEADER
-#define CC_PRIMITIVE_FACTORY_DLG_HEADER
 
 #include <ui_primitiveFactoryDlg.h>
 
@@ -59,5 +58,3 @@ class ccPrimitiveFactoryDlg : public QDialog
 	//! Associated main window
 	MainWindow* m_win;
 };
-
-#endif // CC_PRIMITIVE_FACTORY_DLG_HEADER

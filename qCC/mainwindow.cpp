@@ -93,6 +93,7 @@
 #include "ccClippingBoxTool.h"
 #include "ccColorFromScalarDlg.h"
 #include "ccColorScaleEditorDlg.h"
+#include "ccCommon.h"
 #include "ccComparisonDlg.h"
 #include "ccEntitySelectionDlg.h"
 #include "ccExtrudePolylineDlg.h"

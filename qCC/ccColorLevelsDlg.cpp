@@ -30,8 +30,7 @@
 #include <QPushButton>
 
 // system
-#include <assert.h>
-#include <string.h>
+#include <cassert>
 
 // persistent parameters
 static int  s_inputLevels[2]      = {0, 255};

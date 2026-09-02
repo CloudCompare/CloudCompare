@@ -24,9 +24,6 @@
 #include <ccBasicTypes.h>
 #include <ccSingleton.h>
 
-// System
-#include <string.h>
-
 //! Unique instance of ccGui
 static ccSingleton<ccGui> s_gui;
 

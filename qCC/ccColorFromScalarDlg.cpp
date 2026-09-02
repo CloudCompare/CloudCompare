@@ -18,7 +18,6 @@
 #include "ccColorFromScalarDlg.h"
 
 // local
-#include "ccConsole.h"
 #include "ccHistogramWindow.h"
 
 // qCC_db

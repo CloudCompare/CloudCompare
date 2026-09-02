@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_QCUSTOMPLOT_HEADER
-#define CC_QCUSTOMPLOT_HEADER
 
 // QCustomPlot
 #ifdef _MSC_VER
@@ -477,5 +476,3 @@ class QCPArrow : public QCPSelectableCursor
 		}
 	}
 };
-
-#endif // CC_QCUSTOMPLOT_HEADER

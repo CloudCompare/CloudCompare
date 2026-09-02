@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                   COPYRIGHT: Daniel Girardeau-Montaut                  #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GEOM_FEATURES_DIALOG_HEADER
-#define CC_GEOM_FEATURES_DIALOG_HEADER
 
 // Local
 #include "ccLibAlgorithms.h"
@@ -64,5 +63,3 @@ class ccGeomFeaturesDlg : public QDialog
 
 	std::vector<Option> m_options;
 };
-
-#endif // CC_GEOM_FEATURES_DIALOG_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                    COPYRIGHT: Daniel Girardeau-Montaut                 #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SCALE_DLG_HEADER
-#define CC_SCALE_DLG_HEADER
 
 // CC_Lib
 #include <CCGeom.h>
@@ -58,5 +57,3 @@ class ccScaleDlg : public QDialog
 
 	Ui::ScaleDialog* m_ui;
 };
-
-#endif // CC_SCALE_DLG_HEADER

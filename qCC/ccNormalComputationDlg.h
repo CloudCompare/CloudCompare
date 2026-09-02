@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_NORMAL_COMPUTATION_DLG_HEADER
-#define CC_NORMAL_COMPUTATION_DLG_HEADER
 
 #include <ui_normalComputationDlg.h>
 
@@ -104,5 +103,3 @@ class ccNormalComputationDlg : public QDialog
 	//! Selected cloud
 	ccPointCloud* m_cloud;
 };
-
-#endif // CC_NORMAL_COMPUTATION_DLG_HEADER

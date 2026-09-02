@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
 
 #include <ui_camSensorProjectDlg.h>
 
@@ -35,5 +34,3 @@ class ccCamSensorProjectionDlg : public QDialog
 	void initWithCamSensor(const ccCameraSensor* sensor);
 	void updateCamSensor(ccCameraSensor* sensor);
 };
-
-#endif // CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER

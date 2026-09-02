@@ -54,7 +54,7 @@
 #include <QSettings>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 #if defined(_OPENMP)
 // OpenMP

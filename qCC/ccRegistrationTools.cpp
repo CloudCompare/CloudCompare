@@ -38,9 +38,6 @@
 // Qt
 #include <QElapsedTimer>
 
-// system
-#include <set>
-
 //! Default number of points sampled on the 'data' mesh (if any)
 static const unsigned s_defaultSampledPointsOnDataMesh = 50000;
 //! Default temporary registration scalar field

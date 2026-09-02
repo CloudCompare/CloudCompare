@@ -31,7 +31,6 @@
 #include <QFontMetrics>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <numeric>
 
 void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent /*=nullptr*/, unsigned maxDim /*=1024*/)
 {

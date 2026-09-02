@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_STATISTICAL_TEST_DLG_HEADER
-#define CC_STATISTICAL_TEST_DLG_HEADER
 
 #include <QDialog>
 
@@ -53,5 +52,3 @@ class ccStatisticalTestDlg : public QDialog
   private:
 	Ui::StatisticalTestDialog* m_ui;
 };
-
-#endif // CC_STATISTICAL_TEST_DLG_HEADER

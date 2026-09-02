@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SOR_FILTER_DLG_HEADER
-#define CC_SOR_FILTER_DLG_HEADER
 
 #include <QDialog>
 
@@ -48,5 +47,3 @@ class ccSORFilterDlg : public QDialog
   private:
 	Ui::SorFilterDialog* m_ui;
 };
-
-#endif // CC_SOR_FILTER_DLG_HEADER

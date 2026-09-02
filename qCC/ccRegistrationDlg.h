@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_REGISTRATION_DLG_HEADER
-#define CC_REGISTRATION_DLG_HEADER
 
 #include <QDialog>
 
@@ -126,5 +125,3 @@ class ccRegistrationDlg : public QDialog
 	//! 'Data' entity
 	ccHObject* dataEntity;
 };
-
-#endif // CC_REGISTRATION_DLG_HEADER

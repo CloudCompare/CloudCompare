@@ -38,7 +38,7 @@
 #include <QTextStream>
 
 // System
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 // Gui

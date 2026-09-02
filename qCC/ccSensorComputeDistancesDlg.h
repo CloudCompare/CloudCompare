@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SF_DISTANCES_DLG_HEADER
-#define CC_SF_DISTANCES_DLG_HEADER
 
 #include <QDialog>
 
@@ -42,5 +41,3 @@ class ccSensorComputeDistancesDlg : public QDialog
   private:
 	Ui::sensorComputeDistancesDlg* m_ui;
 };
-
-#endif // CC_SF_DISTANCES_DLG_HEADER

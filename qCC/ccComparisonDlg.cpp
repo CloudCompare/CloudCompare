@@ -51,7 +51,7 @@
 #include <QThreadPool>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 

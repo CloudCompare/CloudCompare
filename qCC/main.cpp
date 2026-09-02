@@ -156,7 +156,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-
 	ccApplication::InitOpenGL();
 
 	ccApplication app(argc, argv, commandLine);

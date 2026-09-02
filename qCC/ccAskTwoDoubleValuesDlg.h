@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER
-#define CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER
 
 #include <ui_askTwoDoubleValuesDlg.h>
 
@@ -38,5 +37,3 @@ class ccAskTwoDoubleValuesDlg : public QDialog
 	                        QString        windowTitle = QString(),
 	                        QWidget*       parent      = nullptr);
 };
-
-#endif // CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER

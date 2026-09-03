@@ -194,13 +194,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned decimStep       = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum * 3) / context.minLODTriangleCount)) : 1);
 		unsigned displayedTriNum = triNum / decimStep;
 
-		bool lightIsEnabled = MACRO_LightIsEnabled(context);
-		glFunc->glPushAttrib(GL_LIGHTING_BIT);
-		if (!lightIsEnabled && m_forceSunLightOn)
-		{
-			glFunc->glEnable(GL_LIGHT0);
-			lightIsEnabled = true;
-		}
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
 
 		// display parameters
 		glDrawParams glParams;
@@ -224,7 +219,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTextures   = (hasTextures() && materialsShown() && !lodEnabled);
 
 		// color-based entity picking
-		bool         entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
@@ -276,6 +270,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
 				}
 			}
+		}
+
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		if (lightIsEnabled)
+		{
+			glFunc->glEnable(GL_LIGHT0);
 		}
 
 		// materials or color?

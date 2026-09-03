@@ -288,7 +288,7 @@ void StereogramWidget::mousePressEvent(QMouseEvent* e)
 		if (e->button() == Qt::LeftButton)
 		{
 			QRect contentRect = contentsRect();
-			QPoint pos = e->pos() - contentRect.topLeft();
+			QPoint pos = e->position().toPoint() - contentRect.topLeft();
 			QPoint AB = pos - m_center;
 			int squareDistToCenter = AB.x() * AB.x() + AB.y() * AB.y();
 			if (squareDistToCenter <= m_radius * m_radius)
@@ -383,7 +383,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			}
 		}
 
-		diameter = newDiameter; 
+		diameter = newDiameter;
 	}
 
 	//outer circle
@@ -433,7 +433,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 			if (dipDir_deg < 360.0)
 			{
 				const double dipDir_rad = CCCoreLib::DegreesToRadians( dipDir_deg );
-				
+
 				QPoint X(	 static_cast<int>(sin( dipDir_rad ) * radius),
 							-static_cast<int>(cos( dipDir_rad ) * radius) );
 
@@ -455,7 +455,7 @@ void StereogramWidget::paintEvent(QPaintEvent* event)
 
 		const double* d = m_densityGrid->grid;
 		const double step_rad = CCCoreLib::DegreesToRadians( m_densityGrid->step_deg );
-		
+
 		for (unsigned j = 0; j < m_densityGrid->ddSteps; ++j)
 		{
 			double dipDir0_rad = (j    ) * step_rad;

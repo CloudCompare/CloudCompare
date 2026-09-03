@@ -5739,7 +5739,8 @@ void ccGLWindowInterface::onItemPickedFast(ccHObject* pickedEntity, int pickedIt
 			ccClipBox*     cbox     = cBoxPart->clipBox();
 			assert(cbox);
 			cbox->setActiveComponent(cBoxPart->partID());
-			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+			// x and y are in device coordinates so use glWidth and glHeight instead of logical height/width (could be divided by getDevicePixelRatio as well)
+			cbox->setClickedPoint(x, y, glWidth(), glHeight(), m_viewportParams.viewMat);
 
 			m_activeItems.insert(cbox);
 		}

@@ -203,7 +203,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("Failed to generate the set of rays"));
 	}
 
-	QScopedPointer<ccProgressDialog> pcvProgressCb;
+	std::unique_ptr<ccProgressDialog> pcvProgressCb;
 
 	if (!cmd.silentMode())
 	{
@@ -226,7 +226,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	for (CLMeshDesc& desc : cmd.meshes())
 		candidates.push_back(desc.mesh);
 
-	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.data(), nullptr))
+	if (!Process(candidates, rays, meshIsClosed, resolution, pcvProgressCb.get(), nullptr))
 	{
 		return cmd.error(QObject::tr("Process failed"));
 	}

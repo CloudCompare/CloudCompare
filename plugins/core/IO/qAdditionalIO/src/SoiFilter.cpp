@@ -84,7 +84,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	// Progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget)); // cancel is not supported
@@ -92,7 +92,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 		pDlg->setInfo(QObject::tr("%1 scans / %2 points").arg(nbScansTotal).arg(nbPointsTotal));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbPointsTotal);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), nbPointsTotal);
 
 	// Scan by scan
 	for (unsigned k = 0; k < nbScansTotal; k++)

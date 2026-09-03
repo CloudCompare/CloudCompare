@@ -436,7 +436,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			}
 
 			// progress dialog
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 			if (!cmd.silentMode())
 			{
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
@@ -463,7 +463,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			                  interpolationType,
 			                  interpolationParams,
 			                  sfProjectionType,
-			                  pDlg.data(),
+			                  pDlg.get(),
 			                  invVarProjSFIndex))
 			{
 				grid.fillEmptyCells(emptyCellFillStrategy, customHeight);

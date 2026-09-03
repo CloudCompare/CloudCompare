@@ -309,7 +309,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Loading LAS points");
 	progressDialog.setInfo("Loading points");
-	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	std::unique_ptr<CCCoreLib::NormalizedProgress> normProgress;
 	if (parameters.parentWidget)
 	{
 		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCount));
@@ -923,7 +923,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Saving LAS points");
 	progressDialog.setInfo("Saving points");
-	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	std::unique_ptr<CCCoreLib::NormalizedProgress> normProgress;
 	if (parameters.parentWidget)
 	{
 		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCloud->size()));

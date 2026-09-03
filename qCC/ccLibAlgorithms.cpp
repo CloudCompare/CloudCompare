@@ -141,7 +141,7 @@ namespace ccLibAlgorithms
 		}
 
 		// multiple features case
-		QScopedPointer<ccProgressDialog> pDlg;
+		std::unique_ptr<ccProgressDialog> pDlg;
 		if (parent)
 		{
 			pDlg.reset(new ccProgressDialog(true, parent));
@@ -156,7 +156,7 @@ namespace ccLibAlgorithms
 			                               entities,
 			                               roughnessUpDir,
 			                               parent,
-			                               pDlg.data()))
+			                               pDlg.get()))
 			{
 				return false;
 			}
@@ -537,7 +537,7 @@ namespace ccLibAlgorithms
 					}
 				}
 
-				QScopedPointer<ccProgressDialog> pDlg;
+				std::unique_ptr<ccProgressDialog> pDlg;
 				if (parent)
 				{
 					pDlg.reset(new ccProgressDialog(true, parent));
@@ -550,7 +550,7 @@ namespace ccLibAlgorithms
 					{
 						pDlg->show();
 					}
-					octree = cloud->computeOctree(pDlg.data());
+					octree = cloud->computeOctree(pDlg.get());
 					if (!octree)
 					{
 						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
@@ -568,7 +568,7 @@ namespace ccLibAlgorithms
 					                                                                 0, // auto --> FIXME: should be properly set by the user!
 					                                                                 euclidean,
 					                                                                 false,
-					                                                                 pDlg.data(),
+					                                                                 pDlg.get(),
 					                                                                 octree.data());
 					break;
 
@@ -660,14 +660,14 @@ namespace ccLibAlgorithms
 		unsigned count = static_cast<unsigned>(entities.size());
 
 		// now compute the scales
-		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parent)
 		{
 			pDlg.reset(new ccProgressDialog(true, parent));
 			pDlg->setMethodTitle(QObject::tr("Computing entities scales"));
 			pDlg->setInfo(QObject::tr("Entities: %1").arg(count));
 		}
-		CCCoreLib::NormalizedProgress nProgress(pDlg.data(), 2 * count - 1);
+		CCCoreLib::NormalizedProgress nProgress(pDlg.get(), 2 * count - 1);
 		if (pDlg)
 		{
 			pDlg->start();

@@ -114,7 +114,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 	unsigned faceCount = mesh->size();
 
 	// progress
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -123,7 +123,7 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, QFile& theFile, QWid
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), faceCount);
 
 	// header
 	{
@@ -206,7 +206,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 	unsigned faceCount = mesh->size();
 
 	// progress
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -215,7 +215,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, QFile& theFile, QW
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), faceCount);
 
 	QTextStream stream(&theFile);
 	stream << "solid " << mesh->getName() << Qt::endl;
@@ -430,7 +430,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 	mesh->setName(name);
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -739,7 +739,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 	}
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -748,7 +748,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 		pDlg->start();
 		QApplication::processEvents();
 	}
-	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), faceCount);
+	CCCoreLib::NormalizedProgress nProgress(pDlg.get(), faceCount);
 
 	// current vertex shift
 	CCVector3d Pshift(0, 0, 0);

@@ -170,7 +170,7 @@ int main(int argc, char** argv)
 	ccLog::EnableMessageBackup(true);
 
 	// splash screen
-	QScopedPointer<QSplashScreen> splash(nullptr);
+	std::unique_ptr<QSplashScreen> splash(nullptr);
 
 	// standard mode
 	if (!commandLine)

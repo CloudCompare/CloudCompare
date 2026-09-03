@@ -1659,7 +1659,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 
 	// export points
 	{
-		QScopedPointer<CCCoreLib::NormalizedProgress> nProgress;
+		std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 		if (progressDialog)
 		{
 			nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(height * width)));
@@ -1930,7 +1930,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		// do we need to project the original SFs?
 		if (projectSFs && inputCloud && inputCloudAsPC)
 		{
-			QScopedPointer<CCCoreLib::NormalizedProgress> nProgress;
+			std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 			if (progressDialog)
 			{
 				progressDialog->setInfo(QObject::tr("Projecting %1 scalar fields").arg(scalarFields.size()));

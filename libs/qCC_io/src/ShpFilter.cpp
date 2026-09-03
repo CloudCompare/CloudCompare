@@ -1994,7 +1994,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	// progress bar
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	qint64                           fileSize = file.size();
 	if (parameters.parentWidget)
 	{

@@ -4132,7 +4132,7 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 
 		// tag the duplicated vertices
 		{
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 			if (parentWidget)
 			{
 				pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -4140,7 +4140,7 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 
 			// try to build the octree
 			ccOctree::Shared octree = ccOctree::Shared(new ccOctree(m_associatedCloud));
-			if (!octree->build(pDlg.data()))
+			if (!octree->build(pDlg.get()))
 			{
 				ccLog::Warning("[MergeDuplicatedVertices] Not enough memory");
 				return false;
@@ -4151,7 +4151,7 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
                                                                         TagDuplicatedVertices,
                                                                         additionalParameters,
                                                                         false,
-                                                                        pDlg.data(),
+                                                                        pDlg.get(),
                                                                         "Tag duplicated vertices");
 
 			if (result == 0)

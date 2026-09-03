@@ -109,7 +109,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	ScalarType    maxIntensity = 0;
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -118,7 +118,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 	}
 
 	// progress dialog (for normals computation)
-	QScopedPointer<ccProgressDialog> normalsProgressDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> normalsProgressDlg(nullptr);
 	if (parameters.parentWidget && parameters.autoComputeNormals)
 	{
 		normalsProgressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -272,7 +272,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 
 		// read points
 		{
-			CCCoreLib::NormalizedProgress nprogress(pDlg.data(), gridSize);
+			CCCoreLib::NormalizedProgress nprogress(pDlg.get(), gridSize);
 			if (pDlg)
 			{
 				pDlg->setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
@@ -532,7 +532,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 				// by default we don't compute normals without asking the user
 				if (!cloud->hasNormals() && parameters.autoComputeNormals)
 				{
-					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.data());
+					cloud->computeNormalsWithGrids(1.0, normalsProgressDlg.get());
 				}
 			}
 

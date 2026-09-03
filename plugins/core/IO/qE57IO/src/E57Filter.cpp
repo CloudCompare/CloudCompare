@@ -1047,7 +1047,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		s_absoluteScanIndex = 0;
 
 		// progress dialog
-		QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -1071,7 +1071,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 			// create corresponding node
 			e57::StructureNode scanNode = e57::StructureNode(imf);
-			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, progressDlg.data()))
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, progressDlg.get()))
 			{
 				++s_absoluteScanIndex;
 				scansGUID.insert(cloud, scanGUID);
@@ -1103,7 +1103,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 				if (imageCount != 0)
 				{
 					// progress bar
-					CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+					CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), imageCount);
 					if (progressDlg)
 					{
 						progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -2802,7 +2802,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
 
 			// global progress bar
-			QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 			if (parameters.parentWidget)
 			{
 				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2818,7 +2818,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				progressDlg->start();
 				QApplication::processEvents();
 			}
-			CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
+			CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), showGlobalProgress ? scanCount : 100);
 
 			// static states
 			s_absoluteScanIndex     = 0;
@@ -2829,7 +2829,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				const e57::Node scanNode = data3D.get(i);
 				QString         scanGUID;
 
-				LoadedScan scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? nullptr : progressDlg.data());
+				LoadedScan scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? nullptr : progressDlg.get());
 
 				if (scan.entity)
 				{
@@ -2902,7 +2902,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			if (imageCount)
 			{
 				// progress bar
-				QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+				std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 				if (parameters.parentWidget)
 				{
 					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2911,7 +2911,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 					progressDlg->start();
 					QApplication::processEvents();
 				}
-				CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+				CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), imageCount);
 
 				for (unsigned i = 0; i < imageCount; ++i)
 				{

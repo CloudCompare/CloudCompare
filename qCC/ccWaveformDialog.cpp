@@ -347,7 +347,7 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent* event)
 			if (roi.contains(event->pos(), false))
 			{
 				m_drawVerticalIndicator            = true;
-				m_verticalIndicatorPositionPercent = static_cast<double>(event->x() - roi.x()) / roi.width();
+				m_verticalIndicatorPositionPercent = static_cast<double>(event->position().x() - roi.x()) / roi.width();
 				refresh();
 			}
 		}

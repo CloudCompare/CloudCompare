@@ -96,9 +96,6 @@ class ccWaveWidget : public QCustomPlot
 
 	//! Rendering font
 	QFont m_renderingFont;
-
-	//! Last mouse click
-	QPoint m_lastMouseClick;
 };
 
 //! Waveform dialog

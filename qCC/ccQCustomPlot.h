@@ -148,7 +148,7 @@ class QCPColoredBars : public QCPBars
 			newData.value = value[i];
 			if (colors.size() > i)
 				newData.color = colors[i];
-			m_coloredData.insertMulti(newData.key, newData);
+			m_coloredData.insert(newData.key, newData);
 			QCPBars::addData(newData.key, newData.value);
 		}
 	}

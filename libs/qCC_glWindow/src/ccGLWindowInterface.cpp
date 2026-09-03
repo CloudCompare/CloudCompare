@@ -1936,6 +1936,9 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(const QPointF&
 			return CCVector3d(0, 0, 1);
 		}
 
+		// Q2D is in GL (unscaled) coordinates, change it to logical to be consistent with position and heigh() / width() usage
+		Q2D = Q2D / getDevicePixelRatio();
+
 		// we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
 		Q2D.x = std::min(Q2D.x, 3.0 * width() / 4.0);
 		Q2D.x = std::max(Q2D.x, width() / 4.0);

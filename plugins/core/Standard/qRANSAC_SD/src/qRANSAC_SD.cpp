@@ -50,6 +50,7 @@
 #include <ccCylinder.h>
 #include <ccCone.h>
 #include <ccTorus.h>
+#include <ccBackgroundTask.h>
 #include <ccProgressDialog.h>
 
 //CCCoreLib
@@ -503,21 +504,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		s_cloud = &cloud;
 		QElapsedTimer eTimer;
 		eTimer.start();
-		QFuture<void> future = QtConcurrent::run(doDetection);
-
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-			if (!silent && pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			QApplication::processEvents();
-		}
+		//run in a worker thread, so that the progress dialog keeps refreshing
+		ccBackgroundTask::Run(doDetection);
 		remaining = static_cast<unsigned>(s_remainingPoints);
 
 		QApplication::processEvents();

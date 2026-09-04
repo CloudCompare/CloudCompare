@@ -67,4 +67,24 @@ class ccBackgroundTask
 			return watcher.result();
 		}
 	}
+
+	//! Waits for an already started task, while the GUI keeps refreshing
+	/** Same idea as Run, but for code that has already launched something with
+	    QtConcurrent (a map, for instance). Waiting on it directly would block the
+	    GUI thread, and wrapping it in Run would mean blocking inside a thread of
+	    the same pool, which can deadlock when few threads are allowed.
+
+	    \param future the task to wait for
+	**/
+	template <typename T>
+	static void Wait(QFuture<T>& future)
+	{
+		QFutureWatcher<T> watcher;
+		QEventLoop        loop;
+
+		QObject::connect(&watcher, &QFutureWatcherBase::finished, &loop, &QEventLoop::quit, Qt::QueuedConnection);
+
+		watcher.setFuture(future);
+		loop.exec();
+	}
 };

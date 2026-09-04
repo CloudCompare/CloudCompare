@@ -35,6 +35,7 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccBackgroundTask.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
@@ -441,22 +442,8 @@ void qPoissonRecon::doAction()
 			s_densitySF = (densitySF = new ccScalarField("Density"));
 		}
 
-		QFuture<bool> future = QtConcurrent::run(doReconstruct);
-
-		//wait until process is finished!
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-
-			pDlg.setValue(pDlg.value() + 1);
-			QApplication::processEvents();
-		}
-
-		result = future.result();
+		//run in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(doReconstruct);
 
 		s_cloud = nullptr;
 		s_mesh = nullptr;

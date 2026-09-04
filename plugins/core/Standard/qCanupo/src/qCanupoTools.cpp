@@ -32,6 +32,7 @@
 
 //qCC_plugins
 #include <ccMainAppInterface.h>
+#include <ccBackgroundTask.h>
 #include <ccQtHelpers.h>
 
 //Qt
@@ -346,15 +347,7 @@ bool qCanupoTools::ComputeCorePointsDescriptors(CCCoreLib::GenericIndexedCloud* 
 
 		// Do not use a blocking map, as it's blocking the UI as well
 		auto future = QtConcurrent::map(corePointsIndexes, ComputeCorePointDescriptor);
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(250);
-#else
-			usleep(250 * 1000);
-#endif
-			QCoreApplication::processEvents();
-		}
+		ccBackgroundTask::Wait(future);
 	}
 	else
 	{

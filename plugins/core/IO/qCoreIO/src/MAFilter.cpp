@@ -148,7 +148,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const QString& filename, c
 
 	// progress dialog
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
-	const int                        coloursAdjustment = (hasColors ? 1 : 0);
+	const int                         coloursAdjustment = (hasColors ? 1 : 0);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available

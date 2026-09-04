@@ -3123,7 +3123,7 @@ bool CommandMergeMeshes::process(ccCommandLineInterface& cmd)
 	bool       firstValidMesh = true;
 
 	// create the destination mesh
-	ccPointCloud*          vertices = new ccPointCloud("vertices");
+	ccPointCloud*           vertices = new ccPointCloud("vertices");
 	std::unique_ptr<ccMesh> mergedMesh(new ccMesh(vertices));
 	mergedMesh->setName("Merged mesh");
 	mergedMesh->addChild(vertices);

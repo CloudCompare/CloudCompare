@@ -732,7 +732,7 @@ bool ccComparisonDlg::computeDistances()
 	s_maxThreadCount = c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 	ccLog::Print(QString("[Distances] Will use %1 threads").arg(s_maxThreadCount));
 
-	int                              result = -1;
+	int                               result = -1;
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{

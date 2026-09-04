@@ -444,7 +444,7 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 	if (!m_sliders || m_sliders->size() <= 2)
 		return;
 
-	double    pos         = (m_orientation == Qt::Horizontal ? e->position().x() : e->position().y());
+	double pos         = (m_orientation == Qt::Horizontal ? e->position().x() : e->position().y());
 	double relativePos = static_cast<double>(pos - DEFAULT_MARGIN) / static_cast<double>(length());
 
 	if (relativePos > 0.0 && relativePos < 1.0)

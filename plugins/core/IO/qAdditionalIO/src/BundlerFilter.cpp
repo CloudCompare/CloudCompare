@@ -639,7 +639,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 	/*** pre-processing steps (colored MNT computation, etc.) ***/
 
 	// for colored DTM generation
-	std::vector<int>                      mntColors;
+	std::vector<int>                       mntColors;
 	std::unique_ptr<CCCoreLib::PointCloud> mntSamples;
 	if (generateColoredDTM)
 	{

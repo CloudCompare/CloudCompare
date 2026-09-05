@@ -6998,7 +6998,7 @@ void ccGLWindowInterface::drawPivot()
 			glEnableSunLight();
 			CC_DRAW_CONTEXT CONTEXT;
 			getContext(CONTEXT);
-			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED | CC_NO_SHADER;
 			CONTEXT.display      = nullptr;
 			sphere.draw(CONTEXT);
 			glFunc->glPopAttrib(); // GL_LIGHTING_BIT

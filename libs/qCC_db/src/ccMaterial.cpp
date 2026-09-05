@@ -29,6 +29,11 @@
 // Textures DB
 static ccMaterialDB s_materialDB;
 
+ccMaterialDB* ccMaterial::GetTextureDB()
+{
+	return &s_materialDB;
+}
+
 ccMaterial::ccMaterial(const QString& name)
     : m_name(name)
     , m_uniqueID(QUuid::createUuid().toString())
@@ -193,11 +198,7 @@ GLuint ccMaterial::getTextureID() const
 		{
 			return 0;
 		}
-		QSharedPointer<QOpenGLTexture> tex;
-		if (s_materialDB.openGLTextures.contains(m_textureFilename))
-		{
-			tex = s_materialDB.openGLTextures[m_textureFilename];
-		}
+		QSharedPointer<QOpenGLTexture> tex = s_materialDB.getOpenGLTexture(m_textureFilename);
 
 		if (!tex)
 		{
@@ -207,7 +208,7 @@ GLuint ccMaterial::getTextureID() const
 			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 			tex->setData(getTexture(), QOpenGLTexture::DontGenerateMipMaps);
 			tex->create();
-			s_materialDB.openGLTextures[m_textureFilename] = tex;
+			s_materialDB.addOpenGLTexture(m_textureFilename, tex);
 		}
 		return tex->textureId();
 	}
@@ -275,7 +276,7 @@ void ccMaterial::ReleaseTextures()
 		return;
 	}
 
-	s_materialDB.openGLTextures.clear();
+	s_materialDB.releaseAllOpenGLTextures();
 }
 
 void ccMaterial::releaseTexture()
@@ -389,10 +390,10 @@ void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilt
 		m_texMinificationFilter  = minificationFilter;
 		m_texMagnificationFilter = magnificationFilter;
 
-		if (!m_textureFilename.isEmpty() && s_materialDB.openGLTextures.contains(m_textureFilename))
+		if (!m_textureFilename.isEmpty())
 		{
 			// remove the existing texture (if any) so that it's initialized again next time
-			s_materialDB.openGLTextures.remove(m_textureFilename);
+			s_materialDB.removeOpenGLTexture(m_textureFilename);
 		}
 	}
 }

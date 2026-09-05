@@ -26,7 +26,6 @@
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccHObjectCaster.h"
-#include "ccMaterialDB.h"
 #include "ccMaterialSet.h"
 #include "ccNormalVectors.h"
 #include "ccPointCloud.h"
@@ -1721,71 +1720,6 @@ void ccMesh::ReleaseOpenGLRessources()
 	}
 }
 
-// create a 2D texture containing all the normals (for OpenGL 2.1)
-static QSharedPointer<QOpenGLTexture> CreateNormalLUTTexture(QOpenGLFunctions_2_1* gl)
-{
-	if (!gl)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	const unsigned totalNormals = ccNormalCompressor::MAX_VALID_NORM_CODE + 1; // number of valid codes
-	// Query max texture size
-	GLint maxTexSize = 0;
-	gl->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
-	if (maxTexSize <= 0)
-	{
-		return nullptr;
-	}
-
-	// choose width as large as possible (but <= maxTexSize) to minimize height
-	int width  = std::min(static_cast<int>(totalNormals), maxTexSize);
-	int height = static_cast<int>(std::ceil(static_cast<float>(totalNormals) / float(width)));
-
-	const size_t texels = static_cast<size_t>(width) * static_cast<size_t>(height);
-
-	// buffer RGB unsigned bytes
-	std::vector<unsigned char> pixels;
-	try
-	{
-		pixels.resize(texels * 3);
-	}
-	catch (const std::bad_alloc&)
-	{
-		ccLog::Warning("[ccMesh::CreateNormalLUTTexture] Not enough memory");
-		return nullptr;
-	}
-
-	// fill: for each index, call ccNormalCompressor::Decompress
-	for (unsigned i = 0; i < totalNormals; ++i)
-	{
-		CCVector3 n = ccNormalVectors::GetNormal(i);
-
-		// map [-1,1] -> [0,255]
-		// handle NULL_NORM_CODE: Decompress sets to 0, so it becomes 127 -> you can change if needed
-		pixels[i * 3 + 0] = static_cast<unsigned char>(std::round(std::clamp((n.x * 0.5 + 0.5), 0.0, 1.0) * 255.0));
-		pixels[i * 3 + 1] = static_cast<unsigned char>(std::round(std::clamp((n.y * 0.5 + 0.5), 0.0, 1.0) * 255.0));
-		pixels[i * 3 + 2] = static_cast<unsigned char>(std::round(std::clamp((n.z * 0.5 + 0.5), 0.0, 1.0) * 255.0));
-	}
-
-	// generate GL texture
-	QSharedPointer<QOpenGLTexture> tex(new QOpenGLTexture(QOpenGLTexture::Target2D));
-
-	// configure texture
-	tex->setFormat(QOpenGLTexture::RGB8_UNorm);
-	tex->setSize(width, height);
-	tex->allocateStorage();
-	tex->setWrapMode(QOpenGLTexture::ClampToEdge);
-	tex->setMinificationFilter(QOpenGLTexture::Nearest);
-	tex->setMagnificationFilter(QOpenGLTexture::Nearest);
-
-	// upload data
-	tex->setData(QOpenGLTexture::RGB, QOpenGLTexture::UInt8, pixels.data());
-
-	return tex;
-}
-
 // Simple program builder (GLSL 1.20) for mesh rendering (position, normal, color)
 static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
 {
@@ -1959,6 +1893,8 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFuncti
 	}
 
 	s_programs[attributes] = program;
+
+	ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.build");
 
 	return program;
 }
@@ -2146,10 +2082,19 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		EnableGLStippleMask(context.qGLContext, true);
 	}
 
-	if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues) && !MACRO_NoShader(context))
-	{
-		assert(!entityPickingMode || !glParams.showSF);
+	// normal acceleration texture (for fast normals display)
+	static bool s_normalLUTTextureFailed = false;
+	QSharedPointer<QOpenGLTexture> lutTex;
 
+	bool fallBackDisplay = (visFiltering
+	                        || (applyMaterials || showTextures)
+	                        || (glParams.showSF && sfMayHaveHiddenValues)
+	                        || (glParams.showNorms && s_normalLUTTextureFailed))
+	                       || MACRO_NoShader(context);
+
+	QSharedPointer<QOpenGLShaderProgram> prog;
+	if (!fallBackDisplay)
+	{
 		// get GL program
 		int attributes = ATTR_POS;
 		if (glParams.showNorms)
@@ -2161,244 +2106,242 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			attributes |= ATTR_COL;
 		}
 
-		QSharedPointer<QOpenGLShaderProgram> prog = BuildSimpleMeshProgram(glFunc, attributes);
-		if (prog)
+		prog = BuildSimpleMeshProgram(glFunc, attributes);
+		if (prog.isNull())
 		{
-			ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.build");
+			fallBackDisplay = true;
+		}
+		else if (glParams.showNorms)
+		{
+			assert(!s_normalLUTTextureFailed);
+
+			// create or retrieve the LUT texture
+			lutTex = ccNormalVectors::GetNormalLUTTexture(glFunc);
+			if (lutTex.isNull())
+			{
+				ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
+				s_normalLUTTextureFailed = true;
+				fallBackDisplay          = true;
+			}
+		}
+	}
+
+	if (!fallBackDisplay)
+	{
+		assert(!entityPickingMode || !glParams.showSF);
+		assert(prog.isNull() == false);	
 
 			// static VBO handles reused between calls
-			if (s_vboVertex == 0)
+		if (s_vboVertex == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboVertex);
+		}
+
+		if (glParams.showNorms && s_vboNormals == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboNormals);
+		}
+
+		if ((glParams.showColors || glParams.showSF) && s_vboColor == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboColor);
+		}
+
+		auto   vertices  = GetVertexBuffer();
+		float* normals   = reinterpret_cast<float*>(GetNormalsBuffer());
+		auto   rgbColors = GetColorsBuffer();
+
+		// we can scan and process each chunk separately in an optimized way
+		size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
+		for (size_t k = 0; k < chunkCount; ++k)
+		{
+			const size_t                      chunkSize               = ccChunk::Size(k, m_triVertIndexes->size());
+			const CCCoreLib::VerticesIndexes* _vertIndexesChunkOrigin = ccChunk::Start(*m_triVertIndexes, k);
+
+			// vertices
+			size_t vertexCount = 0;
 			{
-				glFunc->glGenBuffers(1, &s_vboVertex);
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				CCVector3*                        _vertices    = vertices;
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < cloud->size());
+					assert(_vertIndexes->i2 < cloud->size());
+					assert(_vertIndexes->i3 < cloud->size());
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i1);
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i2);
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i3);
+					vertexCount += 3;
+				}
 			}
 
-			if (glParams.showNorms && s_vboNormals == 0)
+			// scalar field
+			size_t rgbColorCount = 0;
+			if (glParams.showSF)
 			{
-				glFunc->glGenBuffers(1, &s_vboNormals);
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(rgbColors);
+				assert(colorScale);
+
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < currentDisplayedScalarField->size());
+					assert(_vertIndexes->i2 < currentDisplayedScalarField->size());
+					assert(_vertIndexes->i3 < currentDisplayedScalarField->size());
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i1);
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i2);
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i3);
+					rgbColorCount += 3;
+				}
+			}
+			else if (glParams.showColors) // colors
+			{
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(rgbColors);
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < rgbaColorsTable->size());
+					assert(_vertIndexes->i2 < rgbaColorsTable->size());
+					assert(_vertIndexes->i3 < rgbaColorsTable->size());
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i1);
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i2);
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i3);
+					rgbColorCount += 3;
+				}
 			}
 
-			if ((glParams.showColors || glParams.showSF) && s_vboColor == 0)
+			// normals
+			size_t normalCount = 0;
+			if (glParams.showNorms)
 			{
-				glFunc->glGenBuffers(1, &s_vboColor);
-			}
-
-			auto   vertices  = GetVertexBuffer();
-			float* normals   = reinterpret_cast<float*>(GetNormalsBuffer());
-			auto   rgbColors = GetColorsBuffer();
-
-			// we can scan and process each chunk separately in an optimized way
-			size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
-			for (size_t k = 0; k < chunkCount; ++k)
-			{
-				const size_t                      chunkSize               = ccChunk::Size(k, m_triVertIndexes->size());
-				const CCCoreLib::VerticesIndexes* _vertIndexesChunkOrigin = ccChunk::Start(*m_triVertIndexes, k);
-
-				// vertices
-				size_t vertexCount = 0;
+				float* _normals = normals;
+				if (showTriNormals)
 				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					CCVector3*                        _vertices    = vertices;
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					assert(m_triNormalIndexes);
+					const Tuple3i* _triNormalIndexes = ccChunk::Start(*m_triNormalIndexes, k);
+					for (size_t n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
 					{
-						assert(_vertIndexes->i1 < cloud->size());
-						assert(_vertIndexes->i2 < cloud->size());
-						assert(_vertIndexes->i3 < cloud->size());
-						*_vertices++ = *cloud->getPoint(_vertIndexes->i1);
-						*_vertices++ = *cloud->getPoint(_vertIndexes->i2);
-						*_vertices++ = *cloud->getPoint(_vertIndexes->i3);
-						vertexCount += 3;
+						assert(_triNormalIndexes->u[0] < static_cast<int>(m_triNormals->size()));
+						assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
+						assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
+
+						*_normals++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
+						*_normals++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
+						*_normals++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
+
+						normalCount += 3;
 					}
-				}
-
-				// scalar field
-				size_t rgbColorCount = 0;
-				if (glParams.showSF)
-				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(rgbColors);
-					assert(colorScale);
-
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-					{
-						assert(_vertIndexes->i1 < currentDisplayedScalarField->size());
-						assert(_vertIndexes->i2 < currentDisplayedScalarField->size());
-						assert(_vertIndexes->i3 < currentDisplayedScalarField->size());
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i1);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i2);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i3);
-						rgbColorCount += 3;
-					}
-				}
-				else if (glParams.showColors) // colors
-				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(rgbColors);
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-					{
-						assert(_vertIndexes->i1 < rgbaColorsTable->size());
-						assert(_vertIndexes->i2 < rgbaColorsTable->size());
-						assert(_vertIndexes->i3 < rgbaColorsTable->size());
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i1);
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i2);
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i3);
-						rgbColorCount += 3;
-					}
-				}
-
-				// normals
-				size_t normalCount = 0;
-				if (glParams.showNorms)
-				{
-					float* _normals = normals;
-					if (showTriNormals)
-					{
-						assert(m_triNormalIndexes);
-						const Tuple3i* _triNormalIndexes = ccChunk::Start(*m_triNormalIndexes, k);
-						for (size_t n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
-						{
-							assert(_triNormalIndexes->u[0] < static_cast<int>(m_triNormals->size()));
-							assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
-							assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
-
-							*_normals++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
-							*_normals++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
-							*_normals++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
-
-							normalCount += 3;
-						}
-					}
-					else
-					{
-						const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-						for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-						{
-							assert(_vertIndexes->i1 < normalsIndexesTable->size());
-							assert(_vertIndexes->i2 < normalsIndexesTable->size());
-							assert(_vertIndexes->i3 < normalsIndexesTable->size());
-							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
-							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
-							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
-
-							normalCount += 3;
-						}
-					}
-				}
-
-				// Upload to VBOs and draw with shader
-				prog->bind();
-
-				// Normals
-				if (glParams.showNorms)
-				{
-					// If not done already, create the LUT texture and bind it to unit 0
-					assert(ccMaterial::GetTextureDB());
-					QSharedPointer<QOpenGLTexture> lutTex = ccMaterial::GetTextureDB()->getOpenGLTexture("CompressedNormalsLUT");
-					if (lutTex.isNull())
-					{
-						lutTex = CreateNormalLUTTexture(glFunc);
-						if (lutTex)
-						{
-							ccMaterial::GetTextureDB()->addOpenGLTexture("CompressedNormalsLUT", lutTex);
-						}
-						else
-						{
-							static bool errorAlreadyDisplayed = false;
-							if (!errorAlreadyDisplayed)
-							{
-								ccLog::Error("Failed to create normals LUT texture! Cannot render with normals.");
-								errorAlreadyDisplayed = true;
-							}
-						}
-					}
-
-					// bind texture to unit 0
-					if (!lutTex.isNull())
-					{
-						glFunc->glActiveTexture(GL_TEXTURE0);
-						glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
-					}
-
-					// set sampler uniform to unit 0
-					int locSampler = prog->uniformLocation("uNormalLUT");
-					if (locSampler >= 0)
-					{
-						glFunc->glUniform1i(locSampler, 0);
-					}
-					// set LUT dimensions
-					int locW = prog->uniformLocation("uLUTWidth");
-					if (locW >= 0)
-					{
-						glFunc->glUniform1i(locW, lutTex->width());
-					}
-					int locH = prog->uniformLocation("uLUTHeight");
-					if (locH >= 0)
-					{
-						glFunc->glUniform1i(locH, lutTex->height());
-					}
-
-					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normals, GL_DYNAMIC_DRAW);
-					glFunc->glEnableVertexAttribArray(ATTR_NOR);
-					glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
-				}
-
-				// Vertex buffer
-				{
-					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
-					glFunc->glEnableVertexAttribArray(ATTR_POS);
-					glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, reinterpret_cast<void*>(0));
-				}
-
-				// Colors
-				if (glParams.showSF)
-				{
-					// colors are RGB unsigned bytes (3 components)
-					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
-					glFunc->glEnableVertexAttribArray(ATTR_COL);
-					// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
-					glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
-					// ensure alpha = 1.0 for all vertices
-					// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
-				}
-				else if (glParams.showColors)
-				{
-					// colors are RGBA unsigned bytes
-					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
-					glFunc->glEnableVertexAttribArray(ATTR_COL);
-					glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
-				}
-
-				// draw
-				if (!showWired)
-				{
-					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, static_cast<GLint>(vertexCount));
 				}
 				else
 				{
-					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
-				}
+					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					{
+						assert(_vertIndexes->i1 < normalsIndexesTable->size());
+						assert(_vertIndexes->i2 < normalsIndexesTable->size());
+						assert(_vertIndexes->i3 < normalsIndexesTable->size());
+						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
+						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
+						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
 
-				// cleanup per-chunk state
-				glFunc->glDisableVertexAttribArray(ATTR_POS);
-				if (glParams.showNorms)
-				{
-					glFunc->glDisableVertexAttribArray(ATTR_NOR);
-					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+						normalCount += 3;
+					}
 				}
-				if (glParams.showSF || glParams.showColors)
-				{
-					glFunc->glDisableVertexAttribArray(ATTR_COL);
-				}
-
-				// unbind array buffer
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
-				prog->release();
-
-				ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.end");
 			}
+
+			// Upload to VBOs and draw with shader
+			prog->bind();
+
+			// Normals
+			if (glParams.showNorms)
+			{
+				// If not done already, create the LUT texture and bind it to unit 0
+				assert(!lutTex.isNull());
+
+				// bind texture to unit 0
+				glFunc->glActiveTexture(GL_TEXTURE0);
+				glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
+
+				// set sampler uniform to unit 0
+				int locSampler = prog->uniformLocation("uNormalLUT");
+				if (locSampler >= 0)
+				{
+					glFunc->glUniform1i(locSampler, 0);
+				}
+				// set LUT dimensions
+				int locW = prog->uniformLocation("uLUTWidth");
+				if (locW >= 0)
+				{
+					glFunc->glUniform1i(locW, lutTex->width());
+				}
+				int locH = prog->uniformLocation("uLUTHeight");
+				if (locH >= 0)
+				{
+					glFunc->glUniform1i(locH, lutTex->height());
+				}
+
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normals, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_NOR);
+				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// Vertex buffer
+			{
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_POS);
+				glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// Colors
+			if (glParams.showSF)
+			{
+				// colors are RGB unsigned bytes (3 components)
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_COL);
+				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
+				glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+				// ensure alpha = 1.0 for all vertices
+				// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
+			}
+			else if (glParams.showColors)
+			{
+				// colors are RGBA unsigned bytes
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_COL);
+				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// draw
+			if (!showWired)
+			{
+				glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, static_cast<GLint>(vertexCount));
+			}
+			else
+			{
+				glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
+			}
+
+			// cleanup per-chunk state
+			glFunc->glDisableVertexAttribArray(ATTR_POS);
+			if (glParams.showNorms)
+			{
+				glFunc->glDisableVertexAttribArray(ATTR_NOR);
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			if (glParams.showSF || glParams.showColors)
+			{
+				glFunc->glDisableVertexAttribArray(ATTR_COL);
+			}
+
+			// unbind array buffer
+			glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+			prog->release();
+
+			ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.end");
 		}
 	}
 	else

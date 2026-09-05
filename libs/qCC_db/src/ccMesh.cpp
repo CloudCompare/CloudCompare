@@ -2146,7 +2146,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		EnableGLStippleMask(context.qGLContext, true);
 	}
 
-	if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
+	if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues) && !MACRO_NoShader(context))
 	{
 		assert(!entityPickingMode || !glParams.showSF);
 
@@ -2164,6 +2164,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		QSharedPointer<QOpenGLShaderProgram> prog = BuildSimpleMeshProgram(glFunc, attributes);
 		if (prog)
 		{
+			ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.build");
+
 			// static VBO handles reused between calls
 			if (s_vboVertex == 0)
 			{
@@ -2394,6 +2396,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				// unbind array buffer
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
 				prog->release();
+
+				ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.end");
 			}
 		}
 	}

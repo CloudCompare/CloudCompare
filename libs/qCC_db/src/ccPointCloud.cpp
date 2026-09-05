@@ -5442,42 +5442,6 @@ CCCoreLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned
 	return ref;
 }
 
-static bool CatchGLErrors(GLenum err, const char* context)
-{
-	// catch GL errors
-	{
-		// see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
-		switch (err)
-		{
-		case GL_NO_ERROR:
-			return false;
-		case GL_INVALID_ENUM:
-			ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
-			break;
-		case GL_INVALID_VALUE:
-			ccLog::Warning("[%s] OpenGL error: invalid value", context);
-			break;
-		case GL_INVALID_OPERATION:
-			ccLog::Warning("[%s] OpenGL error: invalid operation", context);
-			break;
-		case GL_STACK_OVERFLOW:
-			ccLog::Warning("[%s] OpenGL error: stack overflow", context);
-			break;
-		case GL_STACK_UNDERFLOW:
-			ccLog::Warning("[%s] OpenGL error: stack underflow", context);
-			break;
-		case GL_OUT_OF_MEMORY:
-			ccLog::Warning("[%s] OpenGL error: out of memory", context);
-			break;
-		case GL_INVALID_FRAMEBUFFER_OPERATION:
-			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
-			break;
-		}
-	}
-
-	return true;
-}
-
 // DGM: normals are so slow to display that it's a waste of memory and time to load them in VBOs!
 #define DONT_LOAD_NORMALS_IN_VBOS
 
@@ -5606,7 +5570,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 			if (glFunc)
 			{
-				CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
+				ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccPointCloud::vbo.init");
 			}
 
 			if (vboSizeBytes > 0)
@@ -5696,7 +5660,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				// if an error is detected
 				QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 				assert(glFunc != nullptr);
-				if (CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
+				if (ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccPointCloud::updateVBOs"))
 				{
 					vboSizeBytes = -1;
 				}

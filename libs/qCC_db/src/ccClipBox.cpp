@@ -78,9 +78,13 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 	}
 
 	if (!c_arrowShaft)
+	{
 		c_arrowShaft.reset(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
+	}
 	if (!c_arrowHead)
+	{
 		c_arrowHead.reset(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
+	}
 
 	glFunc->glTranslatef(0, 0, 0.3f);
 	c_arrowShaft->setTempColor(col);
@@ -677,6 +681,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// force the light on
 		if (!entityPickingMode)
 		{
+			componentContext.drawingFlags |= CC_LIGHT_ENABLED;
 			glFunc->glPushAttrib(GL_LIGHTING_BIT);
 			glFunc->glEnable(GL_LIGHT0);
 		}

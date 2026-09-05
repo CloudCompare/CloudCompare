@@ -1717,7 +1717,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// fix 'showNorms'
 		glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
 		// no normals shading without light!
-		if (!MACRO_LightIsEnabled(context))
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
+		if (!lightIsEnabled)
 		{
 			glParams.showNorms = false;
 		}
@@ -1727,7 +1729,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTextures   = (hasTextures() && materialsShown() && !lodEnabled);
 
 		// color-based entity picking
-		bool         entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
@@ -1782,6 +1783,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
+
+		if (lightIsEnabled)
+		{
+			glFunc->glEnable(GL_LIGHT0);
+		}
 
 		// materials or color?
 		bool colorMaterial = false;

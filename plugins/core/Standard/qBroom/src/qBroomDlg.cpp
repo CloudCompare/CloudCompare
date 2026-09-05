@@ -134,6 +134,7 @@ qBroomDlg::qBroomDlg(ccMainAppInterface* app/*=nullptr*/)
 	{
 		m_broomBox->setEnabled(true);
 		m_broomBox->setDisplay(m_glWindow);
+		m_broomBox->forceSunLightOn(true);
 
 		m_selectionBox->setEnabled(true);
 		m_selectionBox->setDisplay(m_glWindow);

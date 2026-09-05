@@ -56,6 +56,7 @@ ccGenericMesh::ccGenericMesh(QString name /*=QString()*/, unsigned uniqueID /*=c
     , m_materialsShown(false)
     , m_showWired(false)
     , m_stippling(false)
+    , m_forceSunLightOn(false)
 {
 	setVisible(true);
 	lockVisibility(false);
@@ -193,10 +194,13 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned decimStep       = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum * 3) / context.minLODTriangleCount)) : 1);
 		unsigned displayedTriNum = triNum / decimStep;
 
+		bool entityPickingMode = MACRO_EntityPicking(context);
+		bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
+
 		// display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		glParams.showNorms &= lightIsEnabled;
 
 		// vertices visibility
 		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = vertices->getTheVisibilityArray();
@@ -215,7 +219,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool showTextures   = (hasTextures() && materialsShown() && !lodEnabled);
 
 		// color-based entity picking
-		bool         entityPickingMode = MACRO_EntityPicking(context);
 		ccColor::Rgb pickingColor;
 		if (entityPickingMode)
 		{
@@ -267,6 +270,12 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
 				}
 			}
+		}
+
+		glFunc->glPushAttrib(GL_LIGHTING_BIT);
+		if (lightIsEnabled)
+		{
+			glFunc->glEnable(GL_LIGHT0);
 		}
 
 		// materials or color?
@@ -660,6 +669,8 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glDisable(GL_LIGHTING);
 			glFunc->glDisable(GL_RESCALE_NORMAL);
 		}
+
+		glFunc->glPopAttrib(); // GL_LIGHTING_BIT
 	}
 }
 

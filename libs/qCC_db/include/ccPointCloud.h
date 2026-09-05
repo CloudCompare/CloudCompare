@@ -980,21 +980,27 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	//! Init/updates VBOs
 	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
 
-	class VBO : public QOpenGLBuffer
+	//! Composite VBO structure
+	class VBO
 	{
 	  public:
-		int rgbShift;
-		int normalShift;
+		QOpenGLBuffer vertexBuffer;      //!< vertex buffer
+		QOpenGLBuffer colorBuffer;       //!< color buffer
+		QOpenGLBuffer normalIndexBuffer; //!< normal indexes buffer
 
 		//! Inits the VBO
 		/** \return the number of allocated bytes (or -1 if an error occurred)
 		 **/
 		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
 
+		//! Releases the VBO
+		void destroy();
+
+		//! Default constructor
 		VBO()
-		    : QOpenGLBuffer(QOpenGLBuffer::VertexBuffer)
-		    , rgbShift(0)
-		    , normalShift(0)
+		    : vertexBuffer(QOpenGLBuffer::VertexBuffer)
+		    , colorBuffer(QOpenGLBuffer::VertexBuffer)
+		    , normalIndexBuffer(QOpenGLBuffer::VertexBuffer)
 		{
 		}
 	};
@@ -1046,10 +1052,10 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	vboSet m_vboManager;
 
 	// per-block data transfer to the GPU (VBO or standard mode)
-	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg = false);
+	void glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg = false);
 	void glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
-	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg = false);
 
   public: // Level of Detail (LOD)
 	//! Initializes the LOD structure

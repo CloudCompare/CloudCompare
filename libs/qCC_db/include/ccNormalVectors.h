@@ -219,7 +219,7 @@ class QCC_DB_LIB_API ccNormalVectors
   public:
 	//! Returns a 2D texture containing a normal LUT (for OpenGL rendering)
 	/** The texture will be created on the first call, and then stored in the shared texture database
-		\param glFunc OpenGL functions (OpenGL 2.1)
+	    \param glFunc OpenGL functions (OpenGL 2.1)
 	    \return the texture
 	**/
 	static QSharedPointer<QOpenGLTexture> GetNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);

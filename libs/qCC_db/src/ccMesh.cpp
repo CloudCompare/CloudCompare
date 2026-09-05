@@ -2083,7 +2083,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	// normal acceleration texture (for fast normals display)
-	static bool s_normalLUTTextureFailed = false;
+	static bool                    s_normalLUTTextureFailed = false;
 	QSharedPointer<QOpenGLTexture> lutTex;
 
 	bool fallBackDisplay = (visFiltering
@@ -2129,9 +2129,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!fallBackDisplay)
 	{
 		assert(!entityPickingMode || !glParams.showSF);
-		assert(prog.isNull() == false);	
+		assert(prog.isNull() == false);
 
-			// static VBO handles reused between calls
+		// static VBO handles reused between calls
 		if (s_vboVertex == 0)
 		{
 			glFunc->glGenBuffers(1, &s_vboVertex);
@@ -2147,9 +2147,36 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glGenBuffers(1, &s_vboColor);
 		}
 
-		auto   vertices  = GetVertexBuffer();
-		float* normals   = reinterpret_cast<float*>(GetNormalsBuffer());
-		auto   rgbColors = GetColorsBuffer();
+		auto   vertices      = GetVertexBuffer();
+		float* normalIndexes = reinterpret_cast<float*>(GetNormalsBuffer());
+		auto   rgbColors     = GetColorsBuffer();
+
+		prog->bind();
+
+		if (glParams.showNorms && lutTex)
+		{
+			// bind texture to unit 0
+			glFunc->glActiveTexture(GL_TEXTURE0);
+			glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
+
+			// set sampler uniform to unit 0
+			int locSampler = prog->uniformLocation("uNormalLUT");
+			if (locSampler >= 0)
+			{
+				glFunc->glUniform1i(locSampler, 0);
+			}
+			// set LUT dimensions
+			int locW = prog->uniformLocation("uLUTWidth");
+			if (locW >= 0)
+			{
+				glFunc->glUniform1i(locW, lutTex->width());
+			}
+			int locH = prog->uniformLocation("uLUTHeight");
+			if (locH >= 0)
+			{
+				glFunc->glUniform1i(locH, lutTex->height());
+			}
+		}
 
 		// we can scan and process each chunk separately in an optimized way
 		size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
@@ -2210,11 +2237,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
-			// normals
+			// normals (indexes)
 			size_t normalCount = 0;
 			if (glParams.showNorms)
 			{
-				float* _normals = normals;
+				float* _normalIndexes = normalIndexes;
 				if (showTriNormals)
 				{
 					assert(m_triNormalIndexes);
@@ -2225,9 +2252,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
 						assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
 
-						*_normals++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
-						*_normals++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
-						*_normals++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
 
 						normalCount += 3;
 					}
@@ -2240,9 +2267,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(_vertIndexes->i1 < normalsIndexesTable->size());
 						assert(_vertIndexes->i2 < normalsIndexesTable->size());
 						assert(_vertIndexes->i3 < normalsIndexesTable->size());
-						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
-						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
-						*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
 
 						normalCount += 3;
 					}
@@ -2250,48 +2277,22 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			// Upload to VBOs and draw with shader
-			prog->bind();
-
-			// Normals
-			if (glParams.showNorms)
-			{
-				// If not done already, create the LUT texture and bind it to unit 0
-				assert(!lutTex.isNull());
-
-				// bind texture to unit 0
-				glFunc->glActiveTexture(GL_TEXTURE0);
-				glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
-
-				// set sampler uniform to unit 0
-				int locSampler = prog->uniformLocation("uNormalLUT");
-				if (locSampler >= 0)
-				{
-					glFunc->glUniform1i(locSampler, 0);
-				}
-				// set LUT dimensions
-				int locW = prog->uniformLocation("uLUTWidth");
-				if (locW >= 0)
-				{
-					glFunc->glUniform1i(locW, lutTex->width());
-				}
-				int locH = prog->uniformLocation("uLUTHeight");
-				if (locH >= 0)
-				{
-					glFunc->glUniform1i(locH, lutTex->height());
-				}
-
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normals, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_NOR);
-				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
-			}
 
 			// Vertex buffer
 			{
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
 				glFunc->glEnableVertexAttribArray(ATTR_POS);
-				glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, reinterpret_cast<void*>(0));
+				glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
+			}
+
+			// Normals
+			if (glParams.showNorms)
+			{
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_NOR);
+				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 			}
 
 			// Colors
@@ -2302,7 +2303,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
 				glFunc->glEnableVertexAttribArray(ATTR_COL);
 				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
-				glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+				glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 				// ensure alpha = 1.0 for all vertices
 				// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
 			}
@@ -2312,7 +2313,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
 				glFunc->glEnableVertexAttribArray(ATTR_COL);
-				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 			}
 
 			// draw
@@ -2330,7 +2331,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showNorms)
 			{
 				glFunc->glDisableVertexAttribArray(ATTR_NOR);
-				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
@@ -2339,10 +2339,15 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			// unbind array buffer
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
-			prog->release();
 
 			ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.end");
 		}
+
+		if (glParams.showNorms)
+		{
+			glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		prog->release();
 	}
 	else
 	{

@@ -856,9 +856,9 @@ ccColor::Rgb ccNormalVectors::ConvertNormalToRGB(const CCVector3& N)
 	                    static_cast<ColorCompType>(col.b * ccColor::MAX));
 }
 
-QSharedPointer<QOpenGLTexture> ccNormalVectors::CreateNormalLUTTexture(QOpenGLFunctions_2_1* gl)
+QSharedPointer<QOpenGLTexture> ccNormalVectors::CreateNormalLUTTexture(QOpenGLFunctions_2_1* glFunc)
 {
-	if (!gl)
+	if (!glFunc)
 	{
 		assert(false);
 		return nullptr;
@@ -867,7 +867,7 @@ QSharedPointer<QOpenGLTexture> ccNormalVectors::CreateNormalLUTTexture(QOpenGLFu
 	const unsigned totalNormals = ccNormalCompressor::MAX_VALID_NORM_CODE + 1; // number of valid codes
 	// Query max texture size
 	GLint maxTexSize = 0;
-	gl->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	glFunc->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
 	if (maxTexSize <= 0)
 	{
 		return nullptr;

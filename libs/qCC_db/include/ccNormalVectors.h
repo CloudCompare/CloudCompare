@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_NORMAL_VECTORS_HEADER
-#define CC_NORMAL_VECTORS_HEADER
-
 // Local
 #include "ccGenericPointCloud.h"
+
+// Qt
+#include <QOpenGLTexture>
+#include <QSharedPointer>
 
 // System
 #include <vector>
@@ -65,7 +68,6 @@ class QCC_DB_LIB_API ccNormalVectors
 	//! 'Default' orientations
 	enum Orientation
 	{
-
 		PLUS_X              = 0,  //!< N.x always positive
 		MINUS_X             = 1,  //!< N.x always negative
 		PLUS_Y              = 2,  //!< N.y always positive
@@ -214,6 +216,20 @@ class QCC_DB_LIB_API ccNormalVectors
 	 **/
 	static bool ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
 
+  public:
+	//! Returns a 2D texture containing a normal LUT (for OpenGL rendering)
+	/** The texture will be created on the first call, and then stored in the shared texture database
+		\param glFunc OpenGL functions (OpenGL 2.1)
+	    \return the texture
+	**/
+	static QSharedPointer<QOpenGLTexture> GetNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);
+
+	//! Creates a 2D texture containing a normal LUT (for OpenGL rendering)
+	/** \param glFunc OpenGL functions (OpenGL 2.1)
+	    \return created texture
+	**/
+	static QSharedPointer<QOpenGLTexture> CreateNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);
+
   protected:
 	//! Default constructor
 	/** Shouldn't be called directly. Use 'GetUniqueInstance' instead.
@@ -238,5 +254,3 @@ class QCC_DB_LIB_API ccNormalVectors
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = nullptr);
 };
-
-#endif // CC_NORMAL_VECTORS_HEADER

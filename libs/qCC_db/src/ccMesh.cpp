@@ -46,6 +46,10 @@
 #include <cmath> //for std::modf
 #include <string.h>
 
+// Qt
+#include <QOpenGLShader>
+#include <QOpenGLVersionFunctionsFactory>
+
 static CCVector3 s_blankNorm(0, 0, 0);
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -1671,543 +1675,904 @@ CCCoreLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 	return nullptr;
 }
 
+// Global OpenGL resources
+static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
+static GLuint                                          s_vboVertex  = 0;
+static GLuint                                          s_vboNormals = 0;
+static GLuint                                          s_vboColor   = 0;
+
+// Attribute indexes that we bound when creating the programs
+static const GLuint ATTR_POS = 0;
+static const GLuint ATTR_NOR = 1;
+static const GLuint ATTR_COL = 2;
+
+void ccMesh::ReleaseOpenGLRessources()
+{
+	if (!QOpenGLContext::currentContext())
+	{
+		ccLog::Warning("[ccMesh::ReleaseOpenGLRessources] No valid OpenGL context");
+		return;
+	}
+
+	// get the set of OpenGL functions (version 2.1)
+	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
+	if (glFunc)
+	{
+		s_programs.clear();
+
+		if (s_vboVertex != 0)
+		{
+			glFunc->glDeleteBuffers(1, &s_vboVertex);
+			s_vboVertex = 0;
+		}
+
+		if (s_vboNormals != 0)
+		{
+			glFunc->glDeleteBuffers(1, &s_vboNormals);
+			s_vboNormals = 0;
+		}
+
+		if (s_vboColor != 0)
+		{
+			glFunc->glDeleteBuffers(1, &s_vboColor);
+			s_vboColor = 0;
+		}
+	}
+}
+
+// Simple program builder (GLSL 1.20) for mesh rendering (position, normal, color)
+static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
+{
+	if (!glFunc)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	if (s_programs.contains(attributes))
+	{
+		return s_programs[attributes];
+	}
+
+	QString vertexProgSrc;
+	QString fragmentProgSrc;
+
+	static const char* ColorOnlyFragmentProgSrc =
+	    "#version 120\n"
+	    "varying vec4 vColor;\n"
+	    "void main()\n"
+	    "{\n"
+	    "    gl_FragColor = vColor;\n"
+	    "}\n";
+
+	static const char* ColorAndNormalFragmentProgSrc =
+	    "#version 120\n"
+	    "varying vec4 vColor;\n"
+	    "varying vec3 vNormal;\n"
+	    "void main()\n"
+	    "{\n"
+	    "    vec3 n = normalize(vNormal);\n"
+	    "    vec3 lightDir = normalize(vec3(0.0,0.0,1.0));\n"
+	    "    float diff = max(dot(n, lightDir), 0.0);\n"
+	    "    vec4 base = vColor;\n"
+	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
+	    "}\n";
+
+	switch (attributes)
+	{
+	case ATTR_POS:
+		vertexProgSrc =
+		    "#version 120\n"
+		    "attribute vec3 aPosition;\n"
+		    "varying vec4 vColor;\n"
+		    "void main()\n"
+		    "{\n"
+		    "    vColor = gl_Color;\n"
+		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+		    "}\n";
+
+		fragmentProgSrc = ColorOnlyFragmentProgSrc;
+
+		break;
+
+	case ATTR_COL:
+		vertexProgSrc =
+		    "#version 120\n"
+		    "attribute vec3 aPosition;\n"
+		    "attribute vec4 aColor;\n"
+		    "varying vec4 vColor;\n"
+		    "void main()\n"
+		    "{\n"
+		    "    vColor = aColor;\n"
+		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+		    "}\n";
+
+		fragmentProgSrc = ColorOnlyFragmentProgSrc;
+		break;
+
+	case ATTR_NOR:
+		vertexProgSrc =
+		    "#version 120\n"
+		    "attribute vec3 aPosition;\n"
+		    "attribute float aNormalIndex;\n"
+		    "varying vec4 vColor;\n"
+		    "varying vec3 vNormal;\n"
+		    "uniform sampler2D uNormalLUT;\n"
+		    "uniform int uLUTWidth;\n"
+		    "uniform int uLUTHeight;\n"
+		    "vec3 fetchNormalFromLUT(float fi)\n"
+		    "{\n"
+		    "	float w  = float(uLUTWidth);\n"
+		    "	float h  = float(uLUTHeight);\n"
+		    "	float tx = mod(fi, w);\n"
+		    "	float ty = floor(fi / w);\n"
+		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
+		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
+		    "	vec3 n = enc * 2.0 - 1.0;\n"
+		    "	return normalize(n);\n"
+		    "}\n"
+		    "void main()\n"
+		    "{\n"
+		    "    vColor = gl_Color;\n"
+		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
+		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+		    "}\n";
+
+		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
+		break;
+
+	case (ATTR_COL | ATTR_NOR):
+		vertexProgSrc =
+		    "#version 120\n"
+		    "attribute vec3 aPosition;\n"
+		    "attribute float aNormalIndex;\n"
+		    "attribute vec4 aColor;\n"
+		    "varying vec4 vColor;\n"
+		    "varying vec3 vNormal;\n"
+		    "uniform sampler2D uNormalLUT;\n"
+		    "uniform int uLUTWidth;\n"
+		    "uniform int uLUTHeight;\n"
+		    "vec3 fetchNormalFromLUT(float fi)\n"
+		    "{\n"
+		    "	float w  = float(uLUTWidth);\n"
+		    "	float h  = float(uLUTHeight);\n"
+		    "	float tx = mod(fi, w);\n"
+		    "	float ty = floor(fi / w);\n"
+		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
+		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
+		    "	vec3 n = enc * 2.0 - 1.0;\n"
+		    "	return normalize(n);\n"
+		    "}\n"
+		    "void main()\n"
+		    "{\n"
+		    "    vColor = aColor;\n"
+		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
+		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+		    "}\n";
+
+		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
+		break;
+
+	default:
+		assert(false);
+		ccLog::Warning("[BuildSimpleMeshProgram] Unsupported feature combination!");
+		return nullptr;
+	}
+
+	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
+	if (false == vertexShader.compileSourceCode(vertexProgSrc))
+	{
+		ccLog::Warning(QString("[BuildSimpleMeshProgram] Vertex shader compilation failed: ") + vertexShader.log());
+		return nullptr;
+	}
+	QOpenGLShader fragmentShader(QOpenGLShader::Fragment);
+	if (false == fragmentShader.compileSourceCode(fragmentProgSrc))
+	{
+		ccLog::Warning(QString("[BuildSimpleMeshProgram] Fragment shader compilation failed: ") + fragmentShader.log());
+		return nullptr;
+	}
+	QSharedPointer<QOpenGLShaderProgram> program(new QOpenGLShaderProgram);
+	program->addShader(&vertexShader);
+	program->addShader(&fragmentShader);
+
+	// bind attribute locations before linking for stable locations
+	program->bindAttributeLocation("aPosition", ATTR_POS);
+	if (attributes & ATTR_COL)
+	{
+		program->bindAttributeLocation("aColor", ATTR_COL);
+	}
+	if (attributes & ATTR_NOR)
+	{
+		program->bindAttributeLocation("aNormalIndex", ATTR_NOR);
+	}
+
+	if (false == program->link())
+	{
+		ccLog::Warning(QString("[BuildSimpleMeshProgram] Shader program linking failed: ") + program->log());
+		return nullptr;
+	}
+
+	s_programs[attributes] = program;
+
+	ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.build");
+
+	return program;
+}
+
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (!m_associatedCloud)
+	// 3D pass only
+	if (!MACRO_Draw3D(context))
+	{
 		return;
+	}
+
+	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		return;
+	}
+
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 	handleColorRamp(context);
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// any triangle?
+	size_t triNum = m_triVertIndexes->size();
+	if (triNum == 0)
 	{
 		return;
 	}
 
-	// 3D pass
-	if (MACRO_Draw3D(context))
+	// L.O.D.
+	bool     lodEnabled = (triNum > context.minLODTriangleCount && context.decimateMeshOnMove && MACRO_LODActivated(context));
+	unsigned decimStep  = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum * 3) / context.minLODTriangleCount)) : 1);
+
+	// display parameters
+	glDrawParams glParams;
+	getDrawingParameters(glParams);
+
+	// vertices visibility
+	const ccGenericPointCloud::VisibilityTableType& verticesVisibility = cloud->getTheVisibilityArray();
+	bool                                            visFiltering       = (verticesVisibility.size() >= cloud->size());
+
+	// wireframe ? (not compatible with LOD)
+	bool showWired = isShownAsWire() && !lodEnabled;
+
+	// per-triangle normals?
+	bool showTriNormals = (hasTriNormals() && triNormsShown());
+	// fix 'showNorms'
+	glParams.showNorms = showTriNormals || (cloud->hasNormals() && m_normalsDisplayed);
+	// no normals shading without light!
+	bool entityPickingMode = MACRO_EntityPicking(context);
+	bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
+	if (!lightIsEnabled)
 	{
-		// any triangle?
-		size_t triNum = m_triVertIndexes->size();
-		if (triNum == 0)
+		glParams.showNorms = false;
+	}
+
+	// materials & textures
+	bool applyMaterials = (hasMaterials() && materialsShown());
+	bool showTextures   = (hasTextures() && materialsShown() && !lodEnabled);
+
+	// color-based entity picking
+	ccColor::Rgb pickingColor;
+	if (entityPickingMode)
+	{
+		// not fast at all!
+		if (MACRO_FastEntityPicking(context))
 		{
 			return;
 		}
 
-		// L.O.D.
-		bool     lodEnabled = (triNum > context.minLODTriangleCount && context.decimateMeshOnMove && MACRO_LODActivated(context));
-		unsigned decimStep  = (lodEnabled ? static_cast<unsigned>(ceil(static_cast<double>(triNum * 3) / context.minLODTriangleCount)) : 1);
+		pickingColor = context.entityPicking.registerEntity(this);
 
-		// display parameters
-		glDrawParams glParams;
-		getDrawingParameters(glParams);
+		// minimal display for picking mode!
+		glParams.showNorms  = false;
+		glParams.showColors = false;
+		// glParams.showSF --> we keep it only if SF 'NaN' values are hidden
+		showTriNormals = false;
+		applyMaterials = false;
+		showTextures   = false;
+	}
 
-		// vertices visibility
-		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
-		bool                                            visFiltering       = (verticesVisibility.size() >= m_associatedCloud->size());
+	// in the case we need to display scalar field colors
+	ccScalarField* currentDisplayedScalarField = nullptr;
+	bool           sfMayHaveHiddenValues       = false;
+	// unsigned colorRampSteps = 0;
+	ccColorScale::Shared colorScale(nullptr);
 
-		// wireframe ? (not compatible with LOD)
-		bool showWired = isShownAsWire() && !lodEnabled;
+	if (glParams.showSF)
+	{
+		currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+		sfMayHaveHiddenValues       = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
 
-		// per-triangle normals?
-		bool showTriNormals = (hasTriNormals() && triNormsShown());
-		// fix 'showNorms'
-		glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
-		// no normals shading without light!
-		bool entityPickingMode = MACRO_EntityPicking(context);
-		bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
-		if (!lightIsEnabled)
+		if (!currentDisplayedScalarField
+		    || (entityPickingMode && !sfMayHaveHiddenValues)) // in picking mode, no need to take SF into account if we don't hide any points!
 		{
-			glParams.showNorms = false;
-		}
-
-		// materials & textures
-		bool applyMaterials = (hasMaterials() && materialsShown());
-		bool showTextures   = (hasTextures() && materialsShown() && !lodEnabled);
-
-		// color-based entity picking
-		ccColor::Rgb pickingColor;
-		if (entityPickingMode)
-		{
-			// not fast at all!
-			if (MACRO_FastEntityPicking(context))
-			{
-				return;
-			}
-
-			pickingColor = context.entityPicking.registerEntity(this);
-
-			// minimal display for picking mode!
-			glParams.showNorms  = false;
-			glParams.showColors = false;
-			// glParams.showSF --> we keep it only if SF 'NaN' values are hidden
-			showTriNormals = false;
-			applyMaterials = false;
-			showTextures   = false;
-		}
-
-		// in the case we need to display scalar field colors
-		ccScalarField* currentDisplayedScalarField = nullptr;
-		bool           sfMayHaveHiddenValues       = false;
-		// unsigned colorRampSteps = 0;
-		ccColorScale::Shared colorScale(nullptr);
-
-		if (glParams.showSF)
-		{
-			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-			ccPointCloud* cloud         = static_cast<ccPointCloud*>(m_associatedCloud);
-			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
-			sfMayHaveHiddenValues       = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
-
-			if (!currentDisplayedScalarField
-			    || (entityPickingMode && !sfMayHaveHiddenValues)) // in picking mode, no need to take SF into account if we don't hide any points!
-			{
-				currentDisplayedScalarField = nullptr;
-				glParams.showSF             = false;
-			}
-			else
-			{
-				colorScale = currentDisplayedScalarField->getColorScale();
-				// colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
-
-				// get default color ramp if cloud has no scale associated?!
-				if (!colorScale)
-				{
-					assert(false);
-					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
-				}
-			}
-		}
-
-		glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
-
-		if (lightIsEnabled)
-		{
-			glFunc->glEnable(GL_LIGHT0);
-		}
-
-		// materials or color?
-		bool colorMaterial = false;
-		if (glParams.showSF || glParams.showColors)
-		{
-			applyMaterials = false;
-			colorMaterial  = true;
-			glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-			glFunc->glEnable(GL_COLOR_MATERIAL);
-		}
-
-		// in the case we need to display vertex colors
-		RGBAColorsTableType* rgbaColorsTable = nullptr;
-		if (glParams.showColors)
-		{
-			if (isColorOverridden())
-			{
-				ccGL::Color(glFunc, m_tempColor);
-				glParams.showColors = false;
-			}
-			else
-			{
-				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-				rgbaColorsTable = static_cast<ccPointCloud*>(m_associatedCloud)->rgbaColors();
-			}
-		}
-		else if (entityPickingMode)
-		{
-			ccGL::Color(glFunc, pickingColor);
+			currentDisplayedScalarField = nullptr;
+			glParams.showSF             = false;
 		}
 		else
 		{
-			ccGL::Color(glFunc, context.defaultMat->getDiffuseFront());
-		}
+			colorScale = currentDisplayedScalarField->getColorScale();
+			// colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
 
-		if (glParams.showNorms)
-		{
-			glFunc->glEnable(GL_RESCALE_NORMAL);
-			glFunc->glEnable(GL_LIGHTING);
-			context.defaultMat->applyGL(context.qGLContext, true, colorMaterial);
-		}
-
-		if (!entityPickingMode)
-		{
-			glFunc->glEnable(GL_BLEND);
-		}
-
-		// in the case we need normals (i.e. lighting)
-		NormsIndexesTableType* normalsIndexesTable = nullptr;
-		ccNormalVectors*       compressedNormals   = nullptr;
-		if (glParams.showNorms)
-		{
-			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-			normalsIndexesTable = static_cast<ccPointCloud*>(m_associatedCloud)->normals();
-			compressedNormals   = ccNormalVectors::GetUniqueInstance();
-		}
-
-		// stipple mask
-		bool stippling = (m_stippling && !entityPickingMode);
-		if (stippling)
-		{
-			EnableGLStippleMask(context.qGLContext, true);
-		}
-
-		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
-		{
-			assert(!entityPickingMode || !glParams.showSF);
-			// the GL type depends on the PointCoordinateType 'size' (float or double)
-			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
-
-			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
-
-			if (glParams.showNorms)
+			// get default color ramp if cloud has no scale associated?!
+			if (!colorScale)
 			{
-				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
+				assert(false);
+				colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
 			}
+		}
+	}
+
+	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT);
+
+	if (lightIsEnabled)
+	{
+		glFunc->glEnable(GL_LIGHT0);
+	}
+
+	// materials or color?
+	bool colorMaterial = false;
+	if (glParams.showSF || glParams.showColors)
+	{
+		applyMaterials = false;
+		colorMaterial  = true;
+		glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+		glFunc->glEnable(GL_COLOR_MATERIAL);
+	}
+
+	// in the case we need to display vertex colors
+	RGBAColorsTableType* rgbaColorsTable = nullptr;
+	if (glParams.showColors)
+	{
+		if (isColorOverridden())
+		{
+			ccGL::Color(glFunc, m_tempColor);
+			glParams.showColors = false;
+		}
+		else
+		{
+			rgbaColorsTable = cloud->rgbaColors();
+		}
+	}
+	else if (entityPickingMode)
+	{
+		ccGL::Color(glFunc, pickingColor);
+	}
+	else
+	{
+		ccGL::Color(glFunc, context.defaultMat->getDiffuseFront());
+	}
+
+	if (glParams.showNorms)
+	{
+		glFunc->glEnable(GL_RESCALE_NORMAL);
+		glFunc->glEnable(GL_LIGHTING);
+		context.defaultMat->applyGL(context.qGLContext, true, colorMaterial);
+	}
+
+	if (!entityPickingMode)
+	{
+		glFunc->glEnable(GL_BLEND);
+	}
+
+	// in the case we need normals (i.e. lighting)
+	NormsIndexesTableType* normalsIndexesTable = nullptr;
+	ccNormalVectors*       compressedNormals   = nullptr;
+	if (glParams.showNorms)
+	{
+		normalsIndexesTable = cloud->normals();
+		compressedNormals   = ccNormalVectors::GetUniqueInstance();
+	}
+
+	// stipple mask
+	bool stippling = (m_stippling && !entityPickingMode);
+	if (stippling)
+	{
+		EnableGLStippleMask(context.qGLContext, true);
+	}
+
+	// normal acceleration texture (for fast normals display)
+	static bool                    s_normalLUTTextureFailed = false;
+	QSharedPointer<QOpenGLTexture> lutTex;
+
+	bool fallBackDisplay = (visFiltering
+	                        || (applyMaterials || showTextures)
+	                        || (glParams.showSF && sfMayHaveHiddenValues)
+	                        || (glParams.showNorms && s_normalLUTTextureFailed))
+	                       || MACRO_NoShader(context);
+
+	QSharedPointer<QOpenGLShaderProgram> prog;
+	if (!fallBackDisplay)
+	{
+		// get GL program
+		int attributes = ATTR_POS;
+		if (glParams.showNorms)
+		{
+			attributes |= ATTR_NOR;
+		}
+		if (glParams.showColors || glParams.showSF)
+		{
+			attributes |= ATTR_COL;
+		}
+
+		prog = BuildSimpleMeshProgram(glFunc, attributes);
+		if (prog.isNull())
+		{
+			fallBackDisplay = true;
+		}
+		else if (glParams.showNorms)
+		{
+			assert(!s_normalLUTTextureFailed);
+
+			// create or retrieve the LUT texture
+			lutTex = ccNormalVectors::GetNormalLUTTexture(glFunc);
+			if (lutTex.isNull())
+			{
+				ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
+				s_normalLUTTextureFailed = true;
+				fallBackDisplay          = true;
+			}
+		}
+	}
+
+	if (!fallBackDisplay)
+	{
+		assert(!entityPickingMode || !glParams.showSF);
+		assert(prog.isNull() == false);
+
+		// static VBO handles reused between calls
+		if (s_vboVertex == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboVertex);
+		}
+
+		if (glParams.showNorms && s_vboNormals == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboNormals);
+		}
+
+		if ((glParams.showColors || glParams.showSF) && s_vboColor == 0)
+		{
+			glFunc->glGenBuffers(1, &s_vboColor);
+		}
+
+		auto   vertices      = GetVertexBuffer();
+		float* normalIndexes = reinterpret_cast<float*>(GetNormalsBuffer());
+		auto   rgbColors     = GetColorsBuffer();
+
+		prog->bind();
+
+		if (glParams.showNorms && lutTex)
+		{
+			// bind texture to unit 0
+			glFunc->glActiveTexture(GL_TEXTURE0);
+			glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
+
+			// set sampler uniform to unit 0
+			int locSampler = prog->uniformLocation("uNormalLUT");
+			if (locSampler >= 0)
+			{
+				glFunc->glUniform1i(locSampler, 0);
+			}
+			// set LUT dimensions
+			int locW = prog->uniformLocation("uLUTWidth");
+			if (locW >= 0)
+			{
+				glFunc->glUniform1i(locW, lutTex->width());
+			}
+			int locH = prog->uniformLocation("uLUTHeight");
+			if (locH >= 0)
+			{
+				glFunc->glUniform1i(locH, lutTex->height());
+			}
+		}
+
+		// we can scan and process each chunk separately in an optimized way
+		size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
+		for (size_t k = 0; k < chunkCount; ++k)
+		{
+			const size_t                      chunkSize               = ccChunk::Size(k, m_triVertIndexes->size());
+			const CCCoreLib::VerticesIndexes* _vertIndexesChunkOrigin = ccChunk::Start(*m_triVertIndexes, k);
+
+			// vertices
+			size_t vertexCount = 0;
+			{
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				CCVector3*                        _vertices    = vertices;
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < cloud->size());
+					assert(_vertIndexes->i2 < cloud->size());
+					assert(_vertIndexes->i3 < cloud->size());
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i1);
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i2);
+					*_vertices++ = *cloud->getPoint(_vertIndexes->i3);
+					vertexCount += 3;
+				}
+			}
+
+			// scalar field
+			size_t rgbColorCount = 0;
 			if (glParams.showSF)
 			{
-				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(rgbColors);
+				assert(colorScale);
+
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < currentDisplayedScalarField->size());
+					assert(_vertIndexes->i2 < currentDisplayedScalarField->size());
+					assert(_vertIndexes->i3 < currentDisplayedScalarField->size());
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i1);
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i2);
+					*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i3);
+					rgbColorCount += 3;
+				}
 			}
-			else if (glParams.showColors)
+			else if (glParams.showColors) // colors
 			{
-				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
+				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+				ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(rgbColors);
+				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+				{
+					assert(_vertIndexes->i1 < rgbaColorsTable->size());
+					assert(_vertIndexes->i2 < rgbaColorsTable->size());
+					assert(_vertIndexes->i3 < rgbaColorsTable->size());
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i1);
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i2);
+					*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i3);
+					rgbColorCount += 3;
+				}
 			}
 
-			// we can scan and process each chunk separately in an optimized way
-			size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
-			for (size_t k = 0; k < chunkCount; ++k)
+			// normals (indexes)
+			size_t normalCount = 0;
+			if (glParams.showNorms)
 			{
-				const size_t                      chunkSize               = ccChunk::Size(k, m_triVertIndexes->size());
-				const CCCoreLib::VerticesIndexes* _vertIndexesChunkOrigin = ccChunk::Start(*m_triVertIndexes, k);
-
-				// vertices
+				float* _normalIndexes = normalIndexes;
+				if (showTriNormals)
 				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					CCVector3*                        _vertices    = GetVertexBuffer();
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					assert(m_triNormalIndexes);
+					const Tuple3i* _triNormalIndexes = ccChunk::Start(*m_triNormalIndexes, k);
+					for (size_t n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
 					{
-						assert(_vertIndexes->i1 < m_associatedCloud->size());
-						assert(_vertIndexes->i2 < m_associatedCloud->size());
-						assert(_vertIndexes->i3 < m_associatedCloud->size());
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i1);
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i2);
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i3);
-					}
-				}
+						assert(_triNormalIndexes->u[0] < static_cast<int>(m_triNormals->size()));
+						assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
+						assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
 
-				// scalar field
-				if (glParams.showSF)
-				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(GetColorsBuffer());
-					assert(colorScale);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
+						*_normalIndexes++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
 
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-					{
-						assert(_vertIndexes->i1 < currentDisplayedScalarField->size());
-						assert(_vertIndexes->i2 < currentDisplayedScalarField->size());
-						assert(_vertIndexes->i3 < currentDisplayedScalarField->size());
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i1);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i2);
-						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i3);
+						normalCount += 3;
 					}
-				}
-				// colors
-				else if (glParams.showColors)
-				{
-					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(GetColorsBuffer());
-					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-					{
-						assert(_vertIndexes->i1 < rgbaColorsTable->size());
-						assert(_vertIndexes->i2 < rgbaColorsTable->size());
-						assert(_vertIndexes->i3 < rgbaColorsTable->size());
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i1);
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i2);
-						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i3);
-					}
-				}
-
-				// normals
-				if (glParams.showNorms)
-				{
-					CCVector3* _normals = GetNormalsBuffer();
-					if (showTriNormals)
-					{
-						assert(m_triNormalIndexes);
-						const Tuple3i* _triNormalIndexes = ccChunk::Start(*m_triNormalIndexes, k);
-						for (size_t n = 0; n < chunkSize; n += decimStep, _triNormalIndexes += decimStep)
-						{
-							assert(_triNormalIndexes->u[0] < static_cast<int>(m_triNormals->size()));
-							assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
-							assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
-
-							*_normals++ = (_triNormalIndexes->u[0] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[0])) : s_blankNorm);
-							*_normals++ = (_triNormalIndexes->u[1] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[1])) : s_blankNorm);
-							*_normals++ = (_triNormalIndexes->u[2] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[2])) : s_blankNorm);
-						}
-					}
-					else
-					{
-						const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-						for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
-						{
-							assert(_vertIndexes->i1 < normalsIndexesTable->size());
-							assert(_vertIndexes->i2 < normalsIndexesTable->size());
-							assert(_vertIndexes->i3 < normalsIndexesTable->size());
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i1));
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i2));
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i3));
-						}
-					}
-				}
-
-				if (!showWired)
-				{
-					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
 				}
 				else
 				{
-					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
+					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
+					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
+					{
+						assert(_vertIndexes->i1 < normalsIndexesTable->size());
+						assert(_vertIndexes->i2 < normalsIndexesTable->size());
+						assert(_vertIndexes->i3 < normalsIndexesTable->size());
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
+						*_normalIndexes++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
+
+						normalCount += 3;
+					}
 				}
 			}
 
-			// disable arrays
-			glFunc->glDisableClientState(GL_VERTEX_ARRAY);
-			if (glParams.showNorms)
-				glFunc->glDisableClientState(GL_NORMAL_ARRAY);
-			if (glParams.showSF || glParams.showColors)
-				glFunc->glDisableClientState(GL_COLOR_ARRAY);
-		}
-		else
-		{
-			// current vertex color (RGB)
-			const ccColor::Rgb* rgb1 = nullptr;
-			const ccColor::Rgb* rgb2 = nullptr;
-			const ccColor::Rgb* rgb3 = nullptr;
-			// current vertex color (RGBA)
-			const ccColor::Rgba* rgba1 = nullptr;
-			const ccColor::Rgba* rgba2 = nullptr;
-			const ccColor::Rgba* rgba3 = nullptr;
-			// current vertex normal
-			const PointCoordinateType* N1 = nullptr;
-			const PointCoordinateType* N2 = nullptr;
-			const PointCoordinateType* N3 = nullptr;
-			// current vertex texture coordinates
-			const TexCoords2D* Tx1 = nullptr;
-			const TexCoords2D* Tx2 = nullptr;
-			const TexCoords2D* Tx3 = nullptr;
+			// Upload to VBOs and draw with shader
 
-			int    lasMtlIndex  = -1;
-			GLuint currentTexID = 0;
-
-			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP
-			                                                                : GL_TRIANGLES;
-			glFunc->glBegin(triangleDisplayType);
-
-			// loop on all triangles
-			for (size_t n = 0; n < triNum; ++n)
+			// Vertex buffer
 			{
-				// LOD: shall we display this triangle?
-				if (n % decimStep)
-				{
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_POS);
+				glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// Normals
+			if (glParams.showNorms)
+			{
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_NOR);
+				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// Colors
+			if (glParams.showSF)
+			{
+				// colors are RGB unsigned bytes (3 components)
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_COL);
+				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
+				glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+				// ensure alpha = 1.0 for all vertices
+				// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
+			}
+			else if (glParams.showColors)
+			{
+				// colors are RGBA unsigned bytes
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_COL);
+				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+			}
+
+			// draw
+			if (!showWired)
+			{
+				glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, static_cast<GLint>(vertexCount));
+			}
+			else
+			{
+				glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
+			}
+
+			// cleanup per-chunk state
+			glFunc->glDisableVertexAttribArray(ATTR_POS);
+			if (glParams.showNorms)
+			{
+				glFunc->glDisableVertexAttribArray(ATTR_NOR);
+			}
+			if (glParams.showSF || glParams.showColors)
+			{
+				glFunc->glDisableVertexAttribArray(ATTR_COL);
+			}
+
+			// unbind array buffer
+			glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+			ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.end");
+		}
+
+		if (glParams.showNorms)
+		{
+			glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		prog->release();
+	}
+	else
+	{
+		// current vertex color (RGB)
+		const ccColor::Rgb* rgb1 = nullptr;
+		const ccColor::Rgb* rgb2 = nullptr;
+		const ccColor::Rgb* rgb3 = nullptr;
+		// current vertex color (RGBA)
+		const ccColor::Rgba* rgba1 = nullptr;
+		const ccColor::Rgba* rgba2 = nullptr;
+		const ccColor::Rgba* rgba3 = nullptr;
+		// current vertex normal
+		const PointCoordinateType* N1 = nullptr;
+		const PointCoordinateType* N2 = nullptr;
+		const PointCoordinateType* N3 = nullptr;
+		// current vertex texture coordinates
+		const TexCoords2D* Tx1 = nullptr;
+		const TexCoords2D* Tx2 = nullptr;
+		const TexCoords2D* Tx3 = nullptr;
+
+		int    lasMtlIndex  = -1;
+		GLuint currentTexID = 0;
+
+		GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP
+		                                                                : GL_TRIANGLES;
+		glFunc->glBegin(triangleDisplayType);
+
+		// loop on all triangles
+		for (size_t n = 0; n < triNum; ++n)
+		{
+			// LOD: shall we display this triangle?
+			if (n % decimStep)
+			{
+				continue;
+			}
+
+			// current triangle vertices
+			const CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(n);
+
+			if (visFiltering)
+			{
+				// we skip the triangle if at least one vertex is hidden
+				if ((verticesVisibility[tsi.i1] != CCCoreLib::POINT_VISIBLE) || (verticesVisibility[tsi.i2] != CCCoreLib::POINT_VISIBLE) || (verticesVisibility[tsi.i3] != CCCoreLib::POINT_VISIBLE))
 					continue;
-				}
+			}
 
-				// current triangle vertices
-				const CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(n);
+			if (glParams.showSF)
+			{
+				assert(colorScale);
+				rgb1 = currentDisplayedScalarField->getValueColor(tsi.i1);
+				if (!rgb1)
+					continue;
+				rgb2 = currentDisplayedScalarField->getValueColor(tsi.i2);
+				if (!rgb2)
+					continue;
+				rgb3 = currentDisplayedScalarField->getValueColor(tsi.i3);
+				if (!rgb3)
+					continue;
 
-				if (visFiltering)
+				if (entityPickingMode)
 				{
-					// we skip the triangle if at least one vertex is hidden
-					if ((verticesVisibility[tsi.i1] != CCCoreLib::POINT_VISIBLE) || (verticesVisibility[tsi.i2] != CCCoreLib::POINT_VISIBLE) || (verticesVisibility[tsi.i3] != CCCoreLib::POINT_VISIBLE))
-						continue;
+					// in picking mode, we don't want to apply the colors, just filter the invisible triangles
+					rgb1 = nullptr;
+					rgb2 = nullptr;
+					rgb3 = nullptr;
 				}
+			}
+			else if (glParams.showColors)
+			{
+				rgba1 = &rgbaColorsTable->at(tsi.i1);
+				rgba2 = &rgbaColorsTable->at(tsi.i2);
+				rgba3 = &rgbaColorsTable->at(tsi.i3);
+			}
 
-				if (glParams.showSF)
+			if (glParams.showNorms)
+			{
+				if (showTriNormals)
 				{
-					assert(colorScale);
-					rgb1 = currentDisplayedScalarField->getValueColor(tsi.i1);
-					if (!rgb1)
-						continue;
-					rgb2 = currentDisplayedScalarField->getValueColor(tsi.i2);
-					if (!rgb2)
-						continue;
-					rgb3 = currentDisplayedScalarField->getValueColor(tsi.i3);
-					if (!rgb3)
-						continue;
-
-					if (entityPickingMode)
-					{
-						// in picking mode, we don't want to apply the colors, just filter the invisible triangles
-						rgb1 = nullptr;
-						rgb2 = nullptr;
-						rgb3 = nullptr;
-					}
+					assert(m_triNormalIndexes);
+					const Tuple3i& idx = m_triNormalIndexes->at(n);
+					assert(idx.u[0] < static_cast<int>(m_triNormals->size()));
+					assert(idx.u[1] < static_cast<int>(m_triNormals->size()));
+					assert(idx.u[2] < static_cast<int>(m_triNormals->size()));
+					N1 = (idx.u[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[0])).u : nullptr);
+					N2 = (idx.u[0] == idx.u[1] ? N1 : idx.u[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[1])).u
+					                                                : nullptr);
+					N3 = (idx.u[0] == idx.u[2] ? N1 : idx.u[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[2])).u
+					                                                : nullptr);
 				}
-				else if (glParams.showColors)
+				else
 				{
-					rgba1 = &rgbaColorsTable->at(tsi.i1);
-					rgba2 = &rgbaColorsTable->at(tsi.i2);
-					rgba3 = &rgbaColorsTable->at(tsi.i3);
+					N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i1)).u;
+					N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i2)).u;
+					N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i3)).u;
 				}
+			}
 
-				if (glParams.showNorms)
+			if (applyMaterials || showTextures)
+			{
+				assert(m_materials);
+				int newMatlIndex = m_triMtlIndexes->getValue(n);
+
+				// do we need to change material?
+				if (lasMtlIndex != newMatlIndex)
 				{
-					if (showTriNormals)
-					{
-						assert(m_triNormalIndexes);
-						const Tuple3i& idx = m_triNormalIndexes->at(n);
-						assert(idx.u[0] < static_cast<int>(m_triNormals->size()));
-						assert(idx.u[1] < static_cast<int>(m_triNormals->size()));
-						assert(idx.u[2] < static_cast<int>(m_triNormals->size()));
-						N1 = (idx.u[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[0])).u : nullptr);
-						N2 = (idx.u[0] == idx.u[1] ? N1 : idx.u[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[1])).u
-						                                                : nullptr);
-						N3 = (idx.u[0] == idx.u[2] ? N1 : idx.u[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx.u[2])).u
-						                                                : nullptr);
-					}
-					else
-					{
-						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i1)).u;
-						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i2)).u;
-						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi.i3)).u;
-					}
-				}
-
-				if (applyMaterials || showTextures)
-				{
-					assert(m_materials);
-					int newMatlIndex = m_triMtlIndexes->getValue(n);
-
-					// do we need to change material?
-					if (lasMtlIndex != newMatlIndex)
-					{
-						assert(newMatlIndex < static_cast<int>(m_materials->size()));
-						glFunc->glEnd();
-						if (showTextures)
-						{
-							if (newMatlIndex >= 0) // valid material index
-							{
-								GLuint newTexID = m_materials->at(newMatlIndex)->getTextureID();
-								if (newTexID != currentTexID)
-								{
-									// the texture ID changes
-									if (0 != newTexID)
-									{
-										// new and valid texture ID --> we bind it
-										currentTexID = newTexID;
-										glFunc->glEnable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still try
-										                                 // to display an (invalid) texture. So we have to enable texture mode only when necessary.
-										glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
-									}
-									else if (0 != currentTexID)
-									{
-										// the previous texture ID was valid --> we unbind it
-										currentTexID = 0;
-										glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-										glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
-										                                  // try to display an (invalid) texture. So we disable the whole texture mode.
-									}
-								}
-							}
-							else if (0 != currentTexID)
-							{
-								currentTexID = 0;
-								glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-								glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
-								                                  // try to display an (invalid) texture. So we disable the whole texture mode.
-							}
-						}
-
-						// if we don't have any current material, we apply default one
-						if (newMatlIndex >= 0)
-							(*m_materials)[newMatlIndex]->applyGL(context.qGLContext, glParams.showNorms, false);
-						else
-							context.defaultMat->applyGL(context.qGLContext, glParams.showNorms, false);
-
-						glFunc->glBegin(triangleDisplayType);
-						lasMtlIndex = newMatlIndex;
-					}
-
+					assert(newMatlIndex < static_cast<int>(m_materials->size()));
+					glFunc->glEnd();
 					if (showTextures)
 					{
-						assert(m_texCoords && m_texCoordIndexes);
-						const Tuple3i& txInd = m_texCoordIndexes->getValue(n);
-						assert(txInd.u[0] < static_cast<int>(m_texCoords->size()));
-						assert(txInd.u[1] < static_cast<int>(m_texCoords->size()));
-						assert(txInd.u[2] < static_cast<int>(m_texCoords->size()));
-						Tx1 = (txInd.u[0] >= 0 ? &m_texCoords->getValue(txInd.u[0]) : nullptr);
-						Tx2 = (txInd.u[1] >= 0 ? &m_texCoords->getValue(txInd.u[1]) : nullptr);
-						Tx3 = (txInd.u[2] >= 0 ? &m_texCoords->getValue(txInd.u[2]) : nullptr);
+						if (newMatlIndex >= 0) // valid material index
+						{
+							GLuint newTexID = m_materials->at(newMatlIndex)->getTextureID();
+							if (newTexID != currentTexID)
+							{
+								// the texture ID changes
+								if (0 != newTexID)
+								{
+									// new and valid texture ID --> we bind it
+									currentTexID = newTexID;
+									glFunc->glEnable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still try
+									                                 // to display an (invalid) texture. So we have to enable texture mode only when necessary.
+									glFunc->glBindTexture(GL_TEXTURE_2D, currentTexID);
+								}
+								else if (0 != currentTexID)
+								{
+									// the previous texture ID was valid --> we unbind it
+									currentTexID = 0;
+									glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+									glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+									                                  // try to display an (invalid) texture. So we disable the whole texture mode.
+								}
+							}
+						}
+						else if (0 != currentTexID)
+						{
+							currentTexID = 0;
+							glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+							glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+							                                  // try to display an (invalid) texture. So we disable the whole texture mode.
+						}
 					}
-				}
 
-				if (showWired)
-				{
-					glFunc->glEnd();
+					// if we don't have any current material, we apply default one
+					if (newMatlIndex >= 0)
+						(*m_materials)[newMatlIndex]->applyGL(context.qGLContext, glParams.showNorms, false);
+					else
+						context.defaultMat->applyGL(context.qGLContext, glParams.showNorms, false);
+
 					glFunc->glBegin(triangleDisplayType);
+					lasMtlIndex = newMatlIndex;
 				}
 
-				// vertex 1
-				if (N1)
-					ccGL::Normal3v(glFunc, N1);
-				if (rgb1)
-					ccGL::Color(glFunc, *rgb1);
-				else if (rgba1)
-					ccGL::Color(glFunc, *rgba1);
-				if (Tx1)
-					glFunc->glTexCoord2fv(Tx1->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i1)->u);
-
-				// vertex 2
-				if (N2)
-					ccGL::Normal3v(glFunc, N2);
-				if (rgb2)
-					ccGL::Color(glFunc, *rgb2);
-				else if (rgba2)
-					ccGL::Color(glFunc, *rgba2);
-				if (Tx2)
-					glFunc->glTexCoord2fv(Tx2->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i2)->u);
-
-				// vertex 3
-				if (N3)
-					ccGL::Normal3v(glFunc, N3);
-				if (rgb3)
-					ccGL::Color(glFunc, *rgb3);
-				else if (rgba3)
-					ccGL::Color(glFunc, *rgba3);
-				if (Tx3)
-					glFunc->glTexCoord2fv(Tx3->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i3)->u);
-			}
-
-			glFunc->glEnd();
-
-			if (showTextures)
-			{
-				if (0 != currentTexID)
+				if (showTextures)
 				{
-					currentTexID = 0;
-					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
-					glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
-					                                  // try to display an (invalid) texture. So we disable the whole texture mode.
+					assert(m_texCoords && m_texCoordIndexes);
+					const Tuple3i& txInd = m_texCoordIndexes->getValue(n);
+					assert(txInd.u[0] < static_cast<int>(m_texCoords->size()));
+					assert(txInd.u[1] < static_cast<int>(m_texCoords->size()));
+					assert(txInd.u[2] < static_cast<int>(m_texCoords->size()));
+					Tx1 = (txInd.u[0] >= 0 ? &m_texCoords->getValue(txInd.u[0]) : nullptr);
+					Tx2 = (txInd.u[1] >= 0 ? &m_texCoords->getValue(txInd.u[1]) : nullptr);
+					Tx3 = (txInd.u[2] >= 0 ? &m_texCoords->getValue(txInd.u[2]) : nullptr);
 				}
 			}
+
+			if (showWired)
+			{
+				glFunc->glEnd();
+				glFunc->glBegin(triangleDisplayType);
+			}
+
+			// vertex 1
+			if (N1)
+				ccGL::Normal3v(glFunc, N1);
+			if (rgb1)
+				ccGL::Color(glFunc, *rgb1);
+			else if (rgba1)
+				ccGL::Color(glFunc, *rgba1);
+			if (Tx1)
+				glFunc->glTexCoord2fv(Tx1->t);
+			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i1)->u);
+
+			// vertex 2
+			if (N2)
+				ccGL::Normal3v(glFunc, N2);
+			if (rgb2)
+				ccGL::Color(glFunc, *rgb2);
+			else if (rgba2)
+				ccGL::Color(glFunc, *rgba2);
+			if (Tx2)
+				glFunc->glTexCoord2fv(Tx2->t);
+			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i2)->u);
+
+			// vertex 3
+			if (N3)
+				ccGL::Normal3v(glFunc, N3);
+			if (rgb3)
+				ccGL::Color(glFunc, *rgb3);
+			else if (rgba3)
+				ccGL::Color(glFunc, *rgba3);
+			if (Tx3)
+				glFunc->glTexCoord2fv(Tx3->t);
+			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i3)->u);
 		}
 
-		if (stippling)
+		glFunc->glEnd();
+
+		if (showTextures)
 		{
-			EnableGLStippleMask(context.qGLContext, false);
+			if (0 != currentTexID)
+			{
+				currentTexID = 0;
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				glFunc->glDisable(GL_TEXTURE_2D); // it seems some driver now won't manage the case where no texture is bound and still
+				                                  // try to display an (invalid) texture. So we disable the whole texture mode.
+			}
 		}
-
-		glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT
 	}
+
+	if (stippling)
+	{
+		EnableGLStippleMask(context.qGLContext, false);
+	}
+
+	glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_TRANSFORM_BIT | GL_ENABLE_BIT
 }
 
 ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTriangles,

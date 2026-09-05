@@ -470,6 +470,9 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	               bool                                arbitraryOutputCS = false,
 	               CCCoreLib::GenericProgressCallback* progressCb        = nullptr) const;
 
+	//! Releases OpenGL ressources (textures, VBOs, etc.)
+	static void ReleaseOpenGLRessources();
+
   protected: // methods
 	// inherited from ccHObject
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;

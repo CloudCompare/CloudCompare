@@ -19,6 +19,7 @@
 
 // Qt
 #include <QDir>
+#include <QOpenGLWidget>
 #include <QProcessEnvironment>
 #include <QSettings>
 #include <QStandardPaths>
@@ -29,15 +30,15 @@
 #include <QtGlobal>
 
 // CCCoreLib
-#include "CCPlatform.h"
+#include <CCPlatform.h>
 
 // qCC_db
-#include "ccMaterial.h"
-
+#include <ccMaterial.h>
+#include <ccMesh.h>
 #include <ccPointCloud.h>
 
 // qCC_glWindow
-#include "ccGLWindowInterface.h"
+#include <ccGLWindowInterface.h>
 
 // Common
 #include "ccApplicationBase.h"
@@ -46,9 +47,6 @@
 
 // ccPluginAPI
 #include <ccPersistentSettings.h>
-
-// Qt
-#include <QOpenGLWidget>
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 4, 0))
 #error CloudCompare does not support versions of Qt prior to 6.4
@@ -132,7 +130,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	ccTranslationManager::Get().loadTranslations();
 
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
-	        { ccMaterial::ReleaseTextures(); });
+	        { ccMaterial::ReleaseTextures();
+	          ccMesh::ReleaseOpenGLRessources(); });
 }
 
 QString ccApplicationBase::versionLongStr(bool includeOS) const

@@ -42,7 +42,7 @@ struct glDrawParams
 	bool showNorms;
 };
 
-// Drawing flags (type: short)
+//! Drawing flags (type: short)
 enum CC_DRAWING_FLAGS
 {
 	CC_DRAW_2D         = 0x0001,
@@ -53,7 +53,7 @@ enum CC_DRAWING_FLAGS
 	CC_SKIP_SELECTED   = 0x0020,
 	CC_SKIP_ALL        = 0x0030, // = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
 	CC_ENTITY_PICKING  = 0x0040, // formerly named CC_DRAW_ENTITY_NAMES
-	// CC_FREE_FLAG    = 0x0080, // UNUSED (formerly CC_DRAW_POINT_NAMES)
+	CC_NO_SHADER       = 0x0080, // shaders should not be used to display this entity (formerly CC_DRAW_POINT_NAMES)
 	// CC_FREE_FLAG    = 0x0100, // UNUSED (formerly CC_DRAW_TRI_NAMES)
 	CC_FAST_ENTITY_PICKING = 0x0200, // formerly named CC_DRAW_FAST_NAMES_ONLY
 	// CC_FREE_FLAG        = 0x03C0, // UNUSED (formerly CC_DRAW_ANY_NAMES = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES)
@@ -69,6 +69,7 @@ enum CC_DRAWING_FLAGS
 #define MACRO_SkipUnselected(context) ((context.drawingFlags & CC_SKIP_UNSELECTED) != 0)
 #define MACRO_SkipSelected(context) ((context.drawingFlags & CC_SKIP_SELECTED) != 0)
 #define MACRO_EntityPicking(context) ((context.drawingFlags & CC_ENTITY_PICKING) != 0)
+#define MACRO_NoShader(context) ((context.drawingFlags & CC_NO_SHADER) != 0)
 #define MACRO_FastEntityPicking(context) ((context.drawingFlags & CC_FAST_ENTITY_PICKING) != 0)
 #define MACRO_LODActivated(context) ((context.drawingFlags & CC_LOD_ACTIVATED) != 0)
 #define MACRO_VirtualTransEnabled(context) ((context.drawingFlags & CC_VIRTUAL_TRANS_ENABLED) != 0)
@@ -201,10 +202,48 @@ struct ccGLDrawContext
 	{
 	}
 
+	//! Returns the OpenGL functions for a given profile (or nullptr if not available)
 	template <class TYPE>
 	TYPE* glFunctions() const
 	{
 		return qGLContext ? QOpenGLVersionFunctionsFactory::get<TYPE>(qGLContext) : 0;
+	}
+
+	//! Catches GL errors and logs them
+	static bool CatchGLErrors(GLenum err, const char* context)
+	{
+		// catch GL errors
+		{
+			// see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
+			switch (err)
+			{
+			case GL_NO_ERROR:
+				return false;
+			case GL_INVALID_ENUM:
+				ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+				break;
+			case GL_INVALID_VALUE:
+				ccLog::Warning("[%s] OpenGL error: invalid value", context);
+				break;
+			case GL_INVALID_OPERATION:
+				ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+				break;
+			case GL_STACK_OVERFLOW:
+				ccLog::Warning("[%s] OpenGL error: stack overflow", context);
+				break;
+			case GL_STACK_UNDERFLOW:
+				ccLog::Warning("[%s] OpenGL error: stack underflow", context);
+				break;
+			case GL_OUT_OF_MEMORY:
+				ccLog::Warning("[%s] OpenGL error: out of memory", context);
+				break;
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+				break;
+			}
+		}
+
+		return true;
 	}
 };
 

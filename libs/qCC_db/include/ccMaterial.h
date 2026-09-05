@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MATERIAL_HEADER
-#define CC_MATERIAL_HEADER
-
 // Local
 #include "ccColorTypes.h"
 #include "ccSerializableObject.h"
@@ -27,6 +26,7 @@
 #include <QSharedPointer>
 #include <QtGui/qopengl.h>
 
+class ccMaterialDB;
 class QImage;
 class QOpenGLContext;
 
@@ -180,6 +180,9 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	//! Adds a texture to the global texture DB
 	static void AddTexture(QImage image, const QString& absoluteFilename);
 
+	//! Returns the global texture DB
+	static ccMaterialDB* GetTextureDB();
+
 	//! Release all texture objects
 	/** Should be called BEFORE the global shared context is destroyed.
 	 **/
@@ -231,5 +234,3 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	QOpenGLTexture::Filter m_texMinificationFilter;
 	QOpenGLTexture::Filter m_texMagnificationFilter;
 };
-
-#endif // CC_MATERIAL_HEADER

@@ -19,6 +19,7 @@
 
 // Local
 #include "ccHObjectCaster.h"
+#include "ccMaterialDB.h"
 #include "ccNormalCompressor.h"
 #include "ccSensor.h"
 #include "ccSingleton.h"
@@ -853,4 +854,93 @@ ccColor::Rgb ccNormalVectors::ConvertNormalToRGB(const CCVector3& N)
 	return ccColor::Rgb(static_cast<ColorCompType>(col.r * ccColor::MAX),
 	                    static_cast<ColorCompType>(col.g * ccColor::MAX),
 	                    static_cast<ColorCompType>(col.b * ccColor::MAX));
+}
+
+QSharedPointer<QOpenGLTexture> ccNormalVectors::CreateNormalLUTTexture(QOpenGLFunctions_2_1* gl)
+{
+	if (!gl)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	const unsigned totalNormals = ccNormalCompressor::MAX_VALID_NORM_CODE + 1; // number of valid codes
+	// Query max texture size
+	GLint maxTexSize = 0;
+	gl->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	if (maxTexSize <= 0)
+	{
+		return nullptr;
+	}
+
+	// choose width as large as possible (but <= maxTexSize) to minimize height
+	int width  = std::min(static_cast<int>(totalNormals), maxTexSize);
+	int height = static_cast<int>(std::ceil(static_cast<float>(totalNormals) / float(width)));
+
+	const size_t texels = static_cast<size_t>(width) * static_cast<size_t>(height);
+
+	// buffer RGB unsigned bytes
+	std::vector<unsigned char> pixels;
+	try
+	{
+		pixels.resize(texels * 3);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccMesh::CreateNormalLUTTexture] Not enough memory");
+		return nullptr;
+	}
+
+	// fill: for each index, call ccNormalCompressor::Decompress
+	for (unsigned i = 0; i < totalNormals; ++i)
+	{
+		CCVector3 n = ccNormalVectors::GetNormal(i);
+
+		// map [-1,1] -> [0,255]
+		// handle NULL_NORM_CODE: Decompress sets to 0, so it becomes 127 -> you can change if needed
+		pixels[i * 3 + 0] = static_cast<unsigned char>(std::round(std::clamp((n.x * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+		pixels[i * 3 + 1] = static_cast<unsigned char>(std::round(std::clamp((n.y * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+		pixels[i * 3 + 2] = static_cast<unsigned char>(std::round(std::clamp((n.z * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+	}
+
+	// generate GL texture
+	QSharedPointer<QOpenGLTexture> tex(new QOpenGLTexture(QOpenGLTexture::Target2D));
+
+	// configure texture
+	tex->setFormat(QOpenGLTexture::RGB8_UNorm);
+	tex->setSize(width, height);
+	tex->allocateStorage();
+	tex->setWrapMode(QOpenGLTexture::ClampToEdge);
+	tex->setMinificationFilter(QOpenGLTexture::Nearest);
+	tex->setMagnificationFilter(QOpenGLTexture::Nearest);
+
+	// upload data
+	tex->setData(QOpenGLTexture::RGB, QOpenGLTexture::UInt8, pixels.data());
+
+	return tex;
+}
+
+QSharedPointer<QOpenGLTexture> ccNormalVectors::GetNormalLUTTexture(QOpenGLFunctions_2_1* glFunc)
+{
+	// If not done already, create the LUT texture and bind it to unit 0
+	if (nullptr == ccMaterial::GetTextureDB())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	QSharedPointer<QOpenGLTexture> lutTex = ccMaterial::GetTextureDB()->getOpenGLTexture("CompressedNormalsLUT");
+	if (!lutTex.isNull())
+	{
+		return lutTex;
+	}
+
+	// try to create it if necessary
+	lutTex = ccNormalVectors::CreateNormalLUTTexture(glFunc);
+	if (!lutTex.isNull())
+	{
+		ccMaterial::GetTextureDB()->addOpenGLTexture("CompressedNormalsLUT", lutTex);
+	}
+
+	return lutTex;
 }

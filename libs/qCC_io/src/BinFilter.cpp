@@ -21,10 +21,10 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QtConcurrentRun>
 
 // qCC_db
 #include <cc2DLabel.h>
+#include <ccBackgroundTask.h>
 #include <ccCameraSensor.h>
 #include <ccCircle.h>
 #include <ccFacet.h>
@@ -45,13 +45,6 @@
 #include <cassert>
 #include <cstring>
 #include <unordered_set>
-
-#if defined(CC_WINDOWS)
-#include <windows.h>
-#else
-#include <ctime>
-#include <unistd.h>
-#endif
 
 //! Last saved file version
 static short s_lastSavedFileBinVersion = 0;
@@ -173,25 +166,9 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 		pDlg->start();
 	}
 
-	// concurrent call
-	QFuture<CC_FILE_ERROR> future = QtConcurrent::run([&]()
-	                                                  { return BinFilter::SaveFileV2(out, root); });
-
-	while (!future.isFinished())
-	{
-#if defined(CC_WINDOWS)
-		::Sleep(500);
-#else
-		usleep(500 * 1000);
-#endif
-		if (pDlg)
-		{
-			pDlg->setValue(pDlg->value() + 1);
-		}
-		QApplication::processEvents();
-	}
-
-	CC_FILE_ERROR result = future.result();
+	// concurrent call, so that the progress dialog keeps refreshing
+	CC_FILE_ERROR result = ccBackgroundTask::Run([&]()
+	                                             { return BinFilter::SaveFileV2(out, root); });
 
 	return result;
 }
@@ -520,26 +497,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 	if (parallel)
 	{
-		// concurrent call in a separate thread
-		QFuture<bool> future = QtConcurrent::run([&]()
-		                                         { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
-
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-			if (pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			// pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
-			QApplication::processEvents();
-		}
-
-		success = future.result();
+		// concurrent call in a separate thread, so that the progress dialog keeps refreshing
+		success = ccBackgroundTask::Run([&]()
+		                                { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
 	}
 	else
 	{

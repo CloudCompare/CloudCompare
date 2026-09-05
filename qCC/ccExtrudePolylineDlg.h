@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -12,9 +14,6 @@
 // #  GNU General Public License for more details.                          #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_EXTRUDE_POLYLINE_DLG_HEADER
-#define CC_EXTRUDE_POLYLINE_DLG_HEADER
 
 #include <ui_extrudePolylineDlg.h>
 
@@ -33,5 +32,3 @@ class ccExtrudePolylineDlg : public QDialog
 	void setHeightAbove(double value);
 	void setDepthBelow(double value);
 };
-
-#endif // CC_EXTRUDE_POLYLINE_DLG_HEADER

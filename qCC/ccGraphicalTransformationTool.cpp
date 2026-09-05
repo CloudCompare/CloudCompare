@@ -19,6 +19,7 @@
 
 #include "mainwindow.h"
 
+// qCC_gl
 #include <ccGLUtils.h>
 #include <ccGLWindowInterface.h>
 

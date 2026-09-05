@@ -38,9 +38,6 @@
 // Qt
 #include <QElapsedTimer>
 
-// system
-#include <set>
-
 //! Default number of points sampled on the 'data' mesh (if any)
 static const unsigned s_defaultSampledPointsOnDataMesh = 50000;
 //! Default temporary registration scalar field
@@ -65,7 +62,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	CCCoreLib::ICPRegistrationTools::Parameters params            = inputParameters;
 
 	// progress bar
-	QScopedPointer<ccProgressDialog> progressDlg;
+	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parent)
 	{
 		progressDlg.reset(new ccProgressDialog(false, parent));
@@ -90,7 +87,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	CCCoreLib::GenericIndexedCloudPersist* dataCloud = nullptr;
 	if (data->isKindOf(CC_TYPES::MESH))
 	{
-		dataCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data), s_defaultSampledPointsOnDataMesh, progressDlg.data());
+		dataCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data), s_defaultSampledPointsOnDataMesh, progressDlg.get());
 		if (!dataCloud)
 		{
 			ccLog::Error("[ICP] Failed to sample points on 'data' mesh!");
@@ -164,7 +161,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 			result                    = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(dataCloud,
                                                                                      modelMesh,
                                                                                      c2mParams,
-                                                                                     progressDlg.data());
+                                                                                     progressDlg.get());
 		}
 		else
 		{
@@ -172,7 +169,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 			                                                                               modelCloud,
 			                                                                               gridLevel,
 			                                                                               -1,
-			                                                                               progressDlg.data());
+			                                                                               progressDlg.get());
 		}
 
 		if (result < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
@@ -285,7 +282,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	                                                   transform,
 	                                                   finalRMS,
 	                                                   finalPointCount,
-	                                                   static_cast<CCCoreLib::GenericProgressCallback*>(progressDlg.data()));
+	                                                   static_cast<CCCoreLib::GenericProgressCallback*>(progressDlg.get()));
 
 	if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 	{

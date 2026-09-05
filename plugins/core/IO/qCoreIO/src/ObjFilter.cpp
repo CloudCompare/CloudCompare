@@ -120,7 +120,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	// progress (start with vertices)
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -137,7 +137,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		pDlg->setAutoClose(false); // don't close dialogue when progress bar is full
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), nbPoints);
 
 	QTextStream stream(&file);
 	stream.setRealNumberNotation(QTextStream::FixedNotation);
@@ -595,7 +595,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	int                    maxTriNormIndex = -1;
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));

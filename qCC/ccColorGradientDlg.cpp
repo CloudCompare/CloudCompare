@@ -24,7 +24,7 @@
 #include <QColorDialog>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 // persistent parameters
 static QColor                           s_firstColor(Qt::black);

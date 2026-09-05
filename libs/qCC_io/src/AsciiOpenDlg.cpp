@@ -105,7 +105,7 @@ struct AsciiOpenContext
 };
 
 //! Semi-persistent loading context
-static QScopedPointer<AsciiOpenContext> s_asciiOpenContext;
+static std::unique_ptr<AsciiOpenContext> s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
     : QDialog(parent)

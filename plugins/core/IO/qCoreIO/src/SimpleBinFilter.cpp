@@ -197,7 +197,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 	unsigned sfCount    = cloud->getNumberOfScalarFields();
 	unsigned pointCount = cloud->size();
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -207,7 +207,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 		pDlg->start();
 	}
 
-	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), pointCount);
+	CCCoreLib::NormalizedProgress nProgress(pDlg.get(), pointCount);
 
 	// we can eventually save the data
 	dataStream.setFloatingPointPrecision(QDataStream::SinglePrecision); // we wave only 'float' values in the data
@@ -501,13 +501,13 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 	}
 
 	// init structures
-	QScopedPointer<ccPointCloud> cloud(new ccPointCloud("unnamed"));
+	std::unique_ptr<ccPointCloud> cloud(new ccPointCloud("unnamed"));
 	if (!cloud->reserve(static_cast<unsigned>(descriptor.pointCount)))
 	{
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -516,7 +516,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		pDlg->setModal(true);
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nProgress(pDlg.data(), static_cast<unsigned>(descriptor.pointCount));
+	CCCoreLib::NormalizedProgress nProgress(pDlg.get(), static_cast<unsigned>(descriptor.pointCount));
 
 	// reserve memory
 	for (size_t i = 0; i < descriptor.SFs.size(); ++i)
@@ -635,7 +635,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		cloud->showSF(true);
 	}
 
-	container.addChild(cloud.take());
+	container.addChild(cloud.release());
 
 	return CC_FERR_NO_ERROR;
 }

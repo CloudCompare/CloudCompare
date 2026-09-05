@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                       COPYRIGHT: SAGE INGENIERIE                       #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_PLANE_EDIT_DLG_HEADER
-#define CC_PLANE_EDIT_DLG_HEADER
 
 // Local
 #include "ccPickingListener.h"
@@ -76,5 +75,3 @@ class ccPlaneEditDlg : public QDialog
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 };
-
-#endif

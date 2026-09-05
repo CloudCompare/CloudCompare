@@ -424,19 +424,19 @@ void ccPropertiesTreeDelegate::fillWithMetaData(const ccObject* _obj)
 		QVariant var = it.value();
 		QString  value;
 
-		if (var.canConvert(QVariant::String))
+		if (var.canConvert(QMetaType(QMetaType::QString)))
 		{
-			var.convert(QVariant::String);
+			var.convert(QMetaType(QMetaType::QString));
 			value = var.toString();
 			if (value.length() > 1024)
 			{
 				// prefer the name over a very long description!
-				value = QString(QVariant::typeToName(var.type()));
+				value = QString(QMetaType(var.typeId()).name());
 			}
 		}
 		else
 		{
-			value = QString(QVariant::typeToName(var.type()));
+			value = QString(QMetaType(var.typeId()).name());
 		}
 
 		appendRow(ITEM(it.key()), ITEM(value));

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                    COPYRIGHT: Daniel Girardeau-Montaut                 #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ITEM_SELECTION_DIALOG_HEADER
-#define CC_ITEM_SELECTION_DIALOG_HEADER
 
 #include <ui_itemSelectionDlg.h>
 
@@ -58,5 +57,3 @@ class ccItemSelectionDlg : public QDialog
 	//! Returns selected indexes (multi-selection mode)
 	void getSelectedIndexes(std::vector<int>& indexes) const;
 };
-
-#endif // CC_ITEM_SELECTION_DIALOG_HEADER

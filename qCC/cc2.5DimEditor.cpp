@@ -19,7 +19,6 @@
 
 // Local
 #include "ccBoundingBoxEditorDlg.h"
-#include "ccPersistentSettings.h"
 #include "mainwindow.h"
 
 // qCC_db

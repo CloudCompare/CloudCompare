@@ -52,7 +52,6 @@ ccWaveWidget::ccWaveWidget(QWidget* parent /*=nullptr*/)
     , m_drawVerticalIndicator(false)
     , m_verticalIndicatorPositionPercent(0.0)
     , m_peakBar(nullptr)
-    , m_lastMouseClick(0, 0)
 {
 	setWindowTitle("Waveform");
 	setFocusPolicy(Qt::StrongFocus);
@@ -332,8 +331,6 @@ void ccWaveWidget::resizeEvent(QResizeEvent* event)
 
 void ccWaveWidget::mousePressEvent(QMouseEvent* event)
 {
-	m_lastMouseClick = event->pos();
-
 	mouseMoveEvent(event);
 }
 
@@ -344,10 +341,10 @@ void ccWaveWidget::mouseMoveEvent(QMouseEvent* event)
 		if (m_curve && !m_curveValues.empty())
 		{
 			QRect roi = /*m_curve->*/ rect();
-			if (roi.contains(event->pos(), false))
+			if (roi.contains(event->position().toPoint(), false))
 			{
 				m_drawVerticalIndicator            = true;
-				m_verticalIndicatorPositionPercent = static_cast<double>(event->x() - roi.x()) / roi.width();
+				m_verticalIndicatorPositionPercent = static_cast<double>(event->position().x() - roi.x()) / roi.width();
 				refresh();
 			}
 		}

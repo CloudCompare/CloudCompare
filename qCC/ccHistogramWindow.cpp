@@ -38,7 +38,7 @@
 #include <QTextStream>
 
 // System
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 // Gui
@@ -796,7 +796,7 @@ void ccHistogramWindow::resizeEvent(QResizeEvent* event)
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent* event)
 {
-	m_lastMouseClick = event->pos();
+	m_lastMouseClick = event->position().toPoint();
 
 	if (m_sfInteractionModes)
 	{
@@ -842,7 +842,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_sfInteractionModes)
 		{
-			QPoint mousePos = event->pos();
+			QPoint mousePos = event->position().toPoint();
 			if (m_histogram)
 			{
 				QRect rect = m_histogram->rect();
@@ -944,11 +944,11 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 			if (m_histogram && !m_histoValues.empty())
 			{
 				QRect roi = m_histogram->rect();
-				if (roi.contains(event->pos(), false))
+				if (roi.contains(event->position().toPoint(), false))
 				{
 					m_drawVerticalIndicator = true;
 
-					int verticalIndicatorPosition      = (static_cast<int>(m_histoValues.size()) * (event->x() - roi.x())) / roi.width();
+					int verticalIndicatorPosition      = (static_cast<int>(m_histoValues.size()) * (event->position().toPoint().x() - roi.x())) / roi.width();
 					m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
 
 					refresh();

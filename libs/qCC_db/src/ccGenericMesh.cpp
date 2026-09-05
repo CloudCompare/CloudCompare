@@ -764,7 +764,7 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 
 	bool withFeatures = (withNormals || withRGB || withTexture);
 
-	QScopedPointer<std::vector<unsigned>> triIndices;
+	std::unique_ptr<std::vector<unsigned>> triIndices;
 	if (withFeatures)
 	{
 		triIndices.reset(new std::vector<unsigned>);
@@ -773,11 +773,11 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 	CCCoreLib::PointCloud* sampledCloud = nullptr;
 	if (densityBased)
 	{
-		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices.data());
+		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, samplingParameter, pDlg, triIndices.get());
 	}
 	else
 	{
-		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices.data());
+		sampledCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(this, static_cast<unsigned>(samplingParameter), pDlg, triIndices.get());
 	}
 
 	// convert to real point cloud

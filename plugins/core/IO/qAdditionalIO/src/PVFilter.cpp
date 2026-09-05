@@ -91,7 +91,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	float val = std::numeric_limits<float>::quiet_NaN();
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -99,7 +99,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -157,7 +157,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize / singlePointSize);
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -165,7 +165,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	ccPointCloud*           loadedCloud = nullptr;
 	CCCoreLib::ScalarField* sf          = nullptr;

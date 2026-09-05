@@ -599,8 +599,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				else if (validPoints.size() != 0 && validPoints.size() < pc->size())
 				{
 					// shall we remove the points with invalid heights?
-					static bool s_alwaysRemoveInvalidHeights = false;
-					int         result                       = QMessageBox::Yes;
+					static bool                 s_alwaysRemoveInvalidHeights = false;
+					QMessageBox::StandardButton result                       = QMessageBox::Yes;
 					if (parameters.parentWidget) // otherwise it means we are in command line mode --> no popup
 					{
 						result = (s_alwaysRemoveInvalidHeights
@@ -608,9 +608,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 						              : QMessageBox::question(nullptr,
 						                                      "Remove invalid points?",
 						                                      "This raster has pixels with invalid heights. Shall we remove them?",
-						                                      QMessageBox::Yes,
-						                                      QMessageBox::YesToAll,
-						                                      QMessageBox::No));
+						                                      QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No));
 					}
 					if (result != QMessageBox::No) // Yes = let's remove them
 					{

@@ -167,16 +167,16 @@ void ColorBarWidget::mousePressEvent(QMouseEvent* e)
 		else
 			contentRect.adjust(0, m_margin, 0, -m_margin);
 
-		if (contentRect.contains(e->pos(), true))
+		if (contentRect.contains(e->position().toPoint(), true))
 		{
 			double relativePos = -1.0;
 			if (m_orientation == Qt::Horizontal)
 			{
-				relativePos = static_cast<double>(e->pos().x() - contentRect.left()) / contentRect.width();
+				relativePos = (e->position().x() - contentRect.left()) / contentRect.width();
 			}
 			else
 			{
-				relativePos = static_cast<double>(e->pos().y() - contentRect.top()) / contentRect.height();
+				relativePos = (e->position().y() - contentRect.top()) / contentRect.height();
 			}
 
 			Q_EMIT pointClicked(relativePos);
@@ -429,7 +429,7 @@ void SlidersWidget::mousePressEvent(QMouseEvent* e)
 		for (int i = 0; i < m_sliders->size(); i++)
 		{
 			QRect rect = m_sliders->element(i)->geometry();
-			if (rect.contains(e->pos(), true))
+			if (rect.contains(e->position().toPoint(), true))
 			{
 				select(i);
 				e->accept();
@@ -444,7 +444,7 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 	if (!m_sliders || m_sliders->size() <= 2)
 		return;
 
-	int    pos         = (m_orientation == Qt::Horizontal ? e->pos().x() : e->pos().y());
+	double pos         = (m_orientation == Qt::Horizontal ? e->position().x() : e->position().y());
 	double relativePos = static_cast<double>(pos - DEFAULT_MARGIN) / static_cast<double>(length());
 
 	if (relativePos > 0.0 && relativePos < 1.0)
@@ -457,9 +457,9 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 			assert(slider && slider->isSelected());
 
 			if (m_orientation == Qt::Horizontal)
-				slider->move(pos - slider->width() / 2, 0);
+				slider->move(static_cast<int>(std::round(pos - slider->width() / 2.0)), 0);
 			else
-				slider->move(0, pos - slider->height() / 2);
+				slider->move(0, static_cast<int>(std::round(pos - slider->height() / 2.0)));
 
 			slider->setRelativePos(relativePos);
 
@@ -481,7 +481,7 @@ void SlidersWidget::mouseDoubleClickEvent(QMouseEvent* e)
 		for (int i = 0; i < m_sliders->size(); i++)
 		{
 			QRect rect = m_sliders->element(i)->geometry();
-			if (rect.contains(e->pos(), true))
+			if (rect.contains(e->position().toPoint(), true))
 			{
 				select(i);
 

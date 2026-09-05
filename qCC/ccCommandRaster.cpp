@@ -1,3 +1,19 @@
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
 
 // local
 #include "ccRasterizeTool.h"
@@ -420,7 +436,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			}
 
 			// progress dialog
-			QScopedPointer<ccProgressDialog> pDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 			if (!cmd.silentMode())
 			{
 				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
@@ -447,7 +463,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			                  interpolationType,
 			                  interpolationParams,
 			                  sfProjectionType,
-			                  pDlg.data(),
+			                  pDlg.get(),
 			                  invVarProjSFIndex))
 			{
 				grid.fillEmptyCells(emptyCellFillStrategy, customHeight);

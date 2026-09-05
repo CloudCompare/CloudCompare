@@ -22,7 +22,7 @@
 #include <QListWidgetItem>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 ccMatchScalesDlg::ccMatchScalesDlg(const ccHObject::Container& entities,
                                    int                         defaultSelectedIndex /*=0*/,

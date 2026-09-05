@@ -817,7 +817,7 @@ namespace ccEntityAction
 			}
 		}
 
-		QScopedPointer<ccProgressDialog> pDlg;
+		std::unique_ptr<ccProgressDialog> pDlg;
 		if (parent && !noDialog)
 		{
 			bool ok = false;
@@ -944,7 +944,7 @@ namespace ccEntityAction
 				    ccOctree::Shared octree = pc->getOctree();
 				    if (!octree)
 				    {
-					    octree = pc->computeOctree(parent ? pDlg.data() : nullptr);
+					    octree = pc->computeOctree(parent ? pDlg.get() : nullptr);
 					    if (!octree)
 					    {
 						    errorMessage = QObject::tr("Failed to compute octree for cloud '%1'").arg(pc->getName());
@@ -954,7 +954,7 @@ namespace ccEntityAction
 
 				    QElapsedTimer eTimer;
 				    eTimer.start();
-				    if (false == pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.data() : nullptr))
+				    if (false == pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.get() : nullptr))
 				    {
 					    errorMessage = QT_TR_NOOP("An error occurred! (see console)");
 					    return false;
@@ -1038,7 +1038,7 @@ namespace ccEntityAction
 			}
 		}
 
-		QScopedPointer<ccProgressDialog> pDlg;
+		std::unique_ptr<ccProgressDialog> pDlg;
 		if (parent && !noDialog)
 		{
 			if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
@@ -1154,7 +1154,7 @@ namespace ccEntityAction
 					    ccOctree::Shared octree = pc->getOctree();
 					    if (!octree)
 					    {
-						    octree = pc->computeOctree(parent ? pDlg.data() : nullptr);
+						    octree = pc->computeOctree(parent ? pDlg.get() : nullptr);
 						    if (!octree)
 						    {
 							    errorMessage = QObject::tr("Couldn't compute octree for cloud '%1'!").arg(pc->getName());
@@ -1168,7 +1168,7 @@ namespace ccEntityAction
 					    if (!CCCoreLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(spatialSigma),
 					                                                                     pc,
 					                                                                     static_cast<PointCoordinateType>(scalarFieldSigma),
-					                                                                     parent ? pDlg.data() : nullptr,
+					                                                                     parent ? pDlg.get() : nullptr,
 					                                                                     octree.data()))
 					    {
 						    errorMessage = QObject::tr("Failed to apply filter on cloud %1").arg(pc->getName());
@@ -2337,7 +2337,7 @@ namespace ccEntityAction
 							continue;
 						}
 						ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
-						
+
 						const int* _indexGrid = scanGrid->indexes.data();
 						for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
 						{
@@ -2352,7 +2352,7 @@ namespace ccEntityAction
 								}
 							}
 						}
-						
+
 						addToDB(newCloud);
 					}
 #endif
@@ -3130,7 +3130,7 @@ namespace ccEntityAction
 
 		int distribIndex = poeDlg.getSelectedIndex();
 
-		QScopedPointer<ccStatisticalTestDlg> sDlg;
+		std::unique_ptr<ccStatisticalTestDlg> sDlg;
 		switch (distribIndex)
 		{
 		case 0: // Gauss
@@ -3150,7 +3150,7 @@ namespace ccEntityAction
 		}
 
 		// build up corresponding distribution
-		QScopedPointer<CCCoreLib::GenericDistribution> distrib;
+		std::unique_ptr<CCCoreLib::GenericDistribution> distrib;
 		{
 			ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
 			ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
@@ -3236,7 +3236,7 @@ namespace ccEntityAction
 				    QElapsedTimer eTimer;
 				    eTimer.start();
 
-				    double chi2dist = CCCoreLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib.data(), pc, nn, pChi2, &pDlg, theOctree.data());
+				    double chi2dist = CCCoreLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib.get(), pc, nn, pChi2, &pDlg, theOctree.data());
 
 				    if (chi2dist >= 0.0)
 				    {

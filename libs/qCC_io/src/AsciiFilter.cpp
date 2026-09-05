@@ -40,9 +40,6 @@
 #include <cassert>
 #include <cstring>
 
-// Qt
-#include <QScopedPointer>
-
 // Semi-persistent parameters
 static int  s_defaultSkippedLineCount = 0;
 static int  s_outputCoordPrecision    = 8;
@@ -321,7 +318,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 	bool writeSF = (!theScalarFields.empty());
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -329,7 +326,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	// non static parameters
 	int   normalPrecision = 2 + sizeof(PointCoordinateType);
@@ -514,7 +511,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 	}
 
 	// files saved with legacy Mac line endings (a lone CR) would otherwise be read as a single line
-	QScopedPointer<CRToLFDevice> crToLFDevice;
+	std::unique_ptr<CRToLFDevice> crToLFDevice;
 	{
 		const QByteArray head = file.peek(LINE_ENDING_SNIFF_SIZE); // doesn't move the read position
 		if (UsesLoneCRLineEndings(head.constData(), head.size()))
@@ -528,7 +525,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 		}
 	}
 
-	QTextStream stream(crToLFDevice ? static_cast<QIODevice*>(crToLFDevice.data()) : static_cast<QIODevice*>(&file));
+	QTextStream stream(crToLFDevice ? static_cast<QIODevice*>(crToLFDevice.get()) : static_cast<QIODevice*>(&file));
 
 	return loadStream(stream, filename, file.size(), container, parameters);
 }
@@ -960,7 +957,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 	}
 
 	// progress indicator
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -968,7 +965,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), approximateNumberOfLines);
 
 	// buffers
 	CCVector3d    P(0, 0, 0);

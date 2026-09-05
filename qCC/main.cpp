@@ -156,11 +156,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-#ifdef Q_OS_WIN
-	// enables automatic scaling based on the monitor's pixel density
-	ccApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-
 	ccApplication::InitOpenGL();
 
 	ccApplication app(argc, argv, commandLine);
@@ -175,7 +170,7 @@ int main(int argc, char** argv)
 	ccLog::EnableMessageBackup(true);
 
 	// splash screen
-	QScopedPointer<QSplashScreen> splash(nullptr);
+	std::unique_ptr<QSplashScreen> splash(nullptr);
 
 	// standard mode
 	if (!commandLine)

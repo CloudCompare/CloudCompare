@@ -20,7 +20,6 @@
 #include "ui_rasterizeDlg.h"
 
 // Local
-#include "ccCommon.h"
 #include "ccContourLinesGenerator.h"
 #include "ccKrigingParamsDialog.h"
 #include "ccPersistentSettings.h"

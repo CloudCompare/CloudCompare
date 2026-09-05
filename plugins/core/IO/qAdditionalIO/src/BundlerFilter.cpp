@@ -223,7 +223,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 	// Read Bundler '.out' file
 	{
 		// progress dialog
-		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -231,7 +231,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 			pDlg->setInfo(QObject::tr("Cameras: %1\nPoints: %2").arg(camCount).arg(ptsCount));
 			pDlg->start();
 		}
-		CCCoreLib::NormalizedProgress nprogress(pDlg.data(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
+		CCCoreLib::NormalizedProgress nprogress(pDlg.get(), camCount + (importKeypoints || orthoRectifyImages || generateColoredDTM ? ptsCount : 0));
 
 		// read cameras info (whatever the case!)
 		cameras.resize(camCount);
@@ -623,7 +623,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 	}
 
 	// let's try to open the image corresponding to each camera
-	QScopedPointer<ccProgressDialog> ipDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> ipDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		ipDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -632,18 +632,18 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 		ipDlg->start();
 		QApplication::processEvents();
 	}
-	CCCoreLib::NormalizedProgress inprogress(ipDlg.data(), camCount);
+	CCCoreLib::NormalizedProgress inprogress(ipDlg.get(), camCount);
 
 	assert(imageFilenames.size() >= static_cast<int>(camCount));
 
 	/*** pre-processing steps (colored MNT computation, etc.) ***/
 
 	// for colored DTM generation
-	std::vector<int>                      mntColors;
-	QScopedPointer<CCCoreLib::PointCloud> mntSamples;
+	std::vector<int>                       mntColors;
+	std::unique_ptr<CCCoreLib::PointCloud> mntSamples;
 	if (generateColoredDTM)
 	{
-		QScopedPointer<ccProgressDialog> toDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> toDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			toDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available

@@ -263,7 +263,7 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent /*=nullptr*/, bool sile
     , m_initialized(false)
     , m_trihedronGLList(GL_INVALID_LIST_ID)
     , m_pivotGLList(GL_INVALID_LIST_ID)
-    , m_lastMousePos(-1, -1)
+    , m_lastMousePos(-1.0, -1.0)
     , m_validModelviewMatrix(false)
     , m_validProjectionMatrix(false)
     , m_LODEnabled(true)
@@ -926,10 +926,7 @@ void ccGLWindowInterface::setGLViewport(const QRect& rect)
 {
 	// correction for HD screens
 	const auto devicePixelRatio = getDevicePixelRatio();
-	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio),
-                         static_cast<int>(rect.top() * devicePixelRatio),
-                         static_cast<int>(rect.width() * devicePixelRatio),
-                         static_cast<int>(rect.height() * devicePixelRatio));
+	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio), static_cast<int>(rect.top() * devicePixelRatio), static_cast<int>(rect.width() * devicePixelRatio), static_cast<int>(rect.height() * devicePixelRatio));
 	invalidateViewport();
 
 	if (getOpenGLContext() && getOpenGLContext()->isValid())
@@ -1921,10 +1918,10 @@ void ccGLWindowInterface::setPickingMode(PICKING_MODE mode /*=DEFAULT_PICKING*/,
 	// ccLog::Warning(QString("[%1] Picking mode set to: ").arg(m_uniqueID) + ToString(m_pickingMode));
 }
 
-CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
+CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(const QPointF& position)
 {
 	double xc = width() / 2.0;
-	double yc = height() / 2.0; // DGM FIXME: is it scaled coordinates or not?!
+	double yc = height() / 2.0;
 
 	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)
@@ -1938,6 +1935,9 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 			// arbitrary direction
 			return CCVector3d(0, 0, 1);
 		}
+
+		// Q2D is in GL (unscaled) coordinates, change it to logical to be consistent with position and heigh() / width() usage
+		Q2D = Q2D / getDevicePixelRatio();
 
 		// we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
 		Q2D.x = std::min(Q2D.x, 3.0 * width() / 4.0);
@@ -1953,9 +1953,9 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 	}
 
 	// invert y
-	y = height() - 1 - y;
+	double y = height() - 1 - position.y();
 
-	CCVector3d v(x - Q2D.x, y - Q2D.y, 0.0);
+	CCVector3d v(position.x() - Q2D.x, y - Q2D.y, 0.0);
 
 	v.x = std::max(std::min(v.x / xc, 1.0), -1.0);
 	v.y = std::max(std::min(v.y / yc, 1.0), -1.0);
@@ -1978,11 +1978,12 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 	return v;
 }
 
-void ccGLWindowInterface::updateActiveItemsList(int x, int y, bool extendToSelectedLabels /*=false*/)
+void ccGLWindowInterface::updateActiveItemsList(const QPointF& position, bool extendToSelectedLabels /*=false*/)
 {
 	m_activeItems.clear();
 
-	PickingParameters params(FAST_PICKING, x, y, 2, 2);
+	const auto        intPosition = position.toPoint();
+	PickingParameters params(FAST_PICKING, intPosition.x(), intPosition.y(), 2, 2);
 
 	startPicking(params);
 
@@ -3943,6 +3944,12 @@ void ccGLWindowInterface::toggleAutoRefresh(bool state, int period_ms /*=0*/)
 	}
 }
 
+QPointF ccGLWindowInterface::toCenteredGLCoordinates(const QPointF& coordinates) const
+{
+	QPoint integerPoint = coordinates.toPoint();
+	return toCornerGLCoordinates(integerPoint.x(), integerPoint.y());
+}
+
 QPointF ccGLWindowInterface::toCenteredGLCoordinates(int x, int y) const
 {
 	return QPointF(x - width() / 2, height() / 2 - y) * getDevicePixelRatio();
@@ -4548,11 +4555,11 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 		// Gesture update
 		if (m_touchInProgress && !m_viewportParams.perspectiveView)
 		{
-			QTouchEvent*                          touchEvent  = static_cast<QTouchEvent*>(evt);
-			const QList<QTouchEvent::TouchPoint>& touchPoints = touchEvent->touchPoints();
+			QTouchEvent*              touchEvent  = static_cast<QTouchEvent*>(evt);
+			const QList<QEventPoint>& touchPoints = touchEvent->points();
 			if (touchPoints.size() == 2)
 			{
-				QPointF D    = (touchPoints[1].pos() - touchPoints[0].pos());
+				QPointF D    = (touchPoints[1].position() - touchPoints[0].position());
 				qreal   dist = std::sqrt(D.x() * D.x() + D.y() * D.y());
 				if (m_touchBaseDist != 0.0)
 				{
@@ -4567,7 +4574,7 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 				return true;
 			}
 		}
-		ccLog::PrintDebug(QString("Touch update (%1 points)").arg(static_cast<QTouchEvent*>(evt)->touchPoints().size()));
+		ccLog::PrintDebug(QString("Touch update (%1 points)").arg(static_cast<QTouchEvent*>(evt)->points().size()));
 	}
 	break;
 
@@ -5484,10 +5491,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			{
 				// use plain color as specified by the user
 				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f,
-                                                     bkgCol.g / 255.0f,
-                                                     bkgCol.b / 255.0f,
-                                                     1.0f);
+				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
 
 				glFunc->glClearColor(backgroundColor.r,
 				                     backgroundColor.g,
@@ -5735,7 +5739,8 @@ void ccGLWindowInterface::onItemPickedFast(ccHObject* pickedEntity, int pickedIt
 			ccClipBox*     cbox     = cBoxPart->clipBox();
 			assert(cbox);
 			cbox->setActiveComponent(cBoxPart->partID());
-			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+			// x and y are in device coordinates so use glWidth and glHeight instead of logical height/width (could be divided by getDevicePixelRatio as well)
+			cbox->setClickedPoint(x, y, glWidth(), glHeight(), m_viewportParams.viewMat);
 
 			m_activeItems.insert(cbox);
 		}
@@ -6060,8 +6065,8 @@ void ccGLWindowInterface::checkScheduledRedraw()
 
 void ccGLWindowInterface::doPicking()
 {
-	int x = m_lastMousePos.x();
-	int y = m_lastMousePos.y();
+	double x = m_lastMousePos.x();
+	double y = m_lastMousePos.y();
 
 	if (x < 0 || y < 0 || x > width() || y > height())
 	{
@@ -6075,7 +6080,7 @@ void ccGLWindowInterface::doPicking()
 		if (m_interactionFlags & INTERACT_2D_ITEMS)
 		{
 			// label selection
-			updateActiveItemsList(x, y, false);
+			updateActiveItemsList(m_lastMousePos, false);
 			if (!m_activeItems.empty())
 			{
 				if (m_activeItems.size() == 1)
@@ -6250,7 +6255,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 	m_mouseMoved              = false;
 	m_mouseButtonPressed      = true;
 	m_ignoreMouseReleaseEvent = false;
-	m_lastMousePos            = event->pos();
+	m_lastMousePos            = event->position();
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -6267,7 +6272,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->rightButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->rightButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	else if (event->buttons() & Qt::LeftButton)
@@ -6282,7 +6287,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->leftButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->leftButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	if (event->buttons() & Qt::MiddleButton)
@@ -6290,7 +6295,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 		// middle click = zooming
 		if (m_interactionFlags & INTERACT_SIG_MB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->middleButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->middleButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	else
@@ -6306,8 +6311,8 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent* event)
 
 	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = static_cast<int>(event->x() * devicePixelRatio);
-	const int y = static_cast<int>(event->y() * devicePixelRatio);
+	const int x = static_cast<int>(event->position().x() * devicePixelRatio);
+	const int y = static_cast<int>(event->position().y() * devicePixelRatio);
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))
@@ -6341,14 +6346,14 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
-		Q_EMIT m_signalEmitter->mouseMoved(event->x(), event->y(), event->buttons());
+		Q_EMIT m_signalEmitter->mouseMoved(event->position().x(), event->position().y(), event->buttons());
 		event->accept();
 	}
 
 	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = static_cast<int>(event->x() * devicePixelRatio);
-	const int y = static_cast<int>(event->y() * devicePixelRatio);
+	const int x = static_cast<int>(event->position().x() * devicePixelRatio);
+	const int y = static_cast<int>(event->position().y() * devicePixelRatio);
 
 	// no button pressed
 	if (event->buttons() == Qt::NoButton)
@@ -6390,8 +6395,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 		return;
 	}
 
-	int dx = event->x() - m_lastMousePos.x();
-	int dy = event->y() - m_lastMousePos.y();
+	double dx = event->position().x() - m_lastMousePos.x();
+	double dy = event->position().y() - m_lastMousePos.y();
 
 	setLODEnabled(true);
 
@@ -6455,7 +6460,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				    && (QApplication::keyboardModifiers() == Qt::NoModifier
 				        || QApplication::keyboardModifiers() == Qt::ControlModifier))
 				{
-					updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
+					updateActiveItemsList(m_lastMousePos, true);
 				}
 			}
 		}
@@ -6506,7 +6511,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						m_rectPickingPoly->set2DMode(true);
 						m_rectPickingPoly->setDisplay(this);
 						m_rectPickingPoly->setVisible(true);
-						QPointF posA = toCenteredGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+						QPointF posA = toCenteredGLCoordinates(m_lastMousePos);
 
 						CCVector3 A(static_cast<PointCoordinateType>(posA.x()),
 						            static_cast<PointCoordinateType>(posA.y()),
@@ -6535,7 +6540,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 					CCVector3* B    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(1));
 					CCVector3* C    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(2));
 					CCVector3* D    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(3));
-					QPointF    posD = toCenteredGLCoordinates(event->x(), event->y());
+					QPointF    posD = toCenteredGLCoordinates(event->position());
 					B->x = C->x = static_cast<PointCoordinateType>(posD.x());
 					C->y = D->y = static_cast<PointCoordinateType>(posD.y());
 				}
@@ -6563,9 +6568,9 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				{
 				case BubbleViewMode:
 				{
-					QPoint posDelta = m_lastMousePos - event->pos();
+					QPointF posDelta = m_lastMousePos - event->position();
 
-					if (std::abs(posDelta.x()) != 0)
+					if (std::abs(posDelta.x()) != 0.0)
 					{
 						double delta_deg = (posDelta.x() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						// rotation about the sensor Z axis
@@ -6573,7 +6578,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						rotMat.initFromParameters(CCCoreLib::DegreesToRadians(delta_deg), axis, CCVector3d(0, 0, 0));
 					}
 
-					if (std::abs(posDelta.y()) != 0)
+					if (std::abs(posDelta.y()) != 0.0)
 					{
 						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						// rotation about the local X axis
@@ -6587,7 +6592,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				case StandardMode:
 				{
 					static CCVector3d s_lastMouseOrientation;
-					CCVector3d        currentMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
+					CCVector3d        currentMouseOrientation = convertMousePositionToOrientation(event->position());
 
 					if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
 					{
@@ -6600,7 +6605,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						if (!m_mouseMoved)
 						{
 							// on the first time, we must compute the previous orientation (the camera hasn't moved yet)
-							s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos.x(), m_lastMousePos.y());
+							s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos);
 						}
 						// unconstrained rotation following mouse position
 						rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
@@ -6613,8 +6618,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				case LockedAxisMode:
 				{
 					// apply rotation about the locked axis
-					int mousePosDeltaY = event->y() - m_lastMousePos.y();
-					int mousePosDeltaX = event->x() - m_lastMousePos.x();
+					double mousePosDeltaY = event->position().y() - m_lastMousePos.y();
+					double mousePosDeltaX = event->position().x() - m_lastMousePos.x();
 
 					// horizontal mouse motion rotates the view about the fixed axis
 					{
@@ -6683,7 +6688,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 	}
 
 	m_mouseMoved   = true;
-	m_lastMousePos = event->pos();
+	m_lastMousePos = event->position();
 
 	event->accept();
 
@@ -6740,12 +6745,12 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent* event)
 		else if (m_interactionFlags & INTERACT_2D_ITEMS)
 		{
 			// interaction with 2D item(s)
-			updateActiveItemsList(event->x(), event->y(), false);
+			updateActiveItemsList(event->position(), false);
 			if (!m_activeItems.empty())
 			{
 				ccInteractor* item = *m_activeItems.begin();
 				m_activeItems.clear();
-				if (item->acceptClick(static_cast<int>(devicePixelRatio * event->x()), glHeight() - 1 - static_cast<int>(devicePixelRatio * event->y()), Qt::RightButton))
+				if (item->acceptClick(static_cast<int>(devicePixelRatio * event->position().x()), glHeight() - 1 - static_cast<int>(devicePixelRatio * event->position().y()), Qt::RightButton))
 				{
 					event->accept();
 					toBeRefreshed();
@@ -6787,13 +6792,13 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent* event)
 			// picking?
 			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) // in msec
 			{
-				int x = m_lastMousePos.x();
-				int y = m_lastMousePos.y();
+				double x = m_lastMousePos.x();
+				double y = m_lastMousePos.y();
 
 				// first test if the user has clicked on a particular item on the screen
 				if (!processClickableItems(x, y))
 				{
-					m_lastMousePos                          = event->pos(); // just in case (it should be already at this position)
+					m_lastMousePos                          = event->position(); // just in case (it should be already at this position)
 					const ccGui::ParamStruct& displayParams = getDisplayParameters();
 					if (displayParams.singleClickPicking)
 					{

@@ -310,7 +310,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 		mscMetaData = realCorePoints->getMetaData(s_canupoMSCMetaData);
 		if (mscMetaData.isValid())
 		{
-			bool validMetaData = (	mscMetaData.type() == QVariant::ByteArray
+			bool validMetaData = (	mscMetaData.metaType() ==  QMetaType(QMetaType::QByteArray)
 								&&	corePointsDescriptors.fromByteArray(mscMetaData.toByteArray()));
 
 			if (validMetaData)

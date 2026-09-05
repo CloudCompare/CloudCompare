@@ -15,6 +15,7 @@ depends-on = ["install"]
 [feature.build.dependencies]
 cmake = ">=4.1.1,<4.2"
 cxx-compiler = ">=1.9.0,<1.10"
+clang-format = ">=18,<19"
 ninja = "1.13.*"
 # CCPythonRuntime plugin dependency
 pybind11 = ">=3.0.0,<3.1.0"
@@ -113,6 +114,10 @@ cmd = ["cmake", "--build", ".build"]
 depends-on = ["configure"]
 inputs = ["CMakeLists.txt", "qCC/"]
 outputs = [".build/qCC/CloudCompare"]
+
+[feature.build.tasks.format]
+cmd = ["cmake", "--build", ".build", "--target", "check-format"]
+depends-on = ["configure"]
 
 [feature.build.tasks.install]
 cmd = ["cmake", "--install", ".build", "--config", "Release"]

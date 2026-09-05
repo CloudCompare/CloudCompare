@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                       COPYRIGHT: CNRS / OSUR                           #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_WAVEFORM_DIALOG_HEADER
-#define CC_WAVEFORM_DIALOG_HEADER
 
 // Local
 #include "cc2DLabel.h"
@@ -97,9 +96,6 @@ class ccWaveWidget : public QCustomPlot
 
 	//! Rendering font
 	QFont m_renderingFont;
-
-	//! Last mouse click
-	QPoint m_lastMouseClick;
 };
 
 //! Waveform dialog
@@ -152,5 +148,3 @@ class ccWaveDialog : public QDialog
 	//! The display associated with the cloud whose waveforms are displayed
 	ccGenericGLDisplay* m_display;
 };
-
-#endif // CC_WAVEFORM_DIALOG_HEADER

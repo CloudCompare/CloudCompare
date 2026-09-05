@@ -303,7 +303,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -1167,7 +1167,7 @@ CC_FILE_ERROR LASFilter::loadFile(const QString& filename, ccHObject& container,
 
 		bool tiling = s_lasOpenDlg->tileGroupBox->isChecked();
 
-		QScopedPointer<ccProgressDialog> pDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available

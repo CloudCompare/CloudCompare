@@ -1,5 +1,4 @@
-#ifndef CCAPPLICATION_H
-#define CCAPPLICATION_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -34,5 +33,3 @@ class ccApplication : public ccApplicationBase
   protected:
 	bool event(QEvent* inEvent) override;
 };
-
-#endif

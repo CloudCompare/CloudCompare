@@ -555,7 +555,7 @@ static bool SaveScan(ccPointCloud*       cloud,
 
 	// Cartesian field
 	{
-		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 || isScaled ? e57::E57_DOUBLE : e57::E57_SINGLE;
+		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 || isScaled ? e57::PrecisionDouble : e57::PrecisionSingle;
 
 		CCVector3d bbCenter = (bbMin + bbMax) / 2;
 
@@ -576,7 +576,7 @@ static bool SaveScan(ccPointCloud*       cloud,
 	bool hasNormals = cloud->hasNormals();
 	if (hasNormals)
 	{
-		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
+		e57::FloatPrecision precision = sizeof(PointCoordinateType) == 8 ? e57::PrecisionDouble : e57::PrecisionSingle;
 
 		proto.set("nor:normalX", e57::FloatNode(imf, 0.0, precision, -1.0, 1.0));
 		arrays.xNormData.resize(chunkSize);
@@ -603,7 +603,7 @@ static bool SaveScan(ccPointCloud*       cloud,
 	// Intensity field
 	if (intensitySF)
 	{
-		proto.set("intensity", e57::FloatNode(imf, intensitySF->getMin(), sizeof(ScalarType) == 8 ? e57::E57_DOUBLE : e57::E57_SINGLE, intensitySF->getMin(), intensitySF->getMax()));
+		proto.set("intensity", e57::FloatNode(imf, intensitySF->getMin(), sizeof(ScalarType) == 8 ? e57::PrecisionDouble : e57::PrecisionSingle, intensitySF->getMin(), intensitySF->getMax()));
 		arrays.intData.resize(chunkSize);
 		dbufs.emplace_back(imf, "intensity", arrays.intData.data(), chunkSize, true, true);
 
@@ -1009,7 +1009,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		/// We are using the E57 v1.0 data format standard fieldnames.
 		/// The standard fieldnames are used without an extension prefix (in the default namespace).
 		/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
-		imf.extensionsAdd("", e57::E57_V1_0_URI);
+		imf.extensionsAdd("", e57::VERSION_1_0_URI);
 
 		// Set per-file properties.
 		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
@@ -1047,7 +1047,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 		s_absoluteScanIndex = 0;
 
 		// progress dialog
-		QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 		if (parameters.parentWidget)
 		{
 			progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -1071,7 +1071,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 
 			// create corresponding node
 			e57::StructureNode scanNode = e57::StructureNode(imf);
-			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, progressDlg.data()))
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID, progressDlg.get()))
 			{
 				++s_absoluteScanIndex;
 				scansGUID.insert(cloud, scanGUID);
@@ -1103,7 +1103,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const QString& filename, 
 				if (imageCount != 0)
 				{
 					// progress bar
-					CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+					CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), imageCount);
 					if (progressDlg)
 					{
 						progressDlg->setMethodTitle(QObject::tr("Write E57 file"));
@@ -1167,7 +1167,7 @@ static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node& cur
 
 	switch (currentE57Node.type())
 	{
-	case e57::E57_STRUCTURE:
+	case e57::TypeStructure:
 	{
 		infoStr += QString(" [STRUCTURE]");
 		e57::StructureNode s = static_cast<e57::StructureNode>(currentE57Node);
@@ -1175,7 +1175,7 @@ static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node& cur
 			NodeStructureToTree(obj, s.get(i));
 	}
 	break;
-	case e57::E57_VECTOR:
+	case e57::TypeVector:
 	{
 		infoStr += QString(" [VECTOR]");
 		e57::VectorNode v = static_cast<e57::VectorNode>(currentE57Node);
@@ -1183,37 +1183,37 @@ static bool NodeStructureToTree(ccHObject* currentTreeNode, const e57::Node& cur
 			NodeStructureToTree(obj, v.get(i));
 	}
 	break;
-	case e57::E57_COMPRESSED_VECTOR:
+	case e57::TypeCompressedVector:
 	{
 		e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(currentE57Node);
 		infoStr += QString(" [COMPRESSED VECTOR (%1 elements)]").arg(cv.childCount());
 	}
 	break;
-	case e57::E57_INTEGER:
+	case e57::TypeInteger:
 	{
 		e57::IntegerNode i = static_cast<e57::IntegerNode>(currentE57Node);
 		infoStr += QString(" [INTEGER: %1]").arg(i.value());
 	}
 	break;
-	case e57::E57_SCALED_INTEGER:
+	case e57::TypeScaledInteger:
 	{
 		e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(currentE57Node);
 		infoStr += QString(" [SCALED INTEGER: %1]").arg(si.scaledValue());
 	}
 	break;
-	case e57::E57_FLOAT:
+	case e57::TypeFloat:
 	{
 		e57::FloatNode f = static_cast<e57::FloatNode>(currentE57Node);
 		infoStr += QString(" [FLOAT: %1]").arg(f.value());
 	}
 	break;
-	case e57::E57_STRING:
+	case e57::TypeString:
 	{
 		e57::StringNode s = static_cast<e57::StringNode>(currentE57Node);
 		infoStr += QString(" [STRING: %1]").arg(s.value().c_str());
 	}
 	break;
-	case e57::E57_BLOB:
+	case e57::TypeBlob:
 	{
 		e57::BlobNode b = static_cast<e57::BlobNode>(currentE57Node);
 		infoStr += QString(" [BLOB (%1 bytes)]").arg(b.byteCount());
@@ -1236,49 +1236,49 @@ static void NodeToConsole(const e57::Node& node)
 	QString infoStr = QString("[E57] '%1' - ").arg(node.elementName().c_str());
 	switch (node.type())
 	{
-	case e57::E57_STRUCTURE:
+	case e57::TypeStructure:
 	{
 		e57::StructureNode s = static_cast<e57::StructureNode>(node);
 		infoStr += QString("STRUCTURE, %1 child(ren)").arg(s.childCount());
 	}
 	break;
-	case e57::E57_VECTOR:
+	case e57::TypeVector:
 	{
 		e57::VectorNode v = static_cast<e57::VectorNode>(node);
 		infoStr += QString("VECTOR, %1 child(ren)").arg(v.childCount());
 	}
 	break;
-	case e57::E57_COMPRESSED_VECTOR:
+	case e57::TypeCompressedVector:
 	{
 		e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
 		infoStr += QString("COMPRESSED VECTOR, %1 elements").arg(cv.childCount());
 	}
 	break;
-	case e57::E57_INTEGER:
+	case e57::TypeInteger:
 	{
 		e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
 		infoStr += QString("%1 (INTEGER)").arg(i.value());
 	}
 	break;
-	case e57::E57_SCALED_INTEGER:
+	case e57::TypeScaledInteger:
 	{
 		e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
 		infoStr += QString("%1 (SCALED INTEGER)").arg(si.scaledValue());
 	}
 	break;
-	case e57::E57_FLOAT:
+	case e57::TypeFloat:
 	{
 		e57::FloatNode f = static_cast<e57::FloatNode>(node);
 		infoStr += QString("%1 (FLOAT)").arg(f.value());
 	}
 	break;
-	case e57::E57_STRING:
+	case e57::TypeString:
 	{
 		e57::StringNode s = static_cast<e57::StringNode>(node);
 		infoStr += QString(s.value().c_str());
 	}
 	break;
-	case e57::E57_BLOB:
+	case e57::TypeBlob:
 	{
 		e57::BlobNode b = static_cast<e57::BlobNode>(node);
 		infoStr += QString("BLOB, size=%1").arg(b.byteCount());
@@ -1297,7 +1297,7 @@ static void NodeToConsole(const e57::Node& node)
 static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 {
 	assert(childName);
-	if (node.type() == e57::E57_STRUCTURE)
+	if (node.type() == e57::TypeStructure)
 	{
 		e57::StructureNode s = static_cast<e57::StructureNode>(node);
 		if (!s.isDefined(childName))
@@ -1318,7 +1318,7 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 			}
 		}
 	}
-	else if (node.type() == e57::E57_VECTOR)
+	else if (node.type() == e57::TypeVector)
 	{
 		e57::VectorNode v = static_cast<e57::VectorNode>(node);
 		if (!v.isDefined(childName))
@@ -1363,7 +1363,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if (proto.isDefined("cartesianX"))
 	{
-		if (proto.get("cartesianX").type() == e57::E57_SCALED_INTEGER)
+		if (proto.get("cartesianX").type() == e57::TypeScaledInteger)
 		{
 			double  scale                              = e57::ScaledIntegerNode(proto.get("cartesianX")).scale();
 			double  offset                             = e57::ScaledIntegerNode(proto.get("cartesianX")).offset();
@@ -1373,7 +1373,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.pointFields.pointRangeMaximum       = maximum * scale + offset;
 			header.pointFields.pointRangeScaledInteger = scale;
 		}
-		else if (proto.get("cartesianX").type() == e57::E57_FLOAT)
+		else if (proto.get("cartesianX").type() == e57::TypeFloat)
 		{
 			header.pointFields.pointRangeMinimum = e57::FloatNode(proto.get("cartesianX")).minimum();
 			header.pointFields.pointRangeMaximum = e57::FloatNode(proto.get("cartesianX")).maximum();
@@ -1381,7 +1381,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 	}
 	else if (proto.isDefined("sphericalRange"))
 	{
-		if (proto.get("sphericalRange").type() == e57::E57_SCALED_INTEGER)
+		if (proto.get("sphericalRange").type() == e57::TypeScaledInteger)
 		{
 			double  scale                              = e57::ScaledIntegerNode(proto.get("sphericalRange")).scale();
 			double  offset                             = e57::ScaledIntegerNode(proto.get("sphericalRange")).offset();
@@ -1391,7 +1391,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.pointFields.pointRangeMaximum       = maximum * scale + offset;
 			header.pointFields.pointRangeScaledInteger = scale;
 		}
-		else if (proto.get("sphericalRange").type() == e57::E57_FLOAT)
+		else if (proto.get("sphericalRange").type() == e57::TypeFloat)
 		{
 			header.pointFields.pointRangeMinimum = e57::FloatNode(proto.get("sphericalRange")).minimum();
 			header.pointFields.pointRangeMaximum = e57::FloatNode(proto.get("sphericalRange")).maximum();
@@ -1409,7 +1409,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if (proto.isDefined("sphericalAzimuth"))
 	{
-		if (proto.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER)
+		if (proto.get("sphericalAzimuth").type() == e57::TypeScaledInteger)
 		{
 			double  scale                         = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).scale();
 			double  offset                        = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).offset();
@@ -1419,7 +1419,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.pointFields.angleMaximum       = maximum * scale + offset;
 			header.pointFields.angleScaledInteger = scale;
 		}
-		else if (proto.get("sphericalAzimuth").type() == e57::E57_FLOAT)
+		else if (proto.get("sphericalAzimuth").type() == e57::TypeFloat)
 		{
 			header.pointFields.angleMinimum = e57::FloatNode(proto.get("sphericalAzimuth")).minimum();
 			header.pointFields.angleMaximum = e57::FloatNode(proto.get("sphericalAzimuth")).maximum();
@@ -1456,7 +1456,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if (proto.isDefined("nor:normalX"))
 	{
-		if (proto.get("nor:normalX").type() == e57::E57_SCALED_INTEGER)
+		if (proto.get("nor:normalX").type() == e57::TypeScaledInteger)
 		{
 			double  scale                             = e57::ScaledIntegerNode(proto.get("nor:normalX")).scale();
 			double  offset                            = e57::ScaledIntegerNode(proto.get("nor:normalX")).offset();
@@ -1466,7 +1466,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.pointFields.normRangeMaximum       = maximum * scale + offset;
 			header.pointFields.normRangeScaledInteger = scale;
 		}
-		else if (proto.get("nor:normalX").type() == e57::E57_FLOAT)
+		else if (proto.get("nor:normalX").type() == e57::TypeFloat)
 		{
 			header.pointFields.normRangeMinimum = e57::FloatNode(proto.get("nor:normalX")).minimum();
 			header.pointFields.normRangeMaximum = e57::FloatNode(proto.get("nor:normalX")).maximum();
@@ -1479,9 +1479,9 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if (proto.isDefined("timeStamp"))
 	{
-		if (proto.get("timeStamp").type() == e57::E57_INTEGER)
+		if (proto.get("timeStamp").type() == e57::TypeInteger)
 			header.pointFields.timeMaximum = static_cast<double>(e57::IntegerNode(proto.get("timeStamp")).maximum());
-		else if (proto.get("timeStamp").type() == e57::E57_FLOAT)
+		else if (proto.get("timeStamp").type() == e57::TypeFloat)
 			header.pointFields.timeMaximum = static_cast<double>(e57::FloatNode(proto.get("timeStamp")).maximum());
 	}
 
@@ -1495,17 +1495,17 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 	if (scan.isDefined("intensityLimits"))
 	{
 		e57::StructureNode intbox(scan.get("intensityLimits"));
-		if (intbox.get("intensityMaximum").type() == e57::E57_SCALED_INTEGER)
+		if (intbox.get("intensityMaximum").type() == e57::TypeScaledInteger)
 		{
 			header.intensityLimits.intensityMaximum = e57::ScaledIntegerNode(intbox.get("intensityMaximum")).scaledValue();
 			header.intensityLimits.intensityMinimum = e57::ScaledIntegerNode(intbox.get("intensityMinimum")).scaledValue();
 		}
-		else if (intbox.get("intensityMaximum").type() == e57::E57_FLOAT)
+		else if (intbox.get("intensityMaximum").type() == e57::TypeFloat)
 		{
 			header.intensityLimits.intensityMaximum = e57::FloatNode(intbox.get("intensityMaximum")).value();
 			header.intensityLimits.intensityMinimum = e57::FloatNode(intbox.get("intensityMinimum")).value();
 		}
-		else if (intbox.get("intensityMaximum").type() == e57::E57_INTEGER)
+		else if (intbox.get("intensityMaximum").type() == e57::TypeInteger)
 		{
 			header.intensityLimits.intensityMaximum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMaximum")).value());
 			header.intensityLimits.intensityMinimum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMinimum")).value());
@@ -1514,7 +1514,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if (proto.isDefined("intensity"))
 	{
-		if (proto.get("intensity").type() == e57::E57_INTEGER)
+		if (proto.get("intensity").type() == e57::TypeInteger)
 		{
 			if (header.intensityLimits.intensityMaximum == 0.)
 			{
@@ -1523,7 +1523,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			}
 			header.pointFields.intensityScaledInteger = -1.;
 		}
-		else if (proto.get("intensity").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("intensity").type() == e57::TypeScaledInteger)
 		{
 			double scale  = e57::ScaledIntegerNode(proto.get("intensity")).scale();
 			double offset = e57::ScaledIntegerNode(proto.get("intensity")).offset();
@@ -1537,7 +1537,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			}
 			header.pointFields.intensityScaledInteger = scale;
 		}
-		else if (proto.get("intensity").type() == e57::E57_FLOAT)
+		else if (proto.get("intensity").type() == e57::TypeFloat)
 		{
 			if (header.intensityLimits.intensityMaximum == 0.)
 			{
@@ -1562,7 +1562,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 	if (scan.isDefined("colorLimits"))
 	{
 		e57::StructureNode colorbox(scan.get("colorLimits"));
-		if (colorbox.get("colorRedMaximum").type() == e57::E57_SCALED_INTEGER)
+		if (colorbox.get("colorRedMaximum").type() == e57::TypeScaledInteger)
 		{
 			header.colorLimits.colorRedMaximum   = e57::ScaledIntegerNode(colorbox.get("colorRedMaximum")).scaledValue();
 			header.colorLimits.colorRedMinimum   = e57::ScaledIntegerNode(colorbox.get("colorRedMinimum")).scaledValue();
@@ -1571,7 +1571,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.colorLimits.colorBlueMaximum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMaximum")).scaledValue();
 			header.colorLimits.colorBlueMinimum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMinimum")).scaledValue();
 		}
-		else if (colorbox.get("colorRedMaximum").type() == e57::E57_FLOAT)
+		else if (colorbox.get("colorRedMaximum").type() == e57::TypeFloat)
 		{
 			header.colorLimits.colorRedMaximum   = e57::FloatNode(colorbox.get("colorRedMaximum")).value();
 			header.colorLimits.colorRedMinimum   = e57::FloatNode(colorbox.get("colorRedMinimum")).value();
@@ -1580,7 +1580,7 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 			header.colorLimits.colorBlueMaximum  = e57::FloatNode(colorbox.get("colorBlueMaximum")).value();
 			header.colorLimits.colorBlueMinimum  = e57::FloatNode(colorbox.get("colorBlueMinimum")).value();
 		}
-		else if (colorbox.get("colorRedMaximum").type() == e57::E57_INTEGER)
+		else if (colorbox.get("colorRedMaximum").type() == e57::TypeInteger)
 		{
 			header.colorLimits.colorRedMaximum   = static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMaximum")).value());
 			header.colorLimits.colorRedMinimum   = static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMinimum")).value());
@@ -1593,17 +1593,17 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if ((header.colorLimits.colorRedMaximum == 0.) && proto.isDefined("colorRed"))
 	{
-		if (proto.get("colorRed").type() == e57::E57_INTEGER)
+		if (proto.get("colorRed").type() == e57::TypeInteger)
 		{
 			header.colorLimits.colorRedMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).minimum());
 			header.colorLimits.colorRedMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).maximum());
 		}
-		else if (proto.get("colorRed").type() == e57::E57_FLOAT)
+		else if (proto.get("colorRed").type() == e57::TypeFloat)
 		{
 			header.colorLimits.colorRedMinimum = e57::FloatNode(proto.get("colorRed")).minimum();
 			header.colorLimits.colorRedMaximum = e57::FloatNode(proto.get("colorRed")).maximum();
 		}
-		else if (proto.get("colorRed").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorRed").type() == e57::TypeScaledInteger)
 		{
 			double  scale                      = e57::ScaledIntegerNode(proto.get("colorRed")).scale();
 			double  offset                     = e57::ScaledIntegerNode(proto.get("colorRed")).offset();
@@ -1616,17 +1616,17 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 
 	if ((header.colorLimits.colorGreenMaximum == 0.) && proto.isDefined("colorGreen"))
 	{
-		if (proto.get("colorGreen").type() == e57::E57_INTEGER)
+		if (proto.get("colorGreen").type() == e57::TypeInteger)
 		{
 			header.colorLimits.colorGreenMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).minimum());
 			header.colorLimits.colorGreenMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).maximum());
 		}
-		else if (proto.get("colorGreen").type() == e57::E57_FLOAT)
+		else if (proto.get("colorGreen").type() == e57::TypeFloat)
 		{
 			header.colorLimits.colorGreenMinimum = e57::FloatNode(proto.get("colorGreen")).minimum();
 			header.colorLimits.colorGreenMaximum = e57::FloatNode(proto.get("colorGreen")).maximum();
 		}
-		else if (proto.get("colorGreen").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorGreen").type() == e57::TypeScaledInteger)
 		{
 			double  scale                        = e57::ScaledIntegerNode(proto.get("colorGreen")).scale();
 			double  offset                       = e57::ScaledIntegerNode(proto.get("colorGreen")).offset();
@@ -1638,17 +1638,17 @@ static void DecodePrototype(const e57::StructureNode& scan, const e57::Structure
 	}
 	if ((header.colorLimits.colorBlueMaximum == 0.) && proto.isDefined("colorBlue"))
 	{
-		if (proto.get("colorBlue").type() == e57::E57_INTEGER)
+		if (proto.get("colorBlue").type() == e57::TypeInteger)
 		{
 			header.colorLimits.colorBlueMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).minimum());
 			header.colorLimits.colorBlueMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).maximum());
 		}
-		else if (proto.get("colorBlue").type() == e57::E57_FLOAT)
+		else if (proto.get("colorBlue").type() == e57::TypeFloat)
 		{
 			header.colorLimits.colorBlueMinimum = e57::FloatNode(proto.get("colorBlue")).minimum();
 			header.colorLimits.colorBlueMaximum = e57::FloatNode(proto.get("colorBlue")).maximum();
 		}
-		else if (proto.get("colorBlue").type() == e57::E57_SCALED_INTEGER)
+		else if (proto.get("colorBlue").type() == e57::TypeScaledInteger)
 		{
 			double  scale                      = e57::ScaledIntegerNode(proto.get("colorBlue")).scale();
 			double  offset                     = e57::ScaledIntegerNode(proto.get("colorBlue")).offset();
@@ -1715,7 +1715,7 @@ struct LoadedScan
 
 static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDialog* progressDlg = nullptr)
 {
-	if (node.type() != e57::E57_STRUCTURE)
+	if (node.type() != e57::TypeStructure)
 	{
 		ccLog::Warning("[E57Filter] Scan nodes should be STRUCTURES!");
 		return {};
@@ -1737,7 +1737,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	if (scanNode.isDefined("guid"))
 	{
 		e57::Node guidNode = scanNode.get("guid");
-		assert(guidNode.type() == e57::E57_STRING);
+		assert(guidNode.type() == e57::TypeString);
 		guidStr = QString(static_cast<e57::StringNode>(guidNode).value().c_str());
 	}
 	else
@@ -1974,24 +1974,24 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		if (header.pointFields.sphericalRangeField)
 		{
 			arrays.xData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "sphericalRange", arrays.xData.data(), chunkSize, true, (prototype.get("sphericalRange").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "sphericalRange", arrays.xData.data(), chunkSize, true, (prototype.get("sphericalRange").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.sphericalAzimuthField)
 		{
 			arrays.yData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "sphericalAzimuth", arrays.yData.data(), chunkSize, true, (prototype.get("sphericalAzimuth").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "sphericalAzimuth", arrays.yData.data(), chunkSize, true, (prototype.get("sphericalAzimuth").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.sphericalElevationField)
 		{
 			arrays.zData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "sphericalElevation", arrays.zData.data(), chunkSize, true, (prototype.get("sphericalElevation").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "sphericalElevation", arrays.zData.data(), chunkSize, true, (prototype.get("sphericalElevation").type() == e57::TypeScaledInteger));
 		}
 
 		// data validity
 		if (header.pointFields.sphericalInvalidStateField)
 		{
 			arrays.isInvalidData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "sphericalInvalidState", arrays.isInvalidData.data(), chunkSize, true, (prototype.get("sphericalInvalidState").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "sphericalInvalidState", arrays.isInvalidData.data(), chunkSize, true, (prototype.get("sphericalInvalidState").type() == e57::TypeScaledInteger));
 		}
 	}
 	else
@@ -2000,24 +2000,24 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		if (header.pointFields.cartesianXField)
 		{
 			arrays.xData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "cartesianX", arrays.xData.data(), chunkSize, true, (prototype.get("cartesianX").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "cartesianX", arrays.xData.data(), chunkSize, true, (prototype.get("cartesianX").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.cartesianYField)
 		{
 			arrays.yData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "cartesianY", arrays.yData.data(), chunkSize, true, (prototype.get("cartesianY").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "cartesianY", arrays.yData.data(), chunkSize, true, (prototype.get("cartesianY").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.cartesianZField)
 		{
 			arrays.zData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "cartesianZ", arrays.zData.data(), chunkSize, true, (prototype.get("cartesianZ").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "cartesianZ", arrays.zData.data(), chunkSize, true, (prototype.get("cartesianZ").type() == e57::TypeScaledInteger));
 		}
 
 		// data validity
 		if (header.pointFields.cartesianInvalidStateField)
 		{
 			arrays.isInvalidData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "cartesianInvalidState", arrays.isInvalidData.data(), chunkSize, true, (prototype.get("cartesianInvalidState").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "cartesianInvalidState", arrays.isInvalidData.data(), chunkSize, true, (prototype.get("cartesianInvalidState").type() == e57::TypeScaledInteger));
 		}
 	}
 
@@ -2037,17 +2037,17 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		if (header.pointFields.normXField)
 		{
 			arrays.xNormData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "nor:normalX", arrays.xNormData.data(), chunkSize, true, (prototype.get("nor:normalX").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "nor:normalX", arrays.xNormData.data(), chunkSize, true, (prototype.get("nor:normalX").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.normYField)
 		{
 			arrays.yNormData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "nor:normalY", arrays.yNormData.data(), chunkSize, true, (prototype.get("nor:normalY").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "nor:normalY", arrays.yNormData.data(), chunkSize, true, (prototype.get("nor:normalY").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.normZField)
 		{
 			arrays.zNormData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "nor:normalZ", arrays.zNormData.data(), chunkSize, true, (prototype.get("nor:normalZ").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "nor:normalZ", arrays.zNormData.data(), chunkSize, true, (prototype.get("nor:normalZ").type() == e57::TypeScaledInteger));
 		}
 	}
 
@@ -2070,14 +2070,14 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		cloud->addScalarField(intensitySF);
 
 		arrays.intData.resize(chunkSize);
-		dbufs.emplace_back(node.destImageFile(), "intensity", arrays.intData.data(), chunkSize, true, (prototype.get("intensity").type() == e57::E57_SCALED_INTEGER));
+		dbufs.emplace_back(node.destImageFile(), "intensity", arrays.intData.data(), chunkSize, true, (prototype.get("intensity").type() == e57::TypeScaledInteger));
 		// intRange = header.intensityLimits.intensityMaximum - header.intensityLimits.intensityMinimum;
 		// intOffset = header.intensityLimits.intensityMinimum;
 
 		if (header.pointFields.isIntensityInvalidField)
 		{
 			arrays.isInvalidIntData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "isIntensityInvalid", arrays.isInvalidIntData.data(), chunkSize, true, (prototype.get("isIntensityInvalid").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "isIntensityInvalid", arrays.isInvalidIntData.data(), chunkSize, true, (prototype.get("isIntensityInvalid").type() == e57::TypeScaledInteger));
 		}
 	}
 
@@ -2096,12 +2096,12 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		cloud->addScalarField(timeStampSF);
 
 		arrays.timeData.resize(chunkSize);
-		dbufs.emplace_back(node.destImageFile(), "timeStamp", arrays.timeData.data(), chunkSize, true, (prototype.get("timeStamp").type() == e57::E57_SCALED_INTEGER));
+		dbufs.emplace_back(node.destImageFile(), "timeStamp", arrays.timeData.data(), chunkSize, true, (prototype.get("timeStamp").type() == e57::TypeScaledInteger));
 
 		if (header.pointFields.isTimeStampInvalidField)
 		{
 			arrays.isInvalidTimeData.resize(chunkSize);
-			dbufs.emplace_back(node.destImageFile(), "isTimeStampInvalid", arrays.isInvalidTimeData.data(), chunkSize, true, (prototype.get("isTimeStampInvalid").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "isTimeStampInvalid", arrays.isInvalidTimeData.data(), chunkSize, true, (prototype.get("isTimeStampInvalid").type() == e57::TypeScaledInteger));
 		}
 	}
 
@@ -2130,7 +2130,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			colorRedRange  = header.colorLimits.colorRedMaximum - header.colorLimits.colorRedMinimum;
 			if (colorRedRange <= 0.0)
 				colorRedRange = 1.0;
-			dbufs.emplace_back(node.destImageFile(), "colorRed", arrays.redData.data(), chunkSize, true, (prototype.get("colorRed").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "colorRed", arrays.redData.data(), chunkSize, true, (prototype.get("colorRed").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.colorGreenField)
 		{
@@ -2139,7 +2139,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			colorGreenRange  = header.colorLimits.colorGreenMaximum - header.colorLimits.colorGreenMinimum;
 			if (colorGreenRange <= 0.0)
 				colorGreenRange = 1.0;
-			dbufs.emplace_back(node.destImageFile(), "colorGreen", arrays.greenData.data(), chunkSize, true, (prototype.get("colorGreen").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "colorGreen", arrays.greenData.data(), chunkSize, true, (prototype.get("colorGreen").type() == e57::TypeScaledInteger));
 		}
 		if (header.pointFields.colorBlueField)
 		{
@@ -2148,7 +2148,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			colorBlueRange  = header.colorLimits.colorBlueMaximum - header.colorLimits.colorBlueMinimum;
 			if (colorBlueRange <= 0.0)
 				colorBlueRange = 1.0;
-			dbufs.emplace_back(node.destImageFile(), "colorBlue", arrays.blueData.data(), chunkSize, true, (prototype.get("colorBlue").type() == e57::E57_SCALED_INTEGER));
+			dbufs.emplace_back(node.destImageFile(), "colorBlue", arrays.blueData.data(), chunkSize, true, (prototype.get("colorBlue").type() == e57::TypeScaledInteger));
 		}
 	}
 
@@ -2167,7 +2167,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 		}
 		cloud->addScalarField(returnIndexSF);
 		arrays.scanIndexData.resize(chunkSize);
-		dbufs.emplace_back(node.destImageFile(), "returnIndex", arrays.scanIndexData.data(), chunkSize, true, (prototype.get("returnIndex").type() == e57::E57_SCALED_INTEGER));
+		dbufs.emplace_back(node.destImageFile(), "returnIndex", arrays.scanIndexData.data(), chunkSize, true, (prototype.get("returnIndex").type() == e57::TypeScaledInteger));
 	}
 
 	// Read the point data
@@ -2462,7 +2462,7 @@ struct LoadedImage
 
 static LoadedImage LoadImage(const e57::Node& node, QString& associatedData3DGuid)
 {
-	if (node.type() != e57::E57_STRUCTURE)
+	if (node.type() != e57::TypeStructure)
 	{
 		ccLog::Warning("[E57Filter] Image nodes should be STRUCTURES!");
 		return {};
@@ -2748,7 +2748,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		e57::ImageFile imf(filename.toStdString(), "r", e57::CHECKSUM_POLICY_SPARSE);
+		e57::ImageFile imf(filename.toStdString(), "r", e57::ChecksumSparse);
 
 		if (!imf.isOpen())
 		{
@@ -2792,7 +2792,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 		if (root.isDefined("/data3D"))
 		{
 			e57::Node n = root.get("/data3D"); // E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
-			if (n.type() != e57::E57_VECTOR)
+			if (n.type() != e57::TypeVector)
 			{
 				imf.close();
 				return CC_FERR_MALFORMED_FILE;
@@ -2802,7 +2802,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			unsigned scanCount = static_cast<unsigned>(data3D.childCount());
 
 			// global progress bar
-			QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 			if (parameters.parentWidget)
 			{
 				progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2818,7 +2818,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				progressDlg->start();
 				QApplication::processEvents();
 			}
-			CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), showGlobalProgress ? scanCount : 100);
+			CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), showGlobalProgress ? scanCount : 100);
 
 			// static states
 			s_absoluteScanIndex     = 0;
@@ -2829,7 +2829,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 				const e57::Node scanNode = data3D.get(i);
 				QString         scanGUID;
 
-				LoadedScan scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? nullptr : progressDlg.data());
+				LoadedScan scan = LoadScan(scanNode, scanGUID, showGlobalProgress ? nullptr : progressDlg.get());
 
 				if (scan.entity)
 				{
@@ -2890,7 +2890,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 		if (!s_cancelRequestedByUser && root.isDefined("/images2D"))
 		{
 			e57::Node n = root.get("/images2D"); // E57 standard: "images2D is a vector for storing two dimensional images"
-			if (n.type() != e57::E57_VECTOR)
+			if (n.type() != e57::TypeVector)
 			{
 				imf.close();
 				return CC_FERR_MALFORMED_FILE;
@@ -2902,7 +2902,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			if (imageCount)
 			{
 				// progress bar
-				QScopedPointer<ccProgressDialog> progressDlg(nullptr);
+				std::unique_ptr<ccProgressDialog> progressDlg(nullptr);
 				if (parameters.parentWidget)
 				{
 					progressDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2911,7 +2911,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 					progressDlg->start();
 					QApplication::processEvents();
 				}
-				CCCoreLib::NormalizedProgress nprogress(progressDlg.data(), imageCount);
+				CCCoreLib::NormalizedProgress nprogress(progressDlg.get(), imageCount);
 
 				for (unsigned i = 0; i < imageCount; ++i)
 				{

@@ -1,5 +1,4 @@
-#ifndef CCABOUTDIALOG_H
-#define CCABOUTDIALOG_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -36,5 +35,3 @@ class ccAboutDialog : public QDialog
   private:
 	Ui::AboutDialog* mUI;
 };
-
-#endif // CCABOUTDIALOG_H

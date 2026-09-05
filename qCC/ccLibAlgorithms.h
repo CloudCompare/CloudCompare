@@ -1,5 +1,5 @@
-#ifndef CCLIBALGORITHMS_H
-#define CCLIBALGORITHMS_H
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -99,5 +99,3 @@ namespace ccLibAlgorithms
 	                                 double                 minScale       = std::numeric_limits<double>::quiet_NaN(),
 	                                 double                 maxScale       = std::numeric_limits<double>::quiet_NaN());
 } // namespace ccLibAlgorithms
-
-#endif

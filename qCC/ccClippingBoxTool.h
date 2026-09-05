@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CLIPPING_BOX_TOOL_HEADER
-#define CC_CLIPPING_BOX_TOOL_HEADER
 
 // common
 #include <ccOverlayDialog.h>
@@ -183,5 +182,3 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Clipping box
 	ccClipBox* m_clipBox;
 };
-
-#endif // CC_CLIPPING_BOX_TOOL_HEADER

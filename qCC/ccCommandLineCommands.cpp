@@ -1,3 +1,20 @@
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
+
 // CCCoreLib
 #include <AutoSegmentationTools.h>
 #include <CCConst.h>
@@ -1102,7 +1119,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 	{
 		ccPointCloud* cloud = thisCloudDesc.pc;
 
-		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
 		{
 			progressDialog.reset(new ccProgressDialog(true, cmd.widgetParent()));
@@ -1111,7 +1128,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 
 		if (!cloud->getOctree())
 		{
-			if (!cloud->computeOctree(progressDialog.data()))
+			if (!cloud->computeOctree(progressDialog.get()))
 			{
 				return cmd.error(QObject::tr("Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 			}
@@ -1142,7 +1159,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			if (orientation == ccNormalVectors::UNDEFINED)
 			{
 				ccLog::Print("\tcompute + orient normals with grids");
-				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), ccNormalVectors::UNDEFINED);
+				success = cloud->computeNormalsWithGrids(angle, progressDialog.get(), ccNormalVectors::UNDEFINED);
 				if (orientNormalsWithGrids)
 				{
 					normalsAlreadyOriented = true;
@@ -1151,7 +1168,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 			else
 			{
 				ccLog::Print("\tcompute normals with grids, preferred orientation: " + QString::number(orientation));
-				success = cloud->computeNormalsWithGrids(angle, progressDialog.data(), orientation);
+				success = cloud->computeNormalsWithGrids(angle, progressDialog.get(), orientation);
 			}
 			if (!success)
 			{
@@ -1161,7 +1178,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		else
 		{
 			ccLog::Print("\tcompute normals with octree, preferred orientation: " + QString::number(orientation));
-			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.data());
+			success = cloud->computeNormalsWithOctree(model, orientation, thisCloudRadius, progressDialog.get());
 			if (!success)
 			{
 				return cmd.error(QObject::tr("computeNormalsWithOctree failed"));
@@ -1655,7 +1672,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			}
 		}
 
-		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
 		{
 			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -1723,7 +1740,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 				refCloud = CCCoreLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(desc.pc,
 				                                                                          static_cast<unsigned char>(octreeLevel),
 				                                                                          CCCoreLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
-				                                                                          progressDialog.data(),
+				                                                                          progressDialog.get(),
 				                                                                          octree);
 
 				if (!refCloud)
@@ -1827,7 +1844,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 
 	try
 	{
-		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
 		{
 			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -1857,7 +1874,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 			int componentCount = CCCoreLib::AutoSegmentationTools::labelConnectedComponents(desc.pc,
 			                                                                                static_cast<unsigned char>(octreeLevel),
 			                                                                                false,
-			                                                                                progressDialog.data());
+			                                                                                progressDialog.get());
 
 			if (componentCount == 0)
 			{
@@ -3106,8 +3123,8 @@ bool CommandMergeMeshes::process(ccCommandLineInterface& cmd)
 	bool       firstValidMesh = true;
 
 	// create the destination mesh
-	ccPointCloud*          vertices = new ccPointCloud("vertices");
-	QScopedPointer<ccMesh> mergedMesh(new ccMesh(vertices));
+	ccPointCloud*           vertices = new ccPointCloud("vertices");
+	std::unique_ptr<ccMesh> mergedMesh(new ccMesh(vertices));
 	mergedMesh->setName("Merged mesh");
 	mergedMesh->addChild(vertices);
 	vertices->setEnabled(false);
@@ -3150,7 +3167,7 @@ bool CommandMergeMeshes::process(ccCommandLineInterface& cmd)
 	cmd.removeMeshes();
 	// add the new mesh
 	mergedMeshDesc.basename += QObject::tr("_MERGED");
-	mergedMeshDesc.mesh = mergedMesh.take();
+	mergedMeshDesc.mesh = mergedMesh.release();
 	cmd.meshes().push_back(mergedMeshDesc);
 
 	if (cmd.autoSaveMode())
@@ -4074,7 +4091,7 @@ bool CommandOrientNormalsMST::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -4091,7 +4108,7 @@ bool CommandOrientNormalsMST::process(ccCommandLineInterface& cmd)
 		}
 
 		// computation
-		if (desc.pc->orientNormalsWithMST(knn, progressDialog.data()))
+		if (desc.pc->orientNormalsWithMST(knn, progressDialog.get()))
 		{
 			desc.basename += QObject::tr("_NORMS_REORIENTED");
 			if (cmd.autoSaveMode())
@@ -4142,7 +4159,7 @@ bool CommandSORFilter::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -4158,7 +4175,7 @@ bool CommandSORFilter::process(ccCommandLineInterface& cmd)
 		                                                                                knn,
 		                                                                                nSigma,
 		                                                                                nullptr,
-		                                                                                progressDialog.data());
+		                                                                                progressDialog.get());
 
 		if (selection)
 		{
@@ -4277,7 +4294,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 		removeIsolatedPoints = true;
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -4298,7 +4315,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 		                                                                                  absoluteError,
 		                                                                                  error,
 		                                                                                  nullptr,
-		                                                                                  progressDialog.data());
+		                                                                                  progressDialog.get());
 
 		if (selection)
 		{
@@ -4375,7 +4392,7 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 
 	cmd.print(QObject::tr("Minimum distance between points: '%1'").arg(minDistanceBetweenPoints));
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -4385,7 +4402,7 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		assert(desc.pc);
-		ccPointCloud* filteredCloud = desc.pc->removeDuplicatePoints(minDistanceBetweenPoints, progressDialog.data());
+		ccPointCloud* filteredCloud = desc.pc->removeDuplicatePoints(minDistanceBetweenPoints, progressDialog.get());
 		if (!filteredCloud)
 		{
 			return cmd.error(QObject::tr("Process failed (see log)"));
@@ -4531,7 +4548,7 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -4542,7 +4559,7 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 
 	for (CLMeshDesc& desc : cmd.meshes())
 	{
-		ccPointCloud* cloud = desc.mesh->samplePoints(useDensity, parameter, true, true, true, progressDialog.data());
+		ccPointCloud* cloud = desc.mesh->samplePoints(useDensity, parameter, true, true, true, progressDialog.get());
 
 		if (!cloud)
 		{
@@ -5894,7 +5911,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
 		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
@@ -5926,7 +5943,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 			ccOctree::Shared theOctree = desc.pc->getOctree();
 			if (!theOctree)
 			{
-				theOctree = desc.pc->computeOctree(progressDialog.data());
+				theOctree = desc.pc->computeOctree(progressDialog.get());
 				if (!theOctree)
 				{
 					delete distrib;
@@ -5935,7 +5952,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 				}
 			}
 
-			double chi2dist = CCCoreLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, desc.pc, kNN, pValue, progressDialog.data(), theOctree.data());
+			double chi2dist = CCCoreLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib, desc.pc, kNN, pValue, progressDialog.get(), theOctree.data());
 
 			cmd.print(QObject::tr("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 
@@ -6016,7 +6033,7 @@ bool CommandStatFit::process(ccCommandLineInterface& cmd)
 			continue;
 		}
 
-		QScopedPointer<CCCoreLib::GenericDistribution> distrib;
+		std::unique_ptr<CCCoreLib::GenericDistribution> distrib;
 		if (distribStr == "GAUSS")
 		{
 			distrib.reset(new CCCoreLib::NormalDistribution());
@@ -6035,12 +6052,12 @@ bool CommandStatFit::process(ccCommandLineInterface& cmd)
 		QString description;
 		if (distribStr == "GAUSS")
 		{
-			const CCCoreLib::NormalDistribution* normal = static_cast<const CCCoreLib::NormalDistribution*>(distrib.data());
+			const CCCoreLib::NormalDistribution* normal = static_cast<const CCCoreLib::NormalDistribution*>(distrib.get());
 			description                                 = QObject::tr("mean = %1 / std.dev. = %2").arg(normal->getMu(), 0, 'f', precision).arg(sqrt(normal->getSigma2()), 0, 'f', precision);
 		}
 		else
 		{
-			const CCCoreLib::WeibullDistribution* weibull = static_cast<const CCCoreLib::WeibullDistribution*>(distrib.data());
+			const CCCoreLib::WeibullDistribution* weibull = static_cast<const CCCoreLib::WeibullDistribution*>(distrib.get());
 			ScalarType                            a       = 0;
 			ScalarType                            b       = 0;
 			weibull->getParameters(a, b);

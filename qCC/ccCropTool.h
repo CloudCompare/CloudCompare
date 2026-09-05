@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CROP_TOOL_HEADER
-#define CC_CROP_TOOL_HEADER
 
 // qCC_db
 #include <ccBBox.h>
@@ -39,5 +38,3 @@ class ccCropTool
 	**/
 	static ccHObject* Crop(ccHObject* entity, const ccBBox& box, bool inside = true, const ccGLMatrix* meshRotation = nullptr);
 };
-
-#endif // CC_CROP_TOOL_HEADER

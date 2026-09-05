@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                   COPYRIGHT: CloudCompare project                      #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
-#define CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER
 
 // Qt
 #include <QString>
@@ -51,5 +50,3 @@ class ccGraphicalSegmentationOptionsDlg : public QDialog
 		return "Segmented";
 	}
 };
-
-#endif // CC_GRAPHICAL_SEGMENTATION_OPTIONS_DLG_HEADER

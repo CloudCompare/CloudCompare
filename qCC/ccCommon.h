@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COMMON_HEADER
-#define CC_COMMON_HEADER
 
 // STANDARD SCALAR FIELD NAMES
 #define CC_DEFAULT_SF_NAME "Unknown"
@@ -50,5 +49,3 @@
 #define CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME "Vertex type"
 #define CC_DEFAULT_ID_SF_NAME "Id"
 #define CC_ORIGINAL_CLOUD_INDEX_SF_NAME "Original cloud index"
-
-#endif

@@ -39,7 +39,7 @@
 #include <QThread>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 static bool     s_adjustScale                 = false;
 static bool     s_constrainScale              = false;

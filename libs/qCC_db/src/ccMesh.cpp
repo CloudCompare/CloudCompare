@@ -1671,10 +1671,208 @@ CCCoreLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 	return nullptr;
 }
 
+// attribute indexes that we bound when creating the program
+static const GLuint ATTR_POS = 0;
+static const GLuint ATTR_NOR = 1;
+static const GLuint ATTR_COL = 2;
+
+// create a 2D texture containing all the normals (for OpenGL 2.1)
+static bool CreateNormalLUTTexture(QOpenGLFunctions_2_1* gl, GLuint& outTex, int& width, int& height)
+{
+	width = 0;
+	height = 0;
+	if (!gl)
+	{
+		return false;
+	}
+
+	const unsigned totalNormals = ccNormalCompressor::MAX_VALID_NORM_CODE + 1; // number of valid codes
+	// Query max texture size
+	GLint maxTexSize = 0;
+	gl->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	if (maxTexSize <= 0)
+	{
+		return false;
+	}
+
+	// choose width as large as possible (but <= maxTexSize) to minimize height
+	width  = std::min(static_cast<int>(totalNormals), maxTexSize);
+	height = static_cast<int>(std::ceil(static_cast<float>(totalNormals) / float(width)));
+
+	const size_t texels = static_cast<size_t>(width) * static_cast<size_t>(height);
+
+	// buffer RGB unsigned bytes
+	std::vector<unsigned char> pixels;
+	try
+	{
+		pixels.resize(texels * 3);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccMesh::CreateNormalLUTTexture] Not enough memory");
+		return false;
+	}
+
+	// fill: for each index, call ccNormalCompressor::Decompress
+	for (unsigned i = 0; i < totalNormals; ++i)
+	{
+		CCVector3 n = ccNormalVectors::GetNormal(i);
+
+		// map [-1,1] -> [0,255]
+		// handle NULL_NORM_CODE: Decompress sets to 0, so it becomes 127 -> you can change if needed
+		unsigned char r = static_cast<unsigned char>(std::round(std::clamp((n.x * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+		unsigned char g = static_cast<unsigned char>(std::round(std::clamp((n.y * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+		unsigned char b = static_cast<unsigned char>(std::round(std::clamp((n.z * 0.5 + 0.5), 0.0, 1.0) * 255.0));
+
+		size_t idx          = static_cast<size_t>(i);
+		pixels[idx * 3 + 0] = r;
+		pixels[idx * 3 + 1] = g;
+		pixels[idx * 3 + 2] = b;
+	}
+
+	// generate or update GL texture
+	if (outTex == 0)
+	{
+		gl->glGenTextures(1, &outTex);
+	}
+
+	gl->glBindTexture(GL_TEXTURE_2D, outTex);
+	gl->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	gl->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	// upload as GL_RGB/GL_UNSIGNED_BYTE
+	gl->glTexImage2D(GL_TEXTURE_2D,
+	                 0,
+	                 GL_RGB,
+	                 width,
+	                 height,
+	                 0,
+	                 GL_RGB,
+	                 GL_UNSIGNED_BYTE,
+	                 pixels.data());
+
+	gl->glBindTexture(GL_TEXTURE_2D, 0);
+	return true;
+}
+
+// Simple program builder (GLSL 1.20) for mesh rendering (position, normal, color)
+static GLuint BuildSimpleMeshProgram(QOpenGLFunctions_2_1* glFunc)
+{
+	if (!glFunc)
+		return 0;
+
+	static GLuint s_program = 0;
+	if (s_program != 0)
+		return s_program;
+
+	const char* vertSrc =
+	    "#version 120\n"
+	    "attribute vec3 aPosition;\n"
+	    "attribute float aNormalIndex;\n"
+	    "attribute vec4 aColor;\n"
+	    "varying vec4 vColor;\n"
+	    "varying vec3 vNormal;\n"
+		"uniform sampler2D uNormalLUT;\n"
+		"uniform int uLUTWidth;\n"
+		"uniform int uLUTHeight;\n"
+		"vec3 fetchNormalFromLUT(float fi)\n"
+		"{\n"
+		"	float w  = float(uLUTWidth);\n"
+		"	float h  = float(uLUTHeight);\n"
+		"	float tx = mod(fi, w);\n"
+		"	float ty = floor(fi / w);\n"
+		"	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
+		"	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
+		"	vec3 n = enc * 2.0 - 1.0;\n"
+		"	return normalize(n);\n"
+		"}\n"
+	    "void main()\n"
+	    "{\n"
+	    "    vColor = aColor;\n"
+	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
+	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+	    "}\n";
+
+	const char* fragSrc =
+	    "#version 120\n"
+	    "varying vec4 vColor;\n"
+	    "varying vec3 vNormal;\n"
+	    "void main()\n"
+	    "{\n"
+	    "    vec3 n = normalize(vNormal);\n"
+	    "    vec3 lightDir = normalize(vec3(0.0,0.0,1.0));\n"
+	    "    float diff = max(dot(n, lightDir), 0.0);\n"
+	    "    vec4 base = vColor;\n"
+	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
+	    "}\n";
+
+	GLuint vert = glFunc->glCreateShader(GL_VERTEX_SHADER);
+	GLuint frag = glFunc->glCreateShader(GL_FRAGMENT_SHADER);
+
+	glFunc->glShaderSource(vert, 1, &vertSrc, nullptr);
+	glFunc->glCompileShader(vert);
+	GLint compiled = 0;
+	glFunc->glGetShaderiv(vert, GL_COMPILE_STATUS, &compiled);
+	if (!compiled)
+	{
+		// optionally retrieve log with glGetShaderInfoLog
+		GLchar buffer[1024];
+		glFunc->glGetShaderInfoLog(vert, 1024, nullptr, buffer);
+		ccLog::Warning(QString("[BuildSimpleMeshProgram] Vertex shader compilation failed:\n%1").arg(QString(buffer)));
+		glFunc->glDeleteShader(vert);
+		return 0;
+	}
+
+	glFunc->glShaderSource(frag, 1, &fragSrc, nullptr);
+	glFunc->glCompileShader(frag);
+	glFunc->glGetShaderiv(frag, GL_COMPILE_STATUS, &compiled);
+	if (!compiled)
+	{
+		glFunc->glDeleteShader(vert);
+		glFunc->glDeleteShader(frag);
+		return 0;
+	}
+
+	s_program = glFunc->glCreateProgram();
+	glFunc->glAttachShader(s_program, vert);
+	glFunc->glAttachShader(s_program, frag);
+
+	// Bind attribute locations before linking for stable locations
+	glFunc->glBindAttribLocation(s_program, ATTR_POS, "aPosition");
+	glFunc->glBindAttribLocation(s_program, ATTR_NOR, "aNormalIndex");
+	glFunc->glBindAttribLocation(s_program, ATTR_COL, "aColor");
+
+	glFunc->glLinkProgram(s_program);
+	GLint linked = 0;
+	glFunc->glGetProgramiv(s_program, GL_LINK_STATUS, &linked);
+	if (!linked)
+	{
+		// cleanup on failure
+		glFunc->glDeleteProgram(s_program);
+		s_program = 0;
+		glFunc->glDeleteShader(vert);
+		glFunc->glDeleteShader(frag);
+		return 0;
+	}
+
+	// shaders can be deleted after linking
+	glFunc->glDeleteShader(vert);
+	glFunc->glDeleteShader(frag);
+
+	return s_program;
+}
+
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (!m_associatedCloud)
+	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
 		return;
+	}
+
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 	handleColorRamp(context);
 
@@ -1706,8 +1904,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		getDrawingParameters(glParams);
 
 		// vertices visibility
-		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = m_associatedCloud->getTheVisibilityArray();
-		bool                                            visFiltering       = (verticesVisibility.size() >= m_associatedCloud->size());
+		const ccGenericPointCloud::VisibilityTableType& verticesVisibility = cloud->getTheVisibilityArray();
+		bool                                            visFiltering       = (verticesVisibility.size() >= cloud->size());
 
 		// wireframe ? (not compatible with LOD)
 		bool showWired = isShownAsWire() && !lodEnabled;
@@ -1715,7 +1913,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		// fix 'showNorms'
-		glParams.showNorms = showTriNormals || (m_associatedCloud->hasNormals() && m_normalsDisplayed);
+		glParams.showNorms = showTriNormals || (cloud->hasNormals() && m_normalsDisplayed);
 		// no normals shading without light!
 		bool entityPickingMode = MACRO_EntityPicking(context);
 		bool lightIsEnabled    = ((m_forceSunLightOn && !entityPickingMode) || MACRO_LightIsEnabled(context));
@@ -1757,8 +1955,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showSF)
 		{
-			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-			ccPointCloud* cloud         = static_cast<ccPointCloud*>(m_associatedCloud);
 			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
 			sfMayHaveHiddenValues       = currentDisplayedScalarField ? currentDisplayedScalarField->mayHaveHiddenValues() : false;
 
@@ -1810,8 +2006,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else
 			{
-				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-				rgbaColorsTable = static_cast<ccPointCloud*>(m_associatedCloud)->rgbaColors();
+				rgbaColorsTable = cloud->rgbaColors();
 			}
 		}
 		else if (entityPickingMode)
@@ -1840,8 +2035,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccNormalVectors*       compressedNormals   = nullptr;
 		if (glParams.showNorms)
 		{
-			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-			normalsIndexesTable = static_cast<ccPointCloud*>(m_associatedCloud)->normals();
+			normalsIndexesTable = cloud->normals();
 			compressedNormals   = ccNormalVectors::GetUniqueInstance();
 		}
 
@@ -1855,27 +2049,27 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || !sfMayHaveHiddenValues))
 		{
 			assert(!entityPickingMode || !glParams.showSF);
+
 			// the GL type depends on the PointCoordinateType 'size' (float or double)
 			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
-			glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-			glFunc->glVertexPointer(3, GL_COORD_TYPE, 0, GetVertexBuffer());
+			// get GL program
+			GLuint prog = BuildSimpleMeshProgram(glFunc);
 
-			if (glParams.showNorms)
-			{
-				glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-				glFunc->glNormalPointer(GL_COORD_TYPE, 0, GetNormalsBuffer());
-			}
-			if (glParams.showSF)
-			{
-				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(3, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
-			}
-			else if (glParams.showColors)
-			{
-				glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				glFunc->glColorPointer(4, GL_UNSIGNED_BYTE, 0, GetColorsBuffer());
-			}
+			// static VBO handles reused between calls
+			static GLuint s_vboV = 0;
+			static GLuint s_vboN = 0;
+			static GLuint s_vboC = 0;
+			if (s_vboV == 0)
+				glFunc->glGenBuffers(1, &s_vboV);
+			if (s_vboN == 0)
+				glFunc->glGenBuffers(1, &s_vboN);
+			if (s_vboC == 0)
+				glFunc->glGenBuffers(1, &s_vboC);
+
+			auto   vertices  = GetVertexBuffer();
+			float* normals   = reinterpret_cast<float*>(GetNormalsBuffer());
+			auto   rgbColors = GetColorsBuffer();
 
 			// we can scan and process each chunk separately in an optimized way
 			size_t chunkCount = ccChunk::Count(m_triVertIndexes->size());
@@ -1884,18 +2078,23 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const size_t                      chunkSize               = ccChunk::Size(k, m_triVertIndexes->size());
 				const CCCoreLib::VerticesIndexes* _vertIndexesChunkOrigin = ccChunk::Start(*m_triVertIndexes, k);
 
+				size_t vertexCount       = 0;
+				size_t normalCount       = 0;
+				size_t rgbColorCompCount = 0;
+
 				// vertices
 				{
 					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					CCVector3*                        _vertices    = GetVertexBuffer();
+					CCVector3*                        _vertices    = vertices;
 					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 					{
-						assert(_vertIndexes->i1 < m_associatedCloud->size());
-						assert(_vertIndexes->i2 < m_associatedCloud->size());
-						assert(_vertIndexes->i3 < m_associatedCloud->size());
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i1);
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i2);
-						*_vertices++ = *m_associatedCloud->getPoint(_vertIndexes->i3);
+						assert(_vertIndexes->i1 < cloud->size());
+						assert(_vertIndexes->i2 < cloud->size());
+						assert(_vertIndexes->i3 < cloud->size());
+						*_vertices++ = *cloud->getPoint(_vertIndexes->i1);
+						*_vertices++ = *cloud->getPoint(_vertIndexes->i2);
+						*_vertices++ = *cloud->getPoint(_vertIndexes->i3);
+						vertexCount += 3;
 					}
 				}
 
@@ -1903,7 +2102,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showSF)
 				{
 					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(GetColorsBuffer());
+					ccColor::Rgb*                     _rgbColors   = reinterpret_cast<ccColor::Rgb*>(rgbColors);
 					assert(colorScale);
 
 					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
@@ -1914,13 +2113,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i1);
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i2);
 						*_rgbColors++ = *currentDisplayedScalarField->getValueColor(_vertIndexes->i3);
+						rgbColorCompCount += 9; // 3 components per vertex
 					}
 				}
 				// colors
 				else if (glParams.showColors)
 				{
 					const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-					ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(GetColorsBuffer());
+					ccColor::Rgba*                    _rgbaColors  = reinterpret_cast<ccColor::Rgba*>(rgbColors);
 					for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 					{
 						assert(_vertIndexes->i1 < rgbaColorsTable->size());
@@ -1929,13 +2129,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i1);
 						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i2);
 						*(_rgbaColors)++ = rgbaColorsTable->at(_vertIndexes->i3);
+						rgbColorCompCount += 12; // 4 components per vertex
 					}
 				}
 
 				// normals
 				if (glParams.showNorms)
 				{
-					CCVector3* _normals = GetNormalsBuffer();
+					float* _normals = normals;
 					if (showTriNormals)
 					{
 						assert(m_triNormalIndexes);
@@ -1946,9 +2147,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							assert(_triNormalIndexes->u[1] < static_cast<int>(m_triNormals->size()));
 							assert(_triNormalIndexes->u[2] < static_cast<int>(m_triNormals->size()));
 
-							*_normals++ = (_triNormalIndexes->u[0] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[0])) : s_blankNorm);
-							*_normals++ = (_triNormalIndexes->u[1] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[1])) : s_blankNorm);
-							*_normals++ = (_triNormalIndexes->u[2] >= 0 ? compressedNormals->getNormal(m_triNormals->at(_triNormalIndexes->u[2])) : s_blankNorm);
+							*_normals++ = static_cast<float>(_triNormalIndexes->u[0] >= 0 ? m_triNormals->at(_triNormalIndexes->u[0]) : 0);
+							*_normals++ = static_cast<float>(_triNormalIndexes->u[1] >= 0 ? m_triNormals->at(_triNormalIndexes->u[1]) : 0);
+							*_normals++ = static_cast<float>(_triNormalIndexes->u[2] >= 0 ? m_triNormals->at(_triNormalIndexes->u[2]) : 0);
+
+							normalCount += 3;
 						}
 					}
 					else
@@ -1959,29 +2162,122 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 							assert(_vertIndexes->i1 < normalsIndexesTable->size());
 							assert(_vertIndexes->i2 < normalsIndexesTable->size());
 							assert(_vertIndexes->i3 < normalsIndexesTable->size());
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i1));
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i2));
-							*_normals++ = compressedNormals->getNormal(normalsIndexesTable->at(_vertIndexes->i3));
+							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i1));
+							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i2));
+							*_normals++ = static_cast<float>(normalsIndexesTable->at(_vertIndexes->i3));
+
+							normalCount += 3;
 						}
 					}
 				}
 
+				// Upload to VBOs and draw with shader
+				// Bind program if available, else fallback to client arrays (safe fallback)
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				if (prog != 0)
+				{
+					glFunc->glUseProgram(prog);
+				}
+
+				static GLuint lutTex;
+				static int lutWidth = 0;
+				static int lutHeight = 0;
+				if (lutTex == 0)
+				{
+					CreateNormalLUTTexture(glFunc, lutTex, lutWidth, lutHeight);
+				}
+
+				// bind texture to unit 0
+				glFunc->glActiveTexture(GL_TEXTURE0);
+				glFunc->glBindTexture(GL_TEXTURE_2D, lutTex);
+
+				// set sampler uniform to unit 0
+				GLint locSampler = glFunc->glGetUniformLocation(prog, "uNormalLUT");
+				if (locSampler >= 0)
+					glFunc->glUniform1i(locSampler, 0);
+
+				// set LUT dimensions
+				GLint locW = glFunc->glGetUniformLocation(prog, "uLUTWidth");
+				if (locW >= 0)
+					glFunc->glUniform1i(locW, lutWidth);
+				GLint locH = glFunc->glGetUniformLocation(prog, "uLUTHeight");
+				if (locH >= 0)
+					glFunc->glUniform1i(locH, lutHeight);
+
+				// Vertex buffer
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboV);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
+				glFunc->glEnableVertexAttribArray(ATTR_POS);
+				glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, reinterpret_cast<void*>(0));
+
+				// Normals
+				if (glParams.showNorms)
+				{
+					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboN);
+					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normals, GL_DYNAMIC_DRAW);
+					glFunc->glEnableVertexAttribArray(ATTR_NOR);
+					glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
+				}
+				else
+				{
+					// set default normal to +Z
+					glFunc->glDisableVertexAttribArray(ATTR_NOR);
+					glFunc->glVertexAttrib3f(ATTR_NOR, 0.0f, 0.0f, 1.0f);
+				}
+
+				// Colors
+				if (glParams.showSF)
+				{
+					// colors are RGB unsigned bytes (3 components)
+					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboC);
+					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCompCount * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+					glFunc->glEnableVertexAttribArray(ATTR_COL);
+					// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
+					glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+					// ensure alpha = 1.0 for all vertices
+					// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
+				}
+				else if (glParams.showColors)
+				{
+					// colors are RGBA unsigned bytes
+					glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboC);
+					glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCompCount * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+					glFunc->glEnableVertexAttribArray(ATTR_COL);
+					glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, reinterpret_cast<void*>(0));
+				}
+				else
+				{
+					// use default material diffuse front (converted to 0..1)
+					glFunc->glDisableVertexAttribArray(ATTR_COL);
+					const ccColor::Rgbaf& def = context.defaultMat->getDiffuseFront();
+					glFunc->glVertexAttrib4fv(ATTR_COL, def.rgba);
+				}
+
+				// draw
 				if (!showWired)
 				{
-					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, (static_cast<int>(chunkSize) / decimStep) * 3);
+					glFunc->glDrawArrays(lodEnabled ? GL_POINTS : GL_TRIANGLES, 0, static_cast<GLint>(vertexCount));
 				}
 				else
 				{
 					glFunc->glDrawElements(GL_LINES, (static_cast<int>(chunkSize) / decimStep) * 6, GL_UNSIGNED_INT, GetWireVertexIndexes());
 				}
-			}
 
-			// disable arrays
-			glFunc->glDisableClientState(GL_VERTEX_ARRAY);
-			if (glParams.showNorms)
-				glFunc->glDisableClientState(GL_NORMAL_ARRAY);
-			if (glParams.showSF || glParams.showColors)
-				glFunc->glDisableClientState(GL_COLOR_ARRAY);
+				// cleanup per-chunk state
+				glFunc->glDisableVertexAttribArray(ATTR_POS);
+				if (glParams.showNorms)
+					glFunc->glDisableVertexAttribArray(ATTR_NOR);
+				if (glParams.showSF || glParams.showColors)
+					glFunc->glDisableVertexAttribArray(ATTR_COL);
+
+				// unbind array buffer
+				glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+				glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				if (prog != 0)
+				{
+					glFunc->glUseProgram(0);
+				}
+			}
 		}
 		else
 		{
@@ -2162,7 +2458,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					ccGL::Color(glFunc, *rgba1);
 				if (Tx1)
 					glFunc->glTexCoord2fv(Tx1->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i1)->u);
+				ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i1)->u);
 
 				// vertex 2
 				if (N2)
@@ -2173,7 +2469,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					ccGL::Color(glFunc, *rgba2);
 				if (Tx2)
 					glFunc->glTexCoord2fv(Tx2->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i2)->u);
+				ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i2)->u);
 
 				// vertex 3
 				if (N3)
@@ -2184,7 +2480,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					ccGL::Color(glFunc, *rgba3);
 				if (Tx3)
 					glFunc->glTexCoord2fv(Tx3->t);
-				ccGL::Vertex3v(glFunc, m_associatedCloud->getPoint(tsi.i3)->u);
+				ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i3)->u);
 			}
 
 			glFunc->glEnd();

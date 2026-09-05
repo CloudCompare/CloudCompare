@@ -31,11 +31,13 @@ class ccMaterialDB : public QObject
 	Q_OBJECT
 
   public:
+	//! Default constructor
 	ccMaterialDB()
 	    : m_initialized(false)
 	{
 	}
 
+	//! Initializes the database (connects the file watcher)
 	void init()
 	{
 		if (!m_initialized)
@@ -45,6 +47,7 @@ class ccMaterialDB : public QObject
 		}
 	}
 
+	//! Callback called when a file has changed (deleted, renamed or updated)
 	void onFileChanged(const QString& filename)
 	{
 		if (!m_textures.contains(filename))
@@ -75,16 +78,19 @@ class ccMaterialDB : public QObject
 		}
 	}
 
+	//! Returns whether the database contains a texture associated with the given filename.
 	inline bool hasTexture(const QString& filename) const
 	{
 		return m_textures.contains(filename);
 	}
 
+	//!	Returns the texture associated with the given filename (if any).
 	inline QImage getTexture(const QString& filename) const
 	{
 		return m_textures.contains(filename) ? m_textures[filename].image : QImage();
 	}
 
+	//! Add a texture associated with the given filename to the database.
 	void addTexture(const QString& filename, const QImage& image)
 	{
 		if (!m_initialized)
@@ -102,6 +108,7 @@ class ccMaterialDB : public QObject
 		}
 	}
 
+	//!	Increase the texture counter associated with the given filename.
 	void increaseTextureCounter(const QString& filename)
 	{
 		if (m_textures.contains(filename))
@@ -115,6 +122,7 @@ class ccMaterialDB : public QObject
 		}
 	}
 
+	//!	Decrease the texture counter associated with the given filename.
 	void releaseTexture(const QString& filename)
 	{
 		if (m_textures.contains(filename))
@@ -130,6 +138,7 @@ class ccMaterialDB : public QObject
 		}
 	}
 
+	//!	Remove the texture associated with the given filename from the database.
 	void removeTexture(const QString& filename)
 	{
 		m_textures.remove(filename);
@@ -139,16 +148,41 @@ class ccMaterialDB : public QObject
 		openGLTextures.remove(filename);
 	}
 
-	QMap<QString, QSharedPointer<QOpenGLTexture>> openGLTextures;
+	//! Add an OpenGL texture associated with the given filename to the database.
+	void addOpenGLTexture(const QString& filename, QSharedPointer<QOpenGLTexture> texture)
+	{
+		openGLTextures[filename] = texture;
+	}
+
+	//! Remove the OpenGL texture associated with the given filename from the database.
+	void removeOpenGLTexture(const QString& filename)
+	{
+		openGLTextures.remove(filename);
+	}
+
+	//!	Returns the OpenGL texture associated with the given filename (if any).
+	QSharedPointer<QOpenGLTexture> getOpenGLTexture(const QString& filename) const
+	{
+		return openGLTextures.contains(filename) ? openGLTextures[filename] : nullptr;
+	}
+
+	//!	Releases all OpenGL textures associated with the database.
+	void releaseAllOpenGLTextures()
+	{
+		openGLTextures.clear();
+	}
 
   protected:
+	QMap<QString, QSharedPointer<QOpenGLTexture>> openGLTextures; //!< OpenGL textures associated with the database
+
+	//! Texture information
 	struct TextureInfo
 	{
-		QImage   image;
-		unsigned counter = 0;
+		QImage   image;       //!< Texture image
+		unsigned counter = 0; //!< Texture counter (number of times the texture is used)
 	};
 
-	bool                       m_initialized;
-	QFileSystemWatcher         m_watcher;
-	QMap<QString, TextureInfo> m_textures;
+	bool                       m_initialized; //!< Whether the database has been initialized (file watcher connected)
+	QFileSystemWatcher         m_watcher;     //!< File system watcher to monitor texture files for changes
+	QMap<QString, TextureInfo> m_textures;    //!< Texture information associated with the database
 };

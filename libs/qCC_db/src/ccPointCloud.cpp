@@ -6065,7 +6065,6 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				// load colors
 				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
 				{
-					currentVBO->colorBuffer.bind();
 					if (glParams.showSF)
 					{
 						// copy SF colors in static array
@@ -6102,15 +6101,18 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 							}
 						}
 						// then send them in VRAM
+						currentVBO->colorBuffer.bind();
 						currentVBO->colorBuffer.write(0, s_rgbBuffer4ub, sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->colorBuffer.release();
 						// upadte 'modification' flag for current displayed SF
 						m_vboManager.sourceSF->setModificationFlag(false);
 					}
 					else if (glParams.showColors)
 					{
+						currentVBO->colorBuffer.bind();
 						currentVBO->colorBuffer.write(0, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
+						currentVBO->colorBuffer.release();
 					}
-					currentVBO->colorBuffer.release();
 				}
 
 				// load normals

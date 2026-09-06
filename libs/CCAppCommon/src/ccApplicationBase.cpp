@@ -133,7 +133,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
 	        { ccMaterial::ReleaseTextures();
 			  ccColorScalesManager::ReleaseUniqueInstance();
-	          ccMesh::ReleaseOpenGLRessources(); });
+	          ccMesh::ReleaseOpenGLRessources();
+	          ccPointCloud::ReleaseOpenGLRessources(); });
 }
 
 QString ccApplicationBase::versionLongStr(bool includeOS) const

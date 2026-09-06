@@ -936,6 +936,9 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	 **/
 	static void ReleaseShaders();
 
+	//! Releases OpenGL ressources (textures, VBOs, etc.)
+	static void ReleaseOpenGLRessources();
+
   protected:
 	// inherited from ccHObject
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;

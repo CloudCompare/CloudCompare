@@ -23,8 +23,8 @@
 
 // Qt
 #include <QList>
-#include <QSharedPointer>
 #include <QOpenGLTexture>
+#include <QSharedPointer>
 
 // System
 #include <set>
@@ -373,8 +373,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 		return m_texture;
 	}
 
-protected:
-
+  protected:
 	//! Builds the OpenGL texture corresponding to this color scale
 	bool buildTexture(QOpenGLFunctions_2_1* glFunc) const;
 

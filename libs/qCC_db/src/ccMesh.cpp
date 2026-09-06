@@ -1682,9 +1682,10 @@ static GLuint                                          s_vboNormals = 0;
 static GLuint                                          s_vboColor   = 0;
 
 // Attribute indexes that we bound when creating the programs
-static const GLuint ATTR_POS = 0;
-static const GLuint ATTR_NOR = 1;
-static const GLuint ATTR_COL = 2;
+static const GLuint ATTR_POS  = 0;
+static const GLuint ATTR_NOR  = 1;
+static const GLuint ATTR_COL  = 2;
+static const GLuint ATTR_CLIP = 4;
 
 void ccMesh::ReleaseOpenGLRessources()
 {
@@ -1720,8 +1721,8 @@ void ccMesh::ReleaseOpenGLRessources()
 	}
 }
 
-// Simple program builder (GLSL 1.20) for mesh rendering (position, normal, color)
-static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
+// GLSL program builder (GLSL 1.20) for mesh rendering (position, normal, color)
+static QSharedPointer<QOpenGLShaderProgram> BuildMeshDisplayProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
 {
 	if (!glFunc)
 	{
@@ -1734,9 +1735,56 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFuncti
 		return s_programs[attributes];
 	}
 
-	QString vertexProgSrc;
-	QString fragmentProgSrc;
+	// Vertex shaders
+	static const char* VertexProgHeaderSrc =
+	    "#version 120\n"
+	    "attribute vec3 aPosition;\n"
+	    "varying vec4 vColor;\n";
 
+	static const char* VertexProgColorAttributesSrc =
+	    "attribute vec4 aColor;\n";
+
+	static const char* VertexProgNormAttributesSrc =
+	    "attribute float aNormalIndex;\n"
+	    "varying vec3 vNormal;\n"
+	    "uniform sampler2D uNormalLUT;\n"
+	    "uniform int uLUTWidth;\n"
+	    "uniform int uLUTHeight;\n";
+
+	static const char* VertexProgFetchNormFuncSrc =
+	    "vec3 fetchNormalFromLUT(float fi)\n"
+	    "{\n"
+	    "	float w  = float(uLUTWidth);\n"
+	    "	float h  = float(uLUTHeight);\n"
+	    "	float tx = mod(fi, w);\n"
+	    "	float ty = floor(fi / w);\n"
+	    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
+	    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
+	    "	vec3 n = enc * 2.0 - 1.0;\n"
+	    "	return normalize(n);\n"
+	    "}\n";
+
+	static const char* VertexProgMainStartSrc =
+	    "void main()\n"
+	    "{\n";
+
+	static const char* VertexProgMainUseDefaultGLColorSrc =
+	    "    vColor = gl_Color;\n";
+
+	static const char* VertexProgMainUseInputColorSrc =
+	    "    vColor = aColor;\n";
+
+	static const char* VertexProgMainFetchNormalSrc =
+	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
+
+	static const char* VertexProgMainClippingSrc =
+	    "    gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n";
+
+	static const char* VertexProgMainEndSrc =
+	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+	    "}\n";
+
+	// Fragment shaders
 	static const char* ColorOnlyFragmentProgSrc =
 	    "#version 120\n"
 	    "varying vec4 vColor;\n"
@@ -1758,117 +1806,61 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFuncti
 	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
 	    "}\n";
 
-	switch (attributes)
+	QString vertexProgSrc = VertexProgHeaderSrc;
 	{
-	case ATTR_POS:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "varying vec4 vColor;\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = gl_Color;\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+		// add attributes
+		if (attributes & ATTR_COL)
+			vertexProgSrc += VertexProgColorAttributesSrc;
+		if (attributes & ATTR_NOR)
+			vertexProgSrc += VertexProgNormAttributesSrc;
 
-		fragmentProgSrc = ColorOnlyFragmentProgSrc;
+		// add special functions
+		if (attributes & ATTR_NOR)
+		{
+			vertexProgSrc += VertexProgFetchNormFuncSrc;
+		}
 
-		break;
+		// main function
+		{
+			vertexProgSrc += VertexProgMainStartSrc;
 
-	case ATTR_COL:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute vec4 aColor;\n"
-		    "varying vec4 vColor;\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = aColor;\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+			// color transfer
+			if (attributes & ATTR_COL)
+			{
+				vertexProgSrc += VertexProgMainUseInputColorSrc;
+			}
+			else
+			{
+				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
+			}
 
-		fragmentProgSrc = ColorOnlyFragmentProgSrc;
-		break;
+			// normal transfer (if any)
+			if (attributes & ATTR_NOR)
+			{
+				vertexProgSrc += VertexProgMainFetchNormalSrc;
+			}
 
-	case ATTR_NOR:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute float aNormalIndex;\n"
-		    "varying vec4 vColor;\n"
-		    "varying vec3 vNormal;\n"
-		    "uniform sampler2D uNormalLUT;\n"
-		    "uniform int uLUTWidth;\n"
-		    "uniform int uLUTHeight;\n"
-		    "vec3 fetchNormalFromLUT(float fi)\n"
-		    "{\n"
-		    "	float w  = float(uLUTWidth);\n"
-		    "	float h  = float(uLUTHeight);\n"
-		    "	float tx = mod(fi, w);\n"
-		    "	float ty = floor(fi / w);\n"
-		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-		    "	vec3 n = enc * 2.0 - 1.0;\n"
-		    "	return normalize(n);\n"
-		    "}\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = gl_Color;\n"
-		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+			if (attributes & ATTR_CLIP)
+			{
+				vertexProgSrc += VertexProgMainClippingSrc;
+			}
 
-		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
-		break;
-
-	case (ATTR_COL | ATTR_NOR):
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute float aNormalIndex;\n"
-		    "attribute vec4 aColor;\n"
-		    "varying vec4 vColor;\n"
-		    "varying vec3 vNormal;\n"
-		    "uniform sampler2D uNormalLUT;\n"
-		    "uniform int uLUTWidth;\n"
-		    "uniform int uLUTHeight;\n"
-		    "vec3 fetchNormalFromLUT(float fi)\n"
-		    "{\n"
-		    "	float w  = float(uLUTWidth);\n"
-		    "	float h  = float(uLUTHeight);\n"
-		    "	float tx = mod(fi, w);\n"
-		    "	float ty = floor(fi / w);\n"
-		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-		    "	vec3 n = enc * 2.0 - 1.0;\n"
-		    "	return normalize(n);\n"
-		    "}\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = aColor;\n"
-		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
-
-		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
-		break;
-
-	default:
-		assert(false);
-		ccLog::Warning("[BuildSimpleMeshProgram] Unsupported feature combination!");
-		return nullptr;
+			vertexProgSrc += VertexProgMainEndSrc;
+		}
 	}
+
+	QString fragmentProgSrc = (attributes & ATTR_NOR ? ColorAndNormalFragmentProgSrc : ColorOnlyFragmentProgSrc);
 
 	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
 	if (false == vertexShader.compileSourceCode(vertexProgSrc))
 	{
-		ccLog::Warning(QString("[BuildSimpleMeshProgram] Vertex shader compilation failed: ") + vertexShader.log());
+		ccLog::Warning(QString("[BuildMeshDisplayProgram] Vertex shader compilation failed: ") + vertexShader.log());
 		return nullptr;
 	}
 	QOpenGLShader fragmentShader(QOpenGLShader::Fragment);
 	if (false == fragmentShader.compileSourceCode(fragmentProgSrc))
 	{
-		ccLog::Warning(QString("[BuildSimpleMeshProgram] Fragment shader compilation failed: ") + fragmentShader.log());
+		ccLog::Warning(QString("[BuildMeshDisplayProgram] Fragment shader compilation failed: ") + fragmentShader.log());
 		return nullptr;
 	}
 	QSharedPointer<QOpenGLShaderProgram> program(new QOpenGLShaderProgram);
@@ -1888,7 +1880,7 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleMeshProgram(QOpenGLFuncti
 
 	if (false == program->link())
 	{
-		ccLog::Warning(QString("[BuildSimpleMeshProgram] Shader program linking failed: ") + program->log());
+		ccLog::Warning(QString("[BuildMeshDisplayProgram] Shader program linking failed: ") + program->log());
 		return nullptr;
 	}
 
@@ -2105,8 +2097,13 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			attributes |= ATTR_COL;
 		}
+		if (!m_clipPlanes.empty())
+		{
+			attributes |= ATTR_CLIP;
+		}
 
-		prog = BuildSimpleMeshProgram(glFunc, attributes);
+		prog = BuildMeshDisplayProgram(glFunc, attributes);
+
 		if (prog.isNull())
 		{
 			fallBackDisplay = true;
@@ -2122,6 +2119,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
 				s_normalLUTTextureFailed = true;
 				fallBackDisplay          = true;
+
+				prog.clear();
+				fallBackDisplay = true;
 			}
 		}
 	}

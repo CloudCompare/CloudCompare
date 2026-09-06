@@ -2758,15 +2758,16 @@ inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField
 static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 // Attribute indexes that we bound when creating the programs
-static const GLuint ATTR_POS = 0;
-static const GLuint ATTR_NOR = 1;
-static const GLuint ATTR_COL = 2;
-static const GLuint ATTR_SF  = 4;
-static const GLuint ATTR_VIS = 8;
+static const GLuint ATTR_POS  = 0;
+static const GLuint ATTR_NOR  = 1;
+static const GLuint ATTR_COL  = 2;
+static const GLuint ATTR_SF   = 4;
+static const GLuint ATTR_VIS  = 8;
+static const GLuint ATTR_CLIP = 16;
 // For internal use only
-static const GLuint ATTR_LOG_SCALE  = 16;
-static const GLuint ATTR_SYM_SCALE  = 32;
-static const GLuint ATTR_HIDDEN_VAL = 64;
+static const GLuint ATTR_LOG_SCALE  = 32;
+static const GLuint ATTR_SYM_SCALE  = 64;
+static const GLuint ATTR_HIDDEN_VAL = 128;
 
 // Global OpenGL resources
 static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
@@ -3576,6 +3577,9 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 	static const char* VertexProgMainFetchNormalSrc =
 	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
 
+	static const char* VertexProgMainClippingSrc =
+	    "    gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n";
+
 	static const char* VertexProgMainEndSrc =
 	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
 	    "}\n";
@@ -3660,6 +3664,11 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 			if (attributes & ATTR_NOR)
 			{
 				vertexProgSrc += VertexProgMainFetchNormalSrc;
+			}
+
+			if (attributes & ATTR_CLIP)
+			{
+				vertexProgSrc += VertexProgMainClippingSrc;
 			}
 
 			vertexProgSrc += VertexProgMainEndSrc;
@@ -3989,6 +3998,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (visTableEnabled)
 			{
 				attributes |= ATTR_VIS;
+			}
+			if (!m_clipPlanes.empty())
+			{
+				attributes |= ATTR_CLIP;
 			}
 
 			prog = BuildCloudDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);

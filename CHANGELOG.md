@@ -150,6 +150,13 @@ New plugins
 
 Improvements:
 
+	- Display speed of clouds and meshes has been improved a lot
+		- use of a composite GLSL 1.2 program
+		- use of a LUT texture with uncompressed normals
+		- use of a color scale texture when displaying scalar fields
+		- visibility filtering done in the same program
+		- (does not work with partial or textured meshes yet)
+
 	- Display > Lock rotation about an axis
 		- now a proper 'turntable' rotation mode
 		- dedicated icon in the left 'View' toolbar

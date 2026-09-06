@@ -6478,8 +6478,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				// load colors
 				if (chunkUpdateFlags & vboSet::UPDATE_COLORS)
 				{
-#if 0
-					if (glParams.showSF)
+					if (glParams.showSF && !noSF)
 					{
 						// copy SF colors in static array
 						ColorCompType* _sfColors = s_rgbBuffer4ub;
@@ -6521,9 +6520,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 						// upadte 'modification' flag for current displayed SF
 						m_vboManager.sourceSF->setModificationFlag(false);
 					}
-					else
-#endif
-					if (glParams.showColors)
+					else if (glParams.showColors)
 					{
 						currentVBO->colorBuffer.bind();
 						currentVBO->colorBuffer.write(0, ccChunk::Start(*m_rgbaColors, chunkIndex), sizeof(ColorCompType) * chunkSize * 4);
@@ -6532,7 +6529,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 				}
 
 				// load normals
-				if (glParams.showNorms && (chunkUpdateFlags & vboSet::UPDATE_NORMALS))
+				if (glParams.showNorms && (chunkUpdateFlags & vboSet::UPDATE_NORMALS) && !noNormals)
 				{
 					// we must decode the normals first!
 					CompressedNormType* inNorms  = ccChunk::Start(*m_normals, chunkIndex);

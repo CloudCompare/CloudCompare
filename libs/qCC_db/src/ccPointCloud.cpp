@@ -2762,6 +2762,10 @@ static const GLuint ATTR_POS = 0;
 static const GLuint ATTR_NOR = 1;
 static const GLuint ATTR_COL = 2;
 static const GLuint ATTR_SF  = 4;
+// For internal use only
+static const GLuint ATTR_LOG_SCALE  = 8;
+static const GLuint ATTR_SYM_SCALE  = 16;
+static const GLuint ATTR_HIDDEN_VAL = 32;
 
 // Global OpenGL resources
 static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
@@ -3294,6 +3298,29 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 		return nullptr;
 	}
 
+	// add secondary attributes
+	if (attributes & ATTR_SF)
+	{
+		if (!sf)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		if (sf->logScale())
+		{
+			attributes |= ATTR_LOG_SCALE;
+		}
+		else if (sf->symmetricalScale())
+		{
+			attributes |= ATTR_SYM_SCALE;
+		}
+		if (!sf->areNaNValuesShownInGrey())
+		{
+			attributes |= ATTR_HIDDEN_VAL;
+		}
+	}
+
 	if (s_programs.contains(attributes))
 	{
 		return s_programs[attributes];
@@ -3343,10 +3370,6 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 	static const char* VertexProgFetchSFColorFuncSrc =
 	    "vec4 fetchColorFromTex(float sfVal)\n"
 	    "{\n"
-	    "   if (sfVal < uMinVal)\n"
-	    "       return vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
-	    "   if (sfVal > uMaxVal)\n"
-	    "       return vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
 	    "   float v = normalizeSFVal(sfVal);\n"
 	    "   v = v * float(uTexWidth * uTexHeight - 1);\n"
 	    "	float w  = float(uTexWidth);\n"
@@ -3409,7 +3432,25 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 	    "    vColor = aColor;\n";
 
 	static const char* VertexProgMainFetchSFColorSrc =
-	    "    vColor = fetchColorFromTex(aSFValue);\n";
+	    "   if (aSFValue >= uMinVal && aSFValue <= uMaxVal)\n"
+	    "   {\n"
+	    "      vColor = fetchColorFromTex(aSFValue);\n"
+	    "   }\n"
+	    "   else\n"
+	    "   {\n"
+	    "      vColor = vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
+	    "   }\n";
+
+	static const char* VertexProgMainFetchSFColorHideNaNSrc =
+	    "   if (aSFValue >= uMinVal && aSFValue <= uMaxVal)\n"
+	    "   {\n"
+	    "      vColor = fetchColorFromTex(aSFValue);\n"
+	    "   }\n"
+	    "   else\n"
+	    "   {\n"
+	    "      gl_Position = vec4(0, 0, 0, -1.0);\n" // impossible position, should be discarded by the GPU
+	    "      return;\n"
+	    "   }\n";
 
 	static const char* VertexProgMainFetchNormalSrc =
 	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
@@ -3453,13 +3494,13 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 		// add special functions
 		if (attributes & ATTR_SF)
 		{
-			if (sf->logScale())
+			if (attributes & ATTR_LOG_SCALE)
 			{
 				vertexProgSrc += NormalizeValueLogScaleFuncSrc;
 			}
 			else
 			{
-				vertexProgSrc += (sf->symmetricalScale() ? NormalizeSymmetricalValueFuncSrc : NormalizeNonSymmetricalValueFuncSrc);
+				vertexProgSrc += ((attributes & ATTR_SYM_SCALE) ? NormalizeSymmetricalValueFuncSrc : NormalizeNonSymmetricalValueFuncSrc);
 			}
 			vertexProgSrc += VertexProgFetchSFColorFuncSrc;
 		}
@@ -3475,15 +3516,23 @@ static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunc
 
 			// color transfer
 			if (attributes & ATTR_SF)
-				vertexProgSrc += VertexProgMainFetchSFColorSrc;
+			{
+				vertexProgSrc += ((attributes & ATTR_HIDDEN_VAL) ? VertexProgMainFetchSFColorHideNaNSrc : VertexProgMainFetchSFColorSrc);
+			}
 			else if (attributes & ATTR_COL)
+			{
 				vertexProgSrc += VertexProgMainUseInputColorSrc;
+			}
 			else
+			{
 				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
+			}
 
 			// normal transfer (if any)
 			if (attributes & ATTR_NOR)
+			{
 				vertexProgSrc += VertexProgMainFetchNormalSrc;
+			}
 
 			vertexProgSrc += VertexProgMainEndSrc;
 		}
@@ -3830,186 +3879,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			glFunc->glEnd();
 		}
-		else if (glParams.showSF
-		         && m_currentDisplayedScalarField
-		         && m_currentDisplayedScalarField->mayHaveHiddenValues()) // no visibility table enabled but scalar field with hidden points/values
-		{
-			// color ramp shader initialization
-			ccColorRampShader* colorRampShader = context.colorRampShader;
-			{
-				// FIXME: color ramp shader doesn't support log scale yet!
-				if (m_currentDisplayedScalarField->logScale())
-				{
-					colorRampShader = nullptr;
-				}
-				// the shader can't be used during color-based color picking
-				if (entityPickingMode)
-				{
-					colorRampShader = nullptr;
-				}
-			}
-
-			const ccScalarField::Range& sfDisplayRange    = m_currentDisplayedScalarField->displayRange();
-			const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
-			const bool                  symmetricalScale  = m_currentDisplayedScalarField->symmetricalScale();
-
-			if (colorRampShader)
-			{
-				// max available space for fragment's shader uniforms
-				GLint maxBytes = 0;
-				glFunc->glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxBytes);
-				GLint    maxComponents = (maxBytes >> 2) - 4; // leave space for the other uniforms!
-				unsigned steps         = m_currentDisplayedScalarField->getColorRampSteps();
-				assert(steps != 0);
-
-				if (steps > ccColorRampShader::MaxColorRampSize() || maxComponents < static_cast<GLint>(steps))
-				{
-					ccLog::WarningDebug("Color ramp steps exceed shader limits!");
-					colorRampShader = nullptr;
-				}
-				else
-				{
-					float sfMinSatRel = 0.0f;
-					float sfMaxSatRel = 1.0f;
-					if (!m_currentDisplayedScalarField->symmetricalScale())
-					{
-						sfMinSatRel = GetNormalizedValue(sfSaturationRange.start(), sfDisplayRange); // doesn't need to be between 0 and 1!
-						sfMaxSatRel = GetNormalizedValue(sfSaturationRange.stop(), sfDisplayRange);  // doesn't need to be between 0 and 1!
-					}
-					else
-					{
-						// we can only handle 'maximum' saturation
-						sfMinSatRel = GetSymmetricalNormalizedValue(-sfSaturationRange.stop(), sfSaturationRange);
-						sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(), sfSaturationRange);
-						// we'll have to handle the 'minimum' saturation manually!
-					}
-
-					const ccColorScale::Shared& colorScale = m_currentDisplayedScalarField->getColorScale();
-					assert(colorScale);
-
-					colorRampShader->bind();
-					if (!colorRampShader->setup(glFunc, sfMinSatRel, sfMaxSatRel, steps, colorScale))
-					{
-						// An error occurred during shader initialization?
-						ccLog::WarningDebug("Failed to init ColorRamp shader!");
-						colorRampShader->release();
-						colorRampShader = nullptr;
-					}
-					else if (glParams.showNorms)
-					{
-						// we must get rid of lights material (other than ambient) for the red and green fields
-						glFunc->glPushAttrib(GL_LIGHTING_BIT);
-
-						// we use the ambient light to pass the scalar value (and 'grayed' marker) without any
-						// modification from the GPU pipeline, even if normals are enabled!
-						glFunc->glDisable(GL_COLOR_MATERIAL);
-						glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-						glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
-						glFunc->glEnable(GL_COLOR_MATERIAL);
-
-						GLint maxLightCount;
-						glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
-						for (GLint i = 0; i < maxLightCount; ++i)
-						{
-							if (glFunc->glIsEnabled(GL_LIGHT0 + i))
-							{
-								float diffuse[4];
-								float ambiant[4];
-								float specular[4];
-
-								glFunc->glGetLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
-								glFunc->glGetLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
-								glFunc->glGetLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
-
-								ambiant[0] = ambiant[1] = 1.0f;
-								diffuse[0] = diffuse[1] = 0.0f;
-								specular[0] = specular[1] = 0.0f;
-
-								glFunc->glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
-								glFunc->glLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
-								glFunc->glLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
-							}
-						}
-					}
-				}
-			}
-
-			glFunc->glBegin(GL_POINTS);
-
-			if (entityPickingMode)
-			{
-				for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
-				{
-					unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
-					assert(pointIndex < m_currentDisplayedScalarField->currentSize());
-					const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
-					if (col) // is the point visible?
-					{
-						// for entity picking, don't change the color, we just need to know whether the point is visible
-						ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
-					}
-				}
-			}
-			else
-			{
-				// compressed normals set
-				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
-				assert(compressedNormals);
-
-				if (colorRampShader)
-				{
-					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
-					{
-						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
-						assert(pointIndex < m_currentDisplayedScalarField->currentSize());
-						const ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
-						if (sfDisplayRange.isInRange(sfVal)) // NaN values are rejected
-						{
-							glFunc->glColor3f(symmetricalScale ? GetSymmetricalNormalizedValue(sfVal, sfSaturationRange)
-							                                   : GetNormalizedValue(sfVal, sfDisplayRange),
-							                  1.0f,
-							                  1.0f);
-							if (glParams.showNorms)
-							{
-								ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
-							}
-							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
-						}
-					}
-				}
-				else // no color ramp shader
-				{
-					for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
-					{
-						unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
-						assert(pointIndex < m_currentDisplayedScalarField->currentSize());
-						const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
-						if (col) // is the point visible?
-						{
-							ccGL::Color(glFunc, *col);
-							if (glParams.showNorms)
-							{
-								ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
-							}
-							ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
-						}
-					}
-				}
-			}
-
-			glFunc->glEnd();
-
-			if (colorRampShader)
-			{
-				colorRampShader->release();
-
-				if (glParams.showNorms)
-				{
-					glFunc->glPopAttrib(); // GL_LIGHTING_BIT
-				}
-			}
-		}
-		else // no visibility table enabled, no scalar field or scalar field with no hidden values
+		else // no visibility table enabled
 		{
 			size_t chunkCount = ccChunk::Count(m_points);
 
@@ -4022,8 +3892,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			QSharedPointer<QOpenGLTexture> lutTex;
 
 			QSharedPointer<QOpenGLShaderProgram> prog;
-			if ((glParams.showSF || glParams.showNorms)
-			    && (false == s_normalLUTTextureFailed)
+			if (/*(glParams.showSF || glParams.showNorms)
+			    &&*/
+			    (false == s_normalLUTTextureFailed)
 			    && (false == s_globalVBOCreationFailed))
 			{
 				int attributes = ATTR_POS;
@@ -4120,6 +3991,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				                     /*noNormals=*/!useProgram); // we don't need normal (indexes) VBOs if we don't use the GLSL program
 			}
 
+			bool displayDone = false;
+
 			if (prog)
 			{
 				prog->bind();
@@ -4214,150 +4087,339 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 			}
-			else
+			else // no program available
 			{
-				glFunc->glEnableClientState(GL_VERTEX_ARRAY);
-				if (glParams.showNorms)
+				// specific case: long fallback mechanism to display clouds with NaN or outbound SF values without a program... :-(
+				if (glParams.showSF
+				    && m_currentDisplayedScalarField
+				    && m_currentDisplayedScalarField->mayHaveHiddenValues()) // no visibility table enabled but scalar field with hidden points/values
 				{
-					glFunc->glEnableClientState(GL_NORMAL_ARRAY);
-				}
-				if (glParams.showColors)
-				{
-					glFunc->glEnableClientState(GL_COLOR_ARRAY);
-				}
-			}
-
-			if (toDisplay.indexMap) // LoD display
-			{
-				unsigned s = toDisplay.startIndex;
-				while (s < toDisplay.endIndex)
-				{
-					unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
-					unsigned e     = s + count;
-
-					const auto& indexMap = (*toDisplay.indexMap);
-
-					// points
-					glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e, useProgram);
-
-					// normals
-					if (glParams.showNorms)
+					// color ramp shader initialization
+					ccColorRampShader* colorRampShader = context.colorRampShader;
 					{
-						glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e, useProgram);
+						// FIXME: color ramp shader doesn't support log scale yet!
+						if (m_currentDisplayedScalarField->logScale())
+						{
+							colorRampShader = nullptr;
+						}
+						// the shader can't be used during color-based color picking
+						if (entityPickingMode)
+						{
+							colorRampShader = nullptr;
+						}
 					}
 
-					// SFs
-					if (glParams.showSF)
+					const ccScalarField::Range& sfDisplayRange    = m_currentDisplayedScalarField->displayRange();
+					const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
+					const bool                  symmetricalScale  = m_currentDisplayedScalarField->symmetricalScale();
+
+					if (colorRampShader)
 					{
-						glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e, useProgram);
-					}
-					// colors
-					else if (glParams.showColors)
-					{
-						glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e, useProgram);
+						// max available space for fragment's shader uniforms
+						GLint maxBytes = 0;
+						glFunc->glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &maxBytes);
+						GLint    maxComponents = (maxBytes >> 2) - 4; // leave space for the other uniforms!
+						unsigned steps         = m_currentDisplayedScalarField->getColorRampSteps();
+						assert(steps != 0);
+
+						if (steps > ccColorRampShader::MaxColorRampSize() || maxComponents < static_cast<GLint>(steps))
+						{
+							ccLog::WarningDebug("Color ramp steps exceed shader limits!");
+							colorRampShader = nullptr;
+						}
+						else
+						{
+							float sfMinSatRel = 0.0f;
+							float sfMaxSatRel = 1.0f;
+							if (!m_currentDisplayedScalarField->symmetricalScale())
+							{
+								sfMinSatRel = GetNormalizedValue(sfSaturationRange.start(), sfDisplayRange); // doesn't need to be between 0 and 1!
+								sfMaxSatRel = GetNormalizedValue(sfSaturationRange.stop(), sfDisplayRange);  // doesn't need to be between 0 and 1!
+							}
+							else
+							{
+								// we can only handle 'maximum' saturation
+								sfMinSatRel = GetSymmetricalNormalizedValue(-sfSaturationRange.stop(), sfSaturationRange);
+								sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(), sfSaturationRange);
+								// we'll have to handle the 'minimum' saturation manually!
+							}
+
+							const ccColorScale::Shared& colorScale = m_currentDisplayedScalarField->getColorScale();
+							assert(colorScale);
+
+							colorRampShader->bind();
+							if (!colorRampShader->setup(glFunc, sfMinSatRel, sfMaxSatRel, steps, colorScale))
+							{
+								// An error occurred during shader initialization?
+								ccLog::WarningDebug("Failed to init ColorRamp shader!");
+								colorRampShader->release();
+								colorRampShader = nullptr;
+							}
+							else if (glParams.showNorms)
+							{
+								// we must get rid of lights material (other than ambient) for the red and green fields
+								glFunc->glPushAttrib(GL_LIGHTING_BIT);
+
+								// we use the ambient light to pass the scalar value (and 'grayed' marker) without any
+								// modification from the GPU pipeline, even if normals are enabled!
+								glFunc->glDisable(GL_COLOR_MATERIAL);
+								glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+								glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+								glFunc->glEnable(GL_COLOR_MATERIAL);
+
+								GLint maxLightCount;
+								glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
+								for (GLint i = 0; i < maxLightCount; ++i)
+								{
+									if (glFunc->glIsEnabled(GL_LIGHT0 + i))
+									{
+										float diffuse[4];
+										float ambiant[4];
+										float specular[4];
+
+										glFunc->glGetLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
+										glFunc->glGetLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
+										glFunc->glGetLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
+
+										ambiant[0] = ambiant[1] = 1.0f;
+										diffuse[0] = diffuse[1] = 0.0f;
+										specular[0] = specular[1] = 0.0f;
+
+										glFunc->glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, diffuse);
+										glFunc->glLightfv(GL_LIGHT0 + i, GL_AMBIENT, ambiant);
+										glFunc->glLightfv(GL_LIGHT0 + i, GL_SPECULAR, specular);
+									}
+								}
+							}
+						}
 					}
 
-					glFunc->glDrawArrays(GL_POINTS, 0, count);
+					glFunc->glBegin(GL_POINTS);
 
-					if (prog)
+					if (entityPickingMode)
 					{
-						glFunc->glDisableVertexAttribArray(ATTR_POS);
+						for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+						{
+							unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
+							assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+							const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+							if (col) // is the point visible?
+							{
+								// for entity picking, don't change the color, we just need to know whether the point is visible
+								ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+							}
+						}
+					}
+					else
+					{
+						// compressed normals set
+						const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+						assert(compressedNormals);
+
+						if (colorRampShader)
+						{
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+							{
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ScalarType sfVal = m_currentDisplayedScalarField->getValue(pointIndex);
+								if (sfDisplayRange.isInRange(sfVal)) // NaN values are rejected
+								{
+									glFunc->glColor3f(symmetricalScale ? GetSymmetricalNormalizedValue(sfVal, sfSaturationRange)
+									                                   : GetNormalizedValue(sfVal, sfDisplayRange),
+									                  1.0f,
+									                  1.0f);
+									if (glParams.showNorms)
+									{
+										ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+									}
+									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+								}
+							}
+						}
+						else // no color ramp shader
+						{
+							for (unsigned j = toDisplay.startIndex; j < toDisplay.endIndex; j += toDisplay.decimStep)
+							{
+								unsigned pointIndex = (toDisplay.indexMap ? toDisplay.indexMap->at(j) : j);
+								assert(pointIndex < m_currentDisplayedScalarField->currentSize());
+								const ccColor::Rgb* col = m_currentDisplayedScalarField->getValueColor(pointIndex);
+								if (col) // is the point visible?
+								{
+									ccGL::Color(glFunc, *col);
+									if (glParams.showNorms)
+									{
+										ccGL::Normal3v(glFunc, compressedNormals->getNormal(m_normals->getValue(pointIndex)).u);
+									}
+									ccGL::Vertex3v(glFunc, m_points[pointIndex].u);
+								}
+							}
+						}
+					}
+
+					glFunc->glEnd();
+
+					if (colorRampShader)
+					{
+						colorRampShader->release();
+
 						if (glParams.showNorms)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							glFunc->glPopAttrib(); // GL_LIGHTING_BIT
 						}
-						if (glParams.showSF)
-						{
-							glFunc->glDisableVertexAttribArray(ATTR_SF);
-						}
-						else if (glParams.showColors)
-						{
-							glFunc->glDisableVertexAttribArray(ATTR_COL);
-						}
-						// unbind array buffer
-						glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
 					}
-					s = e;
 				}
-			}
-			else
-			{
-				for (size_t k = 0; k < chunkCount; ++k)
+				else
 				{
-					size_t chunkSize = ccChunk::Size(k, m_points);
-
-					// points
-					glChunkVertexPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
-
-					// normals
+					// simpler fallback mechanism to display a cloud without a program but no missing points
+					glFunc->glEnableClientState(GL_VERTEX_ARRAY);
 					if (glParams.showNorms)
 					{
-						glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
+						glFunc->glEnableClientState(GL_NORMAL_ARRAY);
 					}
-					// SFs
-					if (glParams.showSF)
+					if (glParams.showSF || glParams.showColors)
 					{
-						glChunkSFPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
+						glFunc->glEnableClientState(GL_COLOR_ARRAY);
 					}
-					// colors
-					else if (glParams.showColors)
-					{
-						glChunkColorPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
-					}
+				}
 
-					if (toDisplay.decimStep > 1)
-					{
-						chunkSize = chunkSize / static_cast<size_t>(toDisplay.decimStep); // equivalent to floor if value >= 0
-					}
+				displayDone = true;
+			}
 
-					glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(chunkSize));
-
-					if (prog)
+			if (!displayDone)
+			{
+				if (toDisplay.indexMap) // LoD display
+				{
+					unsigned s = toDisplay.startIndex;
+					while (s < toDisplay.endIndex)
 					{
-						glFunc->glDisableVertexAttribArray(ATTR_POS);
+						unsigned count = std::min(MAX_POINT_COUNT_PER_LOD_RENDER_PASS, toDisplay.endIndex - s);
+						unsigned e     = s + count;
+
+						const auto& indexMap = (*toDisplay.indexMap);
+
+						// points
+						glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e, useProgram);
+
+						// normals
 						if (glParams.showNorms)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e, useProgram);
 						}
+
+						// SFs
 						if (glParams.showSF)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_SF);
+							glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e, useProgram);
 						}
+						// colors
 						else if (glParams.showColors)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_COL);
+							glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e, useProgram);
 						}
-						// unbind array buffer
-						glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+						glFunc->glDrawArrays(GL_POINTS, 0, count);
+
+						if (prog)
+						{
+							glFunc->glDisableVertexAttribArray(ATTR_POS);
+							if (glParams.showNorms)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							}
+							if (glParams.showSF)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_SF);
+							}
+							else if (glParams.showColors)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_COL);
+							}
+							// unbind array buffer
+							glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+						}
+						s = e;
 					}
 				}
-			}
+				else
+				{
+					for (size_t k = 0; k < chunkCount; ++k)
+					{
+						size_t chunkSize = ccChunk::Size(k, m_points);
 
-			if (prog)
-			{
-				prog->release();
+						// points
+						glChunkVertexPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
 
-				if (glParams.showNorms)
-				{
-					glFunc->glActiveTexture(GL_TEXTURE0);
-					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+						// normals
+						if (glParams.showNorms)
+						{
+							glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
+						}
+						// SFs
+						if (glParams.showSF)
+						{
+							glChunkSFPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
+						}
+						// colors
+						else if (glParams.showColors)
+						{
+							glChunkColorPointer(context, k, toDisplay.decimStep, useVBOs, useProgram);
+						}
+
+						if (toDisplay.decimStep > 1)
+						{
+							chunkSize = chunkSize / static_cast<size_t>(toDisplay.decimStep); // equivalent to floor if value >= 0
+						}
+
+						glFunc->glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(chunkSize));
+
+						if (prog)
+						{
+							glFunc->glDisableVertexAttribArray(ATTR_POS);
+							if (glParams.showNorms)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							}
+							if (glParams.showSF)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_SF);
+							}
+							else if (glParams.showColors)
+							{
+								glFunc->glDisableVertexAttribArray(ATTR_COL);
+							}
+							// unbind array buffer
+							glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
+						}
+					}
 				}
-				if (glParams.showSF)
+
+				if (prog)
 				{
-					glFunc->glActiveTexture(GL_TEXTURE1);
-					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					prog->release();
+
+					if (glParams.showNorms)
+					{
+						glFunc->glActiveTexture(GL_TEXTURE0);
+						glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					}
+					if (glParams.showSF)
+					{
+						glFunc->glActiveTexture(GL_TEXTURE1);
+						glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+					}
 				}
-			}
-			else
-			{
-				glFunc->glDisableClientState(GL_VERTEX_ARRAY);
-				if (glParams.showNorms)
+				else
 				{
-					glFunc->glDisableClientState(GL_NORMAL_ARRAY);
-				}
-				if (glParams.showColors)
-				{
-					glFunc->glDisableClientState(GL_COLOR_ARRAY);
+					glFunc->glDisableClientState(GL_VERTEX_ARRAY);
+					if (glParams.showNorms)
+					{
+						glFunc->glDisableClientState(GL_NORMAL_ARRAY);
+					}
+					if (glParams.showSF || glParams.showColors)
+					{
+						glFunc->glDisableClientState(GL_COLOR_ARRAY);
+					}
 				}
 			}
 		}

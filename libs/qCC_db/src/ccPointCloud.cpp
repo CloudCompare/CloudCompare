@@ -3285,8 +3285,8 @@ struct DisplayDesc : LODLevelDesc
 	LODIndexSet* indexMap;
 };
 
-// Simple program builder (GLSL 1.20) for cloud rendering (position, normal, color)
-static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunctions_2_1* glFunc, int attributes, ccScalarField* sf /*=nullptr*/)
+// GLSL program builder (GLSL 1.20) for cloud rendering (position, normal, color, scalar values)
+static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunctions_2_1* glFunc, int attributes, ccScalarField* sf /*=nullptr*/)
 {
 	if (!glFunc)
 	{
@@ -3494,13 +3494,13 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunct
 	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
 	if (false == vertexShader.compileSourceCode(vertexProgSrc))
 	{
-		ccLog::Warning(QString("[BuildSimpleCloudProgram] Vertex shader compilation failed: ") + vertexShader.log());
+		ccLog::Warning(QString("[BuildCloudDisplayProgram] Vertex shader compilation failed: ") + vertexShader.log());
 		return nullptr;
 	}
 	QOpenGLShader fragmentShader(QOpenGLShader::Fragment);
 	if (false == fragmentShader.compileSourceCode(fragmentProgSrc))
 	{
-		ccLog::Warning(QString("[BuildSimpleCloudProgram] Fragment shader compilation failed: ") + fragmentShader.log());
+		ccLog::Warning(QString("[BuildCloudDisplayProgram] Fragment shader compilation failed: ") + fragmentShader.log());
 		return nullptr;
 	}
 	QSharedPointer<QOpenGLShaderProgram> program(new QOpenGLShaderProgram);
@@ -3526,7 +3526,7 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunct
 
 	if (false == program->link())
 	{
-		ccLog::Warning(QString("[BuildSimpleCloudProgram] Shader program linking failed: ") + program->log());
+		ccLog::Warning(QString("[BuildCloudDisplayProgram] Shader program linking failed: ") + program->log());
 		return nullptr;
 	}
 
@@ -4040,7 +4040,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					attributes |= ATTR_COL;
 				}
 
-				prog = BuildSimpleCloudProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
+				prog = BuildCloudDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
 
 				if (glParams.showSF && prog)
 				{

@@ -978,32 +978,10 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 
   protected: // VBO
 	//! Init/updates VBOs
-	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams);
+	bool updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams& glParams, bool noSF = false, bool noNormals = false);
 
 	//! Composite VBO structure
-	class VBO
-	{
-	  public:
-		QOpenGLBuffer vertexBuffer;      //!< vertex buffer
-		QOpenGLBuffer colorBuffer;       //!< color buffer
-		QOpenGLBuffer normalIndexBuffer; //!< normal indexes buffer
-
-		//! Inits the VBO
-		/** \return the number of allocated bytes (or -1 if an error occurred)
-		 **/
-		int init(int count, bool withColors, bool withNormals, bool* reallocated = nullptr);
-
-		//! Releases the VBO
-		void destroy();
-
-		//! Default constructor
-		VBO()
-		    : vertexBuffer(QOpenGLBuffer::VertexBuffer)
-		    , colorBuffer(QOpenGLBuffer::VertexBuffer)
-		    , normalIndexBuffer(QOpenGLBuffer::VertexBuffer)
-		{
-		}
-	};
+	class VBO;
 
 	//! VBO set
 	struct vboSet

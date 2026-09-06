@@ -2639,12 +2639,14 @@ static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_D
 static const GLuint ATTR_POS = 0;
 static const GLuint ATTR_NOR = 1;
 static const GLuint ATTR_COL = 2;
+static const GLuint ATTR_SF  = 4;
 
 // Global OpenGL resources
 static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
 static GLuint                                          s_vboVertex  = 0;
 static GLuint                                          s_vboNormals = 0;
 static GLuint                                          s_vboColor   = 0;
+static GLuint                                          s_vboSF      = 0;
 
 void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg /*=false*/)
 {
@@ -2857,15 +2859,20 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	}
 }
 
-void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs)
+void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg /*=false*/)
 {
-	assert(m_currentDisplayedScalarField);
+	if (!m_currentDisplayedScalarField)
+	{
+		assert(false);
+		return;
+	}
 	assert(sizeof(ColorCompType) == 1);
 
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
 	assert(glFunc != nullptr);
 
 	if (useVBOs
+	    && !useProg
 	    && m_vboManager.state == vboSet::INITIALIZED
 	    && m_vboManager.hasColors
 	    && m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
@@ -2887,7 +2894,21 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 			glChunkSFPointer(context, chunkIndex, decimStep, false);
 		}
 	}
-	else if (m_currentDisplayedScalarField)
+	else if (useProg)
+	{
+		if (0 != s_vboSF)
+		{
+			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)), ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), GL_DYNAMIC_DRAW);
+			glFunc->glEnableVertexAttribArray(ATTR_SF);
+			glFunc->glVertexAttribPointer(ATTR_SF, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+	else
 	{
 		// we must convert the scalar values to RGB colors in a dedicated static array
 		size_t         chunkStart = ccChunk::StartPos(chunkIndex);
@@ -3113,7 +3134,7 @@ struct DisplayDesc : LODLevelDesc
 };
 
 // Simple program builder (GLSL 1.20) for cloud rendering (position, normal, color)
-static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
+static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunctions_2_1* glFunc, int attributes, ccScalarField* sf /*=nullptr*/)
 {
 	if (!glFunc)
 	{
@@ -3126,9 +3147,126 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunct
 		return s_programs[attributes];
 	}
 
-	QString vertexProgSrc;
-	QString fragmentProgSrc;
+	// Vertex programs
+	static const char* VertexProgHeaderSrc =
+	    "#version 120\n"
+	    "attribute vec3 aPosition;\n"
+	    "varying vec4 vColor;\n";
 
+	static const char* VertexProgColorAttributesSrc =
+	    "attribute vec4 aColor;\n";
+
+	static const char* VertexProgSFAttributesSrc =
+	    "attribute float aSFValue;\n"
+	    "uniform sampler2D uColorScaleTex;\n"
+	    "uniform int uTexWidth;\n"
+	    "uniform int uTexHeight;\n"
+	    "uniform float uMinVal;\n"
+	    "uniform float uMaxVal;\n"
+	    "uniform float uMinSat;\n"
+	    "uniform float uMaxSat;\n"
+	    "uniform float uSatRange;\n"
+	    "uniform float uOutOfRangeGreyScale;\n";
+
+	static const char* VertexProgNormAttributesSrc =
+	    "attribute float aNormalIndex;\n"
+	    "varying vec3 vNormal;\n"
+	    "uniform sampler2D uNormalLUT;\n"
+	    "uniform int uLUTWidth;\n"
+	    "uniform int uLUTHeight;\n";
+
+	static const char* VertexProgFetchNormFuncSrc =
+	    "vec3 fetchNormalFromLUT(float fi)\n"
+	    "{\n"
+	    "	float w  = float(uLUTWidth);\n"
+	    "	float h  = float(uLUTHeight);\n"
+	    "	float tx = mod(fi, w);\n"
+	    "	float ty = floor(fi / w);\n"
+	    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
+	    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
+	    "	vec3 n = enc * 2.0 - 1.0;\n"
+	    "	return normalize(n);\n"
+	    "}\n";
+
+	static const char* VertexProgFetchSFColorFuncSrc =
+	    "vec4 fetchColorFromTex(float sfVal)\n"
+	    "{\n"
+	    "   if (sfVal < uMinVal)\n"
+	    "       return vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
+	    "   if (sfVal > uMaxVal)\n"
+	    "       return vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
+	    "   float v = normalizeSFVal(sfVal);\n"
+	    "   v = v * float(uTexWidth * uTexHeight - 1);\n"
+	    "	float w  = float(uTexWidth);\n"
+	    "	float h  = float(uTexHeight);\n"
+	    "	float tx = mod(v, w);\n"
+	    "	float ty = floor(v/ w);\n"
+	    "	vec2 uv = vec2(tx / w, ty / h);\n"
+	    "	vec4 color = texture2D(uColorScaleTex, uv);\n"
+	    "	return color;\n"
+	    "}\n";
+
+	static const char* NormalizeNonSymmetricalValueFuncSrc =
+	    "float normalizeSFVal(float sfVal)\n"
+	    "{\n"
+	    "   if (sfVal <= uMinSat)\n"
+	    "      return 0.0;\n"
+	    "   if (sfVal >= uMaxSat)\n"
+	    "      return 1.0;\n"
+	    "   return (sfVal - uMinSat) / uSatRange;\n"
+	    "}\n";
+
+	static const char* NormalizeSymmetricalValueFuncSrc =
+	    "float normalizeSFVal(float sfVal)\n"
+	    "{\n"
+	    "   if (abs(sfVal) <= uMinSat)\n"
+	    "      return 0.5;\n"
+	    "   if (sfVal >= 0)\n"
+	    "   {\n"
+	    "      if (sfVal > uMaxSat)\n"
+	    "         return 1.0;\n"
+	    "      return (1.0 + (sfVal - uMinSat) / uSatRange) / 2.0;\n"
+	    "   }\n"
+	    "   else\n"
+	    "   {\n"
+	    "      if (sfVal < -uMaxSat)\n"
+	    "         return 0.0;\n"
+	    "      return (1.0 + (sfVal + uMinSat) / uSatRange) / 2.0;\n"
+	    "   }\n"
+	    "}\n";
+
+	static const char* NormalizeValueLogScaleFuncSrc =
+	    "float normalizeSFVal(float sfVal)\n"
+	    "{\n"
+	    " 	float dLog = log(max(abs(d), 0.00001)) / log(10.0);\n"
+	    "   if (dLog <= uMinSat)\n"
+	    "      return 0.0;\n"
+	    "   if (dLog >= uMaxSat)\n"
+	    "      return 1.0;\n"
+	    "   return (dLog - uMinSat) / uSatRange;\n"
+	    "}\n";
+
+	static const char* VertexProgMainStartSrc =
+	    "void main()\n"
+	    "{\n";
+
+	static const char* VertexProgMainUseDefaultGLColorSrc =
+	    "    vColor = gl_Color;\n";
+
+	static const char* VertexProgMainUseInputColorSrc =
+	    "    vColor = aColor;\n";
+
+	static const char* VertexProgMainFetchSFColorSrc =
+	    "    vColor = fetchColorFromTex(aSFValue);\n";
+
+	static const char* VertexProgMainFetchNormalSrc =
+	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
+
+	static const char* VertexProgMainEndSrc =
+	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+	    "}\n";
+
+	// Fragment programs
 	static const char* ColorOnlyFragmentProgSrc =
 	    "#version 120\n"
 	    "varying vec4 vColor;\n"
@@ -3150,106 +3288,56 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunct
 	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
 	    "}\n";
 
-	switch (attributes)
+	QString vertexProgSrc = VertexProgHeaderSrc;
 	{
-	case ATTR_POS:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "varying vec4 vColor;\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = gl_Color;\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+		// add attributes
+		if (attributes & ATTR_SF)
+			vertexProgSrc += VertexProgSFAttributesSrc;
+		else if (attributes & ATTR_COL)
+			vertexProgSrc += VertexProgColorAttributesSrc;
+		if (attributes & ATTR_NOR)
+			vertexProgSrc += VertexProgNormAttributesSrc;
 
-		fragmentProgSrc = ColorOnlyFragmentProgSrc;
+		// add special functions
+		if (attributes & ATTR_SF)
+		{
+			if (sf->logScale())
+			{
+				vertexProgSrc += NormalizeValueLogScaleFuncSrc;
+			}
+			else
+			{
+				vertexProgSrc += (sf->symmetricalScale() ? NormalizeSymmetricalValueFuncSrc : NormalizeNonSymmetricalValueFuncSrc);
+			}
+			vertexProgSrc += VertexProgFetchSFColorFuncSrc;
+		}
 
-		break;
+		if (attributes & ATTR_NOR)
+		{
+			vertexProgSrc += VertexProgFetchNormFuncSrc;
+		}
 
-	case ATTR_COL:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute vec4 aColor;\n"
-		    "varying vec4 vColor;\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = aColor;\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+		// main function
+		{
+			vertexProgSrc += VertexProgMainStartSrc;
 
-		fragmentProgSrc = ColorOnlyFragmentProgSrc;
-		break;
+			// color transfer
+			if (attributes & ATTR_SF)
+				vertexProgSrc += VertexProgMainFetchSFColorSrc;
+			else if (attributes & ATTR_COL)
+				vertexProgSrc += VertexProgMainUseInputColorSrc;
+			else
+				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
 
-	case ATTR_NOR:
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute float aNormalIndex;\n"
-		    "varying vec4 vColor;\n"
-		    "varying vec3 vNormal;\n"
-		    "uniform sampler2D uNormalLUT;\n"
-		    "uniform int uLUTWidth;\n"
-		    "uniform int uLUTHeight;\n"
-		    "vec3 fetchNormalFromLUT(float fi)\n"
-		    "{\n"
-		    "	float w  = float(uLUTWidth);\n"
-		    "	float h  = float(uLUTHeight);\n"
-		    "	float tx = mod(fi, w);\n"
-		    "	float ty = floor(fi / w);\n"
-		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-		    "	vec3 n = enc * 2.0 - 1.0;\n"
-		    "	return normalize(n);\n"
-		    "}\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = gl_Color;\n"
-		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
+			// normal transfer (if any)
+			if (attributes & ATTR_NOR)
+				vertexProgSrc += VertexProgMainFetchNormalSrc;
 
-		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
-		break;
-
-	case (ATTR_COL | ATTR_NOR):
-		vertexProgSrc =
-		    "#version 120\n"
-		    "attribute vec3 aPosition;\n"
-		    "attribute float aNormalIndex;\n"
-		    "attribute vec4 aColor;\n"
-		    "varying vec4 vColor;\n"
-		    "varying vec3 vNormal;\n"
-		    "uniform sampler2D uNormalLUT;\n"
-		    "uniform int uLUTWidth;\n"
-		    "uniform int uLUTHeight;\n"
-		    "vec3 fetchNormalFromLUT(float fi)\n"
-		    "{\n"
-		    "	float w  = float(uLUTWidth);\n"
-		    "	float h  = float(uLUTHeight);\n"
-		    "	float tx = mod(fi, w);\n"
-		    "	float ty = floor(fi / w);\n"
-		    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-		    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-		    "	vec3 n = enc * 2.0 - 1.0;\n"
-		    "	return normalize(n);\n"
-		    "}\n"
-		    "void main()\n"
-		    "{\n"
-		    "    vColor = aColor;\n"
-		    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n"
-		    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-		    "}\n";
-
-		fragmentProgSrc = ColorAndNormalFragmentProgSrc;
-		break;
-
-	default:
-		assert(false);
-		ccLog::Warning("[	] Unsupported feature combination!");
-		return nullptr;
+			vertexProgSrc += VertexProgMainEndSrc;
+		}
 	}
+
+	QString fragmentProgSrc = (attributes & ATTR_NOR ? ColorAndNormalFragmentProgSrc : ColorOnlyFragmentProgSrc);
 
 	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
 	if (false == vertexShader.compileSourceCode(vertexProgSrc))
@@ -3269,8 +3357,14 @@ static QSharedPointer<QOpenGLShaderProgram> BuildSimpleCloudProgram(QOpenGLFunct
 
 	// bind attribute locations before linking for stable locations
 	program->bindAttributeLocation("aPosition", ATTR_POS);
-	if (attributes & ATTR_COL)
+	if (attributes & ATTR_SF)
 	{
+		assert((attributes & ATTR_COL) == 0);
+		program->bindAttributeLocation("aSFValue", ATTR_SF);
+	}
+	else if (attributes & ATTR_COL)
+	{
+		assert((attributes & ATTR_SF) == 0);
 		program->bindAttributeLocation("aColor", ATTR_COL);
 	}
 	if (attributes & ATTR_NOR)
@@ -3462,7 +3556,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	// ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
 
-	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT);
+	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT | GL_TEXTURE_BIT | GL_POINT_BIT);
 
 	if (glParams.showSF || glParams.showColors)
 	{
@@ -3508,7 +3602,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	// rounded points
 	if (context.drawRoundedPoints)
 	{
-		glFunc->glPushAttrib(GL_POINT_BIT);
 		// DGM: alpha/blending doesn't work well because it creates a halo around points with a potentially wrong color (due to the display order)
 		// glFunc->glDisable(GL_BLEND);
 		glFunc->glEnable(GL_POINT_SMOOTH);
@@ -3580,20 +3673,20 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			glFunc->glEnd();
 		}
-		else if (glParams.showSF) // no visibility table enabled + scalar field
+		else if (glParams.showSF && m_currentDisplayedScalarField->mayHaveHiddenValues()) // no visibility table enabled + scalar field + but hidden values
 		{
 			assert(m_currentDisplayedScalarField);
 
 			// if some points may not be displayed, we'll have to be smarter!
-			bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
+			// bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
 
 			// whether VBOs are available (for faster display) or not
 			bool useVBOs = false;
-			if (!hiddenPoints && context.useVBOs && !toDisplay.indexMap) // VBOs are not compatible with LoD
-			{
-				// can't use VBOs if some points are hidden
-				useVBOs = updateVBOs(context, glParams);
-			}
+			// if (!hiddenPoints && context.useVBOs && !toDisplay.indexMap) // VBOs are not compatible with LoD
+			//{
+			//	// can't use VBOs if some points are hidden
+			//	useVBOs = updateVBOs(context, glParams);
+			// }
 
 			// color ramp shader initialization
 			ccColorRampShader* colorRampShader = context.colorRampShader;
@@ -3699,6 +3792,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
+#if 0
 			// if all points should be displayed (fastest case)
 			if (!hiddenPoints)
 			{
@@ -3806,6 +3900,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glFunc->glDisableClientState(GL_VERTEX_ARRAY);
 			}
 			else // potentially hidden points
+#endif
 			{
 				// compressed normals set
 				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
@@ -3939,19 +4034,22 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 		}
-		else // no visibility table enabled, no scalar field
+		else // no visibility table enabled, no scalar field or scalar field with no hidden values
 		{
 			bool useVBOs = context.useVBOs && !toDisplay.indexMap ? updateVBOs(context, glParams) : false; // VBOs are not compatible with LoD
 
 			size_t chunkCount = ccChunk::Count(m_points);
 
-			// normal acceleration texture (for fast normals display)
+			// sf display acceleration texture (for fast scalar field display)
+			QSharedPointer<QOpenGLTexture> sfTex;
+
+			// normal display acceleration texture (for fast normals display)
 			static bool                    s_globalVBOCreationFailed = false;
 			static bool                    s_normalLUTTextureFailed  = false;
 			QSharedPointer<QOpenGLTexture> lutTex;
 
 			QSharedPointer<QOpenGLShaderProgram> prog;
-			if (glParams.showNorms
+			if ((glParams.showSF || glParams.showNorms)
 			    && (false == s_normalLUTTextureFailed)
 			    && (false == s_globalVBOCreationFailed))
 			{
@@ -3960,13 +4058,32 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					attributes |= ATTR_NOR;
 				}
-				if (glParams.showColors || glParams.showSF)
+				if (glParams.showSF)
+				{
+					attributes |= ATTR_SF;
+				}
+				else if (glParams.showColors)
 				{
 					attributes |= ATTR_COL;
 				}
 
-				prog = BuildSimpleCloudProgram(glFunc, attributes);
-				if (!prog.isNull())
+				prog = BuildSimpleCloudProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
+
+				if (glParams.showSF && prog)
+				{
+					assert(m_currentDisplayedScalarField);
+					auto colorScale = m_currentDisplayedScalarField->getColorScale();
+					assert(!colorScale.isNull());
+
+					sfTex = colorScale->getTexture(glFunc);
+					if (sfTex.isNull())
+					{
+						ccLog::Warning("Failed to create scalar field texture! Cannot render fast scalar field.");
+						prog.clear();
+					}
+				}
+
+				if (glParams.showNorms && prog)
 				{
 					// create or retrieve the LUT texture
 					lutTex = ccNormalVectors::GetNormalLUTTexture(glFunc);
@@ -3994,6 +4111,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				glFunc->glGenBuffers(1, &s_vboNormals);
 				if (0 == s_vboNormals)
+				{
+					s_globalVBOCreationFailed = true;
+					prog.clear();
+				}
+			}
+
+			if (prog && s_vboSF == 0)
+			{
+				glFunc->glGenBuffers(1, &s_vboSF);
+				if (0 == s_vboSF)
 				{
 					s_globalVBOCreationFailed = true;
 					prog.clear();
@@ -4036,6 +4163,71 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (locH >= 0)
 					{
 						glFunc->glUniform1i(locH, lutTex->height());
+					}
+				}
+
+				if (sfTex && m_currentDisplayedScalarField)
+				{
+					// bind texture to unit 1
+					glFunc->glActiveTexture(GL_TEXTURE1);
+					glFunc->glBindTexture(GL_TEXTURE_2D, sfTex->textureId());
+					// set sampler uniform to unit 1
+					int locSampler = prog->uniformLocation("uColorScaleTex");
+					if (locSampler >= 0)
+					{
+						glFunc->glUniform1i(locSampler, 1);
+					}
+					// set texture dimensions
+					int locW = prog->uniformLocation("uTexWidth");
+					if (locW >= 0)
+					{
+						glFunc->glUniform1i(locW, sfTex->width());
+					}
+					int locH = prog->uniformLocation("uTexHeight");
+					if (locH >= 0)
+					{
+						glFunc->glUniform1i(locH, sfTex->height());
+					}
+
+					auto   colorScale = m_currentDisplayedScalarField->getColorScale();
+					double offset     = m_currentDisplayedScalarField->getOffset();
+
+					float minVal              = static_cast<float>(m_currentDisplayedScalarField->displayRange().start() - offset);
+					float maxVal              = static_cast<float>(m_currentDisplayedScalarField->displayRange().stop() - offset);
+					float minSat              = static_cast<float>(m_currentDisplayedScalarField->saturationRange().start() - offset);
+					float maxSat              = static_cast<float>(m_currentDisplayedScalarField->saturationRange().stop() - offset);
+					float satRange            = static_cast<float>(m_currentDisplayedScalarField->saturationRange().range());
+					float outOfRangeGreyScale = ccColor::lightGreyRGB.r / 255.0f;
+
+					int locMinVal = prog->uniformLocation("uMinVal");
+					if (locMinVal >= 0)
+					{
+						glFunc->glUniform1f(locMinVal, minVal);
+					}
+					int locMaxVal = prog->uniformLocation("uMaxVal");
+					if (locMaxVal >= 0)
+					{
+						glFunc->glUniform1f(locMaxVal, maxVal);
+					}
+					int locMinSat = prog->uniformLocation("uMinSat");
+					if (locMinSat >= 0)
+					{
+						glFunc->glUniform1f(locMinSat, minSat);
+					}
+					int locMaxSat = prog->uniformLocation("uMaxSat");
+					if (locMaxSat >= 0)
+					{
+						glFunc->glUniform1f(locMaxSat, maxSat);
+					}
+					int locSatRange = prog->uniformLocation("uSatRange");
+					if (locSatRange >= 0)
+					{
+						glFunc->glUniform1f(locSatRange, satRange);
+					}
+					int locOutOfRangeGreyScale = prog->uniformLocation("uOutOfRangeGreyScale");
+					if (locOutOfRangeGreyScale >= 0)
+					{
+						glFunc->glUniform1f(locOutOfRangeGreyScale, outOfRangeGreyScale);
 					}
 				}
 			}
@@ -4086,7 +4278,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							glFunc->glDisableVertexAttribArray(ATTR_NOR);
 						}
-						if (glParams.showColors)
+						if (glParams.showSF)
+						{
+							glFunc->glDisableVertexAttribArray(ATTR_SF);
+						}
+						else if (glParams.showColors)
 						{
 							glFunc->glDisableVertexAttribArray(ATTR_COL);
 						}
@@ -4110,8 +4306,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						glChunkNormalPointer(context, k, toDisplay.decimStep, useVBOs, prog != nullptr);
 					}
+					// SFs
+					if (glParams.showSF)
+					{
+						glChunkSFPointer(context, k, toDisplay.decimStep, useVBOs, prog != nullptr);
+					}
 					// colors
-					if (glParams.showColors)
+					else if (glParams.showColors)
 					{
 						glChunkColorPointer(context, k, toDisplay.decimStep, useVBOs, prog != nullptr);
 					}
@@ -4130,11 +4331,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							glFunc->glDisableVertexAttribArray(ATTR_NOR);
 						}
-						if (glParams.showColors)
+						if (glParams.showSF)
+						{
+							glFunc->glDisableVertexAttribArray(ATTR_SF);
+						}
+						else if (glParams.showColors)
 						{
 							glFunc->glDisableVertexAttribArray(ATTR_COL);
 						}
-
 						// unbind array buffer
 						glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
 					}
@@ -4147,6 +4351,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (glParams.showNorms)
 				{
+					glFunc->glActiveTexture(GL_TEXTURE0);
+					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				if (glParams.showSF)
+				{
+					glFunc->glActiveTexture(GL_TEXTURE1);
 					glFunc->glBindTexture(GL_TEXTURE_2D, 0);
 				}
 			}
@@ -4166,11 +4376,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	/*** END DISPLAY ***/
-
-	if (context.drawRoundedPoints)
-	{
-		glFunc->glPopAttrib(); // GL_POINT_BIT
-	}
 
 	glFunc->glPopAttrib(); // GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT --> will switch the light off
 

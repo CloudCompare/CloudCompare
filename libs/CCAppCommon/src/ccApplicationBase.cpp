@@ -33,6 +33,7 @@
 #include <CCPlatform.h>
 
 // qCC_db
+#include <ccColorScalesManager.h>
 #include <ccMaterial.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
@@ -131,6 +132,7 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
 	        { ccMaterial::ReleaseTextures();
+			  ccColorScalesManager::ReleaseUniqueInstance();
 	          ccMesh::ReleaseOpenGLRessources(); });
 }
 

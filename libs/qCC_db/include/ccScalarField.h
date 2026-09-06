@@ -301,6 +301,12 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion() const override;
 
+	//! Returns the underlying data vector (const)
+	const std::vector<float>& data() const
+	{
+		return *this;
+	}
+
   protected: // methods
 	//! Default destructor
 	/** Call release instead

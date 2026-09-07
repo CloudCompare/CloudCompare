@@ -23,6 +23,7 @@
 // Local
 #include "ccChunk.h"
 #include "ccColorScalesManager.h"
+#include "ccGLSLHelper.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccHObjectCaster.h"
@@ -2113,7 +2114,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			assert(!s_normalLUTTextureFailed);
 
 			// create or retrieve the LUT texture
-			lutTex = ccNormalVectors::GetNormalLUTTexture(glFunc);
+			lutTex = ccGLSL::GetNormalLUTTexture(glFunc);
 			if (lutTex.isNull())
 			{
 				ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
@@ -2159,23 +2160,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glActiveTexture(GL_TEXTURE0);
 			glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
 
-			// set sampler uniform to unit 0
-			int locSampler = prog->uniformLocation("uNormalLUT");
-			if (locSampler >= 0)
-			{
-				glFunc->glUniform1i(locSampler, 0);
-			}
-			// set LUT dimensions
-			int locW = prog->uniformLocation("uLUTWidth");
-			if (locW >= 0)
-			{
-				glFunc->glUniform1i(locW, lutTex->width());
-			}
-			int locH = prog->uniformLocation("uLUTHeight");
-			if (locH >= 0)
-			{
-				glFunc->glUniform1i(locH, lutTex->height());
-			}
+			ccGLSL::SetLUTTextureUniforms(glFunc, prog.data(), lutTex.data());
 		}
 
 		// we can scan and process each chunk separately in an optimized way

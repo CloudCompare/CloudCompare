@@ -3691,7 +3691,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showNorms && prog)
 			{
 				// create or retrieve the LUT texture
-				lutTex = ccNormalVectors::GetNormalLUTTexture(glFunc);
+				lutTex = ccGLSL::GetNormalLUTTexture(glFunc);
 				if (lutTex.isNull())
 				{
 					ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
@@ -4014,8 +4014,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (glParams.showNorms)
 				{
-					glFunc->glUniform1i(prog->uniformLocation("uLight0Enabled"), glFunc->glIsEnabled(GL_LIGHT0) ? 1 : 0);
-					glFunc->glUniform1i(prog->uniformLocation("uLight1Enabled"), glFunc->glIsEnabled(GL_LIGHT1) ? 1 : 0);
+					ccGLSL::SetLightUniforms(glFunc, prog.data());
 				}
 
 				if (lutTex)
@@ -4024,11 +4023,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glActiveTexture(GL_TEXTURE0);
 					glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
 
-					// set sampler uniform to unit 0
-					glFunc->glUniform1i(prog->uniformLocation("uNormalLUT"), 0);
-					// set LUT dimensions
-					glFunc->glUniform1i(prog->uniformLocation("uLUTWidth"), lutTex->width());
-					glFunc->glUniform1i(prog->uniformLocation("uLUTHeight"), lutTex->height());
+					ccGLSL::SetLUTTextureUniforms(glFunc, prog.data(), lutTex.data());
 				}
 
 				if (sfTex && m_currentDisplayedScalarField)
@@ -4037,52 +4032,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glActiveTexture(GL_TEXTURE1);
 					glFunc->glBindTexture(GL_TEXTURE_2D, sfTex->textureId());
 
-					// set sampler uniform to unit 1
-					glFunc->glUniform1i(prog->uniformLocation("uColorScaleTex"), 1);
-					// set texture dimensions
-					glFunc->glUniform1i(prog->uniformLocation("uTexWidth"), sfTex->width());
-					glFunc->glUniform1i(prog->uniformLocation("uTexHeight"), sfTex->height());
-
-					auto   colorScale = m_currentDisplayedScalarField->getColorScale();
-					double offset     = m_currentDisplayedScalarField->getOffset();
-
-					float minVal              = static_cast<float>(m_currentDisplayedScalarField->displayRange().start() - offset);
-					float maxVal              = static_cast<float>(m_currentDisplayedScalarField->displayRange().stop() - offset);
-					float minSat              = static_cast<float>(m_currentDisplayedScalarField->saturationRange().start() - offset);
-					float maxSat              = static_cast<float>(m_currentDisplayedScalarField->saturationRange().stop() - offset);
-					float satRange            = static_cast<float>(m_currentDisplayedScalarField->saturationRange().range());
-					float outOfRangeGreyScale = ccColor::lightGreyRGB.r / 255.0f;
-
-					int locMinVal = prog->uniformLocation("uMinVal");
-					if (locMinVal >= 0)
-					{
-						glFunc->glUniform1f(locMinVal, minVal);
-					}
-					int locMaxVal = prog->uniformLocation("uMaxVal");
-					if (locMaxVal >= 0)
-					{
-						glFunc->glUniform1f(locMaxVal, maxVal);
-					}
-					int locMinSat = prog->uniformLocation("uMinSat");
-					if (locMinSat >= 0)
-					{
-						glFunc->glUniform1f(locMinSat, minSat);
-					}
-					int locMaxSat = prog->uniformLocation("uMaxSat");
-					if (locMaxSat >= 0)
-					{
-						glFunc->glUniform1f(locMaxSat, maxSat);
-					}
-					int locSatRange = prog->uniformLocation("uSatRange");
-					if (locSatRange >= 0)
-					{
-						glFunc->glUniform1f(locSatRange, satRange);
-					}
-					int locOutOfRangeGreyScale = prog->uniformLocation("uOutOfRangeGreyScale");
-					if (locOutOfRangeGreyScale >= 0)
-					{
-						glFunc->glUniform1f(locOutOfRangeGreyScale, outOfRangeGreyScale);
-					}
+					ccGLSL::SetSFTextureUniforms(glFunc, prog.data(), sfTex.data(), m_currentDisplayedScalarField);
 				}
 			}
 			else

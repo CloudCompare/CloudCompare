@@ -20,10 +20,6 @@
 // Local
 #include "ccGenericPointCloud.h"
 
-// Qt
-#include <QOpenGLTexture>
-#include <QSharedPointer>
-
 // System
 #include <vector>
 
@@ -215,20 +211,6 @@ class QCC_DB_LIB_API ccNormalVectors
 	/** The normal is computed at the first point (assuming the others are its neighbors).
 	 **/
 	static bool ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPersist* points, const CCVector3& P, CCVector3& N);
-
-  public:
-	//! Returns a 2D texture containing a normal LUT (for OpenGL rendering)
-	/** The texture will be created on the first call, and then stored in the shared texture database
-	    \param glFunc OpenGL functions (OpenGL 2.1)
-	    \return the texture
-	**/
-	static QSharedPointer<QOpenGLTexture> GetNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);
-
-	//! Creates a 2D texture containing a normal LUT (for OpenGL rendering)
-	/** \param glFunc OpenGL functions (OpenGL 2.1)
-	    \return created texture
-	**/
-	static QSharedPointer<QOpenGLTexture> CreateNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);
 
   protected:
 	//! Default constructor

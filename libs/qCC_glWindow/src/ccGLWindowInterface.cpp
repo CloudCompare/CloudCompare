@@ -3288,9 +3288,9 @@ bool ccGLWindowInterface::setFarClippingPlaneDepth(double depth)
 
 void ccGLWindowInterface::setViewportParameters(const ccViewportParameters& params)
 {
-	ccViewportParameters oldParams = m_viewportParams;
-	m_viewportParams                    = params;
-	m_projectiveViewportCenterOffset    = QPointF();
+	ccViewportParameters oldParams   = m_viewportParams;
+	m_viewportParams                 = params;
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (m_stereoModeEnabled && !params.perspectiveView)
 	{
@@ -3423,10 +3423,10 @@ void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRed
 		setPerspectiveState(m_viewportParams.perspectiveView, true);
 	}
 
-	m_viewportParams.viewMat = ccGLUtils::GenerateViewMat(orientation,
-	                                                      getDefaultVertDir(),
-	                                                      &m_lockedRotationAngle_rad,
-	                                                      &m_lockedRotationOrthoAngle_rad);
+	m_viewportParams.viewMat         = ccGLUtils::GenerateViewMat(orientation,
+                                                          getDefaultVertDir(),
+                                                          &m_lockedRotationAngle_rad,
+                                                          &m_lockedRotationOrthoAngle_rad);
 	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)

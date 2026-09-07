@@ -426,7 +426,7 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win 
 	double fov_deg    = CCCoreLib::RadiansToDegrees(fOV_rad);
 	ccLog::Print(QString("[ccCameraSensor::applyImageViewport] Horizontal FOV = %1 deg").arg(fov_deg));
 
-	QSizeF displayedImageSize = image->computeDisplayedSize(screenSize.width(), screenSize.height());
+	QSizeF  displayedImageSize = image->computeDisplayedSize(screenSize.width(), screenSize.height());
 	QPointF projectionCenterOffset;
 	if (m_intrinsicParams.arrayWidth > 0
 	    && m_intrinsicParams.arrayHeight > 0

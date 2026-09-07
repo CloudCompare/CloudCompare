@@ -182,7 +182,7 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	static const char* NormalizeValueLogScaleFuncSrc =
 	    "float normalizeSFVal(float sfVal)\n"
 	    "{\n"
-	    " 	float dLog = log(max(abs(d), 0.00001)) / log(10.0);\n"
+	    " 	float dLog = log(max(abs(sfVal), 0.00001)) / log(10.0);\n"
 	    "   if (dLog <= uMinSat)\n"
 	    "      return 0.0;\n"
 	    "   if (dLog >= uMaxSat)\n"

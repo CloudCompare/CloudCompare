@@ -3570,7 +3570,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	// ccLog::Print(QString("Rendering %1 points starting from index %2 (LoD = %3 / PN = %4)").arg(toDisplay.count).arg(toDisplay.startIndex).arg(toDisplay.indexMap ? "yes" : "no").arg(pushName ? "yes" : "no"));
 
-	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT | GL_TEXTURE_BIT | GL_POINT_BIT);
+	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT | GL_TEXTURE_BIT);
 
 	if (glParams.showSF || glParams.showColors)
 	{
@@ -6838,7 +6838,7 @@ void ccPointCloud::decompressNormals()
 		{
 			m_decompressedNormals.resize(size());
 		}
-		catch (const std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			ccLog::Warning("Not enough memory to decompress normals");
 			m_normalsDrawnAsLines = false;

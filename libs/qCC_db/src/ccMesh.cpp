@@ -2086,7 +2086,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			// Vertex buffer
 			{
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_STREAM_DRAW);
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
 			}
@@ -2095,7 +2095,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showNorms)
 			{
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_DYNAMIC_DRAW);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_STREAM_DRAW);
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 			}
@@ -2105,7 +2105,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				// colors are RGB unsigned bytes (3 components)
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_STREAM_DRAW);
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
@@ -2116,7 +2116,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				// colors are RGBA unsigned bytes
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_STREAM_DRAW);
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 			}

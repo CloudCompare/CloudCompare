@@ -2864,7 +2864,7 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 		if (s_vboVertex != 0)
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_points) * 3 * sizeof(PointCoordinateType)), ccChunk::Start(m_points, chunkIndex), GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_points) * 3 * sizeof(PointCoordinateType)), ccChunk::Start(m_points, chunkIndex), GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
 		}
@@ -2906,7 +2906,7 @@ static void glChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTableT
 	}
 
 	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
-	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_visibilityBuffer, GL_DYNAMIC_DRAW);
+	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_visibilityBuffer, GL_STREAM_DRAW);
 	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
@@ -2962,7 +2962,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 				}
 
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_normalBuffer, GL_DYNAMIC_DRAW);
+				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_normalBuffer, GL_STREAM_DRAW);
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 			}
@@ -3040,7 +3040,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		if (s_vboColor != 0)
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_rgbaColors->size()) * 4 * sizeof(unsigned char)), ccChunk::Start(*m_rgbaColors, chunkIndex), GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_rgbaColors->size()) * 4 * sizeof(unsigned char)), ccChunk::Start(*m_rgbaColors, chunkIndex), GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
 		}
@@ -3097,7 +3097,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		if (0 != s_vboSF)
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)), ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)), ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
 		}
@@ -3154,7 +3154,7 @@ static void glLODChunkVertexPointer(ccPointCloud*      cloud,
 		if (0 != s_vboVertex)
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
 		}
@@ -3195,7 +3195,7 @@ static void glLODChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTab
 	}
 
 	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
-	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_visibilityBuffer, GL_DYNAMIC_DRAW);
+	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_visibilityBuffer, GL_STREAM_DRAW);
 	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
@@ -3224,7 +3224,7 @@ static void glLODChunkNormalPointer(NormsIndexesTableType* normals,
 			}
 
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_normalBuffer, GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_normalBuffer, GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 		}
@@ -3284,7 +3284,7 @@ static void glLODChunkColorPointer(RGBAColorsTableType* colors,
 		{
 			// we must re-order colors in a dedicated static array
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 4 * sizeof(unsigned char)), s_rgbBuffer4ub, GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 4 * sizeof(unsigned char)), s_rgbBuffer4ub, GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 		}
@@ -3324,7 +3324,7 @@ static void glLODChunkSFPointer(ccScalarField*     sf,
 			}
 
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_rgbBuffer4ub, GL_DYNAMIC_DRAW);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_rgbBuffer4ub, GL_STREAM_DRAW);
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 		}
@@ -3556,13 +3556,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				// meanwhile we will display less points
 				if (context.minLODPointCount && toDisplay.count > context.minLODPointCount)
 				{
-					GLint maxStride = 2048;
+					static GLint MaxStride = 0;
+					if (MaxStride == 0)
+					{
 #ifdef GL_MAX_VERTEX_ATTRIB_STRIDE
-					glFunc->glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &maxStride);
+						glFunc->glGetIntegerv(GL_MAX_VERTEX_ATTRIB_STRIDE, &MaxStride);
+#else
+						MaxStride = 2048;
 #endif
+					}
 					// maxStride == decimStep * 3 * sizeof(PointCoordinateType)
 					toDisplay.decimStep = static_cast<int>(ceil(static_cast<float>(toDisplay.count) / context.minLODPointCount));
-					toDisplay.decimStep = std::min<unsigned>(toDisplay.decimStep, maxStride / (3 * sizeof(PointCoordinateType)));
+					toDisplay.decimStep = std::min<unsigned>(toDisplay.decimStep, MaxStride / (3 * sizeof(PointCoordinateType)));
 				}
 			}
 		}

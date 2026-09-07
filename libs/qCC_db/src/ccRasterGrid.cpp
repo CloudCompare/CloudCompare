@@ -280,7 +280,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	{
 		pointRefList.resize(pointCount, nullptr);
 	}
-	catch (const std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory");
 		return false;

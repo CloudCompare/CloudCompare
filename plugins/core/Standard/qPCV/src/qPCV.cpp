@@ -100,7 +100,7 @@ void qPCV::doAction()
 			assert(false);
 			continue;
 		}
-		
+
 		if (obj->isA(CC_TYPES::POINT_CLOUD))
 		{
 			//we need a real point cloud
@@ -138,12 +138,12 @@ void qPCV::doAction()
 	{
 		ccHObject::Container clouds;
 		root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
-		
+
 		for (auto & pointCloud : clouds)
 		{
 			//we keep only clouds with normals
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(pointCloud);
-			
+
 			if (cloud && cloud->hasNormals())
 			{
 				cloudsWithNormals.push_back(cloud);
@@ -157,7 +157,7 @@ void qPCV::doAction()
 			}
 		}
 	}
-	
+
 	if (cloudsWithNormals.empty())
 	{
 		dlg.useCloudRadioButton->setEnabled(false);
@@ -192,7 +192,7 @@ void qPCV::doAction()
 		{
 			rays.resize(count);
 		}
-		catch (std::bad_alloc)
+		catch (const std::bad_alloc&)
 		{
 			m_app->dispToConsole("Not enough memory to generate the set of rays", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;

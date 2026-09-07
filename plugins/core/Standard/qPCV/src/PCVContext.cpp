@@ -99,7 +99,7 @@ bool PCVContext::init(unsigned W,
 			m_snapC.resize(size * 4, 0);
 		}
 	}
-	catch (const std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		// not enough memory
 		return false;
@@ -235,7 +235,7 @@ void PCVContext::drawEntity()
 		// OpenGL version not supported
 		return;
 	}
-	
+
 	if (m_mesh)
 	{
 		unsigned nTri = m_mesh->size();

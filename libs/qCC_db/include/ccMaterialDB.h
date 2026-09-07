@@ -23,6 +23,7 @@
 #include <QFileInfo>
 #include <QFileSystemWatcher>
 #include <QImage>
+#include <QOpenGLContext>
 #include <QOpenGLTexture>
 
 //! Smart texture database

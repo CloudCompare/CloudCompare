@@ -263,6 +263,7 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent /*=nullptr*/, bool sile
     , m_initialized(false)
     , m_trihedronGLList(GL_INVALID_LIST_ID)
     , m_pivotGLList(GL_INVALID_LIST_ID)
+    , m_projectiveViewportCenterOffset(0.0, 0.0)
     , m_lastMousePos(-1.0, -1.0)
     , m_validModelviewMatrix(false)
     , m_validProjectionMatrix(false)
@@ -1652,7 +1653,17 @@ ccGLMatrixd ccGLWindowInterface::computeProjectionMatrix(bool withGLfeatures, Pr
 			//	const_cast<ccGLWindow*>(this)->displayNewMessage(QString("eye sep. = %1 - convergence = %3").arg(*eyeOffset).arg(convergence), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false, 2, ccGLWindowInterface::PERSPECTIVE_STATE_MESSAGE);
 		}
 
-		projMatrix = ccGL::Frustum(-xMax - frustumAsymmetry, xMax - frustumAsymmetry, -yMax, yMax, zNear, zFar);
+		// Shift the frustum in the opposite direction so the optical axis lands on
+		// the requested screen position.
+		const double projectionCenterShiftX = m_projectiveViewportCenterOffset.x() * xMax;
+		const double projectionCenterShiftY = m_projectiveViewportCenterOffset.y() * yMax;
+
+		projMatrix = ccGL::Frustum(-xMax - frustumAsymmetry - projectionCenterShiftX,
+		                           xMax - frustumAsymmetry - projectionCenterShiftX,
+		                           -yMax - projectionCenterShiftY,
+		                           yMax - projectionCenterShiftY,
+		                           zNear,
+		                           zFar);
 	}
 	else
 	{
@@ -3047,6 +3058,7 @@ void ccGLWindowInterface::setPerspectiveState(bool state, bool objectCenteredVie
 	// new state
 	m_viewportParams.perspectiveView    = state;
 	m_viewportParams.objectCenteredView = objectCenteredView;
+	m_projectiveViewportCenterOffset    = QPointF();
 
 	if (m_viewportParams.perspectiveView)
 	{
@@ -3277,7 +3289,8 @@ bool ccGLWindowInterface::setFarClippingPlaneDepth(double depth)
 void ccGLWindowInterface::setViewportParameters(const ccViewportParameters& params)
 {
 	ccViewportParameters oldParams = m_viewportParams;
-	m_viewportParams               = params;
+	m_viewportParams                    = params;
+	m_projectiveViewportCenterOffset    = QPointF();
 
 	if (m_stereoModeEnabled && !params.perspectiveView)
 	{
@@ -3315,7 +3328,8 @@ void ccGLWindowInterface::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 void ccGLWindowInterface::setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
                                                   float              fov_deg /*=0.0f*/,
                                                   bool               viewerBasedPerspective /*=true*/,
-                                                  bool               bubbleViewMode /*=false*/)
+                                                  bool               bubbleViewMode /*=false*/,
+                                                  const QPointF&     projectionCenterOffset /*=QPointF()*/)
 {
 	// perspective (viewer-based by default)
 	if (bubbleViewMode)
@@ -3327,6 +3341,14 @@ void ccGLWindowInterface::setupProjectiveViewport(const ccGLMatrixd& cameraMatri
 	if (fov_deg > 0.0f)
 	{
 		setFov(fov_deg);
+	}
+
+	if (m_projectiveViewportCenterOffset != projectionCenterOffset)
+	{
+		m_projectiveViewportCenterOffset = projectionCenterOffset;
+		invalidateViewport();
+		invalidateVisualization();
+		deprecate3DLayer();
 	}
 
 	// set the camera matrix 'translation' as OpenGL camera center
@@ -3363,6 +3385,7 @@ void ccGLWindowInterface::setCustomView(const CCVector3d& forward, const CCVecto
 
 	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(forward, up);
 	setBaseViewMat(viewMat);
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
@@ -3404,6 +3427,7 @@ void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRed
 	                                                      getDefaultVertDir(),
 	                                                      &m_lockedRotationAngle_rad,
 	                                                      &m_lockedRotationOrthoAngle_rad);
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)
 	{

@@ -32,6 +32,7 @@
 #include <QElapsedTimer>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
+#include <QPointF>
 #include <QTimer>
 
 // system
@@ -203,7 +204,11 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	QPointF toCenteredGLCoordinates(const QPointF& coordinates) const;
 	QPointF toCenteredGLCoordinates(int x, int y) const override;
 	QPointF toCornerGLCoordinates(int x, int y) const override;
-	void    setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void    setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
+	                                float              fov_deg                = 0.0f,
+	                                bool               viewerBasedPerspective = true,
+	                                bool               bubbleViewMode         = false,
+	                                const QPointF&     projectionCenterOffset = QPointF()) override;
 	void    aboutToBeRemoved(ccDrawableObject* entity) override;
 	void    getGLCameraParameters(ccGLCameraParameters& params) override;
 
@@ -1260,6 +1265,8 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 
 	//! Viewport parameters (zoom, etc.)
 	ccViewportParameters m_viewportParams;
+	//! Projection center offset in normalized screen coordinates (+X right, +Y up)
+	QPointF m_projectiveViewportCenterOffset;
 
 	//! Last mouse position
 	QPointF m_lastMousePos;

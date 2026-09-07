@@ -31,11 +31,11 @@ class ccGLSL
   public:
 	enum Attribute
 	{
-		ATTR_POS  = 0,
-		ATTR_NOR  = 1,
-		ATTR_COL  = 2,
-		ATTR_SF   = 4,
-		ATTR_VIS  = 8,
+		ATTR_POS = 0,
+		ATTR_NOR = 1,
+		ATTR_COL = 2,
+		ATTR_SF  = 4,
+		ATTR_VIS = 8,
 		// For internal use only
 		ATTR_LOG_SCALE  = 32,
 		ATTR_SYM_SCALE  = 64,

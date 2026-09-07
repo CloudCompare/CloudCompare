@@ -540,7 +540,7 @@ void ccGLSL::SetSFTextureUniforms(QOpenGLFunctions_2_1* glFunc,
 }
 
 void ccGLSL::SetLightUniforms(QOpenGLFunctions_2_1* glFunc,
-                                   QOpenGLShaderProgram* prog)
+                              QOpenGLShaderProgram* prog)
 {
 	if (!glFunc || !prog)
 	{

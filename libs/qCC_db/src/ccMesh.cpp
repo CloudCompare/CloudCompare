@@ -1677,16 +1677,9 @@ CCCoreLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 }
 
 // Global OpenGL resources
-static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
-static GLuint                                          s_vboVertex  = 0;
-static GLuint                                          s_vboNormals = 0;
-static GLuint                                          s_vboColor   = 0;
-
-// Attribute indexes that we bound when creating the programs
-static const GLuint ATTR_POS  = 0;
-static const GLuint ATTR_NOR  = 1;
-static const GLuint ATTR_COL  = 2;
-static const GLuint ATTR_CLIP = 4;
+static GLuint s_vboVertex  = 0;
+static GLuint s_vboNormals = 0;
+static GLuint s_vboColor   = 0;
 
 void ccMesh::ReleaseOpenGLRessources()
 {
@@ -1696,12 +1689,12 @@ void ccMesh::ReleaseOpenGLRessources()
 		return;
 	}
 
+	ccGLSL::ReleaseOpenGLRessources();
+
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
 	if (glFunc)
 	{
-		s_programs.clear();
-
 		if (s_vboVertex != 0)
 		{
 			glFunc->glDeleteBuffers(1, &s_vboVertex);
@@ -1720,176 +1713,6 @@ void ccMesh::ReleaseOpenGLRessources()
 			s_vboColor = 0;
 		}
 	}
-}
-
-// GLSL program builder (GLSL 1.20) for mesh rendering (position, normal, color)
-static QSharedPointer<QOpenGLShaderProgram> BuildMeshDisplayProgram(QOpenGLFunctions_2_1* glFunc, int attributes)
-{
-	if (!glFunc)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	if (s_programs.contains(attributes))
-	{
-		return s_programs[attributes];
-	}
-
-	// Vertex shaders
-	static const char* VertexProgHeaderSrc =
-	    "#version 120\n"
-	    "attribute vec3 aPosition;\n"
-	    "varying vec4 vColor;\n";
-
-	static const char* VertexProgColorAttributesSrc =
-	    "attribute vec4 aColor;\n";
-
-	static const char* VertexProgNormAttributesSrc =
-	    "attribute float aNormalIndex;\n"
-	    "varying vec3 vNormal;\n"
-	    "uniform sampler2D uNormalLUT;\n"
-	    "uniform int uLUTWidth;\n"
-	    "uniform int uLUTHeight;\n";
-
-	static const char* VertexProgFetchNormFuncSrc =
-	    "vec3 fetchNormalFromLUT(float fi)\n"
-	    "{\n"
-	    "	float w  = float(uLUTWidth);\n"
-	    "	float h  = float(uLUTHeight);\n"
-	    "	float tx = mod(fi, w);\n"
-	    "	float ty = floor(fi / w);\n"
-	    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-	    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-	    "	vec3 n = enc * 2.0 - 1.0;\n"
-	    "	return normalize(n);\n"
-	    "}\n";
-
-	static const char* VertexProgMainStartSrc =
-	    "void main()\n"
-	    "{\n";
-
-	static const char* VertexProgMainUseDefaultGLColorSrc =
-	    "    vColor = gl_Color;\n";
-
-	static const char* VertexProgMainUseInputColorSrc =
-	    "    vColor = aColor;\n";
-
-	static const char* VertexProgMainFetchNormalSrc =
-	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
-
-	static const char* VertexProgMainClippingSrc =
-	    "    gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n";
-
-	static const char* VertexProgMainEndSrc =
-	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-	    "}\n";
-
-	// Fragment shaders
-	static const char* ColorOnlyFragmentProgSrc =
-	    "#version 120\n"
-	    "varying vec4 vColor;\n"
-	    "void main()\n"
-	    "{\n"
-	    "    gl_FragColor = vColor;\n"
-	    "}\n";
-
-	static const char* ColorAndNormalFragmentProgSrc =
-	    "#version 120\n"
-	    "varying vec4 vColor;\n"
-	    "varying vec3 vNormal;\n"
-	    "void main()\n"
-	    "{\n"
-	    "    vec3 n = normalize(vNormal);\n"
-	    "    vec3 lightDir = normalize(vec3(0.0,0.0,1.0));\n"
-	    "    float diff = max(dot(n, lightDir), 0.0);\n"
-	    "    vec4 base = vColor;\n"
-	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
-	    "}\n";
-
-	QString vertexProgSrc = VertexProgHeaderSrc;
-	{
-		// add attributes
-		if (attributes & ATTR_COL)
-			vertexProgSrc += VertexProgColorAttributesSrc;
-		if (attributes & ATTR_NOR)
-			vertexProgSrc += VertexProgNormAttributesSrc;
-
-		// add special functions
-		if (attributes & ATTR_NOR)
-		{
-			vertexProgSrc += VertexProgFetchNormFuncSrc;
-		}
-
-		// main function
-		{
-			vertexProgSrc += VertexProgMainStartSrc;
-
-			// color transfer
-			if (attributes & ATTR_COL)
-			{
-				vertexProgSrc += VertexProgMainUseInputColorSrc;
-			}
-			else
-			{
-				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
-			}
-
-			// normal transfer (if any)
-			if (attributes & ATTR_NOR)
-			{
-				vertexProgSrc += VertexProgMainFetchNormalSrc;
-			}
-
-			if (attributes & ATTR_CLIP)
-			{
-				vertexProgSrc += VertexProgMainClippingSrc;
-			}
-
-			vertexProgSrc += VertexProgMainEndSrc;
-		}
-	}
-
-	QString fragmentProgSrc = (attributes & ATTR_NOR ? ColorAndNormalFragmentProgSrc : ColorOnlyFragmentProgSrc);
-
-	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
-	if (false == vertexShader.compileSourceCode(vertexProgSrc))
-	{
-		ccLog::Warning(QString("[BuildMeshDisplayProgram] Vertex shader compilation failed: ") + vertexShader.log());
-		return nullptr;
-	}
-	QOpenGLShader fragmentShader(QOpenGLShader::Fragment);
-	if (false == fragmentShader.compileSourceCode(fragmentProgSrc))
-	{
-		ccLog::Warning(QString("[BuildMeshDisplayProgram] Fragment shader compilation failed: ") + fragmentShader.log());
-		return nullptr;
-	}
-	QSharedPointer<QOpenGLShaderProgram> program(new QOpenGLShaderProgram);
-	program->addShader(&vertexShader);
-	program->addShader(&fragmentShader);
-
-	// bind attribute locations before linking for stable locations
-	program->bindAttributeLocation("aPosition", ATTR_POS);
-	if (attributes & ATTR_COL)
-	{
-		program->bindAttributeLocation("aColor", ATTR_COL);
-	}
-	if (attributes & ATTR_NOR)
-	{
-		program->bindAttributeLocation("aNormalIndex", ATTR_NOR);
-	}
-
-	if (false == program->link())
-	{
-		ccLog::Warning(QString("[BuildMeshDisplayProgram] Shader program linking failed: ") + program->log());
-		return nullptr;
-	}
-
-	s_programs[attributes] = program;
-
-	ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccMesh::shader.program.build");
-
-	return program;
 }
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -2089,21 +1912,21 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	if (!fallBackDisplay)
 	{
 		// get GL program
-		int attributes = ATTR_POS;
+		int attributes = ccGLSL::ATTR_POS;
 		if (glParams.showNorms)
 		{
-			attributes |= ATTR_NOR;
+			attributes |= ccGLSL::ATTR_NOR;
 		}
 		if (glParams.showColors || glParams.showSF)
 		{
-			attributes |= ATTR_COL;
+			attributes |= ccGLSL::ATTR_COL;
 		}
 		if (!m_clipPlanes.empty())
 		{
-			attributes |= ATTR_CLIP;
+			attributes |= ccGLSL::ATTR_CLIP;
 		}
 
-		prog = BuildMeshDisplayProgram(glFunc, attributes);
+		prog = ccGLSL::BuildDisplayProgram(glFunc, attributes);
 
 		if (prog.isNull())
 		{
@@ -2160,6 +1983,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glFunc->glActiveTexture(GL_TEXTURE0);
 			glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
 
+			ccGLSL::SetLightUniforms(glFunc, prog.data());
 			ccGLSL::SetLUTTextureUniforms(glFunc, prog.data(), lutTex.data());
 		}
 
@@ -2267,8 +2091,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_POS);
-				glFunc->glVertexAttribPointer(ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
 			}
 
 			// Normals
@@ -2276,8 +2100,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_NOR);
-				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 			}
 
 			// Colors
@@ -2286,9 +2110,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				// colors are RGB unsigned bytes (3 components)
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_COL);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
-				glFunc->glVertexAttribPointer(ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 				// ensure alpha = 1.0 for all vertices
 				// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
 			}
@@ -2297,8 +2121,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				// colors are RGBA unsigned bytes
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_COL);
-				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 			}
 
 			// draw
@@ -2312,14 +2136,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			// cleanup per-chunk state
-			glFunc->glDisableVertexAttribArray(ATTR_POS);
+			glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_POS);
 			if (glParams.showNorms)
 			{
-				glFunc->glDisableVertexAttribArray(ATTR_NOR);
+				glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_NOR);
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
-				glFunc->glDisableVertexAttribArray(ATTR_COL);
+				glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_COL);
 			}
 
 			// unbind array buffer

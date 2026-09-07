@@ -3164,10 +3164,17 @@ static void glLODChunkVertexPointer(ccPointCloud*      cloud,
 
 	if (useProg)
 	{
-		glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-		glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_DYNAMIC_DRAW);
-		glFunc->glEnableVertexAttribArray(ATTR_POS);
-		glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
+		if (0 != s_vboVertex)
+		{
+			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
+			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_DYNAMIC_DRAW);
+			glFunc->glEnableVertexAttribArray(ATTR_POS);
+			glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
+		}
+		else
+		{
+			assert(false);
+		}
 	}
 	else
 	{
@@ -3982,7 +3989,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if ((false == s_normalLUTTextureFailed)
 		    && (false == s_globalVBOCreationFailed))
 		{
-			int attributes = ATTR_POS;
+			int attributes = ATTR_POS; // ATTR_POS == 0
 			if (glParams.showNorms)
 			{
 				attributes |= ATTR_NOR;
@@ -4033,7 +4040,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			// static VBO handles reused between calls
-			if (prog && (attributes & ATTR_POS) && s_vboVertex == 0)
+			if (prog && s_vboVertex == 0)
 			{
 				glFunc->glGenBuffers(1, &s_vboVertex);
 				if (0 == s_vboVertex)

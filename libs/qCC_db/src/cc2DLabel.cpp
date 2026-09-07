@@ -550,7 +550,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
 					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
 				}
-				catch (const std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					return MemoryError();
 				}
@@ -579,7 +579,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
 					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
 				}
-				catch (const std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					return MemoryError();
 				}

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                   CLOUDCOMPARE LIGHT VIEWER                            #
@@ -16,9 +18,6 @@
 // #      +++ COPYRIGHT: EDF R&D + TELECOM ParisTech (ENST-TSI) +++         #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CCVIEWER_LOG_HEADER
-#define CCVIEWER_LOG_HEADER
 
 // Qt
 #include <QMainWindow>
@@ -51,5 +50,3 @@ class ccViewerLog : public ccLog
 	//! Associated window
 	QMainWindow* m_parentWindow;
 };
-
-#endif // CCVIEWER_LOG_HEADER

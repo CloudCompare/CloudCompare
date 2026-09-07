@@ -27,7 +27,6 @@
 #include <ccLog.h>
 
 // plugins
-#include "ccGLPluginInterface.h"
 #include "ccIOPluginInterface.h"
 #include "ccStdPluginInterface.h"
 
@@ -36,9 +35,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QPluginLoader>
-#include <QSet>
 #include <QSettings>
-#include <QStandardPaths>
 
 namespace
 {

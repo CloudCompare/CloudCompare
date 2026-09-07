@@ -1,5 +1,4 @@
-#ifndef CCVIEWERAPPLICATION_H
-#define CCVIEWERAPPLICATION_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -38,5 +37,3 @@ class ccViewerApplication : public ccApplicationBase
   private:
 	ccViewer* mViewer;
 };
-
-#endif

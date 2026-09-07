@@ -57,7 +57,7 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
 		m_options.push_back(Option(degreeOfPlanarityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfPlanarity));
 		m_options.push_back(Option(degreeOfLinearityCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::DegreeOfLinearity));
 	}
-	catch (std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccGeomFeaturesDlg] Not enough memory");
 	}

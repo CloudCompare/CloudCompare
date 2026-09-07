@@ -216,7 +216,7 @@ bool PCVCommand::process(ccCommandLineInterface& cmd)
 	{
 		candidates.reserve(cmd.clouds().size() + cmd.meshes().size());
 	}
-	catch (const std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		return cmd.error(QObject::tr("Not enough memory"));
 	}

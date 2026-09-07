@@ -3667,10 +3667,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				attributes |= ccGLSL::ATTR_VIS;
 			}
-			if (!m_clipPlanes.empty())
-			{
-				attributes |= ccGLSL::ATTR_CLIP;
-			}
 
 			prog = ccGLSL::BuildDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
 

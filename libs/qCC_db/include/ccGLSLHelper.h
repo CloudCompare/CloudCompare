@@ -36,7 +36,6 @@ class ccGLSL
 		ATTR_COL  = 2,
 		ATTR_SF   = 4,
 		ATTR_VIS  = 8,
-		ATTR_CLIP = 16,
 		// For internal use only
 		ATTR_LOG_SCALE  = 32,
 		ATTR_SYM_SCALE  = 64,

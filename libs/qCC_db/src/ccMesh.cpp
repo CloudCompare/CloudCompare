@@ -1921,10 +1921,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			attributes |= ccGLSL::ATTR_COL;
 		}
-		if (!m_clipPlanes.empty())
-		{
-			attributes |= ccGLSL::ATTR_CLIP;
-		}
 
 		prog = ccGLSL::BuildDisplayProgram(glFunc, attributes);
 

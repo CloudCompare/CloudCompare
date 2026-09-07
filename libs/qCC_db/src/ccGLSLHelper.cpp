@@ -25,20 +25,6 @@
 // Qt
 #include <QOpenGLFunctions_2_1>
 
-// enum Attribute
-//{
-//	ATTR_POS  = 0,
-//	ATTR_NOR  = 1,
-//	ATTR_COL  = 2,
-//	ATTR_SF   = 4,
-//	ATTR_VIS  = 8,
-//	ATTR_CLIP = 16,
-//	// For internal use only
-//	ATTR_LOG_SCALE  = 32,
-//	ATTR_SYM_SCALE  = 64,
-//	ATTR_HIDDEN_VAL = 128
-// };
-
 //! Map or already built shader programs
 static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
 
@@ -229,14 +215,12 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	    "   }\n";
 
 	static const char* VertexProgMainFetchNormalSrc =
-	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
-
-	static const char* VertexProgMainClippingSrc =
-	    "    gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n";
+	    "   vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
 
 	static const char* VertexProgMainEndSrc =
-	    "    vVertexPos = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n"
-	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
+	    "   gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n"
+	    "   vVertexPos = gl_ClipVertex;\n"
+	    "   gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
 	    "}\n";
 
 	// Fragment programs
@@ -339,11 +323,6 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 			if (attributes & ATTR_NOR)
 			{
 				vertexProgSrc += VertexProgMainFetchNormalSrc;
-			}
-
-			if (attributes & ATTR_CLIP)
-			{
-				vertexProgSrc += VertexProgMainClippingSrc;
 			}
 
 			vertexProgSrc += VertexProgMainEndSrc;

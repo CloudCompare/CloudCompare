@@ -238,6 +238,7 @@ Improvements:
 		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
 		- Empty scans will not trigger an error anymore (just a warning message)
 		- E57 timestamps are now loaded as scalar fields
+		- image viewport projection now accounts for the principal point (principalPointX/Y) specified in pinhole image metadata
 
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields

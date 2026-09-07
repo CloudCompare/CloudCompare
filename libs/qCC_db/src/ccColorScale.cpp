@@ -18,6 +18,7 @@
 #include "ccColorScale.h"
 
 // Qt
+#include <QOpenGLFunctions_2_1>
 #include <QUuid>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -139,6 +140,8 @@ void ccColorScale::sort()
 void ccColorScale::update()
 {
 	m_updated = false;
+
+	m_texture.clear();
 
 	if (m_steps.size() >= static_cast<int>(MIN_STEPS))
 	{
@@ -703,4 +706,69 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 	}
 
 	return scale;
+}
+
+bool ccColorScale::buildTexture(QOpenGLFunctions_2_1* glFunc) const
+{
+	if (!glFunc)
+	{
+		assert(false);
+		return false;
+	}
+
+	m_texture.clear();
+
+	// Query max texture size
+	GLint maxTexSize = 0;
+	glFunc->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTexSize);
+	if (maxTexSize <= 0)
+	{
+		return false;
+	}
+
+	const GLint  squareSize = std::min(maxTexSize, (1 << 6)); // number of samples per dimension (max is 2^6 = 64)
+	const size_t texels     = static_cast<size_t>(squareSize) * static_cast<size_t>(squareSize);
+
+	// buffer RGB unsigned bytes
+	std::vector<unsigned char> pixels;
+	try
+	{
+		pixels.resize(texels * 3);
+	}
+	catch (const std::bad_alloc&)
+	{
+		ccLog::Warning("[ccColorScale::buildTexture] Not enough memory");
+		return false;
+	}
+
+	// fill: for each index, call ccNormalCompressor::Decompress
+	for (size_t i = 0; i < texels; ++i)
+	{
+		auto col = getColorByRelativePos(i / static_cast<double>(texels), &ccColor::lightGreyRGB);
+		assert(col);
+
+		pixels[i * 3 + 0] = col->r;
+		pixels[i * 3 + 1] = col->g;
+		pixels[i * 3 + 2] = col->b;
+	}
+
+	// generate GL texture
+	{
+		QSharedPointer<QOpenGLTexture> tex(new QOpenGLTexture(QOpenGLTexture::Target2D));
+
+		// configure texture
+		tex->setFormat(QOpenGLTexture::RGB8_UNorm);
+		tex->setSize(squareSize, squareSize);
+		tex->allocateStorage();
+		tex->setWrapMode(QOpenGLTexture::ClampToEdge);
+		tex->setMinificationFilter(QOpenGLTexture::Nearest);
+		tex->setMagnificationFilter(QOpenGLTexture::Nearest);
+
+		// upload data
+		tex->setData(QOpenGLTexture::RGB, QOpenGLTexture::UInt8, pixels.data());
+
+		m_texture = tex;
+	}
+
+	return true;
 }

@@ -31,7 +31,6 @@
 #include <ccColorScalesManager.h>
 #include <ccLog.h>
 #include <ccNormalVectors.h>
-#include <ccPointCloud.h>
 
 // qCC_io
 #include <FileIOFilter.h>
@@ -332,7 +331,6 @@ int main(int argc, char** argv)
 	}
 
 	// release global structures
-	ccPointCloud::ReleaseShaders(); // must be done before the OpenGL context is released (i.e. before the windows is destroyed)
 	MainWindow::DestroyInstance();
 	FileIOFilter::UnregisterAll();
 

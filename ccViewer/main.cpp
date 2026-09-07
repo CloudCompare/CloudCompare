@@ -45,7 +45,6 @@
 
 int main(int argc, char* argv[])
 {
-
 	ccViewerApplication::InitOpenGL();
 
 	// Convert the input arguments to QString before the application is initialized
@@ -184,7 +183,6 @@ int main(int argc, char* argv[])
 
 	// release global structures
 	FileIOFilter::UnregisterAll();
-	ccPointCloud::ReleaseShaders();
 
 	return result;
 }

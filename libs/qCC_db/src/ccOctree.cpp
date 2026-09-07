@@ -209,9 +209,9 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 
 			if (m_displayMode == MEAN_POINTS)
 			{
-				void* additionalParameters[] = {reinterpret_cast<void*>(&glParams),
-				                                reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
-				                                reinterpret_cast<void*>(glFunc)};
+				void* additionalParameters[]{reinterpret_cast<void*>(&glParams),
+				                             reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
+				                             reinterpret_cast<void*>(glFunc)};
 
 				if (glParams.showNorms)
 				{
@@ -254,13 +254,13 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 
 				// fake context
 				CC_DRAW_CONTEXT fakeContext = context;
-				fakeContext.drawingFlags    = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+				fakeContext.drawingFlags    = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED | CC_NO_SHADER;
 				fakeContext.display         = nullptr;
 
-				void* additionalParameters[] = {reinterpret_cast<void*>(&glParams),
-				                                reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
-				                                reinterpret_cast<void*>(&box),
-				                                reinterpret_cast<void*>(&fakeContext)};
+				void* additionalParameters[]{reinterpret_cast<void*>(&glParams),
+				                             reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
+				                             reinterpret_cast<void*>(&box),
+				                             reinterpret_cast<void*>(&fakeContext)};
 
 				executeFunctionForAllCellsAtLevel(m_displayedLevel,
 				                                  &DrawCellAsAPrimitive,

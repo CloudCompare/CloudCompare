@@ -1677,9 +1677,9 @@ CCCoreLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 }
 
 // Global OpenGL resources
-static GLuint s_vboVertex  = 0;
-static GLuint s_vboNormals = 0;
-static GLuint s_vboColor   = 0;
+static QOpenGLBuffer s_vboVertex;
+static QOpenGLBuffer s_vboNormals;
+static QOpenGLBuffer s_vboColor;
 
 void ccMesh::ReleaseOpenGLRessources()
 {
@@ -1691,28 +1691,17 @@ void ccMesh::ReleaseOpenGLRessources()
 
 	ccGLSL::ReleaseOpenGLRessources();
 
-	// get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
-	if (glFunc)
+	auto releaseVBO = [](QOpenGLBuffer& vbo)
 	{
-		if (s_vboVertex != 0)
+		if (vbo.isCreated())
 		{
-			glFunc->glDeleteBuffers(1, &s_vboVertex);
-			s_vboVertex = 0;
+			vbo.destroy();
 		}
+	};
 
-		if (s_vboNormals != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboNormals);
-			s_vboNormals = 0;
-		}
-
-		if (s_vboColor != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboColor);
-			s_vboColor = 0;
-		}
-	}
+	releaseVBO(s_vboVertex);
+	releaseVBO(s_vboNormals);
+	releaseVBO(s_vboColor);
 }
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -1902,16 +1891,19 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	static bool                    s_normalLUTTextureFailed = false;
 	QSharedPointer<QOpenGLTexture> lutTex;
 
+	static bool s_globalVBOCreationFailed = false;
+
 	bool fallBackDisplay = (visFiltering
 	                        || (applyMaterials || showTextures)
 	                        || (glParams.showSF && sfMayHaveHiddenValues)
 	                        || (glParams.showNorms && s_normalLUTTextureFailed))
+	                       || s_globalVBOCreationFailed
 	                       || MACRO_NoShader(context);
 
 	QSharedPointer<QOpenGLShaderProgram> prog;
 	if (!fallBackDisplay)
 	{
-		// get GL program
+		// get the right GLSL program
 		int attributes = ccGLSL::ATTR_POS;
 		if (glParams.showNorms)
 		{
@@ -1924,48 +1916,55 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		prog = ccGLSL::BuildDisplayProgram(glFunc, attributes);
 
-		if (prog.isNull())
+		if (prog)
 		{
-			fallBackDisplay = true;
-		}
-		else if (glParams.showNorms)
-		{
-			assert(!s_normalLUTTextureFailed);
-
-			// create or retrieve the LUT texture
-			lutTex = ccGLSL::GetNormalLUTTexture(glFunc);
-			if (lutTex.isNull())
+			if (glParams.showNorms)
 			{
-				ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
-				s_normalLUTTextureFailed = true;
-				fallBackDisplay          = true;
+				// create or retrieve the LUT texture
+				lutTex = ccGLSL::GetNormalLUTTexture(glFunc);
+				if (lutTex.isNull())
+				{
+					ccLog::Warning("Failed to create normals LUT texture! Cannot render fast normals.");
+					s_normalLUTTextureFailed = true;
+					prog.clear();
+				}
+			}
 
-				prog.clear();
-				fallBackDisplay = true;
+			// static VBO handles reused between calls
+			auto createVBOIfNeeded = [&](QOpenGLBuffer& vbo, int sizeBytes)
+			{
+				if (prog && !vbo.isCreated())
+				{
+					if (vbo.create())
+					{
+						vbo.setUsagePattern(QOpenGLBuffer::StreamDraw);
+						vbo.bind();
+						vbo.allocate(sizeBytes);
+						vbo.release();
+					}
+					else
+					{
+						s_globalVBOCreationFailed = true;
+						prog.clear();
+					}
+				}
+			};
+			createVBOIfNeeded(s_vboVertex, static_cast<int>(ccChunk::SIZE * 3 * 3 * sizeof(PointCoordinateType)));
+			if (attributes & ccGLSL::ATTR_NOR)
+			{
+				createVBOIfNeeded(s_vboNormals, static_cast<int>(ccChunk::SIZE * 3 * sizeof(float)));
+			}
+			if (attributes & ccGLSL::ATTR_COL)
+			{
+				createVBOIfNeeded(s_vboColor, static_cast<int>(ccChunk::SIZE * 4 * 3 * sizeof(unsigned char)));
 			}
 		}
 	}
 
-	if (!fallBackDisplay)
+	if (prog)
 	{
 		assert(!entityPickingMode || !glParams.showSF);
 		assert(prog.isNull() == false);
-
-		// static VBO handles reused between calls
-		if (s_vboVertex == 0)
-		{
-			glFunc->glGenBuffers(1, &s_vboVertex);
-		}
-
-		if (glParams.showNorms && s_vboNormals == 0)
-		{
-			glFunc->glGenBuffers(1, &s_vboNormals);
-		}
-
-		if ((glParams.showColors || glParams.showSF) && s_vboColor == 0)
-		{
-			glFunc->glGenBuffers(1, &s_vboColor);
-		}
 
 		auto   vertices      = GetVertexBuffer();
 		float* normalIndexes = reinterpret_cast<float*>(GetNormalsBuffer());
@@ -2085,40 +2084,44 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			// Vertex buffer
 			{
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(vertexCount * 3 * sizeof(PointCoordinateType)), vertices, GL_STREAM_DRAW);
+				s_vboVertex.bind();
+				s_vboVertex.write(0, vertices, static_cast<int>(vertexCount * 3 * sizeof(PointCoordinateType)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
+				s_vboVertex.release();
 			}
 
 			// Normals
 			if (glParams.showNorms)
 			{
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(normalCount * sizeof(float)), normalIndexes, GL_STREAM_DRAW);
+				s_vboNormals.bind();
+				s_vboNormals.write(0, normalIndexes, static_cast<int>(normalCount * sizeof(float)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+				s_vboNormals.release();
 			}
 
 			// Colors
 			if (glParams.showSF)
 			{
 				// colors are RGB unsigned bytes (3 components)
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 3 * sizeof(unsigned char)), rgbColors, GL_STREAM_DRAW);
+				s_vboColor.bind();
+				s_vboColor.write(0, rgbColors, static_cast<int>(rgbColorCount * 3 * sizeof(unsigned char)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 				// we upload 3-component unsigned bytes; align to vec4 in shader by setting alpha = 1.0 via glVertexAttrib4f if needed
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 3, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 				// ensure alpha = 1.0 for all vertices
 				// Note: can't set alpha per-vertex when only 3 components provided; shader expects vec4 but attribute with 3 components will get implicit 1.0 as 4th component
+				s_vboColor.release();
 			}
 			else if (glParams.showColors)
 			{
 				// colors are RGBA unsigned bytes
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(rgbColorCount * 4 * sizeof(unsigned char)), rgbColors, GL_STREAM_DRAW);
+				s_vboColor.bind();
+				s_vboColor.write(0, rgbColors, static_cast<int>(rgbColorCount * 4 * sizeof(unsigned char)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+				s_vboColor.release();
 			}
 
 			// draw

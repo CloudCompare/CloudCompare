@@ -2759,11 +2759,11 @@ inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField
 static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 // Global OpenGL resources
-static GLuint s_vboVertex  = 0;
-static GLuint s_vboNormals = 0;
-static GLuint s_vboColor   = 0;
-static GLuint s_vboSF      = 0;
-static GLuint s_vboVisib   = 0;
+static QOpenGLBuffer s_vboVertex;
+static QOpenGLBuffer s_vboNormals;
+static QOpenGLBuffer s_vboColor;
+static QOpenGLBuffer s_vboSF;
+static QOpenGLBuffer s_vboVisib;
 
 void ccPointCloud::ReleaseOpenGLRessources()
 {
@@ -2776,40 +2776,19 @@ void ccPointCloud::ReleaseOpenGLRessources()
 	ccPointCloud::ReleaseShaders();
 	ccGLSL::ReleaseOpenGLRessources();
 
-	// get the set of OpenGL functions (version 2.1)
-	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
-	if (glFunc)
+	auto releaseVBO = [](QOpenGLBuffer& vbo)
 	{
-		if (s_vboVertex != 0)
+		if (vbo.isCreated())
 		{
-			glFunc->glDeleteBuffers(1, &s_vboVertex);
-			s_vboVertex = 0;
+			vbo.destroy();
 		}
+	};
 
-		if (s_vboNormals != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboNormals);
-			s_vboNormals = 0;
-		}
-
-		if (s_vboColor != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboColor);
-			s_vboColor = 0;
-		}
-
-		if (s_vboSF != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboSF);
-			s_vboSF = 0;
-		}
-
-		if (s_vboVisib != 0)
-		{
-			glFunc->glDeleteBuffers(1, &s_vboVisib);
-			s_vboVisib = 0;
-		}
-	}
+	releaseVBO(s_vboVertex);
+	releaseVBO(s_vboNormals);
+	releaseVBO(s_vboColor);
+	releaseVBO(s_vboSF);
+	releaseVBO(s_vboVisib);
 }
 
 /// Maximum number of points (per cloud) displayed in a single LOD iteration
@@ -2861,12 +2840,13 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 	}
 	else if (useProg) // use a program but no pre-saved VBOs (only the global one)
 	{
-		if (s_vboVertex != 0)
+		if (s_vboVertex.isCreated())
 		{
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_points) * 3 * sizeof(PointCoordinateType)), ccChunk::Start(m_points, chunkIndex), GL_STREAM_DRAW);
+			s_vboVertex.bind();
+			s_vboVertex.write(0, ccChunk::Start(m_points, chunkIndex), static_cast<int>(ccChunk::Size(chunkIndex, m_points) * 3 * sizeof(PointCoordinateType)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
+			s_vboVertex.release();
 		}
 		else
 		{
@@ -2888,7 +2868,7 @@ static void glChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTableT
 {
 	assert(glFunc);
 
-	if (s_vboVisib == 0)
+	if (!s_vboVisib.isCreated())
 	{
 		assert(false);
 		return;
@@ -2905,10 +2885,11 @@ static void glChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTableT
 		++count;
 	}
 
-	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
-	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_visibilityBuffer, GL_STREAM_DRAW);
+	s_vboVisib.bind();
+	s_vboVisib.write(0, s_visibilityBuffer, static_cast<int>(count * sizeof(float)));
 	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+	s_vboVisib.release();
 }
 
 void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg /*=false*/)
@@ -2948,7 +2929,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 		}
 		else // use a program but no pre-saved VBOs (only the global one)
 		{
-			if (s_vboNormals != 0)
+			if (s_vboNormals.isCreated())
 			{
 				// TODO FIXME: use a more recent GLSL version to pass unsigned int directly!
 				float* _normalIndexes = reinterpret_cast<float*>(s_normalBuffer);
@@ -2961,10 +2942,11 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 					++count;
 				}
 
-				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_normalBuffer, GL_STREAM_DRAW);
+				s_vboNormals.bind();
+				s_vboNormals.write(0, s_normalBuffer, static_cast<int>(count * sizeof(float)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+				s_vboNormals.release();
 			}
 			else
 			{
@@ -3037,12 +3019,13 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	}
 	else if (useProg) // use a program but no pre-loaded VBOs (only the global one)
 	{
-		if (s_vboColor != 0)
+		if (s_vboColor.isCreated())
 		{
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_rgbaColors->size()) * 4 * sizeof(unsigned char)), ccChunk::Start(*m_rgbaColors, chunkIndex), GL_STREAM_DRAW);
+			s_vboColor.bind();
+			s_vboColor.write(0, ccChunk::Start(*m_rgbaColors, chunkIndex), static_cast<int>(ccChunk::Size(chunkIndex, m_rgbaColors->size()) * 4 * sizeof(unsigned char)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
+			s_vboColor.release();
 		}
 		else
 		{
@@ -3094,12 +3077,13 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	}
 	else if (useProg) // use a program but no pre-loaded VBOs (only the global one)
 	{
-		if (0 != s_vboSF)
+		if (s_vboSF.isCreated())
 		{
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)), ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), GL_STREAM_DRAW);
+			s_vboSF.bind();
+			s_vboSF.write(0, ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), static_cast<int>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
+			s_vboSF.release();
 		}
 		else
 		{
@@ -3151,12 +3135,13 @@ static void glLODChunkVertexPointer(ccPointCloud*      cloud,
 
 	if (useProg)
 	{
-		if (0 != s_vboVertex)
+		if (s_vboVertex.isCreated())
 		{
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_STREAM_DRAW);
+			s_vboVertex.bind();
+			s_vboVertex.write(0, s_pointBuffer, static_cast<int>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
+			s_vboVertex.release();
 		}
 		else
 		{
@@ -3180,7 +3165,7 @@ static void glLODChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTab
 	assert(startIndex < indexMap.size() && stopIndex <= indexMap.size());
 	assert(glFunc);
 
-	if (s_vboVisib == 0)
+	if (!s_vboVisib.isCreated())
 	{
 		assert(false);
 		return;
@@ -3194,10 +3179,11 @@ static void glLODChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTab
 		*_visibilityBuffer++ = static_cast<float>(m_pointsVisibility[pointIndex]);
 	}
 
-	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
-	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_visibilityBuffer, GL_STREAM_DRAW);
+	s_vboVisib.bind();
+	s_vboVisib.write(0, s_visibilityBuffer, static_cast<int>((stopIndex - startIndex) * sizeof(float)));
 	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+	s_vboVisib.release();
 }
 
 template <class QOpenGLFunctions>
@@ -3213,7 +3199,7 @@ static void glLODChunkNormalPointer(NormsIndexesTableType* normals,
 
 	if (useProg)
 	{
-		if (s_vboNormals != 0)
+		if (s_vboNormals.isCreated())
 		{
 			// with the program, we don't decode normals in a dedicated static array, we just re-order the indexes
 			float* _normalIndexes = reinterpret_cast<float*>(s_normalBuffer);
@@ -3223,10 +3209,11 @@ static void glLODChunkNormalPointer(NormsIndexesTableType* normals,
 				*_normalIndexes++   = static_cast<float>(normals->at(pointIndex));
 			}
 
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_normalBuffer, GL_STREAM_DRAW);
+			s_vboNormals.bind();
+			s_vboNormals.write(0, s_normalBuffer, static_cast<int>((stopIndex - startIndex) * sizeof(float)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+			s_vboNormals.release();
 		}
 		else
 		{
@@ -3280,13 +3267,14 @@ static void glLODChunkColorPointer(RGBAColorsTableType* colors,
 
 	if (useProg)
 	{
-		if (s_vboColor != 0)
+		if (s_vboColor.isCreated())
 		{
 			// we must re-order colors in a dedicated static array
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 4 * sizeof(unsigned char)), s_rgbBuffer4ub, GL_STREAM_DRAW);
+			s_vboColor.bind();
+			s_vboColor.write(0, s_rgbBuffer4ub, static_cast<int>((stopIndex - startIndex) * 4 * sizeof(unsigned char)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+			s_vboColor.release();
 		}
 		else
 		{
@@ -3313,7 +3301,7 @@ static void glLODChunkSFPointer(ccScalarField*     sf,
 
 	if (useProg)
 	{
-		if (s_vboSF != 0)
+		if (s_vboSF.isCreated())
 		{
 			// with the program, we don't convert SF values to color, we just re-order them
 			float* _sfValues = reinterpret_cast<float*>(s_rgbBuffer4ub);
@@ -3323,10 +3311,11 @@ static void glLODChunkSFPointer(ccScalarField*     sf,
 				*_sfValues++        = sf->data()[pointIndex];
 			}
 
-			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
-			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_rgbBuffer4ub, GL_STREAM_DRAW);
+			s_vboSF.bind();
+			s_vboSF.write(0, s_rgbBuffer4ub, static_cast<int>((stopIndex - startIndex) * sizeof(float)));
 			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
 			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+			s_vboSF.release();
 		}
 		else
 		{
@@ -3646,9 +3635,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		QSharedPointer<QOpenGLTexture> sfTex;
 
 		// normal display acceleration texture (for fast normals display)
-		static bool                    s_globalVBOCreationFailed = false;
-		static bool                    s_normalLUTTextureFailed  = false;
+		static bool                    s_normalLUTTextureFailed = false;
 		QSharedPointer<QOpenGLTexture> lutTex;
+
+		static bool s_globalVBOCreationFailed = false;
 
 		// by default, we'll try to use a composite GLSL program (if possible)
 		QSharedPointer<QOpenGLShaderProgram> prog;
@@ -3702,54 +3692,41 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			// static VBO handles reused between calls
-			if (prog && s_vboVertex == 0)
+			auto createVBOIfNeeded = [&](QOpenGLBuffer& vbo, int sizeBytes)
 			{
-				glFunc->glGenBuffers(1, &s_vboVertex);
-				if (0 == s_vboVertex)
+				if (prog && !vbo.isCreated())
 				{
-					s_globalVBOCreationFailed = true;
-					prog.clear();
+					if (vbo.create())
+					{
+						vbo.setUsagePattern(QOpenGLBuffer::StreamDraw);
+						vbo.bind();
+						vbo.allocate(sizeBytes);
+						vbo.release();
+					}
+					else
+					{
+						s_globalVBOCreationFailed = true;
+						prog.clear();
+					}
 				}
-			}
+			};
 
-			if (prog && (attributes & ccGLSL::ATTR_NOR) && s_vboNormals == 0)
+			createVBOIfNeeded(s_vboVertex, MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3 * sizeof(PointCoordinateType));
+			if (attributes & ccGLSL::ATTR_NOR)
 			{
-				glFunc->glGenBuffers(1, &s_vboNormals);
-				if (0 == s_vboNormals)
-				{
-					s_globalVBOCreationFailed = true;
-					prog.clear();
-				}
+				createVBOIfNeeded(s_vboNormals, MAX_POINT_COUNT_PER_LOD_RENDER_PASS * sizeof(float));
 			}
-
-			if (prog && (attributes & ccGLSL::ATTR_SF) && s_vboSF == 0)
+			if (attributes & ccGLSL::ATTR_SF)
 			{
-				glFunc->glGenBuffers(1, &s_vboSF);
-				if (0 == s_vboSF)
-				{
-					s_globalVBOCreationFailed = true;
-					prog.clear();
-				}
+				createVBOIfNeeded(s_vboSF, MAX_POINT_COUNT_PER_LOD_RENDER_PASS * sizeof(float));
 			}
-
-			if (prog && (attributes & ccGLSL::ATTR_COL) && s_vboColor == 0)
+			if (attributes & ccGLSL::ATTR_COL)
 			{
-				glFunc->glGenBuffers(1, &s_vboColor);
-				if (0 == s_vboColor)
-				{
-					s_globalVBOCreationFailed = true;
-					prog.clear();
-				}
+				createVBOIfNeeded(s_vboColor, MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 4 * sizeof(unsigned char));
 			}
-
-			if (prog && (attributes & ccGLSL::ATTR_VIS) && s_vboVisib == 0)
+			if (attributes & ccGLSL::ATTR_VIS)
 			{
-				glFunc->glGenBuffers(1, &s_vboVisib);
-				if (0 == s_vboVisib)
-				{
-					s_globalVBOCreationFailed = true;
-					prog.clear();
-				}
+				createVBOIfNeeded(s_vboVisib, MAX_POINT_COUNT_PER_LOD_RENDER_PASS * sizeof(float));
 			}
 		}
 
@@ -4088,12 +4065,16 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					glFunc->glDrawArrays(GL_POINTS, 0, count);
 
-					if (prog)
+					if (useProgram)
 					{
 						glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_POS);
 						if (glParams.showNorms)
 						{
 							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_NOR);
+						}
+						if (visTableEnabled)
+						{
+							glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 						}
 						if (glParams.showSF)
 						{
@@ -4153,6 +4134,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						if (glParams.showNorms)
 						{
 							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_NOR);
+						}
+						if (visTableEnabled)
+						{
+							glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
 						}
 						if (glParams.showSF)
 						{

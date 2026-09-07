@@ -31,6 +31,7 @@
 #include "ccFastMarchingForNormsDirection.h"
 #include "ccFrustum.h"
 #include "ccGBLSensor.h"
+#include "ccGLSLHelper.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericMesh.h"
 #include "ccHObjectCaster.h"
@@ -2757,25 +2758,12 @@ inline float GetSymmetricalNormalizedValue(ScalarType sfVal, const ccScalarField
 // the GL type depends on the PointCoordinateType 'size' (float or double)
 static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
-// Attribute indexes that we bound when creating the programs
-static const GLuint ATTR_POS  = 0;
-static const GLuint ATTR_NOR  = 1;
-static const GLuint ATTR_COL  = 2;
-static const GLuint ATTR_SF   = 4;
-static const GLuint ATTR_VIS  = 8;
-static const GLuint ATTR_CLIP = 16;
-// For internal use only
-static const GLuint ATTR_LOG_SCALE  = 32;
-static const GLuint ATTR_SYM_SCALE  = 64;
-static const GLuint ATTR_HIDDEN_VAL = 128;
-
 // Global OpenGL resources
-static QMap<int, QSharedPointer<QOpenGLShaderProgram>> s_programs;
-static GLuint                                          s_vboVertex  = 0;
-static GLuint                                          s_vboNormals = 0;
-static GLuint                                          s_vboColor   = 0;
-static GLuint                                          s_vboSF      = 0;
-static GLuint                                          s_vboVisib   = 0;
+static GLuint s_vboVertex  = 0;
+static GLuint s_vboNormals = 0;
+static GLuint s_vboColor   = 0;
+static GLuint s_vboSF      = 0;
+static GLuint s_vboVisib   = 0;
 
 void ccPointCloud::ReleaseOpenGLRessources()
 {
@@ -2786,13 +2774,12 @@ void ccPointCloud::ReleaseOpenGLRessources()
 	}
 
 	ccPointCloud::ReleaseShaders();
+	ccGLSL::ReleaseOpenGLRessources();
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(QOpenGLContext::currentContext());
 	if (glFunc)
 	{
-		s_programs.clear();
-
 		if (s_vboVertex != 0)
 		{
 			glFunc->glDeleteBuffers(1, &s_vboVertex);
@@ -2855,8 +2842,8 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 		{
 			if (useProg)
 			{
-				glFunc->glEnableVertexAttribArray(ATTR_POS);
-				glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
 			}
 			else
 			{
@@ -2878,8 +2865,8 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_points) * 3 * sizeof(PointCoordinateType)), ccChunk::Start(m_points, chunkIndex), GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_POS);
-			glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, decimStep * 3 * sizeof(PointCoordinateType), nullptr);
 		}
 		else
 		{
@@ -2920,8 +2907,8 @@ static void glChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTableT
 
 	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
 	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_visibilityBuffer, GL_DYNAMIC_DRAW);
-	glFunc->glEnableVertexAttribArray(ATTR_VIS);
-	glFunc->glVertexAttribPointer(ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
+	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t chunkIndex, unsigned decimStep, bool useVBOs, bool useProg /*=false*/)
@@ -2947,8 +2934,8 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 			// we can use the pre-loaded VBOs
 			if (m_vboManager.vbos[chunkIndex]->normalIndexBuffer.bind())
 			{
-				glFunc->glEnableVertexAttribArray(ATTR_NOR);
-				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
 				m_vboManager.vbos[chunkIndex]->normalIndexBuffer.release();
 			}
 			else
@@ -2976,8 +2963,8 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 
 				glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
 				glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(count * sizeof(float)), s_normalBuffer, GL_DYNAMIC_DRAW);
-				glFunc->glEnableVertexAttribArray(ATTR_NOR);
-				glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 			}
 			else
 			{
@@ -3031,8 +3018,8 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		{
 			if (useProg)
 			{
-				glFunc->glEnableVertexAttribArray(ATTR_COL);
-				glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
+				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
+				glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
 			}
 			else
 			{
@@ -3054,8 +3041,8 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_rgbaColors->size()) * 4 * sizeof(unsigned char)), ccChunk::Start(*m_rgbaColors, chunkIndex), GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_COL);
-			glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, decimStep * 4 * sizeof(ColorCompType), nullptr);
 		}
 		else
 		{
@@ -3111,8 +3098,8 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(ccChunk::Size(chunkIndex, m_currentDisplayedScalarField->size()) * sizeof(float)), ccChunk::Start(m_currentDisplayedScalarField->data(), chunkIndex), GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_SF);
-			glFunc->glVertexAttribPointer(ATTR_SF, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, decimStep * sizeof(float), nullptr);
 		}
 		else
 		{
@@ -3168,8 +3155,8 @@ static void glLODChunkVertexPointer(ccPointCloud*      cloud,
 		{
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVertex);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 3 * sizeof(PointCoordinateType)), s_pointBuffer, GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_POS);
-			glFunc->glVertexAttribPointer(ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS, 3, GL_COORD_TYPE, GL_FALSE, 0, nullptr);
 		}
 		else
 		{
@@ -3209,8 +3196,8 @@ static void glLODChunkVisibilityPointer(const ccGenericPointCloud::VisibilityTab
 
 	glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboVisib);
 	glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_visibilityBuffer, GL_DYNAMIC_DRAW);
-	glFunc->glEnableVertexAttribArray(ATTR_VIS);
-	glFunc->glVertexAttribPointer(ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_VIS);
+	glFunc->glVertexAttribPointer(ccGLSL::ATTR_VIS, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 template <class QOpenGLFunctions>
@@ -3238,8 +3225,8 @@ static void glLODChunkNormalPointer(NormsIndexesTableType* normals,
 
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboNormals);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_normalBuffer, GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_NOR);
-			glFunc->glVertexAttribPointer(ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_NOR);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_NOR, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 		}
 		else
 		{
@@ -3298,8 +3285,8 @@ static void glLODChunkColorPointer(RGBAColorsTableType* colors,
 			// we must re-order colors in a dedicated static array
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboColor);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * 4 * sizeof(unsigned char)), s_rgbBuffer4ub, GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_COL);
-			glFunc->glVertexAttribPointer(ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_COL);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_COL, 4, GL_UNSIGNED_BYTE, GL_TRUE, 0, nullptr);
 		}
 		else
 		{
@@ -3338,8 +3325,8 @@ static void glLODChunkSFPointer(ccScalarField*     sf,
 
 			glFunc->glBindBuffer(GL_ARRAY_BUFFER, s_vboSF);
 			glFunc->glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>((stopIndex - startIndex) * sizeof(float)), s_rgbBuffer4ub, GL_DYNAMIC_DRAW);
-			glFunc->glEnableVertexAttribArray(ATTR_SF);
-			glFunc->glVertexAttribPointer(ATTR_SF, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
+			glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_SF);
+			glFunc->glVertexAttribPointer(ccGLSL::ATTR_SF, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 		}
 		else
 		{
@@ -3407,332 +3394,6 @@ struct DisplayDesc : LODLevelDesc
 	//! Map of indexes (to invert the natural order)
 	LODIndexSet* indexMap;
 };
-
-// GLSL program builder (GLSL 1.20) for cloud rendering (position, normal, color, scalar values)
-static QSharedPointer<QOpenGLShaderProgram> BuildCloudDisplayProgram(QOpenGLFunctions_2_1* glFunc, int attributes, ccScalarField* sf /*=nullptr*/)
-{
-	if (!glFunc)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	// add secondary attributes
-	if (attributes & ATTR_SF)
-	{
-		if (!sf)
-		{
-			assert(false);
-			return nullptr;
-		}
-
-		if (sf->logScale())
-		{
-			attributes |= ATTR_LOG_SCALE;
-		}
-		else if (sf->symmetricalScale())
-		{
-			attributes |= ATTR_SYM_SCALE;
-		}
-		if (!sf->areNaNValuesShownInGrey())
-		{
-			attributes |= ATTR_HIDDEN_VAL;
-		}
-	}
-
-	if (s_programs.contains(attributes))
-	{
-		return s_programs[attributes];
-	}
-
-	// Vertex programs
-	static const char* VertexProgHeaderSrc =
-	    "#version 120\n"
-	    "attribute vec3 aPosition;\n"
-	    "varying vec4 vColor;\n";
-
-	static const char* VertexProgVisibilityAttributesSrc =
-	    "attribute float aVisib;\n";
-
-	static const char* VertexProgColorAttributesSrc =
-	    "attribute vec4 aColor;\n";
-
-	static const char* VertexProgSFAttributesSrc =
-	    "attribute float aSFValue;\n"
-	    "uniform sampler2D uColorScaleTex;\n"
-	    "uniform int uTexWidth;\n"
-	    "uniform int uTexHeight;\n"
-	    "uniform float uMinVal;\n"
-	    "uniform float uMaxVal;\n"
-	    "uniform float uMinSat;\n"
-	    "uniform float uMaxSat;\n"
-	    "uniform float uSatRange;\n"
-	    "uniform float uOutOfRangeGreyScale;\n";
-
-	static const char* VertexProgNormAttributesSrc =
-	    "attribute float aNormalIndex;\n"
-	    "varying vec3 vNormal;\n"
-	    "uniform sampler2D uNormalLUT;\n"
-	    "uniform int uLUTWidth;\n"
-	    "uniform int uLUTHeight;\n";
-
-	static const char* VertexProgFetchNormFuncSrc =
-	    "vec3 fetchNormalFromLUT(float fi)\n"
-	    "{\n"
-	    "	float w  = float(uLUTWidth);\n"
-	    "	float h  = float(uLUTHeight);\n"
-	    "	float tx = mod(fi, w);\n"
-	    "	float ty = floor(fi / w);\n"
-	    "	vec2 uv = vec2((tx + 0.5) / w, (ty + 0.5) / h);\n"
-	    "	vec3 enc = texture2D(uNormalLUT, uv).rgb;\n"
-	    "	vec3 n = enc * 2.0 - 1.0;\n"
-	    "	return normalize(n);\n"
-	    "}\n";
-
-	static const char* VertexProgFetchSFColorFuncSrc =
-	    "vec4 fetchColorFromTex(float sfVal)\n"
-	    "{\n"
-	    "   float v = normalizeSFVal(sfVal);\n"
-	    "   v = v * float(uTexWidth * uTexHeight - 1);\n"
-	    "	float w  = float(uTexWidth);\n"
-	    "	float h  = float(uTexHeight);\n"
-	    "	float tx = mod(v, w);\n"
-	    "	float ty = floor(v/ w);\n"
-	    "	vec2 uv = vec2(tx / w, ty / h);\n"
-	    "	vec4 color = texture2D(uColorScaleTex, uv);\n"
-	    "	return color;\n"
-	    "}\n";
-
-	static const char* NormalizeNonSymmetricalValueFuncSrc =
-	    "float normalizeSFVal(float sfVal)\n"
-	    "{\n"
-	    "   if (sfVal <= uMinSat)\n"
-	    "      return 0.0;\n"
-	    "   if (sfVal >= uMaxSat)\n"
-	    "      return 1.0;\n"
-	    "   return (sfVal - uMinSat) / uSatRange;\n"
-	    "}\n";
-
-	static const char* NormalizeSymmetricalValueFuncSrc =
-	    "float normalizeSFVal(float sfVal)\n"
-	    "{\n"
-	    "   if (abs(sfVal) <= uMinSat)\n"
-	    "      return 0.5;\n"
-	    "   if (sfVal >= 0)\n"
-	    "   {\n"
-	    "      if (sfVal > uMaxSat)\n"
-	    "         return 1.0;\n"
-	    "      return (1.0 + (sfVal - uMinSat) / uSatRange) / 2.0;\n"
-	    "   }\n"
-	    "   else\n"
-	    "   {\n"
-	    "      if (sfVal < -uMaxSat)\n"
-	    "         return 0.0;\n"
-	    "      return (1.0 + (sfVal + uMinSat) / uSatRange) / 2.0;\n"
-	    "   }\n"
-	    "}\n";
-
-	static const char* NormalizeValueLogScaleFuncSrc =
-	    "float normalizeSFVal(float sfVal)\n"
-	    "{\n"
-	    " 	float dLog = log(max(abs(d), 0.00001)) / log(10.0);\n"
-	    "   if (dLog <= uMinSat)\n"
-	    "      return 0.0;\n"
-	    "   if (dLog >= uMaxSat)\n"
-	    "      return 1.0;\n"
-	    "   return (dLog - uMinSat) / uSatRange;\n"
-	    "}\n";
-
-	static const char* VertexProgMainStartSrc =
-	    "void main()\n"
-	    "{\n";
-
-	static const char* VertexProgMainUseDefaultGLColorSrc =
-	    "    vColor = gl_Color;\n";
-
-	static const char* VertexProgMainUseInputColorSrc =
-	    "    vColor = aColor;\n";
-
-	static const char* VertexProgMainFetchSFColorSrc =
-	    "   if (aSFValue >= uMinVal && aSFValue <= uMaxVal)\n"
-	    "   {\n"
-	    "      vColor = fetchColorFromTex(aSFValue);\n"
-	    "   }\n"
-	    "   else\n"
-	    "   {\n"
-	    "      vColor = vec4(uOutOfRangeGreyScale, uOutOfRangeGreyScale, uOutOfRangeGreyScale, 1.0);\n"
-	    "   }\n";
-
-	static const char* VertexProgMainFetchSFColorHideNaNSrc =
-	    "   if (aSFValue >= uMinVal && aSFValue <= uMaxVal)\n"
-	    "   {\n"
-	    "      vColor = fetchColorFromTex(aSFValue);\n"
-	    "   }\n"
-	    "   else\n"
-	    "   {\n"
-	    "      gl_Position = vec4(0, 0, 0, -1.0);\n" // impossible position, should be discarded by the GPU
-	    "      return;\n"
-	    "   }\n";
-
-	static const char* VertexProgMainTestVisibilitySrc =
-	    "   if (aVisib > 0.0)\n" // CCCoreLib::POINT_VISIBLE = 0
-	    "   {\n"
-	    "      gl_Position = vec4(0, 0, 0, -1.0);\n" // impossible position, should be discarded by the GPU
-	    "      return;\n"
-	    "   }\n";
-
-	static const char* VertexProgMainFetchNormalSrc =
-	    "    vNormal = gl_NormalMatrix * fetchNormalFromLUT(aNormalIndex);\n";
-
-	static const char* VertexProgMainClippingSrc =
-	    "    gl_ClipVertex = gl_ModelViewMatrix * vec4(aPosition, 1.0);\n";
-
-	static const char* VertexProgMainEndSrc =
-	    "    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPosition, 1.0);\n"
-	    "}\n";
-
-	// Fragment programs
-	static const char* ColorOnlyFragmentProgSrc =
-	    "#version 120\n"
-	    "varying vec4 vColor;\n"
-	    "void main()\n"
-	    "{\n"
-	    "    gl_FragColor = vColor;\n"
-	    "}\n";
-
-	static const char* ColorAndNormalFragmentProgSrc =
-	    "#version 120\n"
-	    "varying vec4 vColor;\n"
-	    "varying vec3 vNormal;\n"
-	    "void main()\n"
-	    "{\n"
-	    "    vec3 n = normalize(vNormal);\n"
-	    "    vec3 lightDir = normalize(vec3(0.0,0.0,1.0));\n"
-	    "    float diff = max(dot(n, lightDir), 0.0);\n"
-	    "    vec4 base = vColor;\n"
-	    "    gl_FragColor = vec4(base.rgb * diff, base.a);\n"
-	    "}\n";
-
-	QString vertexProgSrc = VertexProgHeaderSrc;
-	{
-		// add attributes
-		if (attributes & ATTR_SF)
-			vertexProgSrc += VertexProgSFAttributesSrc;
-		else if (attributes & ATTR_COL)
-			vertexProgSrc += VertexProgColorAttributesSrc;
-		if (attributes & ATTR_NOR)
-			vertexProgSrc += VertexProgNormAttributesSrc;
-		if (attributes & ATTR_VIS)
-			vertexProgSrc += VertexProgVisibilityAttributesSrc;
-
-		// add special functions
-		if (attributes & ATTR_SF)
-		{
-			if (attributes & ATTR_LOG_SCALE)
-			{
-				vertexProgSrc += NormalizeValueLogScaleFuncSrc;
-			}
-			else
-			{
-				vertexProgSrc += ((attributes & ATTR_SYM_SCALE) ? NormalizeSymmetricalValueFuncSrc : NormalizeNonSymmetricalValueFuncSrc);
-			}
-			vertexProgSrc += VertexProgFetchSFColorFuncSrc;
-		}
-
-		if (attributes & ATTR_NOR)
-		{
-			vertexProgSrc += VertexProgFetchNormFuncSrc;
-		}
-
-		// main function
-		{
-			vertexProgSrc += VertexProgMainStartSrc;
-
-			if (attributes & ATTR_VIS)
-			{
-				vertexProgSrc += VertexProgMainTestVisibilitySrc;
-			}
-
-			// color transfer
-			if (attributes & ATTR_SF)
-			{
-				vertexProgSrc += ((attributes & ATTR_HIDDEN_VAL) ? VertexProgMainFetchSFColorHideNaNSrc : VertexProgMainFetchSFColorSrc);
-			}
-			else if (attributes & ATTR_COL)
-			{
-				vertexProgSrc += VertexProgMainUseInputColorSrc;
-			}
-			else
-			{
-				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
-			}
-
-			// normal transfer (if any)
-			if (attributes & ATTR_NOR)
-			{
-				vertexProgSrc += VertexProgMainFetchNormalSrc;
-			}
-
-			if (attributes & ATTR_CLIP)
-			{
-				vertexProgSrc += VertexProgMainClippingSrc;
-			}
-
-			vertexProgSrc += VertexProgMainEndSrc;
-		}
-	}
-
-	QString fragmentProgSrc = (attributes & ATTR_NOR ? ColorAndNormalFragmentProgSrc : ColorOnlyFragmentProgSrc);
-
-	QOpenGLShader vertexShader(QOpenGLShader::Vertex);
-	if (false == vertexShader.compileSourceCode(vertexProgSrc))
-	{
-		ccLog::Warning(QString("[BuildCloudDisplayProgram] Vertex shader compilation failed: ") + vertexShader.log());
-		return nullptr;
-	}
-	QOpenGLShader fragmentShader(QOpenGLShader::Fragment);
-	if (false == fragmentShader.compileSourceCode(fragmentProgSrc))
-	{
-		ccLog::Warning(QString("[BuildCloudDisplayProgram] Fragment shader compilation failed: ") + fragmentShader.log());
-		return nullptr;
-	}
-	QSharedPointer<QOpenGLShaderProgram> program(new QOpenGLShaderProgram);
-	program->addShader(&vertexShader);
-	program->addShader(&fragmentShader);
-
-	// bind attribute locations before linking for stable locations
-	program->bindAttributeLocation("aPosition", ATTR_POS);
-	if (attributes & ATTR_VIS)
-	{
-		program->bindAttributeLocation("aVisib", ATTR_VIS);
-	}
-	if (attributes & ATTR_SF)
-	{
-		assert((attributes & ATTR_COL) == 0);
-		program->bindAttributeLocation("aSFValue", ATTR_SF);
-	}
-	else if (attributes & ATTR_COL)
-	{
-		assert((attributes & ATTR_SF) == 0);
-		program->bindAttributeLocation("aColor", ATTR_COL);
-	}
-	if (attributes & ATTR_NOR)
-	{
-		program->bindAttributeLocation("aNormalIndex", ATTR_NOR);
-	}
-
-	if (false == program->link())
-	{
-		ccLog::Warning(QString("[BuildCloudDisplayProgram] Shader program linking failed: ") + program->log());
-		return nullptr;
-	}
-
-	s_programs[attributes] = program;
-
-	ccGLDrawContext::CatchGLErrors(glFunc->glGetError(), "ccPointCloud::shader.program.build");
-
-	return program;
-}
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -3989,29 +3650,29 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if ((false == s_normalLUTTextureFailed)
 		    && (false == s_globalVBOCreationFailed))
 		{
-			int attributes = ATTR_POS; // ATTR_POS == 0
+			int attributes = ccGLSL::ATTR_POS; // ccGLSL::ATTR_POS == 0
 			if (glParams.showNorms)
 			{
-				attributes |= ATTR_NOR;
+				attributes |= ccGLSL::ATTR_NOR;
 			}
 			if (glParams.showSF)
 			{
-				attributes |= ATTR_SF;
+				attributes |= ccGLSL::ATTR_SF;
 			}
 			else if (glParams.showColors)
 			{
-				attributes |= ATTR_COL;
+				attributes |= ccGLSL::ATTR_COL;
 			}
 			if (visTableEnabled)
 			{
-				attributes |= ATTR_VIS;
+				attributes |= ccGLSL::ATTR_VIS;
 			}
 			if (!m_clipPlanes.empty())
 			{
-				attributes |= ATTR_CLIP;
+				attributes |= ccGLSL::ATTR_CLIP;
 			}
 
-			prog = BuildCloudDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
+			prog = ccGLSL::BuildDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
 
 			if (glParams.showSF && prog)
 			{
@@ -4050,7 +3711,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
-			if (prog && (attributes & ATTR_NOR) && s_vboNormals == 0)
+			if (prog && (attributes & ccGLSL::ATTR_NOR) && s_vboNormals == 0)
 			{
 				glFunc->glGenBuffers(1, &s_vboNormals);
 				if (0 == s_vboNormals)
@@ -4060,7 +3721,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
-			if (prog && (attributes & ATTR_SF) && s_vboSF == 0)
+			if (prog && (attributes & ccGLSL::ATTR_SF) && s_vboSF == 0)
 			{
 				glFunc->glGenBuffers(1, &s_vboSF);
 				if (0 == s_vboSF)
@@ -4070,7 +3731,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
-			if (prog && (attributes & ATTR_COL) && s_vboColor == 0)
+			if (prog && (attributes & ccGLSL::ATTR_COL) && s_vboColor == 0)
 			{
 				glFunc->glGenBuffers(1, &s_vboColor);
 				if (0 == s_vboColor)
@@ -4080,7 +3741,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				}
 			}
 
-			if (prog && (attributes & ATTR_VIS) && s_vboVisib == 0)
+			if (prog && (attributes & ccGLSL::ATTR_VIS) && s_vboVisib == 0)
 			{
 				glFunc->glGenBuffers(1, &s_vboVisib);
 				if (0 == s_vboVisib)
@@ -4351,6 +4012,12 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				prog->bind();
 
+				if (glParams.showNorms)
+				{
+					glFunc->glUniform1i(prog->uniformLocation("uLight0Enabled"), glFunc->glIsEnabled(GL_LIGHT0) ? 1 : 0);
+					glFunc->glUniform1i(prog->uniformLocation("uLight1Enabled"), glFunc->glIsEnabled(GL_LIGHT1) ? 1 : 0);
+				}
+
 				if (lutTex)
 				{
 					// bind normal acceleration LUT texture to unit 0
@@ -4358,22 +4025,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glBindTexture(GL_TEXTURE_2D, lutTex->textureId());
 
 					// set sampler uniform to unit 0
-					int locSampler = prog->uniformLocation("uNormalLUT");
-					if (locSampler >= 0)
-					{
-						glFunc->glUniform1i(locSampler, 0);
-					}
+					glFunc->glUniform1i(prog->uniformLocation("uNormalLUT"), 0);
 					// set LUT dimensions
-					int locW = prog->uniformLocation("uLUTWidth");
-					if (locW >= 0)
-					{
-						glFunc->glUniform1i(locW, lutTex->width());
-					}
-					int locH = prog->uniformLocation("uLUTHeight");
-					if (locH >= 0)
-					{
-						glFunc->glUniform1i(locH, lutTex->height());
-					}
+					glFunc->glUniform1i(prog->uniformLocation("uLUTWidth"), lutTex->width());
+					glFunc->glUniform1i(prog->uniformLocation("uLUTHeight"), lutTex->height());
 				}
 
 				if (sfTex && m_currentDisplayedScalarField)
@@ -4383,22 +4038,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glBindTexture(GL_TEXTURE_2D, sfTex->textureId());
 
 					// set sampler uniform to unit 1
-					int locSampler = prog->uniformLocation("uColorScaleTex");
-					if (locSampler >= 0)
-					{
-						glFunc->glUniform1i(locSampler, 1);
-					}
+					glFunc->glUniform1i(prog->uniformLocation("uColorScaleTex"), 1);
 					// set texture dimensions
-					int locW = prog->uniformLocation("uTexWidth");
-					if (locW >= 0)
-					{
-						glFunc->glUniform1i(locW, sfTex->width());
-					}
-					int locH = prog->uniformLocation("uTexHeight");
-					if (locH >= 0)
-					{
-						glFunc->glUniform1i(locH, sfTex->height());
-					}
+					glFunc->glUniform1i(prog->uniformLocation("uTexWidth"), sfTex->width());
+					glFunc->glUniform1i(prog->uniformLocation("uTexHeight"), sfTex->height());
 
 					auto   colorScale = m_currentDisplayedScalarField->getColorScale();
 					double offset     = m_currentDisplayedScalarField->getOffset();
@@ -4496,18 +4139,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (prog)
 					{
-						glFunc->glDisableVertexAttribArray(ATTR_POS);
+						glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_POS);
 						if (glParams.showNorms)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_NOR);
 						}
 						if (glParams.showSF)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_SF);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_SF);
 						}
 						else if (glParams.showColors)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_COL);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_COL);
 						}
 						// unbind array buffer
 						glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -4555,18 +4198,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (useProgram)
 					{
-						glFunc->glDisableVertexAttribArray(ATTR_POS);
+						glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_POS);
 						if (glParams.showNorms)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_NOR);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_NOR);
 						}
 						if (glParams.showSF)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_SF);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_SF);
 						}
 						else if (glParams.showColors)
 						{
-							glFunc->glDisableVertexAttribArray(ATTR_COL);
+							glFunc->glDisableVertexAttribArray(ccGLSL::ATTR_COL);
 						}
 						// unbind array buffer
 						glFunc->glBindBuffer(GL_ARRAY_BUFFER, 0);

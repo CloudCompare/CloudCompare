@@ -43,6 +43,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccGLDrawContext.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLMatrix.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLMatrixTpl.h
+		${CMAKE_CURRENT_LIST_DIR}/ccGLSLHelper.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGriddedTools.h
 		${CMAKE_CURRENT_LIST_DIR}/ccHObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccHObjectCaster.h

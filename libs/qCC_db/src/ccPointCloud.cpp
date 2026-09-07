@@ -4460,29 +4460,29 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					const auto& indexMap = (*toDisplay.indexMap);
 
 					// points
-					glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, *toDisplay.indexMap, s, e, useProgram);
+					glLODChunkVertexPointer<QOpenGLFunctions_2_1>(this, glFunc, indexMap, s, e, useProgram);
 
 					// normals
 					if (glParams.showNorms)
 					{
-						glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, *toDisplay.indexMap, s, e, useProgram);
+						glLODChunkNormalPointer<QOpenGLFunctions_2_1>(m_normals, glFunc, indexMap, s, e, useProgram);
 					}
 
 					// visibility table
 					if (visTableEnabled && useProgram)
 					{
-						glLODChunkVisibilityPointer<QOpenGLFunctions_2_1>(m_pointsVisibility, glFunc, *toDisplay.indexMap, s, e);
+						glLODChunkVisibilityPointer<QOpenGLFunctions_2_1>(m_pointsVisibility, glFunc, indexMap, s, e);
 					}
 
 					// SFs
 					if (glParams.showSF)
 					{
-						glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, *toDisplay.indexMap, s, e, useProgram);
+						glLODChunkSFPointer<QOpenGLFunctions_2_1>(m_currentDisplayedScalarField, glFunc, indexMap, s, e, useProgram);
 					}
 					// colors
 					else if (glParams.showColors)
 					{
-						glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, *toDisplay.indexMap, s, e, useProgram);
+						glLODChunkColorPointer<QOpenGLFunctions_2_1>(m_rgbaColors, glFunc, indexMap, s, e, useProgram);
 					}
 
 					glFunc->glDrawArrays(GL_POINTS, 0, count);

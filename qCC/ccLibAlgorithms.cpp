@@ -21,6 +21,7 @@
 #include <ScalarFieldTools.h>
 
 // qCC_db
+#include <ccBackgroundTask.h>
 #include <ccOctree.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
@@ -335,13 +336,18 @@ namespace ccLibAlgorithms
 					}
 				}
 
-				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c,
-				                                                                                                                   subOption,
-				                                                                                                                   cloud,
-				                                                                                                                   radius,
-				                                                                                                                   roughnessUpDir,
-				                                                                                                                   pDlg,
-				                                                                                                                   octree.data());
+				// only the computation itself runs in a worker thread
+				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
+				    [&]()
+				    {
+					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c,
+					                                                                      subOption,
+					                                                                      cloud,
+					                                                                      radius,
+					                                                                      roughnessUpDir,
+					                                                                      pDlg,
+					                                                                      octree.data());
+				    });
 
 				if (result == CCCoreLib::GeometricalAnalysisTools::NoError)
 				{
@@ -564,12 +570,17 @@ namespace ccLibAlgorithms
 				switch (algo)
 				{
 				case CCLIB_ALGO_SF_GRADIENT:
-					result = CCCoreLib::ScalarFieldTools::computeScalarFieldGradient(cloud,
-					                                                                 0, // auto --> FIXME: should be properly set by the user!
-					                                                                 euclidean,
-					                                                                 false,
-					                                                                 pDlg.get(),
-					                                                                 octree.data());
+					// only the computation itself runs in a worker thread
+					result = ccBackgroundTask::Run(
+					    [&]()
+					    {
+						    return CCCoreLib::ScalarFieldTools::computeScalarFieldGradient(cloud,
+						                                                                   0, // auto --> FIXME: should be properly set by the user!
+						                                                                   euclidean,
+						                                                                   false,
+						                                                                   pDlg.get(),
+						                                                                   octree.data());
+					    });
 					break;
 
 				default:

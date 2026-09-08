@@ -913,6 +913,26 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		}
 	}
 
+	// the "Extra Bytes" descriptor is written to a VLR, whose payload length is stored
+	// on 16 bits, so it cannot describe an unlimited number of fields. Writing it to an
+	// EVLR instead is not supported yet, so we stop here rather than write a broken file.
+	{
+		// the saver adds one field per normal component on top of the ones selected here
+		size_t extraFieldCount = params.extraFields.size();
+		if (params.shouldSaveNormalsAsExtraScalarField && pointCloud->hasNormals())
+		{
+			extraFieldCount += 3;
+		}
+
+		if (extraFieldCount > LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR)
+		{
+			ccLog::Error("[LAS] Cannot save more than %u extra scalar fields (%u requested)",
+			             static_cast<unsigned>(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR),
+			             static_cast<unsigned>(extraFieldCount));
+			return CC_FERR_NOT_IMPLEMENTED;
+		}
+	}
+
 	LasSaver      saver(*pointCloud, params);
 	CC_FILE_ERROR error = saver.open(filename);
 	if (error != CC_FERR_NO_ERROR)

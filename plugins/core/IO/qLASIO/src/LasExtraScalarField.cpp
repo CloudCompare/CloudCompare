@@ -11,6 +11,7 @@
 // Qt
 #include <QDataStream>
 // System
+#include <algorithm>
 #include <cstring>
 #include <stdexcept>
 
@@ -295,17 +296,28 @@ LasExtraScalarField::Kind LasExtraScalarField::kind() const
 void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct& vlr, const std::vector<LasExtraScalarField>& extraFields)
 {
 	strcpy(vlr.user_id, "LASF_Spec");
-	vlr.record_id                  = 4;
-	vlr.record_length_after_header = 192 * static_cast<laszip_U16>(extraFields.size());
+	vlr.record_id = 4;
+
+	// the length of a VLR payload is stored on 16 bits, so the descriptor cannot
+	// describe more fields than that. The caller is expected to have checked this
+	// already, we only make sure we never write past the end of the buffer.
+	const size_t fieldCount = std::min(extraFields.size(), MAX_EXTRA_FIELDS_IN_VLR);
+	if (fieldCount != extraFields.size())
+	{
+		ccLog::Warning("[LAS] Only the first %u extra scalar fields can be described (out of %u)",
+		               static_cast<unsigned>(fieldCount),
+		               static_cast<unsigned>(extraFields.size()));
+	}
+	vlr.record_length_after_header = static_cast<laszip_U16>(192 * fieldCount);
 	std::fill(vlr.description, vlr.description + 32, 0);
 	vlr.data = new laszip_U8[vlr.record_length_after_header];
 
 	QByteArray byteArray;
 	byteArray.resize(vlr.record_length_after_header);
 	QDataStream dataStream(&byteArray, QIODevice::WriteOnly);
-	for (const LasExtraScalarField& extraScalarField : extraFields)
+	for (size_t i = 0; i < fieldCount; ++i)
 	{
-		dataStream << extraScalarField;
+		dataStream << extraFields[i];
 	}
 	Q_ASSERT(byteArray.size() == vlr.record_length_after_header);
 	std::copy(byteArray.begin(), byteArray.end(), vlr.data);

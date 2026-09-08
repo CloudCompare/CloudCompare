@@ -1706,20 +1706,20 @@ void ccMesh::ReleaseOpenGLRessources()
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		return;
+	}
+
+	handleColorRamp(context);
+
 	// 3D pass only
 	if (!MACRO_Draw3D(context))
 	{
 		return;
 	}
 
-	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
-	{
-		return;
-	}
-
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
-
-	handleColorRamp(context);
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();

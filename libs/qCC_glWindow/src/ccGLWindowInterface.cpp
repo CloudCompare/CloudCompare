@@ -835,7 +835,11 @@ void ccGLWindowInterface::uninitializeGL()
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	if (m_trihedronGLList != GL_INVALID_LIST_ID)
 	{
@@ -870,7 +874,10 @@ void ccGLWindowInterface::onResizeGL(int w, int h)
 		// pivot symbol is dependent on the screen size!
 		if (m_pivotGLList != GL_INVALID_LIST_ID)
 		{
-			functions()->glDeleteLists(m_pivotGLList, 1);
+			if (functions())
+			{
+				functions()->glDeleteLists(m_pivotGLList, 1);
+			}
 			m_pivotGLList = GL_INVALID_LIST_ID;
 		}
 
@@ -934,7 +941,10 @@ void ccGLWindowInterface::setGLViewport(const QRect& rect)
 	{
 		doMakeCurrent();
 
-		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
+		if (functions())
+		{
+			functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
+		}
 	}
 }
 
@@ -1022,7 +1032,11 @@ void ccGLWindowInterface::drawClickableItems(int xStart0, int& yStart)
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	//"exit" icon
 	static const QImage c_exitIcon = QImage(":/CC/images/ccExit.png").mirrored();
@@ -1782,7 +1796,11 @@ const ccGLMatrixd& ccGLWindowInterface::getProjectionMatrix()
 void ccGLWindowInterface::setStandardOrthoCenter()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
@@ -1797,7 +1815,11 @@ void ccGLWindowInterface::setStandardOrthoCenter()
 void ccGLWindowInterface::setStandardOrthoCorner()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
@@ -1845,8 +1867,7 @@ void ccGLWindowInterface::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.defaultMat->setAmbient(ccColor::bright);
 	CONTEXT.defaultMat->setSpecular(guiParams.meshSpecular);
 	CONTEXT.defaultMat->setEmission(ccColor::night);
-	CONTEXT.defaultMat->setShininessFront(30);
-	CONTEXT.defaultMat->setShininessBack(50);
+	CONTEXT.defaultMat->setShininess(10);
 	// default colors
 	CONTEXT.pointsDefaultCol      = guiParams.pointsDefaultCol;
 	CONTEXT.textDefaultCol        = guiParams.textDefaultCol;
@@ -2220,7 +2241,11 @@ void ccGLWindowInterface::startOpenGLPicking(const PickingParameters& params)
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	if (!initFBOSafe(m_pickingFbo, glWidth(), glHeight()))
 	{
@@ -2869,22 +2894,33 @@ QFont ccGLWindowInterface::getLabelDisplayFont() const
 	return font;
 }
 
-void ccGLWindowInterface::glEnableSunLight()
+void ccGLWindowInterface::glSetSunLightParameters(ccQOpenGLFunctions* glFunc)
 {
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
-	glFunc->glLightfv(GL_LIGHT0, GL_DIFFUSE, getDisplayParameters().lightDiffuseColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_AMBIENT, getDisplayParameters().lightAmbientColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_SPECULAR, getDisplayParameters().lightSpecularColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
-	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, getDisplayParameters().lightDoubleSided ? GL_TRUE : GL_FALSE);
-	glFunc->glEnable(GL_LIGHT0);
+	if (glFunc)
+	{
+		const auto& displayParams = getDisplayParameters();
+		glFunc->glLightfv(GL_LIGHT0, GL_DIFFUSE, displayParams.lightDiffuseColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_AMBIENT, displayParams.lightAmbientColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_SPECULAR, displayParams.lightSpecularColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
+		glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, displayParams.lightDoubleSided ? GL_TRUE : GL_FALSE);
+	}
 }
 
-void ccGLWindowInterface::glDisableSunLight()
+void ccGLWindowInterface::glEnableSunLight(ccQOpenGLFunctions* glFunc)
 {
-	functions()->glDisable(GL_LIGHT0);
+	if (glFunc)
+	{
+		glFunc->glEnable(GL_LIGHT0);
+	}
+}
+
+void ccGLWindowInterface::glDisableSunLight(ccQOpenGLFunctions* glFunc)
+{
+	if (glFunc)
+	{
+		glFunc->glDisable(GL_LIGHT0);
+	}
 }
 
 void ccGLWindowInterface::setSunLight(bool state)
@@ -2910,22 +2946,33 @@ void ccGLWindowInterface::toggleSunLight()
 	setSunLight(!m_sunLightEnabled);
 }
 
-void ccGLWindowInterface::glEnableCustomLight()
+void ccGLWindowInterface::glSetCustomLightParameters(ccQOpenGLFunctions* glFunc)
 {
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
-	glFunc->glLightfv(GL_LIGHT1, GL_DIFFUSE, getDisplayParameters().lightDiffuseColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_AMBIENT, getDisplayParameters().lightAmbientColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_SPECULAR, getDisplayParameters().lightSpecularColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_POSITION, m_customLightPos);
-	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	glFunc->glEnable(GL_LIGHT1);
+	if (glFunc)
+	{
+		const auto& displayParams = getDisplayParameters();
+		glFunc->glLightfv(GL_LIGHT1, GL_DIFFUSE, displayParams.lightDiffuseColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_AMBIENT, displayParams.lightAmbientColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_SPECULAR, displayParams.lightSpecularColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_POSITION, m_customLightPos);
+		glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	}
 }
 
-void ccGLWindowInterface::glDisableCustomLight()
+void ccGLWindowInterface::glEnableCustomLight(ccQOpenGLFunctions* glFunc)
 {
-	functions()->glDisable(GL_LIGHT1);
+	if (glFunc)
+	{
+		glFunc->glEnable(GL_LIGHT1);
+	}
+}
+
+void ccGLWindowInterface::glDisableCustomLight(ccQOpenGLFunctions* glFunc)
+{
+	if (glFunc)
+	{
+		glFunc->glDisable(GL_LIGHT1);
+	}
 }
 
 void ccGLWindowInterface::setCustomLight(bool state)
@@ -2957,7 +3004,11 @@ void ccGLWindowInterface::toggleCustomLight()
 void ccGLWindowInterface::drawCustomLight()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	ccGL::Color(glFunc, ccColor::yellow);
 	// ensure that the star size is constant (in pixels)
@@ -3560,8 +3611,12 @@ int ccGLWindowInterface::getGlFilterBannerHeight() const
 
 void ccGLWindowInterface::display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color /*=nullptr*/, const QFont& font /*=QFont()*/)
 {
-	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? *color : getDisplayParameters().textDefaultCol);
-	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
+	ccQOpenGLFunctions* glFunc = functions();
+	if (glFunc)
+	{
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : getDisplayParameters().textDefaultCol);
+		renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
+	}
 }
 
 void ccGLWindowInterface::displayText(QString              text,
@@ -3573,7 +3628,11 @@ void ccGLWindowInterface::displayText(QString              text,
                                       const QFont*         font /*=nullptr*/)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	int x2 = x;
 	int y2 = y;
@@ -3731,7 +3790,11 @@ void ccGLWindowInterface::renderText(int x, int y, const QString& str, uint16_t 
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// retrieve the texture
 	SharedTexture texture;
@@ -3894,7 +3957,11 @@ void ccGLWindowInterface::renderText(double x, double y, double z, const QString
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// get the actual viewport / matrices
 	ccGLCameraParameters camera;
@@ -3912,7 +3979,7 @@ void ccGLWindowInterface::renderText(double x, double y, double z, const QString
 
 void ccGLWindowInterface::logGLError(const char* context) const
 {
-	if (m_initialized)
+	if (m_initialized && functions())
 	{
 		LogGLError(functions()->glGetError(), context);
 	}
@@ -4080,9 +4147,13 @@ GLfloat ccGLWindowInterface::getGLDepth(int x, int y, bool extendToNeighbors /*=
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return INVALID_DEPTH;
+	}
 
-	int     kernel[2] = {1, 1};
+	int     kernel[2]{1, 1};
 	GLfloat depthPickingBuffer[9];
 
 	if (extendToNeighbors)
@@ -4231,7 +4302,11 @@ void ccGLWindowInterface::lockRotationAxis(bool state, const CCVector3d& axis)
 void ccGLWindowInterface::drawCross()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// force line width
 	glFunc->glPushAttrib(GL_LINE_BIT);
@@ -4257,7 +4332,11 @@ float ccGLWindowInterface::computeTrihedronLength() const
 void ccGLWindowInterface::drawTrihedron()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	float trihedronEdgeLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float trihedronLength     = computeTrihedronLength();
@@ -4375,6 +4454,13 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 {
 	assert(!m_viewportParams.perspectiveView); // a scale is only valid in ortho. mode!
 
+	ccQOpenGLFunctions* glFunc = functions();
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
+
 	float scaleMaxW = glWidth() / 4.0f; // 25% of screen width
 
 	double pixelSize = computeActualPixelSize();
@@ -4394,9 +4480,6 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	float w               = glWidth() / 2.0f - dW;
 	float h               = glHeight() / 2.0f - dH;
 	float tick            = 3.0f * m_captureMode.zoomFactor;
-
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
 
 	// force line width
 	glFunc->glPushAttrib(GL_LINE_BIT);
@@ -4882,7 +4965,11 @@ void ccGLWindowInterface::doPaintGL()
 void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glPointSize(m_viewportParams.defaultPointSize);
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
@@ -4900,15 +4987,14 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	/****************************************/
 	/****    PASS: 3D/FOREGROUND/LIGHT   ****/
 	/****************************************/
-	if (m_customLightEnabled || m_sunLightEnabled)
+
+	glSetSunLightParameters(glFunc); // these parameters have to be defined anyway, as some entities can force the sun light on later
+
+	// we enable the sun light (if activated)
+	if (m_sunLightEnabled)
 	{
 		CONTEXT.drawingFlags |= CC_LIGHT_ENABLED;
-
-		// we enable absolute sun light (if activated)
-		if (m_sunLightEnabled)
-		{
-			glEnableSunLight();
-		}
+		glEnableSunLight(glFunc);
 	}
 
 	// we activate the current shader (if any)
@@ -5009,11 +5095,14 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		glFunc->glLoadMatrixd(modelViewMat.data());
 	}
 
-	// we enable relative custom light (if activated)
+	// we enable custom light (if activated)
+	// DGM: warning, the custom light must be set/enabled/displayed AFTER the 'model view' and projection matrices have been set!
 	if (m_customLightEnabled)
 	{
-		// DGM: warning, must be enabled/displayed AFTER the 'model view' and projection matrices have been set!
-		glEnableCustomLight();
+		CONTEXT.drawingFlags |= CC_LIGHT_ENABLED;
+
+		glSetCustomLightParameters(glFunc);
+		glEnableCustomLight(glFunc);
 
 		if (!m_captureMode.enabled
 		    && m_currentLODState.level == 0
@@ -5104,11 +5193,11 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	// we disable lights
 	if (m_customLightEnabled)
 	{
-		glDisableCustomLight();
+		glDisableCustomLight(glFunc);
 	}
 	if (m_sunLightEnabled)
 	{
-		glDisableSunLight();
+		glDisableSunLight(glFunc);
 	}
 
 	// we display the cross at the end (and in orthographic mode)
@@ -5139,7 +5228,11 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// backup the current viewport
 	QRect originViewport          = m_glViewport;
@@ -5441,7 +5534,11 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	/****************************************/
 	/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
@@ -5552,8 +5649,11 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 	/****************************************/
 	/****  PASS: 2D/FOREGROUND/NO LIGHT  ****/
 	/****************************************/
@@ -5788,6 +5888,13 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
                                           bool  renderOverlayItems /*=false*/,
                                           bool  silent /*=false*/)
 {
+	ccQOpenGLFunctions* glFunc = functions();
+	if (!glFunc)
+	{
+		assert(false);
+		return {};
+	}
+
 	QImage outputImage;
 
 	if (!m_glExtFuncSupported) // no FBO support?!
@@ -5923,9 +6030,6 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		}
 	}
 	assert(fbo);
-
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
 
 	CC_DRAW_CONTEXT CONTEXT;
 	getContext(CONTEXT);
@@ -6969,7 +7073,11 @@ void ccGLWindowInterface::drawPivot()
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -6995,7 +7103,7 @@ void ccGLWindowInterface::drawPivot()
 			sphere.setEnabled(true);
 			// force lighting for proper sphere display
 			glFunc->glPushAttrib(GL_LIGHTING_BIT);
-			glEnableSunLight();
+			glEnableSunLight(glFunc);
 			CC_DRAW_CONTEXT CONTEXT;
 			getContext(CONTEXT);
 			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED | CC_NO_SHADER;

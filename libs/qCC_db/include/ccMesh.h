@@ -470,6 +470,9 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	               bool                                arbitraryOutputCS = false,
 	               CCCoreLib::GenericProgressCallback* progressCb        = nullptr) const;
 
+	//! Returns whether the mesh has a unique material (i.e. all triangles share the same material)
+	bool hasUniqueMaterial();
+
 	//! Releases OpenGL ressources (textures, VBOs, etc.)
 	static void ReleaseOpenGLRessources();
 
@@ -548,6 +551,9 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 
 	//! Per-triangle material indexes
 	triangleMaterialIndexesSet* m_triMtlIndexes;
+
+	//! Whether the mesh has a unique material (i.e. all triangles share the same material)
+	std::optional<bool> m_hasUniqueMaterial;
 
 	//! Set of triplets of indexes referring to mesh texture coordinates
 	using triangleTexCoordIndexesSet = ccArray<Tuple3i, 3, int>;

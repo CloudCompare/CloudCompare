@@ -29,17 +29,30 @@ class QOpenGLFunctions_2_1;
 class ccGLSL
 {
   public:
-	enum Attribute
+	//! Attribute flags
+	enum AttributeFlags
 	{
-		ATTR_POS = 0,
-		ATTR_NOR = 1,
-		ATTR_COL = 2,
-		ATTR_SF  = 4,
-		ATTR_VIS = 8,
+		ATTR_POS_FLAG = 0,
+		ATTR_NOR_FLAG = 1,
+		ATTR_COL_FLAG = 2,
+		ATTR_SF_FLAG  = 4,
+		ATTR_VIS_FLAG = 8,
+		ATTR_TEX_FLAG = 16,
 		// For internal use only
-		ATTR_LOG_SCALE  = 32,
-		ATTR_SYM_SCALE  = 64,
-		ATTR_HIDDEN_VAL = 128
+		ATTR_LOG_SCALE_FLAG  = 32,
+		ATTR_SYM_SCALE_FLAG  = 64,
+		ATTR_HIDDEN_VAL_FLAG = 128
+	};
+
+	//! Array indexes
+	enum ArrayIndexes
+	{
+		ATTR_POS_ARRAY = 0,
+		ATTR_NOR_ARRAY = 1,
+		ATTR_COL_ARRAY = 2,
+		ATTR_SF_ARRAY  = 3,
+		ATTR_VIS_ARRAY = 4,
+		ATTR_TEX_ARRAY = 5
 	};
 
 	//! Builds a shader program for displaying a point cloud
@@ -56,10 +69,10 @@ class ccGLSL
 	    - uLight0Enabled, uLight1Enabled (for lighting - e.g. if ATTR_NOR is set)
 
 	    If normals are used (ATTR_NOR), a 2D texture containing a normal LUT (see ccGLSL::GetNormalLUTTexture) must be set as uniform
-	    (see ccGLSL::SetLUTTextureUniforms) and must be bound to unit 0.
+	    (see ccGLSL::SetLUTTextureUniforms) and should be bound to unit 1 by default.
 
 	    If a scalar field is used (ATTR_SF), a 2D texture containing the color ramp (see ccColorScale::getTexture) must be set as uniform
-	    (see ccGLSL::SetSFTextureUniforms) and must be bound to unit 1.
+	    (see ccGLSL::SetSFTextureUniforms) and should be bound to unit 2 by default.
 
 	    \param glFunc OpenGL functions
 	    \param attributes bit field of ccGLSL::Attribute
@@ -80,25 +93,38 @@ class ccGLSL
 	**/
 	static QSharedPointer<QOpenGLTexture> GetNormalLUTTexture(QOpenGLFunctions_2_1* glFunc);
 
+	//! Sets the uniforms related to texture (for OpenGL rendering)
+	/** \param glFunc OpenGL functions (OpenGL 2.1)
+	    \param prog shader program
+	    \param textureUnit texture unit to which the texture is bound
+	**/
+	static void SetTextureUniforms(QOpenGLFunctions_2_1* glFunc,
+	                               QOpenGLShaderProgram* prog,
+	                               GLint                 textureUnit = 0);
+
 	//! Sets the uniforms related to a LUT texture (for OpenGL rendering)
 	/** \param glFunc OpenGL functions (OpenGL 2.1)
 	    \param prog shader program
 	    \param lutTex LUT texture
+	    \param textureUnit texture unit to which the texture is bound
 	**/
 	static void SetLUTTextureUniforms(QOpenGLFunctions_2_1* glFunc,
 	                                  QOpenGLShaderProgram* prog,
-	                                  QOpenGLTexture*       lutTex);
+	                                  QOpenGLTexture*       lutTex,
+	                                  GLint                 textureUnit = 1);
 
 	//! Sets the uniforms related to a scalar field texture (for OpenGL rendering)
 	/** \param glFunc OpenGL functions (OpenGL 2.1)
 	    \param prog shader program
 	    \param sfTex LUT texture
 	    \param sf scalar field
+	    \param textureUnit texture unit to which the texture is bound
 	**/
 	static void SetSFTextureUniforms(QOpenGLFunctions_2_1* glFunc,
 	                                 QOpenGLShaderProgram* prog,
 	                                 QOpenGLTexture*       sfTex,
-	                                 ccScalarField*        sf);
+	                                 ccScalarField*        sf,
+	                                 GLint                 textureUnit = 2);
 
 	//! Sets the uniforms related to lighting (for OpenGL rendering)
 	/** \param glFunc OpenGL functions (OpenGL 2.1)

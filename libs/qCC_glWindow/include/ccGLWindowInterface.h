@@ -1103,10 +1103,12 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	void        setStandardOrthoCorner();
 
 	// Lights controls (OpenGL scripts)
-	void glEnableSunLight();
-	void glDisableSunLight();
-	void glEnableCustomLight();
-	void glDisableCustomLight();
+	void glSetSunLightParameters(ccQOpenGLFunctions* glFunc);
+	void glEnableSunLight(ccQOpenGLFunctions* glFunc);
+	void glDisableSunLight(ccQOpenGLFunctions* glFunc);
+	void glSetCustomLightParameters(ccQOpenGLFunctions* glFunc);
+	void glEnableCustomLight(ccQOpenGLFunctions* glFunc);
+	void glDisableCustomLight(ccQOpenGLFunctions* glFunc);
 	void drawCustomLight();
 
 	//! Picking parameters

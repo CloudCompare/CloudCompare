@@ -167,11 +167,14 @@ namespace ccEntityAction
 				if (ent != cloud)
 				{
 					ent->showColors(true);
+					ent->showSF(false); // just in case
+					ent->prepareDisplayForRefresh();
 				}
 				else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 				{
 					cloud->getParent()->showColors(true);
 					cloud->getParent()->showSF(false); // just in case
+					cloud->getParent()->prepareDisplayForRefresh();
 				}
 			}
 			else if (ent->isKindOf(CC_TYPES::PRIMITIVE))

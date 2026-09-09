@@ -291,6 +291,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	static CCVector3*     GetVertexBuffer();
 	static CCVector3*     GetNormalsBuffer();
 	static ColorCompType* GetColorsBuffer();
+	static float*         GetTexCoordsBuffer();
 
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,
@@ -310,9 +311,6 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Enables (OpenGL) stipple mask
 	static void EnableGLStippleMask(QOpenGLContext* context, bool state);
-
-	// inherited from ccHObject
-	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Handles the color ramp display
 	void handleColorRamp(CC_DRAW_CONTEXT& context);

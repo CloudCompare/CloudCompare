@@ -291,6 +291,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	static CCVector3*     GetVertexBuffer();
 	static CCVector3*     GetNormalsBuffer();
 	static ColorCompType* GetColorsBuffer();
+	static float*         GetTexCoordsBuffer();
 
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,

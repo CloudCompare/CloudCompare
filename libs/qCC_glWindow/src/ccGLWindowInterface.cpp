@@ -1845,8 +1845,7 @@ void ccGLWindowInterface::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.defaultMat->setAmbient(ccColor::bright);
 	CONTEXT.defaultMat->setSpecular(guiParams.meshSpecular);
 	CONTEXT.defaultMat->setEmission(ccColor::night);
-	CONTEXT.defaultMat->setShininessFront(30);
-	CONTEXT.defaultMat->setShininessBack(50);
+	CONTEXT.defaultMat->setShininess(10);
 	// default colors
 	CONTEXT.pointsDefaultCol      = guiParams.pointsDefaultCol;
 	CONTEXT.textDefaultCol        = guiParams.textDefaultCol;

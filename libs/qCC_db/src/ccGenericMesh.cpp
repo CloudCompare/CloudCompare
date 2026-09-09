@@ -114,6 +114,13 @@ ColorCompType* ccGenericMesh::GetColorsBuffer()
 	return s_rgbBuffer;
 }
 
+// Texture coordinates buffer
+float* ccGenericMesh::GetTexCoordsBuffer()
+{
+	static float s_texCoordsBuffer[ccChunk::SIZE * 3 * 2];
+	return s_texCoordsBuffer;
+}
+
 // Vertex indexes buffer (for wired display)
 static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
 static bool     s_vertIndexesInitialized = false;

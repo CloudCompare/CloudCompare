@@ -2316,7 +2316,7 @@ namespace ccEntityAction
 			ccBackgroundTask::Run(
 			    [&]()
 			    {
-				    for (auto cloud : clouds)
+				    for (auto* cloud : clouds)
 				    {
 					    Q_ASSERT(cloud != nullptr);
 
@@ -2325,37 +2325,6 @@ namespace ccEntityAction
 
 					    if (useGridStructure && cloud->gridCount())
 					    {
-#if 0
-					ccPointCloud* newCloud = new ccPointCloud("temp");
-					newCloud->reserve(cloud->size());
-					for (size_t gi=0; gi<cloud->gridCount(); ++gi)
-					{
-						const ccPointCloud::Grid::Shared& scanGrid = cloud->grid(gi);
-						if (scanGrid && scanGrid->indexes.empty())
-						{
-							//empty grid, we skip it
-							continue;
-						}
-						ccGLMatrixd toSensor = scanGrid->sensorPosition.inverse();
-
-						const int* _indexGrid = scanGrid->indexes.data();
-						for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
-						{
-							for (int i = 0; i < static_cast<int>(scanGrid->w); ++i, ++_indexGrid)
-							{
-								if (*_indexGrid >= 0)
-								{
-									unsigned pointIndex = static_cast<unsigned>(*_indexGrid);
-									const CCVector3* P = cloud->getPoint(pointIndex);
-									CCVector3 Q = toSensor * (*P);
-									newCloud->addPoint(Q);
-								}
-							}
-						}
-
-						addToDB(newCloud);
-					}
-#endif
 						    if (s_orientNormals)
 						    {
 							    if (orientNormalsWithGrids || orientNormalsWithSensors) // withGrids and withSensors take precedence over other methods

@@ -6528,11 +6528,10 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 	// progress dialog
 	if (pDlg)
 	{
-		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
-		pDlg->setLabelText(QObject::tr("Points: %L1").arg(pointCount));
-		pDlg->setRange(0, static_cast<int>(pointCount));
-		pDlg->show();
-		QCoreApplication::processEvents();
+		pDlg->setMethodTitle(QObject::tr("Orienting normals (Grids)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+		pDlg->update(0);
+		pDlg->start();
 	}
 
 	// for each grid cell
@@ -6592,7 +6591,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 						}
 						else
 						{
-							pDlg->setValue(++progressIndex);
+							pDlg->update(++progressIndex / static_cast<float>(pointCount));
 						}
 					}
 				}
@@ -6605,8 +6604,16 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 
 bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog* pDlg)
 {
-	int progressIndex = 0;
-	for (unsigned pointIndex = 0; pointIndex < m_points.size(); ++pointIndex)
+	const unsigned pointCount = size();
+	if(pDlg)
+	{
+		pDlg->setMethodTitle(QObject::tr("Orienting normals (Viewpoint)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+		pDlg->update(0);
+		pDlg->start();
+	}
+
+	for (unsigned pointIndex = 0; pointIndex < pointCount; ++pointIndex)
 	{
 		const CCVector3* P  = getPoint(pointIndex);
 		CCVector3        N  = getPointNormal(pointIndex);
@@ -6630,7 +6637,7 @@ bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog*
 			}
 			else
 			{
-				pDlg->setValue(++progressIndex);
+				pDlg->update(pointIndex / static_cast<float>(pointCount));
 			}
 		}
 	}

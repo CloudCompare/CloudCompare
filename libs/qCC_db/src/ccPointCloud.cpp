@@ -6291,12 +6291,14 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 	if (pDlg)
 	{
 		pDlg->setMethodTitle(QObject::tr("Normals computation (Grid)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
 		pDlg->setAutoClose(false);
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
 	// double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
 
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
 	// for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
 	{
@@ -6316,12 +6318,11 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 		// progress dialog
 		if (pDlg)
 		{
-			pDlg->setInfo(QObject::tr("Grid: %1 x %2").arg(scanGrid->w).arg(scanGrid->h));
 			pDlg->start();
 		}
 
 		// the code below has been kindly provided by Romain Janvier
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		const CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
 
 		for (int j = 0; j < static_cast<int>(scanGrid->h) - 1; ++j)
 		{
@@ -6456,15 +6457,11 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 			if (pDlg)
 			{
 				// update progress dialog
-				if (pDlg->isCancelRequested())
+				if (!nProgress.oneStep())
 				{
 					unallocateNorms();
 					ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
 					return false;
-				}
-				else
-				{
-					pDlg->update((j + 1) / static_cast<float>(scanGrid->w));
 				}
 			}
 		}
@@ -6530,12 +6527,11 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 	{
 		pDlg->setMethodTitle(QObject::tr("Orienting normals (Grids)"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
-		pDlg->update(0);
 		pDlg->start();
 	}
 
 	// for each grid cell
-	int progressIndex = 0;
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
 	for (size_t gi = 0; gi < gridCount(); ++gi)
 	{
 		const ccPointCloud::Grid::Shared& scanGrid = grid(gi);
@@ -6552,7 +6548,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 		}
 
 		// ccGLMatrixd toSensorCS = scanGrid->sensorPosition.inverse();
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		const CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
 
 		const int* _indexGrid = scanGrid->indexes.data();
 		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
@@ -6583,15 +6579,11 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 					if (pDlg)
 					{
 						// update progress dialog
-						if (pDlg->wasCanceled())
+						if (!nProgress.oneStep())
 						{
 							unallocateNorms();
 							ccLog::Warning("[orientNormalsWithGrids] Process cancelled by user");
 							return false;
-						}
-						else
-						{
-							pDlg->update(++progressIndex / static_cast<float>(pointCount));
 						}
 					}
 				}
@@ -6605,14 +6597,14 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog* pDlg)
 {
 	const unsigned pointCount = size();
-	if(pDlg)
+	if (pDlg)
 	{
 		pDlg->setMethodTitle(QObject::tr("Orienting normals (Viewpoint)"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
-		pDlg->update(0);
 		pDlg->start();
 	}
 
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
 	for (unsigned pointIndex = 0; pointIndex < pointCount; ++pointIndex)
 	{
 		const CCVector3* P  = getPoint(pointIndex);
@@ -6629,15 +6621,11 @@ bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog*
 		if (pDlg)
 		{
 			// update progress dialog
-			if (pDlg->wasCanceled())
+			if (!nProgress.oneStep())
 			{
 				unallocateNorms();
 				ccLog::Warning("[orientNormalsWithSensors] Process cancelled by user");
 				return false;
-			}
-			else
-			{
-				pDlg->update(pointIndex / static_cast<float>(pointCount));
 			}
 		}
 	}

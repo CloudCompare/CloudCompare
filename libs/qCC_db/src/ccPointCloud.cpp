@@ -6290,10 +6290,8 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 	// progress dialog
 	if (pDlg)
 	{
-		pDlg->setWindowTitle(QObject::tr("Normals computation"));
+		pDlg->setMethodTitle(QObject::tr("Normals computation (Grid)"));
 		pDlg->setAutoClose(false);
-		pDlg->show();
-		QCoreApplication::processEvents();
 	}
 
 	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
@@ -6318,10 +6316,8 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 		// progress dialog
 		if (pDlg)
 		{
-			pDlg->setLabelText(QObject::tr("Grid: %1 x %2").arg(scanGrid->w).arg(scanGrid->h));
-			pDlg->setValue(0);
-			pDlg->setRange(0, static_cast<int>(scanGrid->indexes.size()));
-			QCoreApplication::processEvents();
+			pDlg->setInfo(QObject::tr("Grid: %1 x %2").arg(scanGrid->w).arg(scanGrid->h));
+			pDlg->start();
 		}
 
 		// the code below has been kindly provided by Romain Janvier
@@ -6460,7 +6456,7 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 			if (pDlg)
 			{
 				// update progress dialog
-				if (pDlg->wasCanceled())
+				if (pDlg->isCancelRequested())
 				{
 					unallocateNorms();
 					ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
@@ -6468,7 +6464,7 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 				}
 				else
 				{
-					pDlg->setValue(static_cast<unsigned>(j + 1) * scanGrid->w);
+					pDlg->update((j + 1) / static_cast<float>(scanGrid->w));
 				}
 			}
 		}

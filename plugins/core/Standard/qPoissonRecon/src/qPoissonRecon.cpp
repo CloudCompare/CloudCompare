@@ -477,6 +477,7 @@ void qPoissonRecon::doAction()
 	newPC->setEnabled(false);
 	newMesh->setVisible(true);
 	//newMesh->computeNormals(true);
+	newMesh->showNormals(true);
 	if (!cloudHasColors)
 	{
 		newPC->unallocateColors();

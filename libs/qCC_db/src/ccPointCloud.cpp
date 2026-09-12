@@ -6290,14 +6290,13 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 	// progress dialog
 	if (pDlg)
 	{
-		pDlg->setWindowTitle(QObject::tr("Normals computation"));
-		pDlg->setAutoClose(false);
-		pDlg->show();
-		QCoreApplication::processEvents();
+		pDlg->setMethodTitle(QObject::tr("Normals computation (Grid)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+		pDlg->start();
 	}
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
 
-	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
-	// double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
+	auto minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
 
 	// for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
@@ -6316,16 +6315,8 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 		}
 
 		// progress dialog
-		if (pDlg)
-		{
-			pDlg->setLabelText(QObject::tr("Grid: %1 x %2").arg(scanGrid->w).arg(scanGrid->h));
-			pDlg->setValue(0);
-			pDlg->setRange(0, static_cast<int>(scanGrid->indexes.size()));
-			QCoreApplication::processEvents();
-		}
-
 		// the code below has been kindly provided by Romain Janvier
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		const CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
 
 		for (int j = 0; j < static_cast<int>(scanGrid->h) - 1; ++j)
 		{
@@ -6455,20 +6446,15 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 					theNorms[t.u[1]] += N;
 					theNorms[t.u[2]] += N;
 				}
-			}
-
-			if (pDlg)
-			{
-				// update progress dialog
-				if (pDlg->wasCanceled())
+				if (pDlg)
 				{
-					unallocateNorms();
-					ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
-					return false;
-				}
-				else
-				{
-					pDlg->setValue(static_cast<unsigned>(j + 1) * scanGrid->w);
+					// update progress dialog
+					if (!nProgress.oneStep())
+					{
+						unallocateNorms();
+						ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
+						return false;
+					}
 				}
 			}
 		}
@@ -6532,15 +6518,13 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 	// progress dialog
 	if (pDlg)
 	{
-		pDlg->setWindowTitle(QObject::tr("Orienting normals"));
-		pDlg->setLabelText(QObject::tr("Points: %L1").arg(pointCount));
-		pDlg->setRange(0, static_cast<int>(pointCount));
-		pDlg->show();
-		QCoreApplication::processEvents();
+		pDlg->setMethodTitle(QObject::tr("Orienting normals (Grids)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+		pDlg->start();
 	}
 
 	// for each grid cell
-	int progressIndex = 0;
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
 	for (size_t gi = 0; gi < gridCount(); ++gi)
 	{
 		const ccPointCloud::Grid::Shared& scanGrid = grid(gi);
@@ -6557,7 +6541,7 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 		}
 
 		// ccGLMatrixd toSensorCS = scanGrid->sensorPosition.inverse();
-		CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
+		const CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
 
 		const int* _indexGrid = scanGrid->indexes.data();
 		for (int j = 0; j < static_cast<int>(scanGrid->h); ++j)
@@ -6588,15 +6572,11 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 					if (pDlg)
 					{
 						// update progress dialog
-						if (pDlg->wasCanceled())
+						if (!nProgress.oneStep())
 						{
 							unallocateNorms();
 							ccLog::Warning("[orientNormalsWithGrids] Process cancelled by user");
 							return false;
-						}
-						else
-						{
-							pDlg->setValue(++progressIndex);
 						}
 					}
 				}
@@ -6609,8 +6589,16 @@ bool ccPointCloud::orientNormalsWithGrids(ccProgressDialog* pDlg /*=nullptr*/)
 
 bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog* pDlg)
 {
-	int progressIndex = 0;
-	for (unsigned pointIndex = 0; pointIndex < m_points.size(); ++pointIndex)
+	const unsigned pointCount = size();
+	if (pDlg)
+	{
+		pDlg->setMethodTitle(QObject::tr("Orienting normals (Viewpoint)"));
+		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
+		pDlg->start();
+	}
+
+	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
+	for (unsigned pointIndex = 0; pointIndex < pointCount; ++pointIndex)
 	{
 		const CCVector3* P  = getPoint(pointIndex);
 		CCVector3        N  = getPointNormal(pointIndex);
@@ -6626,15 +6614,11 @@ bool ccPointCloud::orientNormalsTowardViewPoint(CCVector3& VP, ccProgressDialog*
 		if (pDlg)
 		{
 			// update progress dialog
-			if (pDlg->wasCanceled())
+			if (!nProgress.oneStep())
 			{
 				unallocateNorms();
 				ccLog::Warning("[orientNormalsWithSensors] Process cancelled by user");
 				return false;
-			}
-			else
-			{
-				pDlg->setValue(++progressIndex);
 			}
 		}
 	}

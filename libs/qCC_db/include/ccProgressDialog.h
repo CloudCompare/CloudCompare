@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_PROGRESS_DIALOG_HEADER
-#define CC_PROGRESS_DIALOG_HEADER
 
 // Local
 #include "qCC_db.h"
@@ -52,9 +51,7 @@ class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog
 	                 QWidget* parent       = nullptr);
 
 	//! Destructor (virtual)
-	virtual ~ccProgressDialog()
-	{
-	}
+	virtual ~ccProgressDialog() = default;
 
 	// inherited method
 	virtual void        update(float percent) override;
@@ -92,5 +89,3 @@ class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog
 	//! Last displayed progress value (percent)
 	QAtomicInt m_lastRefreshValue;
 };
-
-#endif // CC_PROGRESS_DIALOG_HEADER

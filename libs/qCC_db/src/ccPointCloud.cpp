@@ -6292,13 +6292,12 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 	{
 		pDlg->setMethodTitle(QObject::tr("Normals computation (Grid)"));
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(pointCount));
-		pDlg->setAutoClose(false);
+		pDlg->start();
 	}
-
-	PointCoordinateType minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
-	// double minTriangleAngle_rad = CCCoreLib::DegreesToRadians(minTriangleAngle_deg);
-
 	CCCoreLib::NormalizedProgress nProgress(pDlg, pointCount);
+
+	auto minAngleCos = static_cast<PointCoordinateType>(cos(CCCoreLib::DegreesToRadians(minTriangleAngle_deg)));
+
 	// for each grid cell
 	for (size_t gi = 0; gi < gridCount(); ++gi)
 	{
@@ -6316,11 +6315,6 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 		}
 
 		// progress dialog
-		if (pDlg)
-		{
-			pDlg->start();
-		}
-
 		// the code below has been kindly provided by Romain Janvier
 		const CCVector3 sensorOrigin = (scanGrid->sensorPosition.getTranslationAsVec3D() /* + m_globalShift*/).toPC();
 
@@ -6452,16 +6446,15 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 					theNorms[t.u[1]] += N;
 					theNorms[t.u[2]] += N;
 				}
-			}
-
-			if (pDlg)
-			{
-				// update progress dialog
-				if (!nProgress.oneStep())
+				if (pDlg)
 				{
-					unallocateNorms();
-					ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
-					return false;
+					// update progress dialog
+					if (!nProgress.oneStep())
+					{
+						unallocateNorms();
+						ccLog::Warning("[computeNormalsWithGrids] Process cancelled by user");
+						return false;
+					}
 				}
 			}
 		}

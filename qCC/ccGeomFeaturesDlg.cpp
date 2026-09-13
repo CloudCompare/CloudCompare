@@ -31,7 +31,7 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
 
 	try
 	{
-		m_options.reserve(22);
+		m_options.reserve(27);
 		m_options.push_back(Option(roughnessCheckBox, CCCoreLib::GeometricalAnalysisTools::Roughness, 0));
 		m_options.push_back(Option(firstOrderMomentCheckBox, CCCoreLib::GeometricalAnalysisTools::MomentOrder1, 0));
 		m_options.push_back(Option(curvMeanCheckBox, CCCoreLib::GeometricalAnalysisTools::Curvature, CCCoreLib::Neighbourhood::MEAN_CURV));
@@ -40,6 +40,9 @@ ccGeomFeaturesDlg::ccGeomFeaturesDlg(QWidget* parent /*=nullptr*/)
 		m_options.push_back(Option(densityKnnCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
 		m_options.push_back(Option(densitySurfCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
 		m_options.push_back(Option(densityVolCheckBox, CCCoreLib::GeometricalAnalysisTools::LocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
+		m_options.push_back(Option(densityKnnApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN));
+		m_options.push_back(Option(densitySurfApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_2D));
+		m_options.push_back(Option(densityVolApproxCheckBox, CCCoreLib::GeometricalAnalysisTools::ApproxLocalDensity, CCCoreLib::GeometricalAnalysisTools::DENSITY_3D));
 		m_options.push_back(Option(eigSumCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenValuesSum));
 		m_options.push_back(Option(eigOmnivarianceCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::Omnivariance));
 		m_options.push_back(Option(eigenentropyCheckBox, CCCoreLib::GeometricalAnalysisTools::Feature, CCCoreLib::Neighbourhood::EigenEntropy));

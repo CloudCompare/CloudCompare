@@ -518,10 +518,10 @@ void ccClipBox::shift(const CCVector3& v)
 	Q_EMIT boxModified(&m_box);
 }
 
-void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud,
-                                 ccGenericPointCloud::VisibilityTableType* visTable,
-                                 bool                                      shrink /*=false*/,
-                                 bool                                      inside /*=true*/) const
+void ccClipBox::flagPoints(ccGenericPointCloud*                      cloud,
+                           ccGenericPointCloud::VisibilityTableType* visTable,
+                           bool                                      shrink /*=false*/,
+                           bool                                      inside /*=true*/) const
 {
 	if (!cloud || !visTable)
 	{

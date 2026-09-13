@@ -53,7 +53,9 @@ namespace ccLibAlgorithms
 		switch (densityType)
 		{
 		case CCCoreLib::GeometricalAnalysisTools::DENSITY_KNN:
-			sfName = CC_LOCAL_KNN_DENSITY_FIELD_NAME;
+			// in approximate mode only the nearest neighbor is extracted, so this is
+			// the inverse of the distance to it and not a number of neighbors
+			sfName = approx ? CC_LOCAL_NN_DISTANCE_FIELD_NAME : CC_LOCAL_KNN_DENSITY_FIELD_NAME;
 			break;
 		case CCCoreLib::GeometricalAnalysisTools::DENSITY_2D:
 			sfName = CC_LOCAL_SURF_DENSITY_FIELD_NAME;
@@ -66,10 +68,16 @@ namespace ccLibAlgorithms
 			break;
 		}
 
-		sfName += QString(" (r=%2)").arg(densityKernelSize);
-
 		if (approx)
+		{
+			// the approximate density is computed from the nearest neighbor distance,
+			// so there is no radius to report
 			sfName += " [approx]";
+		}
+		else
+		{
+			sfName += QString(" (r=%2)").arg(densityKernelSize);
+		}
 
 		return sfName;
 	}

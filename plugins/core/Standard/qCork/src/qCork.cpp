@@ -18,6 +18,7 @@
 #include "qCork.h"
 
 //qCC_db
+#include <ccBackgroundTask.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 
@@ -39,15 +40,6 @@
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
-
-//system
-#if defined(CC_WINDOWS)
-#include "windows.h"
-#else
-#include <time.h>
-#include <unistd.h>
-#endif
-
 
 qCork::qCork(QObject* parent/*=nullptr*/)
 	: QObject(parent)
@@ -375,18 +367,7 @@ void qCork::doAction()
 
 		QFuture<bool> future = QtConcurrent::run(DoPerformBooleanOp);
 
-		//wait until process is finished!
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-
-			pDlg.setValue(pDlg.value() + 1);
-			QApplication::processEvents();
-		}
+		ccBackgroundTask::Wait(future);
 
 		//just to be sure
 		s_params.app = nullptr;

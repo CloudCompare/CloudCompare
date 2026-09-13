@@ -92,6 +92,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    \param projectOnBestFitPlane to project the points on the slice best fitting plane (otherwise the plane normal to the
 	    \param visualDebugMode displays a 'debugging' window during the envelope extraction process
 	    \param generateRandomColors randomly colors the extracted slices
+	    \param extratOustide whether to extract the outside of the box (otherwise the inside)
 	    \param progressDialog optional progress dialog
 	**/
 	static bool ExtractSlicesAndContours(
@@ -118,6 +119,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    bool                projectOnBestFitPlane = false,
 	    bool                visualDebugMode       = false,
 	    bool                generateRandomColors  = false,
+	    bool                extratOustide         = false,
 	    ccProgressDialog*   progressDialog        = 0);
 
   protected:

@@ -399,7 +399,7 @@ void ccClippingBoxTool::removeLastContour()
 	removeLastContourToolButton->setEnabled(false);
 }
 
-ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
+ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent, bool extractOustide)
 {
 	assert(clipBox);
 	if (!obj)
@@ -425,7 +425,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 			}
 			return nullptr;
 		}
-		clipBox->flagPointsInside(inputCloud, &selectionTable);
+		clipBox->flagPoints(inputCloud, &selectionTable, false, /*inside=*/!extractOustide);
 
 		ccGenericPointCloud* sliceCloud = inputCloud->createNewCloudFromVisibilitySelection(false, &selectionTable, nullptr, true);
 
@@ -459,7 +459,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent)
 		}
 
 		const ccBBox& cropBox = clipBox->getBox();
-		ccHObject*    mesh    = ccCropTool::Crop(obj, cropBox, true, _transformation);
+		ccHObject*    mesh    = ccCropTool::Crop(obj, cropBox, /*inside=*/!extractOustide, _transformation);
 		if (!mesh)
 		{
 			if (!silent)
@@ -486,7 +486,8 @@ void ccClippingBoxTool::exportSlice()
 			continue;
 		}
 
-		ccHObject* result = GetSlice(obj, m_clipBox, false);
+		bool       extractOustide = invertSelectionButton->isChecked();
+		ccHObject* result         = GetSlice(obj, m_clipBox, false, extractOustide);
 
 		if (result)
 		{
@@ -576,6 +577,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
     bool                projectOnBestFitPlane /*=false*/,
     bool                visualDebugMode /*=false*/,
     bool                generateRandomColors /*=false*/,
+    bool                extratOustide /*=false*/,
     ccProgressDialog*   progressDialog /*=nullptr*/)
 {
 	// check input
@@ -630,7 +632,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 			outputSlices.reserve(clouds.size());
 			for (size_t ci = 0; ci != clouds.size(); ++ci)
 			{
-				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false);
+				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false, extratOustide);
 				if (slice)
 				{
 					slice->setName(clouds[ci]->getName() + QString(".slice"));
@@ -1418,6 +1420,8 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	s_defaultGap   = repeatDlg.gapDoubleSpinBox->value();
 	s_groupByIndex = repeatDlg.groupByTypeComboBox->currentIndex();
 
+	bool extractOustide = invertSelectionButton->isChecked();
+
 	ccEnvelopeExtractor::EnvelopeType envelopeType = ccEnvelopeExtractor::EnvelopeType::FULL;
 	switch (s_envelopeTypeIndex)
 	{
@@ -1467,6 +1471,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 	                              s_envProjectPointsOnBestFitPlane,
 	                              s_envelopeDebugMode,
 	                              s_generateRandomColors,
+	                              extractOustide,
 	                              &pDlg))
 	{
 		// process failed (error message has already been issued)

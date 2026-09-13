@@ -518,9 +518,10 @@ void ccClipBox::shift(const CCVector3& v)
 	Q_EMIT boxModified(&m_box);
 }
 
-void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud,
-                                 ccGenericPointCloud::VisibilityTableType* visTable,
-                                 bool                                      shrink /*=false*/) const
+void ccClipBox::flagPoints(ccGenericPointCloud*                      cloud,
+                           ccGenericPointCloud::VisibilityTableType* visTable,
+                           bool                                      shrink /*=false*/,
+                           bool                                      inside /*=true*/) const
 {
 	if (!cloud || !visTable)
 	{
@@ -550,7 +551,7 @@ void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud
 			{
 				CCVector3 P = *cloud->getPoint(static_cast<unsigned>(i));
 				transMat.apply(P);
-				visTable->at(i) = (m_box.contains(P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
+				visTable->at(i) = (m_box.contains(P) == inside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
 	}
@@ -564,7 +565,7 @@ void ccClipBox::flagPointsInside(ccGenericPointCloud*                      cloud
 			if (!shrink || visTable->at(i) == CCCoreLib::POINT_VISIBLE)
 			{
 				const CCVector3* P = cloud->getPoint(static_cast<unsigned>(i));
-				visTable->at(i)    = (m_box.contains(*P) ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
+				visTable->at(i)    = (m_box.contains(*P) == inside ? CCCoreLib::POINT_VISIBLE : CCCoreLib::POINT_HIDDEN);
 			}
 		}
 	}

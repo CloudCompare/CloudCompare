@@ -201,12 +201,11 @@ struct BoolOpParameters
 	QString nameB;
 	ccMainAppInterface* app = nullptr;
 };
-static BoolOpParameters s_params;
 
-static bool DoPerformBooleanOp()
+static bool DoPerformBooleanOp(BoolOpParameters& params)
 {
 	//invalid parameters
-	if (!s_params.meshA || !s_params.meshB)
+	if (!params.meshA || !params.meshB)
 	{
 		assert(false);
 		return false;
@@ -219,7 +218,7 @@ static bool DoPerformBooleanOp()
 
 		igl::MeshBooleanType booleanType = igl::NUM_MESH_BOOLEAN_TYPES; // = invalid
 		//perform the boolean operation
-		switch (s_params.operation)
+		switch (params.operation)
 		{
 		case ccMeshBooleanDialog::UNION:
 			booleanType = igl::MESH_BOOLEAN_TYPE_UNION;
@@ -239,41 +238,49 @@ static bool DoPerformBooleanOp()
 
 		default:
 			assert(false);
-			if (s_params.app)
-				s_params.app->dispToConsole("[Mesh boolean] Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
+			if (params.app)
+				params.app->dispToConsole("[Mesh boolean] Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
 			return false;
 		}
 
-		s_params.output = IGLMesh();
-		if (!igl::copyleft::cgal::mesh_boolean(	s_params.meshA->V,
-												s_params.meshA->F,
-												s_params.meshB->V,
-												s_params.meshB->F,
+		params.output = IGLMesh();
+		if (!igl::copyleft::cgal::mesh_boolean(	params.meshA->V,
+												params.meshA->F,
+												params.meshB->V,
+												params.meshB->F,
 												booleanType,
-												s_params.output.V,
-												s_params.output.F ))
+												params.output.V,
+												params.output.F ))
 		{
-			if (s_params.app)
-				s_params.app->dispToConsole("[Mesh boolean] CSG operation failed", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			if (params.app)
+				params.app->dispToConsole("[Mesh boolean] CSG operation failed", ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 			return false;
 		}
 
-		if (s_params.app)
+		if (params.app)
 		{
 			// display the duration time
-			s_params.app->dispToConsole(QString("[Mesh boolean] CSG operation duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
+			params.app->dispToConsole(QString("[Mesh boolean] CSG operation duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
 		}
 
 	}
 	catch (const std::exception& e)
 	{
-		if (s_params.app)
-			s_params.app->dispToConsole(QString("[Mesh boolean] Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		if (params.app)
+			params.app->dispToConsole(QString("[Mesh boolean] Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
 	return true;
 }
+
+struct IsInUse
+{
+	IsInUse(bool& _inUse) : inUse(_inUse) { inUse = true; }
+	~IsInUse() { inUse = false; }
+	bool& inUse;
+};
+static bool s_inUse = false;
 
 void qMeshBoolean::doAction()
 {
@@ -282,6 +289,13 @@ void qMeshBoolean::doAction()
 		assert(false);
 		return;
 	}
+
+	if (s_inUse)
+	{
+		m_app->dispToConsole(tr("Another boolean operation is already in progress!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	IsInUse inUse(s_inUse);
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
@@ -318,6 +332,7 @@ void qMeshBoolean::doAction()
 		return;
 
 	//launch process
+	BoolOpParameters params;
 	{
 		//run in a separate thread
 		QProgressDialog pDlg(tr("Operation in progress"), QString(), 0, 0, m_app->getMainWindow());
@@ -325,20 +340,16 @@ void qMeshBoolean::doAction()
 		pDlg.show();
 		QApplication::processEvents();
 
-		s_params.app = m_app;
-		s_params.meshA = &iglMeshA;
-		s_params.meshB = &iglMeshB;
-		s_params.nameA = meshA->getName();
-		s_params.nameB = meshB->getName();
-		s_params.operation = cDlg.getSelectedOperation();
+		params.app       = m_app;
+		params.meshA     = &iglMeshA;
+		params.meshB     = &iglMeshB;
+		params.nameA     = meshA->getName();
+		params.nameB     = meshB->getName();
+		params.operation = cDlg.getSelectedOperation();
 
-		QFuture<bool> future = QtConcurrent::run(DoPerformBooleanOp);
+		QFuture<bool> future = QtConcurrent::run([&params]() { return DoPerformBooleanOp(params); });
 
 		ccBackgroundTask::Wait(future);
-
-		//just to be sure
-		s_params.app = nullptr;
-		s_params.meshA = s_params.meshB = nullptr;
 
 		pDlg.hide();
 		QApplication::processEvents();
@@ -353,7 +364,7 @@ void qMeshBoolean::doAction()
 	}
 
 	//convert the updated mesh (A) to a new ccMesh structure
-	ccMesh* result = FromIGLMesh(s_params.output);
+	ccMesh* result = FromIGLMesh(params.output);
 
 	if (result)
 	{

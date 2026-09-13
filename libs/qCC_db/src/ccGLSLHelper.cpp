@@ -113,6 +113,9 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	    "uniform int uLUTWidth;\n"
 	    "uniform int uLUTHeight;\n";
 
+	static const char* VertexProgPickingAttributesSrc =
+	    "uniform vec3 uPickingColor;\n";
+
 	static const char* VertexProgFetchNormFuncSrc =
 	    "vec3 fetchNormalFromLUT(float fi)\n"
 	    "{\n"
@@ -214,6 +217,9 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	    "      return;\n"
 	    "   }\n";
 
+	static const char* VertexProgMainSetPickingColorSrc =
+	    "   vColor = vec4(uPickingColor, 1.0);\n";
+
 	static const char* VertexProgMainTestVisibilitySrc =
 	    "   if (aVisib > 0.0)\n" // CCCoreLib::POINT_VISIBLE = 0
 	    "   {\n"
@@ -311,6 +317,8 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 			vertexProgSrc += VertexProgNormAttributesSrc;
 		if (attributes & ATTR_VIS_FLAG)
 			vertexProgSrc += VertexProgVisibilityAttributesSrc;
+		if (attributes & ATTR_PICK_FLAG)
+			vertexProgSrc += VertexProgPickingAttributesSrc;
 
 		// add special functions
 		if (attributes & ATTR_SF_FLAG)
@@ -356,6 +364,12 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 			else
 			{
 				vertexProgSrc += VertexProgMainUseDefaultGLColorSrc;
+			}
+
+			if (attributes & ATTR_PICK_FLAG)
+			{
+				// override any previously set color
+				vertexProgSrc += VertexProgMainSetPickingColorSrc;
 			}
 
 			// normal transfer (if any)
@@ -633,4 +647,20 @@ void ccGLSL::SetLightUniforms(QOpenGLFunctions_2_1* glFunc,
 	GLboolean twoSide;
 	glFunc->glGetBooleanv(GL_LIGHT_MODEL_TWO_SIDE, &twoSide);
 	glFunc->glUniform1i(prog->uniformLocation("uLightModelTwoSide"), twoSide ? 1 : 0);
+}
+
+void ccGLSL::SetPickingUniforms(QOpenGLFunctions_2_1* glFunc,
+                                QOpenGLShaderProgram* prog,
+                                const unsigned char   pickingColor[3])
+{
+	if (!glFunc || !prog)
+	{
+		assert(false);
+		return;
+	}
+
+	glFunc->glUniform3f(prog->uniformLocation("uPickingColor"),
+	                    static_cast<float>(pickingColor[0]) / 255,
+	                    static_cast<float>(pickingColor[1]) / 255,
+	                    static_cast<float>(pickingColor[2]) / 255);
 }

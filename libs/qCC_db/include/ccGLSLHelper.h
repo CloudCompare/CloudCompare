@@ -32,16 +32,17 @@ class ccGLSL
 	//! Attribute flags
 	enum AttributeFlags
 	{
-		ATTR_POS_FLAG = 0,
-		ATTR_NOR_FLAG = 1,
-		ATTR_COL_FLAG = 2,
-		ATTR_SF_FLAG  = 4,
-		ATTR_VIS_FLAG = 8,
-		ATTR_TEX_FLAG = 16,
+		ATTR_POS_FLAG  = 0,
+		ATTR_NOR_FLAG  = (1 << 0),
+		ATTR_COL_FLAG  = (1 << 1),
+		ATTR_SF_FLAG   = (1 << 2),
+		ATTR_VIS_FLAG  = (1 << 3),
+		ATTR_TEX_FLAG  = (1 << 4),
+		ATTR_PICK_FLAG = (1 << 5),
 		// For internal use only
-		ATTR_LOG_SCALE_FLAG  = 32,
-		ATTR_SYM_SCALE_FLAG  = 64,
-		ATTR_HIDDEN_VAL_FLAG = 128
+		ATTR_LOG_SCALE_FLAG  = (1 << 6),
+		ATTR_SYM_SCALE_FLAG  = (1 << 7),
+		ATTR_HIDDEN_VAL_FLAG = (1 << 8)
 	};
 
 	//! Array indexes
@@ -62,11 +63,13 @@ class ccGLSL
 	    - ATTR_COL  = "aColor"
 	    - ATTR_SF   = "aSFValue"
 	    - ATTR_VIS  = "aVisib"
+	    - ATTR_PICK_FLAG  = none
 
 	    And the following uniform names should be set before usage:
 	    - uColorScaleTex, uTexWidth, uTexHeight, uMinVal, uMaxVal, uMinSat, uMaxSat, uSatRange, uOutOfRangeGreyScale (for scalar fields)
 	    - uNormalLUT, uLUTWidth, uLUTHeight (for normals)
 	    - uLight0Enabled, uLight1Enabled (for lighting - e.g. if ATTR_NOR is set)
+	    - uPickingColor (for picking - e.g. if ATTR_PICK_FLAG is set)
 
 	    If normals are used (ATTR_NOR), a 2D texture containing a normal LUT (see ccGLSL::GetNormalLUTTexture) must be set as uniform
 	    (see ccGLSL::SetLUTTextureUniforms) and should be bound to unit 1 by default.
@@ -132,6 +135,15 @@ class ccGLSL
 	**/
 	static void SetLightUniforms(QOpenGLFunctions_2_1* glFunc,
 	                             QOpenGLShaderProgram* prog);
+
+	//! Sets the uniform related to picking (for OpenGL rendering)
+	/** \param glFunc OpenGL functions (OpenGL 2.1)
+	    \param prog shader program
+	    \param pickingColor picking color (r, g, b) in [0, 255]
+	**/
+	static void SetPickingUniforms(QOpenGLFunctions_2_1* glFunc,
+	                               QOpenGLShaderProgram* prog,
+	                               const unsigned char   pickingColor[3]);
 
   protected:
 	//! Creates a 2D texture containing a normal LUT (for OpenGL rendering)

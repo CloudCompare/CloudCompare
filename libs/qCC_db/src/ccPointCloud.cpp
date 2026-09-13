@@ -3566,7 +3566,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	glFunc->glPushAttrib(GL_LIGHTING_BIT | GL_COLOR_BUFFER_BIT | GL_TRANSFORM_BIT | GL_POINT_BIT | GL_TEXTURE_BIT);
 
-	if (glParams.showSF || glParams.showColors)
+	if (!entityPickingMode && (glParams.showSF || glParams.showColors))
 	{
 		glFunc->glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 		glFunc->glEnable(GL_COLOR_MATERIAL);
@@ -3590,7 +3590,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	// in the case we need normals (i.e. lighting)
 	if (glParams.showNorms)
 	{
-		glFunc->glEnable(GL_RESCALE_NORMAL);
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, CC_DEFAULT_CLOUD_AMBIENT_COLOR.rgba);
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, CC_DEFAULT_CLOUD_SPECULAR_COLOR.rgba);
 		glFunc->glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, CC_DEFAULT_CLOUD_DIFFUSE_COLOR.rgba);
@@ -3601,7 +3600,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (glParams.showSF)
 		{
 			// we must get rid of lights 'color' if a scalar field is displayed!
-			ccMaterial::MakeLightsNeutral(context.qGLContext);
+			ccMaterial::MakeLightsNeutral(context.qGLContext); // covered by GL_LIGHTING_BIT
 		}
 	}
 
@@ -3661,6 +3660,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (visTableEnabled)
 			{
 				attributes |= ccGLSL::ATTR_VIS_FLAG;
+			}
+			if (entityPickingMode)
+			{
+				attributes |= ccGLSL::ATTR_PICK_FLAG;
 			}
 
 			prog = ccGLSL::BuildDisplayProgram(glFunc, attributes, glParams.showSF ? m_currentDisplayedScalarField : nullptr);
@@ -3730,9 +3733,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		bool displayDone = false;
+		bool useProgram  = (nullptr != prog);
 
-		if (!prog) // no program available
+		if (!useProgram) // no program available
 		{
+			if (glParams.showNorms)
+			{
+				glFunc->glEnable(GL_RESCALE_NORMAL);
+			}
+
 			// specific case: fallback mechanism to display clouds with a visibility array but without a program... :-(
 			if (visTableEnabled)
 			{
@@ -3856,9 +3865,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else if (glParams.showNorms)
 						{
-							// we must get rid of lights material (other than ambient) for the red and green fields
-							glFunc->glPushAttrib(GL_LIGHTING_BIT);
-
 							// we use the ambient light to pass the scalar value (and 'grayed' marker) without any
 							// modification from the GPU pipeline, even if normals are enabled!
 							glFunc->glDisable(GL_COLOR_MATERIAL);
@@ -3961,11 +3967,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (colorRampShader)
 				{
 					colorRampShader->release();
-
-					if (glParams.showNorms)
-					{
-						glFunc->glPopAttrib(); // GL_LIGHTING_BIT
-					}
 				}
 
 				displayDone = true;
@@ -3974,8 +3975,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!displayDone)
 		{
-			bool useProgram = (nullptr != prog);
-
 			bool useVBOs = false;
 			if (context.useVBOs && !toDisplay.indexMap) // VBOs are not compatible with LoD
 			{
@@ -3987,6 +3986,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (useProgram)
 			{
+				assert(prog);
 				prog->bind();
 
 				if (glParams.showNorms)
@@ -4010,6 +4010,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glFunc->glBindTexture(GL_TEXTURE_2D, sfTex->textureId());
 
 					ccGLSL::SetSFTextureUniforms(glFunc, prog.data(), sfTex.data(), m_currentDisplayedScalarField, 2);
+				}
+
+				if (entityPickingMode)
+				{
+					ccGLSL::SetPickingUniforms(glFunc, prog.data(), pickingColor.rgb);
 				}
 			}
 			else
@@ -4154,6 +4159,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (useProgram)
 			{
+				assert(prog);
 				prog->release();
 
 				if (lutTex)

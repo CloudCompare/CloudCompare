@@ -36,19 +36,19 @@
 #endif
 
 // Components geometry
-static QSharedPointer<ccCylinder> c_arrowShaft(nullptr);
-static QSharedPointer<ccCone>     c_arrowHead(nullptr);
-static QSharedPointer<ccSphere>   c_centralSphere(nullptr);
-static QSharedPointer<ccTorus>    c_torus(nullptr);
+static QSharedPointer<ccCylinder> s_arrowShaft(nullptr);
+static QSharedPointer<ccCone>     s_arrowHead(nullptr);
+static QSharedPointer<ccTorus>    s_torus(nullptr);
 
 void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const ccColor::Rgb& col, CC_DRAW_CONTEXT& context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -58,17 +58,17 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 
 	// we compute scalar prod between the two vectors
 	CCVector3           Z(0.0, 0.0, 1.0);
-	PointCoordinateType ps = Z.dot(direction);
+	PointCoordinateType dp = Z.dot(direction);
 
-	if (ps < 1)
+	if (dp < 1)
 	{
 		CCVector3           axis(1, 0, 0);
 		PointCoordinateType angle_deg = static_cast<PointCoordinateType>(180.0);
 
-		if (ps > -1)
+		if (dp > -1)
 		{
 			// we deduce angle from scalar prod
-			angle_deg = CCCoreLib::RadiansToDegrees(acos(ps));
+			angle_deg = CCCoreLib::RadiansToDegrees(acos(dp));
 
 			// we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
@@ -77,23 +77,23 @@ void DrawUnitArrow(bool entityPickingMode, const CCVector3& start, const CCVecto
 		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
-	if (!c_arrowShaft)
+	if (!s_arrowShaft)
 	{
-		c_arrowShaft.reset(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
+		s_arrowShaft.reset(new ccCylinder(0.15f, 0.6f, nullptr, "ArrowShaft", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
 	}
-	if (!c_arrowHead)
+	if (!s_arrowHead)
 	{
-		c_arrowHead.reset(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
+		s_arrowHead.reset(new ccCone(0.3f, 0, 0.4f, 0, 0, nullptr, "ArrowHead", 24, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
 	}
 
 	glFunc->glTranslatef(0, 0, 0.3f);
-	c_arrowShaft->setTempColor(col);
-	c_arrowShaft->showNormals(!entityPickingMode);
-	c_arrowShaft->draw(context);
+	s_arrowShaft->setTempColor(col);
+	s_arrowShaft->showNormals(!entityPickingMode);
+	s_arrowShaft->draw(context);
 	glFunc->glTranslatef(0, 0, 0.3f + 0.2f);
-	c_arrowHead->setTempColor(col);
-	c_arrowHead->showNormals(!entityPickingMode);
-	c_arrowHead->draw(context);
+	s_arrowHead->setTempColor(col);
+	s_arrowHead->showNormals(!entityPickingMode);
+	s_arrowHead->draw(context);
 
 	glFunc->glPopMatrix();
 }
@@ -102,10 +102,11 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -115,17 +116,17 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 
 	// we compute scalar prod between the two vectors
 	CCVector3           Z(0, 0, 1);
-	PointCoordinateType ps = Z.dot(direction);
+	PointCoordinateType dp = Z.dot(direction);
 
-	if (ps < 1)
+	if (dp < 1)
 	{
 		CCVector3           axis(1, 0, 0);
 		PointCoordinateType angle_deg = 180;
 
-		if (ps > -1)
+		if (dp > -1)
 		{
 			// we deduce angle from scalar prod
-			angle_deg = CCCoreLib::RadiansToDegrees(acos(ps));
+			angle_deg = CCCoreLib::RadiansToDegrees(acos(dp));
 
 			// we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
@@ -134,13 +135,13 @@ static void DrawUnitTorus(bool entityPickingMode, const CCVector3& center, const
 		ccGL::Rotate(glFunc, angle_deg, axis.x, axis.y, axis.z);
 	}
 
-	if (!c_torus)
-		c_torus.reset(new ccTorus(0.2f, 0.4f, 2.0 * M_PI, false, 0, nullptr, "Torus", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
+	if (!s_torus)
+		s_torus.reset(new ccTorus(0.2f, 0.4f, 2.0 * M_PI, false, 0, nullptr, "Torus", 12, 0)); // we don't want to increase the unique ID counter for this 'invisible' entities
 
 	glFunc->glTranslatef(0, 0, 0.3f);
-	c_torus->setTempColor(col);
-	c_torus->showNormals(!entityPickingMode);
-	c_torus->draw(context);
+	s_torus->setTempColor(col);
+	s_torus->showNormals(!entityPickingMode);
+	s_torus->draw(context);
 
 	glFunc->glPopMatrix();
 }
@@ -149,10 +150,11 @@ static void DrawUnitCross(bool entityPickingMode, const CCVector3& center, Point
 {
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	scale /= 2;
 	DrawUnitArrow(entityPickingMode, center, CCVector3(-1, 0, 0), scale, col, context);
@@ -356,37 +358,6 @@ static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
 	return v;
 }
 
-// 'move2D' was only possible with the sphere (now deprecated)
-#if 0
-bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
-{
-	if (m_activeComponent != SPHERE || !m_box.isValid())
-		return false;
-
-	//convert mouse position to vector (screen-centered)
-	CCVector3d currentOrientation = PointToVector(x, y, screenWidth, screenHeight);
-
-	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation, currentOrientation);
-
-	CCVector3 C = m_box.getCenter();
-
-	ccGLMatrixd transMat;
-	transMat.setTranslation(-C);
-	transMat = rotMat * transMat;
-	transMat.setTranslation(transMat.getTranslationAsVec3D() + C);
-
-	//rotateGL(transMat);
-	m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
-	enableGLTransformation(true);
-
-	m_lastOrientation = currentOrientation;
-
-	update();
-
-	return true;
-}
-#endif
-
 void ccClipBox::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix)
 {
 	m_lastOrientation = PointToVector(x, y, screenWidth, screenHeight);
@@ -449,11 +420,6 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		// send 'modified' signal
 		Q_EMIT boxModified(&m_box);
 	}
-	// else if (m_activeComponent == SPHERE)
-	//{
-	//	//handled by move2D!
-	//	return false;
-	// }
 	else if (m_activeComponent >= X_MINUS_TORUS && m_activeComponent <= Z_PLUS_TORUS)
 	{
 		// we guess the rotation order by comparing the current screen 'normal'
@@ -678,7 +644,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		componentContext.drawingFlags &= (~CC_ENTITY_PICKING); // we must remove the 'entity picking flag' so that the arrows don't push their own!
 		componentContext.display = nullptr;
 
-		// force the light on
+		// force the sun light on
 		if (!entityPickingMode)
 		{
 			componentContext.drawingFlags |= CC_LIGHT_ENABLED;

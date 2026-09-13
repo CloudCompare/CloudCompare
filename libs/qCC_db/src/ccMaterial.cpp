@@ -94,10 +94,11 @@ void ccMaterial::applyGL(QOpenGLContext* context, bool lightEnabled, bool skipDi
 {
 	// get the set of OpenGL functions (version 2.1)
 	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	if (lightEnabled)
 	{
@@ -112,7 +113,7 @@ void ccMaterial::applyGL(QOpenGLContext* context, bool lightEnabled, bool skipDi
 		glFunc->glMaterialf(GL_FRONT, GL_SHININESS, std::max(0.0f, std::min(m_shininessFront, 128.0f)));
 		glFunc->glMaterialf(GL_BACK, GL_SHININESS, std::max(0.0f, std::min(m_shininessBack, 128.0f)));
 	}
-	else
+	else if (!skipDiffuse)
 	{
 		ccGL::Color(glFunc, m_diffuseFront);
 	}
@@ -227,10 +228,11 @@ void ccMaterial::MakeLightsNeutral(QOpenGLContext* context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	GLint maxLightCount;
 	glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);

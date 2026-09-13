@@ -155,7 +155,7 @@ Improvements:
 		- use of a LUT texture with uncompressed normals
 		- use of a color scale texture when displaying scalar fields
 		- visibility filtering done in the same program
-		- (does not work with partial or textured meshes yet)
+		- (does not work for meshes with partial visibility or multi-textured yet)
 
 	- Display > Lock rotation about an axis
 		- now a proper 'turntable' rotation mode

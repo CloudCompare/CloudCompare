@@ -754,10 +754,11 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	// are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
@@ -851,7 +852,9 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	if (draw3D && m_glTransEnabled)
+	{
 		glFunc->glPopMatrix();
+	}
 }
 
 void ccHObject::applyGLTransformation(const ccGLMatrix& trans)

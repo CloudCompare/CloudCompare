@@ -51,8 +51,6 @@
 #include <QOpenGLShader>
 #include <QOpenGLVersionFunctionsFactory>
 
-static CCVector3 s_blankNorm(0, 0, 0);
-
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccGenericMesh("Mesh", uniqueID)
     , m_associatedCloud(nullptr)
@@ -227,7 +225,7 @@ bool ccMesh::computePerVertexNormals()
 	std::vector<CCVector3> theNorms;
 	try
 	{
-		theNorms.resize(vertCount, s_blankNorm);
+		theNorms.resize(vertCount, CCVector3(0, 0, 0));
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -1680,6 +1678,54 @@ CCCoreLib::VerticesIndexes* ccMesh::getNextTriangleVertIndexes()
 	}
 
 	return nullptr;
+}
+
+// Vertex buffer
+static CCVector3* GetVertexBuffer()
+{
+	static CCVector3 s_xyzBuffer[ccChunk::SIZE * 3];
+	return s_xyzBuffer;
+}
+
+// Normals buffer
+static CCVector3* GetNormalsBuffer()
+{
+	static CCVector3 s_normBuffer[ccChunk::SIZE * 3];
+	return s_normBuffer;
+}
+
+// Colors buffer
+static ColorCompType* GetColorsBuffer()
+{
+	static ColorCompType s_rgbBuffer[ccChunk::SIZE * 3 * 4];
+	return s_rgbBuffer;
+}
+
+// Texture coordinates buffer
+static float* GetTexCoordsBuffer()
+{
+	static float s_texCoordsBuffer[ccChunk::SIZE * 3 * 2];
+	return s_texCoordsBuffer;
+}
+
+// Vertex indexes buffer (for wired display)
+static unsigned* GetWireVertexIndexes()
+{
+	static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
+	static bool     s_vertIndexesInitialized = false;
+	// on first call, we init the array
+	if (!s_vertIndexesInitialized)
+	{
+		unsigned* _vertWireIndexes = s_vertWireIndexes;
+		for (unsigned i = 0; i < ccChunk::SIZE * 3; ++i)
+		{
+			*_vertWireIndexes++ = i;
+			*_vertWireIndexes++ = (((i + 1) % 3) == 0 ? i - 2 : i + 1);
+		}
+		s_vertIndexesInitialized = true;
+	}
+
+	return s_vertWireIndexes;
 }
 
 // Global OpenGL resources

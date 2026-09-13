@@ -21,7 +21,6 @@
 #include "ccIncludeGL.h"
 
 // local
-#include "ccChunk.h"
 #include "ccColorScalesManager.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
@@ -91,54 +90,6 @@ void ccGenericMesh::EnableGLStippleMask(QOpenGLContext* context, bool state)
 	{
 		glFunc->glDisable(GL_POLYGON_STIPPLE);
 	}
-}
-
-// Vertex buffer
-CCVector3* ccGenericMesh::GetVertexBuffer()
-{
-	static CCVector3 s_xyzBuffer[ccChunk::SIZE * 3];
-	return s_xyzBuffer;
-}
-
-// Normals buffer
-CCVector3* ccGenericMesh::GetNormalsBuffer()
-{
-	static CCVector3 s_normBuffer[ccChunk::SIZE * 3];
-	return s_normBuffer;
-}
-
-// Colors buffer
-ColorCompType* ccGenericMesh::GetColorsBuffer()
-{
-	static ColorCompType s_rgbBuffer[ccChunk::SIZE * 3 * 4];
-	return s_rgbBuffer;
-}
-
-// Texture coordinates buffer
-float* ccGenericMesh::GetTexCoordsBuffer()
-{
-	static float s_texCoordsBuffer[ccChunk::SIZE * 3 * 2];
-	return s_texCoordsBuffer;
-}
-
-// Vertex indexes buffer (for wired display)
-static unsigned s_vertWireIndexes[ccChunk::SIZE * 6];
-static bool     s_vertIndexesInitialized = false;
-unsigned*       ccGenericMesh::GetWireVertexIndexes()
-{
-	// on first call, we init the array
-	if (!s_vertIndexesInitialized)
-	{
-		unsigned* _vertWireIndexes = s_vertWireIndexes;
-		for (unsigned i = 0; i < ccChunk::SIZE * 3; ++i)
-		{
-			*_vertWireIndexes++ = i;
-			*_vertWireIndexes++ = (((i + 1) % 3) == 0 ? i - 2 : i + 1);
-		}
-		s_vertIndexesInitialized = true;
-	}
-
-	return s_vertWireIndexes;
 }
 
 void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)

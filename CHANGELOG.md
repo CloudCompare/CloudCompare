@@ -4,6 +4,10 @@ CloudCompare Version History
 v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
+	- New I/O filter: dotBIM (.bim)
+		- to load dotBIM meshes (https://dotbim.net/)
+		- import only; each 'element' is loaded as its own mesh, with its rotation and translation applied
+
 	- Edit > Polyline > Extrude
 		- vertical extrusion within specified ownward (-Z) and upward (+Z) offsets
 

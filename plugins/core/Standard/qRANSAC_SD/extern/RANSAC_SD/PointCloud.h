@@ -24,10 +24,8 @@ struct DLL_LINKAGE Point {
 	typedef float value_type;
 	Vec3f pos;
 	Vec3f normal;
-#ifdef POINTSWITHINDEX
 	unsigned index;
-#endif
-	//unsigned int meshFaceIndex;
+
 	Point() {}
 	Point(const Vec3f &Pos) {/*index = -1;*/ pos = Pos; normal = Vec3f(0,0,0); }
 	Point(const Vec3f &Pos, const Vec3f &Normal) { pos = Pos; normal = Normal; }

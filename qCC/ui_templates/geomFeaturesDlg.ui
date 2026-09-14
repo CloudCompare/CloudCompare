@@ -251,6 +251,43 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="Line" name="densitySeparator">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densityKnnApproxCheckBox">
+            <property name="toolTip">
+             <string>Inverse of the distance to the nearest neighbor. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Nearest neighbor distance (approx. density)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densitySurfApproxCheckBox">
+            <property name="toolTip">
+             <string>Surface density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Surface density (approx.)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densityVolApproxCheckBox">
+            <property name="toolTip">
+             <string>Volume density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Volume density (approx.)</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

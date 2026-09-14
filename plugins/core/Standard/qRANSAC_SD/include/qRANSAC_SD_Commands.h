@@ -335,7 +335,6 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 
 		for (CLCloudDesc clCloud : cmd.clouds())
 		{
-
 			CCVector3 bbMin, bbMax;
 			clCloud.pc->getBoundingBox(bbMin, bbMax);
 			CCVector3 diff = bbMax - bbMin;
@@ -365,7 +364,7 @@ struct CommandRANSAC : public ccCommandLineInterface::Command
 				params.bitmapEpsilon = (0.01f * scale);
 			}
 
-			ccHObject* group = qRansacSD::executeRANSAC(clCloud.pc, params, cmd.silentMode());
+			ccHObject* group = qRansacSD::ExecuteRANSAC(clCloud.pc, params, nullptr, cmd.silentMode());
 			
 			if (group)
 			{

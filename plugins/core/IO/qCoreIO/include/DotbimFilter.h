@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,44 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "qCoreIO.h"
+#include "FileIOFilter.h"
 
-#include "DotbimFilter.h"
-#include "HeightProfileFilter.h"
-#include "MAFilter.h"
-#include "MascaretFilter.h"
-#include "OFFFilter.h"
-#include "ObjFilter.h"
-#include "PDMSFilter.h"
-#include "PTXFilter.h"
-#include "STLFilter.h"
-#include "SimpleBinFilter.h"
-#include "VTKFilter.h"
-
-qCoreIO::qCoreIO(QObject* parent)
-    : QObject(parent)
-    , ccIOPluginInterface(":/CC/plugin/CoreIO/info.json")
+//! dotBIM file I/O filter (import only)
+/** See https://dotbim.net/
+ **/
+class DotbimFilter : public FileIOFilter
 {
-}
+  public:
+	DotbimFilter();
 
-void qCoreIO::registerCommands(ccCommandLineInterface* inCmdLine)
-{
-	Q_UNUSED(inCmdLine);
-}
-
-ccIOPluginInterface::FilterList qCoreIO::getFilters()
-{
-	return {
-	    FileIOFilter::Shared(new PTXFilter),
-	    FileIOFilter::Shared(new SimpleBinFilter),
-	    FileIOFilter::Shared(new DotbimFilter),
-	    FileIOFilter::Shared(new ObjFilter),
-	    FileIOFilter::Shared(new VTKFilter),
-	    FileIOFilter::Shared(new STLFilter),
-	    FileIOFilter::Shared(new OFFFilter),
-	    FileIOFilter::Shared(new PDMSFilter),
-	    FileIOFilter::Shared(new MAFilter),
-	    FileIOFilter::Shared(new MascaretFilter),
-	    FileIOFilter::Shared(new HeightProfileFilter),
-	};
-}
+	// inherited from FileIOFilter
+	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;
+};

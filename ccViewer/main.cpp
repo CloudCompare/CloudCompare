@@ -75,7 +75,8 @@ int main(int argc, char* argv[])
 
 	QDir::setCurrent(workingDir.absolutePath());
 
-	QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+	QSurfaceFormat format;
+	format.setRenderableType(QSurfaceFormat::OpenGL);
 	format.setVersion(2, 1);
 	format.setProfile(QSurfaceFormat::CoreProfile);
 	QSurfaceFormat::setDefaultFormat(format);

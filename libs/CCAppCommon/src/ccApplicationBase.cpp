@@ -62,7 +62,9 @@ void ccApplicationBase::InitOpenGL()
 	    using the correct version and profile.
 	**/
 	{
-		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+		QSurfaceFormat format;
+		// force to "OpenGL" else it could default on something else (On wayland it will default to OpenGL ES)
+		format.setRenderableType(QSurfaceFormat::OpenGL);
 		format.setStencilBufferSize(0);
 #ifndef CC_LINUX                // seems to cause some big issues on Linux if Quad-buffering is not supported
                                 // we would need to find a way to check whether it's supported or not in advance...

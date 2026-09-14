@@ -118,7 +118,7 @@ PrimitiveShape *TorusPrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new TorusPrimitiveShape(fit);
+		return new TorusPrimitiveShape(fit, m_allowAppleShaped, m_minMinorRadius, m_minMajorRadius, m_maxMinorRadius, m_maxMajorRadius);
 	}
 	score->first = 0;
 	return NULL;

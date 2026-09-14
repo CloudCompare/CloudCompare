@@ -435,6 +435,8 @@ Bug fixes:
 		extraction of the convex hull.
 	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
 	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
+	- The Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
+		(the limits were not checked after the shape refinement step), and it never refined the detected tori
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

@@ -215,6 +215,8 @@ void qRansacSD::doAction()
 	rsdDlg.maxConeAngledoubleSpinBox->setValue(s_maxConeAngle_deg);
 	rsdDlg.minTorusMinorRadiuscheckBox->setChecked(s_minTorusMinorRadiusEnabled);
 	rsdDlg.minTorusMajorRadiuscheckBox->setChecked(s_minTorusMajorRadiusEnabled);
+	rsdDlg.minTorusMinorRadiusdoubleSpinBox->setValue(s_minTorusMinorRadius);
+	rsdDlg.minTorusMajorRadiusdoubleSpinBox->setValue(s_minTorusMajorRadius);
 	rsdDlg.maxTorusMinorRadiuscheckBox->setChecked(s_maxTorusMinorRadiusEnabled);
 	rsdDlg.maxTorusMajorRadiuscheckBox->setChecked(s_maxTorusMajorRadiusEnabled);
 	rsdDlg.maxTorusMinorRadiusdoubleSpinBox->setValue(s_maxTorusMinorRadius);

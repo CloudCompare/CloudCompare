@@ -371,8 +371,8 @@ void qCork::doAction()
 		//run in a separate thread
 		QProgressDialog pDlg("Operation in progress", QString(), 0, 0, m_app->getMainWindow());
 		pDlg.setWindowTitle("Cork");
-		pDlg.show();
 		pDlg.setModal(true);
+		pDlg.show();
 		QApplication::processEvents();
 
 		BoolOpParameters params;

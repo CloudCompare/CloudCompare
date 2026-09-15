@@ -54,6 +54,10 @@ else()
 		# The hidapi sources are pulled in as a Git submodule under extern/hidapi.
 		if( NOT TARGET hidapi::hidapi )
 			set( HIDAPI_WITH_TESTS OFF CACHE BOOL "" FORCE )
+			if( LINUX )
+				set( HIDAPI_WITH_HIDRAW ON CACHE BOOL "" FORCE )
+				set( HIDAPI_WITH_LIBUSB OFF CACHE BOOL "" FORCE )
+			endif()
 			# Build the hidapi submodule. The path to the source and binary directories is relative to the current CMakeLists.txt file
 			# (useful when CloudCompare is a git submodule in another project).
 			set( CURRENT_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}" )
@@ -82,6 +86,7 @@ else()
 		target_include_directories( ${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR} )
 
 		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_3DMOUSE_SUPPORT )
+
 		# Used by Mouse3DInput.{h,cpp} and Mouse3DInput_hid.{h,cpp} to enable
 		# the HID-based path. Defined as PUBLIC so that consumers (qCC,
 		# ccViewer) also see it when compiling their mainwindow.cpp files.

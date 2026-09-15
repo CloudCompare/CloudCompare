@@ -45,12 +45,16 @@ if( OPTION_SUPPORT_3DMOUSE_WITH_3DxWARE ) # former 3DxWare SDK (Windows only)
 		endif()
 	endfunction()
 
-elseif(OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI )
+elseif( OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI )
+
+    find_package( hidapi 0.13.0 CONFIG )
 
 		# hidapi-based 3DConnexion support, originally for macOS but also works on Linux and Windows (no more 3DxWare SDK required)
 		# We drive the 3DConnexion device directly via hidapi (no 3DxWare SDK).
 		# The hidapi sources are pulled in as a Git submodule under extern/hidapi.
-		if( NOT TARGET hidapi::hidapi )
+
+		if( NOT hidapi_FOUND )
+		  message( STATUS "[3DMouse] HIDAPI Lib not found, using vendored HIDAPI" )
 			set( HIDAPI_WITH_TESTS OFF CACHE BOOL "" FORCE )
 			if( LINUX )
 				set( HIDAPI_WITH_HIDRAW ON CACHE BOOL "" FORCE )

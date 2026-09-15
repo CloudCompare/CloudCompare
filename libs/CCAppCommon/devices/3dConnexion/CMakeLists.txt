@@ -56,9 +56,10 @@ else()
 			set( HIDAPI_WITH_TESTS OFF CACHE BOOL "" FORCE )
 			# Build the hidapi submodule. The path to the source and binary directories is relative to the current CMakeLists.txt file
 			# (useful when CloudCompare is a git submodule in another project).
-			set( HIDAPI_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/extern/hidapi )
-			set( HIDAPI_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/extern/hidapi )
-			add_subdirectory( ${HIDAPI_SOURCE_DIR} ${HIDAPI_BINARY_DIR} EXCLUDE_FROM_ALL )
+			set( CURRENT_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}" )
+			set( BUILD_SHARED_LIBS OFF )
+			add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/extern/hidapi EXCLUDE_FROM_ALL)
+			set( BUILD_SHARED_LIBS "${CURRENT_BUILD_SHARED_LIBS}" )
 		endif()
 
 		# Allow target_link_libraries() to act on targets defined in the parent directory.
@@ -78,15 +79,7 @@ else()
 				${CMAKE_CURRENT_LIST_DIR}/Mouse3DInput_hid.cpp
 		)
 
-		target_include_directories( ${PROJECT_NAME}
-			PUBLIC
-				${CMAKE_CURRENT_LIST_DIR}
-			# The hidapi header (hidapi.h) lives in extern/hidapi/hidapi/.
-			# Add the path explicitly so we don't depend solely on transitive
-			# propagation from the hidapi::hidapi target.
-			PRIVATE
-				${HIDAPI_SOURCE_DIR}/hidapi
-		)
+		target_include_directories( ${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR} )
 
 		target_compile_definitions( ${PROJECT_NAME} PUBLIC CC_3DMOUSE_SUPPORT )
 		# Used by Mouse3DInput.{h,cpp} and Mouse3DInput_hid.{h,cpp} to enable
@@ -99,14 +92,5 @@ else()
 		endif()
 
 		target_link_libraries( ${PROJECT_NAME} PUBLIC hidapi::hidapi )
-		if ( WIN32 )
-			#no need to copy a DLL, as hidapi should be compiled as a static library by default
-			#set( HIDAPI_LIB ${HIDAPI_BINARY_DIR}/src/windows/hidapi.dll )
-			#install( PROGRAMS ${HIDAPI_LIB} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} )
-		elseif ( LINUX )
-			set( HIDAPI_LIB ${HIDAPI_BINARY_DIR}/src/linux/libhidapi-hidraw.so.0.16.0 )
-			install( FILES ${HIDAPI_LIB} DESTINATION ${CLOUDCOMPARE_DEST_FOLDER} RENAME "libhidapi-hidraw.so.0")
-		endif()	
 	endif()
-
 endif()

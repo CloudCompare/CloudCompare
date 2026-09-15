@@ -1,6 +1,7 @@
 if(WIN32)
 	option( OPTION_SUPPORT_3DMOUSE_WITH_3DxWARE "Build with 3DxWare (3D mouse support)" OFF )
 endif()
+option( OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI "Build with hidapi (3D mouse support)" ON )
 
 if( OPTION_SUPPORT_3DMOUSE_WITH_3DxWARE ) # former 3DxWare SDK (Windows only)
 
@@ -44,11 +45,8 @@ if( OPTION_SUPPORT_3DMOUSE_WITH_3DxWARE ) # former 3DxWare SDK (Windows only)
 		endif()
 	endfunction()
 
-else()
+elseif(OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI )
 
-	option( OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI "Build with hidapi (3D mouse support)" ON )
-
-	if( OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI )
 		# hidapi-based 3DConnexion support, originally for macOS but also works on Linux and Windows (no more 3DxWare SDK required)
 		# We drive the 3DConnexion device directly via hidapi (no 3DxWare SDK).
 		# The hidapi sources are pulled in as a Git submodule under extern/hidapi.
@@ -97,5 +95,4 @@ else()
 		endif()
 
 		target_link_libraries( ${PROJECT_NAME} PUBLIC hidapi::hidapi )
-	endif()
 endif()

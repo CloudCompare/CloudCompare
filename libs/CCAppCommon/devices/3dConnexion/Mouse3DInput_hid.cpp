@@ -106,6 +106,55 @@ static const int c_buttonMap[] = {
 };
 static constexpr size_t c_buttonMapSize = sizeof(c_buttonMap) / sizeof(c_buttonMap[0]);
 
+// Known 3DConnexion space-mouse product IDs (VID 0x046d / Logitech era)
+static const unsigned short c_old3dconnexionPIDs[] = {
+    0xc603, // SpaceMouse Plus XT
+    0xc605, // CadMan
+    0xc606, // SpaceMouse Classic
+    0xc621, // SpaceBall 5000
+    0xc623, // SpaceTraveler
+    0xc625, // SpacePilot
+    0xc626, // SpaceNavigator
+    0xc627, // SpaceExplorer
+    0xc628, // SpaceNavigator for Notebooks
+    0xc629, // SpacePilot Pro
+    0xc62b, // SpaceMouse Pro
+    0xc640, // NuLooq
+};
+
+// Known 3DConnexion space-mouse product IDs (VID 0x256f / 3DConnexion era)
+static const unsigned short c_3dconnexionPIDs[] = {
+    0xc62e, // SpaceMouse Wireless (USB)
+    0xc62f, // SpaceMouse Wireless Receiver
+    0xc631, // SpaceMouse Pro Wireless
+    0xc632, // SpaceMouse Pro Wireless Receiver
+    0xc633, // SpaceMouse Enterprise
+    0xc635, // SpaceMouse Compact
+    0xc636, // SpaceMouse Module
+    0xc638, // SpaceMouse Pro Wireless BT (USB)
+    0xc63a, // SpaceMouse Wireless (Bluetooth)
+};
+
+static bool isKnownSpaceMouse(unsigned short vid, unsigned short pid)
+{
+	if (vid == c_3dconnexionVID)
+	{
+		// Check whitelist
+		for (auto p : c_3dconnexionPIDs)
+			if (pid == p)
+				return true;
+		return false;
+	}
+	if (vid == c_old3dconnexionVID)
+	{
+		for (auto p : c_old3dconnexionPIDs)
+			if (pid == p)
+				return true;
+		return false;
+	}
+	return false;
+}
+
 bool HIDWorker::openDevice()
 {
 	hid_device_info* devs = hid_enumerate(c_3dconnexionVID, 0x0);
@@ -127,7 +176,7 @@ bool HIDWorker::openDevice()
 	hid_device_info* cur = devs;
 	for (; cur; cur = cur->next)
 	{
-		if (cur->usage_page == 0x01 && cur->usage == 0x08)
+		if (isKnownSpaceMouse(cur->vendor_id, cur->product_id) && cur->usage_page == 0x01 && cur->usage == 0x08)
 		{
 			m_handle = hid_open_path(cur->path);
 			if (m_handle)
@@ -144,18 +193,20 @@ bool HIDWorker::openDevice()
 	// 3DConnexionHelper.app is running (it creates virtual HID interfaces that
 	// don't carry the Multi-axis Controller usage), or on devices that simply
 	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
-	if (!m_handle)
+	if (!m_handle && is3dConnexionHelperRunning())
 	{
 		cur = devs;
 		for (; cur; cur = cur->next)
 		{
-			m_handle = hid_open_path(cur->path);
-			if (m_handle)
+			if (isKnownSpaceMouse(cur->vendor_id, cur->product_id))
 			{
-				m_devicePath = cur->path;
-				QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
-				ccLog::Print(QString("[3D Mouse] Device: %1 (HID, fallback)").arg(name));
-				break;
+				if (m_handle)
+				{
+					m_devicePath = cur->path;
+					QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
+					ccLog::Print(QString("[3D Mouse] Device: %1 (HID, fallback)").arg(name));
+					break;
+				}
 			}
 		}
 	}

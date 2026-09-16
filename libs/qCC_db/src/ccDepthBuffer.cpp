@@ -18,7 +18,7 @@
 #include "ccDepthBuffer.h"
 
 // algorithm
-#include <string.h>
+#include <cstring>
 #include <vector>
 
 ccDepthBuffer::ccDepthBuffer()

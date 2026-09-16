@@ -19,6 +19,7 @@
 
 // Local
 #include "ccGLDrawContext.h"
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <CCGeom.h>

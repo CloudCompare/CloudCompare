@@ -15,12 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "../include/ccGLSLHelper.h"
+#include "ccGLSLHelper.h"
 
 // Local
-#include "../include/ccMaterialDB.h"
-#include "../include/ccNormalVectors.h"
-#include "../include/ccScalarField.h"
+#include "ccMaterialDB.h"
+#include "ccNormalCompressor.h"
+#include "ccNormalVectors.h"
+#include "ccScalarField.h"
 
 // Qt
 #include <QOpenGLFunctions_2_1>

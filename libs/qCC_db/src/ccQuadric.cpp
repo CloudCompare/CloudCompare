@@ -18,11 +18,7 @@
 // Always on top!
 #include "ccQuadric.h"
 
-#include "ccIncludeGL.h"
-
 // qCC_db
-#include "ccMaterialSet.h"
-#include "ccNormalVectors.h"
 #include "ccPointCloud.h"
 
 // CCLIB

@@ -18,7 +18,6 @@
 #include "ccBox.h"
 
 // qCC_db
-#include "ccPlane.h"
 #include "ccPointCloud.h"
 
 ccBox::ccBox(const CCVector3&  dims,

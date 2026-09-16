@@ -20,10 +20,6 @@
 // Local
 #include "qCC_db.h"
 
-// system
-#include <stdio.h>
-#include <string>
-
 // Qt
 #include <QString>
 

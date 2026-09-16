@@ -20,9 +20,7 @@
 // Local
 #include "ccGenericPrimitive.h"
 
-//! Cone (primitive)
-/** 3D cone primitive
- **/
+//! 3D Cone (primitive)
 class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 {
   public:

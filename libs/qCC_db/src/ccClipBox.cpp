@@ -24,7 +24,6 @@
 #include "ccCone.h"
 #include "ccCylinder.h"
 #include "ccHObjectCaster.h"
-#include "ccSphere.h"
 #include "ccTorus.h"
 
 // system

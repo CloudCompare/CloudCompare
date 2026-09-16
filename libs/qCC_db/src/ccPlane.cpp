@@ -18,8 +18,6 @@
 // Always on top!
 #include "ccPlane.h"
 
-#include "ccIncludeGL.h"
-
 // qCC_db
 #include "ccMaterialSet.h"
 #include "ccPointCloud.h"

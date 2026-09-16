@@ -18,8 +18,6 @@
 // Always first
 #include "ccImage.h"
 
-#include "ccIncludeGL.h"
-
 // Local
 #include "ccCameraSensor.h"
 

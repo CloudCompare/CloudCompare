@@ -22,8 +22,7 @@
 #include <QTextStream>
 
 // System
-#include <assert.h>
-#include <string>
+#include <cassert>
 
 ccIndexedTransformation::ccIndexedTransformation()
     : ccGLMatrix()

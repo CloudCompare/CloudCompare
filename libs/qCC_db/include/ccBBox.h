@@ -18,7 +18,8 @@
 // ##########################################################################
 
 // Local
-#include "ccDrawableObject.h"
+#include "ccGLDrawContext.h"
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <BoundingBox.h>

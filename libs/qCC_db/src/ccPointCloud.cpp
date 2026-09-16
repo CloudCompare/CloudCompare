@@ -39,6 +39,7 @@
 #include "ccMaterial.h"
 #include "ccMesh.h"
 #include "ccMinimumSpanningTreeForNormsDirection.h"
+#include "ccNormalCompressor.h"
 #include "ccNormalVectors.h"
 #include "ccOctree.h"
 #include "ccPointCloudLOD.h"

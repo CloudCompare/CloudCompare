@@ -19,8 +19,8 @@
 
 // Local
 #include "ccArray.h"
+#include "ccBasicTypes.h"
 #include "ccColorTypes.h"
-#include "ccNormalCompressor.h"
 
 /***************************************************
       Advanced cloudCompare types (containers)

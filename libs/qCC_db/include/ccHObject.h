@@ -19,6 +19,7 @@
 
 // Local
 #include "ccBBox.h"
+#include "ccDrawableObject.h"
 #include "ccObject.h"
 
 class QIcon;

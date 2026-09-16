@@ -18,8 +18,8 @@
 // ##########################################################################
 
 // Local
-#include "ccAdvancedTypes.h"
 #include "ccOctree.h"
+#include "ccBasicTypes.h"
 #include "ccShiftedObject.h"
 
 // System

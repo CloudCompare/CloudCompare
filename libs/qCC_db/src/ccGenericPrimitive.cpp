@@ -18,7 +18,6 @@
 // Always first
 #include "ccGenericPrimitive.h"
 
-#include "ccIncludeGL.h"
 #include "ccPointCloud.h"
 
 ccGenericPrimitive::ccGenericPrimitive(QString           name /*=QString()*/,

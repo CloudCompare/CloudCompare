@@ -19,6 +19,7 @@
 
 // Local
 #include "cc2DViewportObject.h"
+
 // System
 #include <array>
 

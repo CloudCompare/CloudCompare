@@ -18,8 +18,8 @@
 // ##########################################################################
 
 // Local
-#include "ccGenericGLDisplay.h"
 #include "ccHObject.h"
+#include "ccViewportParameters.h"
 
 //! 2D viewport object
 class QCC_DB_LIB_API cc2DViewportObject : public ccHObject

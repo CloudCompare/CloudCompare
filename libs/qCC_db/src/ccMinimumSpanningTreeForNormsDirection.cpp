@@ -25,7 +25,6 @@
 #include "ccOctree.h"
 #include "ccPointCloud.h"
 #include "ccProgressDialog.h"
-#include "ccScalarField.h"
 
 // system
 #include <map>

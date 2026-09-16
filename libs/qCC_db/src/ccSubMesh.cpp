@@ -30,7 +30,6 @@
 
 // system
 #include <cassert>
-#include <cstring>
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
     : ccGenericMesh("Sub-mesh")

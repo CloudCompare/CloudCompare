@@ -60,7 +60,7 @@ void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 	glFunc->glEnd();
 }
 
-const ccBBox ccBBox::operator*(const ccGLMatrix& mat)
+ccBBox ccBBox::operator*(const ccGLMatrix& mat) const
 {
 	ccBBox rotatedBox;
 
@@ -79,7 +79,7 @@ const ccBBox ccBBox::operator*(const ccGLMatrix& mat)
 	return rotatedBox;
 }
 
-const ccBBox ccBBox::operator*(const ccGLMatrixd& mat)
+ccBBox ccBBox::operator*(const ccGLMatrixd& mat) const
 {
 	ccBBox rotatedBox;
 

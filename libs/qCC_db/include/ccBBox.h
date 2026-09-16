@@ -48,9 +48,9 @@ class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
 	}
 
 	//! Applies transformation to the bounding box
-	const ccBBox operator*(const ccGLMatrix& mat);
+	ccBBox operator*(const ccGLMatrix& mat) const;
 	//! Applies transformation to the bounding box
-	const ccBBox operator*(const ccGLMatrixd& mat);
+	ccBBox operator*(const ccGLMatrixd& mat) const;
 
 	//! Draws bounding box (OpenGL)
 	/** \param context OpenGL context

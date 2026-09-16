@@ -21,9 +21,6 @@
 #include "ccOctree.h"
 #include "ccSensor.h"
 
-// system
-#include <unordered_set>
-
 class ccImage;
 class ccMesh;
 class ccPointCloud;

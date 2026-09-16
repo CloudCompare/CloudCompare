@@ -15,10 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIncludeGL.h"
+#include "cc2DViewportLabel.h"
 
 // Local
-#include "cc2DViewportLabel.h"
+#include "ccGenericGLDisplay.h"
+#include "ccIncludeGL.h"
 
 // CCCoreLib
 #include <CCConst.h>
@@ -26,9 +27,6 @@
 // Qt
 #include <QDataStream>
 #include <QFontMetrics>
-
-// system
-#include <string.h>
 
 cc2DViewportLabel::cc2DViewportLabel(QString name /*=QString()*/)
     : cc2DViewportObject(name)

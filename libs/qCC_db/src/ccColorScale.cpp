@@ -17,6 +17,9 @@
 
 #include "ccColorScale.h"
 
+// Local
+#include "ccLog.h"
+
 // Qt
 #include <QOpenGLFunctions_2_1>
 #include <QUuid>
@@ -25,9 +28,6 @@
 
 // CCCoreLib
 #include <CCGeom.h>
-
-// Local
-#include "ccLog.h"
 
 static const QString s_xmlCloudCompare("CloudCompare");
 static const QString s_xmlColorScaleTitle("ColorScale");

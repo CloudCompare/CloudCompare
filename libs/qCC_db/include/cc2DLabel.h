@@ -24,6 +24,7 @@
 
 // Qt
 #include <QRect>
+
 // System
 #include <array>
 

@@ -17,9 +17,6 @@
 
 #include "ccMaterialSet.h"
 
-// Local
-#include "ccGenericGLDisplay.h"
-
 // Qt
 #include <QFileInfo>
 #include <QImage>

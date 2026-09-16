@@ -17,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always on top!
-#include "ccIncludeGL.h"
-
 // CCFbo
 #include <ccShader.h>
 

@@ -18,7 +18,6 @@
 #include "ccDish.h"
 
 // Local
-#include "ccNormalVectors.h"
 #include "ccPointCloud.h"
 
 ccDish::ccDish(PointCoordinateType radius,

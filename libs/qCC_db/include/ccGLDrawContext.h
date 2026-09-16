@@ -17,8 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "ccColorBasedEntityPicking.h"
-#include "ccIncludeGL.h"
 
 // Qt
 #include <QOpenGLVersionFunctionsFactory>

@@ -17,6 +17,9 @@
 
 #include "ccIndexedTransformationBuffer.h"
 
+// Local
+#include "ccIncludeGL.h"
+
 // CCCoreLib
 #include <ParallelSort.h>
 

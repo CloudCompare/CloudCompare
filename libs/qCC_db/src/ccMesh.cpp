@@ -28,6 +28,7 @@
 #include "ccGenericPointCloud.h"
 #include "ccHObjectCaster.h"
 #include "ccMaterialSet.h"
+#include "ccNormalCompressor.h"
 #include "ccNormalVectors.h"
 #include "ccPointCloud.h"
 #include "ccPolyline.h"

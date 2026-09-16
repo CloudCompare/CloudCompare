@@ -19,7 +19,7 @@
 
 // Local
 #include "ccGenericGLDisplay.h"
-#include "ccHObject.h"
+#include "ccBBox.h"
 
 // CCCoreLib
 #include <DgmOctree.h>

@@ -18,12 +18,9 @@
 // Always first
 #include "ccKdTree.h"
 
-#include "ccIncludeGL.h"
-
 // Local
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
-#include "ccScalarField.h"
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
     : CCCoreLib::TrueKdTree(aCloud)

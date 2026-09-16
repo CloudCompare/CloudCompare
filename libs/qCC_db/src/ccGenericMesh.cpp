@@ -18,17 +18,11 @@
 // Always first
 #include "ccGenericMesh.h"
 
-#include "ccIncludeGL.h"
-
 // local
-#include "ccColorScalesManager.h"
 #include "ccGenericGLDisplay.h"
 #include "ccGenericPointCloud.h"
 #include "ccHObjectCaster.h"
-#include "ccMaterialSet.h"
-#include "ccNormalVectors.h"
 #include "ccPointCloud.h"
-#include "ccScalarField.h"
 
 // CCCoreLib
 #include <GenericProgressCallback.h>

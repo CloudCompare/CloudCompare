@@ -23,7 +23,6 @@
 // Local
 #include "ccPointCloud.h"
 #include "ccProgressDialog.h"
-#include "ccSphere.h"
 
 // Qt
 #include <QCoreApplication>

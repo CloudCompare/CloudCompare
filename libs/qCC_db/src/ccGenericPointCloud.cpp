@@ -34,7 +34,6 @@ using namespace oneapi;
 #include "ccPointCloud.h"
 #include "ccProgressDialog.h"
 #include "ccScalarField.h"
-#include "ccSensor.h"
 
 #if defined(_OPENMP)
 // OpenMP

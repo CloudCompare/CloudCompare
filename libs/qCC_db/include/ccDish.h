@@ -53,21 +53,21 @@ class QCC_DB_LIB_API ccDish : public ccGenericPrimitive
 	ccDish(QString name = QString("Dish"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::DISH;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Dish";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
   protected:
 	// inherited from ccGenericPrimitive

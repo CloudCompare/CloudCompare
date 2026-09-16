@@ -60,7 +60,7 @@ class MultiplyBoundingBoxVisitor
 	PointCoordinateType m_multFactor;
 };
 
-void ccKdTree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccKdTree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	if (m_root)
 		MultiplyBoundingBoxVisitor(multFactor).visit(m_root);

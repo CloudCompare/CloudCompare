@@ -24,8 +24,8 @@
 class ccChunk
 {
   public:
-	static const size_t SIZE_POWER = 16;
-	static const size_t SIZE       = (1 << SIZE_POWER); //~ 64K
+	static constexpr size_t SIZE_POWER = 16;
+	static constexpr size_t SIZE       = (1 << SIZE_POWER); //~ 64K
 
 	inline static size_t Count(size_t elementCount)
 	{

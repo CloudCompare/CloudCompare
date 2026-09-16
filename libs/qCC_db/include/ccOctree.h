@@ -42,7 +42,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 
   public: // GENERAL METHODS
 	//! Shared pointer
-	typedef QSharedPointer<ccOctree> Shared;
+	using Shared = QSharedPointer<ccOctree>;
 
 	//! Default constructor
 	/** \param cloud a point cloud
@@ -58,7 +58,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 	    to update its bounding-box.
 	    \param  multFactor multiplication factor
 	**/
-	void multiplyBoundingBox(const PointCoordinateType multFactor);
+	void multiplyBoundingBox(PointCoordinateType multFactor);
 
 	//! Translates the bounding-box of the octree
 	/** If the cloud has been simply translated, there is no use to recompute

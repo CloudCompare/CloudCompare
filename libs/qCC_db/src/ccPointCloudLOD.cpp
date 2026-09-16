@@ -18,6 +18,7 @@
 #include "ccPointCloudLOD.h"
 
 // Local
+#include "ccFrustum.h"
 #include "ccPointCloud.h"
 
 // Qt

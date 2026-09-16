@@ -19,7 +19,6 @@
 
 // Local
 #include "ccDrawableObject.h"
-#include "ccFrustum.h"
 #include "ccOctree.h"
 
 // Qt
@@ -29,6 +28,7 @@
 #include <array>
 #include <cstdint>
 
+class Frustum;
 class ccPointCloud;
 class ccPointCloudLODThread;
 

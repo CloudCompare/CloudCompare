@@ -135,7 +135,7 @@ static const unsigned short c_3dconnexionPIDs[] = {
     0xc63a, // SpaceMouse Wireless (Bluetooth)
 };
 
-static bool isKnownSpaceMouse(unsigned short vid, unsigned short pid)
+static bool IsKnownSpaceMouse(unsigned short vid, unsigned short pid)
 {
 	if (vid == c_3dconnexionVID)
 	{

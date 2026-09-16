@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_KD_TREE_HEADER
-#define CC_KD_TREE_HEADER
 
 // CCCoreLib
 #include <TrueKdTree.h>
@@ -92,5 +91,3 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 	//! Associated cloud
 	ccGenericPointCloud* m_associatedGenericCloud;
 };
-
-#endif // CC_KD_TREE_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COLOR_TYPES_HEADER
-#define CC_COLOR_TYPES_HEADER
 
 // Local
 #include "qCC_db.h"
@@ -363,5 +362,3 @@ namespace ccColor
 		             static_cast<float>(qColor.alphaF()));
 	}
 }; // namespace ccColor
-
-#endif // CC_COLOR_TYPES_HEADER

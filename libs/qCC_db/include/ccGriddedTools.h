@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GRIDDED_CLOUD_TOOLS_HEADER
-#define CC_GRIDDED_CLOUD_TOOLS_HEADER
 
 // Local
 #include "ccPointCloud.h"
@@ -72,5 +71,3 @@ class QCC_DB_LIB_API ccGriddedTools
 	                                      ccPointCloud::Grid::Shared grid,
 	                                      ccGLMatrix*                cloudToSensorTrans = nullptr);
 };
-
-#endif

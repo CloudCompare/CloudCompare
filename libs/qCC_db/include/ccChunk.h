@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                  COPYRIGHT: Daniel Girardeau-Montaut                   #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CHUNK_HEADER
-#define CC_CHUNK_HEADER
 
 // System
 #include <vector>
@@ -65,5 +64,3 @@ class ccChunk
 		return Size(chunkIndex, buffer.size());
 	}
 };
-
-#endif // CC_CHUNK_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_POINT_CLOUD_HEADER
-#define CC_GENERIC_POINT_CLOUD_HEADER
 
 // Local
 #include "ccAdvancedTypes.h"
@@ -306,5 +305,3 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;
 };
-
-#endif // CC_GENERIC_POINT_CLOUD_HEADER

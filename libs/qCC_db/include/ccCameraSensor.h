@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CAMERA_SENSOR_HEADER
-#define CC_CAMERA_SENSOR_HEADER
 
 // local
 #include "ccOctree.h"
@@ -672,5 +671,3 @@ class ccOctreeFrustumIntersector
 	// contains the truncated code of the cells INTERSECTING the frustum
 	std::unordered_set<CCCoreLib::DgmOctree::CellCode> m_cellsIntersectFrustum[CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL + 1];
 };
-
-#endif // CC_CAMERA_SENSOR_HEADER

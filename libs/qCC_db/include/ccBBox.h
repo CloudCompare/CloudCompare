@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_BBOX_HEADER
-#define CC_BBOX_HEADER
 
 // Local
 #include "ccDrawableObject.h"
@@ -58,5 +57,3 @@ class QCC_DB_LIB_API ccBBox : public CCCoreLib::BoundingBox
 	 **/
 	void draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const;
 };
-
-#endif // CC_BBOX_HEADER

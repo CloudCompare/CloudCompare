@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_GL_DISPLAY
-#define CC_GENERIC_GL_DISPLAY
 
 // Always first
 #include "ccIncludeGL.h"
@@ -237,5 +236,3 @@ class ccGenericGLDisplay
 		return nullptr;
 	}
 };
-
-#endif // CC_GENERIC_GL_DISPLAY

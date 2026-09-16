@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SPHERE_PRIMITIVE_HEADER
-#define CC_SPHERE_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -85,5 +84,3 @@ class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 	//! Radius
 	PointCoordinateType m_radius;
 };
-
-#endif // CC_SPHERE_PRIMITIVE_HEADER

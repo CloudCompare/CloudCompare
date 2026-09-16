@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DRAWABLE_OBJECT_HEADER
-#define CC_DRAWABLE_OBJECT_HEADER
 
 // Local
 #include "ccGLDrawContext.h"
@@ -408,5 +407,3 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! The stack of pushed display states
 	std::vector<DisplayState::Shared> m_displayStateStack;
 };
-
-#endif // CC_DRAWABLE_OBJECT_HEADER

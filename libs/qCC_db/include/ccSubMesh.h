@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SUB_MESH_HEADER
-#define CC_SUB_MESH_HEADER
 
 // Local
 #include "ccBBox.h"
@@ -219,5 +218,3 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	//! Bounding-box
 	ccBBox m_bBox;
 };
-
-#endif // CC_SUB_MESH_HEADER

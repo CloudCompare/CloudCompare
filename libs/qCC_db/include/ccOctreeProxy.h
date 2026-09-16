@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_OCTREE_PROXY_HEADER
-#define CC_OCTREE_PROXY_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -63,5 +62,3 @@ class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 	//! Associated octree
 	ccOctree::Shared m_octree;
 };
-
-#endif // CC_OCTREE_PROXY_HEADER

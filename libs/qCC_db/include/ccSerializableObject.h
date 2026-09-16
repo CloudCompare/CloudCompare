@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SERIALIZABLE_OBJECT_HEADER
-#define CC_SERIALIZABLE_OBJECT_HEADER
 
 // Local
 #include "ccLog.h"
@@ -414,5 +413,3 @@ class ccSerializationHelper
 		return true;
 	}
 };
-
-#endif // CC_SERIALIZABLE_OBJECT_HEADER

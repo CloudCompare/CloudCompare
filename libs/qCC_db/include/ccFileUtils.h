@@ -1,5 +1,5 @@
-#ifndef CCFILEUTILS_H
-#define CCFILEUTILS_H
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -28,4 +28,3 @@ namespace ccFileUtils
 		return QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first();
 	}
 } // namespace ccFileUtils
-#endif

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ADVANCED_TYPES_HEADER
-#define CC_ADVANCED_TYPES_HEADER
 
 // Local
 #include "ccArray.h"
@@ -214,5 +213,3 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 		return cloneArray;
 	}
 };
-
-#endif // CC_ADVANCED_TYPES_HEADER

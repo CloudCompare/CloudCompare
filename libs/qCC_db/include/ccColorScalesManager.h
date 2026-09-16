@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COLOR_SCALES_MANAGER_HEADER
-#define CC_COLOR_SCALES_MANAGER_HEADER
 
 // Local
 #include "ccColorScale.h"
@@ -122,5 +121,3 @@ class QCC_DB_LIB_API ccColorScalesManager
 	//! Color scales
 	ScalesMap m_scales;
 };
-
-#endif // CC_COLOR_SCALES_MANAGER_HEADER

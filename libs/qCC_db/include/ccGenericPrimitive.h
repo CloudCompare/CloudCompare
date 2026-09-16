@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GENERIC_PRIMITIVE_HEADER
-#define CC_GENERIC_PRIMITIVE_HEADER
 
 // Local
 #include "ccMesh.h"
@@ -150,5 +149,3 @@ class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 	//! Drawing precision (for primitives that support this feature)
 	unsigned m_drawPrecision;
 };
-
-#endif // CC_GENERIC_PRIMITIVE_HEADER

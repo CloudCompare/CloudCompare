@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,8 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_EXTRU_PRIMITIVE_HEADER
-#define CC_EXTRU_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -84,5 +84,3 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	//! Profile
 	std::vector<CCVector2> m_profile;
 };
-
-#endif // CC_EXTRU_PRIMITIVE_HEADER

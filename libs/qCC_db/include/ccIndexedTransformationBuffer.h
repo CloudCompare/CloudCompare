@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
-#define CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -140,5 +139,3 @@ class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject
 	//! Trihedrons display scale
 	float m_trihedronsScale;
 };
-
-#endif

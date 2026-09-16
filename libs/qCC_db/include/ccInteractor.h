@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INTERACTOR_HEADER
-#define CC_INTERACTOR_HEADER
 
 // Local
 #include "CCGeom.h"
@@ -53,5 +52,3 @@ class QCC_DB_LIB_API ccInteractor
 		return false;
 	}
 };
-
-#endif // CC_INTERACTOR_HEADER

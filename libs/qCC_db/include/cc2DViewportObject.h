@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_2D_VIEWPORT_OBJECT_HEADER
-#define CC_2D_VIEWPORT_OBJECT_HEADER
 
 // Local
 #include "ccGenericGLDisplay.h"
@@ -63,5 +62,3 @@ class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
 	//! Viewport parameters
 	ccViewportParameters m_params;
 };
-
-#endif // CC_2D_VIEWPORT_OBJECT_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FAST_MARCHING_DIRECTION_HEADER
-#define CC_FAST_MARCHING_DIRECTION_HEADER
 
 // CCCoreLib
 #include <DgmOctree.h>
@@ -124,5 +123,3 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	//! Resolves the direction of a given cell (once and for all)
 	void resolveCellOrientation(unsigned index);
 };
-
-#endif

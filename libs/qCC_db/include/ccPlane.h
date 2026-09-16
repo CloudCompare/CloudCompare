@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_PLANE_PRIMITIVE_HEADER
-#define CC_PLANE_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -157,5 +156,3 @@ class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 	// Array [a,b,c,d] such that ax+by+cz = d
 	PointCoordinateType m_PlaneEquation[4];
 };
-
-#endif // CC_PLANE_PRIMITIVE_HEADER

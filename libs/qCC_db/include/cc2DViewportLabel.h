@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_2D_VIEWPORT_LABEL_HEADER
-#define CC_2D_VIEWPORT_LABEL_HEADER
 
 // Local
 #include "cc2DViewportObject.h"
@@ -71,5 +70,3 @@ class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
 	 **/
 	ROI m_roi;
 };
-
-#endif // CC_2D_VIEWPORT_LABEL_HEADER

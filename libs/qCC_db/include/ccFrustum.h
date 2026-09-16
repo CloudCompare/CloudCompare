@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #                    COPYRIGHT: CloudCompare project                     #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FRUSTUM_HEADER
-#define CC_FRUSTUM_HEADER
 
 // CCCoreLib
 #include <RayAndBox.h>
@@ -262,5 +261,3 @@ class Frustum
   protected: // members
 	Plane pl[6];
 };
-
-#endif // CC_FRUSTUM_HEADER

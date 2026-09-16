@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ARRAY_HEADER
-#define CC_ARRAY_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -193,5 +192,3 @@ class ccArray : public std::vector<Type>
 		return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, dataVersion, "array");
 	}
 };
-
-#endif // CC_ARRAY_HEADER

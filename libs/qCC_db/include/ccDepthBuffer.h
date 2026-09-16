@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DEPTH_BUFFER_HEADER
-#define CC_DEPTH_BUFFER_HEADER
 
 // local
 #include "qCC_db.h"
@@ -59,5 +58,3 @@ class QCC_DB_LIB_API ccDepthBuffer
 	**/
 	int fillHoles();
 };
-
-#endif // CC_DEPTH_BUFFER_HEADER

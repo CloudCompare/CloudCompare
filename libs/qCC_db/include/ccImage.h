@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_IMAGE_HEADER
-#define CC_IMAGE_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -158,5 +157,3 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	//! Associated sensor
 	ccCameraSensor* m_associatedSensor;
 };
-
-#endif // CC_IMAGE_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INCLUDE_GL_HEADER
-#define CC_INCLUDE_GL_HEADER
 
 #include <cmath>
 
@@ -617,5 +616,3 @@ class ccGL
 		MAT(m, 3, 3) = 1.0;
 	}
 };
-
-#endif // CC_INCLUDE_GL_HEADER

@@ -46,20 +46,20 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	ccExtru(QString name = QString("Extrusion"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::EXTRU;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Extrusion";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	//! Returns extrusion thickness
-	const PointCoordinateType getThickness() const
+	const PointCoordinateType& getThickness() const
 	{
 		return m_height;
 	}

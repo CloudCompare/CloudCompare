@@ -55,11 +55,11 @@ class QCC_DB_LIB_API ccGriddedTools
 	    \param cloudToSensorTrans transformation from cloud coordinate system to the sensor coordinate system (optional)
 	    \return success
 	**/
-	static bool DetectParameters(const ccPointCloud*              cloud,
-	                             const ccPointCloud::Grid::Shared grid,
-	                             GridParameters&                  parameters,
-	                             bool                             verbose            = false,
-	                             ccGLMatrix*                      cloudToSensorTrans = nullptr);
+	static bool DetectParameters(const ccPointCloud*        cloud,
+	                             ccPointCloud::Grid::Shared grid,
+	                             GridParameters&            parameters,
+	                             bool                       verbose            = false,
+	                             ccGLMatrix*                cloudToSensorTrans = nullptr);
 
 	//! Determines the (TLS) sensor parameters from the relative position of gridded points
 	/** \param cloud cloud on which to compute the sensor parameters (should be a single grid)

@@ -91,7 +91,7 @@ class QCC_DB_LIB_API ccColorScalesManager
 	void removeScale(QString UUID);
 
 	//! Color scales map type
-	typedef QMap<QString, ccColorScale::Shared> ScalesMap;
+	using ScalesMap = QMap<QString, ccColorScale::Shared>;
 
 	//! Access to the internal map
 	ScalesMap& map()

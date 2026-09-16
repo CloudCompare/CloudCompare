@@ -45,21 +45,21 @@ class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 	ccSphere(QString name = QString("Sphere"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::SPHERE;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Sphere";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	//! Returns radius
 	inline PointCoordinateType getRadius() const
@@ -79,7 +79,7 @@ class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
 	bool  buildUp() override;
 
 	// inherited from ccHObject
-	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context) override;
+	void drawNameIn3D(CC_DRAW_CONTEXT& context) override;
 
 	//! Radius
 	PointCoordinateType m_radius;

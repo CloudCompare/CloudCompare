@@ -334,9 +334,8 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! Display state
 	struct DisplayState
 	{
-		DisplayState()
-		{
-		}
+		DisplayState() = default;
+
 		DisplayState(const ccDrawableObject& dobj);
 
 		using Shared = QSharedPointer<DisplayState>;

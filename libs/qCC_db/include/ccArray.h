@@ -34,7 +34,7 @@ class ccArray : public std::vector<Type>
 {
   public:
 	//! Base type
-	typedef ccArray<Type, N, ComponentType> Base;
+	using Base = ccArray<Type, N, ComponentType>;
 
 	//! Default constructor
 	ccArray(QString name = QString())
@@ -121,15 +121,15 @@ class ccArray : public std::vector<Type>
 	}
 
 	// inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override
+	inline CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::ARRAY;
 	}
-	inline virtual bool isShareable() const override
+	inline bool isShareable() const override
 	{
 		return true;
 	}
-	inline virtual bool isSerializable() const override
+	inline bool isSerializable() const override
 	{
 		return true;
 	}
@@ -178,9 +178,7 @@ class ccArray : public std::vector<Type>
 	//! Destructor (protected)
 	/** Use release instead.
 	 **/
-	virtual ~ccArray()
-	{
-	}
+	~ccArray() override = default;
 
 	// inherited from ccHObject
 	inline bool toFile_MeOnly(QFile& out, short dataVersion) const override

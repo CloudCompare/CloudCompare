@@ -958,7 +958,7 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVect
 //	return true;
 // }
 
-bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const
+bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, float depth, Vector3Tpl<ScalarType>& sigma) const
 {
 	// no distortion parameters?
 	if (!m_distortionParams)

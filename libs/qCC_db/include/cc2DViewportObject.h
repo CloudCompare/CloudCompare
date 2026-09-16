@@ -32,11 +32,11 @@ class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
 	cc2DViewportObject(const cc2DViewportObject& viewport);
 
 	// inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::VIEWPORT_2D_OBJECT;
 	}
-	virtual bool isSerializable() const override
+	bool isSerializable() const override
 	{
 		return true;
 	}

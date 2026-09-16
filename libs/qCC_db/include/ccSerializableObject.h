@@ -72,7 +72,7 @@ class ccSerializableObject
 	};
 
 	//! Map of loaded unique IDs (old ID --> new ID)
-	typedef QMultiMap<unsigned, unsigned> LoadedIDMap;
+	using LoadedIDMap = QMultiMap<unsigned, unsigned>;
 
 	//! Loads data from binary stream
 	/** \param in input file (already opened)

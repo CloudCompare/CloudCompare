@@ -32,9 +32,7 @@ class QCC_DB_LIB_API ccColorRampShader : public ccShader
 	ccColorRampShader();
 
 	//! Destructor
-	virtual ~ccColorRampShader()
-	{
-	}
+	~ccColorRampShader() override = default;
 
 	//! Setups shader
 	/** Shader must have already been stared!

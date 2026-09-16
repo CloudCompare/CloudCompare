@@ -39,13 +39,13 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	ccImage(const ccImage& image, bool keepSensorLink = true);
 
 	// inherited methods (ccHObject)
-	virtual bool isSerializable() const override
+	bool isSerializable() const override
 	{
 		return true;
 	}
 
 	//! Returns unique class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::IMAGE;
 	}
@@ -120,7 +120,7 @@ class QCC_DB_LIB_API ccImage : public ccHObject
 	}
 
 	// inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//! Compute the displayed image size
 	QSizeF computeDisplayedSize(int glWidth, int glHeight) const;

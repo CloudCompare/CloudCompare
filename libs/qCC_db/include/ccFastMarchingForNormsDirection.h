@@ -78,8 +78,7 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	  public:
 		//! Default constructor
 		DirectionCell()
-		    : Cell()
-		    , N(0, 0, 0)
+		    : N(0, 0, 0)
 		    , C(0, 0, 0)
 		    , cellCode(0)
 		    , signConfidence(1)

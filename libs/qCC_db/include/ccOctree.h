@@ -42,7 +42,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 
   public: // GENERAL METHODS
 	//! Shared pointer
-	typedef QSharedPointer<ccOctree> Shared;
+	using Shared = QSharedPointer<ccOctree>;
 
 	//! Default constructor
 	/** \param cloud a point cloud
@@ -50,7 +50,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 	explicit ccOctree(ccGenericPointCloud* cloud);
 
 	//! Destructor
-	virtual ~ccOctree();
+	~ccOctree() override;
 
 	//! Multiplies the bounding-box of the octree
 	/** If the cloud coordinates are simply multiplied by the same factor,
@@ -58,7 +58,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 	    to update its bounding-box.
 	    \param  multFactor multiplication factor
 	**/
-	void multiplyBoundingBox(const PointCoordinateType multFactor);
+	void multiplyBoundingBox(PointCoordinateType multFactor);
 
 	//! Translates the bounding-box of the octree
 	/** If the cloud has been simply translated, there is no use to recompute
@@ -73,7 +73,7 @@ class QCC_DB_LIB_API ccOctree : public QObject
 	ccBBox getPointsBB() const;
 
 	// inherited from DgmOctree
-	virtual void clear() override;
+	void clear() override;
 
   public: // RENDERING
 	//! Returns the currently displayed octree level
@@ -170,15 +170,15 @@ class QCC_DB_LIB_API ccOctree : public QObject
   protected: ////RENDERING
 	static bool DrawCellAsABox(const CCCoreLib::DgmOctree::octreeCell& cell,
 	                           void**                                  additionalParameters,
-	                           CCCoreLib::NormalizedProgress*          nProgress = 0);
+	                           CCCoreLib::NormalizedProgress*          nProgress = nullptr);
 
 	static bool DrawCellAsAPoint(const CCCoreLib::DgmOctree::octreeCell& cell,
 	                             void**                                  additionalParameters,
-	                             CCCoreLib::NormalizedProgress*          nProgress = 0);
+	                             CCCoreLib::NormalizedProgress*          nProgress = nullptr);
 
 	static bool DrawCellAsAPrimitive(const CCCoreLib::DgmOctree::octreeCell& cell,
 	                                 void**                                  additionalParameters,
-	                                 CCCoreLib::NormalizedProgress*          nProgress = 0);
+	                                 CCCoreLib::NormalizedProgress*          nProgress = nullptr);
 
   protected: // MEMBERS
 	//! Associated cloud (as a ccGenericPointCloud)

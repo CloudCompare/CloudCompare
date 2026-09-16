@@ -30,7 +30,7 @@ class ccColorBasedEntityPicking
   public:
 	//! Unique ID to flag entities
 	/** With 24 bits RGB, we can uniquely color up to 2^24 (= 16 777 216) different entities **/
-	typedef uint32_t ID_TYPE;
+	using ID_TYPE = uint32_t;
 
 	//! Default constructor
 	ccColorBasedEntityPicking()
@@ -95,5 +95,5 @@ class ccColorBasedEntityPicking
 	QMap<ccHObject*, ID_TYPE> ids;
 
 	//! Biggest ID value used during the last picking/rendering process
-	ID_TYPE lastID;
+	ID_TYPE lastID{};
 };

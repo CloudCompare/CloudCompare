@@ -112,7 +112,7 @@ ccBBox ccOctree::getPointsBB() const
 	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
 }
 
-void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	m_dimMin *= multFactor;
 	m_dimMax *= multFactor;

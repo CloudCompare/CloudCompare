@@ -481,7 +481,7 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \param sigma uncertainty vector (along X, Y and Z)
 	    \return operation has succeeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
 	**/
-	bool computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
+	bool computeUncertainty(const CCVector2& pixel, float depth, Vector3Tpl<ScalarType>& sigma) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/**	\warning Only works with Brown's distortion model for now (see BrownDistortionParameters).

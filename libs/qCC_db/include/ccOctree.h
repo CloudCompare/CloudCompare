@@ -18,8 +18,8 @@
 // ##########################################################################
 
 // Local
-#include "ccGenericGLDisplay.h"
 #include "ccBBox.h"
+#include "ccGenericGLDisplay.h"
 
 // CCCoreLib
 #include <DgmOctree.h>

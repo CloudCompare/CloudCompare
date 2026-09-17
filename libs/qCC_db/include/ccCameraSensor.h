@@ -114,12 +114,11 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	struct QCC_DB_LIB_API ExtendedRadialDistortionParameters : RadialDistortionParameters
 	{
 		//! Shared pointer type
-		using Shared = QSharedPointer<RadialDistortionParameters>;
+		using Shared = QSharedPointer<ExtendedRadialDistortionParameters>;
 
 		//! Default initializer
 		ExtendedRadialDistortionParameters()
-		    : RadialDistortionParameters()
-		    , k3(0)
+		    : k3(0)
 		{
 		}
 

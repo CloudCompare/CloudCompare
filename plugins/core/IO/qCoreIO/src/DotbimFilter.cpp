@@ -33,8 +33,8 @@
 #include <ccPointCloud.h>
 
 // System
-#include <array>
-#include <vector>
+#include <memory>
+#include <new>
 
 DotbimFilter::DotbimFilter()
     : FileIOFilter({"_DOTBIM Filter",
@@ -48,6 +48,7 @@ DotbimFilter::DotbimFilter()
 }
 
 CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
+try
 {
 	Q_UNUSED(parameters);
 
@@ -76,13 +77,7 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	// index the mesh geometries by mesh_id
-	struct MeshGeometry
-	{
-		std::vector<CCVector3d>              vertices;
-		std::vector<std::array<unsigned, 3>> triangles;
-	};
-	QMap<int, MeshGeometry> meshGeometries;
+	QMap<int, QJsonObject> meshDefinitions;
 
 	for (const QJsonValue& meshVal : root.value("meshes").toArray())
 	{
@@ -93,33 +88,7 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 			continue;
 		}
 
-		MeshGeometry geom;
-
-		QJsonArray coordinates = meshObj.value("coordinates").toArray();
-		geom.vertices.reserve(static_cast<size_t>(coordinates.size() / 3));
-		for (int i = 0; i + 2 < coordinates.size(); i += 3)
-		{
-			geom.vertices.emplace_back(coordinates[i].toDouble(),
-			                           coordinates[i + 1].toDouble(),
-			                           coordinates[i + 2].toDouble());
-		}
-
-		QJsonArray indices = meshObj.value("indices").toArray();
-		geom.triangles.reserve(static_cast<size_t>(indices.size() / 3));
-		for (int i = 0; i + 2 < indices.size(); i += 3)
-		{
-			unsigned a = static_cast<unsigned>(indices[i].toInt(-1));
-			unsigned b = static_cast<unsigned>(indices[i + 1].toInt(-1));
-			unsigned c = static_cast<unsigned>(indices[i + 2].toInt(-1));
-			if (a >= geom.vertices.size() || b >= geom.vertices.size() || c >= geom.vertices.size())
-			{
-				ccLog::Warning(QString("[dotBIM] mesh_id %1 has an out-of-range triangle index, skipped").arg(meshId));
-				continue;
-			}
-			geom.triangles.push_back({a, b, c});
-		}
-
-		meshGeometries.insert(meshId, geom);
+		meshDefinitions.insert(meshId, meshObj);
 	}
 
 	unsigned loadedCount = 0;
@@ -130,21 +99,28 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 		int         meshId  = elemObj.value("mesh_id").toInt(-1);
 		QString     guid    = elemObj.value("guid").toString();
 
-		auto geomIt = meshGeometries.constFind(meshId);
-		if (geomIt == meshGeometries.constEnd() || geomIt->vertices.empty() || geomIt->triangles.empty())
+		auto meshIt = meshDefinitions.constFind(meshId);
+		if (meshIt == meshDefinitions.constEnd())
 		{
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
 			continue;
 		}
-		const MeshGeometry& geom = *geomIt;
+		QJsonObject meshObj     = *meshIt;
+		QJsonArray  coordinates = meshObj.value("coordinates").toArray();
+		QJsonArray  indices     = meshObj.value("indices").toArray();
+		if (coordinates.size() < 3 || indices.size() < 3)
+		{
+			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
+			continue;
+		}
 
 		// rotate then translate (dotBIM applies rotation first, see the format's DeveloperTips)
 		QJsonObject rotationObj = elemObj.value("rotation").toObject();
 		double      quaternion[4] // (w, x, y, z)
-		    = {rotationObj.value("qw").toDouble(1.0),
-		       rotationObj.value("qx").toDouble(0.0),
-		       rotationObj.value("qy").toDouble(0.0),
-		       rotationObj.value("qz").toDouble(0.0)};
+		    {rotationObj.value("qw").toDouble(1.0),
+		     rotationObj.value("qx").toDouble(0.0),
+		     rotationObj.value("qy").toDouble(0.0),
+		     rotationObj.value("qz").toDouble(0.0)};
 		ccGLMatrixd transform = ccGLMatrixd::FromQuaternion(quaternion);
 
 		QJsonObject vectorObj = elemObj.value("vector").toObject();
@@ -152,32 +128,48 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 		                                    vectorObj.value("y").toDouble(),
 		                                    vectorObj.value("z").toDouble()));
 
-		ccPointCloud* vertices = new ccPointCloud("vertices");
-		if (!vertices->reserve(static_cast<unsigned>(geom.vertices.size())))
+		std::unique_ptr<ccPointCloud> vertices(new ccPointCloud("vertices"));
+		if (!vertices->reserve(static_cast<unsigned>(coordinates.size() / 3)))
 		{
-			delete vertices;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		for (const CCVector3d& rawP : geom.vertices)
+		for (int i = 0; i + 2 < coordinates.size(); i += 3)
 		{
-			CCVector3d P = rawP;
+			CCVector3d P(coordinates[i].toDouble(), coordinates[i + 1].toDouble(), coordinates[i + 2].toDouble());
 			transform.apply(P);
 			vertices->addPoint(P.toPC());
 		}
 
-		ccMesh* mesh = new ccMesh(vertices);
-		mesh->addChild(vertices);
+		ccPointCloud*           cloud = vertices.get();
+		std::unique_ptr<ccMesh> mesh(new ccMesh(cloud));
+		if (!mesh->addChild(vertices.get()))
+		{
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+		vertices.release();
 		QString elementType = elemObj.value("type").toString();
 		mesh->setName(!elementType.isEmpty() ? elementType : (!guid.isEmpty() ? guid : "dotBIM element"));
 
-		if (!mesh->reserve(static_cast<unsigned>(geom.triangles.size())))
+		for (int i = 0; i + 2 < indices.size(); i += 3)
 		{
-			delete mesh; // also deletes 'vertices', already added as its child
-			return CC_FERR_NOT_ENOUGH_MEMORY;
+			unsigned a = static_cast<unsigned>(indices[i].toInt(-1));
+			unsigned b = static_cast<unsigned>(indices[i + 1].toInt(-1));
+			unsigned c = static_cast<unsigned>(indices[i + 2].toInt(-1));
+			if (a >= cloud->size() || b >= cloud->size() || c >= cloud->size())
+			{
+				ccLog::Warning(QString("[dotBIM] mesh_id %1 has an out-of-range triangle index, skipped").arg(meshId));
+				continue;
+			}
+			if (mesh->size() == mesh->capacity() && !mesh->reserve(mesh->size() + 256))
+			{
+				return CC_FERR_NOT_ENOUGH_MEMORY;
+			}
+			mesh->addTriangle(a, b, c);
 		}
-		for (const std::array<unsigned, 3>& tri : geom.triangles)
+		if (mesh->size() == 0)
 		{
-			mesh->addTriangle(tri[0], tri[1], tri[2]);
+			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
+			continue;
 		}
 
 		// mandatory 'color' field: applied as a uniform per-vertex color
@@ -185,16 +177,20 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 		QJsonObject colorObj = elemObj.value("color").toObject();
 		if (!colorObj.isEmpty())
 		{
-			vertices->setColor(static_cast<ColorCompType>(colorObj.value("r").toInt(255)),
-			                   static_cast<ColorCompType>(colorObj.value("g").toInt(255)),
-			                   static_cast<ColorCompType>(colorObj.value("b").toInt(255)),
-			                   static_cast<ColorCompType>(colorObj.value("a").toInt(255)));
-			vertices->showColors(true);
+			cloud->setColor(static_cast<ColorCompType>(colorObj.value("r").toInt(255)),
+			                static_cast<ColorCompType>(colorObj.value("g").toInt(255)),
+			                static_cast<ColorCompType>(colorObj.value("b").toInt(255)),
+			                static_cast<ColorCompType>(colorObj.value("a").toInt(255)));
+			cloud->showColors(true);
 			mesh->showColors(true);
 		}
 
-		vertices->setEnabled(false);
-		container.addChild(mesh);
+		cloud->setEnabled(false);
+		if (!container.addChild(mesh.get()))
+		{
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+		mesh.release();
 		++loadedCount;
 	}
 
@@ -206,4 +202,8 @@ CC_FILE_ERROR DotbimFilter::loadFile(const QString& filename, ccHObject& contain
 	ccLog::Print(QString("[dotBIM] %1 element(s) loaded").arg(loadedCount));
 
 	return CC_FERR_NO_ERROR;
+}
+catch (const std::bad_alloc&)
+{
+	return CC_FERR_NOT_ENOUGH_MEMORY;
 }

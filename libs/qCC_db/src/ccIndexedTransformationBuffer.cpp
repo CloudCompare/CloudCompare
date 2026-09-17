@@ -87,13 +87,13 @@ bool ccIndexedTransformationBuffer::findNearest(double                          
 #if defined(_MSC_VER) && _MSC_VER > 1000
 	ccIndexedTransformation tIndex;
 	tIndex.setIndex(index);
-	ccIndexedTransformationBuffer::const_iterator it = std::lower_bound(begin(), end(), tIndex, IndexedSortOperator);
+	auto it = std::lower_bound(cbegin(), cend(), tIndex, IndexedSortOperator);
 #else
-	ccIndexedTransformationBuffer::const_iterator it = std::lower_bound(begin(), end(), index, IndexCompOperator);
+	auto it = std::lower_bound(cbegin(), cend(), index, IndexCompOperator);
 #endif
 
 	// special case: all transformations are BEFORE the input index
-	if (it == end())
+	if (it == cend())
 	{
 		trans1 = &back();
 		if (trans1IndexInBuffer)
@@ -141,8 +141,8 @@ ccBBox ccIndexedTransformationBuffer::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	if (!m_bBox.isValid() || m_bBoxValidSize != size())
 	{
-		for (ccIndexedTransformationBuffer::const_iterator it = begin(); it != end(); ++it)
-			m_bBox.add(it->getTranslationAsVec3D());
+		for (const auto& trans : *this)
+			m_bBox.add(trans.getTranslationAsVec3D());
 
 		m_bBoxValidSize = size();
 	}
@@ -231,8 +231,8 @@ bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out, short dataVersion)
 		return WriteError();
 
 	// transformations (dataVersion>=34)
-	for (const_iterator it = begin(); it != end(); ++it)
-		if (!it->toFile(out, dataVersion))
+	for (const auto& trans : *this)
+		if (!trans.toFile(out, dataVersion))
 			return false;
 
 	// display options
@@ -273,8 +273,8 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 	}
 
 	// transformations (dataVersion>=34)
-	for (ccIndexedTransformationBuffer::iterator it = begin(); it != end(); ++it)
-		if (!it->fromFile(in, dataVersion, flags, oldToNewIDMap))
+	for (auto& trans : *this)
+		if (!trans.fromFile(in, dataVersion, flags, oldToNewIDMap))
 			return false;
 
 	// display options
@@ -325,19 +325,19 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 	{
 		ccGL::Color(glFunc, ccColor::green);
 		glFunc->glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); // show path as a polyline or points?
-		for (ccIndexedTransformationBuffer::const_iterator it = begin(); it != end(); ++it)
-			glFunc->glVertex3fv(it->getTranslation());
+		for (const auto& trans : *this)
+			glFunc->glVertex3fv(trans.getTranslation());
 		glFunc->glEnd();
 	}
 
 	// show trihedrons?
 	if (m_showTrihedrons)
 	{
-		for (ccIndexedTransformationBuffer::const_iterator it = begin(); it != end(); ++it)
+		for (const auto& trans : *this)
 		{
 			glFunc->glMatrixMode(GL_MODELVIEW);
 			glFunc->glPushMatrix();
-			glFunc->glMultMatrixf(it->data());
+			glFunc->glMultMatrixf(trans.data());
 
 			// force line width
 			glFunc->glPushAttrib(GL_LINE_BIT);

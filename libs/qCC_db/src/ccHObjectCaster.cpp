@@ -194,7 +194,7 @@ ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
 		{
 			return static_cast<ccFacet*>(obj);
 		}
-		else if (obj->isA(CC_TYPES::PLANE))
+		if (obj->isA(CC_TYPES::PLANE))
 		{
 			return static_cast<ccPlane*>(obj);
 		}
@@ -476,7 +476,6 @@ bool ccHObjectCaster::CloneChildren(const ccHObject*  sourceEntity,
 		case CC_TYPES::VIEWPORT_2D_OBJECT:
 		{
 			cc2DViewportObject* viewportObject = static_cast<cc2DViewportObject*>(child);
-			;
 			cc2DViewportObject* clonedViewportObject = new cc2DViewportObject(*viewportObject);
 
 			currentDestEntity->addChild(clonedViewportObject);
@@ -487,7 +486,6 @@ bool ccHObjectCaster::CloneChildren(const ccHObject*  sourceEntity,
 		case CC_TYPES::VIEWPORT_2D_LABEL:
 		{
 			cc2DViewportLabel* viewportLabel = static_cast<cc2DViewportLabel*>(child);
-			;
 			cc2DViewportLabel* clonedViewportLabel = new cc2DViewportLabel(*viewportLabel);
 
 			currentDestEntity->addChild(clonedViewportLabel);
@@ -497,19 +495,13 @@ bool ccHObjectCaster::CloneChildren(const ccHObject*  sourceEntity,
 		// Groups
 		case CC_TYPES::HIERARCHY_OBJECT:
 		{
-			ccHObject* newGroup = new ccHObject(*child);
+			auto newGroup = std::make_unique<ccHObject>(*child);
 			// start (or proceed with) the recursion
-			if (CloneChildren(sourceEntity, destEntity, newPointOrTriangleIndex, child, newGroup))
+			if (CloneChildren(sourceEntity, destEntity, newPointOrTriangleIndex, child, newGroup.get()))
 			{
 				if (newGroup->getChildrenNumber() != 0)
 				{
-					currentDestEntity->addChild(newGroup);
-				}
-				else
-				{
-					// empty group, no need to keep it
-					delete newGroup;
-					newGroup = nullptr;
+					currentDestEntity->addChild(newGroup.release());
 				}
 			}
 			else

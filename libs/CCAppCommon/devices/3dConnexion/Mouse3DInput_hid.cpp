@@ -176,7 +176,7 @@ bool HIDWorker::openDevice()
 	hid_device_info* cur = devs;
 	for (; cur; cur = cur->next)
 	{
-		if (isKnownSpaceMouse(cur->vendor_id, cur->product_id) && cur->usage_page == 0x01 && cur->usage == 0x08)
+		if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id) && cur->usage_page == 0x01 && cur->usage == 0x08)
 		{
 			m_handle = hid_open_path(cur->path);
 			if (m_handle)
@@ -198,7 +198,7 @@ bool HIDWorker::openDevice()
 		cur = devs;
 		for (; cur; cur = cur->next)
 		{
-			if (isKnownSpaceMouse(cur->vendor_id, cur->product_id))
+			if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id))
 			{
 				if (m_handle)
 				{

@@ -263,7 +263,7 @@ QSharedPointer<QOpenGLShaderProgram> ccGLSL::BuildDisplayProgram(QOpenGLFunction
 	    "    vec3 R = normalize(-reflect(L, normVec));\n"
 	    "    vec4 Iamb = lightSource.ambient;\n"                                                                          // calculate Ambient Term
 	    "    vec4 Idiff = lightSource.diffuse * max(dot(normVec, L), 0.0);\n"                                             // calculate Diffuse Term
-	    "    vec4 Ispec = lightSource.specular * pow(max(dot(R, E), 0.0), matParams.shininess);\n"                        // calculate Specular Term
+	    "    vec4 Ispec = lightSource.specular * pow(max(dot(R, E), 0.0001), matParams.shininess);\n"                     // calculate Specular Term
 	    "    vec4 normColor = (matParams.ambient * Iamb) + (matParams.diffuse * Idiff) + (matParams.specular * Ispec);\n" // write Total Color
 	    "    return normColor;\n"
 	    "}\n";

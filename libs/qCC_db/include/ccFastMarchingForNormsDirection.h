@@ -24,7 +24,7 @@
 // qCC_db
 #include "ccAdvancedTypes.h"
 
-// system
+// System
 #include <vector>
 
 class ccGenericPointCloud;
@@ -118,7 +118,7 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	void resolveCellOrientation(unsigned index);
 
   public:
- 	//! static helper to compute relative 'confidence' between two cells (orientations)
+	//! static helper to compute relative 'confidence' between two cells (orientations)
 	/** \return confidence between 0 and 1
 	 **/
 	static float computePropagationConfidence(const DirectionCell* originCell, const DirectionCell* destCell);

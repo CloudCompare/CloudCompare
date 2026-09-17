@@ -1057,7 +1057,8 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = static_cast<uint32_t>(
-	    std::count_if(m_children.cbegin(), m_children.cend(), [](const ccHObject* child) { return child->isSerializable(); }));
+	    std::count_if(m_children.cbegin(), m_children.cend(), [](const ccHObject* child)
+	                  { return child->isSerializable(); }));
 
 	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
 		return WriteError();

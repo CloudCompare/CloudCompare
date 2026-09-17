@@ -24,11 +24,11 @@
 //! Association of an angle and the corresponding number of rows/columns
 using AngleAndSpan = std::pair<PointCoordinateType, unsigned>;
 
-bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
+bool ccGriddedTools::DetectParameters(const ccPointCloud*               cloud,
                                       const ccPointCloud::Grid::Shared& grid,
-                                      GridParameters&                  parameters,
-                                      bool                             verbose /*=false*/,
-                                      ccGLMatrix*                      cloudToSensorTrans /*=nullptr*/)
+                                      GridParameters&                   parameters,
+                                      bool                              verbose /*=false*/,
+                                      ccGLMatrix*                       cloudToSensorTrans /*=nullptr*/)
 {
 	if (!cloud || !grid)
 	{

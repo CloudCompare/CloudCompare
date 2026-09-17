@@ -475,7 +475,7 @@ bool ccHObjectCaster::CloneChildren(const ccHObject*  sourceEntity,
 		// 2D Viewport object
 		case CC_TYPES::VIEWPORT_2D_OBJECT:
 		{
-			cc2DViewportObject* viewportObject = static_cast<cc2DViewportObject*>(child);
+			cc2DViewportObject* viewportObject       = static_cast<cc2DViewportObject*>(child);
 			cc2DViewportObject* clonedViewportObject = new cc2DViewportObject(*viewportObject);
 
 			currentDestEntity->addChild(clonedViewportObject);
@@ -485,7 +485,7 @@ bool ccHObjectCaster::CloneChildren(const ccHObject*  sourceEntity,
 		// 2D Viewport label
 		case CC_TYPES::VIEWPORT_2D_LABEL:
 		{
-			cc2DViewportLabel* viewportLabel = static_cast<cc2DViewportLabel*>(child);
+			cc2DViewportLabel* viewportLabel       = static_cast<cc2DViewportLabel*>(child);
 			cc2DViewportLabel* clonedViewportLabel = new cc2DViewportLabel(*viewportLabel);
 
 			currentDestEntity->addChild(clonedViewportLabel);

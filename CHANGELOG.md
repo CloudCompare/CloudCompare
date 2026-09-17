@@ -43,6 +43,9 @@ New features:
 			- saves the plane information file to this file instead of the automatically generated '{cloud path}/{cloud name}_BEST_FIT_PLANE_INFO.txt'
 			- the filename is used as is: no timestamp and no '.txt' extension are appended
 			- as this command writes one information file per loaded cloud, this option requires that a single cloud is loaded
+		- New sub-options for the -RANSAC command: MIN_SPHERE_RADIUS {value}, MAX_SPHERE_RADIUS {value}, MIN_CYLINDER_RADIUS {value}, MAX_CYLINDER_RADIUS {value}, MIN_TORUS_MINOR_RADIUS {value}, MAX_TORUS_MINOR_RADIUS {value}, MIN_TORUS_MAJOR_RADIUS {value} and MAX_TORUS_MAJOR_RADIUS {value}
+			- same radius limits as in the plugin dialog: shapes with a radius outside the range are not detected
+			- all are optional, and no limit is applied by default
 		- New command -DISTANCES_FROM_SENSOR [-SQUARED]
 			- to compute the distances from every point of the cloud to the associated sensor origin (if any)
 		- New command -SCATTERING_ANGLES [-DEGREES]

@@ -119,7 +119,7 @@ int ccFastMarchingForNormsDirection::init(ccGenericPointCloud*   cloud,
 	return 0;
 }
 
-float ccFastMarchingForNormsDirection::computePropagationConfidence(DirectionCell* originCell, DirectionCell* destCell) const
+float ccFastMarchingForNormsDirection::computePropagationConfidence(const DirectionCell* originCell, const DirectionCell* destCell)
 {
 	// 1) it depends on the angle between the current cell's orientation
 	//	and its neighbor's orientation (symmetric)
@@ -507,7 +507,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 			{
 				resolvedPoints += count;
 				if (progressCb)
-					progressCb->update(resolvedPoints / (numberOfPoints * 100.0f));
+					progressCb->update((resolvedPoints * 100.0f) / numberOfPoints);
 			}
 
 			fm.cleanLastPropagation();

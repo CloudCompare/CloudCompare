@@ -114,11 +114,12 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 		return instantiateGridTpl<DirectionCell*>(size);
 	}
 
-	//! Computes relative 'confidence' between two cells (orientations)
-	/** \return confidence between 0 and 1
-	 **/
-	float computePropagationConfidence(DirectionCell* originCell, DirectionCell* destCell) const;
-
 	//! Resolves the direction of a given cell (once and for all)
 	void resolveCellOrientation(unsigned index);
+
+  public:
+ 	//! static helper to compute relative 'confidence' between two cells (orientations)
+	/** \return confidence between 0 and 1
+	 **/
+	static float computePropagationConfidence(const DirectionCell* originCell, const DirectionCell* destCell);
 };

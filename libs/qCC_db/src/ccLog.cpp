@@ -21,12 +21,7 @@
 #include <CCPlatform.h>
 
 // System
-#include <cassert>
 #include <vector>
-
-#if !defined(CC_WINDOWS)
-#define _vsnprintf vsnprintf
-#endif
 
 /***************
  *** Globals ***
@@ -39,8 +34,8 @@ static char         s_buffer[s_bufferMaxSize];
 //! Message
 struct Message
 {
-	Message(const QString& t, int f)
-	    : text(t)
+	Message(QString t, int f)
+	    : text(std::move(t))
 	    , flags(f)
 	{
 	}
@@ -131,7 +126,7 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 	{ \
 		va_list args; \
 		va_start(args, format); \
-		_vsnprintf(s_buffer, s_bufferMaxSize, format, args); \
+		vsnprintf(s_buffer, s_bufferMaxSize, format, args); \
 		va_end(args); \
 		LogMessage(QString(s_buffer), flags); \
 	}

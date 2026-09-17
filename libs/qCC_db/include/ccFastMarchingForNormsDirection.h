@@ -44,7 +44,7 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	                         unsigned char     octreeLevel,
 	                         ccProgressDialog* progressCb = nullptr);
 	//! Default constructor
-	ccFastMarchingForNormsDirection();
+	ccFastMarchingForNormsDirection() = default;
 
 	//! Initializes the grid with a point cloud (and ist corresponding octree)
 	/** The points should be associated to an (active) scalar field.

@@ -34,11 +34,6 @@
 // system
 #include <cassert>
 
-ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
-    : CCCoreLib::FastMarching()
-{
-}
-
 static CCVector3 ComputeRobustAverageNorm(CCCoreLib::ReferenceCloud* subset,
                                           ccGenericPointCloud*       sourceCloud)
 {

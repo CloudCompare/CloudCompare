@@ -128,9 +128,9 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	m_hidWorker = new HIDWorker(this);
 	if (!m_hidWorker->openDevice())
 	{
+		// error message already displayed by HIDWorker
 		delete m_hidWorker;
 		m_hidWorker = nullptr;
-		ccLog::Warning(tr("[3D Mouse] Could not open a 3DConnexion device via HID"));
 		return false;
 	}
 

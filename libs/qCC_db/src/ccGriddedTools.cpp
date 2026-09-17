@@ -25,7 +25,7 @@
 using AngleAndSpan = std::pair<PointCoordinateType, unsigned>;
 
 bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
-                                      const ccPointCloud::Grid::Shared grid,
+                                      const ccPointCloud::Grid::Shared& grid,
                                       GridParameters&                  parameters,
                                       bool                             verbose /*=false*/,
                                       ccGLMatrix*                      cloudToSensorTrans /*=nullptr*/)
@@ -305,7 +305,7 @@ bool ccGriddedTools::DetectParameters(const ccPointCloud*              cloud,
 	return true;
 }
 
-ccGBLSensor* ccGriddedTools::ComputeBestSensor(ccPointCloud* cloud, ccPointCloud::Grid::Shared grid, ccGLMatrix* cloudToSensorTrans /*=nullptr*/)
+ccGBLSensor* ccGriddedTools::ComputeBestSensor(const ccPointCloud* cloud, const ccPointCloud::Grid::Shared& grid, ccGLMatrix* cloudToSensorTrans /*=nullptr*/)
 {
 	GridParameters parameters;
 	if (!DetectParameters(cloud, grid, parameters, true, cloudToSensorTrans))

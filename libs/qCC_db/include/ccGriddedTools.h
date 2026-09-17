@@ -56,7 +56,7 @@ class QCC_DB_LIB_API ccGriddedTools
 	    \return success
 	**/
 	static bool DetectParameters(const ccPointCloud*              cloud,
-	                             const ccPointCloud::Grid::Shared grid,
+	                             const ccPointCloud::Grid::Shared& grid,
 	                             GridParameters&                  parameters,
 	                             bool                             verbose            = false,
 	                             ccGLMatrix*                      cloudToSensorTrans = nullptr);
@@ -67,7 +67,7 @@ class QCC_DB_LIB_API ccGriddedTools
 	    \param cloudToSensorTrans transformation from cloud coordinate system to the sensor coordinate system (optional)
 	    \return sensor (if successful) or 0 otherwise
 	**/
-	static ccGBLSensor* ComputeBestSensor(ccPointCloud*              cloud,
-	                                      ccPointCloud::Grid::Shared grid,
+	static ccGBLSensor* ComputeBestSensor(const ccPointCloud*              cloud,
+	                                      const ccPointCloud::Grid::Shared& grid,
 	                                      ccGLMatrix*                cloudToSensorTrans = nullptr);
 };

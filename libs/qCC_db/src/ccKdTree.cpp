@@ -171,6 +171,8 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 bool ccKdTree::convertCellIndexToSF()
 {
+	constexpr char const * c_defaultSFName = "Kd-tree indexes";
+
 	if (!m_associatedGenericCloud || !m_associatedGenericCloud->isA(CC_TYPES::POINT_CLOUD))
 		return false;
 
@@ -181,8 +183,7 @@ bool ccKdTree::convertCellIndexToSF()
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
 
-	const char c_defaultSFName[] = "Kd-tree indexes";
-	int        sfIdx             = pc->getScalarFieldIndexByName(c_defaultSFName);
+	int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
 	if (sfIdx < 0)
 		sfIdx = pc->addScalarField(c_defaultSFName);
 	if (sfIdx < 0)
@@ -199,7 +200,7 @@ bool ccKdTree::convertCellIndexToSF()
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)
-				subset->setPointScalarValue(j, (ScalarType)i);
+				subset->setPointScalarValue(j, static_cast<ScalarType>(i));
 		}
 	}
 
@@ -225,10 +226,10 @@ bool ccKdTree::convertCellIndexToRandomColor()
 		return false;
 
 	// for each cell
-	for (size_t i = 0; i < leaves.size(); ++i)
+	for (const auto& leave : leaves)
 	{
-		ccColor::Rgba              col(ccColor::Generator::Random(), ccColor::MAX);
-		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
+		ccColor::Rgba                    col(ccColor::Generator::Random(), ccColor::MAX);
+		const CCCoreLib::ReferenceCloud* subset = leave->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)
@@ -260,13 +261,13 @@ class GetCellBBoxVisitor
 		if (node && node->parent)
 		{
 			assert(node->parent->isNode()); // a leaf can't have children!
-			ccKdTree::Node* parent = static_cast<ccKdTree::Node*>(node->parent);
+			const ccKdTree::Node* parent = static_cast<ccKdTree::Node*>(node->parent);
 
 			// we choose the right 'side' of the box that corresponds to the parent's split plane
 			CCVector3& boxCorner = (parent->leftChild == node ? m_UpdatedBox.maxCorner() : m_UpdatedBox.minCorner());
 
 			// if this side has not been setup yet...
-			if (boxCorner.u[parent->splitDim] != boxCorner.u[parent->splitDim]) // NaN
+			if (std::isnan(boxCorner.u[parent->splitDim])) // NaN
 				boxCorner.u[parent->splitDim] = parent->splitValue;
 
 			visit(node->parent);
@@ -290,10 +291,10 @@ ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 		m_associatedCloud->getBoundingBox(bbMin, bbMax);
 		for (int i = 0; i < 3; ++i)
 		{
-			if (box.minCorner().u[i] != box.minCorner().u[i]) // still NaN value?
-				box.minCorner().u[i] = bbMin.u[i];            // we use the main bb limit
-			if (box.maxCorner().u[i] != box.maxCorner().u[i]) // still NaN value?
-				box.maxCorner().u[i] = bbMax.u[i];            // we use the main bb limit
+			if (std::isnan(box.minCorner().u[i]))  // still NaN value?
+				box.minCorner().u[i] = bbMin.u[i]; // we use the main bb limit
+			if (std::isnan(box.maxCorner().u[i]))  // still NaN value?
+				box.maxCorner().u[i] = bbMax.u[i]; // we use the main bb limit
 		}
 		box.setValidity(true);
 	}

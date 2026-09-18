@@ -17,9 +17,7 @@
 
 #include "ccCameraSensor.h"
 
-#include <cmath>
-
-// local
+// Local
 #include "ccGenericGLDisplay.h"
 #include "ccImage.h"
 #include "ccMesh.h"
@@ -33,6 +31,9 @@
 #include <QPointF>
 #include <QSizeF>
 #include <QTextStream>
+
+// System
+#include <cmath>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
     : vertFocal_pix(1.0f)
@@ -263,14 +264,14 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	if (!withGLFeatures)
 	{
-		return ccBBox();
+		return {};
 	}
 
 	// get current sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
@@ -279,7 +280,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures /*=false*/)
 	if (!cloud.reserve(5))
 	{
 		// not enough memory?!
-		return ccBBox();
+		return {};
 	}
 
 	cloud.addPoint(CCVector3(0, 0, 0));
@@ -311,13 +312,13 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	trans = sensorPos;
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true);
+	return {-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true};
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
@@ -1071,7 +1072,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccCameraSensor::undistort] Invalid input image!");
-		return QImage();
+		return {};
 	}
 
 	// nothing to do
@@ -1079,7 +1080,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	if (!m_distortionParams)
 	{
 		ccLog::Warning("[ccCameraSensor::undistort] No distortion model set!");
-		return QImage();
+		return {};
 	}
 
 	switch (m_distortionParams->getModel())
@@ -1093,7 +1094,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 		if (k1 == 0 && k2 == 0)
 		{
 			ccLog::Warning("[ccCameraSensor::undistort] Invalid radial distortion coefficients!");
-			return QImage();
+			return {};
 		}
 		float k3 = 0;
 		if (m_distortionParams->getModel() == EXTENDED_RADIAL_DISTORTION)
@@ -1113,7 +1114,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 		if (newImage.isNull())
 		{
 			ccLog::Warning("[ccCameraSensor::undistort] Not enough memory!");
-			return QImage();
+			return {};
 		}
 		newImage.fill(0);
 
@@ -1180,7 +1181,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 
 	ccLog::Warning("[ccCameraSensor::undistort] Can't undistort the image with the current distortion model!");
 
-	return QImage();
+	return {};
 }
 
 ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace /*=true*/) const
@@ -1227,7 +1228,7 @@ bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord /*, boo
 CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 {
 	if (m_intrinsicParams.arrayHeight == 0)
-		return CCVector3(0, 0, 0);
+		return {0, 0, 0};
 
 	float ar      = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight : 1.0f;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
@@ -2712,7 +2713,7 @@ void ccOctreeFrustumIntersector::computeFrustumIntersectionByLevel(unsigned char
 		CCCoreLib::DgmOctree::CellCode truncatedCode = baseTruncatedCode + i;
 
 		// if the current cell has not been built (contains no 3D points), we skip it
-		std::unordered_set<CCCoreLib::DgmOctree::CellCode>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
+		auto got = m_cellsBuilt[level].find(truncatedCode);
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell

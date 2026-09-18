@@ -30,7 +30,7 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 	if (dataVersion < 41)
 	{
 		// in previous versions (< 41) the normals were compressed on 15 bytes (2*6+3) as unsigned short
-		static const unsigned OLD_QUANTIZE_LEVEL = 6;
+		constexpr unsigned OLD_QUANTIZE_LEVEL = 6;
 
 		ccArray<unsigned short, 1, unsigned short>* oldNormals = new ccArray<unsigned short, 1, unsigned short>();
 		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, dataVersion, "old compressed normals"))
@@ -39,7 +39,6 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 			return false;
 		}
 
-		bool success = false;
 		try
 		{
 			resize(oldNormals->size());
@@ -60,15 +59,12 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 				ccNormalCompressor::Decompress(n, N.u, OLD_QUANTIZE_LEVEL);
 			}
 			// and recompress
-			CompressedNormType index = static_cast<CompressedNormType>(ccNormalCompressor::Compress(N.u));
+			const CompressedNormType index = static_cast<CompressedNormType>(ccNormalCompressor::Compress(N.u));
 			at(i)                    = index;
 		}
 
 		oldNormals->release();
 		return true;
 	}
-	else
-	{
-		return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion, "compressed normals");
-	}
+	return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion, "compressed normals");
 }

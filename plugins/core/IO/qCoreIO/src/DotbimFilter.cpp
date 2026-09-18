@@ -79,7 +79,7 @@ try
 
 	QMap<int, QJsonObject> meshDefinitions;
 
-	for (const QJsonValue& meshVal : root.value("meshes").toArray())
+	for (QJsonValue meshVal : root.value("meshes").toArray())
 	{
 		QJsonObject meshObj = meshVal.toObject();
 		int         meshId  = meshObj.value("mesh_id").toInt(-1);
@@ -88,12 +88,18 @@ try
 			continue;
 		}
 
+		if (meshDefinitions.contains(meshId))
+		{
+			ccLog::Warning(QString("[dotBIM] Duplicate mesh ID: %1").arg(meshId));
+			return CC_FERR_MALFORMED_FILE;
+		}
+
 		meshDefinitions.insert(meshId, meshObj);
 	}
 
 	unsigned loadedCount = 0;
 
-	for (const QJsonValue& elemVal : root.value("elements").toArray())
+	for (QJsonValue elemVal : root.value("elements").toArray())
 	{
 		QJsonObject elemObj = elemVal.toObject();
 		int         meshId  = elemObj.value("mesh_id").toInt(-1);
@@ -113,62 +119,85 @@ try
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
 			continue;
 		}
-
-		// rotate then translate (dotBIM applies rotation first, see the format's DeveloperTips)
-		QJsonObject rotationObj = elemObj.value("rotation").toObject();
-		double      quaternion[4] // (w, x, y, z)
-		    {rotationObj.value("qw").toDouble(1.0),
-		     rotationObj.value("qx").toDouble(0.0),
-		     rotationObj.value("qy").toDouble(0.0),
-		     rotationObj.value("qz").toDouble(0.0)};
-		ccGLMatrixd transform = ccGLMatrixd::FromQuaternion(quaternion);
-
-		QJsonObject vectorObj = elemObj.value("vector").toObject();
-		transform.setTranslation(CCVector3d(vectorObj.value("x").toDouble(),
-		                                    vectorObj.value("y").toDouble(),
-		                                    vectorObj.value("z").toDouble()));
-
-		std::unique_ptr<ccPointCloud> vertices(new ccPointCloud("vertices"));
-		if (!vertices->reserve(static_cast<unsigned>(coordinates.size() / 3)))
+		if (indices.size() % 3 != 0)
 		{
+			ccLog::Warning(QString("[dotBIM] mesh_id %1 has an invalid number of triangle indices, skipped").arg(meshId));
+			continue;
+		}
+		if (coordinates.size() % 3 != 0)
+		{
+			ccLog::Warning(QString("[dotBIM] mesh_id %1 has an invalid number of vertex coordinates, skipped").arg(meshId));
+			continue;
+		}
+
+		unsigned triCount    = static_cast<unsigned>(indices.size() / 3);
+		unsigned vertexCount = static_cast<unsigned>(coordinates.size() / 3);
+
+		ccPointCloud* vertices = new ccPointCloud("vertices");
+		ccMesh*       mesh     = new ccMesh(vertices);
+		mesh->addChild(vertices);
+		vertices->setEnabled(false);
+
+		if (!vertices->reserve(vertexCount) || !mesh->reserve(triCount))
+		{
+			delete mesh;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
-		for (int i = 0; i + 2 < coordinates.size(); i += 3)
-		{
-			CCVector3d P(coordinates[i].toDouble(), coordinates[i + 1].toDouble(), coordinates[i + 2].toDouble());
-			transform.apply(P);
-			vertices->addPoint(P.toPC());
-		}
 
-		ccPointCloud*           cloud = vertices.get();
-		std::unique_ptr<ccMesh> mesh(new ccMesh(cloud));
-		if (!mesh->addChild(vertices.get()))
-		{
-			return CC_FERR_NOT_ENOUGH_MEMORY;
-		}
-		vertices.release();
 		QString elementType = elemObj.value("type").toString();
 		mesh->setName(!elementType.isEmpty() ? elementType : (!guid.isEmpty() ? guid : "dotBIM element"));
 
-		for (int i = 0; i + 2 < indices.size(); i += 3)
+		// transfer the vertex coordinates to the point cloud
+		for (qsizetype i = 0; i + 2 < coordinates.size(); i += 3)
 		{
-			unsigned a = static_cast<unsigned>(indices[i].toInt(-1));
-			unsigned b = static_cast<unsigned>(indices[i + 1].toInt(-1));
-			unsigned c = static_cast<unsigned>(indices[i + 2].toInt(-1));
-			if (a >= cloud->size() || b >= cloud->size() || c >= cloud->size())
+			CCVector3d P(coordinates[i + 0].toDouble(),
+			             coordinates[i + 1].toDouble(),
+			             coordinates[i + 2].toDouble());
+			vertices->addPoint(P.toPC());
+		}
+
+		if (elemObj.contains("rotation") || elemObj.contains("vector"))
+		{
+			// rotate then translate (dotBIM applies rotation first, see the format's DeveloperTips)
+			QJsonObject rotationObj = elemObj.value("rotation").toObject();
+			double      quaternion[4] // (w, x, y, z)
+			    {rotationObj.value("qw").toDouble(1.0),
+			     rotationObj.value("qx").toDouble(0.0),
+			     rotationObj.value("qy").toDouble(0.0),
+			     rotationObj.value("qz").toDouble(0.0)};
+			ccGLMatrixd transform = ccGLMatrixd::FromQuaternion(quaternion);
+
+			QJsonObject vectorObj = elemObj.value("vector").toObject();
+			transform.setTranslation(CCVector3d(vectorObj.value("x").toDouble(),
+			                                    vectorObj.value("y").toDouble(),
+			                                    vectorObj.value("z").toDouble()));
+
+			vertices->applyRigidTransformation(ccGLMatrix(transform.data()));
+		}
+
+		// transfer the triangle indexes to the mesh
+		for (qsizetype i = 0; i + 2 < indices.size(); i += 3)
+		{
+			int a = indices[i + 0].toInt(-1);
+			int b = indices[i + 1].toInt(-1);
+			int c = indices[i + 2].toInt(-1);
+			if (a < 0
+			    || b < 0
+			    || c < 0
+			    || static_cast<unsigned>(a) >= vertexCount
+			    || static_cast<unsigned>(b) >= vertexCount
+			    || static_cast<unsigned>(c) >= vertexCount)
 			{
 				ccLog::Warning(QString("[dotBIM] mesh_id %1 has an out-of-range triangle index, skipped").arg(meshId));
 				continue;
 			}
-			if (mesh->size() == mesh->capacity() && !mesh->reserve(mesh->size() + 256))
-			{
-				return CC_FERR_NOT_ENOUGH_MEMORY;
-			}
 			mesh->addTriangle(a, b, c);
 		}
+
 		if (mesh->size() == 0)
 		{
 			ccLog::Warning(QString("[dotBIM] Element '%1' references unknown or empty mesh_id %2, skipped").arg(guid).arg(meshId));
+			delete mesh;
 			continue;
 		}
 
@@ -177,20 +206,21 @@ try
 		QJsonObject colorObj = elemObj.value("color").toObject();
 		if (!colorObj.isEmpty())
 		{
-			cloud->setColor(static_cast<ColorCompType>(colorObj.value("r").toInt(255)),
-			                static_cast<ColorCompType>(colorObj.value("g").toInt(255)),
-			                static_cast<ColorCompType>(colorObj.value("b").toInt(255)),
-			                static_cast<ColorCompType>(colorObj.value("a").toInt(255)));
-			cloud->showColors(true);
-			mesh->showColors(true);
+			if (vertices->setColor(static_cast<ColorCompType>(colorObj.value("r").toInt(255)),
+			                       static_cast<ColorCompType>(colorObj.value("g").toInt(255)),
+			                       static_cast<ColorCompType>(colorObj.value("b").toInt(255)),
+			                       static_cast<ColorCompType>(colorObj.value("a").toInt(255))))
+			{
+				vertices->showColors(true);
+				mesh->showColors(true);
+			}
+			else
+			{
+				ccLog::Warning(QString("[dotBIM] Not enough memory to set color for Element '%1' - mesh_id %2").arg(guid).arg(meshId));
+			}
 		}
 
-		cloud->setEnabled(false);
-		if (!container.addChild(mesh.get()))
-		{
-			return CC_FERR_NOT_ENOUGH_MEMORY;
-		}
-		mesh.release();
+		container.addChild(mesh);
 		++loadedCount;
 	}
 

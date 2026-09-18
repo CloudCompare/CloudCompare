@@ -20,27 +20,24 @@
 // Qt
 #include <QFileInfo>
 #include <QImage>
-#include <QSet>
 
 // System
 #include <set>
 
 ccMaterialSet::ccMaterialSet(const QString& name)
-    : std::vector<ccMaterial::CShared>()
-    , CCShareable()
-    , ccHObject(name)
+    : ccHObject(name)
 {
 	setFlagState(CC_LOCKED, true);
 }
 
-int ccMaterialSet::findMaterialByName(const QString& mtlName)
+int ccMaterialSet::findMaterialByName(const QString& mtlName) const
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByName] Query: ") + mtlName);
 
 	int i = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
+	for (auto it = cbegin(); it != cend(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 name: %2").arg(i).arg(mtl->getName()));
 		if (mtl->getName() == mtlName)
 			return i;
@@ -49,14 +46,14 @@ int ccMaterialSet::findMaterialByName(const QString& mtlName)
 	return -1;
 }
 
-int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
+int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID) const
 {
 	ccLog::PrintDebug(QString("[ccMaterialSet::findMaterialByUniqueID] Query: ") + uniqueID);
 
 	int i = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
+	for (auto it = cbegin(); it != cend(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 ID: %2").arg(i).arg(mtl->getUniqueIdentifier()));
 		if (mtl->getUniqueIdentifier() == uniqueID)
 			return i;
@@ -86,7 +83,7 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 			if (!allowDuplicateNames)
 			{
 				// generate a new name
-				static const unsigned MAX_ATTEMPTS = 100;
+				constexpr unsigned MAX_ATTEMPTS = 100;
 				for (unsigned i = 1; i < MAX_ATTEMPTS; i++)
 				{
 					QString newMtlName = previousMtl->getName() + QString("_%1").arg(i);
@@ -351,12 +348,12 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 
 	// texture filenames already used
 	QMap<QString, QString> absFilenamesSaved;
-	QSet<QString>          filenamesUsed;
+	std::set<QString>          filenamesUsed;
 
 	size_t matIndex = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++matIndex)
+	for (auto it = cbegin(); it != cend(); ++it, ++matIndex)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		stream << Qt::endl
 		       << "newmtl " << mtl->getName() << Qt::endl;
 
@@ -374,12 +371,12 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 
 		if (mtl->hasTexture())
 		{
-			QString absFilename = mtl->getTextureFilename();
+			const QString absFilename = mtl->getTextureFilename();
 
 			// if the file has not already been saved
 			if (!absFilenamesSaved.contains(absFilename))
 			{
-				QFileInfo fileInfo(absFilename);
+				const QFileInfo fileInfo(absFilename);
 
 				QString texName = fileInfo.fileName();
 				if (fileInfo.suffix().isEmpty())
@@ -388,14 +385,14 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 				}
 
 				// make sure that the local filename is unique!
-				if (filenamesUsed.contains(texName))
+				if (filenamesUsed.count(texName))
 				{
 					texName.prepend(QString("t%1_").arg(matIndex));
-					assert(!filenamesUsed.contains(texName));
+					assert(!filenamesUsed.count(texName));
 				}
 				filenamesUsed.insert(texName);
 
-				QString destFilename = path + '/' + texName;
+				const QString destFilename = path + '/' + texName;
 				if (mtl->getTexture().mirrored().save(destFilename)) // mirrored: see ccMaterial
 				{
 					// new absolute filename
@@ -469,7 +466,7 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out, short dataVersion) const
 	}
 
 	// Materials count (dataVersion>=20)
-	uint32_t count = (uint32_t)size();
+	uint32_t count = static_cast<uint32_t>(size());
 	if (out.write((const char*)&count, 4) < 0)
 		return WriteError();
 

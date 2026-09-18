@@ -45,12 +45,12 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
 	//! Finds material by name
 	/** \return material index or -1 if not found
 	 **/
-	int findMaterialByName(const QString& mtlName);
+	int findMaterialByName(const QString& mtlName) const;
 
 	//! Finds material by unique identifier
 	/** \return material index or -1 if not found
 	 **/
-	int findMaterialByUniqueID(const QString& uniqueID);
+	int findMaterialByUniqueID(const QString& uniqueID) const;
 
 	//! Adds a material
 	/** Ensures unicity of material names.

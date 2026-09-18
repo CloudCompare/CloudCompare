@@ -40,7 +40,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	using Shared = QSharedPointer<ccMaterial>;
 
 	//! Default constructor
-	ccMaterial(const QString& name = QString("default"));
+	ccMaterial(QString name = QString("default"));
 
 	//! Copy constructor
 	ccMaterial(const ccMaterial& mtl);
@@ -155,7 +155,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	//! Sets texture
 	/** If no filename is provided, a random one will be generated.
 	 **/
-	void setTexture(QImage image, QString absoluteFilename = QString(), bool mirrorImage = true);
+	void setTexture(const QImage& image, QString absoluteFilename = QString(), bool mirrorImage = true);
 
 	//! Loads texture from file (and set it if successful)
 	/** If the filename is not already in DB, the corresponding file will be loaded.
@@ -164,7 +164,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	bool loadAndSetTexture(const QString& absoluteFilename);
 
 	//! Returns the texture (if any)
-	const QImage getTexture() const;
+	QImage getTexture() const;
 
 	//! Returns the texture ID (if any)
 	GLuint getTextureID() const;
@@ -178,7 +178,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	static QImage GetTexture(const QString& absoluteFilename);
 
 	//! Adds a texture to the global texture DB
-	static void AddTexture(QImage image, const QString& absoluteFilename);
+	static void AddTexture(const QImage& image, const QString& absoluteFilename);
 
 	//! Returns the global texture DB
 	static ccMaterialDB* GetTextureDB();

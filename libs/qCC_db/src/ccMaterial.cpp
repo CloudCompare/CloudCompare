@@ -16,10 +16,10 @@
 // ##########################################################################
 
 // Always first
-#include "ccIncludeGL.h"
+#include "ccMaterial.h"
 
 // Local
-#include "ccMaterial.h"
+#include "ccIncludeGL.h"
 #include "ccMaterialDB.h"
 
 // Qt
@@ -34,8 +34,8 @@ ccMaterialDB* ccMaterial::GetTextureDB()
 	return &s_materialDB;
 }
 
-ccMaterial::ccMaterial(const QString& name)
-    : m_name(name)
+ccMaterial::ccMaterial(QString name)
+    : m_name(std::move(name))
     , m_uniqueID(QUuid::createUuid().toString())
     , m_diffuseFront(ccColor::bright)
     , m_diffuseBack(ccColor::bright)
@@ -46,7 +46,7 @@ ccMaterial::ccMaterial(const QString& name)
     , m_texMagnificationFilter(QOpenGLTexture::Linear)
 {
 	setShininess(50.0);
-};
+}
 
 ccMaterial::ccMaterial(const ccMaterial& mtl)
     : m_name(mtl.m_name)
@@ -58,7 +58,7 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
     , m_specular(mtl.m_specular)
     , m_emission(mtl.m_emission)
     , m_shininessFront(mtl.m_shininessFront)
-    , m_shininessBack(mtl.m_shininessFront)
+    , m_shininessBack(mtl.m_shininessBack)
     , m_texMinificationFilter(mtl.m_texMinificationFilter)
     , m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
@@ -137,22 +137,19 @@ bool ccMaterial::loadAndSetTexture(const QString& absoluteFilename)
 	else
 	{
 		// otherwise, we try to load the corresponding file
-		QImage image(absoluteFilename);
+		const QImage image(absoluteFilename);
 		if (image.isNull())
 		{
 			ccLog::Warning(QString("[ccMaterial::loadAndSetTexture] Failed to load image '%1'").arg(absoluteFilename));
 			return false;
 		}
-		else
-		{
-			setTexture(image, absoluteFilename, true);
-		}
+		setTexture(image, absoluteFilename, true);
 	}
 
 	return true;
 }
 
-void ccMaterial::setTexture(QImage image, QString absoluteFilename /*=QString()*/, bool mirrorImage /*=true*/)
+void ccMaterial::setTexture(const QImage& image, QString absoluteFilename /*=QString()*/, bool mirrorImage /*=true*/)
 {
 	ccLog::PrintDebug(QString("[ccMaterial::setTexture] absoluteFilename = '%1' / size = %2 x %3").arg(absoluteFilename).arg(image.width()).arg(image.height()));
 
@@ -185,7 +182,7 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename /*=QString()*
 	s_materialDB.addTexture(m_textureFilename, mirrorImage ? image.mirrored() : image);
 }
 
-const QImage ccMaterial::getTexture() const
+QImage ccMaterial::getTexture() const
 {
 	return s_materialDB.getTexture(m_textureFilename);
 }
@@ -213,10 +210,7 @@ GLuint ccMaterial::getTextureID() const
 		}
 		return tex->textureId();
 	}
-	else
-	{
-		return 0;
-	}
+	return 0;
 }
 
 bool ccMaterial::hasTexture() const
@@ -265,7 +259,7 @@ QImage ccMaterial::GetTexture(const QString& absoluteFilename)
 	return s_materialDB.getTexture(absoluteFilename);
 }
 
-void ccMaterial::AddTexture(QImage image, const QString& absoluteFilename)
+void ccMaterial::AddTexture(const QImage& image, const QString& absoluteFilename)
 {
 	s_materialDB.addTexture(absoluteFilename, image);
 }
@@ -375,7 +369,6 @@ bool ccMaterial::compare(const ccMaterial& mtl) const
 	    || mtl.m_specular != m_specular
 	    || mtl.m_emission != m_emission
 	    || mtl.m_diffuseBack != m_diffuseBack
-	    || mtl.m_diffuseFront != m_diffuseFront
 	    || mtl.m_diffuseFront != m_diffuseFront)
 	{
 		return false;

@@ -27,6 +27,9 @@
 // qCC_db
 #include <ccLog.h>
 
+// CCCoreLib
+#include <CCPlatform.h>
+
 // Qt
 #include <QProcess>
 
@@ -70,7 +73,7 @@ static float scaleAxis(int raw, double ds)
 //! Logs a raw HID report as a hex string. Only compiled when CC_HID_DEBUG is
 //! defined (CMake option OPTION_HID_DEBUG). Used to diagnose device-specific
 //! report formats (e.g. SpaceMouse Compact vs Wireless).
-static void logHidReport(const char* label, const unsigned char* buf, int n)
+static void LogHidReport(const char* label, const unsigned char* buf, int n)
 {
 	QString hex;
 	hex.reserve(n * 3);
@@ -82,19 +85,21 @@ static void logHidReport(const char* label, const unsigned char* buf, int n)
 }
 #endif // CC_HID_DEBUG
 
-//! Returns true if the 3Dconnexion driver daemon (3DConnexionHelper.app) is
+#ifndef CC_WINDOWS
+//! Returns true if the 3Dconnexion driver daemon (3DConnexionHelper application) is
 //! currently running. On macOS it holds an exclusive lock on 3DConnexion HID
 //! devices and silently consumes reports, so our hid_read returns 0 forever.
-static bool is3dConnexionHelperRunning()
+static bool Is3dConnexionHelperRunning()
 {
 	// pgrep -x matches the exact process name. Exit code 0 == found.
 	int exitCode = QProcess::execute(QStringLiteral("pgrep"), {QStringLiteral("-x"), QStringLiteral("3DConnexionHelper")});
 	return exitCode == 0;
 }
+#endif
 
 //! Maps a button bitmask bit to a Mouse3DInput::VirtualKey value.
 //! Layout documented by the spacenavd / 3DConnexion HID community.
-static const int c_buttonMap[] = {
+static const int c_buttonMap[]{
     Mouse3DInput::V3DK_FIT,    // bit 0
     Mouse3DInput::V3DK_MENU,   // bit 1
     Mouse3DInput::V3DK_TOP,    // bit 2
@@ -105,6 +110,65 @@ static const int c_buttonMap[] = {
     Mouse3DInput::V3DK_BACK,   // bit 7
 };
 static constexpr size_t c_buttonMapSize = sizeof(c_buttonMap) / sizeof(c_buttonMap[0]);
+
+//! Known 3DConnexion space-mouse product IDs (VID 0x046d / Logitech era)
+static const unsigned short c_old3dconnexionPIDs[]{
+    0xc603, // SpaceMouse Plus XT
+    0xc605, // CadMan
+    0xc606, // SpaceMouse Classic
+    0xc621, // SpaceBall 5000
+    0xc623, // SpaceTraveler
+    0xc625, // SpacePilot
+    0xc626, // SpaceNavigator
+    0xc627, // SpaceExplorer
+    0xc628, // SpaceNavigator for Notebooks
+    0xc629, // SpacePilot Pro
+    0xc62b, // SpaceMouse Pro
+    0xc640, // NuLooq
+};
+
+//! Known 3DConnexion space-mouse product IDs (VID 0x256f / 3DConnexion era)
+static const unsigned short c_3dconnexionPIDs[]{
+    0xc62e, // SpaceMouse Wireless (USB)
+    0xc62f, // SpaceMouse Wireless Receiver
+    0xc631, // SpaceMouse Pro Wireless
+    0xc632, // SpaceMouse Pro Wireless Receiver
+    0xc633, // SpaceMouse Enterprise
+    0xc635, // SpaceMouse Compact
+    0xc636, // SpaceMouse Module
+    0xc638, // SpaceMouse Pro Wireless BT (USB)
+    0xc63a, // SpaceMouse Wireless (Bluetooth)
+};
+
+//! Returns true if the given vendor/product ID pair is a known space-mouse device.
+static bool IsKnownSpaceMouse(unsigned short vid, unsigned short pid)
+{
+	if (vid == c_3dconnexionVID)
+	{
+		// Check whitelist
+		for (auto p : c_3dconnexionPIDs)
+			if (pid == p)
+				return true;
+
+		ccLog::Warning(QString("Unknown 3DConnexion device detected (PID %1). "
+		                       "Please report this to the CloudCompare developers so it "
+		                       "can be added to the whitelist.")
+		                   .arg(pid));
+
+		// We can still try to open it
+		return true;
+	}
+
+	if (vid == c_old3dconnexionVID)
+	{
+		// For legacy Logitech devices, only accept known PIDs (SpaceNavigator, SpaceExplorer, SpacePilot, etc.)
+		for (auto p : c_old3dconnexionPIDs)
+			if (pid == p)
+				return true;
+	}
+
+	return false;
+}
 
 bool HIDWorker::openDevice()
 {
@@ -127,7 +191,7 @@ bool HIDWorker::openDevice()
 	hid_device_info* cur = devs;
 	for (; cur; cur = cur->next)
 	{
-		if (cur->usage_page == 0x01 && cur->usage == 0x08)
+		if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id) && cur->usage_page == 0x01 && cur->usage == 0x08)
 		{
 			m_handle = hid_open_path(cur->path);
 			if (m_handle)
@@ -141,7 +205,7 @@ bool HIDWorker::openDevice()
 	}
 
 	// Fallback: first openable interface. This is typically only reached when
-	// 3DConnexionHelper.app is running (it creates virtual HID interfaces that
+	// 3DConnexionHelper application is running (it creates virtual HID interfaces that
 	// don't carry the Multi-axis Controller usage), or on devices that simply
 	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
 	if (!m_handle)
@@ -149,13 +213,16 @@ bool HIDWorker::openDevice()
 		cur = devs;
 		for (; cur; cur = cur->next)
 		{
-			m_handle = hid_open_path(cur->path);
-			if (m_handle)
+			if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id))
 			{
-				m_devicePath = cur->path;
-				QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
-				ccLog::Print(QString("[3D Mouse] Device: %1 (HID, fallback)").arg(name));
-				break;
+				m_handle = hid_open_path(cur->path);
+				if (m_handle)
+				{
+					m_devicePath = cur->path;
+					QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
+					ccLog::Print(QString("[3D Mouse] Device: %1 (HID, fallback)").arg(name));
+					break;
+				}
 			}
 		}
 	}
@@ -164,21 +231,22 @@ bool HIDWorker::openDevice()
 
 	if (!m_handle)
 	{
-		ccLog::Warning("[3D Mouse] Could not open any 3DConnexion HID device "
-		               "(is the 3Dconnexion driver holding it exclusively?)");
+		ccLog::Warning("[3D Mouse] Could not open any 3DConnexion HID device");
 		return false;
 	}
 
+#ifndef CC_WINDOWS
 	// Warn if the 3Dconnexion driver daemon is running: it holds an exclusive
 	// lock on the device and silently consumes reports, so our hid_read would
 	// return 0 forever. The user must quit 3DConnexionHelper.app (System
 	// Settings -> General -> Login Items / Background) for the HID path to work.
-	if (is3dConnexionHelperRunning())
+	if (Is3dConnexionHelperRunning())
 	{
-		ccLog::Warning("[3D Mouse] 3DConnexionHelper.app is running and will "
-		               "intercept the device. Quit it (System Settings -> "
+		ccLog::Warning("[3D Mouse] 3DConnexionHelper application is running and may "
+		               "intercept the device. If so, quit it (System Settings -> "
 		               "General -> Login Items / Background) to use the HID path.");
 	}
+#endif
 
 	// Blocking reads with a timeout - avoids the spurious -1 returns that
 	// non-blocking hid_read produces when no data is available.
@@ -274,9 +342,11 @@ void HIDWorker::run()
 					warnedNoReports = true;
 					ccLog::Warning("[3D Mouse] No HID reports received yet. "
 					               "If you have moved the cap and nothing happens, "
-					               "make sure the 3DConnexion driver "
-					               "(3DConnexionHelper.app) is not running - it "
-					               "intercepts the device and prevents the HID "
+					               "you may want to try stopping the 3DConnexion driver "
+#ifndef CC_WINDOWS
+					               "(3DConnexionHelper application)"
+#endif
+					               "as it can intercept the device and prevent the HID "
 					               "path from seeing reports.");
 				}
 			}
@@ -286,7 +356,7 @@ void HIDWorker::run()
 		anyReportArrived = true;
 
 #ifdef CC_HID_DEBUG
-		logHidReport("report", buf, n);
+		LogHidReport("report", buf, n);
 #endif
 
 		// Identify the report type.

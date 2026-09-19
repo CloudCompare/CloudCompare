@@ -99,7 +99,7 @@ static bool Is3dConnexionHelperRunning()
 
 //! Maps a button bitmask bit to a Mouse3DInput::VirtualKey value.
 //! Layout documented by the spacenavd / 3DConnexion HID community.
-static const int c_buttonMap[] = {
+static const int c_buttonMap[]{
     Mouse3DInput::V3DK_FIT,    // bit 0
     Mouse3DInput::V3DK_MENU,   // bit 1
     Mouse3DInput::V3DK_TOP,    // bit 2
@@ -111,7 +111,7 @@ static const int c_buttonMap[] = {
 };
 static constexpr size_t c_buttonMapSize = sizeof(c_buttonMap) / sizeof(c_buttonMap[0]);
 
-// Known 3DConnexion space-mouse product IDs (VID 0x046d / Logitech era)
+//! Known 3DConnexion space-mouse product IDs (VID 0x046d / Logitech era)
 static const unsigned short c_old3dconnexionPIDs[]{
     0xc603, // SpaceMouse Plus XT
     0xc605, // CadMan
@@ -127,7 +127,7 @@ static const unsigned short c_old3dconnexionPIDs[]{
     0xc640, // NuLooq
 };
 
-// Known 3DConnexion space-mouse product IDs (VID 0x256f / 3DConnexion era)
+//! Known 3DConnexion space-mouse product IDs (VID 0x256f / 3DConnexion era)
 static const unsigned short c_3dconnexionPIDs[]{
     0xc62e, // SpaceMouse Wireless (USB)
     0xc62f, // SpaceMouse Wireless Receiver
@@ -140,6 +140,7 @@ static const unsigned short c_3dconnexionPIDs[]{
     0xc63a, // SpaceMouse Wireless (Bluetooth)
 };
 
+//! Returns true if the given vendor/product ID pair is a known space-mouse device.
 static bool IsKnownSpaceMouse(unsigned short vid, unsigned short pid)
 {
 	if (vid == c_3dconnexionVID)
@@ -148,15 +149,24 @@ static bool IsKnownSpaceMouse(unsigned short vid, unsigned short pid)
 		for (auto p : c_3dconnexionPIDs)
 			if (pid == p)
 				return true;
-		return false;
+
+		ccLog::Warning(QString("Unknown 3DConnexion device detected (PID %1). "
+		                       "Please report this to the CloudCompare developers so it "
+		                       "can be added to the whitelist.")
+		                   .arg(pid));
+
+		// We can still try to open it
+		return true;
 	}
+
 	if (vid == c_old3dconnexionVID)
 	{
+		// For legacy Logitech devices, only accept known PIDs (SpaceNavigator, SpaceExplorer, SpacePilot, etc.)
 		for (auto p : c_old3dconnexionPIDs)
 			if (pid == p)
 				return true;
-		return false;
 	}
+
 	return false;
 }
 
@@ -198,17 +208,14 @@ bool HIDWorker::openDevice()
 	// 3DConnexionHelper application is running (it creates virtual HID interfaces that
 	// don't carry the Multi-axis Controller usage), or on devices that simply
 	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
-	if (!m_handle
-#ifndef CC_WINDOWS
-	    && Is3dConnexionHelperRunning()
-#endif
-	)
+	if (!m_handle)
 	{
 		cur = devs;
 		for (; cur; cur = cur->next)
 		{
 			if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id))
 			{
+				m_handle = hid_open_path(cur->path);
 				if (m_handle)
 				{
 					m_devicePath = cur->path;

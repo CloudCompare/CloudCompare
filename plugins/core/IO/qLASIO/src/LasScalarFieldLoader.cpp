@@ -17,6 +17,8 @@
 
 #include "LasScalarFieldLoader.h"
 
+#include <cstring>
+
 // qCC_db
 #include <ccScalarField.h>
 // System
@@ -151,6 +153,18 @@ CC_FILE_ERROR LasScalarFieldLoader::parseExtraScalarField(
 	case LasExtraScalarField::Floating:
 		handleOptionsFor(extraField, m_rawValues.floatingValues, outputValues);
 		break;
+	}
+
+	if (extraField.noDataIsRelevant())
+	{
+		for (unsigned dimIndex = 0; dimIndex < extraField.numElements(); ++dimIndex)
+		{
+			const uint8_t* value = dataStart + dimIndex * extraField.elementSize();
+			if (std::memcmp(value, extraField.noData[dimIndex], extraField.elementSize()) == 0)
+			{
+				outputValues[dimIndex] = ccScalarField::NaN();
+			}
+		}
 	}
 
 	return CC_FERR_NO_ERROR;
@@ -367,19 +381,6 @@ void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraFiel
 	assert(extraField.numElements() <= 3);
 	for (unsigned dimIndex = 0; dimIndex < extraField.numElements(); ++dimIndex)
 	{
-		if (extraField.noDataIsRelevant())
-		{
-			auto noDataValue = ParseValueOfTypeAs<T, T>(static_cast<const uint8_t*>(extraField.noData[dimIndex]));
-			if (noDataValue == inputValues[dimIndex])
-			{
-				outputValues[dimIndex] = ccScalarField::NaN();
-			}
-			else
-			{
-				outputValues[dimIndex] = static_cast<ScalarType>(inputValues[dimIndex]);
-			}
-		}
-
 		if (extraField.scaleIsRelevant())
 		{
 			double scaledValue     = (inputValues[dimIndex] * extraField.scales[dimIndex]) + (extraField.offsets[dimIndex]);

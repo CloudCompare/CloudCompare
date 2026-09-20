@@ -193,7 +193,7 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 	QByteArray                       data(reinterpret_cast<char*>(extraBytesVlr.data), extraBytesVlr.record_length_after_header);
 	QDataStream                      dataStream(data);
 
-	uint16_t numExtraFields = extraBytesVlr.record_length_after_header / 192;
+	uint16_t numExtraFields = extraBytesVlr.record_length_after_header / VLR_FIELD_SIZE_BYTES;
 
 	unsigned byteOffset{0};
 	for (uint16_t j = 0; j < numExtraFields; ++j)
@@ -304,11 +304,9 @@ void LasExtraScalarField::InitExtraBytesVlr(laszip_vlr_struct& vlr, const std::v
 	const size_t fieldCount = std::min(extraFields.size(), MAX_EXTRA_FIELDS_IN_VLR);
 	if (fieldCount != extraFields.size())
 	{
-		ccLog::Warning("[LAS] Only the first %u extra scalar fields can be described (out of %u)",
-		               static_cast<unsigned>(fieldCount),
-		               static_cast<unsigned>(extraFields.size()));
+		ccLog::Warning(QString("[LAS] Only the first %1 extra scalar fields can be described (out of %2)").arg(fieldCount).arg(extraFields.size()));
 	}
-	vlr.record_length_after_header = static_cast<laszip_U16>(192 * fieldCount);
+	vlr.record_length_after_header = static_cast<laszip_U16>(VLR_FIELD_SIZE_BYTES * fieldCount);
 	std::fill(vlr.description, vlr.description + 32, 0);
 	vlr.data = new laszip_U8[vlr.record_length_after_header];
 

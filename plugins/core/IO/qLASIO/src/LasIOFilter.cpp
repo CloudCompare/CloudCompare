@@ -926,9 +926,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 		if (extraFieldCount > LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR)
 		{
-			ccLog::Error("[LAS] Cannot save more than %u extra scalar fields (%u requested)",
-			             static_cast<unsigned>(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR),
-			             static_cast<unsigned>(extraFieldCount));
+			ccLog::Error(QString("[LAS] Cannot save more than %1 extra scalar fields (%2 requested)").arg(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR).arg(extraFieldCount));
 			return CC_FERR_NOT_IMPLEMENTED;
 		}
 	}

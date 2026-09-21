@@ -913,21 +913,23 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		}
 	}
 
-	// the "Extra Bytes" descriptor is written to a VLR, whose payload length is stored
-	// on 16 bits, so it cannot describe an unlimited number of fields. Writing it to an
-	// EVLR instead is not supported yet, so we stop here rather than write a broken file.
+	// The "Extra Bytes" descriptor is written to a VLR, whose payload length is stored on
+	// 16 bits, so it cannot describe an unlimited number of fields. Writing it to an EVLR
+	// instead is not supported yet, so the surplus fields are dropped here. They have to be
+	// dropped before the saver computes the point record length, otherwise the points would
+	// carry extra bytes that the descriptor does not cover.
 	{
-		// the saver adds one field per normal component on top of the ones selected here
-		size_t extraFieldCount = params.extraFields.size();
+		size_t budget = LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR;
 		if (params.shouldSaveNormalsAsExtraScalarField && pointCloud->hasNormals())
 		{
-			extraFieldCount += 3;
+			// the saver adds one field per normal component on top of the ones selected here
+			budget -= 3;
 		}
 
-		if (extraFieldCount > LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR)
+		if (params.extraFields.size() > budget)
 		{
-			ccLog::Error(QString("[LAS] Cannot save more than %1 extra scalar fields (%2 requested)").arg(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR).arg(extraFieldCount));
-			return CC_FERR_NOT_IMPLEMENTED;
+			ccLog::Warning(QString("[LAS] Only %1 extra scalar fields can be saved, the last %2 will be skipped").arg(budget).arg(params.extraFields.size() - budget));
+			params.extraFields.resize(budget);
 		}
 	}
 

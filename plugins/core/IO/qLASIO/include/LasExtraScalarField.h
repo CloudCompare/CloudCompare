@@ -81,6 +81,15 @@ class LasExtraScalarField
 	friend QDataStream& operator>>(QDataStream& dataStream, LasExtraScalarField& extraScalarField);
 	friend QDataStream& operator<<(QDataStream& dataStream, const LasExtraScalarField& extraScalarField);
 
+  public:
+	/// Size of the description of a single extra field, as stored in an "Extra Bytes" VLR
+	static constexpr size_t VLR_FIELD_SIZE_BYTES = 192;
+
+	/// The payload length of a VLR is stored on 16 bits, so an "Extra Bytes" VLR cannot
+	/// describe more fields than this.
+	/// Files with more of them have to store the descriptor in an EVLR.
+	static constexpr size_t MAX_EXTRA_FIELDS_IN_VLR = 65535 / VLR_FIELD_SIZE_BYTES;
+
   public: // Static Helper functions that works on collection of LasExtraScalarFields
 	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header& laszipHeader);
 	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_vlr_struct& extraBytesVlr);

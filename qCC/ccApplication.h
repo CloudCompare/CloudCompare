@@ -20,6 +20,9 @@
 // Common
 #include <ccApplicationBase.h>
 
+// Qt
+#include <QStringList>
+
 class ccApplication : public ccApplicationBase
 {
 	Q_OBJECT
@@ -30,6 +33,15 @@ class ccApplication : public ccApplicationBase
 	//! Returns the minimum version of CC required to load a given file version
 	static QString GetMinCCVersionForFileVersion(short fileVersion);
 
+	//! Opens the files requested before the main window was ready
+	void setMainWindowReady();
+
   protected:
 	bool event(QEvent* inEvent) override;
+
+  private:
+	//! Files the system asked to open before the main window was ready
+	QStringList m_pendingFiles;
+	//! Whether the main window is ready to open files
+	bool m_mainWindowReady = false;
 };

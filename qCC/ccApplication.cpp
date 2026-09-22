@@ -103,6 +103,15 @@ bool ccApplication::event(QEvent* inEvent)
 	{
 	case QEvent::FileOpen:
 	{
+		QString filename = static_cast<QFileOpenEvent*>(inEvent)->file();
+
+		// when CC is launched by opening a file, this event arrives before the I/O filters are loaded
+		if (!m_mainWindowReady)
+		{
+			m_pendingFiles << filename;
+			return true;
+		}
+
 		MainWindow* mainWindow = MainWindow::TheInstance();
 
 		if (mainWindow == nullptr)
@@ -110,7 +119,7 @@ bool ccApplication::event(QEvent* inEvent)
 			return false;
 		}
 
-		mainWindow->addToDB(QStringList(static_cast<QFileOpenEvent*>(inEvent)->file()));
+		mainWindow->addToDB(QStringList(filename));
 		return true;
 	}
 
@@ -120,4 +129,17 @@ bool ccApplication::event(QEvent* inEvent)
 #endif
 
 	return ccApplicationBase::event(inEvent);
+}
+
+void ccApplication::setMainWindowReady()
+{
+	m_mainWindowReady = true;
+
+	if (!m_pendingFiles.isEmpty())
+	{
+		QStringList filenames = m_pendingFiles;
+		m_pendingFiles.clear();
+
+		MainWindow::TheInstance()->addToDB(filenames);
+	}
 }

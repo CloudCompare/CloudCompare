@@ -294,6 +294,9 @@ int main(int argc, char** argv)
 			mainWindow->addToDB(filenames);
 		}
 
+		// open the files the system asked to open during startup (e.g. double-clicked in the macOS Finder)
+		app.setMainWindowReady();
+
 		// change the default path to the application one (do this AFTER processing the command line)
 		QDir workingDir = QCoreApplication::applicationDirPath();
 

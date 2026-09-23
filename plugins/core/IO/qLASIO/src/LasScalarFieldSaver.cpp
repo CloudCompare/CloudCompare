@@ -217,7 +217,18 @@ void LasScalarFieldSaver::handleExtraFields(size_t pointIndex, laszip_point& poi
 		{
 			if (extraField.noDataIsRelevant() && std::isnan(values[i]))
 			{
-				std::memcpy(dataStart, extraField.noData[i], extraField.elementSize());
+				// no_data is upcast to 8 bytes: a double for floating point types,
+				// and a 64-bit integer (whose first bytes hold the value) otherwise
+				if (extraField.type == LasExtraScalarField::f32)
+				{
+					double noDataValue;
+					std::memcpy(&noDataValue, extraField.noData[i], sizeof(noDataValue));
+					WriteScalarValueAs<float>(static_cast<ScalarType>(noDataValue), dataStart);
+				}
+				else
+				{
+					std::memcpy(dataStart, extraField.noData[i], extraField.elementSize());
+				}
 				dataStart += extraField.elementSize();
 				continue;
 			}

@@ -178,6 +178,9 @@ int main(int argc, char* argv[])
 	QCoreApplication::processEvents();
 #endif
 
+	// open the files the system asked to open during startup (e.g. double-clicked in the file manager)
+	a.openPendingFiles();
+
 	w.checkForLoadedEntities();
 
 	int result = a.exec();

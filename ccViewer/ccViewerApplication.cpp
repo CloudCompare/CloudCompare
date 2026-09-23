@@ -42,12 +42,16 @@ bool ccViewerApplication::event(QEvent* inEvent)
 	{
 	case QEvent::FileOpen:
 	{
+		QString filename = static_cast<QFileOpenEvent*>(inEvent)->file();
+
+		// the viewer may not be set yet when ccViewer is launched by opening a file
 		if (mViewer == nullptr)
 		{
-			return false;
+			mPendingFiles << filename;
+			return true;
 		}
 
-		mViewer->addToDB({static_cast<QFileOpenEvent*>(inEvent)->file()});
+		mViewer->addToDB({filename});
 		return true;
 	}
 
@@ -57,4 +61,17 @@ bool ccViewerApplication::event(QEvent* inEvent)
 #endif
 
 	return ccApplicationBase::event(inEvent);
+}
+
+void ccViewerApplication::openPendingFiles()
+{
+	if (mViewer == nullptr || mPendingFiles.isEmpty())
+	{
+		return;
+	}
+
+	QStringList filenames = mPendingFiles;
+	mPendingFiles.clear();
+
+	mViewer->addToDB(filenames);
 }

@@ -20,6 +20,9 @@
 // Common
 #include <ccApplicationBase.h>
 
+// Qt
+#include <QStringList>
+
 class ccViewer;
 
 class ccViewerApplication : public ccApplicationBase
@@ -31,9 +34,14 @@ class ccViewerApplication : public ccApplicationBase
 
 	void setViewer(ccViewer* inViewer);
 
+	//! Opens the files requested before the viewer was ready
+	void openPendingFiles();
+
   protected:
 	bool event(QEvent* inEvent) override;
 
   private:
 	ccViewer* mViewer;
+	//! Files the system asked to open before the viewer was ready
+	QStringList mPendingFiles;
 };

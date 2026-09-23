@@ -15,11 +15,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QtGlobal>
-
-#ifdef Q_OS_MAC
 #include <QFileOpenEvent>
-#endif
+#include <QtGlobal>
 
 // qCC_io
 #include "FileIO.h"
@@ -98,14 +95,13 @@ ccApplication::ccApplication(int& argc, char** argv, bool isCommandLine)
 
 bool ccApplication::event(QEvent* inEvent)
 {
-#ifdef Q_OS_MAC
 	switch (inEvent->type())
 	{
 	case QEvent::FileOpen:
 	{
 		QString filename = static_cast<QFileOpenEvent*>(inEvent)->file();
 
-		// when CC is launched by opening a file, this event arrives before the I/O filters are loaded
+		// when CC is launched by opening a file, this event may arrive before the I/O filters are loaded
 		if (!m_mainWindowReady)
 		{
 			m_pendingFiles << filename;
@@ -126,7 +122,6 @@ bool ccApplication::event(QEvent* inEvent)
 	default:
 		break;
 	}
-#endif
 
 	return ccApplicationBase::event(inEvent);
 }

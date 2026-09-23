@@ -178,6 +178,10 @@ int main(int argc, char* argv[])
 	QCoreApplication::processEvents();
 #endif
 
+	// open the files the system asked to open during startup
+	// (a FileOpen event, e.g. double-clicked in the macOS Finder)
+	a.openPendingFiles();
+
 	w.checkForLoadedEntities();
 
 	int result = a.exec();

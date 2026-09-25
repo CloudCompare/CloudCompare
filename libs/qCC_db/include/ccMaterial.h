@@ -24,7 +24,6 @@
 // Qt
 #include <QOpenGLTexture>
 #include <QSharedPointer>
-#include <QtGui/qopengl.h>
 
 class ccMaterialDB;
 class QImage;

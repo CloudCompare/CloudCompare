@@ -19,6 +19,7 @@
 
 // Local
 #include "../include/ccMaterialDB.h"
+#include "../include/ccNormalCompressor.h"
 #include "../include/ccNormalVectors.h"
 #include "../include/ccScalarField.h"
 

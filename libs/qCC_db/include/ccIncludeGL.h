@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,20 +17,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_INCLUDE_GL_HEADER
-#define CC_INCLUDE_GL_HEADER
-
-#include <cmath>
-
-// CCCoreLib
-#include <CCMath.h>
-
 // Local
 #include "ccColorTypes.h"
 #include "ccGLMatrix.h"
 
+// CCCoreLib
+#include <CCMath.h>
+
 // Qt
 #include <QOpenGLFunctions_2_1>
+
+// System
+#include <cmath>
 
 //! Shortcuts to OpenGL commands independent on the input type
 class ccGL
@@ -617,5 +617,3 @@ class ccGL
 		MAT(m, 3, 3) = 1.0;
 	}
 };
-
-#endif // CC_INCLUDE_GL_HEADER

@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccNormalCompressor.h"
+#include "../include/ccNormalCompressor.h"
 
 // CCCoreLib
 #include <CCConst.h>

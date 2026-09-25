@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GROUND_LIDAR_SENSOR_HEADER
-#define CC_GROUND_LIDAR_SENSOR_HEADER
 
 // Local
 #include "ccDepthBuffer.h"
@@ -322,5 +321,3 @@ class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 	//! Associated Z-buffer
 	ccDepthBuffer m_depthBuffer;
 };
-
-#endif // CC_GROUND_LIDAR_SENSOR_HEADER

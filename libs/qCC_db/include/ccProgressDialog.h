@@ -20,13 +20,13 @@
 // Local
 #include "qCC_db.h"
 
+// CCCoreLib
+#include <GenericProgressCallback.h>
+
 // Qt
 #include <QAtomicInt>
 #include <QProgressDialog>
 #include <QTimer>
-
-// CCCoreLib
-#include <GenericProgressCallback.h>
 
 //! Graphical progress indicator (thread-safe)
 /** Implements the GenericProgressCallback interface, in order
@@ -51,24 +51,24 @@ class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog
 	                 QWidget* parent       = nullptr);
 
 	//! Destructor (virtual)
-	virtual ~ccProgressDialog() = default;
+	~ccProgressDialog() override = default;
 
 	// inherited method
-	virtual void        update(float percent) override;
-	inline virtual void setMethodTitle(const char* methodTitle) override
+	void        update(float percent) override;
+	inline void setMethodTitle(const char* methodTitle) override
 	{
 		setMethodTitle(QString(methodTitle));
 	}
-	inline virtual void setInfo(const char* infoStr) override
+	inline void setInfo(const char* infoStr) override
 	{
 		setInfo(QString(infoStr));
 	}
-	inline virtual bool isCancelRequested() override
+	inline bool isCancelRequested() override
 	{
 		return wasCanceled();
 	}
-	virtual void start() override;
-	virtual void stop() override;
+	void start() override;
+	void stop() override;
 
 	//! setMethodTitle with a QString as argument
 	virtual void setMethodTitle(QString methodTitle);

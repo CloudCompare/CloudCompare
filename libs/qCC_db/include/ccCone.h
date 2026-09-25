@@ -20,9 +20,7 @@
 // Local
 #include "ccGenericPrimitive.h"
 
-//! Cone (primitive)
-/** 3D cone primitive
- **/
+//! 3D Cone (primitive)
 class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 {
   public:
@@ -59,7 +57,7 @@ class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 	ccCone(QString name = QString("Cone"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::CONE;
 	}
@@ -95,36 +93,36 @@ class QCC_DB_LIB_API ccCone : public ccGenericPrimitive
 	virtual void setTopRadius(PointCoordinateType radius);
 
 	//! Returns cone axis bottom end point after applying transformation
-	virtual CCVector3 getBottomCenter() const;
+	CCVector3 getBottomCenter() const;
 	//! Returns cone axis top end point after applying transformation
-	virtual CCVector3 getTopCenter() const;
+	CCVector3 getTopCenter() const;
 
 	//! Returns cone axis end point associated with whichever radii is smaller
-	virtual CCVector3 getSmallCenter() const;
+	CCVector3 getSmallCenter() const;
 	//! Returns cone axis end point associated with whichever radii is larger
-	virtual CCVector3 getLargeCenter() const;
+	CCVector3 getLargeCenter() const;
 
 	//! Returns whichever cone radii is smaller
-	virtual PointCoordinateType getSmallRadius() const;
+	PointCoordinateType getSmallRadius() const;
 	//! Returns whichever cone radii is larger
-	virtual PointCoordinateType getLargeRadius() const;
+	PointCoordinateType getLargeRadius() const;
 
 	//! Returns true if the Cone was created in snout mode
-	virtual bool isSnoutMode() const
+	bool isSnoutMode() const
 	{
 		return (m_xOff != 0 || m_yOff != 0);
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Cone";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	//! Computes the cone apex position
 	CCVector3 computeApex() const;

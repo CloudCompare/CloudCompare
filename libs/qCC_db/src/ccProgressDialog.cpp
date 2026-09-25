@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccProgressDialog.h"
+#include "../include/ccProgressDialog.h"
 
 // Qt
 #include <QCoreApplication>

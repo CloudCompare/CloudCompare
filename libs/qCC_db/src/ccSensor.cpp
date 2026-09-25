@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccSensor.h"
+#include "../include/ccSensor.h"
 
 ccSensor::ccSensor(const QString& name)
     : ccHObject(name)

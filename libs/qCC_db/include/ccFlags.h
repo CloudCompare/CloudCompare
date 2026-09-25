@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FLAGS_HEADER
-#define CC_FLAGS_HEADER
 
 // System
 #include <cstring>
@@ -59,5 +58,3 @@ class ccFlags
 	//! Table of 8 booleans (one per bit)
 	bool table[8];
 };
-
-#endif // CC_FLAGS_HEADER

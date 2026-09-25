@@ -15,20 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccGenericMesh.h"
+#include "../include/ccGenericMesh.h"
 
-#include "ccIncludeGL.h"
-
-// local
-#include "ccColorScalesManager.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericPointCloud.h"
-#include "ccHObjectCaster.h"
-#include "ccMaterialSet.h"
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
+// Local
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccPointCloud.h"
 
 // CCCoreLib
 #include <GenericProgressCallback.h>
@@ -37,11 +30,11 @@
 #include <PointCloud.h>
 #include <ReferenceCloud.h>
 
-// system
-#include <cassert>
-
-// QT
+// Qt
 #include <QPainter>
+
+// System
+#include <cassert>
 
 #if defined(_OPENMP)
 // OpenMP

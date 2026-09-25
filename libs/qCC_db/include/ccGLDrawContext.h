@@ -17,14 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "ccColorBasedEntityPicking.h"
-#include "ccIncludeGL.h"
+#include "ccMaterial.h"
 
 // Qt
 #include <QOpenGLVersionFunctionsFactory>
-
-// Local
-#include "ccMaterial.h"
 
 class ccGenericGLDisplay;
 class ccScalarField;

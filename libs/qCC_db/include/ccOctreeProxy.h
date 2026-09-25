@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_OCTREE_PROXY_HEADER
-#define CC_OCTREE_PROXY_HEADER
-
 // Local
 #include "ccHObject.h"
-
-// CCCoreLib
-#include <ccOctree.h>
+#include "ccOctree.h"
 
 //! Octree structure proxy
 /** Implements ccHObject while holding a (shared) pointer on the octree instance (--> safer)
@@ -34,7 +31,7 @@ class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 	ccOctreeProxy(ccOctree::Shared octree = ccOctree::Shared(nullptr), QString name = "Octree");
 
 	//! Destructor
-	virtual ~ccOctreeProxy() = default;
+	~ccOctreeProxy() override = default;
 
 	//! Sets the associated octree
 	inline void setOctree(ccOctree::Shared octree)
@@ -63,5 +60,3 @@ class QCC_DB_LIB_API ccOctreeProxy : public ccHObject
 	//! Associated octree
 	ccOctree::Shared m_octree;
 };
-
-#endif // CC_OCTREE_PROXY_HEADER

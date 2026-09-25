@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccBBox.h"
+#include "../include/ccBBox.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccIncludeGL.h"
 
 void ccBBox::draw(CC_DRAW_CONTEXT& context, const ccColor::Rgb& col) const
 {

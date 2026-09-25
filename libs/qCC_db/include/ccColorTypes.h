@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COLOR_TYPES_HEADER
-#define CC_COLOR_TYPES_HEADER
 
 // Local
 #include "qCC_db.h"
@@ -300,7 +299,7 @@ namespace ccColor
 	//! Conversion from Rgb to Rgba
 	inline Rgba FromRgbToRgba(const Rgb& color)
 	{
-		return Rgba(color, MAX);
+		return {color, MAX};
 	}
 
 	//! Conversion from Rgbaf to Rgba
@@ -349,19 +348,17 @@ namespace ccColor
 	//! Conversion from QColor (floating point)
 	inline Rgbf FromQColorf(const QColor& qColor)
 	{
-		return Rgbf(static_cast<float>(qColor.redF()),
-		            static_cast<float>(qColor.greenF()),
-		            static_cast<float>(qColor.blueF()));
+		return Rgbf(qColor.redF(),
+		            qColor.greenF(),
+		            qColor.blueF());
 	}
 
 	//! Conversion from QColor'a' (floating point)
 	inline Rgbaf FromQColoraf(const QColor& qColor)
 	{
-		return Rgbaf(static_cast<float>(qColor.redF()),
-		             static_cast<float>(qColor.greenF()),
-		             static_cast<float>(qColor.blueF()),
-		             static_cast<float>(qColor.alphaF()));
+		return Rgbaf(qColor.redF(),
+		             qColor.greenF(),
+		             qColor.blueF(),
+		             qColor.alphaF());
 	}
 }; // namespace ccColor
-
-#endif // CC_COLOR_TYPES_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,12 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_INTERACTOR_HEADER
-#define CC_INTERACTOR_HEADER
-
 // Local
-#include "CCGeom.h"
 #include "qCC_db.h"
+
+// CCCoreLib
+#include <CCGeom.h>
 
 // Qt
 #include <Qt>
@@ -53,5 +54,3 @@ class QCC_DB_LIB_API ccInteractor
 		return false;
 	}
 };
-
-#endif // CC_INTERACTOR_HEADER

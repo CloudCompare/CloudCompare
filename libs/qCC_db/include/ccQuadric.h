@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_QUADRIC_PRIMITIVE_HEADER
-#define CC_QUADRIC_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -56,24 +55,24 @@ class QCC_DB_LIB_API ccQuadric : public ccGenericPrimitive
 	ccQuadric(QString name = QString("Plane"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::QUADRIC;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Quadric";
 	}
-	virtual bool hasDrawingPrecision() const override
+	bool hasDrawingPrecision() const override
 	{
 		return true;
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	// inherited from ccHObject
-	virtual ccBBox getOwnFitBB(ccGLMatrix& trans) override;
+	ccBBox getOwnFitBB(ccGLMatrix& trans) override;
 
 	//! Returns min corner
 	const CCVector2& getMinCorner() const
@@ -139,5 +138,3 @@ class QCC_DB_LIB_API ccQuadric : public ccGenericPrimitive
 	//! Max height
 	PointCoordinateType m_maxZ;
 };
-
-#endif // CC_QUADRIC_PRIMITIVE_HEADER

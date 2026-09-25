@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GENERIC_GL_DISPLAY
-#define CC_GENERIC_GL_DISPLAY
-
-// Always first
-#include "ccIncludeGL.h"
-
 // Local
 #include "ccColorTypes.h"
+#include "ccIncludeGL.h"
 #include "ccViewportParameters.h"
 
 // Qt
@@ -237,5 +234,3 @@ class ccGenericGLDisplay
 		return nullptr;
 	}
 };
-
-#endif // CC_GENERIC_GL_DISPLAY

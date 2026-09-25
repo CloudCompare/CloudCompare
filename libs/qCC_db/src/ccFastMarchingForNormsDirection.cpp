@@ -15,24 +15,25 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccFastMarchingForNormsDirection.h"
-
-// CCCoreLib
-#include "Neighbourhood.h"
+#include "../include/ccFastMarchingForNormsDirection.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccLog.h"
-#include "ccNormalVectors.h"
-#include "ccOctree.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#ifdef QT_DEBUG
-#include "ccScalarField.h"
-#endif
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccLog.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccOctree.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
 
-// system
+// CCCoreLib
+#include <Neighbourhood.h>
+
+// System
 #include <cassert>
+
+#ifdef QT_DEBUG
+#include "../include/ccScalarField.h"
+#endif
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
     : CCCoreLib::FastMarching()

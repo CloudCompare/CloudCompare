@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GENERIC_POINT_CLOUD_HEADER
-#define CC_GENERIC_POINT_CLOUD_HEADER
-
 // Local
-#include "ccAdvancedTypes.h"
+#include "ccBasicTypes.h"
 #include "ccOctree.h"
 #include "ccShiftedObject.h"
 
@@ -306,5 +305,3 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;
 };
-
-#endif // CC_GENERIC_POINT_CLOUD_HEADER

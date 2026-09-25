@@ -15,17 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScalesManager.h"
+#include "../include/ccColorScalesManager.h"
 
 // Local
-#include "ccLog.h"
-#include "ccSingleton.h"
-
-// Qt
-#include <QSettings>
+#include "../include/ccLog.h"
+#include "../include/ccSingleton.h"
 
 // CCCoreLib
 #include <MeshSamplingTools.h>
+
+// Qt
+#include <QSettings>
 
 // System
 #include <assert.h>

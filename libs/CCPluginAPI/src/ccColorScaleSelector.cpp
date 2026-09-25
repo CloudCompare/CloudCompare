@@ -15,15 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScaleSelector.h"
+#include "../include/ccColorScaleSelector.h"
+
+// qCC_db
+#include <ccColorScalesManager.h>
 
 // Qt
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QToolButton>
-
-// Local
-#include "ccColorScalesManager.h"
 
 ccColorScaleSelector::ccColorScaleSelector(ccColorScalesManager* manager, QWidget* parent, QString defaultButtonIconPath /*=QString()*/)
     : QFrame(parent)

@@ -15,19 +15,19 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccRenderToFileDlg.h"
+#include "../include/ccRenderToFileDlg.h"
 
 // Ui
 #include "ui_renderToFileDialog.h"
 
 // Local
-#include "ccInfoDlg.h"
-
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
+#include "../include/ccInfoDlg.h"
 
 // qCC_db
 #include <ccLog.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QFileDialog>

@@ -15,10 +15,9 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
-#include "ccInfoDlg.h"
+#include "../include/ccInfoDlg.h"
 
-// ui
+// Ui
 #include "ui_infoDlg.h"
 
 ccInfoDlg::ccInfoDlg(QWidget* parent)

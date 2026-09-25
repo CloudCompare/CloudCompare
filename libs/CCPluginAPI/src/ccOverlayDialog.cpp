@@ -15,13 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOverlayDialog.h"
-
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
+#include "../include/ccOverlayDialog.h"
 
 // qCC_db
 #include <ccLog.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QApplication>
@@ -29,7 +29,7 @@
 #include <QKeyEvent>
 #include <QShortcut>
 
-// system
+// System
 #include <cassert>
 
 ccOverlayDialog::ccOverlayDialog(QWidget* parent /*=nullptr*/, Qt::WindowFlags flags /*=Qt::FramelessWindowHint | Qt::Tool*/)

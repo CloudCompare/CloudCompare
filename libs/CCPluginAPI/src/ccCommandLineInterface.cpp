@@ -15,11 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+#include "../include/ccCommandLineInterface.h"
 
-#include "ccArgumentParser.h"
-#include "ccGenericMesh.h"
+// Local
+#include "../include/ccArgumentParser.h"
 
+// qCC_db
+#include <ccGenericMesh.h>
+
+// Qt
 #include <QDir>
 
 namespace

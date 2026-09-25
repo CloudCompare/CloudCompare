@@ -17,7 +17,7 @@
 
 // Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
 
-#include "ccColorScaleEditorWidget.h"
+#include "../include/ccColorScaleEditorWidget.h"
 
 // Qt
 #include <QColorDialog>

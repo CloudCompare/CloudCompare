@@ -15,17 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScaleEditorDlg.h"
+#include "../include/ccColorScaleEditorDlg.h"
 
+// Ui
 #include "ui_colorScaleEditorDlg.h"
 
-// local
-#include "ccColorScaleEditorWidget.h"
-#include "ccPersistentSettings.h"
-
-// common
-#include <ccMainAppInterface.h>
-#include <ccQtHelpers.h>
+// Local
+#include "../include/ccColorScaleEditorWidget.h"
+#include "../include/ccMainAppInterface.h"
+#include "../include/ccPersistentSettings.h"
+#include "../include/ccQtHelpers.h"
 
 // qCC_db
 #include <ccColorScalesManager.h>

@@ -18,13 +18,14 @@
 
 // Inspired from ccColorScaleEditorWidget by Richard Steffen (LGPL 2.1)
 
+// Local
 #include "CCPluginAPI.h"
-
-// Qt
-#include <QWidget>
 
 // qCC_db
 #include <ccColorScale.h>
+
+// Qt
+#include <QWidget>
 
 //! Color scale element as a widget
 class CCPLUGIN_LIB_API ColorScaleElementSlider : public QWidget

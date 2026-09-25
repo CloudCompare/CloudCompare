@@ -15,10 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDefaultPluginInterface.h"
+#include "../include/ccDefaultPluginInterface.h"
 
-#include "ccLog.h"
+// qCC_db
+#include <ccLog.h>
 
+// Qt
 #include <QDebug>
 #include <QFile>
 #include <QJsonArray>

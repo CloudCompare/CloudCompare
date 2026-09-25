@@ -28,14 +28,17 @@
 //
 /*****************************************************************/
 
-#include "CCFbo.h"
-
 // Local
+#include "CCFbo.h"
 #include "ccFrameBufferObject.h"
 #include "ccGlFilter.h"
 #include "ccShader.h"
 
-// system
+// Qt
+#include <QOpenGLFunctions_2_1>
+#include <QString>
+
+// System
 #include <vector>
 
 //! Bilateral filer (shader)

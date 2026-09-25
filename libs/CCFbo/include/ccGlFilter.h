@@ -16,10 +16,14 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCFbo.h"
 
 // Qt
 #include <QString>
+
+// System
+#include <utility>
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to

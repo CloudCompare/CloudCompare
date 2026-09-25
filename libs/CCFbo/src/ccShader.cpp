@@ -15,15 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccShader.h"
+#include "../include/ccShader.h"
 
-// Qt
-#include <QFile>
-
-// system
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
+// System
+#include <utility>
 
 ccShader::ccShader(QObject* parent /*=nullptr*/)
     : QOpenGLShaderProgram(parent)

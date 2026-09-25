@@ -39,9 +39,9 @@ bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QStr
 	return loadProgram(std::move(vertFilename), std::move(fragFilename), error);
 }
 
-bool ccShader::loadProgram(QString vertexShaderFile, QString fragShaderFile, QString& error)
+bool ccShader::loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error)
 {
-	if (!vertexShaderFile.isEmpty() && !addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFile))
+	if (!vertShaderFile.isEmpty() && !addShaderFromSourceFile(QOpenGLShader::Vertex, vertShaderFile))
 	{
 		error = log();
 		return false;

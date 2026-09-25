@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorRampShader.h"
+#include "../include/ccColorRampShader.h"
 
 // Local
-#include "ccGLDrawContext.h"
+#include "../include/ccGLDrawContext.h"
 
 // Qt
 #include <QOpenGLFunctions_2_1>

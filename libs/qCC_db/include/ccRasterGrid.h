@@ -17,14 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
+// Local
 #include "ccBBox.h"
 #include "qCC_db.h"
 
 // CCCoreLib
 #include <Kriging.h>
 
-// system
+// System
 #include <limits>
 
 class ccGenericPointCloud;

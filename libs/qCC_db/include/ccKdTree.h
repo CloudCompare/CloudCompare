@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <TrueKdTree.h>
-
 // Local
 #include "ccHObject.h"
+
+// CCCoreLib
+#include <TrueKdTree.h>
 
 // System
 #include <unordered_set>

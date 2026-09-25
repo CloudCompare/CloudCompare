@@ -15,9 +15,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDepthBuffer.h"
+#include "../include/ccDepthBuffer.h"
 
-// algorithm
+// System
 #include <cstring>
 #include <vector>
 

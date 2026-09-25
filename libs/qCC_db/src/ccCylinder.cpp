@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCylinder.h"
+#include "../include/ccCylinder.h"
 
 ccCylinder::ccCylinder(PointCoordinateType radius,
                        PointCoordinateType height,

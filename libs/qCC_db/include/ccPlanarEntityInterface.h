@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccGLDrawContext.h"
+
 // CCCoreLib
 #include <CCGeom.h>
-
-// qCC_gl
-#include <ccGLDrawContext.h>
 
 //! Interface for a planar entity
 class ccPlanarEntityInterface

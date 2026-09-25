@@ -17,11 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccIncludeGL.h"
-
 // Local
 #include "ccColorTypes.h"
+#include "ccIncludeGL.h"
 #include "ccViewportParameters.h"
 
 // Qt

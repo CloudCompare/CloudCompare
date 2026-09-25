@@ -17,14 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccAdvancedTypes.h"
+
 // CCCoreLib
 #include <DgmOctree.h>
 #include <FastMarching.h>
 
-// qCC_db
-#include "ccAdvancedTypes.h"
-
-// system
+// System
 #include <vector>
 
 class ccGenericPointCloud;

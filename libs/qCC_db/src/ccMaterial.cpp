@@ -15,12 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccIncludeGL.h"
+#include "../include/ccMaterial.h"
 
 // Local
-#include "ccMaterial.h"
-#include "ccMaterialDB.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccMaterialDB.h"
 
 // Qt
 #include <QOpenGLVersionFunctionsFactory>

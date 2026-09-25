@@ -19,9 +19,7 @@
 
 // Local
 #include "ccHObject.h"
-
-// CCCoreLib
-#include <ccOctree.h>
+#include "ccOctree.h"
 
 //! Octree structure proxy
 /** Implements ccHObject while holding a (shared) pointer on the octree instance (--> safer)

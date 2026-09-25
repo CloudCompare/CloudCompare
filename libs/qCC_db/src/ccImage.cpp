@@ -15,11 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccImage.h"
+#include "../include/ccImage.h"
 
 // Local
-#include "ccCameraSensor.h"
+#include "../include/ccCameraSensor.h"
 
 // Qt
 #include <QFileInfo>

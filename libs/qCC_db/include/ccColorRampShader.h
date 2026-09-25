@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCFbo
-#include <ccShader.h>
-
 // Local
 #include "ccColorScale.h"
+
+// CCFbo
+#include <ccShader.h>
 
 class QCC_DB_LIB_API ccColorRampShader : public ccShader
 {

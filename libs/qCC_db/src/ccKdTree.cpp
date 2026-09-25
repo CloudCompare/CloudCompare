@@ -15,12 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccKdTree.h"
+#include "../include/ccKdTree.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccPointCloud.h"
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
     : CCCoreLib::TrueKdTree(aCloud)

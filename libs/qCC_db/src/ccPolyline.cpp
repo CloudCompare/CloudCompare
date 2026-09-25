@@ -15,14 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccPolyline.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccPolyline.h"
 
 // Local
-#include "ccCone.h"
-#include "ccPointCloud.h"
+#include "../include/ccCone.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccPointCloud.h"
 
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : Polyline(associatedCloud)

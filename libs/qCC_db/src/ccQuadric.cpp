@@ -15,17 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always on top!
-#include "ccQuadric.h"
+#include "../include/ccQuadric.h"
 
-// qCC_db
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPointCloud.h"
 
-// CCLIB
-#include "DistanceComputationTools.h"
-#include "Neighbourhood.h"
+// CCCoreLib
+#include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 
-// system
+// System
 #include <string.h>
 
 ccQuadric::ccQuadric(CCVector2                      minCorner,

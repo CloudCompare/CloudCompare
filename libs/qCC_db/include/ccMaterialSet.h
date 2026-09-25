@@ -18,8 +18,10 @@
 // ##########################################################################
 
 // Local
-#include "CCShareable.h"
 #include "ccHObject.h"
+
+// CCCoreLib
+#include <CCShareable.h>
 
 class ccGenericGLDisplay;
 

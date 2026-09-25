@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccViewportParameters.h"
+#include "../include/ccViewportParameters.h"
 
 // CCCoreLib
 #include <CCConst.h>

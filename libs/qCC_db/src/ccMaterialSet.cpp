@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccMaterialSet.h"
+#include "../include/ccMaterialSet.h"
 
 // Qt
 #include <QFileInfo>

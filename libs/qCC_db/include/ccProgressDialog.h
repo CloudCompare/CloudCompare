@@ -20,13 +20,13 @@
 // Local
 #include "qCC_db.h"
 
+// CCCoreLib
+#include <GenericProgressCallback.h>
+
 // Qt
 #include <QAtomicInt>
 #include <QProgressDialog>
 #include <QTimer>
-
-// CCCoreLib
-#include <GenericProgressCallback.h>
 
 //! Graphical progress indicator (thread-safe)
 /** Implements the GenericProgressCallback interface, in order

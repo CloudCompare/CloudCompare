@@ -15,15 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccScalarField.h"
+#include "../include/ccScalarField.h"
 
 // Local
-#include "ccColorScalesManager.h"
+#include "../include/ccColorScalesManager.h"
 
 // CCCoreLib
 #include <CCConst.h>
 
-// system
+// System
 #include <algorithm>
 
 using namespace CCCoreLib;

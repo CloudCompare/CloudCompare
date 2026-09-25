@@ -15,8 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "cc2DViewportObject.h"
+#include "../include/cc2DViewportObject.h"
 
 cc2DViewportObject::cc2DViewportObject(QString name /*=QString()*/)
     : ccHObject(name)

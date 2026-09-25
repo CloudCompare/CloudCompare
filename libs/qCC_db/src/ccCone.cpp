@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCone.h"
+#include "../include/ccCone.h"
 
 // Local
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
 
 ccCone::ccCone(PointCoordinateType bottomRadius,
                PointCoordinateType topRadius,

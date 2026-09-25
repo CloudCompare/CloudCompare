@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPointCloudLOD.h"
+#include "../include/ccPointCloudLOD.h"
 
 // Local
-#include "ccFrustum.h"
-#include "ccPointCloud.h"
+#include "../include/ccFrustum.h"
+#include "../include/ccPointCloud.h"
 
 // Qt
 #include <QAtomicInt>

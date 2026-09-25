@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIndexedTransformationBuffer.h"
+#include "../include/ccIndexedTransformationBuffer.h"
 
 // Local
-#include "ccIncludeGL.h"
+#include "../include/ccIncludeGL.h"
 
 // CCCoreLib
 #include <ParallelSort.h>

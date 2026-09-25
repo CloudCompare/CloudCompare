@@ -15,9 +15,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccMeshGroup.h"
+#include "../include/ccMeshGroup.h"
 
-// system
+// System
 #include <cassert>
 
 void ccMeshGroup::drawMeOnly(CC_DRAW_CONTEXT& context)

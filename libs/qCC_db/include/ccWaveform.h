@@ -26,7 +26,7 @@
 // CCCoreLib
 #include <CCGeom.h>
 
-// system
+// System
 #include <cstdint>
 #include <cstdlib>
 

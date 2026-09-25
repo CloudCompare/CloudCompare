@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPointCloudInterpolator.h"
+#include "../include/ccPointCloudInterpolator.h"
 
-// qCC_db
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPointCloud.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
 #include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
-#include <ccScalarField.h>
 
 struct SFPair
 {

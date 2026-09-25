@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIndexedTransformation.h"
+#include "../include/ccIndexedTransformation.h"
 
 // Qt
 #include <QFile>

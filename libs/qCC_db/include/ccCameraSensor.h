@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
+// Local
 #include "ccOctree.h"
 #include "ccSensor.h"
 
-// StdLib
+// System
 #include <unordered_set>
 
 class ccImage;

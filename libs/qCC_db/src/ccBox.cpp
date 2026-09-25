@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccBox.h"
+#include "../include/ccBox.h"
 
-// qCC_db
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPointCloud.h"
 
 ccBox::ccBox(const CCVector3&  dims,
              const ccGLMatrix* transMat /*=nullptr*/,

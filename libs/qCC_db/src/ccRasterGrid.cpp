@@ -15,17 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccRasterGrid.h"
+#include "../include/ccRasterGrid.h"
+
+// Local
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <Delaunay2dMesh.h>
 #include <ParallelSort.h>
-
-// qCC_db
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
 
 // Qt
 #include <QCoreApplication>

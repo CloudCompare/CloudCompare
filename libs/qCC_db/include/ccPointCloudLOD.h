@@ -24,7 +24,7 @@
 // Qt
 #include <QMutex>
 
-// system
+// System
 #include <array>
 #include <cstdint>
 

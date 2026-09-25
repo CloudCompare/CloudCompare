@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccWaveform.h"
+#include "../include/ccWaveform.h"
 
 // Qt
 #include <QDataStream>

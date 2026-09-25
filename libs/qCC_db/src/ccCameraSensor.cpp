@@ -15,15 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCameraSensor.h"
+#include "../include/ccCameraSensor.h"
 
-#include <cmath>
-
-// local
-#include "ccGenericGLDisplay.h"
-#include "ccImage.h"
-#include "ccMesh.h"
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccImage.h"
+#include "../include/ccMesh.h"
+#include "../include/ccPointCloud.h"
 
 // CCCoreLib
 #include <ConjugateGradient.h>
@@ -33,6 +31,9 @@
 #include <QPointF>
 #include <QSizeF>
 #include <QTextStream>
+
+// System
+#include <cmath>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
     : vertFocal_pix(1.0f)

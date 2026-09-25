@@ -21,7 +21,7 @@
 #include "ccHObject.h"
 #include "ccIndexedTransformation.h"
 
-// system
+// System
 #include <cfloat>
 
 //! Indexed Transformation buffer

@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccColorScale.h"
+
 // CCCoreLib
 #include <ScalarField.h>
-
-// qCC_db
-#include "ccColorScale.h"
 
 //! A scalar field associated to display-related parameters
 /** Extends the CCCoreLib::ScalarField object.

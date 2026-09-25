@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccGriddedTools.h"
+#include "../include/ccGriddedTools.h"
 
 // Local
-#include "ccGBLSensor.h"
-#include "ccLog.h"
+#include "../include/ccGBLSensor.h"
+#include "../include/ccLog.h"
 
 //! Association of an angle and the corresponding number of rows/columns
 using AngleAndSpan = std::pair<PointCoordinateType, unsigned>;

@@ -17,13 +17,13 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <PointProjectionTools.h>
-#include <SimpleTriangle.h>
-
 // Local
 #include "ccGenericMesh.h"
 #include "ccPointCloud.h"
+
+// CCCoreLib
+#include <PointProjectionTools.h>
+#include <SimpleTriangle.h>
 
 class ccProgressDialog;
 class ccPolyline;

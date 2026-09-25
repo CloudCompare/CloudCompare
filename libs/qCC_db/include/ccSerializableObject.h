@@ -24,14 +24,14 @@
 #include <CCPlatform.h>
 #include <CCTypes.h>
 
-// System
-#include <cassert>
-#include <cstdint>
-
 // Qt
 #include <QDataStream>
 #include <QFile>
 #include <QMultiMap>
+
+// System
+#include <cassert>
+#include <cstdint>
 
 //! Serializable object interface
 class ccSerializableObject

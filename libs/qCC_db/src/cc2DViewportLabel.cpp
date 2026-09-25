@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "cc2DViewportLabel.h"
+#include "../include/cc2DViewportLabel.h"
 
 // Local
-#include "ccGenericGLDisplay.h"
-#include "ccIncludeGL.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccIncludeGL.h"
 
 // CCCoreLib
 #include <CCConst.h>

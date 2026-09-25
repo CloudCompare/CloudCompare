@@ -17,21 +17,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifdef _MSC_VER
-// To get rid of the warnings about dominant inheritance
-#pragma warning(disable : 4250)
-#endif
-
-// CCCoreLib
-#include <PointCloudTpl.h>
-
 // Local
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
 
+// CCCoreLib
+#include <PointCloudTpl.h>
+
 // Qt
 #include <QOpenGLBuffer>
+
+#ifdef _MSC_VER
+// To get rid of the warnings about dominant inheritance
+#pragma warning(disable : 4250)
+#endif
 
 class ccScalarField;
 class ccPolyline;

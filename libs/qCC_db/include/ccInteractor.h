@@ -18,8 +18,10 @@
 // ##########################################################################
 
 // Local
-#include "CCGeom.h"
 #include "qCC_db.h"
+
+// CCCoreLib
+#include <CCGeom.h>
 
 // Qt
 #include <Qt>

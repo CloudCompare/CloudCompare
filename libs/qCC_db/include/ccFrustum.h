@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <RayAndBox.h>
-
 // Local
 #include "ccGLMatrix.h"
+
+// CCCoreLib
+#include <RayAndBox.h>
 
 class Plane
 {

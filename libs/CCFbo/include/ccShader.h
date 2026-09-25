@@ -34,7 +34,7 @@ class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 
   public:
 	//! Default constructor
-	ccShader(QObject* parent = 0);
+	ccShader(QObject* parent = nullptr);
 
 	//! Destructor
 	~ccShader() override = default;

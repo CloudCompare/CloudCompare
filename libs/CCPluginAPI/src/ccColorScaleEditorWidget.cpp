@@ -380,10 +380,9 @@ void SlidersWidget::updateAllSlidersPos()
 
 	int rectLength = length();
 
-	for (auto it = m_sliders->elements().begin(); it != m_sliders->elements().end(); ++it)
+	for (auto* slider : m_sliders->elements())
 	{
-		ColorScaleElementSlider* slider = *it;
-		int                      pos    = static_cast<int>(slider->getRelativePos() * rectLength);
+		int pos = static_cast<int>(slider->getRelativePos() * rectLength);
 
 		if (m_orientation == Qt::Horizontal)
 		{

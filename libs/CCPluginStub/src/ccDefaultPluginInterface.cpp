@@ -40,7 +40,7 @@ class ccDefaultPluginData
 
 		const QJsonArray array = doc.object().value(fieldName).toArray();
 
-		for (const QJsonValue& value : array)
+		for (const auto& value : array)
 		{
 			const QJsonObject object = value.toObject();
 
@@ -58,7 +58,7 @@ class ccDefaultPluginData
 
 		const QJsonArray array = doc.object().value(fieldName).toArray();
 
-		for (const QJsonValue& value : array)
+		for (const auto& value : array)
 		{
 			const QJsonObject object = value.toObject();
 

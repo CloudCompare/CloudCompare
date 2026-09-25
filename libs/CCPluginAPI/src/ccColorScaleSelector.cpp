@@ -65,14 +65,14 @@ void ccColorScaleSelector::init()
 		// sort the scales by their name
 		// DGM: See doc about qSort --> "An alternative to using qSort() is to put the items to sort in a QMap, using the sort key as the QMap key."
 		QMap<QString, QString> scales;
-		for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().constBegin(); it != m_manager->map().constEnd(); ++it)
+		for (const auto& scale : m_manager->map())
 		{
-			scales.insert((*it)->getName(), (*it)->getUuid());
+			scales.insert(scale->getName(), scale->getUuid());
 		}
 
-		for (QMap<QString, QString>::const_iterator scale = scales.constBegin(); scale != scales.constEnd(); ++scale)
+		for (const auto& scale : scales.asKeyValueRange())
 		{
-			m_comboBox->addItem(scale.key(), scale.value());
+			m_comboBox->addItem(scale.first, scale.second);
 		}
 
 		connect(m_comboBox, qOverload<int>(&QComboBox::activated), this, &ccColorScaleSelector::colorScaleSelected);

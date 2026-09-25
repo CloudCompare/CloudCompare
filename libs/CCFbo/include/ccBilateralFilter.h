@@ -55,16 +55,16 @@ class CCFBO_LIB_API ccBilateralFilter : public ccGlFilter
 	**/
 	ccBilateralFilter();
 	//! Destructor
-	virtual ~ccBilateralFilter() = default;
+	~ccBilateralFilter() override = default;
 
 	//! Resets the filter
 	void reset();
 
 	// inherited from ccGlFilter
-	virtual ccGlFilter*   clone() const override;
-	virtual bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
-	virtual void          shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
-	inline virtual GLuint getTexture() override
+	ccGlFilter*   clone() const override;
+	bool          init(unsigned width, unsigned height, const QString& shadersPath, QString& error, bool silent) override;
+	void          shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters) override;
+	inline GLuint getTexture() override
 	{
 		return m_fbo.getColorTexture();
 	}

@@ -37,7 +37,7 @@ class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 	ccShader(QObject* parent = 0);
 
 	//! Destructor
-	virtual ~ccShader() = default;
+	~ccShader() override = default;
 
 	//! Creates program from two shader files with same base filename
 	/** Path and extensions (.vert and .frag) are automatically

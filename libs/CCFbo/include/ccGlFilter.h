@@ -41,9 +41,7 @@ class CCFBO_LIB_API ccGlFilter
 	}
 
 	//! Default destructor
-	virtual ~ccGlFilter()
-	{
-	}
+	virtual ~ccGlFilter() = default;
 
 	//! Returns filter name
 	inline virtual QString getDescription() const

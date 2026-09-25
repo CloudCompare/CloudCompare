@@ -54,7 +54,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
                                                    QWidget*              parent /*=nullptr*/)
     : QDialog(parent)
     , m_manager(manager)
-    , m_colorScale(currentScale)
+    , m_colorScale(std::move(currentScale))
     , m_scaleWidget(new ccColorScaleEditorWidget(this, Qt::Horizontal))
     , m_associatedSF(nullptr)
     , m_modified(false)
@@ -238,7 +238,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		}
 	}
 
-	m_colorScale = currentScale;
+	m_colorScale = std::move(currentScale);
 	setModified(false);
 
 	// make sure combo-box is up to date

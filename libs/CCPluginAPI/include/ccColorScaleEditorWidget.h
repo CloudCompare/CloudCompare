@@ -145,7 +145,7 @@ class CCPLUGIN_LIB_API ColorScaleEditorBaseWidget : public QWidget
 	                           int                            margin,
 	                           QWidget*                       parent = nullptr)
 	    : QWidget(parent)
-	    , m_sliders(sliders)
+	    , m_sliders(std::move(sliders))
 	    , m_orientation(orientation)
 	    , m_margin(margin)
 	{
@@ -160,7 +160,7 @@ class CCPLUGIN_LIB_API ColorScaleEditorBaseWidget : public QWidget
 	//! Sets associated sliders set
 	virtual void setSliders(SharedColorScaleElementSliders sliders)
 	{
-		m_sliders = sliders;
+		m_sliders = std::move(sliders);
 		update();
 	}
 

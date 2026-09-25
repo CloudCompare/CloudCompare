@@ -36,7 +36,7 @@ bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QStr
 	QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath, shaderBaseFilename);
 	QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath, shaderBaseFilename);
 
-	return loadProgram(vertFilename, fragFilename, error);
+	return loadProgram(std::move(vertFilename), std::move(fragFilename), error);
 }
 
 bool ccShader::loadProgram(QString vertexShaderFile, QString fragShaderFile, QString& error)

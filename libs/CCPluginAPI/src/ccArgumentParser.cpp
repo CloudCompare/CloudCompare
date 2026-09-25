@@ -14,10 +14,13 @@
 // #                   COPYRIGHT: CloudCompare project                      #
 // #                                                                        #
 // ##########################################################################
-#include "ccArgumentParser.h"
+#include "../include/ccArgumentParser.h"
 
-#include <cassert>
+// qCC_db
 #include <ccLog.h>
+
+// System
+#include <cassert>
 
 namespace
 {
@@ -101,7 +104,7 @@ ccArgumentParser::ccArgumentParser(QStringList& arguments)
 {
 }
 
-const QString ccArgumentParser::peek() const
+QString ccArgumentParser::peek() const
 {
 	if (m_arguments.isEmpty())
 	{

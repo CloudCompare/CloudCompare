@@ -15,17 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScaleEditorDlg.h"
+#include "../include/ccColorScaleEditorDlg.h"
 
+// Ui
 #include "ui_colorScaleEditorDlg.h"
 
-// local
-#include "ccColorScaleEditorWidget.h"
-#include "ccPersistentSettings.h"
-
-// common
-#include <ccMainAppInterface.h>
-#include <ccQtHelpers.h>
+// Local
+#include "../include/ccColorScaleEditorWidget.h"
+#include "../include/ccMainAppInterface.h"
+#include "../include/ccPersistentSettings.h"
+#include "../include/ccQtHelpers.h"
 
 // qCC_db
 #include <ccColorScalesManager.h>
@@ -54,7 +53,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
                                                    QWidget*              parent /*=nullptr*/)
     : QDialog(parent)
     , m_manager(manager)
-    , m_colorScale(currentScale)
+    , m_colorScale(std::move(currentScale))
     , m_scaleWidget(new ccColorScaleEditorWidget(this, Qt::Horizontal))
     , m_associatedSF(nullptr)
     , m_modified(false)
@@ -141,8 +140,8 @@ void ccColorScaleEditorDialog::updateMainComboBox()
 
 	// populate combo box with scale names (and UUID)
 	assert(m_manager);
-	for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().constBegin(); it != m_manager->map().constEnd(); ++it)
-		m_ui->rampComboBox->addItem((*it)->getName(), (*it)->getUuid());
+	for (const auto& scale : m_manager->map())
+		m_ui->rampComboBox->addItem(scale->getName(), scale->getUuid());
 
 	// find the currently selected scale in the new 'list'
 	int pos = -1;
@@ -238,7 +237,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		}
 	}
 
-	m_colorScale = currentScale;
+	m_colorScale = std::move(currentScale);
 	setModified(false);
 
 	// make sure combo-box is up to date
@@ -297,7 +296,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 		{
 			QString text;
 			size_t  index = 0;
-			for (ccColorScale::LabelSet::const_iterator it = customLabels.begin(); it != customLabels.end(); ++it, ++index)
+			for (auto it = customLabels.cbegin(); it != customLabels.cend(); ++it, ++index)
 			{
 				if (index != 0)
 					text += QString("\n");
@@ -664,9 +663,9 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 	{
 		ccHObject::Container clouds;
 		m_mainApp->dbRootObject()->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true);
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (auto* entity : clouds)
 		{
-			ccPointCloud* cloud = static_cast<ccPointCloud*>(clouds[i]);
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
 				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(j));

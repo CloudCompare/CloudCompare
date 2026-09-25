@@ -15,15 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScaleSelector.h"
+#include "../include/ccColorScaleSelector.h"
+
+// qCC_db
+#include <ccColorScalesManager.h>
 
 // Qt
 #include <QComboBox>
 #include <QHBoxLayout>
 #include <QToolButton>
-
-// Local
-#include "ccColorScalesManager.h"
 
 ccColorScaleSelector::ccColorScaleSelector(ccColorScalesManager* manager, QWidget* parent, QString defaultButtonIconPath /*=QString()*/)
     : QFrame(parent)
@@ -65,14 +65,14 @@ void ccColorScaleSelector::init()
 		// sort the scales by their name
 		// DGM: See doc about qSort --> "An alternative to using qSort() is to put the items to sort in a QMap, using the sort key as the QMap key."
 		QMap<QString, QString> scales;
-		for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().constBegin(); it != m_manager->map().constEnd(); ++it)
+		for (const auto& scale : m_manager->map())
 		{
-			scales.insert((*it)->getName(), (*it)->getUuid());
+			scales.insert(scale->getName(), scale->getUuid());
 		}
 
-		for (QMap<QString, QString>::const_iterator scale = scales.constBegin(); scale != scales.constEnd(); ++scale)
+		for (const auto& scale : scales.asKeyValueRange())
 		{
-			m_comboBox->addItem(scale.key(), scale.value());
+			m_comboBox->addItem(scale.first, scale.second);
 		}
 
 		connect(m_comboBox, qOverload<int>(&QComboBox::activated), this, &ccColorScaleSelector::colorScaleSelected);
@@ -93,7 +93,7 @@ ccColorScale::Shared ccColorScaleSelector::getSelectedScale() const
 ccColorScale::Shared ccColorScaleSelector::getScale(int index) const
 {
 	if (!m_comboBox || index < 0 || index >= m_comboBox->count())
-		return ccColorScale::Shared(nullptr);
+		return {nullptr};
 
 	// get UUID associated to the combo-box item
 	QString UUID = m_comboBox->itemData(index).toString();

@@ -17,23 +17,17 @@
 
 #include "../include/ccInfoDlg.h"
 
+// Ui
 #include "ui_infoDlg.h"
 
 ccInfoDlg::ccInfoDlg(QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui::InfoDialog)
+    , m_ui(std::make_unique<Ui::InfoDialog>())
 {
 	m_ui->setupUi(this);
 }
 
-ccInfoDlg::~ccInfoDlg()
-{
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = nullptr;
-	}
-}
+ccInfoDlg::~ccInfoDlg() = default;
 
 void ccInfoDlg::showText(const QString& text)
 {

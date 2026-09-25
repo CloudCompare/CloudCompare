@@ -16,6 +16,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
 
 // Qt
@@ -64,5 +65,5 @@ class CCPLUGIN_LIB_API ccRenderToFileDlg : public QDialog
 	QString m_currentPath;
 	QString m_filters;
 
-	Ui::RenderToFileDialog* m_ui;
+	std::unique_ptr<Ui::RenderToFileDialog> m_ui;
 };

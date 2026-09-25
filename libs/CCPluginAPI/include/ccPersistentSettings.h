@@ -22,111 +22,111 @@
 //! Persistent settings key (to be used with QSettings)
 namespace ccPS
 {
-	inline const QString LoadFile()
+	inline QString LoadFile()
 	{
 		return QStringLiteral("LoadFile");
 	}
-	inline const QString SaveFile()
+	inline QString SaveFile()
 	{
 		return QStringLiteral("SaveFile");
 	}
-	inline const QString MainWinGeom()
+	inline QString MainWinGeom()
 	{
 		return QStringLiteral("mainWindowGeometry");
 	}
-	inline const QString MainWinState()
+	inline QString MainWinState()
 	{
 		return QStringLiteral("mainWindowState");
 	}
-	inline const QString DoNotRestoreWindowGeometry()
+	inline QString DoNotRestoreWindowGeometry()
 	{
 		return QStringLiteral("doNotRestoreWindowGeometry");
 	}
-	inline const QString AppStyle()
+	inline QString AppStyle()
 	{
 		return QStringLiteral("AppStyle");
 	}
-	inline const QString CurrentPath()
+	inline QString CurrentPath()
 	{
 		return QStringLiteral("currentPath");
 	}
-	inline const QString SelectedInputFilter()
+	inline QString SelectedInputFilter()
 	{
 		return QStringLiteral("selectedInputFilter");
 	}
-	inline const QString SelectedOutputFilterCloud()
+	inline QString SelectedOutputFilterCloud()
 	{
 		return QStringLiteral("selectedOutputFilterCloud");
 	}
-	inline const QString SelectedOutputFilterMesh()
+	inline QString SelectedOutputFilterMesh()
 	{
 		return QStringLiteral("selectedOutputFilterMesh");
 	}
-	inline const QString SelectedOutputFilterImage()
+	inline QString SelectedOutputFilterImage()
 	{
 		return QStringLiteral("selectedOutputFilterImage");
 	}
-	inline const QString SelectedOutputFilterPoly()
+	inline QString SelectedOutputFilterPoly()
 	{
 		return QStringLiteral("selectedOutputFilterPoly");
 	}
-	inline const QString DuplicatePointsGroup()
+	inline QString DuplicatePointsGroup()
 	{
 		return QStringLiteral("duplicatePoints");
 	}
-	inline const QString DuplicatePointsMinDist()
+	inline QString DuplicatePointsMinDist()
 	{
 		return QStringLiteral("minDist");
 	}
-	inline const QString HeightGridGeneration()
+	inline QString HeightGridGeneration()
 	{
 		return QStringLiteral("HeightGridGeneration");
 	}
-	inline const QString VolumeCalculation()
+	inline QString VolumeCalculation()
 	{
 		return QStringLiteral("VolumeCalculation");
 	}
-	inline const QString Console()
+	inline QString Console()
 	{
 		return QStringLiteral("Console");
 	}
-	inline const QString GlobalShift()
+	inline QString GlobalShift()
 	{
 		return QStringLiteral("GlobalShift");
 	}
-	inline const QString MaxAbsCoord()
+	inline QString MaxAbsCoord()
 	{
 		return QStringLiteral("MaxAbsCoord");
 	}
-	inline const QString MaxAbsDiag()
+	inline QString MaxAbsDiag()
 	{
 		return QStringLiteral("MaxAbsDiag");
 	}
-	inline const QString AutoPickRotationCenter()
+	inline QString AutoPickRotationCenter()
 	{
 		return QStringLiteral("AutoPickRotationCenter");
 	}
-	inline const QString View3dRotationAxisLocked()
+	inline QString View3dRotationAxisLocked()
 	{
 		return QStringLiteral("View3dRotationAxisLocked");
 	}
-	inline const QString View3dLockedAxisRotation()
+	inline QString View3dLockedAxisRotation()
 	{
 		return QStringLiteral("View3dLockedAxisRotation");
 	}
-	inline const QString Options()
+	inline QString Options()
 	{
 		return QStringLiteral("Options");
 	}
-	inline const QString Plugins()
+	inline QString Plugins()
 	{
 		return QStringLiteral("Plugins");
 	}
-	inline const QString Translation()
+	inline QString Translation()
 	{
 		return QStringLiteral("Translation");
 	}
-	inline const QString Shortcuts()
+	inline QString Shortcuts()
 	{
 		return QStringLiteral("Shortcuts");
 	}

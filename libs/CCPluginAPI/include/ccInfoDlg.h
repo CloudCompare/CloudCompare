@@ -16,6 +16,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
 
 // Qt
@@ -40,5 +41,5 @@ class CCPLUGIN_LIB_API ccInfoDlg : public QDialog
 	void showText(const QString& text);
 
   private:
-	Ui::InfoDialog* m_ui;
+	std::unique_ptr<Ui::InfoDialog> m_ui;
 };

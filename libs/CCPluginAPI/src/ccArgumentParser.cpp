@@ -101,7 +101,7 @@ ccArgumentParser::ccArgumentParser(QStringList& arguments)
 {
 }
 
-const QString ccArgumentParser::peek() const
+QString ccArgumentParser::peek() const
 {
 	if (m_arguments.isEmpty())
 	{

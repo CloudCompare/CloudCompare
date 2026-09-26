@@ -4312,10 +4312,14 @@ void ccGLWindowInterface::drawCross()
 	const auto  devicePixelRatio  = getDevicePixelRatio();
 	const float centerCrossLength = CC_DISPLAYED_CENTER_CROSS_LENGTH * static_cast<float>(devicePixelRatio);
 
-	// force line width, and always display the cross on top
+	// force line width
 	glFunc->glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	glFunc->glLineWidth(1.0f);
-	glFunc->glDisable(GL_DEPTH_TEST);
+	if (getDisplayParameters().displayCrossOnTop)
+	{
+		// display the cross on top of the entities
+		glFunc->glDisable(GL_DEPTH_TEST);
+	}
 
 	// cross OpenGL drawing
 	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);

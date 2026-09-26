@@ -270,6 +270,7 @@ Improvements:
 	- Display > Display settings
 		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
 		- new option to choose whether a confirmation dialog (Are you sure?) should appear when deleting entities
+		- new option to always display the middle screen cross on top of the entities (off by default)
 
 	- Quadric model/fitting
 		- improved fitting of quadric functions on points:
@@ -414,14 +415,14 @@ Bug fixes:
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
 		1000 the second time a file was loaded.
-	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
+	- when specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
 	- E57: the local (sensor) pose was not applied to normals at saving time
 	- M3C2:
 		- bug corrected: when the "use other cloud" is checked, do not propose the use of cloud #1 as a possible source for the normals
 		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
-	- Waveform
+	- LAS waveform:
 		- each LAS point with missing waveform data was triggering a warning message
 		- the Waveform picking dialog could display an annoying error message each time a new point was picked
 	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
@@ -441,16 +442,17 @@ Bug fixes:
 	- some SHP files could not be opened due to longer records than specified
 	- DXF files: the 'elevation' of LWPOLYLINE entities was ignored
 	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
-	- When loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion
+	- the middle screen cross was not scaled on high DPI screens, making it hard to see
+	- when loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion
 		for the time being.
-	- Point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
-	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing
+	- point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
+	- in some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing
 		the tool
-	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not
+	- despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not
 		lead to the extraction of the convex hull.
-	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
-	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
-	- The Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
+	- when using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
+	- the sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
+	- the Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
 		(the limits were not checked after the shape refinement step), and it never refined the detected tori
 	- duplicating materials (during cloning, or with Cross Section for section) could lead to the loss of the texture for the source entities
 		(or the destination entity) after the other entity is removed

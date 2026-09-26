@@ -21,24 +21,30 @@
 
 #include "Mouse3DInput.h"
 
+// Local
 #ifdef CC_3DMOUSE_HID
 #include "Mouse3DInput_hid.h"
 #endif
 
-// qCC_db
-#include <ccLog.h>
-// qCC_gl
-#include <ccGLWindowInterface.h>
 // CCCoreLib
 #include <CCPlatform.h>
 
+// qCC_db
+#include <ccLog.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
 // Qt
+#ifndef CC_3DMOUSE_HID
+#include <QAbstractNativeEventFilter>
+#endif
 #include <QApplication>
 #include <QWidget>
 
-// system
-#include <assert.h>
-#include <math.h>
+// System
+#include <cassert>
+#include <cmath>
 #ifdef CC_WINDOWS
 #include <windows.h>
 #endif
@@ -60,7 +66,6 @@ static const double c_3dmouseAngularVelocity = 1.0e-6;
 static Mouse3DInput* s_mouseInputInstance = nullptr;
 
 #ifndef CC_3DMOUSE_HID
-#include <QAbstractNativeEventFilter>
 class RawInputEventFilter : public QAbstractNativeEventFilter
 {
   public:

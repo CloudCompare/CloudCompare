@@ -16,18 +16,20 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
-// Local
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
 
 // qCC_db
 #include <ccGLMatrix.h>
-// qCC_gl
+
+// qCC_glWindow
 #include <ccGLUtils.h>
 
-// system
+// System
 #include <map>
 
 class QMdiSubWindow;

@@ -16,9 +16,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt

@@ -22,24 +22,23 @@
 
 #include "Mouse3DInput_hid.h"
 
+// Local
 #include "Mouse3DInput.h"
-
-// qCC_db
-#include <ccLog.h>
 
 // CCCoreLib
 #include <CCPlatform.h>
 
+// qCC_db
+#include <ccLog.h>
+
 // Qt
 #include <QProcess>
 
-// system
+// System
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
-#include <cstring>
-#include <wchar.h>
 
 // 3DConnexion vendor IDs.
 // Newer devices (since ~2016) use 0x256f. Older devices (SpaceNavigator,

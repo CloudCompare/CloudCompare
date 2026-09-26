@@ -15,20 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPluginManager.h"
+#include "../include/ccPluginManager.h"
 
-#include "ccApplicationBase.h"
+// Local
+#include "../include/ccApplicationBase.h"
 
-// ccPluginAPI
+// CCPluginAPI
 #include <ccPersistentSettings.h>
+
+// CCPluginStub
+#include <ccIOPluginInterface.h>
+#include <ccStdPluginInterface.h>
 
 // qCC_db
 #include <ccExternalFactory.h>
 #include <ccLog.h>
-
-// plugins
-#include "ccIOPluginInterface.h"
-#include "ccStdPluginInterface.h"
 
 // Qt
 #include <QCoreApplication>

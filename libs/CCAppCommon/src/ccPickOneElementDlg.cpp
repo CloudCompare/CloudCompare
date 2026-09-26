@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPickOneElementDlg.h"
+#include "../include/ccPickOneElementDlg.h"
 
-// UI file
-#include <ui_pickOneElementDlg.h>
+// Ui
+#include "ui_pickOneElementDlg.h"
 
 ccPickOneElementDlg::ccPickOneElementDlg(const QString& label,
                                          const QString& windowTitle /*=QString()*/,

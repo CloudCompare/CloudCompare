@@ -15,11 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccStereoModeDlg.h"
+#include "../include/ccStereoModeDlg.h"
 
+// Ui
 #include "ui_stereoModeDlg.h"
 
-// system
+// System
 #include <cassert>
 
 // combo-box items order

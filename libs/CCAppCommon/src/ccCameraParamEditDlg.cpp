@@ -15,25 +15,26 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCameraParamEditDlg.h"
+#include "../include/ccCameraParamEditDlg.h"
 
+// Ui
 #include "ui_cameraParamDlg.h"
-
-// Local
-#include "ccPickingHub.h"
-
-// qCC_db
-#include <ccGLUtils.h>
-#include <ccGenericMesh.h>
-#include <ccHObjectCaster.h>
-#include <ccPointCloud.h>
-
-// qCC_gl
-#include <ccGLWindowInterface.h>
 
 // CCCoreLib
 #include <CCMath.h>
 #include <GenericTriangle.h>
+
+// CCPluginAPI
+#include <ccPickingHub.h>
+
+// qCC_db
+#include <ccGenericMesh.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
+
+// qCC_glWindow
+#include <ccGLUtils.h>
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QMdiSubWindow>

@@ -17,10 +17,16 @@
 
 #include "cc3DMouseManager.h"
 
+// Local
 #include "Mouse3DInput.h"
-#include "ccGLWindowInterface.h"
-#include "ccMainAppInterface.h"
 
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
+// Qt
 #include <QAction>
 #include <QMainWindow>
 #include <QMenu>

@@ -16,12 +16,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "CCAppCommon.h"
-
 // Local
+#include "CCAppCommon.h"
 #include "ccOptions.h"
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGuiParameters.h>
 
 // Qt

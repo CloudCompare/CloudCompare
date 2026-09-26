@@ -16,6 +16,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
 // CCCoreLib
@@ -27,7 +28,7 @@
 // Qt
 #include <QObject>
 
-// system
+// System
 #include <vector>
 
 class ccGLWindowInterface;

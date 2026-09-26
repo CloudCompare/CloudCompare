@@ -22,15 +22,12 @@
 
 #ifdef CC_3DMOUSE_HID
 
+// Local
 #include "Mouse3DInput.h"
 
 // Qt
 #include <QMetaType>
 #include <QThread>
-
-// system
-#include <atomic>
-#include <vector>
 
 // hidapi
 // The in-tree hidapi submodule (extern/hidapi) puts its header directory on the
@@ -38,6 +35,11 @@
 // available as <hidapi.h>. The <hidapi/hidapi.h> form only works when hidapi
 // is installed system-wide (e.g. Homebrew) which we don't want to require.
 #include <hidapi.h>
+
+
+// System
+#include <atomic>
+#include <vector>
 
 class HIDWorker : public QThread
 {

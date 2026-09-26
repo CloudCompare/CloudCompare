@@ -146,5 +146,5 @@ class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog
 	ccPickingHub* m_pickingHub;
 
   private:
-	Ui::CameraParamDlg* m_ui;
+	std::unique_ptr<Ui::CameraParamDlg> m_ui;
 };

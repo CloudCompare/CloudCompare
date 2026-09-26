@@ -110,5 +110,5 @@ class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 	int m_defaultAppStyleIndex;
 
   private:
-	Ui::DisplaySettingsDlg* m_ui;
+	std::unique_ptr<Ui::DisplaySettingsDlg> m_ui;
 };

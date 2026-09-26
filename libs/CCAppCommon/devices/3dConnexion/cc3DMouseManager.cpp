@@ -44,11 +44,7 @@ cc3DMouseManager::cc3DMouseManager(ccMainAppInterface* appInterface, QObject* pa
 cc3DMouseManager::~cc3DMouseManager()
 {
 	releaseDevice();
-
-	if (m_menu)
-	{
-		delete m_menu;
-	}
+	delete m_menu;
 }
 
 void cc3DMouseManager::enableDevice(bool state, bool silent)

@@ -456,6 +456,8 @@ Bug fixes:
 		(the limits were not checked after the shape refinement step), and it never refined the detected tori
 	- duplicating materials (during cloning, or with Cross Section for section) could lead to the loss of the texture for the source entities
 		(or the destination entity) after the other entity is removed
+	- CC could take a long time to start (and to open a file) if the recent files list contained files on an unreachable network drive.
+		The recent files are now only checked when one of them is clicked (and a missing file is then removed from the list).
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

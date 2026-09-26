@@ -33,7 +33,7 @@ ccMaterialDB* ccMaterial::GetTextureDB()
 	return &s_materialDB;
 }
 
-ccMaterial::ccMaterial(const QString& name)
+ccMaterial::ccMaterial(const QString& name /*= QString("default")*/)
     : m_name(name)
     , m_uniqueID(QUuid::createUuid().toString())
     , m_diffuseFront(ccColor::bright)
@@ -61,6 +61,10 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
     , m_texMinificationFilter(mtl.m_texMinificationFilter)
     , m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
+	if (!m_textureFilename.isEmpty())
+	{
+		s_materialDB.increaseTextureCounter(m_textureFilename);
+	}
 }
 
 ccMaterial::~ccMaterial()
@@ -339,7 +343,7 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	else
 	{
 		// texture 'filename' (dataVersion>=37)
-		inStream >> m_textureFilename;
+		inStream >> m_textureFilename; // texture counter is increased in BinFilter.cpp
 	}
 	// material colors (dataVersion>=20)
 	if (in.read((char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)

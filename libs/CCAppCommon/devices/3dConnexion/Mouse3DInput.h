@@ -47,7 +47,7 @@ class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 	//! Default constructor
 	explicit Mouse3DInput(QObject* parent);
 	//! Destructor
-	virtual ~Mouse3DInput();
+	~Mouse3DInput() override;
 
 	//! Attempts to connect with the 3DxWare driver
 	bool connect(QWidget* mainWidget, QString appName);

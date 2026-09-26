@@ -279,14 +279,11 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 			f.close();
 			return false;
 		}
-		else
-		{
-			f.open(QFile::ReadOnly | QFile::Text);
-			QTextStream ts(&f);
-			setStyleSheet(ts.readAll());
-			f.close();
-			return true;
-		}
+		f.open(QFile::ReadOnly | QFile::Text);
+		QTextStream ts(&f);
+		setStyleSheet(ts.readAll());
+		f.close();
+		return true;
 	};
 
 	if (styleKey == "QDarkStyleSheet::Dark")

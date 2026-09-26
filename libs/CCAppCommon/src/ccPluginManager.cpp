@@ -79,22 +79,20 @@ static bool IsMetaDataValid(QPluginLoader* loader)
 
 		return false;
 	}
-	else
+
+	const QJsonObject data = metaObject["MetaData"].toObject();
+
+	// The plugin type is going to be required
+	const QStringList validTypes{"GL", "I/O", "Standard"};
+
+	const QString pluginType = data["type"].toString();
+
+	if (!validTypes.contains(pluginType))
 	{
-		const QJsonObject data = metaObject["MetaData"].toObject();
+		ccLog::Error(QStringLiteral("%1 does not supply a valid plugin type in its info.json.\n\nFound: %2\n\nIt must be one of: %3")
+		                 .arg(fileName, pluginType, validTypes.join(", ")));
 
-		// The plugin type is going to be required
-		const QStringList validTypes{"GL", "I/O", "Standard"};
-
-		const QString pluginType = data["type"].toString();
-
-		if (!validTypes.contains(pluginType))
-		{
-			ccLog::Error(QStringLiteral("%1 does not supply a valid plugin type in its info.json.\n\nFound: %2\n\nIt must be one of: %3")
-			                 .arg(fileName, pluginType, validTypes.join(", ")));
-
-			return false;
-		}
+		return false;
 	}
 
 	return true;

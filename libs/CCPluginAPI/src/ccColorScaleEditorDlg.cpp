@@ -60,7 +60,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
     , m_minAbsoluteVal(0.0)
     , m_maxAbsoluteVal(1.0)
     , m_mainApp(mainApp)
-    , m_ui(new Ui::ColorScaleEditorDlg)
+    , m_ui(std::make_unique<Ui::ColorScaleEditorDlg>())
 {
 	assert(m_manager);
 
@@ -112,10 +112,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
 	setActiveScale(m_colorScale);
 }
 
-ccColorScaleEditorDialog::~ccColorScaleEditorDialog()
-{
-	delete m_ui;
-}
+ccColorScaleEditorDialog::~ccColorScaleEditorDialog() = default;
 
 void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
 {

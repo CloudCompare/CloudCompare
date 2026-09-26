@@ -147,5 +147,5 @@ class CCPLUGIN_LIB_API ccColorScaleEditorDialog : public QDialog
 	//! Associated application (interface)
 	ccMainAppInterface* m_mainApp;
 
-	Ui::ColorScaleEditorDlg* m_ui;
+	std::unique_ptr<Ui::ColorScaleEditorDlg> m_ui;
 };

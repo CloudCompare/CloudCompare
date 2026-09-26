@@ -447,6 +447,8 @@ Bug fixes:
 	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not lead to the
 		extraction of the convex hull.
 	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
+	- CC could take a long time to start (and to open a file) if the recent files list contained files on an unreachable network drive.
+		The recent files are now only checked when one of them is clicked (and a missing file is then removed from the list).
 	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
 	- The Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
 		(the limits were not checked after the shape refinement step), and it never refined the detected tori

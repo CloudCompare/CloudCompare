@@ -36,7 +36,6 @@
 // is installed system-wide (e.g. Homebrew) which we don't want to require.
 #include <hidapi.h>
 
-
 // System
 #include <atomic>
 #include <vector>

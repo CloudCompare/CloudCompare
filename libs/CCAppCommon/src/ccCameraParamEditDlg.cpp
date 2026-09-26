@@ -15,25 +15,26 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCameraParamEditDlg.h"
+#include "../include/ccCameraParamEditDlg.h"
 
+// Ui
 #include "ui_cameraParamDlg.h"
-
-// Local
-#include "ccPickingHub.h"
-
-// qCC_db
-#include <ccGLUtils.h>
-#include <ccGenericMesh.h>
-#include <ccHObjectCaster.h>
-#include <ccPointCloud.h>
-
-// qCC_gl
-#include <ccGLWindowInterface.h>
 
 // CCCoreLib
 #include <CCMath.h>
 #include <GenericTriangle.h>
+
+// CCPluginAPI
+#include <ccPickingHub.h>
+
+// qCC_db
+#include <ccGenericMesh.h>
+#include <ccHObjectCaster.h>
+#include <ccPointCloud.h>
+
+// qCC_glWindow
+#include <ccGLUtils.h>
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QMdiSubWindow>
@@ -42,7 +43,7 @@
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickingHub)
     : ccOverlayDialog(parent, pickingHub ? Qt::FramelessWindowHint | Qt::Tool : Qt::Tool) // pickingHub = CloudCompare / otherwise = ccViewer
     , m_pickingHub(pickingHub)
-    , m_ui(new Ui::CameraParamDlg)
+    , m_ui(std::make_unique<Ui::CameraParamDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -93,11 +94,7 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent, ccPickingHub* pickin
 	connect(m_ui->pivotPickingToolButton, &QAbstractButton::toggled, this, &ccCameraParamEditDlg::pickPointAsPivot);
 }
 
-ccCameraParamEditDlg::~ccCameraParamEditDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccCameraParamEditDlg::~ccCameraParamEditDlg() = default;
 
 void ccCameraParamEditDlg::makeFrameless()
 {

@@ -16,18 +16,20 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
-// Local
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
 
 // qCC_db
 #include <ccGLMatrix.h>
-// qCC_gl
+
+// qCC_glWindow
 #include <ccGLUtils.h>
 
-// system
+// System
 #include <map>
 
 class QMdiSubWindow;
@@ -144,5 +146,5 @@ class CCAPPCOMMON_LIB_API ccCameraParamEditDlg : public ccOverlayDialog
 	ccPickingHub* m_pickingHub;
 
   private:
-	Ui::CameraParamDlg* m_ui;
+	std::unique_ptr<Ui::CameraParamDlg> m_ui;
 };

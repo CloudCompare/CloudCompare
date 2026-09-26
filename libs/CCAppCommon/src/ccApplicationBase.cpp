@@ -15,7 +15,26 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <clocale>
+#include "../include/ccApplicationBase.h"
+
+// Local
+#include "../include/ccPluginManager.h"
+#include "../include/ccTranslationManager.h"
+
+// CCCoreLib
+#include <CCPlatform.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
+// qCC_db
+#include <ccColorScalesManager.h>
+#include <ccMaterial.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QDir>
@@ -29,25 +48,8 @@
 #include <QTranslator>
 #include <QtGlobal>
 
-// CCCoreLib
-#include <CCPlatform.h>
-
-// qCC_db
-#include <ccColorScalesManager.h>
-#include <ccMaterial.h>
-#include <ccMesh.h>
-#include <ccPointCloud.h>
-
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
-
-// Common
-#include "ccApplicationBase.h"
-#include "ccPluginManager.h"
-#include "ccTranslationManager.h"
-
-// ccPluginAPI
-#include <ccPersistentSettings.h>
+// System
+#include <clocale>
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 4, 0))
 #error CloudCompare does not support versions of Qt prior to 6.4
@@ -277,14 +279,11 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 			f.close();
 			return false;
 		}
-		else
-		{
-			f.open(QFile::ReadOnly | QFile::Text);
-			QTextStream ts(&f);
-			setStyleSheet(ts.readAll());
-			f.close();
-			return true;
-		}
+		f.open(QFile::ReadOnly | QFile::Text);
+		QTextStream ts(&f);
+		setStyleSheet(ts.readAll());
+		f.close();
+		return true;
 	};
 
 	if (styleKey == "QDarkStyleSheet::Dark")

@@ -17,10 +17,16 @@
 
 #include "cc3DMouseManager.h"
 
+// Local
 #include "Mouse3DInput.h"
-#include "ccGLWindowInterface.h"
-#include "ccMainAppInterface.h"
 
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
+// Qt
 #include <QAction>
 #include <QMainWindow>
 #include <QMenu>
@@ -38,11 +44,7 @@ cc3DMouseManager::cc3DMouseManager(ccMainAppInterface* appInterface, QObject* pa
 cc3DMouseManager::~cc3DMouseManager()
 {
 	releaseDevice();
-
-	if (m_menu)
-	{
-		delete m_menu;
-	}
+	delete m_menu;
 }
 
 void cc3DMouseManager::enableDevice(bool state, bool silent)

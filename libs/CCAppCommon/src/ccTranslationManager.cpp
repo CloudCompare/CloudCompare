@@ -15,6 +15,14 @@
 // #                                                                        #
 // ##########################################################################
 
+#include "../include/ccTranslationManager.h"
+
+// Local
+#include "../include/ccApplicationBase.h"
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
 // Qt
 #include <QActionGroup>
 #include <QDebug>
@@ -24,13 +32,6 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTranslator>
-
-// ccPluginAPI
-#include <ccPersistentSettings.h>
-
-// Local
-#include "ccApplicationBase.h"
-#include "ccTranslationManager.h"
 
 class _ccTranslationManager : public ccTranslationManager
 {

@@ -17,21 +17,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifdef _MSC_VER
-// To get rid of the warnings about dominant inheritance
-#pragma warning(disable : 4250)
-#endif
-
-// CCCoreLib
-#include <PointCloudTpl.h>
-
 // Local
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
 #include "ccWaveform.h"
 
+// CCCoreLib
+#include <PointCloudTpl.h>
+
 // Qt
 #include <QOpenGLBuffer>
+
+#ifdef _MSC_VER
+// To get rid of the warnings about dominant inheritance
+#pragma warning(disable : 4250)
+#endif
 
 class ccScalarField;
 class ccPolyline;
@@ -412,7 +412,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	void setNormalLength(const float& value);
 
 	//! Get the length of the normals
-	const float& getNormalLength()
+	const float& getNormalLength() const
 	{
 		return m_normalLineParameters.length;
 	}
@@ -431,7 +431,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	void setNormalLineColor(int colorIdx);
 
 	//! Get the color of the normals
-	const int& getNormalLineColor()
+	const int& getNormalLineColor() const
 	{
 		return m_normalLineParameters.colorIdx;
 	}

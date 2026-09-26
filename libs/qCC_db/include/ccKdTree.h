@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_KD_TREE_HEADER
-#define CC_KD_TREE_HEADER
+// Local
+#include "ccHObject.h"
 
 // CCCoreLib
 #include <TrueKdTree.h>
-
-// Local
-#include "ccHObject.h"
 
 // System
 #include <unordered_set>
@@ -47,7 +46,7 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 	    to update its bounding-box.
 	    \param  multFactor multiplication factor
 	**/
-	void multiplyBoundingBox(const PointCoordinateType multFactor);
+	void multiplyBoundingBox(PointCoordinateType multFactor);
 
 	//! Translates the bounding-box of the tree
 	/** If the cloud has simply been translated, there is no use to recompute
@@ -57,13 +56,13 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 	void translateBoundingBox(const CCVector3& T);
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::POINT_KDTREE;
 	}
 
 	// Inherited from ccHObject
-	virtual ccBBox getOwnBB(bool withGLFeatures = false) override;
+	ccBBox getOwnBB(bool withGLFeatures = false) override;
 
 	//! Flag points with cell index (as a scalar field)
 	bool convertCellIndexToSF();
@@ -74,7 +73,7 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 	ccBBox getCellBBox(BaseNode* node) const;
 
 	//! A set of leaves
-	typedef std::unordered_set<Leaf*> LeafSet;
+	using LeafSet = std::unordered_set<Leaf*>;
 
 	//! Returns the neighbor leaves around a given cell
 	bool getNeighborLeaves(BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter = nullptr);
@@ -87,10 +86,8 @@ class QCC_DB_LIB_API ccKdTree : public CCCoreLib::TrueKdTree
 
   protected:
 	// Inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Associated cloud
 	ccGenericPointCloud* m_associatedGenericCloud;
 };
-
-#endif // CC_KD_TREE_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_FRUSTUM_HEADER
-#define CC_FRUSTUM_HEADER
+// Local
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <RayAndBox.h>
-
-// Local
-#include "ccGLMatrix.h"
 
 class Plane
 {
@@ -262,5 +261,3 @@ class Frustum
   protected: // members
 	Plane pl[6];
 };
-
-#endif // CC_FRUSTUM_HEADER

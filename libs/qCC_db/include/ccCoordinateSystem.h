@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,8 +16,6 @@
 // #          COPYRIGHT: Chris Brown                                        #
 // #                                                                        #
 // ##########################################################################
-
-#pragma once
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -54,17 +54,17 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 	ccCoordinateSystem(QString name = QString("CoordinateSystem"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::COORDINATESYSTEM;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "CoordinateSystem";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	inline bool axisPlanesAreShown() const
 	{

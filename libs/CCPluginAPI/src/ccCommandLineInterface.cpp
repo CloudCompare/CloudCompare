@@ -15,11 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+#include "../include/ccCommandLineInterface.h"
 
-#include "ccArgumentParser.h"
-#include "ccGenericMesh.h"
+// Local
+#include "../include/ccArgumentParser.h"
 
+// qCC_db
+#include <ccGenericMesh.h>
+
+// Qt
 #include <QDir>
 
 namespace
@@ -32,8 +36,8 @@ namespace
 //////
 // CLEntityDesc
 
-CLEntityDesc::CLEntityDesc(const QString& name)
-    : basename(name)
+CLEntityDesc::CLEntityDesc(QString name)
+    : basename(std::move(name))
     , path(QDir::currentPath())
     , indexInFile(-1)
 {
@@ -55,9 +59,9 @@ CLEntityDesc::CLEntityDesc(const QString& filename, int _indexInFile)
 	}
 }
 
-CLEntityDesc::CLEntityDesc(const QString& _basename, const QString& _path, int _indexInFile)
-    : basename(_basename)
-    , path(_path)
+CLEntityDesc::CLEntityDesc(QString _basename, QString _path, int _indexInFile)
+    : basename(std::move(_basename))
+    , path(std::move(_path))
     , indexInFile(_indexInFile)
 {
 }
@@ -65,8 +69,8 @@ CLEntityDesc::CLEntityDesc(const QString& _basename, const QString& _path, int _
 //////
 // CLGroupDesc
 
-CLGroupDesc::CLGroupDesc(ccHObject* group, const QString& basename, const QString& path)
-    : CLEntityDesc(basename, path)
+CLGroupDesc::CLGroupDesc(ccHObject* group, QString basename, QString path)
+    : CLEntityDesc(std::move(basename), std::move(path))
     , groupEntity(group)
 {
 }
@@ -137,8 +141,8 @@ CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, const QString& filename, int index)
 {
 }
 
-CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, const QString& basename, const QString& path, int index)
-    : CLEntityDesc(basename, path, index)
+CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, QString basename, QString path, int index)
+    : CLEntityDesc(std::move(basename), std::move(path), index)
     , mesh(_mesh)
 {
 }

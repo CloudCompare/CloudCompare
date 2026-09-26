@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccExtru.h"
+#include "../include/ccExtru.h"
 
-// qCC_db
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
 
 // CCCoreLib
 #include <Delaunay2dMesh.h>

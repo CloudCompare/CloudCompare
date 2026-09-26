@@ -15,7 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccAdvancedTypes.h"
+#include "../include/ccAdvancedTypes.h"
+
+// Local
+#include "../include/ccNormalCompressor.h"
 
 NormsIndexesTableType::NormsIndexesTableType()
     : ccArray<CompressedNormType, 1, CompressedNormType>("Compressed normals")

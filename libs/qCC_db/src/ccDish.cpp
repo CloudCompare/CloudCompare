@@ -15,11 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDish.h"
+#include "../include/ccDish.h"
 
 // Local
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+#include "../include/ccPointCloud.h"
 
 ccDish::ccDish(PointCoordinateType radius,
                PointCoordinateType height,

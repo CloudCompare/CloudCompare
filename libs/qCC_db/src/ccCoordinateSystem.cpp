@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCoordinateSystem.h"
+#include "../include/ccCoordinateSystem.h"
 
-// qCC_db
-#include "ccPlane.h"
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPlane.h"
+#include "../include/ccPointCloud.h"
 
 ccCoordinateSystem::ccCoordinateSystem(PointCoordinateType displayScale,
                                        PointCoordinateType axisWidth,

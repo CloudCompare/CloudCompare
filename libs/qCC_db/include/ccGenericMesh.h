@@ -17,13 +17,13 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <GenericIndexedMesh.h>
-
 // Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
 #include "ccShiftedObject.h"
+
+// CCCoreLib
+#include <GenericIndexedMesh.h>
 
 namespace CCCoreLib
 {

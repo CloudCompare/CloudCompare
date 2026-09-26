@@ -15,13 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccNormalVectors.h"
+#include "../include/ccNormalVectors.h"
 
 // Local
-#include "ccHObjectCaster.h"
-#include "ccNormalCompressor.h"
-#include "ccSensor.h"
-#include "ccSingleton.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccNormalCompressor.h"
+#include "../include/ccSensor.h"
+#include "../include/ccSingleton.h"
 
 // CCCoreLib
 #include <CCGeom.h>

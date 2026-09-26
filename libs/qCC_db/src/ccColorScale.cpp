@@ -15,19 +15,19 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorScale.h"
+#include "../include/ccColorScale.h"
+
+// Local
+#include "../include/ccLog.h"
+
+// CCCoreLib
+#include <CCGeom.h>
 
 // Qt
 #include <QOpenGLFunctions_2_1>
 #include <QUuid>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
-// CCCoreLib
-#include <CCGeom.h>
-
-// Local
-#include "ccLog.h"
 
 static const QString s_xmlCloudCompare("CloudCompare");
 static const QString s_xmlColorScaleTitle("ColorScale");

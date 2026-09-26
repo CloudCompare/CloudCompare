@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIncludeGL.h"
+#include "../include/cc2DLabel.h"
 
 // Local
-#include "cc2DLabel.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericMesh.h"
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
-#include "ccSphere.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccGenericMesh.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccScalarField.h"
+#include "../include/ccSphere.h"
 
 // Qt
 #include <QFontMetrics>

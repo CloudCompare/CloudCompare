@@ -15,30 +15,28 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccOctree.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccOctree.h"
 
 // Local
-#include "ccBox.h"
-#include "ccCameraSensor.h"
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
+#include "../include/ccBox.h"
+#include "../include/ccCameraSensor.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <Neighbourhood.h>
 #include <RayAndBox.h>
 #include <ScalarFieldTools.h>
 
+// System
+#include <random>
+
 #ifdef QT_DEBUG
 // #define DEBUG_PICKING_MECHANISM
 #endif
-
-// System
-#include <random>
 
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
     : CCCoreLib::DgmOctree(aCloud)
@@ -112,7 +110,7 @@ ccBBox ccOctree::getPointsBB() const
 	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
 }
 
-void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	m_dimMin *= multFactor;
 	m_dimMax *= multFactor;

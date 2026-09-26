@@ -15,7 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccColorRampShader.h"
+#include "../include/ccColorRampShader.h"
+
+// Local
+#include "../include/ccGLDrawContext.h"
+
+// Qt
+#include <QOpenGLFunctions_2_1>
 
 //! Maximum color ramp size
 /** 252 so as to get 1024 bytes as total required memory

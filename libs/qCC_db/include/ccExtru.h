@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_EXTRU_PRIMITIVE_HEADER
-#define CC_EXTRU_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -47,20 +46,20 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	ccExtru(QString name = QString("Extrusion"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::EXTRU;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Extrusion";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	//! Returns extrusion thickness
-	const PointCoordinateType getThickness() const
+	const PointCoordinateType& getThickness() const
 	{
 		return m_height;
 	}
@@ -84,5 +83,3 @@ class QCC_DB_LIB_API ccExtru : public ccGenericPrimitive
 	//! Profile
 	std::vector<CCVector2> m_profile;
 };
-
-#endif // CC_EXTRU_PRIMITIVE_HEADER

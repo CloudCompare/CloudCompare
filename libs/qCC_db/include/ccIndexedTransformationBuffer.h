@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,14 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
-#define CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
-
 // Local
 #include "ccHObject.h"
 #include "ccIndexedTransformation.h"
 
-// system
+// System
 #include <cfloat>
 
 //! Indexed Transformation buffer
@@ -140,5 +139,3 @@ class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject
 	//! Trihedrons display scale
 	float m_trihedronsScale;
 };
-
-#endif

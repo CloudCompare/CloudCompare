@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCircle.h"
+#include "../include/ccCircle.h"
 
-// qCC_db
-#include <ccPointCloud.h>
+// Local
+#include "../include/ccPointCloud.h"
 
 ccCircle::ccCircle(double   radius /*=0.0*/,
                    unsigned resolution /*=48*/,

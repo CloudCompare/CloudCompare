@@ -15,19 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccClipBox.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccClipBox.h"
 
 // Local
-#include "ccCone.h"
-#include "ccCylinder.h"
-#include "ccHObjectCaster.h"
-#include "ccSphere.h"
-#include "ccTorus.h"
+#include "../include/ccCone.h"
+#include "../include/ccCylinder.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccTorus.h"
 
-// system
+// System
 #include <cassert>
 
 #if defined(_OPENMP)

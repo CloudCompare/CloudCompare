@@ -19,6 +19,7 @@
 
 // Local
 #include "ccBBox.h"
+#include "ccDrawableObject.h"
 #include "ccObject.h"
 
 class QIcon;
@@ -374,7 +375,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 			setDisplay(newDisplay);
 		}
 
-		for (auto child : m_children)
+		for (auto* child : m_children)
 		{
 			child->transferDisplay(oldDisplay, newDisplay);
 		}

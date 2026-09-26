@@ -373,6 +373,7 @@ void LasScalarFieldLoader::handleOptionsFor(const LasExtraScalarField& extraFiel
 			if (noDataValue == inputValues[dimIndex])
 			{
 				outputValues[dimIndex] = ccScalarField::NaN();
+				continue;
 			}
 			else
 			{

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_INDEXED_TRANSFORMATION_HEADER
-#define CC_INDEXED_TRANSFORMATION_HEADER
 
 // Local
 #include "ccGLMatrix.h"
@@ -118,5 +117,3 @@ class QCC_DB_LIB_API ccIndexedTransformation : public ccGLMatrix
 	//! Associated index (e.g. timestamp)
 	double m_index;
 };
-
-#endif // CC_INDEXED_TRANSFORMATION_HEADER

@@ -1,4 +1,5 @@
 #pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                            CLOUDCOMPARE                                #
@@ -23,7 +24,6 @@
 
 // System
 #include <type_traits>
-#include <utility>
 
 //! Helper to run a long computation without freezing the GUI
 class ccBackgroundTask

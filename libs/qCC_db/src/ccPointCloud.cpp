@@ -15,43 +15,42 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccPointCloud.h"
+#include "../include/ccPointCloud.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccChunk.h"
+#include "../include/ccColorRampShader.h"
+#include "../include/ccFastMarchingForNormsDirection.h"
+#include "../include/ccFrustum.h"
+#include "../include/ccGBLSensor.h"
+#include "../include/ccGLSLHelper.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccGenericMesh.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccKdTree.h"
+#include "../include/ccMaterial.h"
+#include "../include/ccMesh.h"
+#include "../include/ccMinimumSpanningTreeForNormsDirection.h"
+#include "../include/ccNormalCompressor.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccOctree.h"
+#include "../include/ccPointCloudLOD.h"
+#include "../include/ccPolyline.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <GeometricalAnalysisTools.h>
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
 
-// local
-#include "ccChunk.h"
-#include "ccColorRampShader.h"
-#include "ccFastMarchingForNormsDirection.h"
-#include "ccFrustum.h"
-#include "ccGBLSensor.h"
-#include "ccGLSLHelper.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericMesh.h"
-#include "ccHObjectCaster.h"
-#include "ccKdTree.h"
-#include "ccMaterial.h"
-#include "ccMesh.h"
-#include "ccMinimumSpanningTreeForNormsDirection.h"
-#include "ccNormalVectors.h"
-#include "ccOctree.h"
-#include "ccPointCloudLOD.h"
-#include "ccPolyline.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
-
 // Qt
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QSettings>
 
-// system
+// System
 #include <cassert>
 #include <queue>
 

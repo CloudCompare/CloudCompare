@@ -17,18 +17,18 @@
 // #                                                                        #
 // ##########################################################################
 
-// qCC_db
-#include <ccFrustum.h>
-#include <ccOctree.h>
+// Local
+#include "ccDrawableObject.h"
+#include "ccOctree.h"
 
 // Qt
 #include <QMutex>
 
-// system
+// System
 #include <array>
-#include <functional>
-#include <stdint.h>
+#include <cstdint>
 
+class Frustum;
 class ccPointCloud;
 class ccPointCloudLODThread;
 

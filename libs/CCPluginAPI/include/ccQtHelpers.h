@@ -42,14 +42,11 @@ class ccQtHelpers
 		{
 			return idealThreadCount;
 		}
-		else if (idealThreadCount <= 8)
+		if (idealThreadCount <= 8)
 		{
 			return idealThreadCount - 1;
 		}
-		else
-		{
-			return idealThreadCount - 2;
-		}
+		return idealThreadCount - 2;
 	}
 
 	//! Returns the ideal number of threads/cores with Qt Concurrent

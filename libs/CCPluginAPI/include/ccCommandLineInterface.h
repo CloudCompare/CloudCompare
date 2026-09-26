@@ -17,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
 
 // qCC_db
@@ -54,9 +55,9 @@ struct CCPLUGIN_LIB_API CLEntityDesc
 	QString path;
 	int     indexInFile;
 
-	CLEntityDesc(const QString& name);
+	CLEntityDesc(QString name);
 	CLEntityDesc(const QString& filename, int _indexInFile);
-	CLEntityDesc(const QString& _basename, const QString& _path, int _indexInFile = -1);
+	CLEntityDesc(QString _basename, QString _path, int _indexInFile = -1);
 
 	virtual ~CLEntityDesc() = default;
 
@@ -70,9 +71,9 @@ struct CCPLUGIN_LIB_API CLGroupDesc : CLEntityDesc
 {
 	ccHObject* groupEntity;
 
-	CLGroupDesc(ccHObject*     group,
-	            const QString& basename,
-	            const QString& path = QString());
+	CLGroupDesc(ccHObject* group,
+	            QString    basename,
+	            QString    path = QString());
 
 	~CLGroupDesc() override = default;
 
@@ -116,8 +117,8 @@ struct CCPLUGIN_LIB_API CLMeshDesc : CLEntityDesc
 	           int            index    = -1);
 
 	CLMeshDesc(ccGenericMesh* _mesh,
-	           const QString& basename,
-	           const QString& path,
+	           QString        basename,
+	           QString        path,
 	           int            index = -1);
 
 	~CLMeshDesc() override = default;

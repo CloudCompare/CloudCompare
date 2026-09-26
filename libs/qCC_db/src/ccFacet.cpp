@@ -15,11 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccFacet.h"
+#include "../include/ccFacet.h"
 
-#include "ccMesh.h"
-#include "ccPointCloud.h"
-#include "ccPolyline.h"
+// Local
+#include "../include/ccMesh.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccPolyline.h"
 
 // CCCoreLib
 #include <Delaunay2dMesh.h>

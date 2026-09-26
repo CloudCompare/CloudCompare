@@ -16,8 +16,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
 
+// qCC_db
 #include <ccLog.h>
 
 // Qt
@@ -38,8 +40,8 @@ class CCPLUGIN_LIB_API ccArgumentParser
   public:
 	explicit ccArgumentParser(QStringList& arguments);
 
-	//! Returns the next argument without consuming it, or nullptr if there are none
-	const QString peek() const;
+	//! Returns the next argument without consuming it, or a "Null" QString (test with QString::isNull()) if there are none
+	QString peek() const;
 	//! Skips the next argument, to be used with `peek`
 	void skip();
 	//! Returns true if there are no arguments left

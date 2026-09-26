@@ -17,14 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QString>
-
 // qCC_db
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
-// qCC_gl
+
+// qCC_glWindow
 #include <ccGLUtils.h>
+
+// Qt
+#include <QString>
 
 class QMainWindow;
 class QWidget;

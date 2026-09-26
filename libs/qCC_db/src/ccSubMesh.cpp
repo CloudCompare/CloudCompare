@@ -15,22 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccSubMesh.h"
+#include "../include/ccSubMesh.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccMaterialSet.h"
-#include "ccMesh.h"
-
-// Qt
-#include <QString>
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccMaterialSet.h"
+#include "../include/ccMesh.h"
 
 // CCCoreLib
 #include <ManualSegmentationTools.h>
 
-// system
+// Qt
+#include <QString>
+
+// System
 #include <cassert>
-#include <cstring>
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
     : ccGenericMesh("Sub-mesh")

@@ -15,25 +15,24 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccMesh.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccMesh.h"
 
 // Local
-#include "ccChunk.h"
-#include "ccColorScalesManager.h"
-#include "ccGLSLHelper.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericPointCloud.h"
-#include "ccHObjectCaster.h"
-#include "ccMaterialSet.h"
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
-#include "ccPolyline.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
-#include "ccSubMesh.h"
+#include "../include/ccChunk.h"
+#include "../include/ccColorScalesManager.h"
+#include "../include/ccGLSLHelper.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccMaterialSet.h"
+#include "../include/ccNormalCompressor.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccPolyline.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
+#include "../include/ccSubMesh.h"
 
 // CCCoreLib
 #include <Delaunay2dMesh.h>
@@ -42,14 +41,14 @@
 #include <PointProjectionTools.h>
 #include <ReferenceCloud.h>
 
+// Qt
+#include <QOpenGLShader>
+#include <QOpenGLVersionFunctionsFactory>
+
 // System
 #include <assert.h>
 #include <cmath> //for std::modf
 #include <string.h>
-
-// Qt
-#include <QOpenGLShader>
-#include <QOpenGLVersionFunctionsFactory>
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccGenericMesh("Mesh", uniqueID)

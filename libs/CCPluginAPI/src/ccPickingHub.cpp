@@ -15,20 +15,20 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPickingHub.h"
+#include "../include/ccPickingHub.h"
 
-// Qt
-#include <QMdiSubWindow>
-#include <QMessageBox>
-
-// qCC_gl
-#include <ccGLWindowInterface.h>
+// Local
+#include "../include/ccMainAppInterface.h"
 
 // qCC_db
 #include <ccSphere.h>
 
-// Plugins
-#include <ccMainAppInterface.h>
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+
+// Qt
+#include <QMdiSubWindow>
+#include <QMessageBox>
 
 ccPickingHub::ccPickingHub(ccMainAppInterface* app, QObject* parent /*=nullptr*/)
     : QObject(parent)

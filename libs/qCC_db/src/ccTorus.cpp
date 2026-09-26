@@ -15,11 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccTorus.h"
+#include "../include/ccTorus.h"
 
 // Local
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
 
 ccTorus::ccTorus(PointCoordinateType insideRadius,
                  PointCoordinateType outsideRadius,

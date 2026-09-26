@@ -15,15 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccKdTree.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccKdTree.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccPointCloud.h"
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
     : CCCoreLib::TrueKdTree(aCloud)
@@ -63,7 +59,7 @@ class MultiplyBoundingBoxVisitor
 	PointCoordinateType m_multFactor;
 };
 
-void ccKdTree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccKdTree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	if (m_root)
 		MultiplyBoundingBoxVisitor(multFactor).visit(m_root);

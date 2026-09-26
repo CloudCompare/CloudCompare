@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccColorScale.h"
+
 // CCCoreLib
 #include <ScalarField.h>
-
-// qCC_db
-#include "ccColorScale.h"
 
 //! A scalar field associated to display-related parameters
 /** Extends the CCCoreLib::ScalarField object.
@@ -105,15 +105,13 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 		inline void setStart(ScalarType value)
 		{
 			m_start = inbound(value);
-			if (m_stop < m_start)
-				m_stop = m_start;
+			m_stop  = std::min(m_stop, m_start);
 			updateRange();
 		}
 		inline void setStop(ScalarType value)
 		{
-			m_stop = inbound(value);
-			if (m_stop < m_start)
-				m_start = m_stop;
+			m_stop  = inbound(value);
+			m_start = std::min(m_start, m_stop);
 			updateRange();
 		}
 

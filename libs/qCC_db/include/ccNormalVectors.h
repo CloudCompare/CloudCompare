@@ -18,6 +18,7 @@
 // ##########################################################################
 
 // Local
+#include "ccAdvancedTypes.h"
 #include "ccGenericPointCloud.h"
 
 // System

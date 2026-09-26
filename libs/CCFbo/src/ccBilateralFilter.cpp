@@ -16,11 +16,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccBilateralFilter.h"
+#include "../include/ccBilateralFilter.h"
 
-// system
+// System
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <cmath>
 
 //! Max kernel size

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,13 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ADVANCED_TYPES_HEADER
-#define CC_ADVANCED_TYPES_HEADER
-
 // Local
 #include "ccArray.h"
+#include "ccBasicTypes.h"
 #include "ccColorTypes.h"
-#include "ccNormalCompressor.h"
 
 /***************************************************
       Advanced cloudCompare types (containers)
@@ -72,7 +71,7 @@ class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 	    : ccArray<CCVector3, 3, PointCoordinateType>("Normals")
 	{
 	}
-	virtual ~NormsTableType() = default;
+	~NormsTableType() override = default;
 
 	// inherited from ccArray/ccHObject
 	CC_CLASS_ENUM getClassID() const override
@@ -104,7 +103,7 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 	    : ccArray<ccColor::Rgb, 3, ColorCompType>("RGB colors")
 	{
 	}
-	virtual ~ColorsTableType() = default;
+	~ColorsTableType() override = default;
 
 	// inherited from ccArray/ccHObject
 	CC_CLASS_ENUM getClassID() const override
@@ -136,7 +135,7 @@ class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
 	    : ccArray<ccColor::Rgba, 4, ColorCompType>("RGBA colors")
 	{
 	}
-	virtual ~RGBAColorsTableType() = default;
+	~RGBAColorsTableType() override = default;
 
 	// inherited from ccArray/ccHObject
 	CC_CLASS_ENUM getClassID() const override
@@ -192,7 +191,7 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 	    : ccArray<TexCoords2D, 2, float>("Texture coordinates")
 	{
 	}
-	virtual ~TextureCoordsContainer() = default;
+	~TextureCoordsContainer() override = default;
 
 	// inherited from ccArray/ccHObject
 	CC_CLASS_ENUM getClassID() const override
@@ -214,5 +213,3 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 		return cloneArray;
 	}
 };
-
-#endif // CC_ADVANCED_TYPES_HEADER

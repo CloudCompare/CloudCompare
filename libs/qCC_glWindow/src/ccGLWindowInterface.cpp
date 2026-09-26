@@ -4308,20 +4308,29 @@ void ccGLWindowInterface::drawCross()
 		return;
 	}
 
+	// correction for HD screens
+	const auto  devicePixelRatio  = getDevicePixelRatio();
+	const float centerCrossLength = CC_DISPLAYED_CENTER_CROSS_LENGTH * static_cast<float>(devicePixelRatio);
+
 	// force line width
-	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	glFunc->glLineWidth(1.0f);
+	if (getDisplayParameters().displayCrossOnTop)
+	{
+		// display the cross on top of the entities
+		glFunc->glDisable(GL_DEPTH_TEST);
+	}
 
 	// cross OpenGL drawing
 	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);
 	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
-	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
+	glFunc->glVertex3f(0.0f, -centerCrossLength, 0.0f);
+	glFunc->glVertex3f(0.0f, centerCrossLength, 0.0f);
+	glFunc->glVertex3f(-centerCrossLength, 0.0f, 0.0f);
+	glFunc->glVertex3f(centerCrossLength, 0.0f, 0.0f);
 	glFunc->glEnd();
 
-	glFunc->glPopAttrib(); // GL_LINE_BIT
+	glFunc->glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
 }
 
 float ccGLWindowInterface::computeTrihedronLength() const

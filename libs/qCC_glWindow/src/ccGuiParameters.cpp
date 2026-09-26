@@ -83,6 +83,7 @@ void ccGui::ParamStruct::reset()
 	minLoDCloudSize        = 50000000;
 	useVBOs                = true;
 	displayCross           = true;
+	displayCrossOnTop      = false;
 	pickingCursorShape     = Qt::CrossCursor;
 	logVerbosityLevel      = ccLog::LOG_STANDARD;
 
@@ -141,6 +142,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 	minLoDCloudSize         = settings.value("minLoDCloudSize", 50000000).toUInt();
 	useVBOs                 = settings.value("useVBOs", true).toBool();
 	displayCross            = settings.value("crossDisplayed", true).toBool();
+	displayCrossOnTop       = settings.value("crossOnTop", false).toBool();
 	labelMarkerSize         = static_cast<unsigned>(std::max(0, settings.value("labelMarkerSize", 5).toInt()));
 	colorScaleShowHistogram = settings.value("colorScaleShowHistogram", true).toBool();
 	colorScaleUseShader     = settings.value("colorScaleUseShader", false).toBool();
@@ -184,6 +186,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
 	settings.setValue("minLoDCloudSize", minLoDCloudSize);
 	settings.setValue("useVBOs", useVBOs);
 	settings.setValue("crossDisplayed", displayCross);
+	settings.setValue("crossOnTop", displayCrossOnTop);
 	settings.setValue("labelMarkerSize", labelMarkerSize);
 	settings.setValue("colorScaleShowHistogram", colorScaleShowHistogram);
 	settings.setValue("colorScaleUseShader", colorScaleUseShader);

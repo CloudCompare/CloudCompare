@@ -61,6 +61,8 @@ ccDisplaySettingsDlg::ccDisplaySettingsDlg(QWidget* parent)
 	        { m_parameters.drawBackgroundGradient = state; });
 	connect(m_ui->showCrossCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_parameters.displayCross = state; });
+	connect(m_ui->crossOnTopCheckBox, &QCheckBox::toggled, this, [&](bool state)
+	        { m_parameters.displayCrossOnTop = state; });
 	connect(m_ui->colorScaleShowHistogramCheckBox, &QCheckBox::toggled, this, [&](bool state)
 	        { m_parameters.colorScaleShowHistogram = state; });
 	connect(m_ui->useColorScaleShaderCheckBox, &QCheckBox::toggled, this, [&](bool state)
@@ -213,6 +215,7 @@ void ccDisplaySettingsDlg::refresh()
 		m_ui->maxCloudSizeDoubleSpinBox->setValue(m_parameters.minLoDCloudSize / 1000000.0);
 		m_ui->useVBOCheckBox->setChecked(m_parameters.useVBOs);
 		m_ui->showCrossCheckBox->setChecked(m_parameters.displayCross);
+		m_ui->crossOnTopCheckBox->setChecked(m_parameters.displayCrossOnTop);
 		m_ui->singleClickPickingCheckBox->setChecked(m_parameters.singleClickPicking);
 
 		m_ui->colorScaleShowHistogramCheckBox->setChecked(m_parameters.colorScaleShowHistogram);

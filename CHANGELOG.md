@@ -454,6 +454,8 @@ Bug fixes:
 	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
 	- The Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
 		(the limits were not checked after the shape refinement step), and it never refined the detected tori
+	- Custom shortcuts were applied to every action with the same name after a restart (e.g. a shortcut set on the scalar field
+		'Delete' action would replace the 'Del' shortcut of the main 'Delete' action)
 	- duplicating materials (during cloning, or with Cross Section for section) could lead to the loss of the texture for the source entities
 		(or the destination entity) after the other entity is removed
 

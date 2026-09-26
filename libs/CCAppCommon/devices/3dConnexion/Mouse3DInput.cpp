@@ -361,7 +361,7 @@ void Mouse3DInput::on3dmouseCMDKeyUp(int virtualCMDCode)
 	Q_EMIT sigOn3dmouseCMDKeyUp(virtualCMDCode);
 }
 
-void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
+void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& mat)
 {
 	assert(vec.size() == 6);
 
@@ -374,7 +374,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 	// viewMat = rotMat * viewMat (pre-multiply), which applies the rotation
 	// in camera space - exactly like the regular mouse drag does. This makes
 	// the rotation relative to the current view direction automatically.
-	CCVector3d axis(vec[3], vec[4], vec[5]);
+	CCVector3d axis(motionData[3], motionData[4], motionData[5]);
 	double     angle = axis.norm();
 	if (CCCoreLib::GreaterThanEpsilon(angle))
 	{

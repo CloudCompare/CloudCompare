@@ -33,5 +33,5 @@ class ccAboutDialog : public QDialog
 	~ccAboutDialog();
 
   private:
-	Ui::AboutDialog* mUI;
+	std::unique_ptr<Ui::AboutDialog> m_ui;
 };

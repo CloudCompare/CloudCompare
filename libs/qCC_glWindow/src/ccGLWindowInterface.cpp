@@ -4611,11 +4611,15 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 			break;
 		case Qt::ZoomNativeGesture:
 #if defined(Q_OS_MAC)
-			onWheelEvent(value);
-			Q_EMIT m_signalEmitter->mouseWheelRotated(value);
+		{
+			// the gesture value is a relative scale factor: convert it to an equivalent wheel rotation
+			float pseudo_wheelDelta_deg = static_cast<float>(value * 100.0);
+			onWheelEvent(pseudo_wheelDelta_deg);
+			Q_EMIT m_signalEmitter->mouseWheelRotated(pseudo_wheelDelta_deg);
 			evt->accept();
+		}
 #endif
-			break;
+		break;
 		case Qt::SmartZoomNativeGesture:
 			break;
 		case Qt::RotateNativeGesture:

@@ -49,6 +49,7 @@
 // Qt
 #include <QCoreApplication>
 #include <QElapsedTimer>
+#include <QOpenGLShaderProgram>
 #include <QSettings>
 
 // system
@@ -214,6 +215,13 @@ static bool CreateProgramDrawNormals(QOpenGLContext* context)
 	if (!context)
 	{
 		assert(false);
+		return false;
+	}
+
+	// this program needs a geometry shader (i.e. OpenGL 3.2 or later), which is not available everywhere
+	if (!QOpenGLShader::hasOpenGLShaders(QOpenGLShader::Geometry, context))
+	{
+		ccLog::Warning("[ccPointCloud] Can't draw the normals as lines: this system doesn't support geometry shaders");
 		return false;
 	}
 

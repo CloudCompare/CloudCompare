@@ -5204,15 +5204,13 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 
 	try
 	{
-		m_scalarFields.push_back(sf);
+		m_scalarFields.push_back(std::shared_ptr<ccScalarField>(sf));
 	}
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 		return -1;
 	}
-
-	sf->link();
 
 	return static_cast<int>(m_scalarFields.size()) - 1;
 }

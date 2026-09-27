@@ -42,7 +42,6 @@ class ccOctree;
 class ccPlanarEntityInterface;
 class ccPolyline;
 class ccSensor;
-class CCShareable;
 class ccShiftedObject;
 class ccCoordinateSystem;
 
@@ -208,7 +207,6 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 	void fillWithGBLSensor(const ccGBLSensor*);
 	void fillWithCameraSensor(const ccCameraSensor*);
 	void fillWithMaterialSet(const ccMaterialSet*);
-	void fillWithShareable(const CCShareable*);
 	void fillWithMetaData(const ccObject*);
 	void fillWithShifted(const ccShiftedObject*);
 	void fillWithCoordinateSystem(const ccCoordinateSystem*);

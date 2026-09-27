@@ -338,15 +338,5 @@ int main(int argc, char** argv)
 	MainWindow::DestroyInstance();
 	FileIOFilter::UnregisterAll();
 
-#ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
-	// for debug purposes
-	unsigned alive = CCShareable::GetAliveCount();
-	if (alive > 1)
-	{
-		printf("Error: some shared objects (%u) have not been released on program end!", alive);
-		system("PAUSE");
-	}
-#endif
-
 	return result;
 }

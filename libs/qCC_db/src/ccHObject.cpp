@@ -92,22 +92,7 @@ ccHObject::~ccHObject()
 		{
 			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); // in order to avoid any loop!
 			// delete object
-			if (it->first->isShareable())
-			{
-				CCShareable* shareable = dynamic_cast<CCShareable*>(it->first);
-				if (shareable)
-				{
-					shareable->release();
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-			else
-			{
-				delete it->first;
-			}
+			delete it->first;
 		}
 	}
 
@@ -407,18 +392,6 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags /*=DP_PARENT_OF_O
 	if ((dependencyFlags & DP_PARENT_OF_OTHER) == DP_PARENT_OF_OTHER)
 	{
 		child->setParent(this);
-		if (child->isShareable())
-		{
-			CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-			if (shareable)
-			{
-				shareable->link();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
 		if (!child->getDisplay())
 		{
 			child->setDisplay_recursive(getDisplay());
@@ -984,22 +957,7 @@ void ccHObject::removeChild(int pos)
 	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 	{
 		// delete object
-		if (child->isShareable())
-		{
-			CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-			if (shareable)
-			{
-				shareable->release();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-		else /* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
-		{
-			delete child;
-		}
+		delete child;
 	}
 	else if (child->getParent() == this)
 	{
@@ -1017,22 +975,7 @@ void ccHObject::removeAllChildren()
 		int flags = getDependencyFlagsWith(child);
 		if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
-			if (child->isShareable())
-			{
-				CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-				if (shareable)
-				{
-					shareable->release();
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-			else
-			{
-				delete child;
-			}
+			delete child;
 		}
 	}
 }

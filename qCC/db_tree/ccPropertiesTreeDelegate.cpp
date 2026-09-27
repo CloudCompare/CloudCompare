@@ -1228,23 +1228,6 @@ void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 	// Count
 	appendRow(ITEM(tr("Count")), ITEM(QString::number(_obj->size())));
 
-	// ccMaterialSet objects are 'shareable'
-	fillWithShareable(_obj);
-}
-
-void ccPropertiesTreeDelegate::fillWithShareable(const CCShareable* _obj)
-{
-	assert(_obj && m_model);
-	if (!_obj || !m_model)
-	{
-		return;
-	}
-
-	addSeparator(tr("Array"));
-
-	// Link count
-	unsigned linkCount = _obj->getLinkCount(); // if we display it, it means it is a member of the DB --> i.e. link is already >1
-	appendRow(ITEM(tr("Shared")), ITEM(linkCount < 3 ? tr("No") : tr("Yes (%1)").arg(linkCount - 1)));
 }
 
 template <class Type, int N, class ComponentType>
@@ -1270,8 +1253,6 @@ void ccPropertiesTreeDelegate::fillWithCCArray(const ccArray<Type, N, ComponentT
 	// Memory
 	appendRow(ITEM(tr("Memory")), ITEM(QStringLiteral("%1 Mb").arg((_obj->capacity() * sizeof(Type)) / 1048576.0, 0, 'f', 2)));
 
-	// ccArray objects are 'Shareable'
-	fillWithShareable(_obj);
 }
 
 bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const

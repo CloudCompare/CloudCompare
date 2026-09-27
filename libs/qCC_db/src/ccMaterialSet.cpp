@@ -27,7 +27,6 @@
 
 ccMaterialSet::ccMaterialSet(const QString& name)
     : std::vector<ccMaterial::CShared>()
-    , CCShareable()
     , ccHObject(name)
 {
 	setFlagState(CC_LOCKED, true);

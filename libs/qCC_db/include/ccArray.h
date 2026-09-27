@@ -21,6 +21,7 @@
 #include "ccHObject.h"
 
 // System
+#include <memory>
 #include <vector>
 
 //! Shareable array that can be properly inserted in the DB tree
@@ -31,6 +32,8 @@ class ccArray : public std::vector<Type>
   public:
 	//! Base type
 	using Base = ccArray<Type, N, ComponentType>;
+	//! Shared pointer type
+	using Shared = std::shared_ptr<Base>;
 
 	//! Default constructor
 	ccArray(QString name = QString())
@@ -40,14 +43,13 @@ class ccArray : public std::vector<Type>
 	}
 
 	//! Duplicates array
-	virtual Base* clone()
+	Shared clone()
 	{
-		Base* cloneArray = new Base(getName());
+		Shared cloneArray = std::make_shared<Base>(getName());
 		if (!copy(*cloneArray))
 		{
 			// error message already issued
-			delete cloneArray;
-			cloneArray = nullptr;
+			cloneArray.reset();
 		}
 		return cloneArray;
 	}

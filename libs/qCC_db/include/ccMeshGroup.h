@@ -83,7 +83,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	const ccMaterialSet* getMaterialSet() const override
+	const ccMaterialSet::Shared getMaterialSet() const override
 	{
 		return nullptr;
 	}
@@ -95,7 +95,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	TextureCoordsContainer* getTexCoordinatesTable() const override
+	TextureCoordsContainer::Shared getTexCoordinatesTable() const override
 	{
 		return nullptr;
 	}
@@ -123,7 +123,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	NormsIndexesTableType* getTriNormsTable() const override
+	NormsIndexesTableType::Shared getTriNormsTable() const override
 	{
 		return nullptr;
 	}

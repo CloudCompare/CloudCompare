@@ -1102,8 +1102,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					}
 					else
 					{
-						newSF->release();
-						newSF = nullptr;
+						newSF.reset();
 						ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
 					}
 				}

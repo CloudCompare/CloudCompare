@@ -30,6 +30,7 @@
 class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNormType>
 {
   public:
+	//! Shared pointer type
 	using Shared = std::shared_ptr<NormsIndexesTableType>;
 
 	//! Default constructor
@@ -67,6 +68,7 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 {
   public:
+	//! Shared pointer type
 	using Shared = std::shared_ptr<NormsTableType>;
 
 	//! Default constructor
@@ -100,6 +102,7 @@ class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 {
   public:
+	//! Shared pointer type
 	using Shared = std::shared_ptr<ColorsTableType>;
 
 	//! Default constructor
@@ -133,6 +136,7 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
 {
   public:
+	//! Shared pointer type
 	using Shared = std::shared_ptr<RGBAColorsTableType>;
 
 	//! Default constructor
@@ -190,6 +194,7 @@ struct TexCoords2D
 class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 {
   public:
+	//! Shared pointer type
 	using Shared = std::shared_ptr<TextureCoordsContainer>;
 
 	//! Default constructor

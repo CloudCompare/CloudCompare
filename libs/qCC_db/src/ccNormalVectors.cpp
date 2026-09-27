@@ -292,7 +292,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	}
 
 	// we instantiate 3D normal vectors
-	NormsTableType*        theNorms = new NormsTableType;
+	NormsTableType::Shared theNorms = std::make_shared<NormsTableType>();
 	static const CCVector3 blankN(0, 0, 0);
 	if (!theNorms->resizeSafe(pointCount, true, &blankN))
 	{
@@ -305,7 +305,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	}
 	// theNorms->fill(0);
 
-	void* additionalParameters[2] = {reinterpret_cast<void*>(theNorms), reinterpret_cast<void*>(&localRadius)};
+	void* additionalParameters[2]{reinterpret_cast<void*>(theNorms.get()), reinterpret_cast<void*>(&localRadius)};
 
 	unsigned processedCells = 0;
 	switch (localModel)
@@ -366,8 +366,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 		theNormsCodes.setValue(i, nCode);
 	}
 
-	theNorms->release();
-	theNorms = nullptr;
+	theNorms.reset();
 
 	// preferred orientation
 	if (preferredOrientation != UNDEFINED)

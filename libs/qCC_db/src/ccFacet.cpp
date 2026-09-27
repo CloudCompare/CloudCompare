@@ -341,13 +341,15 @@ bool ccFacet::createInternalRepresentation(CCCoreLib::GenericIndexedCloudPersist
 					// unique normal for facets
 					if (m_polygonMesh->reservePerTriangleNormalIndexes())
 					{
-						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
+						NormsIndexesTableType::Shared normsTable = std::make_shared<NormsIndexesTableType>();
 						normsTable->reserve(1);
 						CCVector3 N(m_planeEquation);
 						normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
 						m_polygonMesh->setTriNormsTable(normsTable);
 						for (unsigned i = 0; i < triCount; ++i)
+						{
 							m_polygonMesh->addTriangleNormalIndexes(0, 0, 0); // all triangles will have the same normal!
+						}
 						m_polygonMesh->showNormals(true);
 						m_polygonMesh->setLocked(true);
 						m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);

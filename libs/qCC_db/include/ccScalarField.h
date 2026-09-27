@@ -30,6 +30,21 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
     , public ccSerializableObject
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ccScalarField>;
+
+	//! Returns a CCCoreLib shared pointer from the given CC scalar field
+	static CCCoreLib::ScalarField::Shared ToCCShared(Shared ptr)
+	{
+		return std::static_pointer_cast<CCCoreLib::ScalarField, ccScalarField>(ptr);
+	}
+
+	//! Returns a CC shared pointer from the given CCCoreLib scalar field
+	static Shared FromCCCoreLibShared(CCCoreLib::ScalarField::Shared ptr)
+	{
+		return std::static_pointer_cast<ccScalarField, CCCoreLib::ScalarField>(ptr);
+	}
+
 	//! Default constructor
 	/** \param name scalar field name
 	 **/

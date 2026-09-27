@@ -20,6 +20,7 @@
 // Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
+#include "ccMaterialSet.h"
 #include "ccShiftedObject.h"
 
 // CCCoreLib
@@ -33,7 +34,6 @@ namespace CCCoreLib
 
 class ccGenericPointCloud;
 class ccPointCloud;
-class ccMaterialSet;
 
 //! Generic mesh interface
 class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
@@ -72,7 +72,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool hasMaterials() const = 0;
 
 	//! Returns associated material set
-	virtual const ccMaterialSet* getMaterialSet() const = 0;
+	virtual const ccMaterialSet::Shared getMaterialSet() const = 0;
 
 	//! Returns a given triangle material indexes
 	virtual int getTriangleMtlIndex(unsigned triangleIndex) const = 0;
@@ -81,7 +81,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool hasTextures() const = 0;
 
 	//! Returns per-triangle texture coordinates array
-	virtual TextureCoordsContainer* getTexCoordinatesTable() const = 0;
+	virtual TextureCoordsContainer::Shared getTexCoordinatesTable() const = 0;
 
 	//! Returns per-triangle texture coordinates (pointer to)
 	virtual void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const = 0;
@@ -114,7 +114,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const = 0;
 
 	//! Returns per-triangle normals shared array
-	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
+	virtual NormsIndexesTableType::Shared getTriNormsTable() const = 0;
 
 	//! Returns the (barycentric) interpolation weights for a given triangle
 	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;

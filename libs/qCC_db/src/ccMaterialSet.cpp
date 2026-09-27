@@ -440,13 +440,12 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 	return true;
 }
 
-ccMaterialSet* ccMaterialSet::clone() const
+ccMaterialSet::Shared ccMaterialSet::clone() const
 {
-	ccMaterialSet* cloneSet = new ccMaterialSet(getName());
+	ccMaterialSet::Shared cloneSet = std::make_shared<ccMaterialSet>(getName());
 	if (!cloneSet->append(*this))
 	{
 		ccLog::Warning("[ccMaterialSet::clone] Not enough memory");
-		cloneSet->release();
 		cloneSet = nullptr;
 	}
 

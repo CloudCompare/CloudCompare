@@ -53,7 +53,6 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsIndexesTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray.reset();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -90,7 +89,6 @@ class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray.reset();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -124,7 +122,6 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[ColorsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray.reset();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -158,7 +155,6 @@ class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[RGBAColorsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray.reset();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -216,7 +212,6 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[TextureCoordsContainer::clone] Failed to clone array (not enough memory)");
-			cloneArray.reset();
 			return nullptr;
 		}
 		cloneArray->setName(getName());

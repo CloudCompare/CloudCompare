@@ -119,23 +119,21 @@ const ccGenericPrimitive& ccGenericPrimitive::operator+=(const ccGenericPrimitiv
 			assert(primNorms);
 			unsigned primTriNormCount = primNorms->currentSize();
 
-			NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
-			if (!normsTable || !normsTable->reserveSafe(triFacesNormCount + primTriNormCount))
+			NormsIndexesTableType::Shared normsShared = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
+			if (!normsShared->reserveSafe(triFacesNormCount + primTriNormCount))
 			{
 				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
 				return *this;
 			}
 
-			// attach table if not done already
 			if (!m_triNormals)
 			{
-				setTriNormsTable(normsTable);
-				assert(m_triNormals);
+				setTriNormsTable(normsShared);
 			}
 
 			for (unsigned i = 0; i < primTriNormCount; ++i)
 			{
-				normsTable->addElement(primNorms->getValue(i));
+				normsShared->addElement(primNorms->getValue(i));
 			}
 		}
 

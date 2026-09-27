@@ -27,6 +27,9 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
     , public ccHObject
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ccMaterialSet>;
+
 	//! Default constructor
 	ccMaterialSet(const QString& name = QString());
 
@@ -62,7 +65,7 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
 	bool saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const;
 
 	//! Clones materials set
-	ccMaterialSet* clone() const;
+	Shared clone() const;
 
 	//! Appends materials from another set
 	bool append(const ccMaterialSet& source);

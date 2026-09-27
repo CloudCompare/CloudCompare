@@ -311,11 +311,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 									// per-triangle materials
 									for (unsigned i = 0; i < croppedMesh->size(); ++i)
 									{
-										// get the origin triangle
 										unsigned origTriIndex = origTriIndexes[i];
 										int      mtlIndex     = mesh->getTriangleMtlIndex(origTriIndex);
 										croppedMesh->addTriangleMtlIndex(mtlIndex);
-
 										if (mtlIndex >= 0)
 											materialUsed[mtlIndex] = 1;
 									}
@@ -323,31 +321,26 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 									// import materials
 									{
 										size_t materialUsedCount = 0;
-										{
-											for (size_t i = 0; i < materialUsed.size(); ++i)
-												if (materialUsed[i] == 1)
-													++materialUsedCount;
-										}
+										for (size_t i = 0; i < materialUsed.size(); ++i)
+											if (materialUsed[i] == 1)
+												++materialUsedCount;
 
 										if (materialUsedCount == materialUsed.size())
 										{
-											// nothing to do, we use all input materials
 											croppedMesh->setMaterialSet(origMaterialSet->clone());
 										}
 										else
 										{
 											// create a subset of the input materials
-											ccMaterialSet* matSet = new ccMaterialSet(origMaterialSet->getName());
+											auto matSet = std::make_shared<ccMaterialSet>(origMaterialSet->getName());
+											matSet->reserve(materialUsedCount);
+											for (size_t i = 0; i < materialUsed.size(); ++i)
 											{
-												matSet->reserve(materialUsedCount);
-												for (size_t i = 0; i < materialUsed.size(); ++i)
+												if (materialUsed[i] >= 0)
 												{
-													if (materialUsed[i] >= 0)
-													{
-														matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
-														// update index
-														materialUsed[i] = static_cast<int>(matSet->size()) - 1;
-													}
+													matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
+													// update index
+													materialUsed[i] = static_cast<int>(matSet->size()) - 1;
 												}
 											}
 											croppedMesh->setMaterialSet(matSet);
@@ -375,7 +368,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 								// per-triangle texture coordinates
 								if (mesh->hasPerTriangleTexCoordIndexes())
 								{
-									TextureCoordsContainer* texCoords = new TextureCoordsContainer;
+									auto texCoords = std::make_shared<TextureCoordsContainer>();
 									if (croppedMesh->reservePerTriangleTexCoordIndexes()
 									    && texCoords->reserveSafe(croppedMesh->size() * 3))
 									{
@@ -393,7 +386,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 											const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 											// for each vertex of the new triangle
-											int texIndexes[3] = {-1, -1, -1};
+											int texIndexes[3]{-1, -1, -1};
 											for (unsigned j = 0; j < 3; ++j)
 											{
 												unsigned         vertIndex = tsic->i[j];
@@ -422,8 +415,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 									else
 									{
 										ccLog::Warning("[Crop] Failed to transfer texture coordinates on the output mesh (not enough memory)");
-										delete texCoords;
-										texCoords = nullptr;
+										texCoords.reset();
 									}
 								}
 							}

@@ -919,7 +919,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 						ccMaterialSet* matSet = new ccMaterialSet("Texture");
 
 						// texture coordinates table
-						TextureCoordsContainer* texCoords = new TextureCoordsContainer();
+						auto texCoords = std::make_shared<TextureCoordsContainer>();
 						// texCoords->reserve(verts);
 						texCoords->reserve(4);
 						{
@@ -1027,10 +1027,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 				if (orthoRectifyImagesAsClouds)
 				{
 					ccPointCloud* orthoCloud = sensor->orthoRectifyAsCloud(image, _keypointsCloud, keypointsImage);
-					if (orthoCloud)
+					if (ortoCloud)
 					{
-						orthoCloud->copyGlobalShiftAndScale(*_keypointsCloud);
-						container.addChild(orthoCloud);
+						ortoCloud->copyGlobalShiftAndScale(*_keypointsCloud);
+						container.addChild(ortoCloud);
 					}
 					else
 					{

@@ -39,7 +39,7 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
     , m_sfModEnabled(false)
     , m_sfMin(0)
     , m_sfMax(0)
-    , m_ui(new Ui::SubsamplingDialog)
+    , m_ui(std::make_unique<Ui::SubsamplingDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -62,10 +62,7 @@ ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius
 	m_lastUsedValues[OCTREE]         = static_cast<double>(CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
 }
 
-ccSubsamplingDlg::~ccSubsamplingDlg()
-{
-	delete m_ui;
-}
+ccSubsamplingDlg::~ccSubsamplingDlg() = default;
 
 CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cloud, CCCoreLib::GenericProgressCallback* progressCb /*=nullptr*/)
 {

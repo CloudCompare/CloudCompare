@@ -40,7 +40,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
     : QDialog(parent, Qt::Tool)
     , m_cloud(pointCloud)
     , m_systemInvalid(false)
-    , m_ui(new Ui::ColorFromScalarDialog)
+    , m_ui(std::make_unique<Ui::ColorFromScalarDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -210,7 +210,6 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 			m_cloud->redrawDisplay();
 		}
 	}
-	delete m_ui;
 }
 
 void ccColorFromScalarDlg::updateColormaps()

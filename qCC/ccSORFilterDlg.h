@@ -45,5 +45,5 @@ class ccSORFilterDlg : public QDialog
 	int  maxThreadCount() const;
 
   private:
-	Ui::SorFilterDialog* m_ui;
+	std::unique_ptr<Ui::SorFilterDialog> m_ui;
 };

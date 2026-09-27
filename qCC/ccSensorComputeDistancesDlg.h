@@ -39,5 +39,5 @@ class ccSensorComputeDistancesDlg : public QDialog
 	bool computeSquaredDistances() const;
 
   private:
-	Ui::sensorComputeDistancesDlg* m_ui;
+	std::unique_ptr<Ui::sensorComputeDistancesDlg> m_ui;
 };

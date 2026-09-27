@@ -52,7 +52,7 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
     , m_poly3DVertices(nullptr)
     , m_done(false)
     , m_pickingHub(pickingHub)
-    , m_ui(new Ui::TracePolyLineDlg)
+    , m_ui(std::make_unique<Ui::TracePolyLineDlg>())
 {
 	assert(pickingHub);
 
@@ -92,17 +92,12 @@ ccTracePolylineTool::ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* pare
 ccTracePolylineTool::~ccTracePolylineTool()
 {
 	// m_polyTipVertices is already a child of m_polyTip
-	if (m_polyTip)
-		delete m_polyTip;
+	delete m_polyTip;
 	m_polyTip = nullptr;
 
 	// m_poly3DVertices is already a child of m_poly3D
-	if (m_poly3D)
-		delete m_poly3D;
+	delete m_poly3D;
 	m_poly3D = nullptr;
-
-	delete m_ui;
-	m_ui = nullptr;
 }
 
 void ccTracePolylineTool::onShortcutTriggered(int key)

@@ -27,7 +27,7 @@ static bool       s_rescaleGlobalShift = true;
 
 ccScaleDlg::ccScaleDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent)
-    , m_ui(new Ui::ScaleDialog)
+    , m_ui(std::make_unique<Ui::ScaleDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -43,10 +43,7 @@ ccScaleDlg::ccScaleDlg(QWidget* parent /*=nullptr*/)
 	m_ui->fxSpinBox->setValue(s_lastScales.x); // always last in case 'same for all' is checked!
 }
 
-ccScaleDlg::~ccScaleDlg()
-{
-	delete m_ui;
-}
+ccScaleDlg::~ccScaleDlg() = default;
 
 void ccScaleDlg::saveState()
 {

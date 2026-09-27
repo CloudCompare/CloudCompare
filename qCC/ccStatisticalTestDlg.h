@@ -35,7 +35,7 @@ class ccStatisticalTestDlg : public QDialog
 	                     QString  windowTitle = QString(),
 	                     QWidget* parent      = nullptr);
 
-	~ccStatisticalTestDlg();
+	~ccStatisticalTestDlg() override;
 
 	//! Returns 1st parameter value
 	double getParam1() const;
@@ -50,5 +50,5 @@ class ccStatisticalTestDlg : public QDialog
 	double getProbability() const;
 
   private:
-	Ui::StatisticalTestDialog* m_ui;
+	std::unique_ptr<Ui::StatisticalTestDialog> m_ui;
 };

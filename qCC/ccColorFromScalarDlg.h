@@ -188,5 +188,5 @@ class ccColorFromScalarDlg : public QDialog
 	bool m_systemInvalid;
 
   private:
-	Ui::ColorFromScalarDialog* m_ui;
+	std::unique_ptr<Ui::ColorFromScalarDialog> m_ui;
 };

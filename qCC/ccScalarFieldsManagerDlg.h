@@ -75,8 +75,8 @@ class ccScalarFieldsManagerDialog : public QDialog
 		STD
 	};
 
-	ccPointCloud*               m_pointCloud;      //!< Active point cloud
-	unsigned                    m_sfCount;         //!< Number of scalar fields
-	std::vector<ccPointCloud*>  m_availableClouds; //!< Point clouds (derived from the initial selection)
-	Ui::ScalarFieldsManagerDlg* m_ui;              //!< Associated Qt UI
+	ccPointCloud*                               m_pointCloud;      //!< Active point cloud
+	unsigned                                    m_sfCount;         //!< Number of scalar fields
+	std::vector<ccPointCloud*>                  m_availableClouds; //!< Point clouds (derived from the initial selection)
+	std::unique_ptr<Ui::ScalarFieldsManagerDlg> m_ui;              //!< Associated Qt UI
 };

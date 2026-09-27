@@ -35,7 +35,7 @@ static bool   s_removeStretchedTriangles = true;
 
 ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent /*=nullptr*/)
     : QDialog(parent)
-    , m_ui(new Ui::UnrollDialog)
+    , m_ui(std::make_unique<Ui::UnrollDialog>())
     , m_dbRootEntity(dbRootEntity)
 {
 	m_ui->setupUi(this);
@@ -65,10 +65,7 @@ ccUnrollDlg::ccUnrollDlg(ccHObject* dbRootEntity, QWidget* parent /*=nullptr*/)
 	}
 }
 
-ccUnrollDlg::~ccUnrollDlg()
-{
-	delete m_ui;
-}
+ccUnrollDlg::~ccUnrollDlg() = default;
 
 ccPointCloud::UnrollMode ccUnrollDlg::getType() const
 {

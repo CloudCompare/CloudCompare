@@ -182,5 +182,5 @@ class ccVolumeCalcTool : public QDialog
 	 **/
 	ReportInfo m_lastReport;
 
-	Ui::VolumeCalcDialog* m_ui;
+	std::unique_ptr<Ui::VolumeCalcDialog> m_ui;
 };

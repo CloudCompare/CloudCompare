@@ -76,7 +76,7 @@ class sfEditDlg : public QWidget
 	//! Associated scalar field histogram
 	ccHistogramWindow* m_associatedSFHisto;
 
-	Ui::SFEditDlg* m_ui;
+	std::unique_ptr<Ui::SFEditDlg> m_ui;
 };
 
 #endif // CC_SF_EDIT_DIALOG_HEADER

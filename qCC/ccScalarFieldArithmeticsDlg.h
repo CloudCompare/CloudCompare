@@ -121,5 +121,5 @@ class ccScalarFieldArithmeticsDlg : public QDialog
 	int getSF2Index();
 
   private:
-	Ui::SFArithmeticsDlg* m_ui;
+	std::unique_ptr<Ui::SFArithmeticsDlg> m_ui;
 };

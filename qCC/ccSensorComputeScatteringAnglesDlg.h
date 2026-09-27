@@ -39,5 +39,5 @@ class ccSensorComputeScatteringAnglesDlg : public QDialog
 	bool anglesInDegrees() const;
 
   private:
-	Ui::sensorComputeScatteringAnglesDlg* m_ui;
+	std::unique_ptr<Ui::sensorComputeScatteringAnglesDlg> m_ui;
 };

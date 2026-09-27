@@ -63,5 +63,5 @@ class ccSelectChildrenDlg : public QDialog
 	void onAccept();
 
   private:
-	Ui::SelectChildrenDialog* mUI;
+	std::unique_ptr<Ui::SelectChildrenDialog> m_ui;
 };

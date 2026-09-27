@@ -78,5 +78,5 @@ class ccAlignDlg : public QDialog
 
 	void setColorsAndLabels();
 
-	Ui::AlignDialog* m_ui;
+	std::unique_ptr<Ui::AlignDialog> m_ui;
 };

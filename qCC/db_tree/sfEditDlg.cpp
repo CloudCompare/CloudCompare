@@ -38,7 +38,7 @@ sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
     , m_associatedSF(nullptr)
     , m_associatedSFHisto(nullptr)
-    , m_ui(new Ui::SFEditDlg)
+    , m_ui(std::make_unique<Ui::SFEditDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -74,10 +74,7 @@ sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)
 	show();
 }
 
-sfEditDlg::~sfEditDlg()
-{
-	delete m_ui;
-}
+sfEditDlg::~sfEditDlg() = default;
 
 void sfEditDlg::fillDialogWith(ccScalarField* sf)
 {

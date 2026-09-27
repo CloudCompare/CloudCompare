@@ -597,7 +597,7 @@ class MainWindow : public QMainWindow
 
   private: // members
 	//! Main UI
-	Ui::MainWindow* m_UI;
+	std::unique_ptr<Ui::MainWindow> m_ui;
 
 	//! DB tree
 	ccDBRoot* m_ccRoot;

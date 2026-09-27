@@ -211,7 +211,7 @@ class ccSectionExtractionTool : public ccOverlayDialog
 
   private: // members
 	//! Associated UI
-	Ui::SectionExtractionDlg* m_UI;
+	std::unique_ptr<Ui::SectionExtractionDlg> m_ui;
 
 	//! Pool of active sections
 	SectionPool m_sections;

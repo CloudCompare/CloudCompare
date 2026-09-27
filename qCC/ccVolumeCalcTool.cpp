@@ -44,7 +44,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
     , cc2Point5DimEditor()
     , m_cloud1(cloud1)
     , m_cloud2(cloud2)
-    , m_ui(new Ui::VolumeCalcDialog)
+    , m_ui(std::make_unique<Ui::VolumeCalcDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -124,10 +124,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	gridIsUpToDate(false);
 }
 
-ccVolumeCalcTool::~ccVolumeCalcTool()
-{
-	delete m_ui;
-}
+ccVolumeCalcTool::~ccVolumeCalcTool() = default;
 
 void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 {

@@ -33,7 +33,7 @@
 
 ccAlignDlg::ccAlignDlg(ccGenericPointCloud* data, ccGenericPointCloud* model, QWidget* parent)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::AlignDialog)
+    , m_ui(std::make_unique<Ui::AlignDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -67,8 +67,6 @@ ccAlignDlg::~ccAlignDlg()
 {
 	modelObject->enableTempColor(false);
 	dataObject->enableTempColor(false);
-
-	delete m_ui;
 }
 
 unsigned ccAlignDlg::getNbTries()

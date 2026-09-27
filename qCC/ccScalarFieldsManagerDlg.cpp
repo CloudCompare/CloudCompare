@@ -38,7 +38,7 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(const ccHObject::Contai
     : QDialog(parent)
     , m_pointCloud(nullptr)
     , m_sfCount(0)
-    , m_ui(new Ui::ScalarFieldsManagerDlg)
+    , m_ui(std::make_unique<Ui::ScalarFieldsManagerDlg>())
 {
 	m_ui->setupUi(this);
 	m_ui->sfTableWidget->verticalHeader()->setVisible(true);                     // enable row numbering
@@ -76,11 +76,7 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(const ccHObject::Contai
 	setSelectedEntities(selectedEntities);
 }
 
-ccScalarFieldsManagerDialog::~ccScalarFieldsManagerDialog()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccScalarFieldsManagerDialog::~ccScalarFieldsManagerDialog() = default;
 
 void ccScalarFieldsManagerDialog::setSelectedEntities(const ccHObject::Container& entities)
 {

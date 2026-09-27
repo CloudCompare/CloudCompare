@@ -2164,7 +2164,8 @@ void ccGLWindowInterface::onWheelEvent(float wheelDelta_deg)
 		else
 		{
 			double cameraCenterToPivotDist = m_viewportParams.getFocalDistance();
-			delta                          = (std::abs(cameraCenterToPivotDist) / (wheelDelta_deg < 0.0 ? -20.0 : 20.0)) * getDisplayParameters().zoomSpeed;
+			// 15 degrees = one mouse wheel notch (trackpads and high resolution wheels send much smaller values)
+			delta = (std::abs(cameraCenterToPivotDist) / 20.0) * (wheelDelta_deg / 15.0) * getDisplayParameters().zoomSpeed;
 		}
 
 		CCVector3d v(0.0, 0.0, -delta);

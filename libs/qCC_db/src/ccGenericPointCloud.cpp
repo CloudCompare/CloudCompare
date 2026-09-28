@@ -227,19 +227,19 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 20)
+	if (context.dataVersion < 20)
 	{
 		return CorruptError();
 	}
 
-	if (dataVersion < 33)
+	if (context.dataVersion < 33)
 	{
 		//'coordinates shift' (dataVersion>=20)
 		if (in.read((char*)m_globalShift.u, sizeof(double) * 3) < 0)
@@ -267,7 +267,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 		}
 		if (hasVisibilityArray)
 		{
-			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion, "visibility array"))
+			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, context.dataVersion, "visibility array"))
 			{
 				unallocateVisibilityArray();
 				return false;
@@ -277,7 +277,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 
 	//'point size' (dataVersion>=24)
 	m_pointSize = 0;
-	if (dataVersion >= 24)
+	if (context.dataVersion >= 24)
 	{
 		if (in.read((char*)&m_pointSize, 1) < 0)
 		{

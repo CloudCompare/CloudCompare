@@ -516,9 +516,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// points count (dataVersion >= 20)
@@ -557,7 +557,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 			}
 		}
 
-		if (dataVersion >= 49)
+		if (context.dataVersion >= 49)
 		{
 			// mesh ID (dataVersion >= 49 - will be retrieved later)
 			uint32_t meshID = 0;
@@ -588,7 +588,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 		// entity center point (dataVersion >= 50)
 		bool entityCenterPoint = false;
-		if (dataVersion >= 50)
+		if (context.dataVersion >= 50)
 		{
 			if (in.read((char*)&entityCenterPoint, sizeof(bool)) < 0)
 				return ReadError();
@@ -607,7 +607,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (in.read((char*)&m_showFullBody, sizeof(bool)) < 0)
 		return ReadError();
 
-	if (dataVersion > 20)
+	if (context.dataVersion > 20)
 	{
 		// Show in 2D boolean (dataVersion >= 21)
 		if (in.read((char*)&m_dispIn2D, sizeof(bool)) < 0)

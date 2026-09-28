@@ -594,9 +594,9 @@ bool ccSubMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccSubMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericMesh::fromFile_MeOnly(in, context))
 		return false;
 
 	// as the associated mesh can't be saved directly
@@ -609,7 +609,7 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
 
 	// references (dataVersion>=29)
-	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, dataVersion, "triangle indexes"))
+	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, context.dataVersion, "triangle indexes"))
 		return ReadError();
 
 	return true;

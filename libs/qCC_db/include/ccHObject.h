@@ -397,7 +397,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	// inherited from ccSerializableObject
 	bool  isSerializable() const override;
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	//! Custom version of ccSerializableObject::fromFile
@@ -408,7 +408,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	    \param oldToNewIDMap map to convert old IDs to new ones
 	    \return success
 	**/
-	bool fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
+	bool fromFileNoChildren(QFile& in, LoadingContext& context);
 
 	//! Behavior when selected
 	enum SelectionBehavior
@@ -491,7 +491,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
 	    \param oldToNewIDMap map to link old IDs with new IDs
 	**/
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
+	virtual bool fromFile_MeOnly(QFile& in, LoadingContext& context);
 
 	//! Returns the minimum file version required to save this instance
 	/** To be overloaded (but still called ;) by subclass.

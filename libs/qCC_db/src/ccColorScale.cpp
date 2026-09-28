@@ -272,9 +272,9 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccColorScale::fromFile(QFile& in, LoadingContext& context)
 {
-	if (dataVersion < 27) // structure appeared at version 27!
+	if (context.dataVersion < 27) // structure appeared at version 27!
 		return false;
 
 	QDataStream inStream(&in);
@@ -323,7 +323,7 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 	}
 
 	// custom labels (dataVersion>=40)
-	if (dataVersion >= 40)
+	if (context.dataVersion >= 40)
 	{
 		// custom label count
 		uint32_t labelCount = 0;
@@ -338,7 +338,7 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap
 				QString text;
 
 				inStream >> label;
-				if (dataVersion >= 54)
+				if (context.dataVersion >= 54)
 				{
 					inStream >> text;
 				}

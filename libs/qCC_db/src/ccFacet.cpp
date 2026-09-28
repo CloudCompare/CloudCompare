@@ -494,12 +494,12 @@ bool ccFacet::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
-	if (dataVersion < 32)
+	if (context.dataVersion < 32)
 		return false;
 
 	// origin points (dataVersion>=32)

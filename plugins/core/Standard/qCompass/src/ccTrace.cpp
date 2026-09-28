@@ -1250,9 +1250,9 @@ void ccTrace::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
 	init(cld);
 }
 
-bool ccTrace::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccTrace::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccPolyline::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}

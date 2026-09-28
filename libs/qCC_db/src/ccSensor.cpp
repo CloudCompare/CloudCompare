@@ -192,23 +192,23 @@ bool ccSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// serialization wasn't possible before v3.4!
-	if (dataVersion < 34)
+	if (context.dataVersion < 34)
 		return false;
 
 	// rigid transformation (dataVersion>=34)
-	if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!m_rigidTransformation.fromFile(in, context))
 		return ReadError();
 
 	// various parameters (dataVersion>=35)
 	QDataStream inStream(&in);
 	inStream >> m_activeIndex;
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_scale);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_scale);
 
 	// color (dataVersion>=35)
 	if (in.read((char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)

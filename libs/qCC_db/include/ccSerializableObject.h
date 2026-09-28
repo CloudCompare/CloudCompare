@@ -74,14 +74,26 @@ class ccSerializableObject
 	//! Map of loaded unique IDs (old ID --> new ID)
 	using LoadedIDMap = QMultiMap<unsigned, unsigned>;
 
+	//! Loading context
+	struct LoadingContext
+	{
+		LoadingContext(short _dataVersion, int _flags)
+		    : dataVersion(_dataVersion)
+		    , flags(_flags)
+		{
+		}
+
+		short       dataVersion;   //!< File version
+		int         flags;         //!< Deserialization flags (see ccSerializableObject::DeserializationFlags)
+		LoadedIDMap oldToNewIDMap; //!< Map to link old IDs with new IDs
+	};
+
 	//! Loads data from binary stream
 	/** \param in input file (already opened)
-	    \param dataVersion file version
-	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-	    \param oldToNewIDMap map to link old IDs with new IDs
+	    \param loadingContext loading context
 	    \return success
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+	virtual bool fromFile(QFile& in, LoadingContext& context)
 	{
 		return false;
 	}

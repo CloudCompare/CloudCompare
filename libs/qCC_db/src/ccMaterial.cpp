@@ -327,13 +327,13 @@ bool ccMaterial::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccMaterial::fromFile(QFile& in, LoadingContext& context)
 {
 	QDataStream inStream(&in);
 
 	// material name (dataVersion>=20)
 	inStream >> m_name;
-	if (dataVersion < 37)
+	if (context.dataVersion < 37)
 	{
 		// texture (dataVersion>=20)
 		QImage texture;

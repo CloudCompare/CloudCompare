@@ -358,12 +358,12 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 }
 
-inline bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
+static bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
 {
 	return object && object->getUniqueID() == uniqueID && object->isKindOf(expectedType);
 }
 
-ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::LoadedIDMap& oldToNewIDMap, unsigned oldUniqueID, CC_CLASS_ENUM expectedType)
+static ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::LoadedIDMap& oldToNewIDMap, unsigned oldUniqueID, CC_CLASS_ENUM expectedType)
 {
 	ccObject::LoadedIDMap::const_iterator it = oldToNewIDMap.find(oldUniqueID);
 	while (it != oldToNewIDMap.end() && it.key() == oldUniqueID)
@@ -463,14 +463,15 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		pDlg->show();
 	}
 
+	ccHObject::LoadingContext loadingContext(static_cast<short>(binVersion), flags);
+
 	if (classID == CC_TYPES::CUSTOM_H_OBJECT)
 	{
 		// store seeking position
 		size_t original_pos = in.pos();
 		// we need to load it as plain ccCustomHobject
-		ccHObject::LoadedIDMap oldToNewIDMap;
-		root->fromFileNoChildren(in, static_cast<short>(binVersion), flags, oldToNewIDMap); // this will load it, should be pretty quick
-		in.seek(original_pos);                                                              // back to the beginning of the file
+		root->fromFileNoChildren(in, loadingContext); // this will load it, should be pretty quick
+		in.seek(original_pos);                        // back to the beginning of the file
 
 		QString classId  = root->getMetaData("class_name").toString();
 		QString pluginId = root->getMetaData("plugin_name").toString();
@@ -492,18 +493,17 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		}
 	}
 
-	bool                   success = false;
-	ccHObject::LoadedIDMap oldToNewIDMap;
+	bool success = false;
 
 	if (parallel)
 	{
 		// concurrent call in a separate thread, so that the progress dialog keeps refreshing
 		success = ccBackgroundTask::Run([&]()
-		                                { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
+		                                { return root->fromFile(in, loadingContext); });
 	}
 	else
 	{
-		success = root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap);
+		success = root->fromFile(in, loadingContext);
 	}
 
 	bool forceLoadAfterError = false;
@@ -555,7 +555,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				intptr_t meshID = (intptr_t)subMesh->getAssociatedMesh();
 				if (meshID > 0)
 				{
-					ccHObject* mesh = FindRobust(root, subMesh, oldToNewIDMap, meshID, CC_TYPES::MESH);
+					ccHObject* mesh = FindRobust(root, subMesh, loadingContext.oldToNewIDMap, meshID, CC_TYPES::MESH);
 					if (mesh)
 					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh), false); //'false' because previous mesh is not null (= real mesh ID)!!!
@@ -592,7 +592,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, mesh, loadingContext.oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
@@ -655,7 +655,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet().get();
 					if (matSetID > 0)
 					{
-						materials = FindRobust(root, mesh, oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
+						materials = FindRobust(root, mesh, loadingContext.oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
 						if (materials)
 						{
 							mesh->setMaterialSet(ccMaterialSet::Shared(static_cast<ccMaterialSet*>(materials)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
@@ -674,7 +674,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable().get();
 					if (triNormsTableID > 0)
 					{
-						triNormsTable = FindRobust(root, mesh, oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
+						triNormsTable = FindRobust(root, mesh, loadingContext.oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
 						if (triNormsTable)
 						{
 							mesh->setTriNormsTable(NormsIndexesTableType::Shared(static_cast<NormsIndexesTableType*>(triNormsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
@@ -693,7 +693,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable().get();
 					if (texCoordArrayID > 0)
 					{
-						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
+						texCoordsTable = FindRobust(root, mesh, loadingContext.oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
 						if (texCoordsTable)
 						{
 							mesh->setTexCoordinatesTable(TextureCoordsContainer::Shared(static_cast<TextureCoordsContainer*>(texCoordsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
@@ -764,7 +764,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 			poly->CCCoreLib::Polyline::setAssociatedCloud(nullptr); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
 
-			ccHObject* cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+			ccHObject* cloudEntity = FindRobust(root, poly, loadingContext.oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 			if (cloudEntity)
 			{
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
@@ -803,7 +803,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 			intptr_t  bufferID = (intptr_t)sensor->getPositions();
 			if (bufferID > 0)
 			{
-				ccHObject* buffer = FindRobust(root, sensor, oldToNewIDMap, bufferID, CC_TYPES::TRANS_BUFFER);
+				ccHObject* buffer = FindRobust(root, sensor, loadingContext.oldToNewIDMap, bufferID, CC_TYPES::TRANS_BUFFER);
 				if (buffer)
 				{
 					sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
@@ -836,7 +836,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				if (pp._cloud)
 				{
 					intptr_t   cloudID = (intptr_t)pp._cloud;
-					ccHObject* cloud   = FindRobust(root, label, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud   = FindRobust(root, label, loadingContext.oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
@@ -861,7 +861,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				else if (pp._mesh)
 				{
 					intptr_t   meshID = (intptr_t)pp._mesh;
-					ccHObject* mesh   = FindRobust(root, label, oldToNewIDMap, meshID, CC_TYPES::MESH);
+					ccHObject* mesh   = FindRobust(root, label, loadingContext.oldToNewIDMap, meshID, CC_TYPES::MESH);
 					if (mesh)
 					{
 						ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
@@ -915,7 +915,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, facet, loadingContext.oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 					{
 						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
@@ -934,7 +934,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				intptr_t cloudID = (intptr_t)facet->getContourVertices();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
+					ccHObject* cloud = FindRobust(root, facet, loadingContext.oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
 					if (cloud)
 					{
 						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
@@ -953,7 +953,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				intptr_t polyID = (intptr_t)facet->getContour();
 				if (polyID > 0)
 				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::POLY_LINE);
+					ccHObject* poly = FindRobust(root, facet, loadingContext.oldToNewIDMap, polyID, CC_TYPES::POLY_LINE);
 					if (poly)
 					{
 						facet->setContour(ccHObjectCaster::ToPolyline(poly));
@@ -972,7 +972,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				intptr_t polyID = (intptr_t)facet->getPolygon();
 				if (polyID > 0)
 				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::MESH);
+					ccHObject* poly = FindRobust(root, facet, loadingContext.oldToNewIDMap, polyID, CC_TYPES::MESH);
 					if (poly)
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
@@ -994,7 +994,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 			intptr_t sensorID = (intptr_t)image->getAssociatedSensor();
 			if (sensorID > 0)
 			{
-				ccHObject* sensor = FindRobust(root, image, oldToNewIDMap, sensorID, CC_TYPES::CAMERA_SENSOR);
+				ccHObject* sensor = FindRobust(root, image, loadingContext.oldToNewIDMap, sensorID, CC_TYPES::CAMERA_SENSOR);
 				if (sensor)
 				{
 					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));

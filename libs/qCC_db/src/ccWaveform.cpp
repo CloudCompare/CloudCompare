@@ -61,11 +61,11 @@ bool WaveformDescriptor::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool WaveformDescriptor::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool WaveformDescriptor::fromFile(QFile& in, LoadingContext& context)
 {
 	QDataStream inStream(&in);
 
-	if (dataVersion < 44)
+	if (context.dataVersion < 44)
 		return false;
 
 	// dataVersion >= 44
@@ -317,11 +317,11 @@ bool ccWaveform::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccWaveform::fromFile(QFile& in, LoadingContext& context)
 {
 	QDataStream inStream(&in);
 
-	if (dataVersion < 46)
+	if (context.dataVersion < 46)
 		return CorruptError();
 
 	// dataVersion >= 46
@@ -341,7 +341,7 @@ bool ccWaveform::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 		inStream >> m_beamDir.z;
 		inStream >> m_echoTime_ps;
 
-		if (dataVersion > 46)
+		if (context.dataVersion > 46)
 		{
 			// dataVersion >= 47
 			inStream >> m_returnIndex;

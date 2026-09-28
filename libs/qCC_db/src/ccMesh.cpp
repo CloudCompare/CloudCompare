@@ -3436,11 +3436,11 @@ bool ccMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	ccLog::PrintVerbose(QString("Loading mesh %1...").arg(m_name));
 
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericMesh::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
@@ -3515,7 +3515,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	{
 		return false;
 	}
-	if (!ccSerializationHelper::GenericArrayFromFile<CCCoreLib::VerticesIndexes, 3, unsigned>(*m_triVertIndexes, in, dataVersion, "vertex indexes"))
+	if (!ccSerializationHelper::GenericArrayFromFile<CCCoreLib::VerticesIndexes, 3, unsigned>(*m_triVertIndexes, in, context.dataVersion, "vertex indexes"))
 	{
 		return false;
 	}
@@ -3532,7 +3532,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			m_triMtlIndexes = std::make_shared<triangleMaterialIndexesSet>();
 		}
-		if (!ccSerializationHelper::GenericArrayFromFile<int, 1, int>(*m_triMtlIndexes, in, dataVersion, "material indexes"))
+		if (!ccSerializationHelper::GenericArrayFromFile<int, 1, int>(*m_triMtlIndexes, in, context.dataVersion, "material indexes"))
 		{
 			m_triMtlIndexes.reset();
 			return false;
@@ -3552,7 +3552,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			m_texCoordIndexes = std::make_shared<triangleTexCoordIndexesSet>();
 		}
-		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, dataVersion, "texture coordinates"))
+		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, context.dataVersion, "texture coordinates"))
 		{
 			m_texCoordIndexes.reset();
 			return false;
@@ -3560,7 +3560,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	}
 
 	//'materials shown' state (dataVersion>=20 && dataVersion<29))
-	if (dataVersion < 29)
+	if (context.dataVersion < 29)
 	{
 		bool materialsShown = false;
 		if (in.read((char*)&materialsShown, sizeof(bool)) < 0)
@@ -3583,14 +3583,14 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 			m_triNormalIndexes = std::make_shared<triangleNormalsIndexesSet>();
 		}
 		assert(m_triNormalIndexes);
-		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_triNormalIndexes, in, dataVersion, "normal indexes"))
+		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_triNormalIndexes, in, context.dataVersion, "normal indexes"))
 		{
 			removePerTriangleNormalIndexes();
 			return false;
 		}
 	}
 
-	if (dataVersion < 29)
+	if (context.dataVersion < 29)
 	{
 		//'per-triangle normals shown' state (dataVersion>=20 && dataVersion<29))
 		bool triNormsShown = false;

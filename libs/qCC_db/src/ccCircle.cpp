@@ -116,7 +116,7 @@ bool ccCircle::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCircle::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
 
@@ -127,12 +127,12 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 		m_theAssociatedCloud = nullptr;
 	}
 
-	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccPolyline::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 56)
+	if (context.dataVersion < 56)
 	{
 		return false;
 	}

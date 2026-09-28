@@ -26,15 +26,12 @@ namespace {
 
 qHoughNormalsDialog::qHoughNormalsDialog(QWidget *parent)
 	: QDialog(parent)
-	, m_ui( new Ui::HoughNormalsDialog )
+	, m_ui(std::make_unique<Ui::HoughNormalsDialog>())
 {
 	m_ui->setupUi(this);
 }
 
-qHoughNormalsDialog::~qHoughNormalsDialog()
-{
-	delete m_ui;
-}
+qHoughNormalsDialog::~qHoughNormalsDialog() = default;
 
 void qHoughNormalsDialog::setParameters( const Parameters &params )
 {

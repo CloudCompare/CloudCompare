@@ -305,17 +305,19 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
-	unsigned                    numberOfPoints = cloud->size();
-	bool                        writeColors    = cloud->hasColors();
-	bool                        writeNorms     = cloud->hasNormals();
-	std::vector<ccScalarField*> theScalarFields;
+	unsigned                           numberOfPoints = cloud->size();
+	bool                               writeColors    = cloud->hasColors();
+	bool                               writeNorms     = cloud->hasNormals();
+	std::vector<ccScalarField::Shared> scalarFields;
 	if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
 		for (unsigned i = 0; i < ccCloud->getNumberOfScalarFields(); ++i)
-			theScalarFields.push_back(static_cast<ccScalarField*>(ccCloud->getScalarField(i)));
+		{
+			scalarFields.push_back(ccCloud->getCCScalarField(i));
+		}
 	}
-	bool writeSF = (!theScalarFields.empty());
+	bool writeSF = (!scalarFields.empty());
 
 	// progress dialog
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
@@ -361,7 +363,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF name
-			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
 			{
 				QString sfName(QString::fromStdString((*it)->getName()));
 				sfName.replace(separator, '_');
@@ -461,7 +463,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF values
-			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
 			{
 				line.append(separator);
 				ScalarType sfVal = (*it)->getValue(i);
@@ -639,12 +641,12 @@ struct cloudAttributesDescriptor
 		};
 		int indexes[c_attribCount];
 	};
-	std::vector<int>                     scalarIndexes;
-	std::vector<CCCoreLib::ScalarField*> scalarFields;
-	bool                                 hasNorms;
-	bool                                 hasRGBColors;
-	bool                                 hasFloatRGBColors[4];
-	bool                                 hasQuaternion;
+	std::vector<int>                   scalarIndexes;
+	std::vector<ccScalarField::Shared> scalarFields;
+	bool                               hasNorms;
+	bool                               hasRGBColors;
+	bool                               hasFloatRGBColors[4];
+	bool                               hasQuaternion;
 
 	cloudAttributesDescriptor()
 	{
@@ -776,8 +778,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 				sfName.replace('_', ' ');
 			}
 
-			ccScalarField* sf    = new ccScalarField(sfName.toStdString());
-			int            sfIdx = cloud->addScalarField(sf);
+			ccScalarField::Shared sf    = std::make_shared<ccScalarField>(sfName.toStdString());
+			int                   sfIdx = cloud->addScalarField(sf);
 			if (sfIdx >= 0)
 			{
 				cloudDesc.scalarIndexes.push_back(i);
@@ -786,8 +788,6 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 			else
 			{
 				ccLog::Warning("Failed to add scalar field #%i to cloud! (skipped)", sfIndex);
-				sf->release();
-				sf = nullptr;
 			}
 		}
 		break;
@@ -1044,7 +1044,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 				if (!cloudDesc.scalarFields.empty())
 				{
 					for (unsigned k = 0; k < cloudDesc.scalarFields.size(); ++k)
+					{
 						cloudDesc.scalarFields[k]->computeMinAndMax();
+					}
 					cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 					cloudDesc.cloud->showSF(true);
 				}

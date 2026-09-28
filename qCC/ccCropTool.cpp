@@ -134,8 +134,8 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 					assert(origVertices);
 
 					// import parameters
-					croppedVertices->importParametersFrom(origVertices);
-					croppedMesh->importParametersFrom(mesh);
+					croppedVertices->importParametersFrom(*origVertices);
+					croppedMesh->importParametersFrom(*mesh);
 
 					// compute normals if necessary
 					if (mesh->hasNormals())
@@ -176,8 +176,8 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 								}
 
 								// scalar fields
-								std::vector<ccScalarField*> importedSFs;
-								ccPointCloud*               origVertices_pc = nullptr;
+								std::vector<ccScalarField::Shared> importedSFs;
+								ccPointCloud*                      origVertices_pc = nullptr;
 								if (origVertices->hasScalarFields())
 								{
 									origVertices_pc  = origVertices->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(origVertices) : nullptr;
@@ -189,15 +189,15 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 										int sfIdx = croppedVertices->addScalarField(origVertices_pc ? origVertices_pc->getScalarField(i)->getName() : "Scalar field");
 										if (sfIdx >= 0)
 										{
-											ccScalarField* sf = static_cast<ccScalarField*>(croppedVertices->getScalarField(i));
+											auto sf = croppedVertices->getCCScalarField(i);
 											sf->fill(CCCoreLib::NAN_VALUE);
 											if (origVertices_pc)
 											{
 												// import display parameters if possible
-												ccScalarField* originSf = static_cast<ccScalarField*>(origVertices_pc->getScalarField(i));
+												auto originSf = origVertices_pc->getCCScalarField(i);
 												assert(originSf);
 												// copy display parameters
-												sf->importParametersFrom(originSf);
+												sf->importParametersFrom(*originSf);
 											}
 											importedSFs.push_back(sf);
 										}
@@ -263,10 +263,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 													CCVector3d scalarValues(0, 0, 0);
 													if (origVertices_pc)
 													{
-														const CCCoreLib::ScalarField* sf = origVertices_pc->getScalarField(s);
-														scalarValues.x                   = sf->getValue(tsio->i1);
-														scalarValues.y                   = sf->getValue(tsio->i2);
-														scalarValues.z                   = sf->getValue(tsio->i3);
+														auto sf        = origVertices_pc->getScalarField(s);
+														scalarValues.x = sf->getValue(tsio->i1);
+														scalarValues.y = sf->getValue(tsio->i2);
+														scalarValues.z = sf->getValue(tsio->i3);
 													}
 													else
 													{
@@ -301,7 +301,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 							// per-triangle features (materials)
 							if (mesh->hasMaterials())
 							{
-								const ccMaterialSet* origMaterialSet = mesh->getMaterialSet();
+								auto origMaterialSet = mesh->getMaterialSet();
 								assert(origMaterialSet);
 
 								if (origMaterialSet && !origMaterialSet->empty() && croppedMesh->reservePerTriangleMtlIndexes())

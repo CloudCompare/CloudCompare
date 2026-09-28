@@ -336,26 +336,20 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 	return cloud;
 }
 
-void ccGenericMesh::importParametersFrom(const ccGenericMesh* mesh)
+void ccGenericMesh::importParametersFrom(const ccGenericMesh& mesh)
 {
-	if (!mesh)
-	{
-		assert(false);
-		return;
-	}
-
 	// original shift & scale
-	copyGlobalShiftAndScale(*mesh);
+	copyGlobalShiftAndScale(mesh);
 
 	// stippling
-	enableStippling(mesh->stipplingEnabled());
+	enableStippling(mesh.stipplingEnabled());
 	// wired style
-	showWired(mesh->isShownAsWire());
+	showWired(mesh.isShownAsWire());
 
 	// keep the transformation history!
-	setGLTransformationHistory(mesh->getGLTransformationHistory());
+	setGLTransformationHistory(mesh.getGLTransformationHistory());
 	// and meta-data
-	setMetaData(mesh->metaData());
+	setMetaData(mesh.metaData());
 }
 
 void ccGenericMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const

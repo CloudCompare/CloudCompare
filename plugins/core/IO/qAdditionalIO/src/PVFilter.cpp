@@ -167,8 +167,8 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	}
 	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
-	ccPointCloud*           loadedCloud = nullptr;
-	CCCoreLib::ScalarField* sf          = nullptr;
+	ccPointCloud*                  loadedCloud = nullptr;
+	CCCoreLib::ScalarField::Shared sf;
 	// if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex    = 0;
 	unsigned fileChunkPos  = 0;
@@ -195,7 +195,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 			fileChunkPos  = pointsRead;
 			fileChunkSize = std::min<unsigned>(numberOfPoints - pointsRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud   = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
-			sf            = nullptr;
+			sf.reset();
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->enableScalarField())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;

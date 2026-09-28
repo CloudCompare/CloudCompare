@@ -722,7 +722,7 @@ void DistanceMapGenerationDlg::update()
 			updateMapTexture();
 
 			//add a virtual scalar field for color ramp display
-			ccScalarField* sf = new ccScalarField();
+			ccScalarField::Shared sf = std::make_shared<ccScalarField>();
 			{
 				sf->reserve(2);
 				ScalarType smin = static_cast<ScalarType>(m_map->minVal);
@@ -834,7 +834,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(texturedEntity);
 			//set material
-			ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(mesh->getMaterialSet());
+			ccMaterialSet::Shared materialSet = mesh->getMaterialSet();
 			assert(materialSet);
 			//remove old material (if any)
 			materialSet->clear();
@@ -855,7 +855,7 @@ void DistanceMapGenerationDlg::colorScaleChanged(int)
 	if (!m_window || !m_colorScaleSelector)
 		return;
 
-	ccScalarField* sf = m_window->getAssociatedScalarField();
+	ccScalarField::Shared sf = m_window->getAssociatedScalarField();
 	if (sf)
 	{
 		ccColorScale::Shared colorScale = m_colorScaleSelector->getSelectedScale();

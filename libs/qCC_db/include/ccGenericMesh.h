@@ -244,7 +244,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Imports the parameters from another mesh
 	/** Only the specific parameters are imported.
 	 **/
-	void importParametersFrom(const ccGenericMesh* mesh);
+	void importParametersFrom(const ccGenericMesh& mesh);
 
 	//! Brute force triangle picking
 	virtual bool trianglePicking(const CCVector2d&           clickPos,

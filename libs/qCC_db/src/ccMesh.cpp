@@ -885,7 +885,7 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,
 	cloneMesh->showMaterials(materialsShown());
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
-	cloneMesh->importParametersFrom(this);
+	cloneMesh->importParametersFrom(*this);
 
 	// clone some children
 	ccHObjectCaster::CloneChildren(this, cloneMesh);
@@ -1823,9 +1823,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	bool lightIsEnabled     = false;
 
 	// in the case we need to display scalar field colors (this can also impact the entity picking mode)
-	ccScalarField*       currentDisplayedScalarField = nullptr;
-	bool                 sfMayHaveHiddenValues       = false;
-	ccColorScale::Shared colorScale(nullptr);
+	ccScalarField::Shared currentDisplayedScalarField;
+	bool                  sfMayHaveHiddenValues = false;
+	ccColorScale::Shared  colorScale;
 
 	if (glParams.showSF)
 	{
@@ -1992,8 +1992,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	// in the case we need normals (i.e. lighting)
-	NormsIndexesTableType* normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
-	ccNormalVectors*       compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
+	NormsIndexesTableType::Shared normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
+	ccNormalVectors*              compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
 
 	// stipple mask
 	bool stippling = (m_stippling && !entityPickingMode);
@@ -2868,7 +2868,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 		newMesh->showNormals(normalsShown());
 		newMesh->showMaterials(materialsShown());
 		newMesh->showSF(sfShown());
-		newMesh->importParametersFrom(this);
+		newMesh->importParametersFrom(*this);
 	}
 
 	// we must update eventual sub-meshes

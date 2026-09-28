@@ -76,7 +76,7 @@ sfEditDlg::sfEditDlg(QWidget* parent /*=nullptr*/)
 
 sfEditDlg::~sfEditDlg() = default;
 
-void sfEditDlg::fillDialogWith(ccScalarField* sf)
+void sfEditDlg::fillDialogWith(ccScalarField::Shared sf)
 {
 	m_associatedSF = sf;
 	if (!sf)

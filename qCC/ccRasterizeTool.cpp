@@ -402,7 +402,7 @@ void ccRasterizeTool::activeLayerChanged(int layerIndex, bool autoRedraw /*=true
 
 			if (sfIndex >= 0)
 			{
-				ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+				auto activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 				if (activeLayer)
 				{
 					const ccScalarField::Range& layerValues = activeLayer->displayRange();
@@ -702,13 +702,12 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
 			int hillshadeSFIdx = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
 			if (hillshadeSFIdx >= 0)
 			{
-				CCCoreLib::ScalarField* hillshadeField = m_rasterCloud->getScalarField(hillshadeSFIdx);
+				auto hillshadeField = m_rasterCloud->getCCScalarField(hillshadeSFIdx);
 				if (hillshadeField->currentSize() == cloudGrid->size())
 				{
 					try
 					{
-						ccScalarField* hillshadeClone = new ccScalarField(*static_cast<ccScalarField*>(hillshadeField));
-						cloudGrid->addScalarField(hillshadeClone);
+						cloudGrid->addScalarField(std::make_shared<ccScalarField>(*hillshadeField));
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -724,13 +723,12 @@ ccPointCloud* ccRasterizeTool::convertGridToCloud(bool                          
 			int xraySFIdx = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
 			if (xraySFIdx >= 0)
 			{
-				CCCoreLib::ScalarField* xraySF = m_rasterCloud->getScalarField(xraySFIdx);
+				auto xraySF = m_rasterCloud->getCCScalarField(xraySFIdx);
 				if (xraySF->currentSize() == cloudGrid->size())
 				{
 					try
 					{
-						ccScalarField* xraySFClone = new ccScalarField(*static_cast<ccScalarField*>(xraySF));
-						cloudGrid->addScalarField(xraySFClone);
+						cloudGrid->addScalarField(std::make_shared<ccScalarField>(*xraySF));
 					}
 					catch (const std::bad_alloc&)
 					{
@@ -1698,20 +1696,19 @@ void ccRasterizeTool::generateXRaySF()
 	}
 
 	// get/create layer
-	ccScalarField* xraySF = nullptr;
-	int            sfIdx  = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
+	ccScalarField::Shared xraySF;
+	int                   sfIdx = m_rasterCloud->getScalarFieldIndexByName(XRAY_FIELD_NAME);
 	if (sfIdx >= 0)
 	{
-		xraySF = static_cast<ccScalarField*>(m_rasterCloud->getScalarField(sfIdx));
+		xraySF = m_rasterCloud->getCCScalarField(sfIdx);
 	}
 	else
 	{
-		xraySF = new ccScalarField(XRAY_FIELD_NAME);
+		xraySF = std::make_shared<ccScalarField>(XRAY_FIELD_NAME);
 		if (!xraySF->reserveSafe(m_rasterCloud->size()))
 		{
 			ccLog::Error("Not enough memory!");
-			xraySF->release();
-			xraySF = nullptr;
+			xraySF.reset();
 			return;
 		}
 
@@ -1883,20 +1880,19 @@ void ccRasterizeTool::generateHillshade()
 	}
 
 	// get/create layer
-	ccScalarField* hillshadeLayer = nullptr;
-	int            sfIdx          = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
+	ccScalarField::Shared hillshadeLayer;
+	int                   sfIdx = m_rasterCloud->getScalarFieldIndexByName(HILLSHADE_FIELD_NAME);
 	if (sfIdx >= 0)
 	{
-		hillshadeLayer = static_cast<ccScalarField*>(m_rasterCloud->getScalarField(sfIdx));
+		hillshadeLayer = m_rasterCloud->getCCScalarField(sfIdx);
 	}
 	else
 	{
-		hillshadeLayer = new ccScalarField(HILLSHADE_FIELD_NAME);
+		hillshadeLayer = std::make_shared<ccScalarField>(HILLSHADE_FIELD_NAME);
 		if (!hillshadeLayer->reserveSafe(m_rasterCloud->size()))
 		{
 			ccLog::Error("Not enough memory!");
-			hillshadeLayer->release();
-			hillshadeLayer = nullptr;
+			hillshadeLayer.reset();
 			return;
 		}
 
@@ -2065,7 +2061,7 @@ void ccRasterizeTool::addNewContour(ccPolyline* poly, double height)
 		// poly->setClosed(isClosed);
 		if (m_ui->colorizeContoursCheckBox->isChecked())
 		{
-			ccScalarField* activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
+			auto activeLayer = m_rasterCloud->getCurrentDisplayedScalarField();
 			if (activeLayer)
 			{
 				const ccColor::Rgb* col = activeLayer->getColor(height);
@@ -2287,9 +2283,9 @@ void ccRasterizeTool::generateImage() const
 		return;
 	}
 
-	bool                          exportRGB = (m_ui->activeLayerComboBox->currentData().toInt() == LAYER_RGB);
-	const ccRasterGrid::SF*       gridSF    = nullptr;
-	const CCCoreLib::ScalarField* cloudSF   = nullptr;
+	bool                           exportRGB = (m_ui->activeLayerComboBox->currentData().toInt() == LAYER_RGB);
+	const ccRasterGrid::SF*        gridSF    = nullptr;
+	CCCoreLib::ScalarField::Shared cloudSF;
 	if (!exportRGB && m_ui->activeLayerComboBox->currentData().toInt() == LAYER_SF && m_cloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		// the indexes in the 'm_grid.scalarFields' are the same as in the cloud

@@ -568,11 +568,12 @@ int WriteObjectXML(ccHObject* object, QXmlStreamWriter& out)
 			QString weight;
 			QString trend;
 			QString plunge;
-			CCCoreLib::ScalarField* wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
-			CCCoreLib::ScalarField* trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
-			CCCoreLib::ScalarField* plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
 
-			CCCoreLib::ScalarField* tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
+			CCCoreLib::ScalarField::Shared wSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Weight"));
+			CCCoreLib::ScalarField::Shared trendSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Trend"));
+			CCCoreLib::ScalarField::Shared plungeSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Plunge"));
+			CCCoreLib::ScalarField::Shared tSF = cloud->getScalarField(cloud->getScalarFieldIndexByName("Thickness"));
+
 			for (unsigned p = 0; p < cloud->size(); p++)
 			{
 				x += QString::asprintf("%f,", cloud->getPoint(p)->x);

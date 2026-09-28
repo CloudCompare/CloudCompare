@@ -1027,10 +1027,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 				if (orthoRectifyImagesAsClouds)
 				{
 					ccPointCloud* orthoCloud = sensor->orthoRectifyAsCloud(image, _keypointsCloud, keypointsImage);
-					if (ortoCloud)
+					if (orthoCloud)
 					{
-						ortoCloud->copyGlobalShiftAndScale(*_keypointsCloud);
-						container.addChild(ortoCloud);
+						orthoCloud->copyGlobalShiftAndScale(*_keypointsCloud);
+						container.addChild(orthoCloud);
 					}
 					else
 					{

@@ -180,7 +180,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		unsigned      sfCount    = pointCloud->getNumberOfScalarFields();
 		for (unsigned i = 0; i < sfCount; ++i)
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(pointCloud->getScalarField(i));
+			auto sf = pointCloud->getCCScalarField(i);
 			outFile << "POINT_DATA " << ptsCount << Qt::endl;
 			outFile << "SCALARS " << QString::fromStdString(sf->getName()).replace(" ", "_") << (sizeof(ScalarType) == 4 ? " float" : " double") << " 1" << Qt::endl;
 			outFile << "LOOKUP_TABLE default" << Qt::endl;
@@ -665,15 +665,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			// create scalar field?
-			ccScalarField* sf = nullptr;
+			ccScalarField::Shared sf;
 			if (createSF)
 			{
-				sf = new ccScalarField(lastSfName.toStdString());
+				sf = std::make_shared<ccScalarField>(lastSfName.toStdString());
 				if (!sf->reserveSafe(lastDataSize))
 				{
 					ccLog::Warning(QString("[VTK] Not enough memory to load scalar field' %1' (will be ignored)").arg(lastSfName));
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 			}
 
@@ -698,8 +697,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 							error = CC_FERR_MALFORMED_FILE;
 							if (sf)
 							{
-								sf->release();
-								sf = nullptr;
+								sf.reset();
 							}
 							iScal = lastDataSize;
 							break;

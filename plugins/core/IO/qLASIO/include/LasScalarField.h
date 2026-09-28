@@ -91,7 +91,7 @@ struct LasScalarField
   public: // Methods and Constructors
 	LasScalarField() = delete;
 
-	explicit LasScalarField(LasScalarField::Id id, ccScalarField* sf = nullptr);
+	explicit LasScalarField(LasScalarField::Id id, ccScalarField::Shared sf = nullptr);
 
 	const char* name() const;
 
@@ -121,6 +121,7 @@ struct LasScalarField
 	///
 	/// When writing (saving points) values of the scalar field pointed by sf will
 	/// be stored to the corresponding LAS field (using the Id).
-	ccScalarField* sf{nullptr};
-	Range          range;
+	ccScalarField::Shared sf;
+	/// The range of value the LAS field supports.
+	Range range;
 };

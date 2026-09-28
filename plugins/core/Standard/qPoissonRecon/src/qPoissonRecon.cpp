@@ -106,7 +106,7 @@ template <typename Real>
 class MeshWrapper : public PoissonReconLib::IMesh<Real>
 {
 public:
-	explicit MeshWrapper(ccMesh& mesh, ccPointCloud& vertices, CCCoreLib::ScalarField* densitySF = nullptr)
+	explicit MeshWrapper(ccMesh& mesh, ccPointCloud& vertices, ccScalarField::Shared densitySF = nullptr)
 		: m_mesh(mesh)
 		, m_vertices(vertices)
 		, m_densitySF(densitySF)
@@ -217,7 +217,7 @@ protected:
 	ccMesh& m_mesh;
 	ccPointCloud& m_vertices;
 	bool m_error{false};
-	CCCoreLib::ScalarField* m_densitySF;
+	ccScalarField::Shared m_densitySF;
 };
 
 //dialog for qPoissonRecon plugin
@@ -266,7 +266,7 @@ static PoissonReconLib::Parameters s_params;
 static ccPointCloud* s_cloud = nullptr;
 static ccMesh* s_mesh = nullptr;
 static ccPointCloud* s_meshVertices = nullptr;
-static CCCoreLib::ScalarField* s_densitySF = nullptr;
+static ccScalarField::Shared s_densitySF;
 
 bool doReconstruct()
 {
@@ -408,7 +408,7 @@ void qPoissonRecon::doAction()
 	assert(s_mesh == nullptr);
 	assert(s_meshVertices == nullptr);
 
-	ccScalarField* densitySF = nullptr;
+	ccScalarField::Shared densitySF;
 	ccPointCloud* newPC = new ccPointCloud("vertices");
 	ccMesh* newMesh = new ccMesh(newPC);
 	newMesh->addChild(newPC);
@@ -443,7 +443,8 @@ void qPoissonRecon::doAction()
 
 		if (s_params.density)
 		{
-			s_densitySF = (densitySF = new ccScalarField("Density"));
+			densitySF.reset(new ccScalarField("Density"));
+			s_densitySF = densitySF;
 		}
 
 		//run in a worker thread, so that the progress dialog keeps refreshing
@@ -459,11 +460,6 @@ void qPoissonRecon::doAction()
 
 	if (!result)
 	{
-		if (densitySF)
-		{
-			densitySF->release();
-			densitySF = nullptr;
-		}
 		delete newMesh;
 		newMesh = nullptr;
 		m_app->dispToConsole("Reconstruction failed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);

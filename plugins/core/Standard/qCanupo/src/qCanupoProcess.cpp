@@ -63,7 +63,7 @@ static float RefinePointClassif(const Classifier& classifier,
 								const std::vector<int>& corePointClasses
 	)
 {
-	CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+	auto sf = cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);
@@ -530,7 +530,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				}
 				std::vector<unsigned> unreliablePointIndexes;
 
-				CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+				auto sf = cloud->getCurrentDisplayedScalarField();
 				assert(!params.useActiveSFForConfidence || sf);
 
 				// progress notification
@@ -752,7 +752,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 				// eventually label the points
 				{
 					// instantiate the scalar fields
-					CCCoreLib::ScalarField* classLabelSF = nullptr;
+					CCCoreLib::ScalarField::Shared classLabelSF = nullptr;
 					int classLabelSFIdx = -1;
 					{
 						classLabelSFIdx = cloud->getScalarFieldIndexByName("CANUPO.class");
@@ -771,7 +771,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 						}
 					}
 
-					CCCoreLib::ScalarField* confidenceSF = nullptr;
+					CCCoreLib::ScalarField::Shared confidenceSF = nullptr;
 					int confidenceSFIdx = -1;
 					{
 						confidenceSFIdx = cloud->getScalarFieldIndexByName("CANUPO.confidence");
@@ -789,7 +789,7 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 					}
 
 					//optional: create 1 SF per scale with 'x-y'
-					std::vector<ccScalarField*> scaleSFs;
+					std::vector<ccScalarField::Shared> scaleSFs;
 					bool generateAdditionalSF = params.generateAdditionalSF;
 					if (generateAdditionalSF && corePointsDescriptors.dimPerScale() != 2)
 					{
@@ -830,14 +830,15 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							//SF with same name (if any) should have already been removed!
 							assert(cloud->getScalarFieldIndexByName(sfName.toStdString()) < 0);
 
-							scaleSFs[s] = new ccScalarField(sfName.toStdString());
+							scaleSFs[s].reset(new ccScalarField(sfName.toStdString()));
 							if (!scaleSFs[s]->resizeSafe(cloud->size(), true, CCCoreLib::NAN_VALUE))
 							{
 								if (app)
+								{
 									app->dispToConsole("Not enough memory to store per-level 'x-y' values!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+								}
 								while (!scaleSFs.empty())
 								{
-									scaleSFs.back()->release();
 									scaleSFs.pop_back();
 								}
 								generateAdditionalSF = false;
@@ -1013,7 +1014,6 @@ bool qCanupoProcess::Classify(	QString classifierFilename,
 							cloud->deleteScalarField(confidenceSFIdx);
 						while (!scaleSFs.empty())
 						{
-							scaleSFs.back()->release();
 							scaleSFs.pop_back();
 						}
 					}

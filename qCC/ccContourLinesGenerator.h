@@ -19,11 +19,13 @@
 
 struct ccRasterGrid;
 class ccPolyline;
-class ccScalarField;
 class QWidget;
 
 // CCCoreLib
 #include <CCGeom.h>
+
+// qCC_db
+#include <ccScalarField.h>
 
 // system
 #include <vector>
@@ -35,13 +37,14 @@ class ccContourLinesGenerator
 	//! Contour lines generation parameters
 	struct Parameters
 	{
-		double         startAltitude             = 0.0;
-		double         maxAltitude               = 0.0;
-		double         step                      = 0.0;     // gap between levels
-		ccScalarField* altitudes                 = nullptr; // optional scalar field that stores the 'altitudes' (may be null, in which case the grid 'h' values are used directly)
-		int            minVertexCount            = 3;       // minimum number of vertices per contour line
-		bool           projectContourOnAltitudes = false;
-		double         emptyCellsValue           = std::numeric_limits<double>::quiet_NaN();
+		double startAltitude             = 0.0;
+		double maxAltitude               = 0.0;
+		double step                      = 0.0; // gap between levels
+		int    minVertexCount            = 3;   // minimum number of vertices per contour line
+		bool   projectContourOnAltitudes = false;
+		double emptyCellsValue           = std::numeric_limits<double>::quiet_NaN();
+
+		ccScalarField::Shared altitudes; // optional scalar field that stores the 'altitudes' (may be null, in which case the grid 'h' values are used directly)
 
 		/* The parameters below are only required if GDAL is not required */
 		QWidget* parentWidget  = nullptr; // for progress dialog

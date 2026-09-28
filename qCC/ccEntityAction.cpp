@@ -702,7 +702,7 @@ namespace ccEntityAction
 					ccPickOneElementDlg poeDlg(QT_TR_NOOP("Intensity scalar field"), QT_TR_NOOP("Choose scalar field"), parent);
 					for (unsigned i = 0; i < pc->getNumberOfScalarFields(); ++i)
 					{
-						CCCoreLib::ScalarField* sf = pc->getScalarField(i);
+						auto sf = pc->getCCScalarField(i);
 						assert(sf);
 						QString sfName = QString::fromStdString(sf->getName());
 						poeDlg.addElement(sfName);
@@ -808,7 +808,7 @@ namespace ccEntityAction
 		double sigmaSF = -1.0;
 		if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
 		{
-			CCCoreLib::ScalarField* sf = selectedCloudsWithColors.front().second->getCurrentDisplayedScalarField();
+			auto sf = selectedCloudsWithColors.front().second->getCurrentDisplayedScalarField();
 			if (sf)
 			{
 				ScalarType sfRange = sf->getMax() - sf->getMin();
@@ -907,7 +907,7 @@ namespace ccEntityAction
 
 					    if (filterParams.applyToSFduringRGB)
 					    {
-						    CCCoreLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+						    auto outSF = pc->getCurrentOutScalarField();
 						    Q_ASSERT(outSF != nullptr);
 						    QString sfName;
 						    if (filterParams.filterType == ccPointCloud::RGB_FILTER_TYPES::BILATERAL)
@@ -969,7 +969,7 @@ namespace ccEntityAction
 					    // calc sf min/max for correct display.
 					    pc->setCurrentDisplayedScalarField(sfIdx);
 					    pc->showSF(sfIdx >= 0);
-					    CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+					    auto sf = pc->getCurrentDisplayedScalarField();
 					    if (sf)
 					    {
 						    sf->computeMinAndMax();
@@ -1024,7 +1024,7 @@ namespace ccEntityAction
 				return false;
 			}
 
-			CCCoreLib::ScalarField* testSF = testPC->getCurrentDisplayedScalarField();
+			auto testSF = testPC->getCurrentDisplayedScalarField();
 			if (!testSF)
 			{
 				ccLog::Error(QT_TR_NOOP("No active scalar field"));
@@ -1114,7 +1114,7 @@ namespace ccEntityAction
 				    }
 
 				    // the algorithm will use the currently displayed SF
-				    CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+				    auto sf = pc->getCurrentDisplayedScalarField();
 				    if (sf)
 				    {
 					    // we set the displayed SF as "OUT" SF
@@ -1122,7 +1122,7 @@ namespace ccEntityAction
 					    Q_ASSERT(outSfIdx >= 0);
 
 					    pc->setCurrentOutScalarField(outSfIdx);
-					    CCCoreLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+					    auto outSF = pc->getCurrentOutScalarField();
 					    Q_ASSERT(outSF != nullptr);
 
 					    QString sfName;
@@ -1302,7 +1302,7 @@ namespace ccEntityAction
 				continue;
 			}
 
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			auto sf = pc->getCurrentDisplayedScalarField();
 			// if there is no displayed SF --> nothing to do!
 			if (sf && sf->currentSize() >= pc->size())
 			{
@@ -1349,7 +1349,7 @@ namespace ccEntityAction
 
 			if (nullptr != pc)
 			{
-				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+				auto sf = pc->getCurrentDisplayedScalarField();
 				// if there is no displayed SF --> nothing to do!
 				if (sf == nullptr)
 				{
@@ -1393,7 +1393,7 @@ namespace ccEntityAction
 					return false;
 				}
 
-				CCCoreLib::ScalarField* sf = pc->getScalarField(sfIdx);
+				auto sf = pc->getCCScalarField(sfIdx);
 				Q_ASSERT(sf->currentSize() == pc->size());
 
 				for (unsigned j = 0; j < pc->size(); j++)
@@ -1490,7 +1490,7 @@ namespace ccEntityAction
 			return false;
 		}
 
-		CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		auto sf = cloud->getCCScalarField(sfIdx);
 		assert(sf);
 		if (!sf)
 		{
@@ -1521,7 +1521,7 @@ namespace ccEntityAction
 				continue;
 			}
 
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			auto sf = pc->getCurrentDisplayedScalarField();
 			if (sf == nullptr)
 			{
 				ccLog::Warning(QString("Cloud %1 has no active scalar field").arg(pc->getName()));
@@ -1702,14 +1702,14 @@ namespace ccEntityAction
 
 		dlg.getSFIndexes(xIndex, yIndex, zIndex);
 
-		CCCoreLib::ScalarField* sfX = (xIndex >= 0 ? pc->getScalarField(xIndex) : nullptr);
-		CCCoreLib::ScalarField* sfY = (yIndex >= 0 ? pc->getScalarField(yIndex) : nullptr);
-		CCCoreLib::ScalarField* sfZ = (zIndex >= 0 ? pc->getScalarField(zIndex) : nullptr);
+		auto sfX = (xIndex >= 0 ? pc->getScalarField(xIndex) : nullptr);
+		auto sfY = (yIndex >= 0 ? pc->getScalarField(yIndex) : nullptr);
+		auto sfZ = (zIndex >= 0 ? pc->getScalarField(zIndex) : nullptr);
 
-		std::array<CCCoreLib::ScalarField*, 3> scalarFields{sfX, sfY, sfZ};
+		std::array<CCCoreLib::ScalarField::Shared, 3> scalarFields{sfX, sfY, sfZ};
 
 		PointCoordinateType defaultCoordForNaN = std::numeric_limits<PointCoordinateType>::quiet_NaN();
-		for (CCCoreLib::ScalarField* sf : scalarFields)
+		for (auto sf : scalarFields)
 		{
 			if (sf)
 			{
@@ -1728,9 +1728,9 @@ namespace ccEntityAction
 			const CCVector3* P = pc->getPoint(i);
 
 			CCVector3 newP = *P;
-			SetValueFromSF(newP.x, xIndex, sfX, i, defaultCoordForNaN);
-			SetValueFromSF(newP.y, yIndex, sfY, i, defaultCoordForNaN);
-			SetValueFromSF(newP.z, zIndex, sfZ, i, defaultCoordForNaN);
+			SetValueFromSF(newP.x, xIndex, sfX.get(), i, defaultCoordForNaN);
+			SetValueFromSF(newP.y, yIndex, sfY.get(), i, defaultCoordForNaN);
+			SetValueFromSF(newP.z, zIndex, sfZ.get(), i, defaultCoordForNaN);
 
 			*const_cast<CCVector3*>(P) = newP;
 		}
@@ -1782,7 +1782,7 @@ namespace ccEntityAction
 				continue;
 			}
 
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			auto sf = pc->getCurrentDisplayedScalarField();
 			if (sf != nullptr)
 			{
 				if (std::isnan(defaultValueForNaN) && (sf->countValidValues() < sf->size()))
@@ -1792,7 +1792,7 @@ namespace ccEntityAction
 					break;
 				}
 
-				pc->setCoordFromSF(importDim, sf, defaultValueForNaN);
+				pc->setCoordFromSF(importDim, *sf, defaultValueForNaN);
 			}
 		}
 
@@ -1885,9 +1885,9 @@ namespace ccEntityAction
 			ccLog::Error("Not enough memory");
 		}
 
-		CCCoreLib::ScalarField* sfX = (nxIndex >= 0 ? pc->getScalarField(nxIndex) : nullptr);
-		CCCoreLib::ScalarField* sfY = (nyIndex >= 0 ? pc->getScalarField(nyIndex) : nullptr);
-		CCCoreLib::ScalarField* sfZ = (nzIndex >= 0 ? pc->getScalarField(nzIndex) : nullptr);
+		auto sfX = (nxIndex >= 0 ? pc->getScalarField(nxIndex) : nullptr);
+		auto sfY = (nyIndex >= 0 ? pc->getScalarField(nyIndex) : nullptr);
+		auto sfZ = (nzIndex >= 0 ? pc->getScalarField(nzIndex) : nullptr);
 
 		for (unsigned i = 0; i < pc->size(); ++i)
 		{
@@ -1898,9 +1898,9 @@ namespace ccEntityAction
 				N = pc->getPointNormal(i);
 			}
 
-			SetValueFromSF(N.x, nxIndex, sfX, i, 0);
-			SetValueFromSF(N.y, nyIndex, sfY, i, 0);
-			SetValueFromSF(N.z, nzIndex, sfZ, i, 0);
+			SetValueFromSF(N.x, nxIndex, sfX.get(), i, 0);
+			SetValueFromSF(N.y, nyIndex, sfY.get(), i, 0);
+			SetValueFromSF(N.z, nzIndex, sfZ.get(), i, 0);
 
 			N.normalize();
 			pc->setPointNormal(i, N);
@@ -2058,22 +2058,21 @@ namespace ccEntityAction
 
 		for (const auto cloud : clouds)
 		{
-			std::vector<ccScalarField*> fields(5, nullptr);
-			fields[0] = (exportR ? new ccScalarField(GetFirstAvailableSFName(cloud, "R").toStdString()) : nullptr);
-			fields[1] = (exportG ? new ccScalarField(GetFirstAvailableSFName(cloud, "G").toStdString()) : nullptr);
-			fields[2] = (exportB ? new ccScalarField(GetFirstAvailableSFName(cloud, "B").toStdString()) : nullptr);
-			fields[3] = (exportAlpha ? new ccScalarField(GetFirstAvailableSFName(cloud, "Alpha").toStdString()) : nullptr);
-			fields[4] = (exportComposite ? new ccScalarField(GetFirstAvailableSFName(cloud, "Composite").toStdString()) : nullptr);
+			std::vector<ccScalarField::Shared> fields(5, nullptr);
+			fields[0] = (exportR ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "R").toStdString()) : nullptr);
+			fields[1] = (exportG ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "G").toStdString()) : nullptr);
+			fields[2] = (exportB ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "B").toStdString()) : nullptr);
+			fields[3] = (exportAlpha ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "Alpha").toStdString()) : nullptr);
+			fields[4] = (exportComposite ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "Composite").toStdString()) : nullptr);
 
 			// try to instantiate memory for each field
 			unsigned count = cloud->size();
-			for (ccScalarField*& sf : fields)
+			for (ccScalarField::Shared& sf : fields)
 			{
 				if (sf && !sf->reserveSafe(count))
 				{
 					ccLog::Warning(QObject::tr("[SfFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(QString::fromStdString(sf->getName()), cloud->getName()));
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 			}
 
@@ -2096,7 +2095,7 @@ namespace ccEntityAction
 
 			QString fieldsStr;
 
-			for (ccScalarField*& sf : fields)
+			for (ccScalarField::Shared& sf : fields)
 			{
 				if (sf == nullptr)
 					continue;
@@ -2131,8 +2130,7 @@ namespace ccEntityAction
 				else
 				{
 					ccLog::Warning(QObject::tr("[SfFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(QString::fromStdString(sf->getName()), cloud->getName()));
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 			}
 
@@ -2735,12 +2733,11 @@ namespace ccEntityAction
 						break;
 					}
 
-					ccScalarField* dipSF    = static_cast<ccScalarField*>(pc->getScalarField(dipSFIndex));
-					ccScalarField* dipDirSF = static_cast<ccScalarField*>(pc->getScalarField(dipDirSFIndex));
+					ccScalarField::Shared dipSF    = pc->getCCScalarField(dipSFIndex);
+					ccScalarField::Shared dipDirSF = pc->getCCScalarField(dipDirSFIndex);
 					Q_ASSERT(dipSF && dipDirSF);
 
-					success = pc->convertNormalToDipDirSFs(dipSF, dipDirSF);
-
+					success = pc->convertNormalToDipDirSFs(*dipSF, *dipDirSF);
 					if (success)
 					{
 						// apply default 360 degrees color scale!
@@ -3167,7 +3164,7 @@ namespace ccEntityAction
 				    }
 
 				    // we apply method on currently displayed SF
-				    ccScalarField* inSF = pc->getCurrentDisplayedScalarField();
+				    auto inSF = pc->getCurrentDisplayedScalarField();
 				    if (inSF == nullptr)
 				    {
 					    // TODO handle error?
@@ -3217,7 +3214,7 @@ namespace ccEntityAction
 
 					    // we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
 					    {
-						    ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
+						    auto chi2SF = pc->getCCScalarField(pc->getCurrentInScalarFieldIndex());
 						    Q_ASSERT(chi2SF);
 						    chi2SF->computeMinAndMax();
 						    chi2dist *= chi2dist;
@@ -3287,7 +3284,7 @@ namespace ccEntityAction
 			}
 
 			// we apply method on currently displayed SF
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			auto sf = pc->getCurrentDisplayedScalarField();
 			if (sf == nullptr)
 			{
 				// TODO report error?

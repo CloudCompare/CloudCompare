@@ -713,7 +713,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasSF = pp._cloud->hasDisplayedScalarField();
 			if (info.hasSF)
 			{
-				ccScalarField* sf = nullptr;
+				ccScalarField::Shared sf;
 
 				// fetch the real scalar field if possible
 				if (pp._cloud->isA(CC_TYPES::POINT_CLOUD))
@@ -740,7 +740,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				unsigned      sfCount = pc->getNumberOfScalarFields();
 				for (unsigned i = 0; i < sfCount; ++i)
 				{
-					const CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<int>(i));
+					auto sf = pc->getScalarField(static_cast<int>(i));
 					if (!sf)
 						continue;
 					SFValue sfVal;
@@ -776,7 +776,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				ccGenericPointCloud* vertices = pp._mesh->getAssociatedCloud();
 				assert(vertices);
 
-				ccScalarField* sf = nullptr;
+				ccScalarField::Shared sf;
 
 				// fetch the real scalar field if possible
 				if (vertices->isA(CC_TYPES::POINT_CLOUD))
@@ -823,7 +823,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 					unsigned      sfCount = pc->getNumberOfScalarFields();
 					for (unsigned i = 0; i < sfCount; ++i)
 					{
-						const CCCoreLib::ScalarField* asf = pc->getScalarField(static_cast<int>(i));
+						auto asf = pc->getScalarField(static_cast<int>(i));
 						if (!asf)
 							continue;
 						ScalarType v1 = asf->getValue(vi->i1);

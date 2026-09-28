@@ -351,7 +351,7 @@ ccGenericPrimitive* ccGenericPrimitive::finishCloneJob(ccGenericPrimitive* primi
 		// primitive->setName(getName()+QString(".clone"));
 		primitive->setVisible(isVisible());
 		primitive->setEnabled(isEnabled());
-		primitive->importParametersFrom(this);
+		primitive->importParametersFrom(*this);
 	}
 	else
 	{

@@ -335,7 +335,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	auto sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	// prepare the octree structures
@@ -487,7 +487,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	}
 
-	const CCCoreLib::ScalarField* approxDistances = m_compCloud->getScalarField(sfIdx);
+	auto approxDistances = m_compCloud->getScalarField(sfIdx);
 	if (!approxDistances)
 	{
 		assert(sfIdx >= 0);
@@ -719,7 +719,7 @@ bool ccComparisonDlg::computeDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	auto sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	// max search distance
@@ -753,10 +753,9 @@ bool ccComparisonDlg::computeDistances()
 			bool success = true;
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				ccScalarField* sfDim = new ccScalarField();
+				auto sfDim = std::make_shared<ccScalarField>();
 				if (sfDim->resizeSafe(count))
 				{
-					sfDim->link();
 					c2cParams.splitDistances[j] = sfDim;
 				}
 				else
@@ -772,11 +771,7 @@ bool ccComparisonDlg::computeDistances()
 
 				for (unsigned j = 0; j < 3; ++j)
 				{
-					if (c2cParams.splitDistances[j])
-					{
-						c2cParams.splitDistances[j]->release();
-						c2cParams.splitDistances[j] = nullptr;
-					}
+					c2cParams.splitDistances[j].reset();
 				}
 			}
 		}
@@ -952,7 +947,7 @@ bool ccComparisonDlg::computeDistances()
 			// we add the corresponding scalar fields (one for each dimension)
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				CCCoreLib::ScalarField* sf = c2cParams.splitDistances[j];
+				CCCoreLib::ScalarField::Shared sf = c2cParams.splitDistances[j];
 				if (sf)
 				{
 					static const QChar CharDim[3]{'X', 'Y', 'Z'};
@@ -963,7 +958,7 @@ bool ccComparisonDlg::computeDistances()
 					int sfExit = m_compCloud->getScalarFieldIndexByName(sf->getName());
 					if (sfExit >= 0)
 						m_compCloud->deleteScalarField(sfExit);
-					int sfEnter = m_compCloud->addScalarField(static_cast<ccScalarField*>(sf));
+					int sfEnter = m_compCloud->addScalarField(ccScalarField::FromCCCoreLibShared(sf));
 					assert(sfEnter >= 0);
 				}
 			}
@@ -982,7 +977,7 @@ bool ccComparisonDlg::computeDistances()
 					ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
 					return 0;
 				}
-				CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
+				auto sf = m_compCloud->getCCScalarField(sf2D);
 				for (unsigned idx = 0; idx < m_compCloud->size(); idx++)
 				{
 					float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) + pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
@@ -1003,12 +998,7 @@ bool ccComparisonDlg::computeDistances()
 
 	for (unsigned j = 0; j < 3; ++j)
 	{
-		CCCoreLib::ScalarField*& sf = c2cParams.splitDistances[j];
-		if (sf)
-		{
-			sf->release();
-			sf = nullptr;
-		}
+		c2cParams.splitDistances[j].reset();
 	}
 
 	updateDisplay(sfIdx >= 0, false);
@@ -1021,7 +1011,7 @@ void ccComparisonDlg::showHisto()
 	if (!m_compCloud)
 		return;
 
-	ccScalarField* sf = m_compCloud->getCurrentDisplayedScalarField();
+	auto sf = m_compCloud->getCurrentDisplayedScalarField();
 	if (!sf)
 		return;
 

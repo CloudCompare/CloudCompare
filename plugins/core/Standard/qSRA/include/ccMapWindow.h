@@ -44,18 +44,9 @@ public:
 	//! Sets associated scalar-field
 	/** This scalar field will be used for color ramp display.
 	**/
-	void setAssociatedScalarField(ccScalarField* sf)
+	void setAssociatedScalarField(ccScalarField::Shared sf)
 	{
-		if (m_sfForRampDisplay != sf)
-		{
-			if (m_sfForRampDisplay)
-				m_sfForRampDisplay->release();
-			
-			m_sfForRampDisplay = sf;
-			
-			if (m_sfForRampDisplay)
-				m_sfForRampDisplay->link();
-		}
+		m_sfForRampDisplay = sf;
 	}
 
 	//! Whether to show associated SF or not
@@ -65,7 +56,7 @@ public:
 	bool sfShown() const { return m_showSF; }
 
 	//! Returns associated scalar field
-	ccScalarField* getAssociatedScalarField() const { return m_sfForRampDisplay; }
+	ccScalarField::Shared getAssociatedScalarField() const { return m_sfForRampDisplay; }
 
 	//inherited from ccGLWindow
 	void getContext(CC_DRAW_CONTEXT& context) override
@@ -75,14 +66,14 @@ public:
 		if (m_showSF)
 		{
 			//override sf that will be used for color ramp display
-			context.sfColorScaleToDisplay = m_sfForRampDisplay;
+			context.sfColorScaleToDisplay = m_sfForRampDisplay.get();
 		}
 	}
 
 protected:
 
 	//! Associated scalar field
-	ccScalarField* m_sfForRampDisplay;
+	ccScalarField::Shared m_sfForRampDisplay;
 
 	//! Whether to show or not the associated SF
 	bool m_showSF;

@@ -110,8 +110,7 @@ void ccHistogramWindow::clearInternal()
 {
 	if (m_associatedSF)
 	{
-		m_associatedSF->release();
-		m_associatedSF = nullptr;
+		m_associatedSF.reset();
 	}
 
 	m_histoValues.resize(0);
@@ -152,18 +151,14 @@ void ccHistogramWindow::setAxisLabels(const QString& xLabel, const QString& yLab
 	}
 }
 
-void ccHistogramWindow::fromSF(ccScalarField* sf,
-                               unsigned       initialNumberOfClasses /*=0*/,
-                               bool           numberOfClassesCanBeChanged /*=true*/,
-                               bool           showNaNValuesInGrey /*=true*/)
+void ccHistogramWindow::fromSF(ccScalarField::Shared sf,
+                               unsigned              initialNumberOfClasses /*=0*/,
+                               bool                  numberOfClassesCanBeChanged /*=true*/,
+                               bool                  showNaNValuesInGrey /*=true*/)
 {
 	if (sf && m_associatedSF != sf)
 	{
-		if (m_associatedSF)
-			m_associatedSF->release();
 		m_associatedSF = sf;
-		if (m_associatedSF)
-			m_associatedSF->link();
 	}
 
 	if (m_associatedSF)
@@ -184,7 +179,7 @@ void ccHistogramWindow::fromSF(ccScalarField* sf,
 };
 
 void ccHistogramWindow::fromBinArray(const std::vector<unsigned>& histoValues,
-                                     ccScalarField*               sf)
+                                     ccScalarField::Shared        sf)
 {
 	try
 	{
@@ -198,11 +193,7 @@ void ccHistogramWindow::fromBinArray(const std::vector<unsigned>& histoValues,
 
 	if (sf && m_associatedSF != sf)
 	{
-		if (m_associatedSF)
-			m_associatedSF->release();
 		m_associatedSF = sf;
-		if (m_associatedSF)
-			m_associatedSF->link();
 	}
 
 	m_minVal                      = m_associatedSF ? m_associatedSF->getMin() : 0;

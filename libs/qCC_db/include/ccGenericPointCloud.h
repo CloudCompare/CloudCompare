@@ -277,7 +277,7 @@ class QCC_DB_LIB_API ccGenericPointCloud : public ccShiftedObject
 	//! Imports the parameters from another cloud
 	/** Only the specific parameters are imported.
 	 **/
-	void importParametersFrom(const ccGenericPointCloud* cloud);
+	void importParametersFrom(const ccGenericPointCloud& cloud);
 
 	//! Point picking (brute force or octree-driven)
 	/** \warning the octree-driven method only works if pickWidth == pickHeight

@@ -726,7 +726,7 @@ int ccTrace::getSegmentCostScalar(int p1, int p2)
 	}
 
 	//m_cloud->getCurrentDisplayedScalarFieldIndex();
-	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	ccScalarField::Shared sf = m_cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);
@@ -742,7 +742,7 @@ int ccTrace::getSegmentCostScalarInv(int p1, int p2)
 		return 0;
 	}
 
-	ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+	ccScalarField::Shared sf = m_cloud->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		assert(false);

@@ -56,6 +56,9 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	**/
 	ccScalarField(const ccScalarField& sf);
 
+	//! Default destructor
+	~ccScalarField() override = default;
+
 	/*** Scalar values display handling ***/
 
 	//! Scalar field range structure
@@ -303,7 +306,7 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	}
 
 	//! Imports the parameters from another scalar field
-	void importParametersFrom(const ccScalarField* sf);
+	void importParametersFrom(const ccScalarField& sf);
 
 	// inherited from ccSerializableObject
 	inline bool isSerializable() const override
@@ -321,11 +324,6 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	}
 
   protected: // methods
-	//! Default destructor
-	/** Call release instead
-	 **/
-	~ccScalarField() override = default;
-
 	//! Updates saturation values
 	void updateSaturationBounds();
 

@@ -715,7 +715,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 		appendRow(ITEM(tr("Active")), PERSISTENT_EDITOR(OBJECT_CURRENT_SCALAR_FIELD), true);
 
 		// no need to go any further if no SF is currently active
-		CCCoreLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
+		auto sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
 			if (ccLog::VerbosityLevel() == ccLog::LOG_VERBOSE)
@@ -1227,7 +1227,6 @@ void ccPropertiesTreeDelegate::fillWithMaterialSet(const ccMaterialSet* _obj)
 
 	// Count
 	appendRow(ITEM(tr("Count")), ITEM(QString::number(_obj->size())));
-
 }
 
 template <class Type, int N, class ComponentType>
@@ -1252,7 +1251,6 @@ void ccPropertiesTreeDelegate::fillWithCCArray(const ccArray<Type, N, ComponentT
 
 	// Memory
 	appendRow(ITEM(tr("Memory")), ITEM(QStringLiteral("%1 Mb").arg((_obj->capacity() * sizeof(Type)) / 1048576.0, 0, 'f', 2)));
-
 }
 
 bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const
@@ -1871,7 +1869,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget* editor, const QModelIndex&
 		{
 			return;
 		}
-		ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+		auto sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
 			if (sf->getColorScale())
@@ -1889,7 +1887,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget* editor, const QModelIndex&
 	{
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
-		ccScalarField* sf = cloud ? cloud->getCurrentDisplayedScalarField() : nullptr;
+		auto sf = cloud ? cloud->getCurrentDisplayedScalarField() : nullptr;
 		if (sf)
 			SetSpinBoxValue(editor, sf->getColorRampSteps(), true);
 		break;
@@ -1905,7 +1903,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget* editor, const QModelIndex&
 		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 		assert(cloud);
 
-		ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+		auto sf = cloud->getCurrentDisplayedScalarField();
 		if (sf)
 		{
 			sfd->fillDialogWith(sf);
@@ -2428,7 +2426,7 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
-	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr);
+	auto sf = (cloud ? cloud->getCCScalarField(cloud->getCurrentDisplayedScalarFieldIndex()) : nullptr);
 	if (sf)
 	{
 		ccGLWindowInterface*      glWindow     = static_cast<ccGLWindowInterface*>(cloud->getDisplay());
@@ -2436,7 +2434,7 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 		                                                                      MainWindow::TheInstance(),
 		                                                                      sf->getColorScale(),
 		                                                                      glWindow ? glWindow->asWidget() : nullptr);
-		editorDialog->setAssociatedScalarField(sf);
+		editorDialog->setAssociatedScalarField(sf.get());
 		if (editorDialog->exec())
 		{
 			if (editorDialog->getActiveScale())
@@ -2482,7 +2480,7 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 	// get current SF
 	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 	assert(cloud);
-	ccScalarField* sf = cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : nullptr;
+	auto sf = cloud ? cloud->getCCScalarField(cloud->getCurrentDisplayedScalarFieldIndex()) : nullptr;
 	if (sf && sf->getColorScale() != colorScale)
 	{
 		sf->setColorScale(colorScale);
@@ -2504,7 +2502,7 @@ void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 	{
 		return;
 	}
-	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+	auto sf = cloud ? cloud->getCCScalarField(cloud->getCurrentDisplayedScalarFieldIndex()) : nullptr;
 	if (sf && sf->getColorRampSteps() != pos)
 	{
 		sf->setColorRampSteps(pos);

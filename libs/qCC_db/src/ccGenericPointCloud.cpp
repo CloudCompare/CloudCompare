@@ -293,22 +293,16 @@ short ccGenericPointCloud::minimumFileVersion_MeOnly() const
 	return std::max(static_cast<short>(33), ccHObject::minimumFileVersion_MeOnly());
 }
 
-void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud* cloud)
+void ccGenericPointCloud::importParametersFrom(const ccGenericPointCloud& cloud)
 {
-	if (!cloud)
-	{
-		assert(false);
-		return;
-	}
-
 	// original center
-	copyGlobalShiftAndScale(*cloud);
+	copyGlobalShiftAndScale(cloud);
 	// keep the transformation history!
-	setGLTransformationHistory(cloud->getGLTransformationHistory());
+	setGLTransformationHistory(cloud.getGLTransformationHistory());
 	// custom point size
-	setPointSize(cloud->getPointSize());
+	setPointSize(cloud.getPointSize());
 	// meta-data
-	setMetaData(cloud->metaData());
+	setMetaData(cloud.metaData());
 }
 
 #ifdef QT_DEBUG
@@ -408,14 +402,14 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 		const ccGenericPointCloud::VisibilityTableType* visTable = isVisibilityTableInstantiated() ? &getTheVisibilityArray() : nullptr;
 
 		// scalar field with hidden values (if any)
-		ccScalarField* activeSF = nullptr;
+		ccScalarField::Shared activeSF;
 		if (sfShown()
 		    && isA(CC_TYPES::POINT_CLOUD)
 		    && !visTable // if the visibility table is instantiated, we always display ALL points
 		)
 		{
-			ccPointCloud*  pc = static_cast<ccPointCloud*>(this);
-			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			ccPointCloud*         pc = static_cast<ccPointCloud*>(this);
+			ccScalarField::Shared sf = pc->getCurrentDisplayedScalarField();
 			if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 			{
 				// we must take this SF display parameters into account as some points may be hidden!

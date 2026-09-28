@@ -439,14 +439,13 @@ ccHObject* qFacets::ExecuteFacetExtraction(ccPointCloud*                       p
 		}
 		else
 		{
-			ccScalarField* indexSF = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
+			ccScalarField::Shared indexSF = pc->getCCScalarField(sfIdx);
 			if (!indexSF)
 			{
 				assert(false);
 				return nullptr;
 			}
 
-			indexSF->link();
 			pc->deleteScalarField(sfIdx);
 			sfIdx = -1;
 
@@ -457,7 +456,6 @@ ccHObject* qFacets::ExecuteFacetExtraction(ccPointCloud*                       p
 			{
 				sfIdx = pc->addScalarField(indexSF);
 			}
-			indexSF->release();
 		}
 	}
 	else

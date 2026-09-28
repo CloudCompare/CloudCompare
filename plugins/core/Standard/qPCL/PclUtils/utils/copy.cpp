@@ -34,10 +34,10 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 	unsigned sfCount = inCloud->getNumberOfScalarFields();
 	for (unsigned i = 0; i < sfCount; ++i)
 	{
-		const CCCoreLib::ScalarField* field = inCloud->getScalarField(i);
+		auto field = inCloud->getScalarField(i);
 		const std::string& name = field->getName();
 
-		ccScalarField* newSF = nullptr;
+		ccScalarField::Shared newSF;
 
 		//we need to verify no scalar field with the same name exists in the output cloud
 		int id = outCloud->getScalarFieldIndexByName(name);
@@ -45,7 +45,7 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		{
 			if (overwrite)
 			{
-				newSF = static_cast<ccScalarField*>(outCloud->getScalarField(id));
+				newSF = outCloud->getCCScalarField(id);
 			}
 			else
 			{
@@ -54,14 +54,13 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 		}
 		else
 		{
-			newSF = new ccScalarField(name);
+			newSF.reset(new ccScalarField(name));
 
 			//resize the scalar field to the outcloud size
 			if (!newSF->resizeSafe(outCloudSize))
 			{
 				//not enough memory!
-				newSF->release();
-				newSF = nullptr;
+				newSF.reset();
 				continue;
 			}
 		}

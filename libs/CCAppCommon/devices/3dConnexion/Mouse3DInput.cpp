@@ -363,7 +363,7 @@ void Mouse3DInput::on3dmouseCMDKeyUp(int virtualCMDCode)
 
 void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& mat)
 {
-	assert(vec.size() == 6);
+	assert(motionData.size() == 6);
 
 #ifdef CC_3DMOUSE_HID
 	// Platform-neutral Rodrigues rotation: the rotation vector (rx, ry, rz)

@@ -618,14 +618,14 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : nullptr;
 
 	// scalar field with hidden values (if any)
-	ccScalarField* activeSF = nullptr;
+	ccScalarField::Shared activeSF;
 	if (m_theAssociatedCloudAsGPC->sfShown()
 	    && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD)
 	    && !visTable // if the visibility table is instantiated, we always display ALL points
 	)
 	{
-		ccPointCloud*  pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
-		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+		ccPointCloud*         pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
+		ccScalarField::Shared sf = pc->getCurrentDisplayedScalarField();
 		if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 		{
 			// we must take this SF display parameters into account as some points may be hidden!

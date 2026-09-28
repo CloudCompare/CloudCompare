@@ -327,7 +327,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	ccMesh* mesh = new ccMesh(vertices);
 	mesh->setName(name);
 	// add normals
-	mesh->setTriNormsTable(new NormsIndexesTableType());
+	mesh->setTriNormsTable(std::make_shared<NormsIndexesTableType>());
 
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 	if (ascii)
@@ -348,7 +348,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		vertices->shrinkToFit();
 		mesh->shrinkToFit();
-		NormsIndexesTableType* normals = mesh->getTriNormsTable();
+		NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
 		if (normals)
 		{
 			normals->shrink_to_fit();
@@ -362,7 +362,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
 	if (mesh->size() != 0 && meshVertices) // their might not remain anymore triangle after 'mergeDuplicatedVertices'
 	{
-		NormsIndexesTableType* normals = mesh->getTriNormsTable();
+		NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
 		if (normals)
 		{
 			// normals->link();
@@ -444,11 +444,11 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 	// current vertex shift
 	CCVector3d Pshift(0, 0, 0);
 
-	unsigned               pointCount                    = 0;
-	unsigned               faceCount                     = 0;
-	static const unsigned  s_defaultMemAllocCount        = 65536;
-	bool                   normalWarningAlreadyDisplayed = false;
-	NormsIndexesTableType* normals                       = mesh->getTriNormsTable();
+	unsigned                      pointCount                    = 0;
+	unsigned                      faceCount                     = 0;
+	static const unsigned         s_defaultMemAllocCount        = 65536;
+	bool                          normalWarningAlreadyDisplayed = false;
+	NormsIndexesTableType::Shared normals                       = mesh->getTriNormsTable();
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -630,8 +630,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile&          fp,
 						ccLog::Warning("[STL] Not enough memory: can't store normals!");
 						mesh->removePerTriangleNormalIndexes();
 						mesh->setTriNormsTable(nullptr);
-						normals->release();
-						normals = nullptr;
+						normals.reset();
 					}
 				}
 			}
@@ -730,7 +729,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	if (!vertices->reserve(3 * faceCount))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
-	NormsIndexesTableType* normals = mesh->getTriNormsTable();
+	NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
 	if (normals && (!normals->reserveSafe(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
 	{
 		ccLog::Warning("[STL] Not enough memory: can't store normals!");

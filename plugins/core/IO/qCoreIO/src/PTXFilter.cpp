@@ -247,12 +247,11 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		}
 
 		// intensities
-		ccScalarField* intensitySF = new ccScalarField(CC_PTX_INTENSITY_FIELD_NAME);
+		auto intensitySF = std::make_shared<ccScalarField>(CC_PTX_INTENSITY_FIELD_NAME);
 		if (!intensitySF->reserveSafe(static_cast<unsigned>(gridSize)))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
-			intensitySF->release();
-			intensitySF = nullptr;
+			intensitySF.reset();
 		}
 
 		// grid structure
@@ -460,11 +459,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		{
 			delete cloud;
 			cloud = nullptr;
-			if (intensitySF)
-			{
-				intensitySF->release();
-				intensitySF = nullptr;
-			}
+			intensitySF.reset();
 
 			ccLog::Warning(QString("[PTX] Scan #%1 is empty?!").arg(cloudIndex + 1));
 		}
@@ -561,10 +556,9 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 		{
 			ccHObject* obj = container.getChild(i);
 			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));
-			CCCoreLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
-			if (sf)
+			auto ccSF = static_cast<ccPointCloud*>(obj)->getCCScalarField(0);
+			if (ccSF)
 			{
-				ccScalarField* ccSF = static_cast<ccScalarField*>(sf);
 				ccSF->setColorScale(ccColorScalesManager::GetDefaultScale(validIntensityRange ? ccColorScalesManager::ABS_NORM_GREY : ccColorScalesManager::GREY));
 				ccSF->setSaturationStart(0 /*minIntensity*/);
 				ccSF->setSaturationStop(maxIntensity);

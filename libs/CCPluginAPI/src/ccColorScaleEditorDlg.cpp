@@ -665,7 +665,7 @@ bool ccColorScaleEditorDialog::saveCurrentScale()
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(entity);
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
-				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(j));
+				auto sf = cloud->getCCScalarField(j);
 				if (sf->getColorScale() == m_colorScale)
 				{
 					// trick: we unlink then re-link the color scale to update everything automatically

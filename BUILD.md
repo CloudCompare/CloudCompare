@@ -7,18 +7,16 @@ CloudCompare requires [CMake](http://www.cmake.org) to be built.
 The main dependency of CloudCompare is Qt. CloudCompare 2.14+ requires Qt 6.
 
 - On Windows it is recommended to use the installer from the [Qt website](https://www.qt.io/).
-- On macOs you can also use the installer from Qt's website, or use homebrew.
+- On macOS you can also use the installer from Qt's website, or use homebrew.
 - On Linux it is recommended to use your distribution's package manager:
 
 Debian/ubuntu package names:
 ``` bash
-# Pre Ubuntu 24 (Qt5 dependencies)
-sudo apt install libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools libqt5websockets5-dev
+# Pre Ubuntu 24.04 (Qt5 dependencies)
+sudo apt install libqt5svg5-dev libqt5opengl5-dev qt5-default qttools5-dev qttools5-dev-tools
 
-# Ubuntu 24 (Qt6 depencendies)
-sudo apt install qt6-base-dev qt6-svg-dev qt6-tools-dev \
-qt6-tools-dev-tools libqt6opengl6-dev \
-libqt6websockets6-dev
+# Ubuntu 24.04 or later (Qt6 depencendies)
+sudo apt install qt6-base-dev qt6-svg-dev qt6-tools-dev qt6-tools-dev-tools
 ```
 
 ## 2. Cloning
@@ -270,11 +268,11 @@ Then, the CloudCompare CMake project will request that you set the following var
 
 # Other things
 
-## linux
+## Linux
 
 With versions of CMake prior to 3.13, the compiled application might not work for all users (due to some libraries being linked from the /usr/local directory). See https://github.com/CloudCompare/CloudCompare/issues/1680.
 
-## macOs
+## macOS
 
 If you are compiling and running locally, add `-DCC_MAC_DEV_PATHS` to the `CMAKE_CXX_FLAGS` in the `CMAKE` group. This
 will look for the plugins in your build directory rather than the application bundle. If you need the shaders as well,

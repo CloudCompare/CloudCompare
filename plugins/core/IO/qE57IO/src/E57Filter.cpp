@@ -424,14 +424,14 @@ static bool SaveScan(ccPointCloud*       cloud,
 
 	// No index bounds for unstructured clouds!
 	// But we can still have multiple return indexes
-	ccScalarField* returnIndexSF  = nullptr;
-	int            minReturnIndex = 0;
-	int            maxReturnIndex = 0;
+	ccScalarField::Shared returnIndexSF;
+	int                   minReturnIndex = 0;
+	int                   maxReturnIndex = 0;
 	{
 		int returnIndexSFIndex = cloud->getScalarFieldIndexByName(CC_E57_RETURN_INDEX_FIELD_NAME);
 		if (returnIndexSFIndex >= 0)
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(returnIndexSFIndex));
+			auto sf = cloud->getCCScalarField(returnIndexSFIndex);
 			assert(sf);
 
 			assert(sf->getMin() >= 0);
@@ -472,8 +472,8 @@ static bool SaveScan(ccPointCloud*       cloud,
 	}
 
 	// Intensity
-	ccScalarField* intensitySF           = nullptr;
-	bool           hasInvalidIntensities = false;
+	ccScalarField::Shared intensitySF;
+	bool                  hasInvalidIntensities = false;
 	{
 		int intensitySFIndex = cloud->getScalarFieldIndexByName(CC_E57_INTENSITY_FIELD_NAME);
 		if (intensitySFIndex < 0)
@@ -484,7 +484,7 @@ static bool SaveScan(ccPointCloud*       cloud,
 		}
 		if (intensitySFIndex >= 0)
 		{
-			intensitySF = static_cast<ccScalarField*>(cloud->getScalarField(intensitySFIndex));
+			intensitySF = cloud->getCCScalarField(intensitySFIndex);
 			assert(intensitySF);
 
 			e57::StructureNode intbox = e57::StructureNode(imf);
@@ -2056,14 +2056,13 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	// double intOffset = 0;
 	// ScalarType invalidSFValue = 0;
 
-	ccScalarField* intensitySF = nullptr;
+	ccScalarField::Shared intensitySF;
 	if (header.pointFields.intensityField)
 	{
-		intensitySF = new ccScalarField(CC_E57_INTENSITY_FIELD_NAME);
+		intensitySF = std::make_shared<ccScalarField>(CC_E57_INTENSITY_FIELD_NAME);
 		if (!intensitySF->resizeSafe(static_cast<unsigned>(pointCount)))
 		{
 			ccLog::Error("[E57] Not enough memory!");
-			intensitySF->release();
 			delete cloud;
 			return {};
 		}
@@ -2082,14 +2081,13 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 
 	// timestamp
-	ccScalarField* timeStampSF = nullptr;
+	ccScalarField::Shared timeStampSF;
 	if (header.pointFields.timeStampField)
 	{
-		timeStampSF = new ccScalarField(CC_E57_TIME_STAMP_FIELD_NAME);
+		timeStampSF = std::make_shared<ccScalarField>(CC_E57_TIME_STAMP_FIELD_NAME);
 		if (!timeStampSF->resizeSafe(static_cast<unsigned>(pointCount)))
 		{
 			ccLog::Error("[E57] Not enough memory!");
-			timeStampSF->release();
 			delete cloud;
 			return {};
 		}
@@ -2153,16 +2151,15 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 	}
 
 	// return index (multiple shoots scanners)
-	ccScalarField* returnIndexSF = nullptr;
+	ccScalarField::Shared returnIndexSF;
 	if (header.pointFields.returnIndexField && header.pointFields.returnMaximum > 0)
 	{
 		// we store the point return index as a scalar field
-		returnIndexSF = new ccScalarField(CC_E57_RETURN_INDEX_FIELD_NAME);
+		returnIndexSF = std::make_shared<ccScalarField>(CC_E57_RETURN_INDEX_FIELD_NAME);
 		if (!returnIndexSF->resizeSafe(static_cast<unsigned>(pointCount)))
 		{
 			ccLog::Error("[E57] Not enough memory!");
 			delete cloud;
-			returnIndexSF->release();
 			return {};
 		}
 		cloud->addScalarField(returnIndexSF);
@@ -2872,8 +2869,8 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 			{
 				if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 				{
-					ccPointCloud*  pc = static_cast<ccPointCloud*>(container.getChild(i));
-					ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+					ccPointCloud* pc = static_cast<ccPointCloud*>(container.getChild(i));
+					auto          sf = pc->getCurrentDisplayedScalarField();
 					if (sf)
 					{
 						sf->setSaturationStart(s_minIntensity);

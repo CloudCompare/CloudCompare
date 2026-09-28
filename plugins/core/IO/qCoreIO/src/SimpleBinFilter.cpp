@@ -111,7 +111,7 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 				QStringList tokens;
 				tokens << sfName;
 
-				ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(i));
+				auto sf = cloud->getCCScalarField(i);
 
 				// global shift
 				if (sf && sf->getOffset() != 0.0)
@@ -239,10 +239,10 @@ CC_FILE_ERROR SimpleBinFilter::saveToFile(ccHObject* root, const QString& filena
 
 struct SFDescriptor
 {
-	QString        name;
-	double         precision = std::numeric_limits<double>::quiet_NaN();
-	double         offset    = 0.0;
-	ccScalarField* sf        = nullptr;
+	QString               name;
+	double                precision = std::numeric_limits<double>::quiet_NaN();
+	double                offset    = 0.0;
+	ccScalarField::Shared sf;
 };
 
 struct GlobalDescriptor
@@ -526,11 +526,10 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 		{
 			sfDesc.name = QString("Scalar field #%1").arg(i + 1);
 		}
-		sfDesc.sf = new ccScalarField(sfDesc.name.toStdString());
+		sfDesc.sf = std::make_shared<ccScalarField>(sfDesc.name.toStdString());
 		if (!sfDesc.sf->reserveSafe(static_cast<unsigned>(descriptor.pointCount)))
 		{
-			sfDesc.sf->release();
-			sfDesc.sf = nullptr;
+			sfDesc.sf.reset();
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 

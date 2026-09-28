@@ -410,7 +410,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 				int pos = pointCloud.getScalarFieldIndexByName(name);
 				if (pos >= 0)
 				{
-					extraScalarField.scalarFields[i] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+					extraScalarField.scalarFields[i] = pointCloud.getCCScalarField(pos);
 					found++;
 					ccLog::Warning("[LAS] field %s found", name);
 				}
@@ -436,7 +436,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 			int pos = pointCloud.getScalarFieldIndexByName(nameToSearch);
 			if (pos >= 0)
 			{
-				extraScalarField.scalarFields[0] = dynamic_cast<ccScalarField*>(pointCloud.getScalarField(pos));
+				extraScalarField.scalarFields[0] = pointCloud.getCCScalarField(pos);
 			}
 			else
 			{
@@ -448,7 +448,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 	// ccScalarField
 	const auto notAllScalarFieldWereFound = [](const LasExtraScalarField& extraScalarField)
 	{
-		const auto ptrIsNull = [](const ccScalarField* ptr)
+		const auto ptrIsNull = [](const ccScalarField::Shared& ptr)
 		{
 			return ptr == nullptr;
 		};

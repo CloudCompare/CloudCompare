@@ -342,7 +342,7 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName,
 	return sfIndex;
 }
 
-CCCoreLib::ScalarField* GetScalarField(ccPointCloud* cloud, int sfIndex, const QString& sfName, bool minusOneMeansCurrent = false)
+CCCoreLib::ScalarField::Shared GetScalarField(ccPointCloud* cloud, int sfIndex, const QString& sfName, bool minusOneMeansCurrent = false)
 {
 	sfIndex = GetScalarFieldIndex(cloud, sfIndex, sfName, minusOneMeansCurrent);
 	if (sfIndex < 0)
@@ -1511,7 +1511,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 			if (useActiveSF)
 			{
 				// look for the min and max sf values
-				ccScalarField* sf = desc.pc->getCurrentDisplayedScalarField();
+				auto sf = desc.pc->getCurrentDisplayedScalarField();
 				if (!sf)
 				{
 					// warn the user, not use active SF and keep going
@@ -2548,7 +2548,7 @@ bool CommandSFColorScale::process(ccCommandLineInterface& cmd)
 		bool hasCandidateClouds = false;
 		for (auto& cloud : cmd.clouds())
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud.pc->getCurrentOutScalarField());
+			auto sf = cloud.pc->getCCScalarField(cloud.pc->getCurrentOutScalarFieldIndex());
 			if (sf)
 			{
 				sf->setColorScale(scale);
@@ -2571,7 +2571,7 @@ bool CommandSFColorScale::process(ccCommandLineInterface& cmd)
 			ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(mesh.mesh->getAssociatedCloud());
 			if (vertices)
 			{
-				ccScalarField* sf = static_cast<ccScalarField*>(vertices->getCurrentOutScalarField());
+				auto sf = vertices->getCCScalarField(vertices->getCurrentOutScalarFieldIndex());
 				if (sf)
 				{
 					sf->setColorScale(scale);
@@ -2777,7 +2777,7 @@ static std::pair<ScalarType, ScalarType> GetSFRange(const CCCoreLib::ScalarField
 
 static ScalarType GetSFValue(const ccPointCloud& pc, int sfIndex, ScalarType value, USE_SPECIAL_SF_VALUE useVal)
 {
-	CCCoreLib::ScalarField* sf = pc.getScalarField(sfIndex);
+	auto sf = pc.getCCScalarField(sfIndex);
 	// should be handled way before this point this is just safety
 	if (sf)
 	{
@@ -2948,7 +2948,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 	// for each cloud
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		CCCoreLib::ScalarField* sf = desc.pc->getCurrentOutScalarField();
+		auto sf = desc.pc->getCurrentOutScalarField();
 		if (sf)
 		{
 			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, minVal, useValForMin, maxVal, useValForMax);
@@ -2989,7 +2989,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 			continue;
 		}
 
-		CCCoreLib::ScalarField* sf = pc->getCurrentOutScalarField();
+		auto sf = pc->getCurrentOutScalarField();
 		if (sf)
 		{
 			std::pair<ScalarType, ScalarType> range = GetSFRange(*sf, minVal, useValForMin, maxVal, useValForMax);
@@ -4796,10 +4796,10 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc)
 		{
-			CCCoreLib::ScalarField* sf = GetScalarField(desc.pc, sfIndex, sfName, true);
+			auto sf = GetScalarField(desc.pc, sfIndex, sfName, true);
 			if (sf)
 			{
-				if (desc.pc->setCoordFromSF(exportDims, sf, std::numeric_limits<PointCoordinateType>::quiet_NaN()))
+				if (desc.pc->setCoordFromSF(exportDims, *sf, std::numeric_limits<PointCoordinateType>::quiet_NaN()))
 				{
 					desc.basename += QObject::tr("_SF_TO_COORD_%1").arg(dimStr);
 					if (cmd.autoSaveMode())
@@ -4912,12 +4912,12 @@ bool CommandSFToNorm::process(ccCommandLineInterface& cmd)
 	{
 		if (desc.pc && desc.pc->hasScalarFields())
 		{
-			CCCoreLib::ScalarField* sfX = GetScalarField(desc.pc, sfIndexX, sfNameX, true);
-			CCCoreLib::ScalarField* sfY = GetScalarField(desc.pc, sfIndexY, sfNameY, true);
-			CCCoreLib::ScalarField* sfZ = GetScalarField(desc.pc, sfIndexZ, sfNameZ, true);
+			auto sfX = GetScalarField(desc.pc, sfIndexX, sfNameX, true);
+			auto sfY = GetScalarField(desc.pc, sfIndexY, sfNameY, true);
+			auto sfZ = GetScalarField(desc.pc, sfIndexZ, sfNameZ, true);
 			if (sfX || sfY || sfZ)
 			{
-				if (desc.pc->setNormalsFromSF(sfX, sfY, sfZ))
+				if (desc.pc->setNormalsFromSF(sfX.get(), sfY.get(), sfZ.get()))
 				{
 					desc.basename += "_SF_TO_NORM";
 					if (cmd.autoSaveMode())
@@ -5921,7 +5921,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		// we apply method on currently 'output' SF
-		CCCoreLib::ScalarField* outSF = desc.pc->getCurrentOutScalarField();
+		auto outSF = desc.pc->getCurrentOutScalarField();
 		if (outSF)
 		{
 			assert(outSF->capacity() != 0);
@@ -5958,7 +5958,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 
 			// we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
 			{
-				ccScalarField* chi2SF = static_cast<ccScalarField*>(desc.pc->getCurrentInScalarField());
+				auto chi2SF = desc.pc->getCCScalarField(desc.pc->getCurrentInScalarFieldIndex());
 				assert(chi2SF);
 				chi2SF->computeMinAndMax();
 				chi2dist *= chi2dist;
@@ -6020,7 +6020,7 @@ bool CommandStatFit::process(ccCommandLineInterface& cmd)
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
 		// we apply the method on the currently 'output' SF (the one '-SET_ACTIVE_SF' sets)
-		CCCoreLib::ScalarField* sf = desc.pc->getCurrentOutScalarField();
+		auto sf = desc.pc->getCurrentOutScalarField();
 		if (!sf)
 		{
 			cmd.warning(QObject::tr("Cloud '%1' has no active scalar field. Set one with '-%2'").arg(desc.pc->getName(), COMMAND_SET_ACTIVE_SF));
@@ -6907,7 +6907,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error("A SF with the same name is already defined on cloud " + desc.pc->getName());
 				}
-				CCCoreLib::ScalarField* sf = desc.pc->getScalarField(thisSFIndex);
+				auto sf = desc.pc->getCCScalarField(thisSFIndex);
 				if (!sf)
 				{
 					assert(false);
@@ -6943,7 +6943,7 @@ bool CommandSFRename::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error("A SF with the same name is already defined on cloud " + cloud->getName());
 				}
-				CCCoreLib::ScalarField* sf = cloud->getScalarField(thisSFIndex);
+				auto sf = cloud->getCCScalarField(thisSFIndex);
 				if (!sf)
 				{
 					assert(false);
@@ -7007,7 +7007,7 @@ bool CommandSFAddConst::process(ccCommandLineInterface& cmd)
 			{
 				return cmd.error("Internal error: addScalarField failed");
 			}
-			CCCoreLib::ScalarField* sf = desc.pc->getScalarField(sfIndex);
+			auto sf = desc.pc->getCCScalarField(sfIndex);
 			assert(sf);
 			for (unsigned index = 0; index < desc.pc->size(); index++)
 			{
@@ -8326,7 +8326,7 @@ bool CommandComputeDistancesFromSensor::process(ccCommandLineInterface& cmd)
 				return false;
 			}
 		}
-		CCCoreLib::ScalarField* distances = cl.pc->getScalarField(sfIdx);
+		auto distances = cl.pc->getCCScalarField(sfIdx);
 
 		// perform computation
 		for (unsigned i = 0; i < cl.pc->size(); ++i)
@@ -8412,7 +8412,7 @@ bool CommandComputeScatteringAngles::process(ccCommandLineInterface& cmd)
 				return false;
 			}
 		}
-		CCCoreLib::ScalarField* angles = cl.pc->getScalarField(sfIdx);
+		auto angles = cl.pc->getCCScalarField(sfIdx);
 
 		// perform computation
 		for (unsigned i = 0; i < cl.pc->size(); ++i)

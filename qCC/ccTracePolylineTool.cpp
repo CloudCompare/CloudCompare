@@ -162,7 +162,7 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 		delete newPoly;
 		return nullptr;
 	}
-	newVertices->importParametersFrom(m_poly3DVertices);
+	newVertices->importParametersFrom(*m_poly3DVertices);
 	newVertices->setName(m_poly3DVertices->getName());
 	newVertices->setEnabled(m_poly3DVertices->isEnabled());
 	newPoly->importParametersFrom(*m_poly3D);

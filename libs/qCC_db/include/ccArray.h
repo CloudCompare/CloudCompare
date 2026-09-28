@@ -20,21 +20,20 @@
 // Local
 #include "ccHObject.h"
 
-// CCCoreLib
-#include <CCShareable.h>
-
 // System
+#include <memory>
 #include <vector>
 
 //! Shareable array that can be properly inserted in the DB tree
 template <class Type, int N, class ComponentType>
 class ccArray : public std::vector<Type>
-    , public CCShareable
     , public ccHObject
 {
   public:
 	//! Base type
 	using Base = ccArray<Type, N, ComponentType>;
+	//! Shared pointer type
+	using Shared = std::shared_ptr<Base>;
 
 	//! Default constructor
 	ccArray(QString name = QString())
@@ -44,14 +43,13 @@ class ccArray : public std::vector<Type>
 	}
 
 	//! Duplicates array
-	virtual Base* clone()
+	Shared clone()
 	{
-		Base* cloneArray = new Base(getName());
+		Shared cloneArray = std::make_shared<Base>(getName());
 		if (!copy(*cloneArray))
 		{
 			// error message already issued
-			cloneArray->release();
-			cloneArray = nullptr;
+			cloneArray.reset();
 		}
 		return cloneArray;
 	}
@@ -125,10 +123,6 @@ class ccArray : public std::vector<Type>
 	{
 		return CC_TYPES::ARRAY;
 	}
-	inline bool isShareable() const override
-	{
-		return true;
-	}
 	inline bool isSerializable() const override
 	{
 		return true;
@@ -174,10 +168,8 @@ class ccArray : public std::vector<Type>
 		std::swap(this->at(i1), this->at(i2));
 	}
 
-  protected:
-	//! Destructor (protected)
-	/** Use release instead.
-	 **/
+  public:
+	//! Default destructor
 	~ccArray() override = default;
 
 	// inherited from ccHObject

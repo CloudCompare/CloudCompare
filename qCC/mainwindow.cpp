@@ -1797,13 +1797,13 @@ void MainWindow::doActionFlagMeshVertices()
 						continue;
 					}
 				}
-				CCCoreLib::ScalarField* flags = vertices->getScalarField(sfIdx);
+				CCCoreLib::ScalarField::Shared flags = vertices->getScalarField(sfIdx);
 
 				CCCoreLib::MeshSamplingTools::EdgeConnectivityStats stats;
-				if (CCCoreLib::MeshSamplingTools::flagMeshVerticesByType(mesh, flags, &stats))
+				if (CCCoreLib::MeshSamplingTools::flagMeshVerticesByType(mesh, flags.get(), &stats))
 				{
 					vertices->setCurrentDisplayedScalarField(sfIdx);
-					ccScalarField* sf = vertices->getCurrentDisplayedScalarField();
+					auto sf = vertices->getCurrentDisplayedScalarField();
 					if (sf)
 					{
 						sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::VERTEX_QUALITY));
@@ -1964,7 +1964,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 				return;
 			}
 		}
-		CCCoreLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+		auto distances = cloud->getScalarField(sfIdx);
 
 		for (unsigned i = 0; i < cloud->size(); ++i)
 		{
@@ -2031,7 +2031,7 @@ void MainWindow::doActionComputeScatteringAngles()
 			return;
 		}
 	}
-	CCCoreLib::ScalarField* angles = cloud->getScalarField(sfIdx);
+	auto angles = cloud->getScalarField(sfIdx);
 
 	// perform computations
 	for (unsigned i = 0; i < cloud->size(); ++i)
@@ -2395,7 +2395,7 @@ void MainWindow::doActionProjectUncertainty()
 		}
 
 		// fill scalar field
-		CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+		auto sf = pointCloud->getScalarField(sfIdx);
 		assert(sf);
 		if (sf)
 		{
@@ -2424,7 +2424,7 @@ void MainWindow::doActionProjectUncertainty()
 		}
 
 		// fill scalar field
-		CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+		auto sf = pointCloud->getScalarField(sfIdx);
 		assert(sf);
 		if (sf)
 		{
@@ -2505,7 +2505,7 @@ void MainWindow::doActionCheckPointsInsideFrustum()
 				return;
 			}
 
-			CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+			auto sf = pointCloud->getScalarField(sfIdx);
 			assert(sf);
 			if (sf)
 			{
@@ -2694,7 +2694,7 @@ void MainWindow::doActionComputePointsVisibility()
 		return;
 	}
 
-	CCCoreLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+	auto sf = pointCloud->getScalarField(sfIdx);
 	assert(sf);
 	if (sf)
 	{
@@ -3096,7 +3096,7 @@ void MainWindow::doActionFilterByValue()
 		if (nullptr != pc)
 		{
 			// la methode est activee sur le champ scalaire affiche
-			CCCoreLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
+			auto sf = pc->getCurrentDisplayedScalarField();
 			if (sf)
 			{
 				toFilter.emplace_back(entity, pc);
@@ -3121,7 +3121,7 @@ void MainWindow::doActionFilterByValue()
 	{
 		for (size_t i = 0; i < toFilter.size(); ++i)
 		{
-			ccScalarField* sf = toFilter[i].second->getCurrentDisplayedScalarField();
+			auto sf = toFilter[i].second->getCurrentDisplayedScalarField();
 			assert(sf);
 
 			if (i == 0)
@@ -3365,6 +3365,7 @@ void MainWindow::doActionRenameSF()
 		return;
 	}
 
+	refreshAll(true);
 	updateUI();
 }
 
@@ -3747,8 +3748,8 @@ void MainWindow::doActionMerge()
 		ccHObjectContext firstCloudContext;
 
 		// whether to generate the 'original cloud index' scalar field or not
-		CCCoreLib::ScalarField* ocIndexSF  = nullptr;
-		size_t                  cloudIndex = 0;
+		CCCoreLib::ScalarField::Shared ocIndexSF;
+		size_t                         cloudIndex = 0;
 
 		// compute total size of the final cloud
 		size_t totalSize = 0;
@@ -4354,7 +4355,7 @@ void MainWindow::doActionSubsample()
 				maxCloudRadius = std::max<double>(maxCloudRadius, cloud->getOwnBB().getDiagNorm());
 
 				// we also look for the min and max sf values
-				ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
+				auto sf = cloud->getCurrentDisplayedScalarField();
 				if (sf)
 				{
 					if (!ccScalarField::ValidValue(sfMin) || sfMin > sf->getMin())
@@ -5470,12 +5471,11 @@ void MainWindow::doActionComputeDistanceMap()
 				return;
 			}
 
-			ccScalarField* sf = new ccScalarField("DT values");
+			auto sf = std::make_shared<ccScalarField>("DT values");
 			if (!sf->reserveSafe(pointCount))
 			{
 				ccLog::Error(tr("Not enough memory!"));
 				delete gridCloud;
-				sf->release();
 				return;
 			}
 
@@ -5578,7 +5578,7 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
 					continue;
 				}
 
-				ccScalarField* sf = static_cast<ccScalarField*>(newCloud->getScalarField(sfIdx));
+				auto sf = newCloud->getCCScalarField(sfIdx);
 				assert(sf);
 
 				for (int x = 0; x < steps; ++x)
@@ -8190,7 +8190,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 		if (cloud)
 		{
 			// we display the histogram of the current scalar field
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+			auto sf = cloud->getCCScalarField(cloud->getCurrentDisplayedScalarFieldIndex());
 			if (sf)
 			{
 				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
@@ -8995,7 +8995,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 			}
 		}
 
-		CCCoreLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+		auto sf = cloud->getScalarField(sfIdx);
 		sf->fill(CCCoreLib::NAN_VALUE);
 		cloud->setCurrentScalarField(sfIdx);
 
@@ -9139,7 +9139,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		ccConsole::Error(tr("Failed to compute octree!"));
 	}
 
-	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+	auto sf = cloud->getCCScalarField(sfIdx);
 	sf->computeMinAndMax();
 	sf->showNaNValuesInGrey(false);
 	cloud->setCurrentDisplayedScalarField(sfIdx);
@@ -9673,7 +9673,7 @@ void MainWindow::doActionExportCloudInfo()
 			csvStream << Gg.z << ';' /*"meanZ_global;"*/;
 			for (unsigned j = 0; j < cloud->getNumberOfScalarFields(); ++j)
 			{
-				CCCoreLib::ScalarField* sf = cloud->getScalarField(j);
+				auto sf = cloud->getScalarField(j);
 				csvStream << QString::fromStdString(sf->getName()) << ';' /*"SF name;"*/;
 
 				unsigned validCount = 0;
@@ -10093,7 +10093,7 @@ void MainWindow::doActionCloudPrimitiveDist()
 			}
 			compEnt->renameScalarField(sfIdx, sfName.toStdString());
 
-			ccScalarField* sf = static_cast<ccScalarField*>(compEnt->getScalarField(sfIdx));
+			auto sf = compEnt->getCCScalarField(sfIdx);
 			if (sf)
 			{
 				ScalarType mean;

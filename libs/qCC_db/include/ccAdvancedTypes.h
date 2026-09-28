@@ -30,6 +30,9 @@
 class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNormType>
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<NormsIndexesTableType>;
+
 	//! Default constructor
 	QCC_DB_LIB_API NormsIndexesTableType();
 	~NormsIndexesTableType() override = default;
@@ -45,13 +48,12 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 	}
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	NormsIndexesTableType* clone() override
+	Shared clone()
 	{
-		NormsIndexesTableType* cloneArray = new NormsIndexesTableType();
+		Shared cloneArray = std::make_shared<NormsIndexesTableType>();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsIndexesTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray->release();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -66,6 +68,9 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<NormsTableType>;
+
 	//! Default constructor
 	NormsTableType()
 	    : ccArray<CCVector3, 3, PointCoordinateType>("Normals")
@@ -80,13 +85,12 @@ class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 	}
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	NormsTableType* clone() override
+	Shared clone()
 	{
-		NormsTableType* cloneArray = new NormsTableType();
+		Shared cloneArray = std::make_shared<NormsTableType>();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[NormsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray->release();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -98,6 +102,9 @@ class NormsTableType : public ccArray<CCVector3, 3, PointCoordinateType>
 class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ColorsTableType>;
+
 	//! Default constructor
 	ColorsTableType()
 	    : ccArray<ccColor::Rgb, 3, ColorCompType>("RGB colors")
@@ -112,13 +119,12 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 	}
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	ColorsTableType* clone() override
+	Shared clone()
 	{
-		ColorsTableType* cloneArray = new ColorsTableType();
+		Shared cloneArray = std::make_shared<ColorsTableType>();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[ColorsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray->release();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -130,6 +136,9 @@ class ColorsTableType : public ccArray<ccColor::Rgb, 3, ColorCompType>
 class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<RGBAColorsTableType>;
+
 	//! Default constructor
 	RGBAColorsTableType()
 	    : ccArray<ccColor::Rgba, 4, ColorCompType>("RGBA colors")
@@ -144,13 +153,12 @@ class RGBAColorsTableType : public ccArray<ccColor::Rgba, 4, ColorCompType>
 	}
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	RGBAColorsTableType* clone() override
+	Shared clone()
 	{
-		RGBAColorsTableType* cloneArray = new RGBAColorsTableType();
+		Shared cloneArray = std::make_shared<RGBAColorsTableType>();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[RGBAColorsTableType::clone] Failed to clone array (not enough memory)");
-			cloneArray->release();
 			return nullptr;
 		}
 		cloneArray->setName(getName());
@@ -186,6 +194,9 @@ struct TexCoords2D
 class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<TextureCoordsContainer>;
+
 	//! Default constructor
 	TextureCoordsContainer()
 	    : ccArray<TexCoords2D, 2, float>("Texture coordinates")
@@ -200,13 +211,12 @@ class TextureCoordsContainer : public ccArray<TexCoords2D, 2, float>
 	}
 
 	//! Duplicates array (overloaded from ccArray::clone)
-	TextureCoordsContainer* clone() override
+	Shared clone()
 	{
-		TextureCoordsContainer* cloneArray = new TextureCoordsContainer();
+		Shared cloneArray = std::make_shared<TextureCoordsContainer>();
 		if (!copy(*cloneArray))
 		{
 			ccLog::Warning("[TextureCoordsContainer::clone] Failed to clone array (not enough memory)");
-			cloneArray->release();
 			return nullptr;
 		}
 		cloneArray->setName(getName());

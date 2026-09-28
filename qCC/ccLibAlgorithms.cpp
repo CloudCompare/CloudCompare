@@ -367,7 +367,7 @@ namespace ccLibAlgorithms
 						if (c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
 						{
 							// signed roughness should be displayed with a symmetrical color scale
-							ccScalarField* sf = dynamic_cast<ccScalarField*>(pc->getCurrentInScalarField());
+							auto sf = pc->getCCScalarField(pc->getCurrentInScalarFieldIndex());
 							if (sf)
 							{
 								sf->setSymmetricalScale(true);

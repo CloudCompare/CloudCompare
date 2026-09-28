@@ -20,6 +20,7 @@
 // Local
 #include "ccColorScale.h"
 #include "ccNormalVectors.h"
+#include "ccScalarField.h"
 #include "ccWaveform.h"
 
 // CCCoreLib
@@ -33,7 +34,6 @@
 #pragma warning(disable : 4250)
 #endif
 
-class ccScalarField;
 class ccPolyline;
 class ccMesh;
 class QOpenGLBuffer;
@@ -255,9 +255,19 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 			resize(size());
 	}
 
-  public: // scalar-fields management
+  public:
+	//! Returns a shared pointer to the scalar field at the given index
+	/** Shortcut to getScalarField() but returns a ccScalarField shared pointer instead of a CCCoreLib::ScalarField pointer.
+	    \param index scalar field index
+	    \return ccScalarField shared pointer (or nullptr if index is invalid)
+	  **/
+	ccScalarField::Shared getCCScalarField(int index) const
+	{
+		return ccScalarField::FromCCCoreLibShared(getScalarField(index));
+	}
+
 	//! Returns the currently displayed scalar (or 0 if none)
-	ccScalarField* getCurrentDisplayedScalarField() const;
+	ccScalarField::Shared getCurrentDisplayedScalarField() const;
 	//! Returns the currently displayed scalar field index (or -1 if none)
 	int getCurrentDisplayedScalarFieldIndex() const;
 	//! Sets the currently displayed scalar field
@@ -627,7 +637,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	void addNormAtIndex(const PointCoordinateType* N, unsigned index);
 
 	//! Sets the (compressed) normals table
-	void setNormsTable(NormsIndexesTableType* norms);
+	void setNormsTable(NormsIndexesTableType::Shared norms);
 
 	//! Converts normals to RGB colors
 	/** See ccNormalVectors::ConvertNormalToRGB
@@ -641,7 +651,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	    \param[out] dipDirSF dip direction values
 	    \return success
 	**/
-	bool convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF);
+	bool convertNormalToDipDirSFs(ccScalarField& dipSF, ccScalarField& dipDirSF);
 
 	//! Pushes an RGBA color on stack
 	/** \param C RGBA color
@@ -868,16 +878,16 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	    \param sf existing scalar field
 	    \return index of added scalar field (or -1 if an error occurred)
 	**/
-	int addScalarField(ccScalarField* sf);
+	int addScalarField(ccScalarField::Shared sf);
 
 	//! Returns pointer on RGBA colors table
-	RGBAColorsTableType* rgbaColors() const
+	RGBAColorsTableType::Shared rgbaColors() const
 	{
 		return m_rgbaColors;
 	}
 
 	//! Returns pointer on compressed normals indexes table
-	NormsIndexesTableType* normals() const
+	NormsIndexesTableType::Shared normals() const
 	{
 		return m_normals;
 	}
@@ -908,13 +918,13 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	bool exportCoordToSF(bool exportDims[3]);
 
 	//! Sets coordinate(s) from a scalar field
-	bool setCoordFromSF(bool importDims[3], CCCoreLib::ScalarField* sf, PointCoordinateType defaultValueForNaN);
+	bool setCoordFromSF(bool importDims[3], const CCCoreLib::ScalarField& sf, PointCoordinateType defaultValueForNaN);
 
 	//! Exports the specified normal dimension(s) to scalar field(s)
 	bool exportNormalToSF(bool exportDims[3]);
 
 	//! Sets normals from scalar fields
-	bool setNormalsFromSF(CCCoreLib::ScalarField* sfX, CCCoreLib::ScalarField* sfY, CCCoreLib::ScalarField* sfZ);
+	bool setNormalsFromSF(const CCCoreLib::ScalarField* sfX, const CCCoreLib::ScalarField* sfY, const CCCoreLib::ScalarField* sfZ);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -955,10 +965,10 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 
   protected: // variable members
 	//! Colors
-	RGBAColorsTableType* m_rgbaColors;
+	RGBAColorsTableType::Shared m_rgbaColors;
 
 	//! Normals (compressed)
-	NormsIndexesTableType* m_normals;
+	NormsIndexesTableType::Shared m_normals;
 
 	//! Used for drawing normals if needed
 	std::vector<CCVector3> m_decompressedNormals;
@@ -967,7 +977,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	bool m_sfColorScaleDisplayed;
 
 	//! Currently displayed scalar field
-	ccScalarField* m_currentDisplayedScalarField;
+	ccScalarField::Shared m_currentDisplayedScalarField;
 	//! Currently displayed scalar field index
 	int m_currentDisplayedScalarFieldIndex;
 
@@ -1017,13 +1027,13 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 		{
 		}
 
-		std::vector<VBO*> vbos;
-		bool              hasColors;
-		bool              colorIsSF;
-		ccScalarField*    sourceSF;
-		bool              hasNormals;
-		size_t            totalMemSizeBytes;
-		int               updateFlags;
+		std::vector<VBO*>     vbos;
+		bool                  hasColors;
+		bool                  colorIsSF;
+		ccScalarField::Shared sourceSF;
+		bool                  hasNormals;
+		size_t                totalMemSizeBytes;
+		int                   updateFlags;
 
 		//! Current state
 		STATES state;

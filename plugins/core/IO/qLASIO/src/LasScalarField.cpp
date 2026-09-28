@@ -222,7 +222,7 @@ LasScalarField::Range LasScalarField::ValueRange(LasScalarField::Id id)
 	return Range::ForType<ScalarType>();
 }
 
-LasScalarField::LasScalarField(LasScalarField::Id id, ccScalarField* sf)
+LasScalarField::LasScalarField(LasScalarField::Id id, ccScalarField::Shared sf)
     : id(id)
     , sf(sf)
     , range(LasScalarField::ValueRange(id))

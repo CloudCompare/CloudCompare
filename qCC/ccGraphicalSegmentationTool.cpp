@@ -968,7 +968,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside, ScalarType clas
 
 		// if a classification value is set as input, this means that we want to label the
 		// set of points, and we don't want to segment it
-		CCCoreLib::ScalarField* classifSF = nullptr;
+		CCCoreLib::ScalarField::Shared classifSF;
 		if (classificationMode)
 		{
 			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(*p);

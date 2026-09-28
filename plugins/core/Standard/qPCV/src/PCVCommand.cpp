@@ -102,7 +102,7 @@ bool PCVCommand::Process(	const ccHObject::Container& candidates,
 		}
 		else
 		{
-			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+			auto sf = cloud->getCCScalarField(sfIdx);
 			if (sf)
 			{
 				sf->computeMinAndMax();

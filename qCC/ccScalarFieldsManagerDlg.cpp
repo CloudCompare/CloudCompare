@@ -151,7 +151,7 @@ void ccScalarFieldsManagerDialog::buildTable()
 
 void ccScalarFieldsManagerDialog::appendSFToTable(int sfIdx)
 {
-	ccScalarField* sf = static_cast<ccScalarField*>(m_pointCloud->getScalarField(sfIdx));
+	auto sf = m_pointCloud->getCCScalarField(sfIdx);
 	if (!sf)
 	{
 		return;
@@ -293,8 +293,8 @@ void ccScalarFieldsManagerDialog::showHistogram()
 	for (int i = 0; i < selectedRows.count(); ++i)
 	{
 		// Get the SF info and data
-		int            sfIdx = selectedRows[i].row();
-		ccScalarField* sf    = static_cast<ccScalarField*>(m_pointCloud->getScalarField(sfIdx));
+		int  sfIdx = selectedRows[i].row();
+		auto sf    = m_pointCloud->getCCScalarField(sfIdx);
 		if (!sf)
 		{
 			continue;
@@ -329,7 +329,7 @@ void ccScalarFieldsManagerDialog::showHistogram()
 
 void ccScalarFieldsManagerDialog::renameSF(int row, const QString& newName)
 {
-	ccScalarField* sf = static_cast<ccScalarField*>(m_pointCloud->getScalarField(row));
+	auto sf = m_pointCloud->getCCScalarField(row);
 	if (!sf)
 	{
 		return;

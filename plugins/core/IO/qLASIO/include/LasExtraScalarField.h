@@ -17,6 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// qCC_db
+#include <ccScalarField.h>
+
+// System
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -24,7 +28,6 @@
 class QDataStream;
 
 class ccPointCloud;
-class ccScalarField;
 
 struct laszip_header;
 struct laszip_vlr;
@@ -139,8 +142,8 @@ class LasExtraScalarField
 	double  offsets[MAX_DIM_SIZE]             = {0.0};
 
 	// These are added by us
-	unsigned       byteOffset{0};
-	ccScalarField* scalarFields[MAX_DIM_SIZE] = {nullptr};
+	unsigned              byteOffset{0};
+	ccScalarField::Shared scalarFields[MAX_DIM_SIZE];
 	// TODO explain better
 	// This strings store the name of the field in CC,
 	// Extra fields name may clash with existing scalar fields name

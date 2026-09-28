@@ -870,7 +870,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		uint sfCount = pointCloud->getNumberOfScalarFields();
 		for (uint index = 0; index < sfCount; index++)
 		{
-			ccScalarField*     sf     = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
+			auto               sf     = pointCloud->getCCScalarField(index);
 			const std::string& sfName = sf->getName();
 			bool               found  = false;
 			for (auto& el : params.standardFields)

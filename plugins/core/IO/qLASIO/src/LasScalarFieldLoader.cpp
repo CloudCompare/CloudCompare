@@ -236,7 +236,7 @@ LasScalarFieldLoader::handleScalarField(LasScalarField& sfInfo, ccPointCloud& po
 		{
 			return CC_FERR_NO_ERROR;
 		}
-		auto newSf = new ccScalarField(sfInfo.name());
+		auto newSf = std::make_shared<ccScalarField>(sfInfo.name());
 		sfInfo.sf  = newSf;
 		if (!newSf->reserveSafe(pointCloud.capacity()))
 		{
@@ -267,12 +267,12 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 			{
 				char name[LasExtraScalarField::MAX_NAME_SIZE + 8];
 				snprintf(name, LasExtraScalarField::MAX_NAME_SIZE + 8, "%s (Extra)", extraField.name);
-				extraField.scalarFields[0] = new ccScalarField(name);
+				extraField.scalarFields[0].reset(new ccScalarField(name));
 				memcpy(extraField.ccName, name, LasExtraScalarField::MAX_NAME_SIZE + 8);
 			}
 			else
 			{
-				extraField.scalarFields[0] = new ccScalarField(extraField.name);
+				extraField.scalarFields[0].reset(new ccScalarField(extraField.name));
 			}
 
 			if (!extraField.scalarFields[0]->reserveSafe(pointCloud.capacity()))
@@ -286,7 +286,7 @@ bool LasScalarFieldLoader::createScalarFieldsForExtraBytes(ccPointCloud& pointCl
 			{
 				char name[LasExtraScalarField::MAX_NAME_SIZE + 8];
 				snprintf(name, LasExtraScalarField::MAX_NAME_SIZE + 8, "%s [%d]", extraField.name, dimIndex);
-				extraField.scalarFields[dimIndex] = new ccScalarField(name);
+				extraField.scalarFields[dimIndex].reset(new ccScalarField(name));
 				if (!extraField.scalarFields[dimIndex]->reserveSafe(pointCloud.capacity()))
 				{
 					return false;

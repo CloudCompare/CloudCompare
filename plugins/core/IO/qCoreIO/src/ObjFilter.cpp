@@ -173,7 +173,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			assert(mesh);
 
-			NormsIndexesTableType* normsTable = mesh->getTriNormsTable();
+			auto normsTable = mesh->getTriNormsTable();
 
 			// reset save dialog
 			unsigned numTriangleNormals = normsTable->currentSize();
@@ -239,8 +239,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	// materials
 	if (mesh)
 	{
-		const ccMaterialSet* materials     = mesh->getMaterialSet();
-		bool                 withMaterials = (materials && mesh->hasMaterials());
+		auto materials     = mesh->getMaterialSet();
+		bool withMaterials = (materials && mesh->hasMaterials());
 		if (withMaterials)
 		{
 			// reset save dialog
@@ -264,7 +264,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 			}
 			else
 			{
-				materials     = nullptr;
+				materials.reset();
 				withMaterials = false;
 			}
 
@@ -283,7 +283,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
 		if (withTexCoordinates)
 		{
-			TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
+			auto texCoords = mesh->getTexCoordinatesTable();
 			if (texCoords)
 			{
 				// reset save dialog
@@ -576,23 +576,23 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	std::vector<std::pair<unsigned, QString>> groups;
 
 	// materials
-	ccMaterialSet* materials              = nullptr;
-	bool           hasMaterial            = false;
-	int            currentMaterial        = -1;
-	bool           currentMaterialDefined = false;
-	bool           materialsLoadFailed    = true;
+	ccMaterialSet::Shared materials;
+	bool                  hasMaterial            = false;
+	int                   currentMaterial        = -1;
+	bool                  currentMaterialDefined = false;
+	bool                  materialsLoadFailed    = true;
 
 	// texture coordinates
-	TextureCoordsContainer* texCoords        = nullptr;
-	bool                    hasTexCoords     = false;
-	int                     texCoordsRead    = 0;
-	int                     maxTexCoordIndex = -1;
+	TextureCoordsContainer::Shared texCoords;
+	bool                           hasTexCoords     = false;
+	int                            texCoordsRead    = 0;
+	int                            maxTexCoordIndex = -1;
 
 	// normals
-	NormsIndexesTableType* normals         = nullptr;
-	int                    normsRead       = 0;
-	bool                   normalsPerFacet = false;
-	int                    maxTriNormIndex = -1;
+	NormsIndexesTableType::Shared normals;
+	int                           normsRead       = 0;
+	bool                          normalsPerFacet = false;
+	int                           maxTriNormIndex = -1;
 
 	// progress dialog
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
@@ -716,8 +716,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for tex. coords container if necessary
 				if (!texCoords)
 				{
-					texCoords = new TextureCoordsContainer();
-					texCoords->link();
+					texCoords.reset(new TextureCoordsContainer());
 				}
 				if (texCoords->currentSize() == texCoords->capacity())
 				{
@@ -753,8 +752,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				// create and reserve memory for normals container if necessary
 				if (!normals)
 				{
-					normals = new NormsIndexesTableType;
-					normals->link();
+					normals.reset(new NormsIndexesTableType);
 				}
 				if (normals->currentSize() == normals->capacity())
 				{
@@ -1198,8 +1196,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					// we try to load it
 					if (!materials)
 					{
-						materials = new ccMaterialSet("materials");
-						materials->link();
+						materials.reset(new ccMaterialSet("materials"));
 					}
 					size_t oldSize = materials->size();
 
@@ -1223,8 +1220,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					}
 					if (materials->empty())
 					{
-						materials->release();
-						materials           = nullptr;
+						materials.reset();
 						materialsLoadFailed = true;
 					}
 				}
@@ -1301,21 +1297,18 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 				{
 					if (texCoords)
 					{
-						texCoords->release();
-						texCoords = nullptr;
+						texCoords.reset();
 					}
 					if (materials)
 					{
-						materials->release();
-						materials = nullptr;
+						materials.reset();
 					}
 				}
 				if (maxTriNormIndex >= normsRead)
 				{
 					if (normals)
 					{
-						normals->release();
-						normals = nullptr;
+						normals.reset();
 					}
 				}
 			}
@@ -1435,18 +1428,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 	// release shared structures
 	if (normals)
 	{
-		normals->release();
-		normals = nullptr;
+		normals.reset();
 	}
 	if (texCoords)
 	{
-		texCoords->release();
-		texCoords = nullptr;
+		texCoords.reset();
 	}
 	if (materials)
 	{
-		materials->release();
-		materials = nullptr;
+		materials.reset();
 	}
 
 	if (pDlg)

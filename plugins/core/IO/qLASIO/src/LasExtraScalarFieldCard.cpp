@@ -257,7 +257,7 @@ bool LasExtraScalarFieldCard::fillField(LasExtraScalarField& field, const ccPoin
 			ccLog::Warning("Failed to retrieve scalar field named '%s'", sfName.c_str());
 			return false;
 		}
-		field.scalarFields[i] = static_cast<ccScalarField*>(pointCloud.getScalarField(sfIndex));
+		field.scalarFields[i] = pointCloud.getCCScalarField(sfIndex);
 	}
 
 	return true;

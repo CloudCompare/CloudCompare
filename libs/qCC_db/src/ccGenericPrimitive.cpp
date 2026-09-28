@@ -115,27 +115,25 @@ const ccGenericPrimitive& ccGenericPrimitive::operator+=(const ccGenericPrimitiv
 		// copy face normals
 		if (primHasFaceNorms)
 		{
-			const NormsIndexesTableType* primNorms = prim.getTriNormsTable();
+			const auto primNorms = prim.getTriNormsTable();
 			assert(primNorms);
 			unsigned primTriNormCount = primNorms->currentSize();
 
-			NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
-			if (!normsTable || !normsTable->reserveSafe(triFacesNormCount + primTriNormCount))
+			auto normsShared = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
+			if (!normsShared->reserveSafe(triFacesNormCount + primTriNormCount))
 			{
 				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
 				return *this;
 			}
 
-			// attach table if not done already
 			if (!m_triNormals)
 			{
-				setTriNormsTable(normsTable);
-				assert(m_triNormals);
+				setTriNormsTable(normsShared);
 			}
 
 			for (unsigned i = 0; i < primTriNormCount; ++i)
 			{
-				normsTable->addElement(primNorms->getValue(i));
+				normsShared->addElement(primNorms->getValue(i));
 			}
 		}
 
@@ -316,12 +314,11 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 
 	if (faceNormCounts)
 	{
-		NormsIndexesTableType* normsTable = (m_triNormals ? m_triNormals : new NormsIndexesTableType());
+		auto normsTable = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
 		if (!normsTable || !normsTable->reserveSafe(faceNormCounts) || !reservePerTriangleNormalIndexes())
 		{
 			verts->clear();
 			m_triVertIndexes->clear();
-			delete normsTable;
 			return false;
 		}
 
@@ -354,7 +351,7 @@ ccGenericPrimitive* ccGenericPrimitive::finishCloneJob(ccGenericPrimitive* primi
 		// primitive->setName(getName()+QString(".clone"));
 		primitive->setVisible(isVisible());
 		primitive->setEnabled(isEnabled());
-		primitive->importParametersFrom(this);
+		primitive->importParametersFrom(*this);
 	}
 	else
 	{

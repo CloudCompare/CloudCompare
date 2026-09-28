@@ -202,11 +202,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 			if (mesh->getAssociatedCloud())
 				dependencies.insert(mesh->getAssociatedCloud());
 			if (mesh->getMaterialSet())
-				dependencies.insert(mesh->getMaterialSet());
+				dependencies.insert(mesh->getMaterialSet().get());
+			if (mesh->getTriNormsTable())
+				dependencies.insert(mesh->getTriNormsTable().get());
 			if (mesh->getTexCoordinatesTable())
-				dependencies.insert(mesh->getTexCoordinatesTable());
-			if (mesh->getTexCoordinatesTable())
-				dependencies.insert(mesh->getTexCoordinatesTable());
+				dependencies.insert(mesh->getTexCoordinatesTable().get());
 		}
 		else if (currentObject->isA(CC_TYPES::SUB_MESH))
 		{
@@ -652,13 +652,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				{
 					// materials
 					ccHObject* materials = nullptr;
-					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet();
+					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet().get();
 					if (matSetID > 0)
 					{
 						materials = FindRobust(root, mesh, oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
 						if (materials)
 						{
-							mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials), false);
+							mesh->setMaterialSet(ccMaterialSet::Shared(static_cast<ccMaterialSet*>(materials)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -671,13 +671,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					}
 					// per-triangle normals
 					ccHObject* triNormsTable   = nullptr;
-					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable();
+					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable().get();
 					if (triNormsTableID > 0)
 					{
 						triNormsTable = FindRobust(root, mesh, oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
 						if (triNormsTable)
 						{
-							mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable), false);
+							mesh->setTriNormsTable(NormsIndexesTableType::Shared(static_cast<NormsIndexesTableType*>(triNormsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -690,13 +690,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					}
 					// per-triangle texture coordinates
 					ccHObject* texCoordsTable  = nullptr;
-					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
+					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable().get();
 					if (texCoordArrayID > 0)
 					{
 						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
 						if (texCoordsTable)
 						{
-							mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable), false);
+							mesh->setTexCoordinatesTable(TextureCoordsContainer::Shared(static_cast<TextureCoordsContainer*>(texCoordsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -1159,10 +1159,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 
 		// Creation
-		ccPointCloud*           loadedCloud   = new ccPointCloud(cloudName);
-		CCCoreLib::ScalarField* loadedCloudSF = nullptr;
+		ccPointCloud* loadedCloud = new ccPointCloud(cloudName);
 		if (!loadedCloud)
+		{
 			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
 
 		unsigned fileChunkPos  = 0;
 		unsigned fileChunkSize = std::min(nbOfPoints, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
@@ -1178,6 +1179,8 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			loadedCloud->reserveTheNormsTable();
 			loadedCloud->showNormals(true);
 		}
+
+		CCCoreLib::ScalarField::Shared loadedCloudSF;
 		if (header.scalarField)
 		{
 			if (loadedCloud->enableScalarField())

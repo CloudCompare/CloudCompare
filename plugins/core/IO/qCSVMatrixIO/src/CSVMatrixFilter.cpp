@@ -213,7 +213,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 			{
 				if (mesh)
 				{
-					TextureCoordsContainer* texCoords = new TextureCoordsContainer();
+					auto texCoords = std::make_shared<TextureCoordsContainer>();
 					if (texCoords->reserveSafe(cloud->size())
 					    && mesh->reservePerTriangleTexCoordIndexes()
 					    && mesh->reservePerTriangleMtlIndexes())
@@ -233,9 +233,9 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 						mesh->setTexCoordinatesTable(texCoords);
 
 						// create material
-						ccMaterial::Shared mat(new ccMaterial("texture"));
+						auto mat = std::make_shared<ccMaterial>("texture");
 						mat->setTexture(texture, filename, false);
-						ccMaterialSet* matSet = new ccMaterialSet("Materials");
+						auto matSet = std::make_shared<ccMaterialSet>("Materials");
 						matSet->push_back(mat);
 						mesh->setMaterialSet(matSet);
 
@@ -252,8 +252,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 					else
 					{
 						ccLog::Warning("[CSVMatrixFilter] Not enough memory to map the texture on the mesh!");
-						texCoords->release();
-						texCoords = nullptr;
+						texCoords.reset();
 					}
 				}
 				else

@@ -373,7 +373,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(ccRasterGrid& grid,
 		{
 			rasterCloud->showSF(true);
 			rasterCloud->setCurrentDisplayedScalarField(0);
-			ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+			auto sf = rasterCloud->getCCScalarField(0);
 			assert(sf);
 			sf->setName("Relative height");
 			sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
@@ -420,7 +420,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 			{
 				rasterCloud->showSF(true);
 				rasterCloud->setCurrentDisplayedScalarField(0);
-				ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+				auto sf = rasterCloud->getCCScalarField(0);
 				assert(sf);
 				sf->setName("Relative height");
 				sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);

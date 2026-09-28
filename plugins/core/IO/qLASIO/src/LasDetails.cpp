@@ -221,7 +221,7 @@ namespace LasDetails
 			int classificationIdx = cloud.getScalarFieldIndexByName(LasNames::Classification);
 			if (classificationIdx != -1)
 			{
-				const CCCoreLib::ScalarField* classification = cloud.getScalarField(classificationIdx);
+				auto classification = cloud.getScalarField(classificationIdx);
 				if (classification->getMax() > LasScalarField::ValueRange(LasScalarField::Classification).max)
 				{
 					isExtendedRequired = true;
@@ -231,7 +231,7 @@ namespace LasDetails
 			int returnNumberIdx = cloud.getScalarFieldIndexByName(LasNames::ReturnNumber);
 			if (returnNumberIdx != -1)
 			{
-				const CCCoreLib::ScalarField* returnNumber = cloud.getScalarField(returnNumberIdx);
+				auto returnNumber = cloud.getScalarField(returnNumberIdx);
 				if (returnNumber->getMax() > LasScalarField::ValueRange(LasScalarField::ReturnNumber).max)
 				{
 					isExtendedRequired = true;
@@ -241,7 +241,7 @@ namespace LasDetails
 			int numReturnsIdx = cloud.getScalarFieldIndexByName(LasNames::NumberOfReturns);
 			if (numReturnsIdx != -1)
 			{
-				const CCCoreLib::ScalarField* numReturns = cloud.getScalarField(numReturnsIdx);
+				auto numReturns = cloud.getScalarField(numReturnsIdx);
 				if (numReturns->getMax() > LasScalarField::ValueRange(LasScalarField::NumberOfReturns).max)
 				{
 					isExtendedRequired = true;

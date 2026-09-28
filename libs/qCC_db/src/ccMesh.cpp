@@ -22,13 +22,10 @@
 #include "../include/ccColorScalesManager.h"
 #include "../include/ccGLSLHelper.h"
 #include "../include/ccGenericGLDisplay.h"
-#include "../include/ccGenericPointCloud.h"
 #include "../include/ccHObjectCaster.h"
 #include "../include/ccIncludeGL.h"
-#include "../include/ccMaterialSet.h"
 #include "../include/ccNormalCompressor.h"
 #include "../include/ccNormalVectors.h"
-#include "../include/ccPointCloud.h"
 #include "../include/ccPolyline.h"
 #include "../include/ccProgressDialog.h"
 #include "../include/ccScalarField.h"
@@ -48,6 +45,8 @@
 // System
 #include <assert.h>
 #include <cmath> //for std::modf
+#include <cstdint>
+#include <memory>
 #include <string.h>
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
@@ -65,8 +64,7 @@ ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGen
 {
 	setAssociatedCloud(vertices);
 
-	m_triVertIndexes = new triangleIndexesContainer();
-	m_triVertIndexes->link();
+	m_triVertIndexes = std::make_shared<triangleIndexesContainer>();
 }
 
 ccMesh::ccMesh(CCCoreLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices)
@@ -84,8 +82,7 @@ ccMesh::ccMesh(CCCoreLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVer
 {
 	setAssociatedCloud(giVertices);
 
-	m_triVertIndexes = new triangleIndexesContainer();
-	m_triVertIndexes->link();
+	m_triVertIndexes = std::make_shared<triangleIndexesContainer>();
 
 	if (!giVertices || !giMesh)
 	{
@@ -118,15 +115,6 @@ ccMesh::~ccMesh()
 	clearTriNormals();
 	setMaterialSet(nullptr);
 	setTexCoordinatesTable(nullptr);
-
-	if (m_triVertIndexes)
-		m_triVertIndexes->release();
-	if (m_texCoordIndexes)
-		m_texCoordIndexes->release();
-	if (m_triMtlIndexes)
-		m_triMtlIndexes->release();
-	if (m_triNormalIndexes)
-		m_triNormalIndexes->release();
 }
 
 void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud, bool autoRemoveFlags /*=true*/)
@@ -292,14 +280,13 @@ bool ccMesh::computePerTriangleNormals()
 		return false;
 	}
 
-	NormsIndexesTableType* normIndexes = getTriNormsTable();
+	NormsIndexesTableType::Shared normIndexes = getTriNormsTable();
 	if (!normIndexes || normIndexes->size() < triCount) // warning: the previous table size may not be big enough!
 	{
 		// we need to instantiate the set of normal indexes
-		normIndexes = new NormsIndexesTableType();
+		normIndexes = std::make_shared<NormsIndexesTableType>();
 		if (!normIndexes->resizeSafe(triCount))
 		{
-			normIndexes->release();
 			ccLog::Warning("[ccMesh::computePerTriangleNormals] Not enough memory!");
 			return false;
 		}
@@ -436,27 +423,25 @@ bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	return true;
 }
 
-void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable /*=true*/)
+void ccMesh::setTriNormsTable(NormsIndexesTableType::Shared triNormsTable, bool autoReleaseOldTable /*=true*/)
 {
 	if (m_triNormals == triNormsTable)
 		return;
 
 	if (m_triNormals && autoReleaseOldTable)
 	{
-		int childIndex = getChildIndex(m_triNormals);
-		m_triNormals->release();
-		m_triNormals = nullptr;
+		int childIndex = getChildIndex(m_triNormals.get());
 		if (childIndex >= 0)
-			removeChild(childIndex);
+			detachChild(m_triNormals.get());
+		m_triNormals.reset();
 	}
 
 	m_triNormals = triNormsTable;
 	if (m_triNormals)
 	{
-		m_triNormals->link();
-		int childIndex = getChildIndex(m_triNormals);
+		int childIndex = getChildIndex(m_triNormals.get());
 		if (childIndex < 0)
-			addChild(m_triNormals);
+			addChild(m_triNormals.get());
 	}
 	else
 	{
@@ -464,27 +449,25 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoRel
 	}
 }
 
-void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet /*=true*/)
+void ccMesh::setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseOldMaterialSet /*=true*/)
 {
 	if (m_materials == materialSet)
 		return;
 
 	if (m_materials && autoReleaseOldMaterialSet)
 	{
-		int childIndex = getChildIndex(m_materials);
-		m_materials->release();
-		m_materials = nullptr;
+		int childIndex = getChildIndex(m_materials.get());
 		if (childIndex >= 0)
 			removeChild(childIndex);
+		m_materials.reset();
 	}
 
 	m_materials = materialSet;
 	if (m_materials)
 	{
-		m_materials->link();
-		int childIndex = getChildIndex(m_materials);
+		int childIndex = getChildIndex(m_materials.get());
 		if (childIndex < 0)
-			addChild(m_materials);
+			addChild(m_materials.get());
 	}
 	else
 	{
@@ -671,10 +654,10 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 	return true;
 }
 
-ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*    vertices /*=nullptr*/,
-                          ccMaterialSet*          clonedMaterials /*=nullptr*/,
-                          NormsIndexesTableType*  clonedNormsTable /*=nullptr*/,
-                          TextureCoordsContainer* cloneTexCoords /*=nullptr*/)
+ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,
+                          ccMaterialSet::Shared          clonedMaterials /*=nullptr*/,
+                          NormsIndexesTableType::Shared  clonedNormsTable /*=nullptr*/,
+                          TextureCoordsContainer::Shared cloneTexCoords /*=nullptr*/)
 {
 	assert(m_associatedCloud);
 
@@ -804,9 +787,7 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*    vertices /*=nullptr*/,
 			if (!clonedNormsTable)
 			{
 				clonedNormsTable = m_triNormals->clone(); // TODO: keep only what's necessary!
-				if (clonedNormsTable)
-					cloneMesh->addChild(clonedNormsTable);
-				else
+				if (!clonedNormsTable)
 				{
 					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone per-triangle normals!");
 					cloneMesh->removePerTriangleNormalIndexes(); // don't need this anymore!
@@ -836,7 +817,7 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*    vertices /*=nullptr*/,
 				clonedMaterials = getMaterialSet()->clone(); // TODO: keep only what's necessary!
 				if (clonedMaterials)
 				{
-					cloneMesh->addChild(clonedMaterials);
+					cloneMesh->addChild(clonedMaterials.get());
 				}
 				else
 				{
@@ -907,7 +888,7 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*    vertices /*=nullptr*/,
 	cloneMesh->showMaterials(materialsShown());
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
-	cloneMesh->importParametersFrom(this);
+	cloneMesh->importParametersFrom(*this);
 
 	// clone some children
 	ccHObjectCaster::CloneChildren(this, cloneMesh);
@@ -1276,7 +1257,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					// reserve mem for triangle normals
 					if (!m_triNormals)
 					{
-						NormsIndexesTableType* normsTable = new NormsIndexesTableType();
+						auto normsTable = std::make_shared<NormsIndexesTableType>();
 						setTriNormsTable(normsTable);
 					}
 					assert(m_triNormals);
@@ -1335,7 +1316,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					// reserve mem for materials
 					if (!m_materials)
 					{
-						ccMaterialSet* set = new ccMaterialSet("materials");
+						auto set = ccMaterialSet::Shared(new ccMaterialSet("materials"));
 						setMaterialSet(set);
 					}
 					assert(m_materials);
@@ -1398,7 +1379,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					// reserve mem for triangle normals
 					if (!m_texCoords)
 					{
-						TextureCoordsContainer* texCoordsTable = new TextureCoordsContainer;
+						auto texCoordsTable = std::make_shared<TextureCoordsContainer>();
 						setTexCoordinatesTable(texCoordsTable);
 					}
 					assert(m_texCoords);
@@ -1845,9 +1826,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	bool lightIsEnabled     = false;
 
 	// in the case we need to display scalar field colors (this can also impact the entity picking mode)
-	ccScalarField*       currentDisplayedScalarField = nullptr;
-	bool                 sfMayHaveHiddenValues       = false;
-	ccColorScale::Shared colorScale(nullptr);
+	ccScalarField::Shared currentDisplayedScalarField;
+	bool                  sfMayHaveHiddenValues = false;
+	ccColorScale::Shared  colorScale;
 
 	if (glParams.showSF)
 	{
@@ -2014,8 +1995,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	// in the case we need normals (i.e. lighting)
-	NormsIndexesTableType* normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
-	ccNormalVectors*       compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
+	auto             normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
+	ccNormalVectors* compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
 
 	// stipple mask
 	bool stippling = (m_stippling && !entityPickingMode);
@@ -2689,14 +2670,13 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 		if (addFeatures)
 		{
 			// temporary structure for normal indexes mapping
-			std::vector<int>       newNormIndexes;
-			NormsIndexesTableType* newTriNormals = nullptr;
+			std::vector<int>              newNormIndexes;
+			NormsIndexesTableType::Shared newTriNormals;
 			if (m_triNormals && m_triNormalIndexes)
 			{
 				assert(m_triNormalIndexes->size() == triCount);
 				// create new 'minimal' subset
-				newTriNormals = new NormsIndexesTableType();
-				newTriNormals->link();
+				newTriNormals = std::make_shared<NormsIndexesTableType>();
 				try
 				{
 					newNormIndexes.resize(m_triNormals->size(), -1);
@@ -2705,20 +2685,18 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				{
 					ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 					newMesh->removePerTriangleNormalIndexes();
-					newTriNormals->release();
-					newTriNormals = nullptr;
+					newTriNormals.reset();
 				}
 			}
 
 			// temporary structure for texture indexes mapping
-			std::vector<int>        newTexIndexes;
-			TextureCoordsContainer* newTriTexIndexes = nullptr;
+			std::vector<int>               newTexIndexes;
+			TextureCoordsContainer::Shared newTriTexIndexes;
 			if (m_texCoords && m_texCoordIndexes)
 			{
 				assert(m_texCoordIndexes->size() == triCount);
 				// create new 'minimal' subset
-				newTriTexIndexes = new TextureCoordsContainer();
-				newTriTexIndexes->link();
+				newTriTexIndexes = std::make_shared<TextureCoordsContainer>();
 				try
 				{
 					newTexIndexes.resize(m_texCoords->size(), -1);
@@ -2727,20 +2705,18 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				{
 					ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new texture indexes subset! (not enough memory)");
 					newMesh->removePerTriangleTexCoordIndexes();
-					newTriTexIndexes->release();
-					newTriTexIndexes = nullptr;
+					newTriTexIndexes.reset();
 				}
 			}
 
 			// temporary structure for material indexes mapping
-			std::vector<int> newMatIndexes;
-			ccMaterialSet*   newMaterials = nullptr;
+			std::vector<int>      newMatIndexes;
+			ccMaterialSet::Shared newMaterials;
 			if (m_materials && m_triMtlIndexes)
 			{
 				assert(m_triMtlIndexes->size() == triCount);
 				// create new 'minimal' subset
-				newMaterials = new ccMaterialSet(m_materials->getName() + QString(".subset"));
-				newMaterials->link();
+				newMaterials = std::make_shared<ccMaterialSet>(m_materials->getName() + QString(".subset"));
 				try
 				{
 					newMatIndexes.resize(m_materials->size(), -1);
@@ -2749,13 +2725,11 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 				{
 					ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new material subset! (not enough memory)");
 					newMesh->removePerTriangleMtlIndexes();
-					newMaterials->release();
-					newMaterials = nullptr;
+					newMaterials.reset();
 					if (newTriTexIndexes) // we can release texture coordinates as well (as they depend on materials!)
 					{
 						newMesh->removePerTriangleTexCoordIndexes();
-						newTriTexIndexes->release();
-						newTriTexIndexes = nullptr;
+						newTriTexIndexes.reset();
 						newTexIndexes.resize(0);
 					}
 				}
@@ -2784,8 +2758,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 								{
 									ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new normals subset! (not enough memory)");
 									newMesh->removePerTriangleNormalIndexes();
-									newTriNormals->release();
-									newTriNormals = nullptr;
+									newTriNormals.reset();
 									break;
 								}
 
@@ -2822,8 +2795,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 								{
 									ccLog::Warning("Failed to create new texture coordinates subset! (not enough memory)");
 									newMesh->removePerTriangleTexCoordIndexes();
-									newTriTexIndexes->release();
-									newTriTexIndexes = nullptr;
+									newTriTexIndexes.reset();
 									break;
 								}
 								// import old texture coordinate to new subset (create new index)
@@ -2862,8 +2834,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 							{
 								ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create new materials subset! (not enough memory)");
 								newMesh->removePerTriangleMtlIndexes();
-								newMaterials->release();
-								newMaterials = nullptr;
+								newMaterials.reset();
 							}
 						}
 
@@ -2879,22 +2850,19 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			{
 				newTriNormals->resize(newTriNormals->size()); // smaller so it should always be ok!
 				newMesh->setTriNormsTable(newTriNormals);
-				newTriNormals->release();
-				newTriNormals = nullptr;
+				newTriNormals.reset();
 			}
 
 			if (newTriTexIndexes)
 			{
 				newMesh->setTexCoordinatesTable(newTriTexIndexes);
-				newTriTexIndexes->release();
-				newTriTexIndexes = nullptr;
+				newTriTexIndexes.reset();
 			}
 
 			if (newMaterials)
 			{
 				newMesh->setMaterialSet(newMaterials);
-				newMaterials->release();
-				newMaterials = nullptr;
+				newMaterials.reset();
 			}
 		}
 
@@ -2903,7 +2871,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 		newMesh->showNormals(normalsShown());
 		newMesh->showMaterials(materialsShown());
 		newMesh->showSF(sfShown());
-		newMesh->importParametersFrom(this);
+		newMesh->importParametersFrom(*this);
 	}
 
 	// we must update eventual sub-meshes
@@ -3118,9 +3086,7 @@ bool ccMesh::arePerTriangleNormalsEnabled() const
 
 void ccMesh::removePerTriangleNormalIndexes()
 {
-	if (m_triNormalIndexes)
-		m_triNormalIndexes->release();
-	m_triNormalIndexes = nullptr;
+	m_triNormalIndexes.reset();
 }
 
 bool ccMesh::reservePerTriangleNormalIndexes()
@@ -3128,8 +3094,7 @@ bool ccMesh::reservePerTriangleNormalIndexes()
 	assert(!m_triNormalIndexes); // try to avoid doing this twice!
 	if (!m_triNormalIndexes)
 	{
-		m_triNormalIndexes = new triangleNormalsIndexesSet();
-		m_triNormalIndexes->link();
+		m_triNormalIndexes = std::make_shared<triangleNormalsIndexesSet>();
 	}
 
 	assert(m_triVertIndexes && m_triVertIndexes->isAllocated());
@@ -3224,27 +3189,29 @@ bool ccMesh::hasTriNormals() const
 /************    PER-TRIANGLE TEX COORDS    **************/
 /*********************************************************/
 
-void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable /*=true*/)
+void ccMesh::setTexCoordinatesTable(TextureCoordsContainer::Shared texCoordsTable, bool autoReleaseOldTable /*=true*/)
 {
 	if (m_texCoords == texCoordsTable)
 		return;
 
 	if (m_texCoords && autoReleaseOldTable)
 	{
-		int childIndex = getChildIndex(m_texCoords);
-		m_texCoords->release();
-		m_texCoords = nullptr;
+		int childIndex = getChildIndex(m_texCoords.get());
 		if (childIndex >= 0)
+		{
 			removeChild(childIndex);
+		}
+		m_texCoords.reset();
 	}
 
 	m_texCoords = texCoordsTable;
 	if (m_texCoords)
 	{
-		m_texCoords->link();
-		int childIndex = getChildIndex(m_texCoords);
+		int childIndex = getChildIndex(m_texCoords.get());
 		if (childIndex < 0)
-			addChild(m_texCoords);
+		{
+			addChild(m_texCoords.get());
+		}
 	}
 	else
 	{
@@ -3272,8 +3239,7 @@ bool ccMesh::reservePerTriangleTexCoordIndexes()
 	assert(!m_texCoordIndexes); // try to avoid doing this twice!
 	if (!m_texCoordIndexes)
 	{
-		m_texCoordIndexes = new triangleTexCoordIndexesSet();
-		m_texCoordIndexes->link();
+		m_texCoordIndexes = std::make_shared<triangleTexCoordIndexesSet>();
 	}
 
 	assert(m_triVertIndexes && m_triVertIndexes->isAllocated());
@@ -3283,11 +3249,7 @@ bool ccMesh::reservePerTriangleTexCoordIndexes()
 
 void ccMesh::removePerTriangleTexCoordIndexes()
 {
-	triangleTexCoordIndexesSet* texCoordIndexes = m_texCoordIndexes;
-	m_texCoordIndexes                           = nullptr;
-
-	if (texCoordIndexes)
-		texCoordIndexes->release();
+	m_texCoordIndexes.reset();
 }
 
 void ccMesh::addTriangleTexCoordIndexes(int i1, int i2, int i3)
@@ -3326,22 +3288,19 @@ bool ccMesh::hasMaterials() const
 	return m_materials && !m_materials->empty() && m_triMtlIndexes && (m_triMtlIndexes->size() == m_triVertIndexes->size());
 }
 
-void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet* matIndexesTable, bool autoReleaseOldTable /*=true*/)
+void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet::Shared matIndexesTable, bool autoReleaseOldTable /*=true*/)
 {
 	if (m_triMtlIndexes == matIndexesTable)
+	{
 		return;
+	}
 
 	if (m_triMtlIndexes && autoReleaseOldTable)
 	{
-		m_triMtlIndexes->release();
-		m_triMtlIndexes = nullptr;
+		m_triMtlIndexes.reset();
 	}
 
 	m_triMtlIndexes = matIndexesTable;
-	if (m_triMtlIndexes)
-	{
-		m_triMtlIndexes->link();
-	}
 	m_hasUniqueMaterial.reset(); // we don't know if the new table has a unique material or not
 }
 
@@ -3350,8 +3309,7 @@ bool ccMesh::reservePerTriangleMtlIndexes()
 	assert(!m_triMtlIndexes); // try to avoid doing this twice!
 	if (!m_triMtlIndexes)
 	{
-		m_triMtlIndexes = new triangleMaterialIndexesSet();
-		m_triMtlIndexes->link();
+		m_triMtlIndexes = std::make_shared<triangleMaterialIndexesSet>();
 	}
 
 	assert(m_triVertIndexes && m_triVertIndexes->isAllocated());
@@ -3361,9 +3319,7 @@ bool ccMesh::reservePerTriangleMtlIndexes()
 
 void ccMesh::removePerTriangleMtlIndexes()
 {
-	if (m_triMtlIndexes)
-		m_triMtlIndexes->release();
-	m_triMtlIndexes = nullptr;
+	m_triMtlIndexes.reset();
 	m_hasUniqueMaterial.reset();
 }
 
@@ -3510,8 +3466,12 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_triNormals' pointer!!!
-		*(uint32_t*)(&m_triNormals) = normArrayID;
+		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
+		if (normArrayID != 0)
+		{
+			m_triNormals = NormsIndexesTableType::Shared(reinterpret_cast<NormsIndexesTableType*>(static_cast<uintptr_t>(normArrayID)),
+			                                             [](NormsIndexesTableType*) {});
+		}
 	}
 
 	// texture coordinates array (dataVersion>=20)
@@ -3524,8 +3484,12 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_texCoords' pointer!!!
-		*(uint32_t*)(&m_texCoords) = texCoordArrayID;
+		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
+		if (texCoordArrayID != 0)
+		{
+			m_texCoords = TextureCoordsContainer::Shared(reinterpret_cast<TextureCoordsContainer*>(static_cast<uintptr_t>(texCoordArrayID)),
+			                                             [](TextureCoordsContainer*) {});
+		}
 	}
 
 	// materials
@@ -3538,8 +3502,12 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_materials' pointer!!!
-		*(uint32_t*)(&m_materials) = matSetID;
+		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
+		if (matSetID != 0)
+		{
+			m_materials = ccMaterialSet::Shared(reinterpret_cast<ccMaterialSet*>(static_cast<uintptr_t>(matSetID)),
+			                                    [](ccMaterialSet*) {});
+		}
 	}
 
 	// triangles indexes (dataVersion>=20)
@@ -3562,13 +3530,11 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	{
 		if (!m_triMtlIndexes)
 		{
-			m_triMtlIndexes = new triangleMaterialIndexesSet();
-			m_triMtlIndexes->link();
+			m_triMtlIndexes = std::make_shared<triangleMaterialIndexesSet>();
 		}
 		if (!ccSerializationHelper::GenericArrayFromFile<int, 1, int>(*m_triMtlIndexes, in, dataVersion, "material indexes"))
 		{
-			m_triMtlIndexes->release();
-			m_triMtlIndexes = nullptr;
+			m_triMtlIndexes.reset();
 			return false;
 		}
 		m_hasUniqueMaterial.reset();
@@ -3584,13 +3550,11 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	{
 		if (!m_texCoordIndexes)
 		{
-			m_texCoordIndexes = new triangleTexCoordIndexesSet();
-			m_texCoordIndexes->link();
+			m_texCoordIndexes = std::make_shared<triangleTexCoordIndexesSet>();
 		}
 		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_texCoordIndexes, in, dataVersion, "texture coordinates"))
 		{
-			m_texCoordIndexes->release();
-			m_texCoordIndexes = nullptr;
+			m_texCoordIndexes.reset();
 			return false;
 		}
 	}
@@ -3616,8 +3580,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMa
 	{
 		if (!m_triNormalIndexes)
 		{
-			m_triNormalIndexes = new triangleNormalsIndexesSet();
-			m_triNormalIndexes->link();
+			m_triNormalIndexes = std::make_shared<triangleNormalsIndexesSet>();
 		}
 		assert(m_triNormalIndexes);
 		if (!ccSerializationHelper::GenericArrayFromFile<Tuple3i, 3, int>(*m_triNormalIndexes, in, dataVersion, "normal indexes"))

@@ -48,29 +48,29 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	}
 
 	// inherited methods (ccGenericMesh)
-	ccGenericPointCloud*    getAssociatedCloud() const override;
-	void                    refreshBB() override;
-	bool                    interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
-	bool                    interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
-	bool                    interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
-	bool                    interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
-	bool                    interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
-	bool                    getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
-	bool                    getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
-	bool                    hasMaterials() const override;
-	const ccMaterialSet*    getMaterialSet() const override;
-	int                     getTriangleMtlIndex(unsigned triangleIndex) const override;
-	bool                    hasTextures() const override;
-	TextureCoordsContainer* getTexCoordinatesTable() const override;
-	void                    getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override;
-	bool                    hasPerTriangleTexCoordIndexes() const override;
-	void                    getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	bool                    hasTriNormals() const override;
-	void                    getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	bool                    getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
-	NormsIndexesTableType*  getTriNormsTable() const override;
-	unsigned                capacity() const override;
-	void                    setGlobalShift(const CCVector3d& shift) override
+	ccGenericPointCloud*           getAssociatedCloud() const override;
+	void                           refreshBB() override;
+	bool                           interpolateNormalsBC(unsigned triIndex, const CCVector3d& w, CCVector3& N) override;
+	bool                           interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgb& color) override;
+	bool                           interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgb& color) override;
+	bool                           interpolateColors(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color) override;
+	bool                           interpolateColorsBC(unsigned triIndex, const CCVector3d& w, ccColor::Rgba& color) override;
+	bool                           getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
+	bool                           getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
+	bool                           hasMaterials() const override;
+	const ccMaterialSet::Shared    getMaterialSet() const override;
+	int                            getTriangleMtlIndex(unsigned triangleIndex) const override;
+	bool                           hasTextures() const override;
+	TextureCoordsContainer::Shared getTexCoordinatesTable() const override;
+	void                           getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override;
+	bool                           hasPerTriangleTexCoordIndexes() const override;
+	void                           getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	bool                           hasTriNormals() const override;
+	void                           getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
+	bool                           getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
+	NormsIndexesTableType::Shared  getTriNormsTable() const override;
+	unsigned                       capacity() const override;
+	void                           setGlobalShift(const CCVector3d& shift) override
 	{ /* this method shouldn't be called on ccSubMesh instances */
 		assert(false);
 	}

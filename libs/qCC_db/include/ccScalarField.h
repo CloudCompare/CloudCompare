@@ -30,6 +30,21 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
     , public ccSerializableObject
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ccScalarField>;
+
+	//! Returns a CCCoreLib shared pointer from the given CC scalar field
+	static CCCoreLib::ScalarField::Shared ToCCCoreLibShared(Shared ptr)
+	{
+		return std::static_pointer_cast<CCCoreLib::ScalarField, ccScalarField>(ptr);
+	}
+
+	//! Returns a CC shared pointer from the given CCCoreLib scalar field
+	static Shared FromCCCoreLibShared(CCCoreLib::ScalarField::Shared ptr)
+	{
+		return std::static_pointer_cast<ccScalarField, CCCoreLib::ScalarField>(ptr);
+	}
+
 	//! Default constructor
 	/** \param name scalar field name
 	 **/
@@ -40,6 +55,9 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	    \warning May throw a std::bad_alloc exception
 	**/
 	ccScalarField(const ccScalarField& sf);
+
+	//! Default destructor
+	~ccScalarField() override = default;
 
 	/*** Scalar values display handling ***/
 
@@ -288,7 +306,7 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	}
 
 	//! Imports the parameters from another scalar field
-	void importParametersFrom(const ccScalarField* sf);
+	void importParametersFrom(const ccScalarField& sf);
 
 	// inherited from ccSerializableObject
 	inline bool isSerializable() const override
@@ -306,11 +324,6 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	}
 
   protected: // methods
-	//! Default destructor
-	/** Call release instead
-	 **/
-	~ccScalarField() override = default;
-
 	//! Updates saturation values
 	void updateSaturationBounds();
 

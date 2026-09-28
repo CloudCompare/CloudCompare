@@ -2194,7 +2194,7 @@ void ccCompass::estimateStructureNormals()
 						int thickSF_sample_idx = samples[r]->addScalarField(thickSF_sample);
 						samples[r]->setCurrentDisplayedScalarField(thickSF_sample_idx);
 
-						idSF_sample =std::make_shared<ccScalarField>("PointID");
+						idSF_sample = std::make_shared<ccScalarField>("PointID");
 						idSF_sample->reserve(samples[r]->size());
 						samples[r]->addScalarField(idSF_sample);
 

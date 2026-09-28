@@ -282,7 +282,7 @@ bool ccTrace::optimizePath(int maxIterations)
 	}
 
 	#ifdef DEBUG_PATH
-	CCCoreLib::ScalarField * f = m_cloud->getScalarField(idx);
+	auto f = m_cloud->getScalarField(idx);
 	f->computeMinAndMax();
 	#endif
 

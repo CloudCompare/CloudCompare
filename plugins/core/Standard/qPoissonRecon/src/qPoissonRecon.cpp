@@ -453,6 +453,7 @@ void qPoissonRecon::doAction()
 		s_cloud = nullptr;
 		s_mesh = nullptr;
 		s_meshVertices = nullptr;
+		s_densitySF.reset();
 
 		pDlg.hide();
 		QApplication::processEvents();

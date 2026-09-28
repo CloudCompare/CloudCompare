@@ -916,7 +916,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 						rectMesh->addChild(rectVertices);
 
 						// materials (=textures)
-						ccMaterialSet* matSet = new ccMaterialSet("Texture");
+						auto matSet = std::make_shared<ccMaterialSet>("Texture");
 
 						// texture coordinates table
 						auto texCoords = std::make_shared<TextureCoordsContainer>();

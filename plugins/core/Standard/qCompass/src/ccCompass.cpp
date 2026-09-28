@@ -2193,12 +2193,9 @@ void ccCompass::estimateStructureNormals()
 						thickSF_sample->reserve(samples[r]->size());
 						int thickSF_sample_idx = samples[r]->addScalarField(thickSF_sample);
 						samples[r]->setCurrentDisplayedScalarField(thickSF_sample_idx);
-
-						idSF_sample = std::make_shared<ccScalarField>("PointID");
-						idSF_sample->reserve(samples[r]->size());
-						samples[r]->addScalarField(idSF_sample);
-
 						samples[r]->showSF(true);
+
+						idSF_sample = samples[r]->getCCScalarField(samples[r]->getScalarFieldIndexByName("PointID"));
 					}
 
 					//figure out id of the compared surface (opposite to the current one)
@@ -2243,7 +2240,7 @@ void ccCompass::estimateStructureNormals()
 						{
 							thickSF->setValue(p, -1.0);
 
-							if (samples[r] != nullptr)
+							if (samples[r] != nullptr && idSF_sample && thickSF_sample)
 							{
 								for (unsigned s = 0; s < samples[r]->size(); s++)
 								{
@@ -2274,7 +2271,7 @@ void ccCompass::estimateStructureNormals()
 						points[r]->setPointNormal(p, points[r]->getPointNormal(p) * (d / std::abs(d)));
 
 						//if samples have been generated, also calculate thicknesses for matching sets of points
-						if (samples[r] != nullptr)
+						if (samples[r] != nullptr && idSF_sample && thickSF_sample)
 						{
 							for (unsigned s = 0; s < samples[r]->size(); s++)
 							{
@@ -2553,10 +2550,10 @@ void ccCompass::estimateStrain()
 							if (s != nullptr)
 							{
 								//check that a thickness scalar field exists
-								int thickSF = s->getScalarFieldIndexByName("Thickness");
-								if (thickSF != -1)
+								int thickSFIdx = s->getScalarFieldIndexByName("Thickness");
+								if (thickSFIdx != -1)
 								{
-									s->setCurrentOutScalarField(thickSF);
+									s->setCurrentOutScalarField(thickSFIdx);
 									int region = ccGeoObject::getGeoObjectRegion(s);
 									if (!(region == ccGeoObject::LOWER_BOUNDARY || region == ccGeoObject::UPPER_BOUNDARY))
 									{

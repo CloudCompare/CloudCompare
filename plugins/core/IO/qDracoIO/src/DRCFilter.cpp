@@ -234,7 +234,7 @@ static CC_FILE_ERROR CCMeshToDraco(ccGenericMesh& ccMesh, draco::Mesh& dracoMesh
 
 #if 0 // DGM: useless without a texture!
 	// save texture coordinates
-	TextureCoordsContainer* texCoords = ccMesh.getTexCoordinatesTable();
+	auto texCoords = ccMesh.getTexCoordinatesTable();
 	unsigned vertexCount = vertices->size();
 	if (texCoords && texCoords->size() == vertexCount)
 	{
@@ -480,7 +480,7 @@ static CC_FILE_ERROR LoadCloud(ccPointCloud& ccCloud, const draco::PointCloud& d
 	    && (sfAttribute->data_type() == draco::DataType::DT_FLOAT32)
 	    && (sfAttribute->size() == pointCount))
 	{
-		ccScalarField* sf = new ccScalarField();
+		auto sf = std::make_shared<ccScalarField>();
 		if (sf->reserveSafe(pointCount))
 		{
 			for (draco::AttributeValueIndex i(0); i < static_cast<uint32_t>(sfAttribute->size()); ++i)

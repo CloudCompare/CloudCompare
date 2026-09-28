@@ -252,7 +252,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	}
 
 	// texture coordinates
-	TextureCoordsContainer::Shared texCoords = quadMesh->getTexCoordinatesTable();
+	auto texCoords = quadMesh->getTexCoordinatesTable();
 	if (!texCoords)
 	{
 		texCoords = std::make_shared<TextureCoordsContainer>();
@@ -313,12 +313,12 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	{
 		quadMesh->setMaterialSet(std::make_shared<ccMaterialSet>());
 	}
-	ccMaterialSet::Shared materialSet = quadMesh->getMaterialSet();
+	auto materialSet = quadMesh->getMaterialSet();
 	assert(materialSet);
 	// remove old materials (if any)
 	materialSet->clear();
 	// add new material
-	ccMaterial::Shared material(new ccMaterial("texture"));
+	auto material = std::make_shared<ccMaterial>("texture");
 	material->setTexture(image, imageFilename, false);
 	materialSet->addMaterial(material);
 

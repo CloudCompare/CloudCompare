@@ -439,7 +439,7 @@ ccHObject* qFacets::ExecuteFacetExtraction(ccPointCloud*                       p
 		}
 		else
 		{
-			ccScalarField::Shared indexSF = pc->getCCScalarField(sfIdx);
+			auto indexSF = pc->getCCScalarField(sfIdx);
 			if (!indexSF)
 			{
 				assert(false);

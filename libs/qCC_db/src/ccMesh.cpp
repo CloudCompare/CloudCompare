@@ -287,7 +287,6 @@ bool ccMesh::computePerTriangleNormals()
 		normIndexes = std::make_shared<NormsIndexesTableType>();
 		if (!normIndexes->resizeSafe(triCount))
 		{
-			normIndexes.reset();
 			ccLog::Warning("[ccMesh::computePerTriangleNormals] Not enough memory!");
 			return false;
 		}
@@ -437,7 +436,7 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType::Shared triNormsTable, bool 
 		m_triNormals.reset();
 	}
 
-	m_triNormals = std::move(triNormsTable);
+	m_triNormals = triNormsTable;
 	if (m_triNormals)
 	{
 		int childIndex = getChildIndex(m_triNormals.get());
@@ -459,11 +458,11 @@ void ccMesh::setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseO
 	{
 		int childIndex = getChildIndex(m_materials.get());
 		if (childIndex >= 0)
-			detachChild(m_materials.get());
+			removeChild(childIndex);
 		m_materials.reset();
 	}
 
-	m_materials = std::move(materialSet);
+	m_materials = materialSet;
 	if (m_materials)
 	{
 		int childIndex = getChildIndex(m_materials.get());
@@ -815,8 +814,12 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,
 			// 2nd: clone the main array if not already done
 			if (!clonedMaterials)
 			{
-				clonedMaterials = ccMaterialSet::Shared(getMaterialSet()->clone()); // TODO: keep only what's necessary!
-				if (!clonedMaterials)
+				clonedMaterials = getMaterialSet()->clone(); // TODO: keep only what's necessary!
+				if (clonedMaterials)
+				{
+					cloneMesh->addChild(clonedMaterials.get(), DP_NONE);
+				}
+				else
 				{
 					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone materials set!");
 					cloneMesh->removePerTriangleMtlIndexes(); // don't need this anymore!
@@ -1992,8 +1995,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	// in the case we need normals (i.e. lighting)
-	NormsIndexesTableType::Shared normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
-	ccNormalVectors*              compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
+	auto             normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
+	ccNormalVectors* compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
 
 	// stipple mask
 	bool stippling = (m_stippling && !entityPickingMode);
@@ -2713,7 +2716,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			{
 				assert(m_triMtlIndexes->size() == triCount);
 				// create new 'minimal' subset
-				newMaterials = ccMaterialSet::Shared(new ccMaterialSet(m_materials->getName() + QString(".subset")));
+				newMaterials = std::make_shared<ccMaterialSet>(m_materials->getName() + QString(".subset"));
 				try
 				{
 					newMatIndexes.resize(m_materials->size(), -1);
@@ -3195,16 +3198,20 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer::Shared texCoordsTabl
 	{
 		int childIndex = getChildIndex(m_texCoords.get());
 		if (childIndex >= 0)
-			detachChild(m_texCoords.get());
+		{
+			removeChild(childIndex);
+		}
 		m_texCoords.reset();
 	}
 
-	m_texCoords = std::move(texCoordsTable);
+	m_texCoords = texCoordsTable;
 	if (m_texCoords)
 	{
 		int childIndex = getChildIndex(m_texCoords.get());
 		if (childIndex < 0)
+		{
 			addChild(m_texCoords.get(), DP_NONE);
+		}
 	}
 	else
 	{
@@ -3284,14 +3291,16 @@ bool ccMesh::hasMaterials() const
 void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet::Shared matIndexesTable, bool autoReleaseOldTable /*=true*/)
 {
 	if (m_triMtlIndexes == matIndexesTable)
+	{
 		return;
+	}
 
 	if (m_triMtlIndexes && autoReleaseOldTable)
 	{
 		m_triMtlIndexes.reset();
 	}
 
-	m_triMtlIndexes = std::move(matIndexesTable);
+	m_triMtlIndexes = matIndexesTable;
 	m_hasUniqueMaterial.reset(); // we don't know if the new table has a unique material or not
 }
 

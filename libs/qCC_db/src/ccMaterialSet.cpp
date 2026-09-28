@@ -92,7 +92,7 @@ int ccMaterialSet::addMaterial(ccMaterial::CShared mtl, bool allowDuplicateNames
 					if (findMaterialByName(newMtlName) < 0)
 					{
 						// we duplicate the material and we change its name
-						ccMaterial::Shared newMtl(new ccMaterial(*mtl));
+						auto newMtl = std::make_shared<ccMaterial>(*mtl);
 						newMtl->setName(newMtlName);
 						mtl = newMtl;
 						break;
@@ -165,7 +165,7 @@ bool ccMaterialSet::ParseMTL(const QString& path, const QString& filename, ccMat
 			QString materialName = currentLine.mid(7).trimmed(); // we must take the whole line! (see OBJ filter)
 			if (materialName.isEmpty())
 				materialName = "undefined";
-			currentMaterial = ccMaterial::Shared(new ccMaterial(materialName));
+			currentMaterial = std::make_shared<ccMaterial>(materialName);
 		}
 		else if (currentMaterial) // we already have a "current" material
 		{
@@ -442,7 +442,7 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 
 ccMaterialSet::Shared ccMaterialSet::clone() const
 {
-	ccMaterialSet::Shared cloneSet = std::make_shared<ccMaterialSet>(getName());
+	auto cloneSet = std::make_shared<ccMaterialSet>(getName());
 	if (!cloneSet->append(*this))
 	{
 		ccLog::Warning("[ccMaterialSet::clone] Not enough memory");
@@ -517,7 +517,7 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 	{
 		for (uint32_t i = 0; i < count; ++i)
 		{
-			ccMaterial::Shared mtl(new ccMaterial);
+			auto mtl = std::make_shared<ccMaterial>();
 			if (!mtl->fromFile(in, dataVersion, flags, oldToNewIDMap))
 				return false;
 			addMaterial(mtl, true); // if we load a file, we can't allow that materials are not in the same order as before!

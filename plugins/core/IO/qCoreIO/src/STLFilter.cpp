@@ -348,7 +348,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		vertices->shrinkToFit();
 		mesh->shrinkToFit();
-		NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
+		auto normals = mesh->getTriNormsTable();
 		if (normals)
 		{
 			normals->shrink_to_fit();
@@ -362,7 +362,7 @@ CC_FILE_ERROR STLFilter::loadFile(const QString& filename, ccHObject& container,
 	ccGenericPointCloud* meshVertices = mesh->getAssociatedCloud();
 	if (mesh->size() != 0 && meshVertices) // their might not remain anymore triangle after 'mergeDuplicatedVertices'
 	{
-		NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
+		auto normals = mesh->getTriNormsTable();
 		if (normals)
 		{
 			// normals->link();
@@ -729,7 +729,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile&          fp,
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	if (!vertices->reserve(3 * faceCount))
 		return CC_FERR_NOT_ENOUGH_MEMORY;
-	NormsIndexesTableType::Shared normals = mesh->getTriNormsTable();
+	auto normals = mesh->getTriNormsTable();
 	if (normals && (!normals->reserveSafe(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
 	{
 		ccLog::Warning("[STL] Not enough memory: can't store normals!");

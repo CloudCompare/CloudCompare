@@ -5470,7 +5470,7 @@ void MainWindow::doActionComputeDistanceMap()
 				return;
 			}
 
-			ccScalarField::Shared sf = std::make_shared<ccScalarField>("DT values");
+			auto sf = std::make_shared<ccScalarField>("DT values");
 			if (!sf->reserveSafe(pointCount))
 			{
 				ccLog::Error(tr("Not enough memory!"));

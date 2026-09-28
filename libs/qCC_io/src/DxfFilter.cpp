@@ -370,8 +370,8 @@ class DxfImporter : public DL_CreationAdapter
 		// add per-triangle normals
 		{
 			// normals table
-			NormsIndexesTableType::Shared triNormsTable = m_faces->getTriNormsTable();
-			bool                          firstTime     = false;
+			auto triNormsTable = m_faces->getTriNormsTable();
+			bool firstTime     = false;
 			if (!triNormsTable)
 			{
 				triNormsTable = std::make_shared<NormsIndexesTableType>();

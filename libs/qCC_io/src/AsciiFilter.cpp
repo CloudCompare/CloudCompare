@@ -778,8 +778,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 				sfName.replace('_', ' ');
 			}
 
-			ccScalarField::Shared sf    = std::make_shared<ccScalarField>(sfName.toStdString());
-			int                   sfIdx = cloud->addScalarField(sf);
+			auto sf    = std::make_shared<ccScalarField>(sfName.toStdString());
+			int  sfIdx = cloud->addScalarField(sf);
 			if (sfIdx >= 0)
 			{
 				cloudDesc.scalarIndexes.push_back(i);

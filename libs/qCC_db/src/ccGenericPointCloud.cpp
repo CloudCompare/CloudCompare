@@ -408,8 +408,8 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 		    && !visTable // if the visibility table is instantiated, we always display ALL points
 		)
 		{
-			ccPointCloud*         pc = static_cast<ccPointCloud*>(this);
-			ccScalarField::Shared sf = pc->getCurrentDisplayedScalarField();
+			ccPointCloud* pc = static_cast<ccPointCloud*>(this);
+			auto          sf = pc->getCurrentDisplayedScalarField();
 			if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 			{
 				// we must take this SF display parameters into account as some points may be hidden!

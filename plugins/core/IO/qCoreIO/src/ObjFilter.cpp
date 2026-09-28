@@ -173,7 +173,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		{
 			assert(mesh);
 
-			NormsIndexesTableType::Shared normsTable = mesh->getTriNormsTable();
+			auto normsTable = mesh->getTriNormsTable();
 
 			// reset save dialog
 			unsigned numTriangleNormals = normsTable->currentSize();
@@ -239,8 +239,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	// materials
 	if (mesh)
 	{
-		ccMaterialSet::Shared materials     = mesh->getMaterialSet();
-		bool                  withMaterials = (materials && mesh->hasMaterials());
+		auto materials     = mesh->getMaterialSet();
+		bool withMaterials = (materials && mesh->hasMaterials());
 		if (withMaterials)
 		{
 			// reset save dialog
@@ -283,7 +283,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const QString& filename, 
 		bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
 		if (withTexCoordinates)
 		{
-			TextureCoordsContainer::Shared texCoords = mesh->getTexCoordinatesTable();
+			auto texCoords = mesh->getTexCoordinatesTable();
 			if (texCoords)
 			{
 				// reset save dialog

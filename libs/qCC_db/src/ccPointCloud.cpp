@@ -539,7 +539,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 		{
 			for (unsigned k = 0; k < sfCount; ++k)
 			{
-				const ccScalarField::Shared sf = getCCScalarField(k);
+				auto sf = getCCScalarField(k);
 				assert(sf);
 				if (sf)
 				{
@@ -547,7 +547,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCCoreLib::ReferenceCloud* select
 					int sfIdx = result->addScalarField(sf->getName());
 					if (sfIdx >= 0) // success
 					{
-						ccScalarField::Shared currentScalarField = result->getCCScalarField(sfIdx);
+						auto currentScalarField = result->getCCScalarField(sfIdx);
 						assert(currentScalarField);
 						if (currentScalarField->resizeSafe(selectionSize))
 						{
@@ -1045,14 +1045,14 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		// first we merge the new SF with the existing one
 		for (unsigned k = 0; k < newSFCount; ++k)
 		{
-			const ccScalarField::Shared sf = addedCloud->getCCScalarField(static_cast<int>(k));
+			auto sf = addedCloud->getCCScalarField(static_cast<int>(k));
 			if (sf)
 			{
 				// does this field already exist (same name)?
 				int sfIdx = getScalarFieldIndexByName(sf->getName());
 				if (sfIdx >= 0) // yes
 				{
-					ccScalarField::Shared sameSF = getCCScalarField(sfIdx);
+					auto sameSF = getCCScalarField(sfIdx);
 					assert(sameSF && sameSF->capacity() >= pointCountBefore + addedPoints);
 					// we fill it with new values (it should have been already 'reserved' (if necessary)
 					if (sameSF->currentSize() == pointCountBefore)
@@ -1073,7 +1073,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 				else // otherwise we create a new SF
 				{
-					ccScalarField::Shared newSF = std::make_shared<ccScalarField>(sf->getName());
+					auto newSF = std::make_shared<ccScalarField>(sf->getName());
 					newSF->setOffset(sf->getOffset());
 					// we fill the beginning with NaN (as there is no equivalent in the current cloud)
 					if (newSF->resizeSafe(pointCountBefore + addedPoints, true, CCCoreLib::NAN_VALUE))
@@ -1145,7 +1145,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			if (sfCount == 0)
 			{
 				// and if the added cloud has one displayed
-				const ccScalarField::Shared dispSF = addedCloud->getCurrentDisplayedScalarField();
+				auto dispSF = addedCloud->getCurrentDisplayedScalarField();
 				if (dispSF)
 				{
 					// we set it as displayed on the current cloud also
@@ -5142,7 +5142,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 int ccPointCloud::addScalarField(const std::string& uniqueName)
 {
 	// create new (empty) scalar field
-	ccScalarField::Shared sf = std::make_shared<ccScalarField>(uniqueName);
+	auto sf = std::make_shared<ccScalarField>(uniqueName);
 
 	return addScalarField(sf);
 }
@@ -5182,7 +5182,7 @@ int ccPointCloud::addScalarField(ccScalarField::Shared sf)
 
 	try
 	{
-		m_scalarFields.push_back(ccScalarField::ToCCShared(sf));
+		m_scalarFields.push_back(ccScalarField::ToCCCoreLibShared(sf));
 	}
 	catch (const std::bad_alloc&)
 	{
@@ -5255,7 +5255,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 		// scalar fields (dataVersion>=20)
 		for (uint32_t i = 0; i < sfCount; ++i)
 		{
-			ccScalarField::Shared sf = getCCScalarField(i);
+			auto sf = getCCScalarField(i);
 			assert(sf);
 			if (!sf || !sf->toFile(out, dataVersion))
 				return false;
@@ -5499,7 +5499,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Load
 		// scalar fields (dataVersion>=20)
 		for (uint32_t i = 0; i < sfCount; ++i)
 		{
-			ccScalarField::Shared sf = std::make_shared<ccScalarField>();
+			auto sf = std::make_shared<ccScalarField>();
 			if (!sf->fromFile(in, dataVersion, flags, oldToNewIDMap))
 			{
 				return false;
@@ -6657,7 +6657,7 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 	// computes cloud normals
 	QElapsedTimer eTimer;
 	eTimer.start();
-	NormsIndexesTableType::Shared normsIndexes = std::make_shared<NormsIndexesTableType>();
+	auto normsIndexes = std::make_shared<NormsIndexesTableType>();
 	if (!ccNormalVectors::ComputeCloudNormals(this,
 	                                          *normsIndexes,
 	                                          model,

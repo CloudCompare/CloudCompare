@@ -437,7 +437,7 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 		return -5;
 	}
 
-	NormsIndexesTableType::Shared theNorms = cloud->normals();
+	auto theNorms = cloud->normals();
 
 	// Fast Marching propagation
 	ccFastMarchingForNormsDirection fm;

@@ -115,11 +115,11 @@ const ccGenericPrimitive& ccGenericPrimitive::operator+=(const ccGenericPrimitiv
 		// copy face normals
 		if (primHasFaceNorms)
 		{
-			const NormsIndexesTableType::Shared primNorms = prim.getTriNormsTable();
+			const auto primNorms = prim.getTriNormsTable();
 			assert(primNorms);
 			unsigned primTriNormCount = primNorms->currentSize();
 
-			NormsIndexesTableType::Shared normsShared = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
+			auto normsShared = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
 			if (!normsShared->reserveSafe(triFacesNormCount + primTriNormCount))
 			{
 				ccLog::Error("[ccGenericPrimitive::operator +] Not enough memory!");
@@ -314,7 +314,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 
 	if (faceNormCounts)
 	{
-		NormsIndexesTableType::Shared normsTable = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
+		auto normsTable = (m_triNormals ? m_triNormals : std::make_shared<NormsIndexesTableType>());
 		if (!normsTable || !normsTable->reserveSafe(faceNormCounts) || !reservePerTriangleNormalIndexes())
 		{
 			verts->clear();

@@ -280,7 +280,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 			app->dispToConsole(QString("Failed to allocate a new scalar field for computing distances! Try to free some memory ..."), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return false;
 	}
-	ccScalarField::Shared sf = cloud->getCCScalarField(sfIdx);
+	auto sf = cloud->getCCScalarField(sfIdx);
 	unsigned pointCount = cloud->size();
 	sf->resizeSafe(pointCount); //should always be ok
 	assert(sf);
@@ -896,7 +896,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(const QSharedPointer<
 	if (true/*!mapTexture.isNull()*/) //we force tex. coordinates and indexes creation!
 	{
 		//texture coordinates
-		TextureCoordsContainer::Shared texCoords = std::make_shared<TextureCoordsContainer>();
+		auto texCoords = std::make_shared<TextureCoordsContainer>();
 		if (!texCoords->reserveSafe(meshVertCount))
 		{
 			//not enough memory to finish the job!
@@ -951,10 +951,10 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(const QSharedPointer<
 
 		//set material
 		{
-			ccMaterial::Shared material(new ccMaterial("texture"));
+			auto material = std::make_shared<ccMaterial>("texture");
 			material->setTexture(mapTexture, QString(), false);
 
-			ccMaterialSet::Shared materialSet = std::make_shared<ccMaterialSet>();
+			auto materialSet = std::make_shared<ccMaterialSet>();
 			materialSet->addMaterial(material);
 
 			mesh->setMaterialSet(materialSet);
@@ -1419,7 +1419,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	if (!mapTexture.isNull())
 	{
 		//texture coordinates
-		TextureCoordsContainer::Shared texCoords = std::make_shared<TextureCoordsContainer>();
+		auto texCoords = std::make_shared<TextureCoordsContainer>();
 		mesh->addChild(texCoords.get()); // FIXME TODO: we should use a shared pointer here but ccHObject doesn't support it yet!
 		if (!texCoords->reserveSafe(meshVertCount+profVertCount)) //we add a column for correct wrapping!
 		{
@@ -1487,10 +1487,10 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 
 		//set material
 		{
-			ccMaterial::Shared material(new ccMaterial("texture"));
+			auto material = std::make_shared<ccMaterial>("texture");
 			material->setTexture(mapTexture, QString(), false);
 
-			ccMaterialSet::Shared materialSet = std::make_shared<ccMaterialSet>();
+			auto materialSet = std::make_shared<ccMaterialSet>();
 			materialSet->addMaterial(material);
 
 			mesh->setMaterialSet(materialSet);
@@ -1516,7 +1516,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	unsigned count = map->ySteps * map->xSteps;
 
 	ccPointCloud* cloud = new ccPointCloud("map");
-	ccScalarField::Shared sf(new ccScalarField("values"));
+	auto sf = std::make_shared<ccScalarField>("values");
 	if (!cloud->reserve(count) || !sf->reserveSafe(count))
 	{
 		//not enough memory

@@ -805,7 +805,7 @@ static ccMesh* CreateMesh(
 		}
 		if (!areAllValuesOfPartsNaNs)
 		{
-			ccScalarField::Shared sf = std::make_shared<ccScalarField>("Measures");
+			auto sf = std::make_shared<ccScalarField>("Measures");
 			if (!sf->reserveSafe(vertCount))
 			{
 				ccLog::Warning(QString("[SHP] Mesh: not enough memory to load scalar values!"));
@@ -1237,7 +1237,7 @@ static CC_FILE_ERROR LoadPolyline(QDataStream&      shpStream,
 			    { return std::isnan(v); });
 			if (!allNaNs)
 			{
-				ccScalarField::Shared sf = std::make_shared<ccScalarField>("Measures");
+				auto sf = std::make_shared<ccScalarField>("Measures");
 				if (!sf->reserveSafe(vertCount))
 				{
 					ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));

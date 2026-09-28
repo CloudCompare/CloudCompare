@@ -213,7 +213,7 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 			{
 				if (mesh)
 				{
-					TextureCoordsContainer::Shared texCoords = std::make_shared<TextureCoordsContainer>();
+					auto texCoords = std::make_shared<TextureCoordsContainer>();
 					if (texCoords->reserveSafe(cloud->size())
 					    && mesh->reservePerTriangleTexCoordIndexes()
 					    && mesh->reservePerTriangleMtlIndexes())
@@ -233,9 +233,9 @@ CC_FILE_ERROR CSVMatrixFilter::loadFile(const QString&  filename,
 						mesh->setTexCoordinatesTable(texCoords);
 
 						// create material
-						ccMaterial::Shared mat(new ccMaterial("texture"));
+						auto mat = std::make_shared<ccMaterial>("texture");
 						mat->setTexture(texture, filename, false);
-						ccMaterialSet::Shared matSet = std::make_shared<ccMaterialSet>("Materials");
+						auto matSet = std::make_shared<ccMaterialSet>("Materials");
 						matSet->push_back(mat);
 						mesh->setMaterialSet(matSet);
 

@@ -91,8 +91,13 @@ ccHObject::~ccHObject()
 		if ((it->second & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
 			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); // in order to avoid any loop!
-			// delete object
-			delete it->first;
+
+			if (!it->first->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+			    && !it->first->isKindOf(CC_TYPES::MATERIAL_SET))
+			{
+				// delete object
+				delete it->first;
+			}
 		}
 	}
 
@@ -956,8 +961,12 @@ void ccHObject::removeChild(int pos)
 
 	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 	{
-		// delete object
-		delete child;
+		if (!child->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+		    && !child->isKindOf(CC_TYPES::MATERIAL_SET))
+		{
+			// delete object
+			delete child;
+		}
 	}
 	else if (child->getParent() == this)
 	{
@@ -975,7 +984,12 @@ void ccHObject::removeAllChildren()
 		int flags = getDependencyFlagsWith(child);
 		if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
-			delete child;
+
+			if (!child->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+			    && !child->isKindOf(CC_TYPES::MATERIAL_SET))
+			{
+				delete child;
+			}
 		}
 	}
 }
@@ -997,11 +1011,15 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	// write 'ccObject' header
 	if (!ccObject::toFile(out, dataVersion))
+	{
 		return false;
+	}
 
 	// write own data
 	if (!toFile_MeOnly(out, dataVersion))
+	{
 		return false;
+	}
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
@@ -1014,7 +1032,9 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	}
 
 	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
+	{
 		return WriteError();
+	}
 
 	// write serializable children (if any)
 	for (auto child : m_children)

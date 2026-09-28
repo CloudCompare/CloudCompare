@@ -338,7 +338,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 											{
 												if (materialUsed[i] >= 0)
 												{
-													matSet->push_back(ccMaterial::Shared(new ccMaterial(*origMaterialSet->at(i))));
+													matSet->push_back(std::make_shared<ccMaterial>(*origMaterialSet->at(i)));
 													// update index
 													materialUsed[i] = static_cast<int>(matSet->size()) - 1;
 												}

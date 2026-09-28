@@ -34,7 +34,7 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	using Shared = std::shared_ptr<ccScalarField>;
 
 	//! Returns a CCCoreLib shared pointer from the given CC scalar field
-	static CCCoreLib::ScalarField::Shared ToCCShared(Shared ptr)
+	static CCCoreLib::ScalarField::Shared ToCCCoreLibShared(Shared ptr)
 	{
 		return std::static_pointer_cast<CCCoreLib::ScalarField, ccScalarField>(ptr);
 	}

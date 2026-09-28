@@ -2733,8 +2733,8 @@ namespace ccEntityAction
 						break;
 					}
 
-					ccScalarField::Shared dipSF    = pc->getCCScalarField(dipSFIndex);
-					ccScalarField::Shared dipDirSF = pc->getCCScalarField(dipDirSFIndex);
+					auto dipSF    = pc->getCCScalarField(dipSFIndex);
+					auto dipDirSF = pc->getCCScalarField(dipDirSFIndex);
 					Q_ASSERT(dipSF && dipDirSF);
 
 					success = pc->convertNormalToDipDirSFs(*dipSF, *dipDirSF);

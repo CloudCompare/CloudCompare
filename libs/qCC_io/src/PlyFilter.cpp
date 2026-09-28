@@ -170,8 +170,8 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 		// look for textures/materials in case there's no color
 		// if (!mesh->hasColors())
 		{
-			unsigned                    textureCount = 0;
-			const ccMaterialSet::Shared materials    = mesh->getMaterialSet();
+			unsigned   textureCount = 0;
+			const auto materials    = mesh->getMaterialSet();
 			assert(materials);
 			if (materials)
 			{
@@ -1951,9 +1951,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				QString texturePath = QFileInfo(filename).absolutePath() + QString('/');
 				for (int ti = 0; ti < textureFileNames.size(); ++ti)
 				{
-					QString            textureFileName = textureFileNames[ti];
-					QString            textureFilePath = texturePath + textureFileName;
-					ccMaterial::Shared material(new ccMaterial(textureFileName));
+					QString textureFileName = textureFileNames[ti];
+					QString textureFilePath = texturePath + textureFileName;
+					auto    material        = std::make_shared<ccMaterial>(textureFileName);
 					if (material->loadAndSetTexture(textureFilePath))
 					{
 						const QImage texture = material->getTexture();

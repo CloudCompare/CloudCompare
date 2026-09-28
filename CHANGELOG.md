@@ -460,6 +460,7 @@ Bug fixes:
 		(or the destination entity) after the other entity is removed
 	- CC could take a long time to start (and to open a file) if the recent files list contained files on an unreachable network drive.
 		The recent files are now only checked when one of them is clicked (and a missing file is then removed from the list).
+	- the scalar field name above the color scale in the 3D view was not properly updated after renaming the active scalar field
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

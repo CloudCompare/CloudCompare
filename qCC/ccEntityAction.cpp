@@ -1368,6 +1368,11 @@ namespace ccEntityAction
 					if (ok)
 					{
 						sf->setName(newName.toStdString());
+						if (pc->sfColorScaleShown())
+						{
+							// the color scale title might be impacted
+							pc->prepareDisplayForRefresh();
+						}
 					}
 				}
 			}

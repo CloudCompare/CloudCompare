@@ -3365,6 +3365,7 @@ void MainWindow::doActionRenameSF()
 		return;
 	}
 
+	refreshAll(true);
 	updateUI();
 }
 

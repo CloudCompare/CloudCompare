@@ -50,9 +50,9 @@ class ccTracePolylineTool : public ccOverlayDialog
 	~ccTracePolylineTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool accepted) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool accepted) override;
 
   protected:
 	void        apply();
@@ -76,7 +76,7 @@ class ccTracePolylineTool : public ccOverlayDialog
 	void onShortcutTriggered(int);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi) override;
+	void onItemPicked(const PickedItem& pi) override;
 
   protected:
 	//! Restarts the edition mode
@@ -85,9 +85,7 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Viewport parameters (used for picking)
 	struct SegmentGLParams
 	{
-		SegmentGLParams()
-		{
-		}
+		SegmentGLParams() = default;
 		SegmentGLParams(ccGenericGLDisplay* display, int x, int y);
 		ccGLCameraParameters params;
 		CCVector2d           clickPos;

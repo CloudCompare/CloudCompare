@@ -32,7 +32,7 @@ class ccAdjustZoomDlg : public QDialog
 
   public:
 	ccAdjustZoomDlg(ccGLWindowInterface* win, QWidget* parent = nullptr);
-	virtual ~ccAdjustZoomDlg() = default;
+	~ccAdjustZoomDlg() override = default;
 
 	//! Returns requested focal distance
 	double getFocalDistance() const;

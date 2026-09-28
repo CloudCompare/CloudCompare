@@ -38,7 +38,7 @@ class ccOrderChoiceDlg : public QDialog
 	                 ccMainAppInterface* app = 0);
 
 	//! Destructor
-	virtual ~ccOrderChoiceDlg();
+	~ccOrderChoiceDlg() override;
 
 	//! Returns the first entity (new order)
 	ccHObject* getFirstEntity();

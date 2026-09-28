@@ -38,12 +38,12 @@ class ccGraphicalTransformationTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccGraphicalTransformationTool(QWidget* parent);
 	//! Default destructor
-	virtual ~ccGraphicalTransformationTool();
+	~ccGraphicalTransformationTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool state) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! unselect all advanced mode references
 	void clearAdvModeEntities();

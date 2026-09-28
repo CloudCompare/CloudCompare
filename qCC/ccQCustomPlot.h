@@ -65,7 +65,7 @@ class QCPBarsWithText : public QCPBars
 	bool        m_textOnTheLeft;
 
 	// reimplemented virtual draw method
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!mKeyAxis || !mValueAxis)
 		{
@@ -167,7 +167,7 @@ class QCPColoredBars : public QCPBars
 
   protected:
 	// reimplemented virtual draw method
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		// no colors?
 		if (m_coloredData.empty())
@@ -337,7 +337,7 @@ class QCPHiddenArea : public QCPSelectableCursor
 
   protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!keyAxis())
 			return;
@@ -432,7 +432,7 @@ class QCPArrow : public QCPSelectableCursor
 
   protected:
 	// reimplemented virtual methods:
-	virtual void draw(QCPPainter* painter)
+	void draw(QCPPainter* painter) override
 	{
 		if (!keyAxis())
 			return;

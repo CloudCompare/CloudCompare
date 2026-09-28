@@ -34,7 +34,7 @@ class ccCustomDoubleValidator : public QValidator
 	}
 
 	// reimplemented from QValidator
-	State validate(QString& input, int& pos) const
+	State validate(QString& input, int& pos) const override
 	{
 		for (int i = 0; i < input.size(); ++i)
 		{

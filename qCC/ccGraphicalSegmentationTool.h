@@ -47,7 +47,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccGraphicalSegmentationTool(QWidget* parent);
 	//! Destructor
-	virtual ~ccGraphicalSegmentationTool();
+	~ccGraphicalSegmentationTool() override;
 
 	//! Adds an entity (and/or its children) to the 'to be segmented' pool
 	/** Warning: some entities may be rejected if they are
@@ -77,9 +77,9 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	}
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool accepted) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool accepted) override;
 
 	//! Returns whether hidden parts should be delete after segmentation
 	bool deleteHiddenParts() const

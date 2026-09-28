@@ -43,12 +43,12 @@ class ccVolumeCalcTool : public QDialog
 	ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCloud* cloud2, QWidget* parent = nullptr);
 
 	//! Destructor
-	~ccVolumeCalcTool();
+	~ccVolumeCalcTool() override;
 
 	// Inherited from cc2Point5DimEditor
-	virtual double                       getGridStep() const override;
-	virtual unsigned char                getProjectionDimension() const override;
-	virtual ccRasterGrid::ProjectionType getTypeOfProjection() const override;
+	double                       getGridStep() const override;
+	unsigned char                getProjectionDimension() const override;
+	ccRasterGrid::ProjectionType getTypeOfProjection() const override;
 
 	//! Report info
 	struct ReportInfo
@@ -116,7 +116,7 @@ class ccVolumeCalcTool : public QDialog
 	void sfProjectionTypeChanged(int);
 
 	// Inherited from cc2Point5DimEditor
-	virtual bool showGridBoxEditor() override;
+	bool showGridBoxEditor() override;
 
 	//! Called when the (ground) empty cell filling strategy changes
 	void groundFillEmptyCellStrategyChanged(int);
@@ -157,7 +157,7 @@ class ccVolumeCalcTool : public QDialog
 
   protected: // standard methods
 	// Inherited from cc2Point5DimEditor
-	virtual void gridIsUpToDate(bool state) override;
+	void gridIsUpToDate(bool state) override;
 
 	//! Load persistent settings
 	void loadSettings();

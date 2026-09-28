@@ -51,7 +51,7 @@ class ccComparisonDlg : public QDialog
 	                bool               noDisplay = false);
 
 	//! Default destructor
-	~ccComparisonDlg();
+	~ccComparisonDlg() override;
 
 	//! Should be called once after the dialog is created
 	inline bool initDialog()

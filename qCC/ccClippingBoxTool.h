@@ -50,12 +50,12 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccClippingBoxTool(QWidget* parent);
 	//! Default destructor
-	virtual ~ccClippingBoxTool();
+	~ccClippingBoxTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool state) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! Returns box
 	const ccClipBox* box() const

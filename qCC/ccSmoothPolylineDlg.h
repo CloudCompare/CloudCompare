@@ -33,7 +33,7 @@ class ccSmoothPolylineDialog : public QDialog
 	ccSmoothPolylineDialog(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccSmoothPolylineDialog();
+	~ccSmoothPolylineDialog() override;
 
 	//! Sets the number of iterations
 	void setIerationCount(int count);

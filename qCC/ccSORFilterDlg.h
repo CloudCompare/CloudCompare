@@ -33,7 +33,7 @@ class ccSORFilterDlg : public QDialog
 	//! Default constructor
 	explicit ccSORFilterDlg(QWidget* parent = nullptr);
 
-	~ccSORFilterDlg();
+	~ccSORFilterDlg() override;
 
 	int  KNN() const;
 	void setKNN(int knn);

@@ -739,6 +739,8 @@ bool ccComparisonDlg::computeDistances()
 		progressDlg.reset(new ccProgressDialog(true, this));
 	}
 
+	std::array<ccScalarField::Shared, 3> splitDistances;
+
 	QElapsedTimer eTimer;
 	eTimer.start();
 	switch (m_compType)
@@ -750,28 +752,25 @@ bool ccComparisonDlg::computeDistances()
 			// we create 3 new scalar fields, one for each dimension
 			unsigned count = m_compCloud->size();
 
-			bool success = true;
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				auto sfDim = std::make_shared<ccScalarField>();
-				if (sfDim->resizeSafe(count))
+				splitDistances[j] = std::make_shared<ccScalarField>();
+				if (splitDistances[j]->resizeSafe(count))
 				{
-					c2cParams.splitDistances[j] = sfDim;
+					c2cParams.splitDistances[j] = splitDistances[j].get();
 				}
 				else
 				{
-					success = false;
+					ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
+
+					// cleanup
+					for (unsigned k = 0; k <= j; ++k)
+					{
+						c2cParams.splitDistances[k] = nullptr;
+						splitDistances[k].reset();
+					}
+
 					break;
-				}
-			}
-
-			if (!success)
-			{
-				ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
-
-				for (unsigned j = 0; j < 3; ++j)
-				{
-					c2cParams.splitDistances[j].reset();
 				}
 			}
 		}
@@ -947,7 +946,9 @@ bool ccComparisonDlg::computeDistances()
 			// we add the corresponding scalar fields (one for each dimension)
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				CCCoreLib::ScalarField::Shared sf = c2cParams.splitDistances[j];
+				auto sf = splitDistances[j];
+				assert(c2cParams.splitDistances[j] == sf.get());
+
 				if (sf)
 				{
 					static const QChar CharDim[3]{'X', 'Y', 'Z'};
@@ -955,16 +956,20 @@ bool ccComparisonDlg::computeDistances()
 					sf->setName(dimSFName.toStdString());
 					sf->computeMinAndMax();
 					// check that SF doesn't already exist
-					int sfExit = m_compCloud->getScalarFieldIndexByName(sf->getName());
-					if (sfExit >= 0)
-						m_compCloud->deleteScalarField(sfExit);
-					int sfEnter = m_compCloud->addScalarField(ccScalarField::FromCCCoreLibShared(sf));
-					assert(sfEnter >= 0);
+					int previousSFIndex = m_compCloud->getScalarFieldIndexByName(sf->getName());
+					if (previousSFIndex >= 0)
+					{
+						m_compCloud->deleteScalarField(previousSFIndex);
+					}
+					int newSFIndex = m_compCloud->addScalarField(ccScalarField::FromCCCoreLibShared(sf));
+					assert(newSFIndex >= 0);
 				}
 			}
 			ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			if (mergeXY)
 			{
+				assert(c2cParams.splitDistances[0] && c2cParams.splitDistances[1]);
+
 				ccLog::Warning("[ComputeDistances] compute 2D distances (xy plane)");
 				QString sfNameXY = m_sfName + " (XY)";
 				int     sf2D     = m_compCloud->getScalarFieldIndexByName(sfNameXY.toStdString());
@@ -994,11 +999,6 @@ bool ccComparisonDlg::computeDistances()
 		m_compCloud->deleteScalarField(sfIdx);
 		m_compCloud->showSF(false);
 		sfIdx = -1;
-	}
-
-	for (unsigned j = 0; j < 3; ++j)
-	{
-		c2cParams.splitDistances[j].reset();
 	}
 
 	updateDisplay(sfIdx >= 0, false);

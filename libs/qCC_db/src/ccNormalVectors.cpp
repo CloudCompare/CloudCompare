@@ -354,6 +354,10 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	if (processedCells == 0 || (progressCb && progressCb->isCancelRequested()))
 	{
 		theNormsCodes.resize(0);
+		if (nullptr == inputOctree)
+		{
+			delete theOctree;
+		}
 		return false;
 	}
 

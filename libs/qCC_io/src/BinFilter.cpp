@@ -203,8 +203,8 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(mesh->getAssociatedCloud());
 			if (mesh->getMaterialSet())
 				dependencies.insert(mesh->getMaterialSet().get());
-			if (mesh->getTexCoordinatesTable())
-				dependencies.insert(mesh->getTexCoordinatesTable().get());
+			if (mesh->getTriNormsTable())
+				dependencies.insert(mesh->getTriNormsTable().get());
 			if (mesh->getTexCoordinatesTable())
 				dependencies.insert(mesh->getTexCoordinatesTable().get());
 		}

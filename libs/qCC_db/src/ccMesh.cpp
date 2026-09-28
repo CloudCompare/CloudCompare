@@ -441,7 +441,7 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType::Shared triNormsTable, bool 
 	{
 		int childIndex = getChildIndex(m_triNormals.get());
 		if (childIndex < 0)
-			addChild(m_triNormals.get(), DP_NONE);
+			addChild(m_triNormals.get());
 	}
 	else
 	{
@@ -467,7 +467,7 @@ void ccMesh::setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseO
 	{
 		int childIndex = getChildIndex(m_materials.get());
 		if (childIndex < 0)
-			addChild(m_materials.get(), DP_NONE);
+			addChild(m_materials.get());
 	}
 	else
 	{
@@ -817,7 +817,7 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,
 				clonedMaterials = getMaterialSet()->clone(); // TODO: keep only what's necessary!
 				if (clonedMaterials)
 				{
-					cloneMesh->addChild(clonedMaterials.get(), DP_NONE);
+					cloneMesh->addChild(clonedMaterials.get());
 				}
 				else
 				{
@@ -3210,7 +3210,7 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer::Shared texCoordsTabl
 		int childIndex = getChildIndex(m_texCoords.get());
 		if (childIndex < 0)
 		{
-			addChild(m_texCoords.get(), DP_NONE);
+			addChild(m_texCoords.get());
 		}
 	}
 	else

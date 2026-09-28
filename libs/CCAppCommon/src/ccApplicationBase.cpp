@@ -276,10 +276,14 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 		QFile f(resourcePath);
 		if (!f.exists())
 		{
-			f.close();
+			ccLog::Warning(tr("Style sheet file does not exist: ") + resourcePath);
 			return false;
 		}
-		f.open(QFile::ReadOnly | QFile::Text);
+		if (!f.open(QFile::ReadOnly | QFile::Text))
+		{
+			ccLog::Warning(tr("Failed to open style sheet file: ") + resourcePath);
+			return false;
+		}
 		QTextStream ts(&f);
 		setStyleSheet(ts.readAll());
 		f.close();

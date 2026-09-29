@@ -3131,10 +3131,8 @@ void MainWindow::doActionFilterByValue()
 			}
 			else
 			{
-				if (minVald > static_cast<double>(sf->displayRange().start()))
-					minVald = static_cast<double>(sf->displayRange().start());
-				if (maxVald < static_cast<double>(sf->displayRange().stop()))
-					maxVald = static_cast<double>(sf->displayRange().stop());
+				minVald = std::min(minVald, static_cast<double>(sf->displayRange().start()));
+				maxVald = std::max(maxVald, static_cast<double>(sf->displayRange().stop()));
 			}
 		}
 	}

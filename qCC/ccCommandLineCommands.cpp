@@ -2170,10 +2170,7 @@ bool CommandSFGradient::process(ccCommandLineInterface& cmd)
 			}
 
 			int activeSFIndex = desc.pc->getCurrentOutScalarFieldIndex();
-			if (activeSFIndex < 0)
-			{
-				activeSFIndex = 0;
-			}
+			activeSFIndex     = std::max(activeSFIndex, 0);
 
 			desc.pc->setCurrentDisplayedScalarField(activeSFIndex);
 

@@ -784,10 +784,7 @@ namespace ccEntityAction
 				double sigmaCloud = ccLibAlgorithms::GetDefaultCloudKernelSize(pc);
 
 				// we keep the smallest value
-				if (sigmaCloud < spatialSigma)
-				{
-					spatialSigma = sigmaCloud;
-				}
+				spatialSigma = std::min(sigmaCloud, spatialSigma);
 			}
 		}
 
@@ -2820,7 +2817,7 @@ namespace ccEntityAction
 			if (thisBBox.isValid())
 			{
 				CCVector3           dd   = thisBBox.maxCorner() - thisBBox.minCorner();
-				PointCoordinateType maxd = std::max(dd.x, std::max(dd.y, dd.z));
+				PointCoordinateType maxd = std::max({dd.x, dd.y, dd.z});
 				if (maxBoxSize < 0.0 || maxd > maxBoxSize)
 					maxBoxSize = maxd;
 			}

@@ -115,10 +115,7 @@ namespace ccLibAlgorithms
 			double        sigmaCloud = GetDefaultCloudKernelSize(pc);
 
 			// we keep the smallest value
-			if (sigmaCloud < sigma)
-			{
-				sigma = sigmaCloud;
-			}
+			sigma = std::min(sigmaCloud, sigma);
 		}
 
 		return sigma;

@@ -119,7 +119,7 @@ class QCPColoredBars : public QCPBars
 
 		QColor color;
 	};
-	typedef QMultiMap<double, QCPColoredBarData> QCPColoredBarDataMap;
+	using QCPColoredBarDataMap = QMultiMap<double, QCPColoredBarData>;
 
 	QCPColoredBars(QCPAxis* keyAxis, QCPAxis* valueAxis)
 	    : QCPBars(keyAxis, valueAxis)

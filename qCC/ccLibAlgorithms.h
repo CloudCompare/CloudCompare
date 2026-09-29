@@ -50,7 +50,7 @@ namespace ccLibAlgorithms
 	};
 
 	//! Set of GeomCharacteristic instances
-	typedef std::vector<GeomCharacteristic> GeomCharacteristicSet;
+	using GeomCharacteristicSet = std::vector<GeomCharacteristic>;
 
 	//! Computes geometrical characteristics (see GeometricalAnalysisTools::GeomCharacteristic) on a set of entities
 	bool ComputeGeomCharacteristics(const GeomCharacteristicSet& characteristics,

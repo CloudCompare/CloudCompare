@@ -3087,7 +3087,7 @@ void MainWindow::doRemoveDuplicatePoints()
 
 void MainWindow::doActionFilterByValue()
 {
-	typedef std::pair<ccHObject*, ccPointCloud*> EntityAndVerticesType;
+	using EntityAndVerticesType = std::pair<ccHObject*, ccPointCloud*>;
 	std::vector<EntityAndVerticesType>           toFilter;
 
 	for (ccHObject* entity : getSelectedEntities())

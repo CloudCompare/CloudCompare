@@ -17,9 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <ui_cutPursuitDlg.h>
-
 #include <QStringList>
+#include <ui_cutPursuitDlg.h>
 
 //! Dialog to define Cut-Pursuit parameters
 class ccCutPursuitDlg : public QDialog
@@ -39,7 +38,7 @@ class ccCutPursuitDlg : public QDialog
 
 	//! Returns the list of scalar field names that are checked (to be included in the Y matrix)
 	/** The special "RGB" entry (if present) is excluded from this list; use useRGB() to check it.
-	**/
+	 **/
 	QStringList getSelectedScalarFields() const;
 
 	//! Returns knn parameter
@@ -47,7 +46,7 @@ class ccCutPursuitDlg : public QDialog
 
 	//! Returns search radius parameter
 	double getKNNRadius();
-	
+
 	//! Returns regularization parameter
 	double getRegularization();
 

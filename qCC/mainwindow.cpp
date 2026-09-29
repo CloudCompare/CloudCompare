@@ -68,6 +68,7 @@
 #include "ccEntityAction.h"
 #include "ccHistogramWindow.h"
 #include "ccInnerRect2DFinder.h"
+
 #include <ReferenceCloud.h>
 
 // common
@@ -91,6 +92,7 @@
 #include "ccColorFromScalarDlg.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComparisonDlg.h"
+#include "ccCutPursuitDlg.h"
 #include "ccEntitySelectionDlg.h"
 #include "ccFilterByValueDlg.h"
 #include "ccFitSphereDlg.h"
@@ -125,7 +127,6 @@
 #include "ccUnrollDlg.h"
 #include "ccVolumeCalcTool.h"
 #include "ccWaveformDialog.h"
-#include "ccCutPursuitDlg.h"
 
 // CCPluginAPI
 #include <ccInfoDlg.h>
@@ -4502,7 +4503,7 @@ void MainWindow::doActionCutPursuit()
 	// gather the available scalar field names that are shared by all selected clouds,
 	// excluding the Cut Pursuit label field if it already exists
 	QStringList availableSFNames;
-	bool allCloudsHaveColors = true;
+	bool        allCloudsHaveColors = true;
 	{
 		for (ccGenericPointCloud* cloud : clouds)
 		{
@@ -4530,13 +4531,13 @@ void MainWindow::doActionCutPursuit()
 	if (!dlg.exec())
 		return;
 
-	int32_t s_knn				  = dlg.getKNN();
-	double s_knnRadius			  = dlg.getKNNRadius();
-	float s_regularization   	  = dlg.getRegularization();
-	float s_spatialWeight    	  = dlg.getSpatialWeight();
-	int32_t s_cutoff      	      = dlg.getCutoff();
-	bool s_averageColors		  = dlg.averageColors();
-	bool s_useRGB				  = dlg.useRGB();
+	int32_t     s_knn             = dlg.getKNN();
+	double      s_knnRadius       = dlg.getKNNRadius();
+	float       s_regularization  = dlg.getRegularization();
+	float       s_spatialWeight   = dlg.getSpatialWeight();
+	int32_t     s_cutoff          = dlg.getCutoff();
+	bool        s_averageColors   = dlg.averageColors();
+	bool        s_useRGB          = dlg.useRGB();
 	QStringList s_selectedSFNames = dlg.getSelectedScalarFields();
 
 	ccProgressDialog pDlg(false, this);
@@ -4600,9 +4601,9 @@ void MainWindow::doActionCutPursuit()
 			}
 
 			// some parallel cut pursuit params
-			size_t rgbDim = (s_useRGB && pc->hasColors()) ? 3 : 0;
-			int32_t D = 3 + static_cast<int32_t>(sfIndices.size()) + static_cast<int32_t>(rgbDim);
-			int32_t N = static_cast<int32_t>(pc->size());
+			size_t             rgbDim = (s_useRGB && pc->hasColors()) ? 3 : 0;
+			int32_t            D      = 3 + static_cast<int32_t>(sfIndices.size()) + static_cast<int32_t>(rgbDim);
+			int32_t            N      = static_cast<int32_t>(pc->size());
 			std::vector<float> Y(N * D, 0.0f);
 
 			CCVector3 posOffset(0, 0, 0);
@@ -4615,7 +4616,7 @@ void MainWindow::doActionCutPursuit()
 			for (int32_t i = 0; i < N; ++i)
 			{
 				const CCVector3* P = pc->getPoint(i);
-				
+
 				Y[i * D + 0] = static_cast<float>(P->x - posOffset.x);
 				Y[i * D + 1] = static_cast<float>(P->y - posOffset.y);
 				Y[i * D + 2] = static_cast<float>(P->z - posOffset.z);
@@ -4623,15 +4624,15 @@ void MainWindow::doActionCutPursuit()
 				if (s_useRGB && pc->hasColors())
 				{
 					const ccColor::Rgba& C = pc->getPointColor(i);
-					Y[i * D + 3] = static_cast<float>(C.r / 255.0);
-					Y[i * D + 4] = static_cast<float>(C.g / 255.0);
-					Y[i * D + 5] = static_cast<float>(C.b / 255.0);
+					Y[i * D + 3]           = static_cast<float>(C.r / 255.0);
+					Y[i * D + 4]           = static_cast<float>(C.g / 255.0);
+					Y[i * D + 5]           = static_cast<float>(C.b / 255.0);
 				}
 
 				for (size_t k = 0; k < sfIndices.size(); ++k)
 				{
-					const ccScalarField* sf = static_cast<const ccScalarField*>(pc->getScalarField(sfIndices[k]));
-					float value = static_cast<float>(sf->getValue(i));
+					const ccScalarField* sf    = static_cast<const ccScalarField*>(pc->getScalarField(sfIndices[k]));
+					float                value = static_cast<float>(sf->getValue(i));
 
 					// Sanitize NaN/Inf, force it to 0.0
 					if (std::isnan(value) || std::isinf(value))
@@ -4639,24 +4640,24 @@ void MainWindow::doActionCutPursuit()
 						value = 0.0f;
 					}
 					// Scalar fields start at feature index 3, if RGB is used, they start at feature index 6
-                    Y[i * D + 3 + rgbDim + k] = value;
+					Y[i * D + 3 + rgbDim + k] = value;
 				}
 			}
 
 			// we try to label all CCs
 			std::vector<int32_t> components;
-		    int         	rV = CCCoreLib::AutoSegmentationTools::labelCutPursuitComponents(cloud,
-																							s_knn,
-																							s_knnRadius,
-																							N,
-																							D,
-																							Y,
-																							s_regularization,
-																							s_spatialWeight,
-																							s_cutoff,
-																							components,
-																							&pDlg,
-																							theOctree.data());
+			int                  rV = CCCoreLib::AutoSegmentationTools::labelCutPursuitComponents(cloud,
+                                                                                 s_knn,
+                                                                                 s_knnRadius,
+                                                                                 N,
+                                                                                 D,
+                                                                                 Y,
+                                                                                 s_regularization,
+                                                                                 s_spatialWeight,
+                                                                                 s_cutoff,
+                                                                                 components,
+                                                                                 &pDlg,
+                                                                                 theOctree.data());
 
 			// error handling
 			if (rV < 0)
@@ -4679,12 +4680,12 @@ void MainWindow::doActionCutPursuit()
 			{
 				// Average colors for each component
 				std::vector<CCVector3d> compColorSum(rV, CCVector3d(0, 0, 0));
-				std::vector<unsigned> compCount(rV, 0);
+				std::vector<unsigned>   compCount(rV, 0);
 
 				for (int32_t i = 0; i < N; ++i)
 				{
-					int32_t compIdx = components[i];
-					const ccColor::Rgba& C = pc->getPointColor(i);
+					int32_t              compIdx = components[i];
+					const ccColor::Rgba& C       = pc->getPointColor(i);
 					compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
 					compCount[compIdx]++;
 				}
@@ -4695,17 +4696,15 @@ void MainWindow::doActionCutPursuit()
 					if (compCount[compIdx] > 0)
 					{
 						CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);
-						pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x),
-														 static_cast<ColorCompType>(avgColor.y),
-														 static_cast<ColorCompType>(avgColor.z)));
+						pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x), static_cast<ColorCompType>(avgColor.y), static_cast<ColorCompType>(avgColor.z)));
 					}
 				}
 				pc->showColors(true);
 			}
-			
+
 			pc->setCurrentDisplayedScalarField(sfIdx);
 			pc->showSF(true);
-			pc->prepareDisplayForRefresh();	
+			pc->prepareDisplayForRefresh();
 		}
 	}
 

@@ -18,7 +18,6 @@
 #include "ccCutPursuitDlg.h"
 
 #include <DgmOctree.h>
-
 #include <QSettings>
 
 static const QString s_rgbFeatureName = QObject::tr("RGB");
@@ -32,7 +31,7 @@ ccCutPursuitDlg::ccCutPursuitDlg(QWidget* parent /*=nullptr*/)
 	loadFromPersistentSettings();
 }
 
-void ccCutPursuitDlg::setScalarFields(const QStringList& sfNames, bool includeRGB/*=false*/)
+void ccCutPursuitDlg::setScalarFields(const QStringList& sfNames, bool includeRGB /*=false*/)
 {
 	scalarFieldsListWidget->clear();
 

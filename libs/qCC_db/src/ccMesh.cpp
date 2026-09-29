@@ -449,12 +449,12 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType::Shared triNormsTable, bool 
 	}
 }
 
-void ccMesh::setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseOldMaterialSet /*=true*/)
+void ccMesh::setMaterialSet(ccMaterialSet::Shared materialSet, bool autoRemoveOldMaterialSetFromChildren /*=true*/)
 {
 	if (m_materials == materialSet)
 		return;
 
-	if (m_materials && autoReleaseOldMaterialSet)
+	if (m_materials && autoRemoveOldMaterialSetFromChildren)
 	{
 		int childIndex = getChildIndex(m_materials.get());
 		if (childIndex >= 0)
@@ -3445,6 +3445,8 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		return false;
 	}
 
+	std::vector<LoadingContext::Dependency> dependencies;
+
 	// as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)
 	// we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
 	// is the responsibility of the caller to make sure that all dependencies are saved together)
@@ -3453,8 +3455,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	{
 		return ReadError();
 	}
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-	*(uint32_t*)(&m_associatedCloud) = vertUniqueID;
+	dependencies.push_back(LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::MESH_VERTICES_CLOUD});
 
 	// per-triangle normals array (dataVersion>=20)
 	{
@@ -3466,11 +3467,9 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			return ReadError();
 		}
-		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
 		if (normArrayID != 0)
 		{
-			m_triNormals = NormsIndexesTableType::Shared(reinterpret_cast<NormsIndexesTableType*>(static_cast<uintptr_t>(normArrayID)),
-			                                             [](NormsIndexesTableType*) {});
+			dependencies.push_back(LoadingContext::Dependency{normArrayID, LoadingContext::Dependency::MESH_TRI_NORMALS});
 		}
 	}
 
@@ -3484,11 +3483,9 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			return ReadError();
 		}
-		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
 		if (texCoordArrayID != 0)
 		{
-			m_texCoords = TextureCoordsContainer::Shared(reinterpret_cast<TextureCoordsContainer*>(static_cast<uintptr_t>(texCoordArrayID)),
-			                                             [](TextureCoordsContainer*) {});
+			dependencies.push_back(LoadingContext::Dependency{texCoordArrayID, LoadingContext::Dependency::MESH_TEXTURE_COORDS});
 		}
 	}
 
@@ -3502,12 +3499,15 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			return ReadError();
 		}
-		// Keep the unresolved ID in a non-owning handle until the BIN loader resolves it.
 		if (matSetID != 0)
 		{
-			m_materials = ccMaterialSet::Shared(reinterpret_cast<ccMaterialSet*>(static_cast<uintptr_t>(matSetID)),
-			                                    [](ccMaterialSet*) {});
+			dependencies.push_back(LoadingContext::Dependency{matSetID, LoadingContext::Dependency::MESH_MATERIALS});
 		}
+	}
+
+	if (!dependencies.empty())
+	{
+		context.incompleteEntities.insert(this, dependencies);
 	}
 
 	// triangles indexes (dataVersion>=20)

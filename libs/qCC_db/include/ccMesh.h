@@ -321,7 +321,7 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	void setTriangleMtlIndex(unsigned triangleIndex, int mtlIndex);
 
 	//! Sets associated material set (may be shared)
-	void setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseOldMaterialSet = true);
+	void setMaterialSet(ccMaterialSet::Shared materialSet, bool autoRemoveOldMaterialSetFromChildren = true);
 
 	/******************************************************************/
 	/************    PER-TRIANGLE TEXTURE COORDINATE    ***************/

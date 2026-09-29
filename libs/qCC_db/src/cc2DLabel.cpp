@@ -528,6 +528,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 
 	// points & associated cloud/mesh ID (dataVersion >= 20)
 	assert(m_pickedPoints.empty());
+	std::vector<LoadingContext::Dependency> dependencies;
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		// point index
@@ -547,8 +548,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 				{
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
-					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
+					dependencies.push_back(LoadingContext::Dependency{cloudID, LoadingContext::Dependency::LABEL_SOURCE_CLOUD});
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -576,8 +576,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
 					m_pickedPoints.back().uv    = uv;
-					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
+					dependencies.push_back(LoadingContext::Dependency{meshID, LoadingContext::Dependency::LABEL_SOURCE_MESH});
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -594,6 +593,11 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 				return ReadError();
 		}
 		m_pickedPoints.back().entityCenterPoint = entityCenterPoint;
+	}
+
+	if (!dependencies.empty())
+	{
+		context.incompleteEntities.insert(this, dependencies);
 	}
 
 	// Relative screen position (dataVersion >= 20)

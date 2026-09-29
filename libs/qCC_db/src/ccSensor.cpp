@@ -222,8 +222,10 @@ bool ccSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	{
 		return ReadError();
 	}
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_posBuffer' pointer!!!
-	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;
+	if (bufferUniqueID != 0)
+	{
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{bufferUniqueID, LoadingContext::Dependency::SENSOR_POSITIONS_BUFFER}});
+	}
 
 	return true;
 }

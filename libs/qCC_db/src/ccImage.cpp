@@ -238,8 +238,10 @@ bool ccImage::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	uint32_t sensorUniqueID = 0;
 	if (in.read((char*)&sensorUniqueID, 4) < 0)
 		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-	*(uint32_t*)(&m_associatedSensor) = sensorUniqueID;
+	if (sensorUniqueID != 0)
+	{
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{sensorUniqueID, LoadingContext::Dependency::IMAGE_SENSOR}});
+	}
 
 	float texU = 1.0f;
 	float texV = 1.0f;

@@ -605,8 +605,7 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	uint32_t meshUniqueID = 0;
 	if (in.read((char*)&meshUniqueID, 4) < 0)
 		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'm_associatedMesh' pointer!!!
-	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
+	context.incompleteEntities.insert(this, {LoadingContext::Dependency{meshUniqueID, LoadingContext::Dependency::SUBMESH_ASSOCIATED_MESH}});
 
 	// references (dataVersion>=29)
 	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, context.dataVersion, "triangle indexes"))

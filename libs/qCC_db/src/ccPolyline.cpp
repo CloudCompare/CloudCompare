@@ -464,8 +464,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::POLYLINE_VERTICES_CLOUD}});
 	}
 
 	// number of points (references to) (dataVersion>=28)

@@ -502,6 +502,8 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	if (context.dataVersion < 32)
 		return false;
 
+	std::vector<LoadingContext::Dependency> dependencies;
+
 	// origin points (dataVersion>=32)
 	// as the cloud will be saved automatically (as a child)
 	// we only store its unique ID --> we hope we will find it at loading time
@@ -509,8 +511,10 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t origPointsUniqueID = 0;
 		if (in.read((char*)&origPointsUniqueID, 4) < 0)
 			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_originPoints' pointer!!!
-		*(uint32_t*)(&m_originPoints) = origPointsUniqueID;
+		if (origPointsUniqueID != 0)
+		{
+			dependencies.push_back(LoadingContext::Dependency{origPointsUniqueID, LoadingContext::Dependency::FACET_ORIGIN_POINTS});
+		}
 	}
 
 	// contour points
@@ -520,8 +524,10 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t contourPointsUniqueID = 0;
 		if (in.read((char*)&contourPointsUniqueID, 4) < 0)
 			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_contourVertices' pointer!!!
-		*(uint32_t*)(&m_contourVertices) = contourPointsUniqueID;
+		if (contourPointsUniqueID != 0)
+		{
+			dependencies.push_back(LoadingContext::Dependency{contourPointsUniqueID, LoadingContext::Dependency::FACET_CONTOUR_VERTICES});
+		}
 	}
 
 	// contour points
@@ -531,8 +537,10 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t contourPolyUniqueID = 0;
 		if (in.read((char*)&contourPolyUniqueID, 4) < 0)
 			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
-		*(uint32_t*)(&m_contourPolyline) = contourPolyUniqueID;
+		if (contourPolyUniqueID != 0)
+		{
+			dependencies.push_back(LoadingContext::Dependency{contourPolyUniqueID, LoadingContext::Dependency::FACET_CONTOUR_POLYLINE});
+		}
 	}
 
 	// polygon mesh
@@ -542,8 +550,15 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t polygonMeshUniqueID = 0;
 		if (in.read((char*)&polygonMeshUniqueID, 4) < 0)
 			return ReadError();
-		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
-		*(uint32_t*)(&m_polygonMesh) = polygonMeshUniqueID;
+		if (polygonMeshUniqueID != 0)
+		{
+			dependencies.push_back(LoadingContext::Dependency{polygonMeshUniqueID, LoadingContext::Dependency::FACET_POLYGON_MESH});
+		}
+	}
+
+	if (!dependencies.empty())
+	{
+		context.incompleteEntities.insert(this, dependencies);
 	}
 
 	// plane equation (dataVersion>=32)

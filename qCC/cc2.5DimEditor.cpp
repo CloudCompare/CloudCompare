@@ -37,7 +37,7 @@
 #include <QSettings>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 cc2Point5DimEditor::cc2Point5DimEditor()
     : m_bbEditorDlg(nullptr)

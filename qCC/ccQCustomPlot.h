@@ -29,7 +29,7 @@
 #endif
 
 // System
-#include <assert.h>
+#include <cassert>
 
 /*********************************/
 /*** Custom QCustomPlot wigets ***/

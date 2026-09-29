@@ -35,7 +35,7 @@
 #include <QInputDialog>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* parent)
     : ccPointPickingGenericInterface(pickingHub, parent)

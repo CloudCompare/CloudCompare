@@ -20,9 +20,6 @@
 // Local
 #include "mainwindow.h"
 
-// common
-#include <ccQtHelpers.h>
-
 // CCCoreLib
 #include <CloudSamplingTools.h>
 #include <DgmOctree.h>

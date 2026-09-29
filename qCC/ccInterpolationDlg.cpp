@@ -18,7 +18,7 @@
 #include "ccInterpolationDlg.h"
 
 // System
-#include <assert.h>
+#include <cassert>
 
 ccInterpolationDlg::ccInterpolationDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

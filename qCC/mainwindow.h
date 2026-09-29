@@ -529,7 +529,7 @@ class MainWindow : public QMainWindow
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud*                cloud,
 	                            CCCoreLib::ReferenceCloudContainer& components,
-	                            unsigned                            minPointPerComponent,
+	                            unsigned                            minPointsPerComponent,
 	                            bool                                randomColors,
 	                            bool                                selectComponents,
 	                            bool                                sortBysize = true);

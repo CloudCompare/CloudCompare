@@ -307,7 +307,7 @@ void ccColorFromScalarDlg::updateColormaps()
 	}
 }
 
-void ccColorFromScalarDlg::toggleColors(int state)
+void ccColorFromScalarDlg::toggleColors(int val)
 {
 	if (!m_systemInvalid)
 	{

@@ -226,13 +226,13 @@ bool ccRasterizeTool::showGridBoxEditor()
 	return cc2Point5DimEditor::showGridBoxEditor();
 }
 
-void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
+void ccRasterizeTool::updateCloudName(bool withNonEmptyCellNumber)
 {
 	QString str;
 	if (m_cloud)
 	{
 		str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
-		if (withNonEmptyCells)
+		if (withNonEmptyCellNumber)
 			str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
 		else
 			str += ')';

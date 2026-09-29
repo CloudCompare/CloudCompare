@@ -54,8 +54,8 @@ namespace ccEntityAction
 	bool sfArithmetic(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool sfFromColor(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool sfFromColor(ccHObject::Container selectedEntities, bool exportR, bool exportG, bool exportB, bool exportAlpha, bool exportComposite);
-	bool interpolateSFs(ccHObject::Container selectedEntities, ccMainAppInterface* parent);
-	bool interpolateSFs(ccPointCloud* source, ccPointCloud* dst, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent = nullptr);
+	bool interpolateSFs(ccHObject::Container selectedEntities, ccMainAppInterface* app);
+	bool interpolateSFs(ccPointCloud* source, ccPointCloud* dest, int sfIndex, ccPointCloudInterpolator::Parameters& params, QWidget* parent = nullptr);
 	bool sfAddConstant(ccPointCloud* cloud, QString sfName, bool integerValue, QWidget* parent = nullptr);
 
 	bool processMeshSF(ccHObject::Container selectedEntities, ccMesh::MESH_SCALAR_FIELD_PROCESS process, QWidget* parent = nullptr);

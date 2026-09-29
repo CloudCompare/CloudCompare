@@ -6742,11 +6742,11 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	repositionOverlayDialog(m_mdiDialogs.back());
 }
 
-void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)
+void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dlg)
 {
 	for (std::vector<ccMDIDialogs>::iterator it = m_mdiDialogs.begin(); it != m_mdiDialogs.end(); ++it)
 	{
-		if (it->dialog == dialog)
+		if (it->dialog == dlg)
 		{
 			m_mdiDialogs.erase(it);
 			break;

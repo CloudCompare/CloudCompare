@@ -66,7 +66,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Adds an entity
 	/** \return success, if the entity is eligible for clipping
 	 **/
-	bool addAssociatedEntity(ccHObject* anObject);
+	bool addAssociatedEntity(ccHObject* entity);
 
 	//! Returns the current number of associated entities
 	unsigned getNumberOfAssociatedEntity() const;

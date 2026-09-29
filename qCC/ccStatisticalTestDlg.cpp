@@ -19,9 +19,9 @@
 
 #include "ui_statisticalTestDlg.h"
 
-ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
-                                           QString  p2Label,
-                                           QString  p3Label /*=QString()*/,
+ccStatisticalTestDlg::ccStatisticalTestDlg(QString  param1Label,
+                                           QString  param2Label,
+                                           QString  param3Label /*=QString()*/,
                                            QString  windowTitle /*=QString()*/,
                                            QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
@@ -29,11 +29,11 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
 {
 	m_ui->setupUi(this);
 
-	m_ui->param1Label->setText(p1Label);
-	m_ui->param2Label->setText(p2Label);
-	if (!p3Label.isNull())
+	m_ui->param1Label->setText(param1Label);
+	m_ui->param2Label->setText(param2Label);
+	if (!param3Label.isNull())
 	{
-		m_ui->param3Label->setText(p3Label);
+		m_ui->param3Label->setText(param3Label);
 	}
 	else
 	{

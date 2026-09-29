@@ -174,7 +174,7 @@ namespace ccLibAlgorithms
 		return true;
 	}
 
-	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c,
+	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
 	                               int                                                     subOption,
 	                               PointCoordinateType                                     radius,
 	                               ccHObject::Container&                                   entities,
@@ -189,7 +189,7 @@ namespace ccLibAlgorithms
 		// generate the right SF name
 		QString sfName;
 
-		switch (c)
+		switch (algo)
 		{
 		case CCCoreLib::GeometricalAnalysisTools::Feature:
 		{
@@ -348,7 +348,7 @@ namespace ccLibAlgorithms
 				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
 				    [&]()
 				    {
-					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c,
+					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(algo,
 					                                                                      subOption,
 					                                                                      cloud,
 					                                                                      radius,
@@ -364,7 +364,7 @@ namespace ccLibAlgorithms
 						pc->setCurrentDisplayedScalarField(sfIdx);
 						pc->showSF(sfIdx >= 0);
 						pc->getCurrentInScalarField()->computeMinAndMax();
-						if (c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+						if (algo == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
 						{
 							// signed roughness should be displayed with a symmetrical color scale
 							auto sf = pc->getCCScalarField(pc->getCurrentInScalarFieldIndex());

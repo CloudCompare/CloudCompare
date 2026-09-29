@@ -52,7 +52,7 @@ class ccGraphicalTransformationTool : public ccOverlayDialog
 	/** Only the 'selected' entities are moved.
 	    \return success, if the entity is eligible for graphical transformation
 	**/
-	bool addEntity(ccHObject* anObject);
+	bool addEntity(ccHObject* entity);
 
 	//! Returns the number of valid entities (see addEntity)
 	unsigned getNumberOfValidEntities() const;

@@ -327,16 +327,16 @@ void ccScalarFieldsManagerDialog::showHistogram()
 	}
 }
 
-void ccScalarFieldsManagerDialog::renameSF(int row, const QString& newName)
+void ccScalarFieldsManagerDialog::renameSF(int sfIdx, const QString& newName)
 {
-	auto sf = m_pointCloud->getCCScalarField(row);
+	auto sf = m_pointCloud->getCCScalarField(sfIdx);
 	if (!sf)
 	{
 		return;
 	}
 
 	QString oldName = QString::fromStdString(sf->getName());
-	m_pointCloud->renameScalarField(row, newName.toStdString());
+	m_pointCloud->renameScalarField(sfIdx, newName.toStdString());
 
 	updateDisplay();
 

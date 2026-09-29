@@ -54,7 +54,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	    locked, or can't be segmented this way.
 	    \return whether entity has been added to the pool or not
 	**/
-	bool addEntity(ccHObject* anObject, bool silent = false);
+	bool addEntity(ccHObject* entity, bool silent = false);
 
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities() const;

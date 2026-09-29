@@ -87,7 +87,7 @@ class ccComparisonDlg : public QDialog
 	bool computeApproxDistances();
 	int  getBestOctreeLevel();
 	int  determineBestOctreeLevel(double);
-	void updateDisplay(bool showSF, bool hideRef);
+	void updateDisplay(bool showSF, bool showRef);
 	void releaseOctrees();
 
 	//! Compared entity

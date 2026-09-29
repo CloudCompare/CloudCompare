@@ -1872,7 +1872,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 
 			// try to label all CCs
 			int componentCount = CCCoreLib::AutoSegmentationTools::labelConnectedComponents(desc.pc,
-			                                                                                static_cast<unsigned char>(octreeLevel),
+			                                                                                octreeLevel,
 			                                                                                false,
 			                                                                                progressDialog.get());
 

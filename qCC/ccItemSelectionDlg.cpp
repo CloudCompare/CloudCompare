@@ -52,7 +52,7 @@ void ccItemSelectionDlg::setItems(const QStringList& items, int defaultSelectedI
 	for (int i = 0; i < items.size(); ++i)
 	{
 		// add one line per entity in the combo-box
-		listWidget->insertItem(static_cast<int>(i), new QListWidgetItem(items[i]));
+		listWidget->insertItem(i, new QListWidgetItem(items[i]));
 	}
 
 	// default selection

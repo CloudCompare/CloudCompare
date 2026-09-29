@@ -1921,7 +1921,7 @@ void ccSectionExtractionTool::extractPoints()
 
 	// progress dialog
 	ccProgressDialog              pdlg(true);
-	CCCoreLib::NormalizedProgress nprogress(&pdlg, static_cast<unsigned>(sectionCount));
+	CCCoreLib::NormalizedProgress nprogress(&pdlg, sectionCount);
 	if (!visualDebugMode)
 	{
 		pdlg.setMethodTitle(tr("Extract sections"));

@@ -1750,7 +1750,7 @@ void ccRasterizeTool::generateXRaySF()
 	progressDialog.start();
 	progressDialog.show();
 	QCoreApplication::processEvents();
-	CCCoreLib::NormalizedProgress nProgress(&progressDialog, static_cast<unsigned>(m_grid.width * m_grid.height));
+	CCCoreLib::NormalizedProgress nProgress(&progressDialog, m_grid.width * m_grid.height);
 
 	// for all cells
 	unsigned nonEmptyCellIndex      = 0;

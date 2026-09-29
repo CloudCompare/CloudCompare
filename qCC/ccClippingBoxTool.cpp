@@ -728,7 +728,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 
 						if (gap == 0 || ((P.x - static_cast<PointCoordinateType>(xi)) * cellSizePlusGap.x <= cellSize.x && (P.y - static_cast<PointCoordinateType>(yi)) * cellSizePlusGap.y <= cellSize.y && (P.z - static_cast<PointCoordinateType>(zi)) * cellSizePlusGap.z <= cellSize.z))
 						{
-							int cloudIndex = ((zi - indexMins[2]) * static_cast<int>(gridDim[1]) + (yi - indexMins[1])) * static_cast<int>(gridDim[0]) + (xi - indexMins[0]);
+							int cloudIndex = ((zi - indexMins[2]) * gridDim[1] + (yi - indexMins[1])) * gridDim[0] + (xi - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) * clouds.size() + ci < refClouds.size());
 
 							CCCoreLib::ReferenceCloud*& destCloud = refClouds[cloudIndex * clouds.size() + ci];
@@ -772,7 +772,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 					{
 						for (int k = indexMins[2]; k <= indexMaxs[2]; ++k)
 						{
-							int cloudIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
+							int cloudIndex = ((k - indexMins[2]) * gridDim[1] + (j - indexMins[1])) * gridDim[0] + (i - indexMins[0]);
 							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) * clouds.size() < refClouds.size());
 
 							for (size_t ci = 0; ci != clouds.size(); ++ci)
@@ -901,7 +901,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 					{
 						for (int k = indexMins[2]; k <= indexMaxs[2]; ++k)
 						{
-							int sliceIndex = ((k - indexMins[2]) * static_cast<int>(gridDim[1]) + (j - indexMins[1])) * static_cast<int>(gridDim[0]) + (i - indexMins[0]);
+							int sliceIndex = ((k - indexMins[2]) * gridDim[1] + (j - indexMins[1])) * gridDim[0] + (i - indexMins[0]);
 
 							CCVector3 C = gridOrigin + CCVector3(i * cellSizePlusGap.x, j * cellSizePlusGap.y, k * cellSizePlusGap.z);
 							ccBBox    cropBox(C, C + cellSize, true);

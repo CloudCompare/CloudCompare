@@ -151,10 +151,10 @@ namespace ccEntityAction
 
 				if (colorize)
 				{
-					cloud->colorize(static_cast<float>(colour.redF()),
-					                static_cast<float>(colour.greenF()),
-					                static_cast<float>(colour.blueF()),
-					                static_cast<float>(colour.alphaF()));
+					cloud->colorize(colour.redF(),
+					                colour.greenF(),
+					                colour.blueF(),
+					                colour.alphaF());
 				}
 				else
 				{
@@ -1576,7 +1576,7 @@ namespace ccEntityAction
 					CCCoreLib::ReferenceCloud referenceCloud(pc);
 
 					// populate the cloud with the points which have the selected class
-					for (unsigned index = 0; index < static_cast<unsigned>(pc->size()); index++)
+					for (unsigned index = 0; index < pc->size(); index++)
 					{
 						if (static_cast<int>(sf->getValue(index)) == pointClass)
 						{

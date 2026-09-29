@@ -6244,7 +6244,7 @@ void MainWindow::doActionUnroll()
 		return;
 	}
 
-	ccPointCloud* inputAsCloud = static_cast<ccPointCloud*>(cloud);
+	ccPointCloud* inputAsCloud = cloud;
 
 	// wether the input entity is a mesh
 	ccMesh* inputMesh = ccHObjectCaster::ToMesh(m_selectedEntities.front());

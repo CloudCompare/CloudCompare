@@ -206,14 +206,14 @@ void ccSubsamplingDlg::sliderMoved(int sliderPos)
 		rate = 1.0 - rate;
 	}
 
-	double valueRange = static_cast<double>(m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum());
+	double valueRange = m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum();
 	double newValue   = m_ui->valueDoubleSpinBox->minimum() + rate * valueRange;
 	m_ui->valueDoubleSpinBox->setValue(newValue);
 }
 
 void ccSubsamplingDlg::valueChanged(double value)
 {
-	double valueRange = static_cast<double>(m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum());
+	double valueRange = m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum();
 	double rate       = (value - m_ui->valueDoubleSpinBox->minimum()) / valueRange;
 
 	if (m_ui->samplingMethodComboBox->currentIndex() == SPATIAL)

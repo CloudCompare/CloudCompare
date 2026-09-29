@@ -166,11 +166,11 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		parser->toggleSilentMode(true);
 	}
 
-	std::unique_ptr<QDialog> consoleDlg(nullptr);
+	std::unique_ptr<QDialog> consoleDlg;
 	if (!parser->silentMode())
 	{
 		// show console
-		consoleDlg.reset(new QDialog);
+		consoleDlg = std::make_unique<QDialog>();
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(consoleDlg.get());
 		consoleDlg->show();

@@ -65,7 +65,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parent)
 	{
-		progressDlg.reset(new ccProgressDialog(true, parent));
+		progressDlg = std::make_unique<ccProgressDialog>(true, parent);
 	}
 
 	CCCoreLib::Garbage<CCCoreLib::GenericIndexedCloudPersist> cloudGarbage;

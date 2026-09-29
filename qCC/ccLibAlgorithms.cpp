@@ -150,7 +150,7 @@ namespace ccLibAlgorithms
 		std::unique_ptr<ccProgressDialog> pDlg;
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 		}
 
@@ -551,7 +551,7 @@ namespace ccLibAlgorithms
 				std::unique_ptr<ccProgressDialog> pDlg;
 				if (parent)
 				{
-					pDlg.reset(new ccProgressDialog(true, parent));
+					pDlg = std::make_unique<ccProgressDialog>(true, parent);
 				}
 
 				ccOctree::Shared octree = cloud->getOctree();
@@ -679,7 +679,7 @@ namespace ccLibAlgorithms
 		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setMethodTitle(QObject::tr("Computing entities scales"));
 			pDlg->setInfo(QObject::tr("Entities: %1").arg(count));
 		}

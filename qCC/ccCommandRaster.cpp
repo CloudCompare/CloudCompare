@@ -434,10 +434,10 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			}
 
 			// progress dialog
-			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> pDlg;
 			if (!cmd.silentMode())
 			{
-				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
+				pDlg = std::make_unique<ccProgressDialog>(true, cmd.widgetParent());
 			}
 
 			ccRasterGrid::InterpolationType interpolationType   = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);

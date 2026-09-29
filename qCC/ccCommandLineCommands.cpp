@@ -1119,7 +1119,7 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
 		{
-			progressDialog.reset(new ccProgressDialog(true, cmd.widgetParent()));
+			progressDialog = std::make_unique<ccProgressDialog>(true, cmd.widgetParent());
 			progressDialog->setAutoClose(false);
 		}
 
@@ -1672,7 +1672,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (!cmd.silentMode())
 		{
-			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 			progressDialog->setAutoClose(false);
 		}
 
@@ -1841,10 +1841,10 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 
 	try
 	{
-		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog;
 		if (!cmd.silentMode())
 		{
-			progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+			progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 			progressDialog->setAutoClose(false);
 		}
 
@@ -4079,7 +4079,7 @@ bool CommandOrientNormalsMST::process(ccCommandLineInterface& cmd)
 	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -4144,10 +4144,10 @@ bool CommandSORFilter::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 	}
 
-	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog;
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -4253,12 +4253,12 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 	const auto maybeAbsoluteError = parser.takeEnum<bool>({{COMMAND_NOISE_FILTER_REL, false},
 	                                                       {COMMAND_NOISE_FILTER_ABS, true}},
 	                                                      QObject::tr("error type"));
-	bool       absoluteError;
+	bool       useAbsoluteError;
 	if (!maybeAbsoluteError)
 	{
 		return false;
 	}
-	absoluteError = *maybeAbsoluteError;
+	useAbsoluteError = *maybeAbsoluteError;
 
 	double error = std::numeric_limits<double>::quiet_NaN();
 	{
@@ -4282,7 +4282,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -4297,7 +4297,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 		                                                                                  removeIsolatedPoints,
 		                                                                                  knn > 0,
 		                                                                                  knn,
-		                                                                                  absoluteError,
+		                                                                                  useAbsoluteError,
 		                                                                                  error,
 		                                                                                  nullptr,
 		                                                                                  progressDialog.get());
@@ -4377,10 +4377,10 @@ bool CommandRemoveDuplicatePoints::process(ccCommandLineInterface& cmd)
 
 	cmd.print(QObject::tr("Minimum distance between points: '%1'").arg(minDistanceBetweenPoints));
 
-	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog;
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -4533,10 +4533,10 @@ bool CommandSampleMesh::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
 	}
 
-	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog;
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -5888,10 +5888,10 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr("No cloud available. Be sure to open one first!"));
 	}
 
-	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog;
 	if (!cmd.silentMode())
 	{
-		progressDialog.reset(new ccProgressDialog(false, cmd.widgetParent()));
+		progressDialog = std::make_unique<ccProgressDialog>(false, cmd.widgetParent());
 		progressDialog->setAutoClose(false);
 	}
 
@@ -6013,11 +6013,11 @@ bool CommandStatFit::process(ccCommandLineInterface& cmd)
 		std::unique_ptr<CCCoreLib::GenericDistribution> distrib;
 		if (distribStr == "GAUSS")
 		{
-			distrib.reset(new CCCoreLib::NormalDistribution());
+			distrib = std::make_unique<CCCoreLib::NormalDistribution>();
 		}
 		else
 		{
-			distrib.reset(new CCCoreLib::WeibullDistribution());
+			distrib = std::make_unique<CCCoreLib::WeibullDistribution>();
 		}
 
 		if (!distrib->computeParameters(CCCoreLib::GenericDistribution::SFAsScalarContainer(*sf)))

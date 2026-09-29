@@ -596,7 +596,7 @@ bool ccVolumeCalcTool::ComputeVolume(ccRasterGrid&                     grid,
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 	}
 
 	ccRasterGrid groundRaster;

@@ -876,7 +876,7 @@ namespace ccEntityAction
 
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 			pDlg->setModal(true);
 		}
@@ -1082,7 +1082,7 @@ namespace ccEntityAction
 
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 			pDlg->setModal(true);
 		}
@@ -3096,10 +3096,10 @@ namespace ccEntityAction
 		switch (distribIndex)
 		{
 		case 0: // Gauss
-			sDlg.reset(new ccStatisticalTestDlg("mu", "sigma", QString(), QT_TR_NOOP("Local Statistical Test (Gauss)"), parent));
+			sDlg = std::make_unique<ccStatisticalTestDlg>("mu", "sigma", QString(), QT_TR_NOOP("Local Statistical Test (Gauss)"), parent);
 			break;
 		case 1: // Weibull
-			sDlg.reset(new ccStatisticalTestDlg("a", "b", "shift", QT_TR_NOOP("Local Statistical Test (Weibull)"), parent));
+			sDlg = std::make_unique<ccStatisticalTestDlg>("a", "b", "shift", QT_TR_NOOP("Local Statistical Test (Weibull)"), parent);
 			break;
 		default:
 			ccLog::Error(QT_TR_NOOP("Invalid distribution!"));

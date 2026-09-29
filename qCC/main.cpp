@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 
 		// init splash screen
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
+		splash = std::make_unique<QSplashScreen>(pixmap, Qt::WindowStaysOnTopHint);
 		splash->show();
 	}
 

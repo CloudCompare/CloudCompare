@@ -342,7 +342,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(true, this));
+		progressDlg = std::make_unique<ccProgressDialog>(true, this);
 		progressDlg->show();
 	}
 
@@ -540,7 +540,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(false, this));
+		progressDlg = std::make_unique<ccProgressDialog>(false, this);
 		progressDlg->setMethodTitle(tr("Determining optimal octree level"));
 		progressDlg->setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); // we lie here ;)
 		progressDlg->start();
@@ -736,7 +736,7 @@ bool ccComparisonDlg::computeDistances()
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(true, this));
+		progressDlg = std::make_unique<ccProgressDialog>(true, this);
 	}
 
 	std::array<ccScalarField::Shared, 3> splitDistances;

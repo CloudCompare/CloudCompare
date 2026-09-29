@@ -364,7 +364,7 @@ ccWaveDialog::ccWaveDialog(ccPointCloud* cloud,
     , m_pickingHub(pickingHub)
     , m_gui(new Ui_WaveDialog)
     , m_waveMax(0)
-    , m_label(std::shared_ptr<cc2DLabel>(new cc2DLabel()))
+    , m_label(std::make_shared<cc2DLabel>())
     , m_display(cloud ? cloud->getDisplay() : nullptr)
 {
 	m_gui->setupUi(this);

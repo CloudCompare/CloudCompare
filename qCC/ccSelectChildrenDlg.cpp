@@ -79,7 +79,7 @@ QString ccSelectChildrenDlg::getSelectedName()
 {
 	if (!m_ui->nameCheckBox->isChecked())
 	{
-		return QString();
+		return {};
 	}
 
 	return m_ui->nameLineEdit->text();

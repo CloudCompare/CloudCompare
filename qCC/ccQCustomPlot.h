@@ -302,12 +302,12 @@ class QCPSelectableCursor : public QCPAbstractPlottable
 	QCPRange getKeyRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth) const override
 	{
 		foundRange = false;
-		return QCPRange();
+		return {};
 	}
 	QCPRange getValueRange(bool& foundRange, QCP::SignDomain inSignDomain = QCP::sdBoth, const QCPRange& inKeyRange = QCPRange()) const override
 	{
 		foundRange = false;
-		return QCPRange();
+		return {};
 	}
 
 	// property members:

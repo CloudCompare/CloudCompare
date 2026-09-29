@@ -2899,12 +2899,12 @@ namespace ccEntityAction
 					    {
 						    return newOctree;
 					    }
-					    return ccOctree::Shared(nullptr);
+					    return {nullptr};
 				    }
 
 				    default:
 					    Q_ASSERT(false);
-					    return ccOctree::Shared(nullptr);
+					    return {nullptr};
 				    }
 			    });
 			qint64 elapsedTime_ms = eTimer.elapsed();

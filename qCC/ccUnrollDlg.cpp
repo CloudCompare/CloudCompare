@@ -102,17 +102,17 @@ CCVector3d ccUnrollDlg::getAxis() const
 	switch (axisDim)
 	{
 	case 0:
-		return CCVector3d(1.0, 0.0, 0.0);
+		return {1.0, 0.0, 0.0};
 		break;
 	case 1:
-		return CCVector3d(0.0, 1.0, 0.0);
+		return {0.0, 1.0, 0.0};
 		break;
 	case 2:
-		return CCVector3d(0.0, 0.0, 1.0);
+		return {0.0, 0.0, 1.0};
 		break;
 	case 3:
 	default:
-		return CCVector3d(m_ui->axisXDoubleSpinBox->value(), m_ui->axisYDoubleSpinBox->value(), m_ui->axisZDoubleSpinBox->value());
+		return {m_ui->axisXDoubleSpinBox->value(), m_ui->axisYDoubleSpinBox->value(), m_ui->axisZDoubleSpinBox->value()};
 	}
 
 	return {};
@@ -141,9 +141,9 @@ void ccUnrollDlg::getAngleRange(double& start_deg, double& stop_deg) const
 
 CCVector3 ccUnrollDlg::getAxisPosition() const
 {
-	return CCVector3(static_cast<PointCoordinateType>(m_ui->axisCenterXDoubleSpinBox->value()),
-	                 static_cast<PointCoordinateType>(m_ui->axisCenterYDoubleSpinBox->value()),
-	                 static_cast<PointCoordinateType>(m_ui->axisCenterZDoubleSpinBox->value()));
+	return {static_cast<PointCoordinateType>(m_ui->axisCenterXDoubleSpinBox->value()),
+	        static_cast<PointCoordinateType>(m_ui->axisCenterYDoubleSpinBox->value()),
+	        static_cast<PointCoordinateType>(m_ui->axisCenterZDoubleSpinBox->value())};
 }
 
 double ccUnrollDlg::getRadius() const

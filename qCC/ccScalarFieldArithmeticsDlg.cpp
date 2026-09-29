@@ -176,7 +176,7 @@ QString ccScalarFieldArithmeticsDlg::GetOperationName(Operation op, const QStrin
 		break;
 	}
 
-	return QString();
+	return {};
 }
 
 bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)

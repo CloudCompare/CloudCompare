@@ -271,7 +271,7 @@ QString ccCommandLineParser::getExportFilename(const CLEntityDesc& entityDesc,
 	{
 		assert(false);
 		warning("[getExportFilename] Internal error: invalid input entity!");
-		return QString();
+		return {};
 	}
 
 	// sub-item?
@@ -365,7 +365,7 @@ QString ccCommandLineParser::exportEntity(CLEntityDesc&                         
 	                                           options.testFlag(ExportOption::ForceNoTimestamp));
 	if (outputFilename.isEmpty())
 	{
-		return QString();
+		return {};
 	}
 
 	// update the entity name as well

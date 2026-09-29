@@ -303,15 +303,15 @@ int GetScalarFieldIndex(ccPointCloud* cloud, int sfIndex, const QString& sfName,
 		assert(false);
 		return -1;
 	}
-	else if (!cloud->hasScalarFields())
+	if (!cloud->hasScalarFields())
 	{
 		return -1;
 	}
-	else if (sfIndex == -2)
+	if (sfIndex == -2)
 	{
 		return static_cast<int>(cloud->getNumberOfScalarFields()) - 1;
 	}
-	else if (sfIndex == -1)
+	if (sfIndex == -1)
 	{
 		if (!sfName.isEmpty()) // the user has provided a SF name instead of an index
 		{
@@ -349,10 +349,7 @@ CCCoreLib::ScalarField::Shared GetScalarField(ccPointCloud* cloud, int sfIndex, 
 	{
 		return nullptr;
 	}
-	else
-	{
-		return cloud->getScalarField(sfIndex);
-	}
+	return cloud->getScalarField(sfIndex);
 }
 
 CommandChangeOutputFormat::CommandChangeOutputFormat(const QString& name, const QString& keyword)
@@ -2783,10 +2780,7 @@ static ScalarType GetSFValue(const ccPointCloud& pc, int sfIndex, ScalarType val
 		{
 			return range.first;
 		}
-		else
-		{
-			return range.second;
-		}
+		return range.second;
 	}
 	return 1.0;
 }
@@ -2799,38 +2793,35 @@ static USE_SPECIAL_SF_VALUE ToSpecialSFValue(QString valString)
 	{
 		return USE_MIN;
 	}
-	else if (valString == "DISP_MIN")
+	if (valString == "DISP_MIN")
 	{
 		return USE_DISP_MIN;
 	}
-	else if (valString == "SAT_MIN")
+	if (valString == "SAT_MIN")
 	{
 		return USE_SAT_MIN;
 	}
-	else if (valString == "N_SIGMA_MIN")
+	if (valString == "N_SIGMA_MIN")
 	{
 		return USE_N_SIGMA_MIN;
 	}
-	else if (valString == "MAX")
+	if (valString == "MAX")
 	{
 		return USE_MAX;
 	}
-	else if (valString == "DISP_MAX")
+	if (valString == "DISP_MAX")
 	{
 		return USE_DISP_MAX;
 	}
-	else if (valString == "SAT_MAX")
+	if (valString == "SAT_MAX")
 	{
 		return USE_SAT_MAX;
 	}
-	else if (valString == "N_SIGMA_MAX")
+	if (valString == "N_SIGMA_MAX")
 	{
 		return USE_N_SIGMA_MAX;
 	}
-	else
-	{
-		return USE_NONE;
-	}
+	return USE_NONE;
 }
 
 bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
@@ -3496,10 +3487,7 @@ bool CommandRemoveSF::removeSF(int sfIndex, ccPointCloud& pc)
 
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 bool CommandRemoveSF::process(ccCommandLineInterface& cmd)
@@ -3725,7 +3713,7 @@ bool CommandMatchBBCenters::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error("No entity loaded!");
 	}
-	else if (entities.size() == 1)
+	if (entities.size() == 1)
 	{
 		cmd.warning("Nothing to do: only one entity currently loaded!");
 		return true;
@@ -5211,10 +5199,7 @@ bool CommandColorBanding::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Not enough memory"));
 				}
-				else
-				{
-					hasclouds = true;
-				}
+				hasclouds = true;
 			}
 		}
 
@@ -5237,11 +5222,8 @@ bool CommandColorBanding::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Not enough memory"));
 				}
-				else
-				{
-					desc.mesh->showColors(true);
-					hasMeshes = true;
-				}
+				desc.mesh->showColors(true);
+				hasMeshes = true;
 			}
 			else
 			{
@@ -5381,15 +5363,13 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 			// we would need at least two meshes
 			return cmd.error(QObject::tr("No point cloud available. Be sure to open or generate one first!"));
 		}
-		else
+
+		cmd.warning(QObject::tr("No point cloud available. Will use the first mesh vertices as compared cloud."));
+		compEntity = &(cmd.meshes().front());
+		compCloud  = dynamic_cast<ccPointCloud*>(cmd.meshes()[nextMeshIndex++].mesh->getAssociatedCloud());
+		if (!compCloud)
 		{
-			cmd.warning(QObject::tr("No point cloud available. Will use the first mesh vertices as compared cloud."));
-			compEntity = &(cmd.meshes().front());
-			compCloud  = dynamic_cast<ccPointCloud*>(cmd.meshes()[nextMeshIndex++].mesh->getAssociatedCloud());
-			if (!compCloud)
-			{
-				return cmd.error(QObject::tr("Unhandled mesh vertices type"));
-			}
+			return cmd.error(QObject::tr("Unhandled mesh vertices type"));
 		}
 	}
 	else // at least two clouds
@@ -5411,7 +5391,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("No mesh available. Be sure to open one first!"));
 		}
-		else if (cmd.meshes().size() != nextMeshIndex + 1)
+		if (cmd.meshes().size() != nextMeshIndex + 1)
 		{
 			cmd.warning(QString("Multiple meshes loaded! We take the %1 one by default").arg(nextMeshIndex == 0 ? "first" : "second"));
 		}
@@ -5423,7 +5403,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Only one point cloud available. Be sure to open or generate a second one before performing C2C distance!"));
 		}
-		else if (cmd.clouds().size() > 2)
+		if (cmd.clouds().size() > 2)
 		{
 			cmd.warning(QObject::tr("More than 3 point clouds loaded! We take the second one as reference by default"));
 		}
@@ -5740,7 +5720,7 @@ bool CommandCPS::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("At least two point clouds are needed to compute the closest point set!"));
 	}
-	else if (cmd.clouds().size() > 2)
+	if (cmd.clouds().size() > 2)
 	{
 		cmd.warning(QObject::tr("More than 3 point clouds loaded! We take the second one as reference by default"));
 	}
@@ -6188,7 +6168,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 		}
-		else if (operation <= ccScalarFieldArithmeticsDlg::MAX || operation == ccScalarFieldArithmeticsDlg::SET)
+		if (operation <= ccScalarFieldArithmeticsDlg::MAX || operation == ccScalarFieldArithmeticsDlg::SET)
 		{
 			return cmd.error(QObject::tr("Operation %1 can't be applied with %2. Consider using the %3 command").arg(opName, COMMAND_SF_ARITHMETIC, COMMAND_SF_OP));
 		}
@@ -6225,7 +6205,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(desc, "SF_ARITHMETIC");
 					if (!errorStr.isEmpty())
@@ -6254,7 +6234,7 @@ bool CommandSFArithmetic::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_ARITHMETIC");
 					if (!errorStr.isEmpty())
@@ -6309,7 +6289,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 		}
-		else if (operation > ccScalarFieldArithmeticsDlg::MAX && operation != ccScalarFieldArithmeticsDlg::SET)
+		if (operation > ccScalarFieldArithmeticsDlg::MAX && operation != ccScalarFieldArithmeticsDlg::SET)
 		{
 			return cmd.error(QObject::tr("Operation %1 can't be applied with %2. Consider using the %3 command").arg(opName, COMMAND_SF_OP, COMMAND_SF_ARITHMETIC));
 		}
@@ -6352,7 +6332,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(desc, "SF_OP");
 					if (!errorStr.isEmpty())
@@ -6383,7 +6363,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP");
 					if (!errorStr.isEmpty())
@@ -6427,7 +6407,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 		{
 			return cmd.error(QObject::tr("Unknown operation! (%1)").arg(opName));
 		}
-		else if (operation > ccScalarFieldArithmeticsDlg::MAX)
+		if (operation > ccScalarFieldArithmeticsDlg::MAX)
 		{
 			return cmd.error(QObject::tr("Operation %1 can't be applied with %2").arg(opName, COMMAND_SF_OP_SF));
 		}
@@ -6460,7 +6440,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on cloud '%1'").arg(desc.pc->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(desc, "SF_OP_SF");
 					if (!errorStr.isEmpty())
@@ -6496,7 +6476,7 @@ bool CommandSFOperationSF::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QObject::tr("Failed to apply operation on mesh '%1'").arg(mesh->getName()));
 				}
-				else if (cmd.autoSaveMode())
+				if (cmd.autoSaveMode())
 				{
 					QString errorStr = cmd.exportEntity(cmd.meshes()[j], "SF_OP_SF");
 					if (!errorStr.isEmpty())
@@ -6794,7 +6774,7 @@ bool CommandFilter::process(ccCommandLineInterface& cmd)
 	{
 		return ccEntityAction::sfGaussianFilter(selectedEntities, filterParams, cmd.widgetParent(), true);
 	}
-	else if (applyToRGB)
+	if (applyToRGB)
 	{
 		return ccEntityAction::rgbGaussianFilter(selectedEntities, filterParams, cmd.widgetParent(), true);
 	}
@@ -8259,11 +8239,8 @@ bool CommandSetVerbosity::process(ccCommandLineInterface& cmd)
 	{
 		return cmd.error(QObject::tr("Invalid verbosity level %1").arg(verbosityLevel));
 	}
-	else
-	{
-		cmd.print(QObject::tr("Set verbosity level to %1").arg(verbosityLevel));
-		ccLog::SetVerbosityLevel(verbosityLevel);
-	}
+	cmd.print(QObject::tr("Set verbosity level to %1").arg(verbosityLevel));
+	ccLog::SetVerbosityLevel(verbosityLevel);
 
 	return true;
 }

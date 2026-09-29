@@ -127,11 +127,8 @@ ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::getOperation
 	{
 		return static_cast<ccScalarFieldArithmeticsDlg::Operation>(opIndex);
 	}
-	else
-	{
-		assert(false);
-		return INVALID;
-	}
+	assert(false);
+	return INVALID;
 }
 
 ccScalarFieldArithmeticsDlg::Operation ccScalarFieldArithmeticsDlg::GetOperationByName(const QString& name)
@@ -325,10 +322,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				                        .arg(sf1->getOffset()));
 				return true;
 			}
-			else
-			{
-				sf1->setOffset(sf1->getOffset() + sf2->getOffset());
-			}
+
+			sf1->setOffset(sf1->getOffset() + sf2->getOffset());
 			break;
 		}
 		case MINUS:
@@ -346,10 +341,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 				                        .arg(sf1->getOffset()));
 				return true;
 			}
-			else
-			{
-				sf1->setOffset(sf1->getOffset() - sf2->getOffset());
-			}
+			sf1->setOffset(sf1->getOffset() - sf2->getOffset());
 			break;
 		}
 		case MULTIPLY:

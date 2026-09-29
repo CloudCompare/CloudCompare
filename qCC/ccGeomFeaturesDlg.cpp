@@ -84,10 +84,7 @@ CCVector3* ccGeomFeaturesDlg::getUpDirection() const
 		UpDirection.z = static_cast<PointCoordinateType>(upDirZDoubleSpinBox->value());
 		return &UpDirection;
 	}
-	else
-	{
-		return nullptr;
-	}
+	return nullptr;
 }
 
 void ccGeomFeaturesDlg::setSelectedFeatures(const ccLibAlgorithms::GeomCharacteristicSet& features)

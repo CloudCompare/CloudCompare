@@ -72,10 +72,7 @@ struct FileVersionToCCVersion : QMap<short, QString>
 		{
 			return value(fileVersion);
 		}
-		else
-		{
-			return "Unknown version";
-		}
+		return "Unknown version";
 	}
 };
 static FileVersionToCCVersion s_fileVersionToCCVersion;

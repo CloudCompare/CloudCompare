@@ -874,7 +874,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_AREA;
@@ -914,7 +914,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_ARROW;

@@ -44,14 +44,11 @@ class ccCustomDoubleValidator : public QValidator
 				input[i] = '.';
 				continue;
 			}
-			else if (c == '.' || c == '-' || c.isDigit())
+			if (c == '.' || c == '-' || c.isDigit())
 			{
 				continue;
 			}
-			else
-			{
-				return Invalid;
-			}
+			return Invalid;
 		}
 		return Acceptable;
 	}

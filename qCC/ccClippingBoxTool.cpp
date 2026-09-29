@@ -448,7 +448,7 @@ ccHObject* GetSlice(ccHObject* obj, ccClipBox* clipBox, bool silent, bool extrac
 		}
 		return sliceCloud;
 	}
-	else if (obj->isKindOf(CC_TYPES::MESH))
+	if (obj->isKindOf(CC_TYPES::MESH))
 	{
 		const ccGLMatrix* _transformation = nullptr;
 		ccGLMatrix        transformation;
@@ -1252,7 +1252,7 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 			}
 			return false;
 		}
-		else if (warningsIssued)
+		if (warningsIssued)
 		{
 			ccLog::Warning(tr("[ExtractSlicesAndContours] Warnings were issued during the process! (result may be incomplete)"));
 		}

@@ -334,7 +334,7 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(false);
 		return true;
 	}
-	else if (translateRef->isA(CC_TYPES::PLANE))
+	if (translateRef->isA(CC_TYPES::PLANE))
 	{
 		ccPlane* plane            = static_cast<ccPlane*>(translateRef);
 		m_advTranslationTransform = ccGLMatrixd(plane->getTransformation().data());
@@ -342,7 +342,7 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(true);
 		return true;
 	}
-	else if (translateRef->isA(CC_TYPES::COORDINATESYSTEM))
+	if (translateRef->isA(CC_TYPES::COORDINATESYSTEM))
 	{
 		ccCoordinateSystem* cs    = static_cast<ccCoordinateSystem*>(translateRef);
 		m_advTranslationTransform = ccGLMatrixd(cs->getTransformation().data());
@@ -350,13 +350,10 @@ bool ccGraphicalTransformationTool::setAdvTranslationTransform(ccHObject* transl
 		TyCheckBox->setEnabled(true);
 		return true;
 	}
-	else
-	{
-		advTranslateComboBox->setCurrentIndex(0);
-		TxCheckBox->setEnabled(true);
-		TyCheckBox->setEnabled(true);
-		return false;
-	}
+	advTranslateComboBox->setCurrentIndex(0);
+	TxCheckBox->setEnabled(true);
+	TyCheckBox->setEnabled(true);
+	return false;
 }
 
 bool ccGraphicalTransformationTool::setAdvRotationAxis(ccHObject* rotateRef, rotComboBoxItems selectedAxis)
@@ -712,7 +709,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 			return false;
 		}
 		// if the inverse is true, then we get rid of the current element!
-		else if (entity->isAncestorOf(previous))
+		if (entity->isAncestorOf(previous))
 		{
 			m_toTransform.detachChild(previous);
 			--n;

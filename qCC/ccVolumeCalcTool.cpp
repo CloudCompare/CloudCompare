@@ -934,10 +934,7 @@ bool ccVolumeCalcTool::updateGrid()
 		outputReport(reportInfo);
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 void ccVolumeCalcTool::exportToClipboard() const

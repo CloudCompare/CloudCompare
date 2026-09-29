@@ -911,7 +911,7 @@ bool ccEnvelopeExtractor::ExtractFlatEnvelope(CCCoreLib::GenericIndexedCloudPers
 	{
 		return false;
 	}
-	else if (!allowSplitting)
+	if (!allowSplitting)
 	{
 		parts.push_back(basePoly);
 		return true;

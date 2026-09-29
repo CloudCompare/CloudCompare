@@ -359,7 +359,7 @@ namespace ccEntityAction
 			ccLog::Error(QT_TR_NOOP("None of the selected entities has per-point or per-vertex colors!"));
 			return false;
 		}
-		else if (cloud1->hasColors() && cloud2->hasColors())
+		if (cloud1->hasColors() && cloud2->hasColors())
 		{
 			ccLog::Error(QT_TR_NOOP("Both entities have colors! Remove the colors on the entity you wish to import the colors to!"));
 			return false;
@@ -435,7 +435,7 @@ namespace ccEntityAction
 			ccLog::Error(QT_TR_NOOP("None of the selected entities has per-point or per-vertex colors!"));
 			return false;
 		}
-		else if (cloud1->hasScalarFields() && cloud2->hasScalarFields())
+		if (cloud1->hasScalarFields() && cloud2->hasScalarFields())
 		{
 			// ask the user to chose which will be the 'source' cloud
 			ccOrderChoiceDlg ocDlg(cloud1, QT_TR_NOOP("Source"), cloud2, QT_TR_NOOP("Destination"), app);
@@ -611,30 +611,27 @@ namespace ccEntityAction
 					ccLog::Warning(QObject::tr("[ConvertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
 					continue;
 				}
+				if (mesh->hasColors()
+				    && QMessageBox::warning(parent,
+				                            QT_TR_NOOP("Mesh already has colors"),
+				                            QObject::tr("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
+				                            QMessageBox::Yes | QMessageBox::No,
+				                            QMessageBox::No)
+				           != QMessageBox::Yes)
+				{
+					continue;
+				}
+
+				if (mesh->convertMaterialsToVertexColors())
+				{
+					mesh->showColors(true);
+					mesh->showSF(false); // just in case
+					mesh->showMaterials(false);
+					mesh->prepareDisplayForRefresh_recursive();
+				}
 				else
 				{
-					if (mesh->hasColors()
-					    && QMessageBox::warning(parent,
-					                            QT_TR_NOOP("Mesh already has colors"),
-					                            QObject::tr("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
-					                            QMessageBox::Yes | QMessageBox::No,
-					                            QMessageBox::No)
-					           != QMessageBox::Yes)
-					{
-						continue;
-					}
-
-					if (mesh->convertMaterialsToVertexColors())
-					{
-						mesh->showColors(true);
-						mesh->showSF(false); // just in case
-						mesh->showMaterials(false);
-						mesh->prepareDisplayForRefresh_recursive();
-					}
-					else
-					{
-						ccLog::Warning(QObject::tr("[ConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
-					}
+					ccLog::Warning(QObject::tr("[ConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
 				}
 			}
 		}
@@ -1308,28 +1305,25 @@ namespace ccEntityAction
 					ccLog::Error(QT_TR_NOOP("Not enough memory!"));
 					break;
 				}
-				else
+				ScalarType minSF = sf->getMin();
+				ScalarType maxSF = sf->getMax();
+
+				ScalarType step = (maxSF - minSF) / (s_randomColorsNumber - 1);
+				if (step == 0)
+					step = static_cast<ScalarType>(1.0);
+
+				for (unsigned i = 0; i < pc->size(); ++i)
 				{
-					ScalarType minSF = sf->getMin();
-					ScalarType maxSF = sf->getMax();
+					ScalarType val      = sf->getValue(i);
+					unsigned   colIndex = static_cast<unsigned>((val - minSF) / step);
+					if (colIndex == s_randomColorsNumber)
+						--colIndex;
 
-					ScalarType step = (maxSF - minSF) / (s_randomColorsNumber - 1);
-					if (step == 0)
-						step = static_cast<ScalarType>(1.0);
-
-					for (unsigned i = 0; i < pc->size(); ++i)
-					{
-						ScalarType val      = sf->getValue(i);
-						unsigned   colIndex = static_cast<unsigned>((val - minSF) / step);
-						if (colIndex == s_randomColorsNumber)
-							--colIndex;
-
-						pc->setPointColor(i, randomColors->getValue(colIndex));
-					}
-
-					pc->showColors(true);
-					pc->showSF(false); // just in case
+					pc->setPointColor(i, randomColors->getValue(colIndex));
 				}
+
+				pc->showColors(true);
+				pc->showSF(false); // just in case
 
 				pc->prepareDisplayForRefresh_recursive();
 			}
@@ -1662,11 +1656,8 @@ namespace ccEntityAction
 		{
 			return static_cast<PointCoordinateType>(out);
 		}
-		else
-		{
-			ccLog::Warning(QT_TR_NOOP("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
-			return minSFValue;
-		}
+		ccLog::Warning(QT_TR_NOOP("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
+		return minSFValue;
 	}
 
 	bool sfSetAsCoord(ccHObject* entity, QWidget* parent /*=nullptr*/)
@@ -2970,7 +2961,7 @@ namespace ccEntityAction
 					ent->prepareDisplayForRefresh();
 					continue;
 				}
-				else if (mesh->hasNormals()) // per-vertex normals?
+				if (mesh->hasNormals()) // per-vertex normals?
 				{
 					if (mesh->getParent()
 					    && (mesh->getParent()->isA(CC_TYPES::MESH) /*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) // TODO

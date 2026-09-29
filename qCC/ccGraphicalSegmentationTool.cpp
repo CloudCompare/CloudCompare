@@ -490,7 +490,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
@@ -558,7 +558,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+	if (entity->isKindOf(CC_TYPES::POLY_LINE))
 	{
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
 		assert(poly);
@@ -586,7 +586,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		// automatically add the entities contained in the group
 		bool result = false;
@@ -595,14 +595,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return result;
 	}
-	else
+	if (!silent)
 	{
-		if (!silent)
-		{
-			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
-		}
-		return false;
+		ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
 	}
+	return false;
 }
 
 unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities() const

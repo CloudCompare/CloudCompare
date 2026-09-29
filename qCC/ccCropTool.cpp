@@ -65,7 +65,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 
 		return croppedEnt;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		ccGenericMesh*                                       mesh = static_cast<ccGenericMesh*>(entity);
 		CCCoreLib::ManualSegmentationTools::MeshCutterParams params;

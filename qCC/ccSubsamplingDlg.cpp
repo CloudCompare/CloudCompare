@@ -132,10 +132,7 @@ CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud
 			                                                             octree.data(),
 			                                                             progressCb);
 		}
-		else
-		{
-			ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-		}
+		ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 	}
 	break;
 
@@ -155,10 +152,7 @@ CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud
 			                                                                      progressCb,
 			                                                                      octree.data());
 		}
-		else
-		{
-			ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-		}
+		ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 	}
 	break;
 	}

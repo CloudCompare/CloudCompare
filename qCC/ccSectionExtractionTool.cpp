@@ -452,8 +452,7 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation /*=true*/)
 			{
 				if (QMessageBox::question(MainWindow::TheInstance(), "Reset", "You'll lose all manually defined polylines: are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 					return false;
-				else
-					break;
+				break;
 			}
 		}
 	}

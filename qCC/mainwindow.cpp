@@ -3646,7 +3646,7 @@ void AddToRemoveList(ccHObject* toRemove, ccHObject::Container& toBeRemovedList)
 			// nothing to do, we already have an ancestor
 			return;
 		}
-		else if (toRemove->isAncestorOf(toBeRemovedList[j]))
+		if (toRemove->isAncestorOf(toBeRemovedList[j]))
 		{
 			// we don't need to keep the children
 			toBeRemovedList[j] = toBeRemovedList.back();
@@ -3826,14 +3826,11 @@ void MainWindow::doActionMerge()
 						ccConsole::Error(tr("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ..."));
 						return;
 					}
-					else
+					ocIndexSF = firstCloud->getScalarField(sfIdx);
+					if (ocIndexSF)
 					{
-						ocIndexSF = firstCloud->getScalarField(sfIdx);
-						if (ocIndexSF)
-						{
-							ocIndexSF->fill(0);
-							firstCloud->setCurrentDisplayedScalarField(sfIdx);
-						}
+						ocIndexSF->fill(0);
+						firstCloud->setCurrentDisplayedScalarField(sfIdx);
 					}
 				}
 			}
@@ -5092,10 +5089,7 @@ void MainWindow::doCompute2HalfDimVolume()
 			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
-		else
-		{
-			cloud1 = ccHObjectCaster::ToGenericPointCloud(ent);
-		}
+		cloud1 = ccHObjectCaster::ToGenericPointCloud(ent);
 	}
 
 	ccGenericPointCloud* cloud2 = nullptr;
@@ -5107,10 +5101,7 @@ void MainWindow::doCompute2HalfDimVolume()
 			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
-		else
-		{
-			cloud2 = ccHObjectCaster::ToGenericPointCloud(ent);
-		}
+		cloud2 = ccHObjectCaster::ToGenericPointCloud(ent);
 	}
 
 	ccVolumeCalcTool calcVolumeTool(cloud1, cloud2, this);
@@ -6371,13 +6362,10 @@ ccGLWindowInterface* MainWindow::getActiveGLWindow()
 	{
 		return ccGLWindowInterface::FromWidget(activeSubWindow->widget());
 	}
-	else
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	if (!subWindowList.isEmpty())
 	{
-		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-		if (!subWindowList.isEmpty())
-		{
-			return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
-		}
+		return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
 	}
 
 	return nullptr;
@@ -6405,11 +6393,8 @@ ccGLWindowInterface* MainWindow::getGLWindow(int index) const
 		assert(win);
 		return win;
 	}
-	else
-	{
-		assert(false);
-		return nullptr;
-	}
+	assert(false);
+	return nullptr;
 }
 
 int MainWindow::getGLWindowCount() const
@@ -6935,7 +6920,7 @@ void MainWindow::activateRegisterPointPairTool()
 			ccConsole::Error("Select at least one entity (point cloud or mesh)!");
 			return;
 		}
-		else if (entities.size() == 1)
+		if (entities.size() == 1)
 		{
 			alignedEntities = entities;
 		}
@@ -7460,7 +7445,7 @@ void MainWindow::activateTranslateRotateMode()
 		ccConsole::Error(tr("No entity eligible for manual transformation! (see console)"));
 		return;
 	}
-	else if (rejectedEntities)
+	if (rejectedEntities)
 	{
 		ccConsole::Error(tr("Some entities were ignored! (see console)"));
 	}
@@ -9783,7 +9768,7 @@ void MainWindow::doActionCloudMeshDist()
 		ccConsole::Error(tr("Select at least one mesh!"));
 		return;
 	}
-	else if (meshNum + cloudNum < 2)
+	if (meshNum + cloudNum < 2)
 	{
 		ccConsole::Error(tr("Select one mesh and one cloud or two meshes!"));
 		return;
@@ -9813,7 +9798,7 @@ void MainWindow::doActionCloudMeshDist()
 				{
 					return doActionCloudPrimitiveDist();
 				}
-				else if (answer == QMessageBox::NoToAll)
+				if (answer == QMessageBox::NoToAll)
 				{
 					DontShowPrimitiveDistWarning = true;
 				}
@@ -10336,19 +10321,16 @@ bool MainWindow::checkStereoMode(ccGLWindowInterface* win)
 			}
 			return false;
 		}
+		if (win == getActiveGLWindow())
+		{
+			m_ui->actionEnableStereo->setChecked(false);
+		}
 		else
 		{
-			if (win == getActiveGLWindow())
-			{
-				m_ui->actionEnableStereo->setChecked(false);
-			}
-			else
-			{
-				assert(false);
-				m_ui->actionEnableStereo->blockSignals(true);
-				m_ui->actionEnableStereo->setChecked(false);
-				m_ui->actionEnableStereo->blockSignals(false);
-			}
+			assert(false);
+			m_ui->actionEnableStereo->blockSignals(true);
+			m_ui->actionEnableStereo->setChecked(false);
+			m_ui->actionEnableStereo->blockSignals(false);
 		}
 	}
 

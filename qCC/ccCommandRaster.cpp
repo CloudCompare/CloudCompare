@@ -116,28 +116,26 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 	{
 		return ccRasterGrid::FILL_MINIMUM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_MAX_HEIGHT)
+	if (option == COMMAND_RASTER_FILL_MAX_HEIGHT)
 	{
 		return ccRasterGrid::FILL_MAXIMUM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_CUSTOM_HEIGHT)
+	if (option == COMMAND_RASTER_FILL_CUSTOM_HEIGHT)
 	{
 		return ccRasterGrid::FILL_CUSTOM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_INTERPOLATE)
+	if (option == COMMAND_RASTER_FILL_INTERPOLATE)
 	{
 		return ccRasterGrid::INTERPOLATE_DELAUNAY;
 	}
-	else if (option == COMMAND_RASTER_FILL_KRIGING)
+	if (option == COMMAND_RASTER_FILL_KRIGING)
 	{
 		return ccRasterGrid::KRIGING;
 	}
-	else
-	{
-		assert(false);
-		cmd.warning(QString("Unknown empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
-		return ccRasterGrid::LEAVE_EMPTY;
-	}
+
+	assert(false);
+	cmd.warning(QString("Unknown empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
+	return ccRasterGrid::LEAVE_EMPTY;
 }
 
 CommandRasterize::CommandRasterize()
@@ -389,7 +387,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QString("[Rasterize] Failed to recognize the std. dev. SF '%1' (neither an existing scalar field name nor a valid index)").arg(stdDevSFDesc));
 				}
-				else if (invVarProjSFIndex < 0 || static_cast<unsigned>(invVarProjSFIndex) >= cloudDesc.pc->getNumberOfScalarFields())
+				if (invVarProjSFIndex < 0 || static_cast<unsigned>(invVarProjSFIndex) >= cloudDesc.pc->getNumberOfScalarFields())
 				{
 					return cmd.error("[Rasterize] Invalid std. dev. SF index (negative or greater than the number of scalar fields in the cloud");
 				}

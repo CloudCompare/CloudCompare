@@ -62,4 +62,14 @@ class ccCutPursuitDlg : public QDialog
 
 	//! Returns average colors parameter
 	bool averageColors();
+
+  protected:
+	//! Saves the current dialog parameters to the persistent (application-wide) settings
+	void saveToPersistentSettings() const;
+
+	//! Restores the dialog parameters from the persistent (application-wide) settings
+	void loadFromPersistentSettings();
+
+	//! Overridden to save the parameters when the dialog is accepted
+	void accept() override;
 };

@@ -19,6 +19,8 @@
 
 #include <DgmOctree.h>
 
+#include <QSettings>
+
 static const QString s_rgbFeatureName = QObject::tr("RGB");
 
 ccCutPursuitDlg::ccCutPursuitDlg(QWidget* parent /*=nullptr*/)
@@ -26,6 +28,8 @@ ccCutPursuitDlg::ccCutPursuitDlg(QWidget* parent /*=nullptr*/)
     , Ui::CutPursuitDialog()
 {
 	setupUi(this);
+
+	loadFromPersistentSettings();
 }
 
 void ccCutPursuitDlg::setScalarFields(const QStringList& sfNames, bool includeRGB/*=false*/)
@@ -104,4 +108,40 @@ bool ccCutPursuitDlg::useRGB()
 bool ccCutPursuitDlg::averageColors()
 {
 	return (averageColorsCheckBox->checkState() == Qt::Checked);
+}
+
+void ccCutPursuitDlg::saveToPersistentSettings() const
+{
+	QSettings settings;
+	settings.beginGroup("CutPursuitDialog");
+	{
+		settings.setValue("knn", knnSpinBox->value());
+		settings.setValue("knnRadius", knnRadiusSpinBox->value());
+		settings.setValue("regularization", regularizationSpinBox->value());
+		settings.setValue("spatialWeight", spatialWeightSpinBox->value());
+		settings.setValue("cutoff", cutoffSpinBox->value());
+		settings.setValue("averageColors", averageColorsCheckBox->isChecked());
+	}
+	settings.endGroup();
+}
+
+void ccCutPursuitDlg::loadFromPersistentSettings()
+{
+	QSettings settings;
+	settings.beginGroup("CutPursuitDialog");
+	{
+		knnSpinBox->setValue(settings.value("knn", knnSpinBox->value()).toInt());
+		knnRadiusSpinBox->setValue(settings.value("knnRadius", knnRadiusSpinBox->value()).toDouble());
+		regularizationSpinBox->setValue(settings.value("regularization", regularizationSpinBox->value()).toDouble());
+		spatialWeightSpinBox->setValue(settings.value("spatialWeight", spatialWeightSpinBox->value()).toDouble());
+		cutoffSpinBox->setValue(settings.value("cutoff", cutoffSpinBox->value()).toInt());
+		averageColorsCheckBox->setChecked(settings.value("averageColors", averageColorsCheckBox->isChecked()).toBool());
+	}
+	settings.endGroup();
+}
+
+void ccCutPursuitDlg::accept()
+{
+	saveToPersistentSettings();
+	QDialog::accept();
 }

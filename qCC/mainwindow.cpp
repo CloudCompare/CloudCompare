@@ -4499,31 +4499,48 @@ void MainWindow::doActionCutPursuit()
 	if (count == 0)
 		return;
 
+	// gather the available scalar field names that are shared by all selected clouds,
+	// excluding the Cut Pursuit label field if it already exists
+	QStringList availableSFNames;
+	bool allCloudsHaveColors = true;
+	{
+		for (ccGenericPointCloud* cloud : clouds)
+		{
+			if (!cloud || !cloud->isA(CC_TYPES::POINT_CLOUD))
+				continue;
+
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+
+			if (!pc->hasColors())
+				allCloudsHaveColors = false;
+
+			for (unsigned j = 0; j < pc->getNumberOfScalarFields(); ++j)
+			{
+				QString sfName = QString::fromStdString(pc->getScalarFieldName(j));
+				if (sfName == CC_CUT_PURSUIT_LABEL_NAME)
+					continue;
+				if (!availableSFNames.contains(sfName))
+					availableSFNames.push_back(sfName);
+			}
+		}
+	}
+
 	ccCutPursuitDlg dlg(this);
+	dlg.setScalarFields(availableSFNames, allCloudsHaveColors);
 	if (!dlg.exec())
 		return;
 
-	typedef float real_t;      	// For data and weights
-	typedef int32_t index_t;   	// For vertex and edge indices
-	typedef int32_t comp_t;   	// For component indices
-
-	index_t s_knn				= dlg.getKNN();
-	double s_knnRadius			= dlg.getKNNRadius();
-	real_t s_regularization   	= dlg.getRegularization();
-	real_t s_spatialWeight    	= dlg.getSpatialWeight();
-	index_t s_cutoff      	    = dlg.getCutoff();
-	bool s_averageColors		= dlg.averageColors();
-	bool s_useRGB				= dlg.useRGB();
+	int32_t s_knn				  = dlg.getKNN();
+	double s_knnRadius			  = dlg.getKNNRadius();
+	float s_regularization   	  = dlg.getRegularization();
+	float s_spatialWeight    	  = dlg.getSpatialWeight();
+	int32_t s_cutoff      	      = dlg.getCutoff();
+	bool s_averageColors		  = dlg.averageColors();
+	bool s_useRGB				  = dlg.useRGB();
+	QStringList s_selectedSFNames = dlg.getSelectedScalarFields();
 
 	ccProgressDialog pDlg(false, this);
 	pDlg.setAutoClose(false);
-
-	// we unselect all entities as we are going to automatically select the created components
-	//(otherwise the user won't perceive the change!)
-	if (m_ccRoot)
-	{
-		m_ccRoot->unselectAllEntities();
-	}
 
 	for (ccGenericPointCloud* cloud : clouds)
 	{
@@ -4566,39 +4583,55 @@ void MainWindow::doActionCutPursuit()
 			}
 			pc->setCurrentScalarField(sfIdx);
 
+			// determine which scalar fields to include in Y, based on the user's selection
+			// (always excluding the Cut Pursuit label field itself)
+			std::vector<unsigned> sfIndices;
+			for (unsigned j = 0; j < pc->getNumberOfScalarFields(); ++j)
+			{
+				if (static_cast<int>(j) == sfIdx)
+					continue;
+
+				QString sfName = QString::fromStdString(pc->getScalarFieldName(j));
+				if (sfName == CC_CUT_PURSUIT_LABEL_NAME)
+					continue;
+
+				if (s_selectedSFNames.contains(sfName))
+					sfIndices.push_back(j);
+			}
+
 			// some parallel cut pursuit params
 			size_t rgbDim = (s_useRGB && pc->hasColors()) ? 3 : 0;
-			index_t D = 3 + static_cast<index_t>(pc->getNumberOfScalarFields()) + static_cast<index_t>(rgbDim);
-			index_t N = static_cast<index_t>(pc->size());
-			std::vector<real_t> Y(N * D, 0.0f);
+			int32_t D = 3 + static_cast<int32_t>(sfIndices.size()) + static_cast<int32_t>(rgbDim);
+			int32_t N = static_cast<int32_t>(pc->size());
+			std::vector<float> Y(N * D, 0.0f);
 
 			CCVector3 posOffset(0, 0, 0);
-			for (index_t i = 0; i < N; ++i)
+			for (int32_t i = 0; i < N; ++i)
 			{
 				posOffset += *pc->getPoint(i);
 			}
-			posOffset /= static_cast<real_t>(N);
+			posOffset /= static_cast<float>(N);
 
-			for (index_t i = 0; i < N; ++i)
+			for (int32_t i = 0; i < N; ++i)
 			{
 				const CCVector3* P = pc->getPoint(i);
 				
-				Y[i * D + 0] = static_cast<real_t>(P->x - posOffset.x);
-				Y[i * D + 1] = static_cast<real_t>(P->y - posOffset.y);
-				Y[i * D + 2] = static_cast<real_t>(P->z - posOffset.z);
+				Y[i * D + 0] = static_cast<float>(P->x - posOffset.x);
+				Y[i * D + 1] = static_cast<float>(P->y - posOffset.y);
+				Y[i * D + 2] = static_cast<float>(P->z - posOffset.z);
 
 				if (s_useRGB && pc->hasColors())
 				{
 					const ccColor::Rgba& C = pc->getPointColor(i);
-					Y[i * D + 3] = static_cast<real_t>(C.r / 255.0);
-					Y[i * D + 4] = static_cast<real_t>(C.g / 255.0);
-					Y[i * D + 5] = static_cast<real_t>(C.b / 255.0);
+					Y[i * D + 3] = static_cast<float>(C.r / 255.0);
+					Y[i * D + 4] = static_cast<float>(C.g / 255.0);
+					Y[i * D + 5] = static_cast<float>(C.b / 255.0);
 				}
 
-				for (unsigned j = 0; j < pc->getNumberOfScalarFields(); ++j)
+				for (size_t k = 0; k < sfIndices.size(); ++k)
 				{
-					const ccScalarField* sf = static_cast<const ccScalarField*>(pc->getScalarField(j));
-					real_t value = static_cast<real_t>(sf->getValue(i));
+					const ccScalarField* sf = static_cast<const ccScalarField*>(pc->getScalarField(sfIndices[k]));
+					float value = static_cast<float>(sf->getValue(i));
 
 					// Sanitize NaN/Inf, force it to 0.0
 					if (std::isnan(value) || std::isinf(value))
@@ -4606,12 +4639,12 @@ void MainWindow::doActionCutPursuit()
 						value = 0.0f;
 					}
 					// Scalar fields start at feature index 3, if RGB is used, they start at feature index 6
-                    Y[i * D + 3 + rgbDim + j] = value;
+                    Y[i * D + 3 + rgbDim + k] = value;
 				}
 			}
 
 			// we try to label all CCs
-			std::vector<comp_t> components;
+			std::vector<int32_t> components;
 		    int         	rV = CCCoreLib::AutoSegmentationTools::labelCutPursuitComponents(cloud,
 																							s_knn,
 																							s_knnRadius,
@@ -4634,7 +4667,7 @@ void MainWindow::doActionCutPursuit()
 
 			// Assign component index to each point
 			ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
-			for (index_t i = 0; i < N; ++i)
+			for (int32_t i = 0; i < N; ++i)
 			{
 				sf->setValue(i, static_cast<ScalarType>(components[i]));
 			}
@@ -4648,17 +4681,17 @@ void MainWindow::doActionCutPursuit()
 				std::vector<CCVector3d> compColorSum(rV, CCVector3d(0, 0, 0));
 				std::vector<unsigned> compCount(rV, 0);
 
-				for (index_t i = 0; i < N; ++i)
+				for (int32_t i = 0; i < N; ++i)
 				{
-					comp_t compIdx = components[i];
+					int32_t compIdx = components[i];
 					const ccColor::Rgba& C = pc->getPointColor(i);
 					compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
 					compCount[compIdx]++;
 				}
 
-				for (index_t i = 0; i < N; ++i)
+				for (int32_t i = 0; i < N; ++i)
 				{
-					comp_t compIdx = components[i];
+					int32_t compIdx = components[i];
 					if (compCount[compIdx] > 0)
 					{
 						CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);

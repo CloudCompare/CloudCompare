@@ -19,11 +19,48 @@
 
 #include <DgmOctree.h>
 
+static const QString s_rgbFeatureName = QObject::tr("RGB");
+
 ccCutPursuitDlg::ccCutPursuitDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
     , Ui::CutPursuitDialog()
 {
 	setupUi(this);
+}
+
+void ccCutPursuitDlg::setScalarFields(const QStringList& sfNames, bool includeRGB/*=false*/)
+{
+	scalarFieldsListWidget->clear();
+
+	if (includeRGB)
+	{
+		QListWidgetItem* item = new QListWidgetItem(s_rgbFeatureName, scalarFieldsListWidget);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(Qt::Checked);
+	}
+
+	for (const QString& name : sfNames)
+	{
+		QListWidgetItem* item = new QListWidgetItem(name, scalarFieldsListWidget);
+		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+		item->setCheckState(Qt::Checked);
+	}
+}
+
+QStringList ccCutPursuitDlg::getSelectedScalarFields() const
+{
+	QStringList selected;
+
+	for (int i = 0; i < scalarFieldsListWidget->count(); ++i)
+	{
+		QListWidgetItem* item = scalarFieldsListWidget->item(i);
+		if (item && item->checkState() == Qt::Checked && item->text() != s_rgbFeatureName)
+		{
+			selected.push_back(item->text());
+		}
+	}
+
+	return selected;
 }
 
 int ccCutPursuitDlg::getKNN()
@@ -53,7 +90,15 @@ int ccCutPursuitDlg::getCutoff()
 
 bool ccCutPursuitDlg::useRGB()
 {
-	return (rgbCheckBox->checkState() == Qt::Checked);
+	for (int i = 0; i < scalarFieldsListWidget->count(); ++i)
+	{
+		QListWidgetItem* item = scalarFieldsListWidget->item(i);
+		if (item && item->text() == s_rgbFeatureName)
+		{
+			return (item->checkState() == Qt::Checked);
+		}
+	}
+	return false;
 }
 
 bool ccCutPursuitDlg::averageColors()

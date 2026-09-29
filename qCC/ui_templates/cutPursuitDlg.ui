@@ -152,7 +152,7 @@
         <double>0.0001</double>
        </property>
        <property name="value">
-        <double>0.01</double>
+        <double>0.001</double>
        </property>
       </widget>
      </item>
@@ -191,19 +191,22 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="rgbCheckBox">
+    <widget class="QLabel" name="scalarFieldsLabel">
      <property name="text">
-      <string>use RGB</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
+      <string>Available features</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="averageColorsCheckBox">
-     <property name="text">
-      <string>average colors (warning: overwrites existing ones)</string>
+    <widget class="QListWidget" name="scalarFieldsListWidget">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Select which features to consider for partition</string>
      </property>
     </widget>
    </item>
@@ -219,6 +222,13 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="averageColorsCheckBox">
+     <property name="text">
+      <string>average colors (warning: overwrites existing ones)</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

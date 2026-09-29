@@ -19,6 +19,8 @@
 
 #include <ui_cutPursuitDlg.h>
 
+#include <QStringList>
+
 //! Dialog to define Cut-Pursuit parameters
 class ccCutPursuitDlg : public QDialog
     , public Ui::CutPursuitDialog
@@ -28,6 +30,17 @@ class ccCutPursuitDlg : public QDialog
   public:
 	//! Default constructor
 	explicit ccCutPursuitDlg(QWidget* parent = nullptr);
+
+	//! Populates the scalar fields list with checkable entries
+	/** \param sfNames names of the available scalar fields (the Cut Pursuit label field should already be excluded)
+	    \param includeRGB whether an "RGB" entry should be added at the top of the list (only when all selected clouds have colors)
+	**/
+	void setScalarFields(const QStringList& sfNames, bool includeRGB = false);
+
+	//! Returns the list of scalar field names that are checked (to be included in the Y matrix)
+	/** The special "RGB" entry (if present) is excluded from this list; use useRGB() to check it.
+	**/
+	QStringList getSelectedScalarFields() const;
 
 	//! Returns knn parameter
 	int getKNN();
@@ -44,7 +57,7 @@ class ccCutPursuitDlg : public QDialog
 	//! Returns cutoff parameter
 	int getCutoff();
 
-	//! Returns use RGB parameter
+	//! Returns whether the "RGB" feature entry is checked
 	bool useRGB();
 
 	//! Returns average colors parameter

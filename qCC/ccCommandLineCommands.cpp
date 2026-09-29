@@ -713,7 +713,7 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 	// open specified file
 	if (parser.isEmpty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
+		return cmd.error(QObject::tr(R"(Missing parameter: filename after "-%1")").arg(COMMAND_OPEN));
 	}
 	QString filename(parser.takeNext());
 	if (!cmd.importFile(filename, globalShiftOptions))
@@ -733,14 +733,14 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_COMMAND_FILE));
+		return cmd.error(QObject::tr(R"(Missing parameter: filename after "-%1")").arg(COMMAND_COMMAND_FILE));
 	}
 	QString commandFilePath = cmd.arguments().takeFirst();
 
 	// check if file exists
 	if (!QFileInfo::exists(commandFilePath))
 	{
-		return cmd.error(QObject::tr("Command file not exists \"-%1\"").arg(commandFilePath));
+		return cmd.error(QObject::tr(R"(Command file not exists "-%1")").arg(commandFilePath));
 	}
 
 	QFile commandFile(commandFilePath);
@@ -891,7 +891,7 @@ bool CommandClearNormals::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No entity loaded (be sure to open at least one file with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CLEAR_NORMALS));
+		return cmd.error(QObject::tr(R"(No entity loaded (be sure to open at least one file with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_CLEAR_NORMALS));
 	}
 
 	for (const CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -942,7 +942,7 @@ bool CommandInvertNormal::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No input point cloud or mesh (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_INVERT_NORMALS));
+		return cmd.error(QObject::tr(R"(No input point cloud or mesh (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_INVERT_NORMALS));
 	}
 
 	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -1005,14 +1005,14 @@ bool CommandOctreeNormal::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud to compute normals (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
+		return cmd.error(QObject::tr(R"(No point cloud to compute normals (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 	ccArgumentParser parser(cmd.arguments());
 
 	QString radiusArg = parser.takeNext();
 	if (radiusArg.isEmpty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: radius after \"-%1\"").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
+		return cmd.error(QObject::tr(R"(Missing parameter: radius after "-%1")").arg(COMMAND_COMPUTE_OCTREE_NORMALS));
 	}
 
 	float radius = std::numeric_limits<float>::quiet_NaN();
@@ -1254,7 +1254,7 @@ bool CommandConvertNormalsToDipAndDipDir::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_DIP));
+		return cmd.error(QObject::tr(R"(No input point cloud (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_DIP));
 	}
 
 	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -1296,7 +1296,7 @@ bool CommandConvertNormalsToSFs::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_SFS));
+		return cmd.error(QObject::tr(R"(No input point cloud (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_SFS));
 	}
 
 	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -1340,7 +1340,7 @@ bool CommandConvertNormalsToHSV::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No input point cloud (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_HSV));
+		return cmd.error(QObject::tr(R"(No input point cloud (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_CONVERT_NORMALS_TO_HSV));
 	}
 
 	for (CLCloudDesc& thisCloudDesc : cmd.clouds())
@@ -1382,7 +1382,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud to resample (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SUBSAMPLE));
+		return cmd.error(QObject::tr(R"(No point cloud to resample (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SUBSAMPLE));
 	}
 
 	ccArgumentParser parser(cmd.arguments());
@@ -1390,7 +1390,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	QString method = parser.takeNext();
 	if (method.isNull())
 	{
-		return cmd.error(QObject::tr("Missing parameter: resampling method after \"-%1\"").arg(COMMAND_SUBSAMPLE));
+		return cmd.error(QObject::tr(R"(Missing parameter: resampling method after "-%1")").arg(COMMAND_SUBSAMPLE));
 	}
 
 	method = method.toUpper();
@@ -1399,7 +1399,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 	{
 		if (parser.isEmpty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: number of points or option \"%2\" after \"-%1 RANDOM \"").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
+			return cmd.error(QObject::tr(R"(Missing parameter: number of points or option "%2" after "-%1 RANDOM ")").arg(COMMAND_SUBSAMPLE).arg(OPTION_PERCENT));
 		}
 		bool     isPercent = false;
 		double   percent   = 0.0;
@@ -1639,7 +1639,7 @@ bool CommandSubsample::process(ccCommandLineInterface& cmd)
 
 				if (parser.isEmpty())
 				{
-					return cmd.error(QObject::tr("Missing parameter: number of points or option \"%3\" after \"-%1 OCTREE %2 \"").arg(COMMAND_SUBSAMPLE, OPTION_NUMBER_OF_POINTS, OPTION_PERCENT));
+					return cmd.error(QObject::tr(R"(Missing parameter: number of points or option "%3" after "-%1 OCTREE %2 ")").arg(COMMAND_SUBSAMPLE, OPTION_NUMBER_OF_POINTS, OPTION_PERCENT));
 				}
 
 				// handle percent argument
@@ -1814,13 +1814,13 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud loaded (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_EXTRACT_CC));
+		return cmd.error(QObject::tr(R"(No point cloud loaded (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_EXTRACT_CC));
 	}
 
 	// octree level
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: octree level after \"-%1\"").arg(COMMAND_EXTRACT_CC));
+		return cmd.error(QObject::tr(R"(Missing parameter: octree level after "-%1")").arg(COMMAND_EXTRACT_CC));
 	}
 	bool          ok;
 	unsigned char octreeLevel = std::min<unsigned char>(cmd.arguments().takeFirst().toUShort(&ok), CCCoreLib::DgmOctree::MAX_OCTREE_LEVEL);
@@ -1833,7 +1833,7 @@ bool CommandExtractCCs::process(ccCommandLineInterface& cmd)
 	// min number of points
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: minimum number of points per component after \"-%1 [octree level]\"").arg(COMMAND_EXTRACT_CC));
+		return cmd.error(QObject::tr(R"(Missing parameter: minimum number of points per component after "-%1 [octree level]")").arg(COMMAND_EXTRACT_CC));
 	}
 	unsigned minPointCount = cmd.arguments().takeFirst().toUInt(&ok);
 	if (!ok)
@@ -1977,7 +1977,7 @@ bool CommandCurvature::process(ccCommandLineInterface& cmd)
 	const QString    curvTypeStr = parser.takeNext();
 	if (curvTypeStr.isNull())
 	{
-		return cmd.error(QObject::tr("Missing parameter: curvature type after \"-%1\"").arg(COMMAND_CURVATURE));
+		return cmd.error(QObject::tr(R"(Missing parameter: curvature type after "-%1")").arg(COMMAND_CURVATURE));
 	}
 	const auto maybeCurvType = ccArgumentParser::ParseEnum<CCCoreLib::Neighbourhood::CurvatureType>(
 	    curvTypeStr, {
@@ -1998,7 +1998,7 @@ bool CommandCurvature::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_CURVATURE));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute curvature! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_CURVATURE));
 	}
 
 	// Call MainWindow generic method
@@ -2039,7 +2039,7 @@ bool CommandApproxDensity::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute approx. density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPROX_DENSITY));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute approx. density! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_APPROX_DENSITY));
 	}
 
 	// Call MainWindow generic method
@@ -2100,7 +2100,7 @@ bool CommandDensity::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DENSITY));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute density! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_DENSITY));
 	}
 
 	// Call MainWindow generic method
@@ -2132,7 +2132,7 @@ bool CommandSFGradient::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: boolean (whether SF is euclidean or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
+		return cmd.error(QObject::tr(R"(Missing parameter: boolean (whether SF is euclidean or not) after "-%1")").arg(COMMAND_SF_GRADIENT));
 	}
 
 	QString euclideanStr = cmd.arguments().takeFirst().toUpper();
@@ -2143,12 +2143,12 @@ bool CommandSFGradient::process(ccCommandLineInterface& cmd)
 	}
 	else if (euclideanStr != "FALSE")
 	{
-		return cmd.error(QObject::tr("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_GRADIENT, euclideanStr));
+		return cmd.error(QObject::tr(R"(Invalid boolean value after "-%1". Got '%2' instead of TRUE or FALSE.)").arg(COMMAND_SF_GRADIENT, euclideanStr));
 	}
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_GRADIENT));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute SF gradient! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SF_GRADIENT));
 	}
 
 	// Call MainWindow generic method
@@ -2227,7 +2227,7 @@ bool CommandRoughness::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute roughness! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute roughness! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_ROUGHNESS));
 	}
 
 	// Call MainWindow generic method
@@ -2295,7 +2295,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: transformation file after \"-%1\"").arg(COMMAND_APPLY_TRANSFORMATION));
+		return cmd.error(QObject::tr(R"(Missing parameter: transformation file after "-%1")").arg(COMMAND_APPLY_TRANSFORMATION));
 	}
 
 	QString     filename = cmd.arguments().takeFirst();
@@ -2314,7 +2314,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No entity on which to apply the transformation! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
+		return cmd.error(QObject::tr(R"(No entity on which to apply the transformation! (be sure to open one with "-%1 [filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_APPLY_TRANSFORMATION));
 	}
 
 	// create an entity vector
@@ -2494,7 +2494,7 @@ bool CommandDropGlobalShift::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
+		return cmd.error(QObject::tr(R"(No loaded entity! (be sure to open one with "-%1 [filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_DROP_GLOBAL_SHIFT));
 	}
 
 	// process clouds
@@ -2525,7 +2525,7 @@ bool CommandSFColorScale::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: color scale file after \"-%1\"").arg(COMMAND_SF_COLOR_SCALE));
+		return cmd.error(QObject::tr(R"(Missing parameter: color scale file after "-%1")").arg(COMMAND_SF_COLOR_SCALE));
 	}
 
 	QString filename = cmd.arguments().takeFirst();
@@ -2539,7 +2539,7 @@ bool CommandSFColorScale::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud or mesh on which to set the SF color scale! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
+		return cmd.error(QObject::tr(R"(No point cloud or mesh on which to set the SF color scale! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SF_COLOR_SCALE));
 	}
 
 	// clouds
@@ -2598,7 +2598,7 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: boolean (whether to mix with existing colors or not) after \"-%1\"").arg(COMMAND_SF_CONVERT_TO_RGB));
+		return cmd.error(QObject::tr(R"(Missing parameter: boolean (whether to mix with existing colors or not) after "-%1")").arg(COMMAND_SF_CONVERT_TO_RGB));
 	}
 
 	QString mixWithExistingColorsStr = cmd.arguments().takeFirst().toUpper();
@@ -2609,12 +2609,12 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface& cmd)
 	}
 	else if (mixWithExistingColorsStr != "FALSE")
 	{
-		return cmd.error(QObject::tr("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_CONVERT_TO_RGB, mixWithExistingColorsStr));
+		return cmd.error(QObject::tr(R"(Invalid boolean value after "-%1". Got '%2' instead of TRUE or FALSE.)").arg(COMMAND_SF_CONVERT_TO_RGB, mixWithExistingColorsStr));
 	}
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to convert SF to RGB! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
+		return cmd.error(QObject::tr(R"(No point cloud on which to convert SF to RGB! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SF_CONVERT_TO_RGB));
 	}
 
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -2666,7 +2666,7 @@ bool CommandRGBConvertToSF::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to convert RGB to SF! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_RGB_CONVERT_TO_SF));
+		return cmd.error(QObject::tr(R"(No point cloud on which to convert RGB to SF! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_RGB_CONVERT_TO_SF));
 	}
 
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -2844,7 +2844,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 	{
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
+			return cmd.error(QObject::tr(R"(Missing parameter: min value after "-%1")").arg(COMMAND_FILTER_SF_BY_VALUE));
 		}
 
 		bool paramOk = false;
@@ -2856,26 +2856,26 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr(R"(Missing parameter: N value (after "-%1 N_SIGMA_MIN").)").arg(COMMAND_FILTER_SF_BY_VALUE));
 			}
 			minValStr = cmd.arguments().takeFirst();
 			minVal    = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 			if (!paramOk)
 			{
-				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(minValStr));
+				return cmd.error(QObject::tr(R"(Failed to read a numerical parameter: N value (after "N_SIGMA_MIN"). Got '%2' instead.)").arg(minValStr));
 			}
 		}
 		else if (useValForMin == USE_N_SIGMA_MAX)
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr(R"(Missing parameter: N value (after "-%1 N_SIGMA_MAX").)").arg(COMMAND_FILTER_SF_BY_VALUE));
 			}
 			minValStr = cmd.arguments().takeFirst();
 			minVal    = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 			if (!paramOk)
 			{
-				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(minValStr));
+				return cmd.error(QObject::tr(R"(Failed to read a numerical parameter: N value (after "N_SIGMA_MAX"). Got '%2' instead.)").arg(minValStr));
 			}
 		}
 		else if (useValForMin == USE_NONE)
@@ -2883,7 +2883,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 			if (!paramOk)
 			{
-				return cmd.error(QObject::tr("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE, minValStr));
+				return cmd.error(QObject::tr(R"(Failed to read a numerical parameter: min value (after "-%1"). Got '%2' instead.)").arg(COMMAND_FILTER_SF_BY_VALUE, minValStr));
 			}
 		}
 	}
@@ -2894,7 +2894,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 	{
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: max value after \"-%1\" {min}").arg(COMMAND_FILTER_SF_BY_VALUE));
+			return cmd.error(QObject::tr(R"(Missing parameter: max value after "-%1" {min})").arg(COMMAND_FILTER_SF_BY_VALUE));
 		}
 
 		bool paramOk = false;
@@ -2906,26 +2906,26 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 XXX N_SIGMA_MIN\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr(R"(Missing parameter: N value (after "-%1 XXX N_SIGMA_MIN").)").arg(COMMAND_FILTER_SF_BY_VALUE));
 			}
 			maxValStr = cmd.arguments().takeFirst();
 			maxVal    = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 			if (!paramOk)
 			{
-				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MIN\"). Got '%2' instead.").arg(maxValStr));
+				return cmd.error(QObject::tr(R"(Failed to read a numerical parameter: N value (after "N_SIGMA_MIN"). Got '%2' instead.)").arg(maxValStr));
 			}
 		}
 		else if (useValForMax == USE_N_SIGMA_MAX)
 		{
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: N value (after \"-%1 XXX N_SIGMA_MAX\").").arg(COMMAND_FILTER_SF_BY_VALUE));
+				return cmd.error(QObject::tr(R"(Missing parameter: N value (after "-%1 XXX N_SIGMA_MAX").)").arg(COMMAND_FILTER_SF_BY_VALUE));
 			}
 			maxValStr = cmd.arguments().takeFirst();
 			maxVal    = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 			if (!paramOk)
 			{
-				return cmd.error(QObject::tr("Failed to read a numerical parameter: N value (after \"N_SIGMA_MAX\"). Got '%2' instead.").arg(maxValStr));
+				return cmd.error(QObject::tr(R"(Failed to read a numerical parameter: N value (after "N_SIGMA_MAX"). Got '%2' instead.)").arg(maxValStr));
 			}
 		}
 		else if (useValForMax == USE_NONE)
@@ -2942,7 +2942,7 @@ bool CommandFilterBySFValue::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud nor mesh on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
+		return cmd.error(QObject::tr(R"(No point cloud nor mesh on which to filter SF! (be sure to open one or generate one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_FILTER_SF_BY_VALUE));
 	}
 
 	// for each cloud
@@ -3262,7 +3262,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No loaded entity! (be sure to open one with \"-%1 [filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_GLOBAL_SHIFT));
+		return cmd.error(QObject::tr(R"(No loaded entity! (be sure to open one with "-%1 [filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SET_GLOBAL_SHIFT));
 	}
 
 	ccArgumentParser parser(cmd.arguments());
@@ -3407,7 +3407,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
+		return cmd.error(QObject::tr(R"(Missing parameter: scalar field index after "-%1")").arg(COMMAND_SET_ACTIVE_SF));
 	}
 
 	int     sfIndex = -1;
@@ -3419,7 +3419,7 @@ bool CommandSetActiveSF::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud nor mesh loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
+		return cmd.error(QObject::tr(R"(No point cloud nor mesh loaded! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_SET_ACTIVE_SF));
 	}
 
 	for (CLCloudDesc& desc : cmd.clouds())
@@ -4233,7 +4233,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().size() < 4)
 	{
-		return cmd.error(QObject::tr("Missing parameters: 'KNN/RADIUS {value} REL/ABS {value}' expected after \"-%1\"").arg(COMMAND_NOISE_FILTER));
+		return cmd.error(QObject::tr(R"(Missing parameters: 'KNN/RADIUS {value} REL/ABS {value}' expected after "-%1")").arg(COMMAND_NOISE_FILTER));
 	}
 
 	ccArgumentParser parser(cmd.arguments());
@@ -4262,7 +4262,7 @@ bool CommandNoiseFilter::process(ccCommandLineInterface& cmd)
 	}
 	else
 	{
-		return cmd.error(QObject::tr("Invalid parameter: KNN or RADIUS expected after \"-%1\"").arg(COMMAND_NOISE_FILTER));
+		return cmd.error(QObject::tr(R"(Invalid parameter: KNN or RADIUS expected after "-%1")").arg(COMMAND_NOISE_FILTER));
 	}
 
 	const auto maybeAbsoluteError = parser.takeEnum<bool>({{COMMAND_NOISE_FILTER_REL, false},
@@ -4623,7 +4623,7 @@ bool CommandCrop::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
+		return cmd.error(QObject::tr(R"(Missing parameter: box extents after "-%1" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax))").arg(COMMAND_CROP));
 	}
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -4769,7 +4769,7 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().size() < 2)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (SF INDEX OR NAME) (DIMENSION)").arg(COMMAND_SF_TO_COORD));
+		return cmd.error(QObject::tr(R"(Missing parameter(s) after "-%1" (SF INDEX OR NAME) (DIMENSION))").arg(COMMAND_SF_TO_COORD));
 	}
 	if (cmd.clouds().empty())
 	{
@@ -4788,7 +4788,7 @@ bool CommandSFToCoord::process(ccCommandLineInterface& cmd)
 	bool    exportDims[3]{dimStr == "X", dimStr == "Y", dimStr == "Z"};
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
-		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_SF_TO_COORD));
+		return cmd.error(QObject::tr(R"(Invalid parameter: dimension after "-%1" (expected: X, Y or Z))").arg(COMMAND_SF_TO_COORD));
 	}
 
 	// now we can export the corresponding coordinate
@@ -4839,13 +4839,13 @@ bool CommandCoordToSF::process(ccCommandLineInterface& cmd)
 	// dimension
 	if (parser.isEmpty())
 	{
-		return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_COORD_TO_SF));
+		return cmd.error(QObject::tr(R"(Missing parameter after "-%1" (DIMENSION))").arg(COMMAND_COORD_TO_SF));
 	}
 	QString dimStr = parser.takeNext().toUpper();
 	bool    exportDims[3]{dimStr == "X", dimStr == "Y", dimStr == "Z"};
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
-		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_COORD_TO_SF));
+		return cmd.error(QObject::tr(R"(Invalid parameter: dimension after "-%1" (expected: X, Y or Z))").arg(COMMAND_COORD_TO_SF));
 	}
 
 	// now we can export the corresponding normal components
@@ -4881,7 +4881,7 @@ bool CommandSFToNorm::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().size() < 3)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1)").arg(COMMAND_SF_TO_NORM));
+		return cmd.error(QObject::tr(R"(Missing parameter(s) after "-%1" (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1) (SF INDEX OR NAME OR -1))").arg(COMMAND_SF_TO_NORM));
 	}
 	if (cmd.clouds().empty())
 	{
@@ -4949,7 +4949,7 @@ bool CommandNormToSF::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter after \"-%1\" (DIMENSION)").arg(COMMAND_NORM_TO_SF));
+		return cmd.error(QObject::tr(R"(Missing parameter after "-%1" (DIMENSION))").arg(COMMAND_NORM_TO_SF));
 	}
 	if (cmd.clouds().empty())
 	{
@@ -4961,7 +4961,7 @@ bool CommandNormToSF::process(ccCommandLineInterface& cmd)
 	bool    exportDims[3]{dimStr.contains("X"), dimStr.contains("Y"), dimStr.contains("Z")};
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
-		return cmd.error(QObject::tr("Invalid parameter: dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_NORM_TO_SF));
+		return cmd.error(QObject::tr(R"(Invalid parameter: dimension after "-%1" (expected: X, Y or Z))").arg(COMMAND_NORM_TO_SF));
 	}
 
 	// now we can export the corresponding coordinate
@@ -4999,7 +4999,7 @@ bool CommandCrop2D::process(ccCommandLineInterface& cmd)
 
 	if (parser.size() < 6)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
+		return cmd.error(QObject::tr(R"(Missing parameter(s) after "-%1" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN))").arg(COMMAND_CROP_2D));
 	}
 	if (cmd.clouds().empty())
 	{
@@ -5174,7 +5174,7 @@ bool CommandColorBanding::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().size() < 2)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (DIM FREQUENCY)").arg(COMMAND_COLOR_BANDING));
+		return cmd.error(QObject::tr(R"(Missing parameter(s) after "-%1" (DIM FREQUENCY))").arg(COMMAND_COLOR_BANDING));
 	}
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -5271,7 +5271,7 @@ bool CommandColorLevels::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().size() < 5)
 	{
-		return cmd.error(QObject::tr("Missing parameter(s) after \"-%1\" (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL)").arg(COMMAND_COLOR_LEVELS));
+		return cmd.error(QObject::tr(R"(Missing parameter(s) after "-%1" (COLOR-BANDS MIN-INPUT-LEVEL MAX-INPUT-LEVEL MIN-OUTPUT-LEVEL MAX-OUTPUT-LEVEL))").arg(COMMAND_COLOR_LEVELS));
 	}
 	if (cmd.clouds().empty() && cmd.meshes().empty())
 	{
@@ -5291,7 +5291,7 @@ bool CommandColorLevels::process(ccCommandLineInterface& cmd)
 		testBand.remove('B');
 		if (!testBand.isEmpty())
 		{
-			return cmd.error(QObject::tr("Invalid parameter: bands after \"-%1\" (expected: any combination of R, G or B)").arg(COMMAND_COLOR_LEVELS));
+			return cmd.error(QObject::tr(R"(Invalid parameter: bands after "-%1" (expected: any combination of R, G or B))").arg(COMMAND_COLOR_LEVELS));
 		}
 	}
 
@@ -5459,7 +5459,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (!m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_FLIP_NORMALS));
+				cmd.warning(QObject::tr(R"(Parameter "-%1" ignored: only for C2M distance!)").arg(COMMAND_C2M_DIST_FLIP_NORMALS));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_UNSIGNED))
@@ -5471,7 +5471,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (!m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_UNSIGNED));
+				cmd.warning(QObject::tr(R"(Parameter "-%1" ignored: only for C2M distance!)").arg(COMMAND_C2M_DIST_UNSIGNED));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2M_DIST_NON_ROBUST))
@@ -5483,7 +5483,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (!m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2M distance!").arg(COMMAND_C2M_DIST_NON_ROBUST));
+				cmd.warning(QObject::tr(R"(Parameter "-%1" ignored: only for C2M distance!)").arg(COMMAND_C2M_DIST_NON_ROBUST));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2X_MAX_DISTANCE))
@@ -5493,13 +5493,13 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
+				return cmd.error(QObject::tr(R"(Missing parameter: value after "-%1")").arg(COMMAND_C2X_MAX_DISTANCE));
 			}
 			bool conversionOk = false;
 			maxDist           = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_MAX_DISTANCE));
+				return cmd.error(QObject::tr(R"(Invalid parameter: value after "-%1")").arg(COMMAND_C2X_MAX_DISTANCE));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2X_OCTREE_LEVEL))
@@ -5509,13 +5509,13 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
+				return cmd.error(QObject::tr(R"(Missing parameter: value after "-%1")").arg(COMMAND_C2X_OCTREE_LEVEL));
 			}
 			bool conversionOk = false;
 			octreeLevel       = cmd.arguments().takeFirst().toUInt(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: value after \"-%1\"").arg(COMMAND_C2X_OCTREE_LEVEL));
+				return cmd.error(QObject::tr(R"(Invalid parameter: value after "-%1")").arg(COMMAND_C2X_OCTREE_LEVEL));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_SPLIT_XYZ))
@@ -5527,7 +5527,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2C distance!"));
+				cmd.warning(QObject::tr(R"(Parameter "-%1" ignored: only for C2C distance!)"));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_SPLIT_XY_Z))
@@ -5540,7 +5540,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 
 			if (m_cloud2meshDist)
 			{
-				cmd.warning(QObject::tr("Parameter \"-%1\" ignored: only for C2C distance!"));
+				cmd.warning(QObject::tr(R"(Parameter "-%1" ignored: only for C2C distance!)"));
 			}
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_C2C_LOCAL_MODEL))
@@ -5565,12 +5565,12 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 				}
 				else
 				{
-					return cmd.error(QObject::tr("Invalid parameter: unknown model type \"%1\"").arg(modelType));
+					return cmd.error(QObject::tr(R"(Invalid parameter: unknown model type "%1")").arg(modelType));
 				}
 			}
 			else
 			{
-				return cmd.error(QObject::tr("Missing parameter: model type after \"-%1\" (LS/TRI/HF)").arg(COMMAND_C2C_LOCAL_MODEL));
+				return cmd.error(QObject::tr(R"(Missing parameter: model type after "-%1" (LS/TRI/HF))").arg(COMMAND_C2C_LOCAL_MODEL));
 			}
 
 			if (!cmd.arguments().empty())
@@ -5586,7 +5586,7 @@ bool CommandDist::process(ccCommandLineInterface& cmd)
 				}
 				else
 				{
-					return cmd.error(QObject::tr("Invalid parameter: unknown neighborhood type \"%1\"").arg(nType));
+					return cmd.error(QObject::tr(R"(Invalid parameter: unknown neighborhood type "%1")").arg(nType));
 				}
 			}
 			else
@@ -5797,7 +5797,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 	{
 		if (cmd.arguments().empty())
 		{
-			return cmd.error(QObject::tr("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_TEST));
+			return cmd.error(QObject::tr(R"(Missing parameter: distribution type after "-%1" (GAUSS/WEIBULL))").arg(COMMAND_STAT_TEST));
 		}
 
 		QString distribStr = cmd.arguments().takeFirst().toUpper();
@@ -5806,24 +5806,24 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 			// mu
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: mean value after \"GAUSS\""));
+				return cmd.error(QObject::tr(R"(Missing parameter: mean value after "GAUSS")"));
 			}
 			bool   conversionOk = false;
 			double mu           = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: mean value after \"GAUSS\""));
+				return cmd.error(QObject::tr(R"(Invalid parameter: mean value after "GAUSS")"));
 			}
 			// sigma
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: sigma value after \"GAUSS\" {mu}"));
+				return cmd.error(QObject::tr(R"(Missing parameter: sigma value after "GAUSS" {mu})"));
 			}
 			conversionOk = false;
 			double sigma = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: sigma value after \"GAUSS\" {mu}"));
+				return cmd.error(QObject::tr(R"(Invalid parameter: sigma value after "GAUSS" {mu})"));
 			}
 
 			CCCoreLib::NormalDistribution* N = new CCCoreLib::NormalDistribution();
@@ -5835,35 +5835,35 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 			// a
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: a value after \"WEIBULL\""));
+				return cmd.error(QObject::tr(R"(Missing parameter: a value after "WEIBULL")"));
 			}
 			bool   conversionOk = false;
 			double a            = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: a value after \"WEIBULL\""));
+				return cmd.error(QObject::tr(R"(Invalid parameter: a value after "WEIBULL")"));
 			}
 			// b
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: b value after \"WEIBULL\" {a}"));
+				return cmd.error(QObject::tr(R"(Missing parameter: b value after "WEIBULL" {a})"));
 			}
 			conversionOk = false;
 			double b     = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: b value after \"WEIBULL\" {a}"));
+				return cmd.error(QObject::tr(R"(Invalid parameter: b value after "WEIBULL" {a})"));
 			}
 			// c
 			if (cmd.arguments().empty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: shift value after \"WEIBULL\" {a} {b}"));
+				return cmd.error(QObject::tr(R"(Missing parameter: shift value after "WEIBULL" {a} {b})"));
 			}
 			conversionOk = false;
 			double shift = cmd.arguments().takeFirst().toDouble(&conversionOk);
 			if (!conversionOk)
 			{
-				return cmd.error(QObject::tr("Invalid parameter: shift value after \"WEIBULL\" {a} {b}"));
+				return cmd.error(QObject::tr(R"(Invalid parameter: shift value after "WEIBULL" {a} {b})"));
 			}
 
 			CCCoreLib::WeibullDistribution* N = new CCCoreLib::WeibullDistribution();
@@ -5872,7 +5872,7 @@ bool CommandStatTest::process(ccCommandLineInterface& cmd)
 		}
 		else
 		{
-			return cmd.error(QObject::tr("Invalid parameter: unknown distribution \"%1\"").arg(distribStr));
+			return cmd.error(QObject::tr(R"(Invalid parameter: unknown distribution "%1")").arg(distribStr));
 		}
 	}
 
@@ -6001,13 +6001,13 @@ bool CommandStatFit::process(ccCommandLineInterface& cmd)
 	// distribution
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_FIT));
+		return cmd.error(QObject::tr(R"(Missing parameter: distribution type after "-%1" (GAUSS/WEIBULL))").arg(COMMAND_STAT_FIT));
 	}
 
 	QString distribStr = cmd.arguments().takeFirst().toUpper();
 	if (distribStr != "GAUSS" && distribStr != "WEIBULL")
 	{
-		return cmd.error(QObject::tr("Invalid parameter: unknown distribution '%1' after \"-%2\" (GAUSS/WEIBULL)").arg(distribStr, COMMAND_STAT_FIT));
+		return cmd.error(QObject::tr(R"(Invalid parameter: unknown distribution '%1' after "-%2" (GAUSS/WEIBULL))").arg(distribStr, COMMAND_STAT_FIT));
 	}
 
 	if (cmd.clouds().empty())
@@ -6814,18 +6814,18 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: Name after \"-%1\"").arg(COMMAND_RENAME_ENTITIES));
+		return cmd.error(QObject::tr(R"(Missing parameter: Name after "-%1")").arg(COMMAND_RENAME_ENTITIES));
 	}
 
 	QString newBaseName = cmd.arguments().takeFirst();
 	// Validate if the given name contains any breaking characters for NTFS filesystem at least
-	QRegularExpression          rx("[^:/\\\\*?\"|<>]*");
+	QRegularExpression          rx(R"([^:/\\*?"|<>]*)");
 	QRegularExpressionValidator v(rx, 0);
 	int                         pos = 0;
 	if (!v.validate(newBaseName, pos))
 	{
 		assert(false);
-		return cmd.error("Name cannot contain any of these characters: :/\\*?\"|<>");
+		return cmd.error(R"(Name cannot contain any of these characters: :/\*?"|<>)");
 	}
 
 	// apply operation on clouds
@@ -7170,7 +7170,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			if (parser.isEmpty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: filename after \"-%1\"").arg(COMMAND_ICP_OUTPUT_MATRIX_FILE));
+				return cmd.error(QObject::tr(R"(Missing parameter: filename after "-%1")").arg(COMMAND_ICP_OUTPUT_MATRIX_FILE));
 			}
 
 			outputMatrixFile = parser.takeNext();
@@ -7180,7 +7180,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		{
 			if (parser.isEmpty())
 			{
-				return cmd.error(QObject::tr("Missing parameter: rotation filter after \"-%1\" (XYZ/X/Y/Z/NONE)").arg(COMMAND_ICP_ROT));
+				return cmd.error(QObject::tr(R"(Missing parameter: rotation filter after "-%1" (XYZ/X/Y/Z/NONE))").arg(COMMAND_ICP_ROT));
 			}
 
 			// invalidate all previous rotations in case -ROT used twice
@@ -7214,7 +7214,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 			}
 			else
 			{
-				return cmd.error(QObject::tr("Invalid parameter: unknown rotation filter \"%1\"").arg(rotation));
+				return cmd.error(QObject::tr(R"(Invalid parameter: unknown rotation filter "%1")").arg(rotation));
 			}
 		}
 		else if (parser.tryConsumeOption(COMMAND_ICP_SKIP_TX))
@@ -8029,7 +8029,7 @@ bool CommandMoment::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute first order moment! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_MOMENT));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute first order moment! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_MOMENT));
 	}
 
 	// Call MainWindow generic method
@@ -8060,7 +8060,7 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 {
 	if (cmd.arguments().empty())
 	{
-		return cmd.error(QObject::tr("Missing parameter: feature type after \"-%1\"").arg(COMMAND_FEATURE));
+		return cmd.error(QObject::tr(R"(Missing parameter: feature type after "-%1")").arg(COMMAND_FEATURE));
 	}
 
 	QString                               featureTypeStr = cmd.arguments().takeFirst().toUpper();
@@ -8132,23 +8132,23 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 	}
 	else
 	{
-		return cmd.error(QObject::tr("Invalid feature type after \"-%1\". Got '%2' instead of:\n\
-- SUM_OF_EIGENVALUES\n\
-- OMNIVARIANCE\n\
-- EIGENTROPY\n\
-- ANISOTROPY\n\
-- PLANARITY\n\
-- LINEARITY\n\
-- PCA1\n\
-- PCA2\n\
-- SURFACE_VARIATION\n\
-- SPHERICITY\n\
-- VERTICALITY\n\
-- EIGENVALUE1\n\
-- EIGENVALUE2\n\
-- EIGENVALUE3\n\
-- DEGREE_OF_PLANARITY\n\
-- DEGREE_OF_LINEARITY")
+		return cmd.error(QObject::tr(R"(Invalid feature type after "-%1". Got '%2' instead of:
+- SUM_OF_EIGENVALUES
+- OMNIVARIANCE
+- EIGENTROPY
+- ANISOTROPY
+- PLANARITY
+- LINEARITY
+- PCA1
+- PCA2
+- SURFACE_VARIATION
+- SPHERICITY
+- VERTICALITY
+- EIGENVALUE1
+- EIGENVALUE2
+- EIGENVALUE3
+- DEGREE_OF_PLANARITY
+- DEGREE_OF_LINEARITY)")
 		                     .arg(COMMAND_FEATURE, featureTypeStr));
 	}
 
@@ -8168,7 +8168,7 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 
 	if (cmd.clouds().empty())
 	{
-		return cmd.error(QObject::tr("No point cloud on which to compute feature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN, COMMAND_FEATURE));
+		return cmd.error(QObject::tr(R"(No point cloud on which to compute feature! (be sure to open one with "-%1 [cloud filename]" before "-%2"))").arg(COMMAND_OPEN, COMMAND_FEATURE));
 	}
 
 	// Call MainWindow generic method on all available clouds

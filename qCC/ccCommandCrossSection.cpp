@@ -50,7 +50,7 @@ bool CommandCrossSection::process(ccCommandLineInterface& cmd)
 
 	// expected argument: XML file
 	if (cmd.arguments().empty())
-		return cmd.error(QString("Missing parameter: XML parameters file after \"-%1\"").arg(COMMAND_CROSS_SECTION));
+		return cmd.error(QString(R"(Missing parameter: XML parameters file after "-%1")").arg(COMMAND_CROSS_SECTION));
 	QString xmlFilename = cmd.arguments().takeFirst();
 
 	// read the XML file

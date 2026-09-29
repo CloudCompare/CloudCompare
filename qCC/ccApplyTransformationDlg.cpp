@@ -144,7 +144,7 @@ void ccApplyTransformationDlg::onMatrixTextChange()
 	if (text.contains("["))
 	{
 		// automatically remove anything between square brackets
-		static const QRegularExpression squareBracketsFilter("\\[([^]]+)\\]");
+		static const QRegularExpression squareBracketsFilter(R"(\[([^]]+)\])");
 		text.replace(squareBracketsFilter, "");
 		matrixTextEdit->blockSignals(true);
 		matrixTextEdit->setPlainText(text);

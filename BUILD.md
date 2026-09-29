@@ -94,6 +94,7 @@ The optional features are:
 | OPTION_USE_SHAPE_LIB  |      ON       | Use the vendored shapelib to add support for SHP files.
 | OPTION_USE_DXF_LIB    |      ON       | Use the vendored dxflib to add support for DXF files.
 | OPTION_USE_GDAL       |      OFF      | Add support for a lot of raster files in CloudCompare/ccViewer with **GDAL** library.
+| OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI | OFF | 3D mouse support through the hidapi library (vendored as a git submodule if not installed), no 3DxWare SDK needed.
 
 
 The following options are **Windows-only**:
@@ -101,7 +102,7 @@ The following options are **Windows-only**:
 |     CMake Option                    | Default Value | Description
 |-------------------------------------|---------------|-------------
 | OPTION_MP_BUILD                     | OFF           | Visual Studio only *(multi-process build --> much faster but uses a lot of CPU power)*
-| OPTION_SUPPORT_3D_CONNEXION_DEVICES | OFF           | 3D mouses handling
+| OPTION_SUPPORT_3DMOUSE_WITH_3DxWARE | OFF           | 3D mouse support through the 3DxWare SDK (set 3DXWARE_INCLUDE_DIR and 3DXWARE_LIB_DIR). Takes precedence over OPTION_SUPPORT_3DMOUSE_WITH_HIDAPI.
 | OPTION_USE_VISUAL_LEAK_DETECTOR     | OFF           | To use the Visual Leak Detector library for MSVC (http://vld.codeplex.com/)
 
 The available plugins are

@@ -4967,7 +4967,7 @@ void MainWindow::doConvertPolylinesToMesh()
 			{
 				const CCVector3* P         = poly->getPoint(v);
 				int              vertIndex = static_cast<int>(points2D.size());
-				points2D.push_back(CCVector2(P->u[X], P->u[Y]));
+				points2D.emplace_back(P->u[X], P->u[Y]);
 
 				if (v + 1 < vertCount)
 				{
@@ -6707,7 +6707,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	}
 
 	// otherwise we add it to DB
-	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
+	m_mdiDialogs.emplace_back(dlg, pos);
 
 	// automatically update the dialog placement when its shown
 	connect(dlg, &ccOverlayDialog::shown, this, [=]()
@@ -9241,7 +9241,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				                         0,
 				                         CCVector3(0, 0, 0));
 				matrices.push_back(trans);
-				matrixAngles.push_back(std::pair<double, double>(phi_deg, theta_deg));
+				matrixAngles.emplace_back(phi_deg, theta_deg);
 
 				// for poles, no need to rotate!
 				if (j == 0 || j == thetaSteps)

@@ -2321,7 +2321,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 	// add clouds to the vector
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		entities.push_back({desc.pc, &desc});
+		entities.emplace_back(desc.pc, &desc);
 	}
 
 	// add meshes to the vector
@@ -2331,7 +2331,7 @@ bool CommandApplyTransformation::process(ccCommandLineInterface& cmd)
 		ccShiftedObject* shifted  = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
 		if (shifted && !isLocked)
 		{
-			entities.push_back({shifted, &desc});
+			entities.emplace_back(shifted, &desc);
 		}
 	}
 
@@ -3285,7 +3285,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 	// add clouds to the vector
 	for (CLCloudDesc& desc : cmd.clouds())
 	{
-		entities.push_back({desc.pc, &desc});
+		entities.emplace_back(desc.pc, &desc);
 	}
 
 	// add meshes to the vector
@@ -3295,7 +3295,7 @@ bool CommandSetGlobalShift::process(ccCommandLineInterface& cmd)
 		ccShiftedObject* shifted  = ccHObjectCaster::ToShifted(desc.mesh, &isLocked);
 		if (shifted && !isLocked)
 		{
-			entities.push_back({shifted, &desc});
+			entities.emplace_back(shifted, &desc);
 		}
 	}
 

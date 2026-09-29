@@ -776,7 +776,7 @@ namespace ccEntityAction
 					continue;
 				}
 
-				selectedCloudsWithColors.push_back({ent, pc});
+				selectedCloudsWithColors.emplace_back(ent, pc);
 
 				double sigmaCloud = ccLibAlgorithms::GetDefaultCloudKernelSize(pc);
 

@@ -4763,7 +4763,7 @@ void MainWindow::doActionCutPursuit()
 				for (size_t k = 0; k < sfIndices.size(); ++k)
 				{
 					ccScalarField::Shared sf    = std::static_pointer_cast<ccScalarField>(pc->getScalarField(sfIndices[k]));
-					float                  value = static_cast<float>(sf->getValue(i));
+					float                 value = static_cast<float>(sf->getValue(i));
 
 					// Sanitize NaN/Inf, force it to 0.0
 					if (std::isnan(value) || std::isinf(value))
@@ -4830,11 +4830,17 @@ void MainWindow::doActionCutPursuit()
 						pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x), static_cast<ColorCompType>(avgColor.y), static_cast<ColorCompType>(avgColor.z)));
 					}
 				}
-				pc->showColors(true);
-			}
 
-			pc->setCurrentDisplayedScalarField(sfIdx);
-			pc->showSF(true);
+				// Update display to show the computed colors
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				pc->showColors(true);
+				pc->showSF(false);
+			}
+			else
+			{
+				pc->setCurrentDisplayedScalarField(sfIdx);
+				pc->showSF(true);
+			}
 			pc->prepareDisplayForRefresh();
 		}
 	}

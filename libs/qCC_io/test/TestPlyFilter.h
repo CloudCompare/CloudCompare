@@ -1,5 +1,4 @@
-#ifndef CC_TEST_PLYFILTER_HEADER
-#define CC_TEST_PLYFILTER_HEADER
+#pragma once
 
 #include <QObject>
 #include <QtTest/QtTest>
@@ -10,5 +9,3 @@ class TestPlyFilter : public QObject
   private slots:
 	void testOutOfRangeTextureIndexIsSanitized() const;
 };
-
-#endif // CC_TEST_PLYFILTER_HEADER

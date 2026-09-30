@@ -286,6 +286,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
 	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
+	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,
@@ -297,6 +298,16 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	                             bool                        edgeOnly,
 	                             CCVector3d&                 point,
 	                             CCVector3d*                 barycentricCoords = nullptr) const;
+
+	// Static arrays for OpenGL drawing
+	static CCVector3*     GetVertexBuffer();
+	static CCVector3*     GetNormalsBuffer();
+	static ColorCompType* GetColorsBuffer();
+
+	//! Returns a pre-initialized array of vertex indexes for wired display
+	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default
+	 **/
+	static unsigned* GetWireVertexIndexes();
 
 	//! Enables (OpenGL) stipple mask
 	static void EnableGLStippleMask(QOpenGLContext* context, bool state);

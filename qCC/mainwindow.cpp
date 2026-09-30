@@ -327,6 +327,10 @@ MainWindow::MainWindow()
 		m_shortcutDlg = new ccShortcutDialog(m_actions, this);
 		m_shortcutDlg->restoreShortcutsFromQSettings();
 
+		// to keep the native 'select all' shortcut of the DB tree and the console (see eventFilter)
+		m_ui->dbTreeView->installEventFilter(this);
+		m_ui->consoleWidget->installEventFilter(this);
+
 		connect(m_ui->actionShortcutSettings, &QAction::triggered, this, &MainWindow::showShortcutDialog);
 	}
 
@@ -635,6 +639,7 @@ void MainWindow::connectActions()
 	connect(m_ui->actionCompressFWFData, &QAction::triggered, this, &MainWindow::doActionCompressFWFData);
 	//"Edit" menu
 	connect(m_ui->actionClone, &QAction::triggered, this, &MainWindow::doActionClone);
+	connect(m_ui->actionSelectDisplayedEntities, &QAction::triggered, this, &MainWindow::doActionSelectDisplayedEntities);
 	connect(m_ui->actionMerge, &QAction::triggered, this, &MainWindow::doActionMerge);
 	connect(m_ui->actionApplyTransformation, &QAction::triggered, this, &MainWindow::doActionApplyTransformation);
 	connect(m_ui->actionApplyScale, &QAction::triggered, this, &MainWindow::doActionApplyScale);
@@ -6756,6 +6761,17 @@ void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 {
+	if (obj == m_ui->dbTreeView || obj == m_ui->consoleWidget)
+	{
+		// the DB tree and the console keep their native 'select all' shortcut
+		if (event->type() == QEvent::ShortcutOverride && static_cast<QKeyEvent*>(event)->matches(QKeySequence::SelectAll))
+		{
+			event->accept();
+			return true;
+		}
+		return QObject::eventFilter(obj, event);
+	}
+
 	switch (event->type())
 	{
 	case QEvent::Resize:
@@ -8473,6 +8489,28 @@ void MainWindow::doActionClone()
 	}
 
 	updateUI();
+}
+
+void MainWindow::doActionSelectDisplayedEntities()
+{
+	ccGLWindowInterface* win = getActiveGLWindow();
+	if (!win || !m_ccRoot)
+	{
+		return;
+	}
+
+	ccHObject::Container displayed;
+	m_ccRoot->getRootEntity()->filterChildren(displayed, true, CC_TYPES::OBJECT, false, win);
+
+	// keep only the visible and enabled entities whose parents are all enabled
+	displayed.erase(std::remove_if(displayed.begin(), displayed.end(), [win](const ccHObject* entity)
+	                               { return !entity->isDisplayedIn(win); }),
+	                displayed.end());
+
+	if (!displayed.empty())
+	{
+		m_ccRoot->selectEntities(displayed);
+	}
 }
 
 void MainWindow::doActionAddConstantSF()
@@ -12649,6 +12687,7 @@ void MainWindow::populateActionList()
 	m_actions.push_back(m_ui->actionViewInformation);
 	m_actions.push_back(m_ui->actionLockView3DRotationAxis);
 	m_actions.push_back(m_ui->actionToggleClippingPlanes);
+	m_actions.push_back(m_ui->actionSelectDisplayedEntities);
 }
 
 void MainWindow::showShortcutDialog()

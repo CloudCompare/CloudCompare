@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SOR_FILTER_DLG_HEADER
-#define CC_SOR_FILTER_DLG_HEADER
 
 #include <QDialog>
 
@@ -42,8 +41,9 @@ class ccSORFilterDlg : public QDialog
 	double nSigma() const;
 	void   setNSigma(double nSigma);
 
-  private:
-	Ui::SorFilterDialog* m_ui;
-};
+	void setMaxThreadCount(int count);
+	int  maxThreadCount() const;
 
-#endif // CC_SOR_FILTER_DLG_HEADER
+  private:
+	std::unique_ptr<Ui::SorFilterDialog> m_ui;
+};

@@ -7,6 +7,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/cc2DViewportObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccAdvancedTypes.h
 		${CMAKE_CURRENT_LIST_DIR}/ccArray.h
+		${CMAKE_CURRENT_LIST_DIR}/ccBackgroundTask.h
 		${CMAKE_CURRENT_LIST_DIR}/ccBasicTypes.h
 		${CMAKE_CURRENT_LIST_DIR}/ccBBox.h
 		${CMAKE_CURRENT_LIST_DIR}/ccBox.h
@@ -42,6 +43,7 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccGLDrawContext.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLMatrix.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGLMatrixTpl.h
+		${CMAKE_CURRENT_LIST_DIR}/ccGLSLHelper.h
 		${CMAKE_CURRENT_LIST_DIR}/ccGriddedTools.h
 		${CMAKE_CURRENT_LIST_DIR}/ccHObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccHObjectCaster.h

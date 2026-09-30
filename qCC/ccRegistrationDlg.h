@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_REGISTRATION_DLG_HEADER
-#define CC_REGISTRATION_DLG_HEADER
 
 #include <QDialog>
 
@@ -99,6 +98,9 @@ class ccRegistrationDlg : public QDialog
 	**/
 	bool adjustScale() const;
 
+	//! Returns the scale range (if any, or a pair of NaN values if not)
+	std::pair<double, double> constrainedScaleRange() const;
+
 	//! Returns active transformation filters
 	/** See CCCoreLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	 **/
@@ -123,5 +125,3 @@ class ccRegistrationDlg : public QDialog
 	//! 'Data' entity
 	ccHObject* dataEntity;
 };
-
-#endif // CC_REGISTRATION_DLG_HEADER

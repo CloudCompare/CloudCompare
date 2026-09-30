@@ -15,10 +15,30 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <clocale>
+#include "../include/ccApplicationBase.h"
+
+// Local
+#include "../include/ccPluginManager.h"
+#include "../include/ccTranslationManager.h"
+
+// CCCoreLib
+#include <CCPlatform.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
+// qCC_db
+#include <ccColorScalesManager.h>
+#include <ccMaterial.h>
+#include <ccMesh.h>
+#include <ccPointCloud.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QDir>
+#include <QOpenGLWidget>
 #include <QProcessEnvironment>
 #include <QSettings>
 #include <QStandardPaths>
@@ -28,27 +48,8 @@
 #include <QTranslator>
 #include <QtGlobal>
 
-// CCCoreLib
-#include "CCPlatform.h"
-
-// qCC_db
-#include "ccMaterial.h"
-
-#include <ccPointCloud.h>
-
-// qCC_glWindow
-#include "ccGLWindowInterface.h"
-
-// Common
-#include "ccApplicationBase.h"
-#include "ccPluginManager.h"
-#include "ccTranslationManager.h"
-
-// ccPluginAPI
-#include <ccPersistentSettings.h>
-
-// Qt
-#include <QOpenGLWidget>
+// System
+#include <clocale>
 
 #if (QT_VERSION < QT_VERSION_CHECK(6, 4, 0))
 #error CloudCompare does not support versions of Qt prior to 6.4
@@ -63,7 +64,9 @@ void ccApplicationBase::InitOpenGL()
 	    using the correct version and profile.
 	**/
 	{
-		QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+		QSurfaceFormat format;
+		// force to "OpenGL" else it could default on something else (On wayland it will default to OpenGL ES)
+		format.setRenderableType(QSurfaceFormat::OpenGL);
 		format.setStencilBufferSize(0);
 #ifndef CC_LINUX                // seems to cause some big issues on Linux if Quad-buffering is not supported
                                 // we would need to find a way to check whether it's supported or not in advance...
@@ -132,7 +135,10 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 	ccTranslationManager::Get().loadTranslations();
 
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
-	        { ccMaterial::ReleaseTextures(); });
+	        { ccMaterial::ReleaseTextures();
+			  ccColorScalesManager::ReleaseUniqueInstance();
+	          ccMesh::ReleaseOpenGLRessources();
+	          ccPointCloud::ReleaseOpenGLRessources(); });
 }
 
 QString ccApplicationBase::versionLongStr(bool includeOS) const
@@ -270,17 +276,18 @@ bool ccApplicationBase::setAppStyle(QString styleKey)
 		QFile f(resourcePath);
 		if (!f.exists())
 		{
-			f.close();
+			ccLog::Warning(tr("Style sheet file does not exist: ") + resourcePath);
 			return false;
 		}
-		else
+		if (!f.open(QFile::ReadOnly | QFile::Text))
 		{
-			f.open(QFile::ReadOnly | QFile::Text);
-			QTextStream ts(&f);
-			setStyleSheet(ts.readAll());
-			f.close();
-			return true;
+			ccLog::Warning(tr("Failed to open style sheet file: ") + resourcePath);
+			return false;
 		}
+		QTextStream ts(&f);
+		setStyleSheet(ts.readAll());
+		f.close();
+		return true;
 	};
 
 	if (styleKey == "QDarkStyleSheet::Dark")

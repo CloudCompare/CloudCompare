@@ -15,19 +15,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccMinimumSpanningTreeForNormsDirection.h"
+#include "../include/ccMinimumSpanningTreeForNormsDirection.h"
+
+// Local
+#include "../include/ccLog.h"
+#include "../include/ccOctree.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
 
 // CCCoreLib
 #include <ReferenceCloud.h>
 
-// local
-#include "ccLog.h"
-#include "ccOctree.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
-
-// system
+// System
 #include <map>
 #include <queue>
 #include <set>

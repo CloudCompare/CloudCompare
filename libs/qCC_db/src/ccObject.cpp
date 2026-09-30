@@ -15,18 +15,18 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccObject.h"
+#include "../include/ccObject.h"
 
 // Qt
 #include <QSettings>
+
+// System
+#include <cstdint>
 
 #ifdef USE_VLD
 // VLD
 #include <vld.h>
 #endif
-
-// System
-#include <cstdint>
 
 /** Versions:
     V1.0 = prior to 05/04/2012 = old version

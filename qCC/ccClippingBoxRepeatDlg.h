@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER
-#define CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER
 
 #include <ui_clippingBoxRepeatDlg.h>
 
@@ -47,5 +46,3 @@ class ccClippingBoxRepeatDlg : public QDialog
 	void onDimYChecked(bool);
 	void onDimZChecked(bool);
 };
-
-#endif // CC_CLIPPING_BOX_REPEAT_DIALOG_HEADER

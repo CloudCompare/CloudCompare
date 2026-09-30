@@ -36,11 +36,9 @@
 #include <ccScalarField.h>
 
 // System
+#include <algorithm>
 #include <cassert>
 #include <cstring>
-
-// Qt
-#include <QScopedPointer>
 
 // Semi-persistent parameters
 static int  s_defaultSkippedLineCount = 0;
@@ -51,6 +49,91 @@ static bool s_saveSFBeforeColor       = false;
 static bool s_saveColumnsNamesHeader  = false;
 static bool s_savePointCountHeader    = false;
 static bool s_doNotCreateLabels       = false;
+
+//! Number of bytes inspected to guess the line ending style of a file
+static constexpr qint64 LINE_ENDING_SNIFF_SIZE = 64 * 1024;
+
+//! Returns whether some data uses legacy Mac line endings (a lone CR, without any LF)
+static bool UsesLoneCRLineEndings(const char* data, qint64 size)
+{
+	bool crFound = false;
+	for (qint64 i = 0; i < size; ++i)
+	{
+		if (data[i] == '\n')
+		{
+			// LF or CRLF: QTextStream already handles both
+			return false;
+		}
+		if (data[i] == '\r')
+		{
+			crFound = true;
+		}
+	}
+
+	return crFound;
+}
+
+namespace
+{
+	//! Read-only device that turns lone CR line endings into LF ones on the fly
+	/** QTextStream::readLine only breaks on LF, so a file saved with legacy Mac
+	    (CR only) line endings would be read as a single very long line. Such files
+	    contain no LF at all, therefore replacing every CR by a LF is enough, and
+	    leaves the rest of the content untouched.
+	**/
+	class CRToLFDevice : public QIODevice
+	{
+	  public:
+		explicit CRToLFDevice(QIODevice& source)
+		    : m_source(source)
+		{
+		}
+
+		bool isSequential() const override
+		{
+			return m_source.isSequential();
+		}
+
+		qint64 size() const override
+		{
+			return m_source.size();
+		}
+
+		qint64 bytesAvailable() const override
+		{
+			return QIODevice::bytesAvailable() + m_source.bytesAvailable();
+		}
+
+		bool seek(qint64 pos) override
+		{
+			// one input byte always maps to exactly one output byte
+			return QIODevice::seek(pos) && m_source.seek(pos);
+		}
+
+	  protected:
+		qint64 readData(char* data, qint64 maxSize) override
+		{
+			qint64 bytesRead = m_source.read(data, maxSize);
+			for (qint64 i = 0; i < bytesRead; ++i)
+			{
+				if (data[i] == '\r')
+				{
+					data[i] = '\n';
+				}
+			}
+
+			return bytesRead;
+		}
+
+		qint64 writeData(const char*, qint64) override
+		{
+			return -1; // read-only
+		}
+
+	  private:
+		QIODevice& m_source;
+	};
+} // namespace
 
 void AsciiFilter::SetDefaultSkippedLineCount(int count)
 {
@@ -222,20 +305,22 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
-	unsigned                    numberOfPoints = cloud->size();
-	bool                        writeColors    = cloud->hasColors();
-	bool                        writeNorms     = cloud->hasNormals();
-	std::vector<ccScalarField*> theScalarFields;
+	unsigned                           numberOfPoints = cloud->size();
+	bool                               writeColors    = cloud->hasColors();
+	bool                               writeNorms     = cloud->hasNormals();
+	std::vector<ccScalarField::Shared> scalarFields;
 	if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
 		for (unsigned i = 0; i < ccCloud->getNumberOfScalarFields(); ++i)
-			theScalarFields.push_back(static_cast<ccScalarField*>(ccCloud->getScalarField(i)));
+		{
+			scalarFields.push_back(ccCloud->getCCScalarField(i));
+		}
 	}
-	bool writeSF = (!theScalarFields.empty());
+	bool writeSF = (!scalarFields.empty());
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -243,7 +328,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	// non static parameters
 	int   normalPrecision = 2 + sizeof(PointCoordinateType);
@@ -278,7 +363,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF name
-			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
 			{
 				QString sfName(QString::fromStdString((*it)->getName()));
 				sfName.replace(separator, '_');
@@ -378,7 +463,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF values
-			for (std::vector<ccScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
 			{
 				line.append(separator);
 				ScalarType sfVal = (*it)->getValue(i);
@@ -427,7 +512,22 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 		return CC_FERR_READING;
 	}
 
-	QTextStream stream(&file);
+	// files saved with legacy Mac line endings (a lone CR) would otherwise be read as a single line
+	std::unique_ptr<CRToLFDevice> crToLFDevice;
+	{
+		const QByteArray head = file.peek(LINE_ENDING_SNIFF_SIZE); // doesn't move the read position
+		if (UsesLoneCRLineEndings(head.constData(), head.size()))
+		{
+			ccLog::Warning(QString("[ASCII] File '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(filename));
+			crToLFDevice.reset(new CRToLFDevice(file));
+			if (!crToLFDevice->open(QIODevice::ReadOnly))
+			{
+				return CC_FERR_READING;
+			}
+		}
+	}
+
+	QTextStream stream(crToLFDevice ? static_cast<QIODevice*>(crToLFDevice.get()) : static_cast<QIODevice*>(&file));
 
 	return loadStream(stream, filename, file.size(), container, parameters);
 }
@@ -437,7 +537,18 @@ CC_FILE_ERROR AsciiFilter::loadAsciiData(const QByteArray& data,
                                          ccHObject&        container,
                                          LoadParameters&   parameters)
 {
-	QTextStream stream(data);
+	// same as above, but the data is already in memory so it can be converted directly
+	QByteArray        convertedData;
+	const QByteArray* inputData = &data;
+	if (UsesLoneCRLineEndings(data.constData(), std::min<qint64>(data.size(), LINE_ENDING_SNIFF_SIZE)))
+	{
+		ccLog::Warning(QString("[ASCII] '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(sourceName));
+		convertedData = data;
+		convertedData.replace('\r', '\n');
+		inputData = &convertedData;
+	}
+
+	QTextStream stream(*inputData);
 
 	return loadStream(stream, sourceName, data.size(), container, parameters);
 }
@@ -530,12 +641,12 @@ struct cloudAttributesDescriptor
 		};
 		int indexes[c_attribCount];
 	};
-	std::vector<int>                     scalarIndexes;
-	std::vector<CCCoreLib::ScalarField*> scalarFields;
-	bool                                 hasNorms;
-	bool                                 hasRGBColors;
-	bool                                 hasFloatRGBColors[4];
-	bool                                 hasQuaternion;
+	std::vector<int>                   scalarIndexes;
+	std::vector<ccScalarField::Shared> scalarFields;
+	bool                               hasNorms;
+	bool                               hasRGBColors;
+	bool                               hasFloatRGBColors[4];
+	bool                               hasQuaternion;
 
 	cloudAttributesDescriptor()
 	{
@@ -667,8 +778,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 				sfName.replace('_', ' ');
 			}
 
-			ccScalarField* sf    = new ccScalarField(sfName.toStdString());
-			int            sfIdx = cloud->addScalarField(sf);
+			auto sf    = std::make_shared<ccScalarField>(sfName.toStdString());
+			int  sfIdx = cloud->addScalarField(sf);
 			if (sfIdx >= 0)
 			{
 				cloudDesc.scalarIndexes.push_back(i);
@@ -677,8 +788,6 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 			else
 			{
 				ccLog::Warning("Failed to add scalar field #%i to cloud! (skipped)", sfIndex);
-				sf->release();
-				sf = nullptr;
 			}
 		}
 		break;
@@ -848,7 +957,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 	}
 
 	// progress indicator
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -856,7 +965,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), approximateNumberOfLines);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), approximateNumberOfLines);
 
 	// buffers
 	CCVector3d    P(0, 0, 0);
@@ -935,7 +1044,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 				if (!cloudDesc.scalarFields.empty())
 				{
 					for (unsigned k = 0; k < cloudDesc.scalarFields.size(); ++k)
+					{
 						cloudDesc.scalarFields[k]->computeMinAndMax();
+					}
 					cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 					cloudDesc.cloud->showSF(true);
 				}

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_NOISE_FILTER_DLG_HEADER
-#define CC_NOISE_FILTER_DLG_HEADER
-
 #include <ui_noiseFilterDlg.h>
 
 //! Dialog for noise filtering (based on the distance to the implicit local surface)
@@ -30,5 +29,3 @@ class ccNoiseFilterDlg : public QDialog
 	//! Default constructor
 	explicit ccNoiseFilterDlg(QWidget* parent = nullptr);
 };
-
-#endif // CC_NOISE_FILTER_DLG_HEADER

@@ -17,8 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCAppCommon.h"
 
+// Qt
 #include <QObject>
 
 class QAction;
@@ -33,7 +35,7 @@ class CCAPPCOMMON_LIB_API cc3DMouseManager : public QObject
 
   public:
 	cc3DMouseManager(ccMainAppInterface* appInterface, QObject* parent);
-	~cc3DMouseManager();
+	~cc3DMouseManager() override;
 
 	//! Gets the menu associated with the 3D mouse
 	QMenu* menu()

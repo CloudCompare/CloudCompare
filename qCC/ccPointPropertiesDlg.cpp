@@ -17,9 +17,6 @@
 
 #include "ccPointPropertiesDlg.h"
 
-// Local
-#include "ccCommon.h"
-
 // qCC_gl
 #include <ccGLWindowInterface.h>
 #include <ccGuiParameters.h>

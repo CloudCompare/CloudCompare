@@ -15,13 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccNormalVectors.h"
+#include "../include/ccNormalVectors.h"
 
 // Local
-#include "ccHObjectCaster.h"
-#include "ccNormalCompressor.h"
-#include "ccSensor.h"
-#include "ccSingleton.h"
+#include "../include/ccHObjectCaster.h"
+#include "../include/ccNormalCompressor.h"
+#include "../include/ccSensor.h"
+#include "../include/ccSingleton.h"
 
 // CCCoreLib
 #include <CCGeom.h>
@@ -292,7 +292,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	}
 
 	// we instantiate 3D normal vectors
-	NormsTableType*        theNorms = new NormsTableType;
+	NormsTableType::Shared theNorms = std::make_shared<NormsTableType>();
 	static const CCVector3 blankN(0, 0, 0);
 	if (!theNorms->resizeSafe(pointCount, true, &blankN))
 	{
@@ -305,7 +305,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	}
 	// theNorms->fill(0);
 
-	void* additionalParameters[2] = {reinterpret_cast<void*>(theNorms), reinterpret_cast<void*>(&localRadius)};
+	void* additionalParameters[2]{reinterpret_cast<void*>(theNorms.get()), reinterpret_cast<void*>(&localRadius)};
 
 	unsigned processedCells = 0;
 	switch (localModel)
@@ -354,6 +354,10 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 	if (processedCells == 0 || (progressCb && progressCb->isCancelRequested()))
 	{
 		theNormsCodes.resize(0);
+		if (nullptr == inputOctree)
+		{
+			delete theOctree;
+		}
 		return false;
 	}
 
@@ -366,8 +370,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud*                th
 		theNormsCodes.setValue(i, nCode);
 	}
 
-	theNorms->release();
-	theNorms = nullptr;
+	theNorms.reset();
 
 	// preferred orientation
 	if (preferredOrientation != UNDEFINED)

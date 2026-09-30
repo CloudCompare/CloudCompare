@@ -70,25 +70,25 @@ static const PointCoordinateType s_defaultArrowSize = 20;
 
 ccSectionExtractionTool::ccSectionExtractionTool(QWidget* parent)
     : ccOverlayDialog(parent)
-    , m_UI(new Ui::SectionExtractionDlg)
+    , m_ui(std::make_unique<Ui::SectionExtractionDlg>())
     , m_selectedPoly(nullptr)
     , m_state(0)
     , m_editedPoly(nullptr)
     , m_editedPolyVertices(nullptr)
 {
-	m_UI->setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(m_UI->undoToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::undo);
-	connect(m_UI->validToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::apply);
-	connect(m_UI->cancelToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::cancel);
-	connect(m_UI->polylineToolButton, &QAbstractButton::toggled, this, &ccSectionExtractionTool::enableSectionEditingMode);
-	connect(m_UI->importFromDBToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::doImportPolylinesFromDB);
-	connect(m_UI->vertAxisComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccSectionExtractionTool::setVertDimension);
+	connect(m_ui->undoToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::undo);
+	connect(m_ui->validToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::apply);
+	connect(m_ui->cancelToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::cancel);
+	connect(m_ui->polylineToolButton, &QAbstractButton::toggled, this, &ccSectionExtractionTool::enableSectionEditingMode);
+	connect(m_ui->importFromDBToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::doImportPolylinesFromDB);
+	connect(m_ui->vertAxisComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccSectionExtractionTool::setVertDimension);
 
-	connect(m_UI->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::generateOrthoSections);
-	connect(m_UI->extractPointsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::extractPoints);
-	connect(m_UI->unfoldToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::unfoldPoints);
-	connect(m_UI->exportSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportSections);
+	connect(m_ui->generateOrthoSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::generateOrthoSections);
+	connect(m_ui->extractPointsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::extractPoints);
+	connect(m_ui->unfoldToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::unfoldPoints);
+	connect(m_ui->exportSectionsToolButton, &QAbstractButton::clicked, this, &ccSectionExtractionTool::exportSections);
 
 	// add shortcuts
 	addOverriddenShortcut(Qt::Key_Space);  // space bar for the "pause" button
@@ -109,8 +109,6 @@ ccSectionExtractionTool::~ccSectionExtractionTool()
 		delete m_editedPoly;
 		m_editedPoly = nullptr;
 	}
-
-	delete m_UI;
 }
 
 void ccSectionExtractionTool::setVertDimension(int dim)
@@ -140,7 +138,7 @@ void ccSectionExtractionTool::onShortcutTriggered(int key)
 	switch (key)
 	{
 	case Qt::Key_Space:
-		m_UI->polylineToolButton->toggle();
+		m_ui->polylineToolButton->toggle();
 		return;
 
 	case Qt::Key_Escape:
@@ -247,7 +245,7 @@ bool ccSectionExtractionTool::linkWith(ccGLWindowInterface* win)
 		}
 
 		// update view direction
-		setVertDimension(m_UI->vertAxisComboBox->currentIndex());
+		setVertDimension(m_ui->vertAxisComboBox->currentIndex());
 
 		// section extraction only works in orthoraphic mode!
 		m_associatedWin->setPerspectiveState(false, true);
@@ -286,9 +284,9 @@ void ccSectionExtractionTool::selectPolyline(Section* poly, bool autoRefreshDisp
 		m_associatedWin->redraw();
 	}
 
-	m_UI->generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != nullptr);
-	m_UI->extractPointsToolButton->setEnabled(!m_sections.empty());
-	m_UI->unfoldToolButton->setEnabled(!m_sections.empty());
+	m_ui->generateOrthoSectionsToolButton->setEnabled(m_selectedPoly != nullptr);
+	m_ui->extractPointsToolButton->setEnabled(!m_sections.empty());
+	m_ui->unfoldToolButton->setEnabled(!m_sections.empty());
 }
 
 void ccSectionExtractionTool::releasePolyline(Section* section)
@@ -332,7 +330,7 @@ void ccSectionExtractionTool::deleteSelectedPolyline()
 	// remove the section from the list
 	m_sections.removeOne(*selectedPoly);
 	m_undoCount.resize(0);
-	m_UI->undoToolButton->setEnabled(false);
+	m_ui->undoToolButton->setEnabled(false);
 
 	if (m_associatedWin)
 	{
@@ -427,9 +425,9 @@ void ccSectionExtractionTool::undo()
 	}
 
 	// update GUI
-	m_UI->exportSectionsToolButton->setEnabled(count != 0);
-	m_UI->extractPointsToolButton->setEnabled(count != 0);
-	m_UI->undoToolButton->setEnabled(!m_undoCount.empty());
+	m_ui->exportSectionsToolButton->setEnabled(count != 0);
+	m_ui->extractPointsToolButton->setEnabled(count != 0);
+	m_ui->undoToolButton->setEnabled(!m_undoCount.empty());
 
 	if (m_associatedWin)
 	{
@@ -470,9 +468,9 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation /*=true*/)
 
 	m_sections.clear();
 	m_undoCount.resize(0);
-	m_UI->undoToolButton->setEnabled(false);
-	m_UI->exportSectionsToolButton->setEnabled(false);
-	m_UI->extractPointsToolButton->setEnabled(false);
+	m_ui->undoToolButton->setEnabled(false);
+	m_ui->exportSectionsToolButton->setEnabled(false);
+	m_ui->extractPointsToolButton->setEnabled(false);
 
 	// and we remove only temporary clouds
 	for (int i = 0; i < m_clouds.size();)
@@ -574,7 +572,7 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 		const double half_h = camera.viewport[3] / 2.0;
 
 		// working dimension
-		int vertDim = m_UI->vertAxisComboBox->currentIndex();
+		int vertDim = m_ui->vertAxisComboBox->currentIndex();
 		assert(vertDim >= 0 && vertDim < 3);
 
 		// get default altitude from the cloud(s) bouding-box
@@ -626,8 +624,8 @@ bool ccSectionExtractionTool::addPolyline(ccPolyline* inputPoly, bool alreadyInD
 	// add polyline to the 'sections' set
 	//(all its parameters will be backuped!)
 	m_sections.push_back(Section(inputPoly, alreadyInDB));
-	m_UI->exportSectionsToolButton->setEnabled(true);
-	m_UI->extractPointsToolButton->setEnabled(true);
+	m_ui->exportSectionsToolButton->setEnabled(true);
+	m_ui->extractPointsToolButton->setEnabled(true);
 
 	// apply default look
 	inputPoly->setEnabled(true);
@@ -922,10 +920,10 @@ void ccSectionExtractionTool::enableSectionEditingMode(bool state)
 	}
 
 	// update mini-GUI
-	m_UI->polylineToolButton->blockSignals(true);
-	m_UI->polylineToolButton->setChecked(state);
-	m_UI->frame->setEnabled(!state);
-	m_UI->polylineToolButton->blockSignals(false);
+	m_ui->polylineToolButton->blockSignals(true);
+	m_ui->polylineToolButton->setChecked(state);
+	m_ui->frame->setEnabled(!state);
+	m_ui->polylineToolButton->blockSignals(false);
 
 	m_associatedWin->redraw();
 }
@@ -935,7 +933,7 @@ void ccSectionExtractionTool::addUndoStep()
 	if (m_undoCount.empty() || (static_cast<int>(m_undoCount.back()) < m_sections.size()))
 	{
 		m_undoCount.push_back(m_sections.size());
-		m_UI->undoToolButton->setEnabled(true);
+		m_ui->undoToolButton->setEnabled(true);
 	}
 }
 
@@ -1086,7 +1084,7 @@ void          ccSectionExtractionTool::generateOrthoSections()
 
 		// normal to the plane
 		CCVector3 N(0, 0, 0);
-		int       vertDim = m_UI->vertAxisComboBox->currentIndex();
+		int       vertDim = m_ui->vertAxisComboBox->currentIndex();
 		assert(vertDim >= 0 && vertDim < 3);
 		{
 			N.u[vertDim] = 1.0;
@@ -1571,7 +1569,7 @@ void ccSectionExtractionTool::unfoldPoints()
 	s_defaultThickness = thickness;
 
 	// projection direction
-	int vertDim = m_UI->vertAxisComboBox->currentIndex();
+	int vertDim = m_ui->vertAxisComboBox->currentIndex();
 	int xDim    = (vertDim < 2 ? vertDim + 1 : 0);
 	int yDim    = (xDim < 2 ? xDim + 1 : 0);
 
@@ -1932,7 +1930,7 @@ void ccSectionExtractionTool::extractPoints()
 		QCoreApplication::processEvents();
 	}
 
-	int vertDim = m_UI->vertAxisComboBox->currentIndex();
+	int vertDim = m_ui->vertAxisComboBox->currentIndex();
 	int xDim    = (vertDim < 2 ? vertDim + 1 : 0);
 	int yDim    = (xDim < 2 ? xDim + 1 : 0);
 

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,27 +17,23 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ARRAY_HEADER
-#define CC_ARRAY_HEADER
-
 // Local
 #include "ccHObject.h"
 
-// CCCoreLib
-#include <CCShareable.h>
-
 // System
+#include <memory>
 #include <vector>
 
 //! Shareable array that can be properly inserted in the DB tree
 template <class Type, int N, class ComponentType>
 class ccArray : public std::vector<Type>
-    , public CCShareable
     , public ccHObject
 {
   public:
 	//! Base type
-	typedef ccArray<Type, N, ComponentType> Base;
+	using Base = ccArray<Type, N, ComponentType>;
+	//! Shared pointer type
+	using Shared = std::shared_ptr<Base>;
 
 	//! Default constructor
 	ccArray(QString name = QString())
@@ -45,14 +43,13 @@ class ccArray : public std::vector<Type>
 	}
 
 	//! Duplicates array
-	virtual Base* clone()
+	Shared clone()
 	{
-		Base* cloneArray = new Base(getName());
+		Shared cloneArray = std::make_shared<Base>(getName());
 		if (!copy(*cloneArray))
 		{
 			// error message already issued
-			cloneArray->release();
-			cloneArray = nullptr;
+			cloneArray.reset();
 		}
 		return cloneArray;
 	}
@@ -122,15 +119,11 @@ class ccArray : public std::vector<Type>
 	}
 
 	// inherited from ccHObject
-	inline virtual CC_CLASS_ENUM getClassID() const override
+	inline CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::ARRAY;
 	}
-	inline virtual bool isShareable() const override
-	{
-		return true;
-	}
-	inline virtual bool isSerializable() const override
+	inline bool isSerializable() const override
 	{
 		return true;
 	}
@@ -175,13 +168,9 @@ class ccArray : public std::vector<Type>
 		std::swap(this->at(i1), this->at(i2));
 	}
 
-  protected:
-	//! Destructor (protected)
-	/** Use release instead.
-	 **/
-	virtual ~ccArray()
-	{
-	}
+  public:
+	//! Default destructor
+	~ccArray() override = default;
 
 	// inherited from ccHObject
 	inline bool toFile_MeOnly(QFile& out, short dataVersion) const override
@@ -193,5 +182,3 @@ class ccArray : public std::vector<Type>
 		return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, dataVersion, "array");
 	}
 };
-
-#endif // CC_ARRAY_HEADER

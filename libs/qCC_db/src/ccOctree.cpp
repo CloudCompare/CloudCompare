@@ -15,30 +15,28 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccOctree.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccOctree.h"
 
 // Local
-#include "ccBox.h"
-#include "ccCameraSensor.h"
-#include "ccNormalVectors.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
+#include "../include/ccBox.h"
+#include "../include/ccCameraSensor.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <Neighbourhood.h>
 #include <RayAndBox.h>
 #include <ScalarFieldTools.h>
 
+// System
+#include <random>
+
 #ifdef QT_DEBUG
 // #define DEBUG_PICKING_MECHANISM
 #endif
-
-// System
-#include <random>
 
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
     : CCCoreLib::DgmOctree(aCloud)
@@ -112,7 +110,7 @@ ccBBox ccOctree::getPointsBB() const
 	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
 }
 
-void ccOctree::multiplyBoundingBox(const PointCoordinateType multFactor)
+void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)
 {
 	m_dimMin *= multFactor;
 	m_dimMax *= multFactor;
@@ -209,9 +207,9 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 
 			if (m_displayMode == MEAN_POINTS)
 			{
-				void* additionalParameters[] = {reinterpret_cast<void*>(&glParams),
-				                                reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
-				                                reinterpret_cast<void*>(glFunc)};
+				void* additionalParameters[]{reinterpret_cast<void*>(&glParams),
+				                             reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
+				                             reinterpret_cast<void*>(glFunc)};
 
 				if (glParams.showNorms)
 				{
@@ -254,13 +252,13 @@ void ccOctree::draw(CC_DRAW_CONTEXT& context, ccColor::Rgb* pickingColor /*=null
 
 				// fake context
 				CC_DRAW_CONTEXT fakeContext = context;
-				fakeContext.drawingFlags    = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+				fakeContext.drawingFlags    = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED | CC_NO_SHADER;
 				fakeContext.display         = nullptr;
 
-				void* additionalParameters[] = {reinterpret_cast<void*>(&glParams),
-				                                reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
-				                                reinterpret_cast<void*>(&box),
-				                                reinterpret_cast<void*>(&fakeContext)};
+				void* additionalParameters[]{reinterpret_cast<void*>(&glParams),
+				                             reinterpret_cast<void*>(m_theAssociatedCloudAsGPC),
+				                             reinterpret_cast<void*>(&box),
+				                             reinterpret_cast<void*>(&fakeContext)};
 
 				executeFunctionForAllCellsAtLevel(m_displayedLevel,
 				                                  &DrawCellAsAPrimitive,
@@ -620,14 +618,14 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 	const ccGenericPointCloud::VisibilityTableType* visTable = m_theAssociatedCloudAsGPC->isVisibilityTableInstantiated() ? &m_theAssociatedCloudAsGPC->getTheVisibilityArray() : nullptr;
 
 	// scalar field with hidden values (if any)
-	ccScalarField* activeSF = nullptr;
+	ccScalarField::Shared activeSF;
 	if (m_theAssociatedCloudAsGPC->sfShown()
 	    && m_theAssociatedCloudAsGPC->isA(CC_TYPES::POINT_CLOUD)
 	    && !visTable // if the visibility table is instantiated, we always display ALL points
 	)
 	{
-		ccPointCloud*  pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
-		ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+		ccPointCloud* pc = static_cast<ccPointCloud*>(m_theAssociatedCloudAsGPC);
+		auto          sf = pc->getCurrentDisplayedScalarField();
 		if (sf && sf->mayHaveHiddenValues() && sf->getColorScale())
 		{
 			// we must take this SF display parameters into account as some points may be hidden!

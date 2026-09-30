@@ -18,7 +18,6 @@
 #include "ccColorFromScalarDlg.h"
 
 // local
-#include "ccConsole.h"
 #include "ccHistogramWindow.h"
 
 // qCC_db
@@ -41,7 +40,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
     : QDialog(parent, Qt::Tool)
     , m_cloud(pointCloud)
     , m_systemInvalid(false)
-    , m_ui(new Ui::ColorFromScalarDialog)
+    , m_ui(std::make_unique<Ui::ColorFromScalarDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -102,7 +101,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 		{
 			m_cloud->setCurrentDisplayedScalarField(0);
 		}
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+		auto sf = m_cloud->getCCScalarField(m_cloud->getCurrentDisplayedScalarFieldIndex());
 		if (!sf) // I had this happen 1 time during testing but could never replicate
 		{
 			assert(false);
@@ -200,7 +199,7 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 {
 	if (!m_systemInvalid)
 	{
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getCurrentDisplayedScalarField());
+		auto sf = m_cloud->getCCScalarField(m_cloud->getCurrentDisplayedScalarFieldIndex());
 		if (sf)
 		{
 			sf->setColorScale(m_storedOrigColorScale);
@@ -211,7 +210,6 @@ ccColorFromScalarDlg::~ccColorFromScalarDlg()
 			m_cloud->redrawDisplay();
 		}
 	}
-	delete m_ui;
 }
 
 void ccColorFromScalarDlg::updateColormaps()
@@ -424,7 +422,7 @@ void ccColorFromScalarDlg::updateSpinBoxLimits(int n)
 		{
 			return;
 		}
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
+		auto sf = m_cloud->getCCScalarField(m_combos[n]->currentIndex());
 		if (sf)
 		{
 			m_minSat[n]           = sf->getMin();
@@ -455,7 +453,7 @@ void ccColorFromScalarDlg::updateChannel(int n)
 			return;
 		}
 
-		ccScalarField* sf = static_cast<ccScalarField*>(m_cloud->getScalarField(m_combos[n]->currentIndex()));
+		auto sf = m_cloud->getCCScalarField(m_combos[n]->currentIndex());
 		if (sf)
 		{
 			m_scalars[n] = sf;

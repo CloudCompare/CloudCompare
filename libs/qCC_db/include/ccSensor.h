@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SENSOR_HEADER
-#define CC_SENSOR_HEADER
 
 // Local
 #include "ccIndexedTransformationBuffer.h"
@@ -199,5 +198,3 @@ class QCC_DB_LIB_API ccSensor : public ccHObject
 	//! Sensor graphic representation scale
 	PointCoordinateType m_scale;
 };
-
-#endif // CC_SENSOR_HEADER

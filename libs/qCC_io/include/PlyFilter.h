@@ -75,6 +75,8 @@ class QCC_IO_LIB_API PlyFilter : public FileIOFilter
 
 	// static accessors
 	static void SetDefaultOutputFormat(e_ply_storage_mode format);
+	//! Sets whether the 'scalar_' prefix should be added to the scalar field names at saving time (true by default)
+	static void SetAddSFPrefix(bool state);
 
 	// inherited from FileIOFilter
 	CC_FILE_ERROR loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters) override;

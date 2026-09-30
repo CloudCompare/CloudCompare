@@ -15,15 +15,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIndexedTransformation.h"
+#include "../include/ccIndexedTransformation.h"
 
 // Qt
 #include <QFile>
 #include <QTextStream>
 
 // System
-#include <assert.h>
-#include <string>
+#include <cassert>
 
 ccIndexedTransformation::ccIndexedTransformation()
     : ccGLMatrix()

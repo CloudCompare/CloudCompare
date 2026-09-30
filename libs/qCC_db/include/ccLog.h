@@ -20,10 +20,6 @@
 // Local
 #include "qCC_db.h"
 
-// system
-#include <stdio.h>
-#include <string>
-
 // Qt
 #include <QString>
 
@@ -35,9 +31,7 @@ class QCC_DB_LIB_API ccLog
 {
   public:
 	//! Destructor
-	virtual ~ccLog()
-	{
-	}
+	virtual ~ccLog() = default;
 
 	//! Returns the static and unique instance
 	static ccLog* TheInstance();

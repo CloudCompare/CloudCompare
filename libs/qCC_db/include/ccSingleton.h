@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SINGLETON_HEADER
-#define CC_SINGLETON_HEADER
 
 //! Generic singleton encapsulation structure
 template <class T>
@@ -45,5 +44,3 @@ struct ccSingleton
 	//! Current instance
 	T* instance;
 };
-
-#endif // CC_SINGLETON_HEADER

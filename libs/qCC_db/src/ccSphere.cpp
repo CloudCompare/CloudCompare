@@ -15,12 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccSphere.h"
+#include "../include/ccSphere.h"
 
 // Local
-#include "ccPointCloud.h"
+#include "../include/ccPointCloud.h"
 
-// QT
+// Qt
 #include <QFontMetrics>
 
 ccSphere::ccSphere(PointCoordinateType radius,

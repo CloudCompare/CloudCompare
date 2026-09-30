@@ -805,11 +805,11 @@ static ccMesh* CreateMesh(
 		}
 		if (!areAllValuesOfPartsNaNs)
 		{
-			ccScalarField* sf = new ccScalarField("Measures");
+			auto sf = std::make_shared<ccScalarField>("Measures");
 			if (!sf->reserveSafe(vertCount))
 			{
 				ccLog::Warning(QString("[SHP] Mesh: not enough memory to load scalar values!"));
-				sf->release();
+				sf.reset();
 			}
 			else
 			{
@@ -1237,12 +1237,11 @@ static CC_FILE_ERROR LoadPolyline(QDataStream&      shpStream,
 			    { return std::isnan(v); });
 			if (!allNaNs)
 			{
-				ccScalarField* sf = new ccScalarField("Measures");
+				auto sf = std::make_shared<ccScalarField>("Measures");
 				if (!sf->reserveSafe(vertCount))
 				{
 					ccLog::Warning(QString("[SHP] Polyline #%1.%2: not enough memory to load scalar values!").arg(index).arg(i + 1));
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 				for (int32_t j = 0; j < vertCount; ++j)
 				{
@@ -1492,19 +1491,18 @@ static CC_FILE_ERROR LoadCloud(QDataStream&      shpStream,
 		if (recordSize16bits * 2 >= expectedSize)                           // recordSize is expressed as a number of 16-bit words
 		{
 			// M boundaries
-			ccScalarField* sf = nullptr;
-			double         mMin;
-			double         mMax;
+			ccScalarField::Shared sf;
+			double                mMin;
+			double                mMax;
 			shpStream >> mMin >> mMax;
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
-				sf = new ccScalarField("Measures");
+				sf.reset(new ccScalarField("Measures"));
 				if (!sf->reserveSafe(numPoints))
 				{
 					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
-					sf->release();
-					sf = nullptr;
+					sf.reset();
 				}
 			}
 
@@ -1536,7 +1534,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream&      shpStream,
 				}
 				else
 				{
-					sf->release();
+					sf.reset();
 				}
 			}
 			else
@@ -1994,8 +1992,8 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	}
 
 	// progress bar
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
-	qint64                           fileSize = file.size();
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	qint64                            fileSize = file.size();
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -2295,7 +2293,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 		}
 		else
 		{
-			CCCoreLib::ScalarField* sf = singlePoints->getScalarField(0);
+			auto sf = singlePoints->getCCScalarField(0);
 			if (sf)
 			{
 				sf->computeMinAndMax();

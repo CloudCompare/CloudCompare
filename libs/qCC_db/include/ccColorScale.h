@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,19 +17,19 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_SCALE_HEADER
-#define CC_COLOR_SCALE_HEADER
-
 // Local
 #include "ccColorTypes.h"
 #include "ccSerializableObject.h"
 
 // Qt
 #include <QList>
+#include <QOpenGLTexture>
 #include <QSharedPointer>
 
 // System
 #include <set>
+
+class QOpenGLFunctions_2_1;
 
 //! Color scale element: one value + one color
 class ccColorScaleElement
@@ -361,6 +363,20 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion() const override;
 
+	//! Returns the OpenGL texture corresponding to this color scale
+	QSharedPointer<QOpenGLTexture> getTexture(QOpenGLFunctions_2_1* glFunc) const
+	{
+		if (m_texture.isNull())
+		{
+			buildTexture(glFunc);
+		}
+		return m_texture;
+	}
+
+  protected:
+	//! Builds the OpenGL texture corresponding to this color scale
+	bool buildTexture(QOpenGLFunctions_2_1* glFunc) const;
+
   protected:
 	//! Sort elements
 	void sort();
@@ -400,6 +416,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 
 	//! List of custom labels
 	LabelSet m_customLabels;
-};
 
-#endif // CC_COLOR_SCALE_HEADER
+	//! OpenGL texture corresponding to this color scale
+	mutable QSharedPointer<QOpenGLTexture> m_texture;
+};

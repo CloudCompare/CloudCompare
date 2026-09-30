@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SF_DISTANCES_DLG_HEADER
-#define CC_SF_DISTANCES_DLG_HEADER
 
 #include <QDialog>
 
@@ -40,7 +39,5 @@ class ccSensorComputeDistancesDlg : public QDialog
 	bool computeSquaredDistances() const;
 
   private:
-	Ui::sensorComputeDistancesDlg* m_ui;
+	std::unique_ptr<Ui::sensorComputeDistancesDlg> m_ui;
 };
-
-#endif // CC_SF_DISTANCES_DLG_HEADER

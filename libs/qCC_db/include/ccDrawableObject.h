@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_DRAWABLE_OBJECT_HEADER
-#define CC_DRAWABLE_OBJECT_HEADER
-
 // Local
 #include "ccGLDrawContext.h"
+#include "ccGLMatrix.h"
 
 // CCCoreLib
 #include <CCGeom.h>
@@ -334,9 +334,8 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! Display state
 	struct DisplayState
 	{
-		DisplayState()
-		{
-		}
+		DisplayState() = default;
+
 		DisplayState(const ccDrawableObject& dobj);
 
 		using Shared = QSharedPointer<DisplayState>;
@@ -408,5 +407,3 @@ class QCC_DB_LIB_API ccDrawableObject
 	//! The stack of pushed display states
 	std::vector<DisplayState::Shared> m_displayStateStack;
 };
-
-#endif // CC_DRAWABLE_OBJECT_HEADER

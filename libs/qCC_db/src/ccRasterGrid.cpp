@@ -15,17 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccRasterGrid.h"
+#include "../include/ccRasterGrid.h"
+
+// Local
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <Delaunay2dMesh.h>
 #include <ParallelSort.h>
-
-// qCC_db
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccScalarField.h"
 
 // Qt
 #include <QCoreApplication>
@@ -280,7 +280,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	{
 		pointRefList.resize(pointCount, nullptr);
 	}
-	catch (const std::bad_alloc)
+	catch (const std::bad_alloc&)
 	{
 		ccLog::Error("Not enough memory");
 		return false;
@@ -377,7 +377,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	}
 
 	// Find the right 'std. dev.' SF if inverse variance is being used
-	CCCoreLib::ScalarField* zStdDevSF = nullptr;
+	CCCoreLib::ScalarField::Shared zStdDevSF;
 	if (projectionType == PROJ_INVERSE_VAR_VALUE || sfProjectionType == PROJ_INVERSE_VAR_VALUE)
 	{
 		if (zStdDevSfIndex >= 0)
@@ -582,7 +582,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						for (size_t k = 0; k < scalarFields.size(); ++k)
 						{
 							assert(!scalarFields[k].empty());
-							CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<unsigned>(k));
+							auto sf = pc->getScalarField(static_cast<unsigned>(k));
 
 							assert(sf && pos < scalarFields[k].size());
 
@@ -1527,8 +1527,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		numberOfExportedSfStatisticsFields = inputCloudAsPC->getNumberOfScalarFields() * sfStatCount;
 	}
 
-	std::vector<CCCoreLib::ScalarField*> exportedSFs;
-	size_t                               totalNumberOfExportedFields = numberOfExportedHeightStatisticsFields + numberOfExportedSfStatisticsFields;
+	std::vector<CCCoreLib::ScalarField::Shared> exportedSFs;
+	size_t                                      totalNumberOfExportedFields = numberOfExportedHeightStatisticsFields + numberOfExportedSfStatisticsFields;
 	if (totalNumberOfExportedFields != 0)
 	{
 		exportedSFs.reserve(totalNumberOfExportedFields);
@@ -1659,7 +1659,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 
 	// export points
 	{
-		QScopedPointer<CCCoreLib::NormalizedProgress> nProgress;
+		std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 		if (progressDialog)
 		{
 			nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(height * width)));
@@ -1728,8 +1728,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 					size_t sfIndex               = 0;
 					for (size_t k = 0; k < numberOfExportedHeightStatisticsFields + maxNumberOfExportedSfStatisticsFields; ++k)
 					{
-						CCCoreLib::ScalarField* sf   = exportedSFs[sfIndex];
-						ScalarType              sVal = CCCoreLib::NAN_VALUE;
+						auto       sf   = exportedSFs[sfIndex];
+						ScalarType sVal = CCCoreLib::NAN_VALUE;
 
 						// specific case: PER_CELL_VALUE
 						if (k < numberOfExportedHeightStatisticsFields && exportedStatistics[k] == PER_CELL_VALUE)
@@ -1773,7 +1773,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 								}
 
 								// Get input scalar field for statistics
-								CCCoreLib::ScalarField* inputScalarField = inputCloudAsPC->getScalarField(static_cast<int>(sfIndex));
+								auto inputScalarField = inputCloudAsPC->getScalarField(static_cast<int>(sfIndex));
 
 								// Set up vector of valid SF values for current cell
 								for (unsigned n = 0; n < aCell->nbPoints; ++n)
@@ -1930,7 +1930,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		// do we need to project the original SFs?
 		if (projectSFs && inputCloud && inputCloudAsPC)
 		{
-			QScopedPointer<CCCoreLib::NormalizedProgress> nProgress;
+			std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 			if (progressDialog)
 			{
 				progressDialog->setInfo(QObject::tr("Projecting %1 scalar fields").arg(scalarFields.size()));
@@ -1946,7 +1946,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 				assert(!scalarFields[k].empty());
 
 				// the corresponding SF should exist on the input cloud
-				ccScalarField* formerSf = static_cast<ccScalarField*>(inputCloudAsPC->getScalarField(static_cast<int>(k)));
+				auto formerSf = inputCloudAsPC->getCCScalarField(static_cast<int>(k));
 				assert(formerSf);
 
 				// we try to create an equivalent SF on the output grid
@@ -1962,7 +1962,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 				}
 				else
 				{
-					ccScalarField* sf = static_cast<ccScalarField*>(cloudGrid->getScalarField(sfIdx));
+					auto sf = cloudGrid->getCCScalarField(sfIdx);
 					assert(sf);
 					// set sf values
 					unsigned      n       = 0;
@@ -1980,7 +1980,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 						}
 					}
 					sf->computeMinAndMax();
-					sf->importParametersFrom(formerSf);
+					sf->importParametersFrom(*formerSf);
 					assert(sf->currentSize() == pointCount);
 				}
 
@@ -1999,7 +1999,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		// we simply add NAN values at the end of the SFs
 		for (int k = 0; k < static_cast<int>(cloudGrid->getNumberOfScalarFields()); ++k)
 		{
-			CCCoreLib::ScalarField* sf = cloudGrid->getScalarField(k);
+			auto sf = cloudGrid->getCCScalarField(k);
 			sf->resizeSafe(cloudGrid->size(), true, CCCoreLib::NAN_VALUE);
 		}
 	}

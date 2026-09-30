@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_VOLUME_CALC_TOOL_HEADER
-#define CC_VOLUME_CALC_TOOL_HEADER
 
 // Local
 #include "cc2.5DimEditor.h"
@@ -183,7 +182,5 @@ class ccVolumeCalcTool : public QDialog
 	 **/
 	ReportInfo m_lastReport;
 
-	Ui::VolumeCalcDialog* m_ui;
+	std::unique_ptr<Ui::VolumeCalcDialog> m_ui;
 };
-
-#endif // CC_VOLUME_CALC_TOOL_HEADER

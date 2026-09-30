@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SF_FROM_COLOR_DLG_HEADER
-#define CC_SF_FROM_COLOR_DLG_HEADER
 
 #include <ui_scalarFieldFromColorDlg.h>
 
@@ -47,5 +46,3 @@ class ccScalarFieldFromColorDlg : public QDialog
 	//! Returns if to export Composite channel as SF
 	bool getCompositeStatus() const;
 };
-
-#endif // CC_SF_FROM_COLOR_DLG_HEADER

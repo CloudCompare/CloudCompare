@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,19 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_POINT_PICKING_GENERIC_INTERFACE_HEADER
-#define CC_POINT_PICKING_GENERIC_INTERFACE_HEADER
-
 // Local
-#include "ccCommon.h"
 #include "ccOverlayDialog.h"
 #include "ccPickingListener.h"
 
 // CCCoreLib
 #include <CCGeom.h>
-
-// system
-#include <vector>
 
 class ccGLWindowInterface;
 class ccPointCloud;
@@ -62,5 +57,3 @@ class ccPointPickingGenericInterface : public ccOverlayDialog
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 };
-
-#endif

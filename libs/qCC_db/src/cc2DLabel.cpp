@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccIncludeGL.h"
+#include "../include/cc2DLabel.h"
 
 // Local
-#include "cc2DLabel.h"
-#include "ccGenericGLDisplay.h"
-#include "ccGenericMesh.h"
-#include "ccGenericPointCloud.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
-#include "ccSphere.h"
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccGenericMesh.h"
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccScalarField.h"
+#include "../include/ccSphere.h"
 
 // Qt
 #include <QFontMetrics>
@@ -550,7 +550,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
 					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
 				}
-				catch (const std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					return MemoryError();
 				}
@@ -579,7 +579,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
 					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
 				}
-				catch (const std::bad_alloc)
+				catch (const std::bad_alloc&)
 				{
 					return MemoryError();
 				}
@@ -713,7 +713,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 			info.hasSF = pp._cloud->hasDisplayedScalarField();
 			if (info.hasSF)
 			{
-				ccScalarField* sf = nullptr;
+				ccScalarField::Shared sf;
 
 				// fetch the real scalar field if possible
 				if (pp._cloud->isA(CC_TYPES::POINT_CLOUD))
@@ -740,7 +740,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				unsigned      sfCount = pc->getNumberOfScalarFields();
 				for (unsigned i = 0; i < sfCount; ++i)
 				{
-					const CCCoreLib::ScalarField* sf = pc->getScalarField(static_cast<int>(i));
+					auto sf = pc->getScalarField(static_cast<int>(i));
 					if (!sf)
 						continue;
 					SFValue sfVal;
@@ -776,7 +776,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 				ccGenericPointCloud* vertices = pp._mesh->getAssociatedCloud();
 				assert(vertices);
 
-				ccScalarField* sf = nullptr;
+				ccScalarField::Shared sf;
 
 				// fetch the real scalar field if possible
 				if (vertices->isA(CC_TYPES::POINT_CLOUD))
@@ -823,7 +823,7 @@ void cc2DLabel::getLabelInfo1(LabelInfo1& info) const
 					unsigned      sfCount = pc->getNumberOfScalarFields();
 					for (unsigned i = 0; i < sfCount; ++i)
 					{
-						const CCCoreLib::ScalarField* asf = pc->getScalarField(static_cast<int>(i));
+						auto asf = pc->getScalarField(static_cast<int>(i));
 						if (!asf)
 							continue;
 						ScalarType v1 = asf->getValue(vi->i1);

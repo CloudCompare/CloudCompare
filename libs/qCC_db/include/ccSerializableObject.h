@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SERIALIZABLE_OBJECT_HEADER
-#define CC_SERIALIZABLE_OBJECT_HEADER
-
 // Local
 #include "ccLog.h"
 
@@ -25,14 +24,14 @@
 #include <CCPlatform.h>
 #include <CCTypes.h>
 
-// System
-#include <cassert>
-#include <cstdint>
-
 // Qt
 #include <QDataStream>
 #include <QFile>
 #include <QMultiMap>
+
+// System
+#include <cassert>
+#include <cstdint>
 
 //! Serializable object interface
 class ccSerializableObject
@@ -73,7 +72,7 @@ class ccSerializableObject
 	};
 
 	//! Map of loaded unique IDs (old ID --> new ID)
-	typedef QMultiMap<unsigned, unsigned> LoadedIDMap;
+	using LoadedIDMap = QMultiMap<unsigned, unsigned>;
 
 	//! Loads data from binary stream
 	/** \param in input file (already opened)
@@ -414,5 +413,3 @@ class ccSerializationHelper
 		return true;
 	}
 };
-
-#endif // CC_SERIALIZABLE_OBJECT_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GL_MATRIX_HEADER
-#define CC_GL_MATRIX_HEADER
 
 // Local
 #include "ccGLMatrixTpl.h"
@@ -187,5 +186,3 @@ ccGLMatrixTpl<Tout> FromCCLibMatrix(const CCCoreLib::SquareMatrixTpl<Tin>& R, co
 
 	return outputMat;
 }
-
-#endif // CC_GL_MATRIX_HEADER

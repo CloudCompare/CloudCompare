@@ -1,6 +1,7 @@
 
 target_sources( ${PROJECT_NAME}
     PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/DotbimFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/HeightProfileFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/MAFilter.h
         ${CMAKE_CURRENT_LIST_DIR}/MascaretFilter.h

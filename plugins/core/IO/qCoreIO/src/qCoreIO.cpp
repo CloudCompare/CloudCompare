@@ -17,6 +17,7 @@
 
 #include "qCoreIO.h"
 
+#include "DotbimFilter.h"
 #include "HeightProfileFilter.h"
 #include "MAFilter.h"
 #include "MascaretFilter.h"
@@ -44,6 +45,7 @@ ccIOPluginInterface::FilterList qCoreIO::getFilters()
 	return {
 	    FileIOFilter::Shared(new PTXFilter),
 	    FileIOFilter::Shared(new SimpleBinFilter),
+	    FileIOFilter::Shared(new DotbimFilter),
 	    FileIOFilter::Shared(new ObjFilter),
 	    FileIOFilter::Shared(new VTKFilter),
 	    FileIOFilter::Shared(new STLFilter),

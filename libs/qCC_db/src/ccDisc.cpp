@@ -1,7 +1,7 @@
-// qCC_db
-#include "ccDisc.h"
+#include "../include/ccDisc.h"
 
-#include <ccPointCloud.h>
+// Local
+#include "../include/ccPointCloud.h"
 
 ccDisc::ccDisc(PointCoordinateType radius,
                const ccGLMatrix*   transMat /*= nullptr*/,

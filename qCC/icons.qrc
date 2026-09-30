@@ -68,9 +68,7 @@
     <file>images/ccPivotOff.png</file>
     <file>images/ccPivotOn.png</file>
     <file>images/dbGBLSensorSymbol.png</file>
-    <file>images/dbCircle.png</file>
     <file>images/dbCamSensorSymbol.png</file>
-    <file>images/smallTrash.png</file>
     <file>images/smallTrash.png</file>
     <file>images/smallRectangleSelect.png</file>
     <file>images/im3DxLogo.png</file>
@@ -109,6 +107,7 @@
     <file>images/ccGaussianFilter.png</file>
     <file>images/ccGlobalZoom.png</file>
     <file>images/ccGradient.png</file>
+    <file>images/ccSFManager.png</file>
     <file>images/ccHistogram.png</file>
     <file>images/ccInteractiveTransformation.png</file>
     <file>images/ccAlign.png</file>

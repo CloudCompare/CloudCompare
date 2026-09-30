@@ -61,10 +61,10 @@ class ccHistogramWindow : public QCustomPlot
 	    \param numberOfClassesCanBeChanged whether to allow the user to modify the number of classes
 	    \param showNaNValuesInGrey show NaN values (in gray)
 	**/
-	void fromSF(ccScalarField* sf,
-	            unsigned       initialNumberOfClasses      = 0,
-	            bool           numberOfClassesCanBeChanged = true,
-	            bool           showNaNValuesInGrey         = true);
+	void fromSF(ccScalarField::Shared sf,
+	            unsigned              initialNumberOfClasses      = 0,
+	            bool                  numberOfClassesCanBeChanged = true,
+	            bool                  showNaNValuesInGrey         = true);
 
 	//! Creates histogram from a bin array (each bin = number of elements per class)
 	/** Number of classes can't be modified.
@@ -82,7 +82,7 @@ class ccHistogramWindow : public QCustomPlot
 	    \param sf associated scalar field
 	**/
 	void fromBinArray(const std::vector<unsigned>& histoValues,
-	                  ccScalarField*               sf);
+	                  ccScalarField::Shared        sf);
 
 	//! Sets overlay curve values
 	/** The curve will only appear over an histogram
@@ -226,7 +226,7 @@ class ccHistogramWindow : public QCustomPlot
 	ccColorScale::Shared m_colorScale;
 
 	//! Associated scalar field
-	ccScalarField* m_associatedSF;
+	ccScalarField::Shared m_associatedSF;
 	// Whether the number of classes can be changed or not
 	/** Only possible with an associated scalar field.
 	 **/

@@ -21,15 +21,12 @@
 
 ccSensorComputeDistancesDlg::ccSensorComputeDistancesDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::sensorComputeDistancesDlg)
+    , m_ui(std::make_unique<Ui::sensorComputeDistancesDlg>())
 {
 	m_ui->setupUi(this);
 }
 
-ccSensorComputeDistancesDlg::~ccSensorComputeDistancesDlg()
-{
-	delete m_ui;
-}
+ccSensorComputeDistancesDlg::~ccSensorComputeDistancesDlg() = default;
 
 bool ccSensorComputeDistancesDlg::computeSquaredDistances() const
 {

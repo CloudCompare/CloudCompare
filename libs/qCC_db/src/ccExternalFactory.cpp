@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccExternalFactory.h"
+#include "../include/ccExternalFactory.h"
 
 //! Container singleton
 static QSharedPointer<ccExternalFactory::Container> s_externalFactoryContainer(nullptr);

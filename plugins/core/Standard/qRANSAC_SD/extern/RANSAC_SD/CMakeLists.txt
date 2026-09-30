@@ -6,9 +6,6 @@ add_subdirectory( GfxTL )
 add_subdirectory( MiscLib )
 
 target_compile_definitions( ${PROJECT_NAME}
-	PUBLIC
-		# Causes sub-clouds to be generated as partial clones of original cloud
-		POINTSWITHINDEX
 	PRIVATE
 		PRECISIONLEVMAR
 		_CRT_SECURE_NO_DEPRECATE

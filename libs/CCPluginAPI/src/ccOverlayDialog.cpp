@@ -15,13 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOverlayDialog.h"
-
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
+#include "../include/ccOverlayDialog.h"
 
 // qCC_db
 #include <ccLog.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
 
 // Qt
 #include <QApplication>
@@ -29,7 +29,7 @@
 #include <QKeyEvent>
 #include <QShortcut>
 
-// system
+// System
 #include <cassert>
 
 ccOverlayDialog::ccOverlayDialog(QWidget* parent /*=nullptr*/, Qt::WindowFlags flags /*=Qt::FramelessWindowHint | Qt::Tool*/)
@@ -154,24 +154,18 @@ bool ccOverlayDialog::eventFilter(QObject* obj, QEvent* e)
 			Q_EMIT shortcutTriggered(keyEvent->key());
 			return true;
 		}
-		else if (keyEvent->key() == Qt::Key_Escape)
+		if (keyEvent->key() == Qt::Key_Escape)
 		{
 			close();
 			return true;
 		}
-		else
-		{
-			return QDialog::eventFilter(obj, e);
-		}
-	}
-	else
-	{
-		if (e->type() == QEvent::Show)
-		{
-			Q_EMIT shown();
-		}
-
-		// standard event processing
 		return QDialog::eventFilter(obj, e);
 	}
+	if (e->type() == QEvent::Show)
+	{
+		Q_EMIT shown();
+	}
+
+	// standard event processing
+	return QDialog::eventFilter(obj, e);
 }

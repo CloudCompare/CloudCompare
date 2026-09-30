@@ -18,7 +18,6 @@
 #include "ccPointPickingGenericInterface.h"
 
 // Local
-#include "db_tree/ccDBRoot.h"
 #include "mainwindow.h"
 
 // common

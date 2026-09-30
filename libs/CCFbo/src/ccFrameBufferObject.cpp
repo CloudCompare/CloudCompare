@@ -15,10 +15,13 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccFrameBufferObject.h"
+#include "../include/ccFrameBufferObject.h"
 
-// system
-#include <assert.h>
+// Qt
+#include <QDebug>
+
+// System
+#include <cassert>
 
 ccFrameBufferObject::ccFrameBufferObject()
     : m_isValid(false)

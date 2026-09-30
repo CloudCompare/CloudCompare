@@ -42,7 +42,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 		{
 			int idx = cloud.getScalarFieldIndexByName(CC_NORMAL_NAMES[i]);
 			assert(idx != -1);
-			auto* sf = dynamic_cast<ccScalarField*>(cloud.getScalarField(idx));
+			auto sf = cloud.getCCScalarField(idx);
 			assert(sf != nullptr);
 
 			LasExtraScalarField field;

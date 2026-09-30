@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SF_ARITMETHIC_DLG_HEADER
-#define CC_SF_ARITMETHIC_DLG_HEADER
 
 #include <QDialog>
 
@@ -122,7 +121,5 @@ class ccScalarFieldArithmeticsDlg : public QDialog
 	int getSF2Index();
 
   private:
-	Ui::SFArithmeticsDlg* m_ui;
+	std::unique_ptr<Ui::SFArithmeticsDlg> m_ui;
 };
-
-#endif // CC_SF_ARITMETHIC_DLG_HEADER

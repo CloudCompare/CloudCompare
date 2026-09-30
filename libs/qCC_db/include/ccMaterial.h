@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,18 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_MATERIAL_HEADER
-#define CC_MATERIAL_HEADER
-
 // Local
 #include "ccColorTypes.h"
 #include "ccSerializableObject.h"
 
 // Qt
 #include <QOpenGLTexture>
-#include <QSharedPointer>
-#include <QtGui/qopengl.h>
 
+class ccMaterialDB;
 class QImage;
 class QOpenGLContext;
 
@@ -35,9 +33,9 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 {
   public:
 	//! Const + Shared type
-	using CShared = QSharedPointer<const ccMaterial>;
+	using CShared = std::shared_ptr<const ccMaterial>;
 	//! Shared type
-	using Shared = QSharedPointer<ccMaterial>;
+	using Shared = std::shared_ptr<ccMaterial>;
 
 	//! Default constructor
 	ccMaterial(const QString& name = QString("default"));
@@ -46,7 +44,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	ccMaterial(const ccMaterial& mtl);
 
 	//! Destructor
-	~ccMaterial();
+	~ccMaterial() override;
 
 	//! Returns the material name
 	inline const QString& getName() const
@@ -180,6 +178,9 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	//! Adds a texture to the global texture DB
 	static void AddTexture(QImage image, const QString& absoluteFilename);
 
+	//! Returns the global texture DB
+	static ccMaterialDB* GetTextureDB();
+
 	//! Release all texture objects
 	/** Should be called BEFORE the global shared context is destroyed.
 	 **/
@@ -231,5 +232,3 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	QOpenGLTexture::Filter m_texMinificationFilter;
 	QOpenGLTexture::Filter m_texMagnificationFilter;
 };
-
-#endif // CC_MATERIAL_HEADER

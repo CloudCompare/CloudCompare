@@ -29,9 +29,6 @@
 // GUIs
 #include <ui_ccviewer.h>
 
-// System
-#include <set>
-
 class ccGLWindowInterface;
 class ccHObject;
 class Mouse3DInput;

@@ -19,21 +19,23 @@
 
 #include "ccAsprsModel.h"
 
-//CC
+// CCCoreLib
 #include <CCTypes.h>
 #include <CCGeom.h>
+
+// qCC_db
+#include <ccAdvancedTypes.h>
 #include <ccColorTypes.h>
 #include <ccGenericGLDisplay.h>
 
-//QT
+// QT
 #include <QColor>
 
-//std
+// System
 #include <vector>
 
 class ccPointCloud;
 class ccMainAppInterface;
-class RGBAColorsTableType;
 
 class ccCloudLayersHelper
 {
@@ -107,7 +109,7 @@ private: // variables
 		int displayedSFIndex = -1;
 		bool colorsWereShown = false;
 		bool hadColors = false;
-		QSharedPointer<RGBAColorsTableType> colors;
+		RGBAColorsTableType::Shared colors;
 		std::vector<double> scalarValues;
 	};
 	BackupData m_originalCloudState;

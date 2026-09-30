@@ -15,18 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always on top!
-#include "ccPlane.h"
+#include "../include/ccPlane.h"
 
-#include "ccIncludeGL.h"
+// Local
+#include "../include/ccMaterialSet.h"
+#include "../include/ccPointCloud.h"
 
-// qCC_db
-#include "ccMaterialSet.h"
-#include "ccPointCloud.h"
-
-// CCLIB
-#include "DistanceComputationTools.h"
-#include "Neighbourhood.h"
+// CCCoreLib
+#include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 
 ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*=nullptr*/, QString name /*=QString("Plane")*/)
     : ccGenericPrimitive(name, transMat)
@@ -251,20 +248,19 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccPlane::SetQuadTexture] Invalid texture image!");
-		return ccMaterial::Shared(nullptr);
+		return nullptr;
 	}
 
 	// texture coordinates
-	TextureCoordsContainer* texCoords = quadMesh->getTexCoordinatesTable();
+	auto texCoords = quadMesh->getTexCoordinatesTable();
 	if (!texCoords)
 	{
-		texCoords = new TextureCoordsContainer();
+		texCoords = std::make_shared<TextureCoordsContainer>();
 		if (!texCoords->reserveSafe(4))
 		{
 			// not enough memory
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
-			delete texCoords;
-			return ccMaterial::Shared(nullptr);
+			return nullptr;
 		}
 
 		// create default texture coordinates
@@ -315,14 +311,14 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 	// set material
 	if (!quadMesh->getMaterialSet())
 	{
-		quadMesh->setMaterialSet(new ccMaterialSet());
+		quadMesh->setMaterialSet(std::make_shared<ccMaterialSet>());
 	}
-	ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(quadMesh->getMaterialSet());
+	auto materialSet = quadMesh->getMaterialSet();
 	assert(materialSet);
 	// remove old materials (if any)
 	materialSet->clear();
 	// add new material
-	ccMaterial::Shared material(new ccMaterial("texture"));
+	auto material = std::make_shared<ccMaterial>("texture");
 	material->setTexture(image, imageFilename, false);
 	materialSet->addMaterial(material);
 

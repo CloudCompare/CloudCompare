@@ -36,7 +36,7 @@
 
 MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent /*=nullptr*/)
     : QWidget(parent)
-    , m_ui(new Ui::MatrixDisplayDlg)
+    , m_ui(std::make_unique<Ui::MatrixDisplayDlg>())
 {
 	m_ui->setupUi(this);
 
@@ -46,10 +46,7 @@ MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent /*=nullptr*/)
 	show();
 }
 
-MatrixDisplayDlg::~MatrixDisplayDlg()
-{
-	delete m_ui;
-}
+MatrixDisplayDlg::~MatrixDisplayDlg() = default;
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 {

@@ -21,7 +21,7 @@
 #include <ccLog.h>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 ccInnerRect2DFinder::ccInnerRect2DFinder()
     : m_maxArea(0)

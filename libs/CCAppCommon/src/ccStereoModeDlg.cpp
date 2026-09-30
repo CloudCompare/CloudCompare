@@ -15,11 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccStereoModeDlg.h"
+#include "../include/ccStereoModeDlg.h"
 
+// Ui
 #include "ui_stereoModeDlg.h"
 
-// system
+// System
 #include <cassert>
 
 // combo-box items order
@@ -33,7 +34,7 @@ constexpr int COMBO_INDEX_SBS       = 6;
 
 ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::StereoModeDialog)
+    , m_ui(std::make_unique<Ui::StereoModeDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -42,11 +43,7 @@ ccStereoModeDlg::ccStereoModeDlg(QWidget* parent)
 	connect(m_ui->glassTypeComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &ccStereoModeDlg::glassTypeChanged);
 }
 
-ccStereoModeDlg::~ccStereoModeDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccStereoModeDlg::~ccStereoModeDlg() = default;
 
 void ccStereoModeDlg::glassTypeChanged(int index)
 {

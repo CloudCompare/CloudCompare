@@ -15,12 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccIncludeGL.h"
+#include "../include/ccMaterial.h"
 
 // Local
-#include "ccMaterial.h"
-#include "ccMaterialDB.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccMaterialDB.h"
 
 // Qt
 #include <QOpenGLVersionFunctionsFactory>
@@ -29,7 +28,12 @@
 // Textures DB
 static ccMaterialDB s_materialDB;
 
-ccMaterial::ccMaterial(const QString& name)
+ccMaterialDB* ccMaterial::GetTextureDB()
+{
+	return &s_materialDB;
+}
+
+ccMaterial::ccMaterial(const QString& name /*= QString("default")*/)
     : m_name(name)
     , m_uniqueID(QUuid::createUuid().toString())
     , m_diffuseFront(ccColor::bright)
@@ -57,6 +61,10 @@ ccMaterial::ccMaterial(const ccMaterial& mtl)
     , m_texMinificationFilter(mtl.m_texMinificationFilter)
     , m_texMagnificationFilter(mtl.m_texMagnificationFilter)
 {
+	if (!m_textureFilename.isEmpty())
+	{
+		s_materialDB.increaseTextureCounter(m_textureFilename);
+	}
 }
 
 ccMaterial::~ccMaterial()
@@ -89,10 +97,11 @@ void ccMaterial::applyGL(QOpenGLContext* context, bool lightEnabled, bool skipDi
 {
 	// get the set of OpenGL functions (version 2.1)
 	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	if (lightEnabled)
 	{
@@ -107,7 +116,7 @@ void ccMaterial::applyGL(QOpenGLContext* context, bool lightEnabled, bool skipDi
 		glFunc->glMaterialf(GL_FRONT, GL_SHININESS, std::max(0.0f, std::min(m_shininessFront, 128.0f)));
 		glFunc->glMaterialf(GL_BACK, GL_SHININESS, std::max(0.0f, std::min(m_shininessBack, 128.0f)));
 	}
-	else
+	else if (!skipDiffuse)
 	{
 		ccGL::Color(glFunc, m_diffuseFront);
 	}
@@ -193,11 +202,7 @@ GLuint ccMaterial::getTextureID() const
 		{
 			return 0;
 		}
-		QSharedPointer<QOpenGLTexture> tex;
-		if (s_materialDB.openGLTextures.contains(m_textureFilename))
-		{
-			tex = s_materialDB.openGLTextures[m_textureFilename];
-		}
+		QSharedPointer<QOpenGLTexture> tex = s_materialDB.getOpenGLTexture(m_textureFilename);
 
 		if (!tex)
 		{
@@ -207,7 +212,7 @@ GLuint ccMaterial::getTextureID() const
 			tex->setFormat(QOpenGLTexture::RGB8_UNorm);
 			tex->setData(getTexture(), QOpenGLTexture::DontGenerateMipMaps);
 			tex->create();
-			s_materialDB.openGLTextures[m_textureFilename] = tex;
+			s_materialDB.addOpenGLTexture(m_textureFilename, tex);
 		}
 		return tex->textureId();
 	}
@@ -226,10 +231,11 @@ void ccMaterial::MakeLightsNeutral(QOpenGLContext* context)
 {
 	// get the set of OpenGL functions (version 2.1)
 	auto* glFunc = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_2_1>(context);
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	GLint maxLightCount;
 	glFunc->glGetIntegerv(GL_MAX_LIGHTS, &maxLightCount);
@@ -275,7 +281,7 @@ void ccMaterial::ReleaseTextures()
 		return;
 	}
 
-	s_materialDB.openGLTextures.clear();
+	s_materialDB.releaseAllOpenGLTextures();
 }
 
 void ccMaterial::releaseTexture()
@@ -337,7 +343,7 @@ bool ccMaterial::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& 
 	else
 	{
 		// texture 'filename' (dataVersion>=37)
-		inStream >> m_textureFilename;
+		inStream >> m_textureFilename; // texture counter is increased in BinFilter.cpp
 	}
 	// material colors (dataVersion>=20)
 	if (in.read((char*)m_diffuseFront.rgba, sizeof(float) * 4) < 0)
@@ -389,10 +395,10 @@ void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilt
 		m_texMinificationFilter  = minificationFilter;
 		m_texMagnificationFilter = magnificationFilter;
 
-		if (!m_textureFilename.isEmpty() && s_materialDB.openGLTextures.contains(m_textureFilename))
+		if (!m_textureFilename.isEmpty())
 		{
 			// remove the existing texture (if any) so that it's initialized again next time
-			s_materialDB.openGLTextures.remove(m_textureFilename);
+			s_materialDB.removeOpenGLTexture(m_textureFilename);
 		}
 	}
 }

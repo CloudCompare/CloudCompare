@@ -55,7 +55,7 @@ PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
 	{
 		return NULL;
 	}
-	return new TorusPrimitiveShape(torus, m_allowAppleShaped, m_maxMinorRadius, m_maxMajorRadius);
+	return new TorusPrimitiveShape(torus, m_allowAppleShaped, m_minMinorRadius, m_minMajorRadius, m_maxMinorRadius, m_maxMajorRadius);
 }
 
 PrimitiveShape *TorusPrimitiveShapeConstructor::Deserialize(std::istream *i,

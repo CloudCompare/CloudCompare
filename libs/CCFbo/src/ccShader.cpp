@@ -15,15 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccShader.h"
+#include "../include/ccShader.h"
 
-// Qt
-#include <QFile>
-
-// system
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
+// System
+#include <utility>
 
 ccShader::ccShader(QObject* parent /*=nullptr*/)
     : QOpenGLShaderProgram(parent)
@@ -41,12 +36,12 @@ bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QStr
 	QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath, shaderBaseFilename);
 	QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath, shaderBaseFilename);
 
-	return loadProgram(vertFilename, fragFilename, error);
+	return loadProgram(std::move(vertFilename), std::move(fragFilename), error);
 }
 
-bool ccShader::loadProgram(QString vertexShaderFile, QString fragShaderFile, QString& error)
+bool ccShader::loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error)
 {
-	if (!vertexShaderFile.isEmpty() && !addShaderFromSourceFile(QOpenGLShader::Vertex, vertexShaderFile))
+	if (!vertShaderFile.isEmpty() && !addShaderFromSourceFile(QOpenGLShader::Vertex, vertShaderFile))
 	{
 		error = log();
 		return false;

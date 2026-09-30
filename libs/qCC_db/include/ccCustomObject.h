@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CUSTOM_OBJECT_HEADER
-#define CC_CUSTOM_OBJECT_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -85,5 +84,3 @@ class QCC_DB_LIB_API ccCustomLeafObject : public ccCustomHObject
 		return CC_TYPES::CUSTOM_LEAF_OBJECT;
 	}
 };
-
-#endif // CC_CUSTOM_OBJECT_HEADER

@@ -133,8 +133,6 @@ int MLSSmoothingUpsampling::compute()
 		return InvalidInput;
 	}
 
-	ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-
 	//get xyz in PCL format
 	pcl::PointCloud<pcl::PointXYZ>::Ptr xyzCloud = cc2smReader(cloud).getRawXYZ();
 	if (!xyzCloud)

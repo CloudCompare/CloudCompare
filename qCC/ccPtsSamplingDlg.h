@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_POINTS_SAMPLING_DLG_HEADER
-#define CC_POINTS_SAMPLING_DLG_HEADER
 
 #include <ui_ptsSamplingDlg.h>
 
@@ -43,5 +42,3 @@ class ccPtsSamplingDlg : public QDialog
 	void setGenerateNormals(bool state);
 	void setUseDensity(bool state);
 };
-
-#endif // CC_POINTS_SAMPLING_DLG_HEADER

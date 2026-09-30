@@ -1,8 +1,26 @@
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #                   COPYRIGHT: CloudCompare project                      #
+// #                                                                        #
+// ##########################################################################
+//
 #include "ccShortcutDialog.h"
 
 #include "ccPersistentSettings.h"
 
 #include <QAction>
+#include <QHash>
 #include <QMenu>
 #include <QMessageBox>
 #include <QSettings>
@@ -66,15 +84,28 @@ void ccShortcutDialog::restoreShortcutsFromQSettings() const
 	QSettings settings;
 	settings.beginGroup(ccPS::Shortcuts());
 
+	// older versions saved the shortcuts under the action text, which several actions can share
+	QHash<QString, int> textCount;
+	for (int i = 0; i < m_ui->tableWidget->rowCount(); i++)
+	{
+		textCount[m_ui->tableWidget->item(i, KEY_SEQUENCE_COLUMN)->data(Qt::UserRole).value<QAction*>()->text()]++;
+	}
+
 	for (int i = 0; i < m_ui->tableWidget->rowCount(); i++)
 	{
 		QTableWidgetItem* item   = m_ui->tableWidget->item(i, KEY_SEQUENCE_COLUMN);
 		auto*             action = item->data(Qt::UserRole).value<QAction*>();
 
-		if (settings.contains(action->text()))
+		QString key = action->objectName();
+		if (!settings.contains(key) && textCount.value(action->text()) == 1)
+		{
+			key = action->text();
+		}
+
+		if (settings.contains(key))
 		{
 			const QKeySequence defaultValue;
-			const auto         sequence = settings.value(action->text(), defaultValue).value<QKeySequence>();
+			const auto         sequence = settings.value(key, defaultValue).value<QKeySequence>();
 
 			item->setText(sequence.toString());
 			action->setShortcut(sequence);
@@ -143,5 +174,5 @@ void ccShortcutDialog::handleDoubleClick(QTableWidgetItem* item)
 
 	QSettings settings;
 	settings.beginGroup(ccPS::Shortcuts());
-	settings.setValue(action->text(), keySequence);
+	settings.setValue(action->objectName(), keySequence);
 }

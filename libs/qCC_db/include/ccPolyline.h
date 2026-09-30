@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <Polyline.h>
-
 // Local
 #include "ccShiftedObject.h"
+
+// CCCoreLib
+#include <Polyline.h>
 
 class ccPointCloud;
 class ccGenericPointCloud;

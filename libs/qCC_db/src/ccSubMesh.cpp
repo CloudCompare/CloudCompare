@@ -15,22 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccSubMesh.h"
+#include "../include/ccSubMesh.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccMaterialSet.h"
-#include "ccMesh.h"
-
-// Qt
-#include <QString>
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccMaterialSet.h"
+#include "../include/ccMesh.h"
 
 // CCCoreLib
 #include <ManualSegmentationTools.h>
 
-// system
+// Qt
+#include <QString>
+
+// System
 #include <cassert>
-#include <cstring>
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
     : ccGenericMesh("Sub-mesh")
@@ -362,7 +361,7 @@ CC_SUB_MESH_TRANSIENT_CONST_TEST(hasMaterials);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTextures);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTriNormals);
 
-const ccMaterialSet* ccSubMesh::getMaterialSet() const
+const ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
 {
 	return m_associatedMesh ? m_associatedMesh->getMaterialSet() : nullptr;
 }
@@ -372,7 +371,7 @@ int ccSubMesh::getTriangleMtlIndex(unsigned triIndex) const
 	return m_associatedMesh ? m_associatedMesh->getTriangleMtlIndex(getTriGlobalIndex(triIndex)) : -1;
 }
 
-TextureCoordsContainer* ccSubMesh::getTexCoordinatesTable() const
+TextureCoordsContainer::Shared ccSubMesh::getTexCoordinatesTable() const
 {
 	return m_associatedMesh ? m_associatedMesh->getTexCoordinatesTable() : nullptr;
 }
@@ -425,7 +424,7 @@ bool ccSubMesh::getTriangleNormals(unsigned triIndex, CCVector3& Na, CCVector3& 
 	return (m_associatedMesh && triIndex < size() ? m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triIndex), Na, Nb, Nc) : false);
 }
 
-NormsIndexesTableType* ccSubMesh::getTriNormsTable() const
+NormsIndexesTableType::Shared ccSubMesh::getTriNormsTable() const
 {
 	return m_associatedMesh ? m_associatedMesh->getTriNormsTable() : nullptr;
 }

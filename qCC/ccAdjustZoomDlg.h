@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ADJUST_ZOOM_DIALOG_HEADER
-#define CC_ADJUST_ZOOM_DIALOG_HEADER
 
 #include <QDialog>
 #include <ui_adjustZoomDlg.h>
@@ -47,5 +46,3 @@ class ccAdjustZoomDlg : public QDialog
 	int    m_windowWidth_pix;
 	double m_distanceToWidthRatio;
 };
-
-#endif // CC_ADJUST_ZOOM_DIALOG_HEADER

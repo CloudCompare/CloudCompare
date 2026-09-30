@@ -15,36 +15,34 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccHObject.h"
+#include "../include/ccHObject.h"
 
 // Local
-#include "ccIncludeGL.h"
-
-// Objects handled by factory
-#include "cc2DLabel.h"
-#include "cc2DViewportLabel.h"
-#include "ccBox.h"
-#include "ccCameraSensor.h"
-#include "ccCircle.h"
-#include "ccCoordinateSystem.h"
-#include "ccCustomObject.h"
-#include "ccCylinder.h"
-#include "ccDisc.h"
-#include "ccDish.h"
-#include "ccExternalFactory.h"
-#include "ccExtru.h"
-#include "ccFacet.h"
-#include "ccGBLSensor.h"
-#include "ccImage.h"
-#include "ccMaterialSet.h"
-#include "ccMeshGroup.h"
-#include "ccPlane.h"
-#include "ccPointCloud.h"
-#include "ccPolyline.h"
-#include "ccQuadric.h"
-#include "ccSphere.h"
-#include "ccSubMesh.h"
-#include "ccTorus.h"
+#include "../include/cc2DLabel.h"
+#include "../include/cc2DViewportLabel.h"
+#include "../include/ccBox.h"
+#include "../include/ccCameraSensor.h"
+#include "../include/ccCircle.h"
+#include "../include/ccCoordinateSystem.h"
+#include "../include/ccCustomObject.h"
+#include "../include/ccCylinder.h"
+#include "../include/ccDisc.h"
+#include "../include/ccDish.h"
+#include "../include/ccExternalFactory.h"
+#include "../include/ccExtru.h"
+#include "../include/ccFacet.h"
+#include "../include/ccGBLSensor.h"
+#include "../include/ccImage.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccMaterialSet.h"
+#include "../include/ccMeshGroup.h"
+#include "../include/ccPlane.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccPolyline.h"
+#include "../include/ccQuadric.h"
+#include "../include/ccSphere.h"
+#include "../include/ccSubMesh.h"
+#include "../include/ccTorus.h"
 
 // Qt
 #include <QIcon>
@@ -93,21 +91,11 @@ ccHObject::~ccHObject()
 		if ((it->second & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
 			it->first->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE); // in order to avoid any loop!
-			// delete object
-			if (it->first->isShareable())
+
+			if (!it->first->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+			    && !it->first->isKindOf(CC_TYPES::MATERIAL_SET))
 			{
-				CCShareable* shareable = dynamic_cast<CCShareable*>(it->first);
-				if (shareable)
-				{
-					shareable->release();
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-			else
-			{
+				// delete object
 				delete it->first;
 			}
 		}
@@ -400,7 +388,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags /*=DP_PARENT_OF_O
 	// we want to be notified whenever this child is deleted!
 	child->addDependency(this, DP_NOTIFY_OTHER_ON_DELETE); // DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
-	if (dependencyFlags != 0)
+	if (dependencyFlags != DP_NONE)
 	{
 		addDependency(child, dependencyFlags);
 	}
@@ -409,18 +397,6 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags /*=DP_PARENT_OF_O
 	if ((dependencyFlags & DP_PARENT_OF_OTHER) == DP_PARENT_OF_OTHER)
 	{
 		child->setParent(this);
-		if (child->isShareable())
-		{
-			CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-			if (shareable)
-			{
-				shareable->link();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
 		if (!child->getDisplay())
 		{
 			child->setDisplay_recursive(getDisplay());
@@ -754,10 +730,11 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 
 	// get the set of OpenGL functions (version 2.1)
 	QOpenGLFunctions_2_1* glFunc = context.glFunctions<QOpenGLFunctions_2_1>();
-	assert(glFunc != nullptr);
-
 	if (glFunc == nullptr)
+	{
+		assert(false);
 		return;
+	}
 
 	// are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
@@ -851,7 +828,9 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	if (draw3D && m_glTransEnabled)
+	{
 		glFunc->glPopMatrix();
+	}
 }
 
 void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
@@ -982,21 +961,10 @@ void ccHObject::removeChild(int pos)
 
 	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 	{
-		// delete object
-		if (child->isShareable())
+		if (!child->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+		    && !child->isKindOf(CC_TYPES::MATERIAL_SET))
 		{
-			CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-			if (shareable)
-			{
-				shareable->release();
-			}
-			else
-			{
-				assert(false);
-			}
-		}
-		else /* if (!child->isA(CC_TYPES::POINT_OCTREE))*/
-		{
+			// delete object
 			delete child;
 		}
 	}
@@ -1016,19 +984,9 @@ void ccHObject::removeAllChildren()
 		int flags = getDependencyFlagsWith(child);
 		if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
-			if (child->isShareable())
-			{
-				CCShareable* shareable = dynamic_cast<CCShareable*>(child);
-				if (shareable)
-				{
-					shareable->release();
-				}
-				else
-				{
-					assert(false);
-				}
-			}
-			else
+
+			if (!child->isKindOf(CC_TYPES::ARRAY) // DGM FIXME: for now arrays annd material sets are in fact shared pointers held by another entity, so we can't delete them like this
+			    && !child->isKindOf(CC_TYPES::MATERIAL_SET))
 			{
 				delete child;
 			}
@@ -1053,11 +1011,15 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	// write 'ccObject' header
 	if (!ccObject::toFile(out, dataVersion))
+	{
 		return false;
+	}
 
 	// write own data
 	if (!toFile_MeOnly(out, dataVersion))
+	{
 		return false;
+	}
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
@@ -1070,7 +1032,9 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	}
 
 	if (out.write(reinterpret_cast<const char*>(&serializableCount), sizeof(uint32_t)) < 0)
+	{
 		return WriteError();
+	}
 
 	// write serializable children (if any)
 	for (auto child : m_children)

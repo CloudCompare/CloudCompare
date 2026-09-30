@@ -23,6 +23,7 @@
 #include "FileIOFilter.h"
 
 // qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 
 // Qt
@@ -104,7 +105,7 @@ struct AsciiOpenContext
 };
 
 //! Semi-persistent loading context
-static QScopedPointer<AsciiOpenContext> s_asciiOpenContext;
+static std::unique_ptr<AsciiOpenContext> s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
     : QDialog(parent)
@@ -336,7 +337,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	assert(separator.size() == 1);
 	if (separator.length() < 1)
 	{
-		m_ui->asciiCodeLabel->setText("Enter a valid character!");
+		m_ui->asciiCodeLabel->setText(tr("Enter a valid character!"));
 		m_ui->buttonWidget->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnType.clear();
@@ -345,7 +346,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 
 	// new separator
 	m_separator = separator[0];
-	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
+	m_ui->asciiCodeLabel->setText(tr("(ASCII code: %1)").arg(m_separator.unicode()));
 
 	m_headerLine.clear(); // to force re-assignation of columns!
 	m_columnType.clear();
@@ -371,6 +372,7 @@ void AsciiOpenDlg::updateTable()
 	bool hadValidHeader = !m_headerLine.isEmpty();
 	m_headerLine.clear();
 	m_ui->headerLabel->setVisible(false);
+	m_ui->columnsTruncatedLabel->setVisible(false);
 
 	if (m_filename.isEmpty() && m_stream == nullptr)
 	{
@@ -428,10 +430,11 @@ void AsciiOpenDlg::updateTable()
 	}
 	m_ui->tableWidget->setRowCount(DISPLAYED_LINES + 1); //+1 for first line shifting
 
-	unsigned lineCount    = 0; // number of lines read
-	unsigned totalChars   = 0; // total read characters (for stats)
-	unsigned columnsCount = 0; // max columns count per line
-	unsigned commentLines = 0; // number of comments line skipped
+	unsigned lineCount     = 0; // number of lines read
+	unsigned totalChars    = 0; // total read characters (for stats)
+	unsigned columnsCount  = 0; // max columns count per line
+	unsigned commentLines  = 0; // number of comments line skipped
+	unsigned maxPartsCount = 0; // max columns count per line, before it's clamped to MAX_COLUMNS
 
 	std::vector<bool> valueIsNumber;   // identifies columns with numbers only [mandatory]
 	std::vector<bool> valueIsBelowOne; // identifies columns with values between -1 and 1 only
@@ -461,7 +464,13 @@ void AsciiOpenDlg::updateTable()
 			QStringList parts = currentLine.simplified().split(m_separator);
 			if (lineCount < DISPLAYED_LINES)
 			{
-				unsigned partsCount              = std::min(MAX_COLUMNS, static_cast<unsigned>(parts.size()));
+				unsigned rawPartsCount = static_cast<unsigned>(parts.size());
+				if (rawPartsCount > maxPartsCount)
+				{
+					maxPartsCount = rawPartsCount;
+				}
+
+				unsigned partsCount              = std::min(MAX_COLUMNS, rawPartsCount);
 				bool     columnCountHasIncreased = (partsCount > columnsCount);
 
 				// do we need to add one or several new columns?
@@ -574,15 +583,29 @@ void AsciiOpenDlg::updateTable()
 		{
 			displayHeader = m_headerLine.left(256) + "...";
 		}
-		m_ui->headerLabel->setText(QString("Header: ") + displayHeader);
+		m_ui->headerLabel->setText(tr("Header: %1").arg(displayHeader));
 		m_ui->headerLabel->setVisible(true);
 		m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(true);
 	}
 
 	if (commentLines)
 	{
-		m_ui->commentLinesSkippedLabel->setText(QString("+ %1 comment line(s) skipped").arg(commentLines));
+		m_ui->commentLinesSkippedLabel->setText(tr("+ %1 comment line(s) skipped").arg(commentLines));
 		m_ui->commentLinesSkippedLabel->setVisible(true);
+	}
+
+	// warn the user if some columns can't be handled (and would be silently ignored otherwise)
+	if (maxPartsCount > MAX_COLUMNS)
+	{
+		QString warning = tr("This file has %1 columns, but only the first %2 can be loaded. The remaining %3 column(s) will be ignored.")
+		                      .arg(maxPartsCount)
+		                      .arg(MAX_COLUMNS)
+		                      .arg(maxPartsCount - MAX_COLUMNS);
+
+		m_ui->columnsTruncatedLabel->setText(warning);
+		m_ui->columnsTruncatedLabel->setVisible(true);
+
+		ccLog::Warning(QString("[AsciiOpenDlg] ") + warning);
 	}
 
 	if (lineCount == 0 || columnsCount == 0)
@@ -603,7 +626,7 @@ void AsciiOpenDlg::updateTable()
 		propsText.reserve(ASCII_OPEN_DLG_TYPES_COUNT);
 		for (unsigned i = 0; i < ASCII_OPEN_DLG_TYPES_COUNT; i++)
 		{
-			propsText << QString(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+			propsText << tr(ASCII_OPEN_DLG_TYPES_NAMES[i]);
 		}
 	}
 
@@ -1121,7 +1144,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 		{
 			if (counters[i] > 1)
 			{
-				errorMessage = QString("'%1' defined at least twice!").arg(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+				errorMessage = tr("'%1' defined at least twice!").arg(tr(ASCII_OPEN_DLG_TYPES_NAMES[i]));
 				return false;
 			}
 		}
@@ -1133,7 +1156,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 
 	if (coordIsDefined[0] + coordIsDefined[1] + coordIsDefined[2] < 2)
 	{
-		errorMessage = "At least 2 vertex coordinates must be defined!";
+		errorMessage = tr("At least 2 vertex coordinates must be defined!");
 		return false;
 	}
 
@@ -1144,7 +1167,7 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 	                           + counters[ASCII_OPEN_DLG_QuatZ];
 	if (quaternionTotal != 0 && quaternionTotal != 4)
 	{
-		errorMessage = "Incomplete quaternion definition! (4 components expected)";
+		errorMessage = tr("Incomplete quaternion definition! (4 components expected)");
 		return false;
 	}
 
@@ -1158,7 +1181,7 @@ bool AsciiOpenDlg::apply()
 
 	if (!CheckOpenSequence(sequence, errorMessage))
 	{
-		QMessageBox::warning(nullptr, "Error", errorMessage);
+		QMessageBox::warning(nullptr, tr("Error"), errorMessage);
 		return false;
 	}
 	else

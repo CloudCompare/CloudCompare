@@ -47,7 +47,7 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccTracePolylineTool(ccPickingHub* pickingHub, QWidget* parent);
 	//! Destructor
-	virtual ~ccTracePolylineTool();
+	~ccTracePolylineTool() override;
 
 	// inherited from ccOverlayDialog
 	virtual bool linkWith(ccGLWindowInterface* win) override;
@@ -115,5 +115,5 @@ class ccTracePolylineTool : public ccOverlayDialog
 	//! Picking hub
 	ccPickingHub* m_pickingHub;
 
-	Ui::TracePolyLineDlg* m_ui;
+	std::unique_ptr<Ui::TracePolyLineDlg> m_ui;
 };

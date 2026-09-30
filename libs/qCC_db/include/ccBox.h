@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_BOX_PRIMITIVE_HEADER
-#define CC_BOX_PRIMITIVE_HEADER
 
 // Local
 #include "ccGenericPrimitive.h"
@@ -44,17 +43,17 @@ class QCC_DB_LIB_API ccBox : public ccGenericPrimitive
 	ccBox(QString name = QString("Box"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::BOX;
 	}
 
 	// inherited from ccGenericPrimitive
-	virtual QString getTypeName() const override
+	QString getTypeName() const override
 	{
 		return "Box";
 	}
-	virtual ccGenericPrimitive* clone() const override;
+	ccGenericPrimitive* clone() const override;
 
 	//! Sets box dimensions
 	inline void setDimensions(CCVector3& dims)
@@ -79,5 +78,3 @@ class QCC_DB_LIB_API ccBox : public ccGenericPrimitive
 	//! Box dimensions
 	CCVector3 m_dims;
 };
-
-#endif // CC_BOX_PRIMITIVE_HEADER

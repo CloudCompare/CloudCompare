@@ -63,7 +63,7 @@ class MatrixDisplayDlg : public QWidget
 	//! Matrix
 	ccGLMatrixd m_mat;
 
-	Ui::MatrixDisplayDlg* m_ui;
+	std::unique_ptr<Ui::MatrixDisplayDlg> m_ui;
 };
 
 #endif // CC_MATRIX_DISPLAY_DIALOG_HEADER

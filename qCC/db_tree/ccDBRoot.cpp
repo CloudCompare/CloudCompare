@@ -2329,8 +2329,8 @@ void ccDBRoot::editLabelScalarValue()
 		return;
 	}
 
-	ccPointCloud*  pc = static_cast<ccPointCloud*>(P._cloud);
-	ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+	ccPointCloud* pc = static_cast<ccPointCloud*>(P._cloud);
+	auto          sf = pc->getCurrentDisplayedScalarField();
 	if (!sf)
 	{
 		ccLog::Warning("[editLabelScalarValue] No active scalar field");

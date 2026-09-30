@@ -1,4 +1,5 @@
 #pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -48,7 +49,7 @@ class QCC_DB_LIB_API ccShiftedObject : public ccHObject
 	 **/
 	virtual inline void setGlobalShift(double x, double y, double z)
 	{
-		return setGlobalShift(CCVector3d(x, y, z));
+		setGlobalShift(CCVector3d(x, y, z));
 	}
 
 	//! Sets shift applied to original coordinates (information storage only)

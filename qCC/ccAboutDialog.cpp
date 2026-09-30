@@ -17,16 +17,16 @@
 
 #include "ccAboutDialog.h"
 
-#include "ccApplication.h"
+#include "ccApplicationBase.h"
 #include "ui_aboutDlg.h"
 
 ccAboutDialog::ccAboutDialog(QWidget* parent)
     : QDialog(parent)
-    , mUI(new Ui::AboutDialog)
+    , m_ui(std::make_unique<Ui::AboutDialog>())
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	mUI->setupUi(this);
+	m_ui->setupUi(this);
 
 	QString compilationInfo;
 
@@ -40,13 +40,10 @@ ccAboutDialog::ccAboutDialog(QWidget* parent)
 	compilationInfo += QStringLiteral(" Qt %1").arg(QT_VERSION_STR);
 	compilationInfo += QStringLiteral("</i>");
 
-	QString htmlText         = mUI->labelText->text();
+	QString htmlText         = m_ui->labelText->text();
 	QString enrichedHtmlText = htmlText.arg(compilationInfo);
 
-	mUI->labelText->setText(enrichedHtmlText);
+	m_ui->labelText->setText(enrichedHtmlText);
 }
 
-ccAboutDialog::~ccAboutDialog()
-{
-	delete mUI;
-}
+ccAboutDialog::~ccAboutDialog() = default;

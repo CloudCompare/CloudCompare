@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPickOneElementDlg.h"
+#include "../include/ccPickOneElementDlg.h"
 
-// UI file
-#include <ui_pickOneElementDlg.h>
+// Ui
+#include "ui_pickOneElementDlg.h"
 
 ccPickOneElementDlg::ccPickOneElementDlg(const QString& label,
                                          const QString& windowTitle /*=QString()*/,
                                          QWidget*       parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui_PickOneElementDialog)
+    , m_ui(std::make_unique<Ui_PickOneElementDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -36,11 +36,7 @@ ccPickOneElementDlg::ccPickOneElementDlg(const QString& label,
 	m_ui->comboLabel->setText(label);
 }
 
-ccPickOneElementDlg::~ccPickOneElementDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccPickOneElementDlg::~ccPickOneElementDlg() = default;
 
 void ccPickOneElementDlg::addElement(const QString& elementName)
 {

@@ -91,7 +91,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 	float val = std::numeric_limits<float>::quiet_NaN();
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -99,7 +99,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const QString& filename, c
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
@@ -157,7 +157,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 	unsigned numberOfPoints = static_cast<unsigned>(fileSize / singlePointSize);
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget)); // cancel available
@@ -165,10 +165,10 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 		pDlg->setInfo(QObject::tr("Points: %L1").arg(numberOfPoints));
 		pDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nprogress(pDlg.data(), numberOfPoints);
+	CCCoreLib::NormalizedProgress nprogress(pDlg.get(), numberOfPoints);
 
-	ccPointCloud*           loadedCloud = nullptr;
-	CCCoreLib::ScalarField* sf          = nullptr;
+	ccPointCloud*                  loadedCloud = nullptr;
+	CCCoreLib::ScalarField::Shared sf;
 	// if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex    = 0;
 	unsigned fileChunkPos  = 0;
@@ -195,7 +195,7 @@ CC_FILE_ERROR PVFilter::loadFile(const QString& filename, ccHObject& container, 
 			fileChunkPos  = pointsRead;
 			fileChunkSize = std::min<unsigned>(numberOfPoints - pointsRead, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud   = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
-			sf            = nullptr;
+			sf.reset();
 			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->enableScalarField())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;

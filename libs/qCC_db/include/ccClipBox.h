@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CLIP_BOX_HEADER
-#define CC_CLIP_BOX_HEADER
 
 // Local
 #include "ccBBox.h"
@@ -119,9 +118,10 @@ class QCC_DB_LIB_API ccClipBox : public QObject
 	    \param visTable visibility flags
 	    \param shrink Whether the box is shrinking (faster) or not
 	**/
-	void flagPointsInside(ccGenericPointCloud*                      cloud,
-	                      ccGenericPointCloud::VisibilityTableType* visTable,
-	                      bool                                      shrink = false) const;
+	void flagPoints(ccGenericPointCloud*                      cloud,
+	                ccGenericPointCloud::VisibilityTableType* visTable,
+	                bool                                      shrink = false,
+	                bool                                      inside = true) const;
 
 	//! Resets box
 	void reset();
@@ -214,5 +214,3 @@ class QCC_DB_LIB_API ccClipBoxPart : public ccHObject
 	//! Part number
 	ccClipBox::Components m_partID;
 };
-
-#endif // CC_CLIP_BOX_HEADER

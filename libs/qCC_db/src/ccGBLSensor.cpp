@@ -15,15 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include "ccGBLSensor.h"
-
-#include "ccIncludeGL.h"
+#include "../include/ccGBLSensor.h"
 
 // Local
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#include "ccSphere.h"
+#include "../include/ccIncludeGL.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
 
 // Qt
 #include <QCoreApplication>

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,18 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GENERIC_GL_DISPLAY
-#define CC_GENERIC_GL_DISPLAY
-
-// Always first
-#include "ccIncludeGL.h"
-
 // Local
 #include "ccColorTypes.h"
+#include "ccIncludeGL.h"
 #include "ccViewportParameters.h"
 
 // Qt
 #include <QFont>
+#include <QPointF>
 
 class QWidget;
 class ccDrawableObject;
@@ -219,11 +217,13 @@ class ccGenericGLDisplay
 	    \param fov_deg vertical field of view (in degrees). Optional (ignored if 0).
 	    \param viewerBasedPerspective whether the perspective view should be object-centered (false) or camera-centered (true)
 	    \param bubbleViewMode set whether bubble-view mode should be enabled or not (in which case viewerBasedPerspective is forced by default)
+	    \param projectionCenterOffset projection center offset in normalized screen coordinates (+X right, +Y up)
 	**/
 	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
 	                                     float              fov_deg                = 0.0f,
 	                                     bool               viewerBasedPerspective = true,
-	                                     bool               bubbleViewMode         = false) = 0;
+	                                     bool               bubbleViewMode         = false,
+	                                     const QPointF&     projectionCenterOffset = QPointF()) = 0;
 
 	//! Warns the display that the enity is about to be removed
 	virtual void aboutToBeRemoved(ccDrawableObject* entity) = 0;
@@ -234,5 +234,3 @@ class ccGenericGLDisplay
 		return nullptr;
 	}
 };
-
-#endif // CC_GENERIC_GL_DISPLAY

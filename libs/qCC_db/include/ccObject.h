@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_OBJECT_HEADER
-#define CC_OBJECT_HEADER
 
 // Local
 #include "ccSerializableObject.h"
@@ -391,5 +390,3 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 	//! Object unique ID
 	unsigned m_uniqueID;
 };
-
-#endif // CC_OBJECT_HEADER

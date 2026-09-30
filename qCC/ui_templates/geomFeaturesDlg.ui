@@ -251,6 +251,43 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="Line" name="densitySeparator">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densityKnnApproxCheckBox">
+            <property name="toolTip">
+             <string>Inverse of the distance to the nearest neighbor. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Nearest neighbor distance (approx. density)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densitySurfApproxCheckBox">
+            <property name="toolTip">
+             <string>Surface density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Surface density (approx.)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="densityVolApproxCheckBox">
+            <property name="toolTip">
+             <string>Volume density estimated from the distance to the nearest neighbor only. Much faster than the exact density, and independent of the radius.</string>
+            </property>
+            <property name="text">
+             <string>Volume density (approx.)</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -424,6 +461,26 @@
            <widget class="QCheckBox" name="eigenvalue3CheckBox">
             <property name="text">
              <string>3rd eigenvalue</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="degreeOfPlanarityCheckBox">
+            <property name="text">
+             <string>Degree of planarity (M)</string>
+            </property>
+            <property name="toolTip">
+             <string>ln(L1 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="degreeOfLinearityCheckBox">
+            <property name="text">
+             <string>Degree of linearity (K)</string>
+            </property>
+            <property name="toolTip">
+             <string>ln(L1 / L2) / ln(L2 / L3) (see Fernández, O. 2005. Obtaining a Best Fitting Plane Through 3D Georeferenced Data)</string>
             </property>
            </widget>
           </item>

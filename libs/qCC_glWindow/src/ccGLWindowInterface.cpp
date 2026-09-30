@@ -263,7 +263,8 @@ ccGLWindowInterface::ccGLWindowInterface(QObject* parent /*=nullptr*/, bool sile
     , m_initialized(false)
     , m_trihedronGLList(GL_INVALID_LIST_ID)
     , m_pivotGLList(GL_INVALID_LIST_ID)
-    , m_lastMousePos(-1, -1)
+    , m_projectiveViewportCenterOffset(0.0, 0.0)
+    , m_lastMousePos(-1.0, -1.0)
     , m_validModelviewMatrix(false)
     , m_validProjectionMatrix(false)
     , m_LODEnabled(true)
@@ -834,7 +835,11 @@ void ccGLWindowInterface::uninitializeGL()
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	if (m_trihedronGLList != GL_INVALID_LIST_ID)
 	{
@@ -869,7 +874,10 @@ void ccGLWindowInterface::onResizeGL(int w, int h)
 		// pivot symbol is dependent on the screen size!
 		if (m_pivotGLList != GL_INVALID_LIST_ID)
 		{
-			functions()->glDeleteLists(m_pivotGLList, 1);
+			if (functions())
+			{
+				functions()->glDeleteLists(m_pivotGLList, 1);
+			}
 			m_pivotGLList = GL_INVALID_LIST_ID;
 		}
 
@@ -926,17 +934,17 @@ void ccGLWindowInterface::setGLViewport(const QRect& rect)
 {
 	// correction for HD screens
 	const auto devicePixelRatio = getDevicePixelRatio();
-	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio),
-                         static_cast<int>(rect.top() * devicePixelRatio),
-                         static_cast<int>(rect.width() * devicePixelRatio),
-                         static_cast<int>(rect.height() * devicePixelRatio));
+	m_glViewport                = QRect(static_cast<int>(rect.left() * devicePixelRatio), static_cast<int>(rect.top() * devicePixelRatio), static_cast<int>(rect.width() * devicePixelRatio), static_cast<int>(rect.height() * devicePixelRatio));
 	invalidateViewport();
 
 	if (getOpenGLContext() && getOpenGLContext()->isValid())
 	{
 		doMakeCurrent();
 
-		functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
+		if (functions())
+		{
+			functions()->glViewport(m_glViewport.x(), m_glViewport.y(), m_glViewport.width(), m_glViewport.height());
+		}
 	}
 }
 
@@ -1024,7 +1032,11 @@ void ccGLWindowInterface::drawClickableItems(int xStart0, int& yStart)
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	//"exit" icon
 	static const QImage c_exitIcon = QImage(":/CC/images/ccExit.png").mirrored();
@@ -1655,7 +1667,17 @@ ccGLMatrixd ccGLWindowInterface::computeProjectionMatrix(bool withGLfeatures, Pr
 			//	const_cast<ccGLWindow*>(this)->displayNewMessage(QString("eye sep. = %1 - convergence = %3").arg(*eyeOffset).arg(convergence), ccGLWindowInterface::LOWER_LEFT_MESSAGE, false, 2, ccGLWindowInterface::PERSPECTIVE_STATE_MESSAGE);
 		}
 
-		projMatrix = ccGL::Frustum(-xMax - frustumAsymmetry, xMax - frustumAsymmetry, -yMax, yMax, zNear, zFar);
+		// Shift the frustum in the opposite direction so the optical axis lands on
+		// the requested screen position.
+		const double projectionCenterShiftX = m_projectiveViewportCenterOffset.x() * xMax;
+		const double projectionCenterShiftY = m_projectiveViewportCenterOffset.y() * yMax;
+
+		projMatrix = ccGL::Frustum(-xMax - frustumAsymmetry - projectionCenterShiftX,
+		                           xMax - frustumAsymmetry - projectionCenterShiftX,
+		                           -yMax - projectionCenterShiftY,
+		                           yMax - projectionCenterShiftY,
+		                           zNear,
+		                           zFar);
 	}
 	else
 	{
@@ -1774,7 +1796,11 @@ const ccGLMatrixd& ccGLWindowInterface::getProjectionMatrix()
 void ccGLWindowInterface::setStandardOrthoCenter()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
@@ -1789,7 +1815,11 @@ void ccGLWindowInterface::setStandardOrthoCenter()
 void ccGLWindowInterface::setStandardOrthoCorner()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_PROJECTION);
 	glFunc->glLoadIdentity();
@@ -1837,8 +1867,7 @@ void ccGLWindowInterface::getContext(CC_DRAW_CONTEXT& CONTEXT)
 	CONTEXT.defaultMat->setAmbient(ccColor::bright);
 	CONTEXT.defaultMat->setSpecular(guiParams.meshSpecular);
 	CONTEXT.defaultMat->setEmission(ccColor::night);
-	CONTEXT.defaultMat->setShininessFront(30);
-	CONTEXT.defaultMat->setShininessBack(50);
+	CONTEXT.defaultMat->setShininess(10);
 	// default colors
 	CONTEXT.pointsDefaultCol      = guiParams.pointsDefaultCol;
 	CONTEXT.textDefaultCol        = guiParams.textDefaultCol;
@@ -1921,10 +1950,10 @@ void ccGLWindowInterface::setPickingMode(PICKING_MODE mode /*=DEFAULT_PICKING*/,
 	// ccLog::Warning(QString("[%1] Picking mode set to: ").arg(m_uniqueID) + ToString(m_pickingMode));
 }
 
-CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
+CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(const QPointF& position)
 {
 	double xc = width() / 2.0;
-	double yc = height() / 2.0; // DGM FIXME: is it scaled coordinates or not?!
+	double yc = height() / 2.0;
 
 	CCVector3d Q2D;
 	if (m_viewportParams.objectCenteredView)
@@ -1938,6 +1967,9 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 			// arbitrary direction
 			return CCVector3d(0, 0, 1);
 		}
+
+		// Q2D is in GL (unscaled) coordinates, change it to logical to be consistent with position and heigh() / width() usage
+		Q2D = Q2D / getDevicePixelRatio();
 
 		// we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
 		Q2D.x = std::min(Q2D.x, 3.0 * width() / 4.0);
@@ -1953,9 +1985,9 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 	}
 
 	// invert y
-	y = height() - 1 - y;
+	double y = height() - 1 - position.y();
 
-	CCVector3d v(x - Q2D.x, y - Q2D.y, 0.0);
+	CCVector3d v(position.x() - Q2D.x, y - Q2D.y, 0.0);
 
 	v.x = std::max(std::min(v.x / xc, 1.0), -1.0);
 	v.y = std::max(std::min(v.y / yc, 1.0), -1.0);
@@ -1978,11 +2010,12 @@ CCVector3d ccGLWindowInterface::convertMousePositionToOrientation(int x, int y)
 	return v;
 }
 
-void ccGLWindowInterface::updateActiveItemsList(int x, int y, bool extendToSelectedLabels /*=false*/)
+void ccGLWindowInterface::updateActiveItemsList(const QPointF& position, bool extendToSelectedLabels /*=false*/)
 {
 	m_activeItems.clear();
 
-	PickingParameters params(FAST_PICKING, x, y, 2, 2);
+	const auto        intPosition = position.toPoint();
+	PickingParameters params(FAST_PICKING, intPosition.x(), intPosition.y(), 2, 2);
 
 	startPicking(params);
 
@@ -2208,7 +2241,11 @@ void ccGLWindowInterface::startOpenGLPicking(const PickingParameters& params)
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	if (!initFBOSafe(m_pickingFbo, glWidth(), glHeight()))
 	{
@@ -2857,22 +2894,33 @@ QFont ccGLWindowInterface::getLabelDisplayFont() const
 	return font;
 }
 
-void ccGLWindowInterface::glEnableSunLight()
+void ccGLWindowInterface::glSetSunLightParameters(ccQOpenGLFunctions* glFunc)
 {
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
-	glFunc->glLightfv(GL_LIGHT0, GL_DIFFUSE, getDisplayParameters().lightDiffuseColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_AMBIENT, getDisplayParameters().lightAmbientColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_SPECULAR, getDisplayParameters().lightSpecularColor.rgba);
-	glFunc->glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
-	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, getDisplayParameters().lightDoubleSided ? GL_TRUE : GL_FALSE);
-	glFunc->glEnable(GL_LIGHT0);
+	if (glFunc)
+	{
+		const auto& displayParams = getDisplayParameters();
+		glFunc->glLightfv(GL_LIGHT0, GL_DIFFUSE, displayParams.lightDiffuseColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_AMBIENT, displayParams.lightAmbientColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_SPECULAR, displayParams.lightSpecularColor.rgba);
+		glFunc->glLightfv(GL_LIGHT0, GL_POSITION, m_sunLightPos);
+		glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, displayParams.lightDoubleSided ? GL_TRUE : GL_FALSE);
+	}
 }
 
-void ccGLWindowInterface::glDisableSunLight()
+void ccGLWindowInterface::glEnableSunLight(ccQOpenGLFunctions* glFunc)
 {
-	functions()->glDisable(GL_LIGHT0);
+	if (glFunc)
+	{
+		glFunc->glEnable(GL_LIGHT0);
+	}
+}
+
+void ccGLWindowInterface::glDisableSunLight(ccQOpenGLFunctions* glFunc)
+{
+	if (glFunc)
+	{
+		glFunc->glDisable(GL_LIGHT0);
+	}
 }
 
 void ccGLWindowInterface::setSunLight(bool state)
@@ -2898,22 +2946,33 @@ void ccGLWindowInterface::toggleSunLight()
 	setSunLight(!m_sunLightEnabled);
 }
 
-void ccGLWindowInterface::glEnableCustomLight()
+void ccGLWindowInterface::glSetCustomLightParameters(ccQOpenGLFunctions* glFunc)
 {
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
-	glFunc->glLightfv(GL_LIGHT1, GL_DIFFUSE, getDisplayParameters().lightDiffuseColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_AMBIENT, getDisplayParameters().lightAmbientColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_SPECULAR, getDisplayParameters().lightSpecularColor.rgba);
-	glFunc->glLightfv(GL_LIGHT1, GL_POSITION, m_customLightPos);
-	glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
-	glFunc->glEnable(GL_LIGHT1);
+	if (glFunc)
+	{
+		const auto& displayParams = getDisplayParameters();
+		glFunc->glLightfv(GL_LIGHT1, GL_DIFFUSE, displayParams.lightDiffuseColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_AMBIENT, displayParams.lightAmbientColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_SPECULAR, displayParams.lightSpecularColor.rgba);
+		glFunc->glLightfv(GL_LIGHT1, GL_POSITION, m_customLightPos);
+		glFunc->glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+	}
 }
 
-void ccGLWindowInterface::glDisableCustomLight()
+void ccGLWindowInterface::glEnableCustomLight(ccQOpenGLFunctions* glFunc)
 {
-	functions()->glDisable(GL_LIGHT1);
+	if (glFunc)
+	{
+		glFunc->glEnable(GL_LIGHT1);
+	}
+}
+
+void ccGLWindowInterface::glDisableCustomLight(ccQOpenGLFunctions* glFunc)
+{
+	if (glFunc)
+	{
+		glFunc->glDisable(GL_LIGHT1);
+	}
 }
 
 void ccGLWindowInterface::setCustomLight(bool state)
@@ -2945,7 +3004,11 @@ void ccGLWindowInterface::toggleCustomLight()
 void ccGLWindowInterface::drawCustomLight()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	ccGL::Color(glFunc, ccColor::yellow);
 	// ensure that the star size is constant (in pixels)
@@ -3046,6 +3109,7 @@ void ccGLWindowInterface::setPerspectiveState(bool state, bool objectCenteredVie
 	// new state
 	m_viewportParams.perspectiveView    = state;
 	m_viewportParams.objectCenteredView = objectCenteredView;
+	m_projectiveViewportCenterOffset    = QPointF();
 
 	if (m_viewportParams.perspectiveView)
 	{
@@ -3275,8 +3339,9 @@ bool ccGLWindowInterface::setFarClippingPlaneDepth(double depth)
 
 void ccGLWindowInterface::setViewportParameters(const ccViewportParameters& params)
 {
-	ccViewportParameters oldParams = m_viewportParams;
-	m_viewportParams               = params;
+	ccViewportParameters oldParams   = m_viewportParams;
+	m_viewportParams                 = params;
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (m_stereoModeEnabled && !params.perspectiveView)
 	{
@@ -3314,7 +3379,8 @@ void ccGLWindowInterface::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 void ccGLWindowInterface::setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
                                                   float              fov_deg /*=0.0f*/,
                                                   bool               viewerBasedPerspective /*=true*/,
-                                                  bool               bubbleViewMode /*=false*/)
+                                                  bool               bubbleViewMode /*=false*/,
+                                                  const QPointF&     projectionCenterOffset /*=QPointF()*/)
 {
 	// perspective (viewer-based by default)
 	if (bubbleViewMode)
@@ -3326,6 +3392,14 @@ void ccGLWindowInterface::setupProjectiveViewport(const ccGLMatrixd& cameraMatri
 	if (fov_deg > 0.0f)
 	{
 		setFov(fov_deg);
+	}
+
+	if (m_projectiveViewportCenterOffset != projectionCenterOffset)
+	{
+		m_projectiveViewportCenterOffset = projectionCenterOffset;
+		invalidateViewport();
+		invalidateVisualization();
+		deprecate3DLayer();
 	}
 
 	// set the camera matrix 'translation' as OpenGL camera center
@@ -3362,6 +3436,7 @@ void ccGLWindowInterface::setCustomView(const CCVector3d& forward, const CCVecto
 
 	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(forward, up);
 	setBaseViewMat(viewMat);
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView, false);
@@ -3399,10 +3474,11 @@ void ccGLWindowInterface::setView(CC_VIEW_ORIENTATION orientation, bool forceRed
 		setPerspectiveState(m_viewportParams.perspectiveView, true);
 	}
 
-	m_viewportParams.viewMat = ccGLUtils::GenerateViewMat(orientation,
-	                                                      getDefaultVertDir(),
-	                                                      &m_lockedRotationAngle_rad,
-	                                                      &m_lockedRotationOrthoAngle_rad);
+	m_viewportParams.viewMat         = ccGLUtils::GenerateViewMat(orientation,
+                                                          getDefaultVertDir(),
+                                                          &m_lockedRotationAngle_rad,
+                                                          &m_lockedRotationOrthoAngle_rad);
+	m_projectiveViewportCenterOffset = QPointF();
 
 	if (wasViewerBased)
 	{
@@ -3535,8 +3611,12 @@ int ccGLWindowInterface::getGlFilterBannerHeight() const
 
 void ccGLWindowInterface::display3DLabel(const QString& str, const CCVector3& pos3D, const ccColor::Rgba* color /*=nullptr*/, const QFont& font /*=QFont()*/)
 {
-	glColor4ubv_safe<ccQOpenGLFunctions>(functions(), color ? *color : getDisplayParameters().textDefaultCol);
-	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
+	ccQOpenGLFunctions* glFunc = functions();
+	if (glFunc)
+	{
+		glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, color ? *color : getDisplayParameters().textDefaultCol);
+		renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
+	}
 }
 
 void ccGLWindowInterface::displayText(QString              text,
@@ -3548,7 +3628,11 @@ void ccGLWindowInterface::displayText(QString              text,
                                       const QFont*         font /*=nullptr*/)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	int x2 = x;
 	int y2 = y;
@@ -3706,7 +3790,11 @@ void ccGLWindowInterface::renderText(int x, int y, const QString& str, uint16_t 
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// retrieve the texture
 	SharedTexture texture;
@@ -3869,7 +3957,11 @@ void ccGLWindowInterface::renderText(double x, double y, double z, const QString
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// get the actual viewport / matrices
 	ccGLCameraParameters camera;
@@ -3887,7 +3979,7 @@ void ccGLWindowInterface::renderText(double x, double y, double z, const QString
 
 void ccGLWindowInterface::logGLError(const char* context) const
 {
-	if (m_initialized)
+	if (m_initialized && functions())
 	{
 		LogGLError(functions()->glGetError(), context);
 	}
@@ -3941,6 +4033,12 @@ void ccGLWindowInterface::toggleAutoRefresh(bool state, int period_ms /*=0*/)
 	{
 		m_autoRefreshTimer.stop();
 	}
+}
+
+QPointF ccGLWindowInterface::toCenteredGLCoordinates(const QPointF& coordinates) const
+{
+	QPoint integerPoint = coordinates.toPoint();
+	return toCornerGLCoordinates(integerPoint.x(), integerPoint.y());
 }
 
 QPointF ccGLWindowInterface::toCenteredGLCoordinates(int x, int y) const
@@ -4049,9 +4147,13 @@ GLfloat ccGLWindowInterface::getGLDepth(int x, int y, bool extendToNeighbors /*=
 	doMakeCurrent();
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return INVALID_DEPTH;
+	}
 
-	int     kernel[2] = {1, 1};
+	int     kernel[2]{1, 1};
 	GLfloat depthPickingBuffer[9];
 
 	if (extendToNeighbors)
@@ -4200,22 +4302,35 @@ void ccGLWindowInterface::lockRotationAxis(bool state, const CCVector3d& axis)
 void ccGLWindowInterface::drawCross()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
+
+	// correction for HD screens
+	const auto  devicePixelRatio  = getDevicePixelRatio();
+	const float centerCrossLength = CC_DISPLAYED_CENTER_CROSS_LENGTH * static_cast<float>(devicePixelRatio);
 
 	// force line width
-	glFunc->glPushAttrib(GL_LINE_BIT);
+	glFunc->glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	glFunc->glLineWidth(1.0f);
+	if (getDisplayParameters().displayCrossOnTop)
+	{
+		// display the cross on top of the entities
+		glFunc->glDisable(GL_DEPTH_TEST);
+	}
 
 	// cross OpenGL drawing
 	glColor4ubv_safe<ccQOpenGLFunctions>(glFunc, ccColor::lightGrey);
 	glFunc->glBegin(GL_LINES);
-	glFunc->glVertex3f(0.0f, -CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(0.0f, CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f);
-	glFunc->glVertex3f(-CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
-	glFunc->glVertex3f(CC_DISPLAYED_CENTER_CROSS_LENGTH, 0.0f, 0.0f);
+	glFunc->glVertex3f(0.0f, -centerCrossLength, 0.0f);
+	glFunc->glVertex3f(0.0f, centerCrossLength, 0.0f);
+	glFunc->glVertex3f(-centerCrossLength, 0.0f, 0.0f);
+	glFunc->glVertex3f(centerCrossLength, 0.0f, 0.0f);
 	glFunc->glEnd();
 
-	glFunc->glPopAttrib(); // GL_LINE_BIT
+	glFunc->glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
 }
 
 float ccGLWindowInterface::computeTrihedronLength() const
@@ -4226,7 +4341,11 @@ float ccGLWindowInterface::computeTrihedronLength() const
 void ccGLWindowInterface::drawTrihedron()
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	float trihedronEdgeLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float trihedronLength     = computeTrihedronLength();
@@ -4344,6 +4463,13 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 {
 	assert(!m_viewportParams.perspectiveView); // a scale is only valid in ortho. mode!
 
+	ccQOpenGLFunctions* glFunc = functions();
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
+
 	float scaleMaxW = glWidth() / 4.0f; // 25% of screen width
 
 	double pixelSize = computeActualPixelSize();
@@ -4363,9 +4489,6 @@ void ccGLWindowInterface::drawScale(const ccColor::Rgbub& color)
 	float w               = glWidth() / 2.0f - dW;
 	float h               = glHeight() / 2.0f - dH;
 	float tick            = 3.0f * m_captureMode.zoomFactor;
-
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
 
 	// force line width
 	glFunc->glPushAttrib(GL_LINE_BIT);
@@ -4548,11 +4671,11 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 		// Gesture update
 		if (m_touchInProgress && !m_viewportParams.perspectiveView)
 		{
-			QTouchEvent*                          touchEvent  = static_cast<QTouchEvent*>(evt);
-			const QList<QTouchEvent::TouchPoint>& touchPoints = touchEvent->touchPoints();
+			QTouchEvent*              touchEvent  = static_cast<QTouchEvent*>(evt);
+			const QList<QEventPoint>& touchPoints = touchEvent->points();
 			if (touchPoints.size() == 2)
 			{
-				QPointF D    = (touchPoints[1].pos() - touchPoints[0].pos());
+				QPointF D    = (touchPoints[1].position() - touchPoints[0].position());
 				qreal   dist = std::sqrt(D.x() * D.x() + D.y() * D.y());
 				if (m_touchBaseDist != 0.0)
 				{
@@ -4567,7 +4690,7 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 				return true;
 			}
 		}
-		ccLog::PrintDebug(QString("Touch update (%1 points)").arg(static_cast<QTouchEvent*>(evt)->touchPoints().size()));
+		ccLog::PrintDebug(QString("Touch update (%1 points)").arg(static_cast<QTouchEvent*>(evt)->points().size()));
 	}
 	break;
 
@@ -4851,7 +4974,11 @@ void ccGLWindowInterface::doPaintGL()
 void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glPointSize(m_viewportParams.defaultPointSize);
 	glFunc->glLineWidth(m_viewportParams.defaultLineWidth);
@@ -4869,15 +4996,14 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	/****************************************/
 	/****    PASS: 3D/FOREGROUND/LIGHT   ****/
 	/****************************************/
-	if (m_customLightEnabled || m_sunLightEnabled)
+
+	glSetSunLightParameters(glFunc); // these parameters have to be defined anyway, as some entities can force the sun light on later
+
+	// we enable the sun light (if activated)
+	if (m_sunLightEnabled)
 	{
 		CONTEXT.drawingFlags |= CC_LIGHT_ENABLED;
-
-		// we enable absolute sun light (if activated)
-		if (m_sunLightEnabled)
-		{
-			glEnableSunLight();
-		}
+		glEnableSunLight(glFunc);
 	}
 
 	// we activate the current shader (if any)
@@ -4978,11 +5104,14 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 		glFunc->glLoadMatrixd(modelViewMat.data());
 	}
 
-	// we enable relative custom light (if activated)
+	// we enable custom light (if activated)
+	// DGM: warning, the custom light must be set/enabled/displayed AFTER the 'model view' and projection matrices have been set!
 	if (m_customLightEnabled)
 	{
-		// DGM: warning, must be enabled/displayed AFTER the 'model view' and projection matrices have been set!
-		glEnableCustomLight();
+		CONTEXT.drawingFlags |= CC_LIGHT_ENABLED;
+
+		glSetCustomLightParameters(glFunc);
+		glEnableCustomLight(glFunc);
 
 		if (!m_captureMode.enabled
 		    && m_currentLODState.level == 0
@@ -5073,11 +5202,11 @@ void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& rend
 	// we disable lights
 	if (m_customLightEnabled)
 	{
-		glDisableCustomLight();
+		glDisableCustomLight(glFunc);
 	}
 	if (m_sunLightEnabled)
 	{
-		glDisableSunLight();
+		glDisableSunLight(glFunc);
 	}
 
 	// we display the cross at the end (and in orthographic mode)
@@ -5108,7 +5237,11 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	// backup the current viewport
 	QRect originViewport          = m_glViewport;
@@ -5410,7 +5543,11 @@ void ccGLWindowInterface::fullRenderingPass(CC_DRAW_CONTEXT& CONTEXT, RenderingP
 void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	/****************************************/
 	/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
@@ -5484,10 +5621,7 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 			{
 				// use plain color as specified by the user
 				const ccColor::Rgbub& bkgCol = displayParams.backgroundCol;
-				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f,
-                                                     bkgCol.g / 255.0f,
-                                                     bkgCol.b / 255.0f,
-                                                     1.0f);
+				const ccColor::Rgbaf  backgroundColor(bkgCol.r / 255.0f, bkgCol.g / 255.0f, bkgCol.b / 255.0f, 1.0f);
 
 				glFunc->glClearColor(backgroundColor.r,
 				                     backgroundColor.g,
@@ -5524,8 +5658,11 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 void ccGLWindowInterface::drawForeground(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
 {
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
-
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 	/****************************************/
 	/****  PASS: 2D/FOREGROUND/NO LIGHT  ****/
 	/****************************************/
@@ -5735,7 +5872,8 @@ void ccGLWindowInterface::onItemPickedFast(ccHObject* pickedEntity, int pickedIt
 			ccClipBox*     cbox     = cBoxPart->clipBox();
 			assert(cbox);
 			cbox->setActiveComponent(cBoxPart->partID());
-			cbox->setClickedPoint(x, y, width(), height(), m_viewportParams.viewMat);
+			// x and y are in device coordinates so use glWidth and glHeight instead of logical height/width (could be divided by getDevicePixelRatio as well)
+			cbox->setClickedPoint(x, y, glWidth(), glHeight(), m_viewportParams.viewMat);
 
 			m_activeItems.insert(cbox);
 		}
@@ -5759,6 +5897,13 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
                                           bool  renderOverlayItems /*=false*/,
                                           bool  silent /*=false*/)
 {
+	ccQOpenGLFunctions* glFunc = functions();
+	if (!glFunc)
+	{
+		assert(false);
+		return {};
+	}
+
 	QImage outputImage;
 
 	if (!m_glExtFuncSupported) // no FBO support?!
@@ -5894,9 +6039,6 @@ QImage ccGLWindowInterface::renderToImage(float zoomFactor /*=1.0f*/,
 		}
 	}
 	assert(fbo);
-
-	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
 
 	CC_DRAW_CONTEXT CONTEXT;
 	getContext(CONTEXT);
@@ -6060,8 +6202,8 @@ void ccGLWindowInterface::checkScheduledRedraw()
 
 void ccGLWindowInterface::doPicking()
 {
-	int x = m_lastMousePos.x();
-	int y = m_lastMousePos.y();
+	double x = m_lastMousePos.x();
+	double y = m_lastMousePos.y();
 
 	if (x < 0 || y < 0 || x > width() || y > height())
 	{
@@ -6075,7 +6217,7 @@ void ccGLWindowInterface::doPicking()
 		if (m_interactionFlags & INTERACT_2D_ITEMS)
 		{
 			// label selection
-			updateActiveItemsList(x, y, false);
+			updateActiveItemsList(m_lastMousePos, false);
 			if (!m_activeItems.empty())
 			{
 				if (m_activeItems.size() == 1)
@@ -6250,7 +6392,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 	m_mouseMoved              = false;
 	m_mouseButtonPressed      = true;
 	m_ignoreMouseReleaseEvent = false;
-	m_lastMousePos            = event->pos();
+	m_lastMousePos            = event->position();
 
 	if ((event->buttons() & Qt::RightButton)
 #ifdef CC_MAC_OS
@@ -6267,7 +6409,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 
 		if (m_interactionFlags & INTERACT_SIG_RB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->rightButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->rightButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	else if (event->buttons() & Qt::LeftButton)
@@ -6282,7 +6424,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 
 		if (m_interactionFlags & INTERACT_SIG_LB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->leftButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->leftButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	if (event->buttons() & Qt::MiddleButton)
@@ -6290,7 +6432,7 @@ void ccGLWindowInterface::processMousePressEvent(QMouseEvent* event)
 		// middle click = zooming
 		if (m_interactionFlags & INTERACT_SIG_MB_CLICKED)
 		{
-			Q_EMIT m_signalEmitter->middleButtonClicked(event->x(), event->y());
+			Q_EMIT m_signalEmitter->middleButtonClicked(event->position().x(), event->position().y());
 		}
 	}
 	else
@@ -6306,8 +6448,8 @@ void ccGLWindowInterface::processMouseDoubleClickEvent(QMouseEvent* event)
 
 	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = static_cast<int>(event->x() * devicePixelRatio);
-	const int y = static_cast<int>(event->y() * devicePixelRatio);
+	const int x = static_cast<int>(event->position().x() * devicePixelRatio);
+	const int y = static_cast<int>(event->position().y() * devicePixelRatio);
 
 	CCVector3d P;
 	if (getClick3DPos(x, y, P, false))
@@ -6341,14 +6483,14 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 
 	if (m_interactionFlags & INTERACT_SIG_MOUSE_MOVED)
 	{
-		Q_EMIT m_signalEmitter->mouseMoved(event->x(), event->y(), event->buttons());
+		Q_EMIT m_signalEmitter->mouseMoved(event->position().x(), event->position().y(), event->buttons());
 		event->accept();
 	}
 
 	const auto devicePixelRatio = getDevicePixelRatio();
 
-	const int x = static_cast<int>(event->x() * devicePixelRatio);
-	const int y = static_cast<int>(event->y() * devicePixelRatio);
+	const int x = static_cast<int>(event->position().x() * devicePixelRatio);
+	const int y = static_cast<int>(event->position().y() * devicePixelRatio);
 
 	// no button pressed
 	if (event->buttons() == Qt::NoButton)
@@ -6390,8 +6532,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 		return;
 	}
 
-	int dx = event->x() - m_lastMousePos.x();
-	int dy = event->y() - m_lastMousePos.y();
+	double dx = event->position().x() - m_lastMousePos.x();
+	double dy = event->position().y() - m_lastMousePos.y();
 
 	setLODEnabled(true);
 
@@ -6455,7 +6597,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				    && (QApplication::keyboardModifiers() == Qt::NoModifier
 				        || QApplication::keyboardModifiers() == Qt::ControlModifier))
 				{
-					updateActiveItemsList(m_lastMousePos.x(), m_lastMousePos.y(), true);
+					updateActiveItemsList(m_lastMousePos, true);
 				}
 			}
 		}
@@ -6506,7 +6648,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						m_rectPickingPoly->set2DMode(true);
 						m_rectPickingPoly->setDisplay(this);
 						m_rectPickingPoly->setVisible(true);
-						QPointF posA = toCenteredGLCoordinates(m_lastMousePos.x(), m_lastMousePos.y());
+						QPointF posA = toCenteredGLCoordinates(m_lastMousePos);
 
 						CCVector3 A(static_cast<PointCoordinateType>(posA.x()),
 						            static_cast<PointCoordinateType>(posA.y()),
@@ -6535,7 +6677,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 					CCVector3* B    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(1));
 					CCVector3* C    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(2));
 					CCVector3* D    = const_cast<CCVector3*>(vertices->getPointPersistentPtr(3));
-					QPointF    posD = toCenteredGLCoordinates(event->x(), event->y());
+					QPointF    posD = toCenteredGLCoordinates(event->position());
 					B->x = C->x = static_cast<PointCoordinateType>(posD.x());
 					C->y = D->y = static_cast<PointCoordinateType>(posD.y());
 				}
@@ -6563,9 +6705,9 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				{
 				case BubbleViewMode:
 				{
-					QPoint posDelta = m_lastMousePos - event->pos();
+					QPointF posDelta = m_lastMousePos - event->position();
 
-					if (std::abs(posDelta.x()) != 0)
+					if (std::abs(posDelta.x()) != 0.0)
 					{
 						double delta_deg = (posDelta.x() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						// rotation about the sensor Z axis
@@ -6573,7 +6715,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						rotMat.initFromParameters(CCCoreLib::DegreesToRadians(delta_deg), axis, CCVector3d(0, 0, 0));
 					}
 
-					if (std::abs(posDelta.y()) != 0)
+					if (std::abs(posDelta.y()) != 0.0)
 					{
 						double delta_deg = (posDelta.y() * static_cast<double>(m_bubbleViewFov_deg)) / height();
 						// rotation about the local X axis
@@ -6587,7 +6729,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				case StandardMode:
 				{
 					static CCVector3d s_lastMouseOrientation;
-					CCVector3d        currentMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
+					CCVector3d        currentMouseOrientation = convertMousePositionToOrientation(event->position());
 
 					if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
 					{
@@ -6600,7 +6742,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 						if (!m_mouseMoved)
 						{
 							// on the first time, we must compute the previous orientation (the camera hasn't moved yet)
-							s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos.x(), m_lastMousePos.y());
+							s_lastMouseOrientation = convertMousePositionToOrientation(m_lastMousePos);
 						}
 						// unconstrained rotation following mouse position
 						rotMat = ccGLMatrixd::FromToRotation(s_lastMouseOrientation, currentMouseOrientation);
@@ -6613,8 +6755,8 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 				case LockedAxisMode:
 				{
 					// apply rotation about the locked axis
-					int mousePosDeltaY = event->y() - m_lastMousePos.y();
-					int mousePosDeltaX = event->x() - m_lastMousePos.x();
+					double mousePosDeltaY = event->position().y() - m_lastMousePos.y();
+					double mousePosDeltaX = event->position().x() - m_lastMousePos.x();
 
 					// horizontal mouse motion rotates the view about the fixed axis
 					{
@@ -6683,7 +6825,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 	}
 
 	m_mouseMoved   = true;
-	m_lastMousePos = event->pos();
+	m_lastMousePos = event->position();
 
 	event->accept();
 
@@ -6740,12 +6882,12 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent* event)
 		else if (m_interactionFlags & INTERACT_2D_ITEMS)
 		{
 			// interaction with 2D item(s)
-			updateActiveItemsList(event->x(), event->y(), false);
+			updateActiveItemsList(event->position(), false);
 			if (!m_activeItems.empty())
 			{
 				ccInteractor* item = *m_activeItems.begin();
 				m_activeItems.clear();
-				if (item->acceptClick(static_cast<int>(devicePixelRatio * event->x()), glHeight() - 1 - static_cast<int>(devicePixelRatio * event->y()), Qt::RightButton))
+				if (item->acceptClick(static_cast<int>(devicePixelRatio * event->position().x()), glHeight() - 1 - static_cast<int>(devicePixelRatio * event->position().y()), Qt::RightButton))
 				{
 					event->accept();
 					toBeRefreshed();
@@ -6787,13 +6929,13 @@ void ccGLWindowInterface::processMouseReleaseEvent(QMouseEvent* event)
 			// picking?
 			if (m_timer.elapsed() < m_lastClickTime_ticks + CC_MAX_PICKING_CLICK_DURATION_MS) // in msec
 			{
-				int x = m_lastMousePos.x();
-				int y = m_lastMousePos.y();
+				double x = m_lastMousePos.x();
+				double y = m_lastMousePos.y();
 
 				// first test if the user has clicked on a particular item on the screen
 				if (!processClickableItems(x, y))
 				{
-					m_lastMousePos                          = event->pos(); // just in case (it should be already at this position)
+					m_lastMousePos                          = event->position(); // just in case (it should be already at this position)
 					const ccGui::ParamStruct& displayParams = getDisplayParameters();
 					if (displayParams.singleClickPicking)
 					{
@@ -6940,7 +7082,11 @@ void ccGLWindowInterface::drawPivot()
 	}
 
 	ccQOpenGLFunctions* glFunc = functions();
-	assert(glFunc);
+	if (!glFunc)
+	{
+		assert(false);
+		return;
+	}
 
 	glFunc->glMatrixMode(GL_MODELVIEW);
 	glFunc->glPushMatrix();
@@ -6966,10 +7112,10 @@ void ccGLWindowInterface::drawPivot()
 			sphere.setEnabled(true);
 			// force lighting for proper sphere display
 			glFunc->glPushAttrib(GL_LIGHTING_BIT);
-			glEnableSunLight();
+			glEnableSunLight(glFunc);
 			CC_DRAW_CONTEXT CONTEXT;
 			getContext(CONTEXT);
-			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED;
+			CONTEXT.drawingFlags = CC_DRAW_3D | CC_DRAW_FOREGROUND | CC_LIGHT_ENABLED | CC_NO_SHADER;
 			CONTEXT.display      = nullptr;
 			sphere.draw(CONTEXT);
 			glFunc->glPopAttrib(); // GL_LIGHTING_BIT

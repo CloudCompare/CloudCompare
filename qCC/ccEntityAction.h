@@ -37,10 +37,10 @@ namespace ccEntityAction
 	bool interpolateColors(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool convertTextureToColor(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool enhanceRGBWithIntensities(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
-	bool rgbGaussianFilter(ccHObject::Container selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
+	bool rgbGaussianFilter(ccHObject::Container selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr, bool noDialog = false);
 
 	// Scalar Fields
-	bool sfGaussianFilter(ccHObject::Container selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr);
+	bool sfGaussianFilter(ccHObject::Container selectedEntities, ccPointCloud::RgbFilterOptions filterParams, QWidget* parent = nullptr, bool noDialog = false);
 	bool sfConvertToRGB(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool sfConvertToRandomRGB(ccHObject::Container selectedEntities, QWidget* parent = nullptr);
 	bool sfRename(ccHObject::Container selectedEntities, QWidget* parent = nullptr);

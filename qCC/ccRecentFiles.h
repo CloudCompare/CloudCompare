@@ -1,5 +1,4 @@
-#ifndef CCRECENTFILES_H
-#define CCRECENTFILES_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -46,7 +45,6 @@ class ccRecentFiles : public QObject
 	void openFileFromAction();
 
 	//! Returns a list of file paths from the QSettings
-	//! This will also remove any file from the list that does not exist
 	QStringList listRecent();
 
 	//! Contracts the path by substituting '~' for the user's home directory
@@ -64,5 +62,3 @@ class ccRecentFiles : public QObject
 
 	QAction* m_actionClearMenu;
 };
-
-#endif

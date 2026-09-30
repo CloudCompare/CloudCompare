@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COLOR_GRADIENT_DLG_HEADER
-#define CC_COLOR_GRADIENT_DLG_HEADER
 
 // Qt
 #include <QColor>
@@ -58,5 +57,3 @@ class ccColorGradientDlg : public QDialog
 	void changeFirstColor();
 	void changeSecondColor();
 };
-
-#endif // CC_COLOR_GRADIENT_DLG_HEADER

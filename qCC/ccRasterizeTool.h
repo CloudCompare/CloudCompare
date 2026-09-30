@@ -220,7 +220,7 @@ class ccRasterizeTool : public QDialog
 	};
 
 	//! Associated Qt UI
-	Ui::RasterizeToolDialog* m_UI;
+	std::unique_ptr<Ui::RasterizeToolDialog> m_ui;
 
 	//! Associated cloud
 	ccGenericPointCloud* m_cloud;

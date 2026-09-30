@@ -17,7 +17,7 @@
 
 #include "ccSNECloud.h"
 #include <ccScalarField.h>
-#include <ccColorRampShader.h>
+
 //pass ctors straight to ccPointCloud
 ccSNECloud::ccSNECloud()
 	: ccPointCloud()

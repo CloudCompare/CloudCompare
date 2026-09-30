@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_BOUNDING_BOX_EDITOR_DLG_HEADER
-#define CC_BOUNDING_BOX_EDITOR_DLG_HEADER
 
 #include <ui_boundingBoxEditorDlg.h>
 
@@ -123,5 +122,3 @@ class ccBoundingBoxEditorDlg : public QDialog
 	//! Whether to show 'inclusion' warning or not
 	bool m_showInclusionWarning;
 };
-
-#endif // CC_BOUNDING_BOX_EDITOR_DLG_HEADER

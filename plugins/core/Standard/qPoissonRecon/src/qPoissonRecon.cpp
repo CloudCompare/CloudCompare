@@ -35,6 +35,7 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccBackgroundTask.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
@@ -42,7 +43,7 @@
 #if defined(CC_WINDOWS)
 #include "Windows.h"
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
 
@@ -52,10 +53,10 @@ class PointCloudWrapper : public PoissonReconLib::ICloud<Real>
 public:
 	explicit PointCloudWrapper( const ccPointCloud& cloud ) : m_cloud(cloud) {}
 
-	virtual size_t size() const { return m_cloud.size(); }
-	virtual bool hasNormals() const { return m_cloud.hasNormals(); }
-	virtual bool hasColors() const { return m_cloud.hasColors(); }
-	virtual void getPoint(size_t index, Real* coords) const
+	size_t size() const override { return m_cloud.size(); }
+	bool hasNormals() const override { return m_cloud.hasNormals(); }
+	bool hasColors() const override { return m_cloud.hasColors(); }
+	void getPoint(size_t index, Real* coords) const override
 	{
 		if (index >= m_cloud.size())
 		{
@@ -69,7 +70,7 @@ public:
 		coords[2] = static_cast<Real>(P->z);
 	}
 
-	virtual void getNormal(size_t index, Real* coords) const
+	void getNormal(size_t index, Real* coords) const override
 	{
 		if (index >= m_cloud.size() || !m_cloud.hasNormals())
 		{
@@ -82,8 +83,8 @@ public:
 		coords[1] = static_cast<Real>(N.y);
 		coords[2] = static_cast<Real>(N.z);
 	}
-	
-	virtual void getColor(size_t index, Real* rgb) const
+
+	void getColor(size_t index, Real* rgb) const override
 	{
 		if (index >= m_cloud.size() || !m_cloud.hasColors())
 		{
@@ -105,7 +106,7 @@ template <typename Real>
 class MeshWrapper : public PoissonReconLib::IMesh<Real>
 {
 public:
-	explicit MeshWrapper(ccMesh& mesh, ccPointCloud& vertices, CCCoreLib::ScalarField* densitySF = nullptr)
+	explicit MeshWrapper(ccMesh& mesh, ccPointCloud& vertices, ccScalarField::Shared densitySF = nullptr)
 		: m_mesh(mesh)
 		, m_vertices(vertices)
 		, m_densitySF(densitySF)
@@ -142,7 +143,7 @@ public:
 		return true;
 	}
 
-	virtual void addVertex(const Real* coords) override
+	void addVertex(const Real* coords) override
 	{
 		if (!checkVertexCapacity())
 		{
@@ -152,7 +153,7 @@ public:
 		m_vertices.addPoint(P);
 	}
 
-	virtual void addNormal(const Real* coords) override
+	void addNormal(const Real* coords) override
 	{
 		if (!checkVertexCapacity())
 		{
@@ -163,11 +164,12 @@ public:
 			m_error = true;
 			return;
 		}
-		CCVector3 N = CCVector3::fromArray(coords);
+		// Output of normals is inverted in PoissonRecon
+		const CCVector3 N = PointCoordinateType(-1.0) * CCVector3::fromArray(coords);
 		m_vertices.addNorm(N);
 	}
 
-	virtual void addColor(const Real* rgb) override
+	void addColor(const Real* rgb) override
 	{
 		if (!checkVertexCapacity())
 		{
@@ -186,7 +188,7 @@ public:
 								static_cast<ColorCompType>(std::min((Real)255, std::max((Real)0, rgb[2]))) );
 	}
 
-	virtual void addDensity(double d) override
+	void addDensity(double d) override
 	{
 		if (!m_densitySF)
 		{
@@ -214,8 +216,8 @@ public:
 protected:
 	ccMesh& m_mesh;
 	ccPointCloud& m_vertices;
-	bool m_error;
-	CCCoreLib::ScalarField* m_densitySF;
+	bool m_error{false};
+	ccScalarField::Shared m_densitySF;
 };
 
 //dialog for qPoissonRecon plugin
@@ -264,7 +266,7 @@ static PoissonReconLib::Parameters s_params;
 static ccPointCloud* s_cloud = nullptr;
 static ccMesh* s_mesh = nullptr;
 static ccPointCloud* s_meshVertices = nullptr;
-static CCCoreLib::ScalarField* s_densitySF = nullptr;
+static ccScalarField::Shared s_densitySF;
 
 bool doReconstruct()
 {
@@ -279,7 +281,7 @@ bool doReconstruct()
 
 	MeshWrapper<PointCoordinateType> meshWrapper(*s_mesh, *s_meshVertices, s_densitySF);
 	PointCloudWrapper<PointCoordinateType> cloudWrapper(*s_cloud);
-	
+
 	if (!PoissonReconLib::Reconstruct(s_params, cloudWrapper, meshWrapper) || meshWrapper.isInErrorState())
 	{
 		return false;
@@ -317,7 +319,7 @@ void qPoissonRecon::doAction()
 	}
 
 	//with normals!
-	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
+	auto* pc = static_cast<ccPointCloud*>(ent);
 	if (!pc->hasNormals())
 	{
 		m_app->dispToConsole("Cloud must have normals!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -332,7 +334,7 @@ void qPoissonRecon::doAction()
 		s_defaultResolution = pc->getOwnBB().getDiagNormd() / 200.0;
 		s_lastEntityID = pc->getUniqueID();
 	}
-	
+
 	bool cloudHasColors = pc->hasColors();
 	PoissonReconParamDlg prpDlg(m_app->getMainWindow());
 	prpDlg.importColorsCheckBox->setVisible(cloudHasColors);
@@ -350,6 +352,8 @@ void qPoissonRecon::doAction()
 	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
 	prpDlg.threadSpinBox->setValue(s_params.threads);
 	prpDlg.linearFitCheckBox->setChecked(s_params.linearFit);
+	prpDlg.exactInterpolationCheckbox->setChecked(s_params.exactInterpolation);
+
 	switch (s_params.boundary)
 	{
 	case PoissonReconLib::Parameters::FREE:
@@ -372,7 +376,7 @@ void qPoissonRecon::doAction()
 	//set parameters with dialog settings
 	s_depthMode = prpDlg.depthRadioButton->isChecked();
 	s_defaultResolution = prpDlg.resolutionDoubleSpinBox->value();
-	
+
 	s_params.depth = (s_depthMode ? prpDlg.depthSpinBox->value() : 0);
 	s_params.finestCellWidth = static_cast<float>(s_depthMode ? 0.0 : s_defaultResolution);
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
@@ -381,6 +385,7 @@ void qPoissonRecon::doAction()
 	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
 	s_params.threads = prpDlg.threadSpinBox->value();
 	s_params.linearFit = prpDlg.linearFitCheckBox->isChecked();
+	s_params.exactInterpolation = prpDlg.exactInterpolationCheckbox->isChecked();
 	switch (prpDlg.boundaryComboBox->currentIndex())
 	{
 	case 0:
@@ -403,7 +408,7 @@ void qPoissonRecon::doAction()
 	assert(s_mesh == nullptr);
 	assert(s_meshVertices == nullptr);
 
-	ccScalarField* densitySF = nullptr;
+	ccScalarField::Shared densitySF;
 	ccPointCloud* newPC = new ccPointCloud("vertices");
 	ccMesh* newMesh = new ccMesh(newPC);
 	newMesh->addChild(newPC);
@@ -438,29 +443,17 @@ void qPoissonRecon::doAction()
 
 		if (s_params.density)
 		{
-			s_densitySF = (densitySF = new ccScalarField("Density"));
+			densitySF.reset(new ccScalarField("Density"));
+			s_densitySF = densitySF;
 		}
 
-		QFuture<bool> future = QtConcurrent::run(doReconstruct);
-
-		//wait until process is finished!
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-
-			pDlg.setValue(pDlg.value() + 1);
-			QApplication::processEvents();
-		}
-
-		result = future.result();
+		//run in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(doReconstruct);
 
 		s_cloud = nullptr;
 		s_mesh = nullptr;
 		s_meshVertices = nullptr;
+		s_densitySF.reset();
 
 		pDlg.hide();
 		QApplication::processEvents();
@@ -468,24 +461,20 @@ void qPoissonRecon::doAction()
 
 	if (!result)
 	{
-		if (densitySF)
-		{
-			densitySF->release();
-			densitySF = nullptr;
-		}
 		delete newMesh;
 		newMesh = nullptr;
 		m_app->dispToConsole("Reconstruction failed!", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
-	
+
 	//success message
 	m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(newMesh->size()).arg(newPC->size()), ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
 	newPC->setEnabled(false);
 	newMesh->setVisible(true);
-	newMesh->computeNormals(true);
+	//newMesh->computeNormals(true);
+	newMesh->showNormals(true);
 	if (!cloudHasColors)
 	{
 		newPC->unallocateColors();

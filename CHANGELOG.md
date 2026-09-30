@@ -4,6 +4,13 @@ CloudCompare Version History
 v2.14.beta (???) - (??/??/202?)
 ----------------------
 New features:
+	- New I/O filter: dotBIM (.bim)
+		- to load dotBIM meshes (https://dotbim.net/)
+		- import only; each 'element' is loaded as its own mesh, with its rotation and translation applied
+
+	- Edit > Polyline > Extrude
+		- vertical extrusion within specified ownward (-Z) and upward (+Z) offsets
+
 	- Edit > Color > Gaussian filter
 	- Edit > Color > Bilateral filter
 	- Edit > Color > Median filter
@@ -21,10 +28,28 @@ New features:
 		- distances between a point cloud and a disc can be computed with 'Tools > Distances > Cloud/primitive dist'
 
 	- New Command line options
-		- New command -MATCH_SCALES {BB_MAX_DIM|BB_VOLUME|PCA_MAX_DIM|ICP} [-REFERENCE {index}] [-RMS_DIFF {value}] [-OVERLAP {percent}]
+		- New command -MATCH_SCALES {BB_MAX_DIM|BB_VOLUME|PCA_MAX_DIM|ICP} [-REFERENCE {index}] [-RMS_DIFF {value}] [-OVERLAP {percent}] [-MIN_SCALE {value}] [-MAX_SCALE {value}]
 			- ports the 'Tools > Registration > Match scales' tool to the command line
 			- rescales all loaded clouds/meshes to match the scale of the reference entity (0-based index, 0 by default)
 			- -RMS_DIFF and -OVERLAP only apply to the ICP algorithm (defaults: 1e-5 and 100 respectively)
+			- -MIN_SCALE and -MAX_SCALE constrain the scale factor: a factor falling outside the range is clamped to the nearest bound and a warning is issued (both are optional, and no limit is applied by default)
+		- New command -PLY_NO_SF_PREFIX
+			- tells the PLY filter not to add the 'scalar_' prefix to the scalar field names when saving
+			- scalar fields coming from an input PLY file already keep their original name
+		- New command -STAT_FIT {GAUSS|WEIBULL}
+			- ports the 'Compute stat. params' tool (distribution fitting) to the command line
+			- fits the distribution on the active scalar field of each loaded cloud (see -SET_ACTIVE_SF)
+			- the fitted parameters are printed to the console, and therefore to the -LOG_FILE file if one is set
+		- New option -OUTPUT_MATRIX_FILE {filename} for the -ICP command
+			- saves the registration matrix to this file instead of the automatically generated '{cloud path}/{cloud name}_REGISTRATION_MATRIX.txt'
+			- the filename is used as is: no timestamp and no '.txt' extension are appended
+		- New option -OUTPUT_INFO_FILE {filename} for the -BEST_FIT_PLANE command
+			- saves the plane information file to this file instead of the automatically generated '{cloud path}/{cloud name}_BEST_FIT_PLANE_INFO.txt'
+			- the filename is used as is: no timestamp and no '.txt' extension are appended
+			- as this command writes one information file per loaded cloud, this option requires that a single cloud is loaded
+		- New sub-options for the -RANSAC command: MIN_SPHERE_RADIUS {value}, MAX_SPHERE_RADIUS {value}, MIN_CYLINDER_RADIUS {value}, MAX_CYLINDER_RADIUS {value}, MIN_TORUS_MINOR_RADIUS {value}, MAX_TORUS_MINOR_RADIUS {value}, MIN_TORUS_MAJOR_RADIUS {value} and MAX_TORUS_MAJOR_RADIUS {value}
+			- same radius limits as in the plugin dialog: shapes with a radius outside the range are not detected
+			- all are optional, and no limit is applied by default
 		- New command -DISTANCES_FROM_SENSOR [-SQUARED]
 			- to compute the distances from every point of the cloud to the associated sensor origin (if any)
 		- New command -SCATTERING_ANGLES [-DEGREES]
@@ -132,6 +157,13 @@ New plugins
 
 Improvements:
 
+	- Display speed of clouds and meshes has been improved a lot
+		- use of a composite GLSL 1.2 program
+		- use of a LUT texture with uncompressed normals
+		- use of a color scale texture when displaying scalar fields
+		- visibility filtering done in the same program
+		- (does not work for meshes with partial visibility or multi-textured yet)
+
 	- Display > Lock rotation about an axis
 		- now a proper 'turntable' rotation mode
 		- dedicated icon in the left 'View' toolbar
@@ -220,6 +252,7 @@ Improvements:
 		- CC will now properly handle the case when a reflective transformation has been applied to a cloud (see bug fixes)
 		- Empty scans will not trigger an error anymore (just a warning message)
 		- E57 timestamps are now loaded as scalar fields
+		- image viewport projection now accounts for the principal point (principalPointX/Y) specified in pinhole image metadata
 
 	- PLY files:
 		- loading dialog: new 'Add all' button to add all the unused standard properties to be loaded as scalar fields
@@ -237,6 +270,7 @@ Improvements:
 	- Display > Display settings
 		- new option to set the logs verbosity level (Verbose/Standard/Important/Warning & Errors)
 		- new option to choose whether a confirmation dialog (Are you sure?) should appear when deleting entities
+		- new option to always display the middle screen cross on top of the entities (off by default)
 
 	- Quadric model/fitting
 		- improved fitting of quadric functions on points:
@@ -330,6 +364,26 @@ Improvements:
 		- 3D mouse support on macOS, Linux and Windows (thanks to https://github.com/braunsi23 and Paul Rascle!)
 		- on Windows, option to compile with the 3DxWare SDK or the generic hidapi library
 
+	- Tools > Other > Compute geometric feature
+		- new geometric features: (from "Obtaining a Best Fitting Plane Through 3D Georeferenced Data", Fernandez, 2005)
+			- Degree of planarity (M): ln(L1 / L3)
+			- Degree of linearity (K): ln(L1 / L2) / ln(L2 / L3)
+		- the approximate density can be computed again (it was only reachable with the -APPROX_DENSITY
+			command line option since 2.10)
+			- it only looks at the nearest neighbor, so it ignores the radius and is much faster than the
+				exact density on large neighborhoods
+			- the 'number of neighbors' variant is in fact the inverse of the distance to the nearest
+				neighbor, and its scalar field is now named accordingly
+
+	- SOR/Cleaning filters
+		- the user can now choose the number of threads to use
+
+	- ICP
+		- new option to define/restrict the scaling range if 'adjust scale' is enabled
+
+	- Cross Section (clipping box) tool
+		- new 'invert' button to invert the selection (i.e. the 'inside' and 'outside' of the box)
+
 	- Others:
 		- the Subsampling dialog won't allow the user to input sampling modulation parameters if all SF values are the same
 		- the shortcut to the 'Level' tool in the 'View' toolbar (left) has been removed. Contrarily to the other options in this toolbar,
@@ -343,8 +397,12 @@ Improvements:
 		- CloudCompare is now built upon Qt 6.
 		- Removed Gamepad support (QGamepad is no longer part of Qt starting from Qt6).
 		- point picking now works on mesh displayed with wireframe
+		- the ASCII loading dialog now warns the user when a file has more columns than it can handle
+			(only the first 512 columns are loaded, the other ones were previously ignored silently)
+		- the PoissonRecon library (used by the Poisson Surface reconstruction plugin) has been updated to version 18.76
 
 Bug fixes:
+	- ASCII files saved with legacy Mac line endings (a lone CR) were read as a single line, silently loading only one point
 	- the weights derived from normals comparison during ICP registration of 2 clouds could be wrong (the wrong normals were compared)
 	- editing the Global Shift & Scale information of a polyline would make CC crash
 	- segmenting a cloud with polylines depending on it but not directly present below the cloud entity in the DB tree could lead
@@ -357,14 +415,14 @@ Bug fixes:
 	- CC will now consider infinite SF values as 'invalid' (just as NaN values currently) so as to avoid various types of issues
 	- the STEP file loader was behaving strangely when loading files a second time (or more). For instance, the scale was divided by
 		1000 the second time a file was loaded.
-	- When specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
+	- when specifying some scalar fields by name or by index as weights to the ICP command line, those would be ignored
 	- E57/PCD: when saving a cloud after having applied a 'reflection' transformation (e.g. inverting a single axis), the saved
 		sensor pose was truncated due to the internal representation of these formats (as a quaternion)
 	- E57: the local (sensor) pose was not applied to normals at saving time
 	- M3C2:
 		- bug corrected: when the "use other cloud" is checked, do not propose the use of cloud #1 as a possible source for the normals
 		- force the vertical mode in CLI call when NormalMode=3 is requested (needed in case of multiple calls in the same command line)
-	- Waveform
+	- LAS waveform:
 		- each LAS point with missing waveform data was triggering a warning message
 		- the Waveform picking dialog could display an annoying error message each time a new point was picked
 	- the 'Translation' field of the Translate/Rotate tool could remain disabled if only the 'Ty' option was checked
@@ -384,13 +442,25 @@ Bug fixes:
 	- some SHP files could not be opened due to longer records than specified
 	- DXF files: the 'elevation' of LWPOLYLINE entities was ignored
 	- High DPI displays with a 1.5 ratio would be badly handled (point picking, 2D labels, etc.)
-	- When loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion for the time being.
-	- Point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
-	- In some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing the tool
-	- Despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not lead to the
-		extraction of the convex hull.
-	- When using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
-	- The sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
+	- the middle screen cross was not scaled on high DPI screens, making it hard to see
+	- when loading a file, the user could change the Global scale, but the value was ignored. The field will be disabled to avoid confusion
+		for the time being.
+	- point picking would not work on entities below a mesh displayed with wireframe in the DB tree (typically its vertices)
+	- in some cases, especially when using the 'advanced mode', the Rotate/Translate tool could apply the wrong rotation matrix when closing
+		the tool
+	- despite what the tooltip was saying, using 0 as max edge length in the contour extraction option of the Cross Section tool would not
+		lead to the extraction of the convex hull.
+	- when using some tools and changing the selection was CloudCompare was still working, the tool could be applied to the newly selected entities
+	- the sphere detection feature of the point-pair-based-alignment tool could lead to a crash (2.14.alpha and 2.14.beta only)
+	- the Ransac Shape Detection plugin could output spheres or cylinders outside the min/max radius limits
+		(the limits were not checked after the shape refinement step), and it never refined the detected tori
+	- Custom shortcuts were applied to every action with the same name after a restart (e.g. a shortcut set on the scalar field
+		'Delete' action would replace the 'Del' shortcut of the main 'Delete' action)
+	- duplicating materials (during cloning, or with Cross Section for section) could lead to the loss of the texture for the source entities
+		(or the destination entity) after the other entity is removed
+	- CC could take a long time to start (and to open a file) if the recent files list contained files on an unreachable network drive.
+		The recent files are now only checked when one of them is clicked (and a missing file is then removed from the list).
+	- the scalar field name above the color scale in the 3D view was not properly updated after renaming the active scalar field
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

@@ -27,8 +27,10 @@
 #include <QSet>
 
 // GUI
-#include <set>
 #include <ui_graphicalSegmentationDlg.h>
+
+// System
+#include <set>
 
 class ccPolyline;
 class ccPointCloud;

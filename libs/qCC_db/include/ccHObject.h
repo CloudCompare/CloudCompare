@@ -19,6 +19,7 @@
 
 // Local
 #include "ccBBox.h"
+#include "ccDrawableObject.h"
 #include "ccObject.h"
 
 class QIcon;
@@ -374,7 +375,7 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 			setDisplay(newDisplay);
 		}
 
-		for (auto child : m_children)
+		for (auto* child : m_children)
 		{
 			child->transferDisplay(oldDisplay, newDisplay);
 		}
@@ -408,15 +409,6 @@ class QCC_DB_LIB_API ccHObject : public ccObject
 	    \return success
 	**/
 	bool fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap);
-
-	//! Returns whether object is shareable or not
-	/** If object is father dependent and 'shared', it won't
-	    be deleted but 'released' instead.
-	**/
-	virtual inline bool isShareable() const
-	{
-		return false;
-	}
 
 	//! Behavior when selected
 	enum SelectionBehavior

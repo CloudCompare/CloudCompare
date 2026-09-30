@@ -18,6 +18,7 @@
 #include "qCork.h"
 
 //qCC_db
+#include <ccBackgroundTask.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 
@@ -39,15 +40,6 @@
 #ifdef _MSC_VER
 #pragma warning( pop )
 #endif
-
-//system
-#if defined(CC_WINDOWS)
-#include "windows.h"
-#else
-#include <time.h>
-#include <unistd.h>
-#endif
-
 
 qCork::qCork(QObject* parent/*=nullptr*/)
 	: QObject(parent)
@@ -230,12 +222,11 @@ struct BoolOpParameters
 	ccMainAppInterface* app;
 	bool meshesAreOk;
 };
-static BoolOpParameters s_params;
 
-static bool DoPerformBooleanOp()
+static bool DoPerformBooleanOp(BoolOpParameters& params)
 {
 	//invalid parameters
-	if (!s_params.corkA || !s_params.corkB)
+	if (!params.corkA || !params.corkB)
 	{
 		assert(false);
 		return false;
@@ -247,82 +238,99 @@ static bool DoPerformBooleanOp()
 		timer.start();
 
 		//check meshes
-		s_params.meshesAreOk = true;
+		params.meshesAreOk = true;
 		if (false)
 		{
-			if (s_params.corkA->isSelfIntersecting())
+			if (params.corkA->isSelfIntersecting())
 			{
-				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-				s_params.meshesAreOk = false;
+				if (params.app)
+					params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				params.meshesAreOk = false;
 			}
-			else if (!s_params.corkA->isClosed())
+			else if (!params.corkA->isClosed())
 			{
-				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-				s_params.meshesAreOk = false;
+				if (params.app)
+					params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(params.nameA), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				params.meshesAreOk = false;
 			}
-			if (s_params.corkB->isSelfIntersecting())
+			if (params.corkB->isSelfIntersecting())
 			{
-				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-				s_params.meshesAreOk = false;
+				if (params.app)
+					params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				params.meshesAreOk = false;
 			}
-			else if (!s_params.corkB->isClosed())
+			else if (!params.corkB->isClosed())
 			{
-				if (s_params.app)
-					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-				s_params.meshesAreOk = false;
+				if (params.app)
+					params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(params.nameB), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				params.meshesAreOk = false;
 			}
 		}
 
 		//perform the boolean operation
-		switch (s_params.operation)
+		switch (params.operation)
 		{
 		case ccCorkDlg::UNION:
-			s_params.corkA->boolUnion(*s_params.corkB);
+			params.corkA->boolUnion(*params.corkB);
 			break;
 
 		case ccCorkDlg::INTERSECT:
-			s_params.corkA->boolIsct(*s_params.corkB);
+			params.corkA->boolIsct(*params.corkB);
 			break;
 
 		case ccCorkDlg::DIFF:
-			s_params.corkA->boolDiff(*s_params.corkB);
+			params.corkA->boolDiff(*params.corkB);
 			break;
 
 		case ccCorkDlg::SYM_DIFF:
-			s_params.corkA->boolXor(*s_params.corkB);
+			params.corkA->boolXor(*params.corkB);
 			break;
 
 		default:
 			assert(false);
-			if (s_params.app)
-				s_params.app->dispToConsole("[Cork] Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
+			if (params.app)
+				params.app->dispToConsole("[Cork] Unhandled operation?!", ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
 			break;
 		}
 
-		if (s_params.app)
+		if (params.app)
 		{
 			// display the duration time
-			s_params.app->dispToConsole(QString("[Cork] CSG operation duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
+			params.app->dispToConsole(QString("[Cork] CSG operation duration: %1 s").arg(timer.elapsed() / 1000.0, 0, 'f', 2));
 		}
 	}
 	catch (const std::exception& e)
 	{
-		if (s_params.app)
-			s_params.app->dispToConsole(QString("[Cork] Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+		if (params.app)
+			params.app->dispToConsole(QString("[Cork] Exception caught: %1").arg(e.what()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
 	return true;
 }
 
+struct IsInUse
+{
+	IsInUse(bool& _inUse) : inUse(_inUse) { inUse = true; }
+	~IsInUse() { inUse = false; }
+	bool& inUse;
+};
+static bool s_inUse = false;
+
 void qCork::doAction()
 {
-	assert(m_app);
 	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
+
+	if (s_inUse)
+	{
+		m_app->dispToConsole(tr("Another boolean operation is already in progress!"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	IsInUse inUse(s_inUse);
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
@@ -363,34 +371,23 @@ void qCork::doAction()
 		//run in a separate thread
 		QProgressDialog pDlg("Operation in progress", QString(), 0, 0, m_app->getMainWindow());
 		pDlg.setWindowTitle("Cork");
+		pDlg.setModal(true);
 		pDlg.show();
 		QApplication::processEvents();
 
-		s_params.app = m_app;
-		s_params.corkA = &corkA;
-		s_params.corkB = &corkB;
-		s_params.nameA = meshA->getName();
-		s_params.nameB = meshB->getName();
-		s_params.operation = cDlg.getSelectedOperation();
-
-		QFuture<bool> future = QtConcurrent::run(DoPerformBooleanOp);
-
-		//wait until process is finished!
-		while (!future.isFinished())
+		BoolOpParameters params;
 		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-
-			pDlg.setValue(pDlg.value() + 1);
-			QApplication::processEvents();
+			params.app       = m_app;
+			params.corkA     = &corkA;
+			params.corkB     = &corkB;
+			params.nameA     = meshA->getName();
+			params.nameB     = meshB->getName();
+			params.operation = cDlg.getSelectedOperation();
 		}
 
-		//just to be sure
-		s_params.app = nullptr;
-		s_params.corkA = s_params.corkB = 0;
+		QFuture<bool> future = QtConcurrent::run([&params]() { return DoPerformBooleanOp(params); });
+
+		ccBackgroundTask::Wait(future);
 
 		pDlg.hide();
 		QApplication::processEvents();
@@ -398,7 +395,7 @@ void qCork::doAction()
 		if (!future.result())
 		{
 			if (m_app)
-				m_app->dispToConsole(s_params.meshesAreOk ? "Computation failed!" : "Computation failed! (check console)", ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				m_app->dispToConsole(params.meshesAreOk ? tr("Computation failed!") : tr("Computation failed! (check console)"), ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			//an error occurred
 			return;
 		}

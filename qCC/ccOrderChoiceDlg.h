@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ORDER_CHOICE_DIALOG_HEADER
-#define CC_ORDER_CHOICE_DIALOG_HEADER
 
 // Qt
 #include <QDialog>
@@ -60,5 +59,3 @@ class ccOrderChoiceDlg : public QDialog
 	ccHObject*           m_secondEnt;
 	bool                 m_useInputOrder;
 };
-
-#endif // CC_ORDER_CHOICE_DIALOG_HEADER

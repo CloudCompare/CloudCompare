@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,13 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SF_EDIT_DIALOG_HEADER
-#define CC_SF_EDIT_DIALOG_HEADER
-
 // Qt
 #include <QWidget>
 
-class ccScalarField;
+// qCC_db
+#include <ccScalarField.h>
+
 class ccHistogramWindow;
 
 namespace Ui
@@ -41,7 +42,7 @@ class sfEditDlg : public QWidget
 	~sfEditDlg();
 
 	//! Updates dialog with a given scalar field
-	void fillDialogWith(ccScalarField* sf);
+	void fillDialogWith(ccScalarField::Shared sf);
 
   public:
 	void minValSBChanged(double);
@@ -72,11 +73,9 @@ class sfEditDlg : public QWidget
 	double satSlider2spin(int pos) const;
 
 	//! Associated scalar field
-	ccScalarField* m_associatedSF;
+	ccScalarField::Shared m_associatedSF;
 	//! Associated scalar field histogram
 	ccHistogramWindow* m_associatedSFHisto;
 
-	Ui::SFEditDlg* m_ui;
+	std::unique_ptr<Ui::SFEditDlg> m_ui;
 };
-
-#endif // CC_SF_EDIT_DIALOG_HEADER

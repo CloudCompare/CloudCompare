@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccPointCloudInterpolator.h"
+#include "../include/ccPointCloudInterpolator.h"
 
-// qCC_db
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccPointCloud.h"
+#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
 #include <DistanceComputationTools.h>
 #include <GenericProgressCallback.h>
-#include <ccScalarField.h>
 
 struct SFPair
 {
@@ -232,9 +232,9 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 			overwrite = true;
 		}
 
-		CCCoreLib::ScalarField* inSF  = srcCloud->getScalarField(inSFIndex);
-		CCCoreLib::ScalarField* outSF = destCloud->getScalarField(outSFIndex);
-		scalarFields.push_back(SFPair(inSF, outSF));
+		auto inSF  = srcCloud->getScalarField(inSFIndex);
+		auto outSF = destCloud->getScalarField(outSFIndex);
+		scalarFields.push_back(SFPair(inSF.get(), outSF.get()));
 
 		outSF->fill(CCCoreLib::NAN_VALUE);
 	}
@@ -285,8 +285,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
             /*maxSearchDist*/ 0,
             progressCb);
 
-		QScopedPointer<CCCoreLib::DgmOctree> srcOctree(_srcOctree);
-		QScopedPointer<CCCoreLib::DgmOctree> destOctree(_destOctree);
+		std::unique_ptr<CCCoreLib::DgmOctree> srcOctree(_srcOctree);
+		std::unique_ptr<CCCoreLib::DgmOctree> destOctree(_destOctree);
 
 		if (soCode != CCCoreLib::DistanceComputationTools::SYNCHRONIZED)
 		{
@@ -311,7 +311,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 		{
 			// additional parameters
 			void* additionalParameters[] = {reinterpret_cast<void*>(srcCloud),
-			                                reinterpret_cast<void*>(srcOctree.data()),
+			                                reinterpret_cast<void*>(srcOctree.get()),
 			                                reinterpret_cast<void*>(&scalarFields),
 			                                (void*)(&params)};
 

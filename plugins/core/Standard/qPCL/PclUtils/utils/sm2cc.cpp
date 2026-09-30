@@ -260,10 +260,9 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 	unsigned pointCount = ccCloud.size();
 
 	//create new scalar field
-	ccScalarField* newSF = new ccScalarField(sfName.c_str());
+	auto newSF = std::make_shared<ccScalarField>(sfName.c_str());
 	if (!newSF->reserveSafe(pointCount))
 	{
-		newSF->release();
 		return false;
 	}
 
@@ -271,7 +270,6 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 	int fieldIndex = pcl::getFieldIndex(pclCloud, sfName);
 	if (fieldIndex < 0)
 	{
-		newSF->release();
 		return false;
 	}
 	const PCLScalarField& pclField = pclCloud.fields[fieldIndex];
@@ -412,7 +410,6 @@ bool pcl2cc::CopyScalarField(	const PCLCloud& pclCloud,
 #endif
 	default:
 		ccLog::Warning(QString("[PCL] Field with an unmanaged type (= %1)").arg(pclField.datatype));
-		newSF->release();
 		return false;
 	}
 

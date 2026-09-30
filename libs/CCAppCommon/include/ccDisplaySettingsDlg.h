@@ -16,12 +16,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "CCAppCommon.h"
-
 // Local
+#include "CCAppCommon.h"
 #include "ccOptions.h"
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGuiParameters.h>
 
 // Qt
@@ -111,5 +110,5 @@ class CCAPPCOMMON_LIB_API ccDisplaySettingsDlg : public QDialog
 	int m_defaultAppStyleIndex;
 
   private:
-	Ui::DisplaySettingsDlg* m_ui;
+	std::unique_ptr<Ui::DisplaySettingsDlg> m_ui;
 };

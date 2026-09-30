@@ -28,28 +28,21 @@ template< class InIteratorT >
 static bool CircleFrom3Points(InIteratorT i, float *r,
 	GfxTL::Vector2Df *center)
 {
-	float a;
-	float b;
-	float bot;
-	float c;
-	float top1;
-	float top2;
-	a = std::sqrt(std::pow(i[1][0] - i[0][0], 2)
-			+ std::pow(i[1][1] - i[0][1], 2));
-	b = std::sqrt(std::pow(i[2][0] - i[1][0], 2)
-			+ std::pow(i[2][1] - i[1][1], 2));
-	c = std::sqrt(std::pow(i[0][0] - i[2][0], 2)
-			+ std::pow(i[0][1] - i[2][1], 2));
-
-	bot = (a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c);
+	float a = std::sqrt(std::pow(i[1][0] - i[0][0], 2.0f)
+			+ std::pow(i[1][1] - i[0][1], 2.0f));
+	float b = std::sqrt(std::pow(i[2][0] - i[1][0], 2.0f)
+			+ std::pow(i[2][1] - i[1][1], 2.0f));
+	float c = std::sqrt(std::pow(i[0][0] - i[2][0], 2.0f)
+			+ std::pow(i[0][1] - i[2][1], 2.0f));
+	float bot = (a + b + c) * (-a + b + c) * (a - b + c) * (a + b - c);
 
 	if(bot <= 0.f)
 		return false;
 
 	*r = a * b * c / std::sqrt(bot);
 	//  center.
-	top1 = (i[1][1] - i[0][1]) * c * c - (i[2][1] - i[0][1]) * a * a;
-	top2 = (i[1][0] - i[0][0]) * c * c - (i[2][0] - i[0][0]) * a * a;
+	float top1 = (i[1][1] - i[0][1]) * c * c - (i[2][1] - i[0][1]) * a * a;
+	float top2 = (i[1][0] - i[0][0]) * c * c - (i[2][0] - i[0][0]) * a * a;
 	bot = (i[1][1] - i[0][1]) * (i[2][0] - i[0][0])  
 		- (i[2][1] - i[0][1]) * (i[1][0] - i[0][0]);
 

@@ -15,22 +15,25 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCameraSensor.h"
+#include "../include/ccCameraSensor.h"
 
-#include <cmath>
-
-// local
-#include "ccGenericGLDisplay.h"
-#include "ccImage.h"
-#include "ccMesh.h"
-#include "ccPointCloud.h"
+// Local
+#include "../include/ccGenericGLDisplay.h"
+#include "../include/ccImage.h"
+#include "../include/ccMesh.h"
+#include "../include/ccPointCloud.h"
 
 // CCCoreLib
 #include <ConjugateGradient.h>
 
 // Qt
 #include <QDir>
+#include <QPointF>
+#include <QSizeF>
 #include <QTextStream>
+
+// System
+#include <cmath>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
     : vertFocal_pix(1.0f)
@@ -424,6 +427,24 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win 
 	double fov_deg    = CCCoreLib::RadiansToDegrees(fOV_rad);
 	ccLog::Print(QString("[ccCameraSensor::applyImageViewport] Horizontal FOV = %1 deg").arg(fov_deg));
 
+	QSizeF  displayedImageSize = image->computeDisplayedSize(screenSize.width(), screenSize.height());
+	QPointF projectionCenterOffset;
+	if (m_intrinsicParams.arrayWidth > 0
+	    && m_intrinsicParams.arrayHeight > 0
+	    && screenSize.width() > 0
+	    && screenSize.height() > 0)
+	{
+		const double principalPointOffsetX = static_cast<double>(m_intrinsicParams.principal_point[0])
+		                                     - m_intrinsicParams.arrayWidth / 2.0;
+		const double principalPointOffsetY = m_intrinsicParams.arrayHeight / 2.0
+		                                     - static_cast<double>(m_intrinsicParams.principal_point[1]);
+
+		projectionCenterOffset.setX(2.0 * principalPointOffsetX * displayedImageSize.width()
+		                            / (m_intrinsicParams.arrayWidth * screenSize.width()));
+		projectionCenterOffset.setY(2.0 * principalPointOffsetY * displayedImageSize.height()
+		                            / (m_intrinsicParams.arrayHeight * screenSize.height()));
+	}
+
 	// camera position/orientation
 	ccIndexedTransformation trans;
 	if (!getActiveAbsoluteTransformation(trans))
@@ -432,7 +453,7 @@ bool ccCameraSensor::applyImageViewport(ccImage* image, ccGenericGLDisplay* win 
 	}
 
 	ccGLMatrixd transd(trans.data());
-	win->setupProjectiveViewport(transd, static_cast<float>(fov_deg));
+	win->setupProjectiveViewport(transd, static_cast<float>(fov_deg), true, false, projectionCenterOffset);
 
 	return true;
 }
@@ -938,7 +959,7 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2& real, CCVect
 //	return true;
 // }
 
-bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const
+bool ccCameraSensor::computeUncertainty(const CCVector2& pixel, float depth, Vector3Tpl<ScalarType>& sigma) const
 {
 	// no distortion parameters?
 	if (!m_distortionParams)

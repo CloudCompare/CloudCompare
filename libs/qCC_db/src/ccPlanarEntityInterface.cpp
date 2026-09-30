@@ -1,8 +1,8 @@
-#include "ccPlanarEntityInterface.h"
+#include "../include/ccPlanarEntityInterface.h"
 
 // Local
-#include <ccCone.h>
-#include <ccCylinder.h>
+#include "../include/ccCone.h"
+#include "../include/ccCylinder.h"
 
 // Qt
 #include <QSharedPointer>

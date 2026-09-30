@@ -124,7 +124,7 @@ PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new CylinderPrimitiveShape(fit, m_maxRadius, m_maxLength);
+		return new CylinderPrimitiveShape(fit, m_minRadius, m_maxRadius, m_maxLength);
 	}
 	score->first = 0;
 	return NULL;

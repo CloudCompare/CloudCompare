@@ -295,6 +295,7 @@ class MainWindow : public QMainWindow
 	void doActionSFConvertToRGB();
 	void doActionSFConvertToRandomRGB();
 	void doActionRenameSF();
+	void doActionOpenSelectedEntitiesSFManager();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
 	void doActionSplitCloudUsingSF();
@@ -327,6 +328,7 @@ class MainWindow : public QMainWindow
 	void doActionStatisticalTest();
 	void doActionSamplePointsOnMesh();
 	void doActionSamplePointsOnPolyline();
+	void doActionExtrudePolyline();
 	void doActionSmoohPolyline();
 	void doActionConvertTextureToColor();
 	void doActionLabelConnectedComponents();
@@ -596,7 +598,7 @@ class MainWindow : public QMainWindow
 
   private: // members
 	//! Main UI
-	Ui::MainWindow* m_UI;
+	std::unique_ptr<Ui::MainWindow> m_ui;
 
 	//! DB tree
 	ccDBRoot* m_ccRoot;

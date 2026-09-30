@@ -642,6 +642,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					{	
 						Candidate clone2;
 						clone.Clone(&clone2);
+						clone2.Shape(shape);
 						clone2.ConnectedComponent(pc, m_options.m_bitmapEpsilon);
 						if (clone2.Shape()->CheckGeneratedShapeWithinLimits(pc, clone.Indices()->begin(), clone.Indices()->end()))
 						{

@@ -16,10 +16,14 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCFbo.h"
 
 // Qt
 #include <QString>
+
+// System
+#include <utility>
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
@@ -32,14 +36,12 @@ class CCFBO_LIB_API ccGlFilter
 	//! Default constructor
 	ccGlFilter(QString description)
 	    : m_isValid(false)
-	    , m_description(description)
+	    , m_description(std::move(description))
 	{
 	}
 
 	//! Default destructor
-	virtual ~ccGlFilter()
-	{
-	}
+	virtual ~ccGlFilter() = default;
 
 	//! Returns filter name
 	inline virtual QString getDescription() const

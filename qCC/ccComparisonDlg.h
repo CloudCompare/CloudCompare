@@ -15,8 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COMPARISON_DIALOG_HEADER
-#define CC_COMPARISON_DIALOG_HEADER
+#include <ui_comparisonDlg.h>
 
 // qCC_db
 #include <ccOctree.h>
@@ -24,7 +23,6 @@
 // Qt
 #include <QDialog>
 #include <QString>
-#include <ui_comparisonDlg.h>
 
 class ccHObject;
 class ccPointCloud;
@@ -131,5 +129,3 @@ class ccComparisonDlg : public QDialog
 	//! Best octree level (or 0 if none has been guessed already)
 	int m_bestOctreeLevel;
 };
-
-#endif

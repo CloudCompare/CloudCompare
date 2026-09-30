@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDepthBuffer.h"
+#include "../include/ccDepthBuffer.h"
 
-// algorithm
-#include <string.h>
+// System
+#include <cstring>
 #include <vector>
 
 ccDepthBuffer::ccDepthBuffer()

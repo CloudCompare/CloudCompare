@@ -309,7 +309,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Loading LAS points");
 	progressDialog.setInfo("Loading points");
-	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	std::unique_ptr<CCCoreLib::NormalizedProgress> normProgress;
 	if (parameters.parentWidget)
 	{
 		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCount));
@@ -870,7 +870,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		uint sfCount = pointCloud->getNumberOfScalarFields();
 		for (uint index = 0; index < sfCount; index++)
 		{
-			ccScalarField*     sf     = static_cast<ccScalarField*>(pointCloud->getScalarField(index));
+			auto               sf     = pointCloud->getCCScalarField(index);
 			const std::string& sfName = sf->getName();
 			bool               found  = false;
 			for (auto& el : params.standardFields)
@@ -913,6 +913,26 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 		}
 	}
 
+	// The "Extra Bytes" descriptor is written to a VLR, whose payload length is stored on
+	// 16 bits, so it cannot describe an unlimited number of fields. Writing it to an EVLR
+	// instead is not supported yet, so the surplus fields are dropped here. They have to be
+	// dropped before the saver computes the point record length, otherwise the points would
+	// carry extra bytes that the descriptor does not cover.
+	{
+		size_t budget = LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR;
+		if (params.shouldSaveNormalsAsExtraScalarField && pointCloud->hasNormals())
+		{
+			// the saver adds one field per normal component on top of the ones selected here
+			budget -= 3;
+		}
+
+		if (params.extraFields.size() > budget)
+		{
+			ccLog::Warning(QString("[LAS] Only %1 extra scalar fields can be saved, the last %2 will be skipped").arg(budget).arg(params.extraFields.size() - budget));
+			params.extraFields.resize(budget);
+		}
+	}
+
 	LasSaver      saver(*pointCloud, params);
 	CC_FILE_ERROR error = saver.open(filename);
 	if (error != CC_FERR_NO_ERROR)
@@ -923,7 +943,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	ccProgressDialog progressDialog(true, parameters.parentWidget);
 	progressDialog.setMethodTitle("Saving LAS points");
 	progressDialog.setInfo("Saving points");
-	QScopedPointer<CCCoreLib::NormalizedProgress> normProgress;
+	std::unique_ptr<CCCoreLib::NormalizedProgress> normProgress;
 	if (parameters.parentWidget)
 	{
 		normProgress.reset(new CCCoreLib::NormalizedProgress(&progressDialog, pointCloud->size()));

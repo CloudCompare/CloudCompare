@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_CUSTOM_DOUBLE_VALIDATOR_HEADER
-#define CC_CUSTOM_DOUBLE_VALIDATOR_HEADER
 
 // Qt
 #include <QString>
@@ -57,5 +56,3 @@ class ccCustomDoubleValidator : public QValidator
 		return Acceptable;
 	}
 };
-
-#endif // CC_CUSTOM_DOUBLE_VALIDATOR_HEADER

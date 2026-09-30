@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
-#define CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER
 
 // Qt
 #include <QDialog>
@@ -57,5 +56,3 @@ class ccOrthoSectionGenerationDlg : public QDialog
 	//! Path length
 	double m_pathLength;
 };
-
-#endif // CC_ORTHO_SECTION_GENERATION_DIALOG_HEADER

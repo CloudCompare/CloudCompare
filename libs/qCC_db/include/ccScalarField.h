@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccColorScale.h"
+
 // CCCoreLib
 #include <ScalarField.h>
-
-// qCC_db
-#include "ccColorScale.h"
 
 //! A scalar field associated to display-related parameters
 /** Extends the CCCoreLib::ScalarField object.
@@ -30,6 +30,21 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
     , public ccSerializableObject
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ccScalarField>;
+
+	//! Returns a CCCoreLib shared pointer from the given CC scalar field
+	static CCCoreLib::ScalarField::Shared ToCCCoreLibShared(Shared ptr)
+	{
+		return std::static_pointer_cast<CCCoreLib::ScalarField, ccScalarField>(ptr);
+	}
+
+	//! Returns a CC shared pointer from the given CCCoreLib scalar field
+	static Shared FromCCCoreLibShared(CCCoreLib::ScalarField::Shared ptr)
+	{
+		return std::static_pointer_cast<ccScalarField, CCCoreLib::ScalarField>(ptr);
+	}
+
 	//! Default constructor
 	/** \param name scalar field name
 	 **/
@@ -40,6 +55,9 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	    \warning May throw a std::bad_alloc exception
 	**/
 	ccScalarField(const ccScalarField& sf);
+
+	//! Default destructor
+	~ccScalarField() override = default;
 
 	/*** Scalar values display handling ***/
 
@@ -105,15 +123,13 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 		inline void setStart(ScalarType value)
 		{
 			m_start = inbound(value);
-			if (m_stop < m_start)
-				m_stop = m_start;
+			m_stop  = std::min(m_stop, m_start);
 			updateRange();
 		}
 		inline void setStop(ScalarType value)
 		{
-			m_stop = inbound(value);
-			if (m_stop < m_start)
-				m_start = m_stop;
+			m_stop  = inbound(value);
+			m_start = std::min(m_start, m_stop);
 			updateRange();
 		}
 
@@ -290,7 +306,7 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	}
 
 	//! Imports the parameters from another scalar field
-	void importParametersFrom(const ccScalarField* sf);
+	void importParametersFrom(const ccScalarField& sf);
 
 	// inherited from ccSerializableObject
 	inline bool isSerializable() const override
@@ -301,12 +317,13 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion() const override;
 
-  protected: // methods
-	//! Default destructor
-	/** Call release instead
-	 **/
-	~ccScalarField() override = default;
+	//! Returns the underlying data vector (const)
+	const std::vector<float>& data() const
+	{
+		return *this;
+	}
 
+  protected: // methods
 	//! Updates saturation values
 	void updateSaturationBounds();
 

@@ -165,7 +165,7 @@ int FastMarchingForFacetExtraction::init(	CCCoreLib::DgmOctree* theOctree,
 	{
 		progressCb->stop();
 	}
-		
+
 	m_initialized = true;
 
 	return 0;
@@ -345,7 +345,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 	//	if (cell)
 	//		delete cell;
 	//}
-	
+
 	//unsigned pointCount = 0;
 	CCCoreLib::ReferenceCloud Yk(m_octree->associatedCloud());
 	for (size_t i = 0; i < m_activeCells.size(); ++i)
@@ -358,7 +358,7 @@ unsigned FastMarchingForFacetExtraction::updateFlagsTable(	ccGenericPointCloud* 
 		{
 			unsigned index = Yk.getPointGlobalIndex(k);
 			assert(flags[index] == 1);
-			//flags.setValue(index,1);			
+			//flags.setValue(index,1);
 			//++pointCount;
 		}
 
@@ -483,7 +483,7 @@ int FastMarchingForFacetExtraction::ExtractPlanarFacets(	ccPointCloud* theCloud,
 
 	//we compute the octree if none is provided
 	CCCoreLib::DgmOctree* theOctree = _theOctree;
-	QScopedPointer<CCCoreLib::DgmOctree> tempOctree;
+	std::unique_ptr<CCCoreLib::DgmOctree> tempOctree;
 	if (!theOctree)
 	{
 		theOctree = new CCCoreLib::DgmOctree(theCloud);

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,17 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_FAST_MARCHING_DIRECTION_HEADER
-#define CC_FAST_MARCHING_DIRECTION_HEADER
+// Local
+#include "ccAdvancedTypes.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
 #include <FastMarching.h>
 
-// qCC_db
-#include "ccAdvancedTypes.h"
-
-// system
+// System
 #include <vector>
 
 class ccGenericPointCloud;
@@ -79,8 +78,7 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	  public:
 		//! Default constructor
 		DirectionCell()
-		    : Cell()
-		    , N(0, 0, 0)
+		    : N(0, 0, 0)
 		    , C(0, 0, 0)
 		    , cellCode(0)
 		    , signConfidence(1)
@@ -124,5 +122,3 @@ class ccFastMarchingForNormsDirection : public CCCoreLib::FastMarching
 	//! Resolves the direction of a given cell (once and for all)
 	void resolveCellOrientation(unsigned index);
 };
-
-#endif

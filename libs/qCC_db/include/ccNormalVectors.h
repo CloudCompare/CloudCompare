@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,10 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_NORMAL_VECTORS_HEADER
-#define CC_NORMAL_VECTORS_HEADER
-
 // Local
+#include "ccAdvancedTypes.h"
 #include "ccGenericPointCloud.h"
 
 // System
@@ -65,7 +65,6 @@ class QCC_DB_LIB_API ccNormalVectors
 	//! 'Default' orientations
 	enum Orientation
 	{
-
 		PLUS_X              = 0,  //!< N.x always positive
 		MINUS_X             = 1,  //!< N.x always negative
 		PLUS_Y              = 2,  //!< N.y always positive
@@ -238,5 +237,3 @@ class QCC_DB_LIB_API ccNormalVectors
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCCoreLib::NormalizedProgress* nProgress = nullptr);
 };
-
-#endif // CC_NORMAL_VECTORS_HEADER

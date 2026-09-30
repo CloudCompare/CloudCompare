@@ -63,6 +63,6 @@ class ccUnrollDlg : public QDialog
 	void centerFromClipboard();
 
   protected:
-	Ui::UnrollDialog* m_ui;
-	ccHObject*        m_dbRootEntity;
+	std::unique_ptr<Ui::UnrollDialog> m_ui;
+	ccHObject*                        m_dbRootEntity;
 };

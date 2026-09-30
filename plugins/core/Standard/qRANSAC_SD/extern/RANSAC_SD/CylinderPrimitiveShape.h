@@ -93,7 +93,7 @@ public:
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end) override
 	{
-		if (m_cylinder.Radius() <= m_maxRadius && Height() <= m_maxLength)
+		if (m_cylinder.Radius() >= m_minRadius && m_cylinder.Radius() <= m_maxRadius && Height() <= m_maxLength)
 		{
 			return true;
 		}

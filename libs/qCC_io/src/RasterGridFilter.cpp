@@ -522,13 +522,12 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					}
 					else if (isScalar && !loadAsTexturedQuad)
 					{
-						QString        sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); // SF names really need to be unique!
-						ccScalarField* sf     = new ccScalarField(sfName.toStdString());
+						QString sfName = QString("band #%1 (%2)").arg(i).arg(GDALGetColorInterpretationName(colorInterp)); // SF names really need to be unique!
+						auto    sf     = std::make_shared<ccScalarField>(sfName.toStdString());
 						if (!sf->resizeSafe(pc->size(), true, CCCoreLib::NAN_VALUE))
 						{
 							ccLog::Warning(QString("Failed to instantiate memory for storing '%1' as a scalar field!").arg(QString::fromStdString(sf->getName())));
-							sf->release();
-							sf = nullptr;
+							sf.reset();
 						}
 						else
 						{
@@ -552,7 +551,6 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 								    != CE_None)
 								{
 									CPLFree(colValues);
-									sf->release();
 									delete pc;
 									return CC_FERR_READING;
 								}
@@ -599,8 +597,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 				else if (validPoints.size() != 0 && validPoints.size() < pc->size())
 				{
 					// shall we remove the points with invalid heights?
-					static bool s_alwaysRemoveInvalidHeights = false;
-					int         result                       = QMessageBox::Yes;
+					static bool                 s_alwaysRemoveInvalidHeights = false;
+					QMessageBox::StandardButton result                       = QMessageBox::Yes;
 					if (parameters.parentWidget) // otherwise it means we are in command line mode --> no popup
 					{
 						result = (s_alwaysRemoveInvalidHeights
@@ -608,9 +606,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 						              : QMessageBox::question(nullptr,
 						                                      "Remove invalid points?",
 						                                      "This raster has pixels with invalid heights. Shall we remove them?",
-						                                      QMessageBox::Yes,
-						                                      QMessageBox::YesToAll,
-						                                      QMessageBox::No));
+						                                      QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No));
 					}
 					if (result != QMessageBox::No) // Yes = let's remove them
 					{

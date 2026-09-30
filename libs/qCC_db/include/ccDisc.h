@@ -18,7 +18,7 @@
 // ##########################################################################
 
 // Local
-#include <ccGenericPrimitive.h>
+#include "ccGenericPrimitive.h"
 
 //! Disc (primitive)
 /** 3D disc primitive

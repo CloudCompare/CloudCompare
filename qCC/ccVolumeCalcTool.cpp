@@ -44,7 +44,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
     , cc2Point5DimEditor()
     , m_cloud1(cloud1)
     , m_cloud2(cloud2)
-    , m_ui(new Ui::VolumeCalcDialog)
+    , m_ui(std::make_unique<Ui::VolumeCalcDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -124,10 +124,7 @@ ccVolumeCalcTool::ccVolumeCalcTool(ccGenericPointCloud* cloud1, ccGenericPointCl
 	gridIsUpToDate(false);
 }
 
-ccVolumeCalcTool::~ccVolumeCalcTool()
-{
-	delete m_ui;
-}
+ccVolumeCalcTool::~ccVolumeCalcTool() = default;
 
 void ccVolumeCalcTool::setDisplayedNumberPrecision(int precision)
 {
@@ -376,7 +373,7 @@ ccPointCloud* ccVolumeCalcTool::ConvertGridToCloud(ccRasterGrid& grid,
 		{
 			rasterCloud->showSF(true);
 			rasterCloud->setCurrentDisplayedScalarField(0);
-			ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+			auto sf = rasterCloud->getCCScalarField(0);
 			assert(sf);
 			sf->setName("Relative height");
 			sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
@@ -423,7 +420,7 @@ ccPointCloud* ccVolumeCalcTool::convertGridToCloud(bool exportToOriginalCS) cons
 			{
 				rasterCloud->showSF(true);
 				rasterCloud->setCurrentDisplayedScalarField(0);
-				ccScalarField* sf = static_cast<ccScalarField*>(rasterCloud->getScalarField(0));
+				auto sf = rasterCloud->getCCScalarField(0);
 				assert(sf);
 				sf->setName("Relative height");
 				sf->setSymmetricalScale(sf->getMin() < 0 && sf->getMax() > 0);
@@ -596,7 +593,7 @@ bool ccVolumeCalcTool::ComputeVolume(ccRasterGrid&                     grid,
 	}
 
 	// progress dialog
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parentWidget));
@@ -635,7 +632,7 @@ bool ccVolumeCalcTool::ComputeVolume(ccRasterGrid&                     grid,
 		                          interpolationType,
 		                          interpolationParams,
 		                          ccRasterGrid::INVALID_PROJECTION_TYPE,
-		                          pDlg.data()))
+		                          pDlg.get()))
 		{
 			groundRaster.fillEmptyCells(groundEmptyCellFillStrategy, groundHeight);
 			ccLog::Print(QString("[Volume] Ground raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(groundRaster.width).arg(groundRaster.height).arg(groundRaster.minHeight).arg(groundRaster.maxHeight));
@@ -680,7 +677,7 @@ bool ccVolumeCalcTool::ComputeVolume(ccRasterGrid&                     grid,
 		                        interpolationType,
 		                        interpolationParams,
 		                        ccRasterGrid::INVALID_PROJECTION_TYPE,
-		                        pDlg.data()))
+		                        pDlg.get()))
 		{
 			ceilRaster.fillEmptyCells(ceilEmptyCellFillStrategy, ceilHeight);
 			ccLog::Print(QString("[Volume] Ceil raster grid: size: %1 x %2 / heights: [%3 ; %4]").arg(ceilRaster.width).arg(ceilRaster.height).arg(ceilRaster.minHeight).arg(ceilRaster.maxHeight));
@@ -701,7 +698,7 @@ bool ccVolumeCalcTool::ComputeVolume(ccRasterGrid&                     grid,
 			pDlg->show();
 			QCoreApplication::processEvents();
 		}
-		CCCoreLib::NormalizedProgress nProgress(pDlg.data(), grid.width * grid.height);
+		CCCoreLib::NormalizedProgress nProgress(pDlg.get(), grid.width * grid.height);
 
 		size_t ceilNonMatchingCount   = 0;
 		size_t groundNonMatchingCount = 0;

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,17 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COLOR_RAMP_SHADER_HEADER
-#define CC_COLOR_RAMP_SHADER_HEADER
-
-// Always on top!
-#include "ccIncludeGL.h"
+// Local
+#include "ccColorScale.h"
 
 // CCFbo
 #include <ccShader.h>
-
-// Local
-#include "ccColorScale.h"
 
 class QCC_DB_LIB_API ccColorRampShader : public ccShader
 {
@@ -36,9 +32,7 @@ class QCC_DB_LIB_API ccColorRampShader : public ccShader
 	ccColorRampShader();
 
 	//! Destructor
-	virtual ~ccColorRampShader()
-	{
-	}
+	~ccColorRampShader() override = default;
 
 	//! Setups shader
 	/** Shader must have already been stared!
@@ -53,5 +47,3 @@ class QCC_DB_LIB_API ccColorRampShader : public ccShader
 	 **/
 	static GLint MinRequiredBytes();
 };
-
-#endif // CC_COLOR_RAMP_SHADER_HEADER

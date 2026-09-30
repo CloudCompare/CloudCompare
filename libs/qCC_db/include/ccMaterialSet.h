@@ -18,17 +18,18 @@
 // ##########################################################################
 
 // Local
-#include "CCShareable.h"
 #include "ccHObject.h"
 
 class ccGenericGLDisplay;
 
 //! Mesh (triangle) material
 class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
-    , public CCShareable
     , public ccHObject
 {
   public:
+	//! Shared pointer type
+	using Shared = std::shared_ptr<ccMaterialSet>;
+
 	//! Default constructor
 	ccMaterialSet(const QString& name = QString());
 
@@ -37,11 +38,6 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
 	{
 		return CC_TYPES::MATERIAL_SET;
 	}
-	bool isShareable() const override
-	{
-		return true;
-	}
-
 	//! Finds material by name
 	/** \return material index or -1 if not found
 	 **/
@@ -69,7 +65,7 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
 	bool saveAsMTL(const QString& path, const QString& baseFilename, QStringList& errors) const;
 
 	//! Clones materials set
-	ccMaterialSet* clone() const;
+	Shared clone() const;
 
 	//! Appends materials from another set
 	bool append(const ccMaterialSet& source);
@@ -86,6 +82,7 @@ class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial::CShared>
 	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion_MeOnly() const override;
 
-	//! Default destructor (protected: use 'release' instead)
+  public:
+	//! Default destructor
 	~ccMaterialSet() override = default;
 };

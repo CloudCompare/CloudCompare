@@ -1,5 +1,4 @@
-#ifndef CCABOUTDIALOG_H
-#define CCABOUTDIALOG_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -34,7 +33,5 @@ class ccAboutDialog : public QDialog
 	~ccAboutDialog();
 
   private:
-	Ui::AboutDialog* mUI;
+	std::unique_ptr<Ui::AboutDialog> m_ui;
 };
-
-#endif // CCABOUTDIALOG_H

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_FACET_HEADER
-#define CC_FACET_HEADER
 
 // Local
 #include "ccHObject.h"
@@ -214,5 +213,3 @@ class QCC_DB_LIB_API ccFacet : public ccHObject
 	// ccHObject interface
 	void applyGLTransformation(const ccGLMatrix& trans) override;
 };
-
-#endif // CC_FACET_PRIMITIVE_HEADER

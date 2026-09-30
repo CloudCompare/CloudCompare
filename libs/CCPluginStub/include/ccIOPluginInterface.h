@@ -17,12 +17,14 @@
 
 #pragma once
 
-#include <QVector>
-
-// qCC_io
+// Local
 #include "ccDefaultPluginInterface.h"
 
+// qCC_io
 #include <FileIOFilter.h>
+
+// Qt
+#include <QVector>
 
 //! I/O filter plugin interface
 /** Version 1.3

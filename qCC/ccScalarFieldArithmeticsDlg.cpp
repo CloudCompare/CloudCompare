@@ -47,7 +47,7 @@ static double s_previousConstValue               = 1.0;
 ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(ccPointCloud* cloud,
                                                          QWidget*      parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::SFArithmeticsDlg)
+    , m_ui(std::make_unique<Ui::SFArithmeticsDlg>())
 {
 	assert(cloud);
 
@@ -85,11 +85,7 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(ccPointCloud* cloud,
 	m_ui->updateSF1CheckBox->setChecked(s_applyInPlace);
 }
 
-ccScalarFieldArithmeticsDlg::~ccScalarFieldArithmeticsDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+ccScalarFieldArithmeticsDlg::~ccScalarFieldArithmeticsDlg() = default;
 
 void ccScalarFieldArithmeticsDlg::onOperationIndexChanged(int index)
 {
@@ -225,8 +221,8 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 		return false;
 	}
 
-	unsigned                sfCount = cloud->getNumberOfScalarFields();
-	CCCoreLib::ScalarField* sf1     = nullptr;
+	unsigned                       sfCount = cloud->getNumberOfScalarFields();
+	CCCoreLib::ScalarField::Shared sf1;
 	{
 		if (sf1Idx >= static_cast<int>(sfCount))
 		{
@@ -239,7 +235,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 	}
 	double sf1PreviousOffset = sf1->getOffset(); // remember the offset, as we may have to change it BEFORE reading the values
 
-	CCCoreLib::ScalarField* sf2 = nullptr;
+	CCCoreLib::ScalarField::Shared sf2;
 	if (op <= MAX)
 	{
 		if (!sf2Desc || (!sf2Desc->isConstantValue && sf2Desc->sfIndex >= static_cast<int>(sfCount)))
@@ -483,7 +479,7 @@ bool ccScalarFieldArithmeticsDlg::Apply(ccPointCloud* cloud,
 
 		sfIdx = sf1Idx;
 	}
-	CCCoreLib::ScalarField* sfDest = cloud->getScalarField(sfIdx);
+	CCCoreLib::ScalarField::Shared sfDest = cloud->getScalarField(sfIdx);
 	assert(sfDest);
 
 	unsigned valCount = sf1->currentSize();

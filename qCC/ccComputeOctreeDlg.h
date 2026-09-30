@@ -15,9 +15,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_COMPUTE_OCTREE_DLG_HEADER
-#define CC_COMPUTE_OCTREE_DLG_HEADER
-
 #include <ui_computeOctreeDlg.h>
 
 // qCC_db
@@ -58,5 +55,3 @@ class ccComputeOctreeDlg : public QDialog
 	//! Associated dialog
 	ccBoundingBoxEditorDlg* m_bbEditorDlg;
 };
-
-#endif // CC_COMPUTE_OCTREE_DLG_HEADER

@@ -635,7 +635,7 @@ CC_FILE_ERROR LASFWFFilter::saveToFile(ccHObject* entity, const QString& filenam
 		}
 
 		// progress dialog
-		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (parameters.parentWidget)
 		{
 			progressDialog.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -942,7 +942,7 @@ CC_FILE_ERROR LASFWFFilter::loadFile(const QString& filename, ccHObject& contain
 		ccLog::Print(QString("[LASLib] " + QObject::tr("Reading %1 points").arg(pointCount)));
 
 		// progress dialog
-		QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+		std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 		if (parameters.parentWidget)
 		{
 			progressDialog.reset(new ccProgressDialog(true, parameters.parentWidget));

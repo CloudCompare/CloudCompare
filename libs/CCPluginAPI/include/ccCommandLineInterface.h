@@ -17,6 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "CCPluginAPI.h"
 
 // qCC_db
@@ -31,8 +32,10 @@
 #include <QString>
 
 // System
+#include <optional>
 #include <vector>
 
+class ccArgumentParser;
 class ccGenericMesh;
 class ccProgressDialog;
 
@@ -52,9 +55,9 @@ struct CCPLUGIN_LIB_API CLEntityDesc
 	QString path;
 	int     indexInFile;
 
-	CLEntityDesc(const QString& name);
+	CLEntityDesc(QString name);
 	CLEntityDesc(const QString& filename, int _indexInFile);
-	CLEntityDesc(const QString& _basename, const QString& _path, int _indexInFile = -1);
+	CLEntityDesc(QString _basename, QString _path, int _indexInFile = -1);
 
 	virtual ~CLEntityDesc() = default;
 
@@ -68,9 +71,9 @@ struct CCPLUGIN_LIB_API CLGroupDesc : CLEntityDesc
 {
 	ccHObject* groupEntity;
 
-	CLGroupDesc(ccHObject*     group,
-	            const QString& basename,
-	            const QString& path = QString());
+	CLGroupDesc(ccHObject* group,
+	            QString    basename,
+	            QString    path = QString());
 
 	~CLGroupDesc() override = default;
 
@@ -114,8 +117,8 @@ struct CCPLUGIN_LIB_API CLMeshDesc : CLEntityDesc
 	           int            index    = -1);
 
 	CLMeshDesc(ccGenericMesh* _mesh,
-	           const QString& basename,
-	           const QString& path,
+	           QString        basename,
+	           QString        path,
 	           int            index = -1);
 
 	~CLMeshDesc() override = default;
@@ -354,6 +357,12 @@ class CCPLUGIN_LIB_API ccCommandLineInterface
 	/** \warning This method assumes the 'COMMAND_OPEN_SHIFT_ON_LOAD' argument has already been removed from the argument stack
 	 **/
 	bool processGlobalShiftCommand(GlobalShiftOptions& options);
+
+	//! Parses global shift options from an argument parser.
+	/** Reads either AUTO, FIRST, or three coordinates (X Y Z) from the parser.
+	    \return parsed options, or std::nullopt on parse/validation error (error logged)
+	**/
+	static std::optional<GlobalShiftOptions> ParseGlobalShiftOptions(ccArgumentParser& parser);
 
   protected: // members
 	//! Currently opened AND SELECTED point clouds and their respective filename

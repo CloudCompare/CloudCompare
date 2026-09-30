@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_COLOR_LEVELS_DLG_HEADER
-#define CC_COLOR_LEVELS_DLG_HEADER
 
 // Qt
 #include <QColor>
@@ -61,5 +60,3 @@ class ccColorLevelsDlg : public QDialog
 	//! Associated point cloud (color source)
 	ccGenericPointCloud* m_cloud;
 };
-
-#endif // CC_COLOR_LEVELS_DLG_HEADER

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                               QCC_DB                                   #
@@ -16,9 +18,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_DB_HEADER
-#define CC_DB_HEADER
-
 #include <QtCore/QtGlobal>
 
 #if defined(QCC_DB_LIBRARY_BUILD)
@@ -26,5 +25,3 @@
 #else
 #define QCC_DB_LIB_API Q_DECL_IMPORT
 #endif
-
-#endif // CC_DB_HEADER

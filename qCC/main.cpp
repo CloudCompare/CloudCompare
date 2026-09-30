@@ -31,7 +31,6 @@
 #include <ccColorScalesManager.h>
 #include <ccLog.h>
 #include <ccNormalVectors.h>
-#include <ccPointCloud.h>
 
 // qCC_io
 #include <FileIOFilter.h>
@@ -156,11 +155,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-#ifdef Q_OS_WIN
-	// enables automatic scaling based on the monitor's pixel density
-	ccApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
-
 	ccApplication::InitOpenGL();
 
 	ccApplication app(argc, argv, commandLine);
@@ -175,7 +169,7 @@ int main(int argc, char** argv)
 	ccLog::EnableMessageBackup(true);
 
 	// splash screen
-	QScopedPointer<QSplashScreen> splash(nullptr);
+	std::unique_ptr<QSplashScreen> splash(nullptr);
 
 	// standard mode
 	if (!commandLine)
@@ -300,6 +294,10 @@ int main(int argc, char** argv)
 			mainWindow->addToDB(filenames);
 		}
 
+		// open the files the system asked to open during startup
+		// (a FileOpen event, e.g. double-clicked in the macOS Finder)
+		app.setMainWindowReady();
+
 		// change the default path to the application one (do this AFTER processing the command line)
 		QDir workingDir = QCoreApplication::applicationDirPath();
 
@@ -337,19 +335,8 @@ int main(int argc, char** argv)
 	}
 
 	// release global structures
-	ccPointCloud::ReleaseShaders(); // must be done before the OpenGL context is released (i.e. before the windows is destroyed)
 	MainWindow::DestroyInstance();
 	FileIOFilter::UnregisterAll();
-
-#ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
-	// for debug purposes
-	unsigned alive = CCShareable::GetAliveCount();
-	if (alive > 1)
-	{
-		printf("Error: some shared objects (%u) have not been released on program end!", alive);
-		system("PAUSE");
-	}
-#endif
 
 	return result;
 }

@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOctreeProxy.h"
+#include "../include/ccOctreeProxy.h"
 
 ccOctreeProxy::ccOctreeProxy(ccOctree::Shared octree /*=ccOctree::Shared(nullptr)*/,
                              QString          name /*="Octree"*/)

@@ -15,14 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QtGlobal>
-
-#ifdef Q_OS_MAC
-#include <QFileOpenEvent>
-#endif
-
 #include "ccViewerApplication.h"
+
 #include "ccviewer.h"
+
+#include <QFileOpenEvent>
+#include <QtGlobal>
 
 ccViewerApplication::ccViewerApplication(int& argc, char** argv, bool isCommandLine)
     : ccApplicationBase(argc, argv, isCommandLine, QString("1.42.beta (%1)").arg(__DATE__))
@@ -37,24 +35,39 @@ void ccViewerApplication::setViewer(ccViewer* inViewer)
 
 bool ccViewerApplication::event(QEvent* inEvent)
 {
-#ifdef Q_OS_MAC
 	switch (inEvent->type())
 	{
 	case QEvent::FileOpen:
 	{
+		QString filename = static_cast<QFileOpenEvent*>(inEvent)->file();
+
+		// when ccViewer is launched by opening a file, this event may arrive before the viewer is set
 		if (mViewer == nullptr)
 		{
-			return false;
+			mPendingFiles << filename;
+			return true;
 		}
 
-		mViewer->addToDB({static_cast<QFileOpenEvent*>(inEvent)->file()});
+		mViewer->addToDB({filename});
 		return true;
 	}
 
 	default:
 		break;
 	}
-#endif
 
 	return ccApplicationBase::event(inEvent);
+}
+
+void ccViewerApplication::openPendingFiles()
+{
+	if (mViewer == nullptr || mPendingFiles.isEmpty())
+	{
+		return;
+	}
+
+	QStringList filenames = mPendingFiles;
+	mPendingFiles.clear();
+
+	mViewer->addToDB(filenames);
 }

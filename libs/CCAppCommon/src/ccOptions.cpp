@@ -15,16 +15,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccOptions.h"
+#include "../include/ccOptions.h"
 
-// ccPluginAPI
+// CCPluginAPI
 #include <ccPersistentSettings.h>
-
-// Qt
-#include <QSettings>
 
 // qCC_db
 #include <ccSingleton.h>
+
+// Qt
+#include <QSettings>
 
 //! Unique instance of ccOptions
 static ccSingleton<ccOptions> s_options;

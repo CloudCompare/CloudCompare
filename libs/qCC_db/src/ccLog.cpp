@@ -15,7 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccLog.h"
+#include "../include/ccLog.h"
 
 // CCCoreLib
 #include <CCPlatform.h>

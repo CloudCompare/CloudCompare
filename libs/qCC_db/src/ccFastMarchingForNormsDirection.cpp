@@ -15,24 +15,25 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccFastMarchingForNormsDirection.h"
-
-// CCCoreLib
-#include "Neighbourhood.h"
+#include "../include/ccFastMarchingForNormsDirection.h"
 
 // Local
-#include "ccGenericPointCloud.h"
-#include "ccLog.h"
-#include "ccNormalVectors.h"
-#include "ccOctree.h"
-#include "ccPointCloud.h"
-#include "ccProgressDialog.h"
-#ifdef QT_DEBUG
-#include "ccScalarField.h"
-#endif
+#include "../include/ccGenericPointCloud.h"
+#include "../include/ccLog.h"
+#include "../include/ccNormalVectors.h"
+#include "../include/ccOctree.h"
+#include "../include/ccPointCloud.h"
+#include "../include/ccProgressDialog.h"
 
-// system
+// CCCoreLib
+#include <Neighbourhood.h>
+
+// System
 #include <cassert>
+
+#ifdef QT_DEBUG
+#include "../include/ccScalarField.h"
+#endif
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
     : CCCoreLib::FastMarching()
@@ -377,11 +378,12 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 		assert(false);
 		return 0;
 	}
-	NormsIndexesTableType* theNorms = cloud->normals();
 
 	unsigned numberOfPoints = cloud->size();
 	if (numberOfPoints == 0)
+	{
 		return -1;
+	}
 
 	// we need the octree
 	if (!cloud->getOctree())
@@ -435,10 +437,11 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 		return -5;
 	}
 
+	auto theNorms = cloud->normals();
+
 	// Fast Marching propagation
 	ccFastMarchingForNormsDirection fm;
-
-	int result = fm.init(cloud, theNorms, octree.data(), octreeLevel);
+	int                             result = fm.init(cloud, theNorms.get(), octree.data(), octreeLevel);
 	if (result < 0)
 	{
 		ccLog::Error("[orientNormalsWithFM] Something went wrong during initialization...");
@@ -478,7 +481,9 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 
 		// all points have been processed? Then we can stop.
 		if (lastProcessedPoint == static_cast<int>(numberOfPoints))
+		{
 			break;
+		}
 
 		// we start the propagation from this point
 		// its corresponding cell in fact ;)
@@ -501,13 +506,15 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 		if (propagationResult >= 0)
 		{
 			// compute the number of points processed during this pass
-			unsigned count = fm.updateResolvedTable(cloud, resolved, theNorms);
+			unsigned count = fm.updateResolvedTable(cloud, resolved, theNorms.get());
 
 			if (count != 0)
 			{
 				resolvedPoints += count;
 				if (progressCb)
+				{
 					progressCb->update(resolvedPoints / (numberOfPoints * 100.0f));
+				}
 			}
 
 			fm.cleanLastPropagation();
@@ -520,7 +527,9 @@ int ccFastMarchingForNormsDirection::OrientNormals(ccPointCloud*     cloud,
 	}
 
 	if (progressCb)
+	{
 		progressCb->stop();
+	}
 
 	cloud->showNormals(true);
 #ifdef QT_DEBUG

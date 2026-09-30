@@ -17,13 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// CCCoreLib
-#include <GenericIndexedMesh.h>
-
 // Local
 #include "ccAdvancedTypes.h"
 #include "ccGenericGLDisplay.h"
+#include "ccMaterialSet.h"
 #include "ccShiftedObject.h"
+
+// CCCoreLib
+#include <GenericIndexedMesh.h>
 
 namespace CCCoreLib
 {
@@ -33,7 +34,6 @@ namespace CCCoreLib
 
 class ccGenericPointCloud;
 class ccPointCloud;
-class ccMaterialSet;
 
 //! Generic mesh interface
 class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
@@ -72,7 +72,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool hasMaterials() const = 0;
 
 	//! Returns associated material set
-	virtual const ccMaterialSet* getMaterialSet() const = 0;
+	virtual const ccMaterialSet::Shared getMaterialSet() const = 0;
 
 	//! Returns a given triangle material indexes
 	virtual int getTriangleMtlIndex(unsigned triangleIndex) const = 0;
@@ -81,7 +81,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool hasTextures() const = 0;
 
 	//! Returns per-triangle texture coordinates array
-	virtual TextureCoordsContainer* getTexCoordinatesTable() const = 0;
+	virtual TextureCoordsContainer::Shared getTexCoordinatesTable() const = 0;
 
 	//! Returns per-triangle texture coordinates (pointer to)
 	virtual void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const = 0;
@@ -114,7 +114,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const = 0;
 
 	//! Returns per-triangle normals shared array
-	virtual NormsIndexesTableType* getTriNormsTable() const = 0;
+	virtual NormsIndexesTableType::Shared getTriNormsTable() const = 0;
 
 	//! Returns the (barycentric) interpolation weights for a given triangle
 	virtual void computeInterpolationWeights(unsigned triIndex, const CCVector3& P, CCVector3d& weights) const;
@@ -225,6 +225,14 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 		m_stippling = state;
 	}
 
+	//! Forces the (sun) light (GL_LIGHT0) to be always on
+	/** \warning Not saved to BIN files (for internal use only)
+	 **/
+	void forceSunLightOn(bool state)
+	{
+		m_forceSunLightOn = state;
+	}
+
 	//! Samples points on a mesh
 	ccPointCloud* samplePoints(bool                                densityBased,
 	                           double                              samplingParameter,
@@ -236,7 +244,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Imports the parameters from another mesh
 	/** Only the specific parameters are imported.
 	 **/
-	void importParametersFrom(const ccGenericMesh* mesh);
+	void importParametersFrom(const ccGenericMesh& mesh);
 
 	//! Brute force triangle picking
 	virtual bool trianglePicking(const CCVector2d&           clickPos,
@@ -279,11 +287,6 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
 	short minimumFileVersion_MeOnly() const override;
 
-	// Static arrays for OpenGL drawing
-	static CCVector3*     GetVertexBuffer();
-	static CCVector3*     GetNormalsBuffer();
-	static ColorCompType* GetColorsBuffer();
-
 	//! Triangle picking (single triangle)
 	virtual bool trianglePicking(unsigned                    triIndex,
 	                             const CCVector2d&           clickPos,
@@ -295,16 +298,8 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	                             CCVector3d&                 point,
 	                             CCVector3d*                 barycentricCoords = nullptr) const;
 
-	//! Returns a pre-initialized array of vertex indexes for wired display
-	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default
-	 **/
-	static unsigned* GetWireVertexIndexes();
-
 	//! Enables (OpenGL) stipple mask
 	static void EnableGLStippleMask(QOpenGLContext* context, bool state);
-
-	// inherited from ccHObject
-	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! Handles the color ramp display
 	void handleColorRamp(CC_DRAW_CONTEXT& context);
@@ -320,4 +315,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 
 	//! Polygon stippling state
 	bool m_stippling;
+
+	//! Forces the GL_LIGHT0 on if true
+	bool m_forceSunLightOn;
 };

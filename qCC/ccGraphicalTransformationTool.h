@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
-#define CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
 
 // Local
 #include <ccOverlayDialog.h>
@@ -196,5 +195,3 @@ class ccGraphicalTransformationTool : public ccOverlayDialog
 	//! Objects found in the dbtree for adv transate/rotate
 	ccHObject::Container m_advancedModeObjectList;
 };
-
-#endif // CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

@@ -21,10 +21,10 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QtConcurrentRun>
 
 // qCC_db
 #include <cc2DLabel.h>
+#include <ccBackgroundTask.h>
 #include <ccCameraSensor.h>
 #include <ccCircle.h>
 #include <ccFacet.h>
@@ -45,13 +45,6 @@
 #include <cassert>
 #include <cstring>
 #include <unordered_set>
-
-#if defined(CC_WINDOWS)
-#include <windows.h>
-#else
-#include <ctime>
-#include <unistd.h>
-#endif
 
 //! Last saved file version
 static short s_lastSavedFileBinVersion = 0;
@@ -162,7 +155,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
@@ -173,25 +166,9 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 		pDlg->start();
 	}
 
-	// concurrent call
-	QFuture<CC_FILE_ERROR> future = QtConcurrent::run([&]()
-	                                                  { return BinFilter::SaveFileV2(out, root); });
-
-	while (!future.isFinished())
-	{
-#if defined(CC_WINDOWS)
-		::Sleep(500);
-#else
-		usleep(500 * 1000);
-#endif
-		if (pDlg)
-		{
-			pDlg->setValue(pDlg->value() + 1);
-		}
-		QApplication::processEvents();
-	}
-
-	CC_FILE_ERROR result = future.result();
+	// concurrent call, so that the progress dialog keeps refreshing
+	CC_FILE_ERROR result = ccBackgroundTask::Run([&]()
+	                                             { return BinFilter::SaveFileV2(out, root); });
 
 	return result;
 }
@@ -225,11 +202,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 			if (mesh->getAssociatedCloud())
 				dependencies.insert(mesh->getAssociatedCloud());
 			if (mesh->getMaterialSet())
-				dependencies.insert(mesh->getMaterialSet());
+				dependencies.insert(mesh->getMaterialSet().get());
+			if (mesh->getTriNormsTable())
+				dependencies.insert(mesh->getTriNormsTable().get());
 			if (mesh->getTexCoordinatesTable())
-				dependencies.insert(mesh->getTexCoordinatesTable());
-			if (mesh->getTexCoordinatesTable())
-				dependencies.insert(mesh->getTexCoordinatesTable());
+				dependencies.insert(mesh->getTexCoordinatesTable().get());
 		}
 		else if (currentObject->isA(CC_TYPES::SUB_MESH))
 		{
@@ -476,7 +453,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parallel && parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(false, parentWidget));
@@ -520,26 +497,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 	if (parallel)
 	{
-		// concurrent call in a separate thread
-		QFuture<bool> future = QtConcurrent::run([&]()
-		                                         { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
-
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-			if (pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			// pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
-			QApplication::processEvents();
-		}
-
-		success = future.result();
+		// concurrent call in a separate thread, so that the progress dialog keeps refreshing
+		success = ccBackgroundTask::Run([&]()
+		                                { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
 	}
 	else
 	{
@@ -692,13 +652,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				{
 					// materials
 					ccHObject* materials = nullptr;
-					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet();
+					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet().get();
 					if (matSetID > 0)
 					{
 						materials = FindRobust(root, mesh, oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
 						if (materials)
 						{
-							mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials), false);
+							mesh->setMaterialSet(ccMaterialSet::Shared(static_cast<ccMaterialSet*>(materials)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -711,13 +671,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					}
 					// per-triangle normals
 					ccHObject* triNormsTable   = nullptr;
-					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable();
+					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable().get();
 					if (triNormsTableID > 0)
 					{
 						triNormsTable = FindRobust(root, mesh, oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
 						if (triNormsTable)
 						{
-							mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable), false);
+							mesh->setTriNormsTable(NormsIndexesTableType::Shared(static_cast<NormsIndexesTableType*>(triNormsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -730,13 +690,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 					}
 					// per-triangle texture coordinates
 					ccHObject* texCoordsTable  = nullptr;
-					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
+					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable().get();
 					if (texCoordArrayID > 0)
 					{
 						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
 						if (texCoordsTable)
 						{
-							mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable), false);
+							mesh->setTexCoordinatesTable(TextureCoordsContainer::Shared(static_cast<TextureCoordsContainer*>(texCoordsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
 						}
 						else
 						{
@@ -1117,7 +1077,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		return CC_FERR_NO_LOAD;
 	}
 
-	QScopedPointer<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
 		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
@@ -1143,7 +1103,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 
 		// progress for this cloud
-		CCCoreLib::NormalizedProgress nprogress(pDlg.data(), nbOfPoints);
+		CCCoreLib::NormalizedProgress nprogress(pDlg.get(), nbOfPoints);
 		if (pDlg)
 		{
 			pDlg->reset();
@@ -1199,10 +1159,11 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 
 		// Creation
-		ccPointCloud*           loadedCloud   = new ccPointCloud(cloudName);
-		CCCoreLib::ScalarField* loadedCloudSF = nullptr;
+		ccPointCloud* loadedCloud = new ccPointCloud(cloudName);
 		if (!loadedCloud)
+		{
 			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
 
 		unsigned fileChunkPos  = 0;
 		unsigned fileChunkSize = std::min(nbOfPoints, CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
@@ -1218,6 +1179,8 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			loadedCloud->reserveTheNormsTable();
 			loadedCloud->showNormals(true);
 		}
+
+		CCCoreLib::ScalarField::Shared loadedCloudSF;
 		if (header.scalarField)
 		{
 			if (loadedCloud->enableScalarField())

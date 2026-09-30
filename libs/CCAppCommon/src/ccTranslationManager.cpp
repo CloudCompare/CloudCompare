@@ -15,6 +15,14 @@
 // #                                                                        #
 // ##########################################################################
 
+#include "../include/ccTranslationManager.h"
+
+// Local
+#include "../include/ccApplicationBase.h"
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
+
 // Qt
 #include <QActionGroup>
 #include <QDebug>
@@ -24,13 +32,6 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTranslator>
-
-// ccPluginAPI
-#include <ccPersistentSettings.h>
-
-// Local
-#include "ccApplicationBase.h"
-#include "ccTranslationManager.h"
 
 class _ccTranslationManager : public ccTranslationManager
 {
@@ -53,18 +54,13 @@ void ccTranslationManager::loadTranslation(QString language)
 
 	for (const auto& fileInfo : mTranslatorFileInfo)
 	{
-		QTranslator* translator = new QTranslator(ccApp);
+		auto translator = std::make_unique<QTranslator>(ccApp);
 
 		bool loaded = translator->load(locale, fileInfo.prefix, QStringLiteral("_"), fileInfo.path);
 
 		if (loaded)
 		{
-			ccApp->installTranslator(translator);
-		}
-		else
-		{
-			delete translator;
-			translator = nullptr;
+			ccApp->installTranslator(translator.release());
 		}
 	}
 }

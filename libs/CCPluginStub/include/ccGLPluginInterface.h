@@ -17,9 +17,10 @@
 
 #pragma once
 
-// CC_FBO_LIB
+// Local
 #include "ccDefaultPluginInterface.h"
 
+// CCFbo
 #include <ccGlFilter.h>
 
 //! GL Filter plugin interface

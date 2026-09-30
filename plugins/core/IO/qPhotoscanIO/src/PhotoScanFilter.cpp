@@ -679,7 +679,7 @@ CC_FILE_ERROR PhotoScanFilter::loadFile(const QString&  filename,
 		}
 	}
 
-	QScopedPointer<ccProgressDialog> progressDialog(nullptr);
+	std::unique_ptr<ccProgressDialog> progressDialog(nullptr);
 	if (parameters.parentWidget)
 	{
 		progressDialog.reset(new ccProgressDialog(parameters.parentWidget));

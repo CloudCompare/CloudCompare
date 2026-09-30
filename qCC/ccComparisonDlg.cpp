@@ -29,6 +29,7 @@
 #include <ScalarFieldTools.h>
 
 // qCC_db
+#include <ccBackgroundTask.h>
 #include <ccGBLSensor.h>
 #include <ccGenericMesh.h>
 #include <ccHObject.h>
@@ -50,7 +51,7 @@
 #include <QThreadPool>
 
 // System
-#include <assert.h>
+#include <cassert>
 
 const unsigned char DEFAULT_OCTREE_LEVEL = 7;
 
@@ -334,11 +335,11 @@ bool ccComparisonDlg::computeApproxDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	auto sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	// prepare the octree structures
-	QScopedPointer<ccProgressDialog> progressDlg;
+	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
 		progressDlg.reset(new ccProgressDialog(true, this));
@@ -356,7 +357,7 @@ bool ccComparisonDlg::computeApproxDistances()
 		                                                                                     m_refCloud,
 		                                                                                     DEFAULT_OCTREE_LEVEL,
 		                                                                                     0,
-		                                                                                     progressDlg.data(),
+		                                                                                     progressDlg.get(),
 		                                                                                     m_compOctree.data(),
 		                                                                                     m_refOctree.data());
 	}
@@ -376,7 +377,7 @@ bool ccComparisonDlg::computeApproxDistances()
 		approxResult = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(m_compCloud,
 		                                                                               m_refMesh,
 		                                                                               c2mParams,
-		                                                                               progressDlg.data(),
+		                                                                               progressDlg.get(),
 		                                                                               m_compOctree.data());
 	}
 	break;
@@ -486,7 +487,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_APPROX_DISTANCES_DEFAULT_SF_NAME);
 	}
 
-	const CCCoreLib::ScalarField* approxDistances = m_compCloud->getScalarField(sfIdx);
+	auto approxDistances = m_compCloud->getScalarField(sfIdx);
 	if (!approxDistances)
 	{
 		assert(sfIdx >= 0);
@@ -536,7 +537,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	int              theBestOctreeLevel = s_minOctreeLevel;
 
 	// we don't test the very first and very last level
-	QScopedPointer<ccProgressDialog> progressDlg;
+	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
 		progressDlg.reset(new ccProgressDialog(false, this));
@@ -544,7 +545,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		progressDlg->setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); // we lie here ;)
 		progressDlg->start();
 	}
-	CCCoreLib::NormalizedProgress nProgress(progressDlg.data(), MAX_OCTREE_LEVEL - 2);
+	CCCoreLib::NormalizedProgress nProgress(progressDlg.get(), MAX_OCTREE_LEVEL - 2);
 	QApplication::processEvents();
 
 	bool                maxDistanceDefined = maxDistCheckBox->isChecked();
@@ -718,7 +719,7 @@ bool ccComparisonDlg::computeDistances()
 	}
 
 	m_compCloud->setCurrentScalarField(sfIdx);
-	CCCoreLib::ScalarField* sf = m_compCloud->getCurrentInScalarField();
+	auto sf = m_compCloud->getCurrentInScalarField();
 	assert(sf);
 
 	// max search distance
@@ -731,12 +732,14 @@ bool ccComparisonDlg::computeDistances()
 	s_maxThreadCount = c2cParams.maxThreadCount = c2mParams.maxThreadCount = maxThreadCountSpinBox->value();
 	ccLog::Print(QString("[Distances] Will use %1 threads").arg(s_maxThreadCount));
 
-	int                              result = -1;
-	QScopedPointer<ccProgressDialog> progressDlg;
+	int                               result = -1;
+	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
 		progressDlg.reset(new ccProgressDialog(true, this));
 	}
+
+	std::array<ccScalarField::Shared, 3> splitDistances;
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -749,33 +752,25 @@ bool ccComparisonDlg::computeDistances()
 			// we create 3 new scalar fields, one for each dimension
 			unsigned count = m_compCloud->size();
 
-			bool success = true;
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				ccScalarField* sfDim = new ccScalarField();
-				if (sfDim->resizeSafe(count))
+				splitDistances[j] = std::make_shared<ccScalarField>();
+				if (splitDistances[j]->resizeSafe(count))
 				{
-					sfDim->link();
-					c2cParams.splitDistances[j] = sfDim;
+					c2cParams.splitDistances[j] = splitDistances[j].get();
 				}
 				else
 				{
-					success = false;
-					break;
-				}
-			}
+					ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
 
-			if (!success)
-			{
-				ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
-
-				for (unsigned j = 0; j < 3; ++j)
-				{
-					if (c2cParams.splitDistances[j])
+					// cleanup
+					for (unsigned k = 0; k <= j; ++k)
 					{
-						c2cParams.splitDistances[j]->release();
-						c2cParams.splitDistances[j] = nullptr;
+						c2cParams.splitDistances[k] = nullptr;
+						splitDistances[k].reset();
 					}
+
+					break;
 				}
 			}
 		}
@@ -852,12 +847,17 @@ bool ccComparisonDlg::computeDistances()
 			c2cParams.CPSet         = nullptr;
 		}
 
-		result = CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(m_compCloud,
-		                                                                          m_refCloud,
-		                                                                          c2cParams,
-		                                                                          progressDlg.data(),
-		                                                                          m_compOctree.data(),
-		                                                                          m_refOctree.data());
+		// in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(
+		    [&]()
+		    {
+			    return CCCoreLib::DistanceComputationTools::computeCloud2CloudDistances(m_compCloud,
+			                                                                            m_refCloud,
+			                                                                            c2cParams,
+			                                                                            progressDlg.get(),
+			                                                                            m_compOctree.data(),
+			                                                                            m_refOctree.data());
+		    });
 		break;
 
 	case CLOUDMESH_DIST: // cloud-mesh
@@ -873,11 +873,16 @@ bool ccComparisonDlg::computeDistances()
 			c2mParams.robust          = robust;
 		}
 
-		result = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(m_compCloud,
-		                                                                         m_refMesh,
-		                                                                         c2mParams,
-		                                                                         progressDlg.data(),
-		                                                                         m_compOctree.data());
+		// in a worker thread, so that the progress dialog keeps refreshing
+		result = ccBackgroundTask::Run(
+		    [&]()
+		    {
+			    return CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(m_compCloud,
+			                                                                           m_refMesh,
+			                                                                           c2mParams,
+			                                                                           progressDlg.get(),
+			                                                                           m_compOctree.data());
+		    });
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
@@ -941,7 +946,9 @@ bool ccComparisonDlg::computeDistances()
 			// we add the corresponding scalar fields (one for each dimension)
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				CCCoreLib::ScalarField* sf = c2cParams.splitDistances[j];
+				auto sf = splitDistances[j];
+				assert(c2cParams.splitDistances[j] == sf.get());
+
 				if (sf)
 				{
 					static const QChar CharDim[3]{'X', 'Y', 'Z'};
@@ -949,16 +956,20 @@ bool ccComparisonDlg::computeDistances()
 					sf->setName(dimSFName.toStdString());
 					sf->computeMinAndMax();
 					// check that SF doesn't already exist
-					int sfExit = m_compCloud->getScalarFieldIndexByName(sf->getName());
-					if (sfExit >= 0)
-						m_compCloud->deleteScalarField(sfExit);
-					int sfEnter = m_compCloud->addScalarField(static_cast<ccScalarField*>(sf));
-					assert(sfEnter >= 0);
+					int previousSFIndex = m_compCloud->getScalarFieldIndexByName(sf->getName());
+					if (previousSFIndex >= 0)
+					{
+						m_compCloud->deleteScalarField(previousSFIndex);
+					}
+					int newSFIndex = m_compCloud->addScalarField(ccScalarField::FromCCCoreLibShared(sf));
+					assert(newSFIndex >= 0);
 				}
 			}
 			ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			if (mergeXY)
 			{
+				assert(c2cParams.splitDistances[0] && c2cParams.splitDistances[1]);
+
 				ccLog::Warning("[ComputeDistances] compute 2D distances (xy plane)");
 				QString sfNameXY = m_sfName + " (XY)";
 				int     sf2D     = m_compCloud->getScalarFieldIndexByName(sfNameXY.toStdString());
@@ -971,7 +982,7 @@ bool ccComparisonDlg::computeDistances()
 					ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
 					return 0;
 				}
-				CCCoreLib::ScalarField* sf = m_compCloud->getScalarField(sf2D);
+				auto sf = m_compCloud->getCCScalarField(sf2D);
 				for (unsigned idx = 0; idx < m_compCloud->size(); idx++)
 				{
 					float d2D = pow(pow(c2cParams.splitDistances[0]->getValue(idx), 2) + pow(c2cParams.splitDistances[1]->getValue(idx), 2), 0.5);
@@ -990,16 +1001,6 @@ bool ccComparisonDlg::computeDistances()
 		sfIdx = -1;
 	}
 
-	for (unsigned j = 0; j < 3; ++j)
-	{
-		CCCoreLib::ScalarField*& sf = c2cParams.splitDistances[j];
-		if (sf)
-		{
-			sf->release();
-			sf = nullptr;
-		}
-	}
-
 	updateDisplay(sfIdx >= 0, false);
 
 	return result >= 0;
@@ -1010,7 +1011,7 @@ void ccComparisonDlg::showHisto()
 	if (!m_compCloud)
 		return;
 
-	ccScalarField* sf = m_compCloud->getCurrentDisplayedScalarField();
+	auto sf = m_compCloud->getCurrentDisplayedScalarField();
 	if (!sf)
 		return;
 

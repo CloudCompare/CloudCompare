@@ -37,7 +37,7 @@
 #include <QSettings>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)
     : QDialog(win)

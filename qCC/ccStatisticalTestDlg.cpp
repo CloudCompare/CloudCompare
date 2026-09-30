@@ -25,7 +25,7 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
                                            QString  windowTitle /*=QString()*/,
                                            QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui::StatisticalTestDialog)
+    , m_ui(std::make_unique<Ui::StatisticalTestDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -49,10 +49,7 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(QString  p1Label,
 	}
 }
 
-ccStatisticalTestDlg::~ccStatisticalTestDlg()
-{
-	delete m_ui;
-}
+ccStatisticalTestDlg::~ccStatisticalTestDlg() = default;
 
 double ccStatisticalTestDlg::getParam1() const
 {

@@ -50,6 +50,7 @@
 #include <ccCylinder.h>
 #include <ccCone.h>
 #include <ccTorus.h>
+#include <ccBackgroundTask.h>
 #include <ccProgressDialog.h>
 
 //CCCoreLib
@@ -64,14 +65,59 @@
 #include <time.h>
 #endif
 
-static ccMainAppInterface* s_app = nullptr;
+//for parameters persistence
+static unsigned s_supportPoints = 500;		// this is the minimal numer of points required for a primitive
+static double s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
+static double s_overlookingProba = 0.01;	// probability that no better candidate was overlooked during sampling
+static double s_epsilon = std::numeric_limits<double>::quiet_NaN();			// max distance to primitive
+static double s_bitmapEpsilon = std::numeric_limits<double>::quiet_NaN();	// sampling resolution
+static bool s_primEnabled[5] { true,true,true,false,false };
+static bool s_allowSimplification = true;
+static bool s_allowFitting = true;
+static bool s_createCloudFromLeftOverPoints = true;
+static bool s_randomColor = true;
+static bool s_minSphereRadiusEnabled = false;
+static bool s_maxSphereRadiusEnabled = false;
+static bool s_minCylinderRadiusEnabled = false;
+static bool s_maxCylinderRadiusEnabled = false;
+static bool s_maxConeRadiusEnabled = false;
+static bool s_maxConeLengthEnabled = false;
+static bool s_maxConeAngleEnabled = false;
+static bool s_maxCylinderLengthEnabled = false;
+static bool s_minTorusMinorRadiusEnabled = false;
+static bool s_minTorusMajorRadiusEnabled = false;
+static bool s_maxTorusMinorRadiusEnabled = false;
+static bool s_maxTorusMajorRadiusEnabled = false;
+static double s_minSphereRadius = 1.0;
+static double s_maxSphereRadius = 1.0;
+static double s_minCylinderRadius = 1.0;
+static double s_maxCylinderRadius = 1.0;
+static double s_maxConeRadius = 1.0;
+static double s_maxCylinderLength = 1.0;
+static double s_maxConeLength = 1.0;
+static double s_maxConeAngle_deg = 90.0;
+static double s_minTorusMinorRadius = 1.0;
+static double s_minTorusMajorRadius = 1.0;
+static double s_maxTorusMinorRadius = 1.0;
+static double s_maxTorusMajorRadius = 1.0;
+
+static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
+static size_t s_remainingPoints = 0;
+static RansacShapeDetector* s_detector = nullptr;
+static PointCloud* s_cloud = nullptr;
+static void DoDetection()
+{
+	if (!s_detector || !s_cloud || !s_shapes)
+		return;
+
+	s_remainingPoints = s_detector->Detect(*s_cloud, 0, s_cloud->size(), s_shapes);
+}
 
 qRansacSD::qRansacSD(QObject* parent/*=nullptr*/)
     : QObject(parent)
     , ccStdPluginInterface(":/CC/plugin/qRANSAC_SD/info.json")
     , m_action(nullptr)
 {
-    s_app = m_app;
 }
 
 void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
@@ -105,57 +151,13 @@ void qRansacSD::registerCommands(ccCommandLineInterface* cmd)
 	cmd->registerCommand(ccCommandLineInterface::Command::Shared(new CommandRANSAC));
 }
 
-static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
-static size_t s_remainingPoints = 0;
-static RansacShapeDetector* s_detector = 0;
-static PointCloud* s_cloud = 0;
-void doDetection()
-{
-	if (!s_detector || !s_cloud || !s_shapes)
-		return;
-
-	s_remainingPoints = s_detector->Detect(*s_cloud, 0, s_cloud->size(), s_shapes);
-}
-
-//for parameters persistence
-static unsigned s_supportPoints = 500;	// this is the minimal numer of points required for a primitive
-static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
-static double   s_proba = 0.01;	// probability that no better candidate was overlooked during sampling
-static bool s_primEnabled[5] = { true,true,true,false,false };
-static bool s_allowSimplification = true;
-static bool s_allowFitting = true;
-static bool s_createCloudFromLeftOverPoints = true;
-static bool s_randomColor = true;
-static bool s_minSphereRadiusEnabled = false;
-static bool s_maxSphereRadiusEnabled = false;
-static bool s_minCylinderRadiusEnabled = false;
-static bool s_maxCylinderRadiusEnabled = false;
-static bool s_maxConeRadiusEnabled = false;
-static bool s_maxConeLengthEnabled = false;
-static bool s_maxConeAngleEnabled = false;
-static bool s_maxCylinderLengthEnabled = false;
-static bool s_minTorusMinorRadiusEnabled = false;
-static bool s_minTorusMajorRadiusEnabled = false;
-static bool s_maxTorusMinorRadiusEnabled = false;
-static bool s_maxTorusMajorRadiusEnabled = false;
-static double s_minSphereRadius = 1;
-static double s_maxSphereRadius = 1;
-static double s_minCylinderRadius = 1;
-static double s_maxCylinderRadius = 1;
-static double s_maxConeRadius = 1;
-static double s_maxCylinderLength = 1;
-static double s_maxConeLength = 1;
-static double s_maxConeAngle_deg = 90;
-static double s_minTorusMinorRadius = 1;
-static double s_minTorusMajorRadius = 1;
-static double s_maxTorusMinorRadius = 1;
-static double s_maxTorusMajorRadius = 1;
-
 void qRansacSD::doAction()
 {
-	assert(m_app);
 	if (!m_app)
+	{
+		assert(false);
 		return;
+	}
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
@@ -172,24 +174,22 @@ void qRansacSD::doAction()
 		ccLog::Error("[qRansacSD] Select a real point cloud!");
 		return;
 	}
-
 	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
 	//input cloud
 	CCVector3 bbMin, bbMax;
 	pc->getBoundingBox(bbMin, bbMax);
 	CCVector3 diff = bbMax - bbMin;
-	float scale = std::max(std::max(diff[0], diff[1]), diff[2]);
-
+	PointCoordinateType scale = std::max(std::max(diff[0], diff[1]), diff[2]);
 
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
 	rsdDlg.advancedConeGroupBox->setVisible(false);
-	rsdDlg.epsilonDoubleSpinBox->setValue(.005 * scale);		// set distance threshold to 0.5% of bounding box width
-	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01 * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
+	rsdDlg.epsilonDoubleSpinBox->setValue(std::isnan(s_epsilon) ? .005 * scale : s_epsilon); // the first time, set distance threshold to 0.5% of bounding box width
+	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(std::isnan(s_bitmapEpsilon) ? .01 * scale : s_bitmapEpsilon);	// the first tiem, set bitmap resolution (= sampling resolution) to 1% of bounding box width
 	rsdDlg.supportPointsSpinBox->setValue(s_supportPoints);
 	rsdDlg.maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);
-	rsdDlg.probaDoubleSpinBox->setValue(s_proba);
+	rsdDlg.probaDoubleSpinBox->setValue(s_overlookingProba);
 	rsdDlg.planeCheckBox->setChecked(s_primEnabled[0]);
 	rsdDlg.sphereCheckBox->setChecked(s_primEnabled[1]);
 	rsdDlg.cylinderCheckBox->setChecked(s_primEnabled[2]);
@@ -214,6 +214,8 @@ void qRansacSD::doAction()
 	rsdDlg.maxConeAngledoubleSpinBox->setValue(s_maxConeAngle_deg);
 	rsdDlg.minTorusMinorRadiuscheckBox->setChecked(s_minTorusMinorRadiusEnabled);
 	rsdDlg.minTorusMajorRadiuscheckBox->setChecked(s_minTorusMajorRadiusEnabled);
+	rsdDlg.minTorusMinorRadiusdoubleSpinBox->setValue(s_minTorusMinorRadius);
+	rsdDlg.minTorusMajorRadiusdoubleSpinBox->setValue(s_minTorusMajorRadius);
 	rsdDlg.maxTorusMinorRadiuscheckBox->setChecked(s_maxTorusMinorRadiusEnabled);
 	rsdDlg.maxTorusMajorRadiuscheckBox->setChecked(s_maxTorusMajorRadiusEnabled);
 	rsdDlg.maxTorusMinorRadiusdoubleSpinBox->setValue(s_maxTorusMinorRadius);
@@ -223,6 +225,21 @@ void qRansacSD::doAction()
 	{
 		return;
 	}
+
+	s_primEnabled[RPT_PLANE] = rsdDlg.planeCheckBox->isChecked();
+	s_primEnabled[RPT_SPHERE] = rsdDlg.sphereCheckBox->isChecked();
+	s_primEnabled[RPT_CYLINDER] = rsdDlg.cylinderCheckBox->isChecked();
+	s_primEnabled[RPT_CONE] = rsdDlg.coneCheckBox->isChecked();
+	s_primEnabled[RPT_TORUS] = rsdDlg.torusCheckBox->isChecked();
+
+	s_supportPoints = static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
+	s_createCloudFromLeftOverPoints = rsdDlg.saveLeftOverscheckBox->isChecked();
+	s_allowSimplification = rsdDlg.simplifyShapescheckBox->isChecked();
+	s_allowFitting = rsdDlg.allowFittingcheckBox->isChecked();
+	s_epsilon = rsdDlg.epsilonDoubleSpinBox->value();
+	s_bitmapEpsilon = rsdDlg.bitmapEpsilonDoubleSpinBox->value();
+	s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
+	s_overlookingProba = rsdDlg.probaDoubleSpinBox->value();
 	s_minSphereRadiusEnabled = rsdDlg.minSphereRadiuscheckBox->isChecked();
 	s_maxSphereRadiusEnabled = rsdDlg.maxSphereRadiuscheckBox->isChecked();
 	s_minCylinderRadiusEnabled = rsdDlg.minCylinderRadiuscheckBox->isChecked();
@@ -237,20 +254,19 @@ void qRansacSD::doAction()
 	s_randomColor = rsdDlg.randomColorcheckBox->isChecked();
 	RansacParams params;
 	{
-		params.epsilon = static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
-		params.bitmapEpsilon = static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
-		params.maxNormalDev_deg = static_cast<float>(rsdDlg.maxNormDevAngleSpinBox->value());
-		params.probability = static_cast<float>(rsdDlg.probaDoubleSpinBox->value());
+		params.epsilon = static_cast<float>(s_epsilon);
+		params.bitmapEpsilon = static_cast<float>(s_bitmapEpsilon);
+		params.maxNormalDev_deg = static_cast<float>(s_maxNormalDev_deg);
+		params.probability = static_cast<float>(s_overlookingProba);
 		params.randomColor = s_randomColor;
-		params.supportPoints = static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
-		params.primEnabled[RPT_PLANE] = rsdDlg.planeCheckBox->isChecked();
-		params.primEnabled[RPT_SPHERE] = rsdDlg.sphereCheckBox->isChecked();
-		params.primEnabled[RPT_CYLINDER] = rsdDlg.cylinderCheckBox->isChecked();
-		params.primEnabled[RPT_CONE] = rsdDlg.coneCheckBox->isChecked();
-		params.primEnabled[RPT_TORUS] = rsdDlg.torusCheckBox->isChecked();
-		params.createCloudFromLeftOverPoints = rsdDlg.saveLeftOverscheckBox->isChecked();
-		params.allowFitting = rsdDlg.allowFittingcheckBox->isChecked();
-		params.allowSimplification = rsdDlg.simplifyShapescheckBox->isChecked();
+		params.supportPoints = s_supportPoints;
+		for (int i = 0; i < 5; ++i)
+		{
+			params.primEnabled[i] = s_primEnabled[i];
+		}
+		params.createCloudFromLeftOverPoints = s_createCloudFromLeftOverPoints;
+		params.allowFitting = s_allowFitting;
+		params.allowSimplification = s_allowSimplification;
 		if (s_minSphereRadiusEnabled)
 		{
 			params.minSphereRadius = static_cast<float>(rsdDlg.minSphereRadiusdoubleSpinBox->value());
@@ -309,8 +325,7 @@ void qRansacSD::doAction()
 		}
 	}
 	
-	ccHObject* group = executeRANSAC(pc, params, false);
-
+	ccHObject* group = ExecuteRANSAC(pc, params, m_app, false);
 
 	if (group)
 	{
@@ -320,31 +335,26 @@ void qRansacSD::doAction()
 	}
 }
 
-
-ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& params, bool silent)
+ccHObject* qRansacSD::ExecuteRANSAC(ccPointCloud* ccPC, const RansacParams& params, ccMainAppInterface* app, bool silent)
 {
 	//consistency check
 	{
-		unsigned char primCount = 0;
+		bool primitiveEnabled = false;
 		for (unsigned char k = 0; k < 5; ++k)
 		{
-			primCount += static_cast<unsigned>(params.primEnabled[k]);
+			if (params.primEnabled[k])
+			{
+				primitiveEnabled = true;
+				break;
+			}
 		}
-		if (primCount == 0)
+		if (!primitiveEnabled)
 		{
 			ccLog::Error("[qRansacSD] No primitive type selected!");
 			return nullptr;
 		}
 	}
-	for (unsigned char k = 0; k < 5; ++k)
-	{
-		s_primEnabled[k] = params.primEnabled[k];
-	}
-	s_supportPoints = params.supportPoints;
-	s_maxNormalDev_deg = params.maxNormalDev_deg;
-	s_proba = params.probability;
-	s_createCloudFromLeftOverPoints = params.createCloudFromLeftOverPoints;
-	s_allowSimplification = params.allowSimplification;
+
 	unsigned count = ccPC->size();
 	bool hasNorms = ccPC->hasNormals();
 	CCVector3 bbMin, bbMax;
@@ -365,15 +375,16 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 		//default point & normal
 		Point Pt;
-		Pt.normal[0] = 0.0;
-		Pt.normal[1] = 0.0;
-		Pt.normal[2] = 0.0;
+		Pt.normal[0] = 0.0f;
+		Pt.normal[1] = 0.0f;
+		Pt.normal[2] = 0.0f;
 		for (unsigned i = 0; i < count; ++i)
 		{
 			const CCVector3* P = ccPC->getPoint(i);
 			Pt.pos[0] = static_cast<float>(P->x);
 			Pt.pos[1] = static_cast<float>(P->y);
 			Pt.pos[2] = static_cast<float>(P->z);
+
 			if (hasNorms)
 			{
 				const CCVector3& N = ccPC->getPointNormal(i);
@@ -381,9 +392,9 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 				Pt.normal[1] = static_cast<float>(N.y);
 				Pt.normal[2] = static_cast<float>(N.z);
 			}
-#ifdef POINTSWITHINDEX
+
 			Pt.index = i;
-#endif
+
 			cloud.push_back(Pt);
 		}
 
@@ -416,7 +427,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		ccProgressDialog* pDlg = nullptr;
 		if (!silent)
 		{
-			pDlg = new ccProgressDialog(false, s_app ? s_app->getMainWindow() : nullptr);
+			pDlg = new ccProgressDialog(false, app ? app->getMainWindow() : nullptr);
 			pDlg->setWindowTitle("Ransac Shape Detection");
 			pDlg->setMethodTitle(tr("Computing normals (please wait)"));
 			pDlg->setRange(0, 0); // infinite loop
@@ -424,7 +435,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		}
 		QApplication::processEvents();
 
-		cloud.calcNormals(.01f * scale);
+		cloud.calcNormals(scale / 100);
 
 		if (ccPC->reserveTheNormsTable())
 		{
@@ -490,7 +501,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		ccProgressDialog* pDlg = nullptr;
 		if (!silent)
 		{
-			pDlg = new ccProgressDialog(false, s_app ? s_app->getMainWindow() : nullptr);
+			pDlg = new ccProgressDialog(false, app ? app->getMainWindow() : nullptr);
 			pDlg->setWindowTitle("Ransac Shape Detection");
 			pDlg->setMethodTitle(tr("Operation in progress (please wait)"));
 			pDlg->setRange(0, 0); // infinite progress
@@ -503,21 +514,8 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		s_cloud = &cloud;
 		QElapsedTimer eTimer;
 		eTimer.start();
-		QFuture<void> future = QtConcurrent::run(doDetection);
-
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-			usleep(500 * 1000);
-#endif
-			if (!silent && pDlg)
-			{
-				pDlg->setValue(pDlg->value() + 1);
-			}
-			QApplication::processEvents();
-		}
+		//run in a worker thread, so that the progress dialog keeps refreshing
+		ccBackgroundTask::Run(DoDetection);
 		remaining = static_cast<unsigned>(s_remainingPoints);
 
 		QApplication::processEvents();
@@ -606,7 +604,6 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 			ccPointCloud* pcShape = nullptr;
 			bool saveNormals = true;
 			{
-#ifdef POINTSWITHINDEX
 				CCCoreLib::ReferenceCloud refPcShape(ccPC);
 				//we fill cloud with sub-part points
 				if (!refPcShape.reserve(static_cast<unsigned>(shapePointsCount)))
@@ -628,29 +625,6 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 						saveNormals = false;
 					}
 				}
-
-#else
-				pcShape = new ccPointCloud(desc.c_str());
-				if (!pcShape->reserve(static_cast<unsigned>(shapePointsCount)))
-				{
-					ccLog::Error("[qRansacSD] Not enough memory!");
-					delete pcShape;
-					break;
-				}
-				saveNormals = pcShape->reserveTheNormsTable();
-
-				for (unsigned j = 0; j < shapePointsCount; ++j)
-				{
-					pcShape->addPoint(CCVector3::fromArray(cloud[shapeCloudIndex - j].pos));
-					if (saveNormals)
-					{
-						pcShape->addNorm(CCVector3::fromArray(cloud[shapeCloudIndex - j].normal));
-					}
-
-				}
-				pcShape->setGlobalShift(globalShift);
-				pcShape->setGlobalScale(globalScale);
-#endif
 			}
 			//random color
 			ccColor::Rgb col = ccColor::Generator::Random();
@@ -908,7 +882,7 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 
 			group->setVisible(true);
 			group->setDisplay_recursive(ccPC->getDisplay());
-#ifdef POINTSWITHINDEX
+
 			if (params.createCloudFromLeftOverPoints)
 			{
 				//new cloud for left overs
@@ -940,7 +914,6 @@ ccHObject* qRansacSD::executeRANSAC(ccPointCloud* ccPC, const RansacParams& para
 					group->addChild(pcLeftOvers);
 				}
 			}
-#endif
 
 			return group;
 		}

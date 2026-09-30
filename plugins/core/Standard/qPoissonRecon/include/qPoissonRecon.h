@@ -20,7 +20,7 @@
 
 #include "ccStdPluginInterface.h"
 
-//! Wrapper to the "Poisson Surface Reconstruction (Version 9)" algorithm
+//! Wrapper to the "Poisson Surface Reconstruction" algorithm
 /** "Poisson Surface Reconstruction", M. Kazhdan, M. Bolitho, and H. Hoppe
 	Symposium on Geometry Processing (June 2006), pages 61--70
 	http://www.cs.jhu.edu/~misha/Code/PoissonRecon/
@@ -29,7 +29,7 @@ class qPoissonRecon : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES( ccPluginInterface ccStdPluginInterface )
-	
+
 	Q_PLUGIN_METADATA( IID "cccorp.cloudcompare.plugin.qPoissonRecon" FILE "../info.json" )
 
 public:
@@ -37,11 +37,11 @@ public:
 	//! Default constructor
 	explicit qPoissonRecon(QObject* parent = nullptr);
 
-	virtual ~qPoissonRecon() = default;
+	~qPoissonRecon() = default;
 
 	//inherited from ccStdPluginInterface
-	virtual void onNewSelection(const ccHObject::Container& selectedEntities) override;
-	virtual QList<QAction *> getActions() override;
+	void onNewSelection(const ccHObject::Container& selectedEntities) override;
+	QList<QAction *> getActions() override;
 
 protected:
 

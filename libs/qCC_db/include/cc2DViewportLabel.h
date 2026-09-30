@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,11 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_2D_VIEWPORT_LABEL_HEADER
-#define CC_2D_VIEWPORT_LABEL_HEADER
-
 // Local
 #include "cc2DViewportObject.h"
+
 // System
 #include <array>
 
@@ -34,16 +34,16 @@ class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
 	explicit cc2DViewportLabel(const cc2DViewportLabel& viewportLabel);
 
 	// inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const override
+	CC_CLASS_ENUM getClassID() const override
 	{
 		return CC_TYPES::VIEWPORT_2D_LABEL;
 	}
-	virtual bool isSerializable() const override
+	bool isSerializable() const override
 	{
 		return true;
 	}
 
-	typedef std::array<float, 4> ROI;
+	using ROI = std::array<float, 4>;
 
 	//! Returns ROI (relative to screen)
 	inline const ROI& roi() const
@@ -64,12 +64,10 @@ class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
 	short minimumFileVersion_MeOnly() const override;
 
 	//! Draws the entity only (not its children)
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) override;
+	void drawMeOnly(CC_DRAW_CONTEXT& context) override;
 
 	//! label ROI
 	/** ROI is relative to the 3D display
 	 **/
 	ROI m_roi;
 };
-
-#endif // CC_2D_VIEWPORT_LABEL_HEADER

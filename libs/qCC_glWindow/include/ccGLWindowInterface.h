@@ -32,6 +32,7 @@
 #include <QElapsedTimer>
 #include <QOpenGLExtraFunctions>
 #include <QOpenGLTexture>
+#include <QPointF>
 #include <QTimer>
 
 // system
@@ -199,9 +200,15 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	{
 		return m_viewportParams;
 	}
+	// FIXME(RJ): temporary helper for migration
+	QPointF toCenteredGLCoordinates(const QPointF& coordinates) const;
 	QPointF toCenteredGLCoordinates(int x, int y) const override;
 	QPointF toCornerGLCoordinates(int x, int y) const override;
-	void    setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, bool viewerBasedPerspective = true, bool bubbleViewMode = false) override;
+	void    setupProjectiveViewport(const ccGLMatrixd& cameraMatrix,
+	                                float              fov_deg                = 0.0f,
+	                                bool               viewerBasedPerspective = true,
+	                                bool               bubbleViewMode         = false,
+	                                const QPointF&     projectionCenterOffset = QPointF()) override;
 	void    aboutToBeRemoved(ccDrawableObject* entity) override;
 	void    getGLCameraParameters(ccGLCameraParameters& params) override;
 
@@ -1096,10 +1103,12 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	void        setStandardOrthoCorner();
 
 	// Lights controls (OpenGL scripts)
-	void glEnableSunLight();
-	void glDisableSunLight();
-	void glEnableCustomLight();
-	void glDisableCustomLight();
+	void glSetSunLightParameters(ccQOpenGLFunctions* glFunc);
+	void glEnableSunLight(ccQOpenGLFunctions* glFunc);
+	void glDisableSunLight(ccQOpenGLFunctions* glFunc);
+	void glSetCustomLightParameters(ccQOpenGLFunctions* glFunc);
+	void glEnableCustomLight(ccQOpenGLFunctions* glFunc);
+	void glDisableCustomLight(ccQOpenGLFunctions* glFunc);
 	void drawCustomLight();
 
 	//! Picking parameters
@@ -1155,7 +1164,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	/** The items must be currently displayed in this context
 	    AND at least one of them must be under the mouse cursor.
 	**/
-	void updateActiveItemsList(int x, int y, bool extendToSelectedLabels = false);
+	void updateActiveItemsList(const QPointF& position, bool extendToSelectedLabels = false);
 
 	//! Currently active items
 	/** Active items can be moved with mouse, etc.
@@ -1179,7 +1188,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	//! Converts a given (mouse) position in pixels to an orientation
 	/** The orientation vector origin is the current pivot point!
 	 **/
-	CCVector3d convertMousePositionToOrientation(int x, int y);
+	CCVector3d convertMousePositionToOrientation(const QPointF& position);
 
 	//! Draws the 'hot zone' (+/- icons for point size), 'leave bubble-view' button, etc.
 	void drawClickableItems(int xStart, int& yStart);
@@ -1258,9 +1267,11 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 
 	//! Viewport parameters (zoom, etc.)
 	ccViewportParameters m_viewportParams;
+	//! Projection center offset in normalized screen coordinates (+X right, +Y up)
+	QPointF m_projectiveViewportCenterOffset;
 
 	//! Last mouse position
-	QPoint m_lastMousePos;
+	QPointF m_lastMousePos;
 
 	//! Complete visualization matrix (GL style - double version)
 	ccGLMatrixd m_viewMatd;

@@ -38,9 +38,6 @@
 // Qt
 #include <QElapsedTimer>
 
-// system
-#include <set>
-
 //! Default number of points sampled on the 'data' mesh (if any)
 static const unsigned s_defaultSampledPointsOnDataMesh = 50000;
 //! Default temporary registration scalar field
@@ -65,10 +62,10 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	CCCoreLib::ICPRegistrationTools::Parameters params            = inputParameters;
 
 	// progress bar
-	QScopedPointer<ccProgressDialog> progressDlg;
+	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parent)
 	{
-		progressDlg.reset(new ccProgressDialog(false, parent));
+		progressDlg.reset(new ccProgressDialog(true, parent));
 	}
 
 	CCCoreLib::Garbage<CCCoreLib::GenericIndexedCloudPersist> cloudGarbage;
@@ -90,7 +87,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	CCCoreLib::GenericIndexedCloudPersist* dataCloud = nullptr;
 	if (data->isKindOf(CC_TYPES::MESH))
 	{
-		dataCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data), s_defaultSampledPointsOnDataMesh, progressDlg.data());
+		dataCloud = CCCoreLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data), s_defaultSampledPointsOnDataMesh, progressDlg.get());
 		if (!dataCloud)
 		{
 			ccLog::Error("[ICP] Failed to sample points on 'data' mesh!");
@@ -104,9 +101,9 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	}
 
 	// we activate a temporary scalar field for registration distances computation
-	CCCoreLib::ScalarField* dataDisplayedSF = nullptr;
-	int                     oldDataSfIdx    = -1;
-	int                     dataSfIdx       = -1;
+	CCCoreLib::ScalarField::Shared dataDisplayedSF;
+	int                            oldDataSfIdx = -1;
+	int                            dataSfIdx    = -1;
 
 	// if the 'data' entity is a real ccPointCloud, we can even create a proper temporary SF for registration distances
 	if (data->isA(CC_TYPES::POINT_CLOUD))
@@ -164,7 +161,7 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 			result                    = CCCoreLib::DistanceComputationTools::computeCloud2MeshDistances(dataCloud,
                                                                                      modelMesh,
                                                                                      c2mParams,
-                                                                                     progressDlg.data());
+                                                                                     progressDlg.get());
 		}
 		else
 		{
@@ -172,12 +169,15 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 			                                                                               modelCloud,
 			                                                                               gridLevel,
 			                                                                               -1,
-			                                                                               progressDlg.data());
+			                                                                               progressDlg.get());
 		}
 
 		if (result < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 		{
-			ccLog::Error("Failed to determine the max (overlap) distance (not enough memory?)");
+			if (progressDlg && progressDlg->wasCanceled())
+				ccLog::Warning("[ICP] Registration canceled by the user");
+			else
+				ccLog::Error("Failed to determine the max (overlap) distance (not enough memory?)");
 			return false;
 		}
 
@@ -285,11 +285,14 @@ bool ccRegistrationTools::ICP(ccHObject*                                        
 	                                                   transform,
 	                                                   finalRMS,
 	                                                   finalPointCount,
-	                                                   static_cast<CCCoreLib::GenericProgressCallback*>(progressDlg.data()));
+	                                                   static_cast<CCCoreLib::GenericProgressCallback*>(progressDlg.get()));
 
 	if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 	{
-		ccLog::Error("Registration failed: an error occurred (code %i)", result);
+		if (progressDlg && progressDlg->wasCanceled())
+			ccLog::Warning("[ICP] Registration canceled by the user");
+		else
+			ccLog::Error("Registration failed: an error occurred (code %i)", result);
 	}
 	else
 	{

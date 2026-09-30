@@ -105,36 +105,33 @@ namespace
 
 ccPluginInfoDlg::ccPluginInfoDlg(QWidget* parent)
     : QDialog(parent)
-    , m_UI(new Ui::ccPluginInfoDlg)
+    , m_ui(std::make_unique<Ui::ccPluginInfoDlg>())
     , m_ProxyModel(new QSortFilterProxyModel(this))
     , m_ItemModel(new QStandardItemModel(this))
 {
-	m_UI->setupUi(this);
+	m_ui->setupUi(this);
 
 	setWindowTitle(tr("About Plugins"));
 
-	m_UI->mWarningLabel->setText(tr("Enabling/disabling plugins will take effect next time you run %1").arg(QApplication::applicationName()));
-	m_UI->mWarningLabel->setStyleSheet(QStringLiteral("QLabel { background-color : #FFFF99; color : black; }"));
-	m_UI->mWarningLabel->hide();
+	m_ui->mWarningLabel->setText(tr("Enabling/disabling plugins will take effect next time you run %1").arg(QApplication::applicationName()));
+	m_ui->mWarningLabel->setStyleSheet(QStringLiteral("QLabel { background-color : #FFFF99; color : black; }"));
+	m_ui->mWarningLabel->hide();
 
-	m_UI->mSearchLineEdit->setStyleSheet("QLineEdit, QLineEdit:focus { border: none; }");
-	m_UI->mSearchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+	m_ui->mSearchLineEdit->setStyleSheet("QLineEdit, QLineEdit:focus { border: none; }");
+	m_ui->mSearchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
 	m_ProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 	m_ProxyModel->setSourceModel(m_ItemModel);
 
-	m_UI->mPluginListView->setModel(m_ProxyModel);
-	m_UI->mPluginListView->setFocus();
+	m_ui->mPluginListView->setModel(m_ProxyModel);
+	m_ui->mPluginListView->setFocus();
 
-	connect(m_UI->mSearchLineEdit, &QLineEdit::textEdited, m_ProxyModel, &QSortFilterProxyModel::setFilterFixedString);
+	connect(m_ui->mSearchLineEdit, &QLineEdit::textEdited, m_ProxyModel, &QSortFilterProxyModel::setFilterFixedString);
 
-	connect(m_UI->mPluginListView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ccPluginInfoDlg::selectionChanged);
+	connect(m_ui->mPluginListView->selectionModel(), &QItemSelectionModel::currentChanged, this, &ccPluginInfoDlg::selectionChanged);
 }
 
-ccPluginInfoDlg::~ccPluginInfoDlg()
-{
-	delete m_UI;
-}
+ccPluginInfoDlg::~ccPluginInfoDlg() = default;
 
 void ccPluginInfoDlg::setPluginPaths(const QStringList& pluginPaths)
 {
@@ -146,7 +143,7 @@ void ccPluginInfoDlg::setPluginPaths(const QStringList& pluginPaths)
 		paths += QStringLiteral("\n");
 	}
 
-	m_UI->mPluginPathTextEdit->setText(paths);
+	m_ui->mPluginPathTextEdit->setText(paths);
 }
 
 void ccPluginInfoDlg::setPluginList(const QList<ccPluginInterface*>& pluginList)
@@ -196,7 +193,7 @@ void ccPluginInfoDlg::setPluginList(const QList<ccPluginInterface*>& pluginList)
 
 		QModelIndex index = m_ItemModel->index(0, 0);
 
-		m_UI->mPluginListView->setCurrentIndex(index);
+		m_ui->mPluginListView->setCurrentIndex(index);
 	}
 
 	connect(m_ItemModel, &QStandardItemModel::itemChanged, this, &ccPluginInfoDlg::itemChanged);
@@ -236,11 +233,11 @@ void ccPluginInfoDlg::itemChanged(QStandardItem* item)
 	{
 		ccPluginManager::Get().setPluginEnabled(plugin, checked);
 
-		if (m_UI->mWarningLabel->isHidden())
+		if (m_ui->mWarningLabel->isHidden())
 		{
-			ccLog::Warning(m_UI->mWarningLabel->text());
+			ccLog::Warning(m_ui->mWarningLabel->text());
 
-			m_UI->mWarningLabel->show();
+			m_ui->mWarningLabel->show();
 		}
 	}
 }
@@ -249,12 +246,12 @@ void ccPluginInfoDlg::updatePluginInfo(const ccPluginInterface* plugin)
 {
 	if (plugin == nullptr)
 	{
-		m_UI->mIcon->setPixmap(QPixmap());
-		m_UI->mNameLabel->setText(tr("(No plugin selected)"));
-		m_UI->mDescriptionTextEdit->clear();
-		m_UI->mReferencesTextBrowser->clear();
-		m_UI->mAuthorsTextBrowser->clear();
-		m_UI->mMaintainerTextBrowser->clear();
+		m_ui->mIcon->setPixmap(QPixmap());
+		m_ui->mNameLabel->setText(tr("(No plugin selected)"));
+		m_ui->mDescriptionTextEdit->clear();
+		m_ui->mReferencesTextBrowser->clear();
+		m_ui->mAuthorsTextBrowser->clear();
+		m_ui->mMaintainerTextBrowser->clear();
 		return;
 	}
 
@@ -276,7 +273,7 @@ void ccPluginInfoDlg::updatePluginInfo(const ccPluginInterface* plugin)
 			iconPixmap = QPixmap(":/CC/pluginManager/images/std_plugin.png").scaled(iconSize);
 		}
 
-		m_UI->mPluginTypeLabel->clear();
+		m_ui->mPluginTypeLabel->clear();
 		break;
 	}
 
@@ -287,7 +284,7 @@ void ccPluginInfoDlg::updatePluginInfo(const ccPluginInterface* plugin)
 			iconPixmap = QPixmap(":/CC/pluginManager/images/gl_plugin.png").scaled(iconSize);
 		}
 
-		m_UI->mPluginTypeLabel->setText(tr("GL Shader"));
+		m_ui->mPluginTypeLabel->setText(tr("GL Shader"));
 		break;
 	}
 
@@ -298,50 +295,50 @@ void ccPluginInfoDlg::updatePluginInfo(const ccPluginInterface* plugin)
 			iconPixmap = QPixmap(":/CC/pluginManager/images/io_plugin.png").scaled(iconSize);
 		}
 
-		m_UI->mPluginTypeLabel->setText(tr("I/O"));
+		m_ui->mPluginTypeLabel->setText(tr("I/O"));
 		break;
 	}
 	}
 
-	m_UI->mIcon->setPixmap(iconPixmap);
+	m_ui->mIcon->setPixmap(iconPixmap);
 
-	m_UI->mNameLabel->setText(plugin->getName());
-	m_UI->mDescriptionTextEdit->setHtml(plugin->getDescription());
+	m_ui->mNameLabel->setText(plugin->getName());
+	m_ui->mDescriptionTextEdit->setHtml(plugin->getDescription());
 
 	const QString referenceText = sFormatReferenceList(plugin->getReferences());
 
 	if (!referenceText.isEmpty())
 	{
-		m_UI->mReferencesTextBrowser->setHtml(referenceText);
-		m_UI->mReferencesLabel->show();
-		m_UI->mReferencesTextBrowser->show();
+		m_ui->mReferencesTextBrowser->setHtml(referenceText);
+		m_ui->mReferencesLabel->show();
+		m_ui->mReferencesTextBrowser->show();
 	}
 	else
 	{
-		m_UI->mReferencesLabel->hide();
-		m_UI->mReferencesTextBrowser->hide();
-		m_UI->mReferencesTextBrowser->clear();
+		m_ui->mReferencesLabel->hide();
+		m_ui->mReferencesTextBrowser->hide();
+		m_ui->mReferencesTextBrowser->clear();
 	}
 
 	const QString authorsText = sFormatContactList(plugin->getAuthors(), plugin->getName());
 
 	if (!authorsText.isEmpty())
 	{
-		m_UI->mAuthorsTextBrowser->setHtml(authorsText);
+		m_ui->mAuthorsTextBrowser->setHtml(authorsText);
 	}
 	else
 	{
-		m_UI->mAuthorsTextBrowser->clear();
+		m_ui->mAuthorsTextBrowser->clear();
 	}
 
 	const QString maintainersText = sFormatContactList(plugin->getMaintainers(), plugin->getName());
 
 	if (!maintainersText.isEmpty())
 	{
-		m_UI->mMaintainerTextBrowser->setHtml(maintainersText);
+		m_ui->mMaintainerTextBrowser->setHtml(maintainersText);
 	}
 	else
 	{
-		m_UI->mMaintainerTextBrowser->clear();
+		m_ui->mMaintainerTextBrowser->clear();
 	}
 }

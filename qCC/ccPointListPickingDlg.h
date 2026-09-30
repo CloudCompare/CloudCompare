@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_POINT_PICKING_LIST_DIALOG_HEADER
-#define CC_POINT_PICKING_LIST_DIALOG_HEADER
 
 // GUI
 #include <ui_pointListPickingDlg.h>
@@ -116,5 +115,3 @@ class ccPointListPickingDlg : public ccPointPickingGenericInterface
 	//! New picked points that the user has selected (for proper "cancel" mechanism)
 	ccHObject::Container m_toBeAdded;
 };
-
-#endif

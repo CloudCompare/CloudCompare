@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccDrawableObject.h"
+#include "../include/ccDrawableObject.h"
 
 // Local
-#include "ccGenericGLDisplay.h"
+#include "../include/ccGenericGLDisplay.h"
 
 ccDrawableObject::ccDrawableObject()
     : m_currentDisplay(nullptr)

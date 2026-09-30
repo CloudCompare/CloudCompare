@@ -361,7 +361,7 @@ void ccUnrollDlg::fromPersistentSettings()
 
 void ccUnrollDlg::setConfiguration(bool cloudsOnly)
 {
-	m_ui->removeStretchedTrianglesCheckBox->setEnabled(false == cloudsOnly);
+	m_ui->removeStretchedTrianglesCheckBox->setEnabled(!cloudsOnly);
 }
 
 void ccUnrollDlg::loadParametersFromEntity()

@@ -980,7 +980,7 @@ bool ccComparisonDlg::computeDistances()
 				if (sf2D < 0)
 				{
 					ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
-					return 0;
+					return false;
 				}
 				auto sf = m_compCloud->getCCScalarField(sf2D);
 				for (unsigned idx = 0; idx < m_compCloud->size(); idx++)

@@ -913,12 +913,6 @@ namespace ccLibAlgorithms
 			// DGM: nope! Not the global scale!
 		}
 
-		if (!nProgress.oneStep())
-		{
-			// process cancelled by user
-			return false;
-		}
-
-		return true;
+		return nProgress.oneStep();
 	}
 } // namespace ccLibAlgorithms

@@ -10795,7 +10795,7 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 {
 	FileIOFilter::LoadParameters parameters;
 	{
-		parameters.alwaysDisplayLoadDialog = silent ? false : true;
+		parameters.alwaysDisplayLoadDialog = !silent;
 		parameters.shiftHandlingMode       = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 		parameters.parentWidget            = silent ? nullptr : this;
 	}

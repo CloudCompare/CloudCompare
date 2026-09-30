@@ -713,12 +713,7 @@ bool CommandLoad::process(ccCommandLineInterface& cmd)
 		return cmd.error(QObject::tr(R"(Missing parameter: filename after "-%1")").arg(COMMAND_OPEN));
 	}
 	QString filename(parser.takeNext());
-	if (!cmd.importFile(filename, globalShiftOptions))
-	{
-		return false;
-	}
-
-	return true;
+	return cmd.importFile(filename, globalShiftOptions);
 }
 
 CommandLoadCommandFile::CommandLoadCommandFile()
@@ -2643,12 +2638,7 @@ bool CommandSFConvertToRGB::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (cmd.autoSaveMode() && !cmd.saveClouds("SF_CONVERT_TO_RGB"))
-	{
-		return false;
-	}
-
-	return true;
+	return !cmd.autoSaveMode() || cmd.saveClouds("SF_CONVERT_TO_RGB");
 }
 
 CommandRGBConvertToSF::CommandRGBConvertToSF()
@@ -8173,12 +8163,7 @@ bool CommandFeature::process(ccCommandLineInterface& cmd)
 	}
 
 	// save output
-	if (cmd.autoSaveMode() && !cmd.saveClouds())
-	{
-		return false;
-	}
-
-	return true;
+	return !cmd.autoSaveMode() || cmd.saveClouds();
 }
 
 CommandDebugCmdLine::CommandDebugCmdLine()

@@ -951,7 +951,7 @@ namespace ccEntityAction
 
 				    QElapsedTimer eTimer;
 				    eTimer.start();
-				    if (false == pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.get() : nullptr))
+				    if (!pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.get() : nullptr))
 				    {
 					    errorMessage = QT_TR_NOOP("An error occurred! (see console)");
 					    return false;

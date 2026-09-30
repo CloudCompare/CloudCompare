@@ -946,7 +946,7 @@ bool ccComparisonDlg::computeDistances()
 			// we add the corresponding scalar fields (one for each dimension)
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				auto sf = splitDistances[j];
+				const auto& sf = splitDistances[j];
 				assert(c2cParams.splitDistances[j] == sf.get());
 
 				if (sf)

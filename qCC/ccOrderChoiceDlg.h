@@ -35,7 +35,7 @@ class ccOrderChoiceDlg : public QDialog
 	                 QString             firstRole,
 	                 ccHObject*          secondEntity,
 	                 QString             secondRole,
-	                 ccMainAppInterface* app = 0);
+	                 ccMainAppInterface* app = nullptr);
 
 	//! Destructor
 	~ccOrderChoiceDlg() override;

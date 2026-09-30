@@ -6797,7 +6797,7 @@ bool CommandRenameEntities::process(ccCommandLineInterface& cmd)
 	QString newBaseName = cmd.arguments().takeFirst();
 	// Validate if the given name contains any breaking characters for NTFS filesystem at least
 	QRegularExpression          rx(R"([^:/\\*?"|<>]*)");
-	QRegularExpressionValidator v(rx, 0);
+	QRegularExpressionValidator v(rx, nullptr);
 	int                         pos = 0;
 	if (!v.validate(newBaseName, pos))
 	{
@@ -7262,7 +7262,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		int index = 0;
 		if (!cmd.clouds().empty())
 		{
-			dataAndModel[index++] = &cmd.clouds()[0];
+			dataAndModel[index++] = cmd.clouds().data();
 			if (cmd.clouds().size() > 1)
 			{
 				dataAndModel[index++] = &cmd.clouds()[1];
@@ -7270,7 +7270,7 @@ bool CommandICP::process(ccCommandLineInterface& cmd)
 		}
 		if (index < 2 && !cmd.meshes().empty())
 		{
-			dataAndModel[index++] = &cmd.meshes()[0];
+			dataAndModel[index++] = cmd.meshes().data();
 			if (index < 2 && cmd.meshes().size() > 1)
 			{
 				dataAndModel[index++] = &cmd.meshes()[1];
@@ -7576,7 +7576,7 @@ bool CommandSaveClouds::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	bool res = cmd.saveClouds(QString(), allAtOnce, allAtOnce && setFileNames ? &fileNames[0] : nullptr);
+	bool res = cmd.saveClouds(QString(), allAtOnce, allAtOnce && setFileNames ? fileNames.data() : nullptr);
 
 	if (setFileNames)
 	{
@@ -7648,7 +7648,7 @@ bool CommandSaveMeshes::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	bool res = cmd.saveMeshes(QString(), allAtOnce, allAtOnce && setFileNames ? &fileNames[0] : nullptr);
+	bool res = cmd.saveMeshes(QString(), allAtOnce, allAtOnce && setFileNames ? fileNames.data() : nullptr);
 
 	if (setFileNames)
 	{

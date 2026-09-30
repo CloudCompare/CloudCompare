@@ -120,7 +120,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    bool                visualDebugMode       = false,
 	    bool                generateRandomColors  = false,
 	    bool                extratOustide         = false,
-	    ccProgressDialog*   progressDialog        = 0);
+	    ccProgressDialog*   progressDialog        = nullptr);
 
   protected:
 	void toggleInteractors(bool);

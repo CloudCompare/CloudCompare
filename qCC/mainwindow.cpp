@@ -9318,8 +9318,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 					{
 						delete B;
-						if (bestB)
-							delete bestB;
+						delete bestB;
 						ccLog::Error(tr("An error occurred while performing ICP!"));
 						return;
 					}
@@ -9717,10 +9716,8 @@ void MainWindow::doActionCloudCloudDist()
 	ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
 	ccGenericPointCloud* refCloud  = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
-	if (m_compDlg)
-	{
-		delete m_compDlg;
-	}
+	delete m_compDlg;
+
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
@@ -9817,9 +9814,8 @@ void MainWindow::doActionCloudMeshDist()
 		refMesh = ccHObjectCaster::ToGenericMesh(dlg.getSecondEntity());
 	}
 
-	// assert(!m_compDlg);
-	if (m_compDlg)
-		delete m_compDlg;
+	delete m_compDlg;
+
 	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMESH_DIST, this);
 	if (!m_compDlg->initDialog())
 	{

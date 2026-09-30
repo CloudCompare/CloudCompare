@@ -72,12 +72,10 @@ ccPointPropertiesDlg::ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* pa
 
 ccPointPropertiesDlg::~ccPointPropertiesDlg()
 {
-	if (m_label)
-		delete m_label;
+	delete m_label;
 	m_label = nullptr;
 
-	if (m_rect2DLabel)
-		delete m_rect2DLabel;
+	delete m_rect2DLabel;
 	m_rect2DLabel = nullptr;
 }
 

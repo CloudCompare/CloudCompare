@@ -78,7 +78,7 @@ static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 	}
 
 	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(comboBox->model());
-	QStandardItem*            item  = model ? model->item(index) : 0;
+	QStandardItem*            item  = model ? model->item(index) : nullptr;
 	if (item)
 	{
 		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));

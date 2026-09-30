@@ -721,7 +721,7 @@ bool CommandVolume25D::process(ccCommandLineInterface& cmd)
 		int          index     = 0;
 		if (!cmd.clouds().empty())
 		{
-			clouds[index++] = &cmd.clouds()[0];
+			clouds[index++] = cmd.clouds().data();
 			if (std::isnan(constHeight) && cmd.clouds().size() > 1)
 			{
 				clouds[index++] = &cmd.clouds()[1];

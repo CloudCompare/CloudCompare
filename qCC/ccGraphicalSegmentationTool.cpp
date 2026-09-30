@@ -143,12 +143,10 @@ void ccGraphicalSegmentationTool::allowPolylineExport(bool state)
 
 ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
-	if (m_segmentationPoly)
-		delete m_segmentationPoly;
+	delete m_segmentationPoly;
 	m_segmentationPoly = nullptr;
 
-	if (m_polyVertices)
-		delete m_polyVertices;
+	delete m_polyVertices;
 	m_polyVertices = nullptr;
 }
 

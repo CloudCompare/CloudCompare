@@ -289,7 +289,7 @@ class QCPSelectableCursor : public QCPAbstractPlottable
 	virtual void clearData()
 	{
 	}
-	double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = 0) const override
+	double selectTest(const QPointF& pos, bool onlySelectable, QVariant* details = nullptr) const override
 	{
 		return -1;
 	} // we don't use the QCP internal selection mechanism!

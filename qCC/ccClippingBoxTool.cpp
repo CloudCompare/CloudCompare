@@ -103,8 +103,7 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 
 ccClippingBoxTool::~ccClippingBoxTool()
 {
-	if (m_clipBox)
-		delete m_clipBox;
+	delete m_clipBox;
 	m_clipBox = nullptr;
 }
 

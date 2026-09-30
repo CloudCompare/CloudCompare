@@ -449,7 +449,7 @@ struct IncompleteEntityLinkerContext
 			}
 		}
 
-		auto parent = incompleteEntity->getParent();
+		auto* parent = incompleteEntity->getParent();
 		if (parent)
 		{
 			// detach the object from its parent (and remove the dependency link if any)
@@ -491,26 +491,25 @@ static bool ContinueAfterError(IncompleteEntityLinkerContext& context, bool coul
 	return context.forceLoadAfterError;
 }
 
-static void HandleMeshGroup(ccHObject* incompleteEntity)
+static void HandleMeshGroup(IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
-	ccLog::Warning(QString("[BIN] Mesh groups are deprecated! Entity %1 should be ignored...").arg(incompleteEntity->getName()));
+	ccLog::Warning(QString("[BIN] Mesh groups are deprecated! Entity %1 should be ignored...").arg(linkerContext.incompleteEntity->getName()));
 }
 
-static void HandleSubMesh(ccHObject*&                    incompleteEntity,
-                          IncompleteEntityLinkerContext& linkerContext)
+static void HandleSubMesh(IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccSubMesh* subMesh = ccHObjectCaster::ToSubMesh(incompleteEntity);
+	ccSubMesh* subMesh = ccHObjectCaster::ToSubMesh(linkerContext.incompleteEntity);
 	if (!subMesh)
 	{
 		assert(false);
@@ -552,8 +551,8 @@ static void HandleSubMesh(ccHObject*&                    incompleteEntity,
 		if (!ContinueAfterError(linkerContext))
 		{
 			linkerContext.deleteIncompleteEntity();
-			linkerContext.result = CC_FERR_MALFORMED_FILE;
-			incompleteEntity     = nullptr;
+			linkerContext.result           = CC_FERR_MALFORMED_FILE;
+			linkerContext.incompleteEntity = nullptr;
 			return;
 		}
 
@@ -566,22 +565,21 @@ static void HandleSubMesh(ccHObject*&                    incompleteEntity,
 		else
 		{
 			linkerContext.deleteIncompleteEntity();
-			incompleteEntity = nullptr;
+			linkerContext.incompleteEntity = nullptr;
 		}
 	}
 }
 
-static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntity,
-                                  IncompleteEntityLinkerContext& linkerContext,
+static void HandleMeshOrPrimitive(IncompleteEntityLinkerContext& linkerContext,
                                   ccHObject*                     orphans)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccMesh* mesh = ccHObjectCaster::ToMesh(incompleteEntity);
+	ccMesh* mesh = ccHObjectCaster::ToMesh(linkerContext.incompleteEntity);
 	if (!mesh)
 	{
 		assert(false);
@@ -627,6 +625,7 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 		break;
 
 		case ccSerializableObject::LoadingContext::Dependency::MESH_MATERIALS:
+		{
 			materials.reset(static_cast<ccMaterialSet*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::MATERIAL_SET)));
 			if (materials)
 			{
@@ -638,9 +637,11 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 				linkerContext.hasBrokenDependencies = true;
 				mesh->showMaterials(false);
 			}
-			break;
+		}
+		break;
 
 		case ccSerializableObject::LoadingContext::Dependency::MESH_TRI_NORMALS:
+		{
 			triNormsTable.reset(static_cast<NormsIndexesTableType*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::NORMAL_INDEXES_ARRAY)));
 			if (triNormsTable)
 			{
@@ -652,9 +653,11 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 				linkerContext.hasBrokenDependencies = true;
 				mesh->showTriNorms(false);
 			}
-			break;
+		}
+		break;
 
 		case ccSerializableObject::LoadingContext::Dependency::MESH_TEXTURE_COORDS:
+		{
 			texCoordsTable.reset(static_cast<TextureCoordsContainer*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::TEX_COORDS_ARRAY)));
 			if (texCoordsTable)
 			{
@@ -666,7 +669,8 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 				linkerContext.hasBrokenDependencies = true;
 				mesh->showMaterials(false);
 			}
-			break;
+		}
+		break;
 
 		default:
 			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for mesh '%2' in the file!").arg(depIt->type).arg(mesh->getName()));
@@ -678,7 +682,7 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 	if (!hasAssociatedVertices)
 	{
 		linkerContext.deleteIncompleteEntity();
-		incompleteEntity = nullptr;
+		linkerContext.incompleteEntity = nullptr;
 		if (!ContinueAfterError(linkerContext))
 		{
 			linkerContext.result = CC_FERR_MALFORMED_FILE;
@@ -726,23 +730,23 @@ static void HandleMeshOrPrimitive(ccHObject*&                    incompleteEntit
 				}
 
 				linkerContext.deleteIncompleteEntity();
-				incompleteEntity = nullptr;
+				linkerContext.incompleteEntity = nullptr;
 				break;
 			}
 		}
 	}
 }
 
-static void HandlePolyline(ccHObject*&                    incompleteEntity,
-                           IncompleteEntityLinkerContext& linkerContext)
+static void HandlePolyline(
+    IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccPolyline* poly = ccHObjectCaster::ToPolyline(incompleteEntity);
+	ccPolyline* poly = ccHObjectCaster::ToPolyline(linkerContext.incompleteEntity);
 	if (!poly)
 	{
 		assert(false);
@@ -781,7 +785,7 @@ static void HandlePolyline(ccHObject*&                    incompleteEntity,
 	{
 		linkerContext.hasBrokenDependencies = true;
 		linkerContext.deleteIncompleteEntity();
-		incompleteEntity = nullptr;
+		linkerContext.incompleteEntity = nullptr;
 		if (!ContinueAfterError(linkerContext))
 		{
 			linkerContext.result = CC_FERR_MALFORMED_FILE;
@@ -798,23 +802,22 @@ static void HandlePolyline(ccHObject*&                    incompleteEntity,
 			{
 				ccLog::Warning(QString("[BIN] Polyline '%1' (ID=%2) seems corrupted!").arg(poly->getName()).arg(poly->getUniqueID()));
 				linkerContext.deleteIncompleteEntity();
-				incompleteEntity = nullptr;
+				linkerContext.incompleteEntity = nullptr;
 				break;
 			}
 		}
 	}
 }
 
-static void HandleSensor(ccHObject*                     incompleteEntity,
-                         IncompleteEntityLinkerContext& linkerContext)
+static void HandleSensor(IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccSensor* sensor = ccHObjectCaster::ToSensor(incompleteEntity);
+	ccSensor* sensor = ccHObjectCaster::ToSensor(linkerContext.incompleteEntity);
 	if (!sensor)
 	{
 		assert(false);
@@ -856,16 +859,16 @@ static void HandleSensor(ccHObject*                     incompleteEntity,
 	}
 }
 
-static void HandleLabel2D(ccHObject*&                    incompleteEntity,
-                          IncompleteEntityLinkerContext& linkerContext)
+static void HandleLabel2D(
+    IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	cc2DLabel* label = ccHObjectCaster::To2DLabel(incompleteEntity);
+	cc2DLabel* label = ccHObjectCaster::To2DLabel(linkerContext.incompleteEntity);
 	if (!label)
 	{
 		assert(false);
@@ -951,7 +954,7 @@ static void HandleLabel2D(ccHObject*&                    incompleteEntity,
 		linkerContext.hasBrokenDependencies = true;
 		ccLog::Warning(QString("[BIN] Label '%1' (ID=%2) seems corrupted!").arg(label->getName()).arg(label->getUniqueID()));
 		linkerContext.deleteIncompleteEntity();
-		incompleteEntity = nullptr;
+		linkerContext.incompleteEntity = nullptr;
 		if (!ContinueAfterError(linkerContext))
 		{
 			linkerContext.result = CC_FERR_MALFORMED_FILE;
@@ -959,16 +962,16 @@ static void HandleLabel2D(ccHObject*&                    incompleteEntity,
 	}
 }
 
-static void HandleFacet(ccHObject*&                    incompleteEntity,
-                        IncompleteEntityLinkerContext& linkerContext)
+static void HandleFacet(
+    IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccFacet* facet = ccHObjectCaster::ToFacet(incompleteEntity);
+	ccFacet* facet = ccHObjectCaster::ToFacet(linkerContext.incompleteEntity);
 	if (!facet)
 	{
 		assert(false);
@@ -1058,7 +1061,7 @@ static void HandleFacet(ccHObject*&                    incompleteEntity,
 	if (!hasOriginPoints && !hasContourVertices && !hasContourPolyline && !hasPolygon)
 	{
 		linkerContext.deleteIncompleteEntity();
-		incompleteEntity = nullptr;
+		linkerContext.incompleteEntity = nullptr;
 		if (!ContinueAfterError(linkerContext))
 		{
 			linkerContext.result = CC_FERR_MALFORMED_FILE;
@@ -1066,16 +1069,16 @@ static void HandleFacet(ccHObject*&                    incompleteEntity,
 	}
 }
 
-static void HandleImage(ccHObject*&                    incompleteEntity,
-                        IncompleteEntityLinkerContext& linkerContext)
+static void HandleImage(
+    IncompleteEntityLinkerContext& linkerContext)
 {
-	if (!incompleteEntity)
+	if (!linkerContext.incompleteEntity)
 	{
 		assert(false);
 		return;
 	}
 
-	ccImage* image = ccHObjectCaster::ToImage(incompleteEntity);
+	ccImage* image = ccHObjectCaster::ToImage(linkerContext.incompleteEntity);
 	if (!image)
 	{
 		assert(false);
@@ -1239,18 +1242,22 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 	for (auto it = loadingContext.incompleteEntities.begin(); root && it != loadingContext.incompleteEntities.end(); ++it)
 	{
-		ccHObject* incompleteEntity = static_cast<ccHObject*>(it.key());
-		assert(incompleteEntity);
-
-		const std::vector<ccSerializableObject::LoadingContext::Dependency> dependencies = it.value();
-		if (dependencies.empty())
+		// initialize the linker context for the current incomplete entity
 		{
-			// means the entity has already been processed or has been deleted already (see CleanDelete() above)
-			continue;
-		}
-		it.value().clear(); // mark it as processed (important for CleanDelete() above)
+			ccHObject* incompleteEntity = static_cast<ccHObject*>(it.key());
+			assert(incompleteEntity);
 
-		linkerContext.setIncompleteEntity(incompleteEntity, dependencies);
+			std::vector<ccSerializableObject::LoadingContext::Dependency>& dependencies = it.value();
+			if (dependencies.empty())
+			{
+				// means the entity has already been processed or has been deleted already (see IncompleteEntityLinkerContext::deleteIncompleteEntity())
+				continue;
+			}
+
+			linkerContext.setIncompleteEntity(incompleteEntity, dependencies); // dependencies will be copied
+			dependencies.clear();                                              // remove the dependencies so as to mark the entity as 'processed'
+			                                                                   //(important for IncompleteEntityLinkerContext::deleteIncompleteEntity())
+		}
 
 		if (linkerContext.result == CC_FERR_MALFORMED_FILE)
 		{
@@ -1261,43 +1268,63 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		}
 
 		// Replace the large if/else chain by calls to the new handlers
-		if (incompleteEntity->isA(CC_TYPES::MESH_GROUP))
+		if (linkerContext.incompleteEntity->isA(CC_TYPES::MESH_GROUP))
 		{
-			HandleMeshGroup(incompleteEntity);
+			HandleMeshGroup(linkerContext);
 		}
-		else if (incompleteEntity->isA(CC_TYPES::SUB_MESH))
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::SUB_MESH))
 		{
-			HandleSubMesh(incompleteEntity, linkerContext);
+			HandleSubMesh(linkerContext);
 		}
-		else if (incompleteEntity->isA(CC_TYPES::MESH) || incompleteEntity->isKindOf(CC_TYPES::PRIMITIVE))
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::MESH) || linkerContext.incompleteEntity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
-			HandleMeshOrPrimitive(incompleteEntity, linkerContext, orphans.get());
+			HandleMeshOrPrimitive(linkerContext, orphans.get());
 		}
-		else if (incompleteEntity->isKindOf(CC_TYPES::POLY_LINE))
+		else if (linkerContext.incompleteEntity->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			HandlePolyline(incompleteEntity, linkerContext);
+			HandlePolyline(linkerContext);
 		}
-		else if (incompleteEntity->isKindOf(CC_TYPES::SENSOR))
+		else if (linkerContext.incompleteEntity->isKindOf(CC_TYPES::SENSOR))
 		{
-			HandleSensor(incompleteEntity, linkerContext);
+			HandleSensor(linkerContext);
 		}
-		else if (incompleteEntity->isA(CC_TYPES::LABEL_2D))
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::LABEL_2D))
 		{
-			HandleLabel2D(incompleteEntity, linkerContext);
+			HandleLabel2D(linkerContext);
 		}
-		else if (incompleteEntity->isA(CC_TYPES::FACET))
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::FACET))
 		{
-			HandleFacet(incompleteEntity, linkerContext);
+			HandleFacet(linkerContext);
 		}
-		else if (incompleteEntity->isA(CC_TYPES::IMAGE))
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::IMAGE))
 		{
-			HandleImage(incompleteEntity, linkerContext);
+			HandleImage(linkerContext);
 		}
 		else
 		{
 			assert(false);
-			ccLog::Warning(QString("[BIN] Unexpected entity type (%1) for entity '%2' in the file!").arg(incompleteEntity->getClassID()).arg(incompleteEntity->getName()));
+			ccLog::Warning(QString("[BIN] Unexpected entity type (%1) for entity '%2' in the file!").arg(linkerContext.incompleteEntity->getClassID()).arg(linkerContext.incompleteEntity->getName()));
 		}
+
+		// if we still have an incomplete entity at this point, it means that we were able to fix all its dependencies
+		if (linkerContext.incompleteEntity)
+		{
+			const ccShiftedObject* shifted = ccHObjectCaster::ToShifted(linkerContext.incompleteEntity);
+			if (shifted)
+			{
+				// it may be interesting to re-use the Global Shift when loading other files
+				ccGlobalShiftManager::StoreShift(shifted->getGlobalShift(), shifted->getGlobalScale());
+
+				// TODO: we should also check that other entities with global shift not too far away
+				// have not already been loaded. In which case we should 'translate' the current entity?
+			}
+		}
+	}
+
+	if (linkerContext.result == CC_FERR_NO_ERROR && linkerContext.hasBrokenDependencies)
+	{
+		// minor error
+		linkerContext.result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 	}
 
 	if (root)

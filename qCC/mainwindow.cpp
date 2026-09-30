@@ -8511,6 +8511,10 @@ void MainWindow::doActionSelectDisplayedEntities()
 	{
 		m_ccRoot->selectEntities(displayed);
 	}
+	else
+	{
+		m_ccRoot->unselectAllEntities();
+	}
 }
 
 void MainWindow::doActionAddConstantSF()

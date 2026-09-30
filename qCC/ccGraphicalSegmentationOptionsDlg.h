@@ -30,7 +30,7 @@ class ccGraphicalSegmentationOptionsDlg : public QDialog
 
   public:
 	//! Default constructor
-	ccGraphicalSegmentationOptionsDlg(const QString windowTitle = QString(), QWidget* parent = nullptr);
+	ccGraphicalSegmentationOptionsDlg(QString windowTitle = QString(), QWidget* parent = nullptr);
 
 	void accept() override;
 

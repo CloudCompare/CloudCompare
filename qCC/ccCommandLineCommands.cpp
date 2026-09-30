@@ -6250,7 +6250,7 @@ bool CommandSFOperation::process(ccCommandLineInterface& cmd)
 	bool inPlace = true;
 	if (!cmd.arguments().empty())
 	{
-		if (cmd.IsCommand(cmd.arguments().front(), COMMAND_SF_OP_NOT_IN_PLACE))
+		if (ccCommandLineInterface::IsCommand(cmd.arguments().front(), COMMAND_SF_OP_NOT_IN_PLACE))
 		{
 			// local arg detected
 			inPlace = false;

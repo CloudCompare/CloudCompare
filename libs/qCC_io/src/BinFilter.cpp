@@ -561,7 +561,6 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 			}
 			else if (root == obj)
 			{
-				delete root;
 				root = nullptr;
 			}
 			delete obj;

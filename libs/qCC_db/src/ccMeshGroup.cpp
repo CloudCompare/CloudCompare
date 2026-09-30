@@ -54,7 +54,7 @@ bool ccMeshGroup::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	uint32_t vertUniqueID = 0;
 	if (in.read((char*)&vertUniqueID, 4) < 0)
 		return ReadError();
-	dependencies.push_back(LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::MESH_VERTICES_CLOUD});
+	dependencies.emplace_back(vertUniqueID, LoadingContext::Dependency::MESH_VERTICES_CLOUD);
 
 	// per-triangle normals array (dataVersion>=20)
 	{
@@ -64,7 +64,7 @@ bool ccMeshGroup::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t normArrayID = 0;
 		if (in.read((char*)&normArrayID, 4) < 0)
 			return ReadError();
-		dependencies.push_back(LoadingContext::Dependency{normArrayID, LoadingContext::Dependency::MESH_TRI_NORMALS});
+		dependencies.emplace_back(normArrayID, LoadingContext::Dependency::MESH_TRI_NORMALS);
 	}
 
 	// texture coordinates array (dataVersion>=20)
@@ -75,7 +75,7 @@ bool ccMeshGroup::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t texCoordArrayID = 0;
 		if (in.read((char*)&texCoordArrayID, 4) < 0)
 			return ReadError();
-		dependencies.push_back(LoadingContext::Dependency{texCoordArrayID, LoadingContext::Dependency::MESH_TEXTURE_COORDS});
+		dependencies.emplace_back(texCoordArrayID, LoadingContext::Dependency::MESH_TEXTURE_COORDS);
 	}
 
 	// materials
@@ -86,7 +86,7 @@ bool ccMeshGroup::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		uint32_t matSetID = 0;
 		if (in.read((char*)&matSetID, 4) < 0)
 			return ReadError();
-		dependencies.push_back(LoadingContext::Dependency{matSetID, LoadingContext::Dependency::MESH_MATERIALS});
+		dependencies.emplace_back(matSetID, LoadingContext::Dependency::MESH_MATERIALS);
 	}
 
 	if (!dependencies.empty())

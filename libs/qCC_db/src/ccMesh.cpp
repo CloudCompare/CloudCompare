@@ -3455,7 +3455,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 	{
 		return ReadError();
 	}
-	dependencies.push_back(LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::MESH_VERTICES_CLOUD});
+	dependencies.emplace_back(vertUniqueID, LoadingContext::Dependency::MESH_VERTICES_CLOUD);
 
 	// per-triangle normals array (dataVersion>=20)
 	{
@@ -3469,7 +3469,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		}
 		if (normArrayID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{normArrayID, LoadingContext::Dependency::MESH_TRI_NORMALS});
+			dependencies.emplace_back(normArrayID, LoadingContext::Dependency::MESH_TRI_NORMALS);
 		}
 	}
 
@@ -3485,7 +3485,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		}
 		if (texCoordArrayID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{texCoordArrayID, LoadingContext::Dependency::MESH_TEXTURE_COORDS});
+			dependencies.emplace_back(texCoordArrayID, LoadingContext::Dependency::MESH_TEXTURE_COORDS);
 		}
 	}
 
@@ -3501,7 +3501,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		}
 		if (matSetID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{matSetID, LoadingContext::Dependency::MESH_MATERIALS});
+			dependencies.emplace_back(matSetID, LoadingContext::Dependency::MESH_MATERIALS);
 		}
 	}
 

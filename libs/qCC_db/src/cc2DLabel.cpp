@@ -548,7 +548,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 				{
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
-					dependencies.push_back(LoadingContext::Dependency{cloudID, LoadingContext::Dependency::LABEL_SOURCE_CLOUD});
+					dependencies.emplace_back(cloudID, LoadingContext::Dependency::LABEL_SOURCE_CLOUD);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -576,7 +576,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
 					m_pickedPoints.back().uv    = uv;
-					dependencies.push_back(LoadingContext::Dependency{meshID, LoadingContext::Dependency::LABEL_SOURCE_MESH});
+					dependencies.emplace_back(meshID, LoadingContext::Dependency::LABEL_SOURCE_MESH);
 				}
 				catch (const std::bad_alloc&)
 				{

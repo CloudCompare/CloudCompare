@@ -513,7 +513,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			return ReadError();
 		if (origPointsUniqueID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{origPointsUniqueID, LoadingContext::Dependency::FACET_ORIGIN_POINTS});
+			dependencies.emplace_back(origPointsUniqueID, LoadingContext::Dependency::FACET_ORIGIN_POINTS);
 		}
 	}
 
@@ -526,7 +526,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			return ReadError();
 		if (contourPointsUniqueID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{contourPointsUniqueID, LoadingContext::Dependency::FACET_CONTOUR_VERTICES});
+			dependencies.emplace_back(contourPointsUniqueID, LoadingContext::Dependency::FACET_CONTOUR_VERTICES);
 		}
 	}
 
@@ -539,7 +539,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			return ReadError();
 		if (contourPolyUniqueID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{contourPolyUniqueID, LoadingContext::Dependency::FACET_CONTOUR_POLYLINE});
+			dependencies.emplace_back(contourPolyUniqueID, LoadingContext::Dependency::FACET_CONTOUR_POLYLINE);
 		}
 	}
 
@@ -552,7 +552,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			return ReadError();
 		if (polygonMeshUniqueID != 0)
 		{
-			dependencies.push_back(LoadingContext::Dependency{polygonMeshUniqueID, LoadingContext::Dependency::FACET_POLYGON_MESH});
+			dependencies.emplace_back(polygonMeshUniqueID, LoadingContext::Dependency::FACET_POLYGON_MESH);
 		}
 	}
 

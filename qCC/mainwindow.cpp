@@ -9793,7 +9793,8 @@ void MainWindow::doActionCloudMeshDist()
 
 				if (answer == QMessageBox::Yes)
 				{
-					return doActionCloudPrimitiveDist();
+					doActionCloudPrimitiveDist();
+					return;
 				}
 				if (answer == QMessageBox::NoToAll)
 				{

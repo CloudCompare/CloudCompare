@@ -458,8 +458,6 @@ void ccWaveDialog::add2DLabel(ccPointCloud* cloud, unsigned pointIndex)
 	}
 
 	m_display->redraw();
-
-	return;
 }
 
 void ccWaveDialog::onItemPicked(const PickedItem& pi)

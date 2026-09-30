@@ -111,7 +111,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	void        cancel();
 	inline void addPointToPolyline(int x, int y)
 	{
-		return addPointToPolylineExt(x, y, false);
+		addPointToPolylineExt(x, y, false);
 	}
 	void addPointToPolylineExt(int x, int y, bool allowClicksOutside);
 	void closePolyLine(int x = 0, int y = 0); // arguments for compatibility with ccGlWindow::rightButtonClicked signal

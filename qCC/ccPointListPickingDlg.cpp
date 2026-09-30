@@ -143,11 +143,11 @@ void ccPointListPickingDlg::linkWithEntity(ccHObject* entity)
 		ccHObject::Container groups;
 		m_associatedEntity->filterChildren(groups, true, CC_TYPES::HIERARCHY_OBJECT);
 
-		for (ccHObject::Container::const_iterator it = groups.begin(); it != groups.end(); ++it)
+		for (auto* group : groups)
 		{
-			if ((*it)->getName() == s_pickedPointContainerName)
+			if (group->getName() == s_pickedPointContainerName)
 			{
-				m_orderedLabelsContainer = *it;
+				m_orderedLabelsContainer = group;
 				break;
 			}
 		}

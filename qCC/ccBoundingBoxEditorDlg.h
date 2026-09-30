@@ -78,7 +78,7 @@ class ccBoundingBoxEditorDlg : public QDialog
 
   public:
 	// overloaded from QDialog
-	virtual int exec();
+	int exec() override;
 
   protected:
 	void squareModeActivated(bool);

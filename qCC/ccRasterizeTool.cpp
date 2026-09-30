@@ -78,7 +78,7 @@ static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 	}
 
 	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(comboBox->model());
-	QStandardItem*            item  = model ? model->item(index) : 0;
+	QStandardItem*            item  = model ? model->item(index) : nullptr;
 	if (item)
 	{
 		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
@@ -226,13 +226,13 @@ bool ccRasterizeTool::showGridBoxEditor()
 	return cc2Point5DimEditor::showGridBoxEditor();
 }
 
-void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
+void ccRasterizeTool::updateCloudName(bool withNonEmptyCellNumber)
 {
 	QString str;
 	if (m_cloud)
 	{
 		str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
-		if (withNonEmptyCells)
+		if (withNonEmptyCellNumber)
 			str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
 		else
 			str += ')';
@@ -1750,7 +1750,7 @@ void ccRasterizeTool::generateXRaySF()
 	progressDialog.start();
 	progressDialog.show();
 	QCoreApplication::processEvents();
-	CCCoreLib::NormalizedProgress nProgress(&progressDialog, static_cast<unsigned>(m_grid.width * m_grid.height));
+	CCCoreLib::NormalizedProgress nProgress(&progressDialog, m_grid.width * m_grid.height);
 
 	// for all cells
 	unsigned nonEmptyCellIndex      = 0;
@@ -2193,7 +2193,7 @@ void ccRasterizeTool::exportContourLines()
 	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(m_ui->contourStepDoubleSpinBox->value()));
-	for (auto poly : m_contourLines)
+	for (auto* poly : m_contourLines)
 	{
 		// now is the time to map the polyline coordinates to the right dimensions!
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(poly->getAssociatedCloud());

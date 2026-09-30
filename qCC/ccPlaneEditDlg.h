@@ -45,7 +45,7 @@ class ccPlaneEditDlg : public QDialog
 	explicit ccPlaneEditDlg(ccPickingHub* pickingHub, QWidget* parent);
 
 	//! Destructor
-	virtual ~ccPlaneEditDlg();
+	~ccPlaneEditDlg() override;
 
 	//! Links this dialog with an existing plane
 	void initWithPlane(ccPlane* plane);
@@ -54,7 +54,7 @@ class ccPlaneEditDlg : public QDialog
 	void updatePlane(ccPlane* plane);
 
 	//! Inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi);
+	void onItemPicked(const PickedItem& pi) override;
 
   public:
 	void pickPointAsCenter(bool);

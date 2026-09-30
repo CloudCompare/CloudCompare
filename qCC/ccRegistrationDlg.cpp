@@ -20,9 +20,6 @@
 // Local
 #include "mainwindow.h"
 
-// common
-#include <ccQtHelpers.h>
-
 // CCCoreLib
 #include <CloudSamplingTools.h>
 #include <DgmOctree.h>
@@ -188,10 +185,7 @@ CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING ccRegistrationDlg::normalsMatc
 	{
 		return static_cast<CCCoreLib::ICPRegistrationTools::NORMALS_MATCHING>(normalsComboBox->currentIndex());
 	}
-	else
-	{
-		return CCCoreLib::ICPRegistrationTools::NO_NORMAL;
-	}
+	return CCCoreLib::ICPRegistrationTools::NO_NORMAL;
 }
 
 bool ccRegistrationDlg::adjustScale() const
@@ -267,8 +261,7 @@ ccRegistrationDlg::ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() c
 {
 	if (errorCriterion->isChecked())
 		return CCCoreLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
-	else
-		return CCCoreLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
+	return CCCoreLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
 }
 
 int ccRegistrationDlg::getTransformationFilters() const

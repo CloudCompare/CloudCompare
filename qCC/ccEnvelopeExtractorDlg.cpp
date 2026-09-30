@@ -27,11 +27,11 @@
 #include <QCoreApplication>
 
 // system
-#include <assert.h>
+#include <cassert>
 #if defined(CC_WINDOWS)
 #include <windows.h>
 #else
-#include <time.h>
+#include <ctime>
 #include <unistd.h>
 #endif
 

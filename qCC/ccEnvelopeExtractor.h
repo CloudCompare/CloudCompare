@@ -78,7 +78,7 @@ class ccEnvelopeExtractor
 	                                std::vector<ccPolyline*>&              parts,
 	                                EnvelopeType                           envelopeType          = FULL,
 	                                bool                                   allowSplitting        = true,
-	                                const PointCoordinateType*             preferredNormDim      = nullptr,
+	                                const PointCoordinateType*             preferredNormDir      = nullptr,
 	                                const PointCoordinateType*             preferredUpDir        = nullptr,
 	                                bool                                   enableVisualDebugMode = false);
 
@@ -93,7 +93,7 @@ class ccEnvelopeExtractor
 	    \param hullPoints output points (on the convex hull)
 	    \param envelopeType type of envelope (above / below / full)
 	    \param allowMultiPass whether to allow multi-pass process (with longer edges potentially generated so as 'disturb' the initial guess)
-	    \param maxSquareLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
+	    \param maxSquareEdgeLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
 	    \param enableVisualDebugMode whether to display a (debug) window to represent the algorithm process
 	    \param maxAngleDeg max angle between segments (angle between 0 and 180, in degrees)
 	    \return success
@@ -102,7 +102,7 @@ class ccEnvelopeExtractor
 	                                 std::list<CCCoreLib::PointProjectionTools::IndexedCCVector2*>&  hullPoints,
 	                                 EnvelopeType                                                    envelopeType,
 	                                 bool                                                            allowMultiPass,
-	                                 PointCoordinateType                                             maxSquareLength       = 0,
+	                                 PointCoordinateType                                             maxSquareEdgeLength   = 0,
 	                                 bool                                                            enableVisualDebugMode = false,
 	                                 double                                                          maxAngleDeg           = 90.0);
 };

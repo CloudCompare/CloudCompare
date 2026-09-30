@@ -279,7 +279,7 @@ void ccConsole::refresh()
 	{
 		if (m_textDisplay || m_logStream)
 		{
-			for (auto messagePair : m_queue)
+			for (const auto& messagePair : m_queue)
 			{
 				// destination: log file
 				if (m_logStream)

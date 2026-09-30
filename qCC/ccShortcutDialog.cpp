@@ -14,7 +14,7 @@
 // #                   COPYRIGHT: CloudCompare project                      #
 // #                                                                        #
 // ##########################################################################
-//
+
 #include "ccShortcutDialog.h"
 
 #include "ccPersistentSettings.h"

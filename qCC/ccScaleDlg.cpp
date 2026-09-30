@@ -64,10 +64,10 @@ void ccScaleDlg::fxUpdated(double val)
 
 CCVector3d ccScaleDlg::getScales() const
 {
-	return CCVector3d(
+	return {
 	    m_ui->fxSpinBox->value(),
 	    m_ui->fySpinBox->value(),
-	    m_ui->fzSpinBox->value());
+	    m_ui->fzSpinBox->value()};
 }
 
 bool ccScaleDlg::keepInPlace() const

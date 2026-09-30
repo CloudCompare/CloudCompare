@@ -30,7 +30,7 @@ class ccAboutDialog : public QDialog
 
   public:
 	ccAboutDialog(QWidget* parent = nullptr);
-	~ccAboutDialog();
+	~ccAboutDialog() override;
 
   private:
 	std::unique_ptr<Ui::AboutDialog> m_ui;

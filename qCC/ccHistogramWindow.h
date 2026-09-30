@@ -47,7 +47,7 @@ class ccHistogramWindow : public QCustomPlot
 	explicit ccHistogramWindow(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccHistogramWindow();
+	~ccHistogramWindow() override;
 
 	//! Sets title
 	void setTitle(const QString& str);
@@ -196,10 +196,10 @@ class ccHistogramWindow : public QCustomPlot
 	void setNumberOfClasses(size_t n);
 
 	// mouse events handling
-	void mousePressEvent(QMouseEvent* event);
-	void mouseMoveEvent(QMouseEvent* event);
-	void wheelEvent(QWheelEvent* event);
-	void resizeEvent(QResizeEvent* event);
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void wheelEvent(QWheelEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
 
 	//! Returns current maximum bin size
 	unsigned getMaxHistoVal();
@@ -301,7 +301,7 @@ class ccHistogramWindowDlg : public QDialog
 	//! Default constructor
 	explicit ccHistogramWindowDlg(QWidget* parent = nullptr);
 	//! Destructor
-	virtual ~ccHistogramWindowDlg();
+	~ccHistogramWindowDlg() override;
 
 	//! Returns encapsulated ccHistogramWindow
 	inline ccHistogramWindow* window()

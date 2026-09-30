@@ -37,10 +37,10 @@ class ccRegistrationDlg : public QDialog
 	ccRegistrationDlg(ccHObject* data, ccHObject* model, QWidget* parent = nullptr);
 
 	//! Default destructor
-	virtual ~ccRegistrationDlg();
+	~ccRegistrationDlg() override;
 
 	// shortcuts
-	typedef CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
+	using ConvergenceMethod = CCCoreLib::ICPRegistrationTools::CONVERGENCE_TYPE;
 
 	//! Returns convergence method
 	ConvergenceMethod getConvergenceMethod() const;

@@ -452,8 +452,7 @@ bool ccSectionExtractionTool::reset(bool askForConfirmation /*=true*/)
 			{
 				if (QMessageBox::question(MainWindow::TheInstance(), "Reset", "You'll lose all manually defined polylines: are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 					return false;
-				else
-					break;
+				break;
 			}
 		}
 	}
@@ -1921,7 +1920,7 @@ void ccSectionExtractionTool::extractPoints()
 
 	// progress dialog
 	ccProgressDialog              pdlg(true);
-	CCCoreLib::NormalizedProgress nprogress(&pdlg, static_cast<unsigned>(sectionCount));
+	CCCoreLib::NormalizedProgress nprogress(&pdlg, sectionCount);
 	if (!visualDebugMode)
 	{
 		pdlg.setMethodTitle(tr("Extract sections"));

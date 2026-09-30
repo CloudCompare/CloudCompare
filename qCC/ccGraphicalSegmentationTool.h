@@ -47,14 +47,14 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccGraphicalSegmentationTool(QWidget* parent);
 	//! Destructor
-	virtual ~ccGraphicalSegmentationTool();
+	~ccGraphicalSegmentationTool() override;
 
 	//! Adds an entity (and/or its children) to the 'to be segmented' pool
 	/** Warning: some entities may be rejected if they are
 	    locked, or can't be segmented this way.
 	    \return whether entity has been added to the pool or not
 	**/
-	bool addEntity(ccHObject* anObject, bool silent = false);
+	bool addEntity(ccHObject* entity, bool silent = false);
 
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities() const;
@@ -77,9 +77,9 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	}
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool accepted) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool accepted) override;
 
 	//! Returns whether hidden parts should be delete after segmentation
 	bool deleteHiddenParts() const
@@ -111,7 +111,7 @@ class ccGraphicalSegmentationTool : public ccOverlayDialog
 	void        cancel();
 	inline void addPointToPolyline(int x, int y)
 	{
-		return addPointToPolylineExt(x, y, false);
+		addPointToPolylineExt(x, y, false);
 	}
 	void addPointToPolylineExt(int x, int y, bool allowClicksOutside);
 	void closePolyLine(int x = 0, int y = 0); // arguments for compatibility with ccGlWindow::rightButtonClicked signal

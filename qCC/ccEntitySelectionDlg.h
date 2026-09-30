@@ -39,7 +39,7 @@ class ccEntitySelectionDialog : public QDialog
 	                        QString                     label                = QString());
 
 	//! Destructor
-	virtual ~ccEntitySelectionDialog();
+	~ccEntitySelectionDialog() override;
 
 	//! Returns the selected index (unique selection mode)
 	int getSelectedIndex() const;

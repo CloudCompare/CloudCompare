@@ -28,7 +28,7 @@
 
 static QString sFormatReferenceList(const ccPluginInterface::ReferenceList& list)
 {
-	const QString linkFormat(" <a href=\"%1\" style=\"text-decoration:none\">&#x1F517;</a>");
+	const QString linkFormat(R"( <a href="%1" style="text-decoration:none">&#x1F517;</a>)");
 	QString       formattedText;
 	int           referenceNum = 1;
 
@@ -51,7 +51,7 @@ static QString sFormatReferenceList(const ccPluginInterface::ReferenceList& list
 
 static QString sFormatContactList(const ccPluginInterface::ContactList& list, const QString& pluginName)
 {
-	const QString emailFormat("&lt;<a href=\"mailto:%1?Subject=CloudCompare %2\">%1</a>&gt;");
+	const QString emailFormat(R"(&lt;<a href="mailto:%1?Subject=CloudCompare %2">%1</a>&gt;)");
 	QString       formattedText;
 
 	for (const ccPluginInterface::Contact& contact : list)

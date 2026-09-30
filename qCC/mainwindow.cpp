@@ -3087,8 +3087,8 @@ void MainWindow::doRemoveDuplicatePoints()
 
 void MainWindow::doActionFilterByValue()
 {
-	typedef std::pair<ccHObject*, ccPointCloud*> EntityAndVerticesType;
-	std::vector<EntityAndVerticesType>           toFilter;
+	using EntityAndVerticesType = std::pair<ccHObject*, ccPointCloud*>;
+	std::vector<EntityAndVerticesType> toFilter;
 
 	for (ccHObject* entity : getSelectedEntities())
 	{
@@ -3131,10 +3131,8 @@ void MainWindow::doActionFilterByValue()
 			}
 			else
 			{
-				if (minVald > static_cast<double>(sf->displayRange().start()))
-					minVald = static_cast<double>(sf->displayRange().start());
-				if (maxVald < static_cast<double>(sf->displayRange().stop()))
-					maxVald = static_cast<double>(sf->displayRange().stop());
+				minVald = std::min(minVald, static_cast<double>(sf->displayRange().start()));
+				maxVald = std::max(maxVald, static_cast<double>(sf->displayRange().stop()));
 			}
 		}
 	}
@@ -3648,7 +3646,7 @@ void AddToRemoveList(ccHObject* toRemove, ccHObject::Container& toBeRemovedList)
 			// nothing to do, we already have an ancestor
 			return;
 		}
-		else if (toRemove->isAncestorOf(toBeRemovedList[j]))
+		if (toRemove->isAncestorOf(toBeRemovedList[j]))
 		{
 			// we don't need to keep the children
 			toBeRemovedList[j] = toBeRemovedList.back();
@@ -3753,9 +3751,9 @@ void MainWindow::doActionMerge()
 
 		// compute total size of the final cloud
 		size_t totalSize = 0;
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (const auto* cloud : clouds)
 		{
-			totalSize += clouds[i]->size();
+			totalSize += cloud->size();
 		}
 
 		if (totalSize > std::numeric_limits<unsigned>::max())
@@ -3764,10 +3762,9 @@ void MainWindow::doActionMerge()
 			return;
 		}
 
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (auto* pc : clouds)
 		{
-			ccPointCloud* pc      = clouds[i];
-			bool          isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_UPDATE); // vertices of meshes or polylines typically have this flag
+			bool isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_UPDATE); // vertices of meshes or polylines typically have this flag
 
 			if (!firstCloud)
 			{
@@ -3828,14 +3825,11 @@ void MainWindow::doActionMerge()
 						ccConsole::Error(tr("Couldn't allocate a new scalar field for storing the original cloud index! Try to free some memory ..."));
 						return;
 					}
-					else
+					ocIndexSF = firstCloud->getScalarField(sfIdx);
+					if (ocIndexSF)
 					{
-						ocIndexSF = firstCloud->getScalarField(sfIdx);
-						if (ocIndexSF)
-						{
-							ocIndexSF->fill(0);
-							firstCloud->setCurrentDisplayedScalarField(sfIdx);
-						}
+						ocIndexSF->fill(0);
+						firstCloud->setCurrentDisplayedScalarField(sfIdx);
 					}
 				}
 			}
@@ -4402,9 +4396,8 @@ void MainWindow::doActionSubsample()
 		QElapsedTimer eTimer;
 		eTimer.start();
 
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (auto* cloud : clouds)
 		{
-			ccPointCloud*              cloud        = clouds[i];
 			CCCoreLib::ReferenceCloud* sampledCloud = sDlg.getSampledCloud(cloud, &pDlg);
 			if (!sampledCloud)
 			{
@@ -4706,9 +4699,9 @@ void MainWindow::doActionLabelConnectedComponents()
 				// safety test
 				int realComponentCount = 0;
 				{
-					for (size_t i = 0; i < components.size(); ++i)
+					for (auto* component : components)
 					{
-						if (components[i]->size() >= s_minComponentSize)
+						if (component->size() >= s_minComponentSize)
 						{
 							++realComponentCount;
 						}
@@ -4972,7 +4965,7 @@ void MainWindow::doConvertPolylinesToMesh()
 			{
 				const CCVector3* P         = poly->getPoint(v);
 				int              vertIndex = static_cast<int>(points2D.size());
-				points2D.push_back(CCVector2(P->u[X], P->u[Y]));
+				points2D.emplace_back(P->u[X], P->u[Y]);
 
 				if (v + 1 < vertCount)
 				{
@@ -5094,10 +5087,7 @@ void MainWindow::doCompute2HalfDimVolume()
 			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
-		else
-		{
-			cloud1 = ccHObjectCaster::ToGenericPointCloud(ent);
-		}
+		cloud1 = ccHObjectCaster::ToGenericPointCloud(ent);
 	}
 
 	ccGenericPointCloud* cloud2 = nullptr;
@@ -5109,10 +5099,7 @@ void MainWindow::doCompute2HalfDimVolume()
 			ccConsole::Error(tr("Select point clouds only!"));
 			return;
 		}
-		else
-		{
-			cloud2 = ccHObjectCaster::ToGenericPointCloud(ent);
-		}
+		cloud2 = ccHObjectCaster::ToGenericPointCloud(ent);
 	}
 
 	ccVolumeCalcTool calcVolumeTool(cloud1, cloud2, this);
@@ -6244,7 +6231,7 @@ void MainWindow::doActionUnroll()
 		return;
 	}
 
-	ccPointCloud* inputAsCloud = static_cast<ccPointCloud*>(cloud);
+	ccPointCloud* inputAsCloud = cloud;
 
 	// wether the input entity is a mesh
 	ccMesh* inputMesh = ccHObjectCaster::ToMesh(m_selectedEntities.front());
@@ -6373,13 +6360,10 @@ ccGLWindowInterface* MainWindow::getActiveGLWindow()
 	{
 		return ccGLWindowInterface::FromWidget(activeSubWindow->widget());
 	}
-	else
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	if (!subWindowList.isEmpty())
 	{
-		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-		if (!subWindowList.isEmpty())
-		{
-			return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
-		}
+		return ccGLWindowInterface::FromWidget(subWindowList[0]->widget());
 	}
 
 	return nullptr;
@@ -6388,10 +6372,10 @@ ccGLWindowInterface* MainWindow::getActiveGLWindow()
 QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	for (int i = 0; i < subWindowList.size(); ++i)
+	for (auto* subWin : subWindowList)
 	{
-		if (ccGLWindowInterface::FromWidget(subWindowList[i]->widget()) == win)
-			return subWindowList[i];
+		if (ccGLWindowInterface::FromWidget(subWin->widget()) == win)
+			return subWin;
 	}
 
 	// not found!
@@ -6407,11 +6391,8 @@ ccGLWindowInterface* MainWindow::getGLWindow(int index) const
 		assert(win);
 		return win;
 	}
-	else
-	{
-		assert(false);
-		return nullptr;
-	}
+	assert(false);
+	return nullptr;
 }
 
 int MainWindow::getGLWindowCount() const
@@ -6724,7 +6705,7 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	}
 
 	// otherwise we add it to DB
-	m_mdiDialogs.push_back(ccMDIDialogs(dlg, pos));
+	m_mdiDialogs.emplace_back(dlg, pos);
 
 	// automatically update the dialog placement when its shown
 	connect(dlg, &ccOverlayDialog::shown, this, [=]()
@@ -6742,11 +6723,11 @@ void MainWindow::registerOverlayDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 	repositionOverlayDialog(m_mdiDialogs.back());
 }
 
-void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dialog)
+void MainWindow::unregisterOverlayDialog(ccOverlayDialog* dlg)
 {
 	for (std::vector<ccMDIDialogs>::iterator it = m_mdiDialogs.begin(); it != m_mdiDialogs.end(); ++it)
 	{
-		if (it->dialog == dialog)
+		if (it->dialog == dlg)
 		{
 			m_mdiDialogs.erase(it);
 			break;
@@ -6937,7 +6918,7 @@ void MainWindow::activateRegisterPointPairTool()
 			ccConsole::Error("Select at least one entity (point cloud or mesh)!");
 			return;
 		}
-		else if (entities.size() == 1)
+		if (entities.size() == 1)
 		{
 			alignedEntities = entities;
 		}
@@ -6952,9 +6933,9 @@ void MainWindow::activateRegisterPointPairTool()
 
 			// add the selected indexes as 'aligned' entities
 			alignedEntities.reserve(indexes.size());
-			for (size_t i = 0; i < indexes.size(); ++i)
+			for (const auto id : indexes)
 			{
-				alignedEntities.push_back(entities[indexes[i]]);
+				alignedEntities.push_back(entities[id]);
 			}
 
 			// add the others as 'reference' entities
@@ -7462,7 +7443,7 @@ void MainWindow::activateTranslateRotateMode()
 		ccConsole::Error(tr("No entity eligible for manual transformation! (see console)"));
 		return;
 	}
-	else if (rejectedEntities)
+	if (rejectedEntities)
 	{
 		ccConsole::Error(tr("Some entities were ignored! (see console)"));
 	}
@@ -9258,7 +9239,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 				                         0,
 				                         CCVector3(0, 0, 0));
 				matrices.push_back(trans);
-				matrixAngles.push_back(std::pair<double, double>(phi_deg, theta_deg));
+				matrixAngles.emplace_back(phi_deg, theta_deg);
 
 				// for poles, no need to rotate!
 				if (j == 0 || j == thetaSteps)
@@ -9335,8 +9316,7 @@ void MainWindow::doActionComputeBestICPRmsMatrix()
 					if (result >= CCCoreLib::ICPRegistrationTools::ICP_ERROR)
 					{
 						delete B;
-						if (bestB)
-							delete bestB;
+						delete bestB;
 						ccLog::Error(tr("An error occurred while performing ICP!"));
 						return;
 					}
@@ -9734,10 +9714,8 @@ void MainWindow::doActionCloudCloudDist()
 	ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
 	ccGenericPointCloud* refCloud  = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
-	if (m_compDlg)
-	{
-		delete m_compDlg;
-	}
+	delete m_compDlg;
+
 	m_compDlg = new ccComparisonDlg(compCloud, refCloud, ccComparisonDlg::CLOUDCLOUD_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
@@ -9785,7 +9763,7 @@ void MainWindow::doActionCloudMeshDist()
 		ccConsole::Error(tr("Select at least one mesh!"));
 		return;
 	}
-	else if (meshNum + cloudNum < 2)
+	if (meshNum + cloudNum < 2)
 	{
 		ccConsole::Error(tr("Select one mesh and one cloud or two meshes!"));
 		return;
@@ -9813,9 +9791,10 @@ void MainWindow::doActionCloudMeshDist()
 
 				if (answer == QMessageBox::Yes)
 				{
-					return doActionCloudPrimitiveDist();
+					doActionCloudPrimitiveDist();
+					return;
 				}
-				else if (answer == QMessageBox::NoToAll)
+				if (answer == QMessageBox::NoToAll)
 				{
 					DontShowPrimitiveDistWarning = true;
 				}
@@ -9834,9 +9813,8 @@ void MainWindow::doActionCloudMeshDist()
 		refMesh = ccHObjectCaster::ToGenericMesh(dlg.getSecondEntity());
 	}
 
-	// assert(!m_compDlg);
-	if (m_compDlg)
-		delete m_compDlg;
+	delete m_compDlg;
+
 	m_compDlg = new ccComparisonDlg(compEnt, refMesh, ccComparisonDlg::CLOUDMESH_DIST, this);
 	if (!m_compDlg->initDialog())
 	{
@@ -10338,19 +10316,16 @@ bool MainWindow::checkStereoMode(ccGLWindowInterface* win)
 			}
 			return false;
 		}
+		if (win == getActiveGLWindow())
+		{
+			m_ui->actionEnableStereo->setChecked(false);
+		}
 		else
 		{
-			if (win == getActiveGLWindow())
-			{
-				m_ui->actionEnableStereo->setChecked(false);
-			}
-			else
-			{
-				assert(false);
-				m_ui->actionEnableStereo->blockSignals(true);
-				m_ui->actionEnableStereo->setChecked(false);
-				m_ui->actionEnableStereo->blockSignals(false);
-			}
+			assert(false);
+			m_ui->actionEnableStereo->blockSignals(true);
+			m_ui->actionEnableStereo->setChecked(false);
+			m_ui->actionEnableStereo->blockSignals(false);
 		}
 	}
 
@@ -10819,7 +10794,7 @@ ccHObject* MainWindow::loadFile(QString filename, bool silent)
 {
 	FileIOFilter::LoadParameters parameters;
 	{
-		parameters.alwaysDisplayLoadDialog = silent ? false : true;
+		parameters.alwaysDisplayLoadDialog = !silent;
 		parameters.shiftHandlingMode       = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
 		parameters.parentWidget            = silent ? nullptr : this;
 	}
@@ -11001,18 +10976,18 @@ void MainWindow::doActionLoadFile()
 static bool IsValidFileName(QString filename)
 {
 #ifdef CC_WINDOWS
-	QString sPattern("^(?!^(PRN|AUX|CLOCK\\$|NUL|CON|COM\\d|LPT\\d|\\..*)(\\..+)?$)[^\\x00-\\x1f\\\\?*:\\"
+	QString sPattern(R"(^(?!^(PRN|AUX|CLOCK\$|NUL|CON|COM\d|LPT\d|\..*)(\..+)?$)[^\x00-\x1f\\?*:\)"
 	                 ";|/]+$");
 #else
-	QString sPattern("^(([a-zA-Z]:|\\\\)\\\\)?(((\\.)|(\\.\\.)|([^\\\\/:\\*\\?"
-	                 "\\|<>\\. ](([^\\\\/:\\*\\?"
-	                 "\\|<>\\. ])|([^\\\\/:\\*\\?"
-	                 "\\|<>]*[^\\\\/:\\*\\?"
-	                 "\\|<>\\. ]))?))\\\\)*[^\\\\/:\\*\\?"
-	                 "\\|<>\\. ](([^\\\\/:\\*\\?"
-	                 "\\|<>\\. ])|([^\\\\/:\\*\\?"
-	                 "\\|<>]*[^\\\\/:\\*\\?"
-	                 "\\|<>\\. ]))?$");
+	QString sPattern(R"(^(([a-zA-Z]:|\\)\\)?(((\.)|(\.\.)|([^\\/:\*\?)"
+	                 R"(\|<>\. ](([^\\/:\*\?)"
+	                 R"(\|<>\. ])|([^\\/:\*\?)"
+	                 R"(\|<>]*[^\\/:\*\?)"
+	                 R"(\|<>\. ]))?))\\)*[^\\/:\*\?)"
+	                 R"(\|<>\. ](([^\\/:\*\?)"
+	                 R"(\|<>\. ])|([^\\/:\*\?)"
+	                 R"(\|<>]*[^\\/:\*\?)"
+	                 R"(\|<>\. ]))?$)");
 #endif
 
 	return QRegularExpression(sPattern).match(filename).hasMatch();
@@ -11182,9 +11157,9 @@ void MainWindow::doActionSaveFile()
 
 			if (useThisFilter)
 			{
-				QStringList ff = filter->getFileFilters(false);
-				for (int j = 0; j < ff.size(); ++j)
-					fileFilters.append(ff[j]);
+				QStringList ffs = filter->getFileFilters(false);
+				for (const auto& ff : ffs)
+					fileFilters.append(ff);
 			}
 		}
 	}

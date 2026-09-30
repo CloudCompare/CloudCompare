@@ -151,10 +151,10 @@ namespace ccEntityAction
 
 				if (colorize)
 				{
-					cloud->colorize(static_cast<float>(colour.redF()),
-					                static_cast<float>(colour.greenF()),
-					                static_cast<float>(colour.blueF()),
-					                static_cast<float>(colour.alphaF()));
+					cloud->colorize(colour.redF(),
+					                colour.greenF(),
+					                colour.blueF(),
+					                colour.alphaF());
 				}
 				else
 				{
@@ -359,7 +359,7 @@ namespace ccEntityAction
 			ccLog::Error(QT_TR_NOOP("None of the selected entities has per-point or per-vertex colors!"));
 			return false;
 		}
-		else if (cloud1->hasColors() && cloud2->hasColors())
+		if (cloud1->hasColors() && cloud2->hasColors())
 		{
 			ccLog::Error(QT_TR_NOOP("Both entities have colors! Remove the colors on the entity you wish to import the colors to!"));
 			return false;
@@ -435,7 +435,7 @@ namespace ccEntityAction
 			ccLog::Error(QT_TR_NOOP("None of the selected entities has per-point or per-vertex colors!"));
 			return false;
 		}
-		else if (cloud1->hasScalarFields() && cloud2->hasScalarFields())
+		if (cloud1->hasScalarFields() && cloud2->hasScalarFields())
 		{
 			// ask the user to chose which will be the 'source' cloud
 			ccOrderChoiceDlg ocDlg(cloud1, QT_TR_NOOP("Source"), cloud2, QT_TR_NOOP("Destination"), app);
@@ -611,30 +611,27 @@ namespace ccEntityAction
 					ccLog::Warning(QObject::tr("[ConvertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
 					continue;
 				}
+				if (mesh->hasColors()
+				    && QMessageBox::warning(parent,
+				                            QT_TR_NOOP("Mesh already has colors"),
+				                            QObject::tr("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
+				                            QMessageBox::Yes | QMessageBox::No,
+				                            QMessageBox::No)
+				           != QMessageBox::Yes)
+				{
+					continue;
+				}
+
+				if (mesh->convertMaterialsToVertexColors())
+				{
+					mesh->showColors(true);
+					mesh->showSF(false); // just in case
+					mesh->showMaterials(false);
+					mesh->prepareDisplayForRefresh_recursive();
+				}
 				else
 				{
-					if (mesh->hasColors()
-					    && QMessageBox::warning(parent,
-					                            QT_TR_NOOP("Mesh already has colors"),
-					                            QObject::tr("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
-					                            QMessageBox::Yes | QMessageBox::No,
-					                            QMessageBox::No)
-					           != QMessageBox::Yes)
-					{
-						continue;
-					}
-
-					if (mesh->convertMaterialsToVertexColors())
-					{
-						mesh->showColors(true);
-						mesh->showSF(false); // just in case
-						mesh->showMaterials(false);
-						mesh->prepareDisplayForRefresh_recursive();
-					}
-					else
-					{
-						ccLog::Warning(QObject::tr("[ConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
-					}
+					ccLog::Warning(QObject::tr("[ConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
 				}
 			}
 		}
@@ -779,15 +776,12 @@ namespace ccEntityAction
 					continue;
 				}
 
-				selectedCloudsWithColors.push_back({ent, pc});
+				selectedCloudsWithColors.emplace_back(ent, pc);
 
 				double sigmaCloud = ccLibAlgorithms::GetDefaultCloudKernelSize(pc);
 
 				// we keep the smallest value
-				if (sigmaCloud < spatialSigma)
-				{
-					spatialSigma = sigmaCloud;
-				}
+				spatialSigma = std::min(sigmaCloud, spatialSigma);
 			}
 		}
 
@@ -882,7 +876,7 @@ namespace ccEntityAction
 
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 			pDlg->setModal(true);
 		}
@@ -957,7 +951,7 @@ namespace ccEntityAction
 
 				    QElapsedTimer eTimer;
 				    eTimer.start();
-				    if (false == pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.get() : nullptr))
+				    if (!pc->applyFilterToRGB(static_cast<PointCoordinateType>(spatialSigma), static_cast<PointCoordinateType>(sigmaSF), filterParams, parent ? pDlg.get() : nullptr))
 				    {
 					    errorMessage = QT_TR_NOOP("An error occurred! (see console)");
 					    return false;
@@ -1088,7 +1082,7 @@ namespace ccEntityAction
 
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 			pDlg->setModal(true);
 		}
@@ -1311,28 +1305,25 @@ namespace ccEntityAction
 					ccLog::Error(QT_TR_NOOP("Not enough memory!"));
 					break;
 				}
-				else
+				ScalarType minSF = sf->getMin();
+				ScalarType maxSF = sf->getMax();
+
+				ScalarType step = (maxSF - minSF) / (s_randomColorsNumber - 1);
+				if (step == 0)
+					step = static_cast<ScalarType>(1.0);
+
+				for (unsigned i = 0; i < pc->size(); ++i)
 				{
-					ScalarType minSF = sf->getMin();
-					ScalarType maxSF = sf->getMax();
+					ScalarType val      = sf->getValue(i);
+					unsigned   colIndex = static_cast<unsigned>((val - minSF) / step);
+					if (colIndex == s_randomColorsNumber)
+						--colIndex;
 
-					ScalarType step = (maxSF - minSF) / (s_randomColorsNumber - 1);
-					if (step == 0)
-						step = static_cast<ScalarType>(1.0);
-
-					for (unsigned i = 0; i < pc->size(); ++i)
-					{
-						ScalarType val      = sf->getValue(i);
-						unsigned   colIndex = static_cast<unsigned>((val - minSF) / step);
-						if (colIndex == s_randomColorsNumber)
-							--colIndex;
-
-						pc->setPointColor(i, randomColors->getValue(colIndex));
-					}
-
-					pc->showColors(true);
-					pc->showSF(false); // just in case
+					pc->setPointColor(i, randomColors->getValue(colIndex));
 				}
+
+				pc->showColors(true);
+				pc->showSF(false); // just in case
 
 				pc->prepareDisplayForRefresh_recursive();
 			}
@@ -1576,7 +1567,7 @@ namespace ccEntityAction
 					CCCoreLib::ReferenceCloud referenceCloud(pc);
 
 					// populate the cloud with the points which have the selected class
-					for (unsigned index = 0; index < static_cast<unsigned>(pc->size()); index++)
+					for (unsigned index = 0; index < pc->size(); index++)
 					{
 						if (static_cast<int>(sf->getValue(index)) == pointClass)
 						{
@@ -1665,11 +1656,8 @@ namespace ccEntityAction
 		{
 			return static_cast<PointCoordinateType>(out);
 		}
-		else
-		{
-			ccLog::Warning(QT_TR_NOOP("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
-			return minSFValue;
-		}
+		ccLog::Warning(QT_TR_NOOP("[SetSFAsCoord] By default the coordinate equivalent to NaN values will be the minimum SF value"));
+		return minSFValue;
 	}
 
 	bool sfSetAsCoord(ccHObject* entity, QWidget* parent /*=nullptr*/)
@@ -1714,7 +1702,7 @@ namespace ccEntityAction
 		std::array<CCCoreLib::ScalarField::Shared, 3> scalarFields{sfX, sfY, sfZ};
 
 		PointCoordinateType defaultCoordForNaN = std::numeric_limits<PointCoordinateType>::quiet_NaN();
-		for (auto sf : scalarFields)
+		for (const auto& sf : scalarFields)
 		{
 			if (sf)
 			{
@@ -2061,7 +2049,7 @@ namespace ccEntityAction
 			return false;
 		}
 
-		for (const auto cloud : clouds)
+		for (auto* cloud : clouds)
 		{
 			std::vector<ccScalarField::Shared> fields(5, nullptr);
 			fields[0] = (exportR ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "R").toStdString()) : nullptr);
@@ -2206,7 +2194,7 @@ namespace ccEntityAction
 
 		try
 		{
-			for (const auto entity : selectedEntities)
+			for (auto* entity : selectedEntities)
 			{
 				if (entity->isA(CC_TYPES::POINT_CLOUD))
 				{
@@ -2452,7 +2440,7 @@ namespace ccEntityAction
 
 			bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
 
-			for (auto mesh : meshes)
+			for (auto* mesh : meshes)
 			{
 				Q_ASSERT(mesh != nullptr);
 
@@ -2820,7 +2808,7 @@ namespace ccEntityAction
 			if (thisBBox.isValid())
 			{
 				CCVector3           dd   = thisBBox.maxCorner() - thisBBox.minCorner();
-				PointCoordinateType maxd = std::max(dd.x, std::max(dd.y, dd.z));
+				PointCoordinateType maxd = std::max({dd.x, dd.y, dd.z});
 				if (maxBoxSize < 0.0 || maxd > maxBoxSize)
 					maxBoxSize = maxd;
 			}
@@ -2856,7 +2844,7 @@ namespace ccEntityAction
 		const ccComputeOctreeDlg::ComputationMode mode           = coDlg.getMode();
 		const double                              chosenCellSize = coDlg.getMinCellSize();
 
-		for (const auto cloud : clouds)
+		for (auto* cloud : clouds)
 		{
 			// we temporarily detach entity, as it may undergo
 			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
@@ -2899,12 +2887,12 @@ namespace ccEntityAction
 					    {
 						    return newOctree;
 					    }
-					    return ccOctree::Shared(nullptr);
+					    return {nullptr};
 				    }
 
 				    default:
 					    Q_ASSERT(false);
-					    return ccOctree::Shared(nullptr);
+					    return {nullptr};
 				    }
 			    });
 			qint64 elapsedTime_ms = eTimer.elapsed();
@@ -2973,7 +2961,7 @@ namespace ccEntityAction
 					ent->prepareDisplayForRefresh();
 					continue;
 				}
-				else if (mesh->hasNormals()) // per-vertex normals?
+				if (mesh->hasNormals()) // per-vertex normals?
 				{
 					if (mesh->getParent()
 					    && (mesh->getParent()->isA(CC_TYPES::MESH) /*|| mesh->getParent()->isKindOf(CC_TYPES::PRIMITIVE)*/) // TODO
@@ -3108,10 +3096,10 @@ namespace ccEntityAction
 		switch (distribIndex)
 		{
 		case 0: // Gauss
-			sDlg.reset(new ccStatisticalTestDlg("mu", "sigma", QString(), QT_TR_NOOP("Local Statistical Test (Gauss)"), parent));
+			sDlg = std::make_unique<ccStatisticalTestDlg>("mu", "sigma", QString(), QT_TR_NOOP("Local Statistical Test (Gauss)"), parent);
 			break;
 		case 1: // Weibull
-			sDlg.reset(new ccStatisticalTestDlg("a", "b", "shift", QT_TR_NOOP("Local Statistical Test (Weibull)"), parent));
+			sDlg = std::make_unique<ccStatisticalTestDlg>("a", "b", "shift", QT_TR_NOOP("Local Statistical Test (Weibull)"), parent);
 			break;
 		default:
 			ccLog::Error(QT_TR_NOOP("Invalid distribution!"));

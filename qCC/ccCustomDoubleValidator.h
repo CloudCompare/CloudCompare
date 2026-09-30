@@ -34,7 +34,7 @@ class ccCustomDoubleValidator : public QValidator
 	}
 
 	// reimplemented from QValidator
-	State validate(QString& input, int& pos) const
+	State validate(QString& input, int& pos) const override
 	{
 		for (int i = 0; i < input.size(); ++i)
 		{
@@ -44,14 +44,11 @@ class ccCustomDoubleValidator : public QValidator
 				input[i] = '.';
 				continue;
 			}
-			else if (c == '.' || c == '-' || c.isDigit())
+			if (c == '.' || c == '-' || c.isDigit())
 			{
 				continue;
 			}
-			else
-			{
-				return Invalid;
-			}
+			return Invalid;
 		}
 		return Acceptable;
 	}

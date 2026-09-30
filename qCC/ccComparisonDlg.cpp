@@ -342,7 +342,7 @@ bool ccComparisonDlg::computeApproxDistances()
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(true, this));
+		progressDlg = std::make_unique<ccProgressDialog>(true, this);
 		progressDlg->show();
 	}
 
@@ -540,7 +540,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(false, this));
+		progressDlg = std::make_unique<ccProgressDialog>(false, this);
 		progressDlg->setMethodTitle(tr("Determining optimal octree level"));
 		progressDlg->setInfo(tr("Testing %1 levels...").arg(MAX_OCTREE_LEVEL)); // we lie here ;)
 		progressDlg->start();
@@ -577,9 +577,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		// scan the octree structure
 		const CCCoreLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
-		for (CCCoreLib::DgmOctree::cellsContainer::const_iterator c = compCodes.begin(); c != compCodes.end(); ++c)
+		for (const auto& compCode : compCodes)
 		{
-			CCCoreLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
+			CCCoreLib::DgmOctree::CellCode truncatedCode = (compCode.theCode >> bitDec);
 
 			// new cell?
 			if (truncatedCode != tempCode)
@@ -736,7 +736,7 @@ bool ccComparisonDlg::computeDistances()
 	std::unique_ptr<ccProgressDialog> progressDlg;
 	if (parentWidget())
 	{
-		progressDlg.reset(new ccProgressDialog(true, this));
+		progressDlg = std::make_unique<ccProgressDialog>(true, this);
 	}
 
 	std::array<ccScalarField::Shared, 3> splitDistances;
@@ -946,7 +946,7 @@ bool ccComparisonDlg::computeDistances()
 			// we add the corresponding scalar fields (one for each dimension)
 			for (unsigned j = 0; j < 3; ++j)
 			{
-				auto sf = splitDistances[j];
+				const auto& sf = splitDistances[j];
 				assert(c2cParams.splitDistances[j] == sf.get());
 
 				if (sf)
@@ -980,7 +980,7 @@ bool ccComparisonDlg::computeDistances()
 				if (sf2D < 0)
 				{
 					ccLog::Error("[ComputeDistances] impossible to add XY scalar field");
-					return 0;
+					return false;
 				}
 				auto sf = m_compCloud->getCCScalarField(sf2D);
 				for (unsigned idx = 0; idx < m_compCloud->size(); idx++)

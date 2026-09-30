@@ -4762,8 +4762,8 @@ void MainWindow::doActionCutPursuit()
 
 				for (size_t k = 0; k < sfIndices.size(); ++k)
 				{
-					const ccScalarField* sf    = static_cast<const ccScalarField*>(pc->getScalarField(sfIndices[k]));
-					float                value = static_cast<float>(sf->getValue(i));
+					ccScalarField::Shared sf    = std::static_pointer_cast<ccScalarField>(pc->getScalarField(sfIndices[k]));
+					float                  value = static_cast<float>(sf->getValue(i));
 
 					// Sanitize NaN/Inf, force it to 0.0
 					if (std::isnan(value) || std::isinf(value))
@@ -4798,7 +4798,7 @@ void MainWindow::doActionCutPursuit()
 			}
 
 			// Assign component index to each point
-			ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
+			ccScalarField::Shared sf = std::static_pointer_cast<ccScalarField>(pc->getScalarField(sfIdx));
 			for (int32_t i = 0; i < N; ++i)
 			{
 				sf->setValue(i, static_cast<ScalarType>(components[i]));

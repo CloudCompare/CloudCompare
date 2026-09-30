@@ -98,10 +98,10 @@ int ccItemSelectionDlg::SelectEntity(const ccHObject::Container& entities,
 	ccItemSelectionDlg epDlg(false, parent, tr("entity"), label);
 
 	QStringList items;
-	for (size_t i = 0; i < entities.size(); ++i)
+	for (auto* entity : entities)
 	{
 		// add one line per entity
-		items << QString("%1 (ID=%2)").arg(entities[i]->getName()).arg(entities[i]->getUniqueID());
+		items << QString("%1 (ID=%2)").arg(entity->getName()).arg(entity->getUniqueID());
 	}
 	epDlg.setItems(items, selectedIndex);
 
@@ -124,10 +124,10 @@ bool ccItemSelectionDlg::SelectEntities(const ccHObject::Container& entities,
 	ccItemSelectionDlg epDlg(true, parent, tr("entities"), label);
 
 	QStringList items;
-	for (size_t i = 0; i < entities.size(); ++i)
+	for (auto* entity : entities)
 	{
 		// add one line per entity
-		items << QString("%1 (ID=%2)").arg(entities[i]->getName()).arg(entities[i]->getUniqueID());
+		items << QString("%1 (ID=%2)").arg(entity->getName()).arg(entity->getUniqueID());
 	}
 	epDlg.setItems(items, -1);
 

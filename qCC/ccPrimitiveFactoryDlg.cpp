@@ -190,7 +190,7 @@ void ccPrimitiveFactoryDlg::setSpherePositionToOrigin()
 void ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject()
 {
 	ccHObject::Container selectedEnt = m_win->getSelectedEntities();
-	for (auto entity : selectedEnt)
+	for (auto* entity : selectedEnt)
 	{
 		csMatrixTextEdit->setPlainText(entity->getGLTransformationHistory().toString());
 	}

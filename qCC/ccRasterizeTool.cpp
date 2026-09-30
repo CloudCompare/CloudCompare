@@ -2193,7 +2193,7 @@ void ccRasterizeTool::exportContourLines()
 	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(m_ui->contourStepDoubleSpinBox->value()));
-	for (auto poly : m_contourLines)
+	for (auto* poly : m_contourLines)
 	{
 		// now is the time to map the polyline coordinates to the right dimensions!
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(poly->getAssociatedCloud());

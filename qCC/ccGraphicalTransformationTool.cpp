@@ -184,20 +184,20 @@ void ccGraphicalTransformationTool::populateAdvModeItems()
 		}
 		if (!polylines.empty())
 		{
-			for (size_t i = 0; i < polylines.size(); i++)
+			for (auto* polyline : polylines)
 			{
-				ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
+				ccPolyline* poly = static_cast<ccPolyline*>(polyline);
 				if (poly->size() == 2) // only single segment polylines allowed
 				{
-					m_advancedModeObjectList.push_back(polylines[i]);
+					m_advancedModeObjectList.push_back(polyline);
 				}
 			}
 		}
 		if (!coordinateSystems.empty())
 		{
-			for (size_t i = 0; i < coordinateSystems.size(); i++)
+			for (auto* coordinateSystem : coordinateSystems)
 			{
-				m_advancedModeObjectList.push_back(coordinateSystems[i]);
+				m_advancedModeObjectList.push_back(coordinateSystem);
 			}
 		}
 		if (!m_advancedModeObjectList.empty())
@@ -496,9 +496,9 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 		return;
 	}
 	int id = advTranslateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
+	for (auto* entity : m_advancedModeObjectList)
 	{
-		if (id == m_advancedModeObjectList[i]->getUniqueID())
+		if (id == entity->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -507,7 +507,7 @@ void ccGraphicalTransformationTool::advTranslateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advTranslateRef);
 				}
-				m_advTranslateRef        = m_advancedModeObjectList[i];
+				m_advTranslateRef        = entity;
 				m_advTranslateRefIsChild = entityInTransformList(m_advTranslateRef);
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
@@ -579,9 +579,9 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 		return;
 	}
 	int id = advRotateComboBox->itemData(index).toInt();
-	for (size_t i = 0; i < m_advancedModeObjectList.size(); i++)
+	for (auto* entity : m_advancedModeObjectList)
 	{
-		if (id == m_advancedModeObjectList[i]->getUniqueID())
+		if (id == entity->getUniqueID())
 		{
 			MainWindow* mainWindow = MainWindow::TheInstance();
 			if (mainWindow)
@@ -590,7 +590,7 @@ void ccGraphicalTransformationTool::advRotateRefUpdate(int index)
 				{
 					mainWindow->db()->unselectEntity(m_advRotateRef);
 				}
-				m_advRotateRef = m_advancedModeObjectList[i];
+				m_advRotateRef = entity;
 				if (m_advTranslateRef != m_advRotateRef) // already selected
 				{
 					mainWindow->db()->selectEntity(m_advRotateRef, true);

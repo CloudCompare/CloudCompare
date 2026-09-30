@@ -91,12 +91,12 @@ class QCPBarsWithText : public QCPBars
 			// we draw at the 'base' line
 			P.setY(P.y() + fontHeight);
 
-			for (int i = 0; i < m_text.size(); ++i)
+			for (const auto& text : m_text)
 			{
 				QPointF Pstart = P;
 				if (m_textOnTheLeft)
-					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(m_text[i]));
-				painter->drawText(Pstart, m_text[i]);
+					Pstart.setX(P.x() - painter->fontMetrics().horizontalAdvance(text));
+				painter->drawText(Pstart, text);
 				P.setY(P.y() + fontHeight);
 			}
 		}

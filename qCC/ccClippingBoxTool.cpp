@@ -629,15 +629,15 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 		{
 			// single slice: easy
 			outputSlices.reserve(clouds.size());
-			for (size_t ci = 0; ci != clouds.size(); ++ci)
+			for (auto* cloud : clouds)
 			{
-				ccHObject* slice = GetSlice(clouds[ci], &clipBox, false, extratOustide);
+				ccHObject* slice = GetSlice(cloud, &clipBox, false, extratOustide);
 				if (slice)
 				{
-					slice->setName(clouds[ci]->getName() + QString(".slice"));
+					slice->setName(cloud->getName() + QString(".slice"));
 
 					// set meta-data
-					slice->setMetaData(s_originEntityUUID, clouds[ci]->getUniqueID());
+					slice->setMetaData(s_originEntityUUID, cloud->getUniqueID());
 					slice->setMetaData(s_sliceID, "slice");
 					if (slice->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
@@ -846,9 +846,8 @@ bool ccClippingBoxTool::ExtractSlicesAndContours(
 
 				// release memory
 				{
-					for (size_t i = 0; i < refClouds.size(); ++i)
-						if (refClouds[i])
-							delete refClouds[i];
+					for (auto* cloud : refClouds)
+						delete cloud;
 					refClouds.clear();
 				}
 

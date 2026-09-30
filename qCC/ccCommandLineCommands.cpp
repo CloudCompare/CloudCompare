@@ -763,9 +763,8 @@ bool CommandLoadCommandFile::process(ccCommandLineInterface& cmd)
 
 				static const QChar SingleQuote{'\''};
 				static const QChar DoubleQuote{'"'};
-				for (int currentArgIndex = 0; currentArgIndex < argumentsInLine.size(); ++currentArgIndex)
+				for (auto& arg : argumentsInLine)
 				{
-					QString arg = argumentsInLine[currentArgIndex];
 					// handle singleQuotes
 					{
 						// argument starts with a single quote and not inside double quotes
@@ -2663,7 +2662,7 @@ bool CommandRGBConvertToSF::process(ccCommandLineInterface& cmd)
 
 		ccHObject::Container container;
 		container.push_back(desc.pc);
-		if (!ccEntityAction::sfFromColor(container, /*exportR=*/true, /*exportG=*/true, /*exportB=*/true, /*exportAlpha=*/true, /*exportC=*/true)) // beta version, only composite
+		if (!ccEntityAction::sfFromColor(container, /*exportR=*/true, /*exportG=*/true, /*exportB=*/true, /*exportAlpha=*/true, /*exportComposite=*/true)) // beta version, only composite
 		{
 			return cmd.error(QObject::tr("Failed to convert RGB to scalar fields"));
 		}
@@ -3177,9 +3176,9 @@ bool CommandMergeClouds::process(ccCommandLineInterface& cmd)
 	if (!cmd.clouds().empty())
 	{
 		size_t totalSize = 0;
-		for (size_t i = 0; i < cmd.clouds().size(); ++i)
+		for (const auto& desc : cmd.clouds())
 		{
-			totalSize += cmd.clouds()[i].pc->size();
+			totalSize += desc.pc->size();
 		}
 
 		if (totalSize > std::numeric_limits<unsigned>::max())
@@ -5266,12 +5265,12 @@ bool CommandColorLevels::process(ccCommandLineInterface& cmd)
 
 	// min level
 	int levels[4] = {0};
-	for (int i = 0; i < 4; ++i)
+	for (int& level : levels)
 	{
 		const auto maybeLevel = parser.takeInt(QObject::tr("color level"), 0, 255);
 		if (!maybeLevel)
 			return false;
-		levels[i] = *maybeLevel;
+		level = *maybeLevel;
 	}
 
 	// process clouds

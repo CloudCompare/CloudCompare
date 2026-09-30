@@ -633,9 +633,8 @@ bool ccEnvelopeExtractor::ExtractConcaveHull2D(std::vector<Vertex2D>& points,
 						}
 
 						// update the removed edges info and put them back in the main list
-						for (size_t i = 0; i < removed.size(); ++i)
+						for (auto itC : removed)
 						{
-							VertexIterator itC = removed[i];
 							VertexIterator itD = itC;
 							++itD;
 							if (itD == hullPoints.end())

@@ -82,7 +82,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
 		m_histograms[i]->setRefreshAfterResize(false);
-		auto layout = new QHBoxLayout;
+		auto* layout = new QHBoxLayout;
 
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_histograms[i]);

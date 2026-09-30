@@ -3088,7 +3088,7 @@ void MainWindow::doRemoveDuplicatePoints()
 void MainWindow::doActionFilterByValue()
 {
 	using EntityAndVerticesType = std::pair<ccHObject*, ccPointCloud*>;
-	std::vector<EntityAndVerticesType>           toFilter;
+	std::vector<EntityAndVerticesType> toFilter;
 
 	for (ccHObject* entity : getSelectedEntities())
 	{
@@ -3751,9 +3751,9 @@ void MainWindow::doActionMerge()
 
 		// compute total size of the final cloud
 		size_t totalSize = 0;
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (const auto* cloud : clouds)
 		{
-			totalSize += clouds[i]->size();
+			totalSize += cloud->size();
 		}
 
 		if (totalSize > std::numeric_limits<unsigned>::max())
@@ -3762,10 +3762,9 @@ void MainWindow::doActionMerge()
 			return;
 		}
 
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (auto* pc : clouds)
 		{
-			ccPointCloud* pc      = clouds[i];
-			bool          isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_UPDATE); // vertices of meshes or polylines typically have this flag
+			bool isInUse = pc->hasDependencyFlag(ccHObject::DEPENDENCY_FLAGS::DP_NOTIFY_OTHER_ON_UPDATE); // vertices of meshes or polylines typically have this flag
 
 			if (!firstCloud)
 			{
@@ -4397,9 +4396,8 @@ void MainWindow::doActionSubsample()
 		QElapsedTimer eTimer;
 		eTimer.start();
 
-		for (size_t i = 0; i < clouds.size(); ++i)
+		for (auto* cloud : clouds)
 		{
-			ccPointCloud*              cloud        = clouds[i];
 			CCCoreLib::ReferenceCloud* sampledCloud = sDlg.getSampledCloud(cloud, &pDlg);
 			if (!sampledCloud)
 			{
@@ -4701,9 +4699,9 @@ void MainWindow::doActionLabelConnectedComponents()
 				// safety test
 				int realComponentCount = 0;
 				{
-					for (size_t i = 0; i < components.size(); ++i)
+					for (auto* component : components)
 					{
-						if (components[i]->size() >= s_minComponentSize)
+						if (component->size() >= s_minComponentSize)
 						{
 							++realComponentCount;
 						}
@@ -6374,10 +6372,10 @@ ccGLWindowInterface* MainWindow::getActiveGLWindow()
 QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindowInterface* win)
 {
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
-	for (int i = 0; i < subWindowList.size(); ++i)
+	for (auto* subWin : subWindowList)
 	{
-		if (ccGLWindowInterface::FromWidget(subWindowList[i]->widget()) == win)
-			return subWindowList[i];
+		if (ccGLWindowInterface::FromWidget(subWin->widget()) == win)
+			return subWin;
 	}
 
 	// not found!
@@ -6935,9 +6933,9 @@ void MainWindow::activateRegisterPointPairTool()
 
 			// add the selected indexes as 'aligned' entities
 			alignedEntities.reserve(indexes.size());
-			for (size_t i = 0; i < indexes.size(); ++i)
+			for (const auto id : indexes)
 			{
-				alignedEntities.push_back(entities[indexes[i]]);
+				alignedEntities.push_back(entities[id]);
 			}
 
 			// add the others as 'reference' entities
@@ -11159,9 +11157,9 @@ void MainWindow::doActionSaveFile()
 
 			if (useThisFilter)
 			{
-				QStringList ff = filter->getFileFilters(false);
-				for (int j = 0; j < ff.size(); ++j)
-					fileFilters.append(ff[j]);
+				QStringList ffs = filter->getFileFilters(false);
+				for (const auto& ff : ffs)
+					fileFilters.append(ff);
 			}
 		}
 	}

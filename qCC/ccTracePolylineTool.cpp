@@ -200,9 +200,9 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 			double    nearestElementSquareDist = -1.0;
 
 			// for each cloud
-			for (size_t c = 0; c < clouds.size(); ++c)
+			for (auto* entity : clouds)
 			{
-				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[c]);
+				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 				if (!cloud->isDisplayedIn(m_associatedWin))
 				{
 					continue;
@@ -227,9 +227,9 @@ ccPolyline* ccTracePolylineTool::polylineOverSampling(unsigned steps) const
 			}
 
 			// for each mesh
-			for (size_t m = 0; m < meshes.size(); ++m)
+			for (auto* entity : meshes)
 			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[m]);
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
 				if (!mesh->isDisplayedIn(m_associatedWin))
 				{
 					continue;

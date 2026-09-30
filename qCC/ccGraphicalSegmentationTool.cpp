@@ -371,7 +371,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 
 	ccOverlayDialog::stop(accepted);
 
-	for (auto item : m_enableOnClose) // in export mode, all parts are enabled at the close
+	for (auto* item : m_enableOnClose) // in export mode, all parts are enabled at the close
 	{
 		if (item != nullptr)
 		{
@@ -380,7 +380,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	}
 	m_enableOnClose.clear();
 
-	for (auto item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
+	for (auto* item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
 	{
 		if (item != nullptr)
 		{

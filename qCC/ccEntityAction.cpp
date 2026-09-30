@@ -1702,7 +1702,7 @@ namespace ccEntityAction
 		std::array<CCCoreLib::ScalarField::Shared, 3> scalarFields{sfX, sfY, sfZ};
 
 		PointCoordinateType defaultCoordForNaN = std::numeric_limits<PointCoordinateType>::quiet_NaN();
-		for (auto sf : scalarFields)
+		for (const auto& sf : scalarFields)
 		{
 			if (sf)
 			{
@@ -2049,7 +2049,7 @@ namespace ccEntityAction
 			return false;
 		}
 
-		for (const auto cloud : clouds)
+		for (auto* cloud : clouds)
 		{
 			std::vector<ccScalarField::Shared> fields(5, nullptr);
 			fields[0] = (exportR ? std::make_shared<ccScalarField>(GetFirstAvailableSFName(cloud, "R").toStdString()) : nullptr);
@@ -2194,7 +2194,7 @@ namespace ccEntityAction
 
 		try
 		{
-			for (const auto entity : selectedEntities)
+			for (auto* entity : selectedEntities)
 			{
 				if (entity->isA(CC_TYPES::POINT_CLOUD))
 				{
@@ -2440,7 +2440,7 @@ namespace ccEntityAction
 
 			bool computePerVertexNormals = (question.clickedButton() == perVertexButton);
 
-			for (auto mesh : meshes)
+			for (auto* mesh : meshes)
 			{
 				Q_ASSERT(mesh != nullptr);
 
@@ -2844,7 +2844,7 @@ namespace ccEntityAction
 		const ccComputeOctreeDlg::ComputationMode mode           = coDlg.getMode();
 		const double                              chosenCellSize = coDlg.getMinCellSize();
 
-		for (const auto cloud : clouds)
+		for (auto* cloud : clouds)
 		{
 			// we temporarily detach entity, as it may undergo
 			//'severe' modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree

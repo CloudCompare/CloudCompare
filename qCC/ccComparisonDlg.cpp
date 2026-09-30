@@ -577,9 +577,9 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 
 		// scan the octree structure
 		const CCCoreLib::DgmOctree::cellsContainer& compCodes = m_compOctree->pointsAndTheirCellCodes();
-		for (CCCoreLib::DgmOctree::cellsContainer::const_iterator c = compCodes.begin(); c != compCodes.end(); ++c)
+		for (const auto& compCode : compCodes)
 		{
-			CCCoreLib::DgmOctree::CellCode truncatedCode = (c->theCode >> bitDec);
+			CCCoreLib::DgmOctree::CellCode truncatedCode = (compCode.theCode >> bitDec);
 
 			// new cell?
 			if (truncatedCode != tempCode)

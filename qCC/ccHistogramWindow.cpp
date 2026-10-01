@@ -981,25 +981,22 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint)
     , m_win(new ccHistogramWindow(this))
-    , m_gui(new Ui_HistogramDialog)
+    , m_ui(std::make_unique<Ui::HistogramDialog>())
 {
-	m_gui->setupUi(this);
+	m_ui->setupUi(this);
 
 	auto* hboxLayout = new QHBoxLayout;
 
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	hboxLayout->addWidget(m_win);
 
-	m_gui->histoFrame->setLayout(hboxLayout);
+	m_ui->histoFrame->setLayout(hboxLayout);
 
-	connect(m_gui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
-	connect(m_gui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
+	connect(m_ui->exportCSVToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToCSV);
+	connect(m_ui->exportImageToolButton, &QAbstractButton::clicked, this, &ccHistogramWindowDlg::onExportToImage);
 }
 
-ccHistogramWindowDlg::~ccHistogramWindowDlg()
-{
-	delete m_gui;
-}
+ccHistogramWindowDlg::~ccHistogramWindowDlg() = default;
 
 // CSV file default separator
 static const QChar s_csvSep(';');

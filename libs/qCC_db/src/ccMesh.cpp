@@ -1752,7 +1752,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	{
 		return;
 	}
-	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
+	ccPointCloud* vertices = static_cast<ccPointCloud*>(m_associatedCloud);
 
 	// check that we have some triangles to display
 	size_t triNum = m_triVertIndexes->size();
@@ -1773,8 +1773,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	bool showWired = !lodEnabled && isShownAsWire();
 
 	// vertices visibility
-	const ccGenericPointCloud::VisibilityTableType& verticesVisibility  = cloud->getTheVisibilityArray();
-	bool                                            visibilityFiltering = (verticesVisibility.size() >= cloud->size());
+	const ccGenericPointCloud::VisibilityTableType& verticesVisibility  = vertices->getTheVisibilityArray();
+	bool                                            visibilityFiltering = (verticesVisibility.size() >= vertices->size());
 
 	// other dispaly parameters
 	bool applyMaterials     = false;
@@ -1791,13 +1791,13 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	if (glParams.showSF)
 	{
-		currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+		currentDisplayedScalarField = vertices->getCurrentDisplayedScalarField();
 		if (currentDisplayedScalarField)
 		{
 			sfMayHaveHiddenValues = currentDisplayedScalarField->mayHaveHiddenValues();
 			colorScale            = currentDisplayedScalarField->getColorScale();
 
-			// get default color ramp if cloud has no scale associated?!
+			// get default color ramp if vertices have no scale associated?!
 			if (!colorScale)
 			{
 				assert(false);
@@ -1838,7 +1838,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	{
 		// per-triangle or per-vertex normals?
 		showTriNormals         = (hasTriNormals() && triNormsShown());
-		bool showVertexNormals = (cloud->hasNormals() && m_normalsDisplayed);
+		bool showVertexNormals = (vertices->hasNormals() && m_normalsDisplayed);
 		// fix 'showNorms'
 		glParams.showNorms = showTriNormals || showVertexNormals;
 
@@ -1954,7 +1954,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 
 	// in the case we need normals (i.e. lighting)
-	auto             normalsIndexesTable = (glParams.showNorms ? cloud->normals() : nullptr);
+	auto             normalsIndexesTable = (glParams.showNorms ? vertices->normals() : nullptr);
 	ccNormalVectors* compressedNormals   = (glParams.showNorms ? ccNormalVectors::GetUniqueInstance() : nullptr);
 
 	// stipple mask
@@ -2052,7 +2052,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!entityPickingMode || !glParams.showSF);
 		assert(prog.isNull() == false);
 
-		auto   vertices      = GetVertexBuffer();
+		auto   verticesBuffer = GetVertexBuffer();
 		float* normalIndexes = reinterpret_cast<float*>(GetNormalsBuffer());
 		auto   rgbColors     = GetColorsBuffer();
 		auto   texCoords     = GetTexCoordsBuffer();
@@ -2098,15 +2098,15 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			size_t vertexCount = 0;
 			{
 				const CCCoreLib::VerticesIndexes* _vertIndexes = _vertIndexesChunkOrigin;
-				CCVector3*                        _vertices    = vertices;
+				CCVector3*                        _vertices    = verticesBuffer;
 				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 				{
-					assert(_vertIndexes->i1 < cloud->size());
-					assert(_vertIndexes->i2 < cloud->size());
-					assert(_vertIndexes->i3 < cloud->size());
-					*_vertices++ = *cloud->getPoint(_vertIndexes->i1);
-					*_vertices++ = *cloud->getPoint(_vertIndexes->i2);
-					*_vertices++ = *cloud->getPoint(_vertIndexes->i3);
+					assert(_vertIndexes->i1 < vertices->size());
+					assert(_vertIndexes->i2 < vertices->size());
+					assert(_vertIndexes->i3 < vertices->size());
+					*_vertices++ = *vertices->getPoint(_vertIndexes->i1);
+					*_vertices++ = *vertices->getPoint(_vertIndexes->i2);
+					*_vertices++ = *vertices->getPoint(_vertIndexes->i3);
 					vertexCount += 3;
 				}
 			}
@@ -2159,7 +2159,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				const CCCoreLib::VerticesIndexes* _vertIndexes    = _vertIndexesChunkOrigin;
 				ccColor::Rgba*                    _rgbaColors     = reinterpret_cast<ccColor::Rgba*>(rgbColors);
-				const auto                        rgbaColorsTable = cloud->rgbaColors();
+				const auto                        rgbaColorsTable = vertices->rgbaColors();
 				for (size_t n = 0; n < chunkSize; n += decimStep, _vertIndexes += decimStep)
 				{
 					assert(_vertIndexes->i1 < rgbaColorsTable->size());
@@ -2216,7 +2216,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			// Vertexes are 3D floats or doubles (depending on the cloud's precision)
 			{
 				s_vboVertex.bind();
-				s_vboVertex.write(0, vertices, static_cast<int>(vertexCount * 3 * sizeof(PointCoordinateType)));
+				s_vboVertex.write(0, verticesBuffer, static_cast<int>(vertexCount * 3 * sizeof(PointCoordinateType)));
 				glFunc->glEnableVertexAttribArray(ccGLSL::ATTR_POS_ARRAY);
 				glFunc->glVertexAttribPointer(ccGLSL::ATTR_POS_ARRAY, 3, sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE, GL_FALSE, 0, nullptr);
 				s_vboVertex.release();
@@ -2338,7 +2338,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			glFunc->glEnable(GL_RESCALE_NORMAL); // not covered by glPushAttrib
 		}
-		const auto rgbaColorsTable = cloud->rgbaColors();
+		const auto rgbaColorsTable = vertices->rgbaColors();
 
 		GLenum triangleDisplayType = (lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP
 		                                                                 : GL_TRIANGLES);
@@ -2499,7 +2499,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccGL::Color(glFunc, *rgba1);
 			if (Tx1)
 				glFunc->glTexCoord2fv(Tx1->t);
-			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i1)->u);
+			ccGL::Vertex3v(glFunc, vertices->getPoint(tsi.i1)->u);
 
 			// vertex 2
 			if (N2)
@@ -2510,7 +2510,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccGL::Color(glFunc, *rgba2);
 			if (Tx2)
 				glFunc->glTexCoord2fv(Tx2->t);
-			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i2)->u);
+			ccGL::Vertex3v(glFunc, vertices->getPoint(tsi.i2)->u);
 
 			// vertex 3
 			if (N3)
@@ -2521,7 +2521,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ccGL::Color(glFunc, *rgba3);
 			if (Tx3)
 				glFunc->glTexCoord2fv(Tx3->t);
-			ccGL::Vertex3v(glFunc, cloud->getPoint(tsi.i3)->u);
+			ccGL::Vertex3v(glFunc, vertices->getPoint(tsi.i3)->u);
 		}
 
 		glFunc->glEnd();

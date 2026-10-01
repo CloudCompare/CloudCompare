@@ -143,12 +143,10 @@ void ccGraphicalSegmentationTool::allowPolylineExport(bool state)
 
 ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
-	if (m_segmentationPoly)
-		delete m_segmentationPoly;
+	delete m_segmentationPoly;
 	m_segmentationPoly = nullptr;
 
-	if (m_polyVertices)
-		delete m_polyVertices;
+	delete m_polyVertices;
 	m_polyVertices = nullptr;
 }
 
@@ -373,7 +371,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 
 	ccOverlayDialog::stop(accepted);
 
-	for (auto item : m_enableOnClose) // in export mode, all parts are enabled at the close
+	for (auto* item : m_enableOnClose) // in export mode, all parts are enabled at the close
 	{
 		if (item != nullptr)
 		{
@@ -382,7 +380,7 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
 	}
 	m_enableOnClose.clear();
 
-	for (auto item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
+	for (auto* item : m_disableOnClose) // in export mode, the original entities are disabled on close to make sure the newly created parts are visible
 	{
 		if (item != nullptr)
 		{
@@ -490,7 +488,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		if (entity->isKindOf(CC_TYPES::PRIMITIVE))
 		{
@@ -558,7 +556,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isKindOf(CC_TYPES::POLY_LINE))
+	if (entity->isKindOf(CC_TYPES::POLY_LINE))
 	{
 		ccPolyline* poly = ccHObjectCaster::ToPolyline(entity);
 		assert(poly);
@@ -586,7 +584,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return true;
 	}
-	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
+	if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		// automatically add the entities contained in the group
 		bool result = false;
@@ -595,14 +593,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* entity, bool silent /*=fa
 
 		return result;
 	}
-	else
+	if (!silent)
 	{
-		if (!silent)
-		{
-			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
-		}
-		return false;
+		ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment entity " + entity->getName());
 	}
+	return false;
 }
 
 unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities() const

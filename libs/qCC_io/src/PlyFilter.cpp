@@ -917,9 +917,10 @@ static int texIndexes_cb(p_ply_argument argument)
 	ply_get_argument_element(argument, &element, &instance_index);
 
 	int index = static_cast<int>(ply_get_argument_value(argument));
-	if (index > s_maxTextureIndex)
+	if (index < 0 || index > s_maxTextureIndex)
 	{
-		s_maxTextureIndex = -1;
+		ccLog::Warning(QString("[PLY] Invalid texture index (%1): the corresponding face will have no material").arg(index));
+		index = -1; // same convention as the rest of ccMesh: a negative index means 'no material'
 	}
 
 	ccMesh::triangleMaterialIndexesSet* texIndexes = nullptr;

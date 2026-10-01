@@ -33,7 +33,7 @@ class ccSensorComputeDistancesDlg : public QDialog
 	//! Default constructor
 	explicit ccSensorComputeDistancesDlg(QWidget* parent = nullptr);
 
-	~ccSensorComputeDistancesDlg();
+	~ccSensorComputeDistancesDlg() override;
 
 	//! Returns whether computed distances should be squared or not
 	bool computeSquaredDistances() const;

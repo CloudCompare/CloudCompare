@@ -80,15 +80,15 @@ ccLibAlgorithms::ScaleMatchingAlgorithm ccMatchScalesDlg::getSelectedAlgorithm()
 	{
 		return ccLibAlgorithms::BB_MAX_DIM;
 	}
-	else if (bbVolumeRadioButton->isChecked())
+	if (bbVolumeRadioButton->isChecked())
 	{
 		return ccLibAlgorithms::BB_VOLUME;
 	}
-	else if (pcaRadioButton->isChecked())
+	if (pcaRadioButton->isChecked())
 	{
 		return ccLibAlgorithms::PCA_MAX_DIM;
 	}
-	else if (icpRadioButton->isChecked())
+	if (icpRadioButton->isChecked())
 	{
 		return ccLibAlgorithms::ICP_SCALE;
 	}

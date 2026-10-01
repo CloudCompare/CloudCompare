@@ -39,7 +39,7 @@ class sfEditDlg : public QWidget
 	//! Default constructor
 	explicit sfEditDlg(QWidget* parent = nullptr);
 
-	~sfEditDlg();
+	~sfEditDlg() override;
 
 	//! Updates dialog with a given scalar field
 	void fillDialogWith(ccScalarField::Shared sf);

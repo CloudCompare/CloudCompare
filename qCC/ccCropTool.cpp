@@ -65,7 +65,7 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 
 		return croppedEnt;
 	}
-	else if (entity->isKindOf(CC_TYPES::MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		ccGenericMesh*                                       mesh = static_cast<ccGenericMesh*>(entity);
 		CCCoreLib::ManualSegmentationTools::MeshCutterParams params;
@@ -230,10 +230,8 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 										const CCCoreLib::VerticesIndexes* tsic = croppedMesh->getTriangleVertIndexes(i);
 
 										// we now have to test the 3 vertices of the new triangle
-										for (unsigned j = 0; j < 3; ++j)
+										for (unsigned int vertIndex : tsic->i)
 										{
-											unsigned vertIndex = tsic->i[j];
-
 											if (vertProcessed[vertIndex])
 											{
 												// vertex has already been process
@@ -286,9 +284,9 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 										}
 									}
 
-									for (size_t s = 0; s < importedSFs.size(); ++s)
+									for (const auto& importedSF : importedSFs)
 									{
-										importedSFs[s]->computeMinAndMax();
+										importedSF->computeMinAndMax();
 									}
 
 									croppedVertices->showColors(importColors && origVertices->colorsShown());
@@ -321,8 +319,8 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 									// import materials
 									{
 										size_t materialUsedCount = 0;
-										for (size_t i = 0; i < materialUsed.size(); ++i)
-											if (materialUsed[i] == 1)
+										for (int isUsed : materialUsed)
+											if (isUsed == 1)
 												++materialUsedCount;
 
 										if (materialUsedCount == materialUsed.size())

@@ -117,7 +117,7 @@ class ccWaveDialog : public QDialog
 	}
 
 	// inherited from ccPickingListener
-	virtual void onItemPicked(const PickedItem& pi) override;
+	void onItemPicked(const PickedItem& pi) override;
 
   protected:
 	void onPointIndexChanged(int);

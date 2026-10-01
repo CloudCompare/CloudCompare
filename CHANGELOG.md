@@ -84,6 +84,10 @@ New features:
 					- optional, only used when bilateral filter applied
 		- New SF_OP suboption: -NOT_IN_PLACE
 			- to create new scalar field during the operation.
+		- New option -OUTPUT_IMAGE {HEIGHT|RGB} for the -RASTERIZE command
+			- saves the height layer or the RGB layer of the raster grid as a PNG image ('{cloud name}_RASTER_IMAGE.png', with a timestamp unless -NO_TIMESTAMP is set)
+			- the height layer uses the 'Blue>Green>Yellow>Red' color scale
+			- empty cells follow the -EMPTY_FILL option (transparent by default)
 		- New SF-to-normals and normals-to-SF conversion methods:
 			- NORM_TO_SF {X/Y/Z}
 				where {X/Y/Z} is any combination of X, Y and Z, such as 'XYZ', 'XZ' or 'Y'
@@ -175,6 +179,10 @@ Improvements:
 		- default shortcut: F12
 		- warning: clipping planes must have already been defined (with the Camera Settings dialog
 			or the CTRL+mouse wheel and CTRL+SHIFT+mouse wheel shortcuts). Both clipping planes are toggled at the same time.
+
+	- Edit > Select all displayed entities
+		- selects all the entities displayed in the active 3D view (visible entities that are enabled, with all their parents enabled)
+		- default shortcut: CTRL+A (can be changed in the shortcut settings). CTRL+A still selects all the items when the DB tree or the console has the focus
 
 	- Rasterize tool
 		- New 'X-ray' field calculation tool (same tab as 'hillshade')

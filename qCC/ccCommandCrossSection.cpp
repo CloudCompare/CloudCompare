@@ -50,7 +50,7 @@ bool CommandCrossSection::process(ccCommandLineInterface& cmd)
 
 	// expected argument: XML file
 	if (cmd.arguments().empty())
-		return cmd.error(QString("Missing parameter: XML parameters file after \"-%1\"").arg(COMMAND_CROSS_SECTION));
+		return cmd.error(QString(R"(Missing parameter: XML parameters file after "-%1")").arg(COMMAND_CROSS_SECTION));
 	QString xmlFilename = cmd.arguments().takeFirst();
 
 	// read the XML file
@@ -238,10 +238,10 @@ bool CommandCrossSection::process(ccCommandLineInterface& cmd)
 			ccHObject::Container entities;
 			try
 			{
-				for (size_t i = 0; i < cmd.clouds().size(); ++i)
-					entities.push_back(cmd.clouds()[i].pc);
-				for (size_t j = 0; j < cmd.meshes().size(); ++j)
-					entities.push_back(cmd.meshes()[j].mesh);
+				for (const auto& cloudDesc : cmd.clouds())
+					entities.push_back(cloudDesc.pc);
+				for (const auto& meshDesc : cmd.meshes())
+					entities.push_back(meshDesc.mesh);
 			}
 			catch (const std::bad_alloc&)
 			{
@@ -397,10 +397,10 @@ bool CommandCrossSection::readVector(const QXmlStreamAttributes& attributes, CCV
 	}
 
 	int count = 0;
-	for (int i = 0; i < attributes.size(); ++i)
+	for (const auto& attribute : attributes)
 	{
-		QString name  = attributes[i].name().toString().toUpper();
-		QString value = attributes[i].value().toString();
+		QString name  = attribute.name().toString().toUpper();
+		QString value = attribute.value().toString();
 
 		bool ok = false;
 		if (name == "X")

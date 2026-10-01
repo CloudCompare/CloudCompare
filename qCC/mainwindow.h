@@ -215,6 +215,9 @@ class MainWindow : public QMainWindow
 	//! Clones currently selected entities
 	void doActionClone();
 
+	//! Selects all the entities displayed in the active 3D view
+	void doActionSelectDisplayedEntities();
+
 	//! Updates entities display target when a gl sub-window is deleted
 	/** \param glWindow the window that is going to be delete
 	 **/
@@ -530,7 +533,7 @@ class MainWindow : public QMainWindow
 	//! Creates point clouds from multiple 'components'
 	void createComponentsClouds(ccGenericPointCloud*                cloud,
 	                            CCCoreLib::ReferenceCloudContainer& components,
-	                            unsigned                            minPointPerComponent,
+	                            unsigned                            minPointsPerComponent,
 	                            bool                                randomColors,
 	                            bool                                selectComponents,
 	                            bool                                sortBysize = true);

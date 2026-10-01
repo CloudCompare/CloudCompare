@@ -166,11 +166,11 @@ int ccCommandLineParser::Parse(const QStringList& arguments, ccPluginInterfaceLi
 		parser->toggleSilentMode(true);
 	}
 
-	std::unique_ptr<QDialog> consoleDlg(nullptr);
+	std::unique_ptr<QDialog> consoleDlg;
 	if (!parser->silentMode())
 	{
 		// show console
-		consoleDlg.reset(new QDialog);
+		consoleDlg = std::make_unique<QDialog>();
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(consoleDlg.get());
 		consoleDlg->show();
@@ -271,7 +271,7 @@ QString ccCommandLineParser::getExportFilename(const CLEntityDesc& entityDesc,
 	{
 		assert(false);
 		warning("[getExportFilename] Internal error: invalid input entity!");
-		return QString();
+		return {};
 	}
 
 	// sub-item?
@@ -365,7 +365,7 @@ QString ccCommandLineParser::exportEntity(CLEntityDesc&                         
 	                                           options.testFlag(ExportOption::ForceNoTimestamp));
 	if (outputFilename.isEmpty())
 	{
-		return QString();
+		return {};
 	}
 
 	// update the entity name as well
@@ -795,14 +795,10 @@ bool ccCommandLineParser::saveClouds(QString suffix /*=QString()*/, bool allAtOn
 			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceCloud);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
-			else
-				return true;
+			return true;
 		}
-		else
-		{
-			error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
-			// will proceed with the standard way
-		}
+		error(QString("The currently selected output format for clouds (%1) doesn't handle multiple entities at once!").arg(m_cloudExportFormat));
+		// will proceed with the standard way
 	}
 
 	// standard way: one file per cloud
@@ -852,14 +848,10 @@ bool ccCommandLineParser::saveMeshes(QString suffix /*=QString()*/, bool allAtOn
 			QString errorStr = exportEntity(desc, suffix, nullptr, ExportOption::ForceMesh);
 			if (!errorStr.isEmpty())
 				return error(errorStr);
-			else
-				return true;
+			return true;
 		}
-		else
-		{
-			error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
-			// will proceed with the standard way
-		}
+		error(QString("The currently selected output format for meshes (%1) doesn't handle multiple entities at once!").arg(m_meshExportFormat));
+		// will proceed with the standard way
 	}
 
 	// standard way: one file per mesh

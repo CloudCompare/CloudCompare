@@ -50,12 +50,12 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Default constructor
 	explicit ccClippingBoxTool(QWidget* parent);
 	//! Default destructor
-	virtual ~ccClippingBoxTool();
+	~ccClippingBoxTool() override;
 
 	// inherited from ccOverlayDialog
-	virtual bool linkWith(ccGLWindowInterface* win) override;
-	virtual bool start() override;
-	virtual void stop(bool state) override;
+	bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool state) override;
 
 	//! Returns box
 	const ccClipBox* box() const
@@ -66,7 +66,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	//! Adds an entity
 	/** \return success, if the entity is eligible for clipping
 	 **/
-	bool addAssociatedEntity(ccHObject* anObject);
+	bool addAssociatedEntity(ccHObject* entity);
 
 	//! Returns the current number of associated entities
 	unsigned getNumberOfAssociatedEntity() const;
@@ -120,7 +120,7 @@ class ccClippingBoxTool : public ccOverlayDialog
 	    bool                visualDebugMode       = false,
 	    bool                generateRandomColors  = false,
 	    bool                extratOustide         = false,
-	    ccProgressDialog*   progressDialog        = 0);
+	    ccProgressDialog*   progressDialog        = nullptr);
 
   protected:
 	void toggleInteractors(bool);

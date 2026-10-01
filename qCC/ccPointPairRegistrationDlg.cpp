@@ -698,7 +698,7 @@ void ccPointPairRegistrationDlg::onDelButtonPushed()
 void ccPointPairRegistrationDlg::addPointToTable(QTableWidget*     tableWidget,
                                                  int               rowIndex,
                                                  const CCVector3d& P,
-                                                 QString           pointName)
+                                                 QString           pointLabel)
 {
 	assert(tableWidget);
 	if (!tableWidget)
@@ -706,7 +706,7 @@ void ccPointPairRegistrationDlg::addPointToTable(QTableWidget*     tableWidget,
 
 	// add corresponding row in table
 	tableWidget->setRowCount(std::max<int>(rowIndex + 1, tableWidget->rowCount()));
-	tableWidget->setVerticalHeaderItem(rowIndex, new QTableWidgetItem(pointName));
+	tableWidget->setVerticalHeaderItem(rowIndex, new QTableWidgetItem(pointLabel));
 
 	// add point coordinates
 	for (int d = 0; d < 3; ++d)

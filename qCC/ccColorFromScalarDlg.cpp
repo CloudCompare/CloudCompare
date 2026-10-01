@@ -82,7 +82,7 @@ ccColorFromScalarDlg::ccColorFromScalarDlg(QWidget* parent, ccPointCloud* pointC
 	{
 		m_histograms[i] = new ccHistogramWindow(this);
 		m_histograms[i]->setRefreshAfterResize(false);
-		auto layout = new QHBoxLayout;
+		auto* layout = new QHBoxLayout;
 
 		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_histograms[i]);
@@ -307,7 +307,7 @@ void ccColorFromScalarDlg::updateColormaps()
 	}
 }
 
-void ccColorFromScalarDlg::toggleColors(int state)
+void ccColorFromScalarDlg::toggleColors(int val)
 {
 	if (!m_systemInvalid)
 	{
@@ -428,10 +428,7 @@ void ccColorFromScalarDlg::updateSpinBoxLimits(int n)
 			m_minSat[n]           = sf->getMin();
 			m_maxSat[n]           = sf->getMax();
 			double singleStepSize = (m_maxSat[n] - m_minSat[n]) / 100.0;
-			if (singleStepSize < 0.01)
-			{
-				singleStepSize = 0.01;
-			}
+			singleStepSize        = std::max(singleStepSize, 0.01);
 			m_boxes_min[n]->setMinimum(m_minSat[n]);
 			m_boxes_min[n]->setMaximum(m_maxSat[n]);
 			m_boxes_min[n]->setSingleStep(singleStepSize);

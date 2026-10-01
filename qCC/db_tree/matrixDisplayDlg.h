@@ -38,7 +38,7 @@ class MatrixDisplayDlg : public QWidget
 	//! Default constructor
 	explicit MatrixDisplayDlg(QWidget* parent = nullptr);
 
-	~MatrixDisplayDlg();
+	~MatrixDisplayDlg() override;
 
 	//! Clears widget
 	void clear();

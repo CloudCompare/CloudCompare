@@ -35,7 +35,7 @@ class ccKrigingParamsDialog : public QDialog
 	ccKrigingParamsDialog(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~ccKrigingParamsDialog();
+	~ccKrigingParamsDialog() override;
 
 	//! Sets the parameters
 	void setParameters(const ccRasterGrid::KrigingParams& krigingParams);

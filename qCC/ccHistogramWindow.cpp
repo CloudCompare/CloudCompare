@@ -313,9 +313,9 @@ unsigned ccHistogramWindow::getMaxHistoVal()
 {
 	unsigned m_maxHistoVal = 0;
 
-	for (size_t i = 0; i < m_histoValues.size(); ++i)
+	for (unsigned int histoValue : m_histoValues)
 	{
-		m_maxHistoVal = std::max(m_maxHistoVal, m_histoValues[i]);
+		m_maxHistoVal = std::max(m_maxHistoVal, histoValue);
 	}
 
 	return m_maxHistoVal;
@@ -874,7 +874,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_AREA;
@@ -914,7 +914,7 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent* event)
 					mouseMoveEvent(event);
 					return;
 				}
-				else if (dx > 2)
+				if (dx > 2)
 				{
 					// going to the left
 					m_selectedItem = LEFT_ARROW;
@@ -985,7 +985,7 @@ ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent /*=nullptr*/)
 {
 	m_gui->setupUi(this);
 
-	auto hboxLayout = new QHBoxLayout;
+	auto* hboxLayout = new QHBoxLayout;
 
 	hboxLayout->setContentsMargins(0, 0, 0, 0);
 	hboxLayout->addWidget(m_win);

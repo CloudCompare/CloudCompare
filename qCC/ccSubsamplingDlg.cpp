@@ -132,10 +132,7 @@ CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud
 			                                                             octree.data(),
 			                                                             progressCb);
 		}
-		else
-		{
-			ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-		}
+		ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 	}
 	break;
 
@@ -155,10 +152,7 @@ CCCoreLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud
 			                                                                      progressCb,
 			                                                                      octree.data());
 		}
-		else
-		{
-			ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
-		}
+		ccLog::Warning(QString("[ccSubsamplingDlg::getSampledCloud] Failed to compute octree for cloud '%1'").arg(cloud->getName()));
 	}
 	break;
 	}
@@ -206,14 +200,14 @@ void ccSubsamplingDlg::sliderMoved(int sliderPos)
 		rate = 1.0 - rate;
 	}
 
-	double valueRange = static_cast<double>(m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum());
+	double valueRange = m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum();
 	double newValue   = m_ui->valueDoubleSpinBox->minimum() + rate * valueRange;
 	m_ui->valueDoubleSpinBox->setValue(newValue);
 }
 
 void ccSubsamplingDlg::valueChanged(double value)
 {
-	double valueRange = static_cast<double>(m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum());
+	double valueRange = m_ui->valueDoubleSpinBox->maximum() - m_ui->valueDoubleSpinBox->minimum();
 	double rate       = (value - m_ui->valueDoubleSpinBox->minimum()) / valueRange;
 
 	if (m_ui->samplingMethodComboBox->currentIndex() == SPATIAL)

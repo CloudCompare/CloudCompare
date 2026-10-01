@@ -115,10 +115,7 @@ namespace ccLibAlgorithms
 			double        sigmaCloud = GetDefaultCloudKernelSize(pc);
 
 			// we keep the smallest value
-			if (sigmaCloud < sigma)
-			{
-				sigma = sigmaCloud;
-			}
+			sigma = std::min(sigmaCloud, sigma);
 		}
 
 		return sigma;
@@ -153,7 +150,7 @@ namespace ccLibAlgorithms
 		std::unique_ptr<ccProgressDialog> pDlg;
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setAutoClose(false);
 		}
 
@@ -174,7 +171,7 @@ namespace ccLibAlgorithms
 		return true;
 	}
 
-	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic c,
+	bool ComputeGeomCharacteristic(CCCoreLib::GeometricalAnalysisTools::GeomCharacteristic algo,
 	                               int                                                     subOption,
 	                               PointCoordinateType                                     radius,
 	                               ccHObject::Container&                                   entities,
@@ -189,7 +186,7 @@ namespace ccLibAlgorithms
 		// generate the right SF name
 		QString sfName;
 
-		switch (c)
+		switch (algo)
 		{
 		case CCCoreLib::GeometricalAnalysisTools::Feature:
 		{
@@ -348,7 +345,7 @@ namespace ccLibAlgorithms
 				CCCoreLib::GeometricalAnalysisTools::ErrorCode result = ccBackgroundTask::Run(
 				    [&]()
 				    {
-					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(c,
+					    return CCCoreLib::GeometricalAnalysisTools::ComputeCharactersitic(algo,
 					                                                                      subOption,
 					                                                                      cloud,
 					                                                                      radius,
@@ -364,7 +361,7 @@ namespace ccLibAlgorithms
 						pc->setCurrentDisplayedScalarField(sfIdx);
 						pc->showSF(sfIdx >= 0);
 						pc->getCurrentInScalarField()->computeMinAndMax();
-						if (c == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
+						if (algo == CCCoreLib::GeometricalAnalysisTools::Roughness && roughnessUpDir != nullptr)
 						{
 							// signed roughness should be displayed with a symmetrical color scale
 							auto sf = pc->getCCScalarField(pc->getCurrentInScalarFieldIndex());
@@ -554,7 +551,7 @@ namespace ccLibAlgorithms
 				std::unique_ptr<ccProgressDialog> pDlg;
 				if (parent)
 				{
-					pDlg.reset(new ccProgressDialog(true, parent));
+					pDlg = std::make_unique<ccProgressDialog>(true, parent);
 				}
 
 				ccOctree::Shared octree = cloud->getOctree();
@@ -682,7 +679,7 @@ namespace ccLibAlgorithms
 		std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 		if (parent)
 		{
-			pDlg.reset(new ccProgressDialog(true, parent));
+			pDlg = std::make_unique<ccProgressDialog>(true, parent);
 			pDlg->setMethodTitle(QObject::tr("Computing entities scales"));
 			pDlg->setInfo(QObject::tr("Entities: %1").arg(count));
 		}
@@ -916,12 +913,6 @@ namespace ccLibAlgorithms
 			// DGM: nope! Not the global scale!
 		}
 
-		if (!nProgress.oneStep())
-		{
-			// process cancelled by user
-			return false;
-		}
-
-		return true;
+		return nProgress.oneStep();
 	}
 } // namespace ccLibAlgorithms

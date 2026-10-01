@@ -65,9 +65,9 @@ ccScalarFieldsManagerDialog::ccScalarFieldsManagerDialog(const ccHObject::Contai
 	// save edits when the user renames a scalar field in the table
 	connect(m_ui->sfTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem* item)
 	        {
-			// since the first column is the only editable one, 
+			// since the first column is the only editable one,
 			// save the remaning back to the point cloud
-			if (item && item->column() == SFAttributes::NAME) 
+			if (item && item->column() == SFAttributes::NAME)
 			{
 				this->renameSF(item->row(), item->text().trimmed());
 			} });
@@ -327,16 +327,16 @@ void ccScalarFieldsManagerDialog::showHistogram()
 	}
 }
 
-void ccScalarFieldsManagerDialog::renameSF(int row, const QString& newName)
+void ccScalarFieldsManagerDialog::renameSF(int sfIdx, const QString& newName)
 {
-	auto sf = m_pointCloud->getCCScalarField(row);
+	auto sf = m_pointCloud->getCCScalarField(sfIdx);
 	if (!sf)
 	{
 		return;
 	}
 
 	QString oldName = QString::fromStdString(sf->getName());
-	m_pointCloud->renameScalarField(row, newName.toStdString());
+	m_pointCloud->renameScalarField(sfIdx, newName.toStdString());
 
 	updateDisplay();
 

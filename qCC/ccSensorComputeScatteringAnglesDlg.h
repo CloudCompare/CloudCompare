@@ -33,7 +33,7 @@ class ccSensorComputeScatteringAnglesDlg : public QDialog
 	//! Default constructor
 	explicit ccSensorComputeScatteringAnglesDlg(QWidget* parent = nullptr);
 
-	~ccSensorComputeScatteringAnglesDlg();
+	~ccSensorComputeScatteringAnglesDlg() override;
 
 	//! Returns whether angles should be converted to degrees
 	bool anglesInDegrees() const;

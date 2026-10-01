@@ -78,7 +78,7 @@ static void MakeComboBoxOptionInaccessible(QComboBox* comboBox, int index)
 	}
 
 	const QStandardItemModel* model = qobject_cast<const QStandardItemModel*>(comboBox->model());
-	QStandardItem*            item  = model ? model->item(index) : 0;
+	QStandardItem*            item  = model ? model->item(index) : nullptr;
 	if (item)
 	{
 		item->setFlags(item->flags() & ~(Qt::ItemIsSelectable | Qt::ItemIsEnabled));
@@ -226,13 +226,13 @@ bool ccRasterizeTool::showGridBoxEditor()
 	return cc2Point5DimEditor::showGridBoxEditor();
 }
 
-void ccRasterizeTool::updateCloudName(bool withNonEmptyCells)
+void ccRasterizeTool::updateCloudName(bool withNonEmptyCellNumber)
 {
 	QString str;
 	if (m_cloud)
 	{
 		str = QString("<b>%1</b> (%2 points").arg(m_cloud->getName(), QLocale::system().toString(m_cloud->size()));
-		if (withNonEmptyCells)
+		if (withNonEmptyCellNumber)
 			str += QString(" - %1 non-empty cells)").arg(QLocale::system().toString(m_grid.validCellCount));
 		else
 			str += ')';
@@ -1678,6 +1678,143 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 #endif
 }
 
+bool ccRasterizeTool::ExportImage(const QString&                    outputFilename,
+                                  const ccRasterGrid&               grid,
+                                  bool                              exportRGB,
+                                  const ccColorScale::Shared&       colorScale,
+                                  ccRasterGrid::EmptyCellFillOption fillEmptyCellsStrategy,
+                                  double                            emptyCellsValue,
+                                  double                            minValue,
+                                  double                            maxValue,
+                                  const ccRasterGrid::SF*           gridSF /*=nullptr*/)
+{
+	double valueRange = maxValue - minValue;
+	if (!exportRGB && CCCoreLib::LessThanEpsilon(valueRange))
+	{
+		ccLog::Warning("[Rasterize::generateImage] Exported field has a flat range");
+		valueRange = 1.0; // to simplify tests below
+	}
+
+	QImage outputImage(grid.width, grid.height, exportRGB ? QImage::Format_ARGB32 : QImage::Format_Indexed8);
+
+	if (!outputImage.isNull())
+	{
+		unsigned emptyCellColorIndex = 0;
+		double   maxColorComp        = 255.99; //.99 --> to avoid round-off issues later!
+
+		if (!exportRGB)
+		{
+			bool addTransparentColor = (gridSF || fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY);
+
+			// build a custom palette
+			QVector<QRgb> palette(256);
+			if (colorScale)
+			{
+				unsigned steps = (addTransparentColor ? 255 : 256);
+				for (unsigned i = 0; i < steps; i++)
+				{
+					const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGreyRGB);
+					palette[i]              = qRgba(col->r, col->g, col->b, 255);
+				}
+			}
+			else
+			{
+				for (unsigned i = 0; i < 256; i++)
+				{
+					palette[i] = qRgba(i, i, i, 255);
+				}
+			}
+
+			if (addTransparentColor)
+			{
+				palette[255] = qRgba(255, 0, 255, 0); // magenta/transparent color for empty cells (in place of pure white)
+				maxColorComp = 254.99;
+			}
+
+			outputImage.setColorTable(palette);
+
+			if (!gridSF) // we are using height values
+			{
+				switch (fillEmptyCellsStrategy)
+				{
+				case ccRasterGrid::LEAVE_EMPTY:
+					emptyCellColorIndex = 255; // should be transparent!
+					break;
+				case ccRasterGrid::FILL_MINIMUM_HEIGHT:
+					emptyCellColorIndex = 0;
+					break;
+				case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
+					emptyCellColorIndex = 255;
+					break;
+				case ccRasterGrid::FILL_CUSTOM_HEIGHT:
+				{
+					double normalizedHeight = (emptyCellsValue - minValue) / valueRange;
+					assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
+					emptyCellColorIndex = static_cast<unsigned>(normalizedHeight * maxColorComp); // static_cast is equivalent to floor if value >= 0
+				}
+				break;
+				case ccRasterGrid::FILL_AVERAGE_HEIGHT:
+				default:
+					assert(false);
+				}
+			}
+			else
+			{
+				emptyCellColorIndex = 255;
+			}
+			// outputImage.fill(emptyCellColorIndex);
+		}
+
+		// Filling the image with grid values
+		for (unsigned j = 0; j < grid.height; ++j)
+		{
+			const ccRasterGrid::Row& row   = grid.rows[j];
+			const double*            sfRow = (gridSF ? gridSF->data() + j * grid.width : nullptr);
+			for (unsigned i = 0; i < grid.width; ++i)
+			{
+				if (std::isfinite(row[i].h))
+				{
+					if (exportRGB)
+					{
+						int r = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[0])));
+						int g = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[1])));
+						int b = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[2])));
+						outputImage.setPixel(i, grid.height - 1 - j, qRgba(r, g, b, 255));
+					}
+					else
+					{
+						double value            = sfRow ? sfRow[i] : row[i].h;
+						double normalizedHeight = (value - minValue) / valueRange;
+						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
+						unsigned char val = static_cast<unsigned char>(normalizedHeight * maxColorComp); // static_cast is equivalent to floor if value >= 0
+						outputImage.setPixel(i, grid.height - 1 - j, val);
+					}
+				}
+				else // NaN
+				{
+					outputImage.setPixel(i, grid.height - 1 - j, emptyCellColorIndex); // in RGBA mode, it should be 0
+				}
+			}
+		}
+
+		if (outputImage.save(outputFilename))
+		{
+			ccLog::Print(QString("[Rasterize] Image '%1' successfully saved").arg(outputFilename));
+			return true;
+		}
+		else
+		{
+			ccLog::Error("Failed to save image file!");
+		}
+	}
+	else
+	{
+		ccLog::Error("Failed to create output image! (not enough memory?)");
+	}
+
+	return false;
+}
+
 void ccRasterizeTool::generateXRaySF()
 {
 	if (!m_grid.isValid() || !m_rasterCloud)
@@ -1750,7 +1887,7 @@ void ccRasterizeTool::generateXRaySF()
 	progressDialog.start();
 	progressDialog.show();
 	QCoreApplication::processEvents();
-	CCCoreLib::NormalizedProgress nProgress(&progressDialog, static_cast<unsigned>(m_grid.width * m_grid.height));
+	CCCoreLib::NormalizedProgress nProgress(&progressDialog, m_grid.width * m_grid.height);
 
 	// for all cells
 	unsigned nonEmptyCellIndex      = 0;
@@ -2193,7 +2330,7 @@ void ccRasterizeTool::exportContourLines()
 	const unsigned char Y = (X == 2 ? 0 : X + 1);
 
 	ccHObject* group = new ccHObject(QString("Contour plot(%1) [step=%2]").arg(m_cloud->getName()).arg(m_ui->contourStepDoubleSpinBox->value()));
-	for (auto poly : m_contourLines)
+	for (auto* poly : m_contourLines)
 	{
 		// now is the time to map the polyline coordinates to the right dimensions!
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(poly->getAssociatedCloud());
@@ -2323,149 +2460,33 @@ void ccRasterizeTool::generateImage() const
 		                                                      maxValue);
 	}
 
-	double valueRange = maxValue - minValue;
-	if (!exportRGB && CCCoreLib::LessThanEpsilon(valueRange))
+	// open file saving dialog
 	{
-		ccLog::Warning("[Rasterize::generateImage] Exported field has a flat range");
-		valueRange = 1.0; // to simplify tests below
-	}
+		QSettings settings;
+		settings.beginGroup(ccPS::HeightGridGeneration());
+		QString imageSavePath = settings.value("savePathImage", ccFileUtils::defaultDocPath()).toString();
 
-	QImage outputImage(m_grid.width, m_grid.height, exportRGB ? QImage::Format_ARGB32 : QImage::Format_Indexed8);
+		QString outputFilename = ImageFileFilter::GetSaveFilename("Save raster as image",
+		                                                          "image",
+		                                                          imageSavePath,
+		                                                          const_cast<ccRasterizeTool*>(this));
 
-	if (!outputImage.isNull())
-	{
-		unsigned emptyCellColorIndex = 0;
-		double   maxColorComp        = 255.99; //.99 --> to avoid round-off issues later!
-
-		if (!exportRGB)
+		if (!outputFilename.isNull())
 		{
-			bool addTransparentColor = (cloudSF || fillEmptyCellsStrategy == ccRasterGrid::LEAVE_EMPTY);
+			// save current export path to persistent settings
+			settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
+			settings.endGroup();
 
-			// build a custom palette
-			QVector<QRgb> palette(256);
+			ccColorScale::Shared colorScale;
 			if (m_rasterCloud
 			    && m_rasterCloud->getCurrentDisplayedScalarField()
 			    && m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale())
 			{
-				const ccColorScale::Shared& colorScale = m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale();
-				unsigned                    steps      = (addTransparentColor ? 255 : 256);
-				for (unsigned i = 0; i < steps; i++)
-				{
-					const ccColor::Rgb* col = colorScale->getColorByRelativePos(i / static_cast<double>(steps - 1), steps, &ccColor::lightGreyRGB);
-					palette[i]              = qRgba(col->r, col->g, col->b, 255);
-				}
-			}
-			else
-			{
-				for (unsigned i = 0; i < 256; i++)
-				{
-					palette[i] = qRgba(i, i, i, 255);
-				}
+				colorScale = m_rasterCloud->getCurrentDisplayedScalarField()->getColorScale();
 			}
 
-			if (addTransparentColor)
-			{
-				palette[255] = qRgba(255, 0, 255, 0); // magenta/transparent color for empty cells (in place of pure white)
-				maxColorComp = 254.99;
-			}
-
-			outputImage.setColorTable(palette);
-
-			if (!cloudSF) // we are using height values
-			{
-				switch (fillEmptyCellsStrategy)
-				{
-				case ccRasterGrid::LEAVE_EMPTY:
-					emptyCellColorIndex = 255; // should be transparent!
-					break;
-				case ccRasterGrid::FILL_MINIMUM_HEIGHT:
-					emptyCellColorIndex = 0;
-					break;
-				case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
-					emptyCellColorIndex = 255;
-					break;
-				case ccRasterGrid::FILL_CUSTOM_HEIGHT:
-				{
-					double normalizedHeight = (emptyCellsValue - minValue) / valueRange;
-					assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-					emptyCellColorIndex = static_cast<unsigned>(normalizedHeight * maxColorComp); // static_cast is equivalent to floor if value >= 0
-				}
-				break;
-				case ccRasterGrid::FILL_AVERAGE_HEIGHT:
-				default:
-					assert(false);
-				}
-			}
-			else
-			{
-				emptyCellColorIndex = 255;
-			}
-			// outputImage.fill(emptyCellColorIndex);
+			ExportImage(outputFilename, m_grid, exportRGB, colorScale, fillEmptyCellsStrategy, emptyCellsValue, minValue, maxValue, gridSF);
 		}
-
-		// Filling the image with grid values
-		for (unsigned j = 0; j < m_grid.height; ++j)
-		{
-			const ccRasterGrid::Row& row   = m_grid.rows[j];
-			const double*            sfRow = (gridSF ? gridSF->data() + j * m_grid.width : nullptr);
-			for (unsigned i = 0; i < m_grid.width; ++i)
-			{
-				if (std::isfinite(row[i].h))
-				{
-					if (exportRGB)
-					{
-						int r = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[0])));
-						int g = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[1])));
-						int b = static_cast<int>(std::max(0.0, std::min(255.0, row[i].color.u[2])));
-						outputImage.setPixel(i, m_grid.height - 1 - j, qRgba(r, g, b, 255));
-					}
-					else
-					{
-						double value            = sfRow ? sfRow[i] : row[i].h;
-						double normalizedHeight = (value - minValue) / valueRange;
-						assert(normalizedHeight >= 0.0 && normalizedHeight <= 1.0);
-						unsigned char val = static_cast<unsigned char>(normalizedHeight * maxColorComp); // static_cast is equivalent to floor if value >= 0
-						outputImage.setPixel(i, m_grid.height - 1 - j, val);
-					}
-				}
-				else // NaN
-				{
-					outputImage.setPixel(i, m_grid.height - 1 - j, emptyCellColorIndex); // in RGBA mode, it should be 0
-				}
-			}
-		}
-
-		// open file saving dialog
-		{
-			QSettings settings;
-			settings.beginGroup(ccPS::HeightGridGeneration());
-			QString imageSavePath = settings.value("savePathImage", ccFileUtils::defaultDocPath()).toString();
-
-			QString outputFilename = ImageFileFilter::GetSaveFilename("Save raster as image",
-			                                                          "image",
-			                                                          imageSavePath,
-			                                                          const_cast<ccRasterizeTool*>(this));
-
-			if (!outputFilename.isNull())
-			{
-				// save current export path to persistent settings
-				settings.setValue("savePathImage", QFileInfo(outputFilename).absolutePath());
-				settings.endGroup();
-
-				if (outputImage.save(outputFilename))
-				{
-					ccLog::Print(QString("[Rasterize] Image '%1' successfully saved").arg(outputFilename));
-				}
-				else
-				{
-					ccLog::Error("Failed to save image file!");
-				}
-			}
-		}
-	}
-	else
-	{
-		ccLog::Error("Failed to create output image! (not enough memory?)");
 	}
 }
 

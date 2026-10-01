@@ -21,7 +21,7 @@
 #include <ui_krigingParamsDialog.h>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 ccKrigingParamsDialog::ccKrigingParamsDialog(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

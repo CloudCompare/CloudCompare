@@ -191,7 +191,7 @@ int main(int argc, char** argv)
 
 		// init splash screen
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-		splash.reset(new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint));
+		splash = std::make_unique<QSplashScreen>(pixmap, Qt::WindowStaysOnTopHint);
 		splash->show();
 	}
 
@@ -257,7 +257,7 @@ int main(int argc, char** argv)
 			QStringList filenames;
 			for (int i = lastArgumentIndex; i < argc; ++i)
 			{
-				QString arg = argumentsLocal8Bit[i];
+				const QString& arg = argumentsLocal8Bit[i];
 
 				// special command: auto start a plugin
 				if (arg.startsWith(":start-plugin:"))

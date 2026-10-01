@@ -26,6 +26,7 @@
 #include "ccCommandRaster.h"
 
 #include <QDateTime>
+#include <ccColorScalesManager.h>
 #include <ccMesh.h>
 #include <ccProgressDialog.h>
 #include <ccVolumeCalcTool.h>
@@ -38,6 +39,7 @@ constexpr char COMMAND_GRID_OUTPUT_MESH[]            = "OUTPUT_MESH";
 constexpr char COMMAND_GRID_OUTPUT_RASTER_Z[]        = "OUTPUT_RASTER_Z";
 constexpr char COMMAND_GRID_OUTPUT_RASTER_Z_AND_SF[] = "OUTPUT_RASTER_Z_AND_SF";
 constexpr char COMMAND_GRID_OUTPUT_RASTER_RGB[]      = "OUTPUT_RASTER_RGB";
+constexpr char COMMAND_GRID_OUTPUT_IMAGE[]           = "OUTPUT_IMAGE";
 
 // Rasterize specific commands
 constexpr char COMMAND_RASTERIZE[]                     = "RASTERIZE";
@@ -58,6 +60,8 @@ constexpr char COMMAND_RASTER_PROJ_AVG[]               = "AVG";
 constexpr char COMMAND_RASTER_PROJ_MED[]               = "MED";
 constexpr char COMMAND_RASTER_PROJ_INVERSE_VAR[]       = "INV_VAR";
 constexpr char COMMAND_RASTER_RESAMPLE[]               = "RESAMPLE";
+constexpr char COMMAND_RASTER_IMAGE_HEIGHT[]           = "HEIGHT";
+constexpr char COMMAND_RASTER_IMAGE_RGB[]              = "RGB";
 
 // 2.5D Volume calculation specific commands
 constexpr char COMMAND_VOLUME[]                 = "VOLUME";
@@ -116,28 +120,26 @@ static ccRasterGrid::EmptyCellFillOption GetEmptyCellFillingStrategy(QString opt
 	{
 		return ccRasterGrid::FILL_MINIMUM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_MAX_HEIGHT)
+	if (option == COMMAND_RASTER_FILL_MAX_HEIGHT)
 	{
 		return ccRasterGrid::FILL_MAXIMUM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_CUSTOM_HEIGHT)
+	if (option == COMMAND_RASTER_FILL_CUSTOM_HEIGHT)
 	{
 		return ccRasterGrid::FILL_CUSTOM_HEIGHT;
 	}
-	else if (option == COMMAND_RASTER_FILL_INTERPOLATE)
+	if (option == COMMAND_RASTER_FILL_INTERPOLATE)
 	{
 		return ccRasterGrid::INTERPOLATE_DELAUNAY;
 	}
-	else if (option == COMMAND_RASTER_FILL_KRIGING)
+	if (option == COMMAND_RASTER_FILL_KRIGING)
 	{
 		return ccRasterGrid::KRIGING;
 	}
-	else
-	{
-		assert(false);
-		cmd.warning(QString("Unknown empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
-		return ccRasterGrid::LEAVE_EMPTY;
-	}
+
+	assert(false);
+	cmd.warning(QString("Unknown empty cell filling strategy: %1 (defaulting to 'leave empty')").arg(option));
+	return ccRasterGrid::LEAVE_EMPTY;
 }
 
 CommandRasterize::CommandRasterize()
@@ -153,6 +155,8 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 	bool                                      outputRasterZ         = false;
 	bool                                      outputRasterSFs       = false;
 	bool                                      outputRasterRGB       = false;
+	bool                                      outputImage           = false;
+	bool                                      outputImageRGB        = false;
 	bool                                      outputMesh            = false;
 	bool                                      resample              = false;
 	double                                    customHeight          = std::numeric_limits<double>::quiet_NaN();
@@ -221,6 +225,31 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			cmd.arguments().pop_front();
 
 			outputRasterRGB = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_OUTPUT_IMAGE))
+		{
+			// local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QString("Missing parameter: layer (%1 or %2) after '%3'").arg(COMMAND_RASTER_IMAGE_HEIGHT, COMMAND_RASTER_IMAGE_RGB, COMMAND_GRID_OUTPUT_IMAGE));
+			}
+
+			QString layer = cmd.arguments().takeFirst().toUpper();
+			if (layer == COMMAND_RASTER_IMAGE_HEIGHT)
+			{
+				outputImageRGB = false;
+			}
+			else if (layer == COMMAND_RASTER_IMAGE_RGB)
+			{
+				outputImageRGB = true;
+			}
+			else
+			{
+				return cmd.error(QString("Invalid image layer '%1' after '%2' (expecting %3 or %4)").arg(layer, COMMAND_GRID_OUTPUT_IMAGE, COMMAND_RASTER_IMAGE_HEIGHT, COMMAND_RASTER_IMAGE_RGB));
+			}
+			outputImage = true;
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_STEP))
 		{
@@ -355,7 +384,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 		}
 	}
 
-	if (!outputCloud && !outputMesh && !outputRasterZ && !outputRasterRGB)
+	if (!outputCloud && !outputMesh && !outputRasterZ && !outputRasterRGB && !outputImage)
 	{
 		// if no export target is specified, we chose the cloud by default
 		outputCloud = true;
@@ -389,11 +418,16 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 				{
 					return cmd.error(QString("[Rasterize] Failed to recognize the std. dev. SF '%1' (neither an existing scalar field name nor a valid index)").arg(stdDevSFDesc));
 				}
-				else if (invVarProjSFIndex < 0 || static_cast<unsigned>(invVarProjSFIndex) >= cloudDesc.pc->getNumberOfScalarFields())
+				if (invVarProjSFIndex < 0 || static_cast<unsigned>(invVarProjSFIndex) >= cloudDesc.pc->getNumberOfScalarFields())
 				{
 					return cmd.error("[Rasterize] Invalid std. dev. SF index (negative or greater than the number of scalar fields in the cloud");
 				}
 			}
+		}
+
+		if (outputImage && outputImageRGB && !cloudDesc.pc->hasColors())
+		{
+			return cmd.error("[Rasterize] Can't export the RGB image: the cloud has no colors");
 		}
 
 		ccBBox gridBBox = cloudDesc.pc->getOwnBB();
@@ -436,10 +470,10 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			}
 
 			// progress dialog
-			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+			std::unique_ptr<ccProgressDialog> pDlg;
 			if (!cmd.silentMode())
 			{
-				pDlg.reset(new ccProgressDialog(true, cmd.widgetParent()));
+				pDlg = std::make_unique<ccProgressDialog>(true, cmd.widgetParent());
 			}
 
 			ccRasterGrid::InterpolationType interpolationType   = ccRasterGrid::InterpolationTypeFromEmptyCellFillOption(emptyCellFillStrategy);
@@ -629,6 +663,46 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 
 			ccRasterizeTool::ExportGeoTiff(exportFilename, bands, emptyCellFillStrategy, grid, gridBBox, vertDir, customHeight, cloudDesc.pc);
 		}
+
+		if (outputImage)
+		{
+			QString exportFilename = cmd.getExportFilename(cloudDesc, "png", "RASTER_IMAGE", nullptr, !cmd.addTimestamp());
+			if (exportFilename.isEmpty())
+			{
+				exportFilename = "rasterImage.png";
+			}
+
+			// the grid is already filled: the cells that are still empty are exported as transparent pixels
+			ccRasterGrid::EmptyCellFillOption imageFillStrategy = ccRasterGrid::LEAVE_EMPTY;
+			switch (emptyCellFillStrategy)
+			{
+			case ccRasterGrid::FILL_MINIMUM_HEIGHT:
+			case ccRasterGrid::FILL_MAXIMUM_HEIGHT:
+				imageFillStrategy = emptyCellFillStrategy;
+				break;
+			case ccRasterGrid::FILL_CUSTOM_HEIGHT:
+			case ccRasterGrid::INTERPOLATE_DELAUNAY:
+				if (customHeight >= grid.minHeight && customHeight <= grid.maxHeight)
+				{
+					imageFillStrategy = ccRasterGrid::FILL_CUSTOM_HEIGHT;
+				}
+				break;
+			default:
+				break;
+			}
+
+			if (!ccRasterizeTool::ExportImage(exportFilename,
+			                                  grid,
+			                                  outputImageRGB,
+			                                  outputImageRGB ? ccColorScale::Shared() : ccColorScalesManager::GetDefaultScale(ccColorScalesManager::BGYR),
+			                                  imageFillStrategy,
+			                                  customHeight,
+			                                  grid.minHeight,
+			                                  grid.maxHeight))
+			{
+				return cmd.error("[Rasterize] Failed to export the image");
+			}
+		}
 	}
 
 	return true;
@@ -723,7 +797,7 @@ bool CommandVolume25D::process(ccCommandLineInterface& cmd)
 		int          index     = 0;
 		if (!cmd.clouds().empty())
 		{
-			clouds[index++] = &cmd.clouds()[0];
+			clouds[index++] = cmd.clouds().data();
 			if (std::isnan(constHeight) && cmd.clouds().size() > 1)
 			{
 				clouds[index++] = &cmd.clouds()[1];

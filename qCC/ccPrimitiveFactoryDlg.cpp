@@ -190,7 +190,7 @@ void ccPrimitiveFactoryDlg::setSpherePositionToOrigin()
 void ccPrimitiveFactoryDlg::setCoordinateSystemBasedOnSelectedObject()
 {
 	ccHObject::Container selectedEnt = m_win->getSelectedEntities();
-	for (auto entity : selectedEnt)
+	for (auto* entity : selectedEnt)
 	{
 		csMatrixTextEdit->setPlainText(entity->getGLTransformationHistory().toString());
 	}
@@ -219,7 +219,7 @@ ccGLMatrix ccPrimitiveFactoryDlg::getCSMatrix(bool& valid)
 	if (text.contains("["))
 	{
 		// automatically remove anything between square brackets
-		static const QRegularExpression squareBracketsFilter("\\[([^]]+)\\]");
+		static const QRegularExpression squareBracketsFilter(R"(\[([^]]+)\])");
 		text.replace(squareBracketsFilter, "");
 		csMatrixTextEdit->blockSignals(true);
 		csMatrixTextEdit->setPlainText(text);

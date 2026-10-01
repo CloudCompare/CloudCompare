@@ -36,12 +36,12 @@ class ccPointPropertiesDlg : public ccPointPickingGenericInterface
 	//! Default constructor
 	explicit ccPointPropertiesDlg(ccPickingHub* pickingHub, QWidget* parent);
 	//! Default destructor
-	virtual ~ccPointPropertiesDlg();
+	~ccPointPropertiesDlg() override;
 
 	// inherited from ccPointPickingGenericInterface
-	virtual bool start() override;
-	virtual void stop(bool state) override;
-	virtual bool linkWith(ccGLWindowInterface* win) override;
+	bool start() override;
+	void stop(bool state) override;
+	bool linkWith(ccGLWindowInterface* win) override;
 
   protected:
 	void onClose();

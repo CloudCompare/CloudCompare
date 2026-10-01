@@ -18,7 +18,7 @@
 #include "ccInterpolationDlg.h"
 
 // System
-#include <assert.h>
+#include <cassert>
 
 ccInterpolationDlg::ccInterpolationDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
@@ -33,9 +33,9 @@ ccPointCloudInterpolator::Parameters::Method ccInterpolationDlg::getInterpolatio
 {
 	if (nnRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::NEAREST_NEIGHBOR;
-	else if (radiusRadioButton->isChecked())
+	if (radiusRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::RADIUS;
-	else if (knnRadioButton->isChecked())
+	if (knnRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::K_NEAREST_NEIGHBORS;
 
 	assert(false);
@@ -64,9 +64,9 @@ ccPointCloudInterpolator::Parameters::Algo ccInterpolationDlg::getInterpolationA
 {
 	if (averageRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::AVERAGE;
-	else if (medianRadioButton->isChecked())
+	if (medianRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::MEDIAN;
-	else if (normalDistribRadioButton->isChecked())
+	if (normalDistribRadioButton->isChecked())
 		return ccPointCloudInterpolator::Parameters::NORMAL_DIST;
 
 	assert(false);

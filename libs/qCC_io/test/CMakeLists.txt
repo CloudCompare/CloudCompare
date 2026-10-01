@@ -22,6 +22,28 @@ endif()
 
 add_test( NAME TestPlyFilter COMMAND TestPlyFilter )
 
+add_executable( TestFileRoundTrip )
+
+target_sources( TestFileRoundTrip
+    PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/TestFileRoundTrip.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/TestFileRoundTrip.h
+)
+
+target_link_libraries( TestFileRoundTrip
+    PRIVATE
+        QCC_IO_LIB
+        Qt6::Test
+)
+
+if ( WIN32 )
+    set_target_properties( TestFileRoundTrip PROPERTIES
+        WIN32_EXECUTABLE False
+    )
+endif()
+
+add_test( NAME TestFileRoundTrip COMMAND TestFileRoundTrip )
+
 if ( OPTION_USE_SHAPE_LIB )
     add_executable( TestShpFilter )
 

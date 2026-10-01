@@ -73,7 +73,8 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const QString& f
 
 	// multiple filenames handling
 	QFileInfo fi(filename);
-	QString   baseName  = fi.baseName();
+	QString   path      = fi.path();
+	QString   baseName  = fi.completeBaseName();
 	QString   extension = fi.suffix();
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -82,7 +83,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const QString& f
 	for (size_t i = 0; i < sensorCount && result == CC_FERR_NO_ERROR; ++i)
 	{
 		// more than one sensor? we must generate auto filename
-		QString sensorFilename = (sensorCount > 1 ? QString("%1_%2.%3").arg(baseName).arg(i).arg(extension) : filename);
+		QString sensorFilename = (sensorCount > 1 ? QString("%1/%2_%3.%4").arg(path, baseName).arg(i).arg(extension) : filename);
 
 		ccGBLSensor* sensor = static_cast<ccGBLSensor*>(sensors[i]);
 		if (sensor)

@@ -383,6 +383,7 @@
     <addaction name="separator"/>
     <addaction name="actionEditGlobalShiftAndScale"/>
     <addaction name="separator"/>
+    <addaction name="actionSelectDisplayedEntities"/>
     <addaction name="menuToggle"/>
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
@@ -3356,6 +3357,17 @@ The active scalar field should have integer values.</string>
    </property>
    <property name="shortcut">
     <string>F12</string>
+   </property>
+  </action>
+  <action name="actionSelectDisplayedEntities">
+   <property name="text">
+    <string>Select all displayed entities</string>
+   </property>
+   <property name="toolTip">
+    <string>Select all the entities displayed in the active 3D view</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
  </widget>

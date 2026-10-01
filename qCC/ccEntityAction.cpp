@@ -1266,8 +1266,8 @@ namespace ccEntityAction
 			return false;
 		Q_ASSERT(s_randomColorsNumber > 1);
 
-		RGBAColorsTableType* randomColors = new RGBAColorsTableType;
-		if (!randomColors->reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
+		RGBAColorsTableType randomColors;
+		if (!randomColors.reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
 		{
 			ccLog::Error(QT_TR_NOOP("Not enough memory!"));
 			return false;
@@ -1277,7 +1277,7 @@ namespace ccEntityAction
 		for (int i = 0; i < s_randomColorsNumber; ++i)
 		{
 			ccColor::Rgba col(ccColor::Generator::Random(), ccColor::MAX);
-			randomColors->addElement(col);
+			randomColors.addElement(col);
 		}
 
 		// apply random colors
@@ -1319,7 +1319,7 @@ namespace ccEntityAction
 					if (colIndex == s_randomColorsNumber)
 						--colIndex;
 
-					pc->setPointColor(i, randomColors->getValue(colIndex));
+					pc->setPointColor(i, randomColors.getValue(colIndex));
 				}
 
 				pc->showColors(true);

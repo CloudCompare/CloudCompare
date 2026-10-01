@@ -40,9 +40,6 @@
 // CCCoreLib
 #include <MeshSamplingTools.h>
 
-// System
-#include <array>
-
 using FieldIndexAndName = QPair<int, QString>;
 
 // Specific value for NaN

@@ -1,5 +1,4 @@
-#ifndef FILEIO_H
-#define FILEIO_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -41,4 +40,3 @@ class FileIO
 	static QString s_version;
 	static QString s_writerInfo;
 };
-#endif

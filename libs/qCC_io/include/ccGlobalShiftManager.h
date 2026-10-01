@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_GLOBAL_SHIFT_MANAGER_HEADER
-#define CC_GLOBAL_SHIFT_MANAGER_HEADER
 
 // CCCoreLib
 #include <CCGeom.h>
@@ -136,5 +135,3 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 	// Max acceptable diagonal length
 	static double MAX_DIAGONAL_LENGTH;
 };
-
-#endif

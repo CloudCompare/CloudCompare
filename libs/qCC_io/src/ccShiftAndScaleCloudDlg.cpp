@@ -36,8 +36,7 @@
 #include <ccLog.h>
 
 // system
-#include <assert.h>
-#include <float.h>
+#include <cassert>
 
 ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
                                                  double            Dg /*=0*/,

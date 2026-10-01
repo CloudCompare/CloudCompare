@@ -17,6 +17,9 @@
 
 #include "AsciiFilter.h"
 
+// Local
+#include "AsciiSaveDlg.h"
+
 // Qt
 #include <QFile>
 #include <QFileInfo>

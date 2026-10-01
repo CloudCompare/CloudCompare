@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ASCII_OPEN_DIALOG_HEADER
-#define CC_ASCII_OPEN_DIALOG_HEADER
 
 // local
 #include "qCC_io.h"
@@ -344,5 +343,3 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 
 	unsigned m_columnsCount;
 };
-
-#endif // CC_ASCII_OPEN_DIALOG_HEADER

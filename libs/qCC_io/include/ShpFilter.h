@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SHAPEFILE_FILTER_HEADER
-#define CC_SHAPEFILE_FILTER_HEADER
 
 #ifdef CC_SHP_SUPPORT
 
@@ -84,5 +83,3 @@ class QCC_IO_LIB_API ShpFilter : public FileIOFilter
 };
 
 #endif // CC_SHP_SUPPORT
-
-#endif // CC_SHAPEFILE_FILTER_HEADER

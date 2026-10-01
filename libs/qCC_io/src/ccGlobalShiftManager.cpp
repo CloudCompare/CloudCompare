@@ -28,8 +28,8 @@
 #include <ccHObject.h>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 double ccGlobalShiftManager::MAX_COORDINATE_ABS_VALUE = 1.0e4;
 double ccGlobalShiftManager::MAX_DIAGONAL_LENGTH      = 1.0e6;

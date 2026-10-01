@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_DXF_FILTER_HEADER
-#define CC_DXF_FILTER_HEADER
-
 #include "FileIOFilter.h"
 
 //! Autocad DXF file I/O filter
@@ -32,5 +31,3 @@ class QCC_IO_LIB_API DxfFilter : public FileIOFilter
 	bool          canSave(CC_CLASS_ENUM type, bool& multiple, bool& exclusive) const override;
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 };
-
-#endif // CC_DXF_FILTER_HEADER

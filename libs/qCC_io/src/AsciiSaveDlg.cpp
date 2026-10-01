@@ -27,7 +27,7 @@
 #include <QSpinBox>
 
 // system
-#include <assert.h>
+#include <cassert>
 
 AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
     : QDialog(parent)

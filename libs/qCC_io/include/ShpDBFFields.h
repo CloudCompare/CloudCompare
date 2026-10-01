@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_SHAPEFILE_DBF_FIELDS_HEADER
-#define CC_SHAPEFILE_DBF_FIELDS_HEADER
 
 #ifdef CC_SHP_SUPPORT
 
@@ -172,5 +171,3 @@ class QCC_IO_LIB_API DoubleDBFField3D : public GenericDBFField
 };
 
 #endif // CC_SHP_SUPPORT
-
-#endif // CC_SHAPEFILE_DBF_FIELDS_HEADER

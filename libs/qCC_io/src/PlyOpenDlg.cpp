@@ -26,8 +26,8 @@
 #include <ccLog.h>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 //! Ply dialog loading context
 struct PlyLoadingContext

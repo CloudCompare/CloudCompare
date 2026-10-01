@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_IMAGE_FILE_FILTER_HEADER
-#define CC_IMAGE_FILE_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
@@ -43,5 +42,3 @@ class QCC_IO_LIB_API ImageFileFilter : public FileIOFilter
 	                               const QString& imageSavePath,
 	                               QWidget*       parentWidget = nullptr);
 };
-
-#endif // CC_IMAGE_FILE_FILTER_HEADER

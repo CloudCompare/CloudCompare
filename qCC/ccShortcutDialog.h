@@ -17,7 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ui_shorcutSettings.h"
+#include "ui_shortcutSettings.h"
 #include "ui_shortcutEditDialog.h"
 
 //! Widget that captures key sequences to be able to edit a shortcut assigned to

@@ -5788,9 +5788,9 @@ Note: the diagonal is not tested at loading time.</source>
         <translation>全局偏移与缩放机制旨在减少在处理大坐标时的精度损失。
 
         由于CloudCompare和大多数图形卡使用32位浮点值，它们的分辨率和计算精度是有限的。数字越大，分辨率就越低。
-        
+
         在下面，您可以设置触发&apos;全局偏移 &amp; 缩放&apos;机制的限制值。
-        
+
         注意：在加载时不测试对角线。</translation>
     </message>
     <message>
@@ -7407,13 +7407,13 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
-        <source>Use Polynomial 
+        <source>Use Polynomial
 (instead of tangent)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
-        <source>Squared Gaussian 
+        <source>Squared Gaussian
 Parameter</source>
         <translation type="unfinished"></translation>
     </message>
@@ -19352,7 +19352,7 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
-        <source>might not preserve data accuracy  
+        <source>might not preserve data accuracy
 (especially if you have transformed the original data)  </source>
         <translation type="unfinished"></translation>
     </message>
@@ -19840,22 +19840,22 @@ Warning: may not be compatible with Mascaret export.</source>
 <context>
     <name>ShortcutDialog</name>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="14"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="14"/>
         <source>Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="20"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="20"/>
         <source>Double click to edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="33"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="33"/>
         <source>Action</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="38"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="38"/>
         <source>Shortcut</source>
         <translation type="unfinished"></translation>
     </message>
@@ -19935,7 +19935,7 @@ multiplier threshold (nSigma)</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
-        <source>Number of points to use for 
+        <source>Number of points to use for
 mean distance estimation</source>
         <translation type="unfinished"></translation>
     </message>

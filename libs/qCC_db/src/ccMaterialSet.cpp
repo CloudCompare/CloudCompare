@@ -500,9 +500,9 @@ bool ccMaterialSet::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccMaterialSet::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// Materials count (dataVersion>=20)
@@ -518,13 +518,13 @@ bool ccMaterialSet::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 		for (uint32_t i = 0; i < count; ++i)
 		{
 			auto mtl = std::make_shared<ccMaterial>();
-			if (!mtl->fromFile(in, dataVersion, flags, oldToNewIDMap))
+			if (!mtl->fromFile(in, context))
 				return false;
 			addMaterial(mtl, true); // if we load a file, we can't allow that materials are not in the same order as before!
 		}
 	}
 
-	if (dataVersion >= 37)
+	if (context.dataVersion >= 37)
 	{
 		QDataStream inStream(&in);
 

@@ -1059,9 +1059,9 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFile(QFile& in, LoadingContext& context)
 {
-	if (!fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap))
+	if (!fromFileNoChildren(in, context))
 		return false;
 
 	//(serializable) child count (dataVersion>=20)
@@ -1073,11 +1073,11 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	for (uint32_t i = 0; i < serializableCount; ++i)
 	{
 		// read children class ID
-		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, context.dataVersion);
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
-		if (dataVersion >= 35 && dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
+		if (context.dataVersion >= 35 && context.dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
 		{
 			// bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
 			// with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
@@ -1097,7 +1097,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 			// store current position
 			size_t originalFilePos = in.pos();
 			// we need to load the custom object as plain ccCustomHObject
-			child->fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap);
+			child->fromFileNoChildren(in, context);
 			// go back to original position
 			in.seek(originalFilePos);
 			// get custom object name and plugin name
@@ -1124,7 +1124,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 		assert(child && child->isSerializable());
 		if (child)
 		{
-			if (child->fromFile(in, dataVersion, flags, oldToNewIDMap))
+			if (child->fromFile(in, context))
 			{
 				addChild(child);
 			}
@@ -1142,7 +1142,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	}
 
 	// read the selection behavior (dataVersion>=23)
-	if (dataVersion >= 23)
+	if (context.dataVersion >= 23)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
 		{
@@ -1155,9 +1155,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	}
 
 	// read transformation history (dataVersion >= 45)
-	if (dataVersion >= 45)
+	if (context.dataVersion >= 45)
 	{
-		if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!m_glTransHistory.fromFile(in, context))
 		{
 			return false;
 		}
@@ -1181,16 +1181,16 @@ short ccHObject::minimumFileVersion() const
 	return minVersion;
 }
 
-bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFileNoChildren(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
 	// read 'ccObject' header
-	if (!ccObject::fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccObject::fromFile(in, context))
 		return false;
 
 	// read own data
-	return fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap);
+	return fromFile_MeOnly(in, context);
 }
 
 bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
@@ -1272,7 +1272,7 @@ bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -1327,7 +1327,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	if (m_glTransEnabled)
 	{
-		if (!m_glTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!m_glTrans.fromFile(in, context))
 		{
 			m_glTransEnabled = false;
 			return false;
@@ -1335,7 +1335,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	//'showNameIn3D' state (dataVersion>=24)
-	if (dataVersion >= 24)
+	if (context.dataVersion >= 24)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_showNameIn3D), sizeof(bool)) < 0)
 		{

@@ -110,7 +110,7 @@ class QCC_DB_LIB_API ccIndexedTransformation : public ccGLMatrix
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
   protected:

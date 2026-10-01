@@ -321,7 +321,7 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	void setTriangleMtlIndex(unsigned triangleIndex, int mtlIndex);
 
 	//! Sets associated material set (may be shared)
-	void setMaterialSet(ccMaterialSet::Shared materialSet, bool autoReleaseOldMaterialSet = true);
+	void setMaterialSet(ccMaterialSet::Shared materialSet, bool autoRemoveOldMaterialSetFromChildren = true);
 
 	/******************************************************************/
 	/************    PER-TRIANGLE TEXTURE COORDINATE    ***************/
@@ -483,7 +483,7 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	// inherited from ccHObject
 	void  drawMeOnly(CC_DRAW_CONTEXT& context) override;
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	void  applyGLTransformation(const ccGLMatrix& trans) override;
 	void  onUpdateOf(ccHObject* obj) override;

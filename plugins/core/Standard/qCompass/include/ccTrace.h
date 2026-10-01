@@ -70,7 +70,7 @@ public:
 
 	//inherited from ccPolyline
 	void setAssociatedCloud(GenericIndexedCloudPersist* cloud) override;
-	bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 
 	/*
 	Adds waypoint to the end of this trace.

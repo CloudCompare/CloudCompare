@@ -579,21 +579,21 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCameraSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccSensor::fromFile_MeOnly(in, context))
 		return false;
 
 	// serialization wasn't possible before v3.5!
-	if (dataVersion < 35)
+	if (context.dataVersion < 35)
 		return false;
 
 	// projection matrix (35 <= dataVersion < 38)
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// we don't need to save/load this matrix as it is dynamically computed!
 		ccGLMatrix dummyMatrix;
-		if (!dummyMatrix.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!dummyMatrix.fromFile(in, context))
 			return ReadError();
 	}
 	m_projectionMatrixIsValid = false;
@@ -612,7 +612,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	inStream >> m_intrinsicParams.zNear_mm;
 	inStream >> m_intrinsicParams.zFar_mm;
 
-	if (dataVersion >= 43)
+	if (context.dataVersion >= 43)
 	{
 		// we added the principal point in version 43
 		inStream >> m_intrinsicParams.principal_point[0];
@@ -626,7 +626,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 
 	// distortion parameters
 	DistortionModel distModel = NO_DISTORTION_MODEL;
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// before v38, only Brown's parameters were used (and always set)
 		distModel = BROWN_DISTORTION;
@@ -685,7 +685,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	}
 
 	// FrustumInformation
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		bool dummyBool; // formerly: m_frustumInfos.isComputed (no need to save/load it!)
 		inStream >> dummyBool;
@@ -693,15 +693,15 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	m_frustumInfos.isComputed = false;
 	inStream >> m_frustumInfos.drawFrustum;
 	inStream >> m_frustumInfos.drawSidePlanes;
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_frustumInfos.center.u, 3);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, m_frustumInfos.center.u, 3);
 
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// frustum corners: no need to save/load them!
 		for (unsigned i = 0; i < 8; ++i)
 		{
 			CCVector3 P;
-			ccSerializationHelper::CoordsFromDataStream(inStream, flags, P.u, 3);
+			ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, P.u, 3);
 		}
 	}
 

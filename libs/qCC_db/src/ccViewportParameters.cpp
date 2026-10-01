@@ -99,19 +99,19 @@ bool ccViewportParameters::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccViewportParameters::fromFile(QFile& in, LoadingContext& context)
 {
 	// base modelview matrix (dataVersion>=20)
-	if (dataVersion >= 36) // we now save the camera matrix in double precision
+	if (context.dataVersion >= 36) // we now save the camera matrix in double precision
 	{
-		if (!viewMat.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!viewMat.fromFile(in, context))
 			return false;
 	}
 	else
 	{
 		// camera matrix was saved in standard (float) precision
 		ccGLMatrix _viewMat;
-		if (!_viewMat.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!_viewMat.fromFile(in, context))
 			return false;
 		viewMat = ccGLMatrixd(_viewMat.data());
 	}
@@ -120,7 +120,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	QDataStream inStream(&in);
 	float       zoom      = 1.0f;
 	float       pixelSize = 0.0f;
-	if (dataVersion < 51)
+	if (context.dataVersion < 51)
 	{
 		// we read these values for backward compatibility only: we don't handle them this way anymore
 		inStream >> pixelSize;
@@ -135,7 +135,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	inStream >> defaultLineWidth;
 	inStream >> perspectiveView;
 	inStream >> objectCenteredView;
-	if (dataVersion >= 36) // we now save the camera center and pivot point in double precision
+	if (context.dataVersion >= 36) // we now save the camera center and pivot point in double precision
 	{
 		inStream >> pivotPoint.x;
 		inStream >> pivotPoint.y;
@@ -147,12 +147,12 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	else
 	{
 		CCVector3 _pivotPoint;
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, _pivotPoint.u, 3);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, _pivotPoint.u, 3);
 		pivotPoint = _pivotPoint;
-		if (dataVersion >= 25) // after version 25 the camera center is saved as a separate point!
+		if (context.dataVersion >= 25) // after version 25 the camera center is saved as a separate point!
 		{
 			CCVector3 _cameraCenter;
-			ccSerializationHelper::CoordsFromDataStream(inStream, flags, _cameraCenter.u, 3);
+			ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, _cameraCenter.u, 3);
 			cameraCenter = _cameraCenter;
 		}
 		else
@@ -164,7 +164,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 
 	inStream >> fov_deg;
 	inStream >> cameraAspectRatio;
-	if (dataVersion < 25) // screenPan has been replaced by cameraCenter(x,y) in object centered mode!
+	if (context.dataVersion < 25) // screenPan has been replaced by cameraCenter(x,y) in object centered mode!
 	{
 		float screenPan[2];
 		inStream >> screenPan[0];
@@ -177,7 +177,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 		}
 	}
 
-	if (dataVersion >= 30 && dataVersion < 51)
+	if (context.dataVersion >= 30 && context.dataVersion < 51)
 	{
 		// ortho mode aspect ratio (30 >= dataVersion < 51)
 		float orthoAspectRatio = 0.0f;
@@ -185,7 +185,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	}
 
 	// for older version, deduce the focal distance from the old parameters (pixelSize and zoom)
-	if (dataVersion < 51 && zoom != 1.0f)
+	if (context.dataVersion < 51 && zoom != 1.0f)
 	{
 		if (perspectiveView)
 		{
@@ -201,7 +201,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags, Loa
 	}
 
 	// clipping depths
-	if (dataVersion < 53)
+	if (context.dataVersion < 53)
 	{
 		nearClippingDepth = farClippingDepth = std::numeric_limits<double>::quiet_NaN();
 	}

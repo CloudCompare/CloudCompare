@@ -61,7 +61,7 @@ class NormsIndexesTableType : public ccArray<CompressedNormType, 1, CompressedNo
 	}
 
 	// inherited from ccHObject/ccArray
-	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	QCC_DB_LIB_API bool fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)

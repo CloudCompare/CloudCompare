@@ -25,19 +25,12 @@
 
 ccSmoothPolylineDialog::ccSmoothPolylineDialog(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui_SmoothPolylineDialog)
+    , m_ui(std::make_unique<Ui::SmoothPolylineDialog>())
 {
 	m_ui->setupUi(this);
 }
 
-ccSmoothPolylineDialog::~ccSmoothPolylineDialog()
-{
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = nullptr;
-	}
-}
+ccSmoothPolylineDialog::~ccSmoothPolylineDialog() = default;
 
 void ccSmoothPolylineDialog::setIerationCount(int count)
 {

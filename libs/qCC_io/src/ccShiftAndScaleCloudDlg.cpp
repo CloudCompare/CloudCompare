@@ -43,7 +43,6 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
                                                  double            Dg /*=0*/,
                                                  QWidget*          parent /*=nullptr*/)
     : QDialog(parent)
-    , m_ui(nullptr)
     , m_applyAll(false)
     , m_cancel(false)
     , m_activeInfoIndex(-1)
@@ -68,7 +67,6 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pl,
                                                  double            Dg,
                                                  QWidget*          parent /*=nullptr*/)
     : QDialog(parent)
-    , m_ui(nullptr)
     , m_applyAll(false)
     , m_cancel(false)
     , m_activeInfoIndex(-1)
@@ -91,14 +89,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pl,
 	onGlobalPosCheckBoxToggled(m_ui->keepGlobalPosCheckBox->isChecked());
 }
 
-ccShiftAndScaleCloudDlg::~ccShiftAndScaleCloudDlg()
-{
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = nullptr;
-	}
-}
+ccShiftAndScaleCloudDlg::~ccShiftAndScaleCloudDlg() = default;
 
 void ccShiftAndScaleCloudDlg::setShiftFieldsPrecision(int precision)
 {
@@ -116,7 +107,7 @@ void ccShiftAndScaleCloudDlg::init()
 		return;
 	}
 
-	m_ui = new Ui_GlobalShiftAndScaleDlg;
+	m_ui = std::make_unique<Ui::GlobalShiftAndScaleDlg>();
 	m_ui->setupUi(this);
 
 	// DGM: we sometimes need to input values > 1.0e9 (for georeferenced clouds expressed in mm!)
@@ -138,8 +129,8 @@ void ccShiftAndScaleCloudDlg::init()
 
 void ccShiftAndScaleCloudDlg::displayMoreInfo()
 {
-	QDialog                        dlg(this);
-	Ui_GlobalShiftAndScaleAboutDlg uiDlg;
+	QDialog                         dlg(this);
+	Ui::GlobalShiftAndScaleAboutDlg uiDlg;
 	uiDlg.setupUi(&dlg);
 
 	dlg.exec();

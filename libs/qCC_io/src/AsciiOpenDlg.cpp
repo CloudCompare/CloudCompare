@@ -68,7 +68,7 @@ struct AsciiOpenContext
 	}
 
 	//! Saves state
-	void save(Ui_AsciiOpenDialog* ui)
+	void save(Ui::AsciiOpenDialog* ui)
 	{
 		extractSFNameFrom1stLine = ui->extractSFNamesFrom1stLineCheckBox->isChecked();
 		maxPointCountPerCloud    = ui->maxCloudSizeDoubleSpinBox->value();
@@ -78,7 +78,7 @@ struct AsciiOpenContext
 	}
 
 	//! Restores state
-	void load(Ui_AsciiOpenDialog* ui) const
+	void load(Ui::AsciiOpenDialog* ui) const
 	{
 		ui->maxCloudSizeDoubleSpinBox->setValue(maxPointCountPerCloud);
 		ui->lineEditSeparator->blockSignals(true);
@@ -109,7 +109,7 @@ static std::unique_ptr<AsciiOpenContext> s_asciiOpenContext;
 
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui_AsciiOpenDialog)
+    , m_ui(std::make_unique<Ui::AsciiOpenDialog>())
     , m_separator(' ')
     , m_averageLineSize(-1.0)
     , m_stream(nullptr)
@@ -142,11 +142,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	setMaximumSize(screenSize);
 }
 
-AsciiOpenDlg::~AsciiOpenDlg()
-{
-	delete m_ui;
-	m_ui = nullptr;
-}
+AsciiOpenDlg::~AsciiOpenDlg() = default;
 
 bool AsciiOpenDlg::setInput(const QString& filename, QTextStream* stream /*=nullptr*/)
 {
@@ -1194,7 +1190,7 @@ bool AsciiOpenDlg::apply()
 		{
 			s_asciiOpenContext.reset(new AsciiOpenContext);
 		}
-		s_asciiOpenContext->save(m_ui);
+		s_asciiOpenContext->save(m_ui.get());
 		s_asciiOpenContext->sequence = sequence;
 		s_asciiOpenContext->applyAll = false;
 
@@ -1236,7 +1232,7 @@ bool AsciiOpenDlg::restorePreviousContext()
 	}
 
 	// restore previous dialog state
-	s_asciiOpenContext->load(m_ui);
+	s_asciiOpenContext->load(m_ui.get());
 	m_separator = s_asciiOpenContext->separator;
 	setSkippedLines(s_asciiOpenContext->skipLines, true);
 	updateTable();

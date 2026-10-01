@@ -7570,9 +7570,9 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
-        <source>Use Polynomial 
+        <source>Use Polynomial
 (instead of tangent)</source>
-        <translation>다항식 사용 
+        <translation>다항식 사용
 (접선 대신)</translation>
     </message>
     <message>
@@ -7582,9 +7582,9 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
-        <source>Squared Gaussian 
+        <source>Squared Gaussian
 Parameter</source>
-        <translation>가우스 제곱 
+        <translation>가우스 제곱
 파라미터</translation>
     </message>
     <message>
@@ -19579,9 +19579,9 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
-        <source>might not preserve data accuracy  
+        <source>might not preserve data accuracy
 (especially if you have transformed the original data)  </source>
-        <translation>데이터 정확도를 유지하지 못할 수 있습니다  
+        <translation>데이터 정확도를 유지하지 못할 수 있습니다
 (특히 원본 데이터를 변환한 경우)  </translation>
     </message>
     <message>
@@ -20082,22 +20082,22 @@ Warning: may not be compatible with Mascaret export.</source>
 <context>
     <name>ShortcutDialog</name>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="14"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="14"/>
         <source>Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="20"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="20"/>
         <source>Double click to edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="33"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="33"/>
         <source>Action</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="38"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="38"/>
         <source>Shortcut</source>
         <translation type="unfinished"></translation>
     </message>
@@ -20179,7 +20179,7 @@ multiplier threshold (nSigma)</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
-        <source>Number of points to use for 
+        <source>Number of points to use for
 mean distance estimation</source>
         <translation>평균예상거리
 를 사용할 점의 갯수</translation>

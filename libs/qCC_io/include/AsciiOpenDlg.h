@@ -186,7 +186,11 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_COUNT][20] = {QT_TRAN
 class QComboBox;
 class QPushButton;
 class QTextStream;
-class Ui_AsciiOpenDialog;
+
+namespace Ui
+{
+	class AsciiOpenDialog;
+}
 
 //! Dialog for configuration of ASCII files opening sequence
 class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
@@ -318,8 +322,8 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 	//! Resest all column roles
 	void resetColumnRoles();
 
-	// associated UI
-	Ui_AsciiOpenDialog* m_ui;
+	//! associated UI
+	std::unique_ptr<Ui::AsciiOpenDialog> m_ui;
 
 	QChar        m_separator;
 	double       m_averageLineSize;

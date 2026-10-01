@@ -31,7 +31,7 @@
 
 AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui_AsciiSaveDialog)
+    , m_ui(std::make_unique<Ui::AsciiSaveDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -40,11 +40,7 @@ AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 	initFromPersistentSettings();
 }
 
-AsciiSaveDlg::~AsciiSaveDlg()
-{
-	if (m_ui)
-		delete m_ui;
-}
+AsciiSaveDlg::~AsciiSaveDlg() = default;
 
 bool AsciiSaveDlg::saveColumnsNamesHeader() const
 {

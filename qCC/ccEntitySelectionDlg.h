@@ -23,7 +23,10 @@
 // Qt
 #include <QDialog>
 
-class Ui_EntitySelectionDialog;
+namespace Ui
+{
+	class EntitySelectionDialog;
+} // namespace Ui
 
 //! Dialog to select one or multiple entities
 class ccEntitySelectionDialog : public QDialog
@@ -67,5 +70,5 @@ class ccEntitySelectionDialog : public QDialog
 
   protected:
 	//! Associated ui
-	Ui_EntitySelectionDialog* m_ui;
+	std::unique_ptr<Ui::EntitySelectionDialog> m_ui;
 };

@@ -17,8 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ui_shortcutSettings.h"
-#include "ui_shortcutEditDialog.h"
+// Qt
+#include <QDialog>
+
+namespace Ui
+{
+	class ShortcutDialog;
+	class ShortcutEditDialog;
+} // namespace Ui
+
+class QTableWidgetItem;
 
 //! Widget that captures key sequences to be able to edit a shortcut assigned to
 //! an action
@@ -29,6 +37,8 @@ class ccShortcutEditDialog final : public QDialog
   public:
 	explicit ccShortcutEditDialog(QWidget* parent = nullptr);
 
+	~ccShortcutEditDialog() override;
+
 	QKeySequence keySequence() const;
 
 	void setKeySequence(const QKeySequence& sequence) const;
@@ -36,7 +46,7 @@ class ccShortcutEditDialog final : public QDialog
 	int exec() override;
 
   private:
-	Ui_ShortcutEditDialog* m_ui;
+	std::unique_ptr<Ui::ShortcutEditDialog> m_ui;
 };
 
 //! Shortcut edit dialog
@@ -49,12 +59,13 @@ class ccShortcutDialog final : public QDialog
   public:
 	explicit ccShortcutDialog(const QList<QAction*>& actions, QWidget* parent = nullptr);
 
+	~ccShortcutDialog() override;
+
 	void restoreShortcutsFromQSettings() const;
 
   private:
 	const QAction* checkConflict(const QKeySequence& sequence) const;
 	void           handleDoubleClick(QTableWidgetItem* item);
 
-	Ui_ShortcutDialog*    m_ui;
-	ccShortcutEditDialog* m_editDialog;
+	std::unique_ptr<Ui::ShortcutDialog> m_ui;
 };

@@ -123,7 +123,7 @@ class QCC_DB_LIB_API ccScalarField : public CCCoreLib::ScalarField
 		inline void setStart(ScalarType value)
 		{
 			m_start = inbound(value);
-			m_stop  = std::min(m_stop, m_start);
+			m_stop  = std::max(m_stop, m_start);
 			updateRange();
 		}
 		inline void setStop(ScalarType value)

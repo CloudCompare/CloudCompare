@@ -24,7 +24,10 @@
 // Qt
 #include <QDialog>
 
-class Ui_AsciiSaveDialog;
+namespace Ui
+{
+	class AsciiSaveDialog;
+}
 
 //! Dialog for configuration of ASCII files saving sequence
 class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
@@ -92,7 +95,7 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 
   protected:
 	//! Associated UI
-	Ui_AsciiSaveDialog* m_ui;
+	std::unique_ptr<Ui::AsciiSaveDialog> m_ui;
 
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();

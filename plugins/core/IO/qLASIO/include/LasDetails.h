@@ -153,6 +153,8 @@ namespace LasDetails
 
 		bool isCOPCEntry() const;
 
+		bool isExtraBytes() const;
+
 		friend QDataStream& operator>>(QDataStream& stream, EvlrHeader& hdr);
 		friend QDataStream& operator<<(QDataStream& stream, const EvlrHeader& hdr);
 	};

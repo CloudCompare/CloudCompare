@@ -26,6 +26,7 @@
 #include <vector>
 
 class QDataStream;
+class QString;
 
 class ccPointCloud;
 
@@ -94,8 +95,10 @@ class LasExtraScalarField
 	static constexpr size_t MAX_EXTRA_FIELDS_IN_VLR = 65535 / VLR_FIELD_SIZE_BYTES;
 
   public: // Static Helper functions that works on collection of LasExtraScalarFields
-	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header& laszipHeader);
+	/// Reads the "Extra Bytes" descriptor from the VLR or, if there is none, from the EVLR (read from the file itself)
+	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_header& laszipHeader, const QString& fileName);
 	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const laszip_vlr_struct& extraBytesVlr);
+	static std::vector<LasExtraScalarField> ParseExtraScalarFields(const char* data, size_t size);
 	static void                             InitExtraBytesVlr(laszip_vlr_struct&                      vlr,
 	                                                          const std::vector<LasExtraScalarField>& extraFields);
 	static void                             UpdateByteOffsets(std::vector<LasExtraScalarField>& extraFields);

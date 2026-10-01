@@ -47,6 +47,11 @@ namespace LasDetails
 		return recordID == 1'000 && strncmp(userID, "copc", EvlrHeader::USER_ID_SIZE) == 0;
 	}
 
+	bool EvlrHeader::isExtraBytes() const
+	{
+		return recordID == 4 && strncmp(userID, "LASF_Spec", EvlrHeader::USER_ID_SIZE) == 0;
+	}
+
 	EvlrHeader EvlrHeader::Waveform()
 	{
 		EvlrHeader self;

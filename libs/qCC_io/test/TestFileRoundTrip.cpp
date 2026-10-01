@@ -10,8 +10,8 @@
 #include "ccScalarField.h"
 
 #include <QTemporaryDir>
-#include <cfloat>
 #include <cmath>
+#include <limits>
 #include <memory>
 
 static constexpr unsigned PointCount = 100;
@@ -50,8 +50,8 @@ static double Tolerance(int decimals, double value)
 	if (decimals == Exact)
 		return 0.0;
 	if (decimals == Float32)
-		return std::abs(value) * FLT_EPSILON;
-	return 0.5 * std::pow(10.0, -decimals) + std::abs(value) * FLT_EPSILON;
+		return std::abs(value) * std::numeric_limits<float>::epsilon();
+	return 0.5 * std::pow(10.0, -decimals) + std::abs(value) * std::numeric_limits<float>::epsilon();
 }
 
 void TestFileRoundTrip::initTestCase()
@@ -124,10 +124,11 @@ void TestFileRoundTrip::roundTrip()
 	{
 		const CCVector3* P  = original->getPoint(i);
 		const CCVector3* Q  = loaded->getPoint(i);
+		CCVector3d       Pg = original->toGlobal3d<PointCoordinateType>(*P);
 		CCVector3d       Qg = loaded->toGlobal3d<PointCoordinateType>(*Q);
 		for (unsigned d = 0; d < 3; ++d)
 		{
-			QVERIFY(std::abs(Qg.u[d] - P->u[d]) <= Tolerance(coordDecimals, P->u[d]));
+			QVERIFY(std::abs(Qg.u[d] - Pg.u[d]) <= Tolerance(coordDecimals, Pg.u[d]));
 		}
 
 		const ccColor::Rgba& c  = original->getPointColor(i);

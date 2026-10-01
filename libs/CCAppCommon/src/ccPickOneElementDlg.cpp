@@ -24,7 +24,7 @@ ccPickOneElementDlg::ccPickOneElementDlg(const QString& label,
                                          const QString& windowTitle /*=QString()*/,
                                          QWidget*       parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(std::make_unique<Ui_PickOneElementDialog>())
+    , m_ui(std::make_unique<Ui::PickOneElementDialog>())
 {
 	m_ui->setupUi(this);
 

@@ -22,7 +22,10 @@
 // Qt
 #include <QDialog>
 
-class Ui_PickOneElementDialog;
+namespace Ui
+{
+	class PickOneElementDialog;
+}
 
 //! Minimal dialog to pick one element in a list (combox box)
 class CCAPPCOMMON_LIB_API ccPickOneElementDlg : public QDialog
@@ -47,5 +50,5 @@ class CCAPPCOMMON_LIB_API ccPickOneElementDlg : public QDialog
 
   private:
 	//! Associated UI
-	std::unique_ptr<Ui_PickOneElementDialog> m_ui;
+	std::unique_ptr<Ui::PickOneElementDialog> m_ui;
 };

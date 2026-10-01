@@ -132,12 +132,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				for (unsigned j = 0; j < faceCount; ++j)
 				{
 					// we can't use the 'NormsIndexesTable' so we save all the normals of all the vertices
-					CCVector3 Na, Nb, Nc;
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na.x, Na.y, Na.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb.x, Nb.y, Nb.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc.x, Nc.y, Nc.z));
-
+					const CCVector3 *Na = nullptr, *Nb = nullptr, *Nc = nullptr;
 					mesh->getTriangleNormals(j, Na, Nb, Nc);
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na->x, Na->y, Na->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb->x, Nb->y, Nb->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc->x, Nc->y, Nc->z));
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 0, static_cast<int>(j) * 3 + 0);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 1, static_cast<int>(j) * 3 + 1);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 2, static_cast<int>(j) * 3 + 2);

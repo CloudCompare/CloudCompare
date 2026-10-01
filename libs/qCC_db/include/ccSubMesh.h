@@ -62,12 +62,13 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	int                            getTriangleMtlIndex(unsigned triangleIndex) const override;
 	bool                           hasTextures() const override;
 	TextureCoordsContainer::Shared getTexCoordinatesTable() const override;
-	void                           getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override;
+	void                           getTriangleTexCoordinates(unsigned triIndex, const TexCoords2D*& tx1, const TexCoords2D*& tx2, const TexCoords2D*& tx3) const override;
 	bool                           hasPerTriangleTexCoordIndexes() const override;
 	void                           getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
 	bool                           hasTriNormals() const override;
 	void                           getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const override;
-	bool                           getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override;
+	void                           getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const override;
+	void                           getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const override;
 	NormsIndexesTableType::Shared  getTriNormsTable() const override;
 	unsigned                       capacity() const override;
 	void                           setGlobalShift(const CCVector3d& shift) override

@@ -63,6 +63,9 @@
 #include <ccGLWindowInterface.h>
 #include <ccRenderingTools.h>
 
+// qCC_pcp
+#include <Partition.h>
+
 // CCPluginAPI
 #include <ccBackgroundTask.h>
 #include <ccQtHelpers.h>
@@ -4775,7 +4778,7 @@ void MainWindow::doActionCutPursuit()
 
 			// we try to label all CCs
 			std::vector<int32_t> components;
-			int                  rV = CCCoreLib::AutoSegmentationTools::labelCutPursuitComponents(cloud,
+			int                  rV = PCP::Partition::labelCutPursuitComponents(cloud,
                                                                                  s_knn,
                                                                                  s_knnRadius,
                                                                                  N,

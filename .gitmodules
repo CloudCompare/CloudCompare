@@ -3,8 +3,7 @@
 	url = https://github.com/asmaloney/libE57Format
 [submodule "extern/CCCoreLib"]
 	path = libs/qCC_db/extern/CCCoreLib
-	url = https://github.com/farmakis/CCCoreLib
-	branch = cut-pursuit
+	url = https://github.com/CloudCompare/CCCoreLib
 [submodule "plugins/core/Standard/qPoissonRecon/extern/PoissonRecon"]
 	path = plugins/core/Standard/qPoissonRecon/extern/PoissonRecon
 	url = https://github.com/cloudcompare/PoissonRecon
@@ -54,3 +53,6 @@
 [submodule "libs/CCAppCommon/devices/3dConnexion/extern/hidapi"]
 	path = libs/CCAppCommon/devices/3dConnexion/extern/hidapi
 	url = https://github.com/libusb/hidapi.git
+[submodule "libs/qCC_pcp"]
+	path = libs/qCC_pcp
+	url = https://github.com/farmakis/qCC_pcp.git

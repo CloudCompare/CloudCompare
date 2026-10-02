@@ -551,6 +551,8 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 		progressCb->start();
 	}
 
+	bool success = true;
+
 	// repeat Laplacian smoothing iterations
 	for (unsigned iter = 0; iter < nbIteration; iter++)
 	{
@@ -574,6 +576,7 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 		if (!nProgress.oneStep())
 		{
 			// cancelled by user
+			success = false;
 			break;
 		}
 
@@ -601,10 +604,17 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 
 	if (hasNormals())
 	{
-		computeNormals(!hasTriNormals());
+		if (hasTriNormals())
+		{
+			computePerTriangleNormals();
+		}
+		if (m_associatedCloud && m_associatedCloud->hasNormals())
+		{
+			computePerVertexNormals();
+		}
 	}
 
-	return true;
+	return success;
 }
 
 ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,

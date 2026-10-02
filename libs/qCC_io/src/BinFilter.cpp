@@ -888,7 +888,7 @@ static void HandleLabel2D(
 			{
 				ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 				assert(genCloud && genCloud->size() > pp.index);
-				correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud, pp.index, pp.entityCenterPoint));
+				correctedPickedPoints.emplace_back(genCloud, pp.index, pp.entityCenterPoint);
 			}
 			else
 			{
@@ -906,7 +906,7 @@ static void HandleLabel2D(
 			{
 				ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
 				assert(genMesh && genMesh->size() > pp.index);
-				correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genMesh, pp.index, pp.uv, pp.entityCenterPoint));
+				correctedPickedPoints.emplace_back(genMesh, pp.index, pp.uv, pp.entityCenterPoint);
 			}
 			else
 			{

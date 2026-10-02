@@ -461,10 +461,7 @@ void AsciiOpenDlg::updateTable()
 			if (lineCount < DISPLAYED_LINES)
 			{
 				unsigned rawPartsCount = static_cast<unsigned>(parts.size());
-				if (rawPartsCount > maxPartsCount)
-				{
-					maxPartsCount = rawPartsCount;
-				}
+				maxPartsCount          = std::max(rawPartsCount, maxPartsCount);
 
 				unsigned partsCount              = std::min(MAX_COLUMNS, rawPartsCount);
 				bool     columnCountHasIncreased = (partsCount > columnsCount);

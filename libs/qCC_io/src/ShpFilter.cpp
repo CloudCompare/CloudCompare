@@ -2059,8 +2059,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					ccHObject* child = container.getChild(i);
 					assert(child && child->isA(CC_TYPES::POLY_LINE));
 					polyIDs[static_cast<ccPolyline*>(child)] = recordNumber;
-					if (recordNumber > maxPolyID)
-						maxPolyID = recordNumber;
+					maxPolyID                                = std::max(recordNumber, maxPolyID);
 				}
 			}
 		}

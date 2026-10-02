@@ -672,12 +672,10 @@ struct cloudAttributesDescriptor
 	void updateMaxIndex(int& maxIndex)
 	{
 		for (int attribIndex : indexes)
-			if (attribIndex > maxIndex)
-				maxIndex = attribIndex;
+			maxIndex = std::max(attribIndex, maxIndex);
 
 		for (int sfIndex : scalarIndexes)
-			if (sfIndex > maxIndex)
-				maxIndex = sfIndex;
+			maxIndex = std::max(sfIndex, maxIndex);
 	}
 };
 

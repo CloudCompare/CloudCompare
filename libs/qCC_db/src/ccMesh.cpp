@@ -529,36 +529,17 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 		return false;
 	}
 
-	std::vector<CCVector3> verticesDisplacement;
+	std::vector<CCVector3d> verticesAccum;
+	std::vector<unsigned>   neighborCount;
 	try
 	{
-		verticesDisplacement.resize(vertCount);
+		verticesAccum.resize(vertCount);
+		neighborCount.resize(vertCount);
 	}
 	catch (const std::bad_alloc&)
 	{
 		// not enough memory
 		return false;
-	}
-
-	// compute the number of edges to which belong each vertex
-	std::vector<unsigned> edgesCount;
-	try
-	{
-		edgesCount.resize(vertCount, 0);
-	}
-	catch (const std::bad_alloc&)
-	{
-		// not enough memory
-		return false;
-	}
-
-	placeIteratorAtBeginning();
-	for (unsigned j = 0; j < faceCount; j++)
-	{
-		const CCCoreLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
-		edgesCount[tri->i1] += 2;
-		edgesCount[tri->i2] += 2;
-		edgesCount[tri->i3] += 2;
 	}
 
 	// progress dialog
@@ -573,25 +554,21 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 	// repeat Laplacian smoothing iterations
 	for (unsigned iter = 0; iter < nbIteration; iter++)
 	{
-		std::fill(verticesDisplacement.begin(), verticesDisplacement.end(), CCVector3(0, 0, 0));
+		std::fill(verticesAccum.begin(), verticesAccum.end(), CCVector3d(0, 0, 0));
+		std::fill(neighborCount.begin(), neighborCount.end(), 0);
 
 		// for each triangle
-		placeIteratorAtBeginning();
 		for (unsigned j = 0; j < faceCount; j++)
 		{
-			const CCCoreLib::VerticesIndexes* tri = getNextTriangleVertIndexes();
+			const CCCoreLib::VerticesIndexes* tri = getTriangleVertIndexes(j);
 
-			const CCVector3* A = m_associatedCloud->getPoint(tri->i1);
-			const CCVector3* B = m_associatedCloud->getPoint(tri->i2);
-			const CCVector3* C = m_associatedCloud->getPoint(tri->i3);
-
-			CCVector3 dAB = (*B - *A);
-			CCVector3 dAC = (*C - *A);
-			CCVector3 dBC = (*C - *B);
-
-			verticesDisplacement[tri->i1] += dAB + dAC;
-			verticesDisplacement[tri->i2] += dBC - dAB;
-			verticesDisplacement[tri->i3] -= dAC + dBC;
+			// 'Throwing Vertices' technique
+			verticesAccum[tri->i1] += m_associatedCloud->getPoint(tri->i3)->toDouble();
+			neighborCount[tri->i1]++;
+			verticesAccum[tri->i2] += m_associatedCloud->getPoint(tri->i1)->toDouble();
+			neighborCount[tri->i2]++;
+			verticesAccum[tri->i3] += m_associatedCloud->getPoint(tri->i2)->toDouble();
+			neighborCount[tri->i3]++;
 		}
 
 		if (!nProgress.oneStep())
@@ -603,11 +580,19 @@ bool ccMesh::laplacianSmooth(unsigned            nbIteration,
 		// apply displacement
 		for (unsigned i = 0; i < vertCount; i++)
 		{
-			if (edgesCount[i])
+			if (neighborCount[i] != 0)
 			{
 				// this is a "persistent" pointer and we know what type of cloud is behind ;)
-				CCVector3* P = const_cast<CCVector3*>(m_associatedCloud->getPointPersistentPtr(i));
-				(*P) += verticesDisplacement[i] * (factor / edgesCount[i]);
+				CCVector3* P    = const_cast<CCVector3*>(m_associatedCloud->getPointPersistentPtr(i));
+				CCVector3d Pd   = P->toDouble();
+				CCVector3d Pavg = verticesAccum[i] / static_cast<double>(neighborCount[i]);
+				CCVector3d Pupd = Pd + factor * (Pavg - Pd); // lerp
+				(*P)            = Pupd.toPC();
+			}
+			else
+			{
+				// vertex has no edge (isolated?), skip it
+				continue;
 			}
 		}
 	}

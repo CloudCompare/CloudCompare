@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,18 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_SHAPEFILE_FILTER_HEADER
-#define CC_SHAPEFILE_FILTER_HEADER
-
 #ifdef CC_SHP_SUPPORT
 
-// qCC_io
-#include <FileIOFilter.h>
+// Local
+#include "FileIOFilter.h"
 
 // Qt
 #include <QString>
 
-// system
+// System
 #include <vector>
 
 class GenericDBFField;
@@ -46,7 +45,7 @@ class QCC_IO_LIB_API ShpFilter : public FileIOFilter
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
 	//! Special method to save multiple entities with attributes
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters) const;
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state)
@@ -84,5 +83,3 @@ class QCC_IO_LIB_API ShpFilter : public FileIOFilter
 };
 
 #endif // CC_SHP_SUPPORT
-
-#endif // CC_SHAPEFILE_FILTER_HEADER

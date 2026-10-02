@@ -17,10 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QDialog>
-
 // qCC_db
 #include <ccPointCloud.h>
+
+// Qt
+#include <QDialog>
 
 namespace Ui
 {

@@ -1,5 +1,4 @@
-#ifndef FILEIO_H
-#define FILEIO_H
+#pragma once
 
 // ##########################################################################
 // #                                                                        #
@@ -18,8 +17,10 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
 #include "qCC_io.h"
 
+// Qt
 #include <QString>
 
 class FileIO
@@ -41,4 +42,3 @@ class FileIO
 	static QString s_version;
 	static QString s_writerInfo;
 };
-#endif

@@ -17,7 +17,7 @@
 
 #include "ccEntitySelectionDlg.h"
 
-// ui
+// Ui
 #include <ui_entitySelectionDlg.h>
 
 // Qt
@@ -30,7 +30,7 @@ ccEntitySelectionDialog::ccEntitySelectionDialog(const ccHObject::Container& ent
                                                  QWidget*                    parent /*=nullptr*/,
                                                  QString                     labelStr /*=QString()*/)
     : QDialog(parent, Qt::Tool)
-    , m_ui(new Ui_EntitySelectionDialog)
+    , m_ui(std::make_unique<Ui::EntitySelectionDialog>())
 {
 	m_ui->setupUi(this);
 
@@ -67,14 +67,7 @@ ccEntitySelectionDialog::ccEntitySelectionDialog(const ccHObject::Container& ent
 	}
 }
 
-ccEntitySelectionDialog::~ccEntitySelectionDialog()
-{
-	if (m_ui)
-	{
-		delete m_ui;
-		m_ui = nullptr;
-	}
-}
+ccEntitySelectionDialog::~ccEntitySelectionDialog() = default;
 
 void ccEntitySelectionDialog::selectAll()
 {

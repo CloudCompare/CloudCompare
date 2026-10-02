@@ -267,11 +267,11 @@ bool ccObject::hasMetaData(const QString& key) const
 	return m_metaData.contains(key);
 }
 
-bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccObject::fromFile(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	if (dataVersion < 20)
+	if (context.dataVersion < 20)
 		return CorruptError();
 
 	// DGM: if we are here, we assume the class ID has already been read!
@@ -286,14 +286,13 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	if (in.read((char*)&uniqueID, 4) < 0)
 		return ReadError();
 	// DGM: this ID will be useful to recreate dynamic links between entities later!
-	if (oldToNewIDMap.contains(uniqueID))
+	if (context.oldToNewIDMap.contains(uniqueID))
 	{
 		ccLog::Warning(QString("Malformed file: uniqueID #%1 is used several times! (not that unique ;)").arg(uniqueID));
 	}
-	oldToNewIDMap.insert(uniqueID, m_uniqueID);
-
+	context.oldToNewIDMap.insert(uniqueID, m_uniqueID);
 	// name
-	if (dataVersion < 22) // old style
+	if (context.dataVersion < 22) // old style
 	{
 		char name[256];
 		if (in.read(name, 256) < 0)
@@ -313,7 +312,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 	m_flags = (unsigned)objFlags;
 
 	// meta data (dataVersion>=30)
-	if (dataVersion >= 30)
+	if (context.dataVersion >= 30)
 	{
 		// count
 		uint32_t metaDataCount = 0;
@@ -327,7 +326,6 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 			QString     key;
 			QVariant    value;
 			inStream >> key;
-#if 1 // patch to overcome the issue with LAS vlrs not being readable anymore as QVariant object with Qt 6
 			if (key == "LAS.vlrs")
 			{
 				inStream.skipRawData(16); // size of a partial QVariant object on Windows
@@ -349,7 +347,6 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& ol
 				inStream.skipRawData(272 * extraScalarFieldCount);
 			}
 			else
-#endif
 			{
 				inStream >> value;
 				setMetaData(key, value);

@@ -119,7 +119,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isA(CC_TYPES::POINT_OCTREE))
 		{
@@ -137,10 +137,8 @@ ccOctree::Shared ccGenericPointCloud::getOctree() const
 	{
 		return proxy->getOctree();
 	}
-	else
-	{
-		return {};
-	}
+
+	return {};
 }
 
 void ccGenericPointCloud::setOctree(ccOctree::Shared octree, bool autoAddChild /*=true*/)
@@ -227,19 +225,19 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 20)
+	if (context.dataVersion < 20)
 	{
 		return CorruptError();
 	}
 
-	if (dataVersion < 33)
+	if (context.dataVersion < 33)
 	{
 		//'coordinates shift' (dataVersion>=20)
 		if (in.read((char*)m_globalShift.u, sizeof(double) * 3) < 0)
@@ -267,7 +265,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 		}
 		if (hasVisibilityArray)
 		{
-			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, dataVersion, "visibility array"))
+			if (!ccSerializationHelper::GenericArrayFromFile<unsigned char, 1, unsigned char>(m_pointsVisibility, in, context.dataVersion, "visibility array"))
 			{
 				unallocateVisibilityArray();
 				return false;
@@ -277,7 +275,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 
 	//'point size' (dataVersion>=24)
 	m_pointSize = 0;
-	if (dataVersion >= 24)
+	if (context.dataVersion >= 24)
 	{
 		if (in.read((char*)&m_pointSize, 1) < 0)
 		{
@@ -369,16 +367,12 @@ bool ccGenericPointCloud::pointPicking(const CCVector2d&           clickPos,
 					nearestSquareDist = point.squareDistd;
 					return true;
 				}
-				else
-				{
-					// nothing found
-					return false;
-				}
+
+				// nothing found
+				return false;
 			}
-			else
-			{
-				ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
-			}
+
+			ccLog::Warning("[Point picking] Failed to use the octree. We'll fall back to the slow process...");
 		}
 	}
 

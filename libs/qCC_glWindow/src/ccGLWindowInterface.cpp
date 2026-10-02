@@ -607,12 +607,14 @@ bool ccGLWindowInterface::initialize()
 		const QString vendorNameStr = QString(vendorName).toUpper();
 		if (!m_silentInitialization)
 		{
-			ccLog::Print("[3D View %i] Graphics card manufacturer: %s", m_uniqueID, vendorName);
-			ccLog::Print("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
-			ccLog::Print("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
-			ccLog::Print("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
+			ccLog::Printf("[3D View %i] Graphics card manufacturer: %s", m_uniqueID, vendorName);
+			ccLog::Printf("[3D View %i] Renderer: %s", m_uniqueID, glFunc->glGetString(GL_RENDERER));
+			ccLog::Printf("[3D View %i] GL version: %s", m_uniqueID, glFunc->glGetString(GL_VERSION));
+			ccLog::Printf("[3D View %i] GLSL Version: %s", m_uniqueID, glFunc->glGetString(GL_SHADING_LANGUAGE_VERSION));
 			if (m_glExtFuncSupported)
-				ccLog::Print("[3D View %i] FBO available", m_uniqueID);
+			{
+				ccLog::Printf("[3D View %i] FBO available", m_uniqueID);
+			}
 		}
 
 		ccGui::ParamStruct params = getDisplayParameters();
@@ -636,12 +638,14 @@ bool ccGLWindowInterface::initialize()
 			if (params.useVBOs && (!vendorName || (vendorNameStr.startsWith("ATI") && (majorVersion < 4 || (majorVersion == 4 && minorVersion < 6))))) // only if OpenGL version is earlier than 4.6
 			{
 				if (!m_silentInitialization)
-					ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
+				{
+					ccLog::Warningf("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
+				}
 				params.useVBOs = false;
 			}
 			else if (!m_silentInitialization)
 			{
-				ccLog::Print("[3D View %i] VBOs available", m_uniqueID);
+				ccLog::Printf("[3D View %i] VBOs available", m_uniqueID);
 			}
 		}
 		else
@@ -658,23 +662,27 @@ bool ccGLWindowInterface::initialize()
 		{
 			// if no shader, no GL filter!
 			if (!m_silentInitialization)
-				ccLog::Warning("[3D View %i] Shaders and GL filters unavailable", m_uniqueID);
+			{
+				ccLog::Warningf("[3D View %i] Shaders and GL filters unavailable", m_uniqueID);
+			}
 		}
 		else
 		{
 			if (!m_silentInitialization)
-				ccLog::Print("[3D View %i] Shaders available", m_uniqueID);
+				ccLog::Printf("[3D View %i] Shaders available", m_uniqueID);
 
 			m_glFiltersEnabled = glContext->hasExtension(QByteArrayLiteral("GL_EXT_framebuffer_object"));
 			if (m_glFiltersEnabled)
 			{
 				if (!m_silentInitialization)
-					ccLog::Print("[3D View %i] GL filters available", m_uniqueID);
+				{
+					ccLog::Printf("[3D View %i] GL filters available", m_uniqueID);
+				}
 				m_alwaysUseFBO = true;
 			}
 			else if (!m_silentInitialization)
 			{
-				ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)", m_uniqueID);
+				ccLog::Warningf("[3D View %i] GL filters unavailable (FBO not supported)", m_uniqueID);
 			}
 
 			// color ramp shader
@@ -690,7 +698,9 @@ bool ccGLWindowInterface::initialize()
 				if (maxBytes < minRequiredBytes)
 				{
 					if (!m_silentInitialization)
-						ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)", m_uniqueID, maxBytes, minRequiredBytes);
+					{
+						ccLog::Warningf("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)", m_uniqueID, maxBytes, minRequiredBytes);
+					}
 				}
 				else
 				{
@@ -701,14 +711,18 @@ bool ccGLWindowInterface::initialize()
 					if (!colorRampShader->loadProgram(QString(), shaderPath, error))
 					{
 						if (!m_silentInitialization)
+						{
 							ccLog::Warning(QString("[3D View %1] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
+						}
 						delete colorRampShader;
 						colorRampShader = nullptr;
 					}
 					else
 					{
 						if (!m_silentInitialization)
-							ccLog::Print("[3D View %i] Color ramp shader loaded successfully", m_uniqueID);
+						{
+							ccLog::Printf("[3D View %i] Color ramp shader loaded successfully", m_uniqueID);
+						}
 						m_colorRampShader                = colorRampShader;
 						params.colorScaleShaderSupported = true;
 
@@ -720,7 +734,7 @@ bool ccGLWindowInterface::initialize()
 							{
 								if (!m_silentInitialization)
 								{
-									ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
+									ccLog::Warningf("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)", m_uniqueID, vendorName);
 								}
 								shouldUseShader = false;
 							}
@@ -753,7 +767,7 @@ bool ccGLWindowInterface::initialize()
 		if (glContext->hasExtension(QByteArrayLiteral("GL_KHR_debug")))
 		{
 			if (!m_silentInitialization)
-				ccLog::Print("[3D View %i] GL KHR (debug) extension available", m_uniqueID);
+				ccLog::Printf("[3D View %i] GL KHR (debug) extension available", m_uniqueID);
 
 			QOpenGLDebugLogger* logger = new QOpenGLDebugLogger(asQObject());
 			logger->initialize();
@@ -3993,25 +4007,25 @@ void ccGLWindowInterface::LogGLError(GLenum err, const char* context)
 	case GL_NO_ERROR:
 		break;
 	case GL_INVALID_ENUM:
-		ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+		ccLog::Warning(QString("[%1] OpenGL error: invalid enumerator").arg(context));
 		break;
 	case GL_INVALID_VALUE:
-		ccLog::Warning("[%s] OpenGL error: invalid value", context);
+		ccLog::Warning(QString("[%1] OpenGL error: invalid value").arg(context));
 		break;
 	case GL_INVALID_OPERATION:
-		ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+		ccLog::Warning(QString("[%1] OpenGL error: invalid operation").arg(context));
 		break;
 	case GL_STACK_OVERFLOW:
-		ccLog::Error("[%s] OpenGL error: stack overflow", context);
+		ccLog::Error(QString("[%1] OpenGL error: stack overflow").arg(context));
 		break;
 	case GL_STACK_UNDERFLOW:
-		ccLog::Error("[%s] OpenGL error: stack underflow", context);
+		ccLog::Error(QString("[%1] OpenGL error: stack underflow").arg(context));
 		break;
 	case GL_OUT_OF_MEMORY:
-		ccLog::Error("[%s] OpenGL error: out of memory", context);
+		ccLog::Error(QString("[%1] OpenGL error: out of memory").arg(context));
 		break;
 	case GL_INVALID_FRAMEBUFFER_OPERATION:
-		ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+		ccLog::Warning(QString("[%1] OpenGL error: invalid framebuffer operation").arg(context));
 		break;
 	}
 }
@@ -4534,11 +4548,11 @@ void ccGLWindowInterface::setInteractionMode(INTERACTION_FLAGS flags)
 
 void ccGLWindowInterface::set3DMouseActive(bool state)
 {
-	// While a 3D mouse is driving the view we set m_mouseMoved so that
-	// decimateMeshOnMove is active (see display parameter setup). This
-	// mirrors the behaviour of a regular mouse drag, giving smooth
-	// interaction with large meshes. When the 3D mouse is released,
-	// m_mouseMoved is cleared so the LOD refinement cycle can run.
+	// While a 3D mouse is driving the view we set m_mouseMoved to true so
+	// that decimateMeshOnMove is active (see display parameter setup).
+	// This mirrors the behaviour of a regular mouse drag, allowing smoother
+	// interactions with large meshes. When the 3D mouse is released,
+	// m_mouseMoved should be set to false so the LOD refinement cycle can start.
 	m_mouseMoved = state;
 }
 
@@ -4792,6 +4806,7 @@ void ccGLWindowInterface::updateFrameRateTest()
 			rotMat.initFromParameters(2 * M_PI / FRAMERATE_TEST_MIN_FRAMES, CCVector3d(0, 1, 0), CCVector3d(0, 0, 0));
 			m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 			invalidateVisualization();
+			invalidateViewport();
 		}
 	}
 	else

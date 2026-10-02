@@ -18,14 +18,16 @@
 // ##########################################################################
 
 // Local
-#include "cc2DLabel.h"
-#include "ccPickingListener.h"
+#include "ccQCustomPlot.h"
+
+// CCPluginAPI
+#include <ccPickingListener.h>
+
+// qCC_db
+#include <cc2DLabel.h>
 
 // Qt
 #include <QDialog>
-
-// QCustomPlot
-#include "ccQCustomPlot.h"
 
 class QCPArrow;
 class QCPBarsWithText;
@@ -33,7 +35,10 @@ class QCPColoredBars;
 class QCPHiddenArea;
 class QCPTextElement;
 
-class Ui_WaveDialog;
+namespace Ui
+{
+	class WaveDialog;
+} // namespace Ui
 class ccPointCloud;
 class ccPickingHub;
 
@@ -137,7 +142,7 @@ class ccWaveDialog : public QDialog
 	ccPickingHub* m_pickingHub;
 
 	//! GUI
-	Ui_WaveDialog* m_gui;
+	std::unique_ptr<Ui::WaveDialog> m_ui;
 
 	//! Maximum wave amplitude (for all points)
 	double m_waveMax;

@@ -15,13 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QFileOpenEvent>
-#include <QtGlobal>
+#include "ccApplication.h"
+
+// Local
+#include "mainwindow.h"
 
 // qCC_io
-#include "FileIO.h"
-#include "ccApplication.h"
-#include "mainwindow.h"
+#include <FileIO.h>
+
+// Qt
+#include <QFileOpenEvent>
+#include <QtGlobal>
 
 //! Map between a file version, and the first version of CloudCompare that was able to load it
 struct FileVersionToCCVersion : QMap<short, QString>

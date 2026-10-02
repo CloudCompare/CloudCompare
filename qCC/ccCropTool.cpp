@@ -17,6 +17,10 @@
 
 #include "ccCropTool.h"
 
+// CCCoreLib
+#include <ManualSegmentationTools.h>
+#include <SimpleMesh.h>
+
 // qCC_db
 #include <ccHObject.h>
 #include <ccLog.h>
@@ -25,10 +29,6 @@
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
-
-// CCCoreLib
-#include <ManualSegmentationTools.h>
-#include <SimpleMesh.h>
 
 ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*=true*/, const ccGLMatrix* meshRotation /*=nullptr*/)
 {
@@ -374,10 +374,10 @@ ccHObject* ccCropTool::Crop(ccHObject* entity, const ccBBox& box, bool inside /*
 										for (unsigned i = 0; i < croppedMesh->size(); ++i)
 										{
 											// get the origin triangle
-											unsigned     origTriIndex = origTriIndexes[i];
-											TexCoords2D* tx1          = nullptr;
-											TexCoords2D* tx2          = nullptr;
-											TexCoords2D* tx3          = nullptr;
+											unsigned           origTriIndex = origTriIndexes[i];
+											const TexCoords2D* tx1          = nullptr;
+											const TexCoords2D* tx2          = nullptr;
+											const TexCoords2D* tx3          = nullptr;
 											mesh->getTriangleTexCoordinates(origTriIndex, tx1, tx2, tx3);
 
 											// get the new triangle

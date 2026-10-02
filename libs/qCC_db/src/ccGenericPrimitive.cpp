@@ -180,9 +180,9 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccMesh::fromFile_MeOnly(in, context))
 		return false;
 
 	// HACK: first, we have to remove any 'wrongly' associated vertices cloud!
@@ -194,7 +194,7 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 	}
 
 	// Transformation matrix backup (dataVersion>=21)
-	if (!m_transformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!m_transformation.fromFile(in, context))
 		return false;
 
 	//'drawing precision' (dataVersion>=21))

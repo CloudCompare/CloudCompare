@@ -132,12 +132,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				for (unsigned j = 0; j < faceCount; ++j)
 				{
 					// we can't use the 'NormsIndexesTable' so we save all the normals of all the vertices
-					CCVector3 Na, Nb, Nc;
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na.x, Na.y, Na.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb.x, Nb.y, Nb.z));
-					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc.x, Nc.y, Nc.z));
-
+					const CCVector3 *Na = nullptr, *Nb = nullptr, *Nc = nullptr;
 					mesh->getTriangleNormals(j, Na, Nb, Nc);
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na->x, Na->y, Na->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb->x, Nb->y, Nb->z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc->x, Nc->y, Nc->z));
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 0, static_cast<int>(j) * 3 + 0);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 1, static_cast<int>(j) * 3 + 1);
 					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j) * 3 + 2, static_cast<int>(j) * 3 + 2);
@@ -429,7 +428,7 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 	if (lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
 	{
 		ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
-		ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
+		ccLog::Warningf("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
 		return false;
 	}
 
@@ -526,7 +525,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
+		ccLog::Printf("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
 	}
 
 	try
@@ -1249,7 +1248,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					{
 						vertices->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 

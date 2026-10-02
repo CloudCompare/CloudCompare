@@ -60,7 +60,7 @@
 #endif
 
 //! Object angular velocity per mouse tick (in radians per ms per count)
-static const double c_3dmouseAngularVelocity = 1.0e-6;
+static const double c_3DMouseAngularVelocity = 1.0e-6;
 
 // Unique instance
 static Mouse3DInput* s_mouseInputInstance = nullptr;
@@ -143,8 +143,8 @@ bool Mouse3DInput::connect(QWidget* mainWidget, QString appName)
 	                 { Q_EMIT sigMove3d(v); },
 	                 Qt::QueuedConnection);
 	QObject::connect(m_hidWorker, &HIDWorker::sigReleased, this, &Mouse3DInput::sigReleased, Qt::QueuedConnection);
-	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyDown, this, &Mouse3DInput::sigOn3dmouseKeyDown, Qt::QueuedConnection);
-	QObject::connect(m_hidWorker, &HIDWorker::sigOn3dmouseKeyUp, this, &Mouse3DInput::sigOn3dmouseKeyUp, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3DMouseKeyDown, this, &Mouse3DInput::sigOn3DMouseKeyDown, Qt::QueuedConnection);
+	QObject::connect(m_hidWorker, &HIDWorker::sigOn3DMouseKeyUp, this, &Mouse3DInput::sigOn3DMouseKeyUp, Qt::QueuedConnection);
 
 	m_hidWorker->start();
 	return true;
@@ -269,7 +269,7 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 		    || eventData.mData[SI_RZ] != 0)
 		{
 			std::vector<float> axes(6);
-			double             ds = eventData.period * c_3dmouseAngularVelocity; // period is in ms
+			double             ds = eventData.period * c_3DMouseAngularVelocity; // period is in ms
 			// translation data
 			axes[0] = -static_cast<float>(eventData.mData[SI_TX] * ds);
 			axes[1] = static_cast<float>(eventData.mData[SI_TY] * ds);
@@ -296,21 +296,21 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 		if (buttonNumber != 0)
 		{
 			if (SiButtonPressed(&siEvent) > 0)
-				on3dmouseKeyDown(buttonNumber);
+				on3DMouseKeyDown(buttonNumber);
 			else if (SiButtonReleased(&siEvent) > 0)
-				on3dmouseKeyUp(buttonNumber);
+				on3DMouseKeyUp(buttonNumber);
 		}
 	}
 	break;
 
 	case SI_BUTTON_PRESS_EVENT:
 		// ccLog::Print(QString("SI_BUTTON_PRESS_EVENT"));
-		on3dmouseKeyDown(siEvent.u.hwButtonEvent.buttonNumber);
+		on3DMouseKeyDown(siEvent.u.hwButtonEvent.buttonNumber);
 		break;
 
 	case SI_BUTTON_RELEASE_EVENT:
 		// ccLog::Print(QString("SI_BUTTON_RELEASE_EVENT"));
-		on3dmouseKeyUp(siEvent.u.hwButtonEvent.buttonNumber);
+		on3DMouseKeyUp(siEvent.u.hwButtonEvent.buttonNumber);
 		break;
 	case SI_CMD_EVENT:
 		// ccLog::Print(QString("SI_CMD_EVENT"));
@@ -319,11 +319,11 @@ bool Mouse3DInput::onSiEvent(void* siGetEventData)
 			if (siEvent.u.cmdEventData.functionNumber == V3DCMD_MENU_OPTIONS)
 				SiSetUiMode(m_siHandle, SI_UI_ALL_CONTROLS);
 			else
-				on3dmouseCMDKeyDown(siEvent.u.cmdEventData.functionNumber);
+				on3DMouseCMDKeyDown(siEvent.u.cmdEventData.functionNumber);
 		}
 		else
 		{
-			on3dmouseCMDKeyUp(siEvent.u.cmdEventData.functionNumber);
+			on3DMouseCMDKeyUp(siEvent.u.cmdEventData.functionNumber);
 		}
 		break;
 
@@ -341,24 +341,24 @@ void Mouse3DInput::move3d(std::vector<float>& motionData)
 	Q_EMIT sigMove3d(motionData);
 }
 
-void Mouse3DInput::on3dmouseKeyDown(int virtualKeyCode)
+void Mouse3DInput::on3DMouseKeyDown(int virtualKeyCode)
 {
-	Q_EMIT sigOn3dmouseKeyDown(virtualKeyCode);
+	Q_EMIT sigOn3DMouseKeyDown(virtualKeyCode);
 }
 
-void Mouse3DInput::on3dmouseCMDKeyDown(int virtualCMDCode)
+void Mouse3DInput::on3DMouseCMDKeyDown(int virtualCMDCode)
 {
-	Q_EMIT sigOn3dmouseCMDKeyDown(virtualCMDCode);
+	Q_EMIT sigOn3DMouseCMDKeyDown(virtualCMDCode);
 }
 
-void Mouse3DInput::on3dmouseKeyUp(int virtualKeyCode)
+void Mouse3DInput::on3DMouseKeyUp(int virtualKeyCode)
 {
-	Q_EMIT sigOn3dmouseKeyUp(virtualKeyCode);
+	Q_EMIT sigOn3DMouseKeyUp(virtualKeyCode);
 }
 
-void Mouse3DInput::on3dmouseCMDKeyUp(int virtualCMDCode)
+void Mouse3DInput::on3DMouseCMDKeyUp(int virtualCMDCode)
 {
-	Q_EMIT sigOn3dmouseCMDKeyUp(virtualCMDCode);
+	Q_EMIT sigOn3DMouseCMDKeyUp(virtualCMDCode);
 }
 
 void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& mat)
@@ -385,7 +385,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& 
 		mat.toIdentity();
 	}
 #else
-	float axis[3] = {-vec[3], vec[4], -vec[5]};
+	float axis[3]{-motionData[3], motionData[4], -motionData[5]};
 
 	Matrix Rd;
 	SPW_ArbitraryAxisToMatrix(Rd, axis, 1.0f);
@@ -507,6 +507,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 			break;
 		}
 	}
+
 	if (hasMotion)
 	{
 		// Enable LOD and signal that the 3D mouse is driving the view. This
@@ -516,7 +517,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 		// until the movement stops.
 		win->setLODEnabled(true);
 		win->set3DMouseActive(true);
-		win->redraw(false, false);
+		win->redraw(false, true);
 	}
 	else
 	{

@@ -3285,7 +3285,7 @@ void ccCompass::distributeSelection()
 		}
 		else //a best match was not found...
 		{
-			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches %s.",obj->getName().toLatin1().data()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+			m_app->dispToConsole(QString::asprintf("[Compass] Warning: No GeoObject could be found that matches '%s'.",obj->getName().toLatin1().data()), ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		}
 	}
 	

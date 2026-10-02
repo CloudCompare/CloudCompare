@@ -1,17 +1,37 @@
-#ifndef CC_RECENTER_CLOUD_DIALOG
-#define CC_RECENTER_CLOUD_DIALOG
+#pragma once
 
-// local
+// ##########################################################################
+// #                                                                        #
+// #                              CLOUDCOMPARE                              #
+// #                                                                        #
+// #  This program is free software; you can redistribute it and/or modify  #
+// #  it under the terms of the GNU General Public License as published by  #
+// #  the Free Software Foundation; version 2 or later of the License.      #
+// #                                                                        #
+// #  This program is distributed in the hope that it will be useful,       #
+// #  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+// #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
+// #  GNU General Public License for more details.                          #
+// #                                                                        #
+// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #                                                                        #
+// ##########################################################################
+
+// Local
 #include "ccGlobalShiftManager.h"
 #include "qCC_io.h"
-
-// Qt
-#include <QDialog>
 
 // CCCoreLib
 #include <CCGeom.h>
 
-class Ui_GlobalShiftAndScaleDlg;
+// Qt
+#include <QDialog>
+
+namespace Ui
+{
+	class GlobalShiftAndScaleDlg;
+}
+
 class QAbstractButton;
 
 //! Dialog for selection of cloud center
@@ -40,7 +60,7 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	void setShiftFieldsPrecision(int precision);
 
 	//! Destructor
-	virtual ~ccShiftAndScaleCloudDlg();
+	~ccShiftAndScaleCloudDlg() override;
 
 	//! Returns shift
 	CCVector3d getShift() const;
@@ -147,7 +167,7 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	void updateGlobalSystem();
 
 	//! Associated UI
-	Ui_GlobalShiftAndScaleDlg* m_ui;
+	std::unique_ptr<Ui::GlobalShiftAndScaleDlg> m_ui;
 
 	//! Whether shift should be applied to all files
 	bool m_applyAll;
@@ -171,5 +191,3 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	//! Whether the reverse mode is active or not
 	bool m_reversedMode;
 };
-
-#endif

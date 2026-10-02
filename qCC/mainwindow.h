@@ -17,16 +17,18 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QMainWindow>
-
 // Local
 #include "ccEntityAction.h"
-#include "ccMainAppInterface.h"
-#include "ccPickingListener.h"
 
 // CCCoreLib
 #include <AutoSegmentationTools.h>
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
+#include <ccPickingListener.h>
+
+// Qt
+#include <QMainWindow>
 
 class QAction;
 class QMdiArea;

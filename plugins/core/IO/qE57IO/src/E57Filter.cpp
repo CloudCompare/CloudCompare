@@ -480,7 +480,9 @@ static bool SaveScan(ccPointCloud*       cloud,
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
 			if (intensitySFIndex >= 0)
-				ccLog::Print("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex).c_str());
+			{
+				ccLog::Printf("[E57] No 'intensity' scalar field found, we'll use the currently displayed one instead (%s)", cloud->getScalarFieldName(intensitySFIndex).c_str());
+			}
 		}
 		if (intensitySFIndex >= 0)
 		{
@@ -1302,7 +1304,7 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 		e57::StructureNode s = static_cast<e57::StructureNode>(node);
 		if (!s.isDefined(childName))
 		{
-			ccLog::Warning("[E57] Couldn't find element named '%s'", childName);
+			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
 		else
@@ -1323,7 +1325,7 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 		e57::VectorNode v = static_cast<e57::VectorNode>(node);
 		if (!v.isDefined(childName))
 		{
-			ccLog::Warning("[E57] Couldn't find element named '%s'", childName);
+			ccLog::Warningf("[E57] Couldn't find element named '%s'", childName);
 			return false;
 		}
 		else
@@ -1341,7 +1343,7 @@ static bool ChildNodeToConsole(const e57::Node& node, const char* childName)
 	}
 	else
 	{
-		ccLog::Warning("[E57] Element '%s' has no child (not a structure nor a vector!)", node.elementName().c_str());
+		ccLog::Warningf("[E57] Element '%s' has no child (not a structure nor a vector!)", node.elementName().c_str());
 		return false;
 	}
 
@@ -1922,7 +1924,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 			}
 			poseMatWasShifted  = true;
 			globalShiftApplied = true;
-			ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), poseMatShift.x, poseMatShift.y, poseMatShift.z);
+			ccLog::Warningf("[E57Filter::loadFile] Cloud '%s' has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), poseMatShift.x, poseMatShift.y, poseMatShift.z);
 		}
 
 		// cloud->setGLTransformation(poseMat); //TODO-> apply it at the end instead! Otherwise we will loose original coordinates!
@@ -2256,7 +2258,7 @@ static LoadedScan LoadScan(const e57::Node& node, QString& guidStr, ccProgressDi
 					{
 						cloud->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[E57Filter::loadFile] Cloud '%s' has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(guidStr), Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -2985,7 +2987,7 @@ CC_FILE_ERROR E57Filter::loadFile(const QString& filename, ccHObject& container,
 									ccGLMatrix poseMatf(image.poseMat.data());
 									image.sensor->setRigidTransformation(poseMatf);
 
-									ccLog::Warning("[E57Filter::loadFile] The sensor of image %s has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
+									ccLog::Warningf("[E57Filter::loadFile] The sensor of image '%s' has been recentered! Translation: (%.2f ; %.2f ; %.2f)", qPrintable(image.entity->getName()), poseMatShift.x, poseMatShift.y, poseMatShift.z);
 								}
 							}
 

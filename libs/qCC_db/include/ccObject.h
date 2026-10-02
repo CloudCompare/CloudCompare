@@ -182,8 +182,7 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 	//! Updates the value of the last generated unique ID with the current one
 	void update(unsigned ID)
 	{
-		if (ID > m_lastUniqueID)
-			m_lastUniqueID = ID;
+		m_lastUniqueID = std::max(ID, m_lastUniqueID);
 	}
 
   protected:
@@ -375,7 +374,7 @@ class QCC_DB_LIB_API ccObject : public ccSerializableObject
 	    before calling this method, as the classID is voluntarily
 	    skipped (in order to let the user instantiate the object first)
 	**/
-	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool fromFile(QFile& in, LoadingContext& context) override;
 
 	//! Object name
 	QString m_name;

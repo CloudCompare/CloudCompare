@@ -17,10 +17,10 @@
 
 #ifdef CC_SHP_SUPPORT
 
-#include "ShpDBFFields.h"
+#include "../include/ShpDBFFields.h"
 
-// system
-#include <assert.h>
+// System
+#include <cassert>
 
 bool IntegerDBFField::save(DBFHandle handle, int fieldIndex) const
 {

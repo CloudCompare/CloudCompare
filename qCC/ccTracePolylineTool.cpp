@@ -17,13 +17,14 @@
 
 #include "ccTracePolylineTool.h"
 
-#include "ui_tracePolylineDlg.h"
-
 // Local
 #include "ccReservedIDs.h"
 #include "mainwindow.h"
 
-// common
+// Ui
+#include <ui_tracePolylineDlg.h>
+
+// CCPluginAPI
 #include <ccPickingHub.h>
 
 // qCC_db

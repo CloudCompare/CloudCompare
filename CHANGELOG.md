@@ -88,6 +88,9 @@ New features:
 			- saves the height layer or the RGB layer of the raster grid as a PNG image ('{cloud name}_RASTER_IMAGE.png', with a timestamp unless -NO_TIMESTAMP is set)
 			- the height layer uses the 'Blue>Green>Yellow>Red' color scale
 			- empty cells follow the -EMPTY_FILL option (transparent by default)
+		- New option -IMAGE_COLOR_SCALE {name} for the -RASTERIZE command (with -OUTPUT_IMAGE HEIGHT)
+			- {name} is a color scale name as shown in the Color Scales Manager (not case sensitive), custom scales included
+			- the default scale remains 'Blue>Green>Yellow>Red'
 		- New SF-to-normals and normals-to-SF conversion methods:
 			- NORM_TO_SF {X/Y/Z}
 				where {X/Y/Z} is any combination of X, Y and Z, such as 'XYZ', 'XZ' or 'Y'
@@ -469,6 +472,11 @@ Bug fixes:
 	- CC could take a long time to start (and to open a file) if the recent files list contained files on an unreachable network drive.
 		The recent files are now only checked when one of them is clicked (and a missing file is then removed from the list).
 	- the scalar field name above the color scale in the 3D view was not properly updated after renaming the active scalar field
+	- LAS 1.4 files: the extra fields described by an Extra Bytes EVLR (instead of a VLR) were ignored at loading time
+		(a VLR can describe at most 341 extra fields, so files with more fields have to use an EVLR).
+		If a file has both, the VLR is used and a warning is issued.
+	- LAS files: an extra field name of 32 characters (the maximum) was loaded with the field description appended to it
+	- LAS 1.4 files: only the first 341 extra fields could be saved. The others are now saved too, described by an Extra Bytes EVLR.
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

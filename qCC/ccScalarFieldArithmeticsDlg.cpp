@@ -17,22 +17,24 @@
 
 #include "ccScalarFieldArithmeticsDlg.h"
 
-#include "ui_sfArithmeticsDlg.h"
-
-// Qt
-#include <QMessageBox>
-#include <QPushButton>
+// Ui
+#include <ui_sfArithmeticsDlg.h>
 
 // qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
-// system
+// Qt
+#include <QMessageBox>
+#include <QPushButton>
+
+// System
 #include <cassert>
+#include <cmath>
+
 #ifdef _MSC_VER
 #include <windows.h>
 #endif
-#include <cmath>
 
 // number of valid operations
 constexpr unsigned s_opCount = 22;

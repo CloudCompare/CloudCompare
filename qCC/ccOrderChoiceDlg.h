@@ -22,7 +22,10 @@
 
 class ccHObject;
 class ccMainAppInterface;
-class Ui_RoleChoiceDialog;
+namespace Ui
+{
+	class RoleChoiceDialog;
+} // namespace Ui
 
 //! Dialog to assign roles to two entities (e.g. compared/reference)
 class ccOrderChoiceDlg : public QDialog
@@ -53,9 +56,9 @@ class ccOrderChoiceDlg : public QDialog
 	//! Sets the right colors to the entities and updates the dialog
 	void setColorsAndLabels();
 
-	Ui_RoleChoiceDialog* m_gui;
-	ccMainAppInterface*  m_app;
-	ccHObject*           m_firstEnt;
-	ccHObject*           m_secondEnt;
-	bool                 m_useInputOrder;
+	std::unique_ptr<Ui::RoleChoiceDialog> m_ui;
+	ccMainAppInterface*                   m_app;
+	ccHObject*                            m_firstEnt;
+	ccHObject*                            m_secondEnt;
+	bool                                  m_useInputOrder;
 };

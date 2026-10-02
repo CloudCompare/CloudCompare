@@ -15,21 +15,21 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
-#include "ccRasterizeTool.h"
-
-// Qt
-#include <QMessageBox>
-#include <QString>
-
-// qCC_db
 #include "ccCommandRaster.h"
 
-#include <QDateTime>
+// Local
+#include "ccRasterizeTool.h"
+#include "ccVolumeCalcTool.h"
+
+// qCC_db
 #include <ccColorScalesManager.h>
 #include <ccMesh.h>
 #include <ccProgressDialog.h>
-#include <ccVolumeCalcTool.h>
+
+// Qt
+#include <QDateTime>
+#include <QMessageBox>
+#include <QString>
 
 // shared commands
 constexpr char COMMAND_GRID_VERT_DIR[]               = "VERT_DIR";
@@ -62,6 +62,7 @@ constexpr char COMMAND_RASTER_PROJ_INVERSE_VAR[]       = "INV_VAR";
 constexpr char COMMAND_RASTER_RESAMPLE[]               = "RESAMPLE";
 constexpr char COMMAND_RASTER_IMAGE_HEIGHT[]           = "HEIGHT";
 constexpr char COMMAND_RASTER_IMAGE_RGB[]              = "RGB";
+constexpr char COMMAND_RASTER_IMAGE_COLOR_SCALE[]      = "IMAGE_COLOR_SCALE";
 
 // 2.5D Volume calculation specific commands
 constexpr char COMMAND_VOLUME[]                 = "VOLUME";
@@ -171,6 +172,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 		krigingParams.autoGuess = true;
 	}
 	QString projStdDevSFDesc, sfProjStdDevSFDesc;
+	QString imageColorScaleName;
 
 	while (!cmd.arguments().empty())
 	{
@@ -250,6 +252,18 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 				return cmd.error(QString("Invalid image layer '%1' after '%2' (expecting %3 or %4)").arg(layer, COMMAND_GRID_OUTPUT_IMAGE, COMMAND_RASTER_IMAGE_HEIGHT, COMMAND_RASTER_IMAGE_RGB));
 			}
 			outputImage = true;
+		}
+		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_RASTER_IMAGE_COLOR_SCALE))
+		{
+			// local option confirmed, we can move on
+			cmd.arguments().pop_front();
+
+			if (cmd.arguments().empty())
+			{
+				return cmd.error(QString("Missing parameter: color scale name after '%1'").arg(COMMAND_RASTER_IMAGE_COLOR_SCALE));
+			}
+
+			imageColorScaleName = cmd.arguments().takeFirst();
 		}
 		else if (ccCommandLineInterface::IsCommand(argument, COMMAND_GRID_STEP))
 		{
@@ -393,6 +407,35 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 	if (resample && !outputCloud && !outputMesh)
 	{
 		cmd.warning("[Rasterize] The 'resample' option is set while the raster won't be exported as a cloud nor as a mesh");
+	}
+
+	ccColorScale::Shared imageColorScale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::BGYR);
+	if (!imageColorScaleName.isEmpty())
+	{
+		if (!outputImage || outputImageRGB)
+		{
+			cmd.warning("[Rasterize] The image color scale option is set while the height layer won't be exported as an image");
+		}
+		else
+		{
+			// look for the color scale by its name (case insensitive)
+			imageColorScale.clear();
+			QStringList scaleNames;
+			for (const ccColorScale::Shared& scale : ccColorScalesManager::GetUniqueInstance()->map())
+			{
+				if (!imageColorScale && scale->getName().compare(imageColorScaleName, Qt::CaseInsensitive) == 0)
+				{
+					imageColorScale = scale;
+				}
+				scaleNames << scale->getName();
+			}
+
+			if (!imageColorScale)
+			{
+				return cmd.error(QString("Unknown color scale '%1' after '%2' (available scales: %3)").arg(imageColorScaleName, COMMAND_RASTER_IMAGE_COLOR_SCALE, scaleNames.join(", ")));
+			}
+			cmd.print(QString("[Rasterize] Image color scale: %1 (%2)").arg(imageColorScale->getName(), imageColorScale->getUuid()));
+		}
 	}
 
 	// we'll get the first two clouds
@@ -694,7 +737,7 @@ bool CommandRasterize::process(ccCommandLineInterface& cmd)
 			if (!ccRasterizeTool::ExportImage(exportFilename,
 			                                  grid,
 			                                  outputImageRGB,
-			                                  outputImageRGB ? ccColorScale::Shared() : ccColorScalesManager::GetDefaultScale(ccColorScalesManager::BGYR),
+			                                  outputImageRGB ? ccColorScale::Shared() : imageColorScale,
 			                                  imageFillStrategy,
 			                                  customHeight,
 			                                  grid.minHeight,

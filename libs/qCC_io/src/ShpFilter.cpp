@@ -17,12 +17,17 @@
 
 #ifdef CC_SHP_SUPPORT
 
-#include "ShpFilter.h"
+#include "../include/ShpFilter.h"
 
 // Local
-#include "ShpDBFFields.h"
-#include "ui_importDBFFieldDlg.h"
-#include "ui_saveSHPFileDlg.h"
+#include "../include/ShpDBFFields.h"
+
+// Ui
+#include <ui_importDBFFieldDlg.h>
+#include <ui_saveSHPFileDlg.h>
+
+// CCCoreLib
+#include <MeshSamplingTools.h>
 
 // qCC_db
 #include <ccGenericMesh.h>
@@ -36,12 +41,6 @@
 
 // Qt
 #include <QFileInfo>
-
-// CCCoreLib
-#include <MeshSamplingTools.h>
-
-// System
-#include <array>
 
 using FieldIndexAndName = QPair<int, QString>;
 
@@ -390,7 +389,7 @@ CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream& sin)
 	sin >> fileCode;
 	if (fileCode != ESRI_SHAPE_FILE_CODE)
 	{
-		ccLog::Warning("[SHP] wrong file code (%d), is this a shape file?", fileCode);
+		ccLog::Warningf("[SHP] wrong file code (%d), is this a shape file?", fileCode);
 		return CC_FERR_MALFORMED_FILE;
 	}
 
@@ -405,7 +404,7 @@ CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream& sin)
 
 	if (!IsValidESRIShapeCode(shapeTypeInt))
 	{
-		ccLog::Warning("[SHP] invalid shape type code in header (%d)", shapeTypeInt);
+		ccLog::Warningf("[SHP] invalid shape type code in header (%d)", shapeTypeInt);
 		return CC_FERR_MALFORMED_FILE;
 	}
 
@@ -556,8 +555,6 @@ static QString ToString(ESRI_SHAPE_TYPE type)
 	default:
 		return "Unknown";
 	}
-
-	return QString("Unknown");
 }
 
 static void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESRI_SHAPE_TYPE& shapeType)
@@ -850,7 +847,7 @@ static CC_FILE_ERROR BuildPatches(
 	{
 		if (!IsValidEsriPartType(partTypes[i]))
 		{
-			ccLog::Warning("[SHP] Multipatch part %d has an invalid part type (%d)", i, partTypes[i]);
+			ccLog::Warningf("[SHP] Multipatch part %d has an invalid part type (%d)", i, partTypes[i]);
 			continue;
 		}
 		ESRI_PART_TYPE type = static_cast<ESRI_PART_TYPE>(partTypes[i]);
@@ -1052,7 +1049,7 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_STRIP;
 		return CC_FERR_NO_ERROR;
 	}
-	else if (IsTriangleFan(secondTriangle))
+	if (IsTriangleFan(secondTriangle))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
@@ -1065,10 +1062,8 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_FAN;
 		return CC_FERR_NO_ERROR;
 	}
-	else
-	{
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
+
+	return CC_FERR_BAD_ENTITY_TYPE;
 }
 
 static CC_FILE_ERROR SaveMesh(ccMesh* mesh, QDataStream& stream, int32_t recordNumber, int32_t& recordSize16bits)
@@ -1273,7 +1268,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline*     poly,
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	const unsigned char Z = static_cast<unsigned char>(vertDim);
+	const unsigned char Z = vertDim;
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
@@ -1498,7 +1493,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream&      shpStream,
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
-				sf.reset(new ccScalarField("Measures"));
+				sf = std::make_shared<ccScalarField>("Measures");
 				if (!sf->reserveSafe(numPoints))
 				{
 					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
@@ -1674,7 +1669,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return saveToFile(entity, fields, filename, parameters);
 }
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters) const
 {
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -1758,7 +1753,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		}
 	}
 
-	ccLog::Print("[SHP] Output type: " + ToString(outputShapeType));
+	ccLog::Print(QStringLiteral("[SHP] Output type: ") + ToString(outputShapeType));
 
 	QFileInfo fi(filename);
 	QString   baseFileName = fi.path() + QString("/") + fi.completeBaseName();
@@ -1848,7 +1843,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		idxStream << static_cast<int32_t>(recordStart / 2); // recordStart must be converted to a number of 16-bit words
 		idxStream << recordSize16bits;                      // recordSize should already be expressed as a number of 16-bit words
 
-		ccLog::PrintDebug("[SHP] Saved shape #%d (%d bytes)", shapeIndex, recordSize16bits * 2);
+		ccLog::PrintDebugf("[SHP] Saved shape #%d (%d bytes)", shapeIndex, recordSize16bits * 2);
 		shapeIndex++;
 	}
 
@@ -1988,7 +1983,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	CCVector3d Pmin                    = hdr.pointMin;
 	if (HandleGlobalShift(Pmin, Pshift, preserveCoordinateShift, parameters))
 	{
-		ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+		ccLog::Warningf("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 	}
 
 	// progress bar
@@ -1996,7 +1991,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	qint64                            fileSize = file.size();
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMaximum(static_cast<int>(fileSize));
 		pDlg->setMethodTitle(QObject::tr("Load SHP file"));
 		pDlg->setInfo(QObject::tr("File size: %1").arg(fileSize));
@@ -2033,7 +2028,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (!IsValidESRIShapeCode(shapeTypeInt))
 		{
-			ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
+			ccLog::Warningf("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
 			return CC_FERR_READING;
 		}
 		ESRI_SHAPE_TYPE shapeType = static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt);
@@ -2064,8 +2059,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					ccHObject* child = container.getChild(i);
 					assert(child && child->isA(CC_TYPES::POLY_LINE));
 					polyIDs[static_cast<ccPolyline*>(child)] = recordNumber;
-					if (recordNumber > maxPolyID)
-						maxPolyID = recordNumber;
+					maxPolyID                                = std::max(recordNumber, maxPolyID);
 				}
 			}
 		}
@@ -2176,9 +2170,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						// create a list of available fields
 						ImportDBFFieldDialog lsfDlg(nullptr);
-						for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+						for (const auto& field : candidateFields)
 						{
-							lsfDlg.listWidget->addItem(it->second);
+							lsfDlg.listWidget->addItem(field.second);
 						}
 						static double s_dbfFieldImportScale = 1.0;
 						lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);

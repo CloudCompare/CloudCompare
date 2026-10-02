@@ -25,7 +25,7 @@ ccShader::ccShader(QObject* parent /*=nullptr*/)
 {
 }
 
-bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QString& error)
+bool ccShader::fromFile(const QString& shaderBasePath, const QString& shaderBaseFilename, QString& error)
 {
 	if (shaderBasePath.isEmpty() || shaderBaseFilename.isEmpty())
 	{
@@ -36,10 +36,10 @@ bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QStr
 	QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath, shaderBaseFilename);
 	QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath, shaderBaseFilename);
 
-	return loadProgram(std::move(vertFilename), std::move(fragFilename), error);
+	return loadProgram(vertFilename, fragFilename, error);
 }
 
-bool ccShader::loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error)
+bool ccShader::loadProgram(const QString& vertShaderFile, const QString& fragShaderFile, QString& error)
 {
 	if (!vertShaderFile.isEmpty() && !addShaderFromSourceFile(QOpenGLShader::Vertex, vertShaderFile))
 	{

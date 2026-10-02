@@ -17,12 +17,12 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccOverlayDialog.h"
-#include "ccPickingListener.h"
-
 // CCCoreLib
 #include <CCGeom.h>
+
+// CCPluginAPI
+#include <ccOverlayDialog.h>
+#include <ccPickingListener.h>
 
 class ccGLWindowInterface;
 class ccPointCloud;

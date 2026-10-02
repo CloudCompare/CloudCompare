@@ -17,7 +17,7 @@
 
 #include "ccPrimitiveFactoryDlg.h"
 
-// local
+// Local
 #include "ccUtils.h"
 #include "mainwindow.h"
 
@@ -36,7 +36,7 @@
 // Qt
 #include <QSettings>
 
-// system
+// System
 #include <cassert>
 
 ccPrimitiveFactoryDlg::ccPrimitiveFactoryDlg(MainWindow* win)

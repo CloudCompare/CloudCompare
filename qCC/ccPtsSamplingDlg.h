@@ -17,9 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
+// Ui
 #include <ui_ptsSamplingDlg.h>
 
-//! Dialog: points sampling on a mesh
 class ccPtsSamplingDlg : public QDialog
     , public Ui::PointsSamplingDialog
 {

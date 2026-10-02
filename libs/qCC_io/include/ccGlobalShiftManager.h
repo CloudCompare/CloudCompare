@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,19 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_GLOBAL_SHIFT_MANAGER_HEADER
-#define CC_GLOBAL_SHIFT_MANAGER_HEADER
+// Local
+#include "qCC_io.h"
 
 // CCCoreLib
 #include <CCGeom.h>
 
-// local
-#include "qCC_io.h"
-
 // Qt
 #include <QString>
 
-// STL
+// System
 #include <vector>
 
 class ccHObject;
@@ -102,7 +101,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		bool       preserve;
 
 		//! Default constructor
-		ShiftInfo(QString str = QString("unnamed"))
+		ShiftInfo(const QString& str = QString("unnamed"))
 		    : shift(0, 0, 0)
 		    , scale(1.0)
 		    , name(str)
@@ -110,7 +109,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		{
 		}
 		//! Constructor from a vector and a scale value
-		ShiftInfo(QString str, const CCVector3d& T, double s = 1.0)
+		ShiftInfo(const QString& str, const CCVector3d& T, double s = 1.0)
 		    : shift(T)
 		    , scale(s)
 		    , name(str)
@@ -136,5 +135,3 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 	// Max acceptable diagonal length
 	static double MAX_DIAGONAL_LENGTH;
 };
-
-#endif

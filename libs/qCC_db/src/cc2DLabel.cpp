@@ -31,8 +31,7 @@
 #include <QSharedPointer>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
 
 //'Delta' character
 static const QChar MathSymbolDelta(0x0394);
@@ -54,10 +53,7 @@ QString cc2DLabel::PickedPoint::itemTitle() const
 			title += QString("@%1").arg(entity()->getUniqueID());
 		return title;
 	}
-	else
-	{
-		return QString::number(index);
-	}
+	return QString::number(index);
 }
 
 QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
@@ -66,17 +62,17 @@ QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
 	{
 		return CENTER_STRING;
 	}
-	else if (_cloud)
+	if (_cloud)
 	{
 		return QString("Point #") + pointTag;
 	}
-	else if (_mesh)
+	if (_mesh)
 	{
 		return QString("Point@Tri#") + pointTag;
 	}
 
 	assert(false);
-	return QString();
+	return {};
 }
 
 CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
@@ -89,10 +85,7 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		{
 			return _cloud->getOwnBB().getCenter();
 		}
-		else
-		{
-			P = *_cloud->getPointPersistentPtr(index);
-		}
+		P = *_cloud->getPointPersistentPtr(index);
 	}
 	else if (_mesh)
 	{
@@ -100,10 +93,7 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		{
 			return _mesh->getOwnBB().getCenter();
 		}
-		else
-		{
-			_mesh->computePointPosition(index, uv, P);
-		}
+		_mesh->computePointPosition(index, uv, P);
 	}
 	else
 	{
@@ -185,15 +175,9 @@ QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 		{
 			return "NaN";
 		}
-		else
-		{
-			return QString::number(info.sfValue, 'f', precision);
-		}
+		return QString::number(info.sfValue, 'f', precision);
 	}
-	else
-	{
-		return QString();
-	}
+	return {};
 }
 
 QString cc2DLabel::getTitle(int precision) const
@@ -308,8 +292,8 @@ void cc2DLabel::onDeletionOf(const ccHObject* obj)
 	// check that associated clouds are not about to be deleted!
 	size_t pointsToRemove = 0;
 	{
-		for (size_t i = 0; i < m_pickedPoints.size(); ++i)
-			if (m_pickedPoints[i].entity() == obj)
+		for (const auto& pickedPoint : m_pickedPoints)
+			if (pickedPoint.entity() == obj)
 				++pointsToRemove;
 	}
 
@@ -472,28 +456,28 @@ bool cc2DLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 		return WriteError();
 
 	// points & associated cloud ID (dataVersion >= 20)
-	for (std::vector<PickedPoint>::const_iterator it = m_pickedPoints.begin(); it != m_pickedPoints.end(); ++it)
+	for (const auto& pickedPoint : m_pickedPoints)
 	{
 		// point index
-		uint32_t index = static_cast<uint32_t>(it->index);
+		uint32_t index = static_cast<uint32_t>(pickedPoint.index);
 		if (out.write((const char*)&index, 4) < 0)
 			return WriteError();
 		// cloud ID (will be retrieved later --> make sure that the cloud is saved alongside!)
-		uint32_t cloudID = static_cast<uint32_t>(it->_cloud ? it->_cloud->getUniqueID() : 0);
+		uint32_t cloudID = static_cast<uint32_t>(pickedPoint._cloud ? pickedPoint._cloud->getUniqueID() : 0);
 		if (out.write((const char*)&cloudID, 4) < 0)
 			return WriteError();
 
 		// mesh ID (dataVersion >= 49 - will be retrieved later --> make sure that the mesh is saved alongside!)
-		uint32_t meshID = static_cast<uint32_t>(it->_mesh ? it->_mesh->getUniqueID() : 0);
+		uint32_t meshID = static_cast<uint32_t>(pickedPoint._mesh ? pickedPoint._mesh->getUniqueID() : 0);
 		if (out.write((const char*)&meshID, 4) < 0)
 			return WriteError();
 
 		// uv coordinates in the triangle (dataVersion >= 49)
-		if (out.write((const char*)it->uv.u, sizeof(double) * 2) < 0)
+		if (out.write((const char*)pickedPoint.uv.u, sizeof(double) * 2) < 0)
 			return WriteError();
 
 		// entity center point (dataVersion >= 50)
-		if (out.write((const char*)&(it->entityCenterPoint), sizeof(bool)) < 0)
+		if (out.write((const char*)&(pickedPoint.entityCenterPoint), sizeof(bool)) < 0)
 			return WriteError();
 	}
 
@@ -516,9 +500,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// points count (dataVersion >= 20)
@@ -528,6 +512,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	// points & associated cloud/mesh ID (dataVersion >= 20)
 	assert(m_pickedPoints.empty());
+	std::vector<LoadingContext::Dependency> dependencies;
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		// point index
@@ -547,8 +532,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 				{
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
-					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
+					dependencies.emplace_back(cloudID, LoadingContext::Dependency::LABEL_SOURCE_CLOUD);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -557,7 +541,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 			}
 		}
 
-		if (dataVersion >= 49)
+		if (context.dataVersion >= 49)
 		{
 			// mesh ID (dataVersion >= 49 - will be retrieved later)
 			uint32_t meshID = 0;
@@ -576,8 +560,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
 					m_pickedPoints.back().uv    = uv;
-					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
+					dependencies.emplace_back(meshID, LoadingContext::Dependency::LABEL_SOURCE_MESH);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -588,12 +571,17 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 		// entity center point (dataVersion >= 50)
 		bool entityCenterPoint = false;
-		if (dataVersion >= 50)
+		if (context.dataVersion >= 50)
 		{
 			if (in.read((char*)&entityCenterPoint, sizeof(bool)) < 0)
 				return ReadError();
 		}
 		m_pickedPoints.back().entityCenterPoint = entityCenterPoint;
+	}
+
+	if (!dependencies.empty())
+	{
+		context.incompleteEntities.insert(this, dependencies);
 	}
 
 	// Relative screen position (dataVersion >= 20)
@@ -607,7 +595,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (in.read((char*)&m_showFullBody, sizeof(bool)) < 0)
 		return ReadError();
 
-	if (dataVersion > 20)
+	if (context.dataVersion > 20)
 	{
 		// Show in 2D boolean (dataVersion >= 21)
 		if (in.read((char*)&m_dispIn2D, sizeof(bool)) < 0)
@@ -1204,7 +1192,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					double unitD = viewportParams.zFar / 2;                     // we consider that the 'standard' scale is at half the depth
 					scale        = static_cast<float>(scale * sqrt(d / unitD)); // sqrt = empirical (probably because the marker size is already partly compensated by ccGLWindowInterface::computeActualPixelSize())
 				}
-				scale = static_cast<float>(scale * context.devicePixelRatio);
+				scale *= context.devicePixelRatio;
 				glFunc->glScalef(scale, scale, scale);
 				m_pickedPoints[i].markerScale = scale;
 				c_unitPointMarker->draw(markerContext);
@@ -1274,8 +1262,8 @@ struct Tab
 		for (int i = 0; i < colCount; ++i)
 		{
 			int maxWidth = 0;
-			for (int j = 0; j < colContent[i].size(); ++j)
-				maxWidth = std::max(maxWidth, fm.horizontalAdvance(colContent[i][j]));
+			for (const auto& content : colContent[i])
+				maxWidth = std::max(maxWidth, fm.horizontalAdvance(content));
 			colWidth[i] = maxWidth;
 			totalWidth += maxWidth;
 		}

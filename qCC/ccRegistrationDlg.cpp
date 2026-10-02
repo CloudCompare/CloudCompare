@@ -35,7 +35,7 @@
 // Qt
 #include <QThread>
 
-// system
+// System
 #include <cassert>
 
 static bool     s_adjustScale                 = false;

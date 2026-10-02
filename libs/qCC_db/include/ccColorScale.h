@@ -314,8 +314,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 		assert(m_updated);
 		if (relativePos >= 0.0 && relativePos <= 1.0)
 			return &getColorByIndex(static_cast<unsigned>(relativePos * (MAX_STEPS - 1)));
-		else
-			return outOfRangeColor;
+		return outOfRangeColor;
 	}
 
 	//! Returns color by relative position in scale with a given 'resolution'
@@ -333,10 +332,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 			unsigned index = (static_cast<unsigned>((relativePos * steps) * 65535.0)) >> 16;
 			return &getColorByIndex((index * (MAX_STEPS - 1)) / steps);
 		}
-		else
-		{
-			return outOfRangeColor;
-		}
+		return outOfRangeColor;
 	}
 
 	//! Returns color by index
@@ -360,7 +356,7 @@ class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	//! Returns the OpenGL texture corresponding to this color scale

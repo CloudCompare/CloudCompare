@@ -32,7 +32,9 @@
 #include <QMap>
 
 // System
+#include <algorithm>
 #include <cassert>
+#include <memory>
 
 // default field names
 struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
@@ -157,8 +159,8 @@ void ccRasterGrid::reset()
 
 bool ccRasterGrid::init(unsigned          w,
                         unsigned          h,
-                        double            s,
-                        const CCVector3d& c)
+                        double            gridStep,
+                        const CCVector3d& minCorner)
 {
 	// we always restart from scratch (clearer / safer)
 	clear();
@@ -178,10 +180,10 @@ bool ccRasterGrid::init(unsigned          w,
 		return false;
 	}
 
-	width     = w;
-	height    = h;
-	gridStep  = s;
-	minCorner = c;
+	width           = w;
+	height          = h;
+	this->gridStep  = gridStep;
+	this->minCorner = minCorner;
 
 	return true;
 }
@@ -209,7 +211,7 @@ struct IndexAndValue
 };
 
 bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
-                            unsigned char        Z,
+                            unsigned char        projectionDimension,
                             ProjectionType       projectionType,
                             InterpolationType    emptyCellsInterpolation /*=InterpolationType::NONE*/,
                             void*                interpolationParams /*=nullptr*/,
@@ -217,6 +219,10 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
                             ccProgressDialog*    progressDialog /*=nullptr*/,
                             int                  zStdDevSfIndex /*=-1*/)
 {
+
+	// vertical dimension
+	assert(projectionDimension <= 2);
+
 	if (!cloud)
 	{
 		assert(false);
@@ -268,9 +274,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	// filling the grid
 	unsigned pointCount = cloud->size();
 
-	// vertical dimension
-	assert(Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z + 1;
+	const unsigned char X = projectionDimension == 2 ? 0 : projectionDimension + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
 	// we always handle the colors (if any)
@@ -426,7 +430,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
 						const CCVector3* P              = cloud->getPoint(pointIndex);
 						cellPointIndexedHeight[n].index = pointIndex;
-						cellPointIndexedHeight[n].val   = P->u[Z];
+						cellPointIndexedHeight[n].val   = P->u[projectionDimension];
 						pRef                            = reinterpret_cast<void**>(*pRef);
 					}
 
@@ -757,7 +761,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 		KrigingParams* krigingParams = reinterpret_cast<KrigingParams*>(interpolationParams);
 		if (krigingParams)
 		{
-			fillGridCellsWithKriging(Z, krigingParams->kNN, krigingParams->params, !krigingParams->autoGuess, progressDialog);
+			fillGridCellsWithKriging(projectionDimension, krigingParams->kNN, krigingParams->params, !krigingParams->autoGuess, progressDialog);
 		}
 		else
 		{
@@ -804,7 +808,7 @@ static void InterpolateOnBorder(const std::vector<uint8_t>& pointsOnBorder,
 		if (d > 0)
 		{
 			// linear interpolation
-			double relativePos = (coord - P[minIndex][dim]) / static_cast<double>(d);
+			double relativePos = (coord - P[minIndex][dim]) / d;
 
 			const ccRasterCell& A = grid.rows[P[minIndex].y][P[minIndex].x];
 			const ccRasterCell& B = grid.rows[P[maxIndex].y][P[maxIndex].x];
@@ -969,10 +973,10 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 				if (static_cast<unsigned>(P[k].y + 1) == height)
 					onTopBorder.push_back(k);
 			}
-			xMin = std::min(std::min(P[0].x, P[1].x), P[2].x);
-			yMin = std::min(std::min(P[0].y, P[1].y), P[2].y);
-			xMax = std::max(std::max(P[0].x, P[1].x), P[2].x);
-			yMax = std::max(std::max(P[0].y, P[1].y), P[2].y);
+			xMin = std::min({P[0].x, P[1].x, P[2].x});
+			yMin = std::min({P[0].y, P[1].y, P[2].y});
+			xMax = std::max({P[0].x, P[1].x, P[2].x});
+			yMax = std::max({P[0].y, P[1].y, P[2].y});
 		}
 
 		// now scan the cells
@@ -1133,7 +1137,7 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 				const ccRasterCell& cell = row[i];
 				if (cell.nbPoints)
 				{
-					dataPoints.push_back(DataPoint(point.x, point.y, cell.h));
+					dataPoints.emplace_back(point.x, point.y, cell.h);
 				}
 			}
 		}
@@ -1146,7 +1150,7 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 	if (hasColors)
 		stepCount += 3;
 
-	CCCoreLib::NormalizedProgress nProgress(progressDialog, static_cast<unsigned>(nonEmptyCellCount * stepCount));
+	CCCoreLib::NormalizedProgress nProgress(progressDialog, nonEmptyCellCount * stepCount);
 
 	Kriging kriging(dataPoints, rasterParams);
 	knn = std::min(knn, static_cast<int>(nonEmptyCellCount - 1));
@@ -1192,10 +1196,8 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 	}
 
 	// then process the scalar values (if any)
-	for (size_t sfIndex = 0; sfIndex < scalarFields.size(); ++sfIndex)
+	for (auto& sf : scalarFields)
 	{
-		SF& sf = scalarFields[sfIndex];
-
 		// update the kriging value
 		{
 			size_t index = 0;
@@ -1662,7 +1664,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 		if (progressDialog)
 		{
-			nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(height * width)));
+			nProgress = std::make_unique<CCCoreLib::NormalizedProgress>(progressDialog, static_cast<unsigned>(height * width));
 		}
 
 		std::vector<double>   cellPointVal;
@@ -1728,8 +1730,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 					size_t sfIndex               = 0;
 					for (size_t k = 0; k < numberOfExportedHeightStatisticsFields + maxNumberOfExportedSfStatisticsFields; ++k)
 					{
-						auto       sf   = exportedSFs[sfIndex];
-						ScalarType sVal = CCCoreLib::NAN_VALUE;
+						const auto& sf   = exportedSFs[sfIndex];
+						ScalarType  sVal = CCCoreLib::NAN_VALUE;
 
 						// specific case: PER_CELL_VALUE
 						if (k < numberOfExportedHeightStatisticsFields && exportedStatistics[k] == PER_CELL_VALUE)
@@ -1852,9 +1854,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 								{
 									double cellSum       = std::accumulate(cellPointVal.begin(), cellPointVal.end(), 0.0);
 									double cellSquareSum = 0.0;
-									for (size_t n = 0; n < cellPointVal.size(); n++)
+									for (double n : cellPointVal)
 									{
-										cellSquareSum += cellPointVal[n] * cellPointVal[n];
+										cellSquareSum += n * n;
 									}
 									double cellAvg = cellSum / cellPointVal.size();
 									sVal           = static_cast<ScalarType>(std::sqrt(std::max(0.0, cellSquareSum / cellPointVal.size() - cellAvg * cellAvg)));
@@ -1914,7 +1916,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		}
 
 		// finish the SFs initialization (if any)
-		for (auto sf : exportedSFs)
+		for (const auto& sf : exportedSFs)
 		{
 			if (sf)
 			{
@@ -1936,7 +1938,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 				progressDialog->setInfo(QObject::tr("Projecting %1 scalar fields").arg(scalarFields.size()));
 				progressDialog->setValue(0);
 				QCoreApplication::processEvents();
-				nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(scalarFields.size())));
+				nProgress = std::make_unique<CCCoreLib::NormalizedProgress>(progressDialog, static_cast<unsigned>(scalarFields.size()));
 			}
 
 			assert(scalarFields.size() == inputCloudAsPC->getNumberOfScalarFields());
@@ -1958,7 +1960,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 
 				if (sfIdx < 0)
 				{
-					ccLog::Warning("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName().c_str());
+					ccLog::Warningf("[Rasterize] Failed to allocate a new scalar field for storing SF '%s' values! Try to free some memory ...", formerSf->getName().c_str());
 				}
 				else
 				{

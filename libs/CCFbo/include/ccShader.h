@@ -47,7 +47,7 @@ class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 	    \param error error string (if any error occurred)
 	    \return success
 	**/
-	virtual bool fromFile(QString shaderBasePath, QString shaderBaseFilename, QString& error);
+	virtual bool fromFile(const QString& shaderBasePath, const QString& shaderBaseFilename, QString& error);
 
 	//! Creates program from one or two shader files
 	/** Filenames must be absolute (full path).
@@ -55,5 +55,5 @@ class CCFBO_LIB_API ccShader : public QOpenGLShaderProgram
 	    \param fragShaderFile fragment shader filename
 	    \param error error string (if any error occurred)
 	**/
-	virtual bool loadProgram(QString vertShaderFile, QString fragShaderFile, QString& error);
+	virtual bool loadProgram(const QString& vertShaderFile, const QString& fragShaderFile, QString& error);
 };

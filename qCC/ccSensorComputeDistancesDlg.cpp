@@ -17,7 +17,8 @@
 
 #include "ccSensorComputeDistancesDlg.h"
 
-#include "ui_sensorComputeDistancesDlg.h"
+// Ui
+#include <ui_sensorComputeDistancesDlg.h>
 
 ccSensorComputeDistancesDlg::ccSensorComputeDistancesDlg(QWidget* parent /*=nullptr*/)
     : QDialog(parent, Qt::Tool)

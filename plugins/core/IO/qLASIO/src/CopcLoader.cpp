@@ -145,13 +145,13 @@ namespace copc
 				else
 				{
 					m_numPoints += entry.point_count;
-					entries.push_back(std::move(entry));
+					entries.push_back(entry);
 				}
 			}
 			pageQueue.pop();
 		}
 
-		ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
+		ccLog::Printf("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
 
 		try
 		{

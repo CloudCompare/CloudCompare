@@ -162,7 +162,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	bool loadAndSetTexture(const QString& absoluteFilename);
 
 	//! Returns the texture (if any)
-	const QImage getTexture() const;
+	QImage getTexture() const;
 
 	//! Returns the texture ID (if any)
 	GLuint getTextureID() const;
@@ -204,7 +204,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	/** \warning Doesn't save the texture image!
 	 **/
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	//! Returns unique identifier (UUID)

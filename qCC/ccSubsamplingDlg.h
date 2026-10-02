@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QDialog>
-
 // CCCoreLib
 #include <CCTypes.h>
+
+// Qt
+#include <QDialog>
 
 // System
 #include <array>

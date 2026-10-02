@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,9 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_PLY_FILTER_HEADER
-#define CC_PLY_FILTER_HEADER
-
+// Local
 #include "FileIOFilter.h"
 #include "rply.h"
 
@@ -91,5 +91,3 @@ class QCC_IO_LIB_API PlyFilter : public FileIOFilter
 	//! Internal method
 	CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename, e_ply_storage_mode storageType);
 };
-
-#endif // CC_PLY_FILTER_HEADER

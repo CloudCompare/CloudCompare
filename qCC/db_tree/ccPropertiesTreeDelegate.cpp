@@ -18,15 +18,13 @@
 #include "ccPropertiesTreeDelegate.h"
 
 // Local
-#include "ccColorScaleEditorDlg.h"
-#include "ccColorScaleSelector.h"
 #include "mainwindow.h"
 #include "matrixDisplayDlg.h"
 #include "sfEditDlg.h"
 
-// qCC_glWindow
-#include <ccGLWindowInterface.h>
-#include <ccGuiParameters.h>
+// CCPluginAPI
+#include <ccColorScaleEditorDlg.h>
+#include <ccColorScaleSelector.h>
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -57,6 +55,10 @@
 #include <ccSensor.h>
 #include <ccSphere.h>
 #include <ccSubMesh.h>
+
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+#include <ccGuiParameters.h>
 
 // Qt
 #include <QAbstractItemView>
@@ -176,17 +178,17 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_OCTREE_TYPE:
 		case OBJECT_COLOR_RAMP_STEPS:
 		case OBJECT_CLOUD_POINT_SIZE:
-			return QSize(50, 24);
+			return {50, 24};
 		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
 		case OBJECT_CURRENT_COLOR_RAMP:
-			return QSize(70, 24);
+			return {70, 24};
 		case OBJECT_CLOUD_SF_EDITOR:
-			return QSize(250, 200);
+			return {250, 200};
 		case OBJECT_SENSOR_MATRIX_EDITOR:
 		case OBJECT_HISTORY_MATRIX_EDITOR:
 		case OBJECT_GLTRANS_MATRIX_EDITOR:
-			return QSize(250, 140);
+			return {250, 140};
 		}
 	}
 

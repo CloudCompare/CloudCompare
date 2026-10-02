@@ -205,15 +205,15 @@ bool ccPlane::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccPlane::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, context))
 		return false;
 
 	// parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_xWidth, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_yWidth, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_xWidth, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_yWidth, 1);
 
 	return true;
 }
@@ -226,7 +226,7 @@ short ccPlane::minimumFileVersion_MeOnly() const
 ccBBox ccPlane::getOwnFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
-	return ccBBox(CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true);
+	return {CCVector3(-m_xWidth / 2, -m_yWidth / 2, 0), CCVector3(m_xWidth / 2, m_yWidth / 2, 0), true};
 }
 
 ccMaterial::Shared ccPlane::setAsTexture(QImage image, QString imageFilename /*=QString()*/)
@@ -284,7 +284,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleMtlIndexes();
-			return ccMaterial::Shared(nullptr);
+			return {nullptr};
 		}
 
 		// set default texture indexes
@@ -300,7 +300,7 @@ ccMaterial::Shared ccPlane::SetQuadTexture(ccMesh* quadMesh, QImage image, QStri
 			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
 			quadMesh->setTexCoordinatesTable(nullptr);
 			quadMesh->removePerTriangleTexCoordIndexes();
-			return ccMaterial::Shared(nullptr);
+			return {nullptr};
 		}
 
 		// set default material indexes

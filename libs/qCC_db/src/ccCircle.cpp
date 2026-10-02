@@ -65,7 +65,7 @@ void ccCircle::applyGLTransformation(const ccGLMatrix& trans)
 	// we call the ccHObject method instead of the ccPolyline one,
 	// to only update the transformation history matrix, and not
 	// trigger any coordinate modification
-	ccHObject::applyGLTransformation(trans);
+	ccHObject::applyGLTransformation(trans); // NOLINT(bugprone-parent-virtual-call)
 
 	// now we can update the vertices
 	updateInternalRepresentation();
@@ -116,7 +116,7 @@ bool ccCircle::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCircle::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
 
@@ -127,12 +127,12 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 		m_theAssociatedCloud = nullptr;
 	}
 
-	if (!ccPolyline::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccPolyline::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 56)
+	if (context.dataVersion < 56)
 	{
 		return false;
 	}
@@ -150,7 +150,7 @@ bool ccCircle::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 short ccCircle::minimumFileVersion_MeOnly() const
 {
 	short minVersion = 56;
-	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
+	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly()); // NOLINT(bugprone-parent-virtual-call)
 }
 
 void ccCircle::updateInternalRepresentation()

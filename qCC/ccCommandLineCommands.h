@@ -16,7 +16,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
 // Qt
 #include <QStringList>

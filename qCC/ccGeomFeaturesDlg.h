@@ -20,9 +20,11 @@
 // Local
 #include "ccLibAlgorithms.h"
 
+// Ui
+#include <ui_geomFeaturesDlg.h>
+
 // Qt
 #include <QDialog>
-#include <ui_geomFeaturesDlg.h>
 
 //! Dialog for computing the density of a point clouds
 class ccGeomFeaturesDlg : public QDialog

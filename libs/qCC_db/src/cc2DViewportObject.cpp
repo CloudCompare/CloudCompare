@@ -47,13 +47,13 @@ bool cc2DViewportObject::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool cc2DViewportObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool cc2DViewportObject::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// ccViewportParameters (dataVersion>=20)
-	if (!m_params.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!m_params.fromFile(in, context))
 		return false;
 
 	return true;

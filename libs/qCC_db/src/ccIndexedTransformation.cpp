@@ -87,7 +87,7 @@ bool ccIndexedTransformation::fromAsciiFile(QString filename)
 
 ccIndexedTransformation ccIndexedTransformation::operator*(const ccGLMatrix& M) const
 {
-	return ccIndexedTransformation(*static_cast<const ccGLMatrix*>(this) * M, m_index);
+	return {*static_cast<const ccGLMatrix*>(this) * M, m_index};
 }
 
 ccIndexedTransformation& ccIndexedTransformation::operator*=(const ccGLMatrix& M)
@@ -158,7 +158,7 @@ ccIndexedTransformation ccIndexedTransformation::Interpolate(double             
 
 	ccGLMatrix mat = ccGLMatrix::Interpolate(static_cast<PointCoordinateType>(t), trans1, trans2);
 
-	return ccIndexedTransformation(mat, index);
+	return {mat, index};
 }
 
 bool ccIndexedTransformation::toFile(QFile& out, short dataVersion) const
@@ -182,14 +182,14 @@ bool ccIndexedTransformation::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccIndexedTransformation::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccIndexedTransformation::fromFile(QFile& in, LoadingContext& context)
 {
-	if (!ccGLMatrix::fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGLMatrix::fromFile(in, context))
 		return false;
 
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	if (dataVersion < 34)
+	if (context.dataVersion < 34)
 		return CorruptError();
 
 	// index (dataVersion>=34)

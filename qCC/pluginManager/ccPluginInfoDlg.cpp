@@ -17,10 +17,16 @@
 
 #include "ccPluginInfoDlg.h"
 
-#include "ccPluginManager.h"
-#include "ccStdPluginInterface.h"
-#include "ui_ccPluginInfoDlg.h"
+// Ui
+#include <ui_ccPluginInfoDlg.h>
 
+// CCAppCommon
+#include <ccPluginManager.h>
+
+// CCPluginStub
+#include <ccStdPluginInterface.h>
+
+// Qt
 #include <QDebug>
 #include <QDir>
 #include <QSortFilterProxyModel>
@@ -202,15 +208,14 @@ void ccPluginInfoDlg::setPluginList(const QList<ccPluginInterface*>& pluginList)
 const ccPluginInterface* ccPluginInfoDlg::pluginFromItemData(const QStandardItem* item) const
 {
 	return item->data(PLUGIN_PTR).value<const ccPluginInterface*>();
-	;
 }
 
 void ccPluginInfoDlg::selectionChanged(const QModelIndex& current, const QModelIndex& previous)
 {
 	Q_UNUSED(previous);
 
-	auto sourceItem = m_ProxyModel->mapToSource(current);
-	auto item       = m_ItemModel->itemFromIndex(sourceItem);
+	auto        sourceItem = m_ProxyModel->mapToSource(current);
+	const auto* item       = m_ItemModel->itemFromIndex(sourceItem);
 
 	if (item == nullptr)
 	{
@@ -219,15 +224,15 @@ void ccPluginInfoDlg::selectionChanged(const QModelIndex& current, const QModelI
 		return;
 	}
 
-	auto plugin = pluginFromItemData(item);
+	const auto* plugin = pluginFromItemData(item);
 
 	updatePluginInfo(plugin);
 }
 
 void ccPluginInfoDlg::itemChanged(QStandardItem* item)
 {
-	bool checked = item->checkState() == Qt::Checked;
-	auto plugin  = pluginFromItemData(item);
+	bool        checked = item->checkState() == Qt::Checked;
+	const auto* plugin  = pluginFromItemData(item);
 
 	if (plugin != nullptr)
 	{

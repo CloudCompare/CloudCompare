@@ -15,6 +15,20 @@
 // #                                                                        #
 // ##########################################################################
 
+#include "ccCommandLineCommands.h"
+
+// Local
+#include "ccColorLevelsDlg.h"
+#include "ccCommon.h"
+#include "ccComparisonDlg.h"
+#include "ccConsole.h"
+#include "ccCropTool.h"
+#include "ccEntityAction.h"
+#include "ccLibAlgorithms.h"
+#include "ccRegistrationTools.h"
+#include "ccScalarFieldArithmeticsDlg.h"
+#include "ccVolumeCalcTool.h"
+
 // CCCoreLib
 #include <AutoSegmentationTools.h>
 #include <CCConst.h>
@@ -24,6 +38,9 @@
 #include <NormalDistribution.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+
+// CCPluginAPI
+#include <ccArgumentParser.h>
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -35,31 +52,16 @@
 #include <ccScalarField.h>
 #include <ccSensor.h>
 #include <ccSubMesh.h>
-#include <ccVolumeCalcTool.h>
 
 // qCC_io
 #include <AsciiFilter.h>
 #include <PlyFilter.h>
 
-// qCC
-#include "ccColorLevelsDlg.h"
-#include "ccCommon.h"
-#include "ccComparisonDlg.h"
-#include "ccConsole.h"
-#include "ccCropTool.h"
-#include "ccLibAlgorithms.h"
-#include "ccRegistrationTools.h"
-#include "ccScalarFieldArithmeticsDlg.h"
-
 // Qt
-#include "ccCommandLineCommands.h"
-
-// Local
-#include "ccArgumentParser.h"
-#include "ccEntityAction.h"
-
 #include <QDateTime>
 #include <QFileInfo>
+
+// System
 #include <limits>
 #include <optional>
 #include <utility>

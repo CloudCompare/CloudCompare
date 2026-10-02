@@ -47,6 +47,9 @@
 // Qt
 #include <QIcon>
 
+// System
+#include <algorithm>
+
 ccHObject::ccHObject(const QString& name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccObject(name, uniqueID)
     , ccDrawableObject()
@@ -210,7 +213,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
 		// construction this way is not supported (yet)
-		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!", objectType);
+		ccLog::ErrorDebugf("[ccHObject::New] This object (type %1) can't be constructed this way (yet)!", objectType);
 		break;
 	default:
 		if ((objectType & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
@@ -220,7 +223,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 		else
 		{
 			// unhandled ID
-			ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!", objectType);
+			ccLog::ErrorDebugf("[ccHObject::New] Invalid object type (%i)!", objectType);
 		}
 		break;
 	}
@@ -254,7 +257,7 @@ ccHObject* ccHObject::New(const QString& pluginId, const QString& classId, const
 
 QIcon ccHObject::getIcon() const
 {
-	return QIcon();
+	return {};
 }
 
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /*=true*/)
@@ -265,7 +268,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /
 		assert(false);
 		return;
 	}
-	else if (flags == 0)
+	if (flags == 0)
 	{
 		return;
 	}
@@ -302,20 +305,13 @@ int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 
 bool ccHObject::hasDependencyFlag(int dependencyFlag) const
 {
-	for (auto it : m_dependencies)
-	{
-		if (it.second == dependencyFlag)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return std::any_of(m_dependencies.cbegin(), m_dependencies.cend(), [dependencyFlag](const auto& p)
+	                   { return p.second == dependencyFlag; });
 }
 
 void ccHObject::removeDependencyWith(ccHObject* otherObject)
 {
-	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); // DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
+	m_dependencies.erase(otherObject);
 	if (!otherObject->m_isDeleting)
 	{
 		otherObject->removeDependencyFlag(this, DP_NOTIFY_OTHER_ON_DELETE);
@@ -410,7 +406,7 @@ unsigned int ccHObject::getChildCountRecursive() const
 {
 	unsigned int count = static_cast<unsigned>(m_children.size());
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		count += child->getChildCountRecursive();
 	}
@@ -445,7 +441,7 @@ unsigned ccHObject::filterChildren(Container&          filteredChildren,
                                    bool                strict /*=false*/,
                                    ccGenericGLDisplay* inDisplay /*=nullptr*/) const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if ((!strict && child->isKindOf(filter))
 		    || (strict && child->isA(filter)))
@@ -497,7 +493,7 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent /*=false*/)
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove link from old parent
 		int childDependencyFlags  = child->getDependencyFlagsWith(this);
@@ -564,14 +560,14 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 
 ccBBox ccHObject::getOwnBB(bool withGLFeatures /*=false*/)
 {
-	return ccBBox();
+	return {};
 }
 
 ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
 {
 	// by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
-	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
+	return {box.minCorner(), box.maxCorner(), box.isValid()};
 }
 
 bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
@@ -587,7 +583,7 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabl
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -602,7 +598,7 @@ ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeature
 {
 	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -620,7 +616,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 	if (!display || display == m_currentDisplay)
 		box = getOwnBB(true);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isEnabled())
 		{
@@ -816,7 +812,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// draw entity's children
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		child->draw(context);
 	}
@@ -864,7 +860,7 @@ void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput /*=
 		notifyGeometryUpdate();
 	}
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 		child->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
@@ -875,13 +871,10 @@ unsigned ccHObject::findMaxUniqueID_recursive() const
 {
 	unsigned id = getUniqueID();
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		unsigned childMaxID = child->findMaxUniqueID_recursive();
-		if (id < childMaxID)
-		{
-			id = childMaxID;
-		}
+		id                  = std::max(id, childMaxID);
 	}
 
 	return id;
@@ -914,7 +907,7 @@ void ccHObject::detachChild(ccHObject* child)
 
 void ccHObject::detachAllChildren()
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove any dependency (bilateral)
 		removeDependencyWith(child);
@@ -1023,7 +1016,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1037,7 +1030,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	}
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1059,9 +1052,9 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFile(QFile& in, LoadingContext& context)
 {
-	if (!fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap))
+	if (!fromFileNoChildren(in, context))
 		return false;
 
 	//(serializable) child count (dataVersion>=20)
@@ -1073,11 +1066,11 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	for (uint32_t i = 0; i < serializableCount; ++i)
 	{
 		// read children class ID
-		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, context.dataVersion);
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
-		if (dataVersion >= 35 && dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
+		if (context.dataVersion >= 35 && context.dataVersion <= 47 && ((classID & CC_CUSTOM_BIT) != 0))
 		{
 			// bug fix: for a long time the CC_CAMERA_BIT and CC_QUADRIC_BIT were wrongly defined
 			// with two bits instead of one! The additional and wrongly defined bit was the CC_CUSTOM_BIT :(
@@ -1097,7 +1090,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 			// store current position
 			size_t originalFilePos = in.pos();
 			// we need to load the custom object as plain ccCustomHObject
-			child->fromFileNoChildren(in, dataVersion, flags, oldToNewIDMap);
+			child->fromFileNoChildren(in, context);
 			// go back to original position
 			in.seek(originalFilePos);
 			// get custom object name and plugin name
@@ -1124,7 +1117,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 		assert(child && child->isSerializable());
 		if (child)
 		{
-			if (child->fromFile(in, dataVersion, flags, oldToNewIDMap))
+			if (child->fromFile(in, context))
 			{
 				addChild(child);
 			}
@@ -1142,7 +1135,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	}
 
 	// read the selection behavior (dataVersion>=23)
-	if (dataVersion >= 23)
+	if (context.dataVersion >= 23)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_selectionBehavior), sizeof(SelectionBehavior)) < 0)
 		{
@@ -1155,9 +1148,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& o
 	}
 
 	// read transformation history (dataVersion >= 45)
-	if (dataVersion >= 45)
+	if (context.dataVersion >= 45)
 	{
-		if (!m_glTransHistory.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!m_glTransHistory.fromFile(in, context))
 		{
 			return false;
 		}
@@ -1173,7 +1166,7 @@ short ccHObject::minimumFileVersion() const
 	minVersion       = std::max(minVersion, minimumFileVersion_MeOnly());
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		minVersion = std::max(minVersion, child->minimumFileVersion());
 	}
@@ -1181,16 +1174,16 @@ short ccHObject::minimumFileVersion() const
 	return minVersion;
 }
 
-bool ccHObject::fromFileNoChildren(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFileNoChildren(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
 	// read 'ccObject' header
-	if (!ccObject::fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccObject::fromFile(in, context))
 		return false;
 
 	// read own data
-	return fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap);
+	return fromFile_MeOnly(in, context);
 }
 
 bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
@@ -1272,7 +1265,7 @@ bool ccHObject::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccHObject::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -1327,7 +1320,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	if (m_glTransEnabled)
 	{
-		if (!m_glTrans.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!m_glTrans.fromFile(in, context))
 		{
 			m_glTransEnabled = false;
 			return false;
@@ -1335,7 +1328,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	}
 
 	//'showNameIn3D' state (dataVersion>=24)
-	if (dataVersion >= 24)
+	if (context.dataVersion >= 24)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_showNameIn3D), sizeof(bool)) < 0)
 		{
@@ -1357,9 +1350,7 @@ short ccHObject::minimumFileVersion_MeOnly() const
 
 struct HObjectDisplayState : ccDrawableObject::DisplayState
 {
-	HObjectDisplayState()
-	{
-	}
+	HObjectDisplayState() = default;
 
 	HObjectDisplayState(const ccHObject& obj)
 	    : ccDrawableObject::DisplayState(obj)

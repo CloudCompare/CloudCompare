@@ -24,16 +24,15 @@
 #include "../include/ccOctree.h"
 #include "../include/ccPointCloud.h"
 #include "../include/ccProgressDialog.h"
+#ifdef QT_DEBUG
+#include "../include/ccScalarField.h"
+#endif
 
 // CCCoreLib
 #include <Neighbourhood.h>
 
 // System
 #include <cassert>
-
-#ifdef QT_DEBUG
-#include "../include/ccScalarField.h"
-#endif
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
     : CCCoreLib::FastMarching()
@@ -44,7 +43,7 @@ static CCVector3 ComputeRobustAverageNorm(CCCoreLib::ReferenceCloud* subset,
                                           ccGenericPointCloud*       sourceCloud)
 {
 	if (!subset || subset->size() == 0 || !sourceCloud)
-		return CCVector3(0, 0, 1);
+		return {0, 0, 1};
 
 	assert(sourceCloud->hasNormals());
 	assert(subset->getAssociatedCloud() == static_cast<CCCoreLib::GenericIndexedCloud*>(sourceCloud));
@@ -264,10 +263,10 @@ int ccFastMarchingForNormsDirection::step()
 	return 1;
 }
 
-float ccFastMarchingForNormsDirection::computeTCoefApprox(CCCoreLib::FastMarching::Cell* originCell, CCCoreLib::FastMarching::Cell* destCell) const
+float ccFastMarchingForNormsDirection::computeTCoefApprox(CCCoreLib::FastMarching::Cell* currentCell, CCCoreLib::FastMarching::Cell* neighbourCell) const
 {
-	DirectionCell* oCell                 = static_cast<DirectionCell*>(originCell);
-	DirectionCell* dCell                 = static_cast<DirectionCell*>(destCell);
+	DirectionCell* oCell                 = static_cast<DirectionCell*>(currentCell);
+	DirectionCell* dCell                 = static_cast<DirectionCell*>(neighbourCell);
 	float          orientationConfidence = computePropagationConfidence(oCell, dCell); // between 0 and 1 (ideal: 1)
 
 	return (1.0f - orientationConfidence) * oCell->signConfidence;

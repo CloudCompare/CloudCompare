@@ -15,12 +15,30 @@
 // #                                                                        #
 // ##########################################################################
 
-// Qt
-#include <QColorDialog>
-#include <QElapsedTimer>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QPushButton>
+#include "ccEntityAction.h"
+
+// Local
+#include "ccAskThreeDoubleValuesDlg.h"
+#include "ccAskTwoDoubleValuesDlg.h"
+#include "ccColorGradientDlg.h"
+#include "ccColorLevelsDlg.h"
+#include "ccCommon.h"
+#include "ccComputeOctreeDlg.h"
+#include "ccExportCoordToSFDlg.h"
+#include "ccHistogramWindow.h"
+#include "ccInterpolationDlg.h"
+#include "ccItemSelectionDlg.h"
+#include "ccLibAlgorithms.h"
+#include "ccNormalComputationDlg.h"
+#include "ccOrderChoiceDlg.h"
+#include "ccScalarFieldArithmeticsDlg.h"
+#include "ccScalarFieldFromColorDlg.h"
+#include "ccSetSFAsVec3Dlg.h"
+#include "ccStatisticalTestDlg.h"
+#include "ccUtils.h"
+
+// CCAppCommon
+#include <ccPickOneElementDlg.h>
 
 // CCCoreLib
 #include <NormalDistribution.h>
@@ -28,6 +46,9 @@
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
+
+// CCPluginAPI
+#include <ccMainAppInterface.h>
 
 // qCC_db
 #include <ccBackgroundTask.h>
@@ -38,38 +59,18 @@
 #include <ccPointCloud.h>
 #include <ccPointCloudInterpolator.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 #include <ccSensor.h>
 
-// qCC_gl
-#include "ccGuiParameters.h"
+// qCC_glWindow
+#include <ccGuiParameters.h>
 
-// common
-#include <ccPickOneElementDlg.h>
-
-// Local
-#include "ccAskThreeDoubleValuesDlg.h"
-#include "ccAskTwoDoubleValuesDlg.h"
-#include "ccColorGradientDlg.h"
-#include "ccColorLevelsDlg.h"
-#include "ccCommon.h"
-#include "ccComputeOctreeDlg.h"
-#include "ccEntityAction.h"
-#include "ccExportCoordToSFDlg.h"
-#include "ccHistogramWindow.h"
-#include "ccInterpolationDlg.h"
-#include "ccItemSelectionDlg.h"
-#include "ccLibAlgorithms.h"
-#include "ccNormalComputationDlg.h"
-#include "ccOrderChoiceDlg.h"
-#include "ccProgressDialog.h"
-#include "ccScalarFieldArithmeticsDlg.h"
-#include "ccScalarFieldFromColorDlg.h"
-#include "ccSetSFAsVec3Dlg.h"
-#include "ccStatisticalTestDlg.h"
-#include "ccUtils.h"
-
-// This is included only for temporarily removing an object from the tree.
-#include "ccMainAppInterface.h"
+// Qt
+#include <QColorDialog>
+#include <QElapsedTimer>
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QPushButton>
 
 // System
 #include <array>
@@ -956,7 +957,7 @@ namespace ccEntityAction
 					    errorMessage = QT_TR_NOOP("An error occurred! (see console)");
 					    return false;
 				    }
-				    ccLog::Print("[RGBFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+				    ccLog::Printf("[RGBFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 				    if (filterParams.applyToSFduringRGB)
 				    {
@@ -1172,7 +1173,7 @@ namespace ccEntityAction
 						    return false;
 					    }
 
-					    ccLog::Print("SF [Bilateral/Gaussian/Mean/Median filter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+					    ccLog::Printf("SF [Bilateral/Gaussian/Mean/Median filter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 					    pc->setCurrentDisplayedScalarField(sfIdx);
 					    pc->showSF(sfIdx >= 0);
 					    sf = pc->getCurrentDisplayedScalarField();
@@ -1266,8 +1267,8 @@ namespace ccEntityAction
 			return false;
 		Q_ASSERT(s_randomColorsNumber > 1);
 
-		RGBAColorsTableType* randomColors = new RGBAColorsTableType;
-		if (!randomColors->reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
+		RGBAColorsTableType randomColors;
+		if (!randomColors.reserveSafe(static_cast<unsigned>(s_randomColorsNumber)))
 		{
 			ccLog::Error(QT_TR_NOOP("Not enough memory!"));
 			return false;
@@ -1277,7 +1278,7 @@ namespace ccEntityAction
 		for (int i = 0; i < s_randomColorsNumber; ++i)
 		{
 			ccColor::Rgba col(ccColor::Generator::Random(), ccColor::MAX);
-			randomColors->addElement(col);
+			randomColors.addElement(col);
 		}
 
 		// apply random colors
@@ -1319,7 +1320,7 @@ namespace ccEntityAction
 					if (colIndex == s_randomColorsNumber)
 						--colIndex;
 
-					pc->setPointColor(i, randomColors->getValue(colIndex));
+					pc->setPointColor(i, randomColors.getValue(colIndex));
 				}
 
 				pc->showColors(true);
@@ -2913,7 +2914,7 @@ namespace ccEntityAction
 
 			if (octree)
 			{
-				ccLog::Print("[doActionComputeOctree] Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1000.0);
+				ccLog::Printf("[doActionComputeOctree] Timing: %2.3f s", elapsedTime_ms / 1000.0);
 				cloud->setEnabled(true); // for vertices!
 				ccOctreeProxy* proxy = cloud->getOctreeProxy();
 				assert(proxy);
@@ -3202,7 +3203,7 @@ namespace ccEntityAction
 
 				    if (chi2dist >= 0.0)
 				    {
-					    ccLog::Print("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
+					    ccLog::Printf("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
 					    ccLog::Print(QObject::tr("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 
 					    // we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed

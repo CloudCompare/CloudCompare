@@ -25,15 +25,15 @@ NormsIndexesTableType::NormsIndexesTableType()
 {
 }
 
-bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (dataVersion < 41)
+	if (context.dataVersion < 41)
 	{
 		// in previous versions (< 41) the normals were compressed on 15 bytes (2*6+3) as unsigned short
 		static const unsigned OLD_QUANTIZE_LEVEL = 6;
 
 		auto oldNormals = std::make_shared<ccArray<unsigned short, 1, unsigned short>>();
-		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, dataVersion, "old compressed normals"))
+		if (!ccSerializationHelper::GenericArrayFromFile<unsigned short, 1, unsigned short>(*oldNormals, in, context.dataVersion, "old compressed normals"))
 		{
 			return false;
 		}
@@ -64,8 +64,5 @@ bool NormsIndexesTableType::fromFile_MeOnly(QFile& in, short dataVersion, int fl
 
 		return true;
 	}
-	else
-	{
-		return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, dataVersion, "compressed normals");
-	}
+	return ccSerializationHelper::GenericArrayFromFile<CompressedNormType, 1, CompressedNormType>(*this, in, context.dataVersion, "compressed normals");
 }

@@ -7607,9 +7607,9 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="62"/>
-        <source>Use Polynomial 
+        <source>Use Polynomial
 (instead of tangent)</source>
-        <translation>Використовувати поліном 
+        <translation>Використовувати поліном
 (замість дотичної)</translation>
     </message>
     <message>
@@ -7619,7 +7619,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/MLSDialog.ui" line="90"/>
-        <source>Squared Gaussian 
+        <source>Squared Gaussian
 Parameter</source>
         <translation>Параметри квадратичної
 функції Гаусса</translation>
@@ -19607,9 +19607,9 @@ but the more accuracy will be lost)</source>
     <message>
         <location filename="../../plugins/core/IO/qLASFWFIO/ui/saveLASFileDlg.ui" line="135"/>
         <location filename="../../plugins/core/IO/qPDALIO/ui/saveLASFileDlg.ui" line="135"/>
-        <source>might not preserve data accuracy  
+        <source>might not preserve data accuracy
 (especially if you have transformed the original data)  </source>
-        <translation>може не зберегти точність даних  
+        <translation>може не зберегти точність даних
 (особливо якщо ви трансформували вихідні дані)  </translation>
     </message>
     <message>
@@ -20128,22 +20128,22 @@ Warning: may not be compatible with Mascaret export.</source>
 <context>
     <name>ShortcutDialog</name>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="14"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="14"/>
         <source>Shortcuts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="20"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="20"/>
         <source>Double click to edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="33"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="33"/>
         <source>Action</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui_templates/shorcutSettings.ui" line="38"/>
+        <location filename="../ui_templates/shortcutSettings.ui" line="38"/>
         <source>Shortcut</source>
         <translation type="unfinished"></translation>
     </message>
@@ -20225,7 +20225,7 @@ multiplier threshold (nSigma)</source>
     </message>
     <message>
         <location filename="../../plugins/core/Standard/qPCL/PclUtils/filters/dialogs/StatisticalOutliersRemoverDlg.ui" line="22"/>
-        <source>Number of points to use for 
+        <source>Number of points to use for
 mean distance estimation</source>
         <translation>Кількість точок для
 оцінки середньої відстані</translation>

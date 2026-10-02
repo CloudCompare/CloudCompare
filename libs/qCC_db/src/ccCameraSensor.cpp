@@ -33,6 +33,7 @@
 #include <QTextStream>
 
 // System
+#include <algorithm>
 #include <cmath>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
@@ -264,14 +265,14 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	if (!withGLFeatures)
 	{
-		return ccBBox();
+		return {};
 	}
 
 	// get current sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
@@ -280,7 +281,7 @@ ccBBox ccCameraSensor::getOwnBB(bool withGLFeatures /*=false*/)
 	if (!cloud.reserve(5))
 	{
 		// not enough memory?!
-		return ccBBox();
+		return {};
 	}
 
 	cloud.addPoint(CCVector3(0, 0, 0));
@@ -312,13 +313,13 @@ ccBBox ccCameraSensor::getOwnFitBB(ccGLMatrix& trans)
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	trans = sensorPos;
 
 	CCVector3 upperLeftPoint = computeUpperLeftPoint();
-	return ccBBox(-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true);
+	return {-upperLeftPoint, CCVector3(upperLeftPoint.x, upperLeftPoint.y, 0), true};
 }
 
 void ccCameraSensor::setVertFocal_pix(float vertFocal_pix)
@@ -579,21 +580,21 @@ bool ccCameraSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccCameraSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccSensor::fromFile_MeOnly(in, context))
 		return false;
 
 	// serialization wasn't possible before v3.5!
-	if (dataVersion < 35)
+	if (context.dataVersion < 35)
 		return false;
 
 	// projection matrix (35 <= dataVersion < 38)
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// we don't need to save/load this matrix as it is dynamically computed!
 		ccGLMatrix dummyMatrix;
-		if (!dummyMatrix.fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!dummyMatrix.fromFile(in, context))
 			return ReadError();
 	}
 	m_projectionMatrixIsValid = false;
@@ -612,7 +613,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	inStream >> m_intrinsicParams.zNear_mm;
 	inStream >> m_intrinsicParams.zFar_mm;
 
-	if (dataVersion >= 43)
+	if (context.dataVersion >= 43)
 	{
 		// we added the principal point in version 43
 		inStream >> m_intrinsicParams.principal_point[0];
@@ -626,7 +627,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 
 	// distortion parameters
 	DistortionModel distModel = NO_DISTORTION_MODEL;
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// before v38, only Brown's parameters were used (and always set)
 		distModel = BROWN_DISTORTION;
@@ -685,7 +686,7 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	}
 
 	// FrustumInformation
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		bool dummyBool; // formerly: m_frustumInfos.isComputed (no need to save/load it!)
 		inStream >> dummyBool;
@@ -693,15 +694,15 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Lo
 	m_frustumInfos.isComputed = false;
 	inStream >> m_frustumInfos.drawFrustum;
 	inStream >> m_frustumInfos.drawSidePlanes;
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, m_frustumInfos.center.u, 3);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, m_frustumInfos.center.u, 3);
 
-	if (dataVersion < 38)
+	if (context.dataVersion < 38)
 	{
 		// frustum corners: no need to save/load them!
 		for (unsigned i = 0; i < 8; ++i)
 		{
 			CCVector3 P;
-			ccSerializationHelper::CoordsFromDataStream(inStream, flags, P.u, 3);
+			ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, P.u, 3);
 		}
 	}
 
@@ -1072,7 +1073,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	if (image.isNull())
 	{
 		ccLog::Warning("[ccCameraSensor::undistort] Invalid input image!");
-		return QImage();
+		return {};
 	}
 
 	// nothing to do
@@ -1080,7 +1081,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 	if (!m_distortionParams)
 	{
 		ccLog::Warning("[ccCameraSensor::undistort] No distortion model set!");
-		return QImage();
+		return {};
 	}
 
 	switch (m_distortionParams->getModel())
@@ -1094,7 +1095,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 		if (k1 == 0 && k2 == 0)
 		{
 			ccLog::Warning("[ccCameraSensor::undistort] Invalid radial distortion coefficients!");
-			return QImage();
+			return {};
 		}
 		float k3 = 0;
 		if (m_distortionParams->getModel() == EXTENDED_RADIAL_DISTORTION)
@@ -1114,7 +1115,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 		if (newImage.isNull())
 		{
 			ccLog::Warning("[ccCameraSensor::undistort] Not enough memory!");
-			return QImage();
+			return {};
 		}
 		newImage.fill(0);
 
@@ -1181,7 +1182,7 @@ QImage ccCameraSensor::undistort(const QImage& image) const
 
 	ccLog::Warning("[ccCameraSensor::undistort] Can't undistort the image with the current distortion model!");
 
-	return QImage();
+	return {};
 }
 
 ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace /*=true*/) const
@@ -1228,9 +1229,9 @@ bool ccCameraSensor::isGlobalCoordInFrustum(const CCVector3& globalCoord /*, boo
 CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 {
 	if (m_intrinsicParams.arrayHeight == 0)
-		return CCVector3(0, 0, 0);
+		return {0, 0, 0};
 
-	float ar      = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight : 1.0f;
+	float ar      = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
 	CCVector3 upperLeftPoint;
@@ -1813,7 +1814,7 @@ bool ccCameraSensor::computeOrthoRectificationParams(const ccImage*             
 }
 
 ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
-                                                   PointCoordinateType Z0,
+                                                   PointCoordinateType altitude,
                                                    double&             pixelSize,
                                                    bool                undistortImages /*=true*/,
                                                    double*             minCorner /*=nullptr*/,
@@ -1830,7 +1831,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xTopLeft(0, 0);
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xTopLeft, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xTopLeft, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1846,7 +1847,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xTopRight(static_cast<PointCoordinateType>(width), 0);
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xTopRight, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xTopRight, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1862,7 +1863,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xBottomRight(static_cast<PointCoordinateType>(width), static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xBottomRight, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xBottomRight, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1878,7 +1879,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xBottomLeft(0, static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xBottomLeft, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xBottomLeft, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1951,7 +1952,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 
 			QRgb rgb = blackValue; // output pixel is (transparent) black by default
 
-			CCVector3 P3D(xip, yip, Z0);
+			CCVector3 P3D(xip, yip, altitude);
 			CCVector2 imageCoord;
 			if (fromGlobalCoordToImageCoord(P3D, imageCoord, undistortImages))
 			{
@@ -2134,12 +2135,12 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(const ccImage*                  ima
 }
 
 bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                   images,
-                                          double                                  a[],
-                                          double                                  b[],
-                                          double                                  c[],
+                                          const double                            a[],
+                                          const double                            b[],
+                                          const double                            c[],
                                           unsigned                                maxSize,
                                           QDir*                                   outputDir /*=nullptr*/,
-                                          std::vector<ccImage*>*                  result /*=nullptr*/,
+                                          std::vector<ccImage*>*                  orthoRectifiedImages /*=nullptr*/,
                                           std::vector<std::pair<double, double>>* relativePos /*=nullptr*/)
 {
 	size_t count = images.size();
@@ -2232,10 +2233,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			else if (maxC[0] < C[0])
 				maxC[0] = C[0];
 
-			if (globalCorners[0] > minC[0])
-				globalCorners[0] = minC[0];
-			if (globalCorners[2] < maxC[0])
-				globalCorners[2] = maxC[0];
+			globalCorners[0] = std::min(globalCorners[0], minC[0]);
+			globalCorners[2] = std::max(globalCorners[2], maxC[0]);
 
 			// dimension: Y
 			if (minC[1] > C[1])
@@ -2243,17 +2242,14 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			else if (maxC[1] < C[1])
 				maxC[1] = C[1];
 
-			if (globalCorners[1] > minC[1])
-				globalCorners[1] = minC[1];
-			if (globalCorners[3] < maxC[1])
-				globalCorners[3] = maxC[1];
+			globalCorners[1] = std::min(globalCorners[1], minC[1]);
+			globalCorners[3] = std::max(globalCorners[3], maxC[1]);
 		}
 
-		double dx   = maxC[0] - minC[0];
-		double dy   = maxC[1] - minC[1];
-		double maxd = std::max(dx, dy);
-		if (maxd > maxDimAllImages)
-			maxDimAllImages = maxd;
+		double dx       = maxC[0] - minC[0];
+		double dy       = maxC[1] - minC[1];
+		double maxd     = std::max(dx, dy);
+		maxDimAllImages = std::max(maxd, maxDimAllImages);
 	}
 
 	// deduce pixel size
@@ -2294,12 +2290,12 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 		if (orthoImage.isNull()) // not enough memory!
 		{
 			// clear mem.
-			if (result)
+			if (orthoRectifiedImages)
 			{
-				while (!result->empty())
+				while (!orthoRectifiedImages->empty())
 				{
-					delete result->back();
-					result->pop_back();
+					delete orthoRectifiedImages->back();
+					orthoRectifiedImages->pop_back();
 				}
 			}
 			ccLog::Warning("[OrthoRectifyAsImages] Not enough memory!");
@@ -2380,8 +2376,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			}
 		}
 
-		if (result)
-			result->push_back(new ccImage(orthoImage, image->getName()));
+		if (orthoRectifiedImages)
+			orthoRectifiedImages->push_back(new ccImage(orthoImage, image->getName()));
 	}
 
 	return true;
@@ -2654,10 +2650,8 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(boxCorners[j]);
-					if (d > dMaxBox)
-						dMaxBox = d;
-					if (d < dMinBox)
-						dMinBox = d;
+					dMaxBox = std::max(d, dMaxBox);
+					dMinBox = std::min(d, dMinBox);
 				}
 			}
 
@@ -2668,10 +2662,8 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(frustumCorners[j]);
-					if (d > dMaxFru)
-						dMaxFru = d;
-					if (d < dMinFru)
-						dMinFru = d;
+					dMaxFru = std::max(d, dMaxFru);
+					dMinFru = std::min(d, dMinFru);
 				}
 			}
 
@@ -2680,12 +2672,9 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				return CELL_OUTSIDE_FRUSTUM;
 
 			// if this plane is NOT a separating plane, the cell is at least intersecting the frustum
-			else
-			{
-				// moreover, the cell can be completely inside the frustum...
-				if (dMaxBox > dMaxFru || dMinBox < dMinFru)
-					boxInside = false;
-			}
+			// moreover, the cell can be completely inside the frustum...
+			if (dMaxBox > dMaxFru || dMinBox < dMinFru)
+				boxInside = false;
 		}
 	}
 

@@ -19,7 +19,9 @@
 
 // Local
 #include "ccEnvelopeExtractor.h"
-#include "ccOverlayDialog.h"
+
+// CCPluginAPI
+#include <ccOverlayDialog.h>
 
 // qCC_db
 #include <ccHObject.h>

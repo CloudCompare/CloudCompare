@@ -17,7 +17,8 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ccCommandLineInterface.h"
+// CCPluginAPI
+#include <ccCommandLineInterface.h>
 
 class QString;
 class QXmlStreamAttributes;

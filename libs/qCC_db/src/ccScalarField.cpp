@@ -69,9 +69,9 @@ ccScalarField::ccScalarField(const ccScalarField& sf)
 	m_logSaturationRange = sf.m_logSaturationRange;
 }
 
-ScalarType ccScalarField::normalize(ScalarType d) const
+ScalarType ccScalarField::normalize(ScalarType val) const
 {
-	if (/*!ValidValue(d) || */ !m_displayRange.isInRange(d)) // NaN values are also rejected by 'isInRange'!
+	if (/*!ValidValue(val) || */ !m_displayRange.isInRange(val)) // NaN values are also rejected by 'isInRange'!
 	{
 		return static_cast<ScalarType>(-1);
 	}
@@ -81,40 +81,32 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	{
 		if (!m_symmetricalScale)
 		{
-			if (d <= m_saturationRange.start())
+			if (val <= m_saturationRange.start())
 				return 0;
-			else if (d >= m_saturationRange.stop())
+			if (val >= m_saturationRange.stop())
 				return static_cast<ScalarType>(1);
-			return (d - m_saturationRange.start()) / m_saturationRange.range();
+			return (val - m_saturationRange.start()) / m_saturationRange.range();
 		}
-		else // symmetric scale
-		{
-			if (std::abs(d) <= m_saturationRange.start())
-				return static_cast<ScalarType>(0.5);
+		if (std::abs(val) <= m_saturationRange.start())
+			return static_cast<ScalarType>(0.5);
 
-			if (d >= 0)
-			{
-				if (d >= m_saturationRange.stop())
-					return static_cast<ScalarType>(1);
-				return (static_cast<ScalarType>(1) + (d - m_saturationRange.start()) / m_saturationRange.range()) / 2;
-			}
-			else
-			{
-				if (d <= -m_saturationRange.stop())
-					return 0;
-				return (static_cast<ScalarType>(1) + (d + m_saturationRange.start()) / m_saturationRange.range()) / 2;
-			}
+		if (val >= 0)
+		{
+			if (val >= m_saturationRange.stop())
+				return static_cast<ScalarType>(1);
+			return (static_cast<ScalarType>(1) + (val - m_saturationRange.start()) / m_saturationRange.range()) / 2;
 		}
-	}
-	else // log scale
-	{
-		ScalarType dLog = log10(std::max(static_cast<ScalarType>(std::abs(d)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
-		if (dLog <= m_logSaturationRange.start())
+
+		if (val <= -m_saturationRange.stop())
 			return 0;
-		else if (dLog >= m_logSaturationRange.stop())
-			return static_cast<ScalarType>(1);
-		return (dLog - m_logSaturationRange.start()) / m_logSaturationRange.range();
+		return (static_cast<ScalarType>(1) + (val + m_saturationRange.start()) / m_saturationRange.range()) / 2;
 	}
+	ScalarType dLog = log10(std::max(static_cast<ScalarType>(std::abs(val)), CCCoreLib::ZERO_TOLERANCE_SCALAR));
+	if (dLog <= m_logSaturationRange.start())
+		return 0;
+	if (dLog >= m_logSaturationRange.stop())
+		return static_cast<ScalarType>(1);
+	return (dLog - m_logSaturationRange.start()) / m_logSaturationRange.range();
 
 	// can't get here normally!
 	assert(false);
@@ -446,10 +438,10 @@ bool ccScalarField::toFile(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccScalarField::fromFile(QFile& in, LoadingContext& context)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
-	if (dataVersion < 20)
+	if (context.dataVersion < 20)
 	{
 		return CorruptError();
 	}
@@ -457,7 +449,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	// name (dataVersion >= 20)
 	{
 		char nameBuffer[MaxSFNameLength + 1];
-		if (dataVersion < 55)
+		if (context.dataVersion < 55)
 		{
 			// read the name the old way (with a fixed size)
 			if (in.read(nameBuffer, 256) < 0)
@@ -489,7 +481,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 
 	//'strictly positive' state (20 <= dataVersion < 26)
 	bool onlyPositiveValues = false;
-	if (dataVersion < 26)
+	if (context.dataVersion < 26)
 	{
 		if (in.read((char*)&onlyPositiveValues, sizeof(bool)) < 0)
 		{
@@ -502,15 +494,15 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	double baseOffset = 0.0;
 	{
 		QString sfDescription     = "SF " + QString::fromStdString(m_name);
-		bool    fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		bool    fileScalarIsFloat = (context.flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
 		if (fileScalarIsFloat) // file is 'float'
 		{
-			result = ccSerializationHelper::GenericArrayFromFile<float, 1, float>(*this, in, dataVersion, sfDescription);
+			result = ccSerializationHelper::GenericArrayFromFile<float, 1, float>(*this, in, context.dataVersion, sfDescription);
 		}
 		else // file is 'double'
 		{
 			// we load it as float, but apply an automatic offset (based on the first element) to not lose information/accuracy
-			result = ccSerializationHelper::GenericArrayFromTypedFile<float, 1, float, double>(*this, in, dataVersion, sfDescription, &baseOffset);
+			result = ccSerializationHelper::GenericArrayFromTypedFile<float, 1, float, double>(*this, in, context.dataVersion, sfDescription, &baseOffset);
 		}
 	}
 	if (!result)
@@ -519,7 +511,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	}
 
 	// convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
-	if (dataVersion < 26)
+	if (context.dataVersion < 26)
 	{
 		const ScalarType FORMER_BIG_VALUE = static_cast<ScalarType>(sqrt(3.4e38f) - 1.0f);
 
@@ -554,7 +546,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	if (in.read((char*)&maxLogSaturation, sizeof(double)) < 0)
 		return ReadError();
 
-	if (dataVersion < 27)
+	if (context.dataVersion < 27)
 	{
 		//'absolute saturation' state (27>dataVersion>=20)
 		bool absSaturation = false;
@@ -570,7 +562,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		return ReadError();
 	}
 
-	if (dataVersion < 27)
+	if (context.dataVersion < 27)
 	{
 		bool autoBoundaries = false;
 		//'automatic boundaries update' state (dataVersion>=20)
@@ -587,7 +579,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 	}
 
 	// new attributes
-	if (dataVersion >= 27)
+	if (context.dataVersion >= 27)
 	{
 		//'symmetrical scale' state (27<=dataVersion)
 		if (in.read((char*)&m_symmetricalScale, sizeof(bool)) < 0)
@@ -612,7 +604,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		}
 
 		// old versions
-		if (dataVersion < 27)
+		if (context.dataVersion < 27)
 		{
 			uint32_t activeColorScale = 0;
 			if (in.read((char*)&activeColorScale, 4) < 0)
@@ -652,7 +644,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 			if (hasColorScale)
 			{
 				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
-				if (!colorScale->fromFile(in, dataVersion, flags, oldToNewIDMap))
+				if (!colorScale->fromFile(in, context))
 					return ReadError();
 				m_colorScale = colorScale;
 
@@ -685,7 +677,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags, LoadedIDMa
 		setColorRampSteps(static_cast<unsigned>(colorRampSteps));
 	}
 
-	if (dataVersion >= 42)
+	if (context.dataVersion >= 42)
 	{
 		// offset (formerly named 'global shift') (dataVersion>=42)
 		double offset = 0.0;

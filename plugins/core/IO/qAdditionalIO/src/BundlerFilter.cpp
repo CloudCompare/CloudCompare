@@ -278,7 +278,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 			}
 			if (importImages && CCCoreLib::LessThanEpsilon(sum))
 			{
-				ccLog::Warning("[Bundler] Camera #%i is invalid!", camIndex + 1);
+				ccLog::Warningf("[Bundler] Camera #%i is invalid!", camIndex + 1);
 				it->isValid = false;
 			}
 
@@ -392,7 +392,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 							trans.setTranslation(trans.getTranslationAsVec3D() + Pshift);
 							trans.invert();
 						}
-						ccLog::Warning("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+						ccLog::Warningf("[Bundler] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 				keypointsCloud->addPoint((Pd + Pshift).toPC());
@@ -431,7 +431,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 				{
 					// sometimes, it appears that keypoints have no associated color!
 					// so we skip the line and assume it's in fact the keypoint description...
-					ccLog::Warning("[Bundler] Keypoint #%i has no associated color!", i);
+					ccLog::Warningf("[Bundler] Keypoint #%i has no associated color!", i);
 					if (hasColors)
 						keypointsCloud->addColor(ccColor::black); // black by default
 				}
@@ -457,7 +457,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const QString&  filename,
 						unsigned nviews = parts[0].toInt(&ok);
 						if (!ok || nviews * 4 + 1 > static_cast<unsigned>(parts.size()))
 						{
-							ccLog::Warning("[Bundler] View list for point #%i is invalid!", i);
+							ccLog::Warningf("[Bundler] View list for point #%i is invalid!", i);
 						}
 						else
 						{

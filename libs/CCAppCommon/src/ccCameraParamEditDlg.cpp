@@ -18,7 +18,7 @@
 #include "../include/ccCameraParamEditDlg.h"
 
 // Ui
-#include "ui_cameraParamDlg.h"
+#include <ui_cameraParamDlg.h>
 
 // CCCoreLib
 #include <CCMath.h>

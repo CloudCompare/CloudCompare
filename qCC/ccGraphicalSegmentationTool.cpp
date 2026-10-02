@@ -17,9 +17,8 @@
 
 #include "ccGraphicalSegmentationTool.h"
 
-#include "ccGraphicalSegmentationOptionsDlg.h"
-
 // Local
+#include "ccGraphicalSegmentationOptionsDlg.h"
 #include "ccItemSelectionDlg.h"
 #include "ccReservedIDs.h"
 #include "mainwindow.h"
@@ -29,21 +28,19 @@
 #include <SquareMatrix.h>
 
 // qCC_db
+#include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
+#include <ccCameraSensor.h>
+#include <ccGBLSensor.h>
 #include <ccGenericPointCloud.h>
 #include <ccHObjectCaster.h>
 #include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
-
-// for the helper (apply)
-#include <cc2DLabel.h>
-#include <ccCameraSensor.h>
-#include <ccGBLSensor.h>
 #include <ccSubMesh.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // Qt

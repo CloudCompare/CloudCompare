@@ -17,6 +17,7 @@
 
 #include "ccNoiseFilterDlg.h"
 
+// Qt
 #include <QThread>
 
 ccNoiseFilterDlg::ccNoiseFilterDlg(QWidget* parent /*=nullptr*/)

@@ -45,9 +45,7 @@ ccSensor::ccSensor(const ccSensor& sensor)
 	}
 }
 
-ccSensor::~ccSensor()
-{
-}
+ccSensor::~ccSensor() = default;
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 {
@@ -192,23 +190,23 @@ bool ccSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// serialization wasn't possible before v3.4!
-	if (dataVersion < 34)
+	if (context.dataVersion < 34)
 		return false;
 
 	// rigid transformation (dataVersion>=34)
-	if (!m_rigidTransformation.fromFile(in, dataVersion, flags, oldToNewIDMap))
+	if (!m_rigidTransformation.fromFile(in, context))
 		return ReadError();
 
 	// various parameters (dataVersion>=35)
 	QDataStream inStream(&in);
 	inStream >> m_activeIndex;
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_scale);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_scale);
 
 	// color (dataVersion>=35)
 	if (in.read((char*)&m_color.rgb, sizeof(ColorCompType) * 3) < 0)
@@ -222,8 +220,10 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedID
 	{
 		return ReadError();
 	}
-	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_posBuffer' pointer!!!
-	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;
+	if (bufferUniqueID != 0)
+	{
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{bufferUniqueID, LoadingContext::Dependency::SENSOR_POSITIONS_BUFFER}});
+	}
 
 	return true;
 }

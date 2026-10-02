@@ -15,19 +15,19 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
 #include "ccCommandCrossSection.h"
 
+// Local
 #include "ccCommandLineCommands.h"
 #include "ccCropTool.h"
 
-// Qt
-#include <QDir>
-#include <QXmlStreamReader> // to read the 'Cross Section' tool XML parameters file
-
-// qcc_db
+// qCC_db
 #include <ccHObjectCaster.h>
 #include <ccMesh.h>
+
+// Qt
+#include <QDir>
+#include <QXmlStreamReader>
 
 constexpr char COMMAND_CROSS_SECTION[] = "CROSS_SECTION";
 

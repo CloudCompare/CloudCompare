@@ -1,10 +1,14 @@
 #include "TestPlyFilter.h"
 
-#include "PlyFilter.h"
-#include "ccHObject.h"
-#include "ccMaterialSet.h"
-#include "ccMesh.h"
+// qCC_db
+#include <ccHObject.h>
+#include <ccMaterialSet.h>
+#include <ccMesh.h>
 
+// qCC_io
+#include <PlyFilter.h>
+
+// Qt
 #include <QFile>
 #include <QImage>
 #include <QTemporaryDir>

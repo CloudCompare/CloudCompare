@@ -71,17 +71,67 @@ class ccSerializableObject
 		DF_SCALAR_VAL_32_BITS = 2, /**< Scalar values are stored as 32 bits floats (otherwise 64 bits double) **/
 	};
 
-	//! Map of loaded unique IDs (old ID --> new ID)
-	using LoadedIDMap = QMultiMap<unsigned, unsigned>;
+	//! Loading context
+	struct LoadingContext
+	{
+		//! Default constructor
+		LoadingContext(short _dataVersion, int _flags)
+		    : dataVersion(_dataVersion)
+		    , flags(_flags)
+		{
+		}
+
+		//! Map of loaded unique IDs (old ID --> new ID)
+		using LoadedIDMap = QMultiMap<unsigned, unsigned>;
+
+		//! Dependency structure
+		struct Dependency
+		{
+			//! Dependency type
+			enum Type
+			{
+				NONE                    = 0,  //!< no dependency
+				LABEL_SOURCE_CLOUD      = 1,  //!< 2D label depends on a cloud
+				LABEL_SOURCE_MESH       = 2,  //!< 2D label depends on a mesh
+				FACET_ORIGIN_POINTS     = 3,  //!< Facet depends on a set of points (origin)
+				FACET_CONTOUR_VERTICES  = 4,  //!< Facet depends on a set of points (contour)
+				FACET_CONTOUR_POLYLINE  = 5,  //!< Facet depends on a polyline (contour)
+				FACET_POLYGON_MESH      = 6,  //!< Facet depends on a polygon mesh
+				IMAGE_SENSOR            = 7,  //!< Image depends on a sensor
+				MESH_VERTICES_CLOUD     = 8,  //!< Mesh depends on a vertices cloud
+				MESH_TRI_NORMALS        = 9,  //!< Mesh depends on a triangle normals array
+				MESH_TEXTURE_COORDS     = 10, //!< Mesh depends on a texture coordinates array
+				MESH_MATERIALS          = 11, //!< Mesh depends on a materials set
+				POLYLINE_VERTICES_CLOUD = 12, //!< Polyline depends on a vertices cloud
+				SENSOR_POSITIONS_BUFFER = 13, //!< Sensor depends on a positions buffer
+				SUBMESH_ASSOCIATED_MESH = 14, //!< Sub-mesh depends on a parent mesh
+			};
+
+			//! Default constructor
+			Dependency(uint32_t _objectID = 0, Type _type = NONE)
+			    : objectID(_objectID)
+			    , type(_type)
+			{
+			}
+
+			uint32_t objectID; //!< Object ID
+			Type     type;     //!< Dependency type (see DEPENDENCY_TYPES)
+		};
+
+		//! Map of incomplete entities (due to missing dependencies)
+		QMap<ccSerializableObject*, std::vector<Dependency>> incompleteEntities;
+
+		short       dataVersion;   //!< File version
+		int         flags;         //!< Deserialization flags (see ccSerializableObject::DeserializationFlags)
+		LoadedIDMap oldToNewIDMap; //!< Map to link old IDs with new IDs
+	};
 
 	//! Loads data from binary stream
 	/** \param in input file (already opened)
-	    \param dataVersion file version
-	    \param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
-	    \param oldToNewIDMap map to link old IDs with new IDs
+	    \param loadingContext loading context
 	    \return success
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+	virtual bool fromFile(QFile& in, LoadingContext& context)
 	{
 		return false;
 	}

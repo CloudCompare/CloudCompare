@@ -23,6 +23,9 @@
 // Qt
 #include <QOpenGLFunctions_2_1>
 
+// System
+#include <algorithm>
+
 //! Maximum color ramp size
 /** 252 so as to get 1024 bytes as total required memory
 (see MinRequiredBytes).
@@ -51,10 +54,7 @@ bool ccColorRampShader::setup(QOpenGLFunctions_2_1* glFunc, float minSatRel, flo
 {
 	assert(glFunc);
 
-	if (colorSteps > CC_MAX_SHADER_COLOR_RAMP_SIZE)
-	{
-		colorSteps = CC_MAX_SHADER_COLOR_RAMP_SIZE;
-	}
+	colorSteps = std::min(colorSteps, CC_MAX_SHADER_COLOR_RAMP_SIZE);
 
 	setUniformValue("uf_minSaturation", minSatRel);
 	setUniformValue("uf_maxSaturation", maxSatRel);

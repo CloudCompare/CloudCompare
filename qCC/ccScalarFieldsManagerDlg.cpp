@@ -17,11 +17,12 @@
 
 #include "ccScalarFieldsManagerDlg.h"
 
-#include "ui_scalarFieldsManagerDlg.h"
-
-// local
+// Local
 #include "ccHistogramWindow.h"
 #include "mainwindow.h"
+
+// Ui
+#include <ui_scalarFieldsManagerDlg.h>
 
 // qCC_db
 #include <ccPointCloud.h>
@@ -238,7 +239,7 @@ void ccScalarFieldsManagerDialog::deleteSF()
 	int row = m_ui->sfTableWidget->currentRow();
 	if (row < 0)
 	{
-		ccLog::Warning("Delete SF", "Please select a scalar field from the table first.");
+		ccLog::Warning("Delete SF: please select a scalar field from the table first.");
 		return;
 	}
 
@@ -279,7 +280,7 @@ void ccScalarFieldsManagerDialog::showHistogram()
 	int row = m_ui->sfTableWidget->currentRow();
 	if (row < 0)
 	{
-		ccLog::Warning("Delete SF", "Please select a scalar field from the table first.");
+		ccLog::Warning("Delete SF: please select a scalar field from the table first.");
 		return;
 	}
 

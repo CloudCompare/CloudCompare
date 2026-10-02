@@ -17,7 +17,80 @@
 
 #include "mainwindow.h"
 
-// CCCoreLib Includes
+// Local
+#include "ccAboutDialog.h"
+#include "ccAdjustZoomDlg.h"
+#include "ccAlignDlg.h"
+#include "ccApplication.h"
+#include "ccApplyTransformationDlg.h"
+#include "ccAskThreeDoubleValuesDlg.h"
+#include "ccBoundingBoxEditorDlg.h"
+#include "ccCamSensorProjectionDlg.h"
+#include "ccClippingBoxTool.h"
+#include "ccColorFromScalarDlg.h"
+#include "ccCommon.h"
+#include "ccComparisonDlg.h"
+#include "ccConsole.h"
+#include "ccCropTool.h"
+#include "ccCutPursuitDlg.h"
+#include "ccEntityAction.h"
+#include "ccEntitySelectionDlg.h"
+#include "ccExtrudePolylineDlg.h"
+#include "ccFilterByValueDlg.h"
+#include "ccFitSphereDlg.h"
+#include "ccGBLSensorProjectionDlg.h"
+#include "ccGeomFeaturesDlg.h"
+#include "ccGraphicalSegmentationTool.h"
+#include "ccGraphicalTransformationTool.h"
+#include "ccHistogramWindow.h"
+#include "ccInnerRect2DFinder.h"
+#include "ccItemSelectionDlg.h"
+#include "ccLabelingDlg.h"
+#include "ccMatchScalesDlg.h"
+#include "ccNoiseFilterDlg.h"
+#include "ccOrderChoiceDlg.h"
+#include "ccPlaneEditDlg.h"
+#include "ccPointListPickingDlg.h"
+#include "ccPointPairRegistrationDlg.h"
+#include "ccPointPropertiesDlg.h"
+#include "ccPrimitiveDistanceDlg.h"
+#include "ccPrimitiveFactoryDlg.h"
+#include "ccPtsSamplingDlg.h"
+#include "ccRasterizeTool.h"
+#include "ccRecentFiles.h"
+#include "ccRegistrationDlg.h"
+#include "ccRegistrationTools.h"
+#include "ccSORFilterDlg.h"
+#include "ccScalarFieldsManagerDlg.h"
+#include "ccScaleDlg.h"
+#include "ccSectionExtractionTool.h"
+#include "ccSensorComputeDistancesDlg.h"
+#include "ccSensorComputeScatteringAnglesDlg.h"
+#include "ccShortcutDialog.h"
+#include "ccSmoothPolylineDlg.h"
+#include "ccSubsamplingDlg.h"
+#include "ccTracePolylineTool.h"
+#include "ccUnrollDlg.h"
+#include "ccUtils.h"
+#include "ccVolumeCalcTool.h"
+#include "ccWaveformDialog.h"
+#include "db_tree/ccDBRoot.h"
+#include "pluginManager/ccPluginUIManager.h"
+
+// Ui
+#include <ui_distanceMapDlg.h>
+#include <ui_globalShiftSettingsDlg.h>
+#include <ui_mainWindow.h>
+
+// CCAppCommon
+#include <ccCameraParamEditDlg.h>
+#include <ccDisplaySettingsDlg.h>
+#include <ccPickOneElementDlg.h>
+#include <ccStereoModeDlg.h>
+#include <ccTranslationManager.h>
+
+// CCCoreLib
+#include <ChamferDistanceTransform.h>
 #include <CloudSamplingTools.h>
 #include <Delaunay2dMesh.h>
 #include <Jacobi.h>
@@ -25,18 +98,27 @@
 #include <NormalDistribution.h>
 #include <ParallelSort.h>
 #include <PointCloud.h>
+#include <SaitoSquaredDistanceTransform.h>
 #include <ScalarFieldTools.h>
 #include <StatisticalTestingTools.h>
 #include <WeibullDistribution.h>
 
-// for tests
-#include <ChamferDistanceTransform.h>
-#include <SaitoSquaredDistanceTransform.h>
+// CCFbo
+#include <ccGlFilter.h>
+
+// CCPluginAPI
+#include <ccColorScaleEditorDlg.h>
+#include <ccInfoDlg.h>
+#include <ccPersistentSettings.h>
+#include <ccPickingHub.h>
+#include <ccQtHelpers.h>
+#include <ccRenderToFileDlg.h>
 
 // qCC_db
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
 #include <cc2DViewportObject.h>
+#include <ccBackgroundTask.h>
 #include <ccCameraSensor.h>
 #include <ccCircle.h>
 #include <ccColorScalesManager.h>
@@ -53,118 +135,25 @@
 #include <ccSphere.h>
 #include <ccSubMesh.h>
 
+// qCC_glWindow
+#include <ccGLWindowInterface.h>
+#include <ccRenderingTools.h>
+
 // qCC_io
 #include <AsciiFilter.h>
 #include <BinFilter.h>
 #include <DepthMapFileFilter.h>
 #include <ccShiftAndScaleCloudDlg.h>
 
-// QCC_glWindow
-#include <ccGLWindowInterface.h>
-#include <ccRenderingTools.h>
-
-// CCPluginAPI
-#include <ccBackgroundTask.h>
-#include <ccQtHelpers.h>
-
-// local includes
-#include "ccConsole.h"
-#include "ccEntityAction.h"
-#include "ccHistogramWindow.h"
-#include "ccInnerRect2DFinder.h"
-
-#include <ReferenceCloud.h>
-
-// common
-#include <ccPickingHub.h>
-// common dialogs
-#include <ccCameraParamEditDlg.h>
-#include <ccDisplaySettingsDlg.h>
-#include <ccPickOneElementDlg.h>
-#include <ccStereoModeDlg.h>
-
-// dialogs
-#include "ccAboutDialog.h"
-#include "ccAdjustZoomDlg.h"
-#include "ccAlignDlg.h"
-#include "ccApplication.h"
-#include "ccApplyTransformationDlg.h"
-#include "ccAskThreeDoubleValuesDlg.h"
-#include "ccBoundingBoxEditorDlg.h"
-#include "ccCamSensorProjectionDlg.h"
-#include "ccClippingBoxTool.h"
-#include "ccColorFromScalarDlg.h"
-#include "ccColorScaleEditorDlg.h"
-#include "ccCommon.h"
-#include "ccComparisonDlg.h"
-#include "ccCutPursuitDlg.h"
-#include "ccEntitySelectionDlg.h"
-#include "ccExtrudePolylineDlg.h"
-#include "ccFilterByValueDlg.h"
-#include "ccFitSphereDlg.h"
-#include "ccGBLSensorProjectionDlg.h"
-#include "ccGeomFeaturesDlg.h"
-#include "ccGraphicalSegmentationTool.h"
-#include "ccGraphicalTransformationTool.h"
-#include "ccItemSelectionDlg.h"
-#include "ccLabelingDlg.h"
-#include "ccMatchScalesDlg.h"
-#include "ccNoiseFilterDlg.h"
-#include "ccOrderChoiceDlg.h"
-#include "ccPlaneEditDlg.h"
-#include "ccPointListPickingDlg.h"
-#include "ccPointPairRegistrationDlg.h"
-#include "ccPointPropertiesDlg.h"
-#include "ccPrimitiveDistanceDlg.h"
-#include "ccPrimitiveFactoryDlg.h"
-#include "ccPtsSamplingDlg.h"
-#include "ccRasterizeTool.h"
-#include "ccRegistrationDlg.h"
-#include "ccRenderToFileDlg.h"
-#include "ccSORFilterDlg.h"
-#include "ccScalarFieldsManagerDlg.h"
-#include "ccScaleDlg.h"
-#include "ccSectionExtractionTool.h"
-#include "ccSensorComputeDistancesDlg.h"
-#include "ccSensorComputeScatteringAnglesDlg.h"
-#include "ccSmoothPolylineDlg.h"
-#include "ccSubsamplingDlg.h"
-#include "ccTracePolylineTool.h"
-#include "ccTranslationManager.h"
-#include "ccUnrollDlg.h"
-#include "ccVolumeCalcTool.h"
-#include "ccWaveformDialog.h"
-
-// CCPluginAPI
-#include <ccInfoDlg.h>
-
-// other
-#include "ccCropTool.h"
-#include "ccGlFilter.h"
-#include "ccPersistentSettings.h"
-#include "ccRecentFiles.h"
-#include "ccRegistrationTools.h"
-#include "ccUtils.h"
-#include "db_tree/ccDBRoot.h"
-#include "pluginManager/ccPluginUIManager.h"
-
-// 3D mouse handler
-#ifdef CC_3DMOUSE_SUPPORT
-#include "cc3DMouseManager.h"
-#endif
-
 // Qt
 #include <QClipboard>
 
-// Qt UI files
-#include <ui_distanceMapDlg.h>
-#include <ui_globalShiftSettingsDlg.h>
-#include <ui_mainWindow.h>
-
 // System
-#include "ccShortcutDialog.h"
-
 #include <random>
+
+#ifdef CC_3DMOUSE_SUPPORT
+#include <cc3DMouseManager.h>
+#endif
 
 // global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = nullptr;
@@ -992,7 +981,7 @@ void MainWindow::doActionComputeKdTree()
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
+		ccConsole::Printf("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
 		cloud->setEnabled(true); // for mesh vertices!
 		cloud->addChild(kdtree);
 		kdtree->setDisplay(cloud->getDisplay());
@@ -1080,7 +1069,7 @@ void MainWindow::doActionResampleWithOctree()
 
 			if (result)
 			{
-				ccConsole::Print("[ResampleWithOctree] Timing: %3.2f s.", eTimer.elapsed() / 1.0e3);
+				ccConsole::Printf("[ResampleWithOctree] Timing: %3.2f s.", eTimer.elapsed() / 1.0e3);
 				ccPointCloud* newCloud = ccPointCloud::From(result, cloud);
 
 				delete result;
@@ -3613,7 +3602,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 	s_laplacianSmooth_nbIter = QInputDialog::getInt(this, tr("Smooth mesh"), tr("Iterations:"), s_laplacianSmooth_nbIter, 1, 1000, 1, &ok);
 	if (!ok)
 		return;
-	s_laplacianSmooth_factor = QInputDialog::getDouble(this, tr("Smooth mesh"), tr("Smoothing factor:"), s_laplacianSmooth_factor, 0, 100, 3, &ok);
+	s_laplacianSmooth_factor = QInputDialog::getDouble(this, tr("Smooth mesh"), tr("Smoothing factor:"), s_laplacianSmooth_factor, 0.0, 2.0, 3, &ok);
 	if (!ok)
 		return;
 
@@ -4448,7 +4437,7 @@ void MainWindow::doActionSubsample()
 			}
 		}
 
-		ccLog::Print("[Subsampling] Timing: %3.3f s.", eTimer.elapsed() / 1000.0);
+		ccLog::Printf("[Subsampling] Timing: %3.3f s.", eTimer.elapsed() / 1000.0);
 
 		if (errors)
 		{

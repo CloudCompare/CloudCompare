@@ -17,16 +17,19 @@
 
 #include "ccRasterizeTool.h"
 
-#include "ui_rasterizeDlg.h"
-
 // Local
 #include "ccContourLinesGenerator.h"
 #include "ccKrigingParamsDialog.h"
-#include "ccPersistentSettings.h"
 #include "mainwindow.h"
+
+// Ui
+#include <ui_rasterizeDlg.h>
 
 // CCCoreLib
 #include <NormalDistribution.h>
+
+// CCPluginAPI
+#include <ccPersistentSettings.h>
 
 // qCC_db
 #include <ccColorScalesManager.h>
@@ -38,7 +41,7 @@
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
 
-// qCC_gl
+// qCC_glWindow
 #include <ccGLWindowInterface.h>
 
 // qCC_io
@@ -53,18 +56,17 @@
 #include <QSettings>
 #include <QStandardItemModel>
 
+// System
+#include <cassert>
+
 #ifdef CC_GDAL_SUPPORT
 // GDAL
 #include <cpl_string.h>
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <ogr_api.h>
-// local
-#include "ui_rasterExportOptionsDlg.h"
+#include <ui_rasterExportOptionsDlg.h>
 #endif
-
-// System
-#include <cassert>
 
 constexpr char HILLSHADE_FIELD_NAME[] = "Hillshade";
 constexpr char XRAY_FIELD_NAME[]      = "X-ray";
@@ -1356,13 +1358,13 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 	}
 
 	GDALAllRegister();
-	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+	ccLog::PrintDebugf("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
 	const char  pszFormat[] = "GTiff";
 	GDALDriver* poDriver    = GetGDALDriverManager()->GetDriverByName(pszFormat);
 	if (!poDriver)
 	{
-		ccLog::Error("[GDAL] Driver %s is not supported", pszFormat);
+		ccLog::Error("[GDAL] Driver '%s' is not supported", pszFormat);
 		return false;
 	}
 
@@ -1373,7 +1375,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 #endif
 	if (!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
 	{
-		ccLog::Error("[GDAL] Driver %s doesn't support Create() method", pszFormat);
+		ccLog::Error("[GDAL] Driver '%s' doesn't support Create() method", pszFormat);
 		return false;
 	}
 

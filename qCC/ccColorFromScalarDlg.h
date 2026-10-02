@@ -17,13 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccHistogramWindow.h"
+
+// qCC_db
+#include <ccColorScale.h>
+#include <ccScalarField.h>
+
 // Qt
 #include <QColor>
-
-// CC
-#include <ccColorScale.h>
-#include <ccHistogramWindow.h>
-#include <ccScalarField.h>
 
 class ccPointCloud;
 

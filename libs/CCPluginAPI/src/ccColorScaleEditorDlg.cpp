@@ -17,14 +17,14 @@
 
 #include "../include/ccColorScaleEditorDlg.h"
 
-// Ui
-#include "ui_colorScaleEditorDlg.h"
-
 // Local
 #include "../include/ccColorScaleEditorWidget.h"
 #include "../include/ccMainAppInterface.h"
 #include "../include/ccPersistentSettings.h"
 #include "../include/ccQtHelpers.h"
+
+// Ui
+#include <ui_colorScaleEditorDlg.h>
 
 // qCC_db
 #include <ccColorScalesManager.h>
@@ -163,7 +163,7 @@ void ccColorScaleEditorDialog::colorScaleChanged(int pos)
 
 void ccColorScaleEditorDialog::relativeModeChanged(int value)
 {
-	setScaleModeToRelative(value == 0 ? true : false);
+	setScaleModeToRelative(value == 0);
 
 	setModified(true);
 }
@@ -207,7 +207,7 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 
 bool ccColorScaleEditorDialog::isRelativeMode() const
 {
-	return (m_ui->scaleModeComboBox->currentIndex() == 0 ? true : false);
+	return (m_ui->scaleModeComboBox->currentIndex() == 0);
 }
 
 void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
@@ -525,7 +525,7 @@ QString ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet&
 			{
 				return "Expecting a numerical value before the text label";
 			}
-			else if (firstQuoteIndex > 0)
+			if (firstQuoteIndex > 0)
 			{
 				int secondQuoteIndex = line.lastIndexOf('"');
 				if (secondQuoteIndex == firstQuoteIndex)

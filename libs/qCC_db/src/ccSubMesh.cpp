@@ -168,11 +168,11 @@ CCCoreLib::GenericTriangle* ccSubMesh::_getTriangle(unsigned triIndex) // tempor
 	return nullptr;
 }
 
-void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
+void ccSubMesh::getTriangleVertices(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C) const
 {
-	if (m_associatedMesh && triIndex < size())
+	if (m_associatedMesh && triangleIndex < size())
 	{
-		m_associatedMesh->getTriangleVertices(getTriGlobalIndex(triIndex), A, B, C);
+		m_associatedMesh->getTriangleVertices(getTriGlobalIndex(triangleIndex), A, B, C);
 	}
 	else
 	{
@@ -181,10 +181,10 @@ void ccSubMesh::getTriangleVertices(unsigned triIndex, CCVector3& A, CCVector3& 
 	}
 }
 
-CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triIndex)
+CCCoreLib::VerticesIndexes* ccSubMesh::getTriangleVertIndexes(unsigned triangleIndex)
 {
-	if (m_associatedMesh && triIndex < size())
-		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triIndex));
+	if (m_associatedMesh && triangleIndex < size())
+		return m_associatedMesh->getTriangleVertIndexes(getTriGlobalIndex(triangleIndex));
 
 	// shouldn't happen
 	assert(false);
@@ -350,6 +350,7 @@ bool ccSubMesh::normalsShown() const
 #define CC_SUB_MESH_TRANSIENT_CONST_TEST(method) \
 	bool ccSubMesh::method() const \
 	{ \
+		assert(m_associatedMesh); \
 		return m_associatedMesh ? m_associatedMesh->method() : false; \
 	}
 
@@ -361,72 +362,71 @@ CC_SUB_MESH_TRANSIENT_CONST_TEST(hasMaterials);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTextures);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTriNormals);
 
-const ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
+bool ccSubMesh::hasUniqueMaterial()
 {
-	return m_associatedMesh ? m_associatedMesh->getMaterialSet() : nullptr;
+	// Despite overriding ccMesh, a submesh doesn't know how materials and per-triangle material indexes are modified.
+	// Thus we cannot trust the local m_hasUniqueMaterial optional, and we can only rely on the parent mesh's version.
+	return m_associatedMesh ? m_associatedMesh->hasUniqueMaterial() : false;
 }
 
-int ccSubMesh::getTriangleMtlIndex(unsigned triIndex) const
+ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
 {
-	return m_associatedMesh ? m_associatedMesh->getTriangleMtlIndex(getTriGlobalIndex(triIndex)) : -1;
+	assert(m_associatedMesh);
+	return m_associatedMesh->getMaterialSet();
+}
+
+int ccSubMesh::getTriangleMtlIndex(unsigned triangleIndex) const
+{
+	assert(m_associatedMesh);
+	return m_associatedMesh->getTriangleMtlIndex(getTriGlobalIndex(triangleIndex));
 }
 
 TextureCoordsContainer::Shared ccSubMesh::getTexCoordinatesTable() const
 {
-	return m_associatedMesh ? m_associatedMesh->getTexCoordinatesTable() : nullptr;
+	assert(m_associatedMesh);
+	return m_associatedMesh->getTexCoordinatesTable();
 }
 
-void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const
+void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, const TexCoords2D*& tx1, const TexCoords2D*& tx2, const TexCoords2D*& tx3) const
 {
-	if (m_associatedMesh && triIndex < size())
-	{
-		m_associatedMesh->getTriangleTexCoordinates(getTriGlobalIndex(triIndex), tx1, tx2, tx3);
-	}
-	else
-	{
-		// shouldn't happen
-		tx1 = tx2 = tx3 = nullptr;
-		assert(false);
-	}
+	assert(m_associatedMesh && triIndex < size());
+	m_associatedMesh->getTriangleTexCoordinates(getTriGlobalIndex(triIndex), tx1, tx2, tx3);
 }
 
 bool ccSubMesh::hasPerTriangleTexCoordIndexes() const
 {
-	return m_associatedMesh ? m_associatedMesh->hasPerTriangleTexCoordIndexes() : false;
+	assert(m_associatedMesh);
+	return m_associatedMesh->hasPerTriangleTexCoordIndexes();
 }
 
 void ccSubMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
 {
-	if (m_associatedMesh && triangleIndex < size())
-	{
-		m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
-	}
-	else
-	{
-		i1 = i2 = i3 = -1;
-	}
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
 }
 
-void ccSubMesh::getTriangleNormalIndexes(unsigned triIndex, int& i1, int& i2, int& i3) const
+void ccSubMesh::getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
 {
-	if (m_associatedMesh && triIndex < size())
-	{
-		m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triIndex), i1, i2, i3);
-	}
-	else
-	{
-		i1 = i2 = i3 = -1;
-	}
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleNormalIndexes(getTriGlobalIndex(triangleIndex), i1, i2, i3);
 }
 
-bool ccSubMesh::getTriangleNormals(unsigned triIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const
+void ccSubMesh::getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const
 {
-	return (m_associatedMesh && triIndex < size() ? m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triIndex), Na, Nb, Nc) : false);
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleCompressedNormals(getTriGlobalIndex(triangleIndex), Na, Nb, Nc);
+}
+
+void ccSubMesh::getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const
+{
+	assert(m_associatedMesh && triangleIndex < size());
+	m_associatedMesh->getTriangleNormals(getTriGlobalIndex(triangleIndex), Na, Nb, Nc);
 }
 
 NormsIndexesTableType::Shared ccSubMesh::getTriNormsTable() const
 {
-	return m_associatedMesh ? m_associatedMesh->getTriNormsTable() : nullptr;
+	assert(m_associatedMesh);
+	return m_associatedMesh->getTriNormsTable();
 }
 
 void ccSubMesh::clear(bool releaseMemory)
@@ -594,9 +594,9 @@ bool ccSubMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccSubMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccGenericMesh::fromFile_MeOnly(in, context))
 		return false;
 
 	// as the associated mesh can't be saved directly
@@ -605,11 +605,10 @@ bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	uint32_t meshUniqueID = 0;
 	if (in.read((char*)&meshUniqueID, 4) < 0)
 		return ReadError();
-	//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'm_associatedMesh' pointer!!!
-	*(uint32_t*)(&m_associatedMesh) = meshUniqueID;
+	context.incompleteEntities.insert(this, {LoadingContext::Dependency{meshUniqueID, LoadingContext::Dependency::SUBMESH_ASSOCIATED_MESH}});
 
 	// references (dataVersion>=29)
-	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, dataVersion, "triangle indexes"))
+	if (!ccSerializationHelper::GenericArrayFromFile<unsigned, 1, unsigned>(m_triIndexes, in, context.dataVersion, "triangle indexes"))
 		return ReadError();
 
 	return true;

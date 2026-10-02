@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DB_ROOT_HEADER
-#define CC_DB_ROOT_HEADER
 
 // Qt
 #include <QAbstractItemModel>
@@ -342,5 +341,3 @@ class ccDBRoot : public QAbstractItemModel
 	//! Last context menu pos
 	QPoint m_contextMenuPos;
 };
-
-#endif

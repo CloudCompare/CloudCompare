@@ -15,12 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "BinFilter.h"
-
-// Qt
-#include <QApplication>
-#include <QFileInfo>
-#include <QMessageBox>
+#include "../include/BinFilter.h"
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -30,6 +25,7 @@
 #include <ccFacet.h>
 #include <ccFlags.h>
 #include <ccGenericPointCloud.h>
+#include <ccGenericPrimitive.h>
 #include <ccHObjectCaster.h>
 #include <ccImage.h>
 #include <ccMaterialSet.h>
@@ -41,7 +37,12 @@
 #include <ccSensor.h>
 #include <ccSubMesh.h>
 
-// system
+// Qt
+#include <QApplication>
+#include <QFileInfo>
+#include <QMessageBox>
+
+// System
 #include <cassert>
 #include <cstring>
 #include <unordered_set>
@@ -144,21 +145,21 @@ static int ReadEntityHeader(QFile& in, unsigned& numberOfPoints, HeaderFlags& he
 	return 0;
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	s_lastSavedFileBinVersion = 0;
 
-	if (!root || filename.isNull())
+	if (!entity || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
 
 	QFile out(filename);
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Please wait... saving in progress"));
 		pDlg->setRange(0, 0);
@@ -168,7 +169,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 
 	// concurrent call, so that the progress dialog keeps refreshing
 	CC_FILE_ERROR result = ccBackgroundTask::Run([&]()
-	                                             { return BinFilter::SaveFileV2(out, root); });
+	                                             { return BinFilter::SaveFileV2(out, entity); });
 
 	return result;
 }
@@ -258,11 +259,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(image->getAssociatedSensor());
 		}
 
-		for (std::unordered_set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
+		for (const auto* dependency : dependencies)
 		{
-			if (!object->find((*it)->getUniqueID()))
+			if (!object->find(dependency->getUniqueID()))
 			{
-				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg((*it)->getName(), currentObject->getName()));
+				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependency->getName(), currentObject->getName()));
 				result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 			}
 		}
@@ -335,37 +336,39 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		return LoadFileV1(in, container, static_cast<unsigned>(firstBytes), parameters); // firstBytes == number of scans for V1 files!
 	}
-	else
-	{
-		// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
-		int flags = 0;
-		{
-			QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
-			bool  ok;
-			flags = QString(c).toInt(&ok);
-			if (!ok || flags > 8)
-			{
-				ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
-				return CC_FERR_WRONG_FILE_TYPE;
-			}
-		}
 
-		return BinFilter::LoadFileV2(in,
-		                             container,
-		                             flags,
-		                             parameters.alwaysDisplayLoadDialog,
-		                             parameters.parentWidget);
+	// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
+	int flags = 0;
+	{
+		QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
+		bool  ok;
+		flags = QString(c).toInt(&ok);
+		if (!ok || flags > 8)
+		{
+			ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
+			return CC_FERR_WRONG_FILE_TYPE;
+		}
 	}
+
+	return BinFilter::LoadFileV2(in,
+	                             container,
+	                             flags,
+	                             parameters.alwaysDisplayLoadDialog,
+	                             parameters.parentWidget);
 }
 
-inline bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
+static bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
 {
 	return object && object->getUniqueID() == uniqueID && object->isKindOf(expectedType);
 }
 
-ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::LoadedIDMap& oldToNewIDMap, unsigned oldUniqueID, CC_CLASS_ENUM expectedType)
+static ccHObject* FindRobust(ccHObject*                                               root,
+                             ccHObject*                                               source,
+                             const ccSerializableObject::LoadingContext::LoadedIDMap& oldToNewIDMap,
+                             unsigned                                                 oldUniqueID,
+                             CC_CLASS_ENUM                                            expectedType)
 {
-	ccObject::LoadedIDMap::const_iterator it = oldToNewIDMap.find(oldUniqueID);
+	auto it = oldToNewIDMap.find(oldUniqueID);
 	while (it != oldToNewIDMap.end() && it.key() == oldUniqueID)
 	{
 		unsigned uniqueID = it.value();
@@ -400,18 +403,726 @@ ccHObject* FindRobust(ccHObject* root, ccHObject* source, const ccObject::Loaded
 	return nullptr;
 }
 
-static bool ContinueAfterError(bool& forceLoadAfterError, bool couldBeAMemoryIssue = false)
+//! Context to tracker errors or events during the incomplete entities linking process
+struct IncompleteEntityLinkerContext
 {
-	if (!forceLoadAfterError)
+	IncompleteEntityLinkerContext(ccHObject*& _root, ccHObject::LoadingContext& loadingContext)
+	    : root(_root)
+	    , loadingContext(loadingContext)
+	    , incompleteEntity(nullptr)
+	    , dependencies()
+	    , result(CC_FERR_NO_ERROR)
+	    , checkErrors(true)
+	    , hasBrokenDependencies(false)
+	    , forceLoadAfterError(false)
 	{
-		// If forceLoadAfterError, it means we haven't asked the question yet, so let's do it
+	}
+
+	void setIncompleteEntity(ccHObject*                                                           _incompleteEntity,
+	                         const std::vector<ccSerializableObject::LoadingContext::Dependency>& _dependencies)
+	{
+		incompleteEntity = _incompleteEntity;
+		dependencies     = _dependencies;
+	}
+
+	//! Detach and delete an object from the DB (and its children from the loading context if the parent was incomplete)
+	void deleteIncompleteEntity()
+	{
+		if (!incompleteEntity)
+		{
+			assert(false);
+			return;
+		}
+
+		// make sure to remove any children from the loading context if the parent was incomplete
+		for (auto it = loadingContext.incompleteEntities.begin(); root && it != loadingContext.incompleteEntities.end(); ++it)
+		{
+			if (it.key() != incompleteEntity && !it.value().empty())
+			{
+				ccHObject* otherIncompleteEntity = static_cast<ccHObject*>(it.key());
+				if (incompleteEntity->isAncestorOf(otherIncompleteEntity))
+				{
+					it.value().clear();
+				}
+			}
+		}
+
+		auto* parent = incompleteEntity->getParent();
+		if (parent)
+		{
+			// detach the object from its parent (and remove the dependency link if any)
+			parent->removeDependencyWith(incompleteEntity);
+			parent->removeChild(incompleteEntity);
+		}
+		else if (root == incompleteEntity)
+		{
+			root = nullptr;
+		}
+		delete incompleteEntity;
+		incompleteEntity = nullptr;
+	}
+
+	ccHObject*&                root;           //!< Reference to the root of the loaded DB
+	ccHObject::LoadingContext& loadingContext; //!< Reference to the loading context
+
+	ccHObject*                                                    incompleteEntity; //!< Reference to the incomplete entity (we may want to delete it if we can't find its dependencies)
+	std::vector<ccSerializableObject::LoadingContext::Dependency> dependencies;     //!< Copy of the dependencies for the current incomplete entity
+
+	CC_FILE_ERROR result; //!< Result of the loading process
+
+	bool checkErrors;           //!< Whether we should check for errors or not
+	bool hasBrokenDependencies; //!< Whether we have detected broken dependencies or not
+	bool forceLoadAfterError;   //!< Whether we should force loading the entity after an error (we may want to ask the user if he wants to continue loading the file or not)
+};
+
+static bool ContinueAfterError(IncompleteEntityLinkerContext& context, bool couldBeAMemoryIssue = false)
+{
+	if (!context.forceLoadAfterError)
+	{
+		// If forceLoadAfterError is false, it means we haven't asked the question yet, so let's do it
 		if (QMessageBox::Yes == QMessageBox::critical(nullptr, QObject::tr("Reading error"), couldBeAMemoryIssue ? "The file couldn't be completely loaded, but some entities were loaded.\nDo you want to take the risk to load them? (CC could crash)" : "The file seems corrupted, but some entities were loaded.\nDo you want to take the risk to load them? (CC could crash)", QMessageBox::Yes, QMessageBox::No))
 		{
-			forceLoadAfterError = true;
+			context.forceLoadAfterError = true;
 		}
 	}
 
-	return forceLoadAfterError;
+	return context.forceLoadAfterError;
+}
+
+static void HandleMeshGroup(IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+	ccLog::Warning(QString("[BIN] Mesh groups are deprecated! Entity %1 should be ignored...").arg(linkerContext.incompleteEntity->getName()));
+}
+
+static void HandleSubMesh(IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccSubMesh* subMesh = ccHObjectCaster::ToSubMesh(linkerContext.incompleteEntity);
+	if (!subMesh)
+	{
+		assert(false);
+		return;
+	}
+
+	bool hasAssociatedMesh = false;
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::SUBMESH_ASSOCIATED_MESH:
+		{
+			ccHObject* mesh = FindRobust(linkerContext.root, subMesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::MESH);
+			if (mesh)
+			{
+				subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh));
+				hasAssociatedMesh = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(depIt->objectID).arg(subMesh->getName()));
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for sub-mesh '%2' in the file!").arg(depIt->type).arg(subMesh->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasAssociatedMesh)
+	{
+		ccLog::Warning(QString("[BIN] No associated mesh found for sub-mesh '%1' in the file!").arg(subMesh->getName()));
+		linkerContext.hasBrokenDependencies = true;
+
+		if (!ContinueAfterError(linkerContext))
+		{
+			linkerContext.deleteIncompleteEntity();
+			linkerContext.result           = CC_FERR_MALFORMED_FILE;
+			linkerContext.incompleteEntity = nullptr;
+			return;
+		}
+
+		auto* subMeshParent = subMesh->getParent();
+		if (subMeshParent && subMeshParent->isA(CC_TYPES::MESH))
+		{
+			ccLog::Warning(QString("[BIN] Automatically replacing it by its parent '%1'...").arg(subMeshParent->getName()));
+			subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMeshParent));
+		}
+		else
+		{
+			linkerContext.deleteIncompleteEntity();
+			linkerContext.incompleteEntity = nullptr;
+		}
+	}
+}
+
+static void HandleMeshOrPrimitive(IncompleteEntityLinkerContext& linkerContext,
+                                  ccHObject*                     orphans)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccMesh* mesh = ccHObjectCaster::ToMesh(linkerContext.incompleteEntity);
+	if (!mesh)
+	{
+		assert(false);
+		return;
+	}
+
+	if (mesh->isKindOf(CC_TYPES::PRIMITIVE))
+	{
+		auto* vertices = mesh->getAssociatedCloud();
+		if (vertices)
+		{
+			mesh->setAssociatedCloud(nullptr);
+			mesh->removeChild(vertices);
+		}
+	}
+
+	bool                           hasAssociatedVertices = false;
+	ccMaterialSet::Shared          materials;
+	NormsIndexesTableType::Shared  triNormsTable;
+	TextureCoordsContainer::Shared texCoordsTable;
+
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::MESH_VERTICES_CLOUD:
+		{
+			ccHObject* cloud = FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::POINT_CLOUD);
+			if (cloud)
+			{
+				mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+				hasAssociatedVertices = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(depIt->objectID).arg(mesh->getName()));
+				if (mesh->isKindOf(CC_TYPES::PRIMITIVE))
+				{
+					static_cast<ccGenericPrimitive*>(mesh)->updateRepresentation();
+				}
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::MESH_MATERIALS:
+		{
+			materials.reset(static_cast<ccMaterialSet*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::MATERIAL_SET)));
+			if (materials)
+			{
+				mesh->setMaterialSet(materials);
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(depIt->objectID).arg(mesh->getName()));
+				linkerContext.hasBrokenDependencies = true;
+				mesh->showMaterials(false);
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::MESH_TRI_NORMALS:
+		{
+			triNormsTable.reset(static_cast<NormsIndexesTableType*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::NORMAL_INDEXES_ARRAY)));
+			if (triNormsTable)
+			{
+				mesh->setTriNormsTable(triNormsTable);
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(depIt->objectID).arg(mesh->getName()));
+				linkerContext.hasBrokenDependencies = true;
+				mesh->showTriNorms(false);
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::MESH_TEXTURE_COORDS:
+		{
+			texCoordsTable.reset(static_cast<TextureCoordsContainer*>(FindRobust(linkerContext.root, mesh, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::TEX_COORDS_ARRAY)));
+			if (texCoordsTable)
+			{
+				mesh->setTexCoordinatesTable(texCoordsTable);
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(depIt->objectID).arg(mesh->getName()));
+				linkerContext.hasBrokenDependencies = true;
+				mesh->showMaterials(false);
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for mesh '%2' in the file!").arg(depIt->type).arg(mesh->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasAssociatedVertices)
+	{
+		linkerContext.deleteIncompleteEntity();
+		linkerContext.incompleteEntity = nullptr;
+		if (!ContinueAfterError(linkerContext))
+		{
+			linkerContext.result = CC_FERR_MALFORMED_FILE;
+		}
+		return;
+	}
+
+	if (mesh && linkerContext.checkErrors)
+	{
+		ccGenericPointCloud* pc = mesh->getAssociatedCloud();
+		assert(pc);
+
+		unsigned faceCount = mesh->size();
+		unsigned vertCount = pc->size();
+
+		for (unsigned i = 0; i < faceCount; ++i)
+		{
+			const CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
+			if (tri->i1 >= vertCount || tri->i2 >= vertCount || tri->i3 >= vertCount)
+			{
+				ccLog::Warning(QString("[BIN] File is corrupted: some vertices are missing for mesh '%1'!").arg(mesh->getName()));
+
+				if (mesh->isAncestorOf(pc) && orphans)
+				{
+					pc->setName(mesh->getName() + QString(".") + pc->getName());
+					orphans->addChild(pc);
+				}
+				pc->setVisible(true);
+				mesh->detachAllChildren();
+
+				if (materials && orphans)
+				{
+					materials->setName(mesh->getName() + QString(".") + materials->getName());
+					orphans->addChild(materials.get());
+				}
+				if (triNormsTable && orphans)
+				{
+					triNormsTable->setName(mesh->getName() + QString(".") + triNormsTable->getName());
+					orphans->addChild(triNormsTable.get());
+				}
+				if (texCoordsTable && orphans)
+				{
+					texCoordsTable->setName(mesh->getName() + QString(".") + texCoordsTable->getName());
+					orphans->addChild(texCoordsTable.get());
+				}
+
+				linkerContext.deleteIncompleteEntity();
+				linkerContext.incompleteEntity = nullptr;
+				break;
+			}
+		}
+	}
+}
+
+static void HandlePolyline(
+    IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccPolyline* poly = ccHObjectCaster::ToPolyline(linkerContext.incompleteEntity);
+	if (!poly)
+	{
+		assert(false);
+		return;
+	}
+
+	bool hasAssociatedVertices = false;
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::POLYLINE_VERTICES_CLOUD:
+		{
+			ccHObject* cloudEntity = FindRobust(linkerContext.root, poly, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::POINT_CLOUD);
+			if (cloudEntity)
+			{
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
+				poly->setAssociatedCloud(cloud);
+				hasAssociatedVertices = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(depIt->objectID).arg(poly->getName()));
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for polyline '%2' in the file!").arg(depIt->type).arg(poly->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasAssociatedVertices)
+	{
+		linkerContext.hasBrokenDependencies = true;
+		linkerContext.deleteIncompleteEntity();
+		linkerContext.incompleteEntity = nullptr;
+		if (!ContinueAfterError(linkerContext))
+		{
+			linkerContext.result = CC_FERR_MALFORMED_FILE;
+		}
+		return;
+	}
+
+	if (poly)
+	{
+		unsigned pointCount = poly->getAssociatedCloud()->size();
+		for (unsigned i = 0; i < poly->size(); ++i)
+		{
+			if (poly->getPointGlobalIndex(i) >= pointCount)
+			{
+				ccLog::Warning(QString("[BIN] Polyline '%1' (ID=%2) seems corrupted!").arg(poly->getName()).arg(poly->getUniqueID()));
+				linkerContext.deleteIncompleteEntity();
+				linkerContext.incompleteEntity = nullptr;
+				break;
+			}
+		}
+	}
+}
+
+static void HandleSensor(IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccSensor* sensor = ccHObjectCaster::ToSensor(linkerContext.incompleteEntity);
+	if (!sensor)
+	{
+		assert(false);
+		return;
+	}
+
+	bool hasAssociatedBuffer = false;
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::SENSOR_POSITIONS_BUFFER:
+		{
+			hasAssociatedBuffer = true;
+			ccHObject* buffer   = FindRobust(linkerContext.root, sensor, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::TRANS_BUFFER);
+			if (buffer)
+			{
+				sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find transformation buffer (ID=%1) for sensor '%2' in the file!").arg(depIt->objectID).arg(sensor->getName()));
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for sensor '%2' in the file!").arg(depIt->type).arg(sensor->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasAssociatedBuffer)
+	{
+		assert(false);
+		ccLog::Warning(QString("[BIN] Missing transformation buffer for sensor '%1' in the file!").arg(sensor->getName()));
+	}
+}
+
+static void HandleLabel2D(
+    IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	cc2DLabel* label = ccHObjectCaster::To2DLabel(linkerContext.incompleteEntity);
+	if (!label)
+	{
+		assert(false);
+		return;
+	}
+
+	std::vector<cc2DLabel::PickedPoint> correctedPickedPoints;
+	correctedPickedPoints.reserve(linkerContext.dependencies.size());
+	for (size_t index = 0; index < linkerContext.dependencies.size(); ++index)
+	{
+		const auto& dep = linkerContext.dependencies[index];
+		switch (dep.type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::LABEL_SOURCE_CLOUD:
+		{
+			const cc2DLabel::PickedPoint& pp    = label->getPickedPoint(static_cast<unsigned>(index));
+			ccHObject*                    cloud = FindRobust(linkerContext.root, label, linkerContext.loadingContext.oldToNewIDMap, dep.objectID, CC_TYPES::POINT_CLOUD);
+			if (cloud)
+			{
+				ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
+				assert(genCloud && genCloud->size() > pp.index);
+				correctedPickedPoints.emplace_back(genCloud, pp.index, pp.entityCenterPoint);
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find cloud (ID=%1) associated to label ID=%2 in the file!").arg(dep.objectID).arg(label->getUniqueID()));
+				index = linkerContext.dependencies.size();
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::LABEL_SOURCE_MESH:
+		{
+			const cc2DLabel::PickedPoint& pp   = label->getPickedPoint(static_cast<unsigned>(index));
+			ccHObject*                    mesh = FindRobust(linkerContext.root, label, linkerContext.loadingContext.oldToNewIDMap, dep.objectID, CC_TYPES::MESH);
+			if (mesh)
+			{
+				ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
+				assert(genMesh && genMesh->size() > pp.index);
+				correctedPickedPoints.emplace_back(genMesh, pp.index, pp.uv, pp.entityCenterPoint);
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find mesh (ID=%1) associated to label ID=%2 in the file!").arg(dep.objectID).arg(label->getUniqueID()));
+				index = linkerContext.dependencies.size();
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for label '%2' in the file!").arg(dep.type).arg(label->getName()));
+			assert(false);
+			index = linkerContext.dependencies.size();
+			break;
+		}
+	}
+
+	if (correctedPickedPoints.size() == label->size())
+	{
+		bool    visible      = label->isVisible();
+		QString originalName = label->getRawName();
+		label->clear(true);
+		for (const cc2DLabel::PickedPoint& cpp : correctedPickedPoints)
+		{
+			if (cpp._cloud)
+			{
+				label->addPickedPoint(cpp._cloud, cpp.index, cpp.entityCenterPoint);
+			}
+			else if (cpp._mesh)
+			{
+				label->addPickedPoint(cpp._mesh, cpp.index, cpp.uv, cpp.entityCenterPoint);
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+		label->setVisible(visible);
+		label->setName(originalName);
+	}
+	else
+	{
+		linkerContext.hasBrokenDependencies = true;
+		ccLog::Warning(QString("[BIN] Label '%1' (ID=%2) seems corrupted!").arg(label->getName()).arg(label->getUniqueID()));
+		linkerContext.deleteIncompleteEntity();
+		linkerContext.incompleteEntity = nullptr;
+		if (!ContinueAfterError(linkerContext))
+		{
+			linkerContext.result = CC_FERR_MALFORMED_FILE;
+		}
+	}
+}
+
+static void HandleFacet(
+    IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccFacet* facet = ccHObjectCaster::ToFacet(linkerContext.incompleteEntity);
+	if (!facet)
+	{
+		assert(false);
+		return;
+	}
+
+	bool hasOriginPoints    = false;
+	bool hasContourVertices = false;
+	bool hasContourPolyline = false;
+	bool hasPolygon         = false;
+
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::FACET_ORIGIN_POINTS:
+		{
+			ccHObject* cloud = FindRobust(linkerContext.root, facet, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::POINT_CLOUD);
+			if (cloud)
+			{
+				facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
+				hasOriginPoints = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(depIt->objectID).arg(facet->getName()));
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::FACET_CONTOUR_VERTICES:
+		{
+			ccHObject* cloud = FindRobust(linkerContext.root, facet, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::POINT_CLOUD);
+			if (cloud)
+			{
+				facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
+				hasContourVertices = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find contour points (ID=%1) for facet '%2' in the file!").arg(depIt->objectID).arg(facet->getName()));
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::FACET_CONTOUR_POLYLINE:
+		{
+			ccHObject* poly = FindRobust(linkerContext.root, facet, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::POLY_LINE);
+			if (poly)
+			{
+				facet->setContour(ccHObjectCaster::ToPolyline(poly));
+				hasContourPolyline = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find contour polyline (ID=%1) for facet '%2' in the file!").arg(depIt->objectID).arg(facet->getName()));
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		case ccSerializableObject::LoadingContext::Dependency::FACET_POLYGON_MESH:
+		{
+			ccHObject* poly = FindRobust(linkerContext.root, facet, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::MESH);
+			if (poly)
+			{
+				facet->setPolygon(ccHObjectCaster::ToMesh(poly));
+				hasPolygon = true;
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(depIt->objectID).arg(facet->getName()));
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for facet '%2' in the file!").arg(depIt->type).arg(facet->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasOriginPoints && !hasContourVertices && !hasContourPolyline && !hasPolygon)
+	{
+		linkerContext.deleteIncompleteEntity();
+		linkerContext.incompleteEntity = nullptr;
+		if (!ContinueAfterError(linkerContext))
+		{
+			linkerContext.result = CC_FERR_MALFORMED_FILE;
+		}
+	}
+}
+
+static void HandleImage(
+    IncompleteEntityLinkerContext& linkerContext)
+{
+	if (!linkerContext.incompleteEntity)
+	{
+		assert(false);
+		return;
+	}
+
+	ccImage* image = ccHObjectCaster::ToImage(linkerContext.incompleteEntity);
+	if (!image)
+	{
+		assert(false);
+		return;
+	}
+
+	bool hasAssociatedSensor = false;
+
+	for (auto depIt = linkerContext.dependencies.begin(); depIt != linkerContext.dependencies.end(); ++depIt)
+	{
+		switch (depIt->type)
+		{
+		case ccSerializableObject::LoadingContext::Dependency::IMAGE_SENSOR:
+		{
+			hasAssociatedSensor = true;
+			ccHObject* sensor   = FindRobust(linkerContext.root, image, linkerContext.loadingContext.oldToNewIDMap, depIt->objectID, CC_TYPES::CAMERA_SENSOR);
+			if (sensor)
+			{
+				image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));
+			}
+			else
+			{
+				ccLog::Warning(QString("[BIN] Couldn't find associated sensor (ID=%1) for image '%2' in the file!").arg(depIt->objectID).arg(image->getName()));
+				ccHObject::Container children;
+				if (image->filterChildren(children, false, CC_TYPES::CAMERA_SENSOR, true) > 0)
+				{
+					ccLog::Warning(QString("[BIN] Automatically replacing it by its child '%1'...").arg(children.front()->getName()));
+					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(children.front()));
+				}
+				linkerContext.hasBrokenDependencies = true;
+			}
+		}
+		break;
+
+		default:
+			ccLog::Warning(QString("[BIN] Unexpected dependency type (%1) for image '%2' in the file!").arg(depIt->type).arg(image->getName()));
+			assert(false);
+			break;
+		}
+	}
+
+	if (!hasAssociatedSensor)
+	{
+		assert(false);
+		ccLog::Warning(QString("[BIN] No associated sensor found for image '%1' in the file!").arg(image->getName()));
+	}
 }
 
 CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, bool parallel, QWidget* parentWidget /*=nullptr*/)
@@ -453,24 +1164,25 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parallel && parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Loading: %1").arg(in.fileName()));
 		pDlg->setRange(0, 0);
 		pDlg->show();
 	}
 
+	ccHObject::LoadingContext loadingContext(static_cast<short>(binVersion), flags);
+
 	if (classID == CC_TYPES::CUSTOM_H_OBJECT)
 	{
 		// store seeking position
 		size_t original_pos = in.pos();
 		// we need to load it as plain ccCustomHobject
-		ccHObject::LoadedIDMap oldToNewIDMap;
-		root->fromFileNoChildren(in, static_cast<short>(binVersion), flags, oldToNewIDMap); // this will load it, should be pretty quick
-		in.seek(original_pos);                                                              // back to the beginning of the file
+		root->fromFileNoChildren(in, loadingContext); // this will load it, should be pretty quick
+		in.seek(original_pos);                        // back to the beginning of the file
 
 		QString classId  = root->getMetaData("class_name").toString();
 		QString pluginId = root->getMetaData("plugin_name").toString();
@@ -492,21 +1204,21 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		}
 	}
 
-	bool                   success = false;
-	ccHObject::LoadedIDMap oldToNewIDMap;
+	bool success = false;
 
 	if (parallel)
 	{
 		// concurrent call in a separate thread, so that the progress dialog keeps refreshing
 		success = ccBackgroundTask::Run([&]()
-		                                { return root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap); });
+		                                { return root->fromFile(in, loadingContext); });
 	}
 	else
 	{
-		success = root->fromFile(in, static_cast<short>(binVersion), flags, oldToNewIDMap);
+		success = root->fromFile(in, loadingContext);
 	}
 
-	bool forceLoadAfterError = false;
+	IncompleteEntityLinkerContext linkerContext(root, loadingContext);
+
 	if (!success)
 	{
 		// delete root; //DGM: can't delete it, too dangerous (bad pointers ;)
@@ -514,509 +1226,88 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 
 		if (!root->isA(CC_TYPES::HIERARCHY_OBJECT) || root->getChildrenNumber() != 0)
 		{
-			ContinueAfterError(forceLoadAfterError, true);
+			ContinueAfterError(linkerContext, true);
 		}
 
-		if (!forceLoadAfterError)
+		if (!linkerContext.forceLoadAfterError)
 		{
 			return CC_FERR_CONSOLE_ERROR;
 		}
 	}
 
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	// re-link incomplete objects (and check errors)
+	std::unique_ptr<ccHObject> orphans(new ccHObject("Orphans (CORRUPTED FILE)"));
 
-	// re-link objects (and check errors)
-	bool                 checkErrors = true;
-	ccHObject*           orphans     = new ccHObject("Orphans (CORRUPTED FILE)");
-	ccHObject::Container toCheck;
-	toCheck.push_back(root);
-	while (!toCheck.empty())
+	for (auto it = loadingContext.incompleteEntities.begin(); root && it != loadingContext.incompleteEntities.end(); ++it)
 	{
-		ccHObject* currentObject = toCheck.back();
-		toCheck.pop_back();
-
-		assert(currentObject);
-
-		// we check objects that have links to other entities (meshes, polylines, etc.)
-		if (currentObject->isKindOf(CC_TYPES::MESH))
+		// initialize the linker context for the current incomplete entity
 		{
-			// specific case: mesh groups are deprecated!
-			if (currentObject->isA(CC_TYPES::MESH_GROUP))
+			ccHObject* incompleteEntity = static_cast<ccHObject*>(it.key());
+			assert(incompleteEntity);
+
+			std::vector<ccSerializableObject::LoadingContext::Dependency>& dependencies = it.value();
+			if (dependencies.empty())
 			{
-				// TODO
-				ccLog::Warning(QString("[BIN] Mesh groups are deprecated! Entity %1 should be ignored...").arg(currentObject->getName()));
-			}
-			else if (currentObject->isA(CC_TYPES::SUB_MESH))
-			{
-				ccSubMesh* subMesh = ccHObjectCaster::ToSubMesh(currentObject);
-
-				// normally, the associated mesh should be the sub-mesh's parent!
-				// however we have its ID so we will look for it just to be sure
-				intptr_t meshID = (intptr_t)subMesh->getAssociatedMesh();
-				if (meshID > 0)
-				{
-					ccHObject* mesh = FindRobust(root, subMesh, oldToNewIDMap, meshID, CC_TYPES::MESH);
-					if (mesh)
-					{
-						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh), false); //'false' because previous mesh is not null (= real mesh ID)!!!
-					}
-					else
-					{
-						// we have a problem here ;)
-						// normally, the associated mesh should be the sub-mesh's parent!
-						if (subMesh->getParent() && subMesh->getParent()->isA(CC_TYPES::MESH))
-						{
-							subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMesh->getParent()), false); //'false' because previous mesh is not null (= real mesh ID)!!!
-						}
-						else
-						{
-							subMesh->setAssociatedMesh(nullptr, false); //'false' because previous mesh is not null (= real mesh ID)!!!
-							// DGM: can't delete it, too dangerous (bad pointers ;)
-							// delete subMesh;
-							ccLog::Warning(QString("[BIN] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(meshID).arg(subMesh->getName()));
-							if (!ContinueAfterError(forceLoadAfterError))
-							{
-								return CC_FERR_MALFORMED_FILE;
-							}
-						}
-					}
-				}
-			}
-			else if (currentObject->isA(CC_TYPES::MESH) || currentObject->isKindOf(CC_TYPES::PRIMITIVE)) // CC_TYPES::MESH or CC_TYPES::PRIMITIVE!
-			{
-				ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
-				assert(mesh);
-
-				// vertices
-				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
-
-				if (cloudID > 0)
-				{
-					ccHObject* cloud = FindRobust(root, mesh, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-					if (cloud)
-					{
-						ccGenericPointCloud* genericCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
-						assert(genericCloud);
-						mesh->setAssociatedCloud(genericCloud, false); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
-					}
-					else
-					{
-						// we have a problem here ;)
-						mesh->setAssociatedCloud(nullptr, false); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
-						if (mesh->getMaterialSet())
-						{
-							mesh->setMaterialSet(nullptr, false);
-						}
-						// DGM: can't delete it, too dangerous (bad pointers ;)
-						// delete mesh;
-						if (mesh->getParent())
-						{
-							mesh->getParent()->removeDependencyWith(mesh);
-							mesh->getParent()->removeChild(mesh);
-						}
-						ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(cloudID).arg(mesh->getName()));
-						if (root == mesh && !ContinueAfterError(forceLoadAfterError))
-						{
-							return CC_FERR_MALFORMED_FILE;
-						}
-						currentObject = mesh = nullptr;
-					}
-				}
-				else
-				{
-					ccLog::Warning(QString("[BIN] Mesh '%1' has no vertices! It will be ignored.").arg(mesh->getName()));
-					if (mesh->getParent())
-					{
-						mesh->getParent()->removeChild(mesh);
-					}
-					else
-					{
-						if (root == mesh)
-						{
-							delete mesh;
-							if (!ContinueAfterError(forceLoadAfterError))
-							{
-								return CC_FERR_MALFORMED_FILE;
-							}
-						}
-						else
-						{
-							// we'll try to live with that
-							delete mesh;
-						}
-					}
-					currentObject = mesh = nullptr;
-				}
-
-				if (mesh)
-				{
-					// materials
-					ccHObject* materials = nullptr;
-					intptr_t   matSetID  = (intptr_t)mesh->getMaterialSet().get();
-					if (matSetID > 0)
-					{
-						materials = FindRobust(root, mesh, oldToNewIDMap, matSetID, CC_TYPES::MATERIAL_SET);
-						if (materials)
-						{
-							mesh->setMaterialSet(ccMaterialSet::Shared(static_cast<ccMaterialSet*>(materials)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
-						}
-						else
-						{
-							// we have a (less severe) problem here ;)
-							mesh->setMaterialSet(nullptr, false);
-							mesh->showMaterials(false);
-							ccLog::Warning(QString("[BIN] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
-							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-						}
-					}
-					// per-triangle normals
-					ccHObject* triNormsTable   = nullptr;
-					intptr_t   triNormsTableID = (intptr_t)mesh->getTriNormsTable().get();
-					if (triNormsTableID > 0)
-					{
-						triNormsTable = FindRobust(root, mesh, oldToNewIDMap, triNormsTableID, CC_TYPES::NORMAL_INDEXES_ARRAY);
-						if (triNormsTable)
-						{
-							mesh->setTriNormsTable(NormsIndexesTableType::Shared(static_cast<NormsIndexesTableType*>(triNormsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
-						}
-						else
-						{
-							// we have a (less severe) problem here ;)
-							mesh->setTriNormsTable(nullptr, false);
-							mesh->showTriNorms(false);
-							ccLog::Warning(QString("[BIN] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
-							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-						}
-					}
-					// per-triangle texture coordinates
-					ccHObject* texCoordsTable  = nullptr;
-					intptr_t   texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable().get();
-					if (texCoordArrayID > 0)
-					{
-						texCoordsTable = FindRobust(root, mesh, oldToNewIDMap, texCoordArrayID, CC_TYPES::TEX_COORDS_ARRAY);
-						if (texCoordsTable)
-						{
-							mesh->setTexCoordinatesTable(TextureCoordsContainer::Shared(static_cast<TextureCoordsContainer*>(texCoordsTable)), false); // TODO FIXME: FindRobust should return a ccHObject::Shared instead of a raw pointer!
-						}
-						else
-						{
-							// we have a (less severe) problem here ;)
-							mesh->setTexCoordinatesTable(nullptr, false);
-							ccLog::Warning(QString("[BIN] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
-							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-						}
-					}
-
-					if (checkErrors)
-					{
-						ccGenericPointCloud* pc        = mesh->getAssociatedCloud();
-						unsigned             faceCount = mesh->size();
-						unsigned             vertCount = pc->size();
-						for (unsigned i = 0; i < faceCount; ++i)
-						{
-							const CCCoreLib::VerticesIndexes* tri = mesh->getTriangleVertIndexes(i);
-							if (tri->i1 >= vertCount
-							    || tri->i2 >= vertCount
-							    || tri->i3 >= vertCount)
-							{
-								ccLog::Warning(QString("[BIN] File is corrupted: missing vertices for mesh '%1'!").arg(mesh->getName()));
-
-								// add cloud to the 'orphans' set
-								pc->setName(mesh->getName() + QString(".") + pc->getName());
-								orphans->addChild(pc);
-								if (texCoordsTable)
-								{
-									texCoordsTable->setName(mesh->getName() + QString(".") + texCoordsTable->getName());
-									orphans->addChild(texCoordsTable);
-								}
-								if (triNormsTable)
-								{
-									triNormsTable->setName(mesh->getName() + QString(".") + triNormsTable->getName());
-									orphans->addChild(triNormsTable);
-								}
-								if (materials)
-								{
-									materials->setName(mesh->getName() + QString(".") + materials->getName());
-									orphans->addChild(materials);
-								}
-
-								// delete corrupted mesh
-								mesh->setMaterialSet(nullptr, false);
-								mesh->setTriNormsTable(nullptr, false);
-								mesh->setTexCoordinatesTable(nullptr, false);
-								if (mesh->getParent())
-								{
-									mesh->getParent()->removeChild(mesh);
-								}
-								currentObject = mesh = nullptr;
-
-								break;
-							}
-						}
-					}
-				}
-			}
-		}
-		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
-		{
-			ccPolyline* poly    = ccHObjectCaster::ToPolyline(currentObject);
-			intptr_t    cloudID = (intptr_t)poly->getAssociatedCloud();
-
-			poly->CCCoreLib::Polyline::setAssociatedCloud(nullptr); // we have to bypass the automatic removal of flags, as the current vertices pointer is 'invalid'
-
-			ccHObject* cloudEntity = FindRobust(root, poly, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-			if (cloudEntity)
-			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(cloudEntity);
-				poly->setAssociatedCloud(cloud);
-
-				// now check the indexes
-				unsigned pointCount = cloud->size();
-				for (unsigned i = 0; i < poly->size(); ++i)
-				{
-					if (poly->getPointGlobalIndex(i) >= pointCount)
-					{
-						ccLog::Warning(QString("[BIN] Polyline '%1' (ID=%2) seems corrupted!").arg(poly->getName()).arg(poly->getUniqueID()));
-						delete poly;
-						currentObject = nullptr;
-						break;
-					}
-				}
-			}
-			else
-			{
-				// we have a problem here ;)
-				poly->setAssociatedCloud(nullptr);
-				// DGM: can't delete it, too dangerous (bad pointers ;)
-				// delete root;
-				currentObject = nullptr;
-				ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(cloudID).arg(poly->getName()));
-				if (!ContinueAfterError(forceLoadAfterError))
-				{
-					return CC_FERR_MALFORMED_FILE;
-				}
-			}
-		}
-		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
-		{
-			ccSensor* sensor   = ccHObjectCaster::ToSensor(currentObject);
-			intptr_t  bufferID = (intptr_t)sensor->getPositions();
-			if (bufferID > 0)
-			{
-				ccHObject* buffer = FindRobust(root, sensor, oldToNewIDMap, bufferID, CC_TYPES::TRANS_BUFFER);
-				if (buffer)
-				{
-					sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
-				}
-				else
-				{
-					// we have a problem here ;)
-					sensor->setPositions(nullptr);
-
-					// DGM: can't delete it, too dangerous (bad pointers ;)
-					// delete root;
-
-					currentObject = nullptr;
-					ccLog::Warning(QString("[BIN] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
-
-					// positions are optional, so we can simply set them to nullptr and go ahead, we do not need to return.
-					// return CC_FERR_MALFORMED_FILE;
-				}
-			}
-		}
-		else if (currentObject->isA(CC_TYPES::LABEL_2D))
-		{
-			cc2DLabel*                          label = ccHObjectCaster::To2DLabel(currentObject);
-			std::vector<cc2DLabel::PickedPoint> correctedPickedPoints;
-			// we must check all label 'points'!
-			bool invalidLabel = false;
-			for (unsigned i = 0; !invalidLabel && i < label->size(); ++i)
-			{
-				const cc2DLabel::PickedPoint& pp = label->getPickedPoint(i);
-				if (pp._cloud)
-				{
-					intptr_t   cloudID = (intptr_t)pp._cloud;
-					ccHObject* cloud   = FindRobust(root, label, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-					if (cloud)
-					{
-						ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
-						assert(genCloud->size() > pp.index);
-						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud, pp.index, pp.entityCenterPoint));
-					}
-					else
-					{
-						// we have a problem here ;)
-						ccLog::Warning(QString("[BIN] Couldn't find cloud (ID=%1) associated to label ID=%2 in the file!").arg(cloudID).arg(label->getUniqueID())); // we can't call getName as it relies on the cloud/mesh pointers!
-						if (label->getParent())
-						{
-							label->getParent()->removeChild(label);
-						}
-						// DGM: can't delete it, too dangerous (bad pointers ;)
-						// delete label;
-						currentObject = label = nullptr;
-						invalidLabel          = true;
-						break;
-					}
-				}
-				else if (pp._mesh)
-				{
-					intptr_t   meshID = (intptr_t)pp._mesh;
-					ccHObject* mesh   = FindRobust(root, label, oldToNewIDMap, meshID, CC_TYPES::MESH);
-					if (mesh)
-					{
-						ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
-						assert(genMesh->size() > pp.index);
-						correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genMesh, pp.index, pp.uv, pp.entityCenterPoint));
-					}
-					else
-					{
-						// we have a problem here ;)
-						ccLog::Warning(QString("[BIN] Couldn't find mesh (ID=%1) associated to label ID=%2 in the file!").arg(meshID).arg(label->getUniqueID())); // we can't call getName as it relies on the cloud/mesh pointers!
-						if (label->getParent())
-						{
-							label->getParent()->removeChild(label);
-						}
-						// DGM: can't delete it, too dangerous (bad pointers ;)
-						// delete label;
-						currentObject = label = nullptr;
-						invalidLabel          = true;
-						break;
-					}
-				}
+				// means the entity has already been processed or has been deleted already (see IncompleteEntityLinkerContext::deleteIncompleteEntity())
+				continue;
 			}
 
-			if (label) // correct label data
-			{
-				assert(correctedPickedPoints.size() == label->size());
-				bool    visible = label->isVisible();
-				QString originalName(label->getRawName());
-				label->clear(true);
-				for (const cc2DLabel::PickedPoint& cpp : correctedPickedPoints)
-				{
-					if (cpp._cloud)
-					{
-						label->addPickedPoint(cpp._cloud, cpp.index, cpp.entityCenterPoint);
-					}
-					else if (cpp._mesh)
-					{
-						label->addPickedPoint(cpp._mesh, cpp.index, cpp.uv, cpp.entityCenterPoint);
-					}
-				}
-				label->setVisible(visible);
-				label->setName(originalName);
-			}
-		}
-		else if (currentObject->isA(CC_TYPES::FACET))
-		{
-			ccFacet* facet = ccHObjectCaster::ToFacet(currentObject);
-
-			// origin points
-			{
-				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
-				if (cloudID > 0)
-				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
-					{
-						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
-					}
-					else
-					{
-						// we have a problem here ;)
-						facet->setOriginPoints(nullptr);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
-					}
-				}
-			}
-			// contour points
-			{
-				intptr_t cloudID = (intptr_t)facet->getContourVertices();
-				if (cloudID > 0)
-				{
-					ccHObject* cloud = FindRobust(root, facet, oldToNewIDMap, cloudID, CC_TYPES::POINT_CLOUD);
-					if (cloud)
-					{
-						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
-					}
-					else
-					{
-						// we have a problem here ;)
-						facet->setContourVertices(nullptr);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find contour points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
-					}
-				}
-			}
-			// contour polyline
-			{
-				intptr_t polyID = (intptr_t)facet->getContour();
-				if (polyID > 0)
-				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::POLY_LINE);
-					if (poly)
-					{
-						facet->setContour(ccHObjectCaster::ToPolyline(poly));
-					}
-					else
-					{
-						// we have a problem here ;)
-						facet->setContourVertices(nullptr);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find contour polyline (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
-					}
-				}
-			}
-			// polygon mesh
-			{
-				intptr_t polyID = (intptr_t)facet->getPolygon();
-				if (polyID > 0)
-				{
-					ccHObject* poly = FindRobust(root, facet, oldToNewIDMap, polyID, CC_TYPES::MESH);
-					if (poly)
-					{
-						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
-					}
-					else
-					{
-						// we have a problem here ;)
-						facet->setPolygon(nullptr);
-						currentObject = nullptr;
-						ccLog::Warning(QString("[BIN] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
-					}
-				}
-			}
-		}
-		else if (currentObject->isKindOf(CC_TYPES::IMAGE))
-		{
-			ccImage* image = ccHObjectCaster::ToImage(currentObject);
-
-			intptr_t sensorID = (intptr_t)image->getAssociatedSensor();
-			if (sensorID > 0)
-			{
-				ccHObject* sensor = FindRobust(root, image, oldToNewIDMap, sensorID, CC_TYPES::CAMERA_SENSOR);
-				if (sensor)
-				{
-					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));
-				}
-				else
-				{
-					// we have a problem here ;)
-					image->setAssociatedSensor(nullptr);
-
-					// DGM: can't delete it, too dangerous (bad pointers ;)
-					// delete root;
-
-					currentObject = nullptr;
-					ccLog::Warning(QString("[BIN] Couldn't find camera sensor (ID=%1) for image '%2' in the file!").arg(sensorID).arg(image->getName()));
-					// return CC_FERR_MALFORMED_FILE;
-				}
-			}
+			linkerContext.setIncompleteEntity(incompleteEntity, dependencies); // dependencies will be copied
+			dependencies.clear();                                              // remove the dependencies so as to mark the entity as 'processed'
+			                                                                   //(important for IncompleteEntityLinkerContext::deleteIncompleteEntity())
 		}
 
-		if (currentObject)
+		if (linkerContext.result == CC_FERR_MALFORMED_FILE)
 		{
-			const ccShiftedObject* shifted = ccHObjectCaster::ToShifted(currentObject);
+			// we don't have the time to check dependencies, we just remove the incomplete entity from the tree
+			assert(!linkerContext.forceLoadAfterError);
+			linkerContext.deleteIncompleteEntity();
+			continue;
+		}
+
+		// Replace the large if/else chain by calls to the new handlers
+		if (linkerContext.incompleteEntity->isA(CC_TYPES::MESH_GROUP))
+		{
+			HandleMeshGroup(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::SUB_MESH))
+		{
+			HandleSubMesh(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::MESH) || linkerContext.incompleteEntity->isKindOf(CC_TYPES::PRIMITIVE))
+		{
+			HandleMeshOrPrimitive(linkerContext, orphans.get());
+		}
+		else if (linkerContext.incompleteEntity->isKindOf(CC_TYPES::POLY_LINE))
+		{
+			HandlePolyline(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isKindOf(CC_TYPES::SENSOR))
+		{
+			HandleSensor(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::LABEL_2D))
+		{
+			HandleLabel2D(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::FACET))
+		{
+			HandleFacet(linkerContext);
+		}
+		else if (linkerContext.incompleteEntity->isA(CC_TYPES::IMAGE))
+		{
+			HandleImage(linkerContext);
+		}
+		else
+		{
+			assert(false);
+			ccLog::Warning(QString("[BIN] Unexpected entity type (%1) for entity '%2' in the file!").arg(linkerContext.incompleteEntity->getClassID()).arg(linkerContext.incompleteEntity->getName()));
+		}
+
+		// if we still have an incomplete entity at this point, it means that we were able to fix all its dependencies
+		if (linkerContext.incompleteEntity)
+		{
+			const ccShiftedObject* shifted = ccHObjectCaster::ToShifted(linkerContext.incompleteEntity);
 			if (shifted)
 			{
 				// it may be interesting to re-use the Global Shift when loading other files
@@ -1025,42 +1316,38 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 				// TODO: we should also check that other entities with global shift not too far away
 				// have not already been loaded. In which case we should 'translate' the current entity?
 			}
-
-			for (unsigned i = 0; i < currentObject->getChildrenNumber(); ++i)
-			{
-				toCheck.push_back(currentObject->getChild(i));
-			}
 		}
 	}
 
-	if (root->isA(CC_TYPES::HIERARCHY_OBJECT))
+	if (linkerContext.result == CC_FERR_NO_ERROR && linkerContext.hasBrokenDependencies)
 	{
-		// transfer children to container
-		root->transferChildren(container, true);
-		delete root;
-		root = nullptr;
-	}
-	else
-	{
-		container.addChild(root);
+		// minor error
+		linkerContext.result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 	}
 
-	// orphans
-	if (orphans)
+	if (root)
 	{
-		if (orphans->getChildrenNumber() != 0)
+		if (root->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
-			orphans->setEnabled(false);
-			container.addChild(orphans);
+			// transfer children to container
+			root->transferChildren(container, true);
+			delete root;
+			root = nullptr;
 		}
 		else
 		{
-			delete orphans;
-			orphans = nullptr;
+			container.addChild(root);
 		}
 	}
 
-	return result;
+	// orphans
+	if (orphans && orphans->getChildrenNumber() != 0)
+	{
+		orphans->setEnabled(false);
+		container.addChild(orphans.release());
+	}
+
+	return linkerContext.result;
 }
 
 CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal, const LoadParameters& parameters)
@@ -1077,10 +1364,10 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		return CC_FERR_NO_LOAD;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Open Bin file (old style)"));
 		pDlg->setAutoClose(false);
 	}

@@ -17,7 +17,7 @@
 
 #include "ccSectionExtractionSubDlg.h"
 
-// system
+// System
 #include <cassert>
 
 ccSectionExtractionSubDlg::ccSectionExtractionSubDlg(QWidget* parent /*=nullptr*/)

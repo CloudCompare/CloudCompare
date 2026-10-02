@@ -17,12 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include <QDialog>
+// Ui
+#include <ui_registrationDlg.h>
 
 // CCCoreLib
 #include <ReferenceCloud.h>
 #include <RegistrationTools.h>
-#include <ui_registrationDlg.h>
+
+// Qt
+#include <QDialog>
 
 class ccHObject;
 

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -15,16 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_ASCII_SAVE_DIALOG_HEADER
-#define CC_ASCII_SAVE_DIALOG_HEADER
-
-// local
+// Local
 #include "qCC_io.h"
 
 // Qt
 #include <QDialog>
 
-class Ui_AsciiSaveDialog;
+namespace Ui
+{
+	class AsciiSaveDialog;
+}
 
 //! Dialog for configuration of ASCII files saving sequence
 class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
@@ -36,7 +38,7 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 	explicit AsciiSaveDlg(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~AsciiSaveDlg();
+	~AsciiSaveDlg() override;
 
 	//! Returns whether columns names should be be saved in header
 	bool saveColumnsNamesHeader() const;
@@ -92,10 +94,8 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 
   protected:
 	//! Associated UI
-	Ui_AsciiSaveDialog* m_ui;
+	std::unique_ptr<Ui::AsciiSaveDialog> m_ui;
 
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
 };
-
-#endif // CC_ASCII_SAVE_DIALOG_HEADER

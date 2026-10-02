@@ -17,6 +17,15 @@
 
 #include "ccLibAlgorithms.h"
 
+// Local
+#include "ccCommon.h"
+#include "ccConsole.h"
+#include "ccRegistrationTools.h"
+#include "ccUtils.h"
+// This is included only for temporarily removing an object from the tree.
+//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
+#include "mainwindow.h"
+
 // CCCoreLib
 #include <ScalarFieldTools.h>
 
@@ -24,24 +33,14 @@
 #include <ccBackgroundTask.h>
 #include <ccOctree.h>
 #include <ccPointCloud.h>
+#include <ccProgressDialog.h>
 #include <ccScalarField.h>
-
-// Local
-#include "ccCommon.h"
-#include "ccConsole.h"
-#include "ccProgressDialog.h"
-#include "ccRegistrationTools.h"
-#include "ccUtils.h"
 
 // Qt
 #include <QApplication>
 #include <QElapsedTimer>
 #include <QInputDialog>
 #include <QMessageBox>
-
-// This is included only for temporarily removing an object from the tree.
-//	TODO figure out a cleaner way to do this without having to include all of mainwindow.h
-#include "mainwindow.h"
 
 namespace ccLibAlgorithms
 {
@@ -603,7 +602,7 @@ namespace ccLibAlgorithms
 						pc->getCurrentInScalarField()->computeMinAndMax();
 					}
 					cloud->prepareDisplayForRefresh();
-					ccConsole::Print("[Algorithm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
+					ccConsole::Printf("[Algorithm] Timing: %3.2f s.", elapsedTime_ms / 1000.0);
 				}
 				else
 				{

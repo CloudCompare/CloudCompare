@@ -19,7 +19,6 @@
 
 // Local
 #include "../include/ccPointCloud.h"
-#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
@@ -205,9 +204,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 		ccLog::Error("Not enough memory");
 		return false;
 	}
-	for (size_t i = 0; i < inSFIndexes.size(); ++i)
+	for (int inSFIndex : inSFIndexes)
 	{
-		int inSFIndex = inSFIndexes[i];
 		if (inSFIndex < 0 || inSFIndex >= static_cast<int>(srcCloud->getNumberOfScalarFields()))
 		{
 			// invalid index
@@ -234,7 +232,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 
 		auto inSF  = srcCloud->getScalarField(inSFIndex);
 		auto outSF = destCloud->getScalarField(outSFIndex);
-		scalarFields.push_back(SFPair(inSF.get(), outSF.get()));
+		scalarFields.emplace_back(inSF.get(), outSF.get());
 
 		outSF->fill(CCCoreLib::NAN_VALUE);
 	}

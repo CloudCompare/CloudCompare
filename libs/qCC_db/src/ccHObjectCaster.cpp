@@ -63,7 +63,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		{
 			return static_cast<ccPointCloud*>(obj);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		if (obj->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices)
@@ -110,7 +110,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 		{
 			return static_cast<ccGenericPointCloud*>(obj);
 		}
-		else if (obj->isKindOf(CC_TYPES::MESH))
+		if (obj->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
 			if (vertices && lockedVertices)
@@ -123,7 +123,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 			}
 			return vertices;
 		}
-		else if (obj->isKindOf(CC_TYPES::POLY_LINE))
+		if (obj->isKindOf(CC_TYPES::POLY_LINE))
 		{
 			ccGenericPointCloud* vertices = dynamic_cast<ccGenericPointCloud*>(static_cast<ccPolyline*>(obj)->getAssociatedCloud());
 			if (vertices && lockedVertices)
@@ -194,7 +194,7 @@ ccPlanarEntityInterface* ccHObjectCaster::ToPlanarEntity(ccHObject* obj)
 		{
 			return static_cast<ccFacet*>(obj);
 		}
-		else if (obj->isA(CC_TYPES::PLANE))
+		if (obj->isA(CC_TYPES::PLANE))
 		{
 			return static_cast<ccPlane*>(obj);
 		}

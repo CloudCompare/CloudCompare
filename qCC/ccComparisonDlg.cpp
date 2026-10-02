@@ -17,9 +17,10 @@
 
 #include "ccComparisonDlg.h"
 
-// Qt
-#include <QHeaderView>
-#include <QMessageBox>
+// Local
+#include "ccCommon.h"
+#include "ccHistogramWindow.h"
+#include "mainwindow.h"
 
 // CCCoreLib
 #include <DgmOctree.h>
@@ -27,6 +28,9 @@
 #include <MeshSamplingTools.h>
 #include <ScalarField.h>
 #include <ScalarFieldTools.h>
+
+// CCPluginAPI
+#include <ccQtHelpers.h>
 
 // qCC_db
 #include <ccBackgroundTask.h>
@@ -38,16 +42,10 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-// CCPluginAPI
-#include <ccQtHelpers.h>
-
-// Local
-#include "ccCommon.h"
-#include "ccHistogramWindow.h"
-#include "mainwindow.h"
-
 // Qt
 #include <QElapsedTimer>
+#include <QHeaderView>
+#include <QMessageBox>
 #include <QThreadPool>
 
 // System
@@ -396,13 +394,13 @@ bool ccComparisonDlg::computeApproxDistances()
 	// if the approximate distances comptation failed...
 	if (approxResult < CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
-		ccLog::Warning("[computeApproxDistances] Computation failed (error code %i)", approxResult);
+		ccLog::Warningf("[computeApproxDistances] Computation failed (error code %i)", approxResult);
 		m_compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
 	}
 	else
 	{
-		ccLog::Print("[computeApproxDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
+		ccLog::Printf("[computeApproxDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		// display approx. dist. statistics
 		ScalarType mean;
@@ -673,7 +671,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 		}
 	}
 
-	ccLog::PrintDebug("[Distances] Best level: %i (maxSearchDist = %f)", theBestOctreeLevel, maxSearchDist);
+	ccLog::PrintDebugf("[Distances] Best level: %i (maxSearchDist = %f)", theBestOctreeLevel, maxSearchDist);
 
 	return theBestOctreeLevel;
 }
@@ -894,7 +892,7 @@ bool ccComparisonDlg::computeDistances()
 
 	if (result >= CCCoreLib::DistanceComputationTools::DISTANCE_COMPUTATION_RESULTS::SUCCESS)
 	{
-		ccLog::Print("[ComputeDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
+		ccLog::Printf("[ComputeDistances] Time: %3.2f s.", elapsedTime_ms / 1.0e3);
 
 		// display some statics about the computed distances
 		ScalarType mean;

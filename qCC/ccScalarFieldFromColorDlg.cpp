@@ -17,11 +17,11 @@
 
 #include "ccScalarFieldFromColorDlg.h"
 
-// Qt
-#include <QPushButton>
-
 // qCC_db
 #include <ccPointCloud.h>
+
+// Qt
+#include <QPushButton>
 
 // System
 #include <cassert>

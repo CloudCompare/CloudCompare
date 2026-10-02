@@ -17,17 +17,14 @@
 // #                                                                        #
 // ##########################################################################
 
-// Always first
-#include <ccIncludeGL.h>
-
-// Qt
-#include <QDialog>
+// Local
+#include "ccQCustomPlot.h"
 
 // qCC_db
 #include <ccScalarField.h>
 
-// QCustomPlot
-#include "ccQCustomPlot.h"
+// Qt
+#include <QDialog>
 
 class QCPArrow;
 class QCPBarsWithText;
@@ -35,7 +32,10 @@ class QCPColoredBars;
 class QCPHiddenArea;
 class QCPTextElement;
 
-class Ui_HistogramDialog;
+namespace Ui
+{
+	class HistogramDialog;
+} // namespace Ui
 
 //! Histogram widget
 class ccHistogramWindow : public QCustomPlot
@@ -324,5 +324,5 @@ class ccHistogramWindowDlg : public QDialog
 	ccHistogramWindow* m_win;
 
 	//! Associated widgets
-	Ui_HistogramDialog* m_gui;
+	std::unique_ptr<Ui::HistogramDialog> m_ui;
 };

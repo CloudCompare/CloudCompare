@@ -41,10 +41,13 @@ class QCC_IO_LIB_API GenericDBFField
 {
   public:
 	//! Default constructor
-	GenericDBFField(QString name)
-	    : m_name(name)
+	explicit GenericDBFField(QString name)
+	    : m_name(std::move(name))
 	{
 	}
+
+	//! default destructor
+	virtual ~GenericDBFField() = default;
 
 	//! Returns field name
 	const QString& name() const
@@ -81,25 +84,25 @@ class QCC_IO_LIB_API IntegerDBFField : public GenericDBFField
 {
   public:
 	//! Default constructor
-	IntegerDBFField(QString name)
-	    : GenericDBFField(name)
+	explicit IntegerDBFField(QString name)
+	    : GenericDBFField(std::move(name))
 	{
 	}
 
 	// inherited from GenericDBFField
-	virtual DBFFieldType type() const
+	DBFFieldType type() const override
 	{
 		return FTInteger;
 	}
-	virtual int width() const
+	int width() const override
 	{
 		return 6;
 	}
-	virtual int decimal() const
+	int decimal() const override
 	{
 		return 0;
 	}
-	virtual bool save(DBFHandle handle, int fieldIndex) const;
+	bool save(DBFHandle handle, int fieldIndex) const override;
 
 	//! Field values
 	std::vector<int> values;
@@ -110,25 +113,25 @@ class QCC_IO_LIB_API DoubleDBFField : public GenericDBFField
 {
   public:
 	//! Default constructor
-	DoubleDBFField(QString name)
-	    : GenericDBFField(name)
+	explicit DoubleDBFField(QString name)
+	    : GenericDBFField(std::move(name))
 	{
 	}
 
 	// inherited from GenericDBFField
-	virtual DBFFieldType type() const
+	DBFFieldType type() const override
 	{
 		return FTDouble;
 	}
-	virtual int width() const
+	int width() const override
 	{
 		return 8;
 	}
-	virtual int decimal() const
+	int decimal() const override
 	{
 		return 8;
 	}
-	virtual bool save(DBFHandle handle, int fieldIndex) const;
+	bool save(DBFHandle handle, int fieldIndex) const override;
 
 	//! Field values
 	std::vector<double> values;
@@ -139,32 +142,29 @@ class QCC_IO_LIB_API DoubleDBFField3D : public GenericDBFField
 {
   public:
 	//! Default constructor
-	DoubleDBFField3D(QString name)
-	    : GenericDBFField(name)
-	{
-	}
-	virtual ~DoubleDBFField3D()
+	explicit DoubleDBFField3D(QString name)
+	    : GenericDBFField(std::move(name))
 	{
 	}
 
 	// inherited from GenericDBFField
-	virtual bool is3D() const
+	bool is3D() const override
 	{
 		return true;
 	}
-	virtual DBFFieldType type() const
+	DBFFieldType type() const override
 	{
 		return FTDouble;
 	}
-	virtual int width() const
+	int width() const override
 	{
 		return 8;
 	}
-	virtual int decimal() const
+	int decimal() const override
 	{
 		return 8;
 	}
-	virtual bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const;
+	bool save(DBFHandle handle, int xFieldIndex, int yFieldIndex, int zFieldIndex) const override;
 
 	//! Field values
 	std::vector<CCVector3d> values;

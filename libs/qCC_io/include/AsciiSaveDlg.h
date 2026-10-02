@@ -38,7 +38,7 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 	explicit AsciiSaveDlg(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~AsciiSaveDlg();
+	~AsciiSaveDlg() override;
 
 	//! Returns whether columns names should be be saved in header
 	bool saveColumnsNamesHeader() const;

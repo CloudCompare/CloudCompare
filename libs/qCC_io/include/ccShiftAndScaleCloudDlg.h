@@ -60,7 +60,7 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	void setShiftFieldsPrecision(int precision);
 
 	//! Destructor
-	virtual ~ccShiftAndScaleCloudDlg();
+	~ccShiftAndScaleCloudDlg() override;
 
 	//! Returns shift
 	CCVector3d getShift() const;

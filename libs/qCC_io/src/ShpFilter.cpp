@@ -1751,7 +1751,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		}
 	}
 
-	ccLog::Print("[SHP] Output type: " + ToString(outputShapeType));
+	ccLog::Print(QStringLiteral("[SHP] Output type: ") + ToString(outputShapeType));
 
 	QFileInfo fi(filename);
 	QString   baseFileName = fi.path() + QString("/") + fi.completeBaseName();

@@ -104,7 +104,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		ShiftInfo(QString str = QString("unnamed"))
 		    : shift(0, 0, 0)
 		    , scale(1.0)
-		    , name(std::move(str))
+		    , name(str)
 		    , preserve(true)
 		{
 		}
@@ -112,7 +112,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		ShiftInfo(QString str, const CCVector3d& T, double s = 1.0)
 		    : shift(T)
 		    , scale(s)
-		    , name(std::move(str))
+		    , name(str)
 		    , preserve(true)
 		{
 		}

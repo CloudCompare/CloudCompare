@@ -327,9 +327,9 @@ bool ccCommandLineInterface::processGlobalShiftCommand(GlobalShiftOptions& optio
 //////
 // ccCommandLineInterface::Command
 
-ccCommandLineInterface::Command::Command(QString name, QString keyword)
-    : m_name(std::move(name))
-    , m_keyword(std::move(keyword))
+ccCommandLineInterface::Command::Command(const QString& name, const QString& keyword)
+    : m_name(name)
+    , m_keyword(keyword)
 {
 }
 

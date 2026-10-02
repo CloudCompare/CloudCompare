@@ -226,9 +226,9 @@ class QCC_IO_LIB_API AsciiOpenDlg : public QDialog
 		}
 
 		//! Constructor from parameters
-		SequenceItem(CC_ASCII_OPEN_DLG_TYPES _type, QString _header)
+		SequenceItem(CC_ASCII_OPEN_DLG_TYPES _type, const QString& _header)
 		    : type(_type)
-		    , header(std::move(_header))
+		    , header(_header)
 		{
 		}
 	};

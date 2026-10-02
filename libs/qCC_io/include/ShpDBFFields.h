@@ -42,7 +42,7 @@ class QCC_IO_LIB_API GenericDBFField
   public:
 	//! Default constructor
 	explicit GenericDBFField(QString name)
-	    : m_name(std::move(name))
+	    : m_name(name)
 	{
 	}
 
@@ -85,7 +85,7 @@ class QCC_IO_LIB_API IntegerDBFField : public GenericDBFField
   public:
 	//! Default constructor
 	explicit IntegerDBFField(QString name)
-	    : GenericDBFField(std::move(name))
+	    : GenericDBFField(name)
 	{
 	}
 
@@ -114,7 +114,7 @@ class QCC_IO_LIB_API DoubleDBFField : public GenericDBFField
   public:
 	//! Default constructor
 	explicit DoubleDBFField(QString name)
-	    : GenericDBFField(std::move(name))
+	    : GenericDBFField(name)
 	{
 	}
 
@@ -143,7 +143,7 @@ class QCC_IO_LIB_API DoubleDBFField3D : public GenericDBFField
   public:
 	//! Default constructor
 	explicit DoubleDBFField3D(QString name)
-	    : GenericDBFField(std::move(name))
+	    : GenericDBFField(name)
 	{
 	}
 

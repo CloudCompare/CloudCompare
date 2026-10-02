@@ -4779,17 +4779,17 @@ void MainWindow::doActionCutPursuit()
 			// we try to label all CCs
 			std::vector<int32_t> components;
 			int                  rV = PCP::Partition::labelCutPursuitComponents(cloud,
-                                                                                 s_knn,
-                                                                                 s_knnRadius,
-                                                                                 N,
-                                                                                 D,
-                                                                                 Y,
-                                                                                 s_regularization,
-                                                                                 s_spatialWeight,
-                                                                                 s_cutoff,
-                                                                                 components,
-                                                                                 &pDlg,
-                                                                                 theOctree.data());
+                                                               s_knn,
+                                                               s_knnRadius,
+                                                               N,
+                                                               D,
+                                                               Y,
+                                                               s_regularization,
+                                                               s_spatialWeight,
+                                                               s_cutoff,
+                                                               components,
+                                                               &pDlg,
+                                                               theOctree.data());
 
 			// error handling
 			if (rV < 0)

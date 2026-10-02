@@ -516,9 +516,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// points count (dataVersion >= 20)
@@ -528,6 +528,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 	// points & associated cloud/mesh ID (dataVersion >= 20)
 	assert(m_pickedPoints.empty());
+	std::vector<LoadingContext::Dependency> dependencies;
 	for (uint32_t i = 0; i < count; ++i)
 	{
 		// point index
@@ -547,8 +548,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 				{
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
-					//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::_cloud' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._cloud) = cloudID;
+					dependencies.emplace_back(cloudID, LoadingContext::Dependency::LABEL_SOURCE_CLOUD);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -557,7 +557,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 			}
 		}
 
-		if (dataVersion >= 49)
+		if (context.dataVersion >= 49)
 		{
 			// mesh ID (dataVersion >= 49 - will be retrieved later)
 			uint32_t meshID = 0;
@@ -576,8 +576,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 					m_pickedPoints.resize(m_pickedPoints.size() + 1);
 					m_pickedPoints.back().index = static_cast<unsigned>(index);
 					m_pickedPoints.back().uv    = uv;
-					//[DIRTY] WARNING: temporarily, we set the mesh unique ID in the 'PickedPoint::_mesh' pointer!!!
-					*(uint32_t*)(&m_pickedPoints.back()._mesh) = meshID;
+					dependencies.emplace_back(meshID, LoadingContext::Dependency::LABEL_SOURCE_MESH);
 				}
 				catch (const std::bad_alloc&)
 				{
@@ -588,12 +587,17 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 
 		// entity center point (dataVersion >= 50)
 		bool entityCenterPoint = false;
-		if (dataVersion >= 50)
+		if (context.dataVersion >= 50)
 		{
 			if (in.read((char*)&entityCenterPoint, sizeof(bool)) < 0)
 				return ReadError();
 		}
 		m_pickedPoints.back().entityCenterPoint = entityCenterPoint;
+	}
+
+	if (!dependencies.empty())
+	{
+		context.incompleteEntities.insert(this, dependencies);
 	}
 
 	// Relative screen position (dataVersion >= 20)
@@ -607,7 +611,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedI
 	if (in.read((char*)&m_showFullBody, sizeof(bool)) < 0)
 		return ReadError();
 
-	if (dataVersion > 20)
+	if (context.dataVersion > 20)
 	{
 		// Show in 2D boolean (dataVersion >= 21)
 		if (in.read((char*)&m_dispIn2D, sizeof(bool)) < 0)

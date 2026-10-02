@@ -1387,11 +1387,11 @@ class ccGLMatrixTpl : public ccSerializableObject
 	}
 
 	// inherited from ccSerializableObject
-	bool fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override
+	bool fromFile(QFile& in, LoadingContext& context) override
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-		if (dataVersion < 20)
+		if (context.dataVersion < 20)
 			return CorruptError();
 
 		// data (dataVersion>=20)

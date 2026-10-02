@@ -1124,9 +1124,9 @@ bool ccGBLSensor::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGBLSensor::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccSensor::fromFile_MeOnly(in, context))
 		return false;
 
 	// rotation order (dataVersion>=34)
@@ -1137,30 +1137,30 @@ bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loade
 
 	// parameters (dataVersion>=34)
 	QDataStream inStream(&in);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_phiMin, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_phiMax, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_deltaPhi, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_thetaMin, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_thetaMax, 1);
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_deltaTheta, 1);
-	if (dataVersion < 38)
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_phiMin, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_phiMax, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_deltaPhi, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_thetaMin, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_thetaMax, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_deltaTheta, 1);
+	if (context.dataVersion < 38)
 	{
 		ScalarType sensorRange{};
 		ScalarType uncertainty{};
-		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &sensorRange, 1);
-		ccSerializationHelper::ScalarsFromDataStream(inStream, flags, &uncertainty, 1);
+		ccSerializationHelper::ScalarsFromDataStream(inStream, context.flags, &sensorRange, 1);
+		ccSerializationHelper::ScalarsFromDataStream(inStream, context.flags, &uncertainty, 1);
 		m_sensorRange = static_cast<PointCoordinateType>(sensorRange);
 		m_uncertainty = static_cast<PointCoordinateType>(uncertainty);
 	}
 	else
 	{
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_sensorRange, 1);
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_uncertainty, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_sensorRange, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_uncertainty, 1);
 	}
-	ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_scale, 1);
+	ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_scale, 1);
 
 	// other parameters (dataVersion>=38)
-	if (dataVersion >= 38)
+	if (context.dataVersion >= 38)
 	{
 		inStream >> m_pitchAnglesAreShifted;
 		inStream >> m_yawAnglesAreShifted;

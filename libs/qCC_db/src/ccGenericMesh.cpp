@@ -150,9 +150,9 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccGenericMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
@@ -164,7 +164,7 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loa
 	}
 
 	//'per-triangle normals shown' state (dataVersion>=29))
-	if (dataVersion >= 29)
+	if (context.dataVersion >= 29)
 	{
 		if (in.read(reinterpret_cast<char*>(&m_triNormsShown), sizeof(bool)) < 0)
 		{

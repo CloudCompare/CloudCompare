@@ -11,7 +11,11 @@
 // CCCoreLib
 #include <CCGeom.h>
 
-class Ui_GlobalShiftAndScaleDlg;
+namespace Ui
+{
+	class GlobalShiftAndScaleDlg;
+}
+
 class QAbstractButton;
 
 //! Dialog for selection of cloud center
@@ -147,7 +151,7 @@ class QCC_IO_LIB_API ccShiftAndScaleCloudDlg : public QDialog
 	void updateGlobalSystem();
 
 	//! Associated UI
-	Ui_GlobalShiftAndScaleDlg* m_ui;
+	std::unique_ptr<Ui::GlobalShiftAndScaleDlg> m_ui;
 
 	//! Whether shift should be applied to all files
 	bool m_applyAll;

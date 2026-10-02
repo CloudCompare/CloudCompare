@@ -52,7 +52,7 @@ class QCC_DB_LIB_API WaveformDescriptor : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
 	uint32_t numberOfSamples; //!< Number of samples
@@ -180,7 +180,7 @@ class QCC_DB_LIB_API ccWaveform : public ccSerializableObject
 		return true;
 	}
 	bool  toFile(QFile& out, short dataVersion) const override;
-	bool  fromFile(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion() const override;
 
   protected: // members

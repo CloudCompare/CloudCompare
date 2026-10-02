@@ -38,21 +38,21 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(ccHObject*          firstEntity,
                                    QString             secondRole,
                                    ccMainAppInterface* app /*=nullptr*/)
     : QDialog(app ? app->getMainWindow() : nullptr, Qt::Tool)
-    , m_gui(new Ui_RoleChoiceDialog)
+    , m_ui(std::make_unique<Ui::RoleChoiceDialog>())
     , m_app(app)
     , m_firstEnt(firstEntity)
     , m_secondEnt(secondEntity)
     , m_useInputOrder(true)
 {
-	m_gui->setupUi(this);
+	m_ui->setupUi(this);
 
-	connect(m_gui->swapButton, &QAbstractButton::clicked, this, &ccOrderChoiceDlg::swap);
+	connect(m_ui->swapButton, &QAbstractButton::clicked, this, &ccOrderChoiceDlg::swap);
 
-	m_gui->firstlabel->setText(firstRole);
-	m_gui->secondlabel->setText(secondRole);
+	m_ui->firstlabel->setText(firstRole);
+	m_ui->secondlabel->setText(secondRole);
 
-	ccQtHelpers::SetButtonColor(m_gui->firstColorButton, Qt::red);
-	ccQtHelpers::SetButtonColor(m_gui->secondColorButton, Qt::yellow);
+	ccQtHelpers::SetButtonColor(m_ui->firstColorButton, Qt::red);
+	ccQtHelpers::SetButtonColor(m_ui->secondColorButton, Qt::yellow);
 
 	setColorsAndLabels();
 }
@@ -74,12 +74,6 @@ ccOrderChoiceDlg::~ccOrderChoiceDlg()
 	{
 		m_app->refreshAll();
 	}
-
-	if (m_gui)
-	{
-		delete m_gui;
-		m_gui = nullptr;
-	}
 }
 
 ccHObject* ccOrderChoiceDlg::getFirstEntity()
@@ -97,7 +91,7 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	ccHObject* o1 = getFirstEntity();
 	if (o1)
 	{
-		m_gui->firstLineEdit->setText(o1->getName());
+		m_ui->firstLineEdit->setText(o1->getName());
 		o1->setEnabled(true);
 		o1->setVisible(true);
 		o1->setTempColor(ccColor::red);
@@ -105,13 +99,13 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	}
 	else
 	{
-		m_gui->firstLineEdit->setText("No entity!");
+		m_ui->firstLineEdit->setText("No entity!");
 	}
 
 	ccHObject* o2 = getSecondEntity();
 	if (o2)
 	{
-		m_gui->secondLineEdit->setText(o2->getName());
+		m_ui->secondLineEdit->setText(o2->getName());
 		o2->setEnabled(true);
 		o2->setVisible(true);
 		o2->setTempColor(ccColor::yellow);
@@ -119,7 +113,7 @@ void ccOrderChoiceDlg::setColorsAndLabels()
 	}
 	else
 	{
-		m_gui->secondLineEdit->setText("No entity!");
+		m_ui->secondLineEdit->setText("No entity!");
 	}
 
 	if (m_app)

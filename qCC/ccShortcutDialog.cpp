@@ -18,10 +18,11 @@
 #include "ccShortcutDialog.h"
 
 #include "ccPersistentSettings.h"
+#include "ui_shortcutEditDialog.h"
+#include "ui_shortcutSettings.h"
 
 #include <QAction>
 #include <QHash>
-#include <QMenu>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -30,11 +31,13 @@ constexpr int KEY_SEQUENCE_COLUMN = 1;
 
 ccShortcutEditDialog::ccShortcutEditDialog(QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui_ShortcutEditDialog)
+    , m_ui(std::make_unique<Ui::ShortcutEditDialog>())
 {
 	m_ui->setupUi(this);
 	connect(m_ui->clearButton, &QPushButton::clicked, m_ui->keySequenceEdit, &QKeySequenceEdit::clear);
 }
+
+ccShortcutEditDialog::~ccShortcutEditDialog() = default;
 
 QKeySequence ccShortcutEditDialog::keySequence() const
 {
@@ -54,8 +57,7 @@ int ccShortcutEditDialog::exec()
 
 ccShortcutDialog::ccShortcutDialog(const QList<QAction*>& actions, QWidget* parent)
     : QDialog(parent)
-    , m_ui(new Ui_ShortcutDialog)
-    , m_editDialog(new ccShortcutEditDialog(this))
+    , m_ui(std::make_unique<Ui::ShortcutDialog>())
 {
 	m_ui->setupUi(this);
 	m_ui->tableWidget->setRowCount(actions.count());
@@ -78,6 +80,8 @@ ccShortcutDialog::ccShortcutDialog(const QList<QAction*>& actions, QWidget* pare
 		row += 1;
 	}
 }
+
+ccShortcutDialog::~ccShortcutDialog() = default;
 
 void ccShortcutDialog::restoreShortcutsFromQSettings() const
 {
@@ -140,16 +144,18 @@ void ccShortcutDialog::handleDoubleClick(QTableWidgetItem* item)
 	{
 		item = m_ui->tableWidget->item(item->row(), KEY_SEQUENCE_COLUMN);
 	}
-
 	auto* action = item->data(Qt::UserRole).value<QAction*>();
-	m_editDialog->setKeySequence(action->shortcut());
 
-	if (m_editDialog->exec() == Rejected)
+	// Editor modal windows
+	ccShortcutEditDialog editDialog(this);
+	editDialog.setKeySequence(action->shortcut());
+
+	if (editDialog.exec() == Rejected)
 	{
 		return;
 	}
 
-	const QKeySequence keySequence = m_editDialog->keySequence();
+	const QKeySequence keySequence = editDialog.keySequence();
 	if (keySequence == action->shortcut())
 	{
 		// User did not change it

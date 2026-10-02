@@ -88,6 +88,9 @@ New features:
 			- saves the height layer or the RGB layer of the raster grid as a PNG image ('{cloud name}_RASTER_IMAGE.png', with a timestamp unless -NO_TIMESTAMP is set)
 			- the height layer uses the 'Blue>Green>Yellow>Red' color scale
 			- empty cells follow the -EMPTY_FILL option (transparent by default)
+		- New option -IMAGE_COLOR_SCALE {name} for the -RASTERIZE command (with -OUTPUT_IMAGE HEIGHT)
+			- {name} is a color scale name as shown in the Color Scales Manager (not case sensitive), custom scales included
+			- the default scale remains 'Blue>Green>Yellow>Red'
 		- New SF-to-normals and normals-to-SF conversion methods:
 			- NORM_TO_SF {X/Y/Z}
 				where {X/Y/Z} is any combination of X, Y and Z, such as 'XYZ', 'XZ' or 'Y'

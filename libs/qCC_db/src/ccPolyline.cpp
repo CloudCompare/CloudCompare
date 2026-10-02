@@ -441,16 +441,16 @@ bool ccPolyline::toFile_MeOnly(QFile& out, short dataVersion) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccPolyline::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
 	ccLog::PrintVerbose(QString("Loading polyline %1...").arg(m_name));
 
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 	{
 		return false;
 	}
 
-	if (dataVersion < 28)
+	if (context.dataVersion < 28)
 	{
 		return false;
 	}
@@ -464,8 +464,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 		{
 			return ReadError();
 		}
-		//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
-		*(uint32_t*)(&m_theAssociatedCloud) = vertUniqueID;
+		context.incompleteEntities.insert(this, {LoadingContext::Dependency{vertUniqueID, LoadingContext::Dependency::POLYLINE_VERTICES_CLOUD}});
 	}
 
 	// number of points (references to) (dataVersion>=28)
@@ -495,7 +494,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 	//'global shift & scale' (dataVersion>=39)
 	m_globalScale = 1.0;
 	m_globalShift = CCVector3d(0, 0, 0);
-	if (dataVersion >= 39)
+	if (context.dataVersion >= 39)
 	{
 		if (!loadShiftInfoFromFile(in))
 		{
@@ -526,9 +525,9 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags, Loaded
 
 	// Width of the line (dataVersion>=31)
 	m_width = 0;
-	if (dataVersion >= 31)
+	if (context.dataVersion >= 31)
 	{
-		ccSerializationHelper::CoordsFromDataStream(inStream, flags, &m_width, 1);
+		ccSerializationHelper::CoordsFromDataStream(inStream, context.flags, &m_width, 1);
 	}
 
 	return true;

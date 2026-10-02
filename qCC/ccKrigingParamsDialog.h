@@ -23,7 +23,10 @@
 // qCC_db
 #include <ccRasterGrid.h>
 
-class Ui_KrigingParamsDialog;
+namespace Ui
+{
+	class KrigingParamsDialog;
+} // namespace Ui
 
 //! Dialog to set the Kriging parameters
 class ccKrigingParamsDialog : public QDialog
@@ -45,5 +48,5 @@ class ccKrigingParamsDialog : public QDialog
 
   protected:
 	//! Associated ui
-	Ui_KrigingParamsDialog* m_ui;
+	std::unique_ptr<Ui::KrigingParamsDialog> m_ui;
 };

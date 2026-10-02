@@ -177,8 +177,8 @@ class ccArray : public std::vector<Type>
 	{
 		return ccSerializationHelper::GenericArrayToFile<Type, N, ComponentType>(*this, out);
 	}
-	inline bool fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override
+	inline bool fromFile_MeOnly(QFile& in, LoadingContext& context) override
 	{
-		return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, dataVersion, "array");
+		return ccSerializationHelper::GenericArrayFromFile<Type, N, ComponentType>(*this, in, context.dataVersion, "array");
 	}
 };

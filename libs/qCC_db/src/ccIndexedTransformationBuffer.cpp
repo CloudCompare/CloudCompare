@@ -251,9 +251,9 @@ bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out, short dataVersion)
 	return true;
 }
 
-bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap)
+bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, LoadingContext& context)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags, oldToNewIDMap))
+	if (!ccHObject::fromFile_MeOnly(in, context))
 		return false;
 
 	// vector size (dataVersion>=34)
@@ -274,7 +274,7 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 
 	// transformations (dataVersion>=34)
 	for (ccIndexedTransformationBuffer::iterator it = begin(); it != end(); ++it)
-		if (!it->fromFile(in, dataVersion, flags, oldToNewIDMap))
+		if (!it->fromFile(in, context))
 			return false;
 
 	// display options

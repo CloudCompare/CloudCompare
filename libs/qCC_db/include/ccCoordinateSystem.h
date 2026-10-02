@@ -122,7 +122,7 @@ class QCC_DB_LIB_API ccCoordinateSystem : public ccGenericPrimitive
 
 	// inherited from ccGenericPrimitive
 	bool  toFile_MeOnly(QFile& out, short dataVersion) const override;
-	bool  fromFile_MeOnly(QFile& in, short dataVersion, int flags, LoadedIDMap& oldToNewIDMap) override;
+	bool  fromFile_MeOnly(QFile& in, LoadingContext& context) override;
 	short minimumFileVersion_MeOnly() const override;
 	bool  buildUp() override;
 

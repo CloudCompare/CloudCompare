@@ -51,10 +51,6 @@ static FileIOFilter::FilterContainer s_ioFilters;
 
 static unsigned s_sessionCounter = 0; //!< Session counter
 
-// This extra definition is required in C++11.
-// In C++17, class-level "static constexpr" is implicitly inline, so these are not required.
-constexpr float FileIOFilter::DEFAULT_PRIORITY;
-
 QString FileIOFilter::GetRealFilename(QString filename)
 {
 	QFileInfo fi(filename);

@@ -45,7 +45,7 @@ class QCC_IO_LIB_API ShpFilter : public FileIOFilter
 	CC_FILE_ERROR saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters) override;
 
 	//! Special method to save multiple entities with attributes
-	CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters);
+	CC_FILE_ERROR saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters) const;
 
 	//! Sets whether to consider closed polylines as polygons or not
 	void treatClosedPolylinesAsPolygons(bool state)

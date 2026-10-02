@@ -145,11 +145,11 @@ static int ReadEntityHeader(QFile& in, unsigned& numberOfPoints, HeaderFlags& he
 	return 0;
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	s_lastSavedFileBinVersion = 0;
 
-	if (!root || filename.isNull())
+	if (!entity || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
 
 	QFile out(filename);
@@ -169,7 +169,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 
 	// concurrent call, so that the progress dialog keeps refreshing
 	CC_FILE_ERROR result = ccBackgroundTask::Run([&]()
-	                                             { return BinFilter::SaveFileV2(out, root); });
+	                                             { return BinFilter::SaveFileV2(out, entity); });
 
 	return result;
 }

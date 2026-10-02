@@ -170,7 +170,7 @@ class CCPLUGIN_LIB_API ccCommandLineInterface
 		using Shared = QSharedPointer<Command>;
 
 		//! Default constructor
-		Command(const QString& name, const QString& keyword);
+		Command(QString name, QString keyword);
 
 		virtual ~Command() = default;
 

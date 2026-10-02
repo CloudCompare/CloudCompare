@@ -1667,7 +1667,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return saveToFile(entity, fields, filename, parameters);
 }
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters) const
 {
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;

@@ -354,7 +354,7 @@ class FileIOFilter
 		FilterFeatures features;
 	};
 
-	QCC_IO_LIB_API explicit FileIOFilter(const FilterInfo& info);
+	QCC_IO_LIB_API explicit FileIOFilter(FilterInfo info);
 
 	//! Allow import extensions to be set after construction
 	//! (e.g. for ImageFileFilter & QImageReader::supportedImageFormats())

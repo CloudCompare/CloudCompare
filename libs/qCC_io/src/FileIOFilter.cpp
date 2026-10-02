@@ -66,8 +66,8 @@ QString FileIOFilter::GetRealFilename(QString filename)
 	return filename;
 }
 
-FileIOFilter::FileIOFilter(const FilterInfo& info)
-    : m_filterInfo(info)
+FileIOFilter::FileIOFilter(FilterInfo info)
+    : m_filterInfo(std::move(info))
 {
 #ifdef QT_DEBUG
 	if (!(m_filterInfo.features & DynamicInfo))

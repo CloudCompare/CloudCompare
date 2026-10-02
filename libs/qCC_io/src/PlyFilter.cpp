@@ -1286,7 +1286,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		ccLog::Warning("[PLY] This ply file has less than 2 properties defined! (not even X and Y ;)");
 		return CC_FERR_MALFORMED_FILE;
 	}
-	else if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
+	if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
 	{
 		// brute force heuristic
 		//(the first element is always 'None')

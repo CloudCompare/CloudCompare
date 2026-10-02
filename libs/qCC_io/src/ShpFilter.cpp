@@ -1049,7 +1049,7 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_STRIP;
 		return CC_FERR_NO_ERROR;
 	}
-	else if (IsTriangleFan(secondTriangle))
+	if (IsTriangleFan(secondTriangle))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
@@ -1062,10 +1062,8 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_FAN;
 		return CC_FERR_NO_ERROR;
 	}
-	else
-	{
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
+
+	return CC_FERR_BAD_ENTITY_TYPE;
 }
 
 static CC_FILE_ERROR SaveMesh(ccMesh* mesh, QDataStream& stream, int32_t recordNumber, int32_t& recordSize16bits)

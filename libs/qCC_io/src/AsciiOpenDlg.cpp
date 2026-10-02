@@ -1180,24 +1180,21 @@ bool AsciiOpenDlg::apply()
 		QMessageBox::warning(nullptr, tr("Error"), errorMessage);
 		return false;
 	}
-	else
+	// save semi-persistent values
+	s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
+	s_csEntitiesScale                = m_ui->quatCSScaleDoubleSpinBox->value();
+
+	if (!s_asciiOpenContext)
 	{
-		// save semi-persistent values
-		s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
-		s_csEntitiesScale                = m_ui->quatCSScaleDoubleSpinBox->value();
-
-		if (!s_asciiOpenContext)
-		{
-			s_asciiOpenContext.reset(new AsciiOpenContext);
-		}
-		s_asciiOpenContext->save(m_ui.get());
-		s_asciiOpenContext->sequence = sequence;
-		s_asciiOpenContext->applyAll = false;
-
-		accept();
-
-		return true;
+		s_asciiOpenContext = std::make_unique<AsciiOpenContext>();
 	}
+	s_asciiOpenContext->save(m_ui.get());
+	s_asciiOpenContext->sequence = sequence;
+	s_asciiOpenContext->applyAll = false;
+
+	accept();
+
+	return true;
 }
 
 void AsciiOpenDlg::applyAll()

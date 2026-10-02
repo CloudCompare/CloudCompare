@@ -525,7 +525,7 @@ QString ccColorScaleEditorDialog::exportCustomLabelsList(ccColorScale::LabelSet&
 			{
 				return "Expecting a numerical value before the text label";
 			}
-			else if (firstQuoteIndex > 0)
+			if (firstQuoteIndex > 0)
 			{
 				int secondQuoteIndex = line.lastIndexOf('"');
 				if (secondQuoteIndex == firstQuoteIndex)

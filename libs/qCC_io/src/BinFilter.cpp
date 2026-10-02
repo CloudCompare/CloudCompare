@@ -336,27 +336,25 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		return LoadFileV1(in, container, static_cast<unsigned>(firstBytes), parameters); // firstBytes == number of scans for V1 files!
 	}
-	else
-	{
-		// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
-		int flags = 0;
-		{
-			QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
-			bool  ok;
-			flags = QString(c).toInt(&ok);
-			if (!ok || flags > 8)
-			{
-				ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
-				return CC_FERR_WRONG_FILE_TYPE;
-			}
-		}
 
-		return BinFilter::LoadFileV2(in,
-		                             container,
-		                             flags,
-		                             parameters.alwaysDisplayLoadDialog,
-		                             parameters.parentWidget);
+	// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
+	int flags = 0;
+	{
+		QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
+		bool  ok;
+		flags = QString(c).toInt(&ok);
+		if (!ok || flags > 8)
+		{
+			ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
+			return CC_FERR_WRONG_FILE_TYPE;
+		}
 	}
+
+	return BinFilter::LoadFileV2(in,
+	                             container,
+	                             flags,
+	                             parameters.alwaysDisplayLoadDialog,
+	                             parameters.parentWidget);
 }
 
 static bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)

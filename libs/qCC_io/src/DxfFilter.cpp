@@ -637,7 +637,7 @@ class DxfImporter : public DL_CreationAdapter
 			// TODO Colours BYBLOCK not handled
 			return false;
 		}
-		else if (colourIndex == 256)
+		if (colourIndex == 256)
 		{
 			// an attribute of 256 means the colours are BYLAYER, so grab it from our map instead
 			const int defaultIndex = -1;

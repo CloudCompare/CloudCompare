@@ -167,13 +167,11 @@ bool ccGlobalShiftManager::Handle(const CCVector3d& P,
 			// canUseInputCoordinatesShift = true;
 			return true;
 		}
-		else
-		{
-			needShift   = NeedShift(P * scale + coordinatesShift);
-			needRescale = NeedRescale(diagonal * scale);
 
-			canUseInputCoordinatesShift = (!needShift && !needRescale);
-		}
+		needShift   = NeedShift(P * scale + coordinatesShift);
+		needRescale = NeedRescale(diagonal * scale);
+
+		canUseInputCoordinatesShift = (!needShift && !needRescale);
 	}
 	else
 	{

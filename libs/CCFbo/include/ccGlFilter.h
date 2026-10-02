@@ -34,9 +34,9 @@ class CCFBO_LIB_API ccGlFilter
 {
   public:
 	//! Default constructor
-	ccGlFilter(QString description)
+	ccGlFilter(const QString& description)
 	    : m_isValid(false)
-	    , m_description(std::move(description))
+	    , m_description(description)
 	{
 	}
 

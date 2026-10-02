@@ -4722,7 +4722,7 @@ void MainWindow::doActionCutPursuit()
 			size_t             rgbDim = (s_useRGB && pc->hasColors()) ? 3 : 0;
 			int32_t            D      = 3 + static_cast<int32_t>(sfIndices.size()) + static_cast<int32_t>(rgbDim);
 			int32_t            N      = static_cast<int32_t>(pc->size());
-			std::vector<float> Y(N * D, 0.0f);
+			std::vector<float> Y(static_cast<size_t>(N) * static_cast<size_t>(D), 0.0f);
 
 			CCVector3 posOffset(0, 0, 0);
 			for (int32_t i = 0; i < N; ++i)

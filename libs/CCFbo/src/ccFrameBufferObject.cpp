@@ -68,7 +68,7 @@ bool ccFrameBufferObject::init(unsigned w, unsigned h)
 			return false;
 		}
 
-		const auto context = QOpenGLContext::currentContext();
+		const auto* context = QOpenGLContext::currentContext();
 		// We test if FBOs are supported.
 		// It's unlikely that the context is null since previous GL functions initialization
 		// does not fail but we check it anyway

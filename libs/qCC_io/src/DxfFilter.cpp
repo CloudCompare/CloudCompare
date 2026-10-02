@@ -769,12 +769,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		ccHObject::Container* containers[3] = {&polylines, &meshes, &clouds};
 
 		bool firstEntity = true;
-		for (int j = 0; j < 3; ++j)
+		for (const auto* container : containers)
 		{
-			const ccHObject::Container& container = *containers[j];
-			for (size_t i = 0; i < container.size(); ++i)
+			for (auto* entity : *container)
 			{
-				ccHObject::GlobalBoundingBox bb = container[i]->getOwnGlobalBB();
+				ccHObject::GlobalBoundingBox bb = entity->getOwnGlobalBB();
 				// update global BB
 				globalBB += bb;
 			}

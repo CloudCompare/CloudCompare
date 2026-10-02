@@ -247,11 +247,11 @@ FileIOFilter::Shared FileIOFilter::GetFilter(const QString& fileFilter, bool onI
 {
 	if (!fileFilter.isEmpty())
 	{
-		for (FilterContainer::const_iterator it = s_ioFilters.begin(); it != s_ioFilters.end(); ++it)
+		for (const auto& ioFilter : s_ioFilters)
 		{
-			QStringList otherFilters = (*it)->getFileFilters(onImport);
+			QStringList otherFilters = ioFilter->getFileFilters(onImport);
 			if (otherFilters.contains(fileFilter))
-				return *it;
+				return ioFilter;
 		}
 	}
 

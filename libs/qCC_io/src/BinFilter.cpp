@@ -259,11 +259,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(image->getAssociatedSensor());
 		}
 
-		for (std::unordered_set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
+		for (const auto* dependency : dependencies)
 		{
-			if (!object->find((*it)->getUniqueID()))
+			if (!object->find(dependency->getUniqueID()))
 			{
-				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg((*it)->getName(), currentObject->getName()));
+				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependency->getName(), currentObject->getName()));
 				result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 			}
 		}
@@ -554,7 +554,7 @@ static void HandleSubMesh(IncompleteEntityLinkerContext& linkerContext)
 			return;
 		}
 
-		auto subMeshParent = subMesh->getParent();
+		auto* subMeshParent = subMesh->getParent();
 		if (subMeshParent && subMeshParent->isA(CC_TYPES::MESH))
 		{
 			ccLog::Warning(QString("[BIN] Automatically replacing it by its parent '%1'...").arg(subMeshParent->getName()));
@@ -586,7 +586,7 @@ static void HandleMeshOrPrimitive(IncompleteEntityLinkerContext& linkerContext,
 
 	if (mesh->isKindOf(CC_TYPES::PRIMITIVE))
 	{
-		auto vertices = mesh->getAssociatedCloud();
+		auto* vertices = mesh->getAssociatedCloud();
 		if (vertices)
 		{
 			mesh->setAssociatedCloud(nullptr);

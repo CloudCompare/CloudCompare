@@ -2171,9 +2171,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						// create a list of available fields
 						ImportDBFFieldDialog lsfDlg(nullptr);
-						for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+						for (const auto& field : candidateFields)
 						{
-							lsfDlg.listWidget->addItem(it->second);
+							lsfDlg.listWidget->addItem(field.second);
 						}
 						static double s_dbfFieldImportScale = 1.0;
 						lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);

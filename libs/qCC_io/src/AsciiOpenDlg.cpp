@@ -620,9 +620,9 @@ void AsciiOpenDlg::updateTable()
 	QStringList propsText;
 	{
 		propsText.reserve(ASCII_OPEN_DLG_TYPES_COUNT);
-		for (unsigned i = 0; i < ASCII_OPEN_DLG_TYPES_COUNT; i++)
+		for (const auto& dlgTypeName : ASCII_OPEN_DLG_TYPES_NAMES)
 		{
-			propsText << tr(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+			propsText << tr(dlgTypeName);
 		}
 	}
 

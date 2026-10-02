@@ -363,9 +363,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF name
-			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
+			for (const auto& sf : scalarFields)
 			{
-				QString sfName(QString::fromStdString((*it)->getName()));
+				QString sfName(QString::fromStdString(sf->getName()));
 				sfName.replace(separator, '_');
 				header.append(separator);
 				header.append(sfName);
@@ -463,10 +463,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF values
-			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
+			for (const auto& sf : scalarFields)
 			{
 				line.append(separator);
-				ScalarType sfVal = (*it)->getValue(i);
+				ScalarType sfVal = sf->getValue(i);
 				line.append(QString::number(sfVal, 'f', s_outputSFPrecision));
 			}
 		}
@@ -656,9 +656,9 @@ struct cloudAttributesDescriptor
 	void reset()
 	{
 		cloud = nullptr;
-		for (unsigned i = 0; i < c_attribCount; ++i)
+		for (int& index : indexes)
 		{
-			indexes[i] = -1;
+			index = -1;
 		}
 		hasNorms             = false;
 		hasRGBColors         = false;
@@ -1043,9 +1043,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 					ccLog::Warning("Memory reallocation failed ... some memory may have been wasted ...");
 				if (!cloudDesc.scalarFields.empty())
 				{
-					for (unsigned k = 0; k < cloudDesc.scalarFields.size(); ++k)
+					for (const auto& scalarField : cloudDesc.scalarFields)
 					{
-						cloudDesc.scalarFields[k]->computeMinAndMax();
+						scalarField->computeMinAndMax();
 					}
 					cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 					cloudDesc.cloud->showSF(true);

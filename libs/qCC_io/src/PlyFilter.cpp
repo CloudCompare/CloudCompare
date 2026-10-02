@@ -1114,7 +1114,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				// we store its properties in 'stdProperties'
 				for (auto& property : lastElement.properties)
 				{
-					property.elemIndex = (int)pointElements.size();
+					property.elemIndex = static_cast<int>(pointElements.size());
 					stdProperties.push_back(property);
 				}
 				pointElements.push_back(lastElement);

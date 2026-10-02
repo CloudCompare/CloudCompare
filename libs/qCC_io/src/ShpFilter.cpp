@@ -40,9 +40,6 @@
 // CCCoreLib
 #include <MeshSamplingTools.h>
 
-// System
-#include <array>
-
 using FieldIndexAndName = QPair<int, QString>;
 
 // Specific value for NaN
@@ -556,8 +553,6 @@ static QString ToString(ESRI_SHAPE_TYPE type)
 	default:
 		return "Unknown";
 	}
-
-	return QString("Unknown");
 }
 
 static void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESRI_SHAPE_TYPE& shapeType)
@@ -1052,7 +1047,7 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_STRIP;
 		return CC_FERR_NO_ERROR;
 	}
-	else if (IsTriangleFan(secondTriangle))
+	if (IsTriangleFan(secondTriangle))
 	{
 		for (unsigned i = 2; i < mesh->size(); ++i)
 		{
@@ -1065,10 +1060,8 @@ static CC_FILE_ERROR FindTriangleOrganisation(ccMesh* mesh, ESRI_PART_TYPE& type
 		type = ESRI_PART_TYPE::TRIANGLE_FAN;
 		return CC_FERR_NO_ERROR;
 	}
-	else
-	{
-		return CC_FERR_BAD_ENTITY_TYPE;
-	}
+
+	return CC_FERR_BAD_ENTITY_TYPE;
 }
 
 static CC_FILE_ERROR SaveMesh(ccMesh* mesh, QDataStream& stream, int32_t recordNumber, int32_t& recordSize16bits)
@@ -1273,7 +1266,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline*     poly,
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	const unsigned char Z = static_cast<unsigned char>(vertDim);
+	const unsigned char Z = vertDim;
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
@@ -1498,7 +1491,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream&      shpStream,
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
-				sf.reset(new ccScalarField("Measures"));
+				sf = std::make_shared<ccScalarField>("Measures");
 				if (!sf->reserveSafe(numPoints))
 				{
 					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
@@ -1674,7 +1667,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	return saveToFile(entity, fields, filename, parameters);
 }
 
-CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<GenericDBFField*>& fields, const QString& filename, const SaveParameters& parameters) const
 {
 	if (!entity)
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -1758,7 +1751,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		}
 	}
 
-	ccLog::Print("[SHP] Output type: " + ToString(outputShapeType));
+	ccLog::Print(QStringLiteral("[SHP] Output type: ") + ToString(outputShapeType));
 
 	QFileInfo fi(filename);
 	QString   baseFileName = fi.path() + QString("/") + fi.completeBaseName();
@@ -1996,7 +1989,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	qint64                            fileSize = file.size();
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMaximum(static_cast<int>(fileSize));
 		pDlg->setMethodTitle(QObject::tr("Load SHP file"));
 		pDlg->setInfo(QObject::tr("File size: %1").arg(fileSize));
@@ -2064,8 +2057,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					ccHObject* child = container.getChild(i);
 					assert(child && child->isA(CC_TYPES::POLY_LINE));
 					polyIDs[static_cast<ccPolyline*>(child)] = recordNumber;
-					if (recordNumber > maxPolyID)
-						maxPolyID = recordNumber;
+					maxPolyID                                = std::max(recordNumber, maxPolyID);
 				}
 			}
 		}
@@ -2176,9 +2168,9 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 					{
 						// create a list of available fields
 						ImportDBFFieldDialog lsfDlg(nullptr);
-						for (QList<FieldIndexAndName>::const_iterator it = candidateFields.begin(); it != candidateFields.end(); ++it)
+						for (const auto& field : candidateFields)
 						{
-							lsfDlg.listWidget->addItem(it->second);
+							lsfDlg.listWidget->addItem(field.second);
 						}
 						static double s_dbfFieldImportScale = 1.0;
 						lsfDlg.scaleDoubleSpinBox->setValue(s_dbfFieldImportScale);

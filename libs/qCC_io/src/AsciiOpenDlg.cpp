@@ -461,10 +461,7 @@ void AsciiOpenDlg::updateTable()
 			if (lineCount < DISPLAYED_LINES)
 			{
 				unsigned rawPartsCount = static_cast<unsigned>(parts.size());
-				if (rawPartsCount > maxPartsCount)
-				{
-					maxPartsCount = rawPartsCount;
-				}
+				maxPartsCount          = std::max(rawPartsCount, maxPartsCount);
 
 				unsigned partsCount              = std::min(MAX_COLUMNS, rawPartsCount);
 				bool     columnCountHasIncreased = (partsCount > columnsCount);
@@ -620,9 +617,9 @@ void AsciiOpenDlg::updateTable()
 	QStringList propsText;
 	{
 		propsText.reserve(ASCII_OPEN_DLG_TYPES_COUNT);
-		for (unsigned i = 0; i < ASCII_OPEN_DLG_TYPES_COUNT; i++)
+		for (const auto& dlgTypeName : ASCII_OPEN_DLG_TYPES_NAMES)
 		{
-			propsText << tr(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+			propsText << tr(dlgTypeName);
 		}
 	}
 
@@ -1180,24 +1177,21 @@ bool AsciiOpenDlg::apply()
 		QMessageBox::warning(nullptr, tr("Error"), errorMessage);
 		return false;
 	}
-	else
+	// save semi-persistent values
+	s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
+	s_csEntitiesScale                = m_ui->quatCSScaleDoubleSpinBox->value();
+
+	if (!s_asciiOpenContext)
 	{
-		// save semi-persistent values
-		s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
-		s_csEntitiesScale                = m_ui->quatCSScaleDoubleSpinBox->value();
-
-		if (!s_asciiOpenContext)
-		{
-			s_asciiOpenContext.reset(new AsciiOpenContext);
-		}
-		s_asciiOpenContext->save(m_ui.get());
-		s_asciiOpenContext->sequence = sequence;
-		s_asciiOpenContext->applyAll = false;
-
-		accept();
-
-		return true;
+		s_asciiOpenContext = std::make_unique<AsciiOpenContext>();
 	}
+	s_asciiOpenContext->save(m_ui.get());
+	s_asciiOpenContext->sequence = sequence;
+	s_asciiOpenContext->applyAll = false;
+
+	accept();
+
+	return true;
 }
 
 void AsciiOpenDlg::applyAll()

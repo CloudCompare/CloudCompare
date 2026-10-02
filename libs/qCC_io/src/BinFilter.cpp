@@ -145,21 +145,21 @@ static int ReadEntityHeader(QFile& in, unsigned& numberOfPoints, HeaderFlags& he
 	return 0;
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 	s_lastSavedFileBinVersion = 0;
 
-	if (!root || filename.isNull())
+	if (!entity || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
 
 	QFile out(filename);
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Please wait... saving in progress"));
 		pDlg->setRange(0, 0);
@@ -169,7 +169,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 
 	// concurrent call, so that the progress dialog keeps refreshing
 	CC_FILE_ERROR result = ccBackgroundTask::Run([&]()
-	                                             { return BinFilter::SaveFileV2(out, root); });
+	                                             { return BinFilter::SaveFileV2(out, entity); });
 
 	return result;
 }
@@ -259,11 +259,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(image->getAssociatedSensor());
 		}
 
-		for (std::unordered_set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
+		for (const auto* dependency : dependencies)
 		{
-			if (!object->find((*it)->getUniqueID()))
+			if (!object->find(dependency->getUniqueID()))
 			{
-				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg((*it)->getName(), currentObject->getName()));
+				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependency->getName(), currentObject->getName()));
 				result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 			}
 		}
@@ -336,27 +336,25 @@ CC_FILE_ERROR BinFilter::loadFile(const QString& filename, ccHObject& container,
 	{
 		return LoadFileV1(in, container, static_cast<unsigned>(firstBytes), parameters); // firstBytes == number of scans for V1 files!
 	}
-	else
-	{
-		// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
-		int flags = 0;
-		{
-			QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
-			bool  ok;
-			flags = QString(c).toInt(&ok);
-			if (!ok || flags > 8)
-			{
-				ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
-				return CC_FERR_WRONG_FILE_TYPE;
-			}
-		}
 
-		return BinFilter::LoadFileV2(in,
-		                             container,
-		                             flags,
-		                             parameters.alwaysDisplayLoadDialog,
-		                             parameters.parentWidget);
+	// Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
+	int flags = 0;
+	{
+		QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
+		bool  ok;
+		flags = QString(c).toInt(&ok);
+		if (!ok || flags > 8)
+		{
+			ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
+			return CC_FERR_WRONG_FILE_TYPE;
+		}
 	}
+
+	return BinFilter::LoadFileV2(in,
+	                             container,
+	                             flags,
+	                             parameters.alwaysDisplayLoadDialog,
+	                             parameters.parentWidget);
 }
 
 static bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
@@ -556,7 +554,7 @@ static void HandleSubMesh(IncompleteEntityLinkerContext& linkerContext)
 			return;
 		}
 
-		auto subMeshParent = subMesh->getParent();
+		auto* subMeshParent = subMesh->getParent();
 		if (subMeshParent && subMeshParent->isA(CC_TYPES::MESH))
 		{
 			ccLog::Warning(QString("[BIN] Automatically replacing it by its parent '%1'...").arg(subMeshParent->getName()));
@@ -588,7 +586,7 @@ static void HandleMeshOrPrimitive(IncompleteEntityLinkerContext& linkerContext,
 
 	if (mesh->isKindOf(CC_TYPES::PRIMITIVE))
 	{
-		auto vertices = mesh->getAssociatedCloud();
+		auto* vertices = mesh->getAssociatedCloud();
 		if (vertices)
 		{
 			mesh->setAssociatedCloud(nullptr);
@@ -890,7 +888,7 @@ static void HandleLabel2D(
 			{
 				ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 				assert(genCloud && genCloud->size() > pp.index);
-				correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud, pp.index, pp.entityCenterPoint));
+				correctedPickedPoints.emplace_back(genCloud, pp.index, pp.entityCenterPoint);
 			}
 			else
 			{
@@ -908,7 +906,7 @@ static void HandleLabel2D(
 			{
 				ccGenericMesh* genMesh = ccHObjectCaster::ToGenericMesh(mesh);
 				assert(genMesh && genMesh->size() > pp.index);
-				correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genMesh, pp.index, pp.uv, pp.entityCenterPoint));
+				correctedPickedPoints.emplace_back(genMesh, pp.index, pp.uv, pp.entityCenterPoint);
 			}
 			else
 			{
@@ -1166,10 +1164,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parallel && parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Loading: %1").arg(in.fileName()));
 		pDlg->setRange(0, 0);
@@ -1366,10 +1364,10 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		return CC_FERR_NO_LOAD;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Open Bin file (old style)"));
 		pDlg->setAutoClose(false);
 	}

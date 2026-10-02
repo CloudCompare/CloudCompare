@@ -36,8 +36,7 @@
 #include <ccLog.h>
 
 // system
-#include <assert.h>
-#include <float.h>
+#include <cassert>
 
 ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
                                                  double            Dg /*=0*/,
@@ -207,7 +206,7 @@ void ccShiftAndScaleCloudDlg::setShift(const CCVector3d& shift)
 
 CCVector3d ccShiftAndScaleCloudDlg::getShift() const
 {
-	return CCVector3d(m_ui->shiftX->value(), m_ui->shiftY->value(), m_ui->shiftZ->value());
+	return {m_ui->shiftX->value(), m_ui->shiftY->value(), m_ui->shiftZ->value()};
 }
 
 void ccShiftAndScaleCloudDlg::setScale(double scale)

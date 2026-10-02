@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_RASTER_FILTER_HEADER
-#define CC_RASTER_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
@@ -35,5 +34,3 @@ class QCC_IO_LIB_API RasterGridFilter : public FileIOFilter
 };
 
 #endif // CC_GDAL_SUPPORT
-
-#endif // CC_RASTER_FILTER_HEADER

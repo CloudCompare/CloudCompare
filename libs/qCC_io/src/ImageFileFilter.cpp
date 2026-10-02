@@ -97,10 +97,10 @@ QString ImageFileFilter::GetSaveFilename(const QString& dialogTitle, const QStri
 
 	// we convert this list into a proper "filters" string
 	QString pngFilter;
-	for (int i = 0; i < formats.size(); ++i)
+	for (const auto& format : formats)
 	{
-		QString ext    = QString(formats[i].data()).toUpper();
-		QString filter = QString("%1 image (*.%2)").arg(ext, formats[i].data());
+		QString ext    = QString(format.data()).toUpper();
+		QString filter = QString("%1 image (*.%2)").arg(ext, format.data());
 		filters.append(filter + QString("\n"));
 
 		// find PNG by default
@@ -124,9 +124,9 @@ QString ImageFileFilter::GetLoadFilename(const QString& dialogTitle, const QStri
 	// we grab the list of supported image file formats (for reading)
 	QList<QByteArray> formats = QImageReader::supportedImageFormats();
 	QStringList       imageExts;
-	for (int i = 0; i < formats.size(); ++i)
+	for (const auto& format : formats)
 	{
-		imageExts.append(QString("*.%1").arg(formats[i].data()));
+		imageExts.append(QString("*.%1").arg(format.data()));
 	}
 	// we convert this list into a proper "filters" string
 	QString imageFilter = QString("Image (%1)").arg(imageExts.join(" "));

@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_ASCII_SAVE_DIALOG_HEADER
-#define CC_ASCII_SAVE_DIALOG_HEADER
 
 // local
 #include "qCC_io.h"
@@ -39,7 +38,7 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 	explicit AsciiSaveDlg(QWidget* parent = nullptr);
 
 	//! Destructor
-	virtual ~AsciiSaveDlg();
+	~AsciiSaveDlg() override;
 
 	//! Returns whether columns names should be be saved in header
 	bool saveColumnsNamesHeader() const;
@@ -100,5 +99,3 @@ class QCC_IO_LIB_API AsciiSaveDlg : public QDialog
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
 };
-
-#endif // CC_ASCII_SAVE_DIALOG_HEADER

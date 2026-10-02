@@ -245,7 +245,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 		return m_customLightEnabled;
 	}
 	//! Returns the current position of the custom light
-	const CCVector3f getCustomLightPosition() const
+	CCVector3f getCustomLightPosition() const
 	{
 		return CCVector3f(m_customLightPos);
 	}
@@ -366,7 +366,7 @@ class CCGLWINDOW_LIB_API ccGLWindowInterface : public ccGenericGLDisplay
 	    - the rotation around the camera center in viewer-centered mode
 	    (see setPerspectiveState).
 	**/
-	const ccGLMatrixd& getBaseViewMat()
+	const ccGLMatrixd& getBaseViewMat() const
 	{
 		return m_viewportParams.viewMat;
 	}

@@ -20,7 +20,7 @@
 #include "ShpDBFFields.h"
 
 // system
-#include <assert.h>
+#include <cassert>
 
 bool IntegerDBFField::save(DBFHandle handle, int fieldIndex) const
 {

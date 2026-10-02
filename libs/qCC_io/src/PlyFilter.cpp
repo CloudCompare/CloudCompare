@@ -175,15 +175,15 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			assert(materials);
 			if (materials)
 			{
-				for (size_t i = 0; i < materials->size(); ++i)
+				for (const auto& mat : *materials)
 				{
 					// texture?
-					if (!materials->at(i)->getTexture().isNull())
+					if (!mat->getTexture().isNull())
 					{
 						// save first encountered texture
 						if (!material)
 						{
-							material = materials->at(i);
+							material = mat;
 						}
 						++textureCount;
 					}
@@ -435,7 +435,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (vertices->hasMetaData("ply.comments"))
 	{
 		QStringList comments = vertices->getMetaData("ply.comments").toStringList();
-		for (QString comment : comments)
+		for (const QString& comment : comments)
 		{
 			ply_add_comment(ply, qUtf8Printable(comment));
 		}
@@ -487,9 +487,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			ply_write(ply, static_cast<double>(N.z));
 		}
 
-		for (auto sf = scalarFields.begin(); sf != scalarFields.end(); ++sf)
+		for (const auto& sf : scalarFields)
 		{
-			ply_write(ply, (*sf)->getValue(i));
+			ply_write(ply, sf->getValue(i));
 		}
 	}
 
@@ -1092,20 +1092,19 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			if (lastElement.isFace)
 			{
 				// we store its properties in 'listProperties'
-				for (size_t i = 0; i < lastElement.properties.size(); ++i)
+				for (auto& property : lastElement.properties)
 				{
-					plyProperty& prop = lastElement.properties[i];
-					prop.elemIndex    = static_cast<int>(meshElements.size());
+					property.elemIndex = static_cast<int>(meshElements.size());
 
-					if (prop.type == PLY_LIST)
+					if (property.type == PLY_LIST)
 					{
 						// multiple elements per face (vertex indexes, texture coordinates, etc.)
-						listProperties.push_back(prop);
+						listProperties.push_back(property);
 					}
 					else
 					{
 						// single element per face (texture index, etc.)
-						singleProperties.push_back(prop);
+						singleProperties.push_back(property);
 					}
 				}
 				meshElements.push_back(lastElement);
@@ -1113,11 +1112,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			else // else if we have a "point-like" element
 			{
 				// we store its properties in 'stdProperties'
-				for (size_t i = 0; i < lastElement.properties.size(); ++i)
+				for (auto& property : lastElement.properties)
 				{
-					plyProperty& prop = lastElement.properties[i];
-					prop.elemIndex    = (int)pointElements.size();
-					stdProperties.push_back(prop);
+					property.elemIndex = static_cast<int>(pointElements.size());
+					stdProperties.push_back(property);
 				}
 				pointElements.push_back(lastElement);
 			}
@@ -1286,7 +1284,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		ccLog::Warning("[PLY] This ply file has less than 2 properties defined! (not even X and Y ;)");
 		return CC_FERR_MALFORMED_FILE;
 	}
-	else if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
+	if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
 	{
 		// brute force heuristic
 		//(the first element is always 'None')
@@ -1301,22 +1299,22 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		// we count all assigned properties
 		int assignedStdProperties = 0;
 		{
-			for (unsigned i = 0; i < nStdProp; ++i)
-				if (stdPropIndexes[i] > 0)
+			for (int stdPropIndex : stdPropIndexes)
+				if (stdPropIndex > 0)
 					++assignedStdProperties;
 		}
 
 		int assignedListProperties = 0;
 		{
-			for (unsigned i = 0; i < nListProp; ++i)
-				if (listPropIndexes[i] > 0)
+			for (int listPropIndex : listPropIndexes)
+				if (listPropIndex > 0)
 					++assignedListProperties;
 		}
 
 		int assignedSingleProperties = 0;
 		{
-			for (unsigned i = 0; i < nSingleProp; ++i)
-				if (singlePropIndexes[i] > 0)
+			for (int singlePropIndex : singlePropIndexes)
+				if (singlePropIndex > 0)
 					++assignedSingleProperties;
 		}
 
@@ -1357,9 +1355,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 				pod.iComboBox->setCurrentIndex(iIndex);
 
-				for (size_t j = 0; j < sfPropIndexes.size(); ++j)
+				for (int sfPropIndex : sfPropIndexes)
 				{
-					pod.addSFComboBox(sfPropIndexes[j]);
+					pod.addSFComboBox(sfPropIndex);
 				}
 
 				pod.nxComboBox->setCurrentIndex(nxIndex);
@@ -1407,9 +1405,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			// get (non null) SF properties
 			sfPropIndexes.clear();
 			{
-				for (size_t j = 0; j < pod.m_sfCombos.size(); ++j)
-					if (pod.m_sfCombos[j]->currentIndex() > 0)
-						sfPropIndexes.push_back(pod.m_sfCombos[j]->currentIndex());
+				for (const auto* sfCombo : pod.m_sfCombos)
+					if (sfCombo->currentIndex() > 0)
+						sfPropIndexes.push_back(sfCombo->currentIndex());
 			}
 		}
 	}
@@ -1731,7 +1729,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		plyProperty& pp = listProperties[texCoordsIndex - 1];
 		assert(pp.type == PLY_LIST); // we only accept PLY_LIST here!
 
-		texCoords.reset(new TextureCoordsContainer);
+		texCoords = std::make_shared<TextureCoordsContainer>();
 
 		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
@@ -1753,7 +1751,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	{
 		plyProperty& pp = singleProperties[texNumberIndex - 1];
 
-		texIndexes.reset(new ccMesh::triangleMaterialIndexesSet);
+		texIndexes = std::make_shared<ccMesh::triangleMaterialIndexesSet>();
 
 		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
@@ -1771,10 +1769,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		}
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget);
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setMethodTitle(QObject::tr("PLY file"));
 		pDlg->setRange(0, 0);
@@ -1802,8 +1800,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	if (success < 1 || s_NotEnoughMemory)
 	{
-		if (mesh)
-			delete mesh;
+		delete mesh;
 		delete cloud;
 		return s_NotEnoughMemory ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
@@ -1950,9 +1947,8 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 				materials = std::make_shared<ccMaterialSet>("materials");
 
 				QString texturePath = QFileInfo(filename).absolutePath() + QString('/');
-				for (int ti = 0; ti < textureFileNames.size(); ++ti)
+				for (const auto& textureFileName : textureFileNames)
 				{
-					QString textureFileName = textureFileNames[ti];
 					QString textureFilePath = texturePath + textureFileName;
 					auto    material        = std::make_shared<ccMaterial>(textureFileName);
 					if (material->loadAndSetTexture(textureFilePath))

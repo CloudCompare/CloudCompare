@@ -17,6 +17,9 @@
 
 #include "AsciiFilter.h"
 
+// Local
+#include "AsciiSaveDlg.h"
+
 // Qt
 #include <QFile>
 #include <QFileInfo>
@@ -275,10 +278,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 						{
 							return result;
 						}
-						else
-						{
-							ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName(), subFilename));
-						}
+						ccLog::Print(QString("[ASCII] Cloud '%1' has been saved in: %2").arg(child->getName(), subFilename));
 					}
 					else
 					{
@@ -320,10 +320,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 	bool writeSF = (!scalarFields.empty());
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
 		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 		pDlg->start();
@@ -363,9 +363,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF name
-			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
+			for (const auto& sf : scalarFields)
 			{
-				QString sfName(QString::fromStdString((*it)->getName()));
+				QString sfName(QString::fromStdString(sf->getName()));
 				sfName.replace(separator, '_');
 				header.append(separator);
 				header.append(sfName);
@@ -463,10 +463,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 		if (writeSF)
 		{
 			// add each associated SF values
-			for (auto it = scalarFields.begin(); it != scalarFields.end(); ++it)
+			for (const auto& sf : scalarFields)
 			{
 				line.append(separator);
-				ScalarType sfVal = (*it)->getValue(i);
+				ScalarType sfVal = sf->getValue(i);
 				line.append(QString::number(sfVal, 'f', s_outputSFPrecision));
 			}
 		}
@@ -519,7 +519,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 		if (UsesLoneCRLineEndings(head.constData(), head.size()))
 		{
 			ccLog::Warning(QString("[ASCII] File '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(filename));
-			crToLFDevice.reset(new CRToLFDevice(file));
+			crToLFDevice = std::make_unique<CRToLFDevice>(file);
 			if (!crToLFDevice->open(QIODevice::ReadOnly))
 			{
 				return CC_FERR_READING;
@@ -656,9 +656,9 @@ struct cloudAttributesDescriptor
 	void reset()
 	{
 		cloud = nullptr;
-		for (unsigned i = 0; i < c_attribCount; ++i)
+		for (int& index : indexes)
 		{
-			indexes[i] = -1;
+			index = -1;
 		}
 		hasNorms             = false;
 		hasRGBColors         = false;
@@ -672,12 +672,10 @@ struct cloudAttributesDescriptor
 	void updateMaxIndex(int& maxIndex)
 	{
 		for (int attribIndex : indexes)
-			if (attribIndex > maxIndex)
-				maxIndex = attribIndex;
+			maxIndex = std::max(attribIndex, maxIndex);
 
 		for (int sfIndex : scalarIndexes)
-			if (sfIndex > maxIndex)
-				maxIndex = sfIndex;
+			maxIndex = std::max(sfIndex, maxIndex);
 	}
 };
 
@@ -697,7 +695,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
 	{
 		delete cloud;
-		return cloudAttributesDescriptor();
+		return {};
 	}
 
 	if (step == 1)
@@ -960,7 +958,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Open ASCII data [%1]").arg(filenameOrTitle));
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();
@@ -1043,9 +1041,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 					ccLog::Warning("Memory reallocation failed ... some memory may have been wasted ...");
 				if (!cloudDesc.scalarFields.empty())
 				{
-					for (unsigned k = 0; k < cloudDesc.scalarFields.size(); ++k)
+					for (const auto& scalarField : cloudDesc.scalarFields)
 					{
-						cloudDesc.scalarFields[k]->computeMinAndMax();
+						scalarField->computeMinAndMax();
 					}
 					cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 					cloudDesc.cloud->showSF(true);

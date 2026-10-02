@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                              CLOUDCOMPARE                              #
@@ -14,9 +16,6 @@
 // #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 // #                                                                        #
 // ##########################################################################
-
-#ifndef CC_DEPTH_MAP_FILE_FILTER_HEADER
-#define CC_DEPTH_MAP_FILE_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
@@ -41,5 +40,3 @@ class QCC_IO_LIB_API DepthMapFileFilter : public FileIOFilter
 	// direct method to save a sensor (depth map)
 	CC_FILE_ERROR saveToFile(const QString& filename, ccGBLSensor* sensor);
 };
-
-#endif // CC_DEPTH_MAP_FILE_FILTER_HEADER

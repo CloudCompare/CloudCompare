@@ -21,7 +21,6 @@
 
 // dialogs
 #include "AsciiOpenDlg.h"
-#include "AsciiSaveDlg.h"
 
 // Qt
 #include <QByteArray>

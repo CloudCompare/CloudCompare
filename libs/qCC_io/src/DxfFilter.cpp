@@ -637,7 +637,7 @@ class DxfImporter : public DL_CreationAdapter
 			// TODO Colours BYBLOCK not handled
 			return false;
 		}
-		else if (colourIndex == 256)
+		if (colourIndex == 256)
 		{
 			// an attribute of 256 means the colours are BYLAYER, so grab it from our map instead
 			const int defaultIndex = -1;
@@ -682,7 +682,7 @@ class DxfImporter : public DL_CreationAdapter
 
 #endif // CC_DXF_SUPPORT
 
-CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, const SaveParameters& parameters)
+CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* entity, const QString& filename, const SaveParameters& parameters)
 {
 #ifndef CC_DXF_SUPPORT
 
@@ -691,28 +691,28 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 
 #else
 
-	if (!root || filename.isEmpty())
+	if (!entity || filename.isEmpty())
 	{
 		return CC_FERR_BAD_ARGUMENT;
 	}
 
 	ccHObject::Container polylines;
-	root->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
-	if (root->isKindOf(CC_TYPES::POLY_LINE))
+	entity->filterChildren(polylines, true, CC_TYPES::POLY_LINE);
+	if (entity->isKindOf(CC_TYPES::POLY_LINE))
 	{
-		polylines.push_back(root);
+		polylines.push_back(entity);
 	}
 	ccHObject::Container meshes;
-	root->filterChildren(meshes, true, CC_TYPES::MESH);
-	if (root->isKindOf(CC_TYPES::MESH))
+	entity->filterChildren(meshes, true, CC_TYPES::MESH);
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
-		meshes.push_back(root);
+		meshes.push_back(entity);
 	}
 	ccHObject::Container clouds;
-	root->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true); // we don't want polylines!
-	if (root->isKindOf(CC_TYPES::POINT_CLOUD))
+	entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD, true); // we don't want polylines!
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		clouds.push_back(root);
+		clouds.push_back(entity);
 	}
 
 	if (!clouds.empty())
@@ -769,12 +769,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const QString& filename, co
 		ccHObject::Container* containers[3] = {&polylines, &meshes, &clouds};
 
 		bool firstEntity = true;
-		for (int j = 0; j < 3; ++j)
+		for (const auto* container : containers)
 		{
-			const ccHObject::Container& container = *containers[j];
-			for (size_t i = 0; i < container.size(); ++i)
+			for (auto* entity : *container)
 			{
-				ccHObject::GlobalBoundingBox bb = container[i]->getOwnGlobalBB();
+				ccHObject::GlobalBoundingBox bb = entity->getOwnGlobalBB();
 				// update global BB
 				globalBB += bb;
 			}

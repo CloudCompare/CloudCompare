@@ -1,3 +1,5 @@
+#pragma once
+
 // ##########################################################################
 // #                                                                        #
 // #                               QCC_IO                                   #
@@ -16,9 +18,6 @@
 // #                                                                        #
 // ##########################################################################
 
-#ifndef CC_IO_HEADER
-#define CC_IO_HEADER
-
 #include <QtCore/QtGlobal>
 
 #if defined(QCC_IO_LIBRARY_BUILD)
@@ -26,5 +25,3 @@
 #else
 #define QCC_IO_LIB_API Q_DECL_IMPORT
 #endif
-
-#endif // CC_IO_HEADER

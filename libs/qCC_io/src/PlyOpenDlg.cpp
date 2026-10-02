@@ -26,8 +26,8 @@
 #include <ccLog.h>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
+#include <cstring>
 
 //! Ply dialog loading context
 struct PlyLoadingContext
@@ -229,12 +229,12 @@ void PlyOpenDlg::saveContext(PlyLoadingContext* context)
 		// additional SF combos
 		{
 			context->sfCombosProperties.clear();
-			for (size_t i = 0; i < m_sfCombos.size(); ++i)
+			for (const auto* sfCombo : m_sfCombos)
 			{
 				// we only copy the valid ones!
-				if (m_sfCombos[i] && m_sfCombos[i]->currentIndex() > 0)
+				if (sfCombo && sfCombo->currentIndex() > 0)
 				{
-					context->sfCombosProperties.push_back(m_sfCombos[i]->currentText());
+					context->sfCombosProperties.push_back(sfCombo->currentText());
 					++assignedProps;
 				}
 			}
@@ -361,10 +361,10 @@ bool PlyOpenDlg::restoreContext(PlyLoadingContext* context, int& unassignedProps
 
 	// additional SF combos
 	{
-		for (size_t i = 0; i < context->sfCombosProperties.size(); ++i)
+		for (const auto& property : context->sfCombosProperties)
 		{
 			// try to find it in the new property list!
-			int idx = m_stdPropsText.lastIndexOf(context->sfCombosProperties[i]);
+			int idx = m_stdPropsText.lastIndexOf(property);
 			if (idx >= 0)
 			{
 				++assignedEntries;
@@ -425,14 +425,14 @@ bool PlyOpenDlg::isValid(bool displayErrors /*=true*/) const
 	assert(n + p + q >= 2);
 	std::vector<int> assignedIndexCount(n + p + q, 0);
 
-	for (size_t i = 0; i < m_standardCombos.size(); ++i)
-		++assignedIndexCount[m_standardCombos[i]->currentIndex()];
-	for (size_t j = 0; j < m_listCombos.size(); ++j)
-		++assignedIndexCount[m_listCombos[j]->currentIndex() > 0 ? n + m_listCombos[j]->currentIndex() : 0];
-	for (size_t k = 0; k < m_singleCombos.size(); ++k)
-		++assignedIndexCount[m_singleCombos[k]->currentIndex() > 0 ? n + p + m_singleCombos[k]->currentIndex() : 0];
-	for (size_t l = 0; l < m_sfCombos.size(); ++l)
-		++assignedIndexCount[m_sfCombos[l]->currentIndex()];
+	for (const auto* standardCombo : m_standardCombos)
+		++assignedIndexCount[standardCombo->currentIndex()];
+	for (const auto* listCombo : m_listCombos)
+		++assignedIndexCount[listCombo->currentIndex() > 0 ? n + listCombo->currentIndex() : 0];
+	for (const auto* singleCombo : m_singleCombos)
+		++assignedIndexCount[singleCombo->currentIndex() > 0 ? n + p + singleCombo->currentIndex() : 0];
+	for (const auto* sfCombo : m_sfCombos)
+		++assignedIndexCount[sfCombo->currentIndex()];
 
 	for (int i = 1; i < n + p + q; ++i)
 	{

@@ -347,7 +347,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 						for (int k = 0; k < nXSize; ++k)
 						{
-							double   z          = static_cast<double>(scanline[k]) + Pshift.z;
+							double   z          = scanline[k] + Pshift.z;
 							unsigned pointIndex = static_cast<unsigned>(k + j * rasterX);
 							if (pointIndex <= pc->size())
 							{

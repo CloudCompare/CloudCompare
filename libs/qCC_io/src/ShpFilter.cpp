@@ -1268,7 +1268,7 @@ static CC_FILE_ERROR SavePolyline(ccPolyline*     poly,
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-	const unsigned char Z = static_cast<unsigned char>(vertDim);
+	const unsigned char Z = vertDim;
 	const unsigned char X = Z == 2 ? 0 : Z + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 

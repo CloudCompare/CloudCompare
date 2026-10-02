@@ -163,7 +163,7 @@ void ccColorScaleEditorDialog::colorScaleChanged(int pos)
 
 void ccColorScaleEditorDialog::relativeModeChanged(int value)
 {
-	setScaleModeToRelative(value == 0 ? true : false);
+	setScaleModeToRelative(value == 0);
 
 	setModified(true);
 }
@@ -207,7 +207,7 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 
 bool ccColorScaleEditorDialog::isRelativeMode() const
 {
-	return (m_ui->scaleModeComboBox->currentIndex() == 0 ? true : false);
+	return (m_ui->scaleModeComboBox->currentIndex() == 0);
 }
 
 void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)

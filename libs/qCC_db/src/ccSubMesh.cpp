@@ -351,7 +351,7 @@ bool ccSubMesh::normalsShown() const
 	bool ccSubMesh::method() const \
 	{ \
 		assert(m_associatedMesh); \
-		return m_associatedMesh->method(); \
+		return m_associatedMesh ? m_associatedMesh->method() : false; \
 	}
 
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasColors);
@@ -361,6 +361,13 @@ CC_SUB_MESH_TRANSIENT_CONST_TEST(hasDisplayedScalarField);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasMaterials);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTextures);
 CC_SUB_MESH_TRANSIENT_CONST_TEST(hasTriNormals);
+
+bool ccSubMesh::hasUniqueMaterial()
+{
+	// Despite overriding ccMesh, a submesh doesn't know how materials and per-triangle material indexes are modified.
+	// Thus we cannot trust the local m_hasUniqueMaterial optional, and we can only rely on the parent mesh's version.
+	return m_associatedMesh ? m_associatedMesh->hasUniqueMaterial() : false;
+}
 
 const ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
 {

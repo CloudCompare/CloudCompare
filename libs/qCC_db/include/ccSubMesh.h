@@ -86,6 +86,7 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	bool hasScalarFields() const override;
 	bool hasDisplayedScalarField() const override;
 	bool normalsShown() const override;
+	bool hasUniqueMaterial() override;
 
 	// inherited methods (GenericIndexedMesh)
 	inline unsigned size() const override

@@ -106,11 +106,11 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Returns whether the mesh has per-triangle normals
 	virtual bool hasTriNormals() const = 0;
 
-	//! Returns a triplet of normal indexes for a given triangle (if any)
+	//! Returns a triplet of normal indexes for a given triangle
 	/** \param[in] triangleIndex triangle index
-	    \param[out] i1 first vertex normal index (or -1 if none)
-	    \param[out] i2 second vertex normal index (or -1 if none)
-	    \param[out] i3 third vertex normal index (or -1 if none)
+	    \param[out] i1 first vertex normal index
+	    \param[out] i2 second vertex normal index
+	    \param[out] i3 third vertex normal index
 	**/
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex,
 	                                      int&     i1,
@@ -320,7 +320,10 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	}
 
 	//! Returns whether the mesh has a unique material (i.e. all triangles share the same material)
-	bool hasUniqueMaterial();
+	virtual bool hasUniqueMaterial();
+
+	//! Resets the unique material flag (so that it will be recomputed next time it is requested)
+	void resetHasUniqueMaterial();
 
 	//! Releases OpenGL ressources (textures, VBOs, etc.)
 	static void ReleaseOpenGLRessources();
@@ -375,6 +378,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	//! Forces the GL_LIGHT0 on if true
 	bool m_forceSunLightOn;
 
+  private:
 	//! Whether the mesh has a unique material (i.e. all triangles share the same material)
 	std::optional<bool> m_hasUniqueMaterial;
 };

@@ -802,7 +802,6 @@ ccMesh* ccMesh::cloneMesh(ccGenericPointCloud*           vertices /*=nullptr*/,
 				cloneMesh->setMaterialSet(clonedMaterials);
 				assert(cloneMesh->m_triMtlIndexes);
 				m_triMtlIndexes->copy(*cloneMesh->m_triMtlIndexes); // should be ok as array is already reserved!
-				cloneMesh->m_hasUniqueMaterial = m_hasUniqueMaterial;
 			}
 		}
 		else
@@ -1321,7 +1320,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 						int newIndex = (index < 0 ? -1 : materialIndexMap[index]);
 						m_triMtlIndexes->emplace_back(newIndex);
 					}
-					m_hasUniqueMaterial.reset(); // we don't know if the merged mesh has a unique material anymore
+					resetHasUniqueMaterial(); // we don't know if the merged mesh has a unique material anymore
 				}
 			}
 			else
@@ -1333,7 +1332,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					for (unsigned i = 0; i < mesh->size(); ++i)
 						m_triMtlIndexes->emplace_back(-1);
 				}
-				m_hasUniqueMaterial = false; // -1 is not considered as a valid material index, so the merged mesh can't have a unique material
+				resetHasUniqueMaterial(); // -1 is not considered as a valid material index, so the merged mesh can't have a unique material
 			}
 		}
 		showMaterials(this->materialsShown() || mesh->materialsShown());
@@ -1572,7 +1571,7 @@ bool ccMesh::resize(size_t n)
 		{
 			return false;
 		}
-		m_hasUniqueMaterial.reset(); // we don't know if the resized mesh has a unique material anymore
+		resetHasUniqueMaterial(); // we don't know if the resized mesh has a unique material anymore
 	}
 
 	if (m_texCoordIndexes)
@@ -2071,11 +2070,6 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			}
 		}
 
-		if (m_triMtlIndexes)
-		{
-			newMesh->m_hasUniqueMaterial = m_hasUniqueMaterial;
-		}
-
 		// update the mesh size
 		resize(lastTri);
 		triCount = size();
@@ -2352,7 +2346,7 @@ void ccMesh::setTriangleMtlIndexesTable(triangleMaterialIndexesSet::Shared matIn
 	}
 
 	m_triMtlIndexes = matIndexesTable;
-	m_hasUniqueMaterial.reset(); // we don't know if the new table has a unique material or not
+	resetHasUniqueMaterial(); // we don't know if the new table has a unique material or not
 }
 
 bool ccMesh::reservePerTriangleMtlIndexes()
@@ -2371,21 +2365,21 @@ bool ccMesh::reservePerTriangleMtlIndexes()
 void ccMesh::removePerTriangleMtlIndexes()
 {
 	m_triMtlIndexes.reset();
-	m_hasUniqueMaterial.reset();
+	resetHasUniqueMaterial();
 }
 
 void ccMesh::addTriangleMtlIndex(int mtlIndex)
 {
 	assert(m_triMtlIndexes && m_triMtlIndexes->isAllocated());
 	m_triMtlIndexes->emplace_back(mtlIndex);
-	m_hasUniqueMaterial.reset();
+	resetHasUniqueMaterial();
 }
 
 void ccMesh::setTriangleMtlIndex(unsigned triangleIndex, int mtlIndex)
 {
 	assert(m_triMtlIndexes && m_triMtlIndexes->size() > triangleIndex);
 	m_triMtlIndexes->setValue(triangleIndex, mtlIndex);
-	m_hasUniqueMaterial.reset();
+	resetHasUniqueMaterial();
 }
 
 int ccMesh::getTriangleMtlIndex(unsigned triangleIndex) const
@@ -2612,7 +2606,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, LoadingContext& context)
 			m_triMtlIndexes.reset();
 			return false;
 		}
-		m_hasUniqueMaterial.reset();
+		resetHasUniqueMaterial();
 	}
 
 	// per-triangle texture coordinates indexes (dataVersion>=20))

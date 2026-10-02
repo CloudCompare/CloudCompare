@@ -166,6 +166,11 @@ unsigned* ccGenericMesh::GetWireVertexIndexes()
 	return s_vertWireIndexes;
 }
 
+void ccGenericMesh::resetHasUniqueMaterial()
+{
+	m_hasUniqueMaterial.reset();
+}
+
 bool ccGenericMesh::hasUniqueMaterial()
 {
 	if (m_hasUniqueMaterial.has_value())
@@ -173,7 +178,7 @@ bool ccGenericMesh::hasUniqueMaterial()
 		return m_hasUniqueMaterial.value();
 	}
 
-	if (!hasMaterials())
+	if (size() == 0 || !hasMaterials())
 	{
 		return false;
 	}
@@ -629,13 +634,25 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				{
 					unsigned triangleIndex = static_cast<unsigned>(chunkStart + n);
 					getTriangleTexCoordinates(triangleIndex, Tx1, Tx2, Tx3);
-					assert(Tx1 && Tx2 && Tx3);
-					*_texCoords++ = Tx1->tx;
-					*_texCoords++ = Tx1->ty;
-					*_texCoords++ = Tx2->tx;
-					*_texCoords++ = Tx2->ty;
-					*_texCoords++ = Tx3->tx;
-					*_texCoords++ = Tx3->ty;
+					if (Tx1 && Tx2 && Tx3)
+					{
+						*_texCoords++ = Tx1->tx;
+						*_texCoords++ = Tx1->ty;
+						*_texCoords++ = Tx2->tx;
+						*_texCoords++ = Tx2->ty;
+						*_texCoords++ = Tx3->tx;
+						*_texCoords++ = Tx3->ty;
+					}
+					else
+					{
+						assert(false);
+						*_texCoords++ = 0.0;
+						*_texCoords++ = 0.0;
+						*_texCoords++ = 0.0;
+						*_texCoords++ = 0.0;
+						*_texCoords++ = 0.0;
+						*_texCoords++ = 0.0;
+					}
 					texCoordCount += 3;
 				}
 			}

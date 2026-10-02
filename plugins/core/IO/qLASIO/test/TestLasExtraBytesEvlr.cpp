@@ -178,4 +178,20 @@ void TestLasExtraBytesEvlr::truncatedEvlr()
 	QCOMPARE(s_log.warnings.filter("Truncated EVLR").size(), 1);
 }
 
+void TestLasExtraBytesEvlr::fullLengthName()
+{
+	// a name that uses all 32 bytes has no NUL in the file
+	LasExtraScalarField field = Field("", LasExtraScalarField::u8);
+	std::memset(field.name, 'N', LasExtraScalarField::MAX_NAME_SIZE);
+	std::memset(field.description, 'D', LasExtraScalarField::MAX_DESCRIPTION_SIZE);
+	const QByteArray descriptor = Descriptor({field});
+	QTemporaryDir    dir;
+	const QString    fileName = WriteFile(dir, {{EvlrHeader("LASF_Spec", 4, descriptor.size()), descriptor}});
+	QVERIFY(!fileName.isEmpty());
+
+	const std::vector<LasExtraScalarField> fields = LasExtraScalarField::ParseExtraScalarFields(Header(1, nullptr), fileName);
+	QCOMPARE(fields.size(), size_t(1));
+	QCOMPARE(QString(fields[0].name), QString(LasExtraScalarField::MAX_NAME_SIZE, 'N'));
+}
+
 QTEST_MAIN(TestLasExtraBytesEvlr)

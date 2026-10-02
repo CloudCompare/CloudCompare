@@ -136,7 +136,8 @@ class LasExtraScalarField
 	DimensionSize dimensions{DimensionSize::One};
 	// These fields are from the vlr itself
 	uint8_t options{0};
-	char    name[MAX_NAME_SIZE]               = "";
+	// +1 for the NUL: a name that uses all 32 bytes has none in the file
+	char    name[MAX_NAME_SIZE + 1]           = "";
 	char    description[MAX_DESCRIPTION_SIZE] = "";
 	uint8_t noData[MAX_DIM_SIZE][8]           = {0};
 	uint8_t mins[MAX_DIM_SIZE][8]             = {0};

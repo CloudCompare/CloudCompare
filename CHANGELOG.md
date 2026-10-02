@@ -472,6 +472,7 @@ Bug fixes:
 	- LAS 1.4 files: the extra fields described by an Extra Bytes EVLR (instead of a VLR) were ignored at loading time
 		(a VLR can describe at most 341 extra fields, so files with more fields have to use an EVLR).
 		If a file has both, the VLR is used and a warning is issued.
+	- LAS files: an extra field name of 32 characters (the maximum) was loaded with the field description appended to it
 
 Unresolved anomalies:
 	- 'LAS.vlrs' meta-data items saved in BIN files with any version prior to 2.14.beta cannot be restored anymore due to Qt 6

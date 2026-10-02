@@ -1493,7 +1493,7 @@ static CC_FILE_ERROR LoadCloud(QDataStream&      shpStream,
 
 			if (mMin != ESRI_NO_DATA && mMax != ESRI_NO_DATA)
 			{
-				sf.reset(new ccScalarField("Measures"));
+				sf = std::make_shared<ccScalarField>("Measures");
 				if (!sf->reserveSafe(numPoints))
 				{
 					ccLog::Warning("[SHP] Not enough memory to load scalar values!");
@@ -1991,7 +1991,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	qint64                            fileSize = file.size();
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMaximum(static_cast<int>(fileSize));
 		pDlg->setMethodTitle(QObject::tr("Load SHP file"));
 		pDlg->setInfo(QObject::tr("File size: %1").arg(fileSize));

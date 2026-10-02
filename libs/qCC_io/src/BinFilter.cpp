@@ -156,10 +156,10 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const QString& filename, co
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Please wait... saving in progress"));
 		pDlg->setRange(0, 0);
@@ -1164,10 +1164,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags, 
 		return CC_FERR_MALFORMED_FILE;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parallel && parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parentWidget);
 		pDlg->setMethodTitle(QObject::tr("BIN file"));
 		pDlg->setInfo(QObject::tr("Loading: %1").arg(in.fileName()));
 		pDlg->setRange(0, 0);
@@ -1364,10 +1364,10 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		return CC_FERR_NO_LOAD;
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Open Bin file (old style)"));
 		pDlg->setAutoClose(false);
 	}

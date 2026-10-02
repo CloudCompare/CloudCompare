@@ -320,10 +320,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const QString& filename
 	bool writeSF = (!scalarFields.empty());
 
 	// progress dialog
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Saving cloud [%1]").arg(cloud->getName()));
 		pDlg->setInfo(QObject::tr("Number of points: %1").arg(numberOfPoints));
 		pDlg->start();
@@ -519,7 +519,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const QString&  filename,
 		if (UsesLoneCRLineEndings(head.constData(), head.size()))
 		{
 			ccLog::Warning(QString("[ASCII] File '%1' uses legacy Mac line endings (CR): they will be read as regular ones").arg(filename));
-			crToLFDevice.reset(new CRToLFDevice(file));
+			crToLFDevice = std::make_unique<CRToLFDevice>(file);
 			if (!crToLFDevice->open(QIODevice::ReadOnly))
 			{
 				return CC_FERR_READING;
@@ -960,7 +960,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(true, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(true, parameters.parentWidget);
 		pDlg->setMethodTitle(QObject::tr("Open ASCII data [%1]").arg(filenameOrTitle));
 		pDlg->setInfo(QObject::tr("Approximate number of points: %1").arg(approximateNumberOfLines));
 		pDlg->start();

@@ -1731,7 +1731,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		plyProperty& pp = listProperties[texCoordsIndex - 1];
 		assert(pp.type == PLY_LIST); // we only accept PLY_LIST here!
 
-		texCoords.reset(new TextureCoordsContainer);
+		texCoords = std::make_shared<TextureCoordsContainer>();
 
 		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
@@ -1753,7 +1753,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	{
 		plyProperty& pp = singleProperties[texNumberIndex - 1];
 
-		texIndexes.reset(new ccMesh::triangleMaterialIndexesSet);
+		texIndexes = std::make_shared<ccMesh::triangleMaterialIndexesSet>();
 
 		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
@@ -1771,10 +1771,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		}
 	}
 
-	std::unique_ptr<ccProgressDialog> pDlg(nullptr);
+	std::unique_ptr<ccProgressDialog> pDlg;
 	if (parameters.parentWidget)
 	{
-		pDlg.reset(new ccProgressDialog(false, parameters.parentWidget));
+		pDlg = std::make_unique<ccProgressDialog>(false, parameters.parentWidget);
 		pDlg->setInfo(QObject::tr("Loading in progress..."));
 		pDlg->setMethodTitle(QObject::tr("PLY file"));
 		pDlg->setRange(0, 0);

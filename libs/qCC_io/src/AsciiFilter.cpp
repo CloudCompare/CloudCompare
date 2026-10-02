@@ -695,7 +695,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
 	{
 		delete cloud;
-		return cloudAttributesDescriptor();
+		return {};
 	}
 
 	if (step == 1)

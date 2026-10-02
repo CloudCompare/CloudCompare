@@ -553,8 +553,6 @@ static QString ToString(ESRI_SHAPE_TYPE type)
 	default:
 		return "Unknown";
 	}
-
-	return QString("Unknown");
 }
 
 static void GetSupportedShapes(ccHObject* baseEntity, ccHObject::Container& shapes, ESRI_SHAPE_TYPE& shapeType)

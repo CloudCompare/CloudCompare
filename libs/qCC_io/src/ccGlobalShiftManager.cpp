@@ -361,7 +361,7 @@ CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 {
 	if (!NeedShift(P))
 	{
-		return CCVector3d(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	CCVector3d shift(std::abs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,

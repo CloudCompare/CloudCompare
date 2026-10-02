@@ -1800,8 +1800,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	if (success < 1 || s_NotEnoughMemory)
 	{
-		if (mesh)
-			delete mesh;
+		delete mesh;
 		delete cloud;
 		return s_NotEnoughMemory ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}

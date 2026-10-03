@@ -15,12 +15,7 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "BinFilter.h"
-
-// Qt
-#include <QApplication>
-#include <QFileInfo>
-#include <QMessageBox>
+#include "../include/BinFilter.h"
 
 // qCC_db
 #include <cc2DLabel.h>
@@ -42,7 +37,12 @@
 #include <ccSensor.h>
 #include <ccSubMesh.h>
 
-// system
+// Qt
+#include <QApplication>
+#include <QFileInfo>
+#include <QMessageBox>
+
+// System
 #include <cassert>
 #include <cstring>
 #include <unordered_set>

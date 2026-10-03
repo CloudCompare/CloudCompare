@@ -15,9 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "ImageFileFilter.h"
+#include "../include/ImageFileFilter.h"
 
-#include "FileIO.h"
+// Local
+#include "../include/FileIO.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>

@@ -17,15 +17,15 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
+// Local
 #include "ccGlobalShiftManager.h"
 #include "qCC_io.h"
 
-// Qt
-#include <QDialog>
-
 // CCCoreLib
 #include <CCGeom.h>
+
+// Qt
+#include <QDialog>
 
 namespace Ui
 {

@@ -15,18 +15,12 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "AsciiFilter.h"
+#include "../include/AsciiFilter.h"
 
 // Local
-#include "AsciiSaveDlg.h"
+#include "../include/AsciiSaveDlg.h"
 
-// Qt
-#include <QFile>
-#include <QFileInfo>
-#include <QSharedPointer>
-#include <QTextStream>
-
-// CClib
+// CCCoreLib
 #include <ScalarField.h>
 
 // qCC_db
@@ -37,6 +31,12 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
+
+// Qt
+#include <QFile>
+#include <QFileInfo>
+#include <QSharedPointer>
+#include <QTextStream>
 
 // System
 #include <algorithm>

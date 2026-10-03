@@ -1,13 +1,19 @@
 #include "TestDepthMapFilter.h"
 
-#include "DepthMapFileFilter.h"
-#include "FileIO.h"
-#include "ccGBLSensor.h"
-#include "ccPointCloud.h"
+// qCC_db
+#include <ccGBLSensor.h>
+#include <ccPointCloud.h>
 
+// qCC_io
+#include <DepthMapFileFilter.h>
+#include <FileIO.h>
+
+// Qt
 #include <QDir>
 #include <QFileInfo>
 #include <QTemporaryDir>
+
+// System
 #include <memory>
 
 void TestDepthMapFilter::initTestCase()

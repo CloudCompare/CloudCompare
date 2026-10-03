@@ -17,11 +17,11 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "ccGlobalShiftManager.h"
+
 // qCC_db
 #include <ccHObject.h>
-
-// local
-#include "ccGlobalShiftManager.h"
 
 class QWidget;
 

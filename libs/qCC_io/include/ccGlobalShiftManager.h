@@ -17,16 +17,16 @@
 // #                                                                        #
 // ##########################################################################
 
+// Local
+#include "qCC_io.h"
+
 // CCCoreLib
 #include <CCGeom.h>
-
-// local
-#include "qCC_io.h"
 
 // Qt
 #include <QString>
 
-// STL
+// System
 #include <vector>
 
 class ccHObject;

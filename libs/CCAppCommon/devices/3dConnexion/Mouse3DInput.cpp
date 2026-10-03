@@ -385,7 +385,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& motionData, ccGLMatrixd& 
 		mat.toIdentity();
 	}
 #else
-	float axis[3] {-motionData[3], motionData[4], -motionData[5]};
+	float axis[3]{-motionData[3], motionData[4], -motionData[5]};
 
 	Matrix Rd;
 	SPW_ArbitraryAxisToMatrix(Rd, axis, 1.0f);

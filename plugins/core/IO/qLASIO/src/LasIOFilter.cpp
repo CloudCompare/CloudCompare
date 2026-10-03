@@ -406,10 +406,10 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 				if (globalShift.norm2() != 0.0)
 				{
 					ccLog::Warningf("[LAS] Cloud has been re-centered! Translation: "
-					               "(%.2f ; %.2f ; %.2f)",
-					               globalShift.x,
-					               globalShift.y,
-					               globalShift.z);
+					                "(%.2f ; %.2f ; %.2f)",
+					                globalShift.x,
+					                globalShift.y,
+					                globalShift.z);
 				}
 				isglobalShiftDefined = true;
 			}
@@ -902,7 +902,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 				if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
 				{
 					ccLog::Warningf("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
-					               stdName.c_str());
+					                stdName.c_str());
 				}
 
 				field.type            = LasExtraScalarField::DataType::f32;

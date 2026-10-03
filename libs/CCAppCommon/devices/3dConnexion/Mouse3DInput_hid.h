@@ -46,7 +46,6 @@ class HIDWorker : public QThread
 	Q_OBJECT
 
   public:
-
 	//! Constructor
 	explicit HIDWorker(Mouse3DInput* parent);
 

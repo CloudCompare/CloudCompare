@@ -4816,7 +4816,8 @@ void ccGLWindowInterface::updateFrameRateTest()
 
 struct BoolGuard
 {
-	BoolGuard(bool& b) : m_b(b)
+	BoolGuard(bool& b)
+	    : m_b(b)
 	{
 		m_b = true;
 	}

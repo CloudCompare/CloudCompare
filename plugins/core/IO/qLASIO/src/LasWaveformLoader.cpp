@@ -226,7 +226,7 @@ void LasWaveformLoader::loadWaveform(ccPointCloud& pointCloud, const laszip_poin
 	if (byteOffset + byteCount > fwfDataCount)
 	{
 		ccLog::Warningf("[LAS] Waveform byte count for point %u is bigger than actual fwf data",
-		               pointCloud.size() - 1);
+		                pointCloud.size() - 1);
 		byteCount = (fwfDataCount - byteOffset);
 	}
 

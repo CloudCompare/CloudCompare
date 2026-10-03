@@ -213,10 +213,10 @@ LasExtraScalarField::ParseExtraScalarFields(const laszip_vlr_struct& extraBytesV
 
 		byteOffset += ebInfo.byteSize();
 		ccLog::Printf("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
-		             ebInfo.name,
-		             ebInfo.typeName().c_str(),
-		             ebInfo.byteSize(),
-		             ebInfo.byteOffset);
+		              ebInfo.name,
+		              ebInfo.typeName().c_str(),
+		              ebInfo.byteSize(),
+		              ebInfo.byteOffset);
 	}
 	return info;
 }

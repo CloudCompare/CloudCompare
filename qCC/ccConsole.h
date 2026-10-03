@@ -22,8 +22,8 @@
 
 // Qt
 #include <QFile>
-#include <QMap>
 #include <QListWidget>
+#include <QMap>
 #include <QMutex>
 #include <QTimer>
 

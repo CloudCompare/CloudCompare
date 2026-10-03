@@ -58,8 +58,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 		{
 			ccLog::Print(QString("Raster file: '%1'").arg(filename));
 			ccLog::Printf("Driver: %s/%s",
-			             poDataset->GetDriver()->GetDescription(),
-			             poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
+			              poDataset->GetDriver()->GetDescription(),
+			              poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
 
 			int rasterCount = poDataset->GetRasterCount();
 			int rasterX     = poDataset->GetRasterXSize();

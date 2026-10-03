@@ -101,7 +101,7 @@ void ccLog::SetVerbosityLevel(int level)
 	s_verbosityLevel = std::min(level, static_cast<int>(LOG_ERROR)); // can't ignore error messages
 }
 
-void ccLog::LogMessage(const QString& message, int level, qint64 time_ns/*=-1*/)
+void ccLog::LogMessage(const QString& message, int level, qint64 time_ns /*=-1*/)
 {
 	// skip messages below the current 'verbosity' level
 	if ((level & 7) < s_verbosityLevel)
@@ -173,7 +173,7 @@ void ccLog::RegisterInstance(ccLog* logInstance)
 		va_list args; \
 		va_start(args, format); \
 		static const size_t s_bufferMaxSize = 4096; \
-		static char s_buffer[s_bufferMaxSize]; \
+		static char         s_buffer[s_bufferMaxSize]; \
 		_vsnprintf(s_buffer, s_bufferMaxSize, format, args); \
 		va_end(args); \
 		LogMessage(QString(s_buffer), flags, timestamp_ns); \

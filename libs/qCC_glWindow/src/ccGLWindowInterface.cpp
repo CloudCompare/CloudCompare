@@ -73,6 +73,14 @@ constexpr int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 // GL filter banner margin (height = 2*margin + current font height)
 static constexpr int CC_GL_FILTER_BANNER_MARGIN = 5;
 
+//! Rotation of one mouse wheel notch (in degrees)
+/** Trackpads and high resolution wheels send much smaller values.
+ **/
+static constexpr float CC_ONE_WHEEL_NOTCH_DEG = 15.0f;
+
+//! Converts the value of a native zoom gesture (a relative scale factor) to an equivalent wheel rotation (in degrees)
+static constexpr double CC_ZOOM_GESTURE_TO_DEG = 100.0;
+
 // Percentage of the smallest screen dimension
 static constexpr double CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8;
 
@@ -2164,8 +2172,7 @@ void ccGLWindowInterface::onWheelEvent(float wheelDelta_deg)
 		else
 		{
 			double cameraCenterToPivotDist = m_viewportParams.getFocalDistance();
-			// 15 degrees = one mouse wheel notch (trackpads and high resolution wheels send much smaller values)
-			delta = (std::abs(cameraCenterToPivotDist) / 20.0) * (wheelDelta_deg / 15.0) * getDisplayParameters().zoomSpeed;
+			delta                          = (std::abs(cameraCenterToPivotDist) / 20.0) * (wheelDelta_deg / CC_ONE_WHEEL_NOTCH_DEG) * getDisplayParameters().zoomSpeed;
 		}
 
 		CCVector3d v(0.0, 0.0, -delta);
@@ -4613,8 +4620,7 @@ bool ccGLWindowInterface::processEvents(QEvent* evt)
 		case Qt::ZoomNativeGesture:
 #if defined(Q_OS_MAC)
 		{
-			// the gesture value is a relative scale factor: convert it to an equivalent wheel rotation
-			float pseudo_wheelDelta_deg = static_cast<float>(value * 100.0);
+			float pseudo_wheelDelta_deg = static_cast<float>(value * CC_ZOOM_GESTURE_TO_DEG);
 			onWheelEvent(pseudo_wheelDelta_deg);
 			Q_EMIT m_signalEmitter->mouseWheelRotated(pseudo_wheelDelta_deg);
 			evt->accept();
@@ -6822,7 +6828,7 @@ void ccGLWindowInterface::processMouseMoveEvent(QMouseEvent* event)
 	}
 	else if ((event->buttons() & Qt::MiddleButton)) // zoom
 	{
-		// middle button = zooming
+		// middle button = zooming (one notch for each CC_ONE_WHEEL_NOTCH_DEG pixels of vertical motion)
 		float pseudo_wheelDelta_deg = static_cast<float>(-dy);
 		onWheelEvent(pseudo_wheelDelta_deg);
 

@@ -159,12 +159,6 @@ class QCC_DB_LIB_API ccLog
 	//! QString version of ccLog::ErrorDebug
 	static bool ErrorDebug(const QString& message);
 
-	//! Sets the start time (for time stamp)
-	void setStartTime(const QTime& time)
-	{
-		m_startTime = time;
-	}
-
   protected:
 	//! Generic message logging method
 	/** To be implemented by child class.
@@ -173,6 +167,13 @@ class QCC_DB_LIB_API ccLog
 	**/
 	virtual void logMessage(const Message& message) = 0;
 
+	//! Sets the start time (for time stamp)
+	void setStartTime(const QTime& time)
+	{
+		m_startTime = time;
+	}
+
+  protected: // members
 	//! Start time (for time stamp)
 	QTime m_startTime;
 };

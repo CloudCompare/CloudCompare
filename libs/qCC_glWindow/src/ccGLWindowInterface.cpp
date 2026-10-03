@@ -4815,32 +4815,8 @@ void ccGLWindowInterface::updateFrameRateTest()
 	}
 }
 
-struct BoolGuard
-{
-	BoolGuard(bool& b)
-	    : m_b(b)
-	{
-		m_b = true;
-	}
-	~BoolGuard()
-	{
-		m_b = false;
-	}
-	bool& m_b;
-};
-
 void ccGLWindowInterface::doPaintGL()
 {
-	static bool s_drawing = false;
-
-	if (s_drawing)
-	{
-		ccLog::Warning("[paintGL] Recursive or parallel call!");
-		return;
-	}
-
-	BoolGuard guard(s_drawing);
-
 	if (!initPaintGL())
 	{
 		// something failed, or it is not necessary to proceed

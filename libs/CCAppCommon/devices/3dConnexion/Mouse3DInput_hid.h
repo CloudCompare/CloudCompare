@@ -40,26 +40,18 @@
 #include <atomic>
 #include <vector>
 
+//! Thread that reads HID reports from the 3DConnexion device and emits signals
 class HIDWorker : public QThread
 {
 	Q_OBJECT
 
   public:
-	explicit HIDWorker(Mouse3DInput* parent)
-	    : QThread(parent)
-	    , m_parent(parent)
-	{
-	}
 
-	~HIDWorker() override
-	{
-		stop();
-		if (isRunning())
-		{
-			wait();
-		}
-		closeDevice();
-	}
+	//! Constructor
+	explicit HIDWorker(Mouse3DInput* parent);
+
+	//! Destructor
+	~HIDWorker() override;
 
 	//! Opens the first available 3DConnexion HID device.
 	bool openDevice();
@@ -67,16 +59,14 @@ class HIDWorker : public QThread
 	//! Closes the HID device (idempotent).
 	void closeDevice();
 
-	void stop()
-	{
-		m_running.store(false);
-	}
+	//! Stops the worker thread (idempotent).
+	void stop();
 
   Q_SIGNALS:
 	void sigMove3d(std::vector<float> motionData);
 	void sigReleased();
-	void sigOn3dmouseKeyDown(int virtualKeyCode);
-	void sigOn3dmouseKeyUp(int virtualKeyCode);
+	void sigOn3DMouseKeyDown(int virtualKeyCode);
+	void sigOn3DMouseKeyUp(int virtualKeyCode);
 
   protected:
 	void run() override;
@@ -85,17 +75,16 @@ class HIDWorker : public QThread
 	void processMotion(const unsigned char* buf, int n);
 	void processButtons(const unsigned char* buf, int n, unsigned int& prevButtonMask);
 
-	hid_device*      m_handle = nullptr;
-	std::atomic_bool m_running{false};
+	hid_device*      m_handle;
+	std::atomic_bool m_running;
 	Mouse3DInput*    m_parent;
-	QString          m_devicePath;
 
 	//! Last known raw axis values (tx, ty, tz, rx, ry, rz).
 	//! Used to merge separate translation and rotation reports (SpaceMouse
 	//! Compact) into a single 6-axis motion event, so that movement stays
 	//! smooth. Combined reports (SpaceMouse Wireless) overwrite all 6 at
 	//! once and are not affected by this buffer.
-	int m_lastAxes[6] = {0, 0, 0, 0, 0, 0};
+	int m_lastAxes[6];
 };
 
 #endif // CC_3DMOUSE_HID

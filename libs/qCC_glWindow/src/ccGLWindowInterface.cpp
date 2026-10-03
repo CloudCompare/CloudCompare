@@ -4806,6 +4806,7 @@ void ccGLWindowInterface::updateFrameRateTest()
 			rotMat.initFromParameters(2 * M_PI / FRAMERATE_TEST_MIN_FRAMES, CCVector3d(0, 1, 0), CCVector3d(0, 0, 0));
 			m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 			invalidateVisualization();
+			invalidateViewport();
 		}
 	}
 	else
@@ -4845,8 +4846,6 @@ void ccGLWindowInterface::doPaintGL()
 		// something failed, or it is not necessary to proceed
 		return;
 	}
-
-	ccLog::PrintDebug("[paintGL] Rendering started");
 
 	// #define DEBUG_TIMINGS
 #ifdef DEBUG_TIMINGS
@@ -5009,8 +5008,6 @@ void ccGLWindowInterface::doPaintGL()
 	debugTimingsMessage += QString("[DT TOTAL = %2]").arg((debugTimings.back() - debugTimings.front()) / 1000);
 	ccLog::Print(debugTimingsMessage);
 #endif
-
-	ccLog::PrintDebug("[paintGL] Rendering ended");
 }
 
 void ccGLWindowInterface::draw3D(CC_DRAW_CONTEXT& CONTEXT, RenderingParams& renderingParams)
@@ -5591,8 +5588,6 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		return;
 	}
 
-	ccLog::PrintDebug("[paintGL] Rendering background");
-
 	/****************************************/
 	/****  PASS: 2D/BACKGROUND/NO LIGHT  ****/
 	/****************************************/
@@ -5615,14 +5610,12 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		if (renderingParams.clearDepthLayer)
 		{
 			clearMask |= GL_DEPTH_BUFFER_BIT;
-			ccLog::PrintDebug("[paintGL] Clearing depth layer");
 		}
 		if (renderingParams.clearColorLayer)
 		{
 			const ccGui::ParamStruct& displayParams = getDisplayParameters();
 			if (displayParams.drawBackgroundGradient)
 			{
-				ccLog::PrintDebug("[paintGL] Drawing background gradient");
 				// draw the default gradient color background
 				int w = glWidth();
 				int h = glHeight();
@@ -5681,7 +5674,6 @@ void ccGLWindowInterface::drawBackground(CC_DRAW_CONTEXT& CONTEXT, RenderingPara
 		// we clear the background
 		if (clearMask != GL_NONE)
 		{
-			ccLog::PrintDebug("[paintGL] Call glClear");
 			glFunc->glClear(clearMask);
 		}
 	}

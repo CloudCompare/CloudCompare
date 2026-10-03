@@ -507,6 +507,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 			break;
 		}
 	}
+
 	if (hasMotion)
 	{
 		// Enable LOD and signal that the 3D mouse is driving the view. This
@@ -516,7 +517,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindowInterfa
 		// until the movement stops.
 		win->setLODEnabled(true);
 		win->set3DMouseActive(true);
-		win->redraw(false, false);
+		win->redraw(false, true);
 	}
 	else
 	{

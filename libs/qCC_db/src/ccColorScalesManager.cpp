@@ -19,7 +19,6 @@
 
 // Local
 #include "../include/ccLog.h"
-#include "../include/ccSingleton.h"
 
 // CCCoreLib
 #include <MeshSamplingTools.h>
@@ -29,9 +28,6 @@
 
 // System
 #include <assert.h>
-
-// unique instance
-static ccSingleton<ccColorScalesManager> s_uniqueInstance;
 
 /*** Persistent settings ***/
 
@@ -1087,19 +1083,16 @@ static const ColorStep s_cividis[]{
 
 ccColorScalesManager* ccColorScalesManager::GetUniqueInstance()
 {
-	if (!s_uniqueInstance.instance)
+	static std::unique_ptr<ccColorScalesManager> s_uniqueInstance;
+
+	if (!s_uniqueInstance)
 	{
-		s_uniqueInstance.instance = new ccColorScalesManager();
+		s_uniqueInstance.reset(new ccColorScalesManager);
 		// load custom scales from persistent settings
-		s_uniqueInstance.instance->fromPersistentSettings();
+		s_uniqueInstance->fromPersistentSettings();
 	}
 
-	return s_uniqueInstance.instance;
-}
-
-void ccColorScalesManager::ReleaseUniqueInstance()
-{
-	s_uniqueInstance.release();
+	return s_uniqueInstance.get();
 }
 
 ccColorScalesManager::ccColorScalesManager()

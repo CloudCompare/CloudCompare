@@ -74,7 +74,7 @@ LasWaveformLoader::LasWaveformLoader(const laszip_header_struct& laszipHeader,
     : isPointFormatExtended(laszipHeader.point_data_format >= 6)
 {
 	descriptors = ParseWaveformDescriptorVlrs(laszipHeader.vlrs, laszipHeader.number_of_variable_length_records);
-	ccLog::Printf("[LAS] %d Waveform Packet Descriptor VLRs found", descriptors.size());
+	ccLog::Printf("[LAS] %lld Waveform Packet Descriptor VLRs found", descriptors.size());
 
 	QFile fwfDataSource;
 	if (laszipHeader.start_of_waveform_data_packet_record != 0)

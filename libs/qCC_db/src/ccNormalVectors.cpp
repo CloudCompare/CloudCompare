@@ -21,7 +21,6 @@
 #include "../include/ccHObjectCaster.h"
 #include "../include/ccNormalCompressor.h"
 #include "../include/ccSensor.h"
-#include "../include/ccSingleton.h"
 
 // CCCoreLib
 #include <CCGeom.h>
@@ -34,9 +33,6 @@
 // System
 #include <cassert>
 
-// unique instance
-static ccSingleton<ccNormalVectors> s_uniqueInstance;
-
 // Number of points for local modeling to compute normals with 2D1/2 Delaunay triangulation
 static const unsigned NUMBER_OF_POINTS_FOR_NORM_WITH_TRI = 6;
 // Number of points for local modeling to compute normals with least square plane
@@ -46,14 +42,13 @@ static const unsigned NUMBER_OF_POINTS_FOR_NORM_WITH_QUADRIC = 6;
 
 ccNormalVectors* ccNormalVectors::GetUniqueInstance()
 {
-	if (!s_uniqueInstance.instance)
-		s_uniqueInstance.instance = new ccNormalVectors();
-	return s_uniqueInstance.instance;
-}
+	static std::unique_ptr<ccNormalVectors> s_uniqueInstance;
 
-void ccNormalVectors::ReleaseUniqueInstance()
-{
-	s_uniqueInstance.release();
+	if (!s_uniqueInstance)
+	{
+		s_uniqueInstance.reset(new ccNormalVectors());
+	}
+	return s_uniqueInstance.get();
 }
 
 ccNormalVectors::ccNormalVectors()

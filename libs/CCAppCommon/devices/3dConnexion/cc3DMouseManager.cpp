@@ -61,10 +61,10 @@ void cc3DMouseManager::enableDevice(bool state, bool silent)
 		{
 			connect(m3dMouseInput, &Mouse3DInput::sigMove3d, this, &cc3DMouseManager::on3DMouseMove);
 			connect(m3dMouseInput, &Mouse3DInput::sigReleased, this, &cc3DMouseManager::on3DMouseReleased);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &cc3DMouseManager::on3DMouseKeyDown);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &cc3DMouseManager::on3DMouseKeyUp);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &cc3DMouseManager::on3DMouseCMDKeyDown);
-			connect(m3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &cc3DMouseManager::on3DMouseCMDKeyUp);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyDown, this, &cc3DMouseManager::on3DMouseKeyDown);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyUp, this, &cc3DMouseManager::on3DMouseKeyUp);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyDown, this, &cc3DMouseManager::on3DMouseCMDKeyDown);
+			connect(m3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyUp, this, &cc3DMouseManager::on3DMouseCMDKeyUp);
 		}
 		else
 		{

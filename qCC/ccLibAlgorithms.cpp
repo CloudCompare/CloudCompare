@@ -603,7 +603,7 @@ namespace ccLibAlgorithms
 						pc->getCurrentInScalarField()->computeMinAndMax();
 					}
 					cloud->prepareDisplayForRefresh();
-					ccConsole::Print("[Algorithm] Timing: %3.2f s.", static_cast<double>(elapsedTime_ms) / 1000.0);
+					ccConsole::Printf("[Algorithm] Timing: %3.2f s.", elapsedTime_ms / 1000.0);
 				}
 				else
 				{

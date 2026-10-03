@@ -32,11 +32,11 @@
 #include <ccLog.h>
 
 // Qt
+#include <QElapsedTimer>
 #include <QProcess>
 
 // System
 #include <algorithm>
-#include <chrono>
 #include <cmath>
 #include <cstdio>
 
@@ -50,22 +50,34 @@ static constexpr unsigned short c_old3dconnexionVID = 0x046d;
 //! Object angular velocity per mouse tick (in radians per ms per count)
 //! Mirrors the definition in Mouse3DInput.cpp (Windows path uses eventData.period,
 //! which is roughly the report period in ms - we use the polling period instead).
-static const double c_3dmouseAngularVelocity_hid = 1.0e-6;
+static const double c_3DMouseAngularVelocity_hid = 1.0e-6;
 //! Polling period (ms) - approximately 60 Hz
-static constexpr int c_hidPollPeriodMs = 16;
+static constexpr int c_HIDPollPeriod_ms = 16;
 
 //! Overall speed multiplier (calibrated for Blender-like feel).
-static constexpr float c_3dmouseGain = 1.5f;
+static constexpr float c_3DMouseGain = 1.5f;
 //! Reference deflection for the progressive curve (typical HID full-scale ~±350).
-static constexpr float c_3dmouseProgressiveRef = 250.0f;
+static constexpr float c_3DMouseProgressiveRef = 250.0f;
+
+// Number of consecutive (read) errors before giving up (e.g. device unplugged).
+static constexpr int MaxConsecutiveErrors = 100;
+
+// Read timeout (shouldn't be too long so that the loop stays responsive)
+// and doesn't busy-poll.
+static constexpr int ReadTimeout_ms = 100;
+
+// If no report arrives within this many ms of startup, warn the user once.
+// The threshold is deliberately generous: some users take a few seconds
+// before they interact with the cap, and we don't want a false alarm.
+constexpr qint64 NoReportsWarn_ms = 5000;
 
 //! Progressive (non-linear) axis scaling: small deflections stay fine, large
 //! deflections get amplified. Curve: out = raw * (1 + |raw|/ref) * gain * ds.
-static float scaleAxis(int raw, double ds)
+static float ScaleAxis(int raw, double ds)
 {
 	float a           = static_cast<float>(raw);
-	float progressive = 1.0f + std::min(std::abs(a) / c_3dmouseProgressiveRef, 1.0f);
-	return a * progressive * c_3dmouseGain * static_cast<float>(ds);
+	float progressive = 1.0f + std::min(std::abs(a) / c_3DMouseProgressiveRef, 1.0f);
+	return a * progressive * c_3DMouseGain * static_cast<float>(ds);
 }
 
 #ifdef CC_HID_DEBUG
@@ -169,16 +181,35 @@ static bool IsKnownSpaceMouse(unsigned short vid, unsigned short pid)
 	return false;
 }
 
+HIDWorker::HIDWorker(Mouse3DInput* parent)
+    : QThread(parent)
+    , m_handle(nullptr)
+    , m_running(false)
+    , m_parent(parent)
+    , m_lastAxes{}
+{
+}
+
+HIDWorker::~HIDWorker()
+{
+	stop();
+	if (isRunning())
+	{
+		wait();
+	}
+	closeDevice();
+}
+
 bool HIDWorker::openDevice()
 {
-	hid_device_info* devs = hid_enumerate(c_3dconnexionVID, 0x0);
-	if (!devs)
+	hid_device_info* devices = hid_enumerate(c_3dconnexionVID, 0x0);
+	if (!devices)
 	{
 		// Fall back to the legacy Logitech vendor ID for older 3DConnexion
 		// devices (SpaceNavigator, SpaceExplorer, SpacePilot, etc.).
-		devs = hid_enumerate(c_old3dconnexionVID, 0x0);
+		devices = hid_enumerate(c_old3dconnexionVID, 0x0);
 	}
-	if (!devs)
+	if (!devices)
 	{
 		ccLog::Warning("[3D Mouse] No 3DConnexion HID device found");
 		return false;
@@ -187,16 +218,17 @@ bool HIDWorker::openDevice()
 	// Preferred interface: Generic Desktop page (0x01), Multi-axis Controller usage (0x08).
 	// This is the interface that carries the 6-DOF motion reports. The SpaceMouse Wireless
 	// exposes several HID interfaces; the others (e.g. Pointer, Consumer Control) do not.
-	hid_device_info* cur = devs;
-	for (; cur; cur = cur->next)
+	hid_device_info* currentDevice = devices;
+	for (; currentDevice; currentDevice = currentDevice->next)
 	{
-		if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id) && cur->usage_page == 0x01 && cur->usage == 0x08)
+		if (IsKnownSpaceMouse(currentDevice->vendor_id, currentDevice->product_id)
+		    && currentDevice->usage_page == 0x01
+		    && currentDevice->usage == 0x08)
 		{
-			m_handle = hid_open_path(cur->path);
+			m_handle = hid_open_path(currentDevice->path);
 			if (m_handle)
 			{
-				m_devicePath = cur->path;
-				QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
+				QString name = (currentDevice->product_string ? QString::fromWCharArray(currentDevice->product_string) : QStringLiteral("Unknown 3DConnexion device"));
 				ccLog::Print(QString("[3D Mouse] Device: %1 (HID)").arg(name));
 				break;
 			}
@@ -209,16 +241,15 @@ bool HIDWorker::openDevice()
 	// don't expose that usage descriptor (e.g. the wired SpaceMouse Compact).
 	if (!m_handle)
 	{
-		cur = devs;
-		for (; cur; cur = cur->next)
+		currentDevice = devices;
+		for (; currentDevice; currentDevice = currentDevice->next)
 		{
-			if (IsKnownSpaceMouse(cur->vendor_id, cur->product_id))
+			if (IsKnownSpaceMouse(currentDevice->vendor_id, currentDevice->product_id))
 			{
-				m_handle = hid_open_path(cur->path);
+				m_handle = hid_open_path(currentDevice->path);
 				if (m_handle)
 				{
-					m_devicePath = cur->path;
-					QString name = (cur->product_string ? QString::fromWCharArray(cur->product_string) : QStringLiteral("3DConnexion device"));
+					QString name = (currentDevice->product_string ? QString::fromWCharArray(currentDevice->product_string) : QStringLiteral("Unknown 3DConnexion device"));
 					ccLog::Print(QString("[3D Mouse] Device: %1 (HID, fallback)").arg(name));
 					break;
 				}
@@ -226,7 +257,8 @@ bool HIDWorker::openDevice()
 		}
 	}
 
-	hid_free_enumeration(devs);
+	hid_free_enumeration(devices);
+	devices = nullptr;
 
 	if (!m_handle)
 	{
@@ -255,6 +287,11 @@ bool HIDWorker::openDevice()
 	return true;
 }
 
+void HIDWorker::stop()
+{
+	m_running.store(false);
+}
+
 void HIDWorker::closeDevice()
 {
 	if (m_handle)
@@ -271,44 +308,37 @@ void HIDWorker::run()
 	// State for button edge detection
 	unsigned int prevButtonMask = 0;
 	// State for "released" emission (analogous to SI_ZERO_EVENT on Windows)
-	auto lastMotionTime = std::chrono::steady_clock::now();
-	bool motionActive   = false;
+	QElapsedTimer lastMotionTimer;
+	lastMotionTimer.start();
+	bool motionActive = false;
 
 	// Tracks whether any report has ever arrived. Used to warn the user once
 	// if no reports arrive within the first few seconds of running, which
 	// typically means the 3Dconnexion driver daemon is holding an exclusive
 	// lock on the device and silently consuming reports.
-	auto threadStartTime  = lastMotionTime;
 	bool warnedNoReports  = false;
 	bool anyReportArrived = false;
 
-	unsigned char buf[80] = {0};
+	unsigned char buf[80]{};
 
 	// Give up only after this many consecutive read errors (e.g. device unplugged).
-	constexpr int kMaxConsecutiveErrors = 100;
-	int           consecutiveErrors     = 0;
-
-	// Read with a timeout so the loop stays responsive to m_running changes
-	// and doesn't busy-poll. hid_read_timeout returns 0 on timeout (not -1).
-	constexpr int kReadTimeoutMs = 100;
-	// If no report arrives within this many ms of startup, warn the user once.
-	// The threshold is deliberately generous: some users take a few seconds
-	// before they interact with the cap, and we don't want a false alarm.
-	constexpr int kNoReportsWarnMs = 5000;
+	int consecutiveErrors = 0;
 
 	while (m_running.load())
 	{
-		int n = hid_read_timeout(m_handle, buf, sizeof(buf), kReadTimeoutMs);
+		// Read with a timeout so the loop stays responsive to m_running changes
+		// and doesn't busy-poll. hid_read_timeout returns 0 on timeout.
+		int n = hid_read_timeout(m_handle, buf, sizeof(buf), ReadTimeout_ms);
 		if (n < 0)
 		{
 			// Genuine read error (device unplugged, I/O error).
 			++consecutiveErrors;
-			if (consecutiveErrors >= kMaxConsecutiveErrors)
+			if (consecutiveErrors >= MaxConsecutiveErrors)
 			{
 				ccLog::Warning("[3D Mouse] Too many HID read errors, giving up");
 				break;
 			}
-			QThread::msleep(c_hidPollPeriodMs);
+			QThread::msleep(c_HIDPollPeriod_ms);
 			continue;
 		}
 		consecutiveErrors = 0;
@@ -319,9 +349,8 @@ void HIDWorker::run()
 			// period, analogous to SI_ZERO_EVENT on Windows.
 			if (motionActive)
 			{
-				auto now     = std::chrono::steady_clock::now();
-				auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastMotionTime).count();
-				if (elapsed > 100)
+				auto elapsed_ms = lastMotionTimer.elapsed();
+				if (elapsed_ms > 100)
 				{
 					Q_EMIT sigReleased();
 					motionActive = false;
@@ -333,10 +362,8 @@ void HIDWorker::run()
 			// also happen if the user simply hasn't touched the cap yet.
 			if (!anyReportArrived && !warnedNoReports)
 			{
-				auto elapsedSinceStart = std::chrono::duration_cast<std::chrono::milliseconds>(
-				                             std::chrono::steady_clock::now() - threadStartTime)
-				                             .count();
-				if (elapsedSinceStart >= kNoReportsWarnMs)
+				auto elapsedSinceStart_ms = lastMotionTimer.elapsed();
+				if (elapsedSinceStart_ms >= NoReportsWarn_ms)
 				{
 					warnedNoReports = true;
 					ccLog::Warning("[3D Mouse] No HID reports received yet. "
@@ -376,15 +403,15 @@ void HIDWorker::run()
 			// a different ID on other devices). processMotion() reads the
 			// first byte as the report ID and skips it when parsing axes.
 			processMotion(buf, n);
-			lastMotionTime = std::chrono::steady_clock::now();
-			motionActive   = true;
+			lastMotionTimer.restart();
+			motionActive = true;
 		}
 		else if (n == 7)
 		{
 			// Separate translation/rotation report (SpaceMouse Compact).
 			processMotion(buf, n);
-			lastMotionTime = std::chrono::steady_clock::now();
-			motionActive   = true;
+			lastMotionTimer.restart();
+			motionActive = true;
 		}
 		else
 		{
@@ -398,7 +425,9 @@ void HIDWorker::run()
 				{
 					QString hex;
 					for (int i = 0; i < n; ++i)
+					{
 						hex += QString("%1 ").arg(buf[i], 2, 16, QLatin1Char('0'));
+					}
 					ccLog::Print(QString("[3D Mouse] Unknown report (%1 bytes): %2").arg(n).arg(hex));
 				}
 			}
@@ -512,7 +541,7 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 
 	// Scaling: progressive (non-linear) curve so small deflections stay fine
 	// while large deflections are amplified for fast navigation.
-	double ds = c_hidPollPeriodMs * c_3dmouseAngularVelocity_hid;
+	double ds = c_HIDPollPeriod_ms * c_3DMouseAngularVelocity_hid;
 
 	std::vector<float> axes(6);
 	// NDOF axis mapping with Y/Z swap (matching spacenavd's DF_SWAPYZ flag).
@@ -528,12 +557,12 @@ void HIDWorker::processMotion(const unsigned char* buf, int n)
 	//   rx (pitch)               -> orbit X  = +rx  (no swap, no invert)
 	//   rz (yaw / twist)         -> orbit Y  = -rz  (device RZ -> CC RY, swap+invert)
 	//   ry (roll / tilt sideways)-> orbit Z  = -ry  (device RY -> CC RZ, swap+invert)
-	axes[0] = -scaleAxis(tx, ds); // pan X
-	axes[1] = -scaleAxis(tz, ds); // pan Y (Y/Z swap)
-	axes[2] = -scaleAxis(ty, ds); // zoom   (Y/Z swap)
-	axes[3] = scaleAxis(rx, ds);  // orbit X
-	axes[4] = -scaleAxis(rz, ds); // orbit Y (Y/Z swap)
-	axes[5] = scaleAxis(ry, ds);  // orbit Z (Y/Z swap)
+	axes[0] = -ScaleAxis(tx, ds); // pan X
+	axes[1] = -ScaleAxis(tz, ds); // pan Y (Y/Z swap)
+	axes[2] = -ScaleAxis(ty, ds); // zoom   (Y/Z swap)
+	axes[3] = ScaleAxis(rx, ds);  // orbit X
+	axes[4] = -ScaleAxis(rz, ds); // orbit Y (Y/Z swap)
+	axes[5] = ScaleAxis(ry, ds);  // orbit Z (Y/Z swap)
 
 	Q_EMIT sigMove3d(axes);
 }
@@ -560,11 +589,11 @@ void HIDWorker::processButtons(const unsigned char* buf, int n, unsigned int& pr
 		unsigned int mask = 1u << bit;
 		if (pressed & mask)
 		{
-			Q_EMIT sigOn3dmouseKeyDown(c_buttonMap[bit]);
+			Q_EMIT sigOn3DMouseKeyDown(c_buttonMap[bit]);
 		}
 		if (released & mask)
 		{
-			Q_EMIT sigOn3dmouseKeyUp(c_buttonMap[bit]);
+			Q_EMIT sigOn3DMouseKeyUp(c_buttonMap[bit]);
 		}
 	}
 

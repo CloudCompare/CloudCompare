@@ -785,7 +785,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence& openSequenc
 			}
 			else
 			{
-				ccLog::Warning("Failed to add scalar field #%i to cloud! (skipped)", sfIndex);
+				ccLog::Warningf("Failed to add scalar field #%i to cloud! (skipped)", sfIndex);
 			}
 		}
 		break;
@@ -1003,7 +1003,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 		// if we have reached the max. number of points per cloud
 		if (pointsRead == nextLimit)
 		{
-			ccLog::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)", pointsRead, cloudChunkSize);
+			ccLog::PrintDebugf("[ASCII] Point %i -> end of chunk (%i points)", pointsRead, cloudChunkSize);
 
 			// we re-evaluate the average line size
 			{
@@ -1016,7 +1016,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 					newNbOfLinesApproximation = std::max(static_cast<double>(cloudChunkPos + cloudChunkSize) + 1.0, static_cast<double>(pointsRead) * 1.02);
 				}
 				approximateNumberOfLines = static_cast<unsigned>(ceil(newNbOfLinesApproximation));
-				ccLog::PrintDebug("[ASCII] New approximate nb of lines: %i", approximateNumberOfLines);
+				ccLog::PrintDebugf("[ASCII] New approximate nb of lines: %i", approximateNumberOfLines);
 			}
 
 			// we try to resize actual clouds
@@ -1118,7 +1118,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 
 			if (lineIsCorrupted)
 			{
-				ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (non numerical value found)", linesRead);
+				ccLog::Warningf("[AsciiFilter::Load] Line %i is corrupted (non numerical value found)", linesRead);
 				continue;
 			}
 
@@ -1131,7 +1131,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 					{
 						cloudDesc.cloud->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -1250,7 +1250,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiStream(QTextStream&        
 		}
 		else
 		{
-			ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i expected)!", linesRead, nParts, maxPartIndex + 1);
+			ccLog::Warningf("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i expected)!", linesRead, nParts, maxPartIndex + 1);
 		}
 
 		if (pDlg && !nprogress.oneStep())

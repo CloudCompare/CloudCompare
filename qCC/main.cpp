@@ -155,6 +155,9 @@ int main(int argc, char** argv)
 		}
 	}
 
+	// store the log message until a valid logging instance is registered
+	ccLog::EnableMessageBackup(true);
+
 	ccApplication::InitOpenGL();
 
 	ccApplication app(argc, argv, commandLine);
@@ -164,9 +167,6 @@ int main(int argc, char** argv)
 		// if not in CLI mode, we set the default log verbosity level
 		ccLog::SetVerbosityLevel(ccGui::Parameters().logVerbosityLevel);
 	}
-
-	// store the log message until a valid logging instance is registered
-	ccLog::EnableMessageBackup(true);
 
 	// splash screen
 	std::unique_ptr<QSplashScreen> splash(nullptr);

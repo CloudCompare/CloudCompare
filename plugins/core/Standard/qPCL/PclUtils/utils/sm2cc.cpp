@@ -125,7 +125,7 @@ template<class T> void PCLCloudToCCCloud(	const PCLCloud& pclCloud,
 					{
 						ccCloud.setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[PCL-to-CC] PCL cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[PCL-to-CC] PCL cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 
 					if (_transform)
 					{

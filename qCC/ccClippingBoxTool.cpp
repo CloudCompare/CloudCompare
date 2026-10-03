@@ -1476,7 +1476,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool singleSliceMode)
 		return;
 	}
 
-	ccLog::Print("[ccClippingBoxTool] Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
+	ccLog::Printf("[ccClippingBoxTool] Processed finished in %.2f s.", eTimer.elapsed() / 1.0e3);
 
 	// possible outputs
 	ccHObject*                 sliceGroup    = nullptr;

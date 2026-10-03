@@ -988,7 +988,7 @@ void MainWindow::doActionComputeKdTree()
 	{
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
+		ccConsole::Printf("[doActionComputeKdTree] Timing: %2.3f s", elapsedTime_ms / 1.0e3);
 		cloud->setEnabled(true); // for mesh vertices!
 		cloud->addChild(kdtree);
 		kdtree->setDisplay(cloud->getDisplay());
@@ -1076,7 +1076,7 @@ void MainWindow::doActionResampleWithOctree()
 
 			if (result)
 			{
-				ccConsole::Print("[ResampleWithOctree] Timing: %3.2f s.", eTimer.elapsed() / 1.0e3);
+				ccConsole::Printf("[ResampleWithOctree] Timing: %3.2f s.", eTimer.elapsed() / 1.0e3);
 				ccPointCloud* newCloud = ccPointCloud::From(result, cloud);
 
 				delete result;
@@ -4444,7 +4444,7 @@ void MainWindow::doActionSubsample()
 			}
 		}
 
-		ccLog::Print("[Subsampling] Timing: %3.3f s.", eTimer.elapsed() / 1000.0);
+		ccLog::Printf("[Subsampling] Timing: %3.3f s.", eTimer.elapsed() / 1000.0);
 
 		if (errors)
 		{

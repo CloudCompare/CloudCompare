@@ -353,7 +353,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	static float*         GetTexCoordsBuffer();
 
 	//! Returns a pre-initialized array of vertex indexes for wired display
-	/** Array size is MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*6 by default
+	/** Array size is ccChunk::SIZE * 6 by default
 	 **/
 	static unsigned* GetWireVertexIndexes();
 

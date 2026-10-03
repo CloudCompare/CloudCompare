@@ -83,7 +83,7 @@ static bool               s_addSFPrefix         = true;
 
 static void errorCallback(p_ply _ply, const char* message)
 {
-	ccLog::Error("[PLY] '%s'", message);
+	ccLog::Error("[PLY] %s", message);
 }
 
 void PlyFilter::SetDefaultOutputFormat(e_ply_storage_mode format)
@@ -594,7 +594,7 @@ static int vertex_cb(p_ply_argument argument)
 				{
 					cloud->setGlobalShift(s_Pshift);
 				}
-				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f ; %.2f ; %.2f)", s_Pshift.x, s_Pshift.y, s_Pshift.z);
+				ccLog::Warningf("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f ; %.2f ; %.2f)", s_Pshift.x, s_Pshift.y, s_Pshift.z);
 			}
 		}
 
@@ -1010,7 +1010,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		const char* lastComment = nullptr;
 		while ((lastComment = ply_get_next_comment(ply, lastComment)))
 		{
-			ccLog::Print("[PLY][Comment] %s", lastComment);
+			ccLog::Printf("[PLY][Comment] %s", lastComment);
 			comments << QString(lastComment);
 			// specific case: TextureFile 'filename.ext'
 			if (QString(lastComment).toUpper().startsWith("TEXTUREFILE "))
@@ -1058,14 +1058,13 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 			if (lastElement.elementInstances == 0)
 			{
-				ccLog::Warning("[PLY] Element '%s' was ignored as it has 0 instance!", lastElement.elementName);
+				ccLog::Warningf("[PLY] Element '%s' was ignored as it has 0 instance!", lastElement.elementName);
 				continue;
 			}
 
 			lastElement.properties.clear();
 			lastElement.propertiesCount = 0;
 			lastElement.isFace          = false;
-			// printf("Element: %s\n",lastElement.elementName);
 
 			// last read property
 			plyProperty lastProperty;
@@ -1076,7 +1075,6 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 			{
 				// we get next property info
 				ply_get_property_info(lastProperty.prop, &lastProperty.propName, &lastProperty.type, &lastProperty.length_type, &lastProperty.value_type);
-				// printf("\tProperty: %s (%s)\n",lastProperty.propName,e_ply_type_names[lastProperty.type]);
 
 				if (lastProperty.type == PLY_LIST && !IsFloat(lastProperty.value_type)) // vertex lists should be of integer type
 				{
@@ -1140,7 +1138,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 		const char* lastObjInfo = nullptr;
 		while ((lastObjInfo = ply_get_next_obj_info(ply, lastObjInfo)))
 		{
-			ccLog::Print("[PLY][Info] %s", lastObjInfo);
+			ccLog::Printf("[PLY][Info] %s", lastObjInfo);
 		}
 	}
 
@@ -1150,7 +1148,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 
 	// properties indexes (0 = unassigned)
 	static const unsigned nStdProp = 10;
-	int                   stdPropIndexes[nStdProp]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	int                   stdPropIndexes[nStdProp]{};
 	int&                  xIndex  = stdPropIndexes[0];
 	int&                  yIndex  = stdPropIndexes[1];
 	int&                  zIndex  = stdPropIndexes[2];
@@ -1165,12 +1163,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const QString& filename, const QString& inputT
 	std::vector<int> sfPropIndexes;
 
 	static const unsigned      nListProp = 2;
-	std::array<int, nListProp> listPropIndexes{0, 0};
+	std::array<int, nListProp> listPropIndexes{};
 	int&                       facesIndex     = listPropIndexes[0];
 	int&                       texCoordsIndex = listPropIndexes[1];
 
 	static const unsigned        nSingleProp = 1;
-	std::array<int, nSingleProp> singlePropIndexes{0};
+	std::array<int, nSingleProp> singlePropIndexes{};
 	int&                         texNumberIndex = singlePropIndexes[0];
 
 	// Combo box items for standard properties (coordinates, color components, etc.)

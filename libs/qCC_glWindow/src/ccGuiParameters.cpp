@@ -22,36 +22,30 @@
 
 // qCC_db
 #include <ccBasicTypes.h>
-#include <ccSingleton.h>
 
-//! Unique instance of ccGui
-static ccSingleton<ccGui> s_gui;
+// Unique instance of ccGui
+static std::unique_ptr<ccGui> s_gui;
 
 const ccGui::ParamStruct& ccGui::Parameters()
 {
-	if (!s_gui.instance)
+	if (!s_gui)
 	{
-		s_gui.instance = new ccGui();
-		s_gui.instance->params.fromPersistentSettings();
+		s_gui = std::make_unique<ccGui>();
+		s_gui->params.fromPersistentSettings();
 	}
 
-	return s_gui.instance->params;
-}
-
-void ccGui::ReleaseInstance()
-{
-	s_gui.release();
+	return s_gui->params;
 }
 
 void ccGui::Set(const ParamStruct& params)
 {
-	if (!s_gui.instance)
+	if (!s_gui)
 	{
-		s_gui.instance = new ccGui();
-		s_gui.instance->params.fromPersistentSettings();
+		s_gui = std::make_unique<ccGui>();
+		s_gui->params.fromPersistentSettings();
 	}
 
-	s_gui.instance->params = params;
+	s_gui->params = params;
 }
 
 ccGui::ParamStruct::ParamStruct()

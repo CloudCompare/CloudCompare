@@ -30,9 +30,6 @@ class QCC_DB_LIB_API ccColorScalesManager
 	//! Returns unique instance
 	static ccColorScalesManager* GetUniqueInstance();
 
-	//! Releases unique instance
-	static void ReleaseUniqueInstance();
-
 	//! Destructor
 	virtual ~ccColorScalesManager();
 

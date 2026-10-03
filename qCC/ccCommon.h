@@ -50,3 +50,4 @@
 #define CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME "Vertex type"
 #define CC_DEFAULT_ID_SF_NAME "Id"
 #define CC_ORIGINAL_CLOUD_INDEX_SF_NAME "Original cloud index"
+#define CC_CUT_PURSUIT_LABEL_NAME "Cut Pursuit labels"

@@ -53,3 +53,6 @@
 [submodule "libs/CCAppCommon/devices/3dConnexion/extern/hidapi"]
 	path = libs/CCAppCommon/devices/3dConnexion/extern/hidapi
 	url = https://github.com/libusb/hidapi.git
+[submodule "libs/qCC_pcp"]
+	path = libs/qCC_pcp
+	url = https://github.com/farmakis/qCC_pcp.git

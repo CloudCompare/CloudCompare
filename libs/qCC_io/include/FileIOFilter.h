@@ -320,8 +320,18 @@ class FileIOFilter
 	Q_DECLARE_FLAGS(FilterFeatures, FilterFeature)
 
   public: // helpers
-	//! Returns the real file/path in case the input filename points to a symbolic link, shortcut or alias
+	//! Returns the real file/path in case the input filename points to a symbolic link, Windows shortcut or macOS alias
 	static QString GetRealFilename(QString filename);
+
+	//! Returns the extension to use to guess the file format for the given (potentially symlinked) filename
+	/** The file format is normally guessed from the file extension.
+	    However, a symbolic link may point (possibly through several levels)
+	    to a target that has no (usable) extension.
+	    This walks the symbolic link chain and returns the first extension
+	    it finds, starting from the original filename itself.
+	    Returns an empty string if no extension is found.
+	**/
+	static QString GetExtensionForFormatGuessing(const QString& originalFilename);
 
   protected:
 	static constexpr float DEFAULT_PRIORITY = 25.0f;

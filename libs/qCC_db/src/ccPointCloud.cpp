@@ -2799,12 +2799,13 @@ void ccPointCloud::ReleaseOpenGLRessources()
 }
 
 /// Maximum number of points (per cloud) displayed in a single LOD iteration
-// warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+// warning MUST BE GREATER THAN 'ccChunk::SIZE'
 #ifdef _DEBUG
 static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 16); //~ 64K
 #else
-static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 19); //~ 512K
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 20); //~ 1M
 #endif
+static_assert(MAX_POINT_COUNT_PER_LOD_RENDER_PASS >= ccChunk::SIZE, "MAX_POINT_COUNT_PER_LOD_RENDER_PASS must be greater than ccChunk::SIZE");
 
 // Vertex indexes for OpenGL "arrays" drawing
 static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];

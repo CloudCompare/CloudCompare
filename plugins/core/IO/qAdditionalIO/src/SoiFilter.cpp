@@ -120,7 +120,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (nbOfPoints == 0)
 		{
-			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!", k);
+			ccLog::Warningf("[SoiFilter::loadFile] Scan #%i is empty!", k);
 			continue;
 		}
 

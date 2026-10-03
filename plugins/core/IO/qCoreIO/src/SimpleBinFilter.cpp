@@ -587,7 +587,7 @@ CC_FILE_ERROR SimpleBinFilter::loadFile(const QString& filename, ccHObject& cont
 				{
 					cloud->setGlobalShift(descriptor.globalShift);
 				}
-				ccLog::Warning("[SBF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", descriptor.globalShift.x, descriptor.globalShift.y, descriptor.globalShift.z);
+				ccLog::Warningf("[SBF] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", descriptor.globalShift.x, descriptor.globalShift.y, descriptor.globalShift.z);
 			}
 
 			// restore previous parameters

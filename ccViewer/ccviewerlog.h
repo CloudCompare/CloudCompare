@@ -39,11 +39,11 @@ class ccViewerLog : public ccLog
 
   protected:
 	// inherited from ccLog
-	virtual void logMessage(const QString& message, int level)
+	void logMessage(const Message& message)
 	{
-		if (level & LOG_ERROR)
+		if (message.level & LOG_ERROR)
 		{
-			QMessageBox::warning(m_parentWindow, "Error", message);
+			QMessageBox::warning(m_parentWindow, "Error", message.text);
 		}
 	}
 

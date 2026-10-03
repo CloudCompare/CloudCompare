@@ -1102,7 +1102,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					else
 					{
 						newSF.reset();
-						ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
+						ccLog::Warningf("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
 					}
 				}
 			}
@@ -6670,7 +6670,7 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 		return false;
 	}
 
-	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+	ccLog::Printf("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 	if (!hasNormals())
 	{

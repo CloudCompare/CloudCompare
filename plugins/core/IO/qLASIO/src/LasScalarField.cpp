@@ -166,7 +166,7 @@ LasScalarField::Id LasScalarField::IdFromName(const char* name, unsigned targetP
 		return LasScalarField::Id::NearInfrared;
 	}
 
-	ccLog::Warning("Unhandled Name %s", name);
+	ccLog::Warningf("Unhandled field name '%s'", name);
 	throw std::logic_error("Unknown name");
 }
 

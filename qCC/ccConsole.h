@@ -22,6 +22,7 @@
 
 // Qt
 #include <QFile>
+#include <QMap>
 #include <QListWidget>
 #include <QMutex>
 #include <QTimer>
@@ -74,16 +75,15 @@ class ccConsole : public QObject
 	//! Releases unique instance
 	static void ReleaseInstance(bool flush = true);
 
-	//! Sets the console refresh time
+	//! Sets the console refresh time (static shortcut)
 	/** \param cycle_ms Refresh cycle (ms) - must be strictly positive
 	 **/
 	static void SetRefreshCycle(int cycle_ms = 1000);
 
-	//! Sets auto-refresh state
-	void setAutoRefresh(bool state);
-
-	//! Whether auto-refresh is in progress
-	bool autoRefresh() const;
+	//! Sets the console refresh time
+	/** \param cycle_ms Refresh cycle (ms) - must be strictly positive
+	 **/
+	void setRefreshCycle(int cycle_ms);
 
 	//! Sets log file
 	bool setLogFile(const QString& filename);
@@ -114,7 +114,7 @@ class ccConsole : public QObject
 	ccConsole();
 
 	// inherited from ccLog
-	void logMessage(const QString& message, int level) override;
+	void logMessage(const Message& message) override;
 
 	//! Associated text display widget
 	QListWidget* m_textDisplay;
@@ -128,11 +128,8 @@ class ccConsole : public QObject
 	//! Mutex for concurrent thread access to console
 	QMutex m_mutex;
 
-	//! Queue element type (message + color)
-	using ConsoleItemType = QPair<QString, int>;
-
 	//! Queue for incoming messages
-	QVector<ConsoleItemType> m_queue;
+	QMap<qint64, Message> m_queue;
 
 	//! Timer for auto-refresh
 	QTimer m_timer;

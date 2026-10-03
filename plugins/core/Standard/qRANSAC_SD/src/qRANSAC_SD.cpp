@@ -526,7 +526,7 @@ ccHObject* qRansacSD::ExecuteRANSAC(ccPointCloud* ccPC, const RansacParams& para
 		}
 		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccLog::Print("[qRANSAC] Search Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1.0e3);
+		ccLog::Printf("[qRANSAC] Search Timing: %2.3f s", elapsedTime_ms / 1.0e3);
 	}
 
 #if 0 //def _DEBUG

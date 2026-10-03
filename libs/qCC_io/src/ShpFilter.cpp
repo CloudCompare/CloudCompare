@@ -387,7 +387,7 @@ CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream& sin)
 	sin >> fileCode;
 	if (fileCode != ESRI_SHAPE_FILE_CODE)
 	{
-		ccLog::Warning("[SHP] wrong file code (%d), is this a shape file?", fileCode);
+		ccLog::Warningf("[SHP] wrong file code (%d), is this a shape file?", fileCode);
 		return CC_FERR_MALFORMED_FILE;
 	}
 
@@ -402,7 +402,7 @@ CC_FILE_ERROR ShapeFileHeader::readFrom(QDataStream& sin)
 
 	if (!IsValidESRIShapeCode(shapeTypeInt))
 	{
-		ccLog::Warning("[SHP] invalid shape type code in header (%d)", shapeTypeInt);
+		ccLog::Warningf("[SHP] invalid shape type code in header (%d)", shapeTypeInt);
 		return CC_FERR_MALFORMED_FILE;
 	}
 
@@ -845,7 +845,7 @@ static CC_FILE_ERROR BuildPatches(
 	{
 		if (!IsValidEsriPartType(partTypes[i]))
 		{
-			ccLog::Warning("[SHP] Multipatch part %d has an invalid part type (%d)", i, partTypes[i]);
+			ccLog::Warningf("[SHP] Multipatch part %d has an invalid part type (%d)", i, partTypes[i]);
 			continue;
 		}
 		ESRI_PART_TYPE type = static_cast<ESRI_PART_TYPE>(partTypes[i]);
@@ -1841,7 +1841,7 @@ CC_FILE_ERROR ShpFilter::saveToFile(ccHObject* entity, const std::vector<Generic
 		idxStream << static_cast<int32_t>(recordStart / 2); // recordStart must be converted to a number of 16-bit words
 		idxStream << recordSize16bits;                      // recordSize should already be expressed as a number of 16-bit words
 
-		ccLog::PrintDebug("[SHP] Saved shape #%d (%d bytes)", shapeIndex, recordSize16bits * 2);
+		ccLog::PrintDebugf("[SHP] Saved shape #%d (%d bytes)", shapeIndex, recordSize16bits * 2);
 		shapeIndex++;
 	}
 
@@ -1981,7 +1981,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 	CCVector3d Pmin                    = hdr.pointMin;
 	if (HandleGlobalShift(Pmin, Pshift, preserveCoordinateShift, parameters))
 	{
-		ccLog::Warning("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+		ccLog::Warningf("[SHP] Entities will be recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 	}
 
 	// progress bar
@@ -2026,7 +2026,7 @@ CC_FILE_ERROR ShpFilter::loadFile(const QString& filename, ccHObject& container,
 
 		if (!IsValidESRIShapeCode(shapeTypeInt))
 		{
-			ccLog::Warning("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
+			ccLog::Warningf("[SHP] Shape %d has an invalid shape code (%d)", recordNumber, shapeTypeInt);
 			return CC_FERR_READING;
 		}
 		ESRI_SHAPE_TYPE shapeType = static_cast<ESRI_SHAPE_TYPE>(shapeTypeInt);

@@ -1356,13 +1356,13 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 	}
 
 	GDALAllRegister();
-	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+	ccLog::PrintDebugf("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
 	const char  pszFormat[] = "GTiff";
 	GDALDriver* poDriver    = GetGDALDriverManager()->GetDriverByName(pszFormat);
 	if (!poDriver)
 	{
-		ccLog::Error("[GDAL] Driver %s is not supported", pszFormat);
+		ccLog::Error("[GDAL] Driver '%s' is not supported", pszFormat);
 		return false;
 	}
 
@@ -1373,7 +1373,7 @@ bool ccRasterizeTool::ExportGeoTiff(const QString&                    outputFile
 #endif
 	if (!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE))
 	{
-		ccLog::Error("[GDAL] Driver %s doesn't support Create() method", pszFormat);
+		ccLog::Error("[GDAL] Driver '%s' doesn't support Create() method", pszFormat);
 		return false;
 	}
 

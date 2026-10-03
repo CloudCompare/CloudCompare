@@ -956,7 +956,7 @@ namespace ccEntityAction
 					    errorMessage = QT_TR_NOOP("An error occurred! (see console)");
 					    return false;
 				    }
-				    ccLog::Print("[RGBFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+				    ccLog::Printf("[RGBFilter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 				    if (filterParams.applyToSFduringRGB)
 				    {
@@ -1172,7 +1172,7 @@ namespace ccEntityAction
 						    return false;
 					    }
 
-					    ccLog::Print("SF [Bilateral/Gaussian/Mean/Median filter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+					    ccLog::Printf("SF [Bilateral/Gaussian/Mean/Median filter] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 					    pc->setCurrentDisplayedScalarField(sfIdx);
 					    pc->showSF(sfIdx >= 0);
 					    sf = pc->getCurrentDisplayedScalarField();
@@ -2913,7 +2913,7 @@ namespace ccEntityAction
 
 			if (octree)
 			{
-				ccLog::Print("[doActionComputeOctree] Timing: %2.3f s", static_cast<double>(elapsedTime_ms) / 1000.0);
+				ccLog::Printf("[doActionComputeOctree] Timing: %2.3f s", elapsedTime_ms / 1000.0);
 				cloud->setEnabled(true); // for vertices!
 				ccOctreeProxy* proxy = cloud->getOctreeProxy();
 				assert(proxy);
@@ -3202,7 +3202,7 @@ namespace ccEntityAction
 
 				    if (chi2dist >= 0.0)
 				    {
-					    ccLog::Print("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
+					    ccLog::Printf("[Chi2 Test] Timing: %3.2f ms.", eTimer.elapsed() / 1000.0);
 					    ccLog::Print(QObject::tr("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
 
 					    // we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed

@@ -210,7 +210,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
 		// construction this way is not supported (yet)
-		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!", objectType);
+		ccLog::ErrorDebugf("[ccHObject::New] This object (type %1) can't be constructed this way (yet)!", objectType);
 		break;
 	default:
 		if ((objectType & CC_TYPES::CUSTOM_H_OBJECT) == CC_TYPES::CUSTOM_H_OBJECT)
@@ -220,7 +220,7 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name /*=nullptr*
 		else
 		{
 			// unhandled ID
-			ccLog::ErrorDebug("[ccHObject::New] Invalid object type (%i)!", objectType);
+			ccLog::ErrorDebugf("[ccHObject::New] Invalid object type (%i)!", objectType);
 		}
 		break;
 	}

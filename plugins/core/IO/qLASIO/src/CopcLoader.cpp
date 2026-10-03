@@ -151,7 +151,7 @@ namespace copc
 			pageQueue.pop();
 		}
 
-		ccLog::Print("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
+		ccLog::Printf("[LAS] COPC file with %zu pages / %zu entries / %llu points", numPages, entries.size(), m_numPoints);
 
 		try
 		{

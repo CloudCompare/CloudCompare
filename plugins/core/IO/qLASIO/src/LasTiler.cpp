@@ -29,7 +29,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 	if (laszip_get_header_pointer(laszipReader, &laszipHeader))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		laszip_close_reader(laszipReader);
 		laszip_clean(laszipReader);
 		laszip_destroy(laszipReader);
@@ -50,7 +50,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 	if (laszip_get_point_pointer(laszipReader, &laszipPoint))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		laszip_close_reader(laszipReader);
 		laszip_clean(laszipReader);
 		laszip_destroy(laszipReader);
@@ -102,7 +102,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 		if (laszip_read_point(laszipReader))
 		{
 			laszip_get_error(laszipReader, &errorMsg);
-			ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+			ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 			break;
 		}
@@ -110,7 +110,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 		if (laszip_get_coordinates(laszipReader, laszipCoordinates))
 		{
 			laszip_get_error(laszipReader, &errorMsg);
-			ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+			ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 			break;
 		}
@@ -148,7 +148,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 			if (laszip_set_header(writer, laszipHeader))
 			{
 				laszip_get_error(writer, &errorMsg);
-				ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+				ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 				error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 				break;
 			}
@@ -156,7 +156,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 			if (laszip_open_writer(writer, outputNameStd.c_str(), false))
 			{
 				laszip_get_error(writer, &errorMsg);
-				ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+				ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 				error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 				break;
 			}
@@ -165,7 +165,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 		if (laszip_set_point(writer, laszipPoint))
 		{
 			laszip_get_error(writer, &errorMsg);
-			ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+			ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 			break;
 		}
@@ -173,7 +173,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 		if (laszip_write_point(writer))
 		{
 			laszip_get_error(writer, &errorMsg);
-			ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+			ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 			break;
 		}
@@ -181,7 +181,7 @@ CC_FILE_ERROR TileLasReader(laszip_POINTER laszipReader, const QString& originNa
 		if (laszip_update_inventory(writer))
 		{
 			laszip_get_error(writer, &errorMsg);
-			ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+			ccLog::Warningf("[LAS] laszip error :'%s'", errorMsg);
 			error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
 			break;
 		}

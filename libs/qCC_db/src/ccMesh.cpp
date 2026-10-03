@@ -3726,8 +3726,8 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 			addChild(m_associatedCloud);
 		}
 		vertCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
-		ccLog::Print("[MergeDuplicatedVertices] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);
-		ccLog::Print("[MergeDuplicatedVertices] Remaining faces after auto-removal of duplicate ones: %i", size());
+		ccLog::Printf("[MergeDuplicatedVertices] Remaining vertices after auto-removal of duplicate ones: %i", vertCount);
+		ccLog::Printf("[MergeDuplicatedVertices] Remaining faces after auto-removal of duplicate ones: %i", size());
 	}
 	catch (const std::bad_alloc&)
 	{

@@ -117,7 +117,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	if (laszip_open_reader(laszipReader, qUtf8Printable(fileName), &isCompressed))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		laszip_clean(laszipReader);
 		laszip_destroy(laszipReader);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
@@ -126,7 +126,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	if (laszip_get_header_pointer(laszipReader, &laszipHeader))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		laszip_close_reader(laszipReader);
 		laszip_clean(laszipReader);
 		laszip_destroy(laszipReader);
@@ -281,7 +281,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	if (laszip_get_point_pointer(laszipReader, &laszipPoint))
 	{
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		laszip_close_reader(laszipReader);
 		laszip_clean(laszipReader);
 		laszip_destroy(laszipReader);
@@ -405,7 +405,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 
 				if (globalShift.norm2() != 0.0)
 				{
-					ccLog::Warning("[LAS] Cloud has been re-centered! Translation: "
+					ccLog::Warningf("[LAS] Cloud has been re-centered! Translation: "
 					               "(%.2f ; %.2f ; %.2f)",
 					               globalShift.x,
 					               globalShift.y,
@@ -596,7 +596,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	{
 		ccLog::Warning("ERROR IS HERE");
 		laszip_get_error(laszipHeader, &errorMsg);
-		ccLog::Warning("[LAS] laszip error: '%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 	}
 
 	laszip_close_reader(laszipReader);
@@ -901,7 +901,7 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 
 				if (stdName.size() > LasExtraScalarField::MAX_NAME_SIZE)
 				{
-					ccLog::Warning("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
+					ccLog::Warningf("[LAS] Extra Scalar field name '%s' is too long and will be truncated",
 					               stdName.c_str());
 				}
 

@@ -15,15 +15,15 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PlyOpenDlg.h"
+#include "../include/PlyOpenDlg.h"
+
+// qCC_db
+#include <ccLog.h>
 
 // Qt
 #include <QListWidgetItem>
 #include <QMessageBox>
 #include <QStringList>
-
-// qCC_db
-#include <ccLog.h>
 
 // System
 #include <cassert>

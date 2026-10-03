@@ -1,15 +1,21 @@
 #include "TestFileRoundTrip.h"
 
-#include "AsciiFilter.h"
-#include "BinFilter.h"
-#include "FileIO.h"
-#include "FileIOFilter.h"
-#include "PlyFilter.h"
-#include "ccHObject.h"
-#include "ccPointCloud.h"
-#include "ccScalarField.h"
+// qCC_db
+#include <ccHObject.h>
+#include <ccPointCloud.h>
+#include <ccScalarField.h>
 
+// qCC_io
+#include <AsciiFilter.h>
+#include <BinFilter.h>
+#include <FileIO.h>
+#include <FileIOFilter.h>
+#include <PlyFilter.h>
+
+// Qt
 #include <QTemporaryDir>
+
+// System
 #include <cmath>
 #include <limits>
 #include <memory>

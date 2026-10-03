@@ -15,9 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "DepthMapFileFilter.h"
+#include "../include/DepthMapFileFilter.h"
 
-#include "FileIO.h"
+// Local
+#include "../include/FileIO.h"
 
 // qCC_db
 #include <ccGBLSensor.h>
@@ -29,7 +30,7 @@
 #include <QFileInfo>
 #include <QString>
 
-// system
+// System
 #include <cassert>
 
 DepthMapFileFilter::DepthMapFileFilter()

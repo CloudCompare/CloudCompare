@@ -15,18 +15,11 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "PlyFilter.h"
-
-#include "FileIO.h"
+#include "../include/PlyFilter.h"
 
 // Local
-#include "PlyOpenDlg.h"
-
-// Qt
-#include <QFileInfo>
-#include <QImage>
-#include <QMessageBox>
-#include <QPushButton>
+#include "../include/FileIO.h"
+#include "../include/PlyOpenDlg.h"
 
 // qCC_db
 #include <ccHObjectCaster.h>
@@ -37,6 +30,12 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
+
+// Qt
+#include <QFileInfo>
+#include <QImage>
+#include <QMessageBox>
+#include <QPushButton>
 
 // System
 #include <array>

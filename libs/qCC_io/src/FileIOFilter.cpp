@@ -15,21 +15,17 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "FileIOFilter.h"
+#include "../include/FileIOFilter.h"
 
-// CLOUDS
-#include "AsciiFilter.h"
-#include "BinFilter.h"
-
-// MESHES
-#include "PlyFilter.h"
-
-// OTHERS
-#include "DepthMapFileFilter.h"
-#include "DxfFilter.h"
-#include "ImageFileFilter.h"
-#include "RasterGridFilter.h"
-#include "ShpFilter.h"
+// Local
+#include "../include/AsciiFilter.h"
+#include "../include/BinFilter.h"
+#include "../include/DepthMapFileFilter.h"
+#include "../include/DxfFilter.h"
+#include "../include/ImageFileFilter.h"
+#include "../include/PlyFilter.h"
+#include "../include/RasterGridFilter.h"
+#include "../include/ShpFilter.h"
 
 // Qt
 #include <QFileInfo>
@@ -39,7 +35,7 @@
 #include <vld.h>
 #endif
 
-// system
+// System
 #include <cassert>
 #include <vector>
 

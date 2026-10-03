@@ -17,10 +17,9 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "FileIOFilter.h"
-
-// dialogs
+// Local
 #include "AsciiOpenDlg.h"
+#include "FileIOFilter.h"
 
 // Qt
 #include <QByteArray>

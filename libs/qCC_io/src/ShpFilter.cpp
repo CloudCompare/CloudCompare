@@ -17,12 +17,17 @@
 
 #ifdef CC_SHP_SUPPORT
 
-#include "ShpFilter.h"
+#include "../include/ShpFilter.h"
 
-// Local
-#include "ShpDBFFields.h"
+// Ui
 #include "ui_importDBFFieldDlg.h"
 #include "ui_saveSHPFileDlg.h"
+
+// Local
+#include "../include/ShpDBFFields.h"
+
+// CCCoreLib
+#include <MeshSamplingTools.h>
 
 // qCC_db
 #include <ccGenericMesh.h>
@@ -36,9 +41,6 @@
 
 // Qt
 #include <QFileInfo>
-
-// CCCoreLib
-#include <MeshSamplingTools.h>
 
 using FieldIndexAndName = QPair<int, QString>;
 

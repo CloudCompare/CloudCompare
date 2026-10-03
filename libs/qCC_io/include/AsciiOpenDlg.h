@@ -17,7 +17,7 @@
 // #                                                                        #
 // ##########################################################################
 
-// local
+// Local
 #include "qCC_io.h"
 
 // Qt
@@ -25,7 +25,7 @@
 #include <QDialog>
 #include <QString>
 
-// system
+// System
 #include <vector>
 
 enum CC_ASCII_OPEN_DLG_TYPES

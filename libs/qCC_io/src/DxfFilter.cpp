@@ -15,9 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-#include "DxfFilter.h"
+#include "../include/DxfFilter.h"
 
-#include "FileIO.h"
+// Local
+#include "../include/FileIO.h"
 
 // CCCoreLib
 #include <ScalarField.h>
@@ -35,7 +36,7 @@
 #include <dl_dxf.h>
 #endif
 
-// system
+// System
 #include <cassert>
 
 DxfFilter::DxfFilter()

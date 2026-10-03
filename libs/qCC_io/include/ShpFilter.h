@@ -19,13 +19,13 @@
 
 #ifdef CC_SHP_SUPPORT
 
-// qCC_io
-#include <FileIOFilter.h>
+// Local
+#include "FileIOFilter.h"
 
 // Qt
 #include <QString>
 
-// system
+// System
 #include <vector>
 
 class GenericDBFField;

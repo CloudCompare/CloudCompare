@@ -17,7 +17,7 @@
 
 #ifdef CC_GDAL_SUPPORT
 
-#include "RasterGridFilter.h"
+#include "../include/RasterGridFilter.h"
 
 // qCC_db
 #include <ccMesh.h>

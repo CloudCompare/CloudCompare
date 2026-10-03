@@ -15,10 +15,10 @@
 // #                                                                        #
 // ##########################################################################
 
-// Local
-#include "ccGlobalShiftManager.h"
+#include "../include/ccGlobalShiftManager.h"
 
-#include "ccShiftAndScaleCloudDlg.h"
+// Local
+#include "../include/ccShiftAndScaleCloudDlg.h"
 
 // Qt
 #include <QCoreApplication>

@@ -19,7 +19,7 @@
 
 #ifdef CC_SHP_SUPPORT
 
-// local
+// Local
 #include "qCC_io.h"
 
 // CCCoreLib
@@ -28,7 +28,7 @@
 // Qt
 #include <QString>
 
-// system
+// System
 #include <vector>
 
 // Shapelib

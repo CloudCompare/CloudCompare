@@ -171,7 +171,7 @@ CC_FILE_ERROR LasIOFilter::loadFile(const QString&  fileName,
 	std::vector<LasScalarField>
 	    availableScalarFields = LasScalarField::ForPointFormat(laszipHeader->point_data_format);
 
-	std::vector<LasExtraScalarField> availableExtraScalarFields = LasExtraScalarField::ParseExtraScalarFields(*laszipHeader);
+	std::vector<LasExtraScalarField> availableExtraScalarFields = LasExtraScalarField::ParseExtraScalarFields(*laszipHeader, fileName);
 
 	std::unique_ptr<FileInfo> infoOfCurrentFile = std::make_unique<FileInfo>();
 	infoOfCurrentFile->version.minorVersion     = laszipHeader->version_minor;

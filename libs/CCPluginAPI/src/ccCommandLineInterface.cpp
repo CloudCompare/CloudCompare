@@ -36,8 +36,8 @@ namespace
 //////
 // CLEntityDesc
 
-CLEntityDesc::CLEntityDesc(QString name)
-    : basename(std::move(name))
+CLEntityDesc::CLEntityDesc(const QString& name)
+    : basename(name)
     , path(QDir::currentPath())
     , indexInFile(-1)
 {
@@ -59,9 +59,9 @@ CLEntityDesc::CLEntityDesc(const QString& filename, int _indexInFile)
 	}
 }
 
-CLEntityDesc::CLEntityDesc(QString _basename, QString _path, int _indexInFile)
-    : basename(std::move(_basename))
-    , path(std::move(_path))
+CLEntityDesc::CLEntityDesc(const QString& _basename, const QString& _path, int _indexInFile)
+    : basename(_basename)
+    , path(_path)
     , indexInFile(_indexInFile)
 {
 }
@@ -69,8 +69,8 @@ CLEntityDesc::CLEntityDesc(QString _basename, QString _path, int _indexInFile)
 //////
 // CLGroupDesc
 
-CLGroupDesc::CLGroupDesc(ccHObject* group, QString basename, QString path)
-    : CLEntityDesc(std::move(basename), std::move(path))
+CLGroupDesc::CLGroupDesc(ccHObject* group, const QString& basename, const QString& path)
+    : CLEntityDesc(basename, path)
     , groupEntity(group)
 {
 }
@@ -141,8 +141,8 @@ CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, const QString& filename, int index)
 {
 }
 
-CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, QString basename, QString path, int index)
-    : CLEntityDesc(std::move(basename), std::move(path), index)
+CLMeshDesc::CLMeshDesc(ccGenericMesh* _mesh, const QString& basename, const QString& path, int index)
+    : CLEntityDesc(basename, path, index)
     , mesh(_mesh)
 {
 }

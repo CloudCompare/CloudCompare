@@ -511,9 +511,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			if (material) // texture coordinates
 			{
 				ply_write(ply, 6.0);
-				TexCoords2D* tx1 = nullptr;
-				TexCoords2D* tx2 = nullptr;
-				TexCoords2D* tx3 = nullptr;
+				const TexCoords2D* tx1 = nullptr;
+				const TexCoords2D* tx2 = nullptr;
+				const TexCoords2D* tx3 = nullptr;
 				mesh->getTriangleTexCoordinates(i, tx1, tx2, tx3);
 				ply_write(ply, tx1 ? tx1->tx : -1.0);
 				ply_write(ply, tx1 ? tx1->ty : -1.0);

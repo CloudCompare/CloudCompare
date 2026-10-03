@@ -101,7 +101,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		bool       preserve;
 
 		//! Default constructor
-		ShiftInfo(QString str = QString("unnamed"))
+		ShiftInfo(const QString& str = QString("unnamed"))
 		    : shift(0, 0, 0)
 		    , scale(1.0)
 		    , name(str)
@@ -109,7 +109,7 @@ class QCC_IO_LIB_API ccGlobalShiftManager
 		{
 		}
 		//! Constructor from a vector and a scale value
-		ShiftInfo(QString str, const CCVector3d& T, double s = 1.0)
+		ShiftInfo(const QString& str, const CCVector3d& T, double s = 1.0)
 		    : shift(T)
 		    , scale(s)
 		    , name(str)

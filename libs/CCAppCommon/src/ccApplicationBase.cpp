@@ -29,8 +29,8 @@
 
 // qCC_db
 #include <ccColorScalesManager.h>
+#include <ccGenericMesh.h>
 #include <ccMaterial.h>
-#include <ccMesh.h>
 #include <ccPointCloud.h>
 
 // qCC_glWindow
@@ -136,8 +136,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
 	        { ccMaterial::ReleaseTextures();
-			  ccColorScalesManager::ReleaseUniqueInstance();
-	          ccMesh::ReleaseOpenGLRessources();
+	          ccColorScalesManager::ReleaseUniqueInstance();
+	          ccGenericMesh::ReleaseOpenGLRessources();
 	          ccPointCloud::ReleaseOpenGLRessources(); });
 }
 

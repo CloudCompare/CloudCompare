@@ -704,7 +704,7 @@ void ccColorScaleEditorWidget::onSliderModified(int sliderIndex)
 	Q_EMIT stepModified(sliderIndex);
 }
 
-void ccColorScaleEditorWidget::setSliders(SharedColorScaleElementSliders sliders)
+void ccColorScaleEditorWidget::setSliders(const SharedColorScaleElementSliders& sliders)
 {
 	if (m_sliders)
 	{

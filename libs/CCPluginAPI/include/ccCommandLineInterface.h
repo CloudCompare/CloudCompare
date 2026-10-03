@@ -55,9 +55,9 @@ struct CCPLUGIN_LIB_API CLEntityDesc
 	QString path;
 	int     indexInFile;
 
-	CLEntityDesc(QString name);
+	CLEntityDesc(const QString& name);
 	CLEntityDesc(const QString& filename, int _indexInFile);
-	CLEntityDesc(QString _basename, QString _path, int _indexInFile = -1);
+	CLEntityDesc(const QString& _basename, const QString& _path, int _indexInFile = -1);
 
 	virtual ~CLEntityDesc() = default;
 
@@ -71,9 +71,9 @@ struct CCPLUGIN_LIB_API CLGroupDesc : CLEntityDesc
 {
 	ccHObject* groupEntity;
 
-	CLGroupDesc(ccHObject* group,
-	            QString    basename,
-	            QString    path = QString());
+	CLGroupDesc(ccHObject*     group,
+	            const QString& basename,
+	            const QString& path = QString());
 
 	~CLGroupDesc() override = default;
 
@@ -117,8 +117,8 @@ struct CCPLUGIN_LIB_API CLMeshDesc : CLEntityDesc
 	           int            index    = -1);
 
 	CLMeshDesc(ccGenericMesh* _mesh,
-	           QString        basename,
-	           QString        path,
+	           const QString& basename,
+	           const QString& path,
 	           int            index = -1);
 
 	~CLMeshDesc() override = default;

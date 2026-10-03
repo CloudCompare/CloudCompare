@@ -3609,7 +3609,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 	s_laplacianSmooth_nbIter = QInputDialog::getInt(this, tr("Smooth mesh"), tr("Iterations:"), s_laplacianSmooth_nbIter, 1, 1000, 1, &ok);
 	if (!ok)
 		return;
-	s_laplacianSmooth_factor = QInputDialog::getDouble(this, tr("Smooth mesh"), tr("Smoothing factor:"), s_laplacianSmooth_factor, 0, 100, 3, &ok);
+	s_laplacianSmooth_factor = QInputDialog::getDouble(this, tr("Smooth mesh"), tr("Smoothing factor:"), s_laplacianSmooth_factor, 0.0, 2.0, 3, &ok);
 	if (!ok)
 		return;
 

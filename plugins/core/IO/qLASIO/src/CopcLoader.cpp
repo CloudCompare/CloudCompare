@@ -145,7 +145,7 @@ namespace copc
 				else
 				{
 					m_numPoints += entry.point_count;
-					entries.push_back(std::move(entry));
+					entries.push_back(entry);
 				}
 			}
 			pageQueue.pop();

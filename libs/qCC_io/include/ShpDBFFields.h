@@ -41,7 +41,7 @@ class QCC_IO_LIB_API GenericDBFField
 {
   public:
 	//! Default constructor
-	explicit GenericDBFField(QString name)
+	explicit GenericDBFField(const QString& name)
 	    : m_name(name)
 	{
 	}
@@ -84,7 +84,7 @@ class QCC_IO_LIB_API IntegerDBFField : public GenericDBFField
 {
   public:
 	//! Default constructor
-	explicit IntegerDBFField(QString name)
+	explicit IntegerDBFField(const QString& name)
 	    : GenericDBFField(name)
 	{
 	}
@@ -113,7 +113,7 @@ class QCC_IO_LIB_API DoubleDBFField : public GenericDBFField
 {
   public:
 	//! Default constructor
-	explicit DoubleDBFField(QString name)
+	explicit DoubleDBFField(const QString& name)
 	    : GenericDBFField(name)
 	{
 	}
@@ -142,7 +142,7 @@ class QCC_IO_LIB_API DoubleDBFField3D : public GenericDBFField
 {
   public:
 	//! Default constructor
-	explicit DoubleDBFField3D(QString name)
+	explicit DoubleDBFField3D(const QString& name)
 	    : GenericDBFField(name)
 	{
 	}

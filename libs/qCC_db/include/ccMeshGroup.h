@@ -99,7 +99,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return nullptr;
 	}
-	void getTriangleTexCoordinates(unsigned triIndex, TexCoords2D*& tx1, TexCoords2D*& tx2, TexCoords2D*& tx3) const override
+	void getTriangleTexCoordinates(unsigned triIndex, const TexCoords2D*& tx1, const TexCoords2D*& tx2, const TexCoords2D*& tx3) const override
 	{
 		tx1 = tx2 = tx3 = nullptr;
 	}
@@ -119,9 +119,14 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		i1 = i2 = i3 = -1;
 	}
-	bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const override
+	void getTriangleCompressedNormals(unsigned triangleIndex, CompressedNormType& Na, CompressedNormType& Nb, CompressedNormType& Nc) const override
 	{
-		return false;
+		Na = Nb = Nc = 0;
+	}
+	void getTriangleNormals(unsigned triangleIndex, const CCVector3*& Na, const CCVector3*& Nb, const CCVector3*& Nc) const override
+	{
+		static CCVector3 zeroVector(0, 0, 0);
+		Na = Nb = Nc = &zeroVector;
 	}
 	NormsIndexesTableType::Shared getTriNormsTable() const override
 	{

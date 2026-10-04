@@ -16,11 +16,11 @@ namespace
 	  public:
 		QStringList warnings;
 
-		void logMessage(const QString& message, int level) override
+		void logMessage(const Message& message) override
 		{
-			if ((level & ~DEBUG_FLAG) == LOG_WARNING)
+			if ((message.level & ~DEBUG_FLAG) == LOG_WARNING)
 			{
-				warnings << message;
+				warnings << message.text;
 			}
 		}
 	};

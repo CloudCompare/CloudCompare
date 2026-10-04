@@ -79,7 +79,6 @@ target_sources( ${PROJECT_NAME}
 		${CMAKE_CURRENT_LIST_DIR}/ccSensor.h
 		${CMAKE_CURRENT_LIST_DIR}/ccSerializableObject.h
 		${CMAKE_CURRENT_LIST_DIR}/ccShiftedObject.h
-		${CMAKE_CURRENT_LIST_DIR}/ccSingleton.h
 		${CMAKE_CURRENT_LIST_DIR}/ccSphere.h
 		${CMAKE_CURRENT_LIST_DIR}/ccSubMesh.h
 		${CMAKE_CURRENT_LIST_DIR}/ccTorus.h

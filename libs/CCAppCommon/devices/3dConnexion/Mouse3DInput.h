@@ -277,10 +277,10 @@ class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 
 	void sigMove3d(std::vector<float>& motionData);
 	void sigReleased();
-	void sigOn3dmouseKeyDown(int virtualKeyCode);
-	void sigOn3dmouseCMDKeyDown(int virtualCMDCode);
-	void sigOn3dmouseKeyUp(int virtualKeyCode);
-	void sigOn3dmouseCMDKeyUp(int virtualCMDCode);
+	void sigOn3DMouseKeyDown(int virtualKeyCode);
+	void sigOn3DMouseCMDKeyDown(int virtualCMDCode);
+	void sigOn3DMouseKeyUp(int virtualKeyCode);
+	void sigOn3DMouseCMDKeyUp(int virtualCMDCode);
 
   protected:
 	//! Called with the processed motion data when a 3D mouse event is received
@@ -289,24 +289,24 @@ class CCAPPCOMMON_LIB_API Mouse3DInput : public QObject
 	virtual void move3d(std::vector<float>& motionData);
 
 	//! Called when a 3D mouse key is pressed
-	/** The default implementation emits a sigOn3dmouseKeyDown signal with the key code.
+	/** The default implementation emits a sigOn3DMouseKeyDown signal with the key code.
 	 */
-	virtual void on3dmouseKeyDown(int virtualKeyCode);
+	virtual void on3DMouseKeyDown(int virtualKeyCode);
 
 	//! Called when a 3D mouse key is pressed after translation to CMD
-	/** The default implementation emits a sigOn3dmouseKeyDown signal with the key code.
+	/** The default implementation emits a sigOn3DMouseCMDKeyDown signal with the key code.
 	 */
-	virtual void on3dmouseCMDKeyDown(int virtualCMDCode);
+	virtual void on3DMouseCMDKeyDown(int virtualCMDCode);
 
 	//! Called when a 3D mouse key is released
-	/** The default implementation emits a sigOn3dmouseKeyUp signal with the key code.
+	/** The default implementation emits a sigOn3DMouseKeyUp signal with the key code.
 	 **/
-	virtual void on3dmouseKeyUp(int virtualKeyCode);
+	virtual void on3DMouseKeyUp(int virtualKeyCode);
 
 	//! Called when a 3D mouse key is released after translation to CMD
-	/** The default implementation emits a sigOn3dmouseKeyUp signal with the key code.
+	/** The default implementation emits a sigOn3DMouseCMDKeyUp signal with the key code.
 	 **/
-	virtual void on3dmouseCMDKeyUp(int virtualCMDCode);
+	virtual void on3DMouseCMDKeyUp(int virtualCMDCode);
 
 	//! 3DxWare handle
 	void* m_siHandle;

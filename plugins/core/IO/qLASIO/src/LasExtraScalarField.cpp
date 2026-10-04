@@ -289,11 +289,11 @@ LasExtraScalarField::ParseExtraScalarFields(const char* data, size_t size)
 		}
 
 		byteOffset += ebInfo.byteSize();
-		ccLog::Print("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
-		             ebInfo.name,
-		             ebInfo.typeName().c_str(),
-		             ebInfo.byteSize(),
-		             ebInfo.byteOffset);
+		ccLog::Printf("[LAS] Extra Bytes: Name: '%s', Type: %s -> Size %d, Offset %d",
+		              ebInfo.name,
+		              ebInfo.typeName().c_str(),
+		              ebInfo.byteSize(),
+		              ebInfo.byteOffset);
 	}
 	return info;
 }
@@ -489,11 +489,11 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 				{
 					extraScalarField.scalarFields[i] = pointCloud.getCCScalarField(pos);
 					found++;
-					ccLog::Warning("[LAS] field %s found", name);
+					ccLog::Warningf("[LAS] field '%s' found", name);
 				}
 				else
 				{
-					ccLog::Warning("[LAS] field %s not found", name);
+					ccLog::Warningf("[LAS] field '%s' not found", name);
 					extraScalarField.scalarFields[i] = nullptr;
 				}
 			}
@@ -517,7 +517,7 @@ void LasExtraScalarField::MatchExtraBytesToScalarFields(std::vector<LasExtraScal
 			}
 			else
 			{
-				ccLog::Warning("[LAS] field %s not found", nameToSearch);
+				ccLog::Warningf("[LAS] field '%s' not found", nameToSearch);
 			}
 		}
 	}

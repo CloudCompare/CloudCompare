@@ -207,7 +207,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 			{
 				if (HandleGlobalShift(cloudTransD.getTranslationAsVec3D(), PshiftTrans, preserveCoordinateShift, parameters))
 				{
-					ccLog::Warning("[PTXFilter::loadFile] Cloud has be recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftTrans.x, PshiftTrans.y, PshiftTrans.z);
+					ccLog::Warningf("[PTXFilter::loadFile] Cloud has be recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftTrans.x, PshiftTrans.y, PshiftTrans.z);
 				}
 			}
 
@@ -368,7 +368,7 @@ CC_FILE_ERROR PTXFilter::loadFile(const QString&  filename,
 									{
 										cloud->setGlobalShift(PshiftCloud);
 									}
-									ccLog::Warning("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftCloud.x, PshiftCloud.y, PshiftCloud.z);
+									ccLog::Warningf("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", PshiftCloud.x, PshiftCloud.y, PshiftCloud.z);
 								}
 							}
 							firstPoint = false;

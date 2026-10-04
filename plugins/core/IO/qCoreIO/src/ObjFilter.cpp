@@ -701,7 +701,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 						{
 							vertices->setGlobalShift(Pshift);
 						}
-						ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+						ccLog::Warningf("[OBJ] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 					}
 				}
 
@@ -852,7 +852,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 				if (currentFace.size() < 3)
 				{
-					ccLog::Warning("[OBJ] Malformed file: polygon on line %1 has less than 3 vertices!", lineCount);
+					ccLog::Warningf("[OBJ] Malformed file: polygon on line %i has less than 3 vertices!", lineCount);
 					error = true;
 					break;
 				}
@@ -1204,7 +1204,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 					QString     mtlPath = QFileInfo(filename).absolutePath();
 					if (ccMaterialSet::ParseMTL(mtlPath, mtlFilename, *materials, errors))
 					{
-						ccLog::Print("[OBJ] %zu materials loaded", materials->size() - oldSize);
+						ccLog::Printf("[OBJ] %zu materials loaded", materials->size() - oldSize);
 						materialsLoadFailed = false;
 					}
 					else
@@ -1256,9 +1256,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 
 	if (!error)
 	{
-		ccLog::Print("[OBJ] %i points, %u faces", pointsRead, totalFacesRead);
+		ccLog::Printf("[OBJ] %i points, %u faces", pointsRead, totalFacesRead);
 		if (texCoordsRead > 0 || normsRead > 0)
-			ccLog::Print("[OBJ] %i tex. coords, %i normals", texCoordsRead, normsRead);
+		{
+			ccLog::Printf("[OBJ] %i tex. coords, %i normals", texCoordsRead, normsRead);
+		}
 
 		// do some cleaning
 		vertices->shrinkToFit();
@@ -1285,7 +1287,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 		    || maxTriNormIndex >= normsRead)
 		{
 			// hum, we've got a problem here
-			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)", maxVertexIndex, maxTexCoordIndex, maxTriNormIndex);
+			ccLog::Warningf("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)", maxVertexIndex, maxTexCoordIndex, maxTriNormIndex);
 			if (maxVertexIndex >= pointsRead)
 			{
 				error = true;
@@ -1345,7 +1347,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const QString& filename, ccHObject& container,
 			}
 
 			// create sub-meshes if necessary
-			ccLog::Print("[OBJ] 1 mesh loaded - %zu group(s)", groups.size());
+			ccLog::Printf("[OBJ] 1 mesh loaded - %zu group(s)", groups.size());
 			if (groups.size() > 1)
 			{
 				for (size_t i = 0; i < groups.size(); ++i)

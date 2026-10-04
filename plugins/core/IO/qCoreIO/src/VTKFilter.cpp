@@ -348,7 +348,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					Pd.u[coordIndex] = parts[i].toDouble(&ok);
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
+						ccLog::Warningf("[VTK] Element #%1 of POINTS data is corrupted!", iPt);
 						error = CC_FERR_MALFORMED_FILE;
 						iPt   = ptsCount;
 						break;
@@ -366,7 +366,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 								{
 									vertices->setGlobalShift(Pshift);
 								}
-								ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+								ccLog::Warningf("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 							}
 						}
 
@@ -540,7 +540,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					N.u[coordIndex] = static_cast<PointCoordinateType>(parts[i].toDouble(&ok));
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
+						ccLog::Warningf("[VTK] Element #%1 of NORMALS data is corrupted!", iNorm);
 						error = CC_FERR_MALFORMED_FILE;
 						iNorm = lastDataSize;
 						break;
@@ -592,7 +592,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 					rgb.rgb[coordIndex] = static_cast<ColorCompType>(parts[i].toDouble(&ok) * ccColor::MAX);
 					if (!ok)
 					{
-						ccLog::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
+						ccLog::Warningf("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!", iCol);
 						error = CC_FERR_MALFORMED_FILE;
 						iCol  = lastDataSize;
 						break;
@@ -693,7 +693,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const QString& filename, ccHObject& container,
 						ScalarType d = static_cast<ScalarType>(parts[i].toDouble(&ok));
 						if (!ok)
 						{
-							ccLog::Warning("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);
+							ccLog::Warningf("[VTK] Element #%1 of LOOKUP_TABLE/VECTORS data is corrupted!", iScal);
 							error = CC_FERR_MALFORMED_FILE;
 							if (sf)
 							{

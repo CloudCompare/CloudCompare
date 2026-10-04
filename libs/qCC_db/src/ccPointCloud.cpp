@@ -1102,7 +1102,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					else
 					{
 						newSF.reset();
-						ccLog::Warning("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
+						ccLog::Warningf("[ccPointCloud::Merge] Not enough memory: failed to allocate a copy of scalar field '%s'", sf->getName().c_str());
 					}
 				}
 			}
@@ -2799,12 +2799,13 @@ void ccPointCloud::ReleaseOpenGLRessources()
 }
 
 /// Maximum number of points (per cloud) displayed in a single LOD iteration
-// warning MUST BE GREATER THAN 'MAX_NUMBER_OF_ELEMENTS_PER_CHUNK'
+// warning MUST BE GREATER THAN 'ccChunk::SIZE'
 #ifdef _DEBUG
 static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 16); //~ 64K
 #else
-static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 19); //~ 512K
+static const unsigned MAX_POINT_COUNT_PER_LOD_RENDER_PASS = (1 << 20); //~ 1M
 #endif
+static_assert(MAX_POINT_COUNT_PER_LOD_RENDER_PASS >= ccChunk::SIZE, "MAX_POINT_COUNT_PER_LOD_RENDER_PASS must be greater than ccChunk::SIZE");
 
 // Vertex indexes for OpenGL "arrays" drawing
 static PointCoordinateType s_pointBuffer[MAX_POINT_COUNT_PER_LOD_RENDER_PASS * 3];
@@ -6670,7 +6671,7 @@ bool ccPointCloud::computeNormalsWithOctree(CCCoreLib::LOCAL_MODEL_TYPES model,
 		return false;
 	}
 
-	ccLog::Print("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
+	ccLog::Printf("[ComputeCloudNormals] Timing: %3.2f s.", eTimer.elapsed() / 1000.0);
 
 	if (!hasNormals())
 	{

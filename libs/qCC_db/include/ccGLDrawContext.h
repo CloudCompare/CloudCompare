@@ -218,25 +218,25 @@ struct ccGLDrawContext
 			case GL_NO_ERROR:
 				return false;
 			case GL_INVALID_ENUM:
-				ccLog::Warning("[%s] OpenGL error: invalid enumerator", context);
+				ccLog::Warning(QString("[%1] OpenGL error: invalid enumerator").arg(context));
 				break;
 			case GL_INVALID_VALUE:
-				ccLog::Warning("[%s] OpenGL error: invalid value", context);
+				ccLog::Warning(QString("[%1] OpenGL error: invalid value").arg(context));
 				break;
 			case GL_INVALID_OPERATION:
-				ccLog::Warning("[%s] OpenGL error: invalid operation", context);
+				ccLog::Warning(QString("[%1] OpenGL error: invalid operation").arg(context));
 				break;
 			case GL_STACK_OVERFLOW:
-				ccLog::Warning("[%s] OpenGL error: stack overflow", context);
+				ccLog::Warning(QString("[%1] OpenGL error: stack overflow").arg(context));
 				break;
 			case GL_STACK_UNDERFLOW:
-				ccLog::Warning("[%s] OpenGL error: stack underflow", context);
+				ccLog::Warning(QString("[%1] OpenGL error: stack underflow").arg(context));
 				break;
 			case GL_OUT_OF_MEMORY:
-				ccLog::Warning("[%s] OpenGL error: out of memory", context);
+				ccLog::Warning(QString("[%1] OpenGL error: out of memory").arg(context));
 				break;
 			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation", context);
+				ccLog::Warning(QString("[%1] OpenGL error: invalid framebuffer operation").arg(context));
 				break;
 			}
 		}

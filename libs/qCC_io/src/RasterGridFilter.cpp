@@ -49,7 +49,7 @@ RasterGridFilter::RasterGridFilter()
 CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& container, LoadParameters& parameters)
 {
 	GDALAllRegister();
-	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+	ccLog::PrintDebug(QString("(GDAL drivers: %1)").arg(GetGDALDriverManager()->GetDriverCount()));
 
 	try
 	{
@@ -57,18 +57,18 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 		if (poDataset != nullptr)
 		{
 			ccLog::Print(QString("Raster file: '%1'").arg(filename));
-			ccLog::Print("Driver: %s/%s",
-			             poDataset->GetDriver()->GetDescription(),
-			             poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
+			ccLog::Printf("Driver: %s/%s",
+			              poDataset->GetDriver()->GetDescription(),
+			              poDataset->GetDriver()->GetMetadataItem(GDAL_DMD_LONGNAME));
 
 			int rasterCount = poDataset->GetRasterCount();
 			int rasterX     = poDataset->GetRasterXSize();
 			int rasterY     = poDataset->GetRasterYSize();
-			ccLog::Print("Size is %dx%dx%d", rasterX, rasterY, rasterCount);
+			ccLog::Printf("Size is %dx%dx%d", rasterX, rasterY, rasterCount);
 
 			if (poDataset->GetProjectionRef() != nullptr)
 			{
-				ccLog::Print("Projection is '%s'", poDataset->GetProjectionRef());
+				ccLog::Printf("Projection is '%s'", poDataset->GetProjectionRef());
 			}
 
 			// See https://gdal.org/user/raster_data_model.html
@@ -78,8 +78,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 			if (poDataset->GetGeoTransform(adfGeoTransform) == CE_None)
 			{
-				ccLog::Print("Origin = (%.6f,%.6f)", adfGeoTransform[0], adfGeoTransform[3]);
-				ccLog::Print("Pixel Size = (%.6f,%.6f)", adfGeoTransform[1], adfGeoTransform[5]);
+				ccLog::Printf("Origin = (%.6f,%.6f)", adfGeoTransform[0], adfGeoTransform[3]);
+				ccLog::Printf("Pixel Size = (%.6f,%.6f)", adfGeoTransform[1], adfGeoTransform[5]);
 			}
 
 			if (adfGeoTransform[1] == 0 || adfGeoTransform[5] == 0)
@@ -176,7 +176,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					{
 						pc->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 
@@ -248,14 +248,14 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 
 			for (int i = 1; i <= rasterCount; ++i)
 			{
-				ccLog::Print("[GDAL] Reading band #%i", i);
+				ccLog::Printf("[GDAL] Reading band #%i", i);
 				GDALRasterBand* poBand = poDataset->GetRasterBand(i);
 
 				GDALColorInterp colorInterp = poBand->GetColorInterpretation();
 
 				int nBlockXSize = 0, nBlockYSize = 0;
 				poBand->GetBlockSize(&nBlockXSize, &nBlockYSize);
-				ccLog::Print("[GDAL] Block=%dx%d, Type=%s, ColorInterp=%s", nBlockXSize, nBlockYSize, GDALGetDataTypeName(poBand->GetRasterDataType()), GDALGetColorInterpretationName(colorInterp));
+				ccLog::Printf("[GDAL] Block=%dx%d, Type=%s, ColorInterp=%s", nBlockXSize, nBlockYSize, GDALGetDataTypeName(poBand->GetRasterDataType()), GDALGetColorInterpretationName(colorInterp));
 
 				// fetching raster scan-line
 				int nXSize = poBand->GetXSize();
@@ -270,17 +270,17 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const QString& filename, ccHObject& con
 					// DGM FIXME: if the file is corrupted (e.g. ASCII ArcGrid with missing rows) this method will enter in a infinite loop!
 					poBand->ComputeRasterMinMax(FALSE, adfMinMax);
 				}
-				ccLog::Print("[GDAL] Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1]);
+				ccLog::Printf("[GDAL] Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1]);
 
 				GDALColorTable* colTable = poBand->GetColorTable();
 				if (colTable != nullptr)
 				{
-					ccLog::Print("[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount());
+					ccLog::Printf("[GDAL] Band has a color table with %d entries", colTable->GetColorEntryCount());
 				}
 
 				if (poBand->GetOverviewCount() > 0)
 				{
-					ccLog::Print("[GDAL] Band has %d overviews", poBand->GetOverviewCount());
+					ccLog::Printf("[GDAL] Band has %d overviews", poBand->GetOverviewCount());
 				}
 
 				if (colorInterp == GCI_GrayIndex && !isColorBand[i - 1])

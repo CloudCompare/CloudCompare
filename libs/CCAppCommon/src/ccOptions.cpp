@@ -20,24 +20,21 @@
 // CCPluginAPI
 #include <ccPersistentSettings.h>
 
-// qCC_db
-#include <ccSingleton.h>
-
 // Qt
 #include <QSettings>
 
 //! Unique instance of ccOptions
-static ccSingleton<ccOptions> s_options;
+static std::unique_ptr<ccOptions> s_options;
 
 ccOptions& ccOptions::InstanceNonConst()
 {
-	if (!s_options.instance)
+	if (!s_options)
 	{
-		s_options.instance = new ccOptions();
-		s_options.instance->fromPersistentSettings();
+		s_options = std::make_unique<ccOptions>();
+		s_options->fromPersistentSettings();
 	}
 
-	return *s_options.instance;
+	return *s_options;
 }
 
 void ccOptions::ReleaseInstance()

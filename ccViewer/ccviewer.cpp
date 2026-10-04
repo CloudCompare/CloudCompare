@@ -1123,10 +1123,10 @@ void ccViewer::enable3DMouse(bool state)
 		{
 			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigMove3d, this, &ccViewer::on3DMouseMove);
 			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigReleased, this, &ccViewer::on3DMouseReleased);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyDown, this, &ccViewer::on3DMouseKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseKeyUp, this, &ccViewer::on3DMouseKeyUp);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyDown, this, &ccViewer::on3DMouseCMDKeyDown);
-			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3dmouseCMDKeyUp, this, &ccViewer::on3DMouseCMDKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyDown, this, &ccViewer::on3DMouseKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseKeyUp, this, &ccViewer::on3DMouseKeyUp);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyDown, this, &ccViewer::on3DMouseCMDKeyDown);
+			QObject::connect(m_3dMouseInput, &Mouse3DInput::sigOn3DMouseCMDKeyUp, this, &ccViewer::on3DMouseCMDKeyUp);
 		}
 		else
 		{

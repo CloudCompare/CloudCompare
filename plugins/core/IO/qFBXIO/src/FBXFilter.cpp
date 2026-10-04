@@ -428,7 +428,7 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 	if (lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
 	{
 		ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
-		ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
+		ccLog::Warningf("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
 		return false;
 	}
 
@@ -525,7 +525,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const QString& filename, 
 	}
 	else
 	{
-		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
+		ccLog::Printf("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
 	}
 
 	try
@@ -1248,7 +1248,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					{
 						vertices->setGlobalShift(Pshift);
 					}
-					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
+					ccLog::Warningf("[FBX] Mesh has been recentered! Translation: (%.2f ; %.2f ; %.2f)", Pshift.x, Pshift.y, Pshift.z);
 				}
 			}
 

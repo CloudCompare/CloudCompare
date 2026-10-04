@@ -93,7 +93,7 @@ class DxfImporter : public DL_CreationAdapter
 			if ((!m_preserveCoordinateShift || ccGlobalShiftManager::NeedShift(P + m_globalShift))
 			    && FileIOFilter::HandleGlobalShift(P, m_globalShift, m_preserveCoordinateShift, m_loadParameters))
 			{
-				ccLog::Warning("[DxfImporter] All points/vertices will be recentered! Translation: (%.2f ; %.2f ; %.2f)", m_globalShift.x, m_globalShift.y, m_globalShift.z);
+				ccLog::Warningf("[DxfImporter] All points/vertices will be recentered! Translation: (%.2f ; %.2f ; %.2f)", m_globalShift.x, m_globalShift.y, m_globalShift.z);
 			}
 			m_firstPoint = false;
 		}

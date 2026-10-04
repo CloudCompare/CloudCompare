@@ -28,8 +28,8 @@
 #include <ccPersistentSettings.h>
 
 // qCC_db
-#include <ccColorScalesManager.h>
 #include <ccGenericMesh.h>
+#include <ccLog.h>
 #include <ccMaterial.h>
 #include <ccPointCloud.h>
 
@@ -98,6 +98,8 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 {
 	setOrganizationName("CCCorp");
 
+	ccLog::Start();
+
 	setupPaths();
 
 #ifdef Q_OS_MAC
@@ -136,7 +138,6 @@ ccApplicationBase::ccApplicationBase(int& argc, char** argv, bool isCommandLine,
 
 	connect(this, &ccApplicationBase::aboutToQuit, [=]()
 	        { ccMaterial::ReleaseTextures();
-	          ccColorScalesManager::ReleaseUniqueInstance();
 	          ccGenericMesh::ReleaseOpenGLRessources();
 	          ccPointCloud::ReleaseOpenGLRessources(); });
 }

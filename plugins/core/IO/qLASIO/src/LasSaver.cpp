@@ -179,14 +179,14 @@ CC_FILE_ERROR LasSaver::open(const QString filePath)
 	if (laszip_set_header(m_laszipWriter, &m_laszipHeader))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
-		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
 	if (laszip_open_writer(m_laszipWriter, qUtf8Printable(filePath), filePath.endsWith("laz")))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
-		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
@@ -227,7 +227,7 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 	if (laszip_set_coordinates(m_laszipWriter, globalPoint.u))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
-		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
@@ -251,14 +251,14 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 	if (laszip_write_point(m_laszipWriter))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
-		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 
 	if (laszip_update_inventory(m_laszipWriter))
 	{
 		laszip_get_error(m_laszipWriter, &errorMsg);
-		ccLog::Warning("[LAS] laszip error :'%s'", errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
 		return CC_FERR_THIRD_PARTY_LIB_FAILURE;
 	}
 

@@ -26,10 +26,12 @@
 #include <QUuid>
 
 // Textures DB
-static ccMaterialDB s_materialDB;
-
+// It is created on first use, and not when the library is loaded: it owns a
+// QFileSystemWatcher, and one created before QApplication exists never emits
+// fileChanged (and warns about QSocketNotifier).
 static ccMaterialDB& GetMaterialDB()
 {
+	static ccMaterialDB s_materialDB;
 	return s_materialDB;
 }
 

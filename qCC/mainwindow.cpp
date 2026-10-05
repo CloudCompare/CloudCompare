@@ -4771,9 +4771,10 @@ void MainWindow::doActionCutPursuit()
 		                                                   theOctree.data());
 
 		// error handling
-		if (rV < 0)
+		if (rV < 0 || components.size() < static_cast<size_t>(N))
 		{
 			ccConsole::Error(tr("[Cut Pursuit] Failed to compute components!"));
+			pc->deleteScalarField(sfIdx);
 			return;
 		}
 
@@ -4786,31 +4787,37 @@ void MainWindow::doActionCutPursuit()
 		sf->computeMinAndMax();
 
 		ccLog::Print(tr("[Cut Pursuit] Partitioned cloud '%1' into %2 components").arg(pc->getName()).arg(rV));
-
+		
 		if (averageColors && pc->hasColors())
 		{
-			// Average colors for each component
-			std::vector<CCVector3d> compColorSum(rV, CCVector3d(0, 0, 0));
-			std::vector<unsigned>   compCount(rV, 0);
-
-			for (int32_t i = 0; i < N; ++i)
+			try
 			{
-				int32_t              compIdx = components[i];
-				const ccColor::Rgba& C       = pc->getPointColor(i);
-				compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
-				compCount[compIdx]++;
-			}
+				// Average colors for each component
+				std::vector<CCVector3d> compColorSum(rV, CCVector3d(0, 0, 0));
+				std::vector<unsigned>   compCount(rV, 0);
 
-			for (int32_t i = 0; i < N; ++i)
-			{
-				int32_t compIdx = components[i];
-				if (compCount[compIdx] > 0)
+				for (int32_t i = 0; i < N; ++i)
 				{
-					CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);
-					pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x), static_cast<ColorCompType>(avgColor.y), static_cast<ColorCompType>(avgColor.z)));
+					int32_t              compIdx = components[i];
+					const ccColor::Rgba& C       = pc->getPointColor(i);
+					compColorSum[compIdx] += CCVector3d(C.r, C.g, C.b);
+					compCount[compIdx]++;
+				}
+
+				for (int32_t i = 0; i < N; ++i)
+				{
+					int32_t compIdx = components[i];
+					if (compCount[compIdx] > 0)
+					{
+						CCVector3d avgColor = compColorSum[compIdx] / static_cast<double>(compCount[compIdx]);
+						pc->setPointColor(i, ccColor::Rgb(static_cast<ColorCompType>(avgColor.x), static_cast<ColorCompType>(avgColor.y), static_cast<ColorCompType>(avgColor.z)));
+					}
 				}
 			}
-
+			catch (const std::bad_alloc&)
+			{
+				ccLog::Error(tr("[Cut Pursuit] Not enough memory to average colors of cloud '%1'").arg(pc->getName()));
+			}
 			// Update display to show the computed colors
 			pc->setCurrentDisplayedScalarField(sfIdx);
 			pc->showColors(true);

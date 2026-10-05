@@ -289,7 +289,7 @@ static bool InitProgramDrawNormals(QOpenGLContext* context)
 	return true;
 }
 
-ccPointCloud::ccPointCloud(QString name /*=QString()*/, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/) throw()
+ccPointCloud::ccPointCloud(QString name /*=QString()*/, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : BaseClass(name, uniqueID)
     , m_rgbaColors(nullptr)
     , m_normals(nullptr)
@@ -4205,7 +4205,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	}
 }
 
-void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context)
+void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context) const
 {
 	int sfIdx = getCurrentDisplayedScalarFieldIndex();
 	if (sfIdx < 0)
@@ -7155,7 +7155,7 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 	return mesh;
 };
 
-bool ccPointCloud::setCoordFromSF(bool importDims[3], const CCCoreLib::ScalarField& sf, PointCoordinateType defaultValueForNaN)
+bool ccPointCloud::setCoordFromSF(const bool importDims[3], const CCCoreLib::ScalarField& sf, PointCoordinateType defaultValueForNaN)
 {
 	unsigned pointCount = size();
 
@@ -7187,7 +7187,7 @@ bool ccPointCloud::setCoordFromSF(bool importDims[3], const CCCoreLib::ScalarFie
 	return true;
 }
 
-bool ccPointCloud::exportCoordToSF(bool exportDims[3])
+bool ccPointCloud::exportCoordToSF(const bool exportDims[3])
 {
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{
@@ -7290,7 +7290,7 @@ bool ccPointCloud::setNormalsFromSF(const CCCoreLib::ScalarField* sfX, const CCC
 	return true;
 }
 
-bool ccPointCloud::exportNormalToSF(bool exportDims[3])
+bool ccPointCloud::exportNormalToSF(const bool exportDims[3])
 {
 	if (!exportDims[0] && !exportDims[1] && !exportDims[2])
 	{

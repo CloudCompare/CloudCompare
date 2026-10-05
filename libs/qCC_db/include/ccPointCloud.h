@@ -73,7 +73,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	    \param name cloud name (optional)
 	    \param uniqueID unique ID (handle with care)
 	**/
-	ccPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID) throw();
+	ccPointCloud(QString name = QString(), unsigned uniqueID = ccUniqueIDGenerator::InvalidUniqueID);
 
 	//! Default destructor
 	~ccPointCloud() override;
@@ -871,7 +871,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	                     CCCoreLib::GenericProgressCallback* progressCb        = nullptr) const;
 
 	//! Adds associated SF color ramp info to current GL context
-	void addColorRampInfo(CC_DRAW_CONTEXT& context);
+	void addColorRampInfo(CC_DRAW_CONTEXT& context) const;
 
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!
@@ -915,13 +915,13 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	bool enhanceRGBWithIntensitySF(int sfIdx, bool useCustomIntensityRange = false, double minI = 0.0, double maxI = 1.0);
 
 	//! Exports the specified coordinate dimension(s) to scalar field(s)
-	bool exportCoordToSF(bool exportDims[3]);
+	bool exportCoordToSF(const bool exportDims[3]);
 
 	//! Sets coordinate(s) from a scalar field
-	bool setCoordFromSF(bool importDims[3], const CCCoreLib::ScalarField& sf, PointCoordinateType defaultValueForNaN);
+	bool setCoordFromSF(const bool importDims[3], const CCCoreLib::ScalarField& sf, PointCoordinateType defaultValueForNaN);
 
 	//! Exports the specified normal dimension(s) to scalar field(s)
-	bool exportNormalToSF(bool exportDims[3]);
+	bool exportNormalToSF(const bool exportDims[3]);
 
 	//! Sets normals from scalar fields
 	bool setNormalsFromSF(const CCCoreLib::ScalarField* sfX, const CCCoreLib::ScalarField* sfY, const CCCoreLib::ScalarField* sfZ);

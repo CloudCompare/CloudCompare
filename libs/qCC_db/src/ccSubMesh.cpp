@@ -369,7 +369,7 @@ bool ccSubMesh::hasUniqueMaterial()
 	return m_associatedMesh ? m_associatedMesh->hasUniqueMaterial() : false;
 }
 
-const ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
+ccMaterialSet::Shared ccSubMesh::getMaterialSet() const
 {
 	assert(m_associatedMesh);
 	return m_associatedMesh->getMaterialSet();

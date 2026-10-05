@@ -445,9 +445,9 @@ class QCC_DB_LIB_API ccCameraSensor : public ccSensor
 	    \return true if successful
 	**/
 	static bool OrthoRectifyAsImages(std::vector<ccImage*>                   images,
-	                                 double                                  a[],
-	                                 double                                  b[],
-	                                 double                                  c[],
+	                                 const double                            a[],
+	                                 const double                            b[],
+	                                 const double                            c[],
 	                                 unsigned                                maxSize,
 	                                 QDir*                                   outputDir            = nullptr,
 	                                 std::vector<ccImage*>*                  orthoRectifiedImages = nullptr,

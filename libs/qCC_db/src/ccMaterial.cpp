@@ -193,7 +193,7 @@ void ccMaterial::setTexture(QImage image, QString absoluteFilename /*=QString()*
 	GetMaterialDB().addTexture(m_textureFilename, mirrorImage ? image.mirrored() : image);
 }
 
-const QImage ccMaterial::getTexture() const
+QImage ccMaterial::getTexture() const
 {
 	return GetMaterialDB().getTexture(m_textureFilename);
 }

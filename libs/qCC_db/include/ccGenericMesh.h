@@ -72,7 +72,7 @@ class QCC_DB_LIB_API ccGenericMesh : public CCCoreLib::GenericIndexedMesh
 	virtual bool hasMaterials() const = 0;
 
 	//! Returns associated material set
-	virtual const ccMaterialSet::Shared getMaterialSet() const = 0;
+	virtual ccMaterialSet::Shared getMaterialSet() const = 0;
 
 	//! Returns a given triangle material indexes
 	virtual int getTriangleMtlIndex(unsigned triangleIndex) const = 0;

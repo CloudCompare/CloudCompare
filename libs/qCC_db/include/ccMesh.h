@@ -263,8 +263,8 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	/********************************************************/
 
 	// inherited from ccGenericMesh
-	bool                        hasMaterials() const override;
-	const ccMaterialSet::Shared getMaterialSet() const override
+	bool                  hasMaterials() const override;
+	ccMaterialSet::Shared getMaterialSet() const override
 	{
 		return m_materials;
 	}
@@ -309,7 +309,7 @@ class QCC_DB_LIB_API ccMesh : public ccGenericMesh
 	void setTriangleMtlIndexesTable(triangleMaterialIndexesSet::Shared matIndexesTable, bool autoReleaseOldTable = true);
 
 	//! Returns the per-triangle material indexes array
-	inline const triangleMaterialIndexesSet::Shared getTriangleMtlIndexesTable() const
+	inline triangleMaterialIndexesSet::Shared getTriangleMtlIndexesTable() const
 	{
 		return m_triMtlIndexes;
 	}

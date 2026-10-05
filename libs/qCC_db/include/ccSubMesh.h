@@ -58,7 +58,7 @@ class QCC_DB_LIB_API ccSubMesh : public ccGenericMesh
 	bool                           getColorFromMaterial(unsigned triIndex, const CCVector3& P, ccColor::Rgba& color, bool interpolateColorIfNoTexture) override;
 	bool                           getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, ccColor::Rgba& color, bool returnColorIfNoTexture) override;
 	bool                           hasMaterials() const override;
-	const ccMaterialSet::Shared    getMaterialSet() const override;
+	ccMaterialSet::Shared          getMaterialSet() const override;
 	int                            getTriangleMtlIndex(unsigned triangleIndex) const override;
 	bool                           hasTextures() const override;
 	TextureCoordsContainer::Shared getTexCoordinatesTable() const override;

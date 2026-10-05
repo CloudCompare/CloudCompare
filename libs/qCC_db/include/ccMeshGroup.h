@@ -83,7 +83,7 @@ class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 	{
 		return false;
 	}
-	const ccMaterialSet::Shared getMaterialSet() const override
+	ccMaterialSet::Shared getMaterialSet() const override
 	{
 		return nullptr;
 	}

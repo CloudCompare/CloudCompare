@@ -2135,9 +2135,9 @@ ccImage* ccCameraSensor::orthoRectifyAsImage(const ccImage*                  ima
 }
 
 bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                   images,
-                                          double                                  a[],
-                                          double                                  b[],
-                                          double                                  c[],
+                                          const double                            a[],
+                                          const double                            b[],
+                                          const double                            c[],
                                           unsigned                                maxSize,
                                           QDir*                                   outputDir /*=nullptr*/,
                                           std::vector<ccImage*>*                  result /*=nullptr*/,

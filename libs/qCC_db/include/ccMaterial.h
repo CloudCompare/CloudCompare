@@ -162,7 +162,7 @@ class QCC_DB_LIB_API ccMaterial : public ccSerializableObject
 	bool loadAndSetTexture(const QString& absoluteFilename);
 
 	//! Returns the texture (if any)
-	const QImage getTexture() const;
+	QImage getTexture() const;
 
 	//! Returns the texture ID (if any)
 	GLuint getTextureID() const;

@@ -248,6 +248,7 @@ void TestLasExtraBytesEvlr::writeEvlr()
 			QCOMPARE(saver.saveNextPoint(), CC_FERR_NO_ERROR);
 		}
 		QCOMPARE(saver.close(), CC_FERR_NO_ERROR);
+		QCOMPARE(saver.appendEVLRsAfterClose(), CC_FERR_NO_ERROR);
 	}
 
 	laszip_POINTER reader{nullptr};

@@ -58,8 +58,11 @@ class LasSaver
 
 	CC_FILE_ERROR saveNextPoint();
 
-	/// Closes the file, then appends the "Extra Bytes" EVLR (if any)
+	/// Closes the file
 	CC_FILE_ERROR close();
+
+	/// Appends the "Extra Bytes" EVLR (if any) to the file and updates its header (to call after close())
+	CC_FILE_ERROR appendEVLRsAfterClose();
 
 	bool canSaveWaveforms() const;
 
@@ -78,7 +81,7 @@ class LasSaver
 	std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
 	laszip_point*                     m_laszipPoint{nullptr};
 	QString                           m_filePath;
-	QByteArray                        m_extraBytesEvlr; // "Extra Bytes" descriptor that doesn't fit in a VLR (LAS 1.4 only, written as an EVLR by close())
+	QByteArray                        m_extraBytesEvlr; // "Extra Bytes" descriptor that doesn't fit in a VLR (LAS 1.4 only, written as an EVLR by appendEVLRsAfterClose())
 	int                               m_originallySelectedScalarField = -1;
 	// contains for the x, y, z dims of the normals, whether it was temporarily
 	// exported to a scalar field. If true, then we have to remove the temporary sf.

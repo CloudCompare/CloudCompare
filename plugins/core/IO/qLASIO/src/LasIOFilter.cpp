@@ -992,6 +992,10 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	{
 		error = closeError;
 	}
+	if (error == CC_FERR_NO_ERROR)
+	{
+		error = saver.appendEVLRsAfterClose();
+	}
 
 	if (saver.canSaveWaveforms())
 	{

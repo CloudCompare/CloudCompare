@@ -70,7 +70,7 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 
 	if (m_laszipHeader.version_minor >= 4 && parameters.extraFields.size() > LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR)
 	{
-		// too many fields for a VLR: the descriptor will be written in an EVLR (see close())
+		// too many fields for a VLR: the descriptor will be written in an EVLR (see appendEVLRsAfterClose())
 		QDataStream stream(&m_extraBytesEvlr, QIODevice::WriteOnly);
 		for (const LasExtraScalarField& field : parameters.extraFields)
 		{
@@ -298,9 +298,20 @@ CC_FILE_ERROR LasSaver::close()
 	m_laszipWriter = nullptr;
 	m_laszipPoint  = nullptr;
 
-	if (error != CC_FERR_NO_ERROR || m_extraBytesEvlr.isEmpty())
+	return error;
+}
+
+CC_FILE_ERROR LasSaver::appendEVLRsAfterClose()
+{
+	if (m_laszipWriter)
 	{
-		return error;
+		// the file must be closed first
+		return CC_FERR_INTERNAL;
+	}
+
+	if (m_extraBytesEvlr.isEmpty())
+	{
+		return CC_FERR_NO_ERROR;
 	}
 
 	// LASzip can't write EVLRs: we append it at the end of the file (after the points,

@@ -119,7 +119,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctreeProxy* ccGenericPointCloud::getOctreeProxy() const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isA(CC_TYPES::POINT_OCTREE))
 		{

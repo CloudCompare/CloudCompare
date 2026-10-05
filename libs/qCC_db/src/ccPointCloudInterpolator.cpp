@@ -204,9 +204,8 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 		ccLog::Error("Not enough memory");
 		return false;
 	}
-	for (size_t i = 0; i < inSFIndexes.size(); ++i)
+	for (int inSFIndex : inSFIndexes)
 	{
-		int inSFIndex = inSFIndexes[i];
 		if (inSFIndex < 0 || inSFIndex >= static_cast<int>(srcCloud->getNumberOfScalarFields()))
 		{
 			// invalid index

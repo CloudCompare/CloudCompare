@@ -1135,14 +1135,14 @@ void ccColorScalesManager::fromPersistentSettings()
 	ccLog::Print(QString("[ccColorScalesManager] Found %1 custom scale(s) in persistent settings").arg(scales.size()));
 
 	// read each scale
-	for (int j = 0; j < scales.size(); ++j)
+	for (const auto& scaleUuid : scales)
 	{
-		settings.beginGroup(scales[j]);
+		settings.beginGroup(scaleUuid);
 
 		QString name     = settings.value(c_csm_scaleName, "unknown").toString();
 		bool    relative = settings.value(c_csm_relative, true).toBool();
 
-		ccColorScale::Shared scale(new ccColorScale(name, scales[j]));
+		ccColorScale::Shared scale(new ccColorScale(name, scaleUuid));
 		if (!relative)
 		{
 			double minVal = settings.value(c_csm_minVal, 0.0).toDouble();
@@ -1206,30 +1206,30 @@ void ccColorScalesManager::toPersistentSettings() const
 	settings.beginGroup(c_csm_groupName);
 
 	// add each scale
-	for (ScalesMap::const_iterator it = m_scales.begin(); it != m_scales.end(); ++it)
+	for (const auto& scale : m_scales)
 	{
-		if (!(*it)->isReadOnly()) // read-only scales are pre-defined ones!
+		if (!scale->isReadOnly()) // read-only scales are pre-defined ones!
 		{
-			settings.beginGroup((*it)->getUuid());
+			settings.beginGroup(scale->getUuid());
 
-			settings.setValue(c_csm_scaleName, (*it)->getName());
-			settings.setValue(c_csm_relative, (*it)->isRelative());
-			if (!(*it)->isRelative())
+			settings.setValue(c_csm_scaleName, scale->getName());
+			settings.setValue(c_csm_relative, scale->isRelative());
+			if (!scale->isRelative())
 			{
 				double minVal = 0.0;
 				double maxVal = 0.0;
-				(*it)->getAbsoluteBoundaries(minVal, maxVal);
+				scale->getAbsoluteBoundaries(minVal, maxVal);
 				settings.setValue(c_csm_minVal, minVal);
 				settings.setValue(c_csm_maxVal, maxVal);
 			}
 
 			settings.beginWriteArray(c_csm_stepsList);
 			{
-				for (int i = 0; i < (*it)->stepCount(); ++i)
+				for (int i = 0; i < scale->stepCount(); ++i)
 				{
 					settings.setArrayIndex(i);
-					settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
-					int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
+					settings.setValue(c_csm_stepRelativePos, scale->step(i).getRelativePos());
+					int rgb = static_cast<int>(scale->step(i).getColor().rgb());
 					settings.setValue(c_csm_stepColor, rgb);
 				}
 			}
@@ -1238,7 +1238,7 @@ void ccColorScalesManager::toPersistentSettings() const
 			settings.beginWriteArray(c_csm_customLabels);
 			{
 				int i = 0;
-				for (ccColorScale::LabelSet::const_iterator itL = (*it)->customLabels().begin(); itL != (*it)->customLabels().end(); ++itL, ++i)
+				for (ccColorScale::LabelSet::const_iterator itL = scale->customLabels().begin(); itL != scale->customLabels().end(); ++itL, ++i)
 				{
 					settings.setArrayIndex(i);
 					settings.setValue(c_csm_customLabelValue, itL->value);
@@ -1490,9 +1490,8 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		break;
 	case CIVIDIS:
 	{
-		for (unsigned i = 0; i < 256; ++i)
+		for (const auto& step : s_cividis)
 		{
-			const ColorStep& step = s_cividis[i];
 			scale->insert(ccColorScaleElement(step.pos, qRgb(step.red, step.green, step.blue)), false);
 		}
 		break;

@@ -385,9 +385,9 @@ size_t ccPointCloudLOD::memory() const
 	size_t thisSize = sizeof(ccPointCloudLOD);
 
 	size_t totalNodeCount = 0;
-	for (size_t i = 0; i < m_levels.size(); ++i)
+	for (const auto& level : m_levels)
 	{
-		totalNodeCount += m_levels[i].data.size();
+		totalNodeCount += level.data.size();
 	}
 	size_t nodeSize  = sizeof(Node);
 	size_t nodesSize = totalNodeCount * nodeSize;

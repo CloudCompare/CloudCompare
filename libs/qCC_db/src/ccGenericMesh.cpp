@@ -559,10 +559,10 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		assert(!entityPickingMode || !glParams.showSF);
 		assert(prog.isNull() == false);
 
-		auto   verticesBuffer = GetVertexBuffer();
+		auto*  verticesBuffer = GetVertexBuffer();
 		float* normalIndexes  = reinterpret_cast<float*>(GetNormalsBuffer());
-		auto   rgbColors      = GetColorsBuffer();
-		auto   texCoords      = GetTexCoordsBuffer();
+		auto*  rgbColors      = GetColorsBuffer();
+		auto*  texCoords      = GetTexCoordsBuffer();
 
 		prog->bind();
 

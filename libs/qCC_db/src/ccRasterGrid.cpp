@@ -1192,10 +1192,8 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 	}
 
 	// then process the scalar values (if any)
-	for (size_t sfIndex = 0; sfIndex < scalarFields.size(); ++sfIndex)
+	for (auto& sf : scalarFields)
 	{
-		SF& sf = scalarFields[sfIndex];
-
 		// update the kriging value
 		{
 			size_t index = 0;
@@ -1728,8 +1726,8 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 					size_t sfIndex               = 0;
 					for (size_t k = 0; k < numberOfExportedHeightStatisticsFields + maxNumberOfExportedSfStatisticsFields; ++k)
 					{
-						auto       sf   = exportedSFs[sfIndex];
-						ScalarType sVal = CCCoreLib::NAN_VALUE;
+						const auto& sf   = exportedSFs[sfIndex];
+						ScalarType  sVal = CCCoreLib::NAN_VALUE;
 
 						// specific case: PER_CELL_VALUE
 						if (k < numberOfExportedHeightStatisticsFields && exportedStatistics[k] == PER_CELL_VALUE)
@@ -1852,9 +1850,9 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 								{
 									double cellSum       = std::accumulate(cellPointVal.begin(), cellPointVal.end(), 0.0);
 									double cellSquareSum = 0.0;
-									for (size_t n = 0; n < cellPointVal.size(); n++)
+									for (double n : cellPointVal)
 									{
-										cellSquareSum += cellPointVal[n] * cellPointVal[n];
+										cellSquareSum += n * n;
 									}
 									double cellAvg = cellSum / cellPointVal.size();
 									sVal           = static_cast<ScalarType>(std::sqrt(std::max(0.0, cellSquareSum / cellPointVal.size() - cellAvg * cellAvg)));
@@ -1914,7 +1912,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		}
 
 		// finish the SFs initialization (if any)
-		for (auto sf : exportedSFs)
+		for (const auto& sf : exportedSFs)
 		{
 			if (sf)
 			{

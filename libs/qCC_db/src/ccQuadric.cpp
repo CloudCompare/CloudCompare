@@ -284,9 +284,9 @@ bool ccQuadric::toFile_MeOnly(QFile& out, short dataVersion) const
 	outStream << m_maxCorner.x;
 	outStream << m_maxCorner.y;
 
-	for (unsigned i = 0; i < 6; ++i)
+	for (float coeff : m_eq)
 	{
-		outStream << m_eq[i];
+		outStream << coeff;
 	}
 
 	return true;

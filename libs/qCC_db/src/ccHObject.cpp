@@ -410,7 +410,7 @@ unsigned int ccHObject::getChildCountRecursive() const
 {
 	unsigned int count = static_cast<unsigned>(m_children.size());
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		count += child->getChildCountRecursive();
 	}
@@ -445,7 +445,7 @@ unsigned ccHObject::filterChildren(Container&          filteredChildren,
                                    bool                strict /*=false*/,
                                    ccGenericGLDisplay* inDisplay /*=nullptr*/) const
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if ((!strict && child->isKindOf(filter))
 		    || (strict && child->isA(filter)))
@@ -497,7 +497,7 @@ void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent /*=false*/)
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove link from old parent
 		int childDependencyFlags  = child->getDependencyFlagsWith(this);
@@ -587,7 +587,7 @@ ccBBox ccHObject::getBB_recursive(bool withGLFeatures /*=false*/, bool onlyEnabl
 {
 	ccBBox box = getOwnBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -602,7 +602,7 @@ ccHObject::GlobalBoundingBox ccHObject::getGlobalBB_recursive(bool withGLFeature
 {
 	GlobalBoundingBox box = getOwnGlobalBB(withGLFeatures);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (!onlyEnabledChildren || child->isEnabled())
 		{
@@ -620,7 +620,7 @@ ccBBox ccHObject::getDisplayBB_recursive(bool relative, const ccGenericGLDisplay
 	if (!display || display == m_currentDisplay)
 		box = getOwnBB(true);
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isEnabled())
 		{
@@ -816,7 +816,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	// draw entity's children
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		child->draw(context);
 	}
@@ -864,7 +864,7 @@ void ccHObject::applyGLTransformation_recursive(const ccGLMatrix* transInput /*=
 		notifyGeometryUpdate();
 	}
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 		child->applyGLTransformation_recursive(transToApply);
 
 	if (m_glTransEnabled)
@@ -875,7 +875,7 @@ unsigned ccHObject::findMaxUniqueID_recursive() const
 {
 	unsigned id = getUniqueID();
 
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		unsigned childMaxID = child->findMaxUniqueID_recursive();
 		if (id < childMaxID)
@@ -914,7 +914,7 @@ void ccHObject::detachChild(ccHObject* child)
 
 void ccHObject::detachAllChildren()
 {
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		// remove any dependency (bilateral)
 		removeDependencyWith(child);
@@ -1023,7 +1023,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 
 	//(serializable) child count (dataVersion >= 20)
 	uint32_t serializableCount = 0;
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1037,7 +1037,7 @@ bool ccHObject::toFile(QFile& out, short dataVersion) const
 	}
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		if (child->isSerializable())
 		{
@@ -1173,7 +1173,7 @@ short ccHObject::minimumFileVersion() const
 	minVersion       = std::max(minVersion, minimumFileVersion_MeOnly());
 
 	// write serializable children (if any)
-	for (auto child : m_children)
+	for (auto* child : m_children)
 	{
 		minVersion = std::max(minVersion, child->minimumFileVersion());
 	}

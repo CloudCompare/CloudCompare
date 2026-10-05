@@ -224,10 +224,10 @@ bool ccKdTree::convertCellIndexToRandomColor()
 		return false;
 
 	// for each cell
-	for (size_t i = 0; i < leaves.size(); ++i)
+	for (const auto& leaf : leaves)
 	{
 		ccColor::Rgba              col(ccColor::Generator::Random(), ccColor::MAX);
-		CCCoreLib::ReferenceCloud* subset = leaves[i]->points;
+		CCCoreLib::ReferenceCloud* subset = leaf->points;
 		if (subset)
 		{
 			for (unsigned j = 0; j < subset->size(); ++j)

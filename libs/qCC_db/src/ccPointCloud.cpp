@@ -1302,11 +1302,11 @@ void ccPointCloud::unallocateColors()
 	}
 
 	// remove the grid colors as well!
-	for (size_t i = 0; i < m_grids.size(); ++i)
+	for (const auto& grid : m_grids)
 	{
-		if (m_grids[i])
+		if (grid)
 		{
-			m_grids[i]->colors.resize(0);
+			grid->colors.resize(0);
 		}
 	}
 
@@ -2377,11 +2377,11 @@ bool ccPointCloud::setColor(const ccColor::Rgba& col)
 	m_rgbaColors->fill(col);
 
 	// update the grid colors as well!
-	for (size_t i = 0; i < m_grids.size(); ++i)
+	for (const auto& grid : m_grids)
 	{
-		if (m_grids[i] && !m_grids[i]->colors.empty())
+		if (grid && !grid->colors.empty())
 		{
-			std::fill(m_grids[i]->colors.begin(), m_grids[i]->colors.end(), col);
+			std::fill(grid->colors.begin(), grid->colors.end(), col);
 		}
 	}
 
@@ -2517,9 +2517,9 @@ void ccPointCloud::translate(const CCVector3& T)
 	ccHObject::Container kdtrees;
 	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
 	{
-		for (size_t i = 0; i < kdtrees.size(); ++i)
+		for (auto* entity : kdtrees)
 		{
-			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
+			static_cast<ccKdTree*>(entity)->translateBoundingBox(T);
 		}
 	}
 
@@ -2596,9 +2596,9 @@ void ccPointCloud::scale(PointCoordinateType fx, PointCoordinateType fy, PointCo
 		filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
 		if (fx == fy && fx == fz && fx > 0)
 		{
-			for (size_t i = 0; i < kdtrees.size(); ++i)
+			for (auto* entity : kdtrees)
 			{
-				ccKdTree* kdTree    = static_cast<ccKdTree*>(kdtrees[i]);
+				ccKdTree* kdTree    = static_cast<ccKdTree*>(entity);
 				CCVector3 centerInv = -center;
 				kdTree->translateBoundingBox(centerInv);
 				kdTree->multiplyBoundingBox(fx);
@@ -4284,9 +4284,9 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool   
 	// count the number of visible points
 	{
 		unsigned visiblePoints = 0;
-		for (size_t i = 0; i < visTable->size(); ++i)
+		for (unsigned char visInfo : *visTable)
 		{
-			if (visTable->at(i) == CCCoreLib::POINT_VISIBLE)
+			if (visInfo == CCCoreLib::POINT_VISIBLE)
 			{
 				++visiblePoints;
 			}
@@ -5819,7 +5819,7 @@ short ccPointCloud::minimumFileVersion_MeOnly() const
 	}
 	if (hasScalarFields())
 	{
-		for (auto& sf : m_scalarFields)
+		for (const auto& sf : m_scalarFields)
 		{
 			minVersion = std::max(minVersion, ccScalarField::FromCCCoreLibShared(sf)->minimumFileVersion()); // we have to test each scalar field
 		}
@@ -6223,13 +6223,13 @@ void ccPointCloud::releaseVBOs()
 	if (m_currentDisplay)
 	{
 		//'destroy' all vbos
-		for (size_t i = 0; i < m_vboManager.vbos.size(); ++i)
+		for (auto& vbo : m_vboManager.vbos)
 		{
-			if (m_vboManager.vbos[i])
+			if (vbo)
 			{
-				m_vboManager.vbos[i]->destroy();
-				delete m_vboManager.vbos[i];
-				m_vboManager.vbos[i] = nullptr;
+				vbo->destroy();
+				delete vbo;
+				vbo = nullptr;
 			}
 		}
 	}
@@ -6404,9 +6404,8 @@ bool ccPointCloud::computeNormalsWithGrids(double                       minTrian
 					continue;
 				}
 
-				for (int trCount = 0; trCount < 2; ++trCount)
+				for (int idx : tri)
 				{
-					int idx = tri[trCount];
 					if (idx < 0)
 					{
 						continue;
@@ -6845,9 +6844,8 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 	{
 		// if we have associated sensors, we can use them to check the visibility of other points
 		unsigned char bestVisibility = 255;
-		for (size_t i = 0; i < m_children.size(); ++i)
+		for (auto* child : m_children)
 		{
-			ccHObject* child = m_children[i];
 			if (child && child->isA(CC_TYPES::GBL_SENSOR))
 			{
 				ccGBLSensor*  sensor     = static_cast<ccGBLSensor*>(child);
@@ -7106,9 +7104,8 @@ ccMesh* ccPointCloud::triangulateGrid(const Grid& grid, double minTriangleAngle_
 				continue;
 			}
 
-			for (int trCount = 0; trCount < 2; ++trCount)
+			for (int idx : tri)
 			{
-				int idx = tri[trCount];
 				if (idx < 0)
 				{
 					continue;

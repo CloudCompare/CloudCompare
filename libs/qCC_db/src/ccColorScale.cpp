@@ -196,9 +196,9 @@ void ccColorScale::update()
 	if (!m_updated)
 	{
 		// I saw an invalid scale and I want it painted black ;)
-		for (unsigned i = 0; i < MAX_STEPS; ++i)
+		for (auto& invalidStep : m_rgbaScale)
 		{
-			m_rgbaScale[i] = ccColor::black;
+			invalidStep = ccColor::black;
 		}
 	}
 }
@@ -259,12 +259,12 @@ bool ccColorScale::toFile(QFile& out, short dataVersion) const
 			return WriteError();
 
 		// write each custom label
-		for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
+		for (const auto& customLabel : m_customLabels)
 		{
-			outStream << it->value;
+			outStream << customLabel.value;
 			if (dataVersion >= 54)
 			{
-				outStream << it->text;
+				outStream << customLabel.text;
 			}
 		}
 	}
@@ -360,9 +360,9 @@ short ccColorScale::minimumFileVersion() const
 {
 	if (!m_customLabels.empty())
 	{
-		for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
+		for (const auto& customLabel : m_customLabels)
 		{
-			if (!it->text.isEmpty())
+			if (!customLabel.text.isEmpty())
 			{
 				// custom labels with an overridding text --> version 54
 				return 54;
@@ -435,13 +435,12 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 				{
 					// write each step
 					{
-						for (QList<ccColorScaleElement>::const_iterator it = m_steps.begin(); it != m_steps.end(); ++it)
+						for (const auto& elem : m_steps)
 						{
 							stream.writeStartElement("step");
 							{
-								const ccColorScaleElement& elem        = *it;
-								const QColor&              color       = elem.getColor();
-								double                     relativePos = elem.getRelativePos();
+								const QColor& color       = elem.getColor();
+								double        relativePos = elem.getRelativePos();
 
 								stream.writeAttribute("r", QString::number(color.red()));
 								stream.writeAttribute("g", QString::number(color.green()));
@@ -454,14 +453,14 @@ bool ccColorScale::saveAsXML(const QString& filename) const
 
 					// write custom labels as well (if any)
 					{
-						for (LabelSet::const_iterator it = m_customLabels.begin(); it != m_customLabels.end(); ++it)
+						for (const auto& customLabel : m_customLabels)
 						{
 							stream.writeStartElement("label");
 							{
-								stream.writeAttribute("val", QString::number(it->value, 'g', 12));
-								if (!it->text.isEmpty())
+								stream.writeAttribute("val", QString::number(customLabel.value, 'g', 12));
+								if (!customLabel.text.isEmpty())
 								{
-									stream.writeAttribute("text", it->text);
+									stream.writeAttribute("text", customLabel.text);
 								}
 							}
 							stream.writeEndElement(); // label
@@ -615,10 +614,10 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 					}
 					QColor rgb;
 					double pos = 0;
-					for (int i = 0; i < attributes.size(); ++i)
+					for (const auto& attribute : attributes)
 					{
-						QString name  = attributes[i].name().toString().toUpper();
-						QString value = attributes[i].value().toString();
+						QString name  = attribute.name().toString().toUpper();
+						QString value = attribute.value().toString();
 						if (name == "R")
 							rgb.setRed(value.toInt());
 						else if (name == "G")
@@ -741,7 +740,7 @@ bool ccColorScale::buildTexture(QOpenGLFunctions_2_1* glFunc) const
 	// fill: for each index, call ccNormalCompressor::Decompress
 	for (size_t i = 0; i < texels; ++i)
 	{
-		auto col = getColorByRelativePos(i / static_cast<double>(texels), &ccColor::lightGreyRGB);
+		const auto* col = getColorByRelativePos(i / static_cast<double>(texels), &ccColor::lightGreyRGB);
 		assert(col);
 
 		pixels[i * 3 + 0] = col->r;

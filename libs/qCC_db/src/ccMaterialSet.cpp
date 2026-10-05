@@ -39,7 +39,7 @@ int ccMaterialSet::findMaterialByName(const QString& mtlName)
 	int i = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 name: %2").arg(i).arg(mtl->getName()));
 		if (mtl->getName() == mtlName)
 			return i;
@@ -55,7 +55,7 @@ int ccMaterialSet::findMaterialByUniqueID(const QString& uniqueID)
 	int i = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++i)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		ccLog::PrintDebug(QString("\tmaterial #%1 ID: %2").arg(i).arg(mtl->getUniqueIdentifier()));
 		if (mtl->getUniqueIdentifier() == uniqueID)
 			return i;
@@ -387,7 +387,7 @@ bool ccMaterialSet::saveAsMTL(const QString& path, const QString& baseFilename, 
 	size_t matIndex = 0;
 	for (ccMaterialSet::const_iterator it = begin(); it != end(); ++it, ++matIndex)
 	{
-		ccMaterial::CShared mtl = *it;
+		const ccMaterial::CShared& mtl = *it;
 		stream << Qt::endl
 		       << "newmtl " << mtl->getName() << Qt::endl;
 

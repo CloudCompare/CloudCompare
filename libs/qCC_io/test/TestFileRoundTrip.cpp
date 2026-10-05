@@ -2,6 +2,7 @@
 
 // qCC_db
 #include <ccHObject.h>
+#include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
 
@@ -45,6 +46,36 @@ static ccPointCloud* CreateCloud()
 	}
 	sf->computeMinAndMax();
 	return cloud;
+}
+
+static constexpr unsigned GridSize = 10; // the mesh vertices form a GridSize x GridSize grid
+
+static ccMesh* CreateMesh()
+{
+	ccPointCloud* vertices = new ccPointCloud("vertices");
+	vertices->reserve(GridSize * GridSize);
+	for (unsigned j = 0; j < GridSize; ++j)
+	{
+		for (unsigned i = 0; i < GridSize; ++i)
+		{
+			vertices->addPoint(CCVector3(i * 0.5f, j * 0.5f, static_cast<PointCoordinateType>(sin(i * 0.3) * cos(j * 0.3))));
+		}
+	}
+	vertices->setEnabled(false);
+
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->addChild(vertices);
+	mesh->reserve(2 * (GridSize - 1) * (GridSize - 1));
+	for (unsigned j = 0; j + 1 < GridSize; ++j)
+	{
+		for (unsigned i = 0; i + 1 < GridSize; ++i)
+		{
+			unsigned k = j * GridSize + i;
+			mesh->addTriangle(k, k + 1, k + GridSize);
+			mesh->addTriangle(k + 1, k + GridSize + 1, k + GridSize);
+		}
+	}
+	return mesh;
 }
 
 static constexpr int Exact   = -1; // stored as in memory
@@ -152,6 +183,75 @@ void TestFileRoundTrip::roundTrip()
 
 		double v = originalSF->getValue(i);
 		QVERIFY(std::abs(loadedSF->getValue(i) - v) <= Tolerance(sfDecimals, v));
+	}
+}
+
+void TestFileRoundTrip::meshRoundTrip_data()
+{
+	QTest::addColumn<QString>("extension");
+
+	QTest::newRow("BIN") << "bin";
+	QTest::newRow("PLY") << "ply";
+}
+
+void TestFileRoundTrip::meshRoundTrip()
+{
+	QFETCH(QString, extension);
+
+	std::unique_ptr<FileIOFilter> filter;
+	if (extension == "bin")
+		filter.reset(new BinFilter);
+	else
+		filter.reset(new PlyFilter);
+
+	QTemporaryDir dir;
+	QVERIFY(dir.isValid());
+	const QString filename = dir.filePath("mesh." + extension);
+
+	std::unique_ptr<ccMesh> original(CreateMesh());
+
+	FileIOFilter::SaveParameters saveParams;
+	saveParams.alwaysDisplaySaveDialog = false;
+	QCOMPARE(filter->saveToFile(original.get(), filename, saveParams), CC_FERR_NO_ERROR);
+
+	ccHObject                    container;
+	FileIOFilter::LoadParameters loadParams;
+	CCVector3d                   shift(0, 0, 0);
+	bool                         shiftEnabled = false;
+	loadParams.alwaysDisplayLoadDialog        = false;
+	loadParams.shiftHandlingMode              = ccGlobalShiftManager::Mode::NO_DIALOG;
+	loadParams._coordinatesShiftEnabled       = &shiftEnabled;
+	loadParams._coordinatesShift              = &shift;
+	QCOMPARE(filter->loadFile(filename, container, loadParams), CC_FERR_NO_ERROR);
+
+	ccHObject::Container meshes;
+	container.filterChildren(meshes, true, CC_TYPES::MESH, true);
+	QCOMPARE(meshes.size(), static_cast<size_t>(1));
+	ccMesh* loaded = static_cast<ccMesh*>(meshes.front());
+
+	ccGenericPointCloud* vertices       = original->getAssociatedCloud();
+	ccGenericPointCloud* loadedVertices = loaded->getAssociatedCloud();
+	QVERIFY(loadedVertices != nullptr);
+	QCOMPARE(loadedVertices->size(), vertices->size());
+	QCOMPARE(loaded->size(), original->size());
+
+	for (unsigned i = 0; i < vertices->size(); ++i)
+	{
+		CCVector3d Pg = vertices->toGlobal3d<PointCoordinateType>(*vertices->getPoint(i));
+		CCVector3d Qg = loadedVertices->toGlobal3d<PointCoordinateType>(*loadedVertices->getPoint(i));
+		for (unsigned d = 0; d < 3; ++d)
+		{
+			QCOMPARE(Qg.u[d], Pg.u[d]);
+		}
+	}
+
+	for (unsigned t = 0; t < original->size(); ++t)
+	{
+		const CCCoreLib::VerticesIndexes* tri       = original->getTriangleVertIndexes(t);
+		const CCCoreLib::VerticesIndexes* loadedTri = loaded->getTriangleVertIndexes(t);
+		QCOMPARE(loadedTri->i1, tri->i1);
+		QCOMPARE(loadedTri->i2, tri->i2);
+		QCOMPARE(loadedTri->i3, tri->i3);
 	}
 }
 

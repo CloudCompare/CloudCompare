@@ -13,22 +13,27 @@
 // #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 // #  GNU General Public License for more details.                          #
 // #                                                                        #
-// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #          COPYRIGHT: The CloudCompare project                           #
 // #                                                                        #
 // ##########################################################################
 
+#include <QDialog>
 #include <QStringList>
-#include <ui_cutPursuitDlg.h>
+
+namespace Ui
+{
+	class CutPursuitDialog;
+}
 
 //! Dialog to define Cut-Pursuit parameters
 class ccCutPursuitDlg : public QDialog
-    , public Ui::CutPursuitDialog
 {
 	Q_OBJECT
 
   public:
 	//! Default constructor
 	explicit ccCutPursuitDlg(QWidget* parent = nullptr);
+	~ccCutPursuitDlg();
 
 	//! Populates the scalar fields list with checkable entries
 	/** \param sfNames names of the available scalar fields (the Cut Pursuit label field should already be excluded)
@@ -71,4 +76,7 @@ class ccCutPursuitDlg : public QDialog
 
 	//! Overridden to save the parameters when the dialog is accepted
 	void accept() override;
+
+  private:
+	std::unique_ptr<Ui::CutPursuitDialog> m_ui;
 };

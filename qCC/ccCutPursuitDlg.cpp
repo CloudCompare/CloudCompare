@@ -11,7 +11,7 @@
 // #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the          #
 // #  GNU General Public License for more details.                          #
 // #                                                                        #
-// #          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+// #          COPYRIGHT: The CloudCompare project                           #
 // #                                                                        #
 // ##########################################################################
 
@@ -19,32 +19,35 @@
 
 #include <DgmOctree.h>
 #include <QSettings>
+#include <ui_cutPursuitDlg.h>
 
 static const QString s_rgbFeatureName = QObject::tr("RGB");
 
 ccCutPursuitDlg::ccCutPursuitDlg(QWidget* parent /*=nullptr*/)
-    : QDialog(parent, Qt::Tool)
-    , Ui::CutPursuitDialog()
+    : QDialog(parent)
+    , m_ui(std::make_unique<Ui::CutPursuitDialog>())
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
 	loadFromPersistentSettings();
 }
 
+ccCutPursuitDlg::~ccCutPursuitDlg() = default;
+
 void ccCutPursuitDlg::setScalarFields(const QStringList& sfNames, bool includeRGB /*=false*/)
 {
-	scalarFieldsListWidget->clear();
+	m_ui->scalarFieldsListWidget->clear();
 
 	if (includeRGB)
 	{
-		QListWidgetItem* item = new QListWidgetItem(s_rgbFeatureName, scalarFieldsListWidget);
+		QListWidgetItem* item = new QListWidgetItem(s_rgbFeatureName, m_ui->scalarFieldsListWidget);
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 		item->setCheckState(Qt::Checked);
 	}
 
 	for (const QString& name : sfNames)
 	{
-		QListWidgetItem* item = new QListWidgetItem(name, scalarFieldsListWidget);
+		QListWidgetItem* item = new QListWidgetItem(name, m_ui->scalarFieldsListWidget);
 		item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
 		item->setCheckState(Qt::Checked);
 	}
@@ -54,9 +57,9 @@ QStringList ccCutPursuitDlg::getSelectedScalarFields() const
 {
 	QStringList selected;
 
-	for (int i = 0; i < scalarFieldsListWidget->count(); ++i)
+	for (int i = 0; i < m_ui->scalarFieldsListWidget->count(); ++i)
 	{
-		QListWidgetItem* item = scalarFieldsListWidget->item(i);
+		QListWidgetItem* item = m_ui->scalarFieldsListWidget->item(i);
 		if (item && item->checkState() == Qt::Checked && item->text() != s_rgbFeatureName)
 		{
 			selected.push_back(item->text());
@@ -68,34 +71,34 @@ QStringList ccCutPursuitDlg::getSelectedScalarFields() const
 
 int ccCutPursuitDlg::getKNN()
 {
-	return knnSpinBox->value();
+	return m_ui->knnSpinBox->value();
 }
 
 double ccCutPursuitDlg::getKNNRadius()
 {
-	return knnRadiusSpinBox->value();
+	return m_ui->knnRadiusSpinBox->value();
 }
 
 double ccCutPursuitDlg::getRegularization()
 {
-	return regularizationSpinBox->value();
+	return m_ui->regularizationSpinBox->value();
 }
 
 double ccCutPursuitDlg::getSpatialWeight()
 {
-	return spatialWeightSpinBox->value();
+	return m_ui->spatialWeightSpinBox->value();
 }
 
 int ccCutPursuitDlg::getCutoff()
 {
-	return cutoffSpinBox->value();
+	return m_ui->cutoffSpinBox->value();
 }
 
 bool ccCutPursuitDlg::useRGB()
 {
-	for (int i = 0; i < scalarFieldsListWidget->count(); ++i)
+	for (int i = 0; i < m_ui->scalarFieldsListWidget->count(); ++i)
 	{
-		QListWidgetItem* item = scalarFieldsListWidget->item(i);
+		QListWidgetItem* item = m_ui->scalarFieldsListWidget->item(i);
 		if (item && item->text() == s_rgbFeatureName)
 		{
 			return (item->checkState() == Qt::Checked);
@@ -106,7 +109,7 @@ bool ccCutPursuitDlg::useRGB()
 
 bool ccCutPursuitDlg::averageColors()
 {
-	return (averageColorsCheckBox->checkState() == Qt::Checked);
+	return (m_ui->averageColorsCheckBox->checkState() == Qt::Checked);
 }
 
 void ccCutPursuitDlg::saveToPersistentSettings() const
@@ -114,12 +117,12 @@ void ccCutPursuitDlg::saveToPersistentSettings() const
 	QSettings settings;
 	settings.beginGroup("CutPursuitDialog");
 	{
-		settings.setValue("knn", knnSpinBox->value());
-		settings.setValue("knnRadius", knnRadiusSpinBox->value());
-		settings.setValue("regularization", regularizationSpinBox->value());
-		settings.setValue("spatialWeight", spatialWeightSpinBox->value());
-		settings.setValue("cutoff", cutoffSpinBox->value());
-		settings.setValue("averageColors", averageColorsCheckBox->isChecked());
+		settings.setValue("knn", m_ui->knnSpinBox->value());
+		settings.setValue("knnRadius", m_ui->knnRadiusSpinBox->value());
+		settings.setValue("regularization", m_ui->regularizationSpinBox->value());
+		settings.setValue("spatialWeight", m_ui->spatialWeightSpinBox->value());
+		settings.setValue("cutoff", m_ui->cutoffSpinBox->value());
+		settings.setValue("averageColors", m_ui->averageColorsCheckBox->isChecked());
 	}
 	settings.endGroup();
 }
@@ -129,12 +132,12 @@ void ccCutPursuitDlg::loadFromPersistentSettings()
 	QSettings settings;
 	settings.beginGroup("CutPursuitDialog");
 	{
-		knnSpinBox->setValue(settings.value("knn", knnSpinBox->value()).toInt());
-		knnRadiusSpinBox->setValue(settings.value("knnRadius", knnRadiusSpinBox->value()).toDouble());
-		regularizationSpinBox->setValue(settings.value("regularization", regularizationSpinBox->value()).toDouble());
-		spatialWeightSpinBox->setValue(settings.value("spatialWeight", spatialWeightSpinBox->value()).toDouble());
-		cutoffSpinBox->setValue(settings.value("cutoff", cutoffSpinBox->value()).toInt());
-		averageColorsCheckBox->setChecked(settings.value("averageColors", averageColorsCheckBox->isChecked()).toBool());
+		m_ui->knnSpinBox->setValue(settings.value("knn", m_ui->knnSpinBox->value()).toInt());
+		m_ui->knnRadiusSpinBox->setValue(settings.value("knnRadius", m_ui->knnRadiusSpinBox->value()).toDouble());
+		m_ui->regularizationSpinBox->setValue(settings.value("regularization", m_ui->regularizationSpinBox->value()).toDouble());
+		m_ui->spatialWeightSpinBox->setValue(settings.value("spatialWeight", m_ui->spatialWeightSpinBox->value()).toDouble());
+		m_ui->cutoffSpinBox->setValue(settings.value("cutoff", m_ui->cutoffSpinBox->value()).toInt());
+		m_ui->averageColorsCheckBox->setChecked(settings.value("averageColors", m_ui->averageColorsCheckBox->isChecked()).toBool());
 	}
 	settings.endGroup();
 }

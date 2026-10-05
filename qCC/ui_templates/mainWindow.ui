@@ -1180,10 +1180,10 @@ QTreeView::branch:open:has-children:has-siblings  {
     <string>Cut Pursuit</string>
    </property>
    <property name="toolTip">
-    <string>Cut Pursuit</string>
+    <string>Graph-based point cloud segmentation</string>
    </property>
    <property name="statusTip">
-    <string>Cut Pursuit</string>
+    <string>Graph-based point cloud segmentation</string>
    </property>
   </action>
   <action name="actionLabelConnectedComponents">

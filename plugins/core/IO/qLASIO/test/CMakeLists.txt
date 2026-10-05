@@ -10,6 +10,12 @@ target_sources( TestLasExtraBytesEvlr
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasDetails.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasExtraScalarField.cpp
         ${CMAKE_CURRENT_LIST_DIR}/../src/LasScalarField.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/LasSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/LasScalarFieldSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/LasWaveformSaver.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/LasMetadata.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/LasVlr.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/../src/CopcLoader.cpp
 )
 
 target_include_directories( TestLasExtraBytesEvlr
@@ -20,6 +26,7 @@ target_include_directories( TestLasExtraBytesEvlr
 target_link_libraries( TestLasExtraBytesEvlr
     PRIVATE
         QCC_DB_LIB
+        QCC_IO_LIB
         LASzip::LASzip
         Qt6::Test
 )

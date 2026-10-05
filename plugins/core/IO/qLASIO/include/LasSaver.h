@@ -26,6 +26,9 @@
 // LASzip
 #include <laszip/laszip_api.h>
 
+// Qt
+#include <QByteArray>
+
 // System
 #include <memory>
 
@@ -55,6 +58,9 @@ class LasSaver
 
 	CC_FILE_ERROR saveNextPoint();
 
+	/// Closes the file, then appends the "Extra Bytes" EVLR (if any)
+	CC_FILE_ERROR close();
+
 	bool canSaveWaveforms() const;
 
 	QString getLastError() const;
@@ -71,6 +77,8 @@ class LasSaver
 	bool                              m_shouldSaveRGB{false};
 	std::unique_ptr<LasWaveformSaver> m_waveformSaver{nullptr};
 	laszip_point*                     m_laszipPoint{nullptr};
+	QString                           m_filePath;
+	QByteArray                        m_extraBytesEvlr; // "Extra Bytes" descriptor that doesn't fit in a VLR (LAS 1.4 only, written as an EVLR by close())
 	int                               m_originallySelectedScalarField = -1;
 	// contains for the x, y, z dims of the normals, whether it was temporarily
 	// exported to a scalar field. If true, then we have to remove the temporary sf.

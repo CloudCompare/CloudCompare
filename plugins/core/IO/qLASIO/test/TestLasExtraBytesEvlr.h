@@ -14,4 +14,6 @@ class TestLasExtraBytesEvlr : public QObject
 	void bothPresent();
 	void truncatedEvlr();
 	void fullLengthName();
+	void writeEvlr_data();
+	void writeEvlr();
 };

@@ -25,6 +25,7 @@
 #include "../include/ccTorus.h"
 
 // System
+#include <algorithm>
 #include <cassert>
 
 #if defined(_OPENMP)
@@ -378,33 +379,27 @@ bool ccClipBox::move3D(const CCVector3d& uInput)
 		{
 		case X_MINUS_ARROW:
 			m_box.minCorner().x += static_cast<PointCoordinateType>(u.x);
-			if (m_box.minCorner().x > m_box.maxCorner().x)
-				m_box.minCorner().x = m_box.maxCorner().x;
+			m_box.minCorner().x = std::min(m_box.minCorner().x, m_box.maxCorner().x);
 			break;
 		case X_PLUS_ARROW:
 			m_box.maxCorner().x += static_cast<PointCoordinateType>(u.x);
-			if (m_box.minCorner().x > m_box.maxCorner().x)
-				m_box.maxCorner().x = m_box.minCorner().x;
+			m_box.maxCorner().x = std::max(m_box.minCorner().x, m_box.maxCorner().x);
 			break;
 		case Y_MINUS_ARROW:
 			m_box.minCorner().y += static_cast<PointCoordinateType>(u.y);
-			if (m_box.minCorner().y > m_box.maxCorner().y)
-				m_box.minCorner().y = m_box.maxCorner().y;
+			m_box.minCorner().y = std::min(m_box.minCorner().y, m_box.maxCorner().y);
 			break;
 		case Y_PLUS_ARROW:
 			m_box.maxCorner().y += static_cast<PointCoordinateType>(u.y);
-			if (m_box.minCorner().y > m_box.maxCorner().y)
-				m_box.maxCorner().y = m_box.minCorner().y;
+			m_box.maxCorner().y = std::max(m_box.minCorner().y, m_box.maxCorner().y);
 			break;
 		case Z_MINUS_ARROW:
 			m_box.minCorner().z += static_cast<PointCoordinateType>(u.z);
-			if (m_box.minCorner().z > m_box.maxCorner().z)
-				m_box.minCorner().z = m_box.maxCorner().z;
+			m_box.minCorner().z = std::min(m_box.minCorner().z, m_box.maxCorner().z);
 			break;
 		case Z_PLUS_ARROW:
 			m_box.maxCorner().z += static_cast<PointCoordinateType>(u.z);
-			if (m_box.minCorner().z > m_box.maxCorner().z)
-				m_box.maxCorner().z = m_box.minCorner().z;
+			m_box.maxCorner().z = std::max(m_box.minCorner().z, m_box.maxCorner().z);
 			break;
 		case CROSS:
 			m_box += u.toPC();

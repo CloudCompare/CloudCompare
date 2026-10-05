@@ -32,6 +32,7 @@
 #include <QMap>
 
 // System
+#include <algorithm>
 #include <cassert>
 
 // default field names
@@ -969,10 +970,10 @@ bool ccRasterGrid::interpolateEmptyCells(double maxSquareEdgeLength)
 				if (static_cast<unsigned>(P[k].y + 1) == height)
 					onTopBorder.push_back(k);
 			}
-			xMin = std::min(std::min(P[0].x, P[1].x), P[2].x);
-			yMin = std::min(std::min(P[0].y, P[1].y), P[2].y);
-			xMax = std::max(std::max(P[0].x, P[1].x), P[2].x);
-			yMax = std::max(std::max(P[0].y, P[1].y), P[2].y);
+			xMin = std::min({P[0].x, P[1].x, P[2].x});
+			yMin = std::min({P[0].y, P[1].y, P[2].y});
+			xMax = std::max({P[0].x, P[1].x, P[2].x});
+			yMax = std::max({P[0].y, P[1].y, P[2].y});
 		}
 
 		// now scan the cells

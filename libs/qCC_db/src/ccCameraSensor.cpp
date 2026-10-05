@@ -33,6 +33,7 @@
 #include <QTextStream>
 
 // System
+#include <algorithm>
 #include <cmath>
 
 ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
@@ -2232,10 +2233,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			else if (maxC[0] < C[0])
 				maxC[0] = C[0];
 
-			if (globalCorners[0] > minC[0])
-				globalCorners[0] = minC[0];
-			if (globalCorners[2] < maxC[0])
-				globalCorners[2] = maxC[0];
+			globalCorners[0] = std::min(globalCorners[0], minC[0]);
+			globalCorners[2] = std::max(globalCorners[2], maxC[0]);
 
 			// dimension: Y
 			if (minC[1] > C[1])
@@ -2243,17 +2242,14 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			else if (maxC[1] < C[1])
 				maxC[1] = C[1];
 
-			if (globalCorners[1] > minC[1])
-				globalCorners[1] = minC[1];
-			if (globalCorners[3] < maxC[1])
-				globalCorners[3] = maxC[1];
+			globalCorners[1] = std::min(globalCorners[1], minC[1]);
+			globalCorners[3] = std::max(globalCorners[3], maxC[1]);
 		}
 
-		double dx   = maxC[0] - minC[0];
-		double dy   = maxC[1] - minC[1];
-		double maxd = std::max(dx, dy);
-		if (maxd > maxDimAllImages)
-			maxDimAllImages = maxd;
+		double dx       = maxC[0] - minC[0];
+		double dy       = maxC[1] - minC[1];
+		double maxd     = std::max(dx, dy);
+		maxDimAllImages = std::max(maxd, maxDimAllImages);
 	}
 
 	// deduce pixel size
@@ -2654,10 +2650,8 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(boxCorners[j]);
-					if (d > dMaxBox)
-						dMaxBox = d;
-					if (d < dMinBox)
-						dMinBox = d;
+					dMaxBox = std::max(d, dMaxBox);
+					dMinBox = std::min(d, dMinBox);
 				}
 			}
 
@@ -2668,10 +2662,8 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				for (unsigned j = 1; j < 8; j++)
 				{
 					float d = testVec.dot(frustumCorners[j]);
-					if (d > dMaxFru)
-						dMaxFru = d;
-					if (d < dMinFru)
-						dMinFru = d;
+					dMaxFru = std::max(d, dMaxFru);
+					dMinFru = std::min(d, dMinFru);
 				}
 			}
 

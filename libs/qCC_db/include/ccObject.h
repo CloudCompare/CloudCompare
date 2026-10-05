@@ -182,8 +182,7 @@ class QCC_DB_LIB_API ccUniqueIDGenerator
 	//! Updates the value of the last generated unique ID with the current one
 	void update(unsigned ID)
 	{
-		if (ID > m_lastUniqueID)
-			m_lastUniqueID = ID;
+		m_lastUniqueID = std::max(ID, m_lastUniqueID);
 	}
 
   protected:

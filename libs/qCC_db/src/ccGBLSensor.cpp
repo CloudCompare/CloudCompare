@@ -625,8 +625,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 					minPitch = maxPitch = Q.y;
 				}
 
-				if (depth > maxDepth)
-					maxDepth = depth;
+				maxDepth = std::max(depth, maxDepth);
 			}
 		}
 
@@ -684,10 +683,7 @@ bool ccGBLSensor::computeAutoParameters(CCCoreLib::GenericCloud* theCloud)
 			const CCVector3*    P     = theCloud->getNextPoint();
 			PointCoordinateType depth = computeDistanceToPoint(*P, m_activeIndex);
 
-			if (depth > maxDepth)
-			{
-				maxDepth = depth;
-			}
+			maxDepth = std::max(depth, maxDepth);
 		}
 		setSensorRange(maxDepth);
 	}

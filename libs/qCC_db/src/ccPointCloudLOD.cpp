@@ -108,10 +108,7 @@ class ccPointCloudLODThread : public QThread
 				{
 					const CCVector3* P            = m_cloud.getPoint(cellCodes[node.firstCodeIndex + i].theIndex);
 					double           squareRadius = (P->toDouble() - sumP).norm2();
-					if (squareRadius > maxSquareRadius)
-					{
-						maxSquareRadius = squareRadius;
-					}
+					maxSquareRadius               = std::max(squareRadius, maxSquareRadius);
 
 					if (m_earlyStop)
 					{

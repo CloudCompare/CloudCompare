@@ -47,6 +47,9 @@
 // Qt
 #include <QIcon>
 
+// System
+#include <algorithm>
+
 ccHObject::ccHObject(const QString& name, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccObject(name, uniqueID)
     , ccDrawableObject()
@@ -302,15 +305,8 @@ int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject) const
 
 bool ccHObject::hasDependencyFlag(int dependencyFlag) const
 {
-	for (auto it : m_dependencies)
-	{
-		if (it.second == dependencyFlag)
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return std::any_of(m_dependencies.cbegin(), m_dependencies.cend(), [dependencyFlag](const auto& p)
+	                   { return p.second == dependencyFlag; });
 }
 
 void ccHObject::removeDependencyWith(ccHObject* otherObject)
@@ -878,10 +874,7 @@ unsigned ccHObject::findMaxUniqueID_recursive() const
 	for (auto* child : m_children)
 	{
 		unsigned childMaxID = child->findMaxUniqueID_recursive();
-		if (id < childMaxID)
-		{
-			id = childMaxID;
-		}
+		id                  = std::max(id, childMaxID);
 	}
 
 	return id;

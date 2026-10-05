@@ -31,6 +31,7 @@
 #include <Neighbourhood.h>
 
 // System
+#include <algorithm>
 #include <cassert>
 
 // Number of points for local modeling to compute normals with 2D1/2 Delaunay triangulation
@@ -639,8 +640,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCCoreLib::DgmOctree::oct
 		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
 		{
-			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3)
-				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3;
+			k = std::min(k, NUMBER_OF_POINTS_FOR_NORM_WITH_TRI * 3);
 			CCCoreLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood, k);
 
 			CCVector3 N;

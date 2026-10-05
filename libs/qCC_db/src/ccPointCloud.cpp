@@ -51,6 +51,7 @@
 #include <QSettings>
 
 // System
+#include <algorithm>
 #include <cassert>
 #include <queue>
 
@@ -6826,16 +6827,8 @@ void ccPointCloud::decompressNormals()
 
 bool ccPointCloud::hasSensor() const
 {
-	for (size_t i = 0; i < m_children.size(); ++i)
-	{
-		ccHObject* child = m_children[i];
-		if (child && child->isKindOf(CC_TYPES::SENSOR))
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return std::any_of(m_children.cbegin(), m_children.cend(), [](const auto* child)
+	                   { return child && child->isKindOf(CC_TYPES::SENSOR); });
 }
 
 unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
@@ -6853,8 +6846,8 @@ unsigned char ccPointCloud::testVisibility(const CCVector3& P) const
 
 				if (visibility == CCCoreLib::POINT_VISIBLE)
 					return CCCoreLib::POINT_VISIBLE;
-				else if (visibility < bestVisibility)
-					bestVisibility = visibility;
+
+				bestVisibility = std::min(visibility, bestVisibility);
 			}
 		}
 		if (bestVisibility != 255)
@@ -6948,14 +6941,8 @@ bool ccPointCloud::computeFWFAmplitude(double& minVal, double& maxVal, ccProgres
 		}
 		else
 		{
-			if (wMaxVal > maxVal)
-			{
-				maxVal = wMaxVal;
-			}
-			if (wMinVal < minVal)
-			{
-				minVal = wMinVal;
-			}
+			maxVal = std::max(wMaxVal, maxVal);
+			minVal = std::min(wMinVal, minVal);
 		}
 	}
 

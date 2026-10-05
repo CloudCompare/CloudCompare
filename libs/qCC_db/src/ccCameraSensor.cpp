@@ -1231,7 +1231,7 @@ CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 	if (m_intrinsicParams.arrayHeight == 0)
 		return {0, 0, 0};
 
-	float ar      = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight : 1.0f;
+	float ar      = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
 	float halfFov = m_intrinsicParams.vFOV_rad / 2;
 
 	CCVector3 upperLeftPoint;
@@ -1814,7 +1814,7 @@ bool ccCameraSensor::computeOrthoRectificationParams(const ccImage*             
 }
 
 ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
-                                                   PointCoordinateType Z0,
+                                                   PointCoordinateType altitude,
                                                    double&             pixelSize,
                                                    bool                undistortImages /*=true*/,
                                                    double*             minCorner /*=nullptr*/,
@@ -1831,7 +1831,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xTopLeft(0, 0);
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xTopLeft, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xTopLeft, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1847,7 +1847,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xTopRight(static_cast<PointCoordinateType>(width), 0);
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xTopRight, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xTopRight, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1863,7 +1863,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xBottomRight(static_cast<PointCoordinateType>(width), static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xBottomRight, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xBottomRight, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1879,7 +1879,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 	{
 		CCVector2 xBottomLeft(0, static_cast<PointCoordinateType>(height));
 		CCVector3 P3D;
-		if (!fromImageCoordToGlobalCoord(xBottomLeft, P3D, Z0))
+		if (!fromImageCoordToGlobalCoord(xBottomLeft, P3D, altitude))
 			return nullptr;
 #ifdef QT_DEBUG
 		// internal check
@@ -1952,7 +1952,7 @@ ccImage* ccCameraSensor::orthoRectifyAsImageDirect(const ccImage*      image,
 
 			QRgb rgb = blackValue; // output pixel is (transparent) black by default
 
-			CCVector3 P3D(xip, yip, Z0);
+			CCVector3 P3D(xip, yip, altitude);
 			CCVector2 imageCoord;
 			if (fromGlobalCoordToImageCoord(P3D, imageCoord, undistortImages))
 			{
@@ -2140,7 +2140,7 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
                                           const double                            c[],
                                           unsigned                                maxSize,
                                           QDir*                                   outputDir /*=nullptr*/,
-                                          std::vector<ccImage*>*                  result /*=nullptr*/,
+                                          std::vector<ccImage*>*                  orthoRectifiedImages /*=nullptr*/,
                                           std::vector<std::pair<double, double>>* relativePos /*=nullptr*/)
 {
 	size_t count = images.size();
@@ -2290,12 +2290,12 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 		if (orthoImage.isNull()) // not enough memory!
 		{
 			// clear mem.
-			if (result)
+			if (orthoRectifiedImages)
 			{
-				while (!result->empty())
+				while (!orthoRectifiedImages->empty())
 				{
-					delete result->back();
-					result->pop_back();
+					delete orthoRectifiedImages->back();
+					orthoRectifiedImages->pop_back();
 				}
 			}
 			ccLog::Warning("[OrthoRectifyAsImages] Not enough memory!");
@@ -2376,8 +2376,8 @@ bool ccCameraSensor::OrthoRectifyAsImages(std::vector<ccImage*>                 
 			}
 		}
 
-		if (result)
-			result->push_back(new ccImage(orthoImage, image->getName()));
+		if (orthoRectifiedImages)
+			orthoRectifiedImages->push_back(new ccImage(orthoImage, image->getName()));
 	}
 
 	return true;

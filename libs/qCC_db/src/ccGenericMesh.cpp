@@ -630,7 +630,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const TexCoords2D* Tx2 = nullptr;
 				const TexCoords2D* Tx3 = nullptr;
 
-				float* _texCoords = reinterpret_cast<float*>(texCoords);
+				float* _texCoords = texCoords;
 				for (size_t n = 0; n < chunkSize; n += decimStep)
 				{
 					unsigned triangleIndex = static_cast<unsigned>(chunkStart + n);
@@ -1497,7 +1497,7 @@ bool ccGenericMesh::trianglePicking(const CCVector2d&           clickPos,
 		if (nearestTriIndex < 0 || squareDist < nearestSquareDist)
 		{
 			nearestSquareDist = squareDist;
-			nearestTriIndex   = static_cast<int>(i);
+			nearestTriIndex   = i;
 			nearestPoint      = P;
 			if (barycentricCoords)
 			{

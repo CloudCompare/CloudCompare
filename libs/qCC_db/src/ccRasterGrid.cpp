@@ -159,8 +159,8 @@ void ccRasterGrid::reset()
 
 bool ccRasterGrid::init(unsigned          w,
                         unsigned          h,
-                        double            s,
-                        const CCVector3d& c)
+                        double            gridStep,
+                        const CCVector3d& minCorner)
 {
 	// we always restart from scratch (clearer / safer)
 	clear();
@@ -180,10 +180,10 @@ bool ccRasterGrid::init(unsigned          w,
 		return false;
 	}
 
-	width     = w;
-	height    = h;
-	gridStep  = s;
-	minCorner = c;
+	width           = w;
+	height          = h;
+	this->gridStep  = gridStep;
+	this->minCorner = minCorner;
 
 	return true;
 }
@@ -211,7 +211,7 @@ struct IndexAndValue
 };
 
 bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
-                            unsigned char        Z,
+                            unsigned char        projectionDimension,
                             ProjectionType       projectionType,
                             InterpolationType    emptyCellsInterpolation /*=InterpolationType::NONE*/,
                             void*                interpolationParams /*=nullptr*/,
@@ -219,6 +219,10 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
                             ccProgressDialog*    progressDialog /*=nullptr*/,
                             int                  zStdDevSfIndex /*=-1*/)
 {
+
+	// vertical dimension
+	assert(projectionDimension <= 2);
+
 	if (!cloud)
 	{
 		assert(false);
@@ -270,9 +274,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 	// filling the grid
 	unsigned pointCount = cloud->size();
 
-	// vertical dimension
-	assert(Z <= 2);
-	const unsigned char X = Z == 2 ? 0 : Z + 1;
+	const unsigned char X = projectionDimension == 2 ? 0 : projectionDimension + 1;
 	const unsigned char Y = X == 2 ? 0 : X + 1;
 
 	// we always handle the colors (if any)
@@ -428,7 +430,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 						unsigned         pointIndex     = static_cast<unsigned>(pRef - pointRefList.data());
 						const CCVector3* P              = cloud->getPoint(pointIndex);
 						cellPointIndexedHeight[n].index = pointIndex;
-						cellPointIndexedHeight[n].val   = P->u[Z];
+						cellPointIndexedHeight[n].val   = P->u[projectionDimension];
 						pRef                            = reinterpret_cast<void**>(*pRef);
 					}
 
@@ -759,7 +761,7 @@ bool ccRasterGrid::fillWith(ccGenericPointCloud* cloud,
 		KrigingParams* krigingParams = reinterpret_cast<KrigingParams*>(interpolationParams);
 		if (krigingParams)
 		{
-			fillGridCellsWithKriging(Z, krigingParams->kNN, krigingParams->params, !krigingParams->autoGuess, progressDialog);
+			fillGridCellsWithKriging(projectionDimension, krigingParams->kNN, krigingParams->params, !krigingParams->autoGuess, progressDialog);
 		}
 		else
 		{
@@ -806,7 +808,7 @@ static void InterpolateOnBorder(const std::vector<uint8_t>& pointsOnBorder,
 		if (d > 0)
 		{
 			// linear interpolation
-			double relativePos = (coord - P[minIndex][dim]) / static_cast<double>(d);
+			double relativePos = (coord - P[minIndex][dim]) / d;
 
 			const ccRasterCell& A = grid.rows[P[minIndex].y][P[minIndex].x];
 			const ccRasterCell& B = grid.rows[P[maxIndex].y][P[maxIndex].x];
@@ -1148,7 +1150,7 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 	if (hasColors)
 		stepCount += 3;
 
-	CCCoreLib::NormalizedProgress nProgress(progressDialog, static_cast<unsigned>(nonEmptyCellCount * stepCount));
+	CCCoreLib::NormalizedProgress nProgress(progressDialog, nonEmptyCellCount * stepCount);
 
 	Kriging kriging(dataPoints, rasterParams);
 	knn = std::min(knn, static_cast<int>(nonEmptyCellCount - 1));

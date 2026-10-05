@@ -35,12 +35,6 @@ static const QString s_xmlColorScaleProperties("Properties");
 static const QString s_xmlColorScaleData("Data");
 constexpr int        s_xmlColorScaleVer = 1;
 
-// These extra definitions are required in C++11.
-// In C++17, "static constexpr" is implicitly inline, so these are not required.
-constexpr unsigned ccColorScale::MIN_STEPS;
-constexpr unsigned ccColorScale::DEFAULT_STEPS;
-constexpr unsigned ccColorScale::MAX_STEPS;
-
 ccColorScale::Shared ccColorScale::Create(const QString& name)
 {
 	return ccColorScale::Shared(new ccColorScale(name));

@@ -2682,7 +2682,7 @@ void ccMesh::computeInterpolationWeights(unsigned triIndex, const CCVector3& P, 
 	assert(triIndex < m_triVertIndexes->size());
 
 	const CCCoreLib::VerticesIndexes& tri = m_triVertIndexes->at(triIndex);
-	return computeInterpolationWeights(tri, P, weights);
+	computeInterpolationWeights(tri, P, weights);
 }
 
 void ccMesh::computeInterpolationWeights(const CCCoreLib::VerticesIndexes& vertIndexes, const CCVector3& P, CCVector3d& weights) const

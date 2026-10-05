@@ -777,7 +777,7 @@ PointCoordinateType ccOctree::GuessBestRadiusAutoComputeOctree(ccGenericPointClo
 
 PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*                cloud,
                                               const BestRadiusParams&             params,
-                                              CCCoreLib::DgmOctree*               inputOctree /*=nullptr*/,
+                                              CCCoreLib::DgmOctree*               cloudOctree /*=nullptr*/,
                                               CCCoreLib::GenericProgressCallback* progressCb /*=nullptr*/)
 {
 	if (!cloud)
@@ -786,7 +786,7 @@ PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*              
 		return 0;
 	}
 
-	CCCoreLib::DgmOctree* octree = inputOctree;
+	CCCoreLib::DgmOctree* octree = cloudOctree;
 	if (!octree)
 	{
 		octree = new CCCoreLib::DgmOctree(cloud);
@@ -933,7 +933,7 @@ PointCoordinateType ccOctree::GuessBestRadius(ccGenericPointCloud*              
 		}
 	}
 
-	if (nullptr == inputOctree)
+	if (nullptr == cloudOctree)
 	{
 		delete octree;
 		octree = nullptr;

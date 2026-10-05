@@ -326,7 +326,6 @@ bool ccObject::fromFile(QFile& in, LoadingContext& context)
 			QString     key;
 			QVariant    value;
 			inStream >> key;
-#if 1 // patch to overcome the issue with LAS vlrs not being readable anymore as QVariant object with Qt 6
 			if (key == "LAS.vlrs")
 			{
 				inStream.skipRawData(16); // size of a partial QVariant object on Windows
@@ -348,7 +347,6 @@ bool ccObject::fromFile(QFile& in, LoadingContext& context)
 				inStream.skipRawData(272 * extraScalarFieldCount);
 			}
 			else
-#endif
 			{
 				inStream >> value;
 				setMetaData(key, value);

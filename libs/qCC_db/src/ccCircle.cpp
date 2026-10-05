@@ -65,7 +65,7 @@ void ccCircle::applyGLTransformation(const ccGLMatrix& trans)
 	// we call the ccHObject method instead of the ccPolyline one,
 	// to only update the transformation history matrix, and not
 	// trigger any coordinate modification
-	ccHObject::applyGLTransformation(trans);
+	ccHObject::applyGLTransformation(trans); // NOLINT(bugprone-parent-virtual-call)
 
 	// now we can update the vertices
 	updateInternalRepresentation();
@@ -150,7 +150,7 @@ bool ccCircle::fromFile_MeOnly(QFile& in, LoadingContext& context)
 short ccCircle::minimumFileVersion_MeOnly() const
 {
 	short minVersion = 56;
-	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly());
+	return std::max(minVersion, ccHObject::minimumFileVersion_MeOnly()); // NOLINT(bugprone-parent-virtual-call)
 }
 
 void ccCircle::updateInternalRepresentation()

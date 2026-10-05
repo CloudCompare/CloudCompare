@@ -1126,10 +1126,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					}
 
 					// we fill the end with NaN (as there is no equivalent in the added cloud)
-					ScalarType NaN = sf->NaN();
 					for (unsigned i = 0; i < addedPoints; i++)
 					{
-						sf->addElement(NaN);
+						sf->addElement(CCCoreLib::ScalarField::NaN());
 					}
 				}
 			}
@@ -2400,7 +2399,7 @@ CCVector3 ccPointCloud::computeGravityCenter()
 
 void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
 {
-	return applyRigidTransformation(trans);
+	applyRigidTransformation(trans);
 }
 
 void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
@@ -2816,7 +2815,7 @@ void ccPointCloud::glChunkVertexPointer(const CC_DRAW_CONTEXT& context, size_t c
 
 	if (useVBOs
 	    && m_vboManager.state == vboSet::INITIALIZED
-	    && m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+	    && m_vboManager.vbos.size() > chunkIndex
 	    && m_vboManager.vbos[chunkIndex]
 	    && m_vboManager.vbos[chunkIndex]->vertexBuffer.isCreated())
 	{
@@ -2912,7 +2911,7 @@ void ccPointCloud::glChunkNormalPointer(const CC_DRAW_CONTEXT& context, size_t c
 		if (useVBOs
 		    && m_vboManager.state == vboSet::INITIALIZED
 		    && m_vboManager.hasNormals
-		    && m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+		    && m_vboManager.vbos.size() > chunkIndex
 		    && m_vboManager.vbos[chunkIndex]
 		    && m_vboManager.vbos[chunkIndex]->normalIndexBuffer.isCreated())
 		{
@@ -2995,7 +2994,7 @@ void ccPointCloud::glChunkColorPointer(const CC_DRAW_CONTEXT& context, size_t ch
 	if (useVBOs
 	    && m_vboManager.state == vboSet::INITIALIZED
 	    && m_vboManager.hasColors
-	    && m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+	    && m_vboManager.vbos.size() > chunkIndex
 	    && m_vboManager.vbos[chunkIndex]
 	    && m_vboManager.vbos[chunkIndex]->colorBuffer.isCreated())
 	{
@@ -3060,7 +3059,7 @@ void ccPointCloud::glChunkSFPointer(const CC_DRAW_CONTEXT& context, size_t chunk
 	    && !useProg
 	    && m_vboManager.state == vboSet::INITIALIZED
 	    && m_vboManager.hasColors
-	    && m_vboManager.vbos.size() > static_cast<size_t>(chunkIndex)
+	    && m_vboManager.vbos.size() > chunkIndex
 	    && m_vboManager.vbos[chunkIndex]
 	    && m_vboManager.vbos[chunkIndex]->colorBuffer.isCreated())
 	{
@@ -4911,7 +4910,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCylinder(AP2, xDir, yDir, params->radius, delta2, longitude2_rad);
 
-				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.x = (longitude2_rad - longitude_rad) * params->radius;
 				N2.y = -(delta2 - delta);
 				N2.z = N.dot(axisDir);
 			}
@@ -4939,7 +4938,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
 				// we simply develop the cone as a cylinder
-				N2.x = static_cast<PointCoordinateType>((longitude2_rad - longitude_rad) * params->radius);
+				N2.x = (longitude2_rad - longitude_rad) * params->radius;
 				N2.y = -(delta2 - delta);
 				N2.z = posAlongAxis - posAlongAxis2;
 			}
@@ -4951,7 +4950,7 @@ ccPointCloud* ccPointCloud::unroll(UnrollMode                          mode,
 				PointCoordinateType delta2         = 0;
 				PointCoordinateType longitude2_rad = 0;
 				ProjectOnCone(AP2, alpha_rad, axisDir, xDir, yDir, posAlongAxis2, delta2, longitude2_rad);
-				N2.x = static_cast<PointCoordinateType>((longitude2_rad * posAlongAxis2 - longitude_rad * posAlongAxis) * sin_alpha);
+				N2.x = (longitude2_rad * posAlongAxis2 - longitude_rad * posAlongAxis) * sin_alpha;
 				N2.y = -(delta2 - delta);
 				N2.z = posAlongAxis - posAlongAxis2;
 			}
@@ -5986,7 +5985,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 			    && (!m_vboManager.hasColors
 			        || !m_vboManager.colorIsSF
 			        || m_vboManager.sourceSF != m_currentDisplayedScalarField
-			        || m_currentDisplayedScalarField->getModificationFlag() == true))
+			        || m_currentDisplayedScalarField->getModificationFlag()))
 			{
 				m_vboManager.updateFlags |= vboSet::UPDATE_COLORS;
 			}
@@ -6711,7 +6710,7 @@ void ccPointCloud::showNormalsAsLines(bool state)
 
 	m_normalsDrawnAsLines = state;
 
-	if (state == false)
+	if (!state)
 	{
 		m_decompressedNormals.clear();
 	}

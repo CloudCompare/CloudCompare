@@ -370,9 +370,9 @@ ccGBLSensor::NormalGrid* ccGBLSensor::projectNormals(CCCoreLib::GenericCloud* cl
 }
 
 ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(CCCoreLib::GenericCloud* cloud,
-                                                   const ColorGrid&         theColors) const
+                                                   const ColorGrid&         rgbColors) const
 {
-	if (!cloud || theColors.capacity() == 0)
+	if (!cloud || rgbColors.capacity() == 0)
 		return nullptr;
 
 	unsigned gridSize = m_depthBuffer.height * m_depthBuffer.width;
@@ -437,7 +437,7 @@ ccGBLSensor::ColorGrid* ccGBLSensor::projectColors(CCCoreLib::GenericCloud* clou
 					unsigned index = y * m_depthBuffer.width + x;
 
 					// accumulate color
-					const ccColor::Rgb& srcC  = theColors[i];
+					const ccColor::Rgb& srcC  = rgbColors[i];
 					ccColor::Rgbf&      destC = colorAccumGrid[index];
 
 					destC.r += srcC.r;

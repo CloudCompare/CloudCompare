@@ -189,7 +189,7 @@ class QCC_DB_LIB_API ccPointCloud : public CCCoreLib::PointCloudTpl<ccGenericPoi
 	    \param _numberOfPoints number of points to reserve the memory for
 	    \return true if ok, false if there's not enough memory
 	**/
-	bool reserveThePointsTable(unsigned _numberOfPoints);
+	bool reserveThePointsTable(unsigned newNumberOfPoints);
 
 	//! Reserves memory to store the RGB colors
 	/** Before adding colors to the cloud (with addColor())

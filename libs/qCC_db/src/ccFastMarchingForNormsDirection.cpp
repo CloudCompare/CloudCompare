@@ -263,10 +263,10 @@ int ccFastMarchingForNormsDirection::step()
 	return 1;
 }
 
-float ccFastMarchingForNormsDirection::computeTCoefApprox(CCCoreLib::FastMarching::Cell* originCell, CCCoreLib::FastMarching::Cell* destCell) const
+float ccFastMarchingForNormsDirection::computeTCoefApprox(CCCoreLib::FastMarching::Cell* currentCell, CCCoreLib::FastMarching::Cell* neighbourCell) const
 {
-	DirectionCell* oCell                 = static_cast<DirectionCell*>(originCell);
-	DirectionCell* dCell                 = static_cast<DirectionCell*>(destCell);
+	DirectionCell* oCell                 = static_cast<DirectionCell*>(currentCell);
+	DirectionCell* dCell                 = static_cast<DirectionCell*>(neighbourCell);
 	float          orientationConfidence = computePropagationConfidence(oCell, dCell); // between 0 and 1 (ideal: 1)
 
 	return (1.0f - orientationConfidence) * oCell->signConfidence;

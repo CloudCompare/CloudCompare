@@ -616,8 +616,7 @@ void ccGLSL::SetSFTextureUniforms(QOpenGLFunctions_2_1* glFunc,
 	glFunc->glUniform1i(prog->uniformLocation("uTexWidth"), sfTex->width());
 	glFunc->glUniform1i(prog->uniformLocation("uTexHeight"), sfTex->height());
 
-	auto   colorScale = sf->getColorScale();
-	double offset     = sf->getOffset();
+	double offset = sf->getOffset();
 
 	float minVal              = static_cast<float>(sf->displayRange().start() - offset);
 	float maxVal              = static_cast<float>(sf->displayRange().stop() - offset);

@@ -25,7 +25,7 @@
 #include <Neighbourhood.h>
 
 // System
-#include <string.h>
+#include <cstring>
 
 ccQuadric::ccQuadric(CCVector2                      minCorner,
                      CCVector2                      maxCorner,

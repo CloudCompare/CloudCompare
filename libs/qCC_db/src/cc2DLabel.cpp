@@ -31,8 +31,7 @@
 #include <QSharedPointer>
 
 // System
-#include <assert.h>
-#include <string.h>
+#include <cassert>
 
 //'Delta' character
 static const QChar MathSymbolDelta(0x0394);

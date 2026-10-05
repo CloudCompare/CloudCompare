@@ -19,7 +19,6 @@
 
 // Local
 #include "../include/ccPointCloud.h"
-#include "../include/ccScalarField.h"
 
 // CCCoreLib
 #include <DgmOctree.h>

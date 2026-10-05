@@ -18,16 +18,12 @@
 #include "../include/ccMesh.h"
 
 // Local
-#include "../include/ccChunk.h"
-#include "../include/ccColorScalesManager.h"
 #include "../include/ccGenericGLDisplay.h"
 #include "../include/ccHObjectCaster.h"
-#include "../include/ccIncludeGL.h"
 #include "../include/ccNormalCompressor.h"
 #include "../include/ccNormalVectors.h"
 #include "../include/ccPolyline.h"
 #include "../include/ccProgressDialog.h"
-#include "../include/ccScalarField.h"
 #include "../include/ccSubMesh.h"
 
 // CCCoreLib
@@ -38,11 +34,11 @@
 #include <ReferenceCloud.h>
 
 // System
-#include <assert.h>
+#include <cassert>
 #include <cmath> //for std::modf
 #include <cstdint>
 #include <memory>
-#include <string.h>
+#include <string>
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices, unsigned uniqueID /*=ccUniqueIDGenerator::InvalidUniqueID*/)
     : ccGenericMesh("Mesh", uniqueID)

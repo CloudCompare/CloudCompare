@@ -24,16 +24,15 @@
 #include "../include/ccOctree.h"
 #include "../include/ccPointCloud.h"
 #include "../include/ccProgressDialog.h"
+#ifdef QT_DEBUG
+#include "../include/ccScalarField.h"
+#endif
 
 // CCCoreLib
 #include <Neighbourhood.h>
 
 // System
 #include <cassert>
-
-#ifdef QT_DEBUG
-#include "../include/ccScalarField.h"
-#endif
 
 ccFastMarchingForNormsDirection::ccFastMarchingForNormsDirection()
     : CCCoreLib::FastMarching()

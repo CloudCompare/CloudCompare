@@ -2026,9 +2026,9 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			if (triangleIndexMap[triId] < 0) // triangle is not used in the new mesh, it will be kept in this one
 			{
 				const CCCoreLib::VerticesIndexes& tsi = m_triVertIndexes->at(triId);
-				for (unsigned int vertId : tsi.i)
+				for (unsigned int vertexIndex : tsi.i)
 				{
-					visArray[vertId] = CCCoreLib::POINT_HIDDEN;
+					visArray[vertexIndex] = CCCoreLib::POINT_HIDDEN;
 				}
 
 				if (triId != lastTri)
@@ -2071,12 +2071,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			for (auto& tsi : *m_triVertIndexes)
 			{
 				// update each vertex index
-				for (unsigned int& j : tsi.i)
+				for (unsigned& vertexIndex : tsi.i)
 				{
-					int oldVertexIndex = j;
+					unsigned oldVertexIndex = vertexIndex;
 					assert(oldVertexIndex < newIndexes.size());
-					j = newIndexes[oldVertexIndex];
-					assert(j < m_associatedCloud->size());
+					vertexIndex = newIndexes[oldVertexIndex];
+					assert(vertexIndex < m_associatedCloud->size());
 				}
 			}
 		}

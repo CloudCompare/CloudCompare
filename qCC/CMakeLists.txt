@@ -51,8 +51,8 @@ endif()
 target_link_libraries( ${PROJECT_NAME}
 	PRIVATE
 		CCAppCommon
-		QCC_PCP_LIB
 		QCustomPlot
+		QPCP_LIB
 		Qt6::PrintSupport
 		Qt6::Widgets
 		Qt6::OpenGLWidgets

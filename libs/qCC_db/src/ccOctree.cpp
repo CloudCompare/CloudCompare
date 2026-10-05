@@ -102,12 +102,12 @@ void ccOctree::clear()
 
 ccBBox ccOctree::getSquareBB() const
 {
-	return ccBBox(m_dimMin, m_dimMax, true);
+	return {m_dimMin, m_dimMax, true};
 }
 
 ccBBox ccOctree::getPointsBB() const
 {
-	return ccBBox(m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0);
+	return {m_pointsMin, m_pointsMax, m_numberOfProjectedPoints != 0};
 }
 
 void ccOctree::multiplyBoundingBox(PointCoordinateType multFactor)

@@ -1344,7 +1344,7 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	if (name.isNull())
 	{
 		ccLog::Error(QStringLiteral("Unhandled pre-defined scale (%1)").arg(scaleType));
-		return ccColorScale::Shared(nullptr);
+		return {nullptr};
 	}
 
 	ccColorScale::Shared scale(new ccColorScale(name, QString::number(scaleType)));
@@ -1502,29 +1502,29 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		std::vector<std::tuple<QString, int, QColor>> classes;
 		{
 			// must be sorted
-			classes.push_back({"Not classified", 0, Qt::white});
-			classes.push_back({"Unclassified", 1, Qt::lightGray});
-			classes.push_back({"Ground", 2, qRgb(166, 116, 4)});
-			classes.push_back({"Low vegetation", 3, qRgb(38, 114, 0)});
-			classes.push_back({"Medium vegetation", 4, qRgb(69, 229, 0)});
-			classes.push_back({"High vegetation", 5, qRgb(204, 240, 123)});
-			classes.push_back({"Building", 6, Qt::yellow});
-			classes.push_back({"Low Point", 7, Qt::red});
-			classes.push_back({"Model Key-Point", 8, Qt::magenta});
-			classes.push_back({"Water", 9, Qt::blue});
-			classes.push_back({"Rail", 10, qRgb(85, 85, 0)});
-			classes.push_back({"Road surface", 11, Qt::darkGray});
-			classes.push_back({"Reserved", 12, qRgb(255, 170, 255)});
-			classes.push_back({"Wire - Guard (Shield)", 13, qRgb(191, 231, 205)});
-			classes.push_back({"Wire - Conductor (Phase)", 14, qRgb(193, 230, 125)});
-			classes.push_back({"Transmission Tower", 15, Qt::darkBlue});
-			classes.push_back({"Wire-structure Connector", 16, Qt::darkYellow});
-			classes.push_back({"Bridge Deck", 17, Qt::darkCyan});
-			classes.push_back({"High Noise", 18, Qt::darkRed});
-			classes.push_back({"Overhead structure", 19, qRgb(270, 170, 255)});
-			classes.push_back({"Ignored ground", 20, qRgb(50, 255, 198)});
-			classes.push_back({"Snow", 21, qRgb(255, 250, 250)});
-			classes.push_back({"Temporal exclusion", 22, Qt::black});
+			classes.emplace_back("Not classified", 0, Qt::white);
+			classes.emplace_back("Unclassified", 1, Qt::lightGray);
+			classes.emplace_back("Ground", 2, qRgb(166, 116, 4));
+			classes.emplace_back("Low vegetation", 3, qRgb(38, 114, 0));
+			classes.emplace_back("Medium vegetation", 4, qRgb(69, 229, 0));
+			classes.emplace_back("High vegetation", 5, qRgb(204, 240, 123));
+			classes.emplace_back("Building", 6, Qt::yellow);
+			classes.emplace_back("Low Point", 7, Qt::red);
+			classes.emplace_back("Model Key-Point", 8, Qt::magenta);
+			classes.emplace_back("Water", 9, Qt::blue);
+			classes.emplace_back("Rail", 10, qRgb(85, 85, 0));
+			classes.emplace_back("Road surface", 11, Qt::darkGray);
+			classes.emplace_back("Reserved", 12, qRgb(255, 170, 255));
+			classes.emplace_back("Wire - Guard (Shield)", 13, qRgb(191, 231, 205));
+			classes.emplace_back("Wire - Conductor (Phase)", 14, qRgb(193, 230, 125));
+			classes.emplace_back("Transmission Tower", 15, Qt::darkBlue);
+			classes.emplace_back("Wire-structure Connector", 16, Qt::darkYellow);
+			classes.emplace_back("Bridge Deck", 17, Qt::darkCyan);
+			classes.emplace_back("High Noise", 18, Qt::darkRed);
+			classes.emplace_back("Overhead structure", 19, qRgb(270, 170, 255));
+			classes.emplace_back("Ignored ground", 20, qRgb(50, 255, 198));
+			classes.emplace_back("Snow", 21, qRgb(255, 250, 250));
+			classes.emplace_back("Temporal exclusion", 22, Qt::black);
 		}
 
 		const double epsilon  = 0.001;

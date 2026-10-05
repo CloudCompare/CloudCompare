@@ -34,6 +34,7 @@
 // System
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 // default field names
 struct DefaultFieldNames : public QMap<ccRasterGrid::ExportableFields, QString>
@@ -1134,7 +1135,7 @@ bool ccRasterGrid::fillGridCellsWithKriging(unsigned char         Z,
 				const ccRasterCell& cell = row[i];
 				if (cell.nbPoints)
 				{
-					dataPoints.push_back(DataPoint(point.x, point.y, cell.h));
+					dataPoints.emplace_back(point.x, point.y, cell.h);
 				}
 			}
 		}
@@ -1661,7 +1662,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 		std::unique_ptr<CCCoreLib::NormalizedProgress> nProgress;
 		if (progressDialog)
 		{
-			nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(height * width)));
+			nProgress = std::make_unique<CCCoreLib::NormalizedProgress>(progressDialog, static_cast<unsigned>(height * width));
 		}
 
 		std::vector<double>   cellPointVal;
@@ -1935,7 +1936,7 @@ ccPointCloud* ccRasterGrid::convertToCloud(bool                                 
 				progressDialog->setInfo(QObject::tr("Projecting %1 scalar fields").arg(scalarFields.size()));
 				progressDialog->setValue(0);
 				QCoreApplication::processEvents();
-				nProgress.reset(new CCCoreLib::NormalizedProgress(progressDialog, static_cast<unsigned>(scalarFields.size())));
+				nProgress = std::make_unique<CCCoreLib::NormalizedProgress>(progressDialog, static_cast<unsigned>(scalarFields.size()));
 			}
 
 			assert(scalarFields.size() == inputCloudAsPC->getNumberOfScalarFields());

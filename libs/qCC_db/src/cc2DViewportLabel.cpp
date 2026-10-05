@@ -35,11 +35,7 @@ cc2DViewportLabel::cc2DViewportLabel(QString name /*=QString()*/)
 	setVisible(false);
 }
 
-cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel)
-    : cc2DViewportObject(viewportLabel)
-    , m_roi(viewportLabel.m_roi)
-{
-}
+cc2DViewportLabel::cc2DViewportLabel(const cc2DViewportLabel& viewportLabel) = default;
 
 bool cc2DViewportLabel::toFile_MeOnly(QFile& out, short dataVersion) const
 {

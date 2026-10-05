@@ -39,6 +39,7 @@
 
 // System
 #include <cassert>
+#include <memory>
 
 #if defined(_OPENMP)
 // OpenMP
@@ -1152,7 +1153,7 @@ ccPointCloud* ccGenericMesh::samplePoints(bool                                de
 	std::unique_ptr<std::vector<unsigned>> triIndices;
 	if (withFeatures)
 	{
-		triIndices.reset(new std::vector<unsigned>);
+		triIndices = std::make_unique<std::vector<unsigned>>();
 	}
 
 	CCCoreLib::PointCloud* sampledCloud = nullptr;

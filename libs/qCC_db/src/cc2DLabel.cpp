@@ -72,7 +72,7 @@ QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
 	}
 
 	assert(false);
-	return QString();
+	return {};
 }
 
 CCVector3 cc2DLabel::PickedPoint::getPointPosition() const

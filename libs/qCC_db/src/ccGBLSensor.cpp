@@ -969,21 +969,21 @@ ccBBox ccGBLSensor::getOwnBB(bool withGLFeatures /*=false*/)
 {
 	if (!withGLFeatures)
 	{
-		return ccBBox();
+		return {};
 	}
 
 	// get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
 	{
-		return ccBBox();
+		return {};
 	}
 
 	ccPointCloud cloud;
 	if (!cloud.reserve(8))
 	{
 		// not enough memory?!
-		return ccBBox();
+		return {};
 	}
 
 	cloud.addPoint(CCVector3(-m_scale, -m_scale, -m_scale));
@@ -1004,13 +1004,13 @@ ccBBox ccGBLSensor::getOwnFitBB(ccGLMatrix& trans)
 	// get sensor position
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos, m_activeIndex))
-		return ccBBox();
+		return {};
 
 	trans = sensorPos;
 
-	return ccBBox(CCVector3(-m_scale, -m_scale, -m_scale),
-	              CCVector3(m_scale, m_scale, m_scale),
-	              true);
+	return {CCVector3(-m_scale, -m_scale, -m_scale),
+	        CCVector3(m_scale, m_scale, m_scale),
+	        true};
 }
 
 bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win /*=nullptr*/) const

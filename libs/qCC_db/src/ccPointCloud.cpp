@@ -53,6 +53,7 @@
 // System
 #include <algorithm>
 #include <cassert>
+#include <memory>
 #include <queue>
 
 static const char s_deviationSFName[] = "Deviation";
@@ -1337,7 +1338,7 @@ bool ccPointCloud::reserveTheRGBTable()
 
 	if (!m_rgbaColors)
 	{
-		m_rgbaColors.reset(new RGBAColorsTableType);
+		m_rgbaColors = std::make_shared<RGBAColorsTableType>();
 	}
 
 	if (!m_rgbaColors->reserveSafe(m_points.capacity()))
@@ -1362,7 +1363,7 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite /*=false*/)
 
 	if (!m_rgbaColors)
 	{
-		m_rgbaColors.reset(new RGBAColorsTableType);
+		m_rgbaColors = std::make_shared<RGBAColorsTableType>();
 	}
 
 	static const ccColor::Rgba s_white(ccColor::MAX, ccColor::MAX, ccColor::MAX, ccColor::MAX);
@@ -1388,7 +1389,7 @@ bool ccPointCloud::reserveTheNormsTable()
 
 	if (!m_normals)
 	{
-		m_normals.reset(new NormsIndexesTableType);
+		m_normals = std::make_shared<NormsIndexesTableType>();
 	}
 
 	if (!m_normals->reserveSafe(m_points.capacity()))
@@ -1414,7 +1415,7 @@ bool ccPointCloud::resizeTheNormsTable()
 
 	if (!m_normals)
 	{
-		m_normals.reset(new NormsIndexesTableType);
+		m_normals = std::make_shared<NormsIndexesTableType>();
 	}
 
 	static const CompressedNormType s_normZero = 0;
@@ -4569,7 +4570,7 @@ QSharedPointer<CCCoreLib::ReferenceCloud> ccPointCloud::computeCPSet(ccGenericPo
 	if (sfIdx < 0)
 	{
 		ccLog::Warning("[ccPointCloud::ComputeCPSet] Not enough memory!");
-		return QSharedPointer<CCCoreLib::ReferenceCloud>(nullptr);
+		return {nullptr};
 	}
 
 	int currentInSFIndex  = m_currentInScalarFieldIndex;
@@ -5416,7 +5417,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			if (!m_rgbaColors)
 			{
-				m_rgbaColors.reset(new RGBAColorsTableType);
+				m_rgbaColors = std::make_shared<RGBAColorsTableType>();
 			}
 			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, context.dataVersion);
 			if (classID == CC_TYPES::RGB_COLOR_ARRAY)
@@ -5467,7 +5468,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, LoadingContext& context)
 		{
 			if (!m_normals)
 			{
-				m_normals.reset(new NormsIndexesTableType);
+				m_normals = std::make_shared<NormsIndexesTableType>();
 			}
 			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, context.dataVersion);
 			if (classID != CC_TYPES::NORMAL_INDEXES_ARRAY)

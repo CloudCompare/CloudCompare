@@ -257,7 +257,7 @@ ccHObject* ccHObject::New(const QString& pluginId, const QString& classId, const
 
 QIcon ccHObject::getIcon() const
 {
-	return QIcon();
+	return {};
 }
 
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /*=true*/)
@@ -560,14 +560,14 @@ bool ccHObject::getAbsoluteGLTransformation(ccGLMatrix& trans) const
 
 ccBBox ccHObject::getOwnBB(bool withGLFeatures /*=false*/)
 {
-	return ccBBox();
+	return {};
 }
 
 ccHObject::GlobalBoundingBox ccHObject::getOwnGlobalBB(bool withGLFeatures /*=false*/)
 {
 	// by default this method returns the local bounding-box!
 	ccBBox box = getOwnBB(false);
-	return GlobalBoundingBox(box.minCorner(), box.maxCorner(), box.isValid());
+	return {box.minCorner(), box.maxCorner(), box.isValid()};
 }
 
 bool ccHObject::getOwnGlobalBB(CCVector3d& minCorner, CCVector3d& maxCorner)
@@ -1350,9 +1350,7 @@ short ccHObject::minimumFileVersion_MeOnly() const
 
 struct HObjectDisplayState : ccDrawableObject::DisplayState
 {
-	HObjectDisplayState()
-	{
-	}
+	HObjectDisplayState() = default;
 
 	HObjectDisplayState(const ccHObject& obj)
 	    : ccDrawableObject::DisplayState(obj)

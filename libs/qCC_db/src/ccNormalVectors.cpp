@@ -774,7 +774,7 @@ CCVector3f ccNormalVectors::ConvertDipAndDipDirToNormal(float dip_deg, float dip
 	// specific case
 	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
 	{
-		return CCVector3f(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	float      Nz         = cos(CCCoreLib::DegreesToRadians(dip_deg));
@@ -803,7 +803,7 @@ CCVector3d ccNormalVectors::ConvertDipAndDipDirToNormal(double dip_deg, double d
 	// specific case
 	if (std::isnan(dip_deg) || std::isnan(dipDir_deg))
 	{
-		return CCVector3(0, 0, 0);
+		return {0, 0, 0};
 	}
 
 	double     Nz         = cos(CCCoreLib::DegreesToRadians(dip_deg));

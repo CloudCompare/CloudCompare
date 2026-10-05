@@ -43,7 +43,7 @@ static CCVector3 ComputeRobustAverageNorm(CCCoreLib::ReferenceCloud* subset,
                                           ccGenericPointCloud*       sourceCloud)
 {
 	if (!subset || subset->size() == 0 || !sourceCloud)
-		return CCVector3(0, 0, 1);
+		return {0, 0, 1};
 
 	assert(sourceCloud->hasNormals());
 	assert(subset->getAssociatedCloud() == static_cast<CCCoreLib::GenericIndexedCloud*>(sourceCloud));

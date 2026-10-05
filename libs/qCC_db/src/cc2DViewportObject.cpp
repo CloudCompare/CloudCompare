@@ -22,11 +22,7 @@ cc2DViewportObject::cc2DViewportObject(QString name /*=QString()*/)
 {
 }
 
-cc2DViewportObject::cc2DViewportObject(const cc2DViewportObject& viewport)
-    : ccHObject(viewport)
-    , m_params(viewport.m_params)
-{
-}
+cc2DViewportObject::cc2DViewportObject(const cc2DViewportObject& viewport) = default;
 
 bool cc2DViewportObject::toFile_MeOnly(QFile& out, short dataVersion) const
 {

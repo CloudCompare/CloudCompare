@@ -80,7 +80,7 @@ ccColorScale::Shared ccColorScale::copy(const QString& uuid /*=QString()*/) cons
 	catch (const std::bad_alloc&)
 	{
 		ccLog::Warning("Not enough memory to copy the color scale");
-		return ccColorScale::Shared(nullptr);
+		return {nullptr};
 	}
 
 	return newCS;
@@ -484,7 +484,7 @@ ccColorScale::Shared ccColorScale::LoadFromXML(const QString& filename)
 	if (!file.open(QFile::ReadOnly | QFile::Text))
 	{
 		ccLog::Error(QString("Failed to open file '%1' for reading!").arg(filename));
-		return Shared(nullptr);
+		return {nullptr};
 	}
 
 	Shared scale(nullptr);

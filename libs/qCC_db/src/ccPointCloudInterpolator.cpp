@@ -232,7 +232,7 @@ bool ccPointCloudInterpolator::InterpolateScalarFieldsFrom(ccPointCloud*        
 
 		auto inSF  = srcCloud->getScalarField(inSFIndex);
 		auto outSF = destCloud->getScalarField(outSFIndex);
-		scalarFields.push_back(SFPair(inSF.get(), outSF.get()));
+		scalarFields.emplace_back(inSF.get(), outSF.get());
 
 		outSF->fill(CCCoreLib::NAN_VALUE);
 	}

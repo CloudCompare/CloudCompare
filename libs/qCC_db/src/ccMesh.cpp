@@ -1277,7 +1277,7 @@ bool ccMesh::merge(const ccMesh* mesh, bool createSubMesh)
 					// reserve mem for materials
 					if (!m_materials)
 					{
-						auto set = ccMaterialSet::Shared(new ccMaterialSet("materials"));
+						auto set = std::make_shared<ccMaterialSet>("materials");
 						setMaterialSet(set);
 					}
 					assert(m_materials);
@@ -3590,7 +3590,7 @@ bool ccMesh::mergeDuplicatedVertices(unsigned char octreeLevel /*=10*/, QWidget*
 			std::unique_ptr<ccProgressDialog> pDlg(nullptr);
 			if (parentWidget)
 			{
-				pDlg.reset(new ccProgressDialog(true, parentWidget));
+				pDlg = std::make_unique<ccProgressDialog>(true, parentWidget);
 			}
 
 			// try to build the octree

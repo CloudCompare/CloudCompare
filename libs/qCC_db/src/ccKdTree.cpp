@@ -276,7 +276,7 @@ class GetCellBBoxVisitor
 ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 {
 	if (!node || !m_associatedCloud)
-		return ccBBox();
+		return {};
 
 	GetCellBBoxVisitor helper;
 	helper.visit(node);

@@ -1652,12 +1652,12 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool              removeSelectedTrian
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] Failed to create segmented mesh vertices! (not enough memory)");
 			return nullptr;
 		}
-		else if (newVertices == m_associatedCloud)
+		if (newVertices == m_associatedCloud)
 		{
 			// nothing to do
 			return this;
 		}
-		else if (newVertices->size() == 0)
+		if (newVertices->size() == 0)
 		{
 			ccLog::Warning("[ccMesh::createNewMeshFromSelection] No visible point in selection");
 			delete newVertices;

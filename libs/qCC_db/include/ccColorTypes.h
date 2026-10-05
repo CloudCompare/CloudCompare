@@ -271,12 +271,11 @@ namespace ccColor
 
 			if (6 * hue < 1.0f)
 				return m1 + (m2 - m1) * hue * 6;
-			else if (2 * hue < 1.0f)
+			if (2 * hue < 1.0f)
 				return m2;
-			else if (3 * hue < 2.0f)
+			if (3 * hue < 2.0f)
 				return m1 + (m2 - m1) * (4.0f - hue * 6);
-			else
-				return m1;
+			return m1;
 		}
 	};
 

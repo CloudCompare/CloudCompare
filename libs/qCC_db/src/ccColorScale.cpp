@@ -372,11 +372,8 @@ short ccColorScale::minimumFileVersion() const
 		// with custom labels, but no overridding text --> version 40
 		return 40;
 	}
-	else
-	{
-		// without custom labels  --> version 27
-		return 27;
-	}
+	// without custom labels  --> version 27
+	return 27;
 }
 
 void ccColorScale::setAbsolute(double minVal, double maxVal)

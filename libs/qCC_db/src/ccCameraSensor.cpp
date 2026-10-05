@@ -2680,12 +2680,9 @@ ccOctreeFrustumIntersector::separatingAxisTest(const CCVector3& bbMin,
 				return CELL_OUTSIDE_FRUSTUM;
 
 			// if this plane is NOT a separating plane, the cell is at least intersecting the frustum
-			else
-			{
-				// moreover, the cell can be completely inside the frustum...
-				if (dMaxBox > dMaxFru || dMinBox < dMinFru)
-					boxInside = false;
-			}
+			// moreover, the cell can be completely inside the frustum...
+			if (dMaxBox > dMaxFru || dMinBox < dMinFru)
+				boxInside = false;
 		}
 	}
 

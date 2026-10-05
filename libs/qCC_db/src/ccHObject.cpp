@@ -265,7 +265,7 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive /
 		assert(false);
 		return;
 	}
-	else if (flags == 0)
+	if (flags == 0)
 	{
 		return;
 	}

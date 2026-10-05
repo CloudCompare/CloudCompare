@@ -406,10 +406,8 @@ bool ccNormalVectors::ComputeNormalWithQuadric(CCCoreLib::GenericIndexedCloudPer
 
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
 }
 
 bool ccNormalVectors::ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)
@@ -434,10 +432,7 @@ bool ccNormalVectors::ComputeNormalWithLS(CCCoreLib::GenericIndexedCloudPersist*
 		N = *_N;
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
 bool ccNormalVectors::ComputeNormalWithTri(CCCoreLib::GenericIndexedCloudPersist* pointAndNeighbors, CCVector3& N)

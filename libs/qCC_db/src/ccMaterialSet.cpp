@@ -585,8 +585,6 @@ short ccMaterialSet::minimumFileVersion_MeOnly() const
 	{
 		return 37;
 	}
-	else
-	{
-		return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
-	}
+
+	return std::max(static_cast<short>(37), at(0)->minimumFileVersion());
 }

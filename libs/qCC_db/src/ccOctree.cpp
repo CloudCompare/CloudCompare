@@ -690,8 +690,7 @@ bool ccOctree::pointPicking(const CCVector2d&           clickPos,
 
 				if (skipThisCell)
 					break;
-				else
-					++level;
+				++level;
 			}
 
 			currentBitDec            = GET_BIT_SHIFT(level);

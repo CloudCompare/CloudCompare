@@ -599,10 +599,7 @@ class PointCloudLODVisibilityFlagger
 						node.intersection = Frustum::OUTSIDE;
 						break;
 					}
-					else
-					{
-						node.intersection = Frustum::INTERSECT;
-					}
+					node.intersection = Frustum::INTERSECT;
 				}
 			}
 		}

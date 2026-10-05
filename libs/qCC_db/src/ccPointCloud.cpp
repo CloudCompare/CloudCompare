@@ -1550,18 +1550,15 @@ ccWaveformProxy ccPointCloud::waveformProxy(unsigned index) const
 			if (m_fwfDescriptors.contains(w.descriptorID()))
 			{
 				WaveformDescriptor& d = const_cast<ccPointCloud*>(this)->m_fwfDescriptors[w.descriptorID()]; // DGM: we really want the reference to the element, not a copy as QMap returns in the const case :(
-				return ccWaveformProxy(w, d, m_fwfData->data());
+				return {w, d, m_fwfData->data()};
 			}
-			else
-			{
-				return ccWaveformProxy(w, invalidD, nullptr);
-			}
+			return {w, invalidD, nullptr};
 		}
 	}
 
 	// if we are here, then something is wrong
 	assert(false);
-	return ccWaveformProxy(invalidW, invalidD, nullptr);
+	return {invalidW, invalidD, nullptr};
 }
 
 bool ccPointCloud::resizeTheFWFTable()
@@ -1592,7 +1589,7 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 		// nothing to do
 		return true;
 	}
-	else if (newNumberOfPoints < size())
+	if (newNumberOfPoints < size())
 	{
 		// reserve works only to enlarge the cloud
 		return false;
@@ -2241,10 +2238,7 @@ bool ccPointCloud::applyFilterToRGB(PointCoordinateType                 sigma,
 			delete theOctree;
 			return false;
 		}
-		else
-		{
-			theOctree = getOctree().data();
-		}
+		theOctree = getOctree().data();
 	}
 
 	// best octree level
@@ -6188,11 +6182,7 @@ bool ccPointCloud::updateVBOs(const CC_DRAW_CONTEXT& context, const glDrawParams
 					m_vboManager.vbos.resize(0);
 					return false;
 				}
-				else
-				{
-					// shouldn't be better for the next VBOs!
-					break;
-				}
+				break;
 			}
 		}
 	}
@@ -7445,7 +7435,7 @@ ccPointCloud* ccPointCloud::removeDuplicatePoints(double minDistanceBetweenPoint
 		ccLog::Warning(QObject::tr("Not enough memory to create the filtered cloud"));
 		return nullptr;
 	}
-	else if (filteredCloud == this)
+	if (filteredCloud == this)
 	{
 		// we have tested above that there should be some duplicate points
 		assert(false);
@@ -7509,10 +7499,7 @@ QImage ccPointCloud::Grid::toImage() const
 		}
 		return image;
 	}
-	else
-	{
-		return QImage();
-	}
+	return {};
 }
 
 bool ccPointCloud::Grid::init(unsigned rowCount, unsigned colCount, bool withRGB /*=false*/)

@@ -53,10 +53,7 @@ QString cc2DLabel::PickedPoint::itemTitle() const
 			title += QString("@%1").arg(entity()->getUniqueID());
 		return title;
 	}
-	else
-	{
-		return QString::number(index);
-	}
+	return QString::number(index);
 }
 
 QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
@@ -65,11 +62,11 @@ QString cc2DLabel::PickedPoint::prefix(const char* pointTag) const
 	{
 		return CENTER_STRING;
 	}
-	else if (_cloud)
+	if (_cloud)
 	{
 		return QString("Point #") + pointTag;
 	}
-	else if (_mesh)
+	if (_mesh)
 	{
 		return QString("Point@Tri#") + pointTag;
 	}
@@ -88,10 +85,7 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		{
 			return _cloud->getOwnBB().getCenter();
 		}
-		else
-		{
-			P = *_cloud->getPointPersistentPtr(index);
-		}
+		P = *_cloud->getPointPersistentPtr(index);
 	}
 	else if (_mesh)
 	{
@@ -99,10 +93,7 @@ CCVector3 cc2DLabel::PickedPoint::getPointPosition() const
 		{
 			return _mesh->getOwnBB().getCenter();
 		}
-		else
-		{
-			_mesh->computePointPosition(index, uv, P);
-		}
+		_mesh->computePointPosition(index, uv, P);
 	}
 	else
 	{
@@ -184,15 +175,9 @@ QString cc2DLabel::GetSFValueAsString(const LabelInfo1& info, int precision)
 		{
 			return "NaN";
 		}
-		else
-		{
-			return QString::number(info.sfValue, 'f', precision);
-		}
+		return QString::number(info.sfValue, 'f', precision);
 	}
-	else
-	{
-		return QString();
-	}
+	return {};
 }
 
 QString cc2DLabel::getTitle(int precision) const

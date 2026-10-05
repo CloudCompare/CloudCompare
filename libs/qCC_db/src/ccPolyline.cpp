@@ -587,7 +587,7 @@ bool ccPolyline::split(PointCoordinateType       maxEdgeLength,
 					parts.push_back(new ccPolyline(*this));
 					return true;
 				}
-				else if (realStartIndex < vertCount)
+				if (realStartIndex < vertCount)
 				{
 					partSize += (vertCount - realStartIndex);
 					assert(realStartIndex != 0);
@@ -699,10 +699,7 @@ const CCVector3d& ccPolyline::getGlobalShift() const
 		// by default we use the vertices global shift info
 		return pc->getGlobalShift();
 	}
-	else
-	{
-		return ccShiftedObject::getGlobalShift();
-	}
+	return ccShiftedObject::getGlobalShift();
 }
 
 double ccPolyline::getGlobalScale() const
@@ -713,10 +710,7 @@ double ccPolyline::getGlobalScale() const
 		// by default we use the vertices global scale info
 		return pc->getGlobalScale();
 	}
-	else
-	{
-		return ccShiftedObject::getGlobalScale();
-	}
+	return ccShiftedObject::getGlobalScale();
 }
 
 ccPointCloud* ccPolyline::samplePoints(bool   densityBased,

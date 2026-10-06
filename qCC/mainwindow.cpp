@@ -4787,7 +4787,7 @@ void MainWindow::doActionCutPursuit()
 		sf->computeMinAndMax();
 
 		ccLog::Print(tr("[Cut Pursuit] Partitioned cloud '%1' into %2 components").arg(pc->getName()).arg(rV));
-		
+
 		if (averageColors && pc->hasColors())
 		{
 			try

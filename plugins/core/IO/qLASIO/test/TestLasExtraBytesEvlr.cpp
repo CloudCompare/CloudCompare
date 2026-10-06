@@ -2,9 +2,12 @@
 
 #include "LasDetails.h"
 #include "LasExtraScalarField.h"
+#include "LasSaver.h"
 
+#include <QFileInfo>
 #include <QTemporaryDir>
 #include <ccLog.h>
+#include <ccPointCloud.h>
 #include <cstring>
 #include <laszip/laszip_api.h>
 
@@ -192,6 +195,96 @@ void TestLasExtraBytesEvlr::fullLengthName()
 	const std::vector<LasExtraScalarField> fields = LasExtraScalarField::ParseExtraScalarFields(Header(1, nullptr), fileName);
 	QCOMPARE(fields.size(), size_t(1));
 	QCOMPARE(QString(fields[0].name), QString(LasExtraScalarField::MAX_NAME_SIZE, 'N'));
+}
+
+void TestLasExtraBytesEvlr::writeEvlr_data()
+{
+	QTest::addColumn<QString>("extension");
+	QTest::addColumn<int>("fieldCount");
+	QTest::newRow("LAS, 341 fields (VLR)") << "las" << 341;
+	QTest::newRow("LAS, 342 fields (EVLR)") << "las" << 342;
+	QTest::newRow("LAZ, 342 fields (EVLR)") << "laz" << 342;
+}
+
+void TestLasExtraBytesEvlr::writeEvlr()
+{
+	QFETCH(QString, extension);
+	QFETCH(int, fieldCount);
+	constexpr unsigned PointCount = 3;
+
+	ccPointCloud cloud;
+	QVERIFY(cloud.reserve(PointCount));
+	for (unsigned i = 0; i < PointCount; ++i)
+	{
+		cloud.addPoint(CCVector3(static_cast<PointCoordinateType>(i), 2.0f * i, 3.0f * i));
+	}
+
+	LasSaver::Parameters params;
+	params.versionMajor = 1;
+	params.versionMinor = 4;
+	params.pointFormat  = 6;
+	params.lasScale     = CCVector3d(0.001, 0.001, 0.001);
+	for (int f = 0; f < fieldCount; ++f)
+	{
+		const std::string name    = "field_" + std::to_string(f);
+		const int         sfIndex = cloud.addScalarField(name);
+		QVERIFY(sfIndex >= 0);
+		for (unsigned i = 0; i < PointCount; ++i)
+		{
+			cloud.getScalarField(sfIndex)->setValue(i, f + 0.25f * i);
+		}
+		LasExtraScalarField field = Field(name.c_str(), LasExtraScalarField::f32);
+		field.scalarFields[0]     = cloud.getCCScalarField(sfIndex);
+		params.extraFields.push_back(field);
+	}
+
+	QTemporaryDir dir;
+	const QString fileName = dir.filePath("test." + extension);
+	{
+		LasSaver saver(cloud, params);
+		QCOMPARE(saver.open(fileName), CC_FERR_NO_ERROR);
+		for (unsigned i = 0; i < PointCount; ++i)
+		{
+			QCOMPARE(saver.saveNextPoint(), CC_FERR_NO_ERROR);
+		}
+		QCOMPARE(saver.close(), CC_FERR_NO_ERROR);
+		QCOMPARE(saver.appendEVLRsAfterClose(), CC_FERR_NO_ERROR);
+	}
+
+	laszip_POINTER reader{nullptr};
+	QVERIFY(laszip_create(&reader) == 0);
+	laszip_BOOL isCompressed{false};
+	QVERIFY(laszip_open_reader(reader, qUtf8Printable(fileName), &isCompressed) == 0);
+	laszip_header* header{nullptr};
+	laszip_get_header_pointer(reader, &header);
+
+	// above the VLR capacity, the descriptor is the last record of the file
+	const bool inEvlr = (fieldCount > static_cast<int>(LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR));
+	QCOMPARE(header->number_of_extended_variable_length_records, inEvlr ? 1u : 0u);
+	QCOMPARE(header->number_of_variable_length_records, inEvlr ? 0u : 1u);
+	if (inEvlr)
+	{
+		const quint64 evlrEnd = header->start_of_first_extended_variable_length_record + LasDetails::EvlrHeader::SIZE + fieldCount * LasExtraScalarField::VLR_FIELD_SIZE_BYTES;
+		QCOMPARE(evlrEnd, static_cast<quint64>(QFileInfo(fileName).size()));
+	}
+
+	const std::vector<LasExtraScalarField> fields = LasExtraScalarField::ParseExtraScalarFields(*header, fileName);
+	QCOMPARE(fields.size(), static_cast<size_t>(fieldCount));
+	const LasExtraScalarField& last = fields.back();
+	QCOMPARE(QString(last.name), QString("field_%1").arg(fieldCount - 1));
+
+	laszip_point* point{nullptr};
+	laszip_get_point_pointer(reader, &point);
+	for (unsigned i = 0; i < PointCount; ++i)
+	{
+		QVERIFY(laszip_read_point(reader) == 0);
+		float value = 0.0f;
+		std::memcpy(&value, point->extra_bytes + last.byteOffset, sizeof(float));
+		QCOMPARE(value, fieldCount - 1 + 0.25f * i);
+	}
+
+	laszip_close_reader(reader);
+	laszip_destroy(reader);
 }
 
 QTEST_MAIN(TestLasExtraBytesEvlr)

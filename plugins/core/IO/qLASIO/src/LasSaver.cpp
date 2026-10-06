@@ -4,7 +4,9 @@
 #include "LasMetadata.h"
 
 // Qt
+#include <QDataStream>
 #include <QDate>
+#include <QFile>
 // qCC_db
 #include <ccPointCloud.h>
 
@@ -64,7 +66,19 @@ LasSaver::LasSaver(ccPointCloud& cloud, Parameters parameters)
 	if (totalExtraByteSize > 0)
 	{
 		m_laszipHeader.point_data_record_length += totalExtraByteSize;
+	}
 
+	if (m_laszipHeader.version_minor >= 4 && parameters.extraFields.size() > LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR)
+	{
+		// too many fields for a VLR: the descriptor will be written in an EVLR (see appendEVLRsAfterClose())
+		QDataStream stream(&m_extraBytesEvlr, QIODevice::WriteOnly);
+		for (const LasExtraScalarField& field : parameters.extraFields)
+		{
+			stream << field;
+		}
+	}
+	else if (totalExtraByteSize > 0)
+	{
 		size_t      newNumVlrs = m_laszipHeader.number_of_variable_length_records + 1;
 		laszip_vlr* vlrs       = new laszip_vlr_struct[newNumVlrs];
 		// Move already existing vlrs
@@ -140,12 +154,7 @@ void LasSaver::initLaszipHeader(const Parameters& parameters)
 }
 LasSaver::~LasSaver() noexcept
 {
-	if (m_laszipWriter)
-	{
-		laszip_close_writer(m_laszipWriter);
-		laszip_clean(m_laszipWriter);
-		laszip_destroy(m_laszipWriter);
-	}
+	close();
 
 	if (m_originallySelectedScalarField != -1)
 	{
@@ -169,6 +178,8 @@ LasSaver::~LasSaver() noexcept
 
 CC_FILE_ERROR LasSaver::open(const QString filePath)
 {
+	m_filePath = filePath;
+
 	laszip_CHAR* errorMsg{nullptr};
 	if (laszip_create(&m_laszipWriter))
 	{
@@ -264,6 +275,76 @@ CC_FILE_ERROR LasSaver::saveNextPoint()
 
 	++m_currentPointIndex;
 
+	return CC_FERR_NO_ERROR;
+}
+
+CC_FILE_ERROR LasSaver::close()
+{
+	if (!m_laszipWriter)
+	{
+		return CC_FERR_NO_ERROR;
+	}
+
+	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
+	if (laszip_close_writer(m_laszipWriter))
+	{
+		laszip_CHAR* errorMsg{nullptr};
+		laszip_get_error(m_laszipWriter, &errorMsg);
+		ccLog::Warningf("[LAS] laszip error: %s", errorMsg);
+		error = CC_FERR_THIRD_PARTY_LIB_FAILURE;
+	}
+	laszip_clean(m_laszipWriter);
+	laszip_destroy(m_laszipWriter);
+	m_laszipWriter = nullptr;
+	m_laszipPoint  = nullptr;
+
+	return error;
+}
+
+CC_FILE_ERROR LasSaver::appendEVLRsAfterClose()
+{
+	if (m_laszipWriter)
+	{
+		// the file must be closed first
+		return CC_FERR_INTERNAL;
+	}
+
+	if (m_extraBytesEvlr.isEmpty())
+	{
+		return CC_FERR_NO_ERROR;
+	}
+
+	// LASzip can't write EVLRs: we append it at the end of the file (after the points,
+	// and after the chunk table for LAZ files), then we update the LAS 1.4 header
+	QFile file(m_filePath);
+	if (!file.open(QIODevice::ReadWrite))
+	{
+		ccLog::Warning("[LAS] Failed to write the Extra Bytes EVLR");
+		return CC_FERR_WRITING;
+	}
+	const quint64 evlrStart = static_cast<quint64>(file.size());
+
+	LasDetails::EvlrHeader evlrHeader;
+	strncpy(evlrHeader.userID, "LASF_Spec", LasDetails::EvlrHeader::USER_ID_SIZE);
+	memset(evlrHeader.description, 0, LasDetails::EvlrHeader::DESCRIPTION_SIZE);
+	evlrHeader.recordID     = 4;
+	evlrHeader.recordLength = static_cast<uint64_t>(m_extraBytesEvlr.size());
+
+	QDataStream stream(&file);
+	stream.setByteOrder(QDataStream::LittleEndian);
+	file.seek(evlrStart);
+	stream << evlrHeader;
+	stream.writeRawData(m_extraBytesEvlr.constData(), static_cast<int>(m_extraBytesEvlr.size()));
+
+	// start of the first EVLR (offset 235) and number of EVLRs (offset 243) in the LAS 1.4 header
+	file.seek(235);
+	stream << evlrStart << quint32(1);
+
+	if (stream.status() != QDataStream::Ok)
+	{
+		ccLog::Warning("[LAS] Failed to write the Extra Bytes EVLR");
+		return CC_FERR_WRITING;
+	}
 	return CC_FERR_NO_ERROR;
 }
 

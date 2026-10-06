@@ -45,6 +45,8 @@
 #include <laszip/laszip_api.h>
 
 // System
+#include <algorithm>
+#include <limits>
 #include <memory>
 #include <utility>
 
@@ -914,16 +916,30 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	}
 
 	// The "Extra Bytes" descriptor is written to a VLR, whose payload length is stored on
-	// 16 bits, so it cannot describe an unlimited number of fields. Writing it to an EVLR
-	// instead is not supported yet, so the surplus fields are dropped here. They have to be
-	// dropped before the saver computes the point record length, otherwise the points would
-	// carry extra bytes that the descriptor does not cover.
+	// 16 bits, so it cannot describe an unlimited number of fields. Only LAS 1.4 files can
+	// have it in an EVLR instead (see LasSaver), so for older versions the surplus fields are
+	// dropped here. The point record length is also stored on 16 bits, whatever the version.
+	// The fields have to be dropped before the saver computes the point record length,
+	// otherwise the points would carry extra bytes that the descriptor does not cover.
 	{
-		size_t budget = LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR;
-		if (params.shouldSaveNormalsAsExtraScalarField && pointCloud->hasNormals())
+		// the saver adds one field per normal component on top of the ones selected here
+		const bool normalsAsExtraFields = params.shouldSaveNormalsAsExtraScalarField && pointCloud->hasNormals();
+
+		size_t budget = params.extraFields.size();
+		if (params.versionMinor < 4)
 		{
-			// the saver adds one field per normal component on top of the ones selected here
-			budget -= 3;
+			budget = LasExtraScalarField::MAX_EXTRA_FIELDS_IN_VLR - (normalsAsExtraFields ? 3 : 0);
+		}
+
+		unsigned recordLength = LasDetails::PointFormatSize(params.pointFormat) + (normalsAsExtraFields ? 3 * 8 : 0);
+		for (size_t i = 0; i < std::min(budget, params.extraFields.size()); ++i)
+		{
+			recordLength += params.extraFields[i].byteSize();
+			if (recordLength > std::numeric_limits<uint16_t>::max())
+			{
+				budget = i;
+				break;
+			}
 		}
 
 		if (params.extraFields.size() > budget)
@@ -969,6 +985,16 @@ CC_FILE_ERROR LasIOFilter::saveToFile(ccHObject* entity, const QString& filename
 	{
 		ccLog::Warning(QString("[LAS] laszip error :'%1'").arg(saver.getLastError()));
 		return error;
+	}
+
+	const CC_FILE_ERROR closeError = saver.close();
+	if (error == CC_FERR_NO_ERROR)
+	{
+		error = closeError;
+	}
+	if (error == CC_FERR_NO_ERROR)
+	{
+		error = saver.appendEVLRsAfterClose();
 	}
 
 	if (saver.canSaveWaveforms())

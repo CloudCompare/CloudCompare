@@ -373,15 +373,15 @@ short ccMaterial::minimumFileVersion() const
 
 bool ccMaterial::compare(const ccMaterial& mtl) const
 {
-	return !(mtl.m_name != m_name
-	         || mtl.m_textureFilename != m_textureFilename
-	         || mtl.m_shininessFront != m_shininessFront
-	         || mtl.m_shininessBack != m_shininessBack
-	         || mtl.m_ambient != m_ambient
-	         || mtl.m_specular != m_specular
-	         || mtl.m_emission != m_emission
-	         || mtl.m_diffuseBack != m_diffuseBack
-	         || mtl.m_diffuseFront != m_diffuseFront);
+	return mtl.m_name == m_name
+	       && mtl.m_textureFilename == m_textureFilename
+	       && mtl.m_shininessFront == m_shininessFront
+	       && mtl.m_shininessBack == m_shininessBack
+	       && mtl.m_ambient == m_ambient
+	       && mtl.m_specular == m_specular
+	       && mtl.m_emission == m_emission
+	       && mtl.m_diffuseBack == m_diffuseBack
+	       && mtl.m_diffuseFront == m_diffuseFront;
 }
 
 void ccMaterial::setTextureMinMagFilters(QOpenGLTexture::Filter minificationFilter, QOpenGLTexture::Filter magnificationFilter)
